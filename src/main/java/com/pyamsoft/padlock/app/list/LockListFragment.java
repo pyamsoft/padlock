@@ -23,6 +23,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
@@ -342,8 +343,10 @@ public final class LockListFragment extends PageAwareFragment
   @Override public void showOnBoarding() {
     new MaterialShowcaseView.Builder(getActivity()).setTarget(fab)
         .setTargetTouchable(false)
-        .setTitleText("PadLock")
-        .setDismissText("GOT IT")
+        .setMaskColour(ContextCompat.getColor(getContext(), R.color.blue500))
+        .setTitleText(R.string.app_name)
+        .setContentText(R.string.getting_started)
+        .setDismissText(R.string.got_it)
         .setListener(new IShowcaseListener() {
           @Override public void onShowcaseDisplayed(MaterialShowcaseView materialShowcaseView) {
             Timber.d("onShowcaseDisplayed");
