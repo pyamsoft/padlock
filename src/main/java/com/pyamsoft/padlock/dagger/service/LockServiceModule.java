@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.dagger.service;
 
 import com.pyamsoft.padlock.app.service.LockServiceInteractor;
-import com.pyamsoft.padlock.app.service.LockServiceInteractorImpl;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
-import com.pyamsoft.padlock.app.service.LockServicePresenterImpl;
 import dagger.Module;
 import dagger.Provides;
 

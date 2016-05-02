@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import com.pyamsoft.padlock.app.main.MainInteractor;
-import com.pyamsoft.padlock.app.main.MainInteractorImpl;
 import com.pyamsoft.padlock.app.main.MainPresenter;
-import com.pyamsoft.padlock.app.main.MainPresenterImpl;
 import dagger.Module;
 import dagger.Provides;
 

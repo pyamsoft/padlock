@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.db;
+package com.pyamsoft.padlock.dagger.db;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
+import com.pyamsoft.padlock.app.db.DBInteractor;
 import com.pyamsoft.padlock.app.lock.LockCommonInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -31,7 +32,7 @@ import com.squareup.sqlbrite.BriteDatabase;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public final class DBInteractorImpl extends LockCommonInteractorImpl implements DBInteractor {
+final class DBInteractorImpl extends LockCommonInteractorImpl implements DBInteractor {
 
   @Inject public DBInteractorImpl(final @NonNull Context context) {
     super(context);

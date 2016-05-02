@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.settings;
+package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenInteractor;
+import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
+import com.pyamsoft.padlock.app.settings.SettingsInteractor;
+import com.pyamsoft.padlock.app.settings.SettingsPresenter;
+import com.pyamsoft.padlock.app.settings.SettingsView;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 import com.pyamsoft.pydroid.base.PresenterImplBase;
 import javax.inject.Inject;
@@ -28,7 +32,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
+final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
     implements SettingsPresenter {
 
   @NonNull private final LockScreenInteractor lockScreenInteractor;

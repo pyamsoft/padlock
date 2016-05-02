@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import com.pyamsoft.padlock.app.list.LockListInteractor;
-import com.pyamsoft.padlock.app.list.LockListInteractorImpl;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
-import com.pyamsoft.padlock.app.list.LockListPresenterImpl;
 import dagger.Module;
 import dagger.Provides;
 

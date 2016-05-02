@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list.info;
+package com.pyamsoft.padlock.dagger.list.info;
 
 import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.list.info.LockInfoInteractor;
+import com.pyamsoft.padlock.app.list.info.LockInfoPresenter;
+import com.pyamsoft.padlock.app.list.info.LockInfoView;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImplBase;
@@ -32,7 +35,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public class LockInfoPresenterImpl extends PresenterImplBase<LockInfoView>
+final class LockInfoPresenterImpl extends PresenterImplBase<LockInfoView>
     implements LockInfoPresenter {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;

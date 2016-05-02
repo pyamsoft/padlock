@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list;
+package com.pyamsoft.padlock.dagger.list;
 
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -24,6 +24,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.app.list.LockList;
+import com.pyamsoft.padlock.app.list.LockListInteractor;
+import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.pinentry.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
 import com.pyamsoft.padlock.app.service.LockServiceStateInteractor;
@@ -43,7 +46,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class LockListPresenterImpl extends PresenterImplBase<LockList>
+final class LockListPresenterImpl extends PresenterImplBase<LockList>
     implements LockListPresenter {
 
   @NonNull private final LockListInteractor lockListInteractor;

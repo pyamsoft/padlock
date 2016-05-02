@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.app.main;
 
-interface MainView {
+public interface MainView {
 
   void showUsageTermsDialog();
 

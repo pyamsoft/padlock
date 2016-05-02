@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.pinentry;
+package com.pyamsoft.padlock.dagger.pinentry;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockInteractor;
-import com.pyamsoft.padlock.app.lock.LockPresenterImpl;
+import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
+import com.pyamsoft.padlock.app.pinentry.PinEntryInteractor;
+import com.pyamsoft.padlock.app.pinentry.PinEntryPresenter;
+import com.pyamsoft.padlock.app.pinentry.PinScreen;
+import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;
 import com.pyamsoft.padlock.model.event.LockButtonClickEvent;
 import javax.inject.Inject;
 import rx.Subscription;
@@ -28,7 +32,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
+final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
     implements PinEntryPresenter {
 
   @NonNull private final PinEntryInteractor interactor;

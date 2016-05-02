@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.app.settings;
 
-interface SettingsView {
+public interface SettingsView {
 
   void setIgnorePeriodNone();
 

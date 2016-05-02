@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.app.list;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.AppEntry;
 
-interface LockList extends LockListCommon {
+public interface LockList extends LockListCommon {
 
   void setFABStateEnabled();
 

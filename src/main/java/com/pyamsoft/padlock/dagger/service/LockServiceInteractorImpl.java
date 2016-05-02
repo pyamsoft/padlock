@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.service;
+package com.pyamsoft.padlock.dagger.service;
 
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.service.LockServiceInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.squareup.sqlbrite.QueryObservable;
@@ -26,7 +27,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-@SuppressWarnings("TryFinallyCanBeTryWithResources") public class LockServiceInteractorImpl
+@SuppressWarnings("TryFinallyCanBeTryWithResources") final class LockServiceInteractorImpl
     implements LockServiceInteractor {
 
   private static final String[] UNLOCKED_CLASSES_REGEX = {
