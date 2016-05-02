@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.service;
+package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.service.LockService;
+import com.pyamsoft.padlock.app.service.LockServiceInteractor;
+import com.pyamsoft.padlock.app.service.LockServicePresenter;
+import com.pyamsoft.padlock.app.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImplBase;
 import javax.inject.Inject;
@@ -27,7 +31,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public class LockServicePresenterImpl extends PresenterImplBase<LockService>
+final class LockServicePresenterImpl extends PresenterImplBase<LockService>
     implements LockServicePresenter {
 
   @NonNull private final LockServiceInteractor interactor;

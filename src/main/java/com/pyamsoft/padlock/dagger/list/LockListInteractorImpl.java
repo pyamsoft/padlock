@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list;
+package com.pyamsoft.padlock.dagger.list;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -22,6 +22,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.list.LockListInteractor;
 import com.pyamsoft.padlock.app.lock.LockCommonInteractorImpl;
 import com.pyamsoft.padlock.app.service.LockServiceInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
@@ -31,7 +32,7 @@ import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-public final class LockListInteractorImpl extends LockCommonInteractorImpl
+final class LockListInteractorImpl extends LockCommonInteractorImpl
     implements LockListInteractor {
 
   @NonNull private final PadLockPreferences preferences;

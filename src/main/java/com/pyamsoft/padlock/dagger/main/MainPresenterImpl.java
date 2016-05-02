@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.main;
+package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
+import com.pyamsoft.padlock.app.main.MainInteractor;
+import com.pyamsoft.padlock.app.main.MainPresenter;
+import com.pyamsoft.padlock.app.main.MainView;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.pydroid.base.PresenterImplBase;
 import javax.inject.Inject;
 import rx.Subscription;
 import timber.log.Timber;
 
-public class MainPresenterImpl extends PresenterImplBase<MainView> implements MainPresenter {
+final class MainPresenterImpl extends PresenterImplBase<MainView> implements MainPresenter {
 
   @NonNull private final MainInteractor interactor;
 

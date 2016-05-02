@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.lock;
+package com.pyamsoft.padlock.dagger.lock;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.lock.LockInteractor;
+import com.pyamsoft.padlock.app.lock.LockPresenter;
+import com.pyamsoft.padlock.app.lock.LockView;
 import com.pyamsoft.padlock.model.event.LockButtonClickEvent;
 import com.pyamsoft.pydroid.base.PresenterImplBase;
 import rx.Observable;

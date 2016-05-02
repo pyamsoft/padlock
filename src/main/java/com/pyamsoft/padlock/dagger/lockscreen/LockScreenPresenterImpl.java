@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.lockscreen;
+package com.pyamsoft.padlock.dagger.lockscreen;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockInteractor;
-import com.pyamsoft.padlock.app.lock.LockPresenterImpl;
+import com.pyamsoft.padlock.app.lockscreen.LockScreen;
+import com.pyamsoft.padlock.app.lockscreen.LockScreenInteractor;
+import com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter;
+import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;
 import com.pyamsoft.padlock.app.lock.LockView;
 import com.pyamsoft.padlock.model.event.LockButtonClickEvent;
 import javax.inject.Inject;
@@ -32,7 +35,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
+final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     implements LockScreenPresenter {
 
   @NonNull private final LockScreenInteractor lockScreenInteractor;

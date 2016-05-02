@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.service;
+package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.pin.MasterPinInteractor;
+import com.pyamsoft.padlock.app.service.LockServiceStateInteractor;
 import javax.inject.Inject;
 
-public class LockServiceStateInteractorImpl implements LockServiceStateInteractor {
+final class LockServiceStateInteractorImpl implements LockServiceStateInteractor {
 
   @NonNull private final MasterPinInteractor pinInteractor;
 

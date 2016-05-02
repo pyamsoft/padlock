@@ -18,9 +18,7 @@ package com.pyamsoft.padlock.dagger.db;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.db.DBInteractor;
-import com.pyamsoft.padlock.app.db.DBInteractorImpl;
 import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.padlock.app.db.DBPresenterImpl;
 import dagger.Module;
 import dagger.Provides;
 

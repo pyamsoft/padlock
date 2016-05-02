@@ -20,7 +20,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.LockListCommon;
 import com.pyamsoft.padlock.model.ActivityEntry;
 
-interface LockInfoView extends LockListCommon {
+public interface LockInfoView extends LockListCommon {
 
   void onEntryAddedToList(@NonNull ActivityEntry entry);
 

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.db;
+package com.pyamsoft.padlock.dagger.db;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.db.DBInteractor;
+import com.pyamsoft.padlock.app.db.DBPresenter;
+import com.pyamsoft.padlock.app.db.DBView;
 import com.pyamsoft.pydroid.base.PresenterImplBase;
 import javax.inject.Inject;
 import rx.Observable;
@@ -26,7 +29,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public class DBPresenterImpl extends PresenterImplBase<DBView> implements DBPresenter {
+class DBPresenterImpl extends PresenterImplBase<DBView> implements DBPresenter {
 
   @NonNull private final DBInteractor dbInteractor;
 

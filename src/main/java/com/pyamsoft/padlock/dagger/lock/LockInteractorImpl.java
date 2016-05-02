@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.lock;
+package com.pyamsoft.padlock.dagger.lock;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -22,10 +22,11 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
+import com.pyamsoft.padlock.app.lock.LockInteractor;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockInteractorImpl implements LockInteractor {
+final class LockInteractorImpl implements LockInteractor {
 
   @Inject public LockInteractorImpl() {
   }

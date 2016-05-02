@@ -14,35 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.settings;
+package com.pyamsoft.padlock.dagger.main;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.model.sql.PadLockDB;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.padlock.app.main.MainInteractor;
 import javax.inject.Inject;
-import timber.log.Timber;
 
-public class SettingsInteractorImpl implements SettingsInteractor {
+final class MainInteractorImpl implements MainInteractor {
 
   @NonNull private final PadLockPreferences preferences;
-  @NonNull private final Context appContext;
 
-  @Inject public SettingsInteractorImpl(final @NonNull Context context,
-      final @NonNull PadLockPreferences preferences) {
-    appContext = context.getApplicationContext();
+  @Inject public MainInteractorImpl(final @NonNull PadLockPreferences preferences) {
     this.preferences = preferences;
   }
 
-  @Override public void clearDatabase() {
-    Timber.d("Clear database of all entries");
-    PadLockDB.with(appContext).delete(PadLockEntry.TABLE_NAME, "1=1");
+  @Override public boolean hasAgreed() {
+    return preferences.hasAgreed();
   }
 
-  @Override public void clearAll() {
-    clearDatabase();
-
-    preferences.clear();
+  @Override public void setAgreed() {
+    preferences.setAgreed();
   }
 }

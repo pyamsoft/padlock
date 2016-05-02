@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.app.pinentry;
 
 import com.pyamsoft.padlock.app.lock.LockView;
 
-interface PinScreen extends LockView {
+public interface PinScreen extends LockView {
 
   void onSubmissionComplete();
 }

@@ -14,27 +14,36 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list.info;
+package com.pyamsoft.padlock.dagger.settings;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.lock.LockCommonInteractorImpl;
+import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.settings.SettingsInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import java.util.List;
 import javax.inject.Inject;
-import rx.Observable;
+import timber.log.Timber;
 
-public class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInfoInteractor {
+final class SettingsInteractorImpl implements SettingsInteractor {
 
-  @Inject public LockInfoInteractorImpl(final @NonNull Context context) {
-    super(context);
+  @NonNull private final PadLockPreferences preferences;
+  @NonNull private final Context appContext;
+
+  @Inject public SettingsInteractorImpl(final @NonNull Context context,
+      final @NonNull PadLockPreferences preferences) {
+    appContext = context.getApplicationContext();
+    this.preferences = preferences;
   }
 
-  @NonNull @Override
-  public Observable<List<PadLockEntry>> getActivityEntries(@NonNull String packageName) {
-    return PadLockDB.with(getAppContext())
-        .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME, packageName)
-        .mapToList(PadLockEntry.MAPPER::map);
+  @Override public void clearDatabase() {
+    Timber.d("Clear database of all entries");
+    PadLockDB.with(appContext).delete(PadLockEntry.TABLE_NAME, "1=1");
+  }
+
+  @Override public void clearAll() {
+    clearDatabase();
+
+    preferences.clear();
   }
 }

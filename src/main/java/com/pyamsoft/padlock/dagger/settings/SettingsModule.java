@@ -18,9 +18,7 @@ package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.settings.SettingsInteractor;
-import com.pyamsoft.padlock.app.settings.SettingsInteractorImpl;
 import com.pyamsoft.padlock.app.settings.SettingsPresenter;
-import com.pyamsoft.padlock.app.settings.SettingsPresenterImpl;
 import dagger.Module;
 import dagger.Provides;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.lockscreen;
+package com.pyamsoft.padlock.dagger.lockscreen;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -23,6 +23,7 @@ import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.db.DBInteractor;
 import com.pyamsoft.padlock.app.lock.LockInteractor;
+import com.pyamsoft.padlock.app.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.app.pin.MasterPinInteractor;
 import com.pyamsoft.padlock.app.pin.PinUtils;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
@@ -33,7 +34,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class LockScreenInteractorImpl implements LockScreenInteractor {
+final class LockScreenInteractorImpl implements LockScreenInteractor {
 
   @NonNull private final LockInteractor lockInteractor;
   @NonNull private final MasterPinInteractor pinInteractor;

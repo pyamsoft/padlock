@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.dagger.pinentry;
 
 import com.pyamsoft.padlock.app.pinentry.PinEntryInteractor;
-import com.pyamsoft.padlock.app.pinentry.PinEntryInteractorImpl;
 import com.pyamsoft.padlock.app.pinentry.PinEntryPresenter;
-import com.pyamsoft.padlock.app.pinentry.PinEntryPresenterImpl;
 import dagger.Module;
 import dagger.Provides;
 

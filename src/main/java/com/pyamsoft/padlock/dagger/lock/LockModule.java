@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import com.pyamsoft.padlock.app.lock.LockInteractor;
-import com.pyamsoft.padlock.app.lock.LockInteractorImpl;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
-import com.pyamsoft.padlock.app.lock.LockPresenterImpl;
 import dagger.Module;
 import dagger.Provides;
 

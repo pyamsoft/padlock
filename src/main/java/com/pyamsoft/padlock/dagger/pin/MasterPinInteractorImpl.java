@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.pin;
+package com.pyamsoft.padlock.dagger.pin;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.pin.MasterPinInteractor;
 import javax.inject.Inject;
 
-public class MasterPinInteractorImpl implements MasterPinInteractor {
+final class MasterPinInteractorImpl implements MasterPinInteractor {
 
   @NonNull private final PadLockPreferences preferences;
 
