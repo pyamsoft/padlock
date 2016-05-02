@@ -31,7 +31,6 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.anjlab.android.iab.v3.BillingProcessor;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.R;
@@ -46,7 +45,6 @@ import com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule;
 import com.pyamsoft.pydroid.base.ActivityBase;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.IMMLeakUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -83,8 +81,6 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
   }
 
   @Override public void onCreate(final Bundle savedInstanceState) {
-    setupFakeFullscreenWindow();
-    IMMLeakUtil.fixFocusedViewLeak(getApplication());
     setTheme(R.style.Theme_PadLock_Light_Lock);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_lock);
@@ -163,15 +159,18 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @Override public void onBackPressed() {
     Timber.d("onBackPressed");
-
     getApplicationContext().startActivity(home);
   }
 
-  @Override public String getPlayStoreAppPackage() {
-    return null;
+  @Override protected boolean shouldConfirmBackPress() {
+    return false;
   }
 
-  @Override public BillingProcessor getBillingProcessor() {
+  @Override protected boolean isDonationSupported() {
+    return false;
+  }
+
+  @Override public String getPlayStoreAppPackage() {
     return null;
   }
 
