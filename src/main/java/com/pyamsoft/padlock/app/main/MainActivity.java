@@ -94,11 +94,6 @@ public class MainActivity extends ActivityBase implements MainView {
     setupViewPager();
     setupTabLayout();
     setupAccessibilityButton();
-    setupOnboarding();
-  }
-
-  private void setupOnboarding() {
-    // TODO setup onboarding
   }
 
   private void setupAccessibilityButton() {
@@ -270,7 +265,7 @@ public class MainActivity extends ActivityBase implements MainView {
   }
 
   @Override public String getPlayStoreAppPackage() {
-    return "com.pyamsoft.padlock";
+    return getPackageName();
   }
 
   @Override protected void onResume() {
