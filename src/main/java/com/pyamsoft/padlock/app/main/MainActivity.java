@@ -99,7 +99,8 @@ public class MainActivity extends ActivityBase
 
     presenter.bind(this);
 
-    billingProcessor = new BillingProcessor(this, getBillingKey(), this);
+    // The billing key is just the package name
+    billingProcessor = new BillingProcessor(this, getPackageName(), this);
 
     setAppBarState();
     setupViewPagerAdapter();
