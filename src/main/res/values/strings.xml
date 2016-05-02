@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2016 Peter Kenji Yamanaka
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<resources>
+  <string name="app_name">PadLock</string>
+  <string name="one">1</string>
+  <string name="two">2</string>
+  <string name="three">3</string>
+  <string name="four">4</string>
+  <string name="five">5</string>
+  <string name="six">6</string>
+  <string name="seven">7</string>
+  <string name="eight">8</string>
+  <string name="nine">9</string>
+  <string name="zero">0</string>
+  <string name="ignore">Ignore</string>
+  <string name="do_not_ignore">Do not Ignore</string>
+  <string name="ignore_for_5_minutes">Ignore for 5 Minutes</string>
+  <string name="ignore_for_10_minutes">Ignore for 10 Minutes</string>
+  <string name="ignore_for_30_minutes">Ignore for 30 Minutes</string>
+  <string name="do_not_time_out">Do not Time Out</string>
+  <string name="time_out_for_1_minute">Time Out for 1 Minute</string>
+  <string name="time_out_for_5_minutes">Time Out for 5 Minutes</string>
+  <string name="time_out_for_10_minutes">Time Out for 10 Minutes</string>
+  <string name="forgot_passcode">Forgot Passcode</string>
+  <string name="package_name">Package:</string>
+  <string name="system">System:</string>
+  <string name="exclude_entry">Exclude Entry</string>
+  <string name="clear_database">Reset Database</string>
+  <string name="clear_all_settings">Reset All Settings</string>
+  <string name="info_for_nerds">Info for Nerds</string>
+  <string name="explain_accessibility_service">PadLock requires an Accessibility Service to
+    monitor the apps that launch on your device. When it detects that an app should be locked
+    it will launch the lock screen. This service is required for use of the application.</string>
+  <string name="accessibility_description">PadLock needs this service to monitor which apps launch
+    on your device. It will not capture any personal data. It does not have the ability to connect
+    to the Internet. It will only watch the apps you launch and lock the ones you request.</string>
+  <string name="got_it">Got It</string>
+  <string name="getting_started">PadLock will not be activated until you set a PIN code. Click the button to get started.</string>
+  <string name="enable_accessibility_service">Enable Accessibility Service</string>
+</resources>

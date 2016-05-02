@@ -1,0 +1,63 @@
+-- Create the table for PadLockEntry objects
+CREATE TABLE padlock_entry (
+  packageName TEXT NOT NULL,
+  activityName TEXT NOT NULL,
+  displayName TEXT NOT NULL,
+  lockCode TEXT,
+  lockUntilTime INTEGER NOT NULL,
+  ignoreUntilTime INTEGER NOT NULL,
+  systemApplication INTEGER AS Boolean NOT NULL
+);
+
+-- Get all entries in the table
+all_entries:
+SELECT *
+FROM padlock_entry
+ORDER BY displayName;
+
+-- Get all entries with the package name
+with_package_name:
+SELECT *
+FROM padlock_entry
+WHERE packageName = ?
+ORDER BY displayName;
+
+-- Get all entries with the package name and activity name
+with_package_activity_name:
+SELECT *
+FROM padlock_entry
+WHERE packageName = ?
+AND activityName = ?
+LIMIT 1;
+
+-- Get the lock code for an entry
+with_lock_code:
+SELECT lockCode
+FROM padlock_entry
+WHERE packageName = ?
+AND activityName = ?
+LIMIT 1;
+
+-- Get whether the entry is from a system application
+is_system_application:
+SELECT systemApplication
+FROM padlock_entry
+WHERE packageName = ?
+AND activityName = ?
+LIMIT 1;
+
+-- Get time to be locked until
+get_lock_until_time:
+SELECT lockUntilTime
+FROM padlock_entry
+WHERE packageName = ?
+AND activityName = ?
+LIMIT 1;
+
+-- Get time to be ignored until
+get_ignore_until_time:
+SELECT ignoreUntilTime
+FROM padlock_entry
+WHERE packageName = ?
+AND activityName = ?
+LIMIT 1;

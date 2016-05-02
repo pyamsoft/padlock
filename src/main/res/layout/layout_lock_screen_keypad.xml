@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2016 Peter Kenji Yamanaka
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:padding="16dp"
+    >
+
+  <LinearLayout
+      android:id="@+id/lock_row_1"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      >
+
+    <ImageView
+        android:id="@+id/lock_back"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:contentDescription="@string/blank"
+        android:gravity="center"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+    <Button
+        android:id="@+id/lock_0"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/zero"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+    <ImageView
+        android:id="@+id/lock_command"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:contentDescription="@string/blank"
+        android:gravity="center"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/lock_row_2"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_above="@id/lock_row_1"
+      >
+
+    <Button
+        android:id="@+id/lock_7"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/seven"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+    <Button
+        android:id="@+id/lock_8"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/eight"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+    <Button
+        android:id="@+id/lock_9"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/nine"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/lock_row_3"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_above="@id/lock_row_2"
+      >
+
+    <Button
+        android:id="@+id/lock_4"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/four"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+    <Button
+        android:id="@+id/lock_5"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/five"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+    <Button
+        android:id="@+id/lock_6"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/six"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/lock_row_4"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_above="@id/lock_row_3"
+      >
+
+    <Button
+        android:id="@+id/lock_1"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/one"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+    <Button
+        android:id="@+id/lock_2"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/two"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+    <Button
+        android:id="@+id/lock_3"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/three"
+        style="?android:attr/buttonBarButtonStyle"
+        />
+
+
+  </LinearLayout>
+
+
+</RelativeLayout>
