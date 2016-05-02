@@ -21,6 +21,4 @@ public interface MainInteractor {
   boolean hasAgreed();
 
   void setAgreed();
-
-  void setShownOnBoarding();
 }

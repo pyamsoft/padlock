@@ -41,4 +41,6 @@ public interface LockListPresenter extends PresenterBase<LockList> {
   void unregisterFromConfirmDialogBus();
 
   void showOnBoarding();
+
+  void setOnBoard();
 }

@@ -35,8 +35,4 @@ public class MainInteractorImpl implements MainInteractor {
   @Override public void setAgreed() {
     preferences.setAgreed();
   }
-
-  @Override public void setShownOnBoarding() {
-    preferences.setOnBoard();
-  }
 }
