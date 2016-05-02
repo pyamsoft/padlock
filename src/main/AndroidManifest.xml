@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2016 Peter Kenji Yamanaka
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.pyamsoft.padlock">
+
+  <!-- For Billing Service -->
+  <uses-permission android:name="com.android.vending.BILLING"/>
+
+  <!-- For accessibility service -->
+  <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"/>
+
+  <application
+      android:name=".PadLock"
+      android:allowBackup="false"
+      android:icon="@mipmap/ic_launcher"
+      android:label="@string/app_name"
+      android:supportsRtl="false"
+      android:theme="@style/Theme.PadLock.Light"
+      tools:ignore="GoogleAppIndexingWarning">
+
+    <!-- Main Activity -->
+    <activity
+        android:name=".app.main.MainActivity"
+        android:excludeFromRecents="false"
+        android:exported="true"
+        android:label="@string/app_name"
+        android:noHistory="false"
+        android:theme="@style/Theme.PadLock.Light.Splash">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+
+    <!-- Lock Screen Activity -->
+    <activity
+        android:name=".app.lockscreen.LockScreenActivity"
+        android:excludeFromRecents="true"
+        android:exported="false"
+        android:launchMode="singleInstance"
+        android:noHistory="true"
+        android:theme="@style/Theme.PadLock.Light.Lock"/>
+
+    <!-- Crash Log Activitiy -->
+    <activity
+        android:name="com.pyamsoft.pydroid.crash.CrashLogActivity"
+        android:excludeFromRecents="true"
+        android:exported="false"
+        android:launchMode="singleInstance"
+        android:noHistory="true"
+        android:windowSoftInputMode="stateHidden">
+      <intent-filter>
+        <action android:name="com.pyamsoft.padlock.crash.SEND_LOG"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+    </activity>
+
+    <!-- Accessibility Service -->
+    <service
+        android:name=".app.service.PadLockService"
+        android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+      <intent-filter>
+        <action android:name="android.accessibilityservice.AccessibilityService"/>
+      </intent-filter>
+      <meta-data
+          android:name="android.accessibilityservice"
+          android:resource="@xml/padlock"/>
+    </service>
+
+    <!-- Crash Log Provider -->
+    <provider
+        android:name="android.support.v4.content.FileProvider"
+        android:authorities="com.pyamsoft.padlock.crash.LOG_PROVIDER"
+        android:exported="false"
+        android:grantUriPermissions="true">
+      <meta-data
+          android:name="android.support.FILE_PROVIDER_PATHS"
+          android:resource="@xml/crashlog_provider"/>
+    </provider>
+
+  </application>
+
+</manifest>
