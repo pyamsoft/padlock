@@ -34,28 +34,25 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.anjlab.android.iab.v3.BillingProcessor;
-import com.anjlab.android.iab.v3.TransactionDetails;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.main.DaggerMainComponent;
 import com.pyamsoft.padlock.dagger.main.MainModule;
-import com.pyamsoft.pydroid.model.AsyncDrawable;
 import com.pyamsoft.pydroid.base.ActivityBase;
+import com.pyamsoft.pydroid.model.AsyncDrawable;
 import com.pyamsoft.pydroid.onboard.HoleView;
+import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.DrawableUtil;
-import com.pyamsoft.pydroid.util.IMMLeakUtil;
 import java.lang.ref.WeakReference;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class MainActivity extends ActivityBase
-    implements BillingProcessor.IBillingHandler, MainView {
+public class MainActivity extends ActivityBase implements MainView {
 
   private static final String USAGE_TERMS_TAG = "usage_terms";
   private static final int VECTOR_TASK_SIZE = 2;
@@ -74,7 +71,6 @@ public class MainActivity extends ActivityBase
   @BindView(R.id.onboard) HoleView holeView;
   @BindView(R.id.onboard_done_button) Button doneButton;
   @Inject MainPresenter presenter;
-  private BillingProcessor billingProcessor;
   private MainPagerAdapter adapter;
   private Unbinder unbinder;
 
@@ -85,8 +81,6 @@ public class MainActivity extends ActivityBase
 
   @Override public void onCreate(final Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
-    IMMLeakUtil.fixFocusedViewLeak(getApplication());
-
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     unbinder = ButterKnife.bind(this);
@@ -98,9 +92,6 @@ public class MainActivity extends ActivityBase
         .inject(this);
 
     presenter.bind(this);
-
-    // The billing key is just the package name
-    billingProcessor = new BillingProcessor(this, getPackageName(), this);
 
     setAppBarState();
     setupViewPagerAdapter();
@@ -141,10 +132,6 @@ public class MainActivity extends ActivityBase
     enableService.setVisibility(View.GONE);
     viewPager.setVisibility(View.VISIBLE);
     tabLayout.setVisibility(View.VISIBLE);
-  }
-
-  @Override public BillingProcessor getBillingProcessor() {
-    return billingProcessor;
   }
 
   private void setupViewPagerAdapter() {
@@ -243,21 +230,8 @@ public class MainActivity extends ActivityBase
     viewPager.setAdapter(adapter);
   }
 
-  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (billingProcessor != null) {
-      if (!billingProcessor.handleActivityResult(requestCode, resultCode, data)) {
-        super.onActivityResult(requestCode, resultCode, data);
-      }
-    } else {
-      super.onActivityResult(requestCode, resultCode, data);
-    }
-  }
-
   @Override protected void onDestroy() {
     super.onDestroy();
-    if (billingProcessor != null) {
-      billingProcessor.release();
-    }
 
     if (tabLayout != null) {
       tabLayout.setOnTabSelectedListener(null);
@@ -342,27 +316,6 @@ public class MainActivity extends ActivityBase
     } else {
       showAccessibilityPrompt();
     }
-  }
-
-  @Override public void onProductPurchased(String productId, TransactionDetails details) {
-    Timber.d("onProductPurchased");
-    Timber.d("Details: %s", details);
-    if (billingProcessor != null) {
-      Timber.d("Consume item: %s", productId);
-      billingProcessor.consumePurchase(productId);
-    }
-  }
-
-  @Override public void onPurchaseHistoryRestored() {
-    Timber.d("onPurchaseHistoryRestored");
-  }
-
-  @Override public void onBillingError(int errorCode, Throwable error) {
-    Timber.d(error, "onBillingError");
-  }
-
-  @Override public void onBillingInitialized() {
-    Timber.d("onBillingInitialized");
   }
 
   @Override protected void onSaveInstanceState(Bundle outState) {
