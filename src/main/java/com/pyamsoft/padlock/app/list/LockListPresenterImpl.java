@@ -302,4 +302,8 @@ public final class LockListPresenterImpl extends PresenterImplBase<LockList>
       pinEntryBusSubscription.unsubscribe();
     }
   }
+
+  @Override public void setOnBoard() {
+    lockListInteractor.setShownOnBoarding();
+  }
 }

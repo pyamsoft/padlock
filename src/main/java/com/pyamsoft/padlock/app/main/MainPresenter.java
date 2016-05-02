@@ -29,6 +29,4 @@ public interface MainPresenter extends PresenterBase<MainView> {
   void registerOnConfirmDialogBus();
 
   void unregisterFromConfirmDialogBus();
-
-  void setOnBoard();
 }

@@ -82,4 +82,8 @@ public final class LockListInteractorImpl extends LockCommonInteractorImpl
   @Override public boolean hasShownOnBoarding() {
     return preferences.isOnBoard();
   }
+
+  @Override public void setShownOnBoarding() {
+    preferences.setOnBoard();
+  }
 }

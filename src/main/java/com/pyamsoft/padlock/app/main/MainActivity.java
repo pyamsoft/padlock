@@ -43,14 +43,12 @@ import com.pyamsoft.padlock.dagger.main.DaggerMainComponent;
 import com.pyamsoft.padlock.dagger.main.MainModule;
 import com.pyamsoft.pydroid.base.ActivityBase;
 import com.pyamsoft.pydroid.model.AsyncDrawable;
-import com.pyamsoft.pydroid.onboard.HoleView;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.DrawableUtil;
 import java.lang.ref.WeakReference;
 import javax.inject.Inject;
-import timber.log.Timber;
 
 public class MainActivity extends ActivityBase implements MainView {
 
@@ -68,8 +66,6 @@ public class MainActivity extends ActivityBase implements MainView {
   @BindView(R.id.main_tabs) TabLayout tabLayout;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.appbar) AppBarLayout appBarLayout;
-  @BindView(R.id.onboard) HoleView holeView;
-  @BindView(R.id.onboard_done_button) Button doneButton;
   @Inject MainPresenter presenter;
   private MainPagerAdapter adapter;
   private Unbinder unbinder;
@@ -102,15 +98,7 @@ public class MainActivity extends ActivityBase implements MainView {
   }
 
   private void setupOnboarding() {
-    doneButton.setOnClickListener(view -> {
-      Timber.d("Done clicked!");
-      presenter.setOnBoard();
-      holeView.hide();
-    });
-  }
-
-  public HoleView getHoleView() {
-    return holeView;
+    // TODO setup onboarding
   }
 
   private void setupAccessibilityButton() {

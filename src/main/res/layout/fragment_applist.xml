@@ -42,7 +42,7 @@
       android:id="@+id/applist_fab"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_gravity="bottom|right|end"
+      android:layout_gravity="bottom|end"
       android:layout_margin="@dimen/fab_margin"
       app:fabSize="normal"
       />

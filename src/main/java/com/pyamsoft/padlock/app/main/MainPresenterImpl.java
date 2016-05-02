@@ -92,8 +92,4 @@ public class MainPresenterImpl extends PresenterImplBase<MainView> implements Ma
       confirmDialogBusSubscription = null;
     }
   }
-
-  @Override public void setOnBoard() {
-    interactor.setShownOnBoarding();
-  }
 }

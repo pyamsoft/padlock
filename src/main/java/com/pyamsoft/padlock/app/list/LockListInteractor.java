@@ -39,4 +39,6 @@ public interface LockListInteractor {
   @NonNull PackageManager getPackageManager();
 
   boolean hasShownOnBoarding();
+
+  void setShownOnBoarding();
 }

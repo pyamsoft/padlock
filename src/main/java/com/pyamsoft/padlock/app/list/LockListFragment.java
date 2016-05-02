@@ -20,7 +20,6 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
@@ -39,27 +38,25 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
-import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.main.PageAwareFragment;
 import com.pyamsoft.padlock.app.pinentry.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.list.DaggerLockListComponent;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.model.AsyncDrawable;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
-import com.pyamsoft.pydroid.onboard.GradientHoleDrawer;
-import com.pyamsoft.pydroid.onboard.HoleOverlay;
+import com.pyamsoft.pydroid.model.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
-import com.pyamsoft.pydroid.tool.FABVisibilityController;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
+import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
 public final class LockListFragment extends PageAwareFragment
-    implements LockList, PinEntryDialogRequest, MasterPinSubmitCallback, FABVisibilityController {
+    implements LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
 
   private static final String PIN_DIALOG_TAG = "pin_dialog";
 
@@ -253,7 +250,7 @@ public final class LockListFragment extends PageAwareFragment
   private void setupFAB() {
     if (fab != null) {
       fab.setOnClickListener(view -> presenter.clickPinFAB());
-      AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(this, 24));
+      AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(24));
       presenter.setFABStateFromPreference();
     }
   }
@@ -338,63 +335,57 @@ public final class LockListFragment extends PageAwareFragment
     }
   }
 
-  @Override public boolean isFABShown(FloatingActionButton fab) {
-    return true;
-  }
-
-  @Override public void onHideFAB() {
-    fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
-      @Override public void onHidden(FloatingActionButton fab) {
-        super.onHidden(fab);
-        endFABAnimation();
-      }
-    });
-  }
-
-  @Override public void onShowFAB() {
-    fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
-      @Override public void onShown(FloatingActionButton fab) {
-        super.onShown(fab);
-        endFABAnimation();
-      }
-    });
-  }
-
-  @Override public void onListPopulated() {
-    Timber.d("onListPopulated");
-    swipeRefreshLayout.post(() -> {
-      swipeRefreshLayout.setRefreshing(false);
-      lockListLayoutManager.setVerticalScrollEnabled(true);
-      fab.show();
-      presenter.showOnBoarding();
-      final FragmentActivity activity = getActivity();
-      if (activity != null) {
-        activity.supportInvalidateOptionsMenu();
-      }
-    });
-  }
-
   @Override public void onListPopulateError() {
     // TODO handle list populate error
   }
 
   @Override public void showOnBoarding() {
-    final HoleOverlay overlay = new GradientHoleDrawer(fab);
-    overlay.setTransparency(230);
-    ((MainActivity) getActivity()).getHoleView().setDrawer(overlay).show();
+    new MaterialShowcaseView.Builder(getActivity()).setTarget(fab)
+        .setTargetTouchable(false)
+        .setTitleText("PadLock")
+        .setDismissText("GOT IT")
+        .setListener(new IShowcaseListener() {
+          @Override public void onShowcaseDisplayed(MaterialShowcaseView materialShowcaseView) {
+            Timber.d("onShowcaseDisplayed");
+          }
+
+          @Override public void onShowcaseDismissed(MaterialShowcaseView materialShowcaseView) {
+            Timber.d("onShowcaseDismissed");
+            presenter.setOnBoard();
+          }
+        })
+        .build()
+        .show(getActivity());
   }
 
   @Override public void onListCleared() {
     Timber.d("onListCleared");
+    lockListLayoutManager.setVerticalScrollEnabled(false);
     swipeRefreshLayout.post(() -> {
       swipeRefreshLayout.setRefreshing(true);
-      lockListLayoutManager.setVerticalScrollEnabled(false);
-      fab.hide();
       final FragmentActivity activity = getActivity();
       if (activity != null) {
+        Timber.d("Reload options");
         activity.supportInvalidateOptionsMenu();
       }
     });
+    fab.hide();
+  }
+
+  @Override public void onListPopulated() {
+    Timber.d("onListPopulated");
+    lockListLayoutManager.setVerticalScrollEnabled(true);
+    swipeRefreshLayout.post(() -> {
+      swipeRefreshLayout.setRefreshing(false);
+      final FragmentActivity activity = getActivity();
+      if (activity != null) {
+        Timber.d("Reload options");
+        activity.supportInvalidateOptionsMenu();
+      }
+    });
+    fab.show();
+
+    presenter.showOnBoarding();
   }
 
   @Override public void refreshList() {
@@ -404,19 +395,5 @@ public final class LockListFragment extends PageAwareFragment
     }
     onListCleared();
     presenter.populateList();
-  }
-
-  private void endFABAnimation() {
-    if (fab != null) {
-      final ViewGroup.LayoutParams params = fab.getLayoutParams();
-      if (params instanceof CoordinatorLayout.LayoutParams) {
-        final CoordinatorLayout.LayoutParams coordParams = (CoordinatorLayout.LayoutParams) params;
-        final CoordinatorLayout.Behavior behavior = coordParams.getBehavior();
-        if (behavior instanceof HideScrollFABBehavior) {
-          final HideScrollFABBehavior hideBehavior = (HideScrollFABBehavior) behavior;
-          hideBehavior.endAnimation();
-        }
-      }
-    }
   }
 }
