@@ -46,8 +46,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockListPresenterImpl extends PresenterImplBase<LockList>
-    implements LockListPresenter {
+final class LockListPresenterImpl extends PresenterImplBase<LockList> implements LockListPresenter {
 
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
@@ -118,29 +117,22 @@ final class LockListPresenterImpl extends PresenterImplBase<LockList>
                 createFromPackageInfo(packageManager, info, defaultIcon, foundEntry != null));
           }
 
-          // KLUDGE Sorting the list by using concatMap and then toSortedList hangs for some reason
-          // on the toSortedList call. Sort in here instead
+          // KLUDGE we cannot use toSortedList because this is an endless stream of observables.
+          // we must take it as a chunk and split it afterwards
           Timber.d("Sort in here");
           Collections.sort(entries,
               (entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()));
           return entries;
         })
-            .subscribeOn(Schedulers.computation())
+            .filter(appEntries -> appEntries != null && !appEntries.isEmpty())
+            .first()
+            .concatMap(Observable::from)
+            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(appEntries -> {
-              // Same thing as the issue in LockInfo populateList()
-              for (final AppEntry entry : appEntries) {
-                Timber.d("LockListPresenterImpl populateList onNext");
-                get().onEntryAddedToList(entry);
-              }
-
-              Timber.d("LockListPresenterImpl populateList onComplete 'faked'");
-              get().onListPopulated();
-              unsubscribePopulateList();
-            }, throwable -> {
+            .subscribe(appEntry -> get().onEntryAddedToList(appEntry), throwable -> {
               Timber.e(throwable, "LockListPresenterImpl populateList onError");
               get().onListPopulateError();
-            });
+            }, () -> get().onListPopulated());
   }
 
   @Nullable private AppEntry createFromPackageInfo(PackageManager packageManager, PackageInfo info,

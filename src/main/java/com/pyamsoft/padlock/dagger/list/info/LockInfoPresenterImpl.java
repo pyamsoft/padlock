@@ -54,26 +54,16 @@ final class LockInfoPresenterImpl extends PresenterImplBase<LockInfoView>
   @Override
   public void populateList(@NonNull String packageName, @NonNull List<ActivityInfo> activities) {
     unsubPopulateList();
-    populateListSubscription =
-        getListObservable(packageName, activities).subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(activityEntries -> {
-              // The DB never stops presenting onNexts, take the list and handle it then
-              // call the view 'onComplete'
-              for (final ActivityEntry entry : activityEntries) {
-                Timber.d("LockInfoPresenterImpl populateList onNext");
-                get().onEntryAddedToList(entry);
-              }
-
-              // Unsub here to prevent continued processing.
-              // This fixes the duplicate entries that appear on list click
-              Timber.d("LockInfoPresenterImpl populateList onComplete faked");
-              get().onListPopulated();
-              unsubPopulateList();
-            }, throwable -> {
-              Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
-              get().onListPopulateError();
-            });
+    populateListSubscription = getListObservable(packageName, activities).filter(
+        activityEntries -> activityEntries != null && !activityEntries.isEmpty())
+        .first()
+        .concatMap(Observable::from)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(activityEntry -> get().onEntryAddedToList(activityEntry), throwable -> {
+          Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
+          get().onListPopulateError();
+        }, () -> get().onListPopulated());
   }
 
   private void unsubPopulateList() {
