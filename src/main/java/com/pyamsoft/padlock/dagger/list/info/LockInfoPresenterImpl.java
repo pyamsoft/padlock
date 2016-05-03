@@ -25,7 +25,6 @@ import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImplBase;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
@@ -54,16 +53,48 @@ final class LockInfoPresenterImpl extends PresenterImplBase<LockInfoView>
   @Override
   public void populateList(@NonNull String packageName, @NonNull List<ActivityInfo> activities) {
     unsubPopulateList();
-    populateListSubscription = getListObservable(packageName, activities).filter(
-        activityEntries -> activityEntries != null && !activityEntries.isEmpty())
-        .first()
-        .concatMap(Observable::from)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(activityEntry -> get().onEntryAddedToList(activityEntry), throwable -> {
-          Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
-          get().onListPopulateError();
-        }, () -> get().onListPopulated());
+    populateListSubscription =
+        lockInfoInteractor.getActivityEntries(packageName)
+            .map(padLockEntries -> {
+              final List<ActivityEntry> entries = new ArrayList<>();
+              // KLUDGE super ugly.
+              Timber.d("Search set for locked activities");
+              for (final ActivityInfo info : activities) {
+                final String name = info.name;
+                PadLockEntry foundEntry = null;
+                for (final PadLockEntry padLockEntry : padLockEntries) {
+                  if (padLockEntry.activityName().equals(name)) {
+                    foundEntry = padLockEntry;
+                    break;
+                  }
+                }
+
+                final ActivityEntry activityEntry =
+                    ActivityEntry.builder().locked(foundEntry != null).name(name).build();
+                Timber.d("Add ActivityEntry: %s", activityEntry);
+                entries.add(activityEntry);
+              }
+
+              return entries;
+            })
+            .flatMap(Observable::from)
+            .toSortedList((activityEntry, activityEntry2) -> {
+              if (activityEntry.name().startsWith(packageName)) {
+                return -1;
+              } else if (activityEntry2.name().startsWith(packageName)) {
+                return 1;
+              } else {
+                return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
+              }
+            })
+            .concatMap(Observable::from)
+            .filter(activityEntry -> activityEntry != null)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(activityEntry -> get().onEntryAddedToList(activityEntry), throwable -> {
+              Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
+              get().onListPopulateError();
+            }, () -> get().onListPopulated());
   }
 
   private void unsubPopulateList() {
@@ -71,52 +102,5 @@ final class LockInfoPresenterImpl extends PresenterImplBase<LockInfoView>
       Timber.d("Unsub from populate List event");
       populateListSubscription.unsubscribe();
     }
-  }
-
-  @NonNull private Observable<List<ActivityEntry>> getListObservable(String packageName,
-      List<ActivityInfo> activities) {
-    return lockInfoInteractor.getActivityEntries(packageName).map(padLockEntries -> {
-      final List<ActivityEntry> entries = new ArrayList<>();
-      // KLUDGE super ugly.
-      Timber.d("Search set for locked activities");
-      for (final ActivityInfo info : activities) {
-        Timber.d("Loopy loop");
-        PadLockEntry foundEntry = null;
-        final String name = info.name;
-        for (final PadLockEntry entry : padLockEntries) {
-          Timber.d("Inner Loopy loop");
-          if (name.equals(entry.activityName())) {
-            Timber.d("Entry: ", name, " is locked");
-            foundEntry = entry;
-            break;
-          }
-        }
-
-        if (foundEntry != null) {
-          Timber.d("Remove found entry from set");
-          padLockEntries.remove(foundEntry);
-        }
-
-        Timber.d("Add entry to list");
-        entries.add(ActivityEntry.builder().locked(foundEntry != null).name(name).build());
-      }
-
-      Timber.d("Finished with list parsing");
-
-      // KLUDGE Sorting the list by using concatMap and then toSortedList hangs for some reason
-      // on the toSortedList call. Sort in here instead
-      Timber.d("Sort in here");
-      Collections.sort(entries, (entry, entry2) -> {
-        if (entry.name().startsWith(packageName)) {
-          return -1;
-        } else if (entry2.name().startsWith(packageName)) {
-          return 1;
-        } else {
-          return entry.name().compareToIgnoreCase(entry2.name());
-        }
-      });
-
-      return entries;
-    });
   }
 }

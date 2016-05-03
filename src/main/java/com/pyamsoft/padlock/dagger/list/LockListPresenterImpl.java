@@ -36,7 +36,6 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImplBase;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
@@ -91,48 +90,51 @@ final class LockListPresenterImpl extends PresenterImplBase<LockList> implements
     Timber.d("populateList");
     unsubscribePopulateList();
 
+    Timber.d("Get package info list");
     final Observable<List<PackageInfo>> packageInfoObservable =
         lockListInteractor.getPackageInfoList();
-    final Observable<List<PadLockEntry>> padlockEntries = lockListInteractor.getAppEntryList();
+
+    Timber.d("Get padlock entry list");
+    final Observable<List<PadLockEntry>> padlockEntryObservable =
+        lockListInteractor.getAppEntryList();
 
     final PackageManager packageManager = lockListInteractor.getPackageManager();
     final Drawable defaultIcon = packageManager.getDefaultActivityIcon();
-    populateListSubscription =
-        Observable.zip(packageInfoObservable, padlockEntries, (packageInfos, padLockEntries) -> {
-          Timber.d("Zip PackageInfo with Locked status");
 
-          final List<AppEntry> entries = new ArrayList<>();
-          for (final PackageInfo info : packageInfos) {
+    populateListSubscription = Observable.zip(packageInfoObservable, padlockEntryObservable,
+        (packageInfos, padLockEntries) -> {
+
+          final List<AppEntry> appEntries = new ArrayList<>();
+          // KLUDGE super ugly.
+          for (final PackageInfo packageInfo : packageInfos) {
             PadLockEntry foundEntry = null;
-            for (final PadLockEntry entry : padLockEntries) {
-              if (entry.packageName().equals(info.packageName)) {
-                Timber.d("AppEntry: ", entry.packageName(), " is locked");
-                foundEntry = entry;
+            for (final PadLockEntry padLockEntry : padLockEntries) {
+              if (padLockEntry.packageName().equals(packageInfo.packageName)) {
+                foundEntry = padLockEntry;
                 break;
               }
             }
 
-            Timber.d("Add appentry: ", info.packageName);
-            entries.add(
-                createFromPackageInfo(packageManager, info, defaultIcon, foundEntry != null));
+            final AppEntry appEntry =
+                createFromPackageInfo(packageManager, packageInfo, defaultIcon, foundEntry != null);
+            Timber.d("Add AppEntry: %s", appEntry);
+            appEntries.add(appEntry);
           }
-
-          // KLUDGE we cannot use toSortedList because this is an endless stream of observables.
-          // we must take it as a chunk and split it afterwards
-          Timber.d("Sort in here");
-          Collections.sort(entries,
-              (entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()));
-          return entries;
+          return appEntries;
         })
-            .filter(appEntries -> appEntries != null && !appEntries.isEmpty())
-            .first()
-            .concatMap(Observable::from)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(appEntry -> get().onEntryAddedToList(appEntry), throwable -> {
-              Timber.e(throwable, "LockListPresenterImpl populateList onError");
-              get().onListPopulateError();
-            }, () -> get().onListPopulated());
+        .flatMap(Observable::from)
+        .toSortedList((appEntry, appEntry2) -> {
+          return appEntry.name().compareToIgnoreCase(appEntry2.name());
+        })
+        .concatMap(Observable::from)
+        .filter(appEntry -> appEntry != null)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(appEntry -> get().onEntryAddedToList(appEntry), throwable -> {
+          // TODO handle error
+          Timber.e(throwable, "populateList onError");
+          get().onListPopulated();
+        }, () -> get().onListPopulated());
   }
 
   @Nullable private AppEntry createFromPackageInfo(PackageManager packageManager, PackageInfo info,

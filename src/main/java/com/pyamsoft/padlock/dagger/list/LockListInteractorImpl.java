@@ -30,10 +30,8 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
-import timber.log.Timber;
 
-final class LockListInteractorImpl extends LockCommonInteractorImpl
-    implements LockListInteractor {
+final class LockListInteractorImpl extends LockCommonInteractorImpl implements LockListInteractor {
 
   @NonNull private final PadLockPreferences preferences;
 
@@ -49,23 +47,23 @@ final class LockListInteractorImpl extends LockCommonInteractorImpl
 
   @Override @NonNull public Observable<List<PackageInfo>> getPackageInfoList() {
     return Observable.defer(() -> Observable.from(getPackageManager().getInstalledPackages(0)))
+        .filter(packageInfo -> packageInfo != null)
         .filter(packageInfo -> {
-          Timber.d("Filter out packages with null application info");
           final ApplicationInfo appInfo = packageInfo.applicationInfo;
           return appInfo != null && !(!appInfo.enabled || (isSystemApplication(appInfo)
               && !isSystemVisible()) || appInfo.packageName.equals(
               LockServiceInteractor.ANDROID_PACKAGE) || appInfo.packageName.equals(
               LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE));
         })
-        .filter(packageInfo -> packageInfo != null)
         .toList();
   }
 
   @NonNull @Override public Observable<List<PadLockEntry>> getAppEntryList() {
-    Timber.d("getPackageInfoList");
     return PadLockDB.with(getAppContext())
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
-        .mapToList(PadLockEntry.MAPPER::map);
+        .mapToList(PadLockEntry.MAPPER::map)
+        .filter(padLockEntries -> padLockEntries != null)
+        .first();
   }
 
   @Override public boolean isSystemApplication(ApplicationInfo info) {
