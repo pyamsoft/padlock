@@ -108,11 +108,19 @@ final class LockListPresenterImpl extends PresenterImplBase<LockList> implements
           // KLUDGE super ugly.
           for (final PackageInfo packageInfo : packageInfos) {
             PadLockEntry foundEntry = null;
-            for (final PadLockEntry padLockEntry : padLockEntries) {
+            int foundLocation = -1;
+            for (int i = 0; i < padLockEntries.size(); ++i) {
+              final PadLockEntry padLockEntry = padLockEntries.get(i);
               if (padLockEntry.packageName().equals(packageInfo.packageName)) {
                 foundEntry = padLockEntry;
+                foundLocation = i;
                 break;
               }
+            }
+
+            // Remove any already found entries
+            if (foundLocation != -1) {
+              padLockEntries.remove(foundLocation);
             }
 
             final AppEntry appEntry =
