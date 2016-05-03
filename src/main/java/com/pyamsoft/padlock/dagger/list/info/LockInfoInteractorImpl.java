@@ -36,6 +36,8 @@ final class LockInfoInteractorImpl extends LockCommonInteractorImpl implements L
   public Observable<List<PadLockEntry>> getActivityEntries(@NonNull String packageName) {
     return PadLockDB.with(getAppContext())
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME, packageName)
-        .mapToList(PadLockEntry.MAPPER::map);
+        .mapToList(PadLockEntry.MAPPER::map)
+        .filter(padLockEntries -> padLockEntries != null)
+        .first();
   }
 }
