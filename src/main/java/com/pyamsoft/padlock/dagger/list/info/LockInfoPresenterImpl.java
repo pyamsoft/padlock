@@ -62,11 +62,19 @@ final class LockInfoPresenterImpl extends PresenterImplBase<LockInfoView>
               for (final ActivityInfo info : activities) {
                 final String name = info.name;
                 PadLockEntry foundEntry = null;
-                for (final PadLockEntry padLockEntry : padLockEntries) {
+                int foundLocation = -1;
+                for (int i = 0; i < padLockEntries.size(); ++i) {
+                  final PadLockEntry padLockEntry = padLockEntries.get(i);
                   if (padLockEntry.activityName().equals(name)) {
                     foundEntry = padLockEntry;
+                    foundLocation = i;
                     break;
                   }
+                }
+
+                // Remove foundEntry from the list as it is already used
+                if (foundLocation != -1) {
+                  padLockEntries.remove(foundLocation);
                 }
 
                 final ActivityEntry activityEntry =
