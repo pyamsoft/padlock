@@ -225,8 +225,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @Override public void onLockedError() {
     Timber.e("LOCK ERROR");
-    AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new ErrorDialog(),
-        "lock_error");
+    AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "lock_error");
   }
 
   @Override public void onUnlockSuccess() {
@@ -254,8 +253,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @Override public void onUnlockError() {
     Timber.e("UNLOCK ERROR");
-    AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new ErrorDialog(),
-        "unlock_error");
+    AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
   }
 
   @Override protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -270,8 +268,8 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
       ignoreDataHolder.put(0, getIgnorePeriodTime());
       excludeDataHolder.put(0, shouldExcludeEntry());
     } else {
-      ignoreDataHolder.remove();
-      excludeDataHolder.remove();
+      DataHolderFragment.remove(this, Long.class);
+      DataHolderFragment.remove(this, Boolean.class);
     }
 
     Timber.d("onSaveInstanceState");
