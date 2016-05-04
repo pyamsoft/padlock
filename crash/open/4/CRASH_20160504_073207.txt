@@ -1,0 +1,37 @@
+PACKAGE: com.pyamsoft.padlock
+
+APPLICATION ID: com.pyamsoft.padlock
+VERSION NAME: 1.0.3
+VERSION CODE: 4
+
+
+ANDROID VERSION: 23
+ANDROID RELEASE: 6.0.1
+ANDROID CODENAME: REL
+
+
+DEVICE MODEL: Nexus 6
+DEVICE HARDWARE: shamu
+DEVICE MANUFACTURER: motorola
+DEVICE BRAND: google
+DEVICE PRODUCT: shamu
+
+
+STACK TRACE FOLLOWS
+
+java.lang.NullPointerException: Attempt to invoke virtual method 'android.support.v4.app.FragmentTransaction android.support.v4.app.FragmentManager.beginTransaction()' on a null object reference
+	at com.pyamsoft.pydroid.tool.DataHolderFragment.remove(DataHolderFragment.java:179)
+	at com.pyamsoft.padlock.app.lockscreen.LockScreenActivity.onSaveInstanceState(LockScreenActivity.java:273)
+	at android.app.Activity.performSaveInstanceState(Activity.java:1302)
+	at android.app.Instrumentation.callActivityOnSaveInstanceState(Instrumentation.java:1289)
+	at android.app.ActivityThread.callCallActivityOnSaveInstanceState(ActivityThread.java:4088)
+	at android.app.ActivityThread.performStopActivityInner(ActivityThread.java:3490)
+	at android.app.ActivityThread.handleStopActivity(ActivityThread.java:3550)
+	at android.app.ActivityThread.-wrap20(ActivityThread.java)
+	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1368)
+	at android.os.Handler.dispatchMessage(Handler.java:102)
+	at android.os.Looper.loop(Looper.java:148)
+	at android.app.ActivityThread.main(ActivityThread.java:5417)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:726)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:616)
