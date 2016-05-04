@@ -24,7 +24,6 @@ import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.db.DBInteractor;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.app.pin.MasterPinInteractor;
-import com.pyamsoft.padlock.app.pin.PinUtils;
 import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -113,7 +112,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         pin = appCode;
       }
 
-      final String encodedPinAttempt = PinUtils.hash256(attempt);
+      final String encodedPinAttempt = encodeSHA256(attempt);
       final boolean unlocked = compareAttemptToPIN(encodedPinAttempt, pin);
 
       // KLUDGE we must do this here as we need the padlock entry

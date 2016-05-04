@@ -41,6 +41,8 @@ public interface LockInteractor {
 
   boolean isSubmittable(String attempt);
 
+  @WorkerThread @NonNull String encodeSHA256(String attempt);
+
   @WorkerThread @NonNull String appendToAttempt(String attempt, char numberCode);
 
   @WorkerThread @NonNull String deleteFromAttempt(String attempt);

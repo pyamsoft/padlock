@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.pinentry;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.pin.MasterPinInteractor;
-import com.pyamsoft.padlock.app.pin.PinUtils;
 import com.pyamsoft.padlock.app.pinentry.PinEntryInteractor;
 import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
@@ -37,7 +36,7 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
   @NonNull @Override public Observable<PinEntryEvent> submitMasterPin(String attempt) {
     return Observable.defer(() -> Observable.just(masterPinInteractor.getMasterPin()))
         .map(masterPin -> {
-          final String encodedMasterPin = PinUtils.hash256(attempt);
+          final String encodedMasterPin = encodeSHA256(attempt);
           if (masterPin == null) {
             Timber.d("No existing master pin, create a new one");
             masterPinInteractor.setMasterPin(encodedMasterPin);

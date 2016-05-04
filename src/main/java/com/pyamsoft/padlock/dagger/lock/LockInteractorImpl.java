@@ -21,13 +21,29 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
+import android.util.Base64;
 import com.pyamsoft.padlock.app.lock.LockInteractor;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import timber.log.Timber;
 
 public abstract class LockInteractorImpl implements LockInteractor {
 
-  protected LockInteractorImpl() {
+  @NonNull private final MessageDigest messageDigest;
 
+  protected LockInteractorImpl() {
+    try {
+      messageDigest = MessageDigest.getInstance("SHA-256");
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException("Could not create SHA-256 Digest");
+    }
+  }
+
+  @NonNull @Override public String encodeSHA256(String attempt) {
+    messageDigest.reset();
+    final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
+    return Base64.encodeToString(output, Base64.DEFAULT).trim();
   }
 
   @WorkerThread @Override @NonNull
