@@ -21,9 +21,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.list.LockListInteractor;
-import com.pyamsoft.padlock.app.lock.LockCommonInteractorImpl;
 import com.pyamsoft.padlock.app.service.LockServiceInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -31,58 +31,67 @@ import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
 
-final class LockListInteractorImpl extends LockCommonInteractorImpl implements LockListInteractor {
+final class LockListInteractorImpl implements LockListInteractor {
 
+  @NonNull private final Context appContext;
   @NonNull private final PadLockPreferences preferences;
 
   @Inject public LockListInteractorImpl(final @NonNull Context context,
       final @NonNull PadLockPreferences preferences) {
-    super(context);
+    appContext = context.getApplicationContext();
     this.preferences = preferences;
   }
 
-  @NonNull @Override public PackageManager getPackageManager() {
-    return getAppContext().getPackageManager();
+  @WorkerThread @NonNull @Override public PackageManager getPackageManager() {
+    return appContext.getPackageManager();
   }
 
-  @Override @NonNull public Observable<List<PackageInfo>> getPackageInfoList() {
+  @WorkerThread @Override @NonNull public Observable<List<PackageInfo>> getPackageInfoList() {
     return Observable.defer(() -> Observable.from(getPackageManager().getInstalledPackages(0)))
         .filter(packageInfo -> packageInfo != null)
         .filter(packageInfo -> {
           final ApplicationInfo appInfo = packageInfo.applicationInfo;
           return appInfo != null && !(!appInfo.enabled || (isSystemApplication(appInfo)
-              && !isSystemVisible()) || appInfo.packageName.equals(
+              && !preferences.isSystemVisible()) || appInfo.packageName.equals(
               LockServiceInteractor.ANDROID_PACKAGE) || appInfo.packageName.equals(
               LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE));
         })
         .toList();
   }
 
-  @NonNull @Override public Observable<List<PadLockEntry>> getAppEntryList() {
-    return PadLockDB.with(getAppContext())
+  @WorkerThread @NonNull @Override public Observable<List<PadLockEntry>> getAppEntryList() {
+    return PadLockDB.with(appContext)
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
         .mapToList(PadLockEntry.MAPPER::map)
         .filter(padLockEntries -> padLockEntries != null)
         .first();
   }
 
-  @Override public boolean isSystemApplication(ApplicationInfo info) {
+  @WorkerThread @Override public boolean isSystemApplication(ApplicationInfo info) {
     return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
   }
 
-  @Override public boolean isSystemVisible() {
-    return preferences.isSystemVisible();
+  @WorkerThread @NonNull @Override public Observable<Boolean> isSystemVisible() {
+    return Observable.defer(() -> Observable.just(preferences.isSystemVisible()))
+        .map(aBoolean -> aBoolean == null ? false : aBoolean);
   }
 
-  @Override public void setSystemVisible(boolean visible) {
-    preferences.setSystemVisible(visible);
+  @WorkerThread @Override @NonNull public Observable<Boolean> hasShownOnBoarding() {
+    return Observable.defer(() -> Observable.just(preferences.isOnBoard()))
+        .map(aBoolean -> aBoolean == null ? false : aBoolean);
   }
 
-  @Override public boolean hasShownOnBoarding() {
-    return preferences.isOnBoard();
+  @NonNull @Override public Observable<Boolean> setShownOnBoarding() {
+    return Observable.defer(() -> {
+      preferences.setOnBoard();
+      return Observable.just(true);
+    });
   }
 
-  @Override public void setShownOnBoarding() {
-    preferences.setOnBoard();
+  @NonNull @Override public Observable<Boolean> setSystemVisible(boolean visible) {
+    return Observable.defer(() -> {
+      preferences.setSystemVisible(visible);
+      return Observable.just(visible);
+    });
   }
 }

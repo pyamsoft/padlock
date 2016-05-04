@@ -17,28 +17,21 @@
 package com.pyamsoft.padlock.dagger.pinentry;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.lock.LockInteractor;
 import com.pyamsoft.padlock.app.pin.MasterPinInteractor;
 import com.pyamsoft.padlock.app.pin.PinUtils;
 import com.pyamsoft.padlock.app.pinentry.PinEntryInteractor;
+import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-final class PinEntryInteractorImpl implements PinEntryInteractor {
+final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntryInteractor {
 
-  @NonNull private final LockInteractor lockInteractor;
   @NonNull private final MasterPinInteractor masterPinInteractor;
 
-  @Inject public PinEntryInteractorImpl(@NonNull final MasterPinInteractor masterPinInteractor,
-      final @NonNull LockInteractor lockInteractor) {
+  @Inject public PinEntryInteractorImpl(@NonNull final MasterPinInteractor masterPinInteractor) {
     this.masterPinInteractor = masterPinInteractor;
-    this.lockInteractor = lockInteractor;
-  }
-
-  @Override public boolean isSubmittable(String attempt) {
-    return lockInteractor.isSubmittable(attempt);
   }
 
   @NonNull @Override public Observable<PinEntryEvent> submitMasterPin(String attempt) {
@@ -50,8 +43,8 @@ final class PinEntryInteractorImpl implements PinEntryInteractor {
             masterPinInteractor.setMasterPin(encodedMasterPin);
             return PinEntryEvent.builder().complete(true).type(0).build();
           } else {
-            final boolean success = lockInteractor.compareAttemptToPIN(encodedMasterPin,
-                masterPinInteractor.getMasterPin());
+            final boolean success =
+                compareAttemptToPIN(encodedMasterPin, masterPinInteractor.getMasterPin());
             if (success) {
               Timber.d("Clear master pin");
               masterPinInteractor.setMasterPin(null);

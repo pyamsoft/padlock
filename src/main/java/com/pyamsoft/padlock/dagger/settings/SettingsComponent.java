@@ -20,14 +20,12 @@ import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.db.DBModule;
-import com.pyamsoft.padlock.dagger.lock.LockModule;
 import com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule;
 import com.pyamsoft.padlock.dagger.pin.MasterPinModule;
 import dagger.Component;
 
 @ActivityScope @Component(modules = {
-    SettingsModule.class, LockScreenModule.class, DBModule.class, MasterPinModule.class,
-    LockModule.class
+    SettingsModule.class, LockScreenModule.class, DBModule.class, MasterPinModule.class
 }, dependencies = {
     PadLockComponent.class
 }) public interface SettingsComponent {

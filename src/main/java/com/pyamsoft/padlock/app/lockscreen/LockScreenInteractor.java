@@ -17,22 +17,18 @@
 package com.pyamsoft.padlock.app.lockscreen;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
+import com.pyamsoft.padlock.app.lock.LockInteractor;
 import rx.Observable;
 
-public interface LockScreenInteractor {
+public interface LockScreenInteractor extends LockInteractor {
 
-  long getDefaultIgnoreTime();
+  @WorkerThread @NonNull Observable<Boolean> unlockEntry(String packageName, String activityName,
+      String attempt, boolean shouldExclude, long ignoreForPeriod);
 
-  void setDefaultIgnoreTime(long ignoreTime);
+  @WorkerThread @NonNull Observable<Boolean> lockEntry(String packageName, String activityName);
 
-  long getTimeoutPeriod();
+  @WorkerThread @NonNull Observable<Long> getDefaultIgnoreTime();
 
-  void setTimeoutPeriod(long ignoreTime);
-
-  boolean isSubmittable(String attempt);
-
-  @NonNull Observable<Boolean> unlockEntry(String packageName, String activityName, String attempt,
-      boolean shouldExclude, long ignoreForPeriod);
-
-  @NonNull Observable<Boolean> lockEntry(String packageName, String activityName);
+  @WorkerThread @NonNull Observable<Long> setDefaultIgnoreTime(long ignoreTime);
 }

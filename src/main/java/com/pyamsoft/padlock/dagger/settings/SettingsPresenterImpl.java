@@ -89,24 +89,23 @@ final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
 
   @Override public void setIgnorePeriodFromPreference() {
     unsubscribeIgnorePeriod();
-    ignorePeriodSubscription =
-        Observable.defer(() -> Observable.just(lockScreenInteractor.getDefaultIgnoreTime()))
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(time -> {
-              final SettingsView settingsView = get();
-              if (time == PadLockPreferences.PERIOD_FIVE) {
-                settingsView.setIgnorePeriodFive();
-              } else if (time == PadLockPreferences.PERIOD_TEN) {
-                settingsView.setIgnorePeriodTen();
-              } else if (time == PadLockPreferences.PERIOD_THIRTY) {
-                settingsView.setIgnorePeriodThirty();
-              } else {
-                settingsView.setIgnorePeriodNone();
-              }
-            }, throwable -> {
-              Timber.e(throwable, "setIgnorePeriodFromPreference onError");
-            });
+    ignorePeriodSubscription = lockScreenInteractor.getDefaultIgnoreTime()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(time -> {
+          final SettingsView settingsView = get();
+          if (time == PadLockPreferences.PERIOD_FIVE) {
+            settingsView.setIgnorePeriodFive();
+          } else if (time == PadLockPreferences.PERIOD_TEN) {
+            settingsView.setIgnorePeriodTen();
+          } else if (time == PadLockPreferences.PERIOD_THIRTY) {
+            settingsView.setIgnorePeriodThirty();
+          } else {
+            settingsView.setIgnorePeriodNone();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "setIgnorePeriodFromPreference onError");
+        });
   }
 
   @Override public void setIgnorePeriodNone() {
@@ -127,56 +126,67 @@ final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
 
   @Override public void setTimeoutPeriodFromPreference() {
     unsubscribeTimeout();
-    timeoutSubscription =
-        Observable.defer(() -> Observable.just(lockScreenInteractor.getTimeoutPeriod()))
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(time -> {
-              final SettingsView settingsView = get();
-              if (time == PadLockPreferences.PERIOD_ONE) {
-                settingsView.setTimeoutPeriodOne();
-              } else if (time == PadLockPreferences.PERIOD_FIVE) {
-                settingsView.setTimeoutPeriodFive();
-              } else if (time == PadLockPreferences.PERIOD_TEN) {
-                settingsView.setTimeoutPeriodTen();
-              } else {
-                settingsView.setTimeoutPeriodNone();
-              }
-            }, throwable -> {
-              Timber.e(throwable, "setTimeoutPeriodFromPreference onError");
-            });
+    timeoutSubscription = settingsInteractor.getTimeoutPeriod()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(time -> {
+          final SettingsView settingsView = get();
+          if (time == PadLockPreferences.PERIOD_ONE) {
+            settingsView.setTimeoutPeriodOne();
+          } else if (time == PadLockPreferences.PERIOD_FIVE) {
+            settingsView.setTimeoutPeriodFive();
+          } else if (time == PadLockPreferences.PERIOD_TEN) {
+            settingsView.setTimeoutPeriodTen();
+          } else {
+            settingsView.setTimeoutPeriodNone();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "setTimeoutPeriodFromPreference onError");
+        });
   }
 
   @Override public void setTimeoutPeriodNone() {
-    lockScreenInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_NONE);
+    unsubscribeTimeout();
+    settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_NONE)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe();
   }
 
   @Override public void setTimeoutPeriodOne() {
-    lockScreenInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_ONE);
+    unsubscribeTimeout();
+    settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_ONE)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe();
   }
 
   @Override public void setTimeoutPeriodFive() {
-    lockScreenInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_FIVE);
+    unsubscribeTimeout();
+    settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_FIVE)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe();
   }
 
   @Override public void setTimeoutPeriodTen() {
-    lockScreenInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_TEN);
+    unsubscribeTimeout();
+    settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_TEN)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe();
   }
 
   private Observable<Boolean> clearDatabase() {
-    Timber.d("Clear database");
-    return Observable.defer(() -> {
-      settingsInteractor.clearDatabase();
-      return Observable.just(true);
-    }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    return settingsInteractor.clearDatabase()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread());
   }
 
   private Observable<Boolean> clearAll() {
-    Timber.d("Clear all settings");
-    return Observable.defer(() -> {
-      settingsInteractor.clearAll();
-      return Observable.just(true);
-    }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    return settingsInteractor.clearAll()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread());
   }
 
   @Override public void unregisterFromConfirmDialogBus() {
@@ -200,7 +210,8 @@ final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
                 Timber.d("Received database cleared confirmation event, clear Database");
                 confirmDialogSubscription = clearDatabase().subscribe(aBoolean -> {
 
-                }, throwable -> Timber.e(throwable, "ConfirmationDialogBus in clearDatabase onError"), () -> {
+                }, throwable -> Timber.e(throwable,
+                    "ConfirmationDialogBus in clearDatabase onError"), () -> {
                   Timber.d("ConfirmationDialogBus in clearDatabase onComplete");
                   ConfirmationDialog.ConfirmationDialogBus.get()
                       .post(ConfirmationEvent.builder(confirmationEvent).complete(true).build());
@@ -213,11 +224,13 @@ final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
                 Timber.d("Received all cleared confirmation event, clear All");
                 confirmDialogSubscription = clearAll().subscribe(aBoolean -> {
 
-                }, throwable -> Timber.e(throwable, "ConfirmationDialogBus in clearAll onError"), () -> {
-                  Timber.d("ConfirmationDialogBus in clearAll onComplete");
-                  ConfirmationDialog.ConfirmationDialogBus.get()
-                      .post(ConfirmationEvent.builder(confirmationEvent).complete(true).build());
-                });
+                    }, throwable -> Timber.e(throwable, "ConfirmationDialogBus in clearAll onError"),
+                    () -> {
+                      Timber.d("ConfirmationDialogBus in clearAll onComplete");
+                      ConfirmationDialog.ConfirmationDialogBus.get()
+                          .post(
+                              ConfirmationEvent.builder(confirmationEvent).complete(true).build());
+                    });
               }
               break;
             default:

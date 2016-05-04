@@ -23,6 +23,7 @@ import com.pyamsoft.padlock.app.settings.SettingsInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
+import rx.Observable;
 import timber.log.Timber;
 
 final class SettingsInteractorImpl implements SettingsInteractor {
@@ -36,14 +37,31 @@ final class SettingsInteractorImpl implements SettingsInteractor {
     this.preferences = preferences;
   }
 
-  @Override public void clearDatabase() {
-    Timber.d("Clear database of all entries");
-    PadLockDB.with(appContext).delete(PadLockEntry.TABLE_NAME, "1=1");
+  @NonNull @Override public Observable<Boolean> clearDatabase() {
+    return Observable.defer(() -> {
+      Timber.d("Clear database of all entries");
+      PadLockDB.with(appContext).delete(PadLockEntry.TABLE_NAME, "1=1");
+      return Observable.just(true);
+    });
   }
 
-  @Override public void clearAll() {
-    clearDatabase();
+  @NonNull @Override public Observable<Boolean> clearAll() {
+    return Observable.zip(clearDatabase(), Observable.defer(() -> {
+      Timber.d("Clear all preferences");
+      preferences.clear();
+      return Observable.just(true);
+    }), (aBoolean, aBoolean2) -> true);
+  }
 
-    preferences.clear();
+  @NonNull @Override public Observable<Long> getTimeoutPeriod() {
+    return Observable.defer(() -> Observable.just(preferences.getTimeoutPeriod()))
+        .map(aLong -> aLong == null ? PadLockPreferences.PERIOD_FIVE : aLong);
+  }
+
+  @NonNull @Override public Observable<Long> setTimeoutPeriod(long ignoreTime) {
+    return Observable.defer(() -> {
+      preferences.setTimeoutPeriod(ignoreTime);
+      return Observable.just(ignoreTime);
+    });
   }
 }

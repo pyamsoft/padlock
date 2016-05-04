@@ -16,9 +16,13 @@
 
 package com.pyamsoft.padlock.app.main;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
+import rx.Observable;
+
 public interface MainInteractor {
 
-  boolean hasAgreed();
+  @WorkerThread @NonNull Observable<Boolean> hasAgreed();
 
-  void setAgreed();
+  @WorkerThread @NonNull Observable<Boolean> setAgreed();
 }

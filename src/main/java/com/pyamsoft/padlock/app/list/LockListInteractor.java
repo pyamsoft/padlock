@@ -20,25 +20,26 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import rx.Observable;
 
 public interface LockListInteractor {
 
-  @NonNull Observable<List<PackageInfo>> getPackageInfoList();
+  @WorkerThread @NonNull Observable<List<PackageInfo>> getPackageInfoList();
 
-  @NonNull Observable<List<PadLockEntry>> getAppEntryList();
+  @WorkerThread @NonNull Observable<List<PadLockEntry>> getAppEntryList();
 
-  boolean isSystemApplication(ApplicationInfo info);
+  @WorkerThread boolean isSystemApplication(ApplicationInfo info);
 
-  boolean isSystemVisible();
+  @WorkerThread @NonNull PackageManager getPackageManager();
 
-  void setSystemVisible(boolean visible);
+  @WorkerThread @NonNull Observable<Boolean> setSystemVisible(boolean visible);
 
-  @NonNull PackageManager getPackageManager();
+  @WorkerThread @NonNull Observable<Boolean> hasShownOnBoarding();
 
-  boolean hasShownOnBoarding();
+  @WorkerThread @NonNull Observable<Boolean> isSystemVisible();
 
-  void setShownOnBoarding();
+  @WorkerThread @NonNull Observable<Boolean> setShownOnBoarding();
 }

@@ -19,9 +19,8 @@ package com.pyamsoft.padlock.app.db;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
-import com.pyamsoft.padlock.app.lock.LockCommonInteractor;
 
-public interface DBInteractor extends LockCommonInteractor {
+public interface DBInteractor {
 
   @WorkerThread void createEntry(@NonNull String packageName, @NonNull String name,
       @Nullable String code, boolean system);

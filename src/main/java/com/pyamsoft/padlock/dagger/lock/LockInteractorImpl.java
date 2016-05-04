@@ -20,28 +20,28 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.app.lock.LockInteractor;
-import javax.inject.Inject;
 import timber.log.Timber;
 
-final class LockInteractorImpl implements LockInteractor {
+public abstract class LockInteractorImpl implements LockInteractor {
 
-  @Inject public LockInteractorImpl() {
+  protected LockInteractorImpl() {
+
   }
 
-  @Override @Nullable public String appendToAttempt(final String attempt, final char numberCode) {
+  @WorkerThread @Override @NonNull
+  public String appendToAttempt(final String attempt, final char numberCode) {
     if (isSubmittable(attempt)) {
       Timber.e("Attempt is all entered.");
       return attempt;
     }
 
-    final int workingIndex = attempt.indexOf(DEFAULT_CHAR);
-    return modifyAttempt(attempt, workingIndex, numberCode);
+    final int index = attempt.indexOf(DEFAULT_CHAR);
+    return modifyAttempt(attempt, index, numberCode);
   }
 
-  @Override @Nullable public String deleteFromAttempt(final String attempt) {
+  @WorkerThread @Override @NonNull public String deleteFromAttempt(final String attempt) {
     int workingIndex = attempt.indexOf(DEFAULT_CHAR);
     if (workingIndex == BAD_INDEX) {
       Timber.d("BACK at bad index, roll back to end");
@@ -61,13 +61,13 @@ final class LockInteractorImpl implements LockInteractor {
     }
   }
 
-  @Override public boolean isSubmittable(final String attempt) {
+  @WorkerThread @Override public boolean isSubmittable(final String attempt) {
     final int index = attempt.indexOf(DEFAULT_CHAR);
     Timber.d("Find index of DEFAULT_CHAR: %d", index);
     return index == BAD_INDEX;
   }
 
-  @Nullable
+  @WorkerThread @NonNull
   private String modifyAttempt(final String attempt, final int modifyAt, final char modifyWith) {
     Timber.d("Modify string: %s with value %s at index %d", attempt, modifyWith, modifyAt);
     // String before current index exclusive, can be empty
@@ -80,7 +80,8 @@ final class LockInteractorImpl implements LockInteractor {
     return prefix + modifyWith + suffix;
   }
 
-  @Override public boolean compareAttemptToPIN(final String attempt, final String pin) {
+  @WorkerThread @Override
+  public boolean compareAttemptToPIN(final String attempt, final String pin) {
     if (pin == null || attempt == null) {
       Timber.e("NULL passed");
       return false;
