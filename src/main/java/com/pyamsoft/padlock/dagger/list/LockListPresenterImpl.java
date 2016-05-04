@@ -55,6 +55,7 @@ final class LockListPresenterImpl extends PresenterImplBase<LockList> implements
   @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
   @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
+  @NonNull private Subscription onBoardingSubscription = Subscriptions.empty();
 
   @Inject public LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor) {
@@ -69,6 +70,13 @@ final class LockListPresenterImpl extends PresenterImplBase<LockList> implements
     unregisterFromConfirmDialogBus();
     unsubscribeSystemVisible();
     unsubscribeFabState();
+    unsubscribeOnBoarding();
+  }
+
+  private void unsubscribeOnBoarding() {
+    if (!onBoardingSubscription.isUnsubscribed()) {
+      onBoardingSubscription.unsubscribe();
+    }
   }
 
   @Override public void destroy() {
@@ -83,7 +91,11 @@ final class LockListPresenterImpl extends PresenterImplBase<LockList> implements
   }
 
   private void setSystemVisible(boolean visible) {
-    lockListInteractor.setSystemVisible(visible);
+    unsubscribeSystemVisible();
+    systemVisibleSubscription = lockListInteractor.setSystemVisible(visible)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe();
   }
 
   @Override public void populateList() {
@@ -230,20 +242,19 @@ final class LockListPresenterImpl extends PresenterImplBase<LockList> implements
 
   @Override public void setSystemVisibilityFromPreference() {
     unsubscribeSystemVisible();
-    systemVisibleSubscription =
-        Observable.defer(() -> Observable.just(lockListInteractor.isSystemVisible()))
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(bool -> {
-              final LockList lockList = get();
-              if (bool) {
-                lockList.setSystemVisible();
-              } else {
-                lockList.setSystemInvisible();
-              }
-            }, throwable -> {
-              Timber.e(throwable, "setSystemVisiblityFromPreference onError");
-            });
+    systemVisibleSubscription = lockListInteractor.isSystemVisible()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(bool -> {
+          final LockList lockList = get();
+          if (bool) {
+            lockList.setSystemVisible();
+          } else {
+            lockList.setSystemInvisible();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "setSystemVisiblityFromPreference onError");
+        });
   }
 
   @Override public void clickPinFAB() {
@@ -271,9 +282,18 @@ final class LockListPresenterImpl extends PresenterImplBase<LockList> implements
   }
 
   @Override public void showOnBoarding() {
-    if (!lockListInteractor.hasShownOnBoarding()) {
-      get().showOnBoarding();
-    }
+    unsubscribeOnBoarding();
+    onBoardingSubscription = lockListInteractor.hasShownOnBoarding()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(onboard -> {
+          if (!onboard) {
+            get().showOnBoarding();
+          }
+        }, throwable -> {
+          // TODO handle error
+          Timber.e(throwable, "onError");
+        });
   }
 
   @Override public void registerOnPinEntryBus() {
@@ -309,6 +329,10 @@ final class LockListPresenterImpl extends PresenterImplBase<LockList> implements
   }
 
   @Override public void setOnBoard() {
-    lockListInteractor.setShownOnBoarding();
+    unsubscribeOnBoarding();
+    onBoardingSubscription = lockListInteractor.setShownOnBoarding()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe();
   }
 }

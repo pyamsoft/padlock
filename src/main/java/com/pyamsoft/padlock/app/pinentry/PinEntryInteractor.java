@@ -17,12 +17,11 @@
 package com.pyamsoft.padlock.app.pinentry;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.lock.LockInteractor;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import rx.Observable;
 
-public interface PinEntryInteractor {
-
-  boolean isSubmittable(String attempt);
+public interface PinEntryInteractor extends LockInteractor {
 
   @NonNull Observable<PinEntryEvent> submitMasterPin(String attempt);
 }

@@ -20,15 +20,13 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.lock.LockInteractor;
+import com.pyamsoft.padlock.app.lock.LockView;
 import com.pyamsoft.padlock.app.lockscreen.LockScreen;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter;
 import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;
-import com.pyamsoft.padlock.app.lock.LockView;
 import com.pyamsoft.padlock.model.event.LockButtonClickEvent;
 import javax.inject.Inject;
-import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -45,9 +43,8 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   @NonNull private Subscription lockSubscription = Subscriptions.empty();
 
   @Inject public LockScreenPresenterImpl(final Context context,
-      @NonNull final LockInteractor lockInteractor,
       @NonNull final LockScreenInteractor lockScreenInteractor) {
-    super(context.getApplicationContext(), lockInteractor);
+    super(context.getApplicationContext(), lockScreenInteractor);
     this.lockScreenInteractor = lockScreenInteractor;
   }
 
@@ -93,14 +90,13 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
       throws NullPointerException {
     unsubIgnoreTime();
     if (ignoreTime == null) {
-      ignoreSubscription =
-          Observable.defer(() -> Observable.just(lockScreenInteractor.getDefaultIgnoreTime()))
-              .subscribeOn(Schedulers.io())
-              .observeOn(AndroidSchedulers.mainThread())
-              .subscribe(this::setIgnorePeriod, throwable -> {
-                Timber.e(throwable, "setIgnorePeriodFromPreferences onError");
-                get().setIgnoreTimeError();
-              });
+      ignoreSubscription = lockScreenInteractor.getDefaultIgnoreTime()
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(this::setIgnorePeriod, throwable -> {
+            Timber.e(throwable, "setIgnorePeriodFromPreferences onError");
+            get().setIgnoreTimeError();
+          });
     } else {
       setIgnorePeriod(ignoreTime);
     }

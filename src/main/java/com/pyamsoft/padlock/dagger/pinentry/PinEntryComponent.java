@@ -19,12 +19,11 @@ package com.pyamsoft.padlock.dagger.pinentry;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
-import com.pyamsoft.padlock.dagger.lock.LockModule;
 import com.pyamsoft.padlock.dagger.pin.MasterPinModule;
 import dagger.Component;
 
 @ActivityScope @Component(modules = {
-    PinEntryModule.class, MasterPinModule.class, LockModule.class
+    PinEntryModule.class, MasterPinModule.class
 }, dependencies = {
     PadLockComponent.class
 }) public interface PinEntryComponent {

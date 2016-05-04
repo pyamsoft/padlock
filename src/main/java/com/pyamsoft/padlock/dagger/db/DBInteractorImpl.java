@@ -25,23 +25,24 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.app.db.DBInteractor;
-import com.pyamsoft.padlock.app.lock.LockCommonInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.squareup.sqlbrite.BriteDatabase;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-final class DBInteractorImpl extends LockCommonInteractorImpl implements DBInteractor {
+final class DBInteractorImpl implements DBInteractor {
+
+  @NonNull private final Context appContext;
 
   @Inject public DBInteractorImpl(final @NonNull Context context) {
-    super(context);
+    appContext = context.getApplicationContext();
   }
 
   @WorkerThread @SuppressLint("NewApi") @Override
   public void createEntry(@NonNull String packageName, @NonNull String name, @Nullable String code,
       boolean system) {
-    final PackageManager packageManager = getAppContext().getPackageManager();
+    final PackageManager packageManager = appContext.getPackageManager();
     final PackageInfo packageInfo;
     try {
       packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
@@ -50,7 +51,7 @@ final class DBInteractorImpl extends LockCommonInteractorImpl implements DBInter
     }
     final ActivityInfo[] activities = packageInfo.activities;
     if (activities != null) {
-      try (final BriteDatabase.Transaction transaction = PadLockDB.with(getAppContext())
+      try (final BriteDatabase.Transaction transaction = PadLockDB.with(appContext)
           .newTransaction()) {
         for (final ActivityInfo info : activities) {
           final String activityName = info.name;
@@ -67,7 +68,7 @@ final class DBInteractorImpl extends LockCommonInteractorImpl implements DBInter
   public void createEntry(@NonNull String packageName, @NonNull String activityName,
       @NonNull String name, @Nullable String code, boolean system) {
     Timber.d("CREATE: %s %s", packageName, activityName);
-    PadLockDB.with(getAppContext())
+    PadLockDB.with(appContext)
         .insert(PadLockEntry.TABLE_NAME, new PadLockEntry.Marshal().packageName(packageName)
             .activityName(activityName)
             .displayName(name)
@@ -80,14 +81,14 @@ final class DBInteractorImpl extends LockCommonInteractorImpl implements DBInter
 
   @WorkerThread @Override public void deleteEntry(@NonNull String packageName) {
     Timber.d("DELETE: all %s", packageName);
-    PadLockDB.with(getAppContext())
+    PadLockDB.with(appContext)
         .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME, packageName);
   }
 
   @WorkerThread @Override
   public void deleteEntry(@NonNull String packageName, @NonNull String activityName) {
     Timber.d("DELETE: %s %s", packageName, activityName);
-    PadLockDB.with(getAppContext())
+    PadLockDB.with(appContext)
         .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME,
             packageName, activityName);
   }

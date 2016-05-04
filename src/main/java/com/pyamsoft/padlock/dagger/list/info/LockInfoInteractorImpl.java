@@ -19,22 +19,23 @@ package com.pyamsoft.padlock.dagger.list.info;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.info.LockInfoInteractor;
-import com.pyamsoft.padlock.app.lock.LockCommonInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
 
-final class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInfoInteractor {
+final class LockInfoInteractorImpl implements LockInfoInteractor {
+
+  @NonNull private final Context appContext;
 
   @Inject public LockInfoInteractorImpl(final @NonNull Context context) {
-    super(context);
+    appContext = context.getApplicationContext();
   }
 
   @NonNull @Override
   public Observable<List<PadLockEntry>> getActivityEntries(@NonNull String packageName) {
-    return PadLockDB.with(getAppContext())
+    return PadLockDB.with(appContext)
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME, packageName)
         .mapToList(PadLockEntry.MAPPER::map)
         .filter(padLockEntries -> padLockEntries != null)

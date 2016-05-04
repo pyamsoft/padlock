@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.app.lock;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
 public interface LockInteractor {
@@ -40,13 +39,13 @@ public interface LockInteractor {
       new String(new char[] { DEFAULT_CHAR, DEFAULT_CHAR, DEFAULT_CHAR, DEFAULT_CHAR });
   int BAD_INDEX = -1;
 
-  @Nullable String appendToAttempt(String attempt, char numberCode);
-
-  @Nullable String deleteFromAttempt(String attempt);
-
   boolean isSubmittable(String attempt);
 
-  boolean compareAttemptToPIN(String attempt, String pin);
+  @WorkerThread @NonNull String appendToAttempt(String attempt, char numberCode);
+
+  @WorkerThread @NonNull String deleteFromAttempt(String attempt);
+
+  @WorkerThread boolean compareAttemptToPIN(String attempt, String pin);
 
   @NonNull @WorkerThread Drawable loadPackageIcon(Context context,
       final @NonNull String packageName);

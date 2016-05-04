@@ -16,9 +16,17 @@
 
 package com.pyamsoft.padlock.app.settings;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
+import rx.Observable;
+
 public interface SettingsInteractor {
 
-  void clearDatabase();
+  @WorkerThread @NonNull Observable<Boolean> clearDatabase();
 
-  void clearAll();
+  @WorkerThread @NonNull Observable<Boolean> clearAll();
+
+  @WorkerThread @NonNull Observable<Long> getTimeoutPeriod();
+
+  @WorkerThread @NonNull Observable<Long> setTimeoutPeriod(long ignoreTime);
 }

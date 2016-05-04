@@ -25,14 +25,18 @@ import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.pydroid.base.PresenterImplBase;
 import javax.inject.Inject;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 final class MainPresenterImpl extends PresenterImplBase<MainView> implements MainPresenter {
 
   @NonNull private final MainInteractor interactor;
 
-  private Subscription confirmDialogBusSubscription;
-  private Subscription agreeTermsBusSubscription;
+  @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
+  @NonNull private Subscription agreeTermsBusSubscription = Subscriptions.empty();
+  @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
 
   @Inject public MainPresenterImpl(@NonNull final MainInteractor interactor) {
     this.interactor = interactor;
@@ -42,12 +46,27 @@ final class MainPresenterImpl extends PresenterImplBase<MainView> implements Mai
     super.unbind();
     unregisterFromConfirmDialogBus();
     unregisterFromAgreeTermsBus();
+    unsubAgreeTermsSubscription();
   }
 
   @Override public void showTermsDialog() {
-    final MainView mainView = get();
-    if (!interactor.hasAgreed()) {
-      mainView.showUsageTermsDialog();
+    unsubAgreeTermsSubscription();
+    agreeTermsSubscription = interactor.hasAgreed()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(agreed -> {
+          if (!agreed) {
+            get().showUsageTermsDialog();
+          }
+        }, throwable -> {
+          // TODO handle error
+          Timber.e(throwable, "onError");
+        });
+  }
+
+  private void unsubAgreeTermsSubscription() {
+    if (!agreeTermsSubscription.isUnsubscribed()) {
+      agreeTermsSubscription.unsubscribe();
     }
   }
 
@@ -57,7 +76,11 @@ final class MainPresenterImpl extends PresenterImplBase<MainView> implements Mai
         AgreeTermsDialog.AgreeTermsBus.get().register().subscribe(agreeTermsEvent -> {
           final MainView mainView = get();
           if (agreeTermsEvent.agreed()) {
-            interactor.setAgreed();
+            unsubAgreeTermsSubscription();
+            agreeTermsSubscription = interactor.setAgreed()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe();
           } else {
             mainView.onDidNotAgreeToTerms();
           }
@@ -67,11 +90,8 @@ final class MainPresenterImpl extends PresenterImplBase<MainView> implements Mai
   }
 
   @Override public void unregisterFromAgreeTermsBus() {
-    if (agreeTermsBusSubscription != null) {
-      if (!agreeTermsBusSubscription.isUnsubscribed()) {
-        agreeTermsBusSubscription.unsubscribe();
-      }
-      agreeTermsBusSubscription = null;
+    if (!agreeTermsBusSubscription.isUnsubscribed()) {
+      agreeTermsBusSubscription.unsubscribe();
     }
   }
 
@@ -89,11 +109,8 @@ final class MainPresenterImpl extends PresenterImplBase<MainView> implements Mai
   }
 
   @Override public void unregisterFromConfirmDialogBus() {
-    if (confirmDialogBusSubscription != null) {
-      if (!confirmDialogBusSubscription.isUnsubscribed()) {
-        confirmDialogBusSubscription.unsubscribe();
-      }
-      confirmDialogBusSubscription = null;
+    if (!confirmDialogBusSubscription.isUnsubscribed()) {
+      confirmDialogBusSubscription.unsubscribe();
     }
   }
 }

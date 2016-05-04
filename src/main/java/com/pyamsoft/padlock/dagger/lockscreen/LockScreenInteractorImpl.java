@@ -22,10 +22,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.db.DBInteractor;
-import com.pyamsoft.padlock.app.lock.LockInteractor;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.app.pin.MasterPinInteractor;
 import com.pyamsoft.padlock.app.pin.PinUtils;
+import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
@@ -34,9 +34,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-final class LockScreenInteractorImpl implements LockScreenInteractor {
+final class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenInteractor {
 
-  @NonNull private final LockInteractor lockInteractor;
   @NonNull private final MasterPinInteractor pinInteractor;
   @NonNull private final DBInteractor dbInteractor;
   @NonNull private final Context appContext;
@@ -44,32 +43,15 @@ final class LockScreenInteractorImpl implements LockScreenInteractor {
 
   @Inject public LockScreenInteractorImpl(final Context context,
       @NonNull final PadLockPreferences preferences, @NonNull final DBInteractor dbInteractor,
-      @NonNull final MasterPinInteractor masterPinInteractor,
-      @NonNull final LockInteractor lockInteractor) {
+      @NonNull final MasterPinInteractor masterPinInteractor) {
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
     this.dbInteractor = dbInteractor;
     this.pinInteractor = masterPinInteractor;
-    this.lockInteractor = lockInteractor;
   }
 
-  @Override public long getDefaultIgnoreTime() {
-    return preferences.getDefaultIgnoreTime();
-  }
-
-  @Override public void setDefaultIgnoreTime(long ignoreTime) {
-    preferences.setDefaultIgnoreTime(ignoreTime);
-  }
-
-  @Override public long getTimeoutPeriod() {
-    return preferences.getTimeoutPeriod();
-  }
-
-  @Override public void setTimeoutPeriod(long ignoreTime) {
-    preferences.setTimeoutPeriod(ignoreTime);
-  }
-
-  @NonNull @Override public Observable<Boolean> lockEntry(String packageName, String activityName) {
+  @WorkerThread @NonNull @Override
+  public Observable<Boolean> lockEntry(String packageName, String activityName) {
     Timber.d("Lock entry: %s %s", packageName, activityName);
     return PadLockDB.with(appContext)
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName,
@@ -77,7 +59,7 @@ final class LockScreenInteractorImpl implements LockScreenInteractor {
         .mapToOne(PadLockEntry.MAPPER::map)
         .map(padLockEntry -> {
           Timber.d("LOCKED entry, update entry in DB: ", padLockEntry);
-          final long timeOutMinutesInMillis = getTimeoutPeriod() * 60 * 1000;
+          final long timeOutMinutesInMillis = preferences.getTimeoutPeriod() * 60 * 1000;
           final ContentValues contentValues =
               new PadLockEntry.Marshal().packageName(padLockEntry.packageName())
                   .activityName(padLockEntry.activityName())
@@ -97,7 +79,7 @@ final class LockScreenInteractorImpl implements LockScreenInteractor {
         .observeOn(AndroidSchedulers.mainThread());
   }
 
-  @NonNull @Override
+  @WorkerThread @NonNull @Override
   public Observable<Boolean> unlockEntry(String packageName, String activityName, String attempt,
       boolean shouldExclude, long ignoreForPeriod) {
     Timber.d("Attempt unlock: %s %s", packageName, activityName);
@@ -132,7 +114,7 @@ final class LockScreenInteractorImpl implements LockScreenInteractor {
       }
 
       final String encodedPinAttempt = PinUtils.hash256(attempt);
-      final boolean unlocked = lockInteractor.compareAttemptToPIN(encodedPinAttempt, pin);
+      final boolean unlocked = compareAttemptToPIN(encodedPinAttempt, pin);
 
       // KLUDGE we must do this here as we need the padlock entry
       if (unlocked) {
@@ -175,7 +157,15 @@ final class LockScreenInteractorImpl implements LockScreenInteractor {
             oldValues.activityName());
   }
 
-  @Override public boolean isSubmittable(String attempt) {
-    return lockInteractor.isSubmittable(attempt);
+  @WorkerThread @NonNull @Override public Observable<Long> getDefaultIgnoreTime() {
+    return Observable.defer(() -> Observable.just(preferences.getDefaultIgnoreTime()))
+        .map(aLong -> aLong == null ? PadLockPreferences.PERIOD_NONE : aLong);
+  }
+
+  @WorkerThread @NonNull @Override public Observable<Long> setDefaultIgnoreTime(long ignoreTime) {
+    return Observable.defer(() -> {
+      preferences.setDefaultIgnoreTime(ignoreTime);
+      return Observable.just(ignoreTime);
+    });
   }
 }
