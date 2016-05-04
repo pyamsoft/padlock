@@ -289,10 +289,10 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @Override public boolean onPrepareOptionsMenu(Menu menu) {
     // Set the default checked value
-    final Long ignorePeriod = ignoreDataHolder.get(0);
+    final Long ignorePeriod = ignoreDataHolder.pop(0);
     presenter.setIgnorePeriodFromPreferences(ignorePeriod);
 
-    final Boolean exclude = excludeDataHolder.get(0);
+    final Boolean exclude = excludeDataHolder.pop(0);
     if (exclude != null) {
       menuExclude.setChecked(exclude);
     }
