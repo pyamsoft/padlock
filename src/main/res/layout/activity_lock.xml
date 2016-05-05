@@ -40,9 +40,9 @@
   </android.support.design.widget.AppBarLayout>
 
   <include
-      layout="@layout/lock_screen"
+      layout="@layout/layout_lock_screen_header"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="match_parent"
       app:layout_behavior="@string/appbar_scrolling_view_behavior"
       />
 
