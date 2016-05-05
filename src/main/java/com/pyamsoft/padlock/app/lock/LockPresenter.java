@@ -16,37 +16,9 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.graphics.drawable.Drawable;
 import com.pyamsoft.pydroid.base.PresenterBase;
-import rx.Observable;
 
 public interface LockPresenter<I extends LockView> extends PresenterBase<I> {
 
-  void clickButton1() throws NullPointerException;
-
-  void clickButton2() throws NullPointerException;
-
-  void clickButton3() throws NullPointerException;
-
-  void clickButton4() throws NullPointerException;
-
-  void clickButton5() throws NullPointerException;
-
-  void clickButton6() throws NullPointerException;
-
-  void clickButton7() throws NullPointerException;
-
-  void clickButton8() throws NullPointerException;
-
-  void clickButton9() throws NullPointerException;
-
-  void clickButton0() throws NullPointerException;
-
-  void clickButtonBack() throws NullPointerException;
-
-  void clickButtonCommand() throws NullPointerException;
-
-  void setDefaultDisplay() throws NullPointerException;
-
-  Observable<Drawable> loadPackageIcon(String packageName);
+  void loadPackageIcon(String packageName);
 }

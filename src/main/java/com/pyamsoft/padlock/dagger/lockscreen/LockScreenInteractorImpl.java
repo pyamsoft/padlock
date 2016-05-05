@@ -56,6 +56,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName,
             activityName)
         .mapToOne(PadLockEntry.MAPPER::map)
+        .filter(padLockEntry -> padLockEntry != null)
+        .first()
         .map(padLockEntry -> {
           Timber.d("LOCKED entry, update entry in DB: ", padLockEntry);
           final long timeOutMinutesInMillis = preferences.getTimeoutPeriod() * 60 * 1000;
@@ -86,6 +88,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName,
             activityName)
         .mapToOne(PadLockEntry.MAPPER::map)
+        .filter(padLockEntry -> padLockEntry != null)
+        .first()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread());
 
@@ -112,8 +116,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         pin = appCode;
       }
 
-      final String encodedPinAttempt = encodeSHA256(attempt);
-      final boolean unlocked = compareAttemptToPIN(encodedPinAttempt, pin);
+      final boolean unlocked = checkSubmissionAttempt(attempt, pin);
 
       // KLUDGE we must do this here as we need the padlock entry
       if (unlocked) {

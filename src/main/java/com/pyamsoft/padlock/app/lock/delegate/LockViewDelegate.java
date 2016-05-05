@@ -16,6 +16,7 @@
 package com.pyamsoft.padlock.app.lock.delegate;
 
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -32,15 +33,17 @@ public interface LockViewDelegate {
 
   @NonNull String getActivityName();
 
-  void setDefaultDisplay(String defaultCode);
+  void clearDisplay();
+
+  void setImageSuccess(@NonNull Drawable drawable);
+
+  void setImageError();
 
   void onCreate(Activity activity, View rootView);
 
   void onCreate(Fragment fragment, View rootView);
 
   void onStart();
-
-  void onDestroyView();
 
   void onDestroy();
 
