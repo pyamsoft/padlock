@@ -104,7 +104,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
         new LockViewDelegateImpl<>(presenter, android.R.color.white, () -> presenter.unlockEntry());
     presenter.create();
     presenter.bind(this);
-    lockViewDelegate.onCreate(this, rootView);
+    lockViewDelegate.onCreateView(this, rootView);
 
     Timber.d("bind");
     getValuesFromIntent();
@@ -154,7 +154,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     super.onDestroy();
     presenter.unbind();
     presenter.destroy();
-    lockViewDelegate.onDestroy();
+    lockViewDelegate.onDestroyView();
     failCount = 0;
     if (unbinder != null) {
       unbinder.unbind();

@@ -39,13 +39,13 @@ public interface LockViewDelegate {
 
   void setImageError();
 
-  void onCreate(Activity activity, View rootView);
+  void onCreateView(Activity activity, View rootView);
 
-  void onCreate(Fragment fragment, View rootView);
+  void onCreateView(Fragment fragment, View rootView);
 
   void onStart();
 
-  void onDestroy();
+  void onDestroyView();
 
   void onRestoreInstanceState(Bundle savedInstanceState);
 
