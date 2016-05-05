@@ -21,13 +21,13 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,7 +45,7 @@ final class LockViewDelegateImpl implements LockViewDelegate {
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
 
   @BindView(R.id.lock_image) ImageView image;
-  @BindView(R.id.lock_text_entry) EditText editText;
+  @BindView(R.id.lock_text_entry) TextInputEditText editText;
   @BindView(R.id.lock_image_go) ImageView imageGo;
 
   private @ColorRes int textColor;
