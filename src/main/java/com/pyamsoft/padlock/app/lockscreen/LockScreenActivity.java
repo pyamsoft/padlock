@@ -25,11 +25,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -102,21 +100,8 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
         .build()
         .inject(this);
 
-    lockViewDelegate = new LockViewDelegateImpl<>(presenter, (textView, actionId, keyEvent) -> {
-      if (keyEvent == null) {
-        Timber.e("KeyEvent was not caused by keypress");
-        return false;
-      }
-
-      if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
-        Timber.d("KeyEvent is Enter pressed");
-        presenter.unlockEntry();
-        return true;
-      }
-
-      Timber.d("Do not handle key event");
-      return false;
-    });
+    lockViewDelegate =
+        new LockViewDelegateImpl<>(presenter, android.R.color.white, () -> presenter.unlockEntry());
     presenter.create();
     presenter.bind(this);
     lockViewDelegate.onCreate(this, rootView);
