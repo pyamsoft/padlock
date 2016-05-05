@@ -42,6 +42,7 @@
       android:imeOptions="actionGo"
       android:inputType="textPassword"
       android:textColor="@android:color/white"
+      android:textAppearance="?android:attr/textAppearanceLarge"
       />
 
 </LinearLayout>
