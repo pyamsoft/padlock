@@ -16,11 +16,13 @@
 package com.pyamsoft.padlock.app.lock.delegate;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -65,7 +67,18 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
     unbinder = ButterKnife.bind(this, rootView);
     getValuesFromBundle(bundle);
 
+    editText.setOnFocusChangeListener((view, hasFocus) -> {
+      if (hasFocus) {
+        final InputMethodManager imm = (InputMethodManager) rootView.getContext()
+            .getApplicationContext()
+            .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+      }
+    });
     editText.setOnEditorActionListener(editActionListener);
+
+    // Force keyboard focus
+    editText.requestFocus();
   }
 
   private void getValuesFromBundle(Bundle bundle) {
