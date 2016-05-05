@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.pyamsoft.padlock.app.lock.delegate;
+package com.pyamsoft.padlock.dagger.lockscreen.delegate;
 
 import android.app.Activity;
 import android.content.Context;
@@ -34,24 +34,21 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
-import com.pyamsoft.padlock.app.lock.LockView;
+import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
 import com.pyamsoft.pydroid.model.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
+import javax.inject.Inject;
 import timber.log.Timber;
 
-public final class LockViewDelegateImpl<I extends LockView, P extends LockPresenter<I>>
-    implements LockViewDelegate {
+final class LockViewDelegateImpl implements LockViewDelegate {
 
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
-
-  @NonNull private final P presenter;
-  @NonNull private final Runnable goRunnable;
-  private final @ColorRes int textColor;
 
   @BindView(R.id.lock_image) ImageView image;
   @BindView(R.id.lock_text_entry) EditText editText;
   @BindView(R.id.lock_image_go) ImageView imageGo;
 
+  private @ColorRes int textColor;
   private View rootView;
   private String activityName;
   private String packageName;
@@ -59,22 +56,26 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
   private Unbinder unbinder;
   private InputMethodManager imm;
 
-  public LockViewDelegateImpl(final @NonNull P presenter, final @ColorRes int textColor,
-      @NonNull final Runnable goRunnable) {
-    this.presenter = presenter;
-    this.goRunnable = goRunnable;
+  @Inject public LockViewDelegateImpl() {
+    this.textColor = R.color.orange500;
+  }
+
+  @Override public void setTextColor(@ColorRes int textColor) {
     this.textColor = textColor;
   }
 
-  @Override public void onCreateView(final Activity activity, final View rootView) {
-    onCreateView(rootView, activity.getIntent().getExtras());
+  @Override public void onCreateView(final LockPresenter presenter, final Activity activity,
+      final View rootView) {
+    onCreateView(presenter, rootView, activity.getIntent().getExtras());
   }
 
-  @Override public void onCreateView(final Fragment fragment, final View rootView) {
-    onCreateView(rootView, fragment.getArguments());
+  @Override public void onCreateView(final LockPresenter presenter, final Fragment fragment,
+      final View rootView) {
+    onCreateView(presenter, rootView, fragment.getArguments());
   }
 
-  private void onCreateView(final View rootView, final Bundle bundle) {
+  private void onCreateView(final LockPresenter presenter, final View rootView,
+      final Bundle bundle) {
     Timber.d("onCreateView");
     this.rootView = rootView;
     unbinder = ButterKnife.bind(this, rootView);
@@ -88,7 +89,7 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
 
       if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
         Timber.d("KeyEvent is Enter pressed");
-        goRunnable.run();
+        presenter.submit();
         return true;
       }
 
@@ -108,7 +109,7 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
     imageGo.setOnClickListener(view -> {
-      goRunnable.run();
+      presenter.submit();
       imm.toggleSoftInputFromWindow(rootView.getWindowToken(), 0, 0);
     });
 
@@ -133,7 +134,7 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
     editText.setText("");
   }
 
-  @Override public void onStart() {
+  @Override public void onStart(final LockPresenter presenter) {
     presenter.loadPackageIcon(packageName);
   }
 

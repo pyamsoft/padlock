@@ -54,7 +54,7 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
     unsubPinEntry();
   }
 
-  @Override public void attemptPinSubmission() {
+  @Override public void submit() {
     Timber.d("Attempt PIN submission");
     unsubPinEntry();
     pinEntrySubscription = interactor.submitMasterPin(get().getCurrentAttempt())

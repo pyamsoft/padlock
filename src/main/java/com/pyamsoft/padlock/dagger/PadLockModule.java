@@ -21,7 +21,6 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import dagger.Module;
 import dagger.Provides;
-import javax.inject.Singleton;
 
 @Module public class PadLockModule {
 
@@ -33,11 +32,11 @@ import javax.inject.Singleton;
     preferences = new PadLockPreferences(context);
   }
 
-  @Singleton @Provides Context provideContext() {
+  @Provides Context provideContext() {
     return appContext;
   }
 
-  @Singleton @Provides PadLockPreferences providePreferences() {
+  @Provides PadLockPreferences providePreferences() {
     return preferences;
   }
 }

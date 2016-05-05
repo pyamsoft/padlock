@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.lockscreen;
+package com.pyamsoft.padlock.dagger.lockscreen.delegate;
 
-import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.app.lock.LockPresenter;
-import com.pyamsoft.pydroid.base.PresenterBase;
+import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
+import dagger.Module;
+import dagger.Provides;
 
-public interface LockScreenPresenter extends PresenterBase<LockScreen>, LockPresenter<LockScreen> {
+@Module public class LockViewDelegateModule {
 
-  void setIgnorePeriodFromPreferences(@Nullable Long time) throws NullPointerException;
-
-  void lockEntry();
+  @Provides LockViewDelegate provideLockViewDelegate(final LockViewDelegateImpl lockViewDelegate) {
+    return lockViewDelegate;
+  }
 }

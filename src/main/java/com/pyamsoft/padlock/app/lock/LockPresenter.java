@@ -21,4 +21,6 @@ import com.pyamsoft.pydroid.base.PresenterBase;
 public interface LockPresenter<I extends LockView> extends PresenterBase<I> {
 
   void loadPackageIcon(String packageName);
+
+  void submit();
 }

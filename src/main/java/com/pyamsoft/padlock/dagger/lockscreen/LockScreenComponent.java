@@ -20,11 +20,12 @@ import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.db.DBModule;
+import com.pyamsoft.padlock.dagger.lockscreen.delegate.LockViewDelegateModule;
 import com.pyamsoft.padlock.dagger.pin.MasterPinModule;
 import dagger.Component;
 
 @ActivityScope @Component(modules = {
-    LockScreenModule.class, DBModule.class, MasterPinModule.class
+    LockScreenModule.class, DBModule.class, MasterPinModule.class, LockViewDelegateModule.class
 }, dependencies = {
     PadLockComponent.class
 }) public interface LockScreenComponent {

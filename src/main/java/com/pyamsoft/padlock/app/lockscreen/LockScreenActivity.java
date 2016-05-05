@@ -37,12 +37,9 @@ import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.ErrorDialog;
 import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
-import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegateImpl;
 import com.pyamsoft.padlock.app.service.LockService;
 import com.pyamsoft.padlock.app.service.PadLockService;
-import com.pyamsoft.padlock.dagger.db.DBModule;
 import com.pyamsoft.padlock.dagger.lockscreen.DaggerLockScreenComponent;
-import com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule;
 import com.pyamsoft.pydroid.base.ActivityBase;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -62,7 +59,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
   @BindView(R.id.appbar) AppBarLayout appBarLayout;
 
   @Inject LockScreenPresenter presenter;
-  private LockViewDelegate lockViewDelegate;
+  @Inject LockViewDelegate lockViewDelegate;
 
   private DataHolderFragment<Long> ignoreDataHolder;
   private DataHolderFragment<Boolean> excludeDataHolder;
@@ -94,17 +91,14 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
     // Inject Dagger graph
     DaggerLockScreenComponent.builder()
-        .lockScreenModule(new LockScreenModule())
-        .dBModule(new DBModule())
         .padLockComponent(PadLock.padLockComponent(this))
         .build()
         .inject(this);
 
-    lockViewDelegate =
-        new LockViewDelegateImpl<>(presenter, android.R.color.white, () -> presenter.unlockEntry());
     presenter.create();
     presenter.bind(this);
-    lockViewDelegate.onCreateView(this, rootView);
+    lockViewDelegate.setTextColor(android.R.color.white);
+    lockViewDelegate.onCreateView(presenter, this, rootView);
 
     Timber.d("bind");
     getValuesFromIntent();
@@ -128,7 +122,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     if (bar != null) {
       bar.setTitle(appName);
     }
-    lockViewDelegate.onStart();
+    lockViewDelegate.onStart(presenter);
 
     supportInvalidateOptionsMenu();
   }
