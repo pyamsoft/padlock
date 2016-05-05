@@ -30,6 +30,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
@@ -38,10 +39,10 @@ final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
   @NonNull private final LockScreenInteractor lockScreenInteractor;
   @NonNull private final SettingsInteractor settingsInteractor;
 
-  private Subscription confirmDialogBusSubscription;
-  private Subscription ignorePeriodSubscription;
-  private Subscription timeoutSubscription;
-  private Subscription confirmDialogSubscription;
+  @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
+  @NonNull private Subscription ignorePeriodSubscription = Subscriptions.empty();
+  @NonNull private Subscription timeoutSubscription = Subscriptions.empty();
+  @NonNull private Subscription confirmDialogSubscription = Subscriptions.empty();
 
   @Inject public SettingsPresenterImpl(@NonNull final LockScreenInteractor lockScreenInteractor,
       @NonNull final SettingsInteractor settingsInteractor) {
@@ -59,31 +60,20 @@ final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
   }
 
   private void unsubscribeConfirmDialog() {
-    if (confirmDialogSubscription != null) {
-      if (confirmDialogSubscription.isUnsubscribed()) {
-        confirmDialogSubscription.unsubscribe();
-      }
-      confirmDialogSubscription = null;
+    if (confirmDialogSubscription.isUnsubscribed()) {
+      confirmDialogSubscription.unsubscribe();
     }
   }
 
   private void unsubscribeIgnorePeriod() {
-    if (ignorePeriodSubscription != null) {
-      if (ignorePeriodSubscription.isUnsubscribed()) {
-        ignorePeriodSubscription.unsubscribe();
-      }
-
-      ignorePeriodSubscription = null;
+    if (ignorePeriodSubscription.isUnsubscribed()) {
+      ignorePeriodSubscription.unsubscribe();
     }
   }
 
   private void unsubscribeTimeout() {
-    if (timeoutSubscription != null) {
-      if (timeoutSubscription.isUnsubscribed()) {
-        timeoutSubscription.unsubscribe();
-      }
-
-      timeoutSubscription = null;
+    if (timeoutSubscription.isUnsubscribed()) {
+      timeoutSubscription.unsubscribe();
     }
   }
 
@@ -109,19 +99,39 @@ final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
   }
 
   @Override public void setIgnorePeriodNone() {
-    lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_NONE);
+    unsubscribeIgnorePeriod();
+    ignorePeriodSubscription =
+        lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_NONE)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe();
   }
 
   @Override public void setIgnorePeriodFive() {
-    lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_FIVE);
+    unsubscribeIgnorePeriod();
+    ignorePeriodSubscription =
+        lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_FIVE)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe();
   }
 
   @Override public void setIgnorePeriodTen() {
-    lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_TEN);
+    unsubscribeIgnorePeriod();
+    ignorePeriodSubscription =
+        lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_TEN)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe();
   }
 
   @Override public void setIgnorePeriodThirty() {
-    lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_THIRTY);
+    unsubscribeIgnorePeriod();
+    ignorePeriodSubscription =
+        lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_THIRTY)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe();
   }
 
   @Override public void setTimeoutPeriodFromPreference() {
@@ -190,11 +200,8 @@ final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
   }
 
   @Override public void unregisterFromConfirmDialogBus() {
-    if (confirmDialogBusSubscription != null) {
-      if (!confirmDialogBusSubscription.isUnsubscribed()) {
-        confirmDialogBusSubscription.unsubscribe();
-      }
-      confirmDialogBusSubscription = null;
+    if (!confirmDialogBusSubscription.isUnsubscribed()) {
+      confirmDialogBusSubscription.unsubscribe();
     }
   }
 
