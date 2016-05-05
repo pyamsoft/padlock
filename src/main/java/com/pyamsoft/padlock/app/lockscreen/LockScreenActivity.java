@@ -102,22 +102,20 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
         .build()
         .inject(this);
 
-    lockViewDelegate = new LockViewDelegateImpl<>(presenter, new TextView.OnEditorActionListener() {
-      @Override public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-        if (keyEvent == null) {
-          Timber.e("KeyEvent was not caused by keypress");
-          return false;
-        }
-
-        if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
-          Timber.d("KeyEvent is Enter pressed");
-          presenter.unlockEntry();
-          return true;
-        }
-
-        Timber.d("Do not handle key event");
+    lockViewDelegate = new LockViewDelegateImpl<>(presenter, (textView, actionId, keyEvent) -> {
+      if (keyEvent == null) {
+        Timber.e("KeyEvent was not caused by keypress");
         return false;
       }
+
+      if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
+        Timber.d("KeyEvent is Enter pressed");
+        presenter.unlockEntry();
+        return true;
+      }
+
+      Timber.d("Do not handle key event");
+      return false;
     });
     presenter.create();
     presenter.bind(this);
