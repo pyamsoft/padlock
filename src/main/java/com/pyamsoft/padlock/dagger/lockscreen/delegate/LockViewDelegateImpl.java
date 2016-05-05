@@ -99,9 +99,6 @@ final class LockViewDelegateImpl implements LockViewDelegate {
 
     editText.setTextColor(ContextCompat.getColor(rootView.getContext(), textColor));
 
-    // Force keyboard focus
-    editText.requestFocus();
-
     // Force the keyboard
     imm = (InputMethodManager) rootView.getContext()
         .getApplicationContext()
@@ -111,6 +108,15 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     imageGo.setOnClickListener(view -> {
       presenter.submit();
       imm.toggleSoftInputFromWindow(rootView.getWindowToken(), 0, 0);
+    });
+
+    // Force keyboard focus
+    editText.requestFocus();
+
+    editText.setOnFocusChangeListener((view, hasFocus) -> {
+      if (hasFocus) {
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+      }
     });
 
     // Load the go arrow
