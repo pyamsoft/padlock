@@ -50,7 +50,7 @@
   </LinearLayout>
 
   <include
-      layout="@layout/layout_lock_screen_header"
+      layout="@layout/layout_lock_screen"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       />

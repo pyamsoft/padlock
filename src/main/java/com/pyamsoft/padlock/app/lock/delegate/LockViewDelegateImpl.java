@@ -19,19 +19,24 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
 import com.pyamsoft.padlock.app.lock.LockView;
+import com.pyamsoft.pydroid.model.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import timber.log.Timber;
 
 public final class LockViewDelegateImpl<I extends LockView, P extends LockPresenter<I>>
@@ -40,19 +45,25 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
 
   @NonNull private final P presenter;
-  @NonNull private final TextView.OnEditorActionListener editActionListener;
+  @NonNull private final Runnable goRunnable;
+  private final @ColorRes int textColor;
 
   @BindView(R.id.lock_image) ImageView image;
   @BindView(R.id.lock_text_entry) EditText editText;
+  @BindView(R.id.lock_image_go) ImageView imageGo;
 
+  private View rootView;
   private String activityName;
   private String packageName;
+  private AsyncVectorDrawableTask arrowGoTask;
   private Unbinder unbinder;
+  private InputMethodManager imm;
 
-  public LockViewDelegateImpl(final @NonNull P presenter,
-      @NonNull final TextView.OnEditorActionListener editorActionListener) {
+  public LockViewDelegateImpl(final @NonNull P presenter, final @ColorRes int textColor,
+      @NonNull final Runnable goRunnable) {
     this.presenter = presenter;
-    this.editActionListener = editorActionListener;
+    this.goRunnable = goRunnable;
+    this.textColor = textColor;
   }
 
   @Override public void onCreate(final Activity activity, final View rootView) {
@@ -64,21 +75,50 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
   }
 
   private void onCreate(final View rootView, final Bundle bundle) {
+    this.rootView = rootView;
     unbinder = ButterKnife.bind(this, rootView);
     getValuesFromBundle(bundle);
 
-    editText.setOnFocusChangeListener((view, hasFocus) -> {
-      if (hasFocus) {
-        final InputMethodManager imm = (InputMethodManager) rootView.getContext()
-            .getApplicationContext()
-            .getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+    editText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+      if (keyEvent == null) {
+        Timber.e("KeyEvent was not caused by keypress");
+        return false;
       }
+
+      if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
+        Timber.d("KeyEvent is Enter pressed");
+        goRunnable.run();
+        return true;
+      }
+
+      Timber.d("Do not handle key event");
+      return false;
     });
-    editText.setOnEditorActionListener(editActionListener);
+
+    editText.setTextColor(ContextCompat.getColor(rootView.getContext(), textColor));
 
     // Force keyboard focus
     editText.requestFocus();
+
+    // Force the keyboard
+    imm = (InputMethodManager) rootView.getContext()
+        .getApplicationContext()
+        .getSystemService(Context.INPUT_METHOD_SERVICE);
+    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
+    imageGo.setOnClickListener(view -> {
+      goRunnable.run();
+      imm.toggleSoftInputFromWindow(rootView.getWindowToken(), 0, 0);
+    });
+
+    // Load the go arrow
+    if (arrowGoTask != null) {
+      arrowGoTask.cancel(true);
+    }
+
+    arrowGoTask = new AsyncVectorDrawableTask(imageGo);
+    arrowGoTask.execute(new AsyncDrawable(rootView.getContext().getApplicationContext(),
+        R.drawable.ic_arrow_forward_24dp));
   }
 
   private void getValuesFromBundle(Bundle bundle) {
@@ -109,6 +149,12 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
     if (unbinder != null) {
       unbinder.unbind();
     }
+    if (arrowGoTask != null) {
+      arrowGoTask.cancel(true);
+    }
+
+    imm.toggleSoftInputFromWindow(rootView.getWindowToken(), 0, 0);
+    rootView = null;
   }
 
   @NonNull @Override public String getCurrentAttempt() {

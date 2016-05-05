@@ -27,10 +27,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.ContextThemeWrapper;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -75,21 +73,8 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
         .padLockComponent(PadLock.padLockComponent(this))
         .build()
         .inject(this);
-    lockViewDelegate = new LockViewDelegateImpl<>(presenter, (textView, actionId, keyEvent) -> {
-      if (keyEvent == null) {
-        Timber.e("KeyEvent was not caused by keypress");
-        return false;
-      }
-
-      if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
-        Timber.d("KeyEvent is Enter pressed");
-        presenter.attemptPinSubmission();
-        return true;
-      }
-
-      Timber.d("Do not handle key event");
-      return false;
-    });
+    lockViewDelegate = new LockViewDelegateImpl<>(presenter, android.R.color.black,
+        () -> presenter.attemptPinSubmission());
     presenter.create();
 
     setCancelable(true);
