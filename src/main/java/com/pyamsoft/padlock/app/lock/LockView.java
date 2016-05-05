@@ -16,13 +16,10 @@
 
 package com.pyamsoft.padlock.app.lock;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
 public interface LockView {
-
-  int getBackIcon();
-
-  int getCommandIcon();
 
   @NonNull String getCurrentAttempt();
 
@@ -30,13 +27,13 @@ public interface LockView {
 
   @NonNull String getActivityName();
 
-  void setDefaultDisplay(String defaultCode);
+  void setImageSuccess(@NonNull Drawable drawable);
 
-  void onNormalButtonEvent();
+  void setImageError();
 
-  void onCommandButtonEvent();
+  void onSubmitSuccess();
 
-  void onSubmitButtonEvent();
+  void onSubmitFailure();
 
-  void onErrorButtonEvent();
+  void onSubmitError();
 }

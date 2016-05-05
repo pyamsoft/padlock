@@ -16,6 +16,7 @@
 package com.pyamsoft.padlock.app.lockscreen;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -24,9 +25,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -99,7 +102,23 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
         .build()
         .inject(this);
 
-    lockViewDelegate = new LockViewDelegateImpl<>(this, presenter);
+    lockViewDelegate = new LockViewDelegateImpl<>(presenter, new TextView.OnEditorActionListener() {
+      @Override public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+        if (keyEvent == null) {
+          Timber.e("KeyEvent was not caused by keypress");
+          return false;
+        }
+
+        if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
+          Timber.d("KeyEvent is Enter pressed");
+          presenter.unlockEntry();
+          return true;
+        }
+
+        Timber.d("Do not handle key event");
+        return false;
+      }
+    });
     presenter.create();
     presenter.bind(this);
     lockViewDelegate.onCreate(this, rootView);
@@ -110,32 +129,6 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     ViewCompat.setElevation(appBarLayout, 0);
     setSupportActionBar(toolbar);
     failCount = 0;
-  }
-
-  @Override public int getBackIcon() {
-    return R.drawable.ic_lock_back_24dp;
-  }
-
-  @Override public int getCommandIcon() {
-    return R.drawable.ic_lock_close_24dp;
-  }
-
-  @Override public void setDefaultDisplay(String defaultCode) {
-    lockViewDelegate.setDefaultDisplay(defaultCode);
-  }
-
-  @Override public void onNormalButtonEvent() {
-    Timber.d("Receive normal button event");
-  }
-
-  @Override public void onCommandButtonEvent() {
-    Timber.d("Receive command button event");
-    startActivity(home);
-  }
-
-  @Override public void onSubmitButtonEvent() {
-    Timber.d("Receive submit button event");
-    presenter.unlockEntry();
   }
 
   private void getValuesFromIntent() {
@@ -178,7 +171,6 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     super.onDestroy();
     presenter.unbind();
     presenter.destroy();
-    lockViewDelegate.onDestroyView();
     lockViewDelegate.onDestroy();
     failCount = 0;
     if (unbinder != null) {
@@ -198,6 +190,14 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @NonNull @Override public String getActivityName() {
     return lockViewDelegate.getActivityName();
+  }
+
+  @Override public void setImageSuccess(@NonNull Drawable drawable) {
+    lockViewDelegate.setImageSuccess(drawable);
+  }
+
+  @Override public void setImageError() {
+    lockViewDelegate.setImageError();
   }
 
   @NonNull @Override public String getCurrentAttempt() {
@@ -228,9 +228,8 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "lock_error");
   }
 
-  @Override public void onUnlockSuccess() {
+  @Override public void onSubmitSuccess() {
     Timber.d("Unlocked!");
-    presenter.setDefaultDisplay();
     final LockService service = PadLockService.getInstance();
     if (service != null) {
       service.passLockScreen();
@@ -238,9 +237,8 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     finish();
   }
 
-  @Override public void onUnlockFailure() {
+  @Override public void onSubmitFailure() {
     Timber.e("Failed to unlock");
-    presenter.setDefaultDisplay();
     showSnackbarWithText("Error: Invalid PIN");
 
     ++failCount;
@@ -249,11 +247,6 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     if (failCount > 2) {
       presenter.lockEntry();
     }
-  }
-
-  @Override public void onUnlockError() {
-    Timber.e("UNLOCK ERROR");
-    AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
   }
 
   @Override protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -301,7 +294,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
   }
 
   @Override public void onSubmitError() {
-    onUnlockFailure();
+    AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
   }
 
   @Override public void setIgnoreTimeError() {
@@ -398,9 +391,5 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @Override public boolean shouldExcludeEntry() {
     return menuExclude.isChecked();
-  }
-
-  @Override public void onErrorButtonEvent() {
-    Timber.e("onErrorButtonEvent. We really shouldn't be receiving this one");
   }
 }

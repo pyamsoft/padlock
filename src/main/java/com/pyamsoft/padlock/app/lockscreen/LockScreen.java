@@ -24,14 +24,6 @@ public interface LockScreen extends LockView {
 
   void onLockedError();
 
-  void onUnlockSuccess();
-
-  void onUnlockFailure();
-
-  void onUnlockError();
-
-  void onSubmitError();
-
   void setIgnoreTimeError();
 
   void setIgnoreTimeNone();

@@ -17,16 +17,15 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockInteractor;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
 import com.pyamsoft.padlock.app.lock.LockView;
-import com.pyamsoft.padlock.model.event.LockButtonClickEvent;
 import com.pyamsoft.pydroid.base.PresenterImplBase;
-import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 public abstract class LockPresenterImpl<I extends LockView> extends PresenterImplBase<I>
@@ -35,123 +34,35 @@ public abstract class LockPresenterImpl<I extends LockView> extends PresenterImp
   @NonNull private final LockInteractor lockInteractor;
   @NonNull private final Context appContext;
 
+  @NonNull private Subscription imageSubscription = Subscriptions.empty();
+
   protected LockPresenterImpl(final @NonNull Context context,
       @NonNull final LockInteractor lockInteractor) {
     this.appContext = context.getApplicationContext();
     this.lockInteractor = lockInteractor;
   }
 
-  @Override public final Observable<Drawable> loadPackageIcon(final @NonNull String packageName) {
-    return Observable.defer(
-        () -> Observable.just(lockInteractor.loadPackageIcon(appContext, packageName)))
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread());
+  @Override public void unbind() {
+    super.unbind();
+    unsubImageSubscription();
   }
 
-  @Override public final void setDefaultDisplay() throws NullPointerException {
-    get().setDefaultDisplay(LockInteractor.DEFAULT_STRING);
+  @Override public final void loadPackageIcon(final @NonNull String packageName) {
+    unsubImageSubscription();
+    imageSubscription = lockInteractor.loadPackageIcon(appContext, packageName)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(drawable -> {
+          get().setImageSuccess(drawable);
+        }, throwable -> {
+          Timber.e(throwable, "onError");
+          get().setImageError();
+        });
   }
 
-  private void processClickEvent(@NonNull final LockButtonClickEvent event)
-      throws NullPointerException {
-    final int status = event.status();
-    final String code = event.code();
-
-    get().setDefaultDisplay(code);
-    switch (status) {
-      case LockButtonClickEvent.STATUS_SUBMITTABLE:
-        Timber.d("STATUS_SUBMITTABLE, attempt submission");
-        get().onSubmitButtonEvent();
-        break;
-      case LockButtonClickEvent.STATUS_COMMAND:
-        Timber.d("STATUS_COMMAND, handle command in view");
-        get().onCommandButtonEvent();
-        break;
-      case LockButtonClickEvent.STATUS_ERROR:
-        Timber.d("STATUS_ERROR, handle error in view");
-        get().onErrorButtonEvent();
-        break;
-      default:
-        Timber.d("STATUS_NONE, do nothing");
-        get().onNormalButtonEvent();
+  private void unsubImageSubscription() {
+    if (!imageSubscription.isUnsubscribed()) {
+      imageSubscription.unsubscribe();
     }
   }
-
-  @Override public final void clickButton1() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.ONE);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButton2() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.TWO);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButton3() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.THREE);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButton4() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.FOUR);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButton5() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.FIVE);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButton6() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.SIX);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButton7() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.SEVEN);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButton8() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.EIGHT);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButton9() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.NINE);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButton0() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.ZERO);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButtonBack() throws NullPointerException {
-    final LockButtonClickEvent event = clickButton(LockInteractor.BACK);
-    processClickEvent(event);
-  }
-
-  @Override public final void clickButtonCommand() throws NullPointerException {
-    final LockButtonClickEvent event = takeCommand();
-    processClickEvent(event);
-  }
-
-  protected final String buttonClicked(final char button, String attempt)
-      throws NullPointerException {
-    String code;
-    switch (button) {
-      // BACK
-      case LockInteractor.DEFAULT_CHAR:
-        code = lockInteractor.deleteFromAttempt(attempt);
-        break;
-      default:
-        code = lockInteractor.appendToAttempt(attempt, button);
-    }
-    return code;
-  }
-
-  protected abstract LockButtonClickEvent takeCommand() throws NullPointerException;
-
-  protected abstract LockButtonClickEvent clickButton(char button) throws NullPointerException;
 }

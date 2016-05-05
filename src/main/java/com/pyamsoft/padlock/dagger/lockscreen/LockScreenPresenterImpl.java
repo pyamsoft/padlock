@@ -20,12 +20,10 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.lock.LockView;
 import com.pyamsoft.padlock.app.lockscreen.LockScreen;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter;
 import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;
-import com.pyamsoft.padlock.model.event.LockButtonClickEvent;
 import javax.inject.Inject;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -102,27 +100,6 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     }
   }
 
-  @Override protected LockButtonClickEvent takeCommand() throws NullPointerException {
-    final LockView lockView = get();
-    final String attempt = lockView.getCurrentAttempt();
-    return LockButtonClickEvent.builder()
-        .code(attempt)
-        .status(LockButtonClickEvent.STATUS_COMMAND)
-        .build();
-  }
-
-  @Override protected LockButtonClickEvent clickButton(char button) throws NullPointerException {
-    final LockScreen lockScreen = get();
-    final String attempt = lockScreen.getCurrentAttempt();
-    final String code = buttonClicked(button, attempt);
-    final boolean submittable = lockScreenInteractor.isSubmittable(code);
-    return LockButtonClickEvent.builder()
-        .status(submittable ? LockButtonClickEvent.STATUS_SUBMITTABLE
-            : LockButtonClickEvent.STATUS_NONE)
-        .code(code)
-        .build();
-  }
-
   @Override public void lockEntry() {
     final LockScreen lockScreen = get();
     unsubLock();
@@ -135,36 +112,30 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
               } else {
                 lockScreen.onLockedError();
               }
-
-              unsubLock();
             }, throwable -> {
               Timber.e(throwable, "lockEntry onError");
               lockScreen.onLockedError();
-            });
+              unsubLock();
+            }, this::unsubLock);
   }
 
   @Override public void unlockEntry() {
     final LockScreen lockScreen = get();
-    final String code = lockScreen.getCurrentAttempt();
-    if (lockScreenInteractor.isSubmittable(code)) {
-      unsubUnlock();
-      unlockSubscription = lockScreenInteractor.unlockEntry(lockScreen.getPackageName(),
-          lockScreen.getActivityName(), lockScreen.getCurrentAttempt(),
-          lockScreen.shouldExcludeEntry(), lockScreen.getIgnorePeriodTime()).subscribe(unlocked -> {
-        Timber.d("Received unlock entry result");
-        if (unlocked) {
-          lockScreen.onUnlockSuccess();
-        } else {
-          lockScreen.onUnlockFailure();
-        }
-
-        unsubUnlock();
-      }, throwable -> {
-        Timber.e(throwable, "unlockEntry onError");
-        lockScreen.onUnlockError();
-      });
-    } else {
-      lockScreen.onSubmitError();
-    }
+    unsubUnlock();
+    unlockSubscription =
+        lockScreenInteractor.unlockEntry(lockScreen.getPackageName(), lockScreen.getActivityName(),
+            lockScreen.getCurrentAttempt(), lockScreen.shouldExcludeEntry(),
+            lockScreen.getIgnorePeriodTime()).subscribe(unlocked -> {
+          Timber.d("Received unlock entry result");
+          if (unlocked) {
+            lockScreen.onSubmitSuccess();
+          } else {
+            lockScreen.onSubmitFailure();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "unlockEntry onError");
+          lockScreen.onSubmitError();
+          unsubUnlock();
+        }, this::unsubUnlock);
   }
 }
