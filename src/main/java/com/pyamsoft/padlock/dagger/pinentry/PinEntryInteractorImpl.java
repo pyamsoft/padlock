@@ -43,7 +43,7 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
             return PinEntryEvent.builder().complete(true).type(0).build();
           } else {
             final boolean success =
-                compareAttemptToPIN(encodedMasterPin, masterPinInteractor.getMasterPin());
+                checkEncodedSubmissionAttempt(encodedMasterPin, masterPinInteractor.getMasterPin());
             if (success) {
               Timber.d("Clear master pin");
               masterPinInteractor.setMasterPin(null);

@@ -23,7 +23,6 @@ import com.pyamsoft.padlock.app.pinentry.PinEntryInteractor;
 import com.pyamsoft.padlock.app.pinentry.PinEntryPresenter;
 import com.pyamsoft.padlock.app.pinentry.PinScreen;
 import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;
-import com.pyamsoft.padlock.model.event.LockButtonClickEvent;
 import javax.inject.Inject;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -55,27 +54,6 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
     unsubPinEntry();
   }
 
-  @Override protected LockButtonClickEvent takeCommand() throws NullPointerException {
-    final PinScreen pinScreen = get();
-    final String attempt = pinScreen.getCurrentAttempt();
-    final boolean isSubmittable = interactor.isSubmittable(attempt);
-    return LockButtonClickEvent.builder()
-        .status(isSubmittable ? LockButtonClickEvent.STATUS_SUBMITTABLE
-            : LockButtonClickEvent.STATUS_ERROR)
-        .code(attempt)
-        .build();
-  }
-
-  @Override protected LockButtonClickEvent clickButton(char button) throws NullPointerException {
-    final PinScreen pinScreen = get();
-    final String attempt = pinScreen.getCurrentAttempt();
-    final String code = buttonClicked(button, attempt);
-    return LockButtonClickEvent.builder()
-        .status(LockButtonClickEvent.STATUS_NONE)
-        .code(code)
-        .build();
-  }
-
   @Override public void attemptPinSubmission() {
     Timber.d("Attempt PIN submission");
     unsubPinEntry();
@@ -84,11 +62,15 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(pinEntryEvent -> {
-          get().onSubmissionComplete();
-          PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
+          if (pinEntryEvent.complete()) {
+            get().onSubmitSuccess();
+            PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
+          } else {
+            get().onSubmitFailure();
+          }
         }, throwable -> {
           Timber.e(throwable, "attemptPinSubmission onError");
-          get().onErrorButtonEvent();
+          get().onSubmitError();
         });
   }
 }
