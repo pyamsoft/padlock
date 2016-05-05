@@ -27,5 +27,9 @@ public interface LockInteractor {
   @NonNull @WorkerThread Observable<Drawable> loadPackageIcon(Context context,
       final @NonNull String packageName);
 
+  @WorkerThread @NonNull String encodeSHA256(@NonNull String attempt);
+
   @WorkerThread boolean checkSubmissionAttempt(@NonNull String attempt, @NonNull String encodedPin);
+
+  @WorkerThread boolean checkEncodedSubmissionAttempt(@NonNull String encodedAttempt, @NonNull String encodedPin);
 }

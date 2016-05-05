@@ -20,16 +20,18 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.ContextThemeWrapper;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
-import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -73,7 +75,21 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
         .padLockComponent(PadLock.padLockComponent(this))
         .build()
         .inject(this);
-    lockViewDelegate = new LockViewDelegateImpl<>(this, presenter);
+    lockViewDelegate = new LockViewDelegateImpl<>(presenter, (textView, actionId, keyEvent) -> {
+      if (keyEvent == null) {
+        Timber.e("KeyEvent was not caused by keypress");
+        return false;
+      }
+
+      if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
+        Timber.d("KeyEvent is Enter pressed");
+        presenter.attemptPinSubmission();
+        return true;
+      }
+
+      Timber.d("Do not handle key event");
+      return false;
+    });
     presenter.create();
 
     setCancelable(true);
@@ -94,40 +110,9 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
   }
 
-  @Override public int getBackIcon() {
-    return R.drawable.ic_pin_back_24dp;
-  }
-
-  @Override public int getCommandIcon() {
-    return R.drawable.ic_pin_forward_24dp;
-  }
-
   @Override public void onStart() {
     super.onStart();
     lockViewDelegate.onStart();
-  }
-
-  @Override public void setDefaultDisplay(String defaultCode) {
-    lockViewDelegate.setDefaultDisplay(defaultCode);
-  }
-
-  @Override public void onNormalButtonEvent() {
-    Timber.d("Received normal button event");
-  }
-
-  @Override public void onCommandButtonEvent() {
-    Timber.d("Received command button event");
-    Timber.d("We really should'nt be receiving this, as Command is 'just another button'");
-  }
-
-  @Override public void onSubmitButtonEvent() {
-    Timber.d("Attempt is now submittable");
-    presenter.attemptPinSubmission();
-  }
-
-  @Override public void onErrorButtonEvent() {
-    Timber.e("On error button event");
-    Toast.makeText(getActivity(), "Error: Invalid PIN", Toast.LENGTH_SHORT).show();
   }
 
   private void setupToolbar() {
@@ -141,8 +126,8 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
   @Override public void onDestroyView() {
     super.onDestroyView();
     Timber.d("Destroy AlertDialog");
+    lockViewDelegate.onDestroy();
     presenter.unbind();
-    lockViewDelegate.onDestroyView();
     if (unbinder != null) {
       unbinder.unbind();
     }
@@ -151,7 +136,6 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
   @Override public void onDestroy() {
     super.onDestroy();
     presenter.destroy();
-    lockViewDelegate.onDestroy();
   }
 
   @NonNull @Override public String getCurrentAttempt() {
@@ -166,12 +150,28 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
     return lockViewDelegate.getActivityName();
   }
 
-  @NonNull @Override public Context getContext() {
-    return super.getContext().getApplicationContext();
+  @Override public void setImageSuccess(@NonNull Drawable drawable) {
+    lockViewDelegate.setImageSuccess(drawable);
   }
 
-  @Override public void onSubmissionComplete() {
+  @Override public void setImageError() {
+    lockViewDelegate.setImageError();
+  }
+
+  @Override public void onSubmitSuccess() {
     dismiss();
+  }
+
+  @Override public void onSubmitFailure() {
+    dismiss();
+  }
+
+  @Override public void onSubmitError() {
+    dismiss();
+  }
+
+  @NonNull @Override public Context getContext() {
+    return super.getContext().getApplicationContext();
   }
 
   public static final class PinEntryBus extends RxBus<PinEntryEvent> {

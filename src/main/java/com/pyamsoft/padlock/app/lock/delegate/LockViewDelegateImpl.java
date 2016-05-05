@@ -19,10 +19,9 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -42,8 +41,7 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
   @NonNull private final TextView.OnEditorActionListener editActionListener;
 
   @BindView(R.id.lock_image) ImageView image;
-  @BindView(R.id.lock_text_layout) TextInputLayout textInputLayout;
-  @BindView(R.id.lock_text_entry) TextInputEditText textInputEditText;
+  @BindView(R.id.lock_text_entry) EditText editText;
 
   private String activityName;
   private String packageName;
@@ -67,7 +65,7 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
     unbinder = ButterKnife.bind(this, rootView);
     getValuesFromBundle(bundle);
 
-    textInputEditText.setOnEditorActionListener(editActionListener);
+    editText.setOnEditorActionListener(editActionListener);
   }
 
   private void getValuesFromBundle(Bundle bundle) {
@@ -78,7 +76,7 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
   }
 
   @Override public void clearDisplay() {
-    textInputEditText.setText("");
+    editText.setText("");
   }
 
   @Override public void onStart() {
@@ -101,7 +99,7 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
   }
 
   @NonNull @Override public String getCurrentAttempt() {
-    return textInputEditText.getText().toString();
+    return editText.getText().toString();
   }
 
   @NonNull @Override public String getPackageName() {
@@ -118,7 +116,7 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
     if (attempt == null) {
       clearDisplay();
     } else {
-      textInputEditText.setText(attempt);
+      editText.setText(attempt);
     }
   }
 

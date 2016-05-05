@@ -40,7 +40,7 @@ public abstract class LockInteractorImpl implements LockInteractor {
     }
   }
 
-  @NonNull private String encodeSHA256(String attempt) {
+  @NonNull public final String encodeSHA256(@NonNull String attempt) {
     messageDigest.reset();
     final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
     return Base64.encodeToString(output, Base64.DEFAULT).trim();
@@ -64,6 +64,11 @@ public abstract class LockInteractorImpl implements LockInteractor {
   @WorkerThread @Override
   public final boolean checkSubmissionAttempt(@NonNull String attempt, @NonNull String encodedPin) {
     final String encodedAttempt = encodeSHA256(attempt);
+    return checkEncodedSubmissionAttempt(encodedAttempt, encodedPin);
+  }
+
+  @Override public boolean checkEncodedSubmissionAttempt(@NonNull String encodedAttempt,
+      @NonNull String encodedPin) {
     return encodedPin.equals(encodedAttempt);
   }
 }
