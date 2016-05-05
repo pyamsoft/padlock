@@ -228,6 +228,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @Override public void onSubmitSuccess() {
     Timber.d("Unlocked!");
+    lockViewDelegate.clearDisplay();
     final LockService service = PadLockService.getInstance();
     if (service != null) {
       service.passLockScreen();
@@ -237,6 +238,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @Override public void onSubmitFailure() {
     Timber.e("Failed to unlock");
+    lockViewDelegate.clearDisplay();
     showSnackbarWithText("Error: Invalid PIN");
 
     ++failCount;
@@ -292,6 +294,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
   }
 
   @Override public void onSubmitError() {
+    lockViewDelegate.clearDisplay();
     AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
   }
 
