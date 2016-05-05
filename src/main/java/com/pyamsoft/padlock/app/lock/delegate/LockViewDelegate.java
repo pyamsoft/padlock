@@ -18,9 +18,11 @@ package com.pyamsoft.padlock.app.lock.delegate;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.View;
+import com.pyamsoft.padlock.app.lock.LockPresenter;
 
 public interface LockViewDelegate {
 
@@ -33,17 +35,19 @@ public interface LockViewDelegate {
 
   @NonNull String getActivityName();
 
+  void setTextColor(@ColorRes int color);
+
   void clearDisplay();
 
   void setImageSuccess(@NonNull Drawable drawable);
 
   void setImageError();
 
-  void onCreateView(Activity activity, View rootView);
+  void onCreateView(LockPresenter presenter, Activity activity, View rootView);
 
-  void onCreateView(Fragment fragment, View rootView);
+  void onCreateView(LockPresenter presenter, Fragment fragment, View rootView);
 
-  void onStart();
+  void onStart(LockPresenter presenter);
 
   void onDestroyView();
 

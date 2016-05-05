@@ -119,7 +119,7 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
             }, this::unsubLock);
   }
 
-  @Override public void unlockEntry() {
+  @Override public void submit() {
     final LockScreen lockScreen = get();
     unsubUnlock();
     unlockSubscription =

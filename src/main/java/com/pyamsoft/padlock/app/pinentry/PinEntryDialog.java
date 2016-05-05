@@ -36,7 +36,6 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
-import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegateImpl;
 import com.pyamsoft.padlock.dagger.pinentry.DaggerPinEntryComponent;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.model.event.RxBus;
@@ -52,7 +51,7 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
   @Inject PinEntryPresenter presenter;
   @BindView(R.id.lock_pin_entry_toolbar) Toolbar toolbar;
   @BindView(R.id.lock_pin_entry_close) ImageView close;
-  private LockViewDelegate lockViewDelegate;
+  @Inject LockViewDelegate lockViewDelegate;
   private Unbinder unbinder;
 
   public PinEntryDialog() {
@@ -73,8 +72,7 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
         .padLockComponent(PadLock.padLockComponent(this))
         .build()
         .inject(this);
-    lockViewDelegate = new LockViewDelegateImpl<>(presenter, android.R.color.black,
-        () -> presenter.attemptPinSubmission());
+    lockViewDelegate.setTextColor(android.R.color.black);
     presenter.create();
 
     setCancelable(true);
@@ -89,7 +87,7 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
         LayoutInflater.from(themedContext).inflate(R.layout.layout_pin_entry, null, false);
     unbinder = ButterKnife.bind(this, rootView);
     presenter.bind(this);
-    lockViewDelegate.onCreateView(this, rootView);
+    lockViewDelegate.onCreateView(presenter, this, rootView);
 
     setupToolbar();
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
@@ -97,7 +95,7 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
 
   @Override public void onStart() {
     super.onStart();
-    lockViewDelegate.onStart();
+    lockViewDelegate.onStart(presenter);
   }
 
   private void setupToolbar() {

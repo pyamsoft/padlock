@@ -20,6 +20,4 @@ import com.pyamsoft.padlock.app.lock.LockPresenter;
 import com.pyamsoft.pydroid.base.PresenterBase;
 
 public interface PinEntryPresenter extends PresenterBase<PinScreen>, LockPresenter<PinScreen> {
-
-  void attemptPinSubmission();
 }
