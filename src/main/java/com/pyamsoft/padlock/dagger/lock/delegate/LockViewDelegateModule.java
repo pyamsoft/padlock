@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.lockscreen.delegate;
+package com.pyamsoft.padlock.dagger.lock.delegate;
 
 import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
 import dagger.Module;
