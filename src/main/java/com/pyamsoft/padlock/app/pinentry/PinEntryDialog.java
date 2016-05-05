@@ -89,7 +89,7 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
         LayoutInflater.from(themedContext).inflate(R.layout.layout_pin_entry, null, false);
     unbinder = ButterKnife.bind(this, rootView);
     presenter.bind(this);
-    lockViewDelegate.onCreate(this, rootView);
+    lockViewDelegate.onCreateView(this, rootView);
 
     setupToolbar();
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
@@ -111,7 +111,7 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
   @Override public void onDestroyView() {
     super.onDestroyView();
     Timber.d("Destroy AlertDialog");
-    lockViewDelegate.onDestroy();
+    lockViewDelegate.onDestroyView();
     presenter.unbind();
     if (unbinder != null) {
       unbinder.unbind();

@@ -55,6 +55,7 @@
         android:exported="false"
         android:launchMode="singleInstance"
         android:noHistory="true"
+        android:windowSoftInputMode="stateVisible"
         android:theme="@style/Theme.PadLock.Light.Lock"/>
 
     <!-- Crash Log Activitiy -->

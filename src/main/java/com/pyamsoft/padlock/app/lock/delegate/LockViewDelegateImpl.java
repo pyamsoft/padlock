@@ -66,15 +66,16 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
     this.textColor = textColor;
   }
 
-  @Override public void onCreate(final Activity activity, final View rootView) {
-    onCreate(rootView, activity.getIntent().getExtras());
+  @Override public void onCreateView(final Activity activity, final View rootView) {
+    onCreateView(rootView, activity.getIntent().getExtras());
   }
 
-  @Override public void onCreate(final Fragment fragment, final View rootView) {
-    onCreate(rootView, fragment.getArguments());
+  @Override public void onCreateView(final Fragment fragment, final View rootView) {
+    onCreateView(rootView, fragment.getArguments());
   }
 
-  private void onCreate(final View rootView, final Bundle bundle) {
+  private void onCreateView(final View rootView, final Bundle bundle) {
+    Timber.d("onCreateView");
     this.rootView = rootView;
     unbinder = ButterKnife.bind(this, rootView);
     getValuesFromBundle(bundle);
@@ -145,7 +146,8 @@ public final class LockViewDelegateImpl<I extends LockView, P extends LockPresen
     // TODO handle error
   }
 
-  @Override public void onDestroy() {
+  @Override public void onDestroyView() {
+    Timber.d("onDestroyView");
     if (unbinder != null) {
       unbinder.unbind();
     }
