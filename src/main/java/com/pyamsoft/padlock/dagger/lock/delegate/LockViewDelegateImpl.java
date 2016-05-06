@@ -64,13 +64,15 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     this.textColor = textColor;
   }
 
-  @Override public void onCreateView(final LockPresenter presenter, final Activity activity,
-      final View rootView) {
+  @Override
+  public void onCreateView(@NonNull final LockPresenter presenter, @NonNull final Activity activity,
+      @NonNull final View rootView) {
     onCreateView(presenter, rootView, activity.getIntent().getExtras());
   }
 
-  @Override public void onCreateView(final LockPresenter presenter, final Fragment fragment,
-      final View rootView) {
+  @Override
+  public void onCreateView(@NonNull final LockPresenter presenter, @NonNull final Fragment fragment,
+      @NonNull final View rootView) {
     onCreateView(presenter, rootView, fragment.getArguments());
   }
 
@@ -127,6 +129,8 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     arrowGoTask = new AsyncVectorDrawableTask(imageGo);
     arrowGoTask.execute(new AsyncDrawable(rootView.getContext().getApplicationContext(),
         R.drawable.ic_arrow_forward_24dp));
+
+    clearDisplay();
   }
 
   private void getValuesFromBundle(Bundle bundle) {
@@ -140,13 +144,12 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     editText.setText("");
   }
 
-  @Override public void onStart(final LockPresenter presenter) {
+  @Override public void onStart(@NonNull final LockPresenter presenter) {
     presenter.loadPackageIcon(packageName);
   }
 
   @Override public void setImageSuccess(@NonNull Drawable drawable) {
     image.setImageDrawable(drawable);
-    clearDisplay();
   }
 
   @Override public void setImageError() {
@@ -178,19 +181,25 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     return activityName;
   }
 
-  @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
+  @Override public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
     final String attempt = savedInstanceState.getString(CODE_DISPLAY, null);
     if (attempt == null) {
+      Timber.d("Empty attempt");
       clearDisplay();
     } else {
+      Timber.d("Set attempt %s", attempt);
       editText.setText(attempt);
     }
   }
 
-  @Override public void onSaveInstanceState(Bundle outState) {
+  @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
     final String attempt = getCurrentAttempt();
-    outState.putString(CODE_DISPLAY, attempt);
+    if (!attempt.isEmpty()) {
+      outState.putString(CODE_DISPLAY, attempt);
+    } else {
+      outState.remove(CODE_DISPLAY);
+    }
   }
 }

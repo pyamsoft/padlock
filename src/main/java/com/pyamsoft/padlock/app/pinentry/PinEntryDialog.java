@@ -89,8 +89,18 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
     presenter.bind(this);
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
+    if (savedInstanceState != null) {
+      lockViewDelegate.onRestoreInstanceState(savedInstanceState);
+    }
+
     setupToolbar();
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
+  }
+
+  @Override public void onSaveInstanceState(Bundle outState) {
+    Timber.d("onSaveInstanceState");
+    lockViewDelegate.onSaveInstanceState(outState);
+    super.onSaveInstanceState(outState);
   }
 
   @Override public void onStart() {
@@ -142,14 +152,17 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
   }
 
   @Override public void onSubmitSuccess() {
+    lockViewDelegate.clearDisplay();
     dismiss();
   }
 
   @Override public void onSubmitFailure() {
+    lockViewDelegate.clearDisplay();
     dismiss();
   }
 
   @Override public void onSubmitError() {
+    lockViewDelegate.clearDisplay();
     dismiss();
   }
 
