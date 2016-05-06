@@ -43,15 +43,17 @@ public interface LockViewDelegate {
 
   void setImageError();
 
-  void onCreateView(LockPresenter presenter, Activity activity, View rootView);
+  void onCreateView(@NonNull LockPresenter presenter, @NonNull Activity activity,
+      @NonNull View rootView);
 
-  void onCreateView(LockPresenter presenter, Fragment fragment, View rootView);
+  void onCreateView(@NonNull LockPresenter presenter, @NonNull Fragment fragment,
+      @NonNull View rootView);
 
-  void onStart(LockPresenter presenter);
+  void onStart(@NonNull LockPresenter presenter);
 
   void onDestroyView();
 
-  void onRestoreInstanceState(Bundle savedInstanceState);
+  void onRestoreInstanceState(@NonNull Bundle savedInstanceState);
 
-  void onSaveInstanceState(Bundle outState);
+  void onSaveInstanceState(@NonNull Bundle outState);
 }
