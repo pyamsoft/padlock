@@ -60,13 +60,14 @@ public abstract class LockInteractorImpl implements LockInteractor {
     });
   }
 
-  @WorkerThread @Override
-  public final boolean checkSubmissionAttempt(@NonNull String attempt, @NonNull String encodedPin) {
+  @WorkerThread protected final boolean checkSubmissionAttempt(@NonNull String attempt,
+      @NonNull String encodedPin) {
     final String encodedAttempt = encodeSHA256(attempt);
     return checkEncodedSubmissionAttempt(encodedAttempt, encodedPin);
   }
 
-  @Override public boolean checkEncodedSubmissionAttempt(@NonNull String encodedAttempt,
+  @WorkerThread
+  protected final boolean checkEncodedSubmissionAttempt(@NonNull String encodedAttempt,
       @NonNull String encodedPin) {
     return encodedPin.equals(encodedAttempt);
   }
