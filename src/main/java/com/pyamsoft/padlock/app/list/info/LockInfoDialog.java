@@ -243,6 +243,7 @@ public class LockInfoDialog extends RetainedDialogFragment
       presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_PRESENTER, presenter);
       presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER,
           adapterPresenter);
+      presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER, dbPresenter);
     } else {
       presenterDataHolder.clear();
     }
