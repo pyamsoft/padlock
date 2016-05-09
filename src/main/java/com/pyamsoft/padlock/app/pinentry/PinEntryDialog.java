@@ -122,11 +122,6 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     }
   }
 
-  @Override public void onDestroy() {
-    super.onDestroy();
-    presenter.onDestroy();
-  }
-
   @NonNull @Override public String getCurrentAttempt() {
     return lockViewDelegate.getCurrentAttempt();
   }

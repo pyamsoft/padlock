@@ -62,10 +62,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     weakFragment.clear();
 
     adapterPresenter.onDestroyView();
-    adapterPresenter.onDestroy();
-
     dbPresenter.onDestroyView();
-    dbPresenter.onDestroy();
   }
 
   @Override public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

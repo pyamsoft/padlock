@@ -164,7 +164,10 @@ public class LockInfoDialog extends RetainedDialogFragment
     recyclerView.setAdapter(null);
 
     adapter.onDestroy();
-    presenter.onDestroyView();
+
+    if (!getActivity().isChangingConfigurations()) {
+      presenter.onDestroyView();
+    }
 
     swipeRefreshLayout.setOnRefreshListener(null);
     swipeRefreshLayout.removeCallbacks(startRefreshRunnable);
@@ -172,15 +175,6 @@ public class LockInfoDialog extends RetainedDialogFragment
 
     if (unbinder != null) {
       unbinder.unbind();
-    }
-  }
-
-  @Override public void onDestroy() {
-    super.onDestroy();
-    Timber.d("onDestroy");
-
-    if (!getActivity().isChangingConfigurations()) {
-      presenter.onDestroy();
     }
   }
 

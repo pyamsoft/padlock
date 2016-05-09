@@ -173,11 +173,6 @@ public final class SettingsFragment extends PageAwareFragment implements
     }
   }
 
-  @Override public void onDestroy() {
-    super.onDestroy();
-    presenter.onDestroy();
-  }
-
   @Override public void setIgnorePeriodNone() {
     ignoreNone.setOnCheckedChangeListener(null);
     ignoreNone.setChecked(true);

@@ -146,7 +146,6 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
   @Override protected void onDestroy() {
     super.onDestroy();
     presenter.onDestroyView();
-    presenter.onDestroy();
     lockViewDelegate.onDestroyView();
     failCount = 0;
     if (unbinder != null) {

@@ -267,8 +267,10 @@ public final class LockListFragment extends PageAwareFragment
     swipeRefreshLayout.removeCallbacks(startRefreshRunnable);
     swipeRefreshLayout.removeCallbacks(stopRefreshRunnable);
 
-    presenter.onDestroyView();
     adapter.onDestroy();
+    if (!getActivity().isChangingConfigurations()) {
+      presenter.onDestroyView();
+    }
 
     cancelFabTask();
 
@@ -283,14 +285,6 @@ public final class LockListFragment extends PageAwareFragment
         fabIconTask.cancel(true);
       }
       fabIconTask = null;
-    }
-  }
-
-  @Override public void onDestroy() {
-    super.onDestroy();
-
-    if (!getActivity().isChangingConfigurations()) {
-      presenter.onDestroy();
     }
   }
 

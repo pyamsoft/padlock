@@ -224,9 +224,8 @@ public class MainActivity extends ActivityBase implements MainPresenter.MainView
       cancelAsyncVectorTask(i);
     }
 
-    presenter.onDestroyView();
     if (!isChangingConfigurations()) {
-      presenter.onDestroy();
+      presenter.onDestroyView();
     }
 
     if (unbinder != null) {
