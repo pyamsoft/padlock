@@ -30,7 +30,7 @@ import com.pyamsoft.pydroid.util.AppUtil;
 
 public final class DBProgressDialog extends RetainedDialogFragment {
 
-  @NonNull public static final String DB_PROGRESS_TAG = "db_progress";
+  @NonNull private static final String DB_PROGRESS_TAG = "db_progress";
   @NonNull private static final String APP_NAME = "app_name";
   private String name;
 
