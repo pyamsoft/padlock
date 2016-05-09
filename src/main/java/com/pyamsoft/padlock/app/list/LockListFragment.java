@@ -289,7 +289,9 @@ public final class LockListFragment extends PageAwareFragment
   @Override public void onDestroy() {
     super.onDestroy();
 
-    presenter.onDestroy();
+    if (!getActivity().isChangingConfigurations()) {
+      presenter.onDestroy();
+    }
   }
 
   private void setupFAB() {

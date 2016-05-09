@@ -179,7 +179,9 @@ public class LockInfoDialog extends RetainedDialogFragment
     super.onDestroy();
     Timber.d("onDestroy");
 
-    presenter.onDestroy();
+    if (!getActivity().isChangingConfigurations()) {
+      presenter.onDestroy();
+    }
   }
 
   private void initializeForEntry() {
