@@ -30,32 +30,29 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.BaseRecyclerAdapter;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.db.DBView;
+import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.dagger.db.DBModule;
 import com.pyamsoft.padlock.dagger.db.DaggerDBComponent;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
 public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.ViewHolder>
     implements LockInfoItem, DBView {
 
-  @NonNull private final List<ActivityEntry> activityEntryList;
+  @NonNull private final AdapterPresenter<ActivityEntry> adapterPresenter;
   @Inject DBPresenter dbPresenter;
 
-  private WeakReference<FragmentActivity> weakActivity;
   private WeakReference<AppEntry> weakEntry;
 
-  public LockInfoAdapter() {
-    activityEntryList = new ArrayList<>();
+  public LockInfoAdapter(@NonNull AdapterPresenter<ActivityEntry> adapterPresenter) {
+    this.adapterPresenter = adapterPresenter;
   }
 
   public void bind(@NonNull AppEntry appEntry, @NonNull FragmentActivity activity) {
     this.weakEntry = new WeakReference<>(appEntry);
-    this.weakActivity = new WeakReference<>(activity);
 
     DaggerDBComponent.builder()
         .padLockComponent(PadLock.padLockComponent(activity))
@@ -71,10 +68,6 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
       weakEntry.clear();
     }
 
-    if (weakActivity != null) {
-      weakActivity.clear();
-    }
-
     dbPresenter.unbind();
     dbPresenter.destroy();
   }
@@ -87,7 +80,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
 
   @Override public void onBindViewHolder(ViewHolder holder, int position) {
     Timber.d("onBindViewHolder: %d", position);
-    final ActivityEntry entry = activityEntryList.get(position);
+    final ActivityEntry entry = adapterPresenter.get(position);
 
     removeViewActionListeners(holder);
     holder.checkBox.setChecked(entry.locked());
@@ -121,32 +114,28 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
   }
 
   @Override public int getItemCount() {
-    return activityEntryList.size();
+    return adapterPresenter.size();
   }
 
   @Override public void addItem(ActivityEntry entry) {
-    final int next = activityEntryList.size();
-    activityEntryList.add(next, entry);
+    final int next = adapterPresenter.add(entry);
     notifyItemInserted(next);
   }
 
   @Override public void removeItem() {
-    final int old = activityEntryList.size() - 1;
-    activityEntryList.remove(old);
+    final int old = adapterPresenter.remove();
     notifyItemRemoved(old);
   }
 
   @Override public void onDBCreateEvent(int position) {
     Timber.d("onDBCreateEvent");
-    activityEntryList.set(position,
-        ActivityEntry.builder(activityEntryList.get(position)).locked(true).build());
+    adapterPresenter.setLocked(position, true);
     notifyItemChanged(position);
   }
 
   @Override public void onDBDeleteEvent(int position) {
     Timber.d("onDBDeleteEvent");
-    activityEntryList.set(position,
-        ActivityEntry.builder(activityEntryList.get(position)).locked(false).build());
+    adapterPresenter.setLocked(position, false);
     notifyItemChanged(position);
   }
 

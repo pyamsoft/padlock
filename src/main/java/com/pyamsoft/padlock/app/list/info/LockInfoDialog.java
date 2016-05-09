@@ -33,6 +33,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.app.list.LockListLayoutManager;
 import com.pyamsoft.padlock.dagger.list.info.DaggerLockInfoComponent;
 import com.pyamsoft.padlock.dagger.list.info.LockInfoModule;
@@ -41,15 +42,12 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.RetainedDialogFragmentBase;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
 import javax.inject.Inject;
-import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 public class LockInfoDialog extends RetainedDialogFragmentBase implements LockInfoView {
 
   private static final String ARG_APP_ENTRY = "app_entry";
 
-  @NonNull private final CompositeSubscription compositeSubscription;
-  @NonNull private final LockInfoAdapter adapter;
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;
   @BindView(R.id.lock_info_icon) ImageView icon;
@@ -58,15 +56,12 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
   @BindView(R.id.lock_info_swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
   @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
   @Inject LockInfoPresenter presenter;
+  @Inject AdapterPresenter<ActivityEntry> adapterPresenter;
+  private LockInfoAdapter adapter;
   private AppEntry appEntry;
   private boolean firstRefresh;
   private LockListLayoutManager layoutManager;
   private Unbinder unbinder;
-
-  public LockInfoDialog() {
-    compositeSubscription = new CompositeSubscription();
-    adapter = new LockInfoAdapter();
-  }
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -89,8 +84,9 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
         .build()
         .inject(this);
 
-    adapter.onCreate();
     presenter.create();
+    adapter = new LockInfoAdapter(adapterPresenter);
+    adapter.onCreate();
 
     setRetainInstance(true);
     firstRefresh = true;
@@ -132,10 +128,6 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
   @Override public void onDestroy() {
     super.onDestroy();
     Timber.d("onDestroy");
-
-    if (compositeSubscription.hasSubscriptions()) {
-      compositeSubscription.clear();
-    }
 
     adapter.onDestroy();
     presenter.destroy();

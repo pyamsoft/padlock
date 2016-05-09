@@ -61,20 +61,17 @@ public final class LockListFragment extends PageAwareFragment
 
   private static final String PIN_DIALOG_TAG = "pin_dialog";
 
-  @NonNull private final LockListAdapter adapter;
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
   @Inject LockListPresenter presenter;
+  @Inject AdapterPresenter<AppEntry> adapterPresenter;
+  private LockListAdapter adapter;
   private LockListLayoutManager lockListLayoutManager;
   private boolean firstRefresh;
   private AsyncVectorDrawableTask fabIconTask;
   private SwitchCompat displaySystem;
   private Unbinder unbinder;
-
-  public LockListFragment() {
-    adapter = new LockListAdapter();
-  }
 
   @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
@@ -141,6 +138,7 @@ public final class LockListFragment extends PageAwareFragment
         .build()
         .inject(this);
     presenter.create();
+    adapter = new LockListAdapter(adapterPresenter);
 
     setHasOptionsMenu(true);
     setRetainInstance(true);
