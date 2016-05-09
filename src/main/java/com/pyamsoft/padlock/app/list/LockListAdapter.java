@@ -43,8 +43,6 @@ import timber.log.Timber;
 
 public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.ViewHolder>
     implements LockListItem, DBPresenter.DBView {
-
-  private static final String DB_PROGRESS_TAG = "db_progress";
   @NonNull private final AdapterPresenter<AppEntry> adapterPresenter;
   private WeakReference<AppCompatActivity> weakActivity;
 
@@ -69,10 +67,6 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
       weakActivity.clear();
     }
     dbPresenter.onDestroyView();
-  }
-
-  @Override public void onDestroy() {
-    super.onDestroy();
   }
 
   @Override public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -123,7 +117,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     final AppCompatActivity appCompatActivity = weakActivity.get();
     if (appCompatActivity != null) {
       AppUtil.guaranteeSingleDialogFragment(appCompatActivity.getSupportFragmentManager(),
-          DBProgressDialog.newInstance(entry.name()), DB_PROGRESS_TAG);
+          DBProgressDialog.newInstance(entry.name()), DBProgressDialog.DB_PROGRESS_TAG);
     }
     dbPresenter.attemptDBModification(position, checked, entry.packageName(), entry.name(), null,
         entry.system());
@@ -189,7 +183,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
       throw new NullPointerException("Activity is NULL, cannot dismiss DBProgressDialog");
     }
 
-    DBProgressDialog.remove(appCompatActivity.getSupportFragmentManager(), DB_PROGRESS_TAG);
+    DBProgressDialog.remove(appCompatActivity.getSupportFragmentManager());
   }
 
   @Override public void onDBDeleteEvent(int position) {
@@ -202,7 +196,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
       throw new NullPointerException("Activity is NULL, cannot dismiss DBProgressDialog");
     }
 
-    DBProgressDialog.remove(appCompatActivity.getSupportFragmentManager(), DB_PROGRESS_TAG);
+    DBProgressDialog.remove(appCompatActivity.getSupportFragmentManager());
   }
 
   @Override public void onDBError() {
@@ -212,7 +206,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
       throw new NullPointerException("Activity is NULL, cannot dismiss DBProgressDialog");
     }
 
-    DBProgressDialog.remove(appCompatActivity.getSupportFragmentManager(), DB_PROGRESS_TAG);
+    DBProgressDialog.remove(appCompatActivity.getSupportFragmentManager());
     // TODO handle exception, show error dialog or something
   }
 
