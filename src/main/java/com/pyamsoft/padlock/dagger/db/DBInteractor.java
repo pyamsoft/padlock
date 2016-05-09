@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.pinentry;
+package com.pyamsoft.padlock.dagger.db;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.lock.LockInteractor;
-import com.pyamsoft.padlock.model.event.PinEntryEvent;
-import rx.Observable;
+import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 
-public interface PinEntryInteractor extends LockInteractor {
+public interface DBInteractor {
 
-  @NonNull Observable<PinEntryEvent> submitMasterPin(String attempt);
+  @WorkerThread void createEntry(@NonNull String packageName, @NonNull String name,
+      @Nullable String code, boolean system);
+
+  @WorkerThread void createEntry(@NonNull String packageName, @NonNull String activityName,
+      @NonNull String name, @Nullable String code, boolean system);
+
+  @WorkerThread void deleteEntry(@NonNull String packageName);
+
+  @WorkerThread void deleteEntry(@NonNull String packageName, @NonNull String activityName);
 }

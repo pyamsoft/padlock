@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.service.LockServiceInteractor;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
-import com.pyamsoft.padlock.app.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;

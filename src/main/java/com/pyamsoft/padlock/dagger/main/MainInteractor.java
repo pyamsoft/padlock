@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list.info;
+package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import java.util.List;
+import android.support.annotation.WorkerThread;
 import rx.Observable;
 
-public interface LockInfoInteractor {
+interface MainInteractor {
 
-  @NonNull Observable<List<PadLockEntry>> getActivityEntries(@NonNull String packageName);
+  @WorkerThread @NonNull Observable<Boolean> hasAgreed();
+
+  @WorkerThread @NonNull Observable<Boolean> setAgreed();
 }

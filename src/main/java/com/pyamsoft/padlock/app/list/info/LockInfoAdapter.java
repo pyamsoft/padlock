@@ -29,7 +29,6 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.BaseRecyclerAdapter;
 import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.padlock.app.db.DBView;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.dagger.db.DBModule;
 import com.pyamsoft.padlock.dagger.db.DaggerDBComponent;
@@ -40,7 +39,7 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.ViewHolder>
-    implements LockInfoItem, DBView {
+    implements LockInfoItem, DBPresenter.DBView {
 
   @NonNull private final AdapterPresenter<ActivityEntry> adapterPresenter;
   @Inject DBPresenter dbPresenter;

@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.dagger.service;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.service.LockServiceInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.squareup.sqlbrite.QueryObservable;

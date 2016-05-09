@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.service;
+package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;

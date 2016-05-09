@@ -17,8 +17,7 @@
 package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.pin.MasterPinInteractor;
-import com.pyamsoft.padlock.app.service.LockServiceStateInteractor;
+import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
 import javax.inject.Inject;
 
 final class LockServiceStateInteractorImpl implements LockServiceStateInteractor {

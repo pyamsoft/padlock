@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.lock.LockInteractor;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import rx.Subscription;

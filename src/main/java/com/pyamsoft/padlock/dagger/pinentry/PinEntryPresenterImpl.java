@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.dagger.pinentry;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
-import com.pyamsoft.padlock.app.pinentry.PinEntryInteractor;
 import com.pyamsoft.padlock.app.pinentry.PinEntryPresenter;
 import com.pyamsoft.padlock.app.pinentry.PinScreen;
 import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;

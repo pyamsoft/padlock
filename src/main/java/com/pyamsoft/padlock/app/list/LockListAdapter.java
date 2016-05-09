@@ -32,7 +32,6 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.BaseRecyclerAdapter;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.db.DBProgressDialog;
-import com.pyamsoft.padlock.app.db.DBView;
 import com.pyamsoft.padlock.app.list.info.LockInfoDialog;
 import com.pyamsoft.padlock.dagger.db.DBModule;
 import com.pyamsoft.padlock.dagger.db.DaggerDBComponent;
@@ -43,7 +42,7 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.ViewHolder>
-    implements LockListItem, DBView {
+    implements LockListItem, DBPresenter.DBView {
 
   private static final String DB_PROGRESS_TAG = "db_progress";
   @NonNull private final AdapterPresenter<AppEntry> adapterPresenter;

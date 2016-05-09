@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list;
+package com.pyamsoft.padlock.dagger.list;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import rx.Observable;
 
-public interface LockListInteractor {
+interface LockListInteractor {
 
   @WorkerThread @NonNull Observable<List<PackageInfo>> getPackageInfoList();
 
