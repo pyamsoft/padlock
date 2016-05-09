@@ -46,7 +46,7 @@ import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.list.DaggerLockListComponent;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.base.PresenterBase;
+import com.pyamsoft.pydroid.base.Presenter;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.model.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
@@ -69,7 +69,7 @@ public final class LockListFragment extends PageAwareFragment
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
   @Inject LockListPresenter presenter;
   @Inject AdapterPresenter<AppEntry> adapterPresenter;
-  private DataHolderFragment<PresenterBase> presenterDataHolder;
+  private DataHolderFragment<Presenter> presenterDataHolder;
   private LockListAdapter adapter;
   private LockListLayoutManager lockListLayoutManager;
   private boolean firstRefresh;
@@ -81,7 +81,7 @@ public final class LockListFragment extends PageAwareFragment
       Bundle savedInstanceState) {
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
-    presenter.bind(this);
+    presenter.start(this);
     adapter.bind(this);
     return view;
   }
@@ -138,7 +138,7 @@ public final class LockListFragment extends PageAwareFragment
     Timber.d("onCreate");
     super.onCreate(savedInstanceState);
 
-    presenterDataHolder = DataHolderFragment.getInstance(getFragmentManager(), PresenterBase.class);
+    presenterDataHolder = DataHolderFragment.getInstance(getFragmentManager(), Presenter.class);
 
     final LockListPresenter lockListPresenter = (LockListPresenter) presenterDataHolder.pop(
         GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_PRESENTER);
@@ -160,7 +160,6 @@ public final class LockListFragment extends PageAwareFragment
     }
 
     adapter = new LockListAdapter(adapterPresenter);
-    presenter.create();
 
     setHasOptionsMenu(true);
   }
@@ -241,7 +240,7 @@ public final class LockListFragment extends PageAwareFragment
     }
 
     adapter.unbind();
-    presenter.unbind();
+    presenter.stop();
 
     cancelFabTask();
 

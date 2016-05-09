@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.app.main.MainInteractor;
 import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.padlock.app.main.MainView;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
-import com.pyamsoft.pydroid.base.PresenterImplBase;
+import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -30,7 +30,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class MainPresenterImpl extends PresenterImplBase<MainView> implements MainPresenter {
+final class MainPresenterImpl extends PresenterImpl<MainView> implements MainPresenter {
 
   @NonNull private final MainInteractor interactor;
 
@@ -42,8 +42,8 @@ final class MainPresenterImpl extends PresenterImplBase<MainView> implements Mai
     this.interactor = interactor;
   }
 
-  @Override public void unbind() {
-    super.unbind();
+  @Override public void stop() {
+    super.stop();
     unregisterFromConfirmDialogBus();
     unregisterFromAgreeTermsBus();
     unsubAgreeTermsSubscription();

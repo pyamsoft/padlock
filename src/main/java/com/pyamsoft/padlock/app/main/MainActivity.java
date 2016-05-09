@@ -87,7 +87,7 @@ public class MainActivity extends ActivityBase implements MainView {
         .build()
         .inject(this);
 
-    presenter.bind(this);
+    presenter.start(this);
 
     setAppBarState();
     setupViewPagerAdapter();
@@ -224,7 +224,7 @@ public class MainActivity extends ActivityBase implements MainView {
       cancelAsyncVectorTask(i);
     }
 
-    presenter.unbind();
+    presenter.stop();
     if (!isChangingConfigurations()) {
       presenter.destroy();
     }

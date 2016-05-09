@@ -102,7 +102,7 @@ public final class PadLockService extends AccessibilityService implements LockSe
     super.onDestroy();
     Timber.d("onDestroy");
     setEnabled(false);
-    presenter.unbind();
+    presenter.stop();
     presenter.destroy();
     setInstance(null);
   }
@@ -119,8 +119,7 @@ public final class PadLockService extends AccessibilityService implements LockSe
         .lockServiceStateModule(new LockServiceStateModule())
         .build()
         .inject(this);
-    presenter.create();
-    presenter.bind(this);
+    presenter.start(this);
     setEnabled(true);
     setInstance(this);
   }

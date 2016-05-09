@@ -16,9 +16,9 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import com.pyamsoft.pydroid.base.PresenterBase;
+import com.pyamsoft.pydroid.base.Presenter;
 
-public interface LockListPresenter extends PresenterBase<LockList> {
+public interface LockListPresenter extends Presenter<LockList> {
 
   void populateList();
 

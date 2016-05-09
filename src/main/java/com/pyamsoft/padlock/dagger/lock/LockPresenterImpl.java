@@ -21,14 +21,14 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockInteractor;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
 import com.pyamsoft.padlock.app.lock.LockView;
-import com.pyamsoft.pydroid.base.PresenterImplBase;
+import com.pyamsoft.pydroid.base.PresenterImpl;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public abstract class LockPresenterImpl<I extends LockView> extends PresenterImplBase<I>
+public abstract class LockPresenterImpl<I extends LockView> extends PresenterImpl<I>
     implements LockPresenter<I> {
 
   @NonNull private final LockInteractor lockInteractor;
@@ -42,8 +42,8 @@ public abstract class LockPresenterImpl<I extends LockView> extends PresenterImp
     this.lockInteractor = lockInteractor;
   }
 
-  @Override public void unbind() {
-    super.unbind();
+  @Override public void stop() {
+    super.stop();
     unsubImageSubscription();
   }
 

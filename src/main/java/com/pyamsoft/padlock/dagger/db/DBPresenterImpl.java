@@ -20,7 +20,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.db.DBInteractor;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.db.DBView;
-import com.pyamsoft.pydroid.base.PresenterImplBase;
+import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
 import rx.Observable;
 import rx.Subscription;
@@ -29,7 +29,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class DBPresenterImpl extends PresenterImplBase<DBView> implements DBPresenter {
+class DBPresenterImpl extends PresenterImpl<DBView> implements DBPresenter {
 
   @NonNull private final DBInteractor dbInteractor;
 
@@ -40,8 +40,8 @@ class DBPresenterImpl extends PresenterImplBase<DBView> implements DBPresenter {
     this.dbInteractor = dbInteractor;
   }
 
-  @Override public void unbind() {
-    super.unbind();
+  @Override public void stop() {
+    super.stop();
     unsubPackageSubscription();
     unsubActivitySubscription();
   }

@@ -19,9 +19,9 @@ package com.pyamsoft.padlock;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.pydroid.base.PreferenceBase;
+import com.pyamsoft.pydroid.base.ApplicationPreferences;
 
-public class PadLockPreferences extends PreferenceBase {
+public class PadLockPreferences extends ApplicationPreferences {
 
   @NonNull private static final String TIMEOUT_PERIOD = "timeout_period";
   @NonNull private static final String IGNORE_TIME = "ignore_time";

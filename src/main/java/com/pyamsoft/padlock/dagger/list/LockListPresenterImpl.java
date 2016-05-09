@@ -33,7 +33,7 @@ import com.pyamsoft.padlock.app.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.base.PresenterImplBase;
+import com.pyamsoft.pydroid.base.PresenterImpl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +45,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockListPresenterImpl extends PresenterImplBase<LockList> implements LockListPresenter {
+final class LockListPresenterImpl extends PresenterImpl<LockList> implements LockListPresenter {
 
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
@@ -63,8 +63,8 @@ final class LockListPresenterImpl extends PresenterImplBase<LockList> implements
     this.stateInteractor = stateInteractor;
   }
 
-  @Override public void unbind() {
-    super.unbind();
+  @Override public void stop() {
+    super.stop();
 
     unregisterFromPinEntryBus();
     unregisterFromConfirmDialogBus();

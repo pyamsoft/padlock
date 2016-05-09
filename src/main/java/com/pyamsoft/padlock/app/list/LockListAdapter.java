@@ -62,14 +62,14 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
         .dBModule(new DBModule())
         .build()
         .inject(this);
-    dbPresenter.bind(this);
+    dbPresenter.start(this);
   }
 
   public final void unbind() {
     if (weakActivity != null) {
       weakActivity.clear();
     }
-    dbPresenter.unbind();
+    dbPresenter.stop();
   }
 
   @Override public void onDestroy() {
