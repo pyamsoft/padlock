@@ -21,7 +21,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lockscreen.LockScreen;
-import com.pyamsoft.padlock.app.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter;
 import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;
 import javax.inject.Inject;

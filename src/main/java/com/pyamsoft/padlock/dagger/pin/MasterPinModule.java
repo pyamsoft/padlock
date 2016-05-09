@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.pin;
 
-import com.pyamsoft.padlock.app.pin.MasterPinInteractor;
 import dagger.Module;
 import dagger.Provides;
 

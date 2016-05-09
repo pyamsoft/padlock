@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.list.info;
 
 import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.list.info.LockInfoInteractor;
 import com.pyamsoft.padlock.app.list.info.LockInfoPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;

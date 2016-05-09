@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.pin;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.pin.MasterPinInteractor;
 import javax.inject.Inject;
 
 final class MasterPinInteractorImpl implements MasterPinInteractor {

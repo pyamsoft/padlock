@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.lock;
+package com.pyamsoft.padlock.dagger.lock;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

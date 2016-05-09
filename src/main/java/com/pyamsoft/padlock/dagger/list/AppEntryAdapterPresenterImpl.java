@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.list.AdapterInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import javax.inject.Inject;
 

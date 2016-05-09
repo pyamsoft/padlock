@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.dagger.main;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.main.MainInteractor;
 import javax.inject.Inject;
 import rx.Observable;
 

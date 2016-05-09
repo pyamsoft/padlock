@@ -97,7 +97,6 @@ public final class LockListFragment extends PageAwareFragment
       Timber.d("Do initial refresh");
       firstRefresh = false;
       refreshList();
-      onPageSelected();
     }
   }
 
@@ -140,7 +139,7 @@ public final class LockListFragment extends PageAwareFragment
 
     final LockListPresenter lockListPresenter = (LockListPresenter) presenterDataHolder.pop(
         GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_PRESENTER);
-    final AdapterPresenter<AppEntry> entryAdapterPresenter =
+    @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry> entryAdapterPresenter =
         (AdapterPresenter<AppEntry>) presenterDataHolder.pop(
             GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER);
     if (lockListPresenter == null || entryAdapterPresenter == null) {

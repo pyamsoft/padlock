@@ -22,7 +22,6 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.util.Base64;
-import com.pyamsoft.padlock.app.lock.LockInteractor;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

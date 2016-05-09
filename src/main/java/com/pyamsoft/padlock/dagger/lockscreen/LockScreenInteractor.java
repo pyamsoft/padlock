@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.main;
+package com.pyamsoft.padlock.dagger.lockscreen;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
+import com.pyamsoft.padlock.dagger.lock.LockInteractor;
 import rx.Observable;
 
-public interface MainInteractor {
+public interface LockScreenInteractor extends LockInteractor {
 
-  @WorkerThread @NonNull Observable<Boolean> hasAgreed();
+  @WorkerThread @NonNull Observable<Boolean> unlockEntry(String packageName, String activityName,
+      String attempt, boolean shouldExclude, long ignoreForPeriod);
 
-  @WorkerThread @NonNull Observable<Boolean> setAgreed();
+  @WorkerThread @NonNull Observable<Boolean> lockEntry(String packageName, String activityName);
+
+  @WorkerThread @NonNull Observable<Long> getDefaultIgnoreTime();
+
+  @WorkerThread @NonNull Observable<Long> setDefaultIgnoreTime(long ignoreTime);
 }

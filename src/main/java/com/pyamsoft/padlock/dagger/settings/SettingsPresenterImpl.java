@@ -18,9 +18,8 @@ package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.lockscreen.LockScreenInteractor;
+import com.pyamsoft.padlock.dagger.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
-import com.pyamsoft.padlock.app.settings.SettingsInteractor;
 import com.pyamsoft.padlock.app.settings.SettingsPresenter;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 import com.pyamsoft.pydroid.base.PresenterImpl;

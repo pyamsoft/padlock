@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
-import com.pyamsoft.padlock.app.main.MainInteractor;
 import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.pydroid.base.PresenterImpl;

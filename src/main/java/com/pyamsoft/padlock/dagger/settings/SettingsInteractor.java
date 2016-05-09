@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.pin;
+package com.pyamsoft.padlock.dagger.settings;
 
-public interface MasterPinInteractor {
+import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
+import rx.Observable;
 
-  String getMasterPin();
+interface SettingsInteractor {
 
-  void setMasterPin(String pin);
+  @WorkerThread @NonNull Observable<Boolean> clearDatabase();
+
+  @WorkerThread @NonNull Observable<Boolean> clearAll();
+
+  @WorkerThread @NonNull Observable<Long> getTimeoutPeriod();
+
+  @WorkerThread @NonNull Observable<Long> setTimeoutPeriod(long ignoreTime);
 }

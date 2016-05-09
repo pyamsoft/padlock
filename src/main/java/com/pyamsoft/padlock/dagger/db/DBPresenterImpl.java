@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.dagger.db;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.db.DBInteractor;
 import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.padlock.app.db.DBView;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
 import rx.Observable;
@@ -29,7 +27,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class DBPresenterImpl extends PresenterImpl<DBView> implements DBPresenter {
+final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements DBPresenter {
 
   @NonNull private final DBInteractor dbInteractor;
 

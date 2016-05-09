@@ -88,7 +88,7 @@ public class LockInfoDialog extends RetainedDialogFragment implements
 
     final LockInfoPresenter lockInfoPresenter = (LockInfoPresenter) presenterDataHolder.pop(
         GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_PRESENTER);
-    final AdapterPresenter<ActivityEntry> activityEntryAdapterPresenter =
+    @SuppressWarnings("unchecked") final AdapterPresenter<ActivityEntry> activityEntryAdapterPresenter =
         (AdapterPresenter<ActivityEntry>) presenterDataHolder.pop(
             GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER);
     if (lockInfoPresenter == null || activityEntryAdapterPresenter == null) {
