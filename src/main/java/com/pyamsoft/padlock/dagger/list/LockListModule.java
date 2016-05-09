@@ -16,8 +16,11 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
+import com.pyamsoft.padlock.app.list.AdapterInteractor;
+import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.app.list.LockListInteractor;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
+import com.pyamsoft.padlock.model.AppEntry;
 import dagger.Module;
 import dagger.Provides;
 
@@ -28,6 +31,16 @@ import dagger.Provides;
 
   @Provides LockListInteractor provideLockScreenInteractor(
       final LockListInteractorImpl interactor) {
+    return interactor;
+  }
+
+  @Provides AdapterPresenter<AppEntry> provideAppEntryAdapterPresenter(
+      final AppEntryAdapterPresenterImpl adapter) {
+    return adapter;
+  }
+
+  @Provides AdapterInteractor<AppEntry> provideAppEntryAdapterInteractor(
+      final AppEntryAdapterInteractorImpl interactor) {
     return interactor;
   }
 }

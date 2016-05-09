@@ -39,8 +39,6 @@ import com.pyamsoft.padlock.dagger.db.DaggerDBComponent;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -48,12 +46,13 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     implements LockListItem, DBView {
 
   private static final String DB_PROGRESS_TAG = "db_progress";
-  @NonNull private final List<AppEntry> appEntryList;
-  @Inject DBPresenter dbPresenter;
+  @NonNull private final AdapterPresenter<AppEntry> adapterPresenter;
   private WeakReference<AppCompatActivity> weakActivity;
 
-  public LockListAdapter() {
-    appEntryList = new ArrayList<>();
+  @Inject DBPresenter dbPresenter;
+
+  @Inject public LockListAdapter(@NonNull AdapterPresenter<AppEntry> adapterPresenter) {
+    this.adapterPresenter = adapterPresenter;
   }
 
   public final void bind(LockListFragment fragment) {
@@ -75,7 +74,6 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
   @Override public void onDestroy() {
     super.onDestroy();
-    appEntryList.clear();
   }
 
   @Override public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -97,7 +95,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
   @Override public void onBindViewHolder(ViewHolder holder, int position) {
     Timber.d("onBindViewHolder: %s", position);
-    final AppEntry entry = appEntryList.get(position);
+    final AppEntry entry = adapterPresenter.get(position);
     removeViewActionListeners(holder);
     holder.name.setText(entry.name());
     holder.icon.setImageBitmap(entry.icon());
@@ -138,7 +136,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
     Timber.d("Access authorized");
     final int position = holder.getAdapterPosition();
-    final AppEntry entry = appEntryList.get(position);
+    final AppEntry entry = adapterPresenter.get(position);
     if (accessPackage) {
       Timber.d("Access package");
       accessPackage(entry, position, checked);
@@ -159,7 +157,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
   }
 
   @Override public int getItemCount() {
-    return appEntryList.size();
+    return adapterPresenter.size();
   }
 
   @Override public void onListItemAdded(int position) {
@@ -173,20 +171,18 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
   }
 
   @Override public void addItem(AppEntry entry) {
-    final int next = appEntryList.size();
-    appEntryList.add(next, entry);
+    final int next = adapterPresenter.add(entry);
     notifyItemInserted(next);
   }
 
   @Override public void removeItem() {
-    final int old = appEntryList.size() - 1;
-    appEntryList.remove(old);
+    final int old = adapterPresenter.remove();
     notifyItemRemoved(old);
   }
 
   @Override public void onDBCreateEvent(int position) {
     Timber.d("onDBCreateEvent");
-    appEntryList.set(position, AppEntry.builder(appEntryList.get(position)).locked(true).build());
+    adapterPresenter.setLocked(position, true);
     notifyItemChanged(position);
 
     final AppCompatActivity appCompatActivity = weakActivity.get();
@@ -199,7 +195,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
   @Override public void onDBDeleteEvent(int position) {
     Timber.d("onDBDeleteEvent");
-    appEntryList.set(position, AppEntry.builder(appEntryList.get(position)).locked(false).build());
+    adapterPresenter.setLocked(position, false);
     notifyItemChanged(position);
 
     final AppCompatActivity appCompatActivity = weakActivity.get();
