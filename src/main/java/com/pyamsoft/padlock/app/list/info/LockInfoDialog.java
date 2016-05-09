@@ -33,13 +33,16 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.GlobalConstants;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.app.list.LockListLayoutManager;
 import com.pyamsoft.padlock.dagger.list.info.DaggerLockInfoComponent;
 import com.pyamsoft.padlock.dagger.list.info.LockInfoModule;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.pydroid.base.PresenterBase;
 import com.pyamsoft.pydroid.base.RetainedDialogFragmentBase;
+import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -57,6 +60,8 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
   @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
   @Inject LockInfoPresenter presenter;
   @Inject AdapterPresenter<ActivityEntry> adapterPresenter;
+
+  private DataHolderFragment<PresenterBase> presenterDataHolder;
   private LockInfoAdapter adapter;
   private AppEntry appEntry;
   private boolean firstRefresh;
@@ -78,18 +83,31 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
     Timber.d("onCreate");
 
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
-    DaggerLockInfoComponent.builder()
-        .padLockComponent(PadLock.padLockComponent(this))
-        .lockInfoModule(new LockInfoModule())
-        .build()
-        .inject(this);
+    presenterDataHolder = DataHolderFragment.getInstance(getFragmentManager(), PresenterBase.class);
 
-    presenter.create();
+    final LockInfoPresenter lockInfoPresenter = (LockInfoPresenter) presenterDataHolder.pop(
+        GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_PRESENTER);
+    final AdapterPresenter<ActivityEntry> activityEntryAdapterPresenter =
+        (AdapterPresenter<ActivityEntry>) presenterDataHolder.pop(
+            GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER);
+    if (lockInfoPresenter == null || activityEntryAdapterPresenter == null) {
+      Timber.d("Create new presenters");
+      firstRefresh = true;
+      DaggerLockInfoComponent.builder()
+          .padLockComponent(PadLock.padLockComponent(this))
+          .lockInfoModule(new LockInfoModule())
+          .build()
+          .inject(this);
+    } else {
+      Timber.d("Load cached presenters");
+      firstRefresh = false;
+      presenter = lockInfoPresenter;
+      adapterPresenter = activityEntryAdapterPresenter;
+    }
+
     adapter = new LockInfoAdapter(adapterPresenter);
+    presenter.create();
     adapter.onCreate();
-
-    setRetainInstance(true);
-    firstRefresh = true;
   }
 
   @SuppressLint("InflateParams") @NonNull @Override
@@ -203,6 +221,17 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
         swipeRefreshLayout.setRefreshing(true);
         layoutManager.setVerticalScrollEnabled(false);
       });
+    }
+  }
+
+  @Override public void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    if (getActivity().isChangingConfigurations()) {
+      presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_PRESENTER, presenter);
+      presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER,
+          adapterPresenter);
+    } else {
+      presenterDataHolder.clear();
     }
   }
 }
