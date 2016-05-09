@@ -19,9 +19,9 @@ package com.pyamsoft.padlock.dagger.list;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.AdapterInteractor;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
-import com.pyamsoft.pydroid.base.PresenterImplBase;
+import com.pyamsoft.pydroid.base.PresenterImpl;
 
-public abstract class AdapterPresenterImpl<I> extends PresenterImplBase<AdapterPresenter.AdapterView>
+public abstract class AdapterPresenterImpl<I> extends PresenterImpl<AdapterPresenter.AdapterView>
     implements AdapterPresenter<I> {
 
   @NonNull private final AdapterInteractor<I> adapterInteractor;

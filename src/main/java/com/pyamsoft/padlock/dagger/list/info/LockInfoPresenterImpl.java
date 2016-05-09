@@ -23,7 +23,7 @@ import com.pyamsoft.padlock.app.list.info.LockInfoPresenter;
 import com.pyamsoft.padlock.app.list.info.LockInfoView;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.base.PresenterImplBase;
+import com.pyamsoft.pydroid.base.PresenterImpl;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -34,7 +34,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockInfoPresenterImpl extends PresenterImplBase<LockInfoView>
+final class LockInfoPresenterImpl extends PresenterImpl<LockInfoView>
     implements LockInfoPresenter {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;

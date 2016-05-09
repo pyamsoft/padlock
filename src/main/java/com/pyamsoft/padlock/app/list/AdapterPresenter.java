@@ -17,9 +17,9 @@
 package com.pyamsoft.padlock.app.list;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.PresenterBase;
+import com.pyamsoft.pydroid.base.Presenter;
 
-public interface AdapterPresenter<I> extends PresenterBase<AdapterPresenter.AdapterView> {
+public interface AdapterPresenter<I> extends Presenter<AdapterPresenter.AdapterView> {
 
   @NonNull I get(int position);
 

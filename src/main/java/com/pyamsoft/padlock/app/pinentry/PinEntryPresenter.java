@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.app.pinentry;
 
 import com.pyamsoft.padlock.app.lock.LockPresenter;
-import com.pyamsoft.pydroid.base.PresenterBase;
+import com.pyamsoft.pydroid.base.Presenter;
 
-public interface PinEntryPresenter extends PresenterBase<PinScreen>, LockPresenter<PinScreen> {
+public interface PinEntryPresenter extends Presenter<PinScreen>, LockPresenter<PinScreen> {
 }

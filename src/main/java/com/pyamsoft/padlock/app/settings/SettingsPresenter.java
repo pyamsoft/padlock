@@ -16,9 +16,9 @@
 
 package com.pyamsoft.padlock.app.settings;
 
-import com.pyamsoft.pydroid.base.PresenterBase;
+import com.pyamsoft.pydroid.base.Presenter;
 
-public interface SettingsPresenter extends PresenterBase<SettingsView> {
+public interface SettingsPresenter extends Presenter<SettingsView> {
 
   void setIgnorePeriodFromPreference();
 

@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.app.service.LockServiceInteractor;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.app.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.base.PresenterImplBase;
+import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
 import rx.Observable;
 import rx.Subscription;
@@ -31,7 +31,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockServicePresenterImpl extends PresenterImplBase<LockService>
+final class LockServicePresenterImpl extends PresenterImpl<LockService>
     implements LockServicePresenter {
 
   @NonNull private final LockServiceInteractor interactor;
@@ -54,8 +54,8 @@ final class LockServicePresenterImpl extends PresenterImplBase<LockService>
     lockScreenPassed = b;
   }
 
-  @Override public void unbind() {
-    super.unbind();
+  @Override public void stop() {
+    super.stop();
     unsubLockedEntry();
   }
 

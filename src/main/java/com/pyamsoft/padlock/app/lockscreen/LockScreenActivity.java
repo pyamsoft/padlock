@@ -95,8 +95,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
         .build()
         .inject(this);
 
-    presenter.create();
-    presenter.bind(this);
+    presenter.start(this);
     lockViewDelegate.setTextColor(android.R.color.white);
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
@@ -146,7 +145,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    presenter.unbind();
+    presenter.stop();
     presenter.destroy();
     lockViewDelegate.onDestroyView();
     failCount = 0;

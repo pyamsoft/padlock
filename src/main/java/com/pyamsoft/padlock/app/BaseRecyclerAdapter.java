@@ -17,10 +17,10 @@
 package com.pyamsoft.padlock.app;
 
 import android.support.v7.widget.RecyclerView;
-import com.pyamsoft.pydroid.base.ActivityRecyclerAdapterBase;
+import com.pyamsoft.pydroid.base.ActivityRecyclerAdapter;
 
 public abstract class BaseRecyclerAdapter<T extends RecyclerView.ViewHolder>
-    extends ActivityRecyclerAdapterBase<T> {
+    extends ActivityRecyclerAdapter<T> {
 
   @Override public void onCreate() {
 

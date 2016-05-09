@@ -40,14 +40,14 @@ import com.pyamsoft.padlock.dagger.list.info.DaggerLockInfoComponent;
 import com.pyamsoft.padlock.dagger.list.info.LockInfoModule;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.base.PresenterBase;
-import com.pyamsoft.pydroid.base.RetainedDialogFragmentBase;
+import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.pydroid.base.RetainedDialogFragment;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockInfoDialog extends RetainedDialogFragmentBase implements LockInfoView {
+public class LockInfoDialog extends RetainedDialogFragment implements LockInfoView {
 
   private static final String ARG_APP_ENTRY = "app_entry";
 
@@ -61,7 +61,7 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
   @Inject LockInfoPresenter presenter;
   @Inject AdapterPresenter<ActivityEntry> adapterPresenter;
 
-  private DataHolderFragment<PresenterBase> presenterDataHolder;
+  private DataHolderFragment<Presenter> presenterDataHolder;
   private LockInfoAdapter adapter;
   private AppEntry appEntry;
   private boolean firstRefresh;
@@ -83,7 +83,7 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
     Timber.d("onCreate");
 
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
-    presenterDataHolder = DataHolderFragment.getInstance(getFragmentManager(), PresenterBase.class);
+    presenterDataHolder = DataHolderFragment.getInstance(getFragmentManager(), Presenter.class);
 
     final LockInfoPresenter lockInfoPresenter = (LockInfoPresenter) presenterDataHolder.pop(
         GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_PRESENTER);
@@ -106,7 +106,6 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
     }
 
     adapter = new LockInfoAdapter(adapterPresenter);
-    presenter.create();
     adapter.onCreate();
   }
 
@@ -117,7 +116,7 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
     unbinder = ButterKnife.bind(this, rootView);
 
     adapter.bind(appEntry, getActivity());
-    presenter.bind(this);
+    presenter.start(this);
     initializeForEntry();
 
     if (firstRefresh) {
@@ -136,7 +135,7 @@ public class LockInfoDialog extends RetainedDialogFragmentBase implements LockIn
     recyclerView.setAdapter(null);
 
     adapter.unbind();
-    presenter.unbind();
+    presenter.stop();
 
     if (unbinder != null) {
       unbinder.unbind();

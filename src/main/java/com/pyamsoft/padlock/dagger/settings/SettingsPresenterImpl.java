@@ -24,7 +24,7 @@ import com.pyamsoft.padlock.app.settings.SettingsInteractor;
 import com.pyamsoft.padlock.app.settings.SettingsPresenter;
 import com.pyamsoft.padlock.app.settings.SettingsView;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
-import com.pyamsoft.pydroid.base.PresenterImplBase;
+import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
 import rx.Observable;
 import rx.Subscription;
@@ -33,7 +33,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
+final class SettingsPresenterImpl extends PresenterImpl<SettingsView>
     implements SettingsPresenter {
 
   @NonNull private final LockScreenInteractor lockScreenInteractor;
@@ -50,8 +50,8 @@ final class SettingsPresenterImpl extends PresenterImplBase<SettingsView>
     this.settingsInteractor = settingsInteractor;
   }
 
-  @Override public void unbind() {
-    super.unbind();
+  @Override public void stop() {
+    super.stop();
 
     unsubscribeIgnorePeriod();
     unsubscribeConfirmDialog();

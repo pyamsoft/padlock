@@ -70,7 +70,6 @@ public final class SettingsFragment extends PageAwareFragment implements Setting
         .padLockComponent(PadLock.padLockComponent(this))
         .build()
         .inject(this);
-    presenter.create();
   }
 
   @Nullable @Override
@@ -78,7 +77,7 @@ public final class SettingsFragment extends PageAwareFragment implements Setting
       @Nullable Bundle savedInstanceState) {
     final View view = inflater.inflate(R.layout.fragment_settings, container, false);
     unbinder = ButterKnife.bind(this, view);
-    presenter.bind(this);
+    presenter.start(this);
     return view;
   }
 
@@ -170,7 +169,7 @@ public final class SettingsFragment extends PageAwareFragment implements Setting
   @Override public void onDestroyView() {
     super.onDestroyView();
 
-    presenter.unbind();
+    presenter.stop();
     if (unbinder != null) {
       unbinder.unbind();
     }

@@ -49,8 +49,8 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
     }
   }
 
-  @Override public void unbind() {
-    super.unbind();
+  @Override public void stop() {
+    super.stop();
     unsubPinEntry();
   }
 

@@ -25,9 +25,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import com.pyamsoft.pydroid.base.RetainedDialogFragmentBase;
+import com.pyamsoft.pydroid.base.RetainedDialogFragment;
 
-public final class DBProgressDialog extends RetainedDialogFragmentBase {
+public final class DBProgressDialog extends RetainedDialogFragment {
 
   private static final String APP_NAME = "app_name";
   private String name;

@@ -16,9 +16,9 @@
 
 package com.pyamsoft.padlock.app.db;
 
-import com.pyamsoft.pydroid.base.PresenterBase;
+import com.pyamsoft.pydroid.base.Presenter;
 
-public interface DBPresenter extends PresenterBase<DBView> {
+public interface DBPresenter extends Presenter<DBView> {
 
   void attemptDBModification(int position, boolean checked, String packageName, String name,
       String code, boolean system) throws NullPointerException;

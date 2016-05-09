@@ -39,11 +39,11 @@ import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
 import com.pyamsoft.padlock.dagger.pinentry.DaggerPinEntryComponent;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.model.event.RxBus;
-import com.pyamsoft.pydroid.base.RetainedDialogFragmentBase;
+import com.pyamsoft.pydroid.base.RetainedDialogFragment;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScreen {
+public class PinEntryDialog extends RetainedDialogFragment implements PinScreen {
 
   private static final String ARG_PACKAGE = LockViewDelegate.ENTRY_PACKAGE_NAME;
   private static final String ARG_ACTIVITY = LockViewDelegate.ENTRY_ACTIVITY_NAME;
@@ -53,9 +53,6 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
   @BindView(R.id.lock_pin_entry_close) ImageView close;
   @Inject LockViewDelegate lockViewDelegate;
   private Unbinder unbinder;
-
-  public PinEntryDialog() {
-  }
 
   public static PinEntryDialog newInstance(final String packageName, final String activityName) {
     final PinEntryDialog fragment = new PinEntryDialog();
@@ -73,7 +70,6 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
         .build()
         .inject(this);
     lockViewDelegate.setTextColor(android.R.color.black);
-    presenter.create();
 
     setCancelable(true);
     setRetainInstance(true);
@@ -86,7 +82,7 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
     @SuppressLint("InflateParams") final View rootView =
         LayoutInflater.from(themedContext).inflate(R.layout.layout_pin_entry, null, false);
     unbinder = ButterKnife.bind(this, rootView);
-    presenter.bind(this);
+    presenter.start(this);
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
     if (savedInstanceState != null) {
@@ -120,7 +116,7 @@ public class PinEntryDialog extends RetainedDialogFragmentBase implements PinScr
     super.onDestroyView();
     Timber.d("Destroy AlertDialog");
     lockViewDelegate.onDestroyView();
-    presenter.unbind();
+    presenter.stop();
     if (unbinder != null) {
       unbinder.unbind();
     }

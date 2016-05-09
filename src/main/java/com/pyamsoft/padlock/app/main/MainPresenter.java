@@ -16,9 +16,9 @@
 
 package com.pyamsoft.padlock.app.main;
 
-import com.pyamsoft.pydroid.base.PresenterBase;
+import com.pyamsoft.pydroid.base.Presenter;
 
-public interface MainPresenter extends PresenterBase<MainView> {
+public interface MainPresenter extends Presenter<MainView> {
 
   void showTermsDialog();
 

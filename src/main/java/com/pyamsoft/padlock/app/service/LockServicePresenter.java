@@ -17,9 +17,9 @@
 package com.pyamsoft.padlock.app.service;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.PresenterBase;
+import com.pyamsoft.pydroid.base.Presenter;
 
-public interface LockServicePresenter extends PresenterBase<LockService> {
+public interface LockServicePresenter extends Presenter<LockService> {
 
   void setLockScreenPassed();
 

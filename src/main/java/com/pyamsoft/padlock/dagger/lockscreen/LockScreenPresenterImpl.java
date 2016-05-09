@@ -46,8 +46,8 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     this.lockScreenInteractor = lockScreenInteractor;
   }
 
-  @Override public void unbind() {
-    super.unbind();
+  @Override public void stop() {
+    super.stop();
     unsubIgnoreTime();
     unsubUnlock();
     unsubLock();
