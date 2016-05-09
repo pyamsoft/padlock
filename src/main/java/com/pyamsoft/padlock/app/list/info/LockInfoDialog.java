@@ -52,7 +52,21 @@ import timber.log.Timber;
 public class LockInfoDialog extends RetainedDialogFragment
     implements LockInfoPresenter.LockInfoView {
 
-  private static final String ARG_APP_ENTRY = "app_entry";
+  @NonNull private static final String ARG_APP_ENTRY = "app_entry";
+
+  @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
+    @Override public void run() {
+      swipeRefreshLayout.setRefreshing(false);
+      layoutManager.setVerticalScrollEnabled(true);
+    }
+  };
+
+  @NonNull private final Runnable startRefreshRunnable = new Runnable() {
+    @Override public void run() {
+      swipeRefreshLayout.setRefreshing(true);
+      layoutManager.setVerticalScrollEnabled(false);
+    }
+  };
 
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;
@@ -152,6 +166,10 @@ public class LockInfoDialog extends RetainedDialogFragment
     adapter.onDestroy();
     presenter.onDestroyView();
 
+    swipeRefreshLayout.setOnRefreshListener(null);
+    swipeRefreshLayout.removeCallbacks(startRefreshRunnable);
+    swipeRefreshLayout.removeCallbacks(stopRefreshRunnable);
+
     if (unbinder != null) {
       unbinder.unbind();
     }
@@ -213,13 +231,8 @@ public class LockInfoDialog extends RetainedDialogFragment
   }
 
   @Override public void onListPopulated() {
-    if (swipeRefreshLayout != null) {
-      Timber.d("Refresh finished");
-      swipeRefreshLayout.post(() -> {
-        swipeRefreshLayout.setRefreshing(false);
-        layoutManager.setVerticalScrollEnabled(true);
-      });
-    }
+    Timber.d("Refresh finished");
+    swipeRefreshLayout.post(stopRefreshRunnable);
   }
 
   @Override public void onListPopulateError() {
@@ -229,12 +242,7 @@ public class LockInfoDialog extends RetainedDialogFragment
 
   @Override public void onListCleared() {
     Timber.d("onListCleared");
-    if (swipeRefreshLayout != null) {
-      swipeRefreshLayout.post(() -> {
-        swipeRefreshLayout.setRefreshing(true);
-        layoutManager.setVerticalScrollEnabled(false);
-      });
-    }
+    swipeRefreshLayout.post(startRefreshRunnable);
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {

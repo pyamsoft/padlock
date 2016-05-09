@@ -63,7 +63,31 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 public final class LockListFragment extends PageAwareFragment
     implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
 
-  private static final String PIN_DIALOG_TAG = "pin_dialog";
+  @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
+
+  @NonNull private final Runnable startRefreshRunnable = new Runnable() {
+    @Override public void run() {
+      swipeRefreshLayout.setRefreshing(true);
+      lockListLayoutManager.setVerticalScrollEnabled(false);
+      final FragmentActivity activity = getActivity();
+      if (activity != null) {
+        Timber.d("Reload options");
+        activity.supportInvalidateOptionsMenu();
+      }
+    }
+  };
+
+  @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
+    @Override public void run() {
+      swipeRefreshLayout.setRefreshing(false);
+      lockListLayoutManager.setVerticalScrollEnabled(true);
+      final FragmentActivity activity = getActivity();
+      if (activity != null) {
+        Timber.d("Reload options");
+        activity.supportInvalidateOptionsMenu();
+      }
+    }
+  };
 
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
@@ -239,9 +263,9 @@ public final class LockListFragment extends PageAwareFragment
       fab.setOnClickListener(null);
     }
 
-    if (swipeRefreshLayout != null) {
-      swipeRefreshLayout.setOnRefreshListener(null);
-    }
+    swipeRefreshLayout.setOnRefreshListener(null);
+    swipeRefreshLayout.removeCallbacks(startRefreshRunnable);
+    swipeRefreshLayout.removeCallbacks(stopRefreshRunnable);
 
     presenter.onDestroyView();
     adapter.onDestroy();
@@ -383,29 +407,13 @@ public final class LockListFragment extends PageAwareFragment
 
   @Override public void onListCleared() {
     Timber.d("onListCleared");
-    lockListLayoutManager.setVerticalScrollEnabled(false);
-    swipeRefreshLayout.post(() -> {
-      swipeRefreshLayout.setRefreshing(true);
-      final FragmentActivity activity = getActivity();
-      if (activity != null) {
-        Timber.d("Reload options");
-        activity.supportInvalidateOptionsMenu();
-      }
-    });
+    swipeRefreshLayout.post(startRefreshRunnable);
     fab.hide();
   }
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
-    lockListLayoutManager.setVerticalScrollEnabled(true);
-    swipeRefreshLayout.post(() -> {
-      swipeRefreshLayout.setRefreshing(false);
-      final FragmentActivity activity = getActivity();
-      if (activity != null) {
-        Timber.d("Reload options");
-        activity.supportInvalidateOptionsMenu();
-      }
-    });
+    swipeRefreshLayout.post(stopRefreshRunnable);
     fab.show();
 
     presenter.showOnBoarding();
