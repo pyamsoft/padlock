@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.app.list.info;
 
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,46 +24,41 @@ import android.view.ViewGroup;
 import android.widget.CheckedTextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.BaseRecyclerAdapter;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
-import com.pyamsoft.padlock.dagger.db.DBModule;
-import com.pyamsoft.padlock.dagger.db.DaggerDBComponent;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import java.lang.ref.WeakReference;
-import javax.inject.Inject;
 import timber.log.Timber;
 
 public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.ViewHolder>
-    implements LockInfoItem, DBPresenter.DBView {
+    implements LockInfoItem, DBPresenter.DBView, AdapterPresenter.AdapterView {
 
   @NonNull private final AdapterPresenter<ActivityEntry> adapterPresenter;
-  @Inject DBPresenter dbPresenter;
+  @NonNull private final DBPresenter dbPresenter;
+  @NonNull private final WeakReference<AppEntry> weakEntry;
 
-  private WeakReference<AppEntry> weakEntry;
-
-  public LockInfoAdapter(@NonNull AdapterPresenter<ActivityEntry> adapterPresenter) {
-    this.adapterPresenter = adapterPresenter;
-  }
-
-  public void bind(@NonNull AppEntry appEntry, @NonNull FragmentActivity activity) {
+  public LockInfoAdapter(@NonNull AppEntry appEntry,
+      @NonNull AdapterPresenter<ActivityEntry> adapterPresenter, @NonNull DBPresenter dbPresenter) {
     this.weakEntry = new WeakReference<>(appEntry);
-
-    DaggerDBComponent.builder()
-        .padLockComponent(PadLock.padLockComponent(activity))
-        .dBModule(new DBModule())
-        .build()
-        .inject(this);
-    dbPresenter.onCreateView(this);
+    this.adapterPresenter = adapterPresenter;
+    this.dbPresenter = dbPresenter;
   }
 
-  public final void unbind() {
-    if (weakEntry != null) {
-      weakEntry.clear();
-    }
+  @Override public void onCreate() {
+    super.onCreate();
+    dbPresenter.onCreateView(this);
+    adapterPresenter.onCreateView(this);
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    weakEntry.clear();
+
+    adapterPresenter.onDestroyView();
+    adapterPresenter.onDestroy();
 
     dbPresenter.onDestroyView();
     dbPresenter.onDestroy();
