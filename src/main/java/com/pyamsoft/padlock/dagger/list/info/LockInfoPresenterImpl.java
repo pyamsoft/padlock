@@ -20,7 +20,6 @@ import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.info.LockInfoInteractor;
 import com.pyamsoft.padlock.app.list.info.LockInfoPresenter;
-import com.pyamsoft.padlock.app.list.info.LockInfoView;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImpl;
@@ -34,7 +33,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockInfoPresenterImpl extends PresenterImpl<LockInfoView>
+final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockInfoView>
     implements LockInfoPresenter {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;
@@ -45,8 +44,8 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoView>
     this.lockInfoInteractor = lockInfoInteractor;
   }
 
-  @Override public void destroy() {
-    super.destroy();
+  @Override public void onDestroy() {
+    super.onDestroy();
     unsubPopulateList();
   }
 

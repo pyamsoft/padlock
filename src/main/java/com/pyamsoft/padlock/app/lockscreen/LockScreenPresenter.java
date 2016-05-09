@@ -18,9 +18,8 @@ package com.pyamsoft.padlock.app.lockscreen;
 
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
-import com.pyamsoft.pydroid.base.Presenter;
 
-public interface LockScreenPresenter extends Presenter<LockScreen>, LockPresenter<LockScreen> {
+public interface LockScreenPresenter extends LockPresenter<LockScreen> {
 
   void setIgnorePeriodFromPreferences(@Nullable Long time) throws NullPointerException;
 

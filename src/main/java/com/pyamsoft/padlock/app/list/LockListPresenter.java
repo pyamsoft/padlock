@@ -16,9 +16,11 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
 
-public interface LockListPresenter extends Presenter<LockList> {
+public interface LockListPresenter extends Presenter<LockListPresenter.LockList> {
 
   void populateList();
 
@@ -32,15 +34,24 @@ public interface LockListPresenter extends Presenter<LockList> {
 
   void clickPinFAB();
 
-  void registerOnPinEntryBus();
-
-  void unregisterFromPinEntryBus();
-
-  void registerOnConfirmDialogBus();
-
-  void unregisterFromConfirmDialogBus();
-
   void showOnBoarding();
 
   void setOnBoard();
+
+  interface LockList extends LockListCommon {
+
+    void setFABStateEnabled();
+
+    void setFABStateDisabled();
+
+    void setSystemVisible();
+
+    void setSystemInvisible();
+
+    void onPinFABClicked();
+
+    void onEntryAddedToList(@NonNull AppEntry entry);
+
+    void showOnBoarding();
+  }
 }

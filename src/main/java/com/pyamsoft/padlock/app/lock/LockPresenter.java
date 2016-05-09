@@ -16,11 +16,32 @@
 
 package com.pyamsoft.padlock.app.lock;
 
+import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.base.Presenter;
 
-public interface LockPresenter<I extends LockView> extends Presenter<I> {
+public interface LockPresenter<I extends LockPresenter.LockView> extends Presenter<I> {
 
   void loadPackageIcon(String packageName);
 
   void submit();
+
+  interface LockView {
+
+    @NonNull String getCurrentAttempt();
+
+    @NonNull String getPackageName();
+
+    @NonNull String getActivityName();
+
+    void setImageSuccess(@NonNull Drawable drawable);
+
+    void setImageError();
+
+    void onSubmitSuccess();
+
+    void onSubmitFailure();
+
+    void onSubmitError();
+  }
 }

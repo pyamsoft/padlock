@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.app.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.padlock.app.settings.SettingsInteractor;
 import com.pyamsoft.padlock.app.settings.SettingsPresenter;
-import com.pyamsoft.padlock.app.settings.SettingsView;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
@@ -33,8 +32,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class SettingsPresenterImpl extends PresenterImpl<SettingsView>
-    implements SettingsPresenter {
+final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.SettingsView> implements SettingsPresenter {
 
   @NonNull private final LockScreenInteractor lockScreenInteractor;
   @NonNull private final SettingsInteractor settingsInteractor;
@@ -50,12 +48,21 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsView>
     this.settingsInteractor = settingsInteractor;
   }
 
-  @Override public void stop() {
-    super.stop();
+  @Override public void onDestroyView() {
+    super.onDestroyView();
 
     unsubscribeIgnorePeriod();
     unsubscribeConfirmDialog();
     unsubscribeTimeout();
+  }
+
+  @Override public void onResume() {
+    super.onResume();
+    registerOnConfirmDialogBus();
+  }
+
+  @Override public void onPause() {
+    super.onPause();
     unregisterFromConfirmDialogBus();
   }
 
@@ -199,13 +206,13 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsView>
         .observeOn(AndroidSchedulers.mainThread());
   }
 
-  @Override public void unregisterFromConfirmDialogBus() {
+  private void unregisterFromConfirmDialogBus() {
     if (!confirmDialogBusSubscription.isUnsubscribed()) {
       confirmDialogBusSubscription.unsubscribe();
     }
   }
 
-  @Override public void registerOnConfirmDialogBus() {
+  private void registerOnConfirmDialogBus() {
     unregisterFromConfirmDialogBus();
     confirmDialogBusSubscription =
         ConfirmationDialog.ConfirmationDialogBus.get().register().subscribe(confirmationEvent -> {

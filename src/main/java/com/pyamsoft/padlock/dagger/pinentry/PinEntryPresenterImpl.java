@@ -49,8 +49,8 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
     }
   }
 
-  @Override public void stop() {
-    super.stop();
+  @Override public void onDestroyView() {
+    super.onDestroyView();
     unsubPinEntry();
   }
 

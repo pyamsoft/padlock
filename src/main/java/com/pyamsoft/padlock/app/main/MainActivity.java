@@ -50,7 +50,7 @@ import com.pyamsoft.pydroid.util.DrawableUtil;
 import java.lang.ref.WeakReference;
 import javax.inject.Inject;
 
-public class MainActivity extends ActivityBase implements MainView {
+public class MainActivity extends ActivityBase implements MainPresenter.MainView {
 
   private static final String USAGE_TERMS_TAG = "usage_terms";
   private static final int VECTOR_TASK_SIZE = 2;
@@ -87,7 +87,7 @@ public class MainActivity extends ActivityBase implements MainView {
         .build()
         .inject(this);
 
-    presenter.start(this);
+    presenter.onCreateView(this);
 
     setAppBarState();
     setupViewPagerAdapter();
@@ -224,9 +224,9 @@ public class MainActivity extends ActivityBase implements MainView {
       cancelAsyncVectorTask(i);
     }
 
-    presenter.stop();
+    presenter.onDestroyView();
     if (!isChangingConfigurations()) {
-      presenter.destroy();
+      presenter.onDestroy();
     }
 
     if (unbinder != null) {
@@ -272,8 +272,7 @@ public class MainActivity extends ActivityBase implements MainView {
     super.onResume();
     animateActionBarToolbar(toolbar);
 
-    presenter.registerOnConfirmDialogBus();
-    presenter.registerOnAgreeTermsBus();
+    presenter.onResume();
   }
 
   @Override public void onDidNotAgreeToTerms() {
@@ -283,8 +282,7 @@ public class MainActivity extends ActivityBase implements MainView {
   @Override protected void onPause() {
     super.onPause();
 
-    presenter.unregisterFromConfirmDialogBus();
-    presenter.unregisterFromAgreeTermsBus();
+    presenter.onPause();
   }
 
   @Override protected void onPostResume() {

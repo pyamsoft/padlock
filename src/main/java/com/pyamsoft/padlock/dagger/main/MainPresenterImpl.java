@@ -20,7 +20,6 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
 import com.pyamsoft.padlock.app.main.MainInteractor;
 import com.pyamsoft.padlock.app.main.MainPresenter;
-import com.pyamsoft.padlock.app.main.MainView;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
@@ -30,7 +29,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class MainPresenterImpl extends PresenterImpl<MainView> implements MainPresenter {
+final class MainPresenterImpl extends PresenterImpl<MainPresenter.MainView> implements MainPresenter {
 
   @NonNull private final MainInteractor interactor;
 
@@ -42,11 +41,21 @@ final class MainPresenterImpl extends PresenterImpl<MainView> implements MainPre
     this.interactor = interactor;
   }
 
-  @Override public void stop() {
-    super.stop();
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+    unsubAgreeTermsSubscription();
+  }
+
+  @Override public void onResume() {
+    super.onResume();
+    registerOnConfirmDialogBus();
+    registerOnAgreeTermsBus();
+  }
+
+  @Override public void onPause() {
+    super.onPause();
     unregisterFromConfirmDialogBus();
     unregisterFromAgreeTermsBus();
-    unsubAgreeTermsSubscription();
   }
 
   @Override public void showTermsDialog() {
@@ -70,7 +79,7 @@ final class MainPresenterImpl extends PresenterImpl<MainView> implements MainPre
     }
   }
 
-  @Override public void registerOnAgreeTermsBus() {
+  private void registerOnAgreeTermsBus() {
     unregisterFromAgreeTermsBus();
     agreeTermsBusSubscription =
         AgreeTermsDialog.AgreeTermsBus.get().register().subscribe(agreeTermsEvent -> {
@@ -89,13 +98,13 @@ final class MainPresenterImpl extends PresenterImpl<MainView> implements MainPre
         });
   }
 
-  @Override public void unregisterFromAgreeTermsBus() {
+  private void unregisterFromAgreeTermsBus() {
     if (!agreeTermsBusSubscription.isUnsubscribed()) {
       agreeTermsBusSubscription.unsubscribe();
     }
   }
 
-  @Override public void registerOnConfirmDialogBus() {
+  private void registerOnConfirmDialogBus() {
     unregisterFromConfirmDialogBus();
     confirmDialogBusSubscription =
         ConfirmationDialog.ConfirmationDialogBus.get().register().subscribe(confirmationEvent -> {
@@ -108,7 +117,7 @@ final class MainPresenterImpl extends PresenterImpl<MainView> implements MainPre
         });
   }
 
-  @Override public void unregisterFromConfirmDialogBus() {
+  private void unregisterFromConfirmDialogBus() {
     if (!confirmDialogBusSubscription.isUnsubscribed()) {
       confirmDialogBusSubscription.unsubscribe();
     }

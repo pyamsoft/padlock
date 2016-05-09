@@ -60,7 +60,7 @@ import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
 public final class LockListFragment extends PageAwareFragment
-    implements LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
+    implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
 
   private static final String PIN_DIALOG_TAG = "pin_dialog";
 
@@ -81,7 +81,7 @@ public final class LockListFragment extends PageAwareFragment
       Bundle savedInstanceState) {
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
-    presenter.start(this);
+    presenter.onCreateView(this);
     adapter.bind(this);
     return view;
   }
@@ -113,15 +113,13 @@ public final class LockListFragment extends PageAwareFragment
   @Override public void onResume() {
     super.onResume();
     AnimUtil.popShow(fab, 500, 300);
-    presenter.registerOnConfirmDialogBus();
-    presenter.registerOnPinEntryBus();
+    presenter.onResume();
   }
 
   @Override public void onPause() {
     super.onPause();
     AnimUtil.popHide(fab, 300, 300);
-    presenter.unregisterFromConfirmDialogBus();
-    presenter.unregisterFromPinEntryBus();
+    presenter.onPause();
   }
 
   private void setupRecyclerView() {
@@ -240,7 +238,7 @@ public final class LockListFragment extends PageAwareFragment
     }
 
     adapter.unbind();
-    presenter.stop();
+    presenter.onDestroyView();
 
     cancelFabTask();
 
@@ -262,7 +260,7 @@ public final class LockListFragment extends PageAwareFragment
     super.onDestroy();
 
     adapter.onDestroy();
-    presenter.destroy();
+    presenter.onDestroy();
   }
 
   private void setupFAB() {
