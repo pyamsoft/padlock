@@ -40,6 +40,7 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.GlobalConstants;
+import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.main.PageAwareFragment;
 import com.pyamsoft.padlock.app.pinentry.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
@@ -67,8 +68,11 @@ public final class LockListFragment extends PageAwareFragment
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
+
   @Inject LockListPresenter presenter;
   @Inject AdapterPresenter<AppEntry> adapterPresenter;
+  @Inject DBPresenter dbPresenter;
+
   private DataHolderFragment<Presenter> presenterDataHolder;
   private LockListAdapter adapter;
   private LockListLayoutManager lockListLayoutManager;
@@ -82,7 +86,7 @@ public final class LockListFragment extends PageAwareFragment
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
     presenter.onCreateView(this);
-    adapter.bind(this);
+    adapter.onCreate();
     return view;
   }
 
@@ -142,7 +146,9 @@ public final class LockListFragment extends PageAwareFragment
     @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry> entryAdapterPresenter =
         (AdapterPresenter<AppEntry>) presenterDataHolder.pop(
             GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER);
-    if (lockListPresenter == null || entryAdapterPresenter == null) {
+    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(
+        GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER);
+    if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
       Timber.d("Create new presenters");
       firstRefresh = true;
       DaggerLockListComponent.builder()
@@ -154,9 +160,10 @@ public final class LockListFragment extends PageAwareFragment
       firstRefresh = false;
       presenter = lockListPresenter;
       adapterPresenter = entryAdapterPresenter;
+      dbPresenter = lockDBPresenter;
     }
 
-    adapter = new LockListAdapter(adapterPresenter);
+    adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
 
     setHasOptionsMenu(true);
   }
@@ -236,8 +243,8 @@ public final class LockListFragment extends PageAwareFragment
       swipeRefreshLayout.setOnRefreshListener(null);
     }
 
-    adapter.unbind();
     presenter.onDestroyView();
+    adapter.onDestroy();
 
     cancelFabTask();
 
@@ -258,7 +265,6 @@ public final class LockListFragment extends PageAwareFragment
   @Override public void onDestroy() {
     super.onDestroy();
 
-    adapter.onDestroy();
     presenter.onDestroy();
   }
 
@@ -420,6 +426,7 @@ public final class LockListFragment extends PageAwareFragment
       presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_PRESENTER, presenter);
       presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER,
           adapterPresenter);
+      presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER, dbPresenter);
     } else {
       presenterDataHolder.clear();
     }

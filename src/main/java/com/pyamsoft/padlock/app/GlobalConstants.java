@@ -20,6 +20,9 @@ public final class GlobalConstants {
 
   public static final int DATA_HOLDER_ID_LOCK_INFO_PRESENTER = 0;
   public static final int DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER = 1;
-  public static final int DATA_HOLDER_ID_LOCK_LIST_PRESENTER = 2;
-  public static final int DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER = 3;
+  public static final int DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER = 2;
+
+  public static final int DATA_HOLDER_ID_LOCK_LIST_PRESENTER = 3;
+  public static final int DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER = 4;
+  public static final int DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER = 5;
 }

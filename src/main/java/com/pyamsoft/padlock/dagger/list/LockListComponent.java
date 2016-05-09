@@ -19,12 +19,13 @@ package com.pyamsoft.padlock.dagger.list;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
+import com.pyamsoft.padlock.dagger.db.DBModule;
 import com.pyamsoft.padlock.dagger.pin.MasterPinModule;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateModule;
 import dagger.Component;
 
 @ActivityScope @Component(modules = {
-    LockListModule.class, LockServiceStateModule.class, MasterPinModule.class
+    LockListModule.class, LockServiceStateModule.class, MasterPinModule.class, DBModule.class
 }, dependencies = {
     PadLockComponent.class
 }) public interface LockListComponent {

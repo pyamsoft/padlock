@@ -19,9 +19,10 @@ package com.pyamsoft.padlock.dagger.list.info;
 import com.pyamsoft.padlock.app.list.info.LockInfoDialog;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
+import com.pyamsoft.padlock.dagger.db.DBModule;
 import dagger.Component;
 
-@ActivityScope @Component(modules = LockInfoModule.class, dependencies = {
+@ActivityScope @Component(modules = { LockInfoModule.class, DBModule.class }, dependencies = {
     PadLockComponent.class
 }) public interface LockInfoComponent {
 

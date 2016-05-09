@@ -26,6 +26,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -34,6 +35,7 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.GlobalConstants;
+import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.app.list.LockListLayoutManager;
 import com.pyamsoft.padlock.dagger.list.info.DaggerLockInfoComponent;
@@ -47,8 +49,8 @@ import com.pyamsoft.pydroid.tool.DividerItemDecoration;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockInfoDialog extends RetainedDialogFragment implements
-    LockInfoPresenter.LockInfoView {
+public class LockInfoDialog extends RetainedDialogFragment
+    implements LockInfoPresenter.LockInfoView {
 
   private static final String ARG_APP_ENTRY = "app_entry";
 
@@ -59,7 +61,9 @@ public class LockInfoDialog extends RetainedDialogFragment implements
   @BindView(R.id.lock_info_system) TextView system;
   @BindView(R.id.lock_info_swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
   @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
+
   @Inject LockInfoPresenter presenter;
+  @Inject DBPresenter dbPresenter;
   @Inject AdapterPresenter<ActivityEntry> adapterPresenter;
 
   private DataHolderFragment<Presenter> presenterDataHolder;
@@ -88,10 +92,14 @@ public class LockInfoDialog extends RetainedDialogFragment implements
 
     final LockInfoPresenter lockInfoPresenter = (LockInfoPresenter) presenterDataHolder.pop(
         GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_PRESENTER);
-    @SuppressWarnings("unchecked") final AdapterPresenter<ActivityEntry> activityEntryAdapterPresenter =
-        (AdapterPresenter<ActivityEntry>) presenterDataHolder.pop(
-            GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER);
-    if (lockInfoPresenter == null || activityEntryAdapterPresenter == null) {
+    @SuppressWarnings("unchecked") final AdapterPresenter<ActivityEntry>
+        activityEntryAdapterPresenter = (AdapterPresenter<ActivityEntry>) presenterDataHolder.pop(
+        GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER);
+    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(
+        GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER);
+    if (lockInfoPresenter == null
+        || activityEntryAdapterPresenter == null
+        || lockDBPresenter == null) {
       Timber.d("Create new presenters");
       firstRefresh = true;
       DaggerLockInfoComponent.builder()
@@ -103,11 +111,19 @@ public class LockInfoDialog extends RetainedDialogFragment implements
       Timber.d("Load cached presenters");
       firstRefresh = false;
       presenter = lockInfoPresenter;
+      dbPresenter = lockDBPresenter;
       adapterPresenter = activityEntryAdapterPresenter;
     }
 
-    adapter = new LockInfoAdapter(adapterPresenter);
+    adapter = new LockInfoAdapter(appEntry, adapterPresenter, dbPresenter);
+  }
+
+  @Nullable @Override
+  public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
     adapter.onCreate();
+    presenter.onCreateView(this);
+    return super.onCreateView(inflater, container, savedInstanceState);
   }
 
   @SuppressLint("InflateParams") @NonNull @Override
@@ -116,8 +132,6 @@ public class LockInfoDialog extends RetainedDialogFragment implements
         LayoutInflater.from(getActivity()).inflate(R.layout.dialog_lockinfo, null, false);
     unbinder = ButterKnife.bind(this, rootView);
 
-    adapter.bind(appEntry, getActivity());
-    presenter.onCreateView(this);
     initializeForEntry();
 
     if (firstRefresh) {
@@ -135,7 +149,7 @@ public class LockInfoDialog extends RetainedDialogFragment implements
     recyclerView.setLayoutManager(null);
     recyclerView.setAdapter(null);
 
-    adapter.unbind();
+    adapter.onDestroy();
     presenter.onDestroyView();
 
     if (unbinder != null) {
@@ -147,7 +161,6 @@ public class LockInfoDialog extends RetainedDialogFragment implements
     super.onDestroy();
     Timber.d("onDestroy");
 
-    adapter.onDestroy();
     presenter.onDestroy();
   }
 

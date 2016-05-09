@@ -26,6 +26,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import com.pyamsoft.pydroid.base.RetainedDialogFragment;
+import com.pyamsoft.pydroid.util.AppUtil;
 
 public final class DBProgressDialog extends RetainedDialogFragment {
 
@@ -33,12 +34,17 @@ public final class DBProgressDialog extends RetainedDialogFragment {
   @NonNull private static final String APP_NAME = "app_name";
   private String name;
 
-  public static DBProgressDialog newInstance(final String name) {
+  private static DBProgressDialog newInstance(final String name) {
     final DBProgressDialog fragment = new DBProgressDialog();
     final Bundle args = new Bundle();
     args.putString(APP_NAME, name);
     fragment.setArguments(args);
     return fragment;
+  }
+
+  public static void add(final @NonNull FragmentManager fragmentManager,
+      final @NonNull String name) {
+    AppUtil.guaranteeSingleDialogFragment(fragmentManager, newInstance(name), DB_PROGRESS_TAG);
   }
 
   @SuppressLint("CommitTransaction")

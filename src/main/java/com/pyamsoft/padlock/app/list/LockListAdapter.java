@@ -16,7 +16,7 @@
 package com.pyamsoft.padlock.app.list;
 
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
@@ -27,46 +27,45 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.BaseRecyclerAdapter;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.db.DBProgressDialog;
 import com.pyamsoft.padlock.app.list.info.LockInfoDialog;
-import com.pyamsoft.padlock.dagger.db.DBModule;
-import com.pyamsoft.padlock.dagger.db.DaggerDBComponent;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.lang.ref.WeakReference;
-import javax.inject.Inject;
 import timber.log.Timber;
 
 public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.ViewHolder>
-    implements LockListItem, DBPresenter.DBView {
+    implements LockListItem, DBPresenter.DBView, AdapterPresenter.AdapterView {
+
   @NonNull private final AdapterPresenter<AppEntry> adapterPresenter;
-  private WeakReference<AppCompatActivity> weakActivity;
+  @NonNull private final WeakReference<Fragment> weakFragment;
+  @NonNull private final DBPresenter dbPresenter;
 
-  @Inject DBPresenter dbPresenter;
-
-  @Inject public LockListAdapter(@NonNull AdapterPresenter<AppEntry> adapterPresenter) {
+  public LockListAdapter(@NonNull LockListFragment fragment,
+      @NonNull AdapterPresenter<AppEntry> adapterPresenter, @NonNull DBPresenter dbPresenter) {
+    this.dbPresenter = dbPresenter;
+    this.weakFragment = new WeakReference<>(fragment);
     this.adapterPresenter = adapterPresenter;
   }
 
-  public final void bind(LockListFragment fragment) {
-    weakActivity = new WeakReference<>((AppCompatActivity) fragment.getActivity());
-    DaggerDBComponent.builder()
-        .padLockComponent(PadLock.padLockComponent(fragment))
-        .dBModule(new DBModule())
-        .build()
-        .inject(this);
+  @Override public void onCreate() {
+    super.onCreate();
+    adapterPresenter.onCreateView(this);
     dbPresenter.onCreateView(this);
   }
 
-  public final void unbind() {
-    if (weakActivity != null) {
-      weakActivity.clear();
-    }
+  @Override public void onDestroy() {
+    super.onDestroy();
+    weakFragment.clear();
+
+    adapterPresenter.onDestroyView();
+    adapterPresenter.onDestroy();
+
     dbPresenter.onDestroyView();
+    dbPresenter.onDestroy();
   }
 
   @Override public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -114,11 +113,11 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
   private void accessPackage(final AppEntry entry, final int position, final boolean checked) {
     // TODO app specific codes
-    final AppCompatActivity appCompatActivity = weakActivity.get();
-    if (appCompatActivity != null) {
-      AppUtil.guaranteeSingleDialogFragment(appCompatActivity.getSupportFragmentManager(),
-          DBProgressDialog.newInstance(entry.name()), DBProgressDialog.DB_PROGRESS_TAG);
+    final Fragment fragment = weakFragment.get();
+    if (fragment != null) {
+      DBProgressDialog.add(fragment.getFragmentManager(), entry.name());
     }
+
     dbPresenter.attemptDBModification(position, checked, entry.packageName(), entry.name(), null,
         entry.system());
   }
@@ -140,12 +139,10 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
   }
 
   private void openInfo(AppEntry entry) {
-    // TODO add optional auth check
 
-    final AppCompatActivity appCompatActivity = weakActivity.get();
-    if (appCompatActivity != null) {
-      AppUtil.guaranteeSingleDialogFragment(appCompatActivity.getSupportFragmentManager(),
-          LockInfoDialog.newInstance(entry), "lock_info");
+    final Fragment fragment = weakFragment.get();
+    if (fragment != null) {
+      AppUtil.guaranteeSingleDialogFragment(fragment.getFragmentManager(), LockInfoDialog.newInstance(entry), "lock_info");
     }
   }
 
@@ -178,12 +175,10 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     adapterPresenter.setLocked(position, true);
     notifyItemChanged(position);
 
-    final AppCompatActivity appCompatActivity = weakActivity.get();
-    if (appCompatActivity == null) {
-      throw new NullPointerException("Activity is NULL, cannot dismiss DBProgressDialog");
+    final Fragment fragment = weakFragment.get();
+    if (fragment != null) {
+      DBProgressDialog.remove(fragment.getFragmentManager());
     }
-
-    DBProgressDialog.remove(appCompatActivity.getSupportFragmentManager());
   }
 
   @Override public void onDBDeleteEvent(int position) {
@@ -191,23 +186,18 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     adapterPresenter.setLocked(position, false);
     notifyItemChanged(position);
 
-    final AppCompatActivity appCompatActivity = weakActivity.get();
-    if (appCompatActivity == null) {
-      throw new NullPointerException("Activity is NULL, cannot dismiss DBProgressDialog");
+    final Fragment fragment = weakFragment.get();
+    if (fragment != null) {
+      DBProgressDialog.remove(fragment.getFragmentManager());
     }
-
-    DBProgressDialog.remove(appCompatActivity.getSupportFragmentManager());
   }
 
   @Override public void onDBError() {
     Timber.e("onDBError");
-    final AppCompatActivity appCompatActivity = weakActivity.get();
-    if (appCompatActivity == null) {
-      throw new NullPointerException("Activity is NULL, cannot dismiss DBProgressDialog");
+    final Fragment fragment = weakFragment.get();
+    if (fragment != null) {
+      DBProgressDialog.remove(fragment.getFragmentManager());
     }
-
-    DBProgressDialog.remove(appCompatActivity.getSupportFragmentManager());
-    // TODO handle exception, show error dialog or something
   }
 
   static final class ViewHolder extends RecyclerView.ViewHolder {
