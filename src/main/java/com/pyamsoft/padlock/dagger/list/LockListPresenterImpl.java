@@ -27,8 +27,8 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.pinentry.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
-import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
+import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImpl;
@@ -43,7 +43,8 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockList> implements LockListPresenter {
+final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockList>
+    implements LockListPresenter {
 
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
@@ -66,6 +67,7 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
     unsubscribeSystemVisible();
     unsubscribeFabState();
     unsubscribeOnBoarding();
+    unsubscribePopulateList();
   }
 
   @Override public void onResume() {
@@ -84,10 +86,6 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
     if (!onBoardingSubscription.isUnsubscribed()) {
       onBoardingSubscription.unsubscribe();
     }
-  }
-
-  @Override public void onDestroy() {
-    unsubscribePopulateList();
   }
 
   private void unsubscribePopulateList() {

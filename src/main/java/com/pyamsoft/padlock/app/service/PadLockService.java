@@ -104,7 +104,6 @@ public final class PadLockService extends AccessibilityService implements
     Timber.d("onDestroy");
     setEnabled(false);
     presenter.onDestroyView();
-    presenter.onDestroy();
     setInstance(null);
   }
 

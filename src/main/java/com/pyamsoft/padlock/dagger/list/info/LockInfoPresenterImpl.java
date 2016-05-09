@@ -43,8 +43,8 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
     this.lockInfoInteractor = lockInfoInteractor;
   }
 
-  @Override public void onDestroy() {
-    super.onDestroy();
+  @Override public void onDestroyView() {
+    super.onDestroyView();
     unsubPopulateList();
   }
 
