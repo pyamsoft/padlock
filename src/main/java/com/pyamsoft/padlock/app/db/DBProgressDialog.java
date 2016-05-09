@@ -29,7 +29,8 @@ import com.pyamsoft.pydroid.base.RetainedDialogFragment;
 
 public final class DBProgressDialog extends RetainedDialogFragment {
 
-  private static final String APP_NAME = "app_name";
+  @NonNull public static final String DB_PROGRESS_TAG = "db_progress";
+  @NonNull private static final String APP_NAME = "app_name";
   private String name;
 
   public static DBProgressDialog newInstance(final String name) {
@@ -41,10 +42,9 @@ public final class DBProgressDialog extends RetainedDialogFragment {
   }
 
   @SuppressLint("CommitTransaction")
-  public static void remove(final @NonNull FragmentManager fragmentManager,
-      final @NonNull String tag) {
+  public static void remove(final @NonNull FragmentManager fragmentManager) {
     final FragmentTransaction ft = fragmentManager.beginTransaction();
-    final Fragment dialog = fragmentManager.findFragmentByTag(tag);
+    final Fragment dialog = fragmentManager.findFragmentByTag(DB_PROGRESS_TAG);
     if (dialog != null) {
       ft.remove(dialog);
     }
