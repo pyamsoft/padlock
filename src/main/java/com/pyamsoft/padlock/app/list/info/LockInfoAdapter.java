@@ -59,7 +59,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
         .dBModule(new DBModule())
         .build()
         .inject(this);
-    dbPresenter.start(this);
+    dbPresenter.onCreateView(this);
   }
 
   public final void unbind() {
@@ -67,8 +67,8 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
       weakEntry.clear();
     }
 
-    dbPresenter.stop();
-    dbPresenter.destroy();
+    dbPresenter.onDestroyView();
+    dbPresenter.onDestroy();
   }
 
   @Override public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

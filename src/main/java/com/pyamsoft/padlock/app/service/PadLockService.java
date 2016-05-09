@@ -29,7 +29,8 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public final class PadLockService extends AccessibilityService implements LockService {
+public final class PadLockService extends AccessibilityService implements
+    LockServicePresenter.LockService {
 
   private static volatile PadLockService instance = null;
   private static volatile boolean enabled = false;
@@ -102,8 +103,8 @@ public final class PadLockService extends AccessibilityService implements LockSe
     super.onDestroy();
     Timber.d("onDestroy");
     setEnabled(false);
-    presenter.stop();
-    presenter.destroy();
+    presenter.onDestroyView();
+    presenter.onDestroy();
     setInstance(null);
   }
 
@@ -119,7 +120,7 @@ public final class PadLockService extends AccessibilityService implements LockSe
         .lockServiceStateModule(new LockServiceStateModule())
         .build()
         .inject(this);
-    presenter.start(this);
+    presenter.onCreateView(this);
     setEnabled(true);
     setInstance(this);
   }

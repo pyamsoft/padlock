@@ -16,9 +16,9 @@
 
 package com.pyamsoft.padlock.app.lockscreen;
 
-import com.pyamsoft.padlock.app.lock.LockView;
+import com.pyamsoft.padlock.app.lock.LockPresenter;
 
-public interface LockScreen extends LockView {
+public interface LockScreen extends LockPresenter.LockView {
 
   void onLocked();
 

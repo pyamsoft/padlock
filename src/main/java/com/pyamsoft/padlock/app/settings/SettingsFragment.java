@@ -39,7 +39,8 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.StringUtil;
 import javax.inject.Inject;
 
-public final class SettingsFragment extends PageAwareFragment implements SettingsView {
+public final class SettingsFragment extends PageAwareFragment implements
+    SettingsPresenter.SettingsView {
 
   @Inject SettingsPresenter presenter;
 
@@ -58,9 +59,6 @@ public final class SettingsFragment extends PageAwareFragment implements Setting
 
   private Unbinder unbinder;
 
-  public SettingsFragment() {
-  }
-
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     DaggerSettingsComponent.builder()
@@ -77,7 +75,7 @@ public final class SettingsFragment extends PageAwareFragment implements Setting
       @Nullable Bundle savedInstanceState) {
     final View view = inflater.inflate(R.layout.fragment_settings, container, false);
     unbinder = ButterKnife.bind(this, view);
-    presenter.start(this);
+    presenter.onCreateView(this);
     return view;
   }
 
@@ -157,19 +155,19 @@ public final class SettingsFragment extends PageAwareFragment implements Setting
   @Override public void onResume() {
     super.onResume();
 
-    presenter.registerOnConfirmDialogBus();
+    presenter.onResume();
   }
 
   @Override public void onPause() {
     super.onPause();
 
-    presenter.unregisterFromConfirmDialogBus();
+    presenter.onPause();
   }
 
   @Override public void onDestroyView() {
     super.onDestroyView();
 
-    presenter.stop();
+    presenter.onDestroyView();
     if (unbinder != null) {
       unbinder.unbind();
     }
@@ -177,7 +175,7 @@ public final class SettingsFragment extends PageAwareFragment implements Setting
 
   @Override public void onDestroy() {
     super.onDestroy();
-    presenter.destroy();
+    presenter.onDestroy();
   }
 
   @Override public void setIgnorePeriodNone() {

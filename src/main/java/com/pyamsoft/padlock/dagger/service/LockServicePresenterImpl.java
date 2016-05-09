@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.service.LockService;
 import com.pyamsoft.padlock.app.service.LockServiceInteractor;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.app.service.LockServiceStateInteractor;
@@ -31,7 +30,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockServicePresenterImpl extends PresenterImpl<LockService>
+final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.LockService>
     implements LockServicePresenter {
 
   @NonNull private final LockServiceInteractor interactor;
@@ -54,8 +53,8 @@ final class LockServicePresenterImpl extends PresenterImpl<LockService>
     lockScreenPassed = b;
   }
 
-  @Override public void stop() {
-    super.stop();
+  @Override public void onDestroyView() {
+    super.onDestroyView();
     unsubLockedEntry();
   }
 

@@ -24,7 +24,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.app.list.LockList;
 import com.pyamsoft.padlock.app.list.LockListInteractor;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.pinentry.MasterPinSubmitCallback;
@@ -45,7 +44,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockListPresenterImpl extends PresenterImpl<LockList> implements LockListPresenter {
+final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockList> implements LockListPresenter {
 
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
@@ -63,14 +62,23 @@ final class LockListPresenterImpl extends PresenterImpl<LockList> implements Loc
     this.stateInteractor = stateInteractor;
   }
 
-  @Override public void stop() {
-    super.stop();
-
-    unregisterFromPinEntryBus();
-    unregisterFromConfirmDialogBus();
+  @Override public void onDestroyView() {
+    super.onDestroyView();
     unsubscribeSystemVisible();
     unsubscribeFabState();
     unsubscribeOnBoarding();
+  }
+
+  @Override public void onResume() {
+    super.onResume();
+    registerOnConfirmDialogBus();
+    registerOnPinEntryBus();
+  }
+
+  @Override public void onPause() {
+    super.onPause();
+    unregisterFromPinEntryBus();
+    unregisterFromConfirmDialogBus();
   }
 
   private void unsubscribeOnBoarding() {
@@ -79,7 +87,7 @@ final class LockListPresenterImpl extends PresenterImpl<LockList> implements Loc
     }
   }
 
-  @Override public void destroy() {
+  @Override public void onDestroy() {
     unsubscribePopulateList();
   }
 
@@ -261,26 +269,6 @@ final class LockListPresenterImpl extends PresenterImpl<LockList> implements Loc
     get().onPinFABClicked();
   }
 
-  @Override public void registerOnConfirmDialogBus() {
-    unregisterFromConfirmDialogBus();
-    confirmDialogBusSubscription =
-        ConfirmationDialog.ConfirmationDialogBus.get().register().subscribe(confirmationEvent -> {
-          Timber.d("Received confirmation event!");
-          if (confirmationEvent.type() == 0 && confirmationEvent.complete()) {
-            Timber.d("Received database cleared confirmation event, refreshList");
-            get().refreshList();
-          }
-        }, throwable -> {
-          Timber.e(throwable, "ConfirmationDialogBus onError");
-        });
-  }
-
-  @Override public void unregisterFromConfirmDialogBus() {
-    if (!confirmDialogBusSubscription.isUnsubscribed()) {
-      confirmDialogBusSubscription.unsubscribe();
-    }
-  }
-
   @Override public void showOnBoarding() {
     unsubscribeOnBoarding();
     onBoardingSubscription = lockListInteractor.hasShownOnBoarding()
@@ -296,7 +284,27 @@ final class LockListPresenterImpl extends PresenterImpl<LockList> implements Loc
         });
   }
 
-  @Override public void registerOnPinEntryBus() {
+  private void registerOnConfirmDialogBus() {
+    unregisterFromConfirmDialogBus();
+    confirmDialogBusSubscription =
+        ConfirmationDialog.ConfirmationDialogBus.get().register().subscribe(confirmationEvent -> {
+          Timber.d("Received confirmation event!");
+          if (confirmationEvent.type() == 0 && confirmationEvent.complete()) {
+            Timber.d("Received database cleared confirmation event, refreshList");
+            get().refreshList();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "ConfirmationDialogBus onError");
+        });
+  }
+
+  private void unregisterFromConfirmDialogBus() {
+    if (!confirmDialogBusSubscription.isUnsubscribed()) {
+      confirmDialogBusSubscription.unsubscribe();
+    }
+  }
+
+  private void registerOnPinEntryBus() {
     unregisterFromPinEntryBus();
     pinEntryBusSubscription =
         PinEntryDialog.PinEntryBus.get().register().subscribe(pinEntryEvent -> {
@@ -322,7 +330,7 @@ final class LockListPresenterImpl extends PresenterImpl<LockList> implements Loc
         });
   }
 
-  @Override public void unregisterFromPinEntryBus() {
+  private void unregisterFromPinEntryBus() {
     if (!pinEntryBusSubscription.isUnsubscribed()) {
       pinEntryBusSubscription.unsubscribe();
     }

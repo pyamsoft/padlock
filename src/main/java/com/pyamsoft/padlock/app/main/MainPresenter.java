@@ -18,15 +18,14 @@ package com.pyamsoft.padlock.app.main;
 
 import com.pyamsoft.pydroid.base.Presenter;
 
-public interface MainPresenter extends Presenter<MainView> {
+public interface MainPresenter extends Presenter<MainPresenter.MainView> {
 
   void showTermsDialog();
 
-  void registerOnAgreeTermsBus();
+  interface MainView {
 
-  void unregisterFromAgreeTermsBus();
+    void showUsageTermsDialog();
 
-  void registerOnConfirmDialogBus();
-
-  void unregisterFromConfirmDialogBus();
+    void onDidNotAgreeToTerms();
+  }
 }

@@ -82,7 +82,7 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     @SuppressLint("InflateParams") final View rootView =
         LayoutInflater.from(themedContext).inflate(R.layout.layout_pin_entry, null, false);
     unbinder = ButterKnife.bind(this, rootView);
-    presenter.start(this);
+    presenter.onCreateView(this);
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
     if (savedInstanceState != null) {
@@ -116,7 +116,7 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     super.onDestroyView();
     Timber.d("Destroy AlertDialog");
     lockViewDelegate.onDestroyView();
-    presenter.stop();
+    presenter.onDestroyView();
     if (unbinder != null) {
       unbinder.unbind();
     }
@@ -124,7 +124,7 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
 
   @Override public void onDestroy() {
     super.onDestroy();
-    presenter.destroy();
+    presenter.onDestroy();
   }
 
   @NonNull @Override public String getCurrentAttempt() {

@@ -40,8 +40,8 @@ class DBPresenterImpl extends PresenterImpl<DBView> implements DBPresenter {
     this.dbInteractor = dbInteractor;
   }
 
-  @Override public void stop() {
-    super.stop();
+  @Override public void onDestroyView() {
+    super.onDestroyView();
     unsubPackageSubscription();
     unsubActivitySubscription();
   }

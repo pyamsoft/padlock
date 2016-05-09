@@ -37,7 +37,7 @@ import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.ErrorDialog;
 import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
-import com.pyamsoft.padlock.app.service.LockService;
+import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.lockscreen.DaggerLockScreenComponent;
 import com.pyamsoft.pydroid.base.ActivityBase;
@@ -95,7 +95,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
         .build()
         .inject(this);
 
-    presenter.start(this);
+    presenter.onCreateView(this);
     lockViewDelegate.setTextColor(android.R.color.white);
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
@@ -145,8 +145,8 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    presenter.stop();
-    presenter.destroy();
+    presenter.onDestroyView();
+    presenter.onDestroy();
     lockViewDelegate.onDestroyView();
     failCount = 0;
     if (unbinder != null) {
@@ -207,7 +207,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
   @Override public void onSubmitSuccess() {
     Timber.d("Unlocked!");
     lockViewDelegate.clearDisplay();
-    final LockService service = PadLockService.getInstance();
+    final LockServicePresenter.LockService service = PadLockService.getInstance();
     if (service != null) {
       service.passLockScreen();
     }

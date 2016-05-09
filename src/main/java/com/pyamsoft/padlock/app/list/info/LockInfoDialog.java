@@ -47,7 +47,8 @@ import com.pyamsoft.pydroid.tool.DividerItemDecoration;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockInfoDialog extends RetainedDialogFragment implements LockInfoView {
+public class LockInfoDialog extends RetainedDialogFragment implements
+    LockInfoPresenter.LockInfoView {
 
   private static final String ARG_APP_ENTRY = "app_entry";
 
@@ -116,7 +117,7 @@ public class LockInfoDialog extends RetainedDialogFragment implements LockInfoVi
     unbinder = ButterKnife.bind(this, rootView);
 
     adapter.bind(appEntry, getActivity());
-    presenter.start(this);
+    presenter.onCreateView(this);
     initializeForEntry();
 
     if (firstRefresh) {
@@ -135,7 +136,7 @@ public class LockInfoDialog extends RetainedDialogFragment implements LockInfoVi
     recyclerView.setAdapter(null);
 
     adapter.unbind();
-    presenter.stop();
+    presenter.onDestroyView();
 
     if (unbinder != null) {
       unbinder.unbind();
@@ -147,7 +148,7 @@ public class LockInfoDialog extends RetainedDialogFragment implements LockInfoVi
     Timber.d("onDestroy");
 
     adapter.onDestroy();
-    presenter.destroy();
+    presenter.onDestroy();
   }
 
   private void initializeForEntry() {
