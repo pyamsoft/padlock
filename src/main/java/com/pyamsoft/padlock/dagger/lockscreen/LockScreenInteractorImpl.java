@@ -63,7 +63,6 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
           final ContentValues contentValues =
               new PadLockEntry.Marshal().packageName(padLockEntry.packageName())
                   .activityName(padLockEntry.activityName())
-                  .displayName(padLockEntry.displayName())
                   .lockCode(padLockEntry.lockCode())
                   .lockUntilTime(System.currentTimeMillis() + timeOutMinutesInMillis)
                   .ignoreUntilTime(padLockEntry.ignoreUntilTime())
@@ -146,7 +145,6 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     final ContentValues contentValues =
         new PadLockEntry.Marshal().packageName(oldValues.packageName())
             .activityName(oldValues.activityName())
-            .displayName(oldValues.displayName())
             .lockCode(oldValues.lockCode())
             .lockUntilTime(oldValues.lockUntilTime())
             .ignoreUntilTime(System.currentTimeMillis() + ignoreMinutesInMillis)
