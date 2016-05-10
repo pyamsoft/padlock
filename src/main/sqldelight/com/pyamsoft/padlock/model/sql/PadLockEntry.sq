@@ -2,7 +2,6 @@
 CREATE TABLE padlock_entry (
   packageName TEXT NOT NULL,
   activityName TEXT NOT NULL,
-  displayName TEXT NOT NULL,
   lockCode TEXT,
   lockUntilTime INTEGER NOT NULL,
   ignoreUntilTime INTEGER NOT NULL,
@@ -12,15 +11,13 @@ CREATE TABLE padlock_entry (
 -- Get all entries in the table
 all_entries:
 SELECT *
-FROM padlock_entry
-ORDER BY displayName;
+FROM padlock_entry;
 
 -- Get all entries with the package name
 with_package_name:
 SELECT *
 FROM padlock_entry
-WHERE packageName = ?
-ORDER BY displayName;
+WHERE packageName = ?;
 
 -- Get all entries with the package name and activity name
 with_package_activity_name:
