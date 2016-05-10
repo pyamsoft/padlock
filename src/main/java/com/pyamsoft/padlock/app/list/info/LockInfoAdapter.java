@@ -79,18 +79,18 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
       throw new NullPointerException("Cannot bind with NULL app entry");
     }
 
-    String name;
+    String activityName;
     final String entryName = entry.name();
     if (entryName.startsWith(appEntry.packageName())) {
-      name = entryName.replace(appEntry.packageName(), "");
+      activityName = entryName.replace(appEntry.packageName(), "");
     } else {
-      name = entryName;
+      activityName = entryName;
     }
-    holder.checkBox.setText(name);
+    holder.checkBox.setText(activityName);
 
     holder.checkBox.setOnClickListener(
         view -> dbPresenter.attemptDBModification(position, !holder.checkBox.isChecked(),
-            appEntry.packageName(), entry.name(), null, appEntry.system()));
+            appEntry.packageName(), activityName, null, appEntry.system()));
   }
 
   @Override public void onViewRecycled(ViewHolder holder) {

@@ -115,8 +115,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
       DBProgressDialog.add(fragment.getFragmentManager(), entry.name());
     }
 
-    dbPresenter.attemptDBModification(position, checked, entry.packageName(), entry.name(), null,
-        entry.system());
+    dbPresenter.attemptDBModification(position, checked, entry.packageName(), null, entry.system());
   }
 
   private void authorizeAccess(final ViewHolder holder, final boolean accessPackage,
@@ -139,7 +138,8 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
     final Fragment fragment = weakFragment.get();
     if (fragment != null) {
-      AppUtil.guaranteeSingleDialogFragment(fragment.getFragmentManager(), LockInfoDialog.newInstance(entry), "lock_info");
+      AppUtil.guaranteeSingleDialogFragment(fragment.getFragmentManager(),
+          LockInfoDialog.newInstance(entry), "lock_info");
     }
   }
 
