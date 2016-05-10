@@ -37,4 +37,6 @@ public interface LockScreen extends LockPresenter.LockView {
   long getIgnorePeriodTime();
 
   boolean shouldExcludeEntry();
+
+  void setDisplayName(String name);
 }

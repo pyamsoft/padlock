@@ -90,7 +90,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
 
     holder.checkBox.setOnClickListener(
         view -> dbPresenter.attemptDBModification(position, !holder.checkBox.isChecked(),
-            appEntry.packageName(), entry.name(), appEntry.name(), null, appEntry.system()));
+            appEntry.packageName(), entry.name(), null, appEntry.system()));
   }
 
   @Override public void onViewRecycled(ViewHolder holder) {

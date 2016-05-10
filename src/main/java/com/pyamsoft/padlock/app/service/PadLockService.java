@@ -83,15 +83,14 @@ public final class PadLockService extends AccessibilityService
 
     lockActivity.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
     lockActivity.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
-    lockActivity.removeExtra(LockScreenActivity.ENTRY_NAME);
 
     final String packageName = entry.packageName();
+    final String activityName = entry.activityName();
     lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
-    lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName());
-    lockActivity.putExtra(LockScreenActivity.ENTRY_NAME, displayName);
+    lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
 
     presenter.setLockScreenNotPassed();
-    Timber.d("Start lock activity for entry: %s %s", packageName, displayName);
+    Timber.d("Start lock activity for entry: %s %s", packageName, activityName);
     startActivity(lockActivity);
   }
 

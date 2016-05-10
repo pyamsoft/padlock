@@ -18,18 +18,18 @@ package com.pyamsoft.padlock.dagger.lockscreen;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
-import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
 import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
+import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 final class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenInteractor {
@@ -73,9 +73,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
                   PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, padLockEntry.packageName(),
                   padLockEntry.activityName());
           return true;
-        })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread());
+        });
   }
 
   @WorkerThread @NonNull @Override
@@ -87,14 +85,10 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
             activityName)
         .mapToOne(PadLockEntry.MAPPER::map)
         .filter(padLockEntry -> padLockEntry != null)
-        .first()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread());
+        .first();
 
     final Observable<String> masterPinObservable =
-        Observable.defer(() -> Observable.just(pinInteractor.getMasterPin()))
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread());
+        Observable.defer(() -> Observable.just(pinInteractor.getMasterPin()));
 
     return Observable.zip(dbObservable, masterPinObservable, (padLockEntry, masterPin) -> {
       final long lockUntilTime = padLockEntry.lockUntilTime();
@@ -136,7 +130,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       }
 
       return unlocked;
-    }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    });
   }
 
   @WorkerThread
@@ -166,5 +160,16 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       preferences.setDefaultIgnoreTime(ignoreTime);
       return Observable.just(ignoreTime);
     });
+  }
+
+  @WorkerThread @NonNull @Override public Observable<String> getDisplayName(String packageName) {
+    final PackageManager packageManager = appContext.getPackageManager();
+    try {
+      final ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+      return Observable.just(applicationInfo.loadLabel(packageManager).toString());
+    } catch (PackageManager.NameNotFoundException e) {
+      Timber.e(e, "EXCEPTION");
+      return Observable.just("");
+    }
   }
 }
