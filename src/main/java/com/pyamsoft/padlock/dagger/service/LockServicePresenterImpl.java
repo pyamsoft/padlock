@@ -87,8 +87,8 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
         return Observable.empty();
       }
 
-      Timber.d("Last Package: ", lastPackageName, " - New Package: ", packageName);
-      Timber.d("Last Class: ", lastClassName, " - New Class: ", className);
+      Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName);
+      Timber.d("Last Class: %s - New Class: %s", lastClassName, className);
 
       if (interactor.isEventCausedByNotificationShade(packageName, className)) {
         Timber.i("Notification shade. Event will be ignored");
@@ -102,21 +102,21 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
 
       if (interactor.isNameHardUnlocked(packageName, className)) {
         Timber.i("Class or package is hardcoded to never be locked");
-        Timber.i("P: " + packageName + " C: " + className);
+        Timber.i("P: %s C: %s", packageName, className);
         return Observable.empty();
       }
 
       final boolean packageChanged = interactor.hasNameChanged(packageName, lastPackageName,
           LockServiceInteractor.GOOGLE_KEYBOARD_PACKAGE_REGEX);
       if (packageChanged) {
-        Timber.i("Last package changed from: " + lastPackageName + " to: " + packageName);
+        Timber.i("Last package changed from: %s to: %s", lastPackageName, packageName);
         lastPackageName = packageName;
       }
 
       final boolean classChanged = interactor.hasNameChanged(className, lastClassName,
           LockServiceInteractor.ANDROID_VIEW_CLASS_REGEX);
       if (classChanged) {
-        Timber.i("Last class changed from: " + lastClassName + " to: " + className);
+        Timber.i("Last class changed from: %s to: %s", lastClassName, className);
         lastClassName = className;
       }
 
