@@ -23,7 +23,7 @@ import timber.log.Timber;
 
 final class PadLockOpenHelper extends SQLiteOpenHelper {
 
-  private static final int DATABASE_VERSION = 1;
+  private static final int DATABASE_VERSION = 2;
 
   public PadLockOpenHelper(final Context context) {
     super(context.getApplicationContext(), "padlock_db", null, DATABASE_VERSION);
