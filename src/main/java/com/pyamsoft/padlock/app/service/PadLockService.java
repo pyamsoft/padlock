@@ -21,16 +21,13 @@ import android.support.annotation.NonNull;
 import android.view.accessibility.AccessibilityEvent;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
-import com.pyamsoft.padlock.dagger.pin.MasterPinModule;
 import com.pyamsoft.padlock.dagger.service.DaggerLockServiceComponent;
-import com.pyamsoft.padlock.dagger.service.LockServiceModule;
-import com.pyamsoft.padlock.dagger.service.LockServiceStateModule;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public final class PadLockService extends AccessibilityService implements
-    LockServicePresenter.LockService {
+public final class PadLockService extends AccessibilityService
+    implements LockServicePresenter.LockService {
 
   private static volatile PadLockService instance = null;
   private static volatile boolean enabled = false;
@@ -114,9 +111,6 @@ public final class PadLockService extends AccessibilityService implements
     lockActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
     DaggerLockServiceComponent.builder()
         .padLockComponent(PadLock.padLockComponent(this))
-        .masterPinModule(new MasterPinModule())
-        .lockServiceModule(new LockServiceModule())
-        .lockServiceStateModule(new LockServiceStateModule())
         .build()
         .inject(this);
     presenter.onCreateView(this);
