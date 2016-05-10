@@ -39,8 +39,7 @@ final class DBInteractorImpl implements DBInteractor {
   }
 
   @WorkerThread @SuppressLint("NewApi") @Override
-  public void createEntry(@NonNull String packageName, @NonNull String name, @Nullable String code,
-      boolean system) {
+  public void createEntry(@NonNull String packageName, @Nullable String code, boolean system) {
     final PackageManager packageManager = appContext.getPackageManager();
     final PackageInfo packageInfo;
     try {
@@ -55,7 +54,7 @@ final class DBInteractorImpl implements DBInteractor {
         for (final ActivityInfo info : activities) {
           final String activityName = info.name;
           if (activityName != null) {
-            createEntry(packageName, activityName, name, code, system);
+            createEntry(packageName, activityName, code, system);
           }
         }
         transaction.markSuccessful();
@@ -65,12 +64,11 @@ final class DBInteractorImpl implements DBInteractor {
 
   @WorkerThread @Override
   public void createEntry(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String name, @Nullable String code, boolean system) {
+      @Nullable String code, boolean system) {
     Timber.d("CREATE: %s %s", packageName, activityName);
     PadLockDB.with(appContext)
         .insert(PadLockEntry.TABLE_NAME, new PadLockEntry.Marshal().packageName(packageName)
             .activityName(activityName)
-            .displayName(name)
             .lockCode(code)
             .lockUntilTime(0)
             .ignoreUntilTime(0)

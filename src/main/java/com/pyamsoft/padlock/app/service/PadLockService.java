@@ -86,7 +86,6 @@ public final class PadLockService extends AccessibilityService
     lockActivity.removeExtra(LockScreenActivity.ENTRY_NAME);
 
     final String packageName = entry.packageName();
-    final String displayName = entry.displayName();
     lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
     lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName());
     lockActivity.putExtra(LockScreenActivity.ENTRY_NAME, displayName);
