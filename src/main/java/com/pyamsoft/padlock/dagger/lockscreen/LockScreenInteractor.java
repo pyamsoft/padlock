@@ -31,4 +31,6 @@ public interface LockScreenInteractor extends LockInteractor {
   @WorkerThread @NonNull Observable<Long> getDefaultIgnoreTime();
 
   @WorkerThread @NonNull Observable<Long> setDefaultIgnoreTime(long ignoreTime);
+
+  @WorkerThread @NonNull Observable<String> getDisplayName(String packageName);
 }

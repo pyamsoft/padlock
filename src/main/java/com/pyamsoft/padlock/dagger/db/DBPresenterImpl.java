@@ -57,60 +57,60 @@ final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements
   }
 
   @NonNull private Observable<Boolean> packageModificationObservable(boolean checked,
-      @NonNull String packageName, @NonNull String name, @NonNull String code, boolean system)
+      @NonNull String packageName, @NonNull String code, boolean system)
       throws NullPointerException {
     return Observable.defer(() -> {
       if (checked) {
         Timber.d("Cursor does not have existing DB data, this is an add call");
-        dbInteractor.createEntry(packageName, name, code, system);
+        dbInteractor.createEntry(packageName, code, system);
       } else {
         Timber.d("Cursor has existing DB data, this is a delete call");
         dbInteractor.deleteEntry(packageName);
       }
       return Observable.just(checked);
-    }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    });
   }
 
   @Override
-  public void attemptDBModification(int position, boolean newState, String packageName, String name,
-      String code, boolean system) throws NullPointerException {
+  public void attemptDBModification(int position, boolean newState, String packageName, String code,
+      boolean system) throws NullPointerException {
     unsubPackageSubscription();
     dbPackageSubscription =
-        packageModificationObservable(newState, packageName, name, code, system).subscribe(
-            created -> {
-              Timber.d("onNext in DBPresenterImpl with data: ", created);
-              if (created) {
-                get().onDBCreateEvent(position);
-              } else {
-                get().onDBDeleteEvent(position);
-              }
-            }, throwable -> {
-              Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
-              get().onDBError();
-            });
+        packageModificationObservable(newState, packageName, code, system).subscribeOn(
+            Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(created -> {
+          Timber.d("onNext in DBPresenterImpl with data: ", created);
+          if (created) {
+            get().onDBCreateEvent(position);
+          } else {
+            get().onDBDeleteEvent(position);
+          }
+        }, throwable -> {
+          Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
+          get().onDBError();
+        });
   }
 
   @NonNull
   private Observable<Boolean> activityModificationObservable(boolean checked, String packageName,
-      String activityName, String name, String code, boolean system) throws NullPointerException {
+      String activityName, String code, boolean system) throws NullPointerException {
     return Observable.defer(() -> {
       if (checked) {
         Timber.d("Cursor does not have existing DB data, this is an add call");
-        dbInteractor.createEntry(packageName, activityName, name, code, system);
+        dbInteractor.createEntry(packageName, activityName, code, system);
       } else {
         Timber.d("Cursor has existing DB data, this is a delete call");
         dbInteractor.deleteEntry(packageName, activityName);
       }
       return Observable.just(checked);
-    }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    });
   }
 
   @Override public void attemptDBModification(int position, boolean checked, String packageName,
-      String activity, String name, String code, boolean system) throws NullPointerException {
+      String activity, String code, boolean system) throws NullPointerException {
     unsubActivitySubscription();
     dbActivitySubscription =
-        activityModificationObservable(checked, packageName, activity, name, code,
-            system).subscribe(created -> {
+        activityModificationObservable(checked, packageName, activity, code, system).subscribeOn(
+            Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(created -> {
           Timber.d("onNext in DBPresenterImpl with data: ", created);
           if (created) {
             get().onDBCreateEvent(position);

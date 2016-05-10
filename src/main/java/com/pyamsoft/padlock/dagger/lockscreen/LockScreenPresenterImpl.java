@@ -38,6 +38,7 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   @NonNull private Subscription ignoreSubscription = Subscriptions.empty();
   @NonNull private Subscription unlockSubscription = Subscriptions.empty();
   @NonNull private Subscription lockSubscription = Subscriptions.empty();
+  @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
 
   @Inject public LockScreenPresenterImpl(final Context context,
       @NonNull final LockScreenInteractor lockScreenInteractor) {
@@ -104,6 +105,8 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     unsubLock();
     lockSubscription =
         lockScreenInteractor.lockEntry(lockScreen.getPackageName(), lockScreen.getActivityName())
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(unlocked -> {
               Timber.d("Received lock entry result");
               if (unlocked) {
@@ -124,17 +127,39 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     unlockSubscription =
         lockScreenInteractor.unlockEntry(lockScreen.getPackageName(), lockScreen.getActivityName(),
             lockScreen.getCurrentAttempt(), lockScreen.shouldExcludeEntry(),
-            lockScreen.getIgnorePeriodTime()).subscribe(unlocked -> {
-          Timber.d("Received unlock entry result");
-          if (unlocked) {
-            lockScreen.onSubmitSuccess();
-          } else {
-            lockScreen.onSubmitFailure();
-          }
+            lockScreen.getIgnorePeriodTime())
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(unlocked -> {
+              Timber.d("Received unlock entry result");
+              if (unlocked) {
+                lockScreen.onSubmitSuccess();
+              } else {
+                lockScreen.onSubmitFailure();
+              }
+            }, throwable -> {
+              Timber.e(throwable, "unlockEntry onError");
+              lockScreen.onSubmitError();
+              unsubUnlock();
+            }, this::unsubUnlock);
+  }
+
+  @Override public void loadDisplayNameFromPackage() {
+    unsubDisplayName();
+    displayNameSubscription = lockScreenInteractor.getDisplayName(get().getPackageName())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(s -> {
+          get().setDisplayName(s);
         }, throwable -> {
-          Timber.e(throwable, "unlockEntry onError");
-          lockScreen.onSubmitError();
-          unsubUnlock();
-        }, this::unsubUnlock);
+          Timber.e(throwable, "Error loading display name from package");
+          get().setDisplayName("");
+        });
+  }
+
+  private void unsubDisplayName() {
+    if (!displayNameSubscription.isUnsubscribed()) {
+      displayNameSubscription.unsubscribe();
+    }
   }
 }

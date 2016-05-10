@@ -24,4 +24,6 @@ public interface LockScreenPresenter extends LockPresenter<LockScreen> {
   void setIgnorePeriodFromPreferences(@Nullable Long time) throws NullPointerException;
 
   void lockEntry();
+
+  void loadDisplayNameFromPackage();
 }

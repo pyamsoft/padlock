@@ -50,7 +50,6 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = LockViewDelegate.ENTRY_PACKAGE_NAME;
   @NonNull public static final String ENTRY_ACTIVITY_NAME = LockViewDelegate.ENTRY_ACTIVITY_NAME;
-  @NonNull public static final String ENTRY_NAME = "entry_name";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
   @NonNull private final Intent home;
@@ -78,6 +77,10 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
   }
 
+  @Override public void setDisplayName(String name) {
+    appName = name;
+  }
+
   @Override public void onCreate(final Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light_Lock);
     super.onCreate(savedInstanceState);
@@ -100,18 +103,11 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
     Timber.d("bind");
-    getValuesFromIntent();
+    presenter.loadDisplayNameFromPackage();
 
     ViewCompat.setElevation(appBarLayout, 0);
     setSupportActionBar(toolbar);
     failCount = 0;
-  }
-
-  private void getValuesFromIntent() {
-    final Intent intent = getIntent();
-    appName = intent.getStringExtra(ENTRY_NAME);
-    Timber.d("Got value appName: %s", appName);
-    Timber.d("reset fail count");
   }
 
   @Override protected void onStart() {

@@ -34,7 +34,7 @@ final class PadLockOpenHelper extends SQLiteOpenHelper {
     sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
   }
 
-  @Override public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-    Timber.d("onUpgrade");
+  @Override public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+    Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion);
   }
 }

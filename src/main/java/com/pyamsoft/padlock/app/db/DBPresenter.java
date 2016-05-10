@@ -20,11 +20,11 @@ import com.pyamsoft.pydroid.base.Presenter;
 
 public interface DBPresenter extends Presenter<DBPresenter.DBView> {
 
-  void attemptDBModification(int position, boolean checked, String packageName, String name,
-      String code, boolean system) throws NullPointerException;
+  void attemptDBModification(int position, boolean checked, String packageName, String code,
+      boolean system) throws NullPointerException;
 
   void attemptDBModification(int position, boolean checked, String packageName, String activity,
-      String name, String code, boolean system) throws NullPointerException;
+      String code, boolean system) throws NullPointerException;
 
   interface DBView {
 
