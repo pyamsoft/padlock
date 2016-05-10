@@ -19,11 +19,13 @@ package com.pyamsoft.padlock.model.sql;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
+import java.util.Locale;
 import timber.log.Timber;
 
 final class PadLockOpenHelper extends SQLiteOpenHelper {
 
-  private static final int DATABASE_VERSION = 2;
+  private static final int DATABASE_VERSION = 1;
 
   public PadLockOpenHelper(final Context context) {
     super(context.getApplicationContext(), "padlock_db", null, DATABASE_VERSION);
@@ -36,5 +38,46 @@ final class PadLockOpenHelper extends SQLiteOpenHelper {
 
   @Override public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
     Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion);
+    if (oldVersion == 1 && newVersion == 2) {
+      upgradeVersion1To2(sqLiteDatabase);
+    }
+  }
+
+  private static void upgradeVersion1To2(SQLiteDatabase sqLiteDatabase) {
+    Timber.d("Upgrading from Version 1 to 2 drops the displayName column");
+
+    // Remove the columns we don't want anymore from the table's list of columns
+    Timber.d("Gather a list of the remaining columns");
+    final String[] updatedTableColumns = {
+        PadLockEntry.PACKAGENAME, PadLockEntry.ACTIVITYNAME, PadLockEntry.LOCKCODE,
+        PadLockEntry.LOCKUNTILTIME, PadLockEntry.IGNOREUNTILTIME, PadLockEntry.SYSTEMAPPLICATION
+    };
+
+    final String columnsSeperated = TextUtils.join(",", updatedTableColumns);
+    Timber.d("Column seperated: %s", columnsSeperated);
+
+    final String tableName = PadLockEntry.TABLE_NAME;
+    final String oldTable = tableName + "_old";
+    final String alterTable =
+        String.format(Locale.getDefault(), "ALTER TABLE %s RENAME TO %s", tableName, oldTable);
+    final String insertIntoNewTable =
+        String.format(Locale.getDefault(), "INSERT INTO %s(%s) SELECT %s FROM %s", tableName,
+            columnsSeperated, columnsSeperated, oldTable);
+    final String dropOldTable = String.format(Locale.getDefault(), "DROP TABLE %s", oldTable);
+
+    // Move the existing table to an old table
+    Timber.d("EXEC SQL: %s", alterTable);
+    sqLiteDatabase.execSQL(alterTable);
+
+    // Creating the table on its new format (no redundant columns)
+    Timber.d("EXEC SQL: %s", PadLockEntry.CREATE_TABLE);
+    sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
+
+    // Populating the table with the data
+    Timber.d("EXEC SQL: %s", insertIntoNewTable);
+    sqLiteDatabase.execSQL(insertIntoNewTable);
+
+    Timber.d("EXEC SQL: %s", dropOldTable);
+    sqLiteDatabase.execSQL(dropOldTable);
   }
 }
