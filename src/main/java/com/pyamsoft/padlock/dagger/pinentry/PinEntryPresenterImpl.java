@@ -63,9 +63,9 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(pinEntryEvent -> {
+            PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
             if (pinEntryEvent.complete()) {
               pinScreen.onSubmitSuccess();
-              PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
             } else {
               pinScreen.onSubmitFailure();
             }
