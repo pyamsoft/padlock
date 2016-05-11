@@ -51,6 +51,7 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     unsubIgnoreTime();
     unsubUnlock();
     unsubLock();
+    unsubDisplayName();
   }
 
   private void unsubIgnoreTime() {
