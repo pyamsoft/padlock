@@ -62,7 +62,6 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   private DataHolderFragment<Long> ignoreDataHolder;
   private DataHolderFragment<Boolean> excludeDataHolder;
-  private String appName;
   private MenuItem menuIgnoreNone;
   private MenuItem menuIgnoreFive;
   private MenuItem menuIgnoreTen;
@@ -78,7 +77,10 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
   }
 
   @Override public void setDisplayName(String name) {
-    appName = name;
+    final ActionBar bar = getSupportActionBar();
+    if (bar != null) {
+      bar.setTitle(name);
+    }
   }
 
   @Override public void onCreate(final Bundle savedInstanceState) {
@@ -102,9 +104,6 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     lockViewDelegate.setTextColor(android.R.color.white);
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
-    Timber.d("bind");
-    presenter.loadDisplayNameFromPackage();
-
     ViewCompat.setElevation(appBarLayout, 0);
     setSupportActionBar(toolbar);
     failCount = 0;
@@ -113,10 +112,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
   @Override protected void onStart() {
     super.onStart();
     Timber.d("onStart");
-    final ActionBar bar = getSupportActionBar();
-    if (bar != null) {
-      bar.setTitle(appName);
-    }
+    presenter.loadDisplayNameFromPackage();
     lockViewDelegate.onStart(presenter);
 
     supportInvalidateOptionsMenu();
