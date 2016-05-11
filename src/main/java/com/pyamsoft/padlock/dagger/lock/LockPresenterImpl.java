@@ -51,10 +51,16 @@ public abstract class LockPresenterImpl<I extends LockPresenter.LockView> extend
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(drawable -> {
-          get().setImageSuccess(drawable);
+          final LockView lockView = getView();
+          if (lockView != null) {
+            lockView.setImageSuccess(drawable);
+          }
         }, throwable -> {
           Timber.e(throwable, "onError");
-          get().setImageError();
+          final LockView lockView = getView();
+          if (lockView != null) {
+            lockView.setImageError();
+          }
         });
   }
 

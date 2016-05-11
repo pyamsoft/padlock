@@ -18,9 +18,9 @@ package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.dagger.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.padlock.app.settings.SettingsPresenter;
+import com.pyamsoft.padlock.dagger.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
@@ -31,7 +31,8 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.SettingsView> implements SettingsPresenter {
+final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.SettingsView>
+    implements SettingsPresenter {
 
   @NonNull private final LockScreenInteractor lockScreenInteractor;
   @NonNull private final SettingsInteractor settingsInteractor;
@@ -89,15 +90,17 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(time -> {
-          final SettingsView settingsView = get();
-          if (time == PadLockPreferences.PERIOD_FIVE) {
-            settingsView.setIgnorePeriodFive();
-          } else if (time == PadLockPreferences.PERIOD_TEN) {
-            settingsView.setIgnorePeriodTen();
-          } else if (time == PadLockPreferences.PERIOD_THIRTY) {
-            settingsView.setIgnorePeriodThirty();
-          } else {
-            settingsView.setIgnorePeriodNone();
+          final SettingsView settingsView = getView();
+          if (settingsView != null) {
+            if (time == PadLockPreferences.PERIOD_FIVE) {
+              settingsView.setIgnorePeriodFive();
+            } else if (time == PadLockPreferences.PERIOD_TEN) {
+              settingsView.setIgnorePeriodTen();
+            } else if (time == PadLockPreferences.PERIOD_THIRTY) {
+              settingsView.setIgnorePeriodThirty();
+            } else {
+              settingsView.setIgnorePeriodNone();
+            }
           }
         }, throwable -> {
           Timber.e(throwable, "setIgnorePeriodFromPreference onError");
@@ -146,15 +149,17 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(time -> {
-          final SettingsView settingsView = get();
-          if (time == PadLockPreferences.PERIOD_ONE) {
-            settingsView.setTimeoutPeriodOne();
-          } else if (time == PadLockPreferences.PERIOD_FIVE) {
-            settingsView.setTimeoutPeriodFive();
-          } else if (time == PadLockPreferences.PERIOD_TEN) {
-            settingsView.setTimeoutPeriodTen();
-          } else {
-            settingsView.setTimeoutPeriodNone();
+          final SettingsView settingsView = getView();
+          if (settingsView != null) {
+            if (time == PadLockPreferences.PERIOD_ONE) {
+              settingsView.setTimeoutPeriodOne();
+            } else if (time == PadLockPreferences.PERIOD_FIVE) {
+              settingsView.setTimeoutPeriodFive();
+            } else if (time == PadLockPreferences.PERIOD_TEN) {
+              settingsView.setTimeoutPeriodTen();
+            } else {
+              settingsView.setTimeoutPeriodNone();
+            }
           }
         }, throwable -> {
           Timber.e(throwable, "setTimeoutPeriodFromPreference onError");

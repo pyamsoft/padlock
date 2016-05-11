@@ -56,20 +56,23 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
   @Override public void submit() {
     Timber.d("Attempt PIN submission");
     unsubPinEntry();
-    pinEntrySubscription = interactor.submitMasterPin(get().getCurrentAttempt())
-        .filter(pinEntryEvent -> pinEntryEvent != null)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(pinEntryEvent -> {
-          if (pinEntryEvent.complete()) {
-            get().onSubmitSuccess();
-            PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
-          } else {
-            get().onSubmitFailure();
-          }
-        }, throwable -> {
-          Timber.e(throwable, "attemptPinSubmission onError");
-          get().onSubmitError();
-        });
+    final PinScreen pinScreen = getView();
+    if (pinScreen != null) {
+      pinEntrySubscription = interactor.submitMasterPin(pinScreen.getCurrentAttempt())
+          .filter(pinEntryEvent -> pinEntryEvent != null)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(pinEntryEvent -> {
+            if (pinEntryEvent.complete()) {
+              pinScreen.onSubmitSuccess();
+              PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
+            } else {
+              pinScreen.onSubmitFailure();
+            }
+          }, throwable -> {
+            Timber.e(throwable, "attemptPinSubmission onError");
+            pinScreen.onSubmitError();
+          });
+    }
   }
 }

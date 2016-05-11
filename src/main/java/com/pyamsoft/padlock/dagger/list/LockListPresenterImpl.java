@@ -155,11 +155,24 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
         .filter(appEntry -> appEntry != null)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(appEntry -> get().onEntryAddedToList(appEntry), throwable -> {
+        .subscribe(appEntry -> {
+          final LockList lockList = getView();
+          if (lockList != null) {
+            lockList.onEntryAddedToList(appEntry);
+          }
+        }, throwable -> {
           // TODO handle error
           Timber.e(throwable, "populateList onError");
-          get().onListPopulated();
-        }, () -> get().onListPopulated());
+          final LockList lockList = getView();
+          if (lockList != null) {
+            lockList.onListPopulated();
+          }
+        }, () -> {
+          final LockList lockList = getView();
+          if (lockList != null) {
+            lockList.onListPopulated();
+          }
+        });
   }
 
   @Nullable private AppEntry createFromPackageInfo(PackageManager packageManager, PackageInfo info,
@@ -214,11 +227,13 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(bool -> {
-              final LockList lockList = get();
-              if (bool) {
-                lockList.setFABStateEnabled();
-              } else {
-                lockList.setFABStateDisabled();
+              final LockList lockList = getView();
+              if (lockList != null) {
+                if (bool) {
+                  lockList.setFABStateEnabled();
+                } else {
+                  lockList.setFABStateDisabled();
+                }
               }
             }, throwable -> {
               Timber.e(throwable, "setFABStateFromPreference onError");
@@ -251,11 +266,13 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(bool -> {
-          final LockList lockList = get();
-          if (bool) {
-            lockList.setSystemVisible();
-          } else {
-            lockList.setSystemInvisible();
+          final LockList lockList = getView();
+          if (lockList != null) {
+            if (bool) {
+              lockList.setSystemVisible();
+            } else {
+              lockList.setSystemInvisible();
+            }
           }
         }, throwable -> {
           Timber.e(throwable, "setSystemVisiblityFromPreference onError");
@@ -263,7 +280,10 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
   }
 
   @Override public void clickPinFAB() {
-    get().onPinFABClicked();
+    final LockList lockList = getView();
+    if (lockList != null) {
+      lockList.onPinFABClicked();
+    }
   }
 
   @Override public void showOnBoarding() {
@@ -272,8 +292,11 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(onboard -> {
-          if (!onboard) {
-            get().showOnBoarding();
+          final LockList lockList = getView();
+          if (lockList != null) {
+            if (!onboard) {
+              lockList.showOnBoarding();
+            }
           }
         }, throwable -> {
           // TODO handle error
@@ -287,8 +310,11 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
         ConfirmationDialog.ConfirmationDialogBus.get().register().subscribe(confirmationEvent -> {
           Timber.d("Received confirmation event!");
           if (confirmationEvent.type() == 0 && confirmationEvent.complete()) {
-            Timber.d("Received database cleared confirmation event, refreshList");
-            get().refreshList();
+            final LockList lockList = getView();
+            if (lockList != null) {
+              Timber.d("Received database cleared confirmation event, refreshList");
+              lockList.refreshList();
+            }
           }
         }, throwable -> {
           Timber.e(throwable, "ConfirmationDialogBus onError");
@@ -305,21 +331,23 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
     unregisterFromPinEntryBus();
     pinEntryBusSubscription =
         PinEntryDialog.PinEntryBus.get().register().subscribe(pinEntryEvent -> {
-          final LockList lockList = get();
-          if (lockList instanceof MasterPinSubmitCallback) {
-            final MasterPinSubmitCallback callback = (MasterPinSubmitCallback) lockList;
-            switch (pinEntryEvent.type()) {
-              case 0:
-                if (pinEntryEvent.complete()) {
-                  callback.onCreateMasterPin();
-                }
-                break;
-              case 1:
-                if (pinEntryEvent.complete()) {
-                  callback.onClearMasterPinSuccess();
-                } else {
-                  callback.onClearMasterPinFailure();
-                }
+          final LockList lockList = getView();
+          if (lockList != null) {
+            if (lockList instanceof MasterPinSubmitCallback) {
+              final MasterPinSubmitCallback callback = (MasterPinSubmitCallback) lockList;
+              switch (pinEntryEvent.type()) {
+                case 0:
+                  if (pinEntryEvent.complete()) {
+                    callback.onCreateMasterPin();
+                  }
+                  break;
+                case 1:
+                  if (pinEntryEvent.complete()) {
+                    callback.onClearMasterPinSuccess();
+                  } else {
+                    callback.onClearMasterPinFailure();
+                  }
+              }
             }
           }
         }, throwable -> {
