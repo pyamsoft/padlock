@@ -53,21 +53,6 @@ public class LockInfoDialog extends RetainedDialogFragment
     implements LockInfoPresenter.LockInfoView {
 
   @NonNull private static final String ARG_APP_ENTRY = "app_entry";
-
-  @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
-    @Override public void run() {
-      swipeRefreshLayout.setRefreshing(false);
-      layoutManager.setVerticalScrollEnabled(true);
-    }
-  };
-
-  @NonNull private final Runnable startRefreshRunnable = new Runnable() {
-    @Override public void run() {
-      swipeRefreshLayout.setRefreshing(true);
-      layoutManager.setVerticalScrollEnabled(false);
-    }
-  };
-
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;
   @BindView(R.id.lock_info_icon) ImageView icon;
@@ -75,16 +60,26 @@ public class LockInfoDialog extends RetainedDialogFragment
   @BindView(R.id.lock_info_system) TextView system;
   @BindView(R.id.lock_info_swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
   @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
-
   @Inject LockInfoPresenter presenter;
   @Inject DBPresenter dbPresenter;
   @Inject AdapterPresenter<ActivityEntry> adapterPresenter;
-
   private DataHolderFragment<Presenter> presenterDataHolder;
   private LockInfoAdapter adapter;
   private AppEntry appEntry;
   private boolean firstRefresh;
   private LockListLayoutManager layoutManager;
+  @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
+    @Override public void run() {
+      swipeRefreshLayout.setRefreshing(false);
+      layoutManager.setVerticalScrollEnabled(true);
+    }
+  };
+  @NonNull private final Runnable startRefreshRunnable = new Runnable() {
+    @Override public void run() {
+      swipeRefreshLayout.setRefreshing(true);
+      layoutManager.setVerticalScrollEnabled(false);
+    }
+  };
   private Unbinder unbinder;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {

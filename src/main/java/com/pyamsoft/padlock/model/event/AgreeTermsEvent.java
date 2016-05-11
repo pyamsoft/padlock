@@ -24,11 +24,11 @@ import com.google.auto.value.AutoValue;
     return new AutoValue_AgreeTermsEvent.Builder().agreed(false);
   }
 
-// --Commented out by Inspection START (4/30/16 2:09 PM):
-//  public static AgreeTermsEvent.Builder builder(AgreeTermsEvent event) {
-//    return new AutoValue_AgreeTermsEvent.Builder(event).agreed(false);
-//  }
-// --Commented out by Inspection STOP (4/30/16 2:09 PM)
+  // --Commented out by Inspection START (4/30/16 2:09 PM):
+  //  public static AgreeTermsEvent.Builder builder(AgreeTermsEvent event) {
+  //    return new AutoValue_AgreeTermsEvent.Builder(event).agreed(false);
+  //  }
+  // --Commented out by Inspection STOP (4/30/16 2:09 PM)
 
   public abstract boolean agreed();
 

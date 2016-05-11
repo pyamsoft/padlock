@@ -31,18 +31,6 @@ final class PadLockOpenHelper extends SQLiteOpenHelper {
     super(context.getApplicationContext(), "padlock_db", null, DATABASE_VERSION);
   }
 
-  @Override public void onCreate(SQLiteDatabase sqLiteDatabase) {
-    Timber.d("onCreate");
-    sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
-  }
-
-  @Override public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-    Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion);
-    if (oldVersion == 1 && newVersion == 2) {
-      upgradeVersion1To2(sqLiteDatabase);
-    }
-  }
-
   private static void upgradeVersion1To2(SQLiteDatabase sqLiteDatabase) {
     Timber.d("Upgrading from Version 1 to 2 drops the displayName column");
 
@@ -79,5 +67,17 @@ final class PadLockOpenHelper extends SQLiteOpenHelper {
 
     Timber.d("EXEC SQL: %s", dropOldTable);
     sqLiteDatabase.execSQL(dropOldTable);
+  }
+
+  @Override public void onCreate(SQLiteDatabase sqLiteDatabase) {
+    Timber.d("onCreate");
+    sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
+  }
+
+  @Override public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+    Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion);
+    if (oldVersion == 1 && newVersion == 2) {
+      upgradeVersion1To2(sqLiteDatabase);
+    }
   }
 }

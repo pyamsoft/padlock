@@ -24,11 +24,11 @@ import com.google.auto.value.AutoValue;
     return new AutoValue_PinEntryEvent.Builder();
   }
 
-// --Commented out by Inspection START (4/30/16 2:14 PM):
-//  public static PinEntryEvent.Builder builder(PinEntryEvent event) {
-//    return new AutoValue_PinEntryEvent.Builder(event);
-//  }
-// --Commented out by Inspection STOP (4/30/16 2:14 PM)
+  // --Commented out by Inspection START (4/30/16 2:14 PM):
+  //  public static PinEntryEvent.Builder builder(PinEntryEvent event) {
+  //    return new AutoValue_PinEntryEvent.Builder(event);
+  //  }
+  // --Commented out by Inspection STOP (4/30/16 2:14 PM)
 
   public abstract int type();
 
