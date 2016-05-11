@@ -64,7 +64,15 @@ public final class LockListFragment extends PageAwareFragment
     implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
 
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
-
+  @BindView(R.id.applist_fab) FloatingActionButton fab;
+  @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
+  @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
+  @Inject LockListPresenter presenter;
+  @Inject AdapterPresenter<AppEntry> adapterPresenter;
+  @Inject DBPresenter dbPresenter;
+  private DataHolderFragment<Presenter> presenterDataHolder;
+  private LockListAdapter adapter;
+  private LockListLayoutManager lockListLayoutManager;
   @NonNull private final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
       swipeRefreshLayout.setRefreshing(true);
@@ -76,7 +84,6 @@ public final class LockListFragment extends PageAwareFragment
       }
     }
   };
-
   @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
       swipeRefreshLayout.setRefreshing(false);
@@ -88,18 +95,6 @@ public final class LockListFragment extends PageAwareFragment
       }
     }
   };
-
-  @BindView(R.id.applist_fab) FloatingActionButton fab;
-  @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
-  @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
-
-  @Inject LockListPresenter presenter;
-  @Inject AdapterPresenter<AppEntry> adapterPresenter;
-  @Inject DBPresenter dbPresenter;
-
-  private DataHolderFragment<Presenter> presenterDataHolder;
-  private LockListAdapter adapter;
-  private LockListLayoutManager lockListLayoutManager;
   private boolean firstRefresh;
   private AsyncVectorDrawableTask fabIconTask;
   private SwitchCompat displaySystem;

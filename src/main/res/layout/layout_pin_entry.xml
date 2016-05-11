@@ -17,10 +17,10 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/pin_entry_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:id="@+id/pin_entry_root"
     >
 
   <LinearLayout
@@ -52,8 +52,8 @@
   </LinearLayout>
 
   <include
-      android:id="@+id/pin_entry_lock_screen"
       layout="@layout/layout_lock_screen"
+      android:id="@+id/pin_entry_lock_screen"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       />

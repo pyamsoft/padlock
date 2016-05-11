@@ -22,8 +22,7 @@ import javax.inject.Inject;
 
 final class ActivityEntryAdapterInteractorImpl extends AdapterInteractorImpl<ActivityEntry> {
 
-  @Inject
-  public ActivityEntryAdapterInteractorImpl() {
+  @Inject public ActivityEntryAdapterInteractorImpl() {
     super();
   }
 }

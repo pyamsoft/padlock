@@ -23,18 +23,17 @@ import com.pyamsoft.pydroid.base.ApplicationPreferences;
 
 public class PadLockPreferences extends ApplicationPreferences {
 
+  public static final long PERIOD_NONE = 0L;
+  public static final long PERIOD_ONE = 1L;
+  public static final long PERIOD_FIVE = 5L;
+  public static final long PERIOD_TEN = 10L;
+  public static final long PERIOD_THIRTY = 30L;
   @NonNull private static final String TIMEOUT_PERIOD = "timeout_period";
   @NonNull private static final String IGNORE_TIME = "ignore_time";
   @NonNull private static final String IS_SYSTEM = "is_system";
   @NonNull private static final String MASTER_PASSWORD = "master_password";
   @NonNull private static final String AGREED = "agreed";
   @NonNull private static final String ONBOARD = "onboard";
-
-  public static final long PERIOD_NONE = 0L;
-  public static final long PERIOD_ONE = 1L;
-  public static final long PERIOD_FIVE = 5L;
-  public static final long PERIOD_TEN = 10L;
-  public static final long PERIOD_THIRTY = 30L;
 
   public PadLockPreferences(final @NonNull Context context) {
     super(context);

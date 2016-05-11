@@ -21,8 +21,7 @@ import javax.inject.Inject;
 
 final class AppEntryAdapterInteractorImpl extends AdapterInteractorImpl<AppEntry> {
 
-  @Inject
-  public AppEntryAdapterInteractorImpl() {
+  @Inject public AppEntryAdapterInteractorImpl() {
     super();
   }
 }

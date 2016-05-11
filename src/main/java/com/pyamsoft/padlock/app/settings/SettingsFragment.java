@@ -39,8 +39,8 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.StringUtil;
 import javax.inject.Inject;
 
-public final class SettingsFragment extends PageAwareFragment implements
-    SettingsPresenter.SettingsView {
+public final class SettingsFragment extends PageAwareFragment
+    implements SettingsPresenter.SettingsView {
 
   @Inject SettingsPresenter presenter;
 

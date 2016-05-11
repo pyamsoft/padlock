@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.dagger.pinentry;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
 import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
+import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import javax.inject.Inject;
 import rx.Observable;
