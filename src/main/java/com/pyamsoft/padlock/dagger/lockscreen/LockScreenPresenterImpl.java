@@ -73,15 +73,17 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   }
 
   private void setIgnorePeriod(final long time) throws NullPointerException {
-    final LockScreen lockScreen = get();
-    if (time == PadLockPreferences.PERIOD_FIVE) {
-      lockScreen.setIgnoreTimeFive();
-    } else if (time == PadLockPreferences.PERIOD_TEN) {
-      lockScreen.setIgnoreTimeTen();
-    } else if (time == PadLockPreferences.PERIOD_THIRTY) {
-      lockScreen.setIgnoreTimeThirty();
-    } else {
-      lockScreen.setIgnoreTimeNone();
+    final LockScreen lockScreen = getView();
+    if (lockScreen != null) {
+      if (time == PadLockPreferences.PERIOD_FIVE) {
+        lockScreen.setIgnoreTimeFive();
+      } else if (time == PadLockPreferences.PERIOD_TEN) {
+        lockScreen.setIgnoreTimeTen();
+      } else if (time == PadLockPreferences.PERIOD_THIRTY) {
+        lockScreen.setIgnoreTimeThirty();
+      } else {
+        lockScreen.setIgnoreTimeNone();
+      }
     }
   }
 
@@ -94,7 +96,10 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(this::setIgnorePeriod, throwable -> {
             Timber.e(throwable, "setIgnorePeriodFromPreferences onError");
-            get().setIgnoreTimeError();
+            final LockScreen lockScreen = getView();
+            if (lockScreen != null) {
+              lockScreen.setIgnoreTimeError();
+            }
           });
     } else {
       setIgnorePeriod(ignoreTime);
@@ -102,60 +107,64 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   }
 
   @Override public void lockEntry() {
-    final LockScreen lockScreen = get();
     unsubLock();
-    lockSubscription =
-        lockScreenInteractor.lockEntry(lockScreen.getPackageName(), lockScreen.getActivityName())
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(unlocked -> {
-              Timber.d("Received lock entry result");
-              if (unlocked) {
-                lockScreen.onLocked();
-              } else {
+    final LockScreen lockScreen = getView();
+    if (lockScreen != null) {
+      lockSubscription =
+          lockScreenInteractor.lockEntry(lockScreen.getPackageName(), lockScreen.getActivityName())
+              .subscribeOn(Schedulers.io())
+              .observeOn(AndroidSchedulers.mainThread())
+              .subscribe(unlocked -> {
+                Timber.d("Received lock entry result");
+                if (unlocked) {
+                  lockScreen.onLocked();
+                } else {
+                  lockScreen.onLockedError();
+                }
+              }, throwable -> {
+                Timber.e(throwable, "lockEntry onError");
                 lockScreen.onLockedError();
-              }
-            }, throwable -> {
-              Timber.e(throwable, "lockEntry onError");
-              lockScreen.onLockedError();
-              unsubLock();
-            }, this::unsubLock);
+                unsubLock();
+              }, this::unsubLock);
+    }
   }
 
   @Override public void submit() {
-    final LockScreen lockScreen = get();
     unsubUnlock();
-    unlockSubscription =
-        lockScreenInteractor.unlockEntry(lockScreen.getPackageName(), lockScreen.getActivityName(),
-            lockScreen.getCurrentAttempt(), lockScreen.shouldExcludeEntry(),
-            lockScreen.getIgnorePeriodTime())
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(unlocked -> {
-              Timber.d("Received unlock entry result");
-              if (unlocked) {
-                lockScreen.onSubmitSuccess();
-              } else {
-                lockScreen.onSubmitFailure();
-              }
-            }, throwable -> {
-              Timber.e(throwable, "unlockEntry onError");
-              lockScreen.onSubmitError();
-              unsubUnlock();
-            }, this::unsubUnlock);
+    final LockScreen lockScreen = getView();
+    if (lockScreen != null) {
+      unlockSubscription = lockScreenInteractor.unlockEntry(lockScreen.getPackageName(),
+          lockScreen.getActivityName(), lockScreen.getCurrentAttempt(),
+          lockScreen.shouldExcludeEntry(), lockScreen.getIgnorePeriodTime())
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(unlocked -> {
+            Timber.d("Received unlock entry result");
+            if (unlocked) {
+              lockScreen.onSubmitSuccess();
+            } else {
+              lockScreen.onSubmitFailure();
+            }
+          }, throwable -> {
+            Timber.e(throwable, "unlockEntry onError");
+            lockScreen.onSubmitError();
+            unsubUnlock();
+          }, this::unsubUnlock);
+    }
   }
 
   @Override public void loadDisplayNameFromPackage() {
     unsubDisplayName();
-    displayNameSubscription = lockScreenInteractor.getDisplayName(get().getPackageName())
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(s -> {
-          get().setDisplayName(s);
-        }, throwable -> {
-          Timber.e(throwable, "Error loading display name from package");
-          get().setDisplayName("");
-        });
+    final LockScreen lockScreen = getView();
+    if (lockScreen != null) {
+      displayNameSubscription = lockScreenInteractor.getDisplayName(lockScreen.getPackageName())
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(lockScreen::setDisplayName, throwable -> {
+            Timber.e(throwable, "Error loading display name from package");
+            lockScreen.setDisplayName("");
+          });
+    }
   }
 
   private void unsubDisplayName() {

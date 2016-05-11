@@ -134,7 +134,10 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
     lockedEntrySubscription =
         getLockedEntryObservable(packageName, className).subscribe(padLockEntry -> {
           Timber.d("Got PadLockEntry for LockScreen: ", padLockEntry.packageName());
-          get().startLockScreen(padLockEntry);
+          final LockService lockService = getView();
+          if (lockService != null) {
+            lockService.startLockScreen(padLockEntry);
+          }
 
           Timber.d("Unsub from observable");
           unsubLockedEntry();

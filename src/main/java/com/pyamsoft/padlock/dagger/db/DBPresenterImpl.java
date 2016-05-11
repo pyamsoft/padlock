@@ -79,14 +79,20 @@ final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements
         packageModificationObservable(newState, packageName, code, system).subscribeOn(
             Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(created -> {
           Timber.d("onNext in DBPresenterImpl with data: ", created);
-          if (created) {
-            get().onDBCreateEvent(position);
-          } else {
-            get().onDBDeleteEvent(position);
+          final DBView dbView = getView();
+          if (dbView != null) {
+            if (created) {
+              dbView.onDBCreateEvent(position);
+            } else {
+              dbView.onDBDeleteEvent(position);
+            }
           }
         }, throwable -> {
           Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
-          get().onDBError();
+          final DBView dbView = getView();
+          if (dbView != null) {
+            dbView.onDBError();
+          }
         });
   }
 
@@ -112,14 +118,20 @@ final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements
         activityModificationObservable(checked, packageName, activity, code, system).subscribeOn(
             Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(created -> {
           Timber.d("onNext in DBPresenterImpl with data: ", created);
-          if (created) {
-            get().onDBCreateEvent(position);
-          } else {
-            get().onDBDeleteEvent(position);
+          final DBView dbView = getView();
+          if (dbView != null) {
+            if (created) {
+              dbView.onDBCreateEvent(position);
+            } else {
+              dbView.onDBDeleteEvent(position);
+            }
           }
         }, throwable -> {
           Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
-          get().onDBError();
+          final DBView dbView = getView();
+          if (dbView != null) {
+            dbView.onDBError();
+          }
         });
   }
 }

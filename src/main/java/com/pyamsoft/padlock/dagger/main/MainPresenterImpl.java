@@ -28,7 +28,8 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class MainPresenterImpl extends PresenterImpl<MainPresenter.MainView> implements MainPresenter {
+final class MainPresenterImpl extends PresenterImpl<MainPresenter.MainView>
+    implements MainPresenter {
 
   @NonNull private final MainInteractor interactor;
 
@@ -63,8 +64,11 @@ final class MainPresenterImpl extends PresenterImpl<MainPresenter.MainView> impl
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(agreed -> {
-          if (!agreed) {
-            get().showUsageTermsDialog();
+          final MainView mainView = getView();
+          if (mainView != null) {
+            if (!agreed) {
+              mainView.showUsageTermsDialog();
+            }
           }
         }, throwable -> {
           // TODO handle error
@@ -82,7 +86,6 @@ final class MainPresenterImpl extends PresenterImpl<MainPresenter.MainView> impl
     unregisterFromAgreeTermsBus();
     agreeTermsBusSubscription =
         AgreeTermsDialog.AgreeTermsBus.get().register().subscribe(agreeTermsEvent -> {
-          final MainView mainView = get();
           if (agreeTermsEvent.agreed()) {
             unsubAgreeTermsSubscription();
             agreeTermsSubscription = interactor.setAgreed()
@@ -90,7 +93,10 @@ final class MainPresenterImpl extends PresenterImpl<MainPresenter.MainView> impl
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe();
           } else {
-            mainView.onDidNotAgreeToTerms();
+            final MainView mainView = getView();
+            if (mainView != null) {
+              mainView.onDidNotAgreeToTerms();
+            }
           }
         }, throwable -> {
           Timber.e(throwable, "AgreeTermsBus onError");

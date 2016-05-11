@@ -97,10 +97,23 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
             .filter(activityEntry -> activityEntry != null)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(activityEntry -> get().onEntryAddedToList(activityEntry), throwable -> {
+            .subscribe(activityEntry -> {
+              final LockInfoView lockInfoView = getView();
+              if (lockInfoView != null) {
+                lockInfoView.onEntryAddedToList(activityEntry);
+              }
+            }, throwable -> {
               Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
-              get().onListPopulateError();
-            }, () -> get().onListPopulated());
+              final LockInfoView lockInfoView = getView();
+              if (lockInfoView != null) {
+                lockInfoView.onListPopulateError();
+              }
+            }, () -> {
+              final LockInfoView lockInfoView = getView();
+              if (lockInfoView != null) {
+                lockInfoView.onListPopulated();
+              }
+            });
   }
 
   private void unsubPopulateList() {
