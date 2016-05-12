@@ -20,22 +20,28 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements DBPresenter {
 
   @NonNull private final DBInteractor dbInteractor;
+  @NonNull private final Scheduler mainScheduler;
+  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription dbPackageSubscription = Subscriptions.empty();
   @NonNull private Subscription dbActivitySubscription = Subscriptions.empty();
 
-  @Inject public DBPresenterImpl(final @NonNull DBInteractor dbInteractor) {
+  @Inject public DBPresenterImpl(final @NonNull DBInteractor dbInteractor,
+      final @NonNull @Named("main") Scheduler mainScheduler,
+      final @NonNull @Named("io") Scheduler ioScheduler) {
     this.dbInteractor = dbInteractor;
+    this.mainScheduler = mainScheduler;
+    this.ioScheduler = ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -56,82 +62,66 @@ final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements
     }
   }
 
-  @NonNull private Observable<Boolean> packageModificationObservable(boolean checked,
-      @NonNull String packageName, @NonNull String code, boolean system)
-      throws NullPointerException {
-    return Observable.defer(() -> {
-      if (checked) {
+  @Override
+  public void attemptDBModification(int position, boolean newState, String packageName, String code,
+      boolean system) throws NullPointerException {
+    unsubPackageSubscription();
+    dbPackageSubscription = Observable.defer(() -> {
+      if (newState) {
         Timber.d("Cursor does not have existing DB data, this is an add call");
         dbInteractor.createEntry(packageName, code, system);
       } else {
         Timber.d("Cursor has existing DB data, this is a delete call");
         dbInteractor.deleteEntry(packageName);
       }
-      return Observable.just(checked);
-    });
-  }
-
-  @Override
-  public void attemptDBModification(int position, boolean newState, String packageName, String code,
-      boolean system) throws NullPointerException {
-    unsubPackageSubscription();
-    dbPackageSubscription =
-        packageModificationObservable(newState, packageName, code, system).subscribeOn(
-            Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(created -> {
-          Timber.d("onNext in DBPresenterImpl with data: ", created);
-          final DBView dbView = getView();
-          if (dbView != null) {
-            if (created) {
-              dbView.onDBCreateEvent(position);
-            } else {
-              dbView.onDBDeleteEvent(position);
-            }
-          }
-        }, throwable -> {
-          Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
-          final DBView dbView = getView();
-          if (dbView != null) {
-            dbView.onDBError();
-          }
-        });
-  }
-
-  @NonNull
-  private Observable<Boolean> activityModificationObservable(boolean checked, String packageName,
-      String activityName, String code, boolean system) throws NullPointerException {
-    return Observable.defer(() -> {
-      if (checked) {
-        Timber.d("Cursor does not have existing DB data, this is an add call");
-        dbInteractor.createEntry(packageName, activityName, code, system);
-      } else {
-        Timber.d("Cursor has existing DB data, this is a delete call");
-        dbInteractor.deleteEntry(packageName, activityName);
+      return Observable.just(newState);
+    }).subscribeOn(ioScheduler).observeOn(mainScheduler).subscribe(created -> {
+      Timber.d("onNext in DBPresenterImpl with data: ", created);
+      final DBView dbView = getView();
+      if (dbView != null) {
+        if (created) {
+          dbView.onDBCreateEvent(position);
+        } else {
+          dbView.onDBDeleteEvent(position);
+        }
       }
-      return Observable.just(checked);
+    }, throwable -> {
+      Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
+      final DBView dbView = getView();
+      if (dbView != null) {
+        dbView.onDBError();
+      }
     });
   }
 
   @Override public void attemptDBModification(int position, boolean checked, String packageName,
       String activity, String code, boolean system) throws NullPointerException {
     unsubActivitySubscription();
-    dbActivitySubscription =
-        activityModificationObservable(checked, packageName, activity, code, system).subscribeOn(
-            Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(created -> {
-          Timber.d("onNext in DBPresenterImpl with data: ", created);
-          final DBView dbView = getView();
-          if (dbView != null) {
-            if (created) {
-              dbView.onDBCreateEvent(position);
-            } else {
-              dbView.onDBDeleteEvent(position);
-            }
-          }
-        }, throwable -> {
-          Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
-          final DBView dbView = getView();
-          if (dbView != null) {
-            dbView.onDBError();
-          }
-        });
+    dbActivitySubscription = Observable.defer(() -> {
+      if (checked) {
+        Timber.d("Cursor does not have existing DB data, this is an add call");
+        dbInteractor.createEntry(packageName, activity, code, system);
+      } else {
+        Timber.d("Cursor has existing DB data, this is a delete call");
+        dbInteractor.deleteEntry(packageName, activity);
+      }
+      return Observable.just(checked);
+    }).subscribeOn(ioScheduler).observeOn(mainScheduler).subscribe(created -> {
+      Timber.d("onNext in DBPresenterImpl with data: ", created);
+      final DBView dbView = getView();
+      if (dbView != null) {
+        if (created) {
+          dbView.onDBCreateEvent(position);
+        } else {
+          dbView.onDBDeleteEvent(position);
+        }
+      }
+    }, throwable -> {
+      Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
+      final DBView dbView = getView();
+      if (dbView != null) {
+        dbView.onDBError();
+      }
+    });
   }
 }

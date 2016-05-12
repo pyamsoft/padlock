@@ -21,10 +21,10 @@ import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -33,6 +33,8 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
 
   @NonNull private final LockServiceInteractor interactor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
+  @NonNull private final Scheduler mainScheduler;
+  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
 
@@ -41,9 +43,13 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
   private String lastClassName;
 
   @Inject public LockServicePresenterImpl(@NonNull final LockServiceStateInteractor stateInteractor,
-      @NonNull final LockServiceInteractor interactor) {
+      @NonNull final LockServiceInteractor interactor,
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
     this.interactor = interactor;
     this.stateInteractor = stateInteractor;
+    this.mainScheduler = mainScheduler;
+    this.ioScheduler = ioScheduler;
   }
 
   private void setLockScreenPassed(boolean b) {
@@ -69,8 +75,8 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
     return interactor.getEntry(lastPackageName, lastClassName)
         .mapToOne(PadLockEntry.MAPPER::map)
         .filter(padLockEntry -> padLockEntry != null)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread());
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler);
   }
 
   private void unsubLockedEntry() {
@@ -79,9 +85,10 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
     }
   }
 
-  @NonNull
-  private Observable<PadLockEntry> getLockedEntryObservable(String packageName, String className) {
-    return Observable.defer(() -> {
+  @Override
+  public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className) {
+    unsubLockedEntry();
+    lockedEntrySubscription = Observable.defer(() -> {
       if (!stateInteractor.isServiceEnabled()) {
         Timber.e("Service is not user-enabled");
         return Observable.empty();
@@ -125,24 +132,17 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
       } else {
         return Observable.empty();
       }
-    }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-  }
+    }).subscribeOn(ioScheduler).observeOn(mainScheduler).subscribe(padLockEntry -> {
+      Timber.d("Got PadLockEntry for LockScreen: ", padLockEntry.packageName());
+      final LockService lockService = getView();
+      if (lockService != null) {
+        lockService.startLockScreen(padLockEntry);
+      }
 
-  @Override
-  public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className) {
-    unsubLockedEntry();
-    lockedEntrySubscription =
-        getLockedEntryObservable(packageName, className).subscribe(padLockEntry -> {
-          Timber.d("Got PadLockEntry for LockScreen: ", padLockEntry.packageName());
-          final LockService lockService = getView();
-          if (lockService != null) {
-            lockService.startLockScreen(padLockEntry);
-          }
-
-          Timber.d("Unsub from observable");
-          unsubLockedEntry();
-        }, throwable -> {
-          Timber.e(throwable, "Error getting PadLockEntry for LockScreen");
-        });
+      Timber.d("Unsub from observable");
+      unsubLockedEntry();
+    }, throwable -> {
+      Timber.e(throwable, "Error getting PadLockEntry for LockScreen");
+    });
   }
 }

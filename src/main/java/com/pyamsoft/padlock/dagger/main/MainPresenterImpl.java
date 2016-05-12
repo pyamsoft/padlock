@@ -22,9 +22,9 @@ import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
+import javax.inject.Named;
+import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -32,13 +32,19 @@ final class MainPresenterImpl extends PresenterImpl<MainPresenter.MainView>
     implements MainPresenter {
 
   @NonNull private final MainInteractor interactor;
+  @NonNull private final Scheduler mainScheduler;
+  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
   @NonNull private Subscription agreeTermsBusSubscription = Subscriptions.empty();
   @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
 
-  @Inject public MainPresenterImpl(@NonNull final MainInteractor interactor) {
+  @Inject public MainPresenterImpl(@NonNull final MainInteractor interactor,
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
     this.interactor = interactor;
+    this.mainScheduler = mainScheduler;
+    this.ioScheduler = ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -61,8 +67,8 @@ final class MainPresenterImpl extends PresenterImpl<MainPresenter.MainView>
   @Override public void showTermsDialog() {
     unsubAgreeTermsSubscription();
     agreeTermsSubscription = interactor.hasAgreed()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe(agreed -> {
           final MainView mainView = getView();
           if (mainView != null) {
@@ -89,8 +95,8 @@ final class MainPresenterImpl extends PresenterImpl<MainPresenter.MainView>
           if (agreeTermsEvent.agreed()) {
             unsubAgreeTermsSubscription();
             agreeTermsSubscription = interactor.setAgreed()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(ioScheduler)
+                .observeOn(mainScheduler)
                 .subscribe();
           } else {
             final MainView mainView = getView();

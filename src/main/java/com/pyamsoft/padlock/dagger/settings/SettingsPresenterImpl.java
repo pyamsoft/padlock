@@ -24,10 +24,10 @@ import com.pyamsoft.padlock.dagger.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -36,6 +36,8 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
 
   @NonNull private final LockScreenInteractor lockScreenInteractor;
   @NonNull private final SettingsInteractor settingsInteractor;
+  @NonNull private final Scheduler mainScheduler;
+  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
   @NonNull private Subscription ignorePeriodSubscription = Subscriptions.empty();
@@ -43,9 +45,13 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
   @NonNull private Subscription confirmDialogSubscription = Subscriptions.empty();
 
   @Inject public SettingsPresenterImpl(@NonNull final LockScreenInteractor lockScreenInteractor,
-      @NonNull final SettingsInteractor settingsInteractor) {
+      @NonNull final SettingsInteractor settingsInteractor,
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
     this.lockScreenInteractor = lockScreenInteractor;
     this.settingsInteractor = settingsInteractor;
+    this.mainScheduler = mainScheduler;
+    this.ioScheduler = ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -87,8 +93,8 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
   @Override public void setIgnorePeriodFromPreference() {
     unsubscribeIgnorePeriod();
     ignorePeriodSubscription = lockScreenInteractor.getDefaultIgnoreTime()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe(time -> {
           final SettingsView settingsView = getView();
           if (settingsView != null) {
@@ -111,8 +117,8 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
     unsubscribeIgnorePeriod();
     ignorePeriodSubscription =
         lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_NONE)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(ioScheduler)
+            .observeOn(mainScheduler)
             .subscribe();
   }
 
@@ -120,8 +126,8 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
     unsubscribeIgnorePeriod();
     ignorePeriodSubscription =
         lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_FIVE)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(ioScheduler)
+            .observeOn(mainScheduler)
             .subscribe();
   }
 
@@ -129,8 +135,8 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
     unsubscribeIgnorePeriod();
     ignorePeriodSubscription =
         lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_TEN)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(ioScheduler)
+            .observeOn(mainScheduler)
             .subscribe();
   }
 
@@ -138,16 +144,16 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
     unsubscribeIgnorePeriod();
     ignorePeriodSubscription =
         lockScreenInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_THIRTY)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(ioScheduler)
+            .observeOn(mainScheduler)
             .subscribe();
   }
 
   @Override public void setTimeoutPeriodFromPreference() {
     unsubscribeTimeout();
     timeoutSubscription = settingsInteractor.getTimeoutPeriod()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe(time -> {
           final SettingsView settingsView = getView();
           if (settingsView != null) {
@@ -169,45 +175,41 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
   @Override public void setTimeoutPeriodNone() {
     unsubscribeTimeout();
     settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_NONE)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe();
   }
 
   @Override public void setTimeoutPeriodOne() {
     unsubscribeTimeout();
     settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_ONE)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe();
   }
 
   @Override public void setTimeoutPeriodFive() {
     unsubscribeTimeout();
     settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_FIVE)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe();
   }
 
   @Override public void setTimeoutPeriodTen() {
     unsubscribeTimeout();
     settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_TEN)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe();
   }
 
   private Observable<Boolean> clearDatabase() {
-    return settingsInteractor.clearDatabase()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread());
+    return settingsInteractor.clearDatabase().subscribeOn(ioScheduler).observeOn(mainScheduler);
   }
 
   private Observable<Boolean> clearAll() {
-    return settingsInteractor.clearAll()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread());
+    return settingsInteractor.clearAll().subscribeOn(ioScheduler).observeOn(mainScheduler);
   }
 
   private void unregisterFromConfirmDialogBus() {

@@ -20,9 +20,9 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
 import com.pyamsoft.pydroid.base.PresenterImpl;
+import javax.inject.Named;
+import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -30,14 +30,27 @@ public abstract class LockPresenterImpl<I extends LockPresenter.LockView> extend
     implements LockPresenter<I> {
 
   @NonNull private final LockInteractor lockInteractor;
+  @NonNull private final Scheduler mainScheduler;
+  @NonNull private final Scheduler ioScheduler;
   @NonNull private final Context appContext;
 
   @NonNull private Subscription imageSubscription = Subscriptions.empty();
 
   protected LockPresenterImpl(final @NonNull Context context,
-      @NonNull final LockInteractor lockInteractor) {
+      @NonNull final LockInteractor lockInteractor, @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
+    this.mainScheduler = mainScheduler;
+    this.ioScheduler = ioScheduler;
     this.appContext = context.getApplicationContext();
     this.lockInteractor = lockInteractor;
+  }
+
+  @NonNull protected final Scheduler getMainScheduler() {
+    return mainScheduler;
+  }
+
+  @NonNull protected final Scheduler getIoScheduler() {
+    return ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -48,8 +61,8 @@ public abstract class LockPresenterImpl<I extends LockPresenter.LockView> extend
   @Override public final void loadPackageIcon(final @NonNull String packageName) {
     unsubImageSubscription();
     imageSubscription = lockInteractor.loadPackageIcon(appContext, packageName)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe(drawable -> {
           final LockView lockView = getView();
           if (lockView != null) {

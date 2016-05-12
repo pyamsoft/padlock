@@ -21,6 +21,10 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Named;
+import rx.Scheduler;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 @Module public class PadLockModule {
 
@@ -38,5 +42,13 @@ import dagger.Provides;
 
   @Provides PadLockPreferences providePreferences() {
     return preferences;
+  }
+
+  @Provides @Named("io") Scheduler provideIOScheduler() {
+    return Schedulers.io();
+  }
+
+  @Provides @Named("main") Scheduler provideMainThreadScheduler() {
+    return AndroidSchedulers.mainThread();
   }
 }

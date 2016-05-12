@@ -36,10 +36,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -48,6 +48,8 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
 
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
+  @NonNull private final Scheduler mainScheduler;
+  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
   @NonNull private Subscription pinEntryBusSubscription = Subscriptions.empty();
@@ -57,9 +59,13 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
   @NonNull private Subscription onBoardingSubscription = Subscriptions.empty();
 
   @Inject public LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
-      final @NonNull LockServiceStateInteractor stateInteractor) {
+      final @NonNull LockServiceStateInteractor stateInteractor,
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
     this.lockListInteractor = lockListInteractor;
     this.stateInteractor = stateInteractor;
+    this.mainScheduler = mainScheduler;
+    this.ioScheduler = ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -98,8 +104,8 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
   private void setSystemVisible(boolean visible) {
     unsubscribeSystemVisible();
     systemVisibleSubscription = lockListInteractor.setSystemVisible(visible)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe();
   }
 
@@ -153,8 +159,8 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
         })
         .concatMap(Observable::from)
         .filter(appEntry -> appEntry != null)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe(appEntry -> {
           final LockList lockList = getView();
           if (lockList != null) {
@@ -224,8 +230,8 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
     unsubscribeFabState();
     fabStateSubscription =
         Observable.defer(() -> Observable.just(stateInteractor.isServiceEnabled()))
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(ioScheduler)
+            .observeOn(mainScheduler)
             .subscribe(bool -> {
               final LockList lockList = getView();
               if (lockList != null) {
@@ -263,8 +269,8 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
   @Override public void setSystemVisibilityFromPreference() {
     unsubscribeSystemVisible();
     systemVisibleSubscription = lockListInteractor.isSystemVisible()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe(bool -> {
           final LockList lockList = getView();
           if (lockList != null) {
@@ -289,8 +295,8 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
   @Override public void showOnBoarding() {
     unsubscribeOnBoarding();
     onBoardingSubscription = lockListInteractor.hasShownOnBoarding()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe(onboard -> {
           final LockList lockList = getView();
           if (lockList != null) {
@@ -364,8 +370,8 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
   @Override public void setOnBoard() {
     unsubscribeOnBoarding();
     onBoardingSubscription = lockListInteractor.setShownOnBoarding()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
         .subscribe();
   }
 }

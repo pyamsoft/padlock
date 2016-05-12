@@ -24,9 +24,9 @@ import com.pyamsoft.padlock.app.lockscreen.LockScreen;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter;
 import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;
 import javax.inject.Inject;
+import javax.inject.Named;
+import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -41,8 +41,10 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
 
   @Inject public LockScreenPresenterImpl(final Context context,
-      @NonNull final LockScreenInteractor lockScreenInteractor) {
-    super(context.getApplicationContext(), lockScreenInteractor);
+      @NonNull final LockScreenInteractor lockScreenInteractor,
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
+    super(context.getApplicationContext(), lockScreenInteractor, mainScheduler, ioScheduler);
     this.lockScreenInteractor = lockScreenInteractor;
   }
 
@@ -92,8 +94,8 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     unsubIgnoreTime();
     if (ignoreTime == null) {
       ignoreSubscription = lockScreenInteractor.getDefaultIgnoreTime()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
+          .subscribeOn(getIoScheduler())
+          .observeOn(getMainScheduler())
           .subscribe(this::setIgnorePeriod, throwable -> {
             Timber.e(throwable, "setIgnorePeriodFromPreferences onError");
             final LockScreen lockScreen = getView();
@@ -112,8 +114,8 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     if (lockScreen != null) {
       lockSubscription =
           lockScreenInteractor.lockEntry(lockScreen.getPackageName(), lockScreen.getActivityName())
-              .subscribeOn(Schedulers.io())
-              .observeOn(AndroidSchedulers.mainThread())
+              .subscribeOn(getIoScheduler())
+              .observeOn(getMainScheduler())
               .subscribe(unlocked -> {
                 Timber.d("Received lock entry result");
                 if (unlocked) {
@@ -136,8 +138,8 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
       unlockSubscription = lockScreenInteractor.unlockEntry(lockScreen.getPackageName(),
           lockScreen.getActivityName(), lockScreen.getCurrentAttempt(),
           lockScreen.shouldExcludeEntry(), lockScreen.getIgnorePeriodTime())
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
+          .subscribeOn(getIoScheduler())
+          .observeOn(getMainScheduler())
           .subscribe(unlocked -> {
             Timber.d("Received unlock entry result");
             if (unlocked) {
@@ -158,8 +160,8 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     final LockScreen lockScreen = getView();
     if (lockScreen != null) {
       displayNameSubscription = lockScreenInteractor.getDisplayName(lockScreen.getPackageName())
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
+          .subscribeOn(getIoScheduler())
+          .observeOn(getMainScheduler())
           .subscribe(lockScreen::setDisplayName, throwable -> {
             Timber.e(throwable, "Error loading display name from package");
             lockScreen.setDisplayName("");
