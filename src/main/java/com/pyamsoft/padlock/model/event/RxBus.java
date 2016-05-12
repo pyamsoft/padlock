@@ -35,8 +35,6 @@ public abstract class RxBus<T> {
   }
 
   @NonNull public Observable<T> register() {
-    return bus.filter(confirmationEvent -> confirmationEvent != null)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread());
+    return bus.filter(confirmationEvent -> confirmationEvent != null);
   }
 }
