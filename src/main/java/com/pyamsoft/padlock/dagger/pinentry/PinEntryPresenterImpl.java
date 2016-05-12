@@ -23,9 +23,9 @@ import com.pyamsoft.padlock.app.pinentry.PinEntryPresenter;
 import com.pyamsoft.padlock.app.pinentry.PinScreen;
 import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;
 import javax.inject.Inject;
+import javax.inject.Named;
+import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -36,9 +36,11 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
 
   @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
 
-  @Inject public PinEntryPresenterImpl(final Context context,
-      @NonNull final PinEntryInteractor interactor) {
-    super(context.getApplicationContext(), interactor);
+  @Inject
+  public PinEntryPresenterImpl(final Context context, @NonNull final PinEntryInteractor interactor,
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
+    super(context.getApplicationContext(), interactor, mainScheduler, ioScheduler);
     this.interactor = interactor;
   }
 
@@ -60,8 +62,8 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
     if (pinScreen != null) {
       pinEntrySubscription = interactor.submitMasterPin(pinScreen.getCurrentAttempt())
           .filter(pinEntryEvent -> pinEntryEvent != null)
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
+          .subscribeOn(getIoScheduler())
+          .observeOn(getMainScheduler())
           .subscribe(pinEntryEvent -> {
             PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
             if (pinEntryEvent.complete()) {

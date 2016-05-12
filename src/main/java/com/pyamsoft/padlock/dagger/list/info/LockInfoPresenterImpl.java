@@ -25,7 +25,9 @@ import com.pyamsoft.pydroid.base.PresenterImpl;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -36,11 +38,16 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
     implements LockInfoPresenter {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;
+  @NonNull private final Scheduler mainScheduler;
+  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
 
-  @Inject public LockInfoPresenterImpl(final @NonNull LockInfoInteractor lockInfoInteractor) {
+  @Inject public LockInfoPresenterImpl(final @NonNull LockInfoInteractor lockInfoInteractor,
+      final @NonNull @Named("main") Scheduler mainScheduler, final @NonNull @Named("io") Scheduler ioScheduler) {
     this.lockInfoInteractor = lockInfoInteractor;
+    this.mainScheduler = mainScheduler;
+    this.ioScheduler = ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -95,8 +102,8 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
             })
             .concatMap(Observable::from)
             .filter(activityEntry -> activityEntry != null)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(ioScheduler)
+            .observeOn(mainScheduler)
             .subscribe(activityEntry -> {
               final LockInfoView lockInfoView = getView();
               if (lockInfoView != null) {
