@@ -24,14 +24,6 @@ public interface SettingsPresenter extends Presenter<SettingsPresenter.SettingsV
 
   void setTimeoutPeriodFromPreference();
 
-  void setTimeoutPeriodNone();
-
-  void setTimeoutPeriodOne();
-
-  void setTimeoutPeriodFive();
-
-  void setTimeoutPeriodTen();
-
   interface SettingsView {
 
     void setIgnorePeriodNone();

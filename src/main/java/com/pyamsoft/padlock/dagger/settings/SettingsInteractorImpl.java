@@ -56,11 +56,4 @@ final class SettingsInteractorImpl implements SettingsInteractor {
     return Observable.defer(() -> Observable.just(preferences.getTimeoutPeriod()))
         .map(aLong -> aLong == null ? PadLockPreferences.PERIOD_FIVE : aLong);
   }
-
-  @NonNull @Override public Observable<Long> setTimeoutPeriod(long ignoreTime) {
-    return Observable.defer(() -> {
-      preferences.setTimeoutPeriod(ignoreTime);
-      return Observable.just(ignoreTime);
-    });
-  }
 }

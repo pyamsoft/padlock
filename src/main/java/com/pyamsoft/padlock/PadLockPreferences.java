@@ -30,7 +30,8 @@ public class PadLockPreferences extends ApplicationPreferences {
   public static final long PERIOD_THIRTY = 30L;
   @NonNull private final String ignoreTimeKey;
   @NonNull private final String ignoreTimeDefault;
-  @NonNull private static final String TIMEOUT_PERIOD = "timeout_period";
+  @NonNull private final String timeoutTimeKey;
+  @NonNull private final String timeoutTimeDefault;
   @NonNull private static final String IS_SYSTEM = "is_system";
   @NonNull private static final String MASTER_PASSWORD = "master_password";
   @NonNull private static final String AGREED = "agreed";
@@ -41,6 +42,8 @@ public class PadLockPreferences extends ApplicationPreferences {
     final Context appContext = context.getApplicationContext();
     ignoreTimeKey = appContext.getString(R.string.ignore_time_key);
     ignoreTimeDefault = appContext.getString(R.string.ignore_time_default);
+    timeoutTimeKey = appContext.getString(R.string.timeout_time_key);
+    timeoutTimeDefault = appContext.getString(R.string.timeout_time_default);
   }
 
   public final long getDefaultIgnoreTime() {
@@ -48,11 +51,7 @@ public class PadLockPreferences extends ApplicationPreferences {
   }
 
   public final long getTimeoutPeriod() {
-    return get(PadLockPreferences.TIMEOUT_PERIOD, PadLockPreferences.PERIOD_FIVE);
-  }
-
-  public final void setTimeoutPeriod(long timeoutPeriod) {
-    put(PadLockPreferences.TIMEOUT_PERIOD, timeoutPeriod);
+    return Long.parseLong(get(timeoutTimeKey, timeoutTimeDefault));
   }
 
   public final boolean isSystemVisible() {
