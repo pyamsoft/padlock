@@ -40,6 +40,7 @@ import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.lockscreen.DaggerLockScreenComponent;
+import com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule;
 import com.pyamsoft.pydroid.base.ActivityBase;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -98,6 +99,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     // Inject Dagger graph
     DaggerLockScreenComponent.builder()
         .padLockComponent(PadLock.padLockComponent(this))
+        .lockScreenModule(new LockScreenModule(this))
         .build()
         .inject(this);
 
@@ -348,22 +350,16 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
   }
 
   @Override public long getIgnorePeriodTime() {
-    final String[] ignoreTimes = getResources().getStringArray(R.array.ignore_time_entries);
-    String period = null;
     if (menuIgnoreFive != null && menuIgnoreTen != null && menuIgnoreThirty != null) {
       if (menuIgnoreFive.isChecked()) {
-        period = ignoreTimes[1];
+        return presenter.getIgnoreTimeFive();
       } else if (menuIgnoreTen.isChecked()) {
-        period = ignoreTimes[2];
+        return presenter.getIgnoreTimeTen();
       } else if (menuIgnoreThirty.isChecked()) {
-        period = ignoreTimes[3];
+        return presenter.getIgnoreTimeThirty();
       }
     }
-    if (period == null) {
-      period = ignoreTimes[0];
-    }
-
-    return Long.parseLong(period);
+    return presenter.getIgnoreTimeNone();
   }
 
   @Override public boolean shouldExcludeEntry() {
