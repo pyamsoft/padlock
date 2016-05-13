@@ -155,13 +155,6 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         .map(aLong -> aLong == null ? PadLockPreferences.PERIOD_NONE : aLong);
   }
 
-  @WorkerThread @NonNull @Override public Observable<Long> setDefaultIgnoreTime(long ignoreTime) {
-    return Observable.defer(() -> {
-      preferences.setDefaultIgnoreTime(ignoreTime);
-      return Observable.just(ignoreTime);
-    });
-  }
-
   @WorkerThread @NonNull @Override public Observable<String> getDisplayName(String packageName) {
     final PackageManager packageManager = appContext.getPackageManager();
     try {

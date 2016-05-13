@@ -24,6 +24,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -87,6 +88,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     setTheme(R.style.Theme_PadLock_Light_Lock);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_lock);
+    PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     // Init holders here to avoid IllegalStateException
     ignoreDataHolder = DataHolderFragment.getInstance(this, Long.class);
