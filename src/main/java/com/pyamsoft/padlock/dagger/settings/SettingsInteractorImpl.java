@@ -23,6 +23,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Observable;
 import timber.log.Timber;
 
@@ -33,10 +34,10 @@ final class SettingsInteractorImpl implements SettingsInteractor {
   private final long defaultTimeoutPeriod;
 
   @Inject public SettingsInteractorImpl(final @NonNull Context context,
-      final @NonNull PadLockPreferences preferences) {
+      final @NonNull PadLockPreferences preferences, @Named("timeout_default") long defaultTimeoutPeriod) {
+    this.defaultTimeoutPeriod = defaultTimeoutPeriod;
     appContext = context.getApplicationContext();
     this.preferences = preferences;
-    this.defaultTimeoutPeriod = Long.parseLong(appContext.getString(R.string.timeout_time_default));
   }
 
   @NonNull @Override public Observable<Boolean> clearDatabase() {

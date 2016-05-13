@@ -16,12 +16,22 @@
 
 package com.pyamsoft.padlock.dagger.settings;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.settings.SettingsPresenter;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Named;
 
 @Module public class SettingsModule {
+
+  private final long defaultTimeoutTime;
+
+  public SettingsModule(final @NonNull Context context) {
+    final Context appContext = context.getApplicationContext();
+    defaultTimeoutTime = Long.parseLong(appContext.getString(R.string.timeout_time_default));
+  }
 
   @Provides SettingsPresenter provideSettingsPresenter(
       final @NonNull SettingsPresenterImpl presenter) {
@@ -31,5 +41,9 @@ import dagger.Provides;
   @Provides SettingsInteractor provideSettingsInteractor(
       final @NonNull SettingsInteractorImpl interactor) {
     return interactor;
+  }
+
+  @Provides @Named("timeout_default") long provideTimeoutDefault() {
+    return defaultTimeoutTime;
   }
 }

@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.dagger.settings.DaggerSettingsComponent;
+import com.pyamsoft.padlock.dagger.settings.SettingsModule;
 import javax.inject.Inject;
 
 public final class SettingsFragment extends PreferenceFragmentCompat
@@ -19,6 +20,7 @@ public final class SettingsFragment extends PreferenceFragmentCompat
       Bundle savedInstanceState) {
     DaggerSettingsComponent.builder()
         .padLockComponent(PadLock.padLockComponent(this))
+        .settingsModule(new SettingsModule(getContext()))
         .build()
         .inject(this);
     presenter.onCreateView(this);
