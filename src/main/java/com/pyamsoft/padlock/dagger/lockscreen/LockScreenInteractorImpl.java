@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
 import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
 import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
@@ -38,6 +39,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   @NonNull private final DBInteractor dbInteractor;
   @NonNull private final Context appContext;
   @NonNull private final PadLockPreferences preferences;
+  private final long defaultIgnoreTime;
 
   @Inject public LockScreenInteractorImpl(final Context context,
       @NonNull final PadLockPreferences preferences, @NonNull final DBInteractor dbInteractor,
@@ -46,6 +48,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     this.preferences = preferences;
     this.dbInteractor = dbInteractor;
     this.pinInteractor = masterPinInteractor;
+    this.defaultIgnoreTime = Long.parseLong(appContext.getString(R.string.ignore_time_default));
   }
 
   @WorkerThread @NonNull @Override
@@ -112,7 +115,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
       // KLUDGE we must do this here as we need the padlock entry
       if (unlocked) {
-        if (ignoreForPeriod != PadLockPreferences.PERIOD_NONE) {
+        if (ignoreForPeriod != defaultIgnoreTime) {
           Timber.d("IGNORE requested, update entry in DB");
           ignoreEntryForTime(padLockEntry, ignoreForPeriod);
         }
@@ -152,7 +155,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @WorkerThread @NonNull @Override public Observable<Long> getDefaultIgnoreTime() {
     return Observable.defer(() -> Observable.just(preferences.getDefaultIgnoreTime()))
-        .map(aLong -> aLong == null ? PadLockPreferences.PERIOD_NONE : aLong);
+        .map(aLong -> aLong == null ? defaultIgnoreTime : aLong);
   }
 
   @WorkerThread @NonNull @Override public Observable<String> getDisplayName(String packageName) {
