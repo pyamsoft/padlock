@@ -20,6 +20,7 @@
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/orangeA200</item>
+    <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
   </style>
 
   <style name="Base.Theme.PadLock.Light.Crash" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
