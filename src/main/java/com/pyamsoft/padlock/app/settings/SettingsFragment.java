@@ -9,6 +9,7 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.dagger.settings.DaggerSettingsComponent;
 import com.pyamsoft.padlock.dagger.settings.SettingsModule;
+import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 
 public final class SettingsFragment extends PreferenceFragmentCompat
@@ -44,5 +45,10 @@ public final class SettingsFragment extends PreferenceFragmentCompat
 
   @Override public void onCreatePreferences(Bundle bundle, String s) {
     addPreferencesFromResource(R.xml.preferences);
+  }
+
+  @Override public void onConfirmAttempt(int code) {
+    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
+        ConfirmationDialog.newInstance(code), "confirm_dialog");
   }
 }
