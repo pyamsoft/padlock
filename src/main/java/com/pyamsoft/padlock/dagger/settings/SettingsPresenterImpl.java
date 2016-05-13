@@ -125,4 +125,19 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
           Timber.e(throwable, "ConfirmationDialogBus onError");
         });
   }
+
+  private void attemptConfirm(int code) {
+    final SettingsView settingsView = getView();
+    if (settingsView != null) {
+      settingsView.onConfirmAttempt(code);
+    }
+  }
+
+  @Override public void confirmDatabaseClear() {
+    attemptConfirm(0);
+  }
+
+  @Override public void confirmSettingsClear() {
+    attemptConfirm(1);
+  }
 }

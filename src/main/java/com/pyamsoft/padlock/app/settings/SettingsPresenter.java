@@ -20,7 +20,12 @@ import com.pyamsoft.pydroid.base.Presenter;
 
 public interface SettingsPresenter extends Presenter<SettingsPresenter.SettingsView> {
 
+  void confirmDatabaseClear();
+
+  void confirmSettingsClear();
+
   interface SettingsView {
 
+    void onConfirmAttempt(int code);
   }
 }
