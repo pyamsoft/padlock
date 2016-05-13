@@ -26,4 +26,9 @@ public interface LockScreenPresenter extends LockPresenter<LockScreen> {
   void lockEntry();
 
   void loadDisplayNameFromPackage();
+
+  long getIgnoreTimeNone();
+  long getIgnoreTimeFive();
+  long getIgnoreTimeTen();
+  long getIgnoreTimeThirty();
 }

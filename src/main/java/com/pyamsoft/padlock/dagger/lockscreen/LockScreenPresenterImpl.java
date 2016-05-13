@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.dagger.lockscreen;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lockscreen.LockScreen;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter;
 import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;
@@ -34,6 +33,7 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     implements LockScreenPresenter {
 
   @NonNull private final LockScreenInteractor lockScreenInteractor;
+  private final long ignoreTimeNone;
   private final long ignoreTimeFive;
   private final long ignoreTimeTen;
   private final long ignoreTimeThirty;
@@ -45,18 +45,15 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
 
   @Inject public LockScreenPresenterImpl(final Context context,
       @NonNull final LockScreenInteractor lockScreenInteractor,
-      @NonNull @Named("main") Scheduler mainScheduler,
-      @NonNull @Named("io") Scheduler ioScheduler) {
+      @NonNull @Named("main") Scheduler mainScheduler, @NonNull @Named("io") Scheduler ioScheduler,
+      @Named("ignore_none") long ignoreTimeNone, @Named("ignore_five") long ignoreTimeFive,
+      @Named("ignore_ten") long ignoreTimeTen, @Named("ignore_thirty") long ignoreTimeThirty) {
     super(context.getApplicationContext(), lockScreenInteractor, mainScheduler, ioScheduler);
-    final Context appContext = context.getApplicationContext();
+    this.ignoreTimeNone = ignoreTimeNone;
+    this.ignoreTimeFive = ignoreTimeFive;
+    this.ignoreTimeTen = ignoreTimeTen;
+    this.ignoreTimeThirty = ignoreTimeThirty;
     this.lockScreenInteractor = lockScreenInteractor;
-
-    // KLUDGE, times are handled in multiple locations
-    final String[] ignoreTimes =
-        appContext.getResources().getStringArray(R.array.ignore_time_entries);
-    this.ignoreTimeFive = Long.parseLong(ignoreTimes[1]);
-    this.ignoreTimeTen = Long.parseLong(ignoreTimes[2]);
-    this.ignoreTimeThirty = Long.parseLong(ignoreTimes[3]);
   }
 
   @Override public void onDestroyView() {
@@ -184,5 +181,21 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     if (!displayNameSubscription.isUnsubscribed()) {
       displayNameSubscription.unsubscribe();
     }
+  }
+
+  @Override public long getIgnoreTimeNone() {
+    return ignoreTimeNone;
+  }
+
+  @Override public long getIgnoreTimeFive() {
+    return ignoreTimeFive;
+  }
+
+  @Override public long getIgnoreTimeTen() {
+    return ignoreTimeTen;
+  }
+
+  @Override public long getIgnoreTimeThirty() {
+    return ignoreTimeThirty;
   }
 }

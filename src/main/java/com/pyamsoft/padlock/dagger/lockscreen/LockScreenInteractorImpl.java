@@ -23,13 +23,13 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
 import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
 import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Observable;
 import timber.log.Timber;
 
@@ -43,12 +43,13 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @Inject public LockScreenInteractorImpl(final Context context,
       @NonNull final PadLockPreferences preferences, @NonNull final DBInteractor dbInteractor,
-      @NonNull final MasterPinInteractor masterPinInteractor) {
+      @NonNull final MasterPinInteractor masterPinInteractor,
+      @Named("ignore_default") long defaultIgnoreTime) {
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
     this.dbInteractor = dbInteractor;
     this.pinInteractor = masterPinInteractor;
-    this.defaultIgnoreTime = Long.parseLong(appContext.getString(R.string.ignore_time_default));
+    this.defaultIgnoreTime = defaultIgnoreTime;
   }
 
   @WorkerThread @NonNull @Override

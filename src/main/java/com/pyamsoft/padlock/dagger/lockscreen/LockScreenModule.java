@@ -16,11 +16,33 @@
 
 package com.pyamsoft.padlock.dagger.lockscreen;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Named;
 
 @Module public class LockScreenModule {
+
+  private final long defaultIgnoreTime;
+  private final long ignoreTimeNone;
+  private final long ignoreTimeFive;
+  private final long ignoreTimeTen;
+  private final long ignoreTimeThirty;
+
+  public LockScreenModule(final @NonNull Context context) {
+    final Context appContext = context.getApplicationContext();
+    defaultIgnoreTime = Long.parseLong(appContext.getString(R.string.ignore_time_default));
+
+    final String[] ignoreTimes =
+        appContext.getResources().getStringArray(R.array.ignore_time_entries);
+    ignoreTimeNone = Long.parseLong(ignoreTimes[0]);
+    ignoreTimeFive = Long.parseLong(ignoreTimes[1]);
+    ignoreTimeTen = Long.parseLong(ignoreTimes[2]);
+    ignoreTimeThirty = Long.parseLong(ignoreTimes[3]);
+  }
 
   @Provides LockScreenPresenter provideLockScreenPresenter(
       final LockScreenPresenterImpl presenter) {
@@ -30,5 +52,25 @@ import dagger.Provides;
   @Provides LockScreenInteractor provideLockScreenInteractor(
       final LockScreenInteractorImpl interactor) {
     return interactor;
+  }
+
+  @Provides @Named("ignore_default") long provideIgnoreDefault() {
+    return defaultIgnoreTime;
+  }
+
+  @Provides @Named("ignore_none") long provideIgnoreNone() {
+    return ignoreTimeNone;
+  }
+
+  @Provides @Named("ignore_five") long provideIgnoreFive() {
+    return ignoreTimeFive;
+  }
+
+  @Provides @Named("ignore_ten") long provideIgnoreTen() {
+    return ignoreTimeTen;
+  }
+
+  @Provides @Named("ignore_thirty") long provideIgnoreThirty() {
+    return ignoreTimeThirty;
   }
 }
