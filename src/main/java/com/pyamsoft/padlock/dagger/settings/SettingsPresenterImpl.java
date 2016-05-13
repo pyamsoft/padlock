@@ -49,7 +49,6 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-
     unsubscribeConfirmDialog();
   }
 

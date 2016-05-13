@@ -19,11 +19,9 @@ package com.pyamsoft.padlock.dagger.settings;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
-import javax.inject.Named;
 import rx.Observable;
 import timber.log.Timber;
 
@@ -31,11 +29,9 @@ final class SettingsInteractorImpl implements SettingsInteractor {
 
   @NonNull private final PadLockPreferences preferences;
   @NonNull private final Context appContext;
-  private final long defaultTimeoutPeriod;
 
   @Inject public SettingsInteractorImpl(final @NonNull Context context,
-      final @NonNull PadLockPreferences preferences, @Named("timeout_default") long defaultTimeoutPeriod) {
-    this.defaultTimeoutPeriod = defaultTimeoutPeriod;
+      final @NonNull PadLockPreferences preferences) {
     appContext = context.getApplicationContext();
     this.preferences = preferences;
   }
@@ -54,10 +50,5 @@ final class SettingsInteractorImpl implements SettingsInteractor {
       preferences.clear();
       return Observable.just(true);
     }), (aBoolean, aBoolean2) -> true);
-  }
-
-  @NonNull @Override public Observable<Long> getTimeoutPeriod() {
-    return Observable.defer(() -> Observable.just(preferences.getTimeoutPeriod()))
-        .map(aLong -> aLong == null ? defaultTimeoutPeriod : aLong);
   }
 }

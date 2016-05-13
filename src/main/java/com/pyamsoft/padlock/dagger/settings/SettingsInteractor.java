@@ -25,6 +25,4 @@ interface SettingsInteractor {
   @WorkerThread @NonNull Observable<Boolean> clearDatabase();
 
   @WorkerThread @NonNull Observable<Boolean> clearAll();
-
-  @WorkerThread @NonNull Observable<Long> getTimeoutPeriod();
 }
