@@ -20,26 +20,7 @@ import com.pyamsoft.pydroid.base.Presenter;
 
 public interface SettingsPresenter extends Presenter<SettingsPresenter.SettingsView> {
 
-  void setIgnorePeriodFromPreference();
-
-  void setTimeoutPeriodFromPreference();
-
   interface SettingsView {
 
-    void setIgnorePeriodNone();
-
-    void setIgnorePeriodFive();
-
-    void setIgnorePeriodTen();
-
-    void setIgnorePeriodThirty();
-
-    void setTimeoutPeriodNone();
-
-    void setTimeoutPeriodOne();
-
-    void setTimeoutPeriodFive();
-
-    void setTimeoutPeriodTen();
   }
 }

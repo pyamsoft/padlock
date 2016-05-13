@@ -17,10 +17,8 @@
 package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.padlock.app.settings.SettingsPresenter;
-import com.pyamsoft.padlock.dagger.lockscreen.LockScreenInteractor;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
@@ -34,21 +32,16 @@ import timber.log.Timber;
 final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.SettingsView>
     implements SettingsPresenter {
 
-  @NonNull private final LockScreenInteractor lockScreenInteractor;
   @NonNull private final SettingsInteractor settingsInteractor;
   @NonNull private final Scheduler mainScheduler;
   @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
-  @NonNull private Subscription ignorePeriodSubscription = Subscriptions.empty();
-  @NonNull private Subscription timeoutSubscription = Subscriptions.empty();
   @NonNull private Subscription confirmDialogSubscription = Subscriptions.empty();
 
-  @Inject public SettingsPresenterImpl(@NonNull final LockScreenInteractor lockScreenInteractor,
-      @NonNull final SettingsInteractor settingsInteractor,
+  @Inject public SettingsPresenterImpl(@NonNull final SettingsInteractor settingsInteractor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
-    this.lockScreenInteractor = lockScreenInteractor;
     this.settingsInteractor = settingsInteractor;
     this.mainScheduler = mainScheduler;
     this.ioScheduler = ioScheduler;
@@ -57,9 +50,7 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
   @Override public void onDestroyView() {
     super.onDestroyView();
 
-    unsubscribeIgnorePeriod();
     unsubscribeConfirmDialog();
-    unsubscribeTimeout();
   }
 
   @Override public void onResume() {
@@ -76,64 +67,6 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
     if (confirmDialogSubscription.isUnsubscribed()) {
       confirmDialogSubscription.unsubscribe();
     }
-  }
-
-  private void unsubscribeIgnorePeriod() {
-    if (ignorePeriodSubscription.isUnsubscribed()) {
-      ignorePeriodSubscription.unsubscribe();
-    }
-  }
-
-  private void unsubscribeTimeout() {
-    if (timeoutSubscription.isUnsubscribed()) {
-      timeoutSubscription.unsubscribe();
-    }
-  }
-
-  @Override public void setIgnorePeriodFromPreference() {
-    unsubscribeIgnorePeriod();
-    ignorePeriodSubscription = lockScreenInteractor.getDefaultIgnoreTime()
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
-        .subscribe(time -> {
-          final SettingsView settingsView = getView();
-          if (settingsView != null) {
-            if (time == PadLockPreferences.PERIOD_FIVE) {
-              settingsView.setIgnorePeriodFive();
-            } else if (time == PadLockPreferences.PERIOD_TEN) {
-              settingsView.setIgnorePeriodTen();
-            } else if (time == PadLockPreferences.PERIOD_THIRTY) {
-              settingsView.setIgnorePeriodThirty();
-            } else {
-              settingsView.setIgnorePeriodNone();
-            }
-          }
-        }, throwable -> {
-          Timber.e(throwable, "setIgnorePeriodFromPreference onError");
-        });
-  }
-
-  @Override public void setTimeoutPeriodFromPreference() {
-    unsubscribeTimeout();
-    timeoutSubscription = settingsInteractor.getTimeoutPeriod()
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
-        .subscribe(time -> {
-          final SettingsView settingsView = getView();
-          if (settingsView != null) {
-            if (time == PadLockPreferences.PERIOD_ONE) {
-              settingsView.setTimeoutPeriodOne();
-            } else if (time == PadLockPreferences.PERIOD_FIVE) {
-              settingsView.setTimeoutPeriodFive();
-            } else if (time == PadLockPreferences.PERIOD_TEN) {
-              settingsView.setTimeoutPeriodTen();
-            } else {
-              settingsView.setTimeoutPeriodNone();
-            }
-          }
-        }, throwable -> {
-          Timber.e(throwable, "setTimeoutPeriodFromPreference onError");
-        });
   }
 
   private Observable<Boolean> clearDatabase() {
@@ -155,6 +88,7 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
     confirmDialogBusSubscription =
         ConfirmationDialog.ConfirmationDialogBus.get().register().subscribe(confirmationEvent -> {
           Timber.d("Received confirmation event!");
+          // KLUDGE nested subscriptions are ugly
           switch (confirmationEvent.type()) {
             case 0:
               if (!confirmationEvent.complete()) {

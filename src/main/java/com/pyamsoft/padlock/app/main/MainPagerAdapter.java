@@ -21,7 +21,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import com.pyamsoft.padlock.app.list.LockListFragment;
-import com.pyamsoft.padlock.app.settings.SettingsScreen;
+import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.pydroid.tool.PageAwareAdapter;
 import com.pyamsoft.pydroid.tool.PageAwareView;
 
@@ -31,7 +31,7 @@ final class MainPagerAdapter extends FragmentStatePagerAdapter implements PageAw
   public static final int SETTINGS = 1;
   private static final int NUMBER_ITEMS = 2;
   private LockListFragment lockListFragment;
-  private SettingsScreen settingsFragment;
+  private SettingsFragment settingsFragment;
 
   public MainPagerAdapter(FragmentManager fm) {
     super(fm);
@@ -41,7 +41,7 @@ final class MainPagerAdapter extends FragmentStatePagerAdapter implements PageAw
     this.lockListFragment = fragment;
   }
 
-  public void setSettingsFragment(final SettingsScreen fragment) {
+  public void setSettingsFragment(final SettingsFragment fragment) {
     this.settingsFragment = fragment;
   }
 
