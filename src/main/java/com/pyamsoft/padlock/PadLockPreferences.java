@@ -47,10 +47,6 @@ public class PadLockPreferences extends ApplicationPreferences {
     return Long.parseLong(get(ignoreTimeKey, ignoreTimeDefault));
   }
 
-  public final void setDefaultIgnoreTime(final @NonNull String value) {
-    put(ignoreTimeKey, value);
-  }
-
   public final long getTimeoutPeriod() {
     return get(PadLockPreferences.TIMEOUT_PERIOD, PadLockPreferences.PERIOD_FIVE);
   }
