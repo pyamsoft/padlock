@@ -39,4 +39,12 @@
   <string name="timeout_time_key">timeout_time</string>
   <string name="timeout_time_default">0</string>
 
+  <string name="clear_db_key">clear_db</string>
+  <string name="clear_db_title">Reset Database</string>
+  <string name="clear_db_summary">Reset the locked applications database</string>
+
+  <string name="clear_all_key">clear_all</string>
+  <string name="clear_all_title">Reset All Settings</string>
+  <string name="clear_all_summary">Reset all application settings to default</string>
+
 </resources>
