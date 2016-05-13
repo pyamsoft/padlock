@@ -39,7 +39,7 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
-import com.pyamsoft.padlock.app.settings.SettingsScreen;
+import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.main.DaggerMainComponent;
 import com.pyamsoft.padlock.dagger.main.MainModule;
 import com.pyamsoft.pydroid.base.ActivityBase;
@@ -59,7 +59,7 @@ public class MainActivity extends ActivityBase implements MainPresenter.MainView
   @NonNull private final AsyncVectorDrawableTask[] tasks =
       new AsyncVectorDrawableTask[VECTOR_TASK_SIZE];
   @NonNull private final LockListFragment lockListFragment;
-  @NonNull private final SettingsScreen settingsFragment;
+  @NonNull private final SettingsFragment settingsFragment;
   @BindView(R.id.main_view) CoordinatorLayout mainView;
   @BindView(R.id.main_pager) ViewPager viewPager;
   @BindView(R.id.main_enable_service) LinearLayout enableService;
@@ -73,7 +73,7 @@ public class MainActivity extends ActivityBase implements MainPresenter.MainView
 
   @SuppressWarnings("WeakerAccess") public MainActivity() {
     lockListFragment = new LockListFragment();
-    settingsFragment = new SettingsScreen();
+    settingsFragment = new SettingsFragment();
   }
 
   @Override public void onCreate(final Bundle savedInstanceState) {
