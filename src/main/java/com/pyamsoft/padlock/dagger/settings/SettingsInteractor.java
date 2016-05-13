@@ -27,6 +27,4 @@ interface SettingsInteractor {
   @WorkerThread @NonNull Observable<Boolean> clearAll();
 
   @WorkerThread @NonNull Observable<Long> getTimeoutPeriod();
-
-  @WorkerThread @NonNull Observable<Long> setTimeoutPeriod(long ignoreTime);
 }

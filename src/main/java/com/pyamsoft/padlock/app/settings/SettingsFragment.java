@@ -256,7 +256,7 @@ public final class SettingsFragment extends PageAwareFragment
   private void setOnCheckListenerTimeoutNone() {
     timeoutNone.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        presenter.setTimeoutPeriodNone();
+        //presenter.setTimeoutPeriodNone();
       }
     });
   }
@@ -264,7 +264,7 @@ public final class SettingsFragment extends PageAwareFragment
   private void setOnCheckListenerTimeoutOne() {
     timeoutOne.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        presenter.setTimeoutPeriodOne();
+        //presenter.setTimeoutPeriodOne();
       }
     });
   }
@@ -272,7 +272,7 @@ public final class SettingsFragment extends PageAwareFragment
   private void setOnCheckListenerTimeoutFive() {
     timeoutFive.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        presenter.setTimeoutPeriodFive();
+        //presenter.setTimeoutPeriodFive();
       }
     });
   }
@@ -280,7 +280,7 @@ public final class SettingsFragment extends PageAwareFragment
   private void setOnCheckListenerTimeoutTen() {
     timeoutTen.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        presenter.setTimeoutPeriodTen();
+        //presenter.setTimeoutPeriodTen();
       }
     });
   }

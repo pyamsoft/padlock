@@ -136,38 +136,6 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
         });
   }
 
-  @Override public void setTimeoutPeriodNone() {
-    unsubscribeTimeout();
-    settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_NONE)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
-        .subscribe();
-  }
-
-  @Override public void setTimeoutPeriodOne() {
-    unsubscribeTimeout();
-    settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_ONE)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
-        .subscribe();
-  }
-
-  @Override public void setTimeoutPeriodFive() {
-    unsubscribeTimeout();
-    settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_FIVE)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
-        .subscribe();
-  }
-
-  @Override public void setTimeoutPeriodTen() {
-    unsubscribeTimeout();
-    settingsInteractor.setTimeoutPeriod(PadLockPreferences.PERIOD_TEN)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
-        .subscribe();
-  }
-
   private Observable<Boolean> clearDatabase() {
     return settingsInteractor.clearDatabase().subscribeOn(ioScheduler).observeOn(mainScheduler);
   }

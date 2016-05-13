@@ -20,4 +20,23 @@
   <string name="ignore_time_key">ignore_time</string>
   <string name="ignore_time_default">0</string>
 
+  <string-array name="timeout_time">
+    <item name="time_none">Do Not Timeout</item>
+    <item name="time_five">Timeout For 5 Minutes</item>
+    <item name="time_ten">Timeout For 10 Minutes</item>
+    <item name="time_thirty">Timeout For 30 Minutes</item>
+  </string-array>
+
+  <string-array name="timeout_time_entries">
+    <item name="time_none">0</item>
+    <item name="time_none">5</item>
+    <item name="time_none">10</item>
+    <item name="time_none">30</item>
+  </string-array>
+
+  <string name="timeout_time_title">Timeout Times</string>
+  <string name="timeout_time_summary">Set the default Timeout duration</string>
+  <string name="timeout_time_key">timeout_time</string>
+  <string name="timeout_time_default">0</string>
+
 </resources>
