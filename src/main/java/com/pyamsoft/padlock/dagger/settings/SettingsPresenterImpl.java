@@ -113,42 +113,6 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
         });
   }
 
-  @Override public void setIgnorePeriodNone() {
-    unsubscribeIgnorePeriod();
-    ignorePeriodSubscription =
-        settingsInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_NONE)
-            .subscribeOn(ioScheduler)
-            .observeOn(mainScheduler)
-            .subscribe();
-  }
-
-  @Override public void setIgnorePeriodFive() {
-    unsubscribeIgnorePeriod();
-    ignorePeriodSubscription =
-        settingsInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_FIVE)
-            .subscribeOn(ioScheduler)
-            .observeOn(mainScheduler)
-            .subscribe();
-  }
-
-  @Override public void setIgnorePeriodTen() {
-    unsubscribeIgnorePeriod();
-    ignorePeriodSubscription =
-        settingsInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_TEN)
-            .subscribeOn(ioScheduler)
-            .observeOn(mainScheduler)
-            .subscribe();
-  }
-
-  @Override public void setIgnorePeriodThirty() {
-    unsubscribeIgnorePeriod();
-    ignorePeriodSubscription =
-        settingsInteractor.setDefaultIgnoreTime(PadLockPreferences.PERIOD_THIRTY)
-            .subscribeOn(ioScheduler)
-            .observeOn(mainScheduler)
-            .subscribe();
-  }
-
   @Override public void setTimeoutPeriodFromPreference() {
     unsubscribeTimeout();
     timeoutSubscription = settingsInteractor.getTimeoutPeriod()

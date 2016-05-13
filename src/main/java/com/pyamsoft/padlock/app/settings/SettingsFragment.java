@@ -224,7 +224,7 @@ public final class SettingsFragment extends PageAwareFragment
   private void setOnCheckListenerIgnoreNone() {
     ignoreNone.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        presenter.setIgnorePeriodNone();
+        //presenter.setIgnorePeriodNone();
       }
     });
   }
@@ -232,7 +232,7 @@ public final class SettingsFragment extends PageAwareFragment
   private void setOnCheckListenerIgnoreFive() {
     ignoreFive.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        presenter.setIgnorePeriodFive();
+        //presenter.setIgnorePeriodFive();
       }
     });
   }
@@ -240,7 +240,7 @@ public final class SettingsFragment extends PageAwareFragment
   private void setOnCheckListenerIgnoreTen() {
     ignoreTen.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        presenter.setIgnorePeriodTen();
+        //presenter.setIgnorePeriodTen();
       }
     });
   }
@@ -248,7 +248,7 @@ public final class SettingsFragment extends PageAwareFragment
   private void setOnCheckListenerIgnoreThirty() {
     ignoreThirty.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        presenter.setIgnorePeriodThirty();
+        //presenter.setIgnorePeriodThirty();
       }
     });
   }

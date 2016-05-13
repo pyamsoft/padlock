@@ -22,14 +22,6 @@ public interface SettingsPresenter extends Presenter<SettingsPresenter.SettingsV
 
   void setIgnorePeriodFromPreference();
 
-  void setIgnorePeriodNone();
-
-  void setIgnorePeriodFive();
-
-  void setIgnorePeriodTen();
-
-  void setIgnorePeriodThirty();
-
   void setTimeoutPeriodFromPreference();
 
   void setTimeoutPeriodNone();

@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.settings;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -61,14 +60,6 @@ final class SettingsInteractorImpl implements SettingsInteractor {
   @NonNull @Override public Observable<Long> setTimeoutPeriod(long ignoreTime) {
     return Observable.defer(() -> {
       preferences.setTimeoutPeriod(ignoreTime);
-      return Observable.just(ignoreTime);
-    });
-  }
-
-  @WorkerThread @NonNull @Override public Observable<Long> setDefaultIgnoreTime(long ignoreTime) {
-    return Observable.defer(() -> {
-      // TODO kludge
-      preferences.setDefaultIgnoreTime("");
       return Observable.just(ignoreTime);
     });
   }
