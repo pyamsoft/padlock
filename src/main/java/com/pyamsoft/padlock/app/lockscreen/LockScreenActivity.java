@@ -34,7 +34,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
-import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.ErrorDialog;
 import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
@@ -349,16 +348,22 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
   }
 
   @Override public long getIgnorePeriodTime() {
+    final String[] ignoreTimes = getResources().getStringArray(R.array.ignore_time_entries);
+    String period = null;
     if (menuIgnoreFive != null && menuIgnoreTen != null && menuIgnoreThirty != null) {
       if (menuIgnoreFive.isChecked()) {
-        return PadLockPreferences.PERIOD_FIVE;
+        period = ignoreTimes[1];
       } else if (menuIgnoreTen.isChecked()) {
-        return PadLockPreferences.PERIOD_TEN;
+        period = ignoreTimes[2];
       } else if (menuIgnoreThirty.isChecked()) {
-        return PadLockPreferences.PERIOD_THIRTY;
+        period = ignoreTimes[3];
       }
     }
-    return PadLockPreferences.PERIOD_NONE;
+    if (period == null) {
+      period = ignoreTimes[0];
+    }
+
+    return Long.parseLong(period);
   }
 
   @Override public boolean shouldExcludeEntry() {

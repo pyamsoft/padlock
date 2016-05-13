@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.settings;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
@@ -29,11 +30,13 @@ final class SettingsInteractorImpl implements SettingsInteractor {
 
   @NonNull private final PadLockPreferences preferences;
   @NonNull private final Context appContext;
+  private final long defaultTimeoutPeriod;
 
   @Inject public SettingsInteractorImpl(final @NonNull Context context,
       final @NonNull PadLockPreferences preferences) {
     appContext = context.getApplicationContext();
     this.preferences = preferences;
+    this.defaultTimeoutPeriod = Long.parseLong(appContext.getString(R.string.timeout_time_default));
   }
 
   @NonNull @Override public Observable<Boolean> clearDatabase() {
@@ -54,6 +57,6 @@ final class SettingsInteractorImpl implements SettingsInteractor {
 
   @NonNull @Override public Observable<Long> getTimeoutPeriod() {
     return Observable.defer(() -> Observable.just(preferences.getTimeoutPeriod()))
-        .map(aLong -> aLong == null ? PadLockPreferences.PERIOD_FIVE : aLong);
+        .map(aLong -> aLong == null ? defaultTimeoutPeriod : aLong);
   }
 }

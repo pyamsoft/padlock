@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.dagger.lockscreen;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lockscreen.LockScreen;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter;
 import com.pyamsoft.padlock.dagger.lock.LockPresenterImpl;
@@ -34,6 +34,9 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     implements LockScreenPresenter {
 
   @NonNull private final LockScreenInteractor lockScreenInteractor;
+  private final long ignoreTimeFive;
+  private final long ignoreTimeTen;
+  private final long ignoreTimeThirty;
 
   @NonNull private Subscription ignoreSubscription = Subscriptions.empty();
   @NonNull private Subscription unlockSubscription = Subscriptions.empty();
@@ -45,7 +48,15 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     super(context.getApplicationContext(), lockScreenInteractor, mainScheduler, ioScheduler);
+    final Context appContext = context.getApplicationContext();
     this.lockScreenInteractor = lockScreenInteractor;
+
+    // KLUDGE, times are handled in multiple locations
+    final String[] ignoreTimes =
+        appContext.getResources().getStringArray(R.array.ignore_time_entries);
+    this.ignoreTimeFive = Long.parseLong(ignoreTimes[1]);
+    this.ignoreTimeTen = Long.parseLong(ignoreTimes[2]);
+    this.ignoreTimeThirty = Long.parseLong(ignoreTimes[3]);
   }
 
   @Override public void onDestroyView() {
@@ -77,11 +88,11 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   private void setIgnorePeriod(final long time) throws NullPointerException {
     final LockScreen lockScreen = getView();
     if (lockScreen != null) {
-      if (time == PadLockPreferences.PERIOD_FIVE) {
+      if (time == ignoreTimeFive) {
         lockScreen.setIgnoreTimeFive();
-      } else if (time == PadLockPreferences.PERIOD_TEN) {
+      } else if (time == ignoreTimeTen) {
         lockScreen.setIgnoreTimeTen();
-      } else if (time == PadLockPreferences.PERIOD_THIRTY) {
+      } else if (time == ignoreTimeThirty) {
         lockScreen.setIgnoreTimeThirty();
       } else {
         lockScreen.setIgnoreTimeNone();
