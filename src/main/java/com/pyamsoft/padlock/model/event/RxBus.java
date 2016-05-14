@@ -18,8 +18,6 @@ package com.pyamsoft.padlock.model.event;
 
 import android.support.annotation.NonNull;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
