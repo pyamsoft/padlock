@@ -29,8 +29,6 @@ import javax.inject.Named;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -44,7 +42,8 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
 
   @Inject public LockInfoPresenterImpl(final @NonNull LockInfoInteractor lockInfoInteractor,
-      final @NonNull @Named("main") Scheduler mainScheduler, final @NonNull @Named("io") Scheduler ioScheduler) {
+      final @NonNull @Named("main") Scheduler mainScheduler,
+      final @NonNull @Named("io") Scheduler ioScheduler) {
     this.lockInfoInteractor = lockInfoInteractor;
     this.mainScheduler = mainScheduler;
     this.ioScheduler = ioScheduler;

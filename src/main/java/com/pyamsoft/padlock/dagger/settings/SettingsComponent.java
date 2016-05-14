@@ -19,8 +19,6 @@ package com.pyamsoft.padlock.dagger.settings;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
-import com.pyamsoft.padlock.dagger.db.DBModule;
-import com.pyamsoft.padlock.dagger.pin.MasterPinModule;
 import dagger.Component;
 
 @ActivityScope @Component(modules = {
