@@ -50,6 +50,8 @@ public interface LockServiceInteractor {
 
   boolean isComingFromLockScreen(String oldClass);
 
+  boolean isDeviceLocked();
+
   boolean isNameHardUnlocked(String packageName, String className);
 
   @NonNull @WorkerThread QueryObservable getEntry(String packageName, String activityName);

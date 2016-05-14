@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.service;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -71,10 +72,14 @@ import timber.log.Timber;
       // Don't lock for the package installer
       ANDROID_PACKAGE_INSTALLER_REGEX,
   };
-  @NonNull private final Context appContext;
 
-  @Inject public LockServiceInteractorImpl(final @NonNull Context context) {
+  @NonNull private final Context appContext;
+  @NonNull private final KeyguardManager keyguard;
+
+  @Inject public LockServiceInteractorImpl(final @NonNull Context context,
+      @NonNull KeyguardManager keyguard) {
     this.appContext = context.getApplicationContext();
+    this.keyguard = keyguard;
   }
 
   private static boolean isUnlocked(final String[] unlockedRegexArray, final String name) {
@@ -135,11 +140,17 @@ import timber.log.Timber;
    * can be its own class or a FrameLayout
    */
   @Override public boolean isEventCausedByNotificationShade(String packageName, String className) {
-    final KeyguardManager kg =
-        (KeyguardManager) appContext.getSystemService(Context.KEYGUARD_SERVICE);
-    return !kg.inKeyguardRestrictedInputMode() &&
+    return !keyguard.inKeyguardRestrictedInputMode() &&
         packageName.equalsIgnoreCase(ANDROID_SYSTEM_UI_PACKAGE) &&
         className.equalsIgnoreCase(ANDROID_FRAME_LAYOUT_CLASS);
+  }
+
+  @Override public boolean isDeviceLocked() {
+    boolean locked = false;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+      locked = keyguard.isDeviceLocked();
+    }
+    return locked || keyguard.inKeyguardRestrictedInputMode();
   }
 
   /**
@@ -157,7 +168,7 @@ import timber.log.Timber;
    * prompt again until we come from a different activity to the LockedApp
    */
   @Override public boolean isComingFromLockScreen(String oldClass) {
-    return oldClass != null && oldClass.equalsIgnoreCase(LOCK_ACTIVITY_CLASS);
+    return oldClass.equalsIgnoreCase(LOCK_ACTIVITY_CLASS);
   }
 
   /**

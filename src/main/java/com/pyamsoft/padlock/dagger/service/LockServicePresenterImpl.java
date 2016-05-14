@@ -39,8 +39,8 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
   @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
 
   private boolean lockScreenPassed;
-  private String lastPackageName;
-  private String lastClassName;
+  @NonNull private String lastPackageName = "";
+  @NonNull private String lastClassName = "";
 
   @Inject public LockServicePresenterImpl(@NonNull final LockServiceStateInteractor stateInteractor,
       @NonNull final LockServiceInteractor interactor,
@@ -105,6 +105,12 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
       if (interactor.isComingFromLockScreen(lastClassName) && lockScreenPassed) {
         Timber.i("Coming from LockActivity, do not show again.");
         return Observable.empty();
+      }
+
+      if (interactor.isDeviceLocked()) {
+        Timber.i("Device is Locked. Reset state");
+        lastPackageName = "";
+        lastClassName = "";
       }
 
       if (interactor.isNameHardUnlocked(packageName, className)) {
