@@ -26,7 +26,6 @@ import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
 import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
 import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
-import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -55,11 +54,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   @WorkerThread @NonNull @Override
   public Observable<Boolean> lockEntry(String packageName, String activityName) {
     Timber.d("Lock entry: %s %s", packageName, activityName);
-    return PadLockDB.with(appContext)
-        .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName,
-            activityName)
-        .mapToOne(PadLockEntry.MAPPER::map)
-        .filter(padLockEntry -> padLockEntry != null)
+    return PadLockEntry.queryWithPackageActivityName(appContext, packageName, activityName)
         .first()
         .map(padLockEntry -> {
           Timber.d("LOCKED entry, update entry in DB: ", padLockEntry);
@@ -72,10 +67,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
                   .ignoreUntilTime(padLockEntry.ignoreUntilTime())
                   .systemApplication(padLockEntry.systemApplication())
                   .asContentValues();
-          PadLockDB.with(appContext)
-              .update(PadLockEntry.TABLE_NAME, contentValues,
-                  PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, padLockEntry.packageName(),
-                  padLockEntry.activityName());
+          PadLockEntry.updateWithPackageActivityName(appContext, contentValues,
+              padLockEntry.packageName(), padLockEntry.activityName());
           return true;
         });
   }
@@ -84,12 +77,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   public Observable<Boolean> unlockEntry(String packageName, String activityName, String attempt,
       boolean shouldExclude, long ignoreForPeriod) {
     Timber.d("Attempt unlock: %s %s", packageName, activityName);
-    final Observable<PadLockEntry> dbObservable = PadLockDB.with(appContext)
-        .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName,
-            activityName)
-        .mapToOne(PadLockEntry.MAPPER::map)
-        .filter(padLockEntry -> padLockEntry != null)
-        .first();
+    final Observable<PadLockEntry> dbObservable =
+        PadLockEntry.queryWithPackageActivityName(appContext, packageName, activityName).first();
 
     final Observable<String> masterPinObservable =
         Observable.defer(() -> Observable.just(pinInteractor.getMasterPin()));
@@ -148,10 +137,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
             .ignoreUntilTime(System.currentTimeMillis() + ignoreMinutesInMillis)
             .systemApplication(oldValues.systemApplication())
             .asContentValues();
-    PadLockDB.with(appContext)
-        .update(PadLockEntry.TABLE_NAME, contentValues,
-            PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, oldValues.packageName(),
-            oldValues.activityName());
+    PadLockEntry.updateWithPackageActivityName(appContext, contentValues, oldValues.packageName(),
+        oldValues.activityName());
   }
 
   @WorkerThread @NonNull @Override public Observable<Long> getDefaultIgnoreTime() {

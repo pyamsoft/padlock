@@ -73,8 +73,6 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
   @NonNull private Observable<PadLockEntry> getLockScreen() {
     Timber.d("Get list of locked classes with package: %s", lastPackageName);
     return interactor.getEntry(lastPackageName, lastClassName)
-        .mapToOne(PadLockEntry.MAPPER::map)
-        .filter(padLockEntry -> padLockEntry != null)
         .subscribeOn(ioScheduler)
         .observeOn(mainScheduler);
   }

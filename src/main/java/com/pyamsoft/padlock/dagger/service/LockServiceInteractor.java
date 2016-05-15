@@ -16,11 +16,13 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
+import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.crash.CrashLogActivity;
-import com.squareup.sqlbrite.QueryObservable;
+import rx.Observable;
 
 public interface LockServiceInteractor {
 
@@ -54,5 +56,6 @@ public interface LockServiceInteractor {
 
   boolean isNameHardUnlocked(String packageName, String className);
 
-  @NonNull @WorkerThread QueryObservable getEntry(String packageName, String activityName);
+  @NonNull @CheckResult @WorkerThread Observable<PadLockEntry> getEntry(String packageName,
+      String activityName);
 }

@@ -36,7 +36,7 @@ public class PadLockDB {
     briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, Schedulers.io());
   }
 
-  @NonNull public static BriteDatabase with(final Context context) {
+  @NonNull static BriteDatabase with(final Context context) {
     if (instance == null) {
       synchronized (lock) {
         if (instance == null) {
