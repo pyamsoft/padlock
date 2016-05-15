@@ -24,7 +24,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
-import com.pyamsoft.padlock.model.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
@@ -59,11 +58,7 @@ final class LockListInteractorImpl implements LockListInteractor {
   }
 
   @WorkerThread @NonNull @Override public Observable<List<PadLockEntry>> getAppEntryList() {
-    return PadLockDB.with(appContext)
-        .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
-        .mapToList(PadLockEntry.MAPPER::map)
-        .filter(padLockEntries -> padLockEntries != null)
-        .first();
+    return PadLockEntry.queryAll(appContext).first();
   }
 
   @WorkerThread @Override public boolean isSystemApplication(ApplicationInfo info) {

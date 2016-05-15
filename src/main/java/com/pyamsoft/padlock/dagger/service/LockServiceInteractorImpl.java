@@ -19,12 +19,13 @@ package com.pyamsoft.padlock.dagger.service;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.sql.PadLockDB;
+import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.squareup.sqlbrite.QueryObservable;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
+import rx.Observable;
 import timber.log.Timber;
 
 @SuppressWarnings("TryFinallyCanBeTryWithResources") final class LockServiceInteractorImpl
@@ -180,9 +181,8 @@ import timber.log.Timber;
         isUnlockedTypeClass(className);
   }
 
-  @NonNull @Override public QueryObservable getEntry(String packageName, String activityName) {
-    return PadLockDB.with(appContext)
-        .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName,
-            activityName);
+  @NonNull @WorkerThread @CheckResult @Override
+  public Observable<PadLockEntry> getEntry(String packageName, String activityName) {
+    return PadLockEntry.queryWithPackageActivityName(appContext, packageName, activityName);
   }
 }
