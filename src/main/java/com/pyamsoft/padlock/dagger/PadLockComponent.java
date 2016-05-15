@@ -26,11 +26,11 @@ import rx.Scheduler;
 
 @Singleton @Component(modules = PadLockModule.class) public interface PadLockComponent {
 
-  @NonNull Context provideContext();
+  Context provideContext();
 
-  @NonNull PadLockPreferences providePreferences();
+  PadLockPreferences providePreferences();
 
-  @NonNull @Named("main") Scheduler provideMainScheduler();
+  @Named("main") Scheduler provideMainScheduler();
 
-  @NonNull @Named("io") Scheduler provideIoScheduler();
+  @Named("io") Scheduler provideIoScheduler();
 }
