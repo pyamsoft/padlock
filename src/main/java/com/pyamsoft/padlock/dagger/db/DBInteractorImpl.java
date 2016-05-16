@@ -24,8 +24,9 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
-import com.pyamsoft.padlock.model.sql.PadLockDB;
+import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -51,7 +52,9 @@ final class DBInteractorImpl implements DBInteractor {
       PadLockEntry.newTransaction(appContext, () -> {
         for (final ActivityInfo info : activities) {
           final String activityName = info.name;
-          if (activityName != null) {
+          if (activityName != null && !activityName.equalsIgnoreCase(
+              LockScreenActivity.class.getName()) && !activityName.equalsIgnoreCase(
+              CrashLogActivity.class.getName())) {
             createEntry(packageName, activityName, code, system);
           }
         }
