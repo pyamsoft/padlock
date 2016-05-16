@@ -96,13 +96,9 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
         return Observable.empty();
       }
 
-      if (interactor.isComingFromLockScreen(lastClassName) && lockScreenPassed) {
-        Timber.i("Coming from LockActivity, do not show again.");
-        return Observable.empty();
-      }
-
-      if (interactor.isWindowFromKeyboard()) {
-        Timber.i("Event for class: %s is caused by InputMethodManager", className);
+      if (interactor.isWindowFromKeyboard(packageName, className)) {
+        Timber.i("Event for package %s class: %s is caused by InputMethodManager", packageName,
+            className);
         return Observable.empty();
       }
 
