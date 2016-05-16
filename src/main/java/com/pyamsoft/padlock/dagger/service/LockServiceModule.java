@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.service;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.view.inputmethod.InputMethodManager;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import dagger.Module;
 import dagger.Provides;
@@ -37,5 +38,10 @@ import dagger.Provides;
   @Provides KeyguardManager provideKeyguardManager(final Context context) {
     return (KeyguardManager) context.getApplicationContext()
         .getSystemService(Context.KEYGUARD_SERVICE);
+  }
+
+  @Provides InputMethodManager provideInputMethodManager(final Context context) {
+    return (InputMethodManager) context.getApplicationContext()
+        .getSystemService(Context.INPUT_METHOD_SERVICE);
   }
 }

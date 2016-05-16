@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -70,17 +69,16 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
     setLockScreenPassed(false);
   }
 
-  @NonNull private Observable<PadLockEntry> getLockScreen() {
-    Timber.d("Get list of locked classes with package: %s", lastPackageName);
-    return interactor.getEntry(lastPackageName, lastClassName)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler);
-  }
-
   private void unsubLockedEntry() {
     if (!lockedEntrySubscription.isUnsubscribed()) {
       lockedEntrySubscription.unsubscribe();
     }
+  }
+
+  private void reset() {
+    Timber.i("Reset name state");
+    lastPackageName = "";
+    lastClassName = "";
   }
 
   @Override
@@ -89,11 +87,9 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
     lockedEntrySubscription = Observable.defer(() -> {
       if (!stateInteractor.isServiceEnabled()) {
         Timber.e("Service is not user-enabled");
+        reset();
         return Observable.empty();
       }
-
-      Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName);
-      Timber.d("Last Class: %s - New Class: %s", lastClassName, className);
 
       if (interactor.isEventCausedByNotificationShade(packageName, className)) {
         Timber.i("Notification shade. Event will be ignored");
@@ -105,46 +101,42 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
         return Observable.empty();
       }
 
-      if (interactor.isDeviceLocked()) {
-        Timber.i("Device is Locked. Reset state");
-        lastPackageName = "";
-        lastClassName = "";
-      }
-
-      if (interactor.isNameHardUnlocked(packageName, className)) {
-        Timber.i("Class or package is hardcoded to never be locked");
-        Timber.i("P: %s C: %s", packageName, className);
+      if (interactor.isWindowFromKeyboard()) {
+        Timber.i("Event for class: %s is caused by InputMethodManager", className);
         return Observable.empty();
       }
 
-      final boolean packageChanged = interactor.hasNameChanged(packageName, lastPackageName,
-          LockServiceInteractor.GOOGLE_KEYBOARD_PACKAGE_REGEX);
+      if (interactor.isDeviceLocked()) {
+        Timber.i("Device is Locked. Reset state");
+        reset();
+      }
+
+      final boolean packageChanged = interactor.hasNameChanged(packageName, lastPackageName);
       if (packageChanged) {
-        Timber.i("Last package changed from: %s to: %s", lastPackageName, packageName);
+        Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName);
         lastPackageName = packageName;
       }
 
-      final boolean classChanged = interactor.hasNameChanged(className, lastClassName,
-          LockServiceInteractor.ANDROID_VIEW_CLASS_REGEX);
+      final boolean classChanged = interactor.hasNameChanged(className, lastClassName);
       if (classChanged) {
-        Timber.i("Last class changed from: %s to: %s", lastClassName, className);
+        Timber.d("Last Class: %s - New Class: %s", lastClassName, className);
         lastClassName = className;
       }
 
       if (packageChanged && classChanged || !lockScreenPassed) {
-        return getLockScreen();
+        Timber.d("Get list of locked classes with package: %s, class: %s", packageName, className);
+        return interactor.getEntry(packageName, className);
       } else {
+        Timber.d("No package change detected");
         return Observable.empty();
       }
     }).subscribeOn(ioScheduler).observeOn(mainScheduler).subscribe(padLockEntry -> {
-      Timber.d("Got PadLockEntry for LockScreen: ", padLockEntry.packageName());
+      Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
+          padLockEntry.activityName());
       final LockService lockService = getView();
       if (lockService != null) {
         lockService.startLockScreen(padLockEntry);
       }
-
-      Timber.d("Unsub from observable");
-      unsubLockedEntry();
     }, throwable -> {
       Timber.e(throwable, "Error getting PadLockEntry for LockScreen");
     });

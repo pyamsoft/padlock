@@ -22,114 +22,32 @@ import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
+import android.view.inputmethod.InputMethodManager;
+import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import java.util.regex.Pattern;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-@SuppressWarnings("TryFinallyCanBeTryWithResources") final class LockServiceInteractorImpl
-    implements LockServiceInteractor {
+final class LockServiceInteractorImpl implements LockServiceInteractor {
 
-  private static final String[] UNLOCKED_CLASSES_REGEX = {
-      // Don't allow locking of the PadLock
-      LOCK_ACTIVITY_CLASS, CRASHLOG_ACTIVITY_CLASS,
+  @NonNull private static final String PADLOCK_LOCK_SCREEN_ACTIVITY_CLASS =
+      LockScreenActivity.class.getName();
 
-      // Don't lock for Dialogs
-      ANDROID_DIALOG_CLASS,
-
-      // Don't allow locking for the Recent activities
-      RECENTS_ACTIVITY_CLASS,
-
-      // Don't change for just Views
-      ANDROID_VIEW_CLASS_REGEX,
-  };
-  private static final String[] UNLOCKED_SUPERCLASS = {
-      // Don't allow locking of the PadLock
-      LOCK_ACTIVITY_CLASS, CRASHLOG_ACTIVITY_CLASS,
-
-      // Don't lock for Dialogs
-      ANDROID_DIALOG_CLASS,
-
-      // Don't allow locking for the Recent activities
-      RECENTS_ACTIVITY_CLASS,
-
-      // Don't change for Views
-      ANDROID_VIEW_CLASS,
-
-      // Don't lock for the Permission request dialog
-      ANDROID_PACKAGE_INSTALLER_PERMISSION_CLASS,
-
-      // Dont lock for USB changer dialog
-      ANDROID_SETTINGS_USB_CHOOSER_CLASS,
-  };
-  private static final String[] UNLOCKED_PACKAGES_REGEX = {
-      // Don't allow locking for the system
-      ANDROID_PACKAGE_REGEX,
-
-      // Don't allow locking for the systemUI
-      ANDROID_SYSTEM_UI_PACKAGE_REGEX,
-
-      // Don't lock for the package installer
-      ANDROID_PACKAGE_INSTALLER_REGEX,
+  private static final String[] NOTIFICATION_SHADE_CLASSES = {
+      // Nexus 6 is a Frame Layout
+      "android.widget.FrameLayout"
   };
 
   @NonNull private final Context appContext;
   @NonNull private final KeyguardManager keyguard;
+  @NonNull private final InputMethodManager inputMethodManager;
 
   @Inject public LockServiceInteractorImpl(final @NonNull Context context,
-      @NonNull KeyguardManager keyguard) {
+      @NonNull KeyguardManager keyguard, @NonNull InputMethodManager inputMethodManager) {
+    this.inputMethodManager = inputMethodManager;
     this.appContext = context.getApplicationContext();
     this.keyguard = keyguard;
-  }
-
-  private static boolean isUnlocked(final String[] unlockedRegexArray, final String name) {
-    boolean ret = false;
-    for (final String anUnlockedRegexArray : unlockedRegexArray) {
-      final Pattern pattern = Pattern.compile(anUnlockedRegexArray);
-      if (pattern.matcher(name).matches()) {
-        ret = true;
-        break;
-      }
-    }
-    return ret;
-  }
-
-  private static boolean isUnlockedTypeClass(final String className) {
-    boolean ret = false;
-    // Just compare classnames
-    for (final String unlockedClass : UNLOCKED_SUPERCLASS) {
-      ret = className.equalsIgnoreCase(unlockedClass);
-      if (ret) {
-        break;
-      }
-    }
-    if (ret) {
-      return true;
-    }
-
-    // Attempt to create actual class
-    final Class<?> currentClass;
-    try {
-      currentClass = Class.forName(className);
-    } catch (ClassNotFoundException e) {
-      Timber.e("Could not create class for: %s", className);
-      return false;
-    }
-
-    // Compare actual class hierarchy to see if subclass
-    for (final String unlockedClass : UNLOCKED_SUPERCLASS) {
-      try {
-        final Class<?> hardUnlocked = Class.forName(unlockedClass);
-        Timber.d("Check if currentClass: %s is a subclass of %s", className, unlockedClass);
-        ret = hardUnlocked.isAssignableFrom(currentClass);
-        if (ret) {
-          break;
-        }
-      } catch (ClassNotFoundException ignored) {
-      }
-    }
-    return ret;
   }
 
   /**
@@ -140,15 +58,28 @@ import timber.log.Timber;
    * The notification shade has the android systemui package and
    * can be its own class or a FrameLayout
    */
-  @Override public boolean isEventCausedByNotificationShade(String packageName, String className) {
-    return !keyguard.inKeyguardRestrictedInputMode() &&
-        packageName.equalsIgnoreCase(ANDROID_SYSTEM_UI_PACKAGE) &&
-        className.equalsIgnoreCase(ANDROID_FRAME_LAYOUT_CLASS);
+  @CheckResult @Override public boolean isEventCausedByNotificationShade(
+      @NonNull String packageName, @NonNull String className) {
+    boolean isNotificationShadeClass = false;
+    for (final String notificationShadeClass : NOTIFICATION_SHADE_CLASSES) {
+      Timber.d("Check if class %s is a known notification shade class %s", className,
+          notificationShadeClass);
+      if (notificationShadeClass.equalsIgnoreCase(className)) {
+        Timber.d("Class %s is a notification shade", className);
+        isNotificationShadeClass = true;
+        break;
+      }
+    }
+
+    return !keyguard.inKeyguardRestrictedInputMode() && packageName.equalsIgnoreCase(
+        ANDROID_SYSTEM_UI_PACKAGE) && isNotificationShadeClass;
   }
 
-  @Override public boolean isDeviceLocked() {
+  @CheckResult @Override public boolean isDeviceLocked() {
     boolean locked = false;
+    Timber.d("Check if device is currently locked in some secure manner");
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+      Timber.d("Device has isDeviceLocked() call");
       locked = keyguard.isDeviceLocked();
     }
     return locked || keyguard.inKeyguardRestrictedInputMode();
@@ -159,30 +90,29 @@ import timber.log.Timber;
    * This will prevent the lock screen from opening twice when the same
    * app opens multiple activities for example.
    */
-  @Override public boolean hasNameChanged(String name, String oldName, String ignoreRegex) {
-    final Pattern pattern = Pattern.compile(ignoreRegex);
-    return !name.equalsIgnoreCase(oldName) && !pattern.matcher(name).matches();
+  @CheckResult @Override public boolean hasNameChanged(@NonNull String name,
+      @NonNull String oldName) {
+    return !name.equalsIgnoreCase(oldName);
   }
 
   /**
    * If we are coming from the LockActivity SELF, we just unlocked the screen. no need to
    * prompt again until we come from a different activity to the LockedApp
    */
-  @Override public boolean isComingFromLockScreen(String oldClass) {
-    return oldClass.equalsIgnoreCase(LOCK_ACTIVITY_CLASS);
+  @CheckResult @Override public boolean isComingFromLockScreen(@NonNull String oldClass) {
+    return oldClass.equals(PADLOCK_LOCK_SCREEN_ACTIVITY_CLASS);
   }
 
-  /**
-   * NOOP if the package current active is part of the user/defined whitelist
-   */
-  @Override public boolean isNameHardUnlocked(String packageName, String className) {
-    return isUnlocked(UNLOCKED_CLASSES_REGEX, className) || isUnlocked(UNLOCKED_PACKAGES_REGEX,
-        packageName) ||
-        isUnlockedTypeClass(className);
+  @CheckResult @Override public boolean isWindowFromKeyboard() {
+    Timber.d("IMM isActive: %s", inputMethodManager.isActive());
+    Timber.d("IMM isAcceptingText: %s", inputMethodManager.isAcceptingText());
+    return inputMethodManager.isActive() && inputMethodManager.isAcceptingText();
   }
 
   @NonNull @WorkerThread @CheckResult @Override
-  public Observable<PadLockEntry> getEntry(String packageName, String activityName) {
+  public Observable<PadLockEntry> getEntry(@NonNull String packageName,
+      @NonNull String activityName) {
+    Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);
     return PadLockEntry.queryWithPackageActivityName(appContext, packageName, activityName);
   }
 }
