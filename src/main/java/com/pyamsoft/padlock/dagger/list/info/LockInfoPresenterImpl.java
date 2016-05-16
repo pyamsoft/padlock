@@ -19,9 +19,11 @@ package com.pyamsoft.padlock.dagger.list.info;
 import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.info.LockInfoPresenter;
+import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImpl;
+import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -57,13 +59,23 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
   @Override
   public void populateList(@NonNull String packageName, @NonNull List<ActivityInfo> activities) {
     unsubPopulateList();
+
+    // Filter out the lockscreen and crashlog entries
+    final Observable<List<ActivityInfo>> activityInfoObservable =
+        Observable.defer(() -> Observable.from(activities)).filter(activityInfo -> {
+          final String name = activityInfo.name;
+          return !name.equalsIgnoreCase(LockScreenActivity.class.getName())
+              && !name.equalsIgnoreCase(CrashLogActivity.class.getName());
+        }).toList();
+
+    // Zip together the lists into a list of ActivityEntry objects
     populateListSubscription =
-        lockInfoInteractor.getActivityEntries(packageName)
-            .map(padLockEntries -> {
+        Observable.zip(lockInfoInteractor.getActivityEntries(packageName), activityInfoObservable,
+            (padLockEntries, activityInfos) -> {
               final List<ActivityEntry> entries = new ArrayList<>();
               // KLUDGE super ugly.
               Timber.d("Search set for locked activities");
-              for (final ActivityInfo info : activities) {
+              for (final ActivityInfo info : activityInfos) {
                 final String name = info.name;
                 PadLockEntry foundEntry = null;
                 int foundLocation = -1;
