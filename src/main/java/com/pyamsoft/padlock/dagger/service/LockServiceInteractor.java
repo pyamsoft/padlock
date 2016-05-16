@@ -19,43 +19,26 @@ package com.pyamsoft.padlock.dagger.service;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
-import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import rx.Observable;
 
 public interface LockServiceInteractor {
 
-  String ANDROID_SYSTEM_UI_PACKAGE = "com.android.systemui";
-  String ANDROID_PACKAGE = "android";
+  // Android Packages
+  @NonNull String ANDROID_SYSTEM_UI_PACKAGE = "com.android.systemui";
+  @NonNull String ANDROID_PACKAGE = "android";
 
-  String LOCK_ACTIVITY_CLASS = LockScreenActivity.class.getName();
-  String CRASHLOG_ACTIVITY_CLASS = CrashLogActivity.class.getName();
-  String ANDROID_FRAME_LAYOUT_CLASS = "android.widget.FrameLayout";
-  String RECENTS_ACTIVITY_CLASS = "com.android.systemui.recents.RecentsActivity";
-  String ANDROID_DIALOG_CLASS = "android.app.Dialog";
-  String ANDROID_VIEW_CLASS = "android.view.View";
-  String ANDROID_PACKAGE_INSTALLER_PERMISSION_CLASS =
-      "com.android.packageinstaller.permission.ui.GrantPermissionsActivity";
-  String ANDROID_SETTINGS_USB_CHOOSER_CLASS =
-      "com.android.settings.deviceinfo.UsbModeChooserActivity";
+  @CheckResult boolean isEventCausedByNotificationShade(@NonNull String packageName,
+      @NonNull String className);
 
-  String GOOGLE_KEYBOARD_PACKAGE_REGEX = "^com.google.android.*inputmethod.*";
-  String ANDROID_VIEW_CLASS_REGEX = "^android.view.*";
-  String ANDROID_SYSTEM_UI_PACKAGE_REGEX = "^com.android.systemui";
-  String ANDROID_PACKAGE_REGEX = "^android";
-  String ANDROID_PACKAGE_INSTALLER_REGEX = "^com.android.packageinstaller";
+  @CheckResult boolean hasNameChanged(@NonNull String name, @NonNull String oldName);
 
-  boolean isEventCausedByNotificationShade(String packageName, String className);
+  @CheckResult boolean isComingFromLockScreen(@NonNull String oldClass);
 
-  boolean hasNameChanged(String name, String oldName, String ignoreRegex);
+  @CheckResult boolean isWindowFromKeyboard();
 
-  boolean isComingFromLockScreen(String oldClass);
+  @CheckResult boolean isDeviceLocked();
 
-  boolean isDeviceLocked();
-
-  boolean isNameHardUnlocked(String packageName, String className);
-
-  @NonNull @CheckResult @WorkerThread Observable<PadLockEntry> getEntry(String packageName,
-      String activityName);
+  @NonNull @CheckResult @WorkerThread Observable<PadLockEntry> getEntry(@NonNull String packageName,
+      @NonNull String activityName);
 }
