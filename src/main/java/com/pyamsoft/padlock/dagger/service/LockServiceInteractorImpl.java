@@ -22,9 +22,11 @@ import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
+import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -37,6 +39,10 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
   private static final String[] NOTIFICATION_SHADE_CLASSES = {
       // Nexus 6 is a Frame Layout
       "android.widget.FrameLayout"
+  };
+  private static final String[] IMM_KEYBOARD_CLASSES = {
+      // Nexus 6 Google Keyboard is a plain View
+      "android.view.View"
   };
 
   @NonNull private final Context appContext;
@@ -64,14 +70,14 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
     for (final String notificationShadeClass : NOTIFICATION_SHADE_CLASSES) {
       Timber.d("Check if class %s is a known notification shade class %s", className,
           notificationShadeClass);
-      if (notificationShadeClass.equalsIgnoreCase(className)) {
+      if (notificationShadeClass.equals(className)) {
         Timber.d("Class %s is a notification shade", className);
         isNotificationShadeClass = true;
         break;
       }
     }
 
-    return !keyguard.inKeyguardRestrictedInputMode() && packageName.equalsIgnoreCase(
+    return !keyguard.inKeyguardRestrictedInputMode() && packageName.equals(
         ANDROID_SYSTEM_UI_PACKAGE) && isNotificationShadeClass;
   }
 
@@ -92,21 +98,48 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
    */
   @CheckResult @Override public boolean hasNameChanged(@NonNull String name,
       @NonNull String oldName) {
-    return !name.equalsIgnoreCase(oldName);
+    return !name.equals(oldName);
   }
 
   /**
-   * If we are coming from the LockActivity SELF, we just unlocked the screen. no need to
-   * prompt again until we come from a different activity to the LockedApp
+   * If the IMM is open and accepting text, there is a good chance then that the event is
+   * actually brought by the Keyboard window opening.
    */
-  @CheckResult @Override public boolean isComingFromLockScreen(@NonNull String oldClass) {
-    return oldClass.equals(PADLOCK_LOCK_SCREEN_ACTIVITY_CLASS);
-  }
+  @Override public boolean isWindowFromKeyboard(@NonNull String packageName,
+      @NonNull String className) {
+    boolean isIMMPackage = false;
+    // We fetch this every time so that we can handle updates to the IMM list
+    final List<InputMethodInfo> enabledInputMethods =
+        inputMethodManager.getEnabledInputMethodList();
+    for (final InputMethodInfo methodInfo : enabledInputMethods) {
+      Timber.d("IMM package: %s, service %s", methodInfo.getPackageName(),
+          methodInfo.getServiceName());
+      if (methodInfo.getPackageName().equals(packageName)) {
+        Timber.d("Package %s is IMM package", packageName);
+        isIMMPackage = true;
+        break;
+      }
+    }
 
-  @CheckResult @Override public boolean isWindowFromKeyboard() {
-    Timber.d("IMM isActive: %s", inputMethodManager.isActive());
-    Timber.d("IMM isAcceptingText: %s", inputMethodManager.isAcceptingText());
-    return inputMethodManager.isActive() && inputMethodManager.isAcceptingText();
+    if (isIMMPackage) {
+      boolean isIMMClass = false;
+      for (final String immClass : IMM_KEYBOARD_CLASSES) {
+        if (immClass.equals(className)) {
+          Timber.d("Class %s is IMM Class", className);
+          isIMMClass = true;
+          break;
+        }
+      }
+
+      if (isIMMClass) {
+        final boolean accepting = inputMethodManager.isAcceptingText();
+        Timber.d("IMM isAcceptingText: %s", accepting);
+        return accepting;
+      }
+    }
+
+    Timber.d("Window event is not from IMM");
+    return false;
   }
 
   @NonNull @WorkerThread @CheckResult @Override

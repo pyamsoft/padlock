@@ -33,9 +33,7 @@ public interface LockServiceInteractor {
 
   @CheckResult boolean hasNameChanged(@NonNull String name, @NonNull String oldName);
 
-  @CheckResult boolean isComingFromLockScreen(@NonNull String oldClass);
-
-  @CheckResult boolean isWindowFromKeyboard();
+  @CheckResult boolean isWindowFromKeyboard(@NonNull String packageName, @NonNull String className);
 
   @CheckResult boolean isDeviceLocked();
 
