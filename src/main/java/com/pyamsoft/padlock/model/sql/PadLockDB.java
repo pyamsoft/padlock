@@ -22,7 +22,7 @@ import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
 import rx.schedulers.Schedulers;
 
-public class PadLockDB {
+final class PadLockDB {
 
   @NonNull private static final Object lock = new Object();
 
