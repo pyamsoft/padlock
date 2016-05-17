@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
@@ -140,6 +141,17 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
 
     Timber.d("Window event is not from IMM");
     return false;
+  }
+
+  @Override
+  public boolean isWindowFromLockScreen(@NonNull String packageName, @NonNull String className) {
+    Timber.d("Window is lock screen: %s, %s", packageName, className);
+    return packageName.equals(PadLock.class.getPackage().getName()) && className.equals(
+        LockScreenActivity.class.getName());
+  }
+
+  @Override public boolean isLiveEvent(@NonNull String packageName, @NonNull String className) {
+    return !packageName.isEmpty() && !className.isEmpty();
   }
 
   @NonNull @WorkerThread @CheckResult @Override

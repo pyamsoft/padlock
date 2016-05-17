@@ -91,20 +91,30 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
         return Observable.empty();
       }
 
+      if (interactor.isDeviceLocked()) {
+        Timber.i("Device is Locked. Reset state");
+        reset();
+      }
+
+      if (!interactor.isLiveEvent(packageName, className)) {
+        Timber.e("Received dead event");
+        return Observable.empty();
+      }
+
       if (interactor.isEventCausedByNotificationShade(packageName, className)) {
-        Timber.i("Notification shade. Event will be ignored");
+        Timber.e("Notification shade. Event will be ignored");
         return Observable.empty();
       }
 
       if (interactor.isWindowFromKeyboard(packageName, className)) {
-        Timber.i("Event for package %s class: %s is caused by InputMethodManager", packageName,
+        Timber.e("Event for package %s class: %s is caused by InputMethodManager", packageName,
             className);
         return Observable.empty();
       }
 
-      if (interactor.isDeviceLocked()) {
-        Timber.i("Device is Locked. Reset state");
-        reset();
+      if (interactor.isWindowFromLockScreen(packageName, className)) {
+        Timber.e("Event for package %s class: %s is caused by LockScreen", packageName, className);
+        return Observable.empty();
       }
 
       final boolean packageChanged = interactor.hasNameChanged(packageName, lastPackageName);
