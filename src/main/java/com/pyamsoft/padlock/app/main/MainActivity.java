@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
@@ -53,7 +54,7 @@ import javax.inject.Inject;
 
 public class MainActivity extends DonationActivityBase implements MainPresenter.MainView {
 
-  private static final String USAGE_TERMS_TAG = "usage_terms";
+  @NonNull private static final String USAGE_TERMS_TAG = "usage_terms";
   private static final int VECTOR_TASK_SIZE = 2;
 
   @NonNull private final AsyncVectorDrawableTask[] tasks =
@@ -76,7 +77,7 @@ public class MainActivity extends DonationActivityBase implements MainPresenter.
     settingsFragment = new SettingsFragment();
   }
 
-  @Override public void onCreate(final Bundle savedInstanceState) {
+  @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -300,7 +301,7 @@ public class MainActivity extends DonationActivityBase implements MainPresenter.
     }
   }
 
-  @Override protected void onSaveInstanceState(Bundle outState) {
+  @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
     if (isFinishing()) {
       DataHolderFragment.removeAll(this);
     }

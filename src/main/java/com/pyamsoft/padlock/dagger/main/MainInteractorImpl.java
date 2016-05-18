@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.main;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import javax.inject.Inject;
@@ -28,7 +29,7 @@ final class MainInteractorImpl implements MainInteractor {
     this.preferences = preferences;
   }
 
-  @Override public boolean hasAgreed() {
+  @CheckResult @Override public boolean hasAgreed() {
     return preferences.hasAgreed();
   }
 

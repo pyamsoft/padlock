@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.main;
 
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -37,11 +38,11 @@ final class MainPagerAdapter extends FragmentStatePagerAdapter implements PageAw
     super(fm);
   }
 
-  public void setLockListFragment(final LockListFragment fragment) {
+  public void setLockListFragment(final @NonNull LockListFragment fragment) {
     this.lockListFragment = fragment;
   }
 
-  public void setSettingsFragment(final SettingsFragment fragment) {
+  public void setSettingsFragment(final @NonNull SettingsFragment fragment) {
     this.settingsFragment = fragment;
   }
 
@@ -69,7 +70,7 @@ final class MainPagerAdapter extends FragmentStatePagerAdapter implements PageAw
     return NUMBER_ITEMS;
   }
 
-  @Override public void onPageSelected(ViewPager viewPager, int position) {
+  @Override public void onPageSelected(@NonNull ViewPager viewPager, int position) {
     final Object item = instantiateItem(viewPager, position);
     if (item != null && item instanceof PageAwareView) {
       final PageAwareView pageAware = (PageAwareView) item;
@@ -77,7 +78,7 @@ final class MainPagerAdapter extends FragmentStatePagerAdapter implements PageAw
     }
   }
 
-  @Override public void onPageUnselected(ViewPager viewPager, int position) {
+  @Override public void onPageUnselected(@NonNull ViewPager viewPager, int position) {
     final Object item = instantiateItem(viewPager, position);
     if (item != null && item instanceof PageAwareView) {
       final PageAwareView pageAware = (PageAwareView) item;
