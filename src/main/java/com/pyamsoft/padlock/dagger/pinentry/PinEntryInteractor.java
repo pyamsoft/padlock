@@ -18,11 +18,12 @@ package com.pyamsoft.padlock.dagger.pinentry;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.dagger.lock.LockInteractor;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import rx.Observable;
 
 interface PinEntryInteractor extends LockInteractor {
 
-  @CheckResult @NonNull Observable<PinEntryEvent> submitMasterPin(String attempt);
+  @CheckResult @NonNull Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt);
 }
