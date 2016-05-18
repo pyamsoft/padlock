@@ -16,22 +16,23 @@
 
 package com.pyamsoft.padlock.app.lockscreen;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
 
 public interface LockScreenPresenter extends LockPresenter<LockScreen> {
 
-  void setIgnorePeriodFromPreferences(@Nullable Long time) throws NullPointerException;
+  void setIgnorePeriodFromPreferences(@Nullable Long time);
 
   void lockEntry();
 
   void loadDisplayNameFromPackage();
 
-  long getIgnoreTimeNone();
+  @CheckResult long getIgnoreTimeNone();
 
-  long getIgnoreTimeFive();
+  @CheckResult long getIgnoreTimeFive();
 
-  long getIgnoreTimeTen();
+  @CheckResult long getIgnoreTimeTen();
 
-  long getIgnoreTimeThirty();
+  @CheckResult long getIgnoreTimeThirty();
 }

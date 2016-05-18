@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlock.app.lockscreen;
 
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
 
 public interface LockScreen extends LockPresenter.LockView {
@@ -34,9 +36,9 @@ public interface LockScreen extends LockPresenter.LockView {
 
   void setIgnoreTimeThirty();
 
-  long getIgnorePeriodTime();
+  @CheckResult long getIgnorePeriodTime();
 
-  boolean shouldExcludeEntry();
+  @CheckResult boolean shouldExcludeEntry();
 
-  void setDisplayName(String name);
+  void setDisplayName(@NonNull String name);
 }

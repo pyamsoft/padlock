@@ -25,13 +25,14 @@ import android.support.v7.app.AlertDialog;
 
 public final class InfoDialog extends DialogFragment {
 
-  private static final String PKG_NAME = "pkgname";
-  private static final String ACT_NAME = "actname";
+  @NonNull private static final String PKG_NAME = "pkgname";
+  @NonNull private static final String ACT_NAME = "actname";
 
   private String activityName;
   private String packageName;
 
-  public static InfoDialog newInstance(final String packageName, final String activityName) {
+  public static InfoDialog newInstance(final @NonNull String packageName,
+      final @NonNull String activityName) {
     final InfoDialog fragment = new InfoDialog();
     final Bundle args = new Bundle();
     args.putString(PKG_NAME, packageName);
@@ -46,7 +47,7 @@ public final class InfoDialog extends DialogFragment {
     activityName = getArguments().getString(ACT_NAME);
   }
 
-  @NonNull @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+  @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     return new AlertDialog.Builder(getActivity()).setTitle("Locked Info")
         .setMessage(packageName + '\n' + activityName)
         .setPositiveButton("Okay", (dialogInterface, i) -> {

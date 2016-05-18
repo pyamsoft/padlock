@@ -20,6 +20,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
@@ -51,7 +52,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     this.defaultIgnoreTime = defaultIgnoreTime;
   }
 
-  @WorkerThread @NonNull @Override
+  @WorkerThread @NonNull @Override @CheckResult
   public Observable<Boolean> lockEntry(@NonNull String packageName, @NonNull String activityName) {
     Timber.d("Lock entry: %s %s", packageName, activityName);
     return PadLockEntry.queryWithPackageActivityName(appContext, packageName, activityName)
@@ -73,7 +74,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         });
   }
 
-  @WorkerThread @NonNull @Override
+  @WorkerThread @NonNull @Override @CheckResult
   public Observable<Boolean> unlockEntry(@NonNull String packageName, @NonNull String activityName,
       @NonNull String attempt, boolean shouldExclude, long ignoreForPeriod) {
     Timber.d("Attempt unlock: %s %s", packageName, activityName);
@@ -141,11 +142,11 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         oldValues.activityName());
   }
 
-  @Override public long getDefaultIgnoreTime() {
+  @CheckResult @Override public long getDefaultIgnoreTime() {
     return preferences.getDefaultIgnoreTime();
   }
 
-  @WorkerThread @NonNull @Override
+  @WorkerThread @NonNull @Override @CheckResult
   public Observable<String> getDisplayName(@NonNull String packageName) {
     final PackageManager packageManager = appContext.getPackageManager();
     try {
