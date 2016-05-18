@@ -17,7 +17,9 @@ package com.pyamsoft.padlock.app.service;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Intent;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.accessibility.AccessibilityEvent;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
@@ -34,7 +36,7 @@ public final class PadLockService extends AccessibilityService
   @Inject LockServicePresenter presenter;
   @NonNull private Intent lockActivity = new Intent();
 
-  public static synchronized boolean isEnabled() {
+  @CheckResult public static synchronized boolean isEnabled() {
     return enabled;
   }
 
@@ -42,15 +44,18 @@ public final class PadLockService extends AccessibilityService
     PadLockService.enabled = enabled;
   }
 
-  public static synchronized PadLockService getInstance() {
+  @CheckResult @NonNull public static synchronized PadLockService getInstance() {
+    if (instance == null) {
+      throw new NullPointerException("Service instance is NULL");
+    }
     return instance;
   }
 
-  private static synchronized void setInstance(PadLockService i) {
+  private static synchronized void setInstance(@Nullable PadLockService i) {
     instance = i;
   }
 
-  @Override public void onAccessibilityEvent(final AccessibilityEvent event) {
+  @Override public void onAccessibilityEvent(final @Nullable AccessibilityEvent event) {
     if (event == null) {
       Timber.e("AccessibilityEvent is NULL");
       return;

@@ -18,10 +18,10 @@ package com.pyamsoft.padlock.app.pinentry;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -54,7 +54,8 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
   @Inject LockViewDelegate lockViewDelegate;
   private Unbinder unbinder;
 
-  public static PinEntryDialog newInstance(final String packageName, final String activityName) {
+  public static PinEntryDialog newInstance(final @NonNull String packageName,
+      final @NonNull String activityName) {
     final PinEntryDialog fragment = new PinEntryDialog();
     final Bundle args = new Bundle();
     args.putString(ARG_PACKAGE, packageName);
@@ -75,7 +76,7 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     setRetainInstance(true);
   }
 
-  @NonNull @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+  @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     Timber.d("Init dialog");
     final ContextWrapper themedContext =
         new ContextThemeWrapper(getContext(), R.style.Theme_PadLock_Light_PINEntry);
@@ -93,7 +94,7 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
   }
 
-  @Override public void onSaveInstanceState(Bundle outState) {
+  @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
     lockViewDelegate.onSaveInstanceState(outState);
     super.onSaveInstanceState(outState);
@@ -157,15 +158,11 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     dismiss();
   }
 
-  @NonNull @Override public Context getContext() {
-    return super.getContext().getApplicationContext();
-  }
-
   public static final class PinEntryBus extends RxBus<PinEntryEvent> {
 
-    private static final PinEntryBus instance = new PinEntryBus();
+    @NonNull private static final PinEntryBus instance = new PinEntryBus();
 
-    public static PinEntryBus get() {
+    @CheckResult @NonNull public static PinEntryBus get() {
       return instance;
     }
   }

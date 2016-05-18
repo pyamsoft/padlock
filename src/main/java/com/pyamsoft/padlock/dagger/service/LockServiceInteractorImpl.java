@@ -34,11 +34,11 @@ import timber.log.Timber;
 
 final class LockServiceInteractorImpl implements LockServiceInteractor {
 
-  private static final String[] NOTIFICATION_SHADE_CLASSES = {
+  @NonNull private static final String[] NOTIFICATION_SHADE_CLASSES = {
       // Nexus 6 is a Frame Layout
       "android.widget.FrameLayout"
   };
-  private static final String[] IMM_KEYBOARD_CLASSES = {
+  @NonNull private static final String[] IMM_KEYBOARD_CLASSES = {
       // Nexus 6 Google Keyboard is a plain View
       "android.view.View"
   };
