@@ -16,9 +16,12 @@
 
 package com.pyamsoft.padlock.dagger.pin;
 
+import android.support.annotation.CheckResult;
+import android.support.annotation.Nullable;
+
 public interface MasterPinInteractor {
 
-  String getMasterPin();
+  @Nullable @CheckResult String getMasterPin();
 
-  void setMasterPin(String pin);
+  void setMasterPin(@Nullable String pin);
 }

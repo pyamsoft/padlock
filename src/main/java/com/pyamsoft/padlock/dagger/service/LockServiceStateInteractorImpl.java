@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
 import javax.inject.Inject;
@@ -28,7 +29,7 @@ final class LockServiceStateInteractorImpl implements LockServiceStateInteractor
     this.pinInteractor = pinInteractor;
   }
 
-  @Override public boolean isServiceEnabled() {
+  @CheckResult @Override public boolean isServiceEnabled() {
     return pinInteractor.getMasterPin() != null;
   }
 }

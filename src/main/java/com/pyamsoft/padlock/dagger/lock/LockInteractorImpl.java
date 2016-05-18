@@ -46,7 +46,7 @@ public abstract class LockInteractorImpl implements LockInteractor {
   }
 
   @NonNull @Override @WorkerThread
-  public final Observable<Drawable> loadPackageIcon(Context context,
+  public final Observable<Drawable> loadPackageIcon(@NonNull Context context,
       final @NonNull String packageName) {
     return Observable.defer(() -> {
       final PackageManager packageManager = context.getApplicationContext().getPackageManager();

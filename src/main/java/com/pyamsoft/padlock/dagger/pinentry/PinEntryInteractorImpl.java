@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.pinentry;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
 import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
@@ -32,7 +33,7 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
     this.masterPinInteractor = masterPinInteractor;
   }
 
-  @NonNull @Override public Observable<PinEntryEvent> submitMasterPin(String attempt) {
+  @CheckResult @NonNull @Override public Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt) {
     return Observable.defer(() -> Observable.just(masterPinInteractor.getMasterPin()))
         .map(masterPin -> {
           final String encodedMasterPin = encodeSHA256(attempt);
@@ -41,8 +42,7 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
             masterPinInteractor.setMasterPin(encodedMasterPin);
             return PinEntryEvent.builder().complete(true).type(0).build();
           } else {
-            final boolean success =
-                checkEncodedSubmissionAttempt(encodedMasterPin, masterPinInteractor.getMasterPin());
+            final boolean success = checkEncodedSubmissionAttempt(encodedMasterPin, masterPin);
             if (success) {
               Timber.d("Clear master pin");
               masterPinInteractor.setMasterPin(null);

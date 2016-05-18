@@ -52,7 +52,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   }
 
   @WorkerThread @NonNull @Override
-  public Observable<Boolean> lockEntry(String packageName, String activityName) {
+  public Observable<Boolean> lockEntry(@NonNull String packageName, @NonNull String activityName) {
     Timber.d("Lock entry: %s %s", packageName, activityName);
     return PadLockEntry.queryWithPackageActivityName(appContext, packageName, activityName)
         .first()
@@ -74,8 +74,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   }
 
   @WorkerThread @NonNull @Override
-  public Observable<Boolean> unlockEntry(String packageName, String activityName, String attempt,
-      boolean shouldExclude, long ignoreForPeriod) {
+  public Observable<Boolean> unlockEntry(@NonNull String packageName, @NonNull String activityName,
+      @NonNull String attempt, boolean shouldExclude, long ignoreForPeriod) {
     Timber.d("Attempt unlock: %s %s", packageName, activityName);
     final Observable<PadLockEntry> dbObservable =
         PadLockEntry.queryWithPackageActivityName(appContext, packageName, activityName).first();
@@ -141,12 +141,12 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         oldValues.activityName());
   }
 
-  @WorkerThread @NonNull @Override public Observable<Long> getDefaultIgnoreTime() {
-    return Observable.defer(() -> Observable.just(preferences.getDefaultIgnoreTime()))
-        .map(aLong -> aLong == null ? defaultIgnoreTime : aLong);
+  @Override public long getDefaultIgnoreTime() {
+    return preferences.getDefaultIgnoreTime();
   }
 
-  @WorkerThread @NonNull @Override public Observable<String> getDisplayName(String packageName) {
+  @WorkerThread @NonNull @Override
+  public Observable<String> getDisplayName(@NonNull String packageName) {
     final PackageManager packageManager = appContext.getPackageManager();
     try {
       final ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);

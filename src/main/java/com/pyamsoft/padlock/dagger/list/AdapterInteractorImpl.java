@@ -32,11 +32,11 @@ public abstract class AdapterInteractorImpl<I> implements AdapterInteractor<I> {
     return entries.get(position);
   }
 
-  @Override public void set(int position, I entry) {
+  @Override public void set(int position, @NonNull I entry) {
     entries.set(position, entry);
   }
 
-  @Override public int add(I entry) {
+  @Override public int add(@NonNull I entry) {
     final int next = entries.size();
     entries.add(next, entry);
     return next;

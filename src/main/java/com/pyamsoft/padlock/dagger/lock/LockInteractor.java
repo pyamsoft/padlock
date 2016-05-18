@@ -18,12 +18,13 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import rx.Observable;
 
 public interface LockInteractor {
 
-  @NonNull @WorkerThread Observable<Drawable> loadPackageIcon(Context context,
-      final @NonNull String packageName);
+  @CheckResult @NonNull @WorkerThread Observable<Drawable> loadPackageIcon(@NonNull Context context,
+      @NonNull String packageName);
 }
