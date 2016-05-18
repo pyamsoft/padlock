@@ -16,20 +16,21 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.base.Presenter;
 
 public interface AdapterPresenter<I> extends Presenter<AdapterPresenter.AdapterView> {
 
-  @NonNull I get(int position);
+  @CheckResult @NonNull I get(int position);
 
   void setLocked(int position, boolean locked);
 
-  int add(I entry);
+  @CheckResult int add(@NonNull I entry);
 
-  int remove();
+  @CheckResult int remove();
 
-  int size();
+  @CheckResult int size();
 
   interface AdapterView {
   }

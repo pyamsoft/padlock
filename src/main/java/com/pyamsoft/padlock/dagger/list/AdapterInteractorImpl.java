@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public abstract class AdapterInteractorImpl<I> implements AdapterInteractor<I> {
     this.entries = new ArrayList<>();
   }
 
-  @NonNull @Override public I get(int position) {
+  @CheckResult @NonNull @Override public I get(int position) {
     return entries.get(position);
   }
 
@@ -36,19 +37,19 @@ public abstract class AdapterInteractorImpl<I> implements AdapterInteractor<I> {
     entries.set(position, entry);
   }
 
-  @Override public int add(@NonNull I entry) {
+  @CheckResult @Override public int add(@NonNull I entry) {
     final int next = entries.size();
     entries.add(next, entry);
     return next;
   }
 
-  @Override public int remove() {
+  @CheckResult @Override public int remove() {
     final int old = entries.size() - 1;
     entries.remove(old);
     return old;
   }
 
-  @Override public int size() {
+  @CheckResult @Override public int size() {
     return entries.size();
   }
 }
