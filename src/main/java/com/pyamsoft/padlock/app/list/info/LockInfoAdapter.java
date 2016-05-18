@@ -28,13 +28,14 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.BaseRecyclerAdapter;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
+import com.pyamsoft.padlock.app.list.LockListItem;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import java.lang.ref.WeakReference;
 import timber.log.Timber;
 
 public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.ViewHolder>
-    implements LockInfoItem, DBPresenter.DBView, AdapterPresenter.AdapterView {
+    implements LockListItem<ActivityEntry>, DBPresenter.DBView, AdapterPresenter.AdapterView {
 
   @NonNull private final AdapterPresenter<ActivityEntry> adapterPresenter;
   @NonNull private final DBPresenter dbPresenter;
@@ -61,13 +62,13 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
     dbPresenter.onDestroyView();
   }
 
-  @Override public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+  @Override public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     final View view = LayoutInflater.from(parent.getContext())
         .inflate(R.layout.adapter_item_lockinfo, parent, false);
     return new ViewHolder(view);
   }
 
-  @Override public void onBindViewHolder(ViewHolder holder, int position) {
+  @Override public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
     Timber.d("onBindViewHolder: %d", position);
     final ActivityEntry entry = adapterPresenter.get(position);
 
@@ -93,12 +94,12 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
             appEntry.packageName(), activityName, null, appEntry.system()));
   }
 
-  @Override public void onViewRecycled(ViewHolder holder) {
+  @Override public void onViewRecycled(@NonNull ViewHolder holder) {
     super.onViewRecycled(holder);
     removeViewActionListeners(holder);
   }
 
-  private void removeViewActionListeners(ViewHolder holder) {
+  private void removeViewActionListeners(@NonNull ViewHolder holder) {
     holder.checkBox.setOnClickListener(null);
   }
 
@@ -106,7 +107,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
     return adapterPresenter.size();
   }
 
-  @Override public void addItem(ActivityEntry entry) {
+  @Override public void addItem(@NonNull ActivityEntry entry) {
     final int next = adapterPresenter.add(entry);
     notifyItemInserted(next);
   }
@@ -137,7 +138,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
 
     @BindView(R.id.lock_info_activity_locked) CheckedTextView checkBox;
 
-    public ViewHolder(View itemView) {
+    public ViewHolder(@NonNull View itemView) {
       super(itemView);
       ButterKnife.bind(this, itemView);
     }

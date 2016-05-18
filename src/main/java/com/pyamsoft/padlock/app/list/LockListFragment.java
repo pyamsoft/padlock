@@ -100,8 +100,9 @@ public final class LockListFragment extends PageAwareFragment
   private SwitchCompat displaySystem;
   private Unbinder unbinder;
 
-  @Nullable @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-      Bundle savedInstanceState) {
+  @Nullable @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
     presenter.onCreateView(this);
@@ -110,7 +111,7 @@ public final class LockListFragment extends PageAwareFragment
   }
 
   @SuppressLint("ShowToast") @Override
-  public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     setupRecyclerView();
     setupSwipeRefresh();
@@ -187,17 +188,17 @@ public final class LockListFragment extends PageAwareFragment
     setHasOptionsMenu(true);
   }
 
-  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+  @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
     super.onCreateOptionsMenu(menu, inflater);
     inflater.inflate(R.menu.locklist_menu, menu);
   }
 
-  @Override public void onPrepareOptionsMenu(Menu menu) {
+  @Override public void onPrepareOptionsMenu(@NonNull Menu menu) {
     super.onPrepareOptionsMenu(menu);
     setupLockListMenuItems(menu);
   }
 
-  private void setupLockListMenuItems(final Menu menu) {
+  private void setupLockListMenuItems(final @NonNull Menu menu) {
     final MenuItem displaySystemItem = menu.findItem(R.id.menu_is_system);
     if (displaySystemItem == null) {
       Timber.e("Item is NULL");
@@ -305,7 +306,7 @@ public final class LockListFragment extends PageAwareFragment
         new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_lock_open_24dp));
   }
 
-  @Override public void onPinEntryDialogRequested(String packageName, String activityName) {
+  @Override public void onPinEntryDialogRequested(@NonNull String packageName, @NonNull String activityName) {
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
         PinEntryDialog.newInstance(packageName, activityName), PIN_DIALOG_TAG);
   }
@@ -419,7 +420,7 @@ public final class LockListFragment extends PageAwareFragment
     presenter.populateList();
   }
 
-  @Override public void onSaveInstanceState(Bundle outState) {
+  @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     if (getActivity().isChangingConfigurations()) {
       presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_PRESENTER, presenter);

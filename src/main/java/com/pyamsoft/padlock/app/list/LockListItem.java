@@ -16,15 +16,11 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import com.pyamsoft.padlock.model.AppEntry;
+import android.support.annotation.NonNull;
 
-interface LockListItem {
+public interface LockListItem<I> {
 
-  void addItem(AppEntry entry);
+  void addItem(@NonNull I entry);
 
   void removeItem();
-
-  void onListItemAdded(int position);
-
-  void onListItemRemoved(int position);
 }

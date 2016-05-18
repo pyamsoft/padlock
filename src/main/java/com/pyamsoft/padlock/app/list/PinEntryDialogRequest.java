@@ -16,7 +16,9 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.support.annotation.NonNull;
+
 interface PinEntryDialogRequest {
 
-  void onPinEntryDialogRequested(String packageName, String activityName);
+  void onPinEntryDialogRequested(@NonNull String packageName, @NonNull String activityName);
 }
