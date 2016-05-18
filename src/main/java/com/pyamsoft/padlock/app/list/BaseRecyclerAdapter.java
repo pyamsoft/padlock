@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app;
+package com.pyamsoft.padlock.app.list;
 
 import android.support.v7.widget.RecyclerView;
 import com.pyamsoft.pydroid.base.ActivityRecyclerAdapter;

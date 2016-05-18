@@ -26,8 +26,6 @@ public interface LockScreen extends LockPresenter.LockView {
 
   void onLockedError();
 
-  void setIgnoreTimeError();
-
   void setIgnoreTimeNone();
 
   void setIgnoreTimeFive();

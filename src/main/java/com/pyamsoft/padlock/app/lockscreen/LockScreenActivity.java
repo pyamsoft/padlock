@@ -37,7 +37,6 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.ErrorDialog;
 import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
@@ -161,7 +160,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @Override public void setImageError() {
-    lockViewDelegate.setImageError();
+    AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new ErrorDialog(), "error");
   }
 
   @NonNull @Override public String getCurrentAttempt() {
@@ -196,9 +195,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     Timber.d("Unlocked!");
     lockViewDelegate.clearDisplay();
     final LockServicePresenter.LockService service = PadLockService.getInstance();
-    if (service != null) {
-      service.passLockScreen();
-    }
+    service.passLockScreen();
     finish();
   }
 
@@ -262,12 +259,6 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @Override public void onSubmitError() {
     lockViewDelegate.clearDisplay();
     AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
-  }
-
-  @Override public void setIgnoreTimeError() {
-    Timber.e("Failed to set ignore time");
-    AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new ErrorDialog(),
-        "ignore_time");
   }
 
   @Override public void setIgnoreTimeNone() {
