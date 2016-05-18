@@ -17,22 +17,19 @@
 package com.pyamsoft.padlock.app.list;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 
 public final class LockListLayoutManager extends LinearLayoutManager {
 
   private boolean verticalScrollEnabled = true;
 
-  public LockListLayoutManager(Context context) {
+  public LockListLayoutManager(@NonNull Context context) {
     super(context);
   }
 
   @Override public boolean canScrollVertically() {
     return verticalScrollEnabled && super.canScrollVertically();
-  }
-
-  public boolean isVerticalScrollEnabled() {
-    return verticalScrollEnabled;
   }
 
   public void setVerticalScrollEnabled(boolean verticalScrollEnabled) {

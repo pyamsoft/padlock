@@ -128,7 +128,7 @@ public class LockInfoDialog extends RetainedDialogFragment
   }
 
   @Nullable @Override
-  public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
     adapter.onCreate();
     presenter.onCreateView(this);
@@ -136,7 +136,7 @@ public class LockInfoDialog extends RetainedDialogFragment
   }
 
   @SuppressLint("InflateParams") @NonNull @Override
-  public Dialog onCreateDialog(Bundle savedInstanceState) {
+  public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     final View rootView =
         LayoutInflater.from(getActivity()).inflate(R.layout.dialog_lockinfo, null, false);
     unbinder = ButterKnife.bind(this, rootView);
@@ -236,7 +236,7 @@ public class LockInfoDialog extends RetainedDialogFragment
     swipeRefreshLayout.post(startRefreshRunnable);
   }
 
-  @Override public void onSaveInstanceState(Bundle outState) {
+  @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     if (getActivity().isChangingConfigurations()) {
       presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_PRESENTER, presenter);

@@ -38,7 +38,7 @@ import java.lang.ref.WeakReference;
 import timber.log.Timber;
 
 public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.ViewHolder>
-    implements LockListItem, DBPresenter.DBView, AdapterPresenter.AdapterView {
+    implements LockListItem<AppEntry>, DBPresenter.DBView, AdapterPresenter.AdapterView {
 
   @NonNull private final AdapterPresenter<AppEntry> adapterPresenter;
   @NonNull private final WeakReference<Fragment> weakFragment;
@@ -65,24 +65,24 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     dbPresenter.onDestroyView();
   }
 
-  @Override public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+  @Override public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     final View view = LayoutInflater.from(parent.getContext())
         .inflate(R.layout.adapter_item_locklist_entry, parent, false);
     return new ViewHolder(view);
   }
 
-  @Override public void onViewRecycled(ViewHolder holder) {
+  @Override public void onViewRecycled(@NonNull ViewHolder holder) {
     super.onViewRecycled(holder);
     removeViewActionListeners(holder);
   }
 
-  private void removeViewActionListeners(ViewHolder holder) {
+  private void removeViewActionListeners(@NonNull ViewHolder holder) {
     holder.toggle.setOnCheckedChangeListener(null);
     holder.name.setOnClickListener(null);
     holder.icon.setOnClickListener(null);
   }
 
-  @Override public void onBindViewHolder(ViewHolder holder, int position) {
+  @Override public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
     Timber.d("onBindViewHolder: %s", position);
     final AppEntry entry = adapterPresenter.get(position);
     removeViewActionListeners(holder);
@@ -92,7 +92,8 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     holder.toggle.setChecked(entry.locked());
     final CompoundButton.OnCheckedChangeListener listener =
         new CompoundButton.OnCheckedChangeListener() {
-          @Override public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+          @Override
+          public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
             // Don't check it yet, get auth first
             holder.toggle.setOnCheckedChangeListener(null);
             holder.toggle.setChecked(!b);
@@ -108,7 +109,8 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     holder.icon.setOnClickListener(view -> authorizeAccess(holder, false, false));
   }
 
-  private void accessPackage(final AppEntry entry, final int position, final boolean checked) {
+  private void accessPackage(final @NonNull AppEntry entry, final int position,
+      final boolean checked) {
     // TODO app specific codes
     final Fragment fragment = weakFragment.get();
     if (fragment != null) {
@@ -118,7 +120,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     dbPresenter.attemptDBModification(position, checked, entry.packageName(), null, entry.system());
   }
 
-  private void authorizeAccess(final ViewHolder holder, final boolean accessPackage,
+  private void authorizeAccess(final @NonNull ViewHolder holder, final boolean accessPackage,
       final boolean checked) {
     // TODO some kind of observable which can confirm correct passcode entry
 
@@ -134,7 +136,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     }
   }
 
-  private void openInfo(AppEntry entry) {
+  private void openInfo(@NonNull AppEntry entry) {
 
     final Fragment fragment = weakFragment.get();
     if (fragment != null) {
@@ -147,17 +149,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     return adapterPresenter.size();
   }
 
-  @Override public void onListItemAdded(int position) {
-    Timber.d("item inserted: %d", position);
-    notifyItemInserted(position);
-  }
-
-  @Override public void onListItemRemoved(int position) {
-    Timber.d("item removed: %d", position);
-    notifyItemRemoved(position);
-  }
-
-  @Override public void addItem(AppEntry entry) {
+  @Override public void addItem(@NonNull AppEntry entry) {
     final int next = adapterPresenter.add(entry);
     notifyItemInserted(next);
   }
@@ -203,7 +195,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     @BindView(R.id.lock_list_icon) ImageView icon;
     @BindView(R.id.lock_list_toggle) SwitchCompat toggle;
 
-    public ViewHolder(final View itemView) {
+    public ViewHolder(final @NonNull View itemView) {
       super(itemView);
       ButterKnife.bind(this, itemView);
     }
