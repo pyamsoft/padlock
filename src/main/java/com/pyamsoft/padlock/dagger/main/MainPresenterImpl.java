@@ -38,10 +38,6 @@ final class MainPresenterImpl extends PresenterImpl<MainPresenter.MainView>
     this.interactor = interactor;
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
-  }
-
   @Override public void onResume() {
     super.onResume();
     registerOnConfirmDialogBus();

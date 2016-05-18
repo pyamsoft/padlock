@@ -35,7 +35,8 @@ public interface LockServiceInteractor {
 
   @CheckResult boolean isLiveEvent(@NonNull String packageName, @NonNull String className);
 
-  @CheckResult boolean isWindowFromLockScreen(@NonNull String packageName, @NonNull String className);
+  @CheckResult boolean isWindowFromLockScreen(@NonNull String packageName,
+      @NonNull String className);
 
   @CheckResult boolean isWindowFromKeyboard(@NonNull String packageName, @NonNull String className);
 

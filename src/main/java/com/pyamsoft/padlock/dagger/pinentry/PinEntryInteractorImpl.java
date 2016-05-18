@@ -33,7 +33,8 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
     this.masterPinInteractor = masterPinInteractor;
   }
 
-  @CheckResult @NonNull @Override public Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt) {
+  @CheckResult @NonNull @Override
+  public Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt) {
     return Observable.defer(() -> Observable.just(masterPinInteractor.getMasterPin()))
         .map(masterPin -> {
           final String encodedMasterPin = encodeSHA256(attempt);
