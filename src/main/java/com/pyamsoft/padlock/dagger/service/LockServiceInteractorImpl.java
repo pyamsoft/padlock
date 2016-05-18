@@ -34,9 +34,6 @@ import timber.log.Timber;
 
 final class LockServiceInteractorImpl implements LockServiceInteractor {
 
-  @NonNull private static final String PADLOCK_LOCK_SCREEN_ACTIVITY_CLASS =
-      LockScreenActivity.class.getName();
-
   private static final String[] NOTIFICATION_SHADE_CLASSES = {
       // Nexus 6 is a Frame Layout
       "android.widget.FrameLayout"

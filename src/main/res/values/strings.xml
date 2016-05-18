@@ -21,16 +21,10 @@
   <string name="ignore_for_5_minutes">Ignore for 5 Minutes</string>
   <string name="ignore_for_10_minutes">Ignore for 10 Minutes</string>
   <string name="ignore_for_30_minutes">Ignore for 30 Minutes</string>
-  <string name="do_not_time_out">Do not Time Out</string>
-  <string name="time_out_for_1_minute">Time Out for 1 Minute</string>
-  <string name="time_out_for_5_minutes">Time Out for 5 Minutes</string>
-  <string name="time_out_for_10_minutes">Time Out for 10 Minutes</string>
   <string name="forgot_passcode">Forgot Passcode</string>
   <string name="package_name">Package:</string>
   <string name="system">System:</string>
   <string name="exclude_entry">Exclude Entry</string>
-  <string name="clear_database">Reset Database</string>
-  <string name="clear_all_settings">Reset All Settings</string>
   <string name="info_for_nerds">Info for Nerds</string>
   <string name="explain_accessibility_service">PadLock requires an Accessibility Service to
     monitor the apps that launch on your device. When it detects that an app should be locked

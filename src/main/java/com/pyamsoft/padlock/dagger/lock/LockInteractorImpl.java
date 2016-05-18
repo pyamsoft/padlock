@@ -39,7 +39,7 @@ public abstract class LockInteractorImpl implements LockInteractor {
     }
   }
 
-  @NonNull public final String encodeSHA256(@NonNull String attempt) {
+  @NonNull protected final String encodeSHA256(@NonNull String attempt) {
     messageDigest.reset();
     final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
     return Base64.encodeToString(output, Base64.DEFAULT).trim();

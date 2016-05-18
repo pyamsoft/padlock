@@ -44,16 +44,16 @@ final class LockListInteractorImpl implements LockListInteractor {
     return appContext.getPackageManager();
   }
 
-  @Override public void setSystemVisible(boolean visible) {
-    preferences.setSystemVisible(visible);
-  }
-
   @Override public boolean hasShownOnBoarding() {
     return preferences.isOnBoard();
   }
 
   @Override public boolean isSystemVisible() {
     return preferences.isSystemVisible();
+  }
+
+  @Override public void setSystemVisible(boolean visible) {
+    preferences.setSystemVisible(visible);
   }
 
   @Override public void setShownOnBoarding() {

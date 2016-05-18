@@ -251,7 +251,7 @@ public class MainActivity extends ActivityBase implements MainPresenter.MainView
     return true;
   }
 
-  @Override public boolean onOptionsItemSelected(final MenuItem item) {
+  @Override public boolean onOptionsItemSelected(final @NonNull MenuItem item) {
     final int itemId = item.getItemId();
     boolean handled;
     switch (itemId) {
@@ -265,7 +265,7 @@ public class MainActivity extends ActivityBase implements MainPresenter.MainView
     return handled || super.onOptionsItemSelected(item);
   }
 
-  @Override public String getPlayStoreAppPackage() {
+  @NonNull @Override public String getPlayStoreAppPackage() {
     return getPackageName();
   }
 

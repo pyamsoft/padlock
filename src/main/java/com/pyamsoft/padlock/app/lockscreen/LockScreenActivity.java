@@ -134,8 +134,8 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     return false;
   }
 
-  @Override public String getPlayStoreAppPackage() {
-    return null;
+  @NonNull @Override public String getPlayStoreAppPackage() {
+    return "";
   }
 
   @Override protected void onDestroy() {
@@ -241,7 +241,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     super.onSaveInstanceState(outState);
   }
 
-  @Override public boolean onCreateOptionsMenu(Menu menu) {
+  @Override public boolean onCreateOptionsMenu(@NonNull Menu menu) {
     Timber.d("onCreateOptionsMenu");
     getMenuInflater().inflate(R.menu.lockscreen_menu, menu);
     menuIgnoreNone = menu.findItem(R.id.menu_ignore_none);
@@ -300,7 +300,7 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
     }
   }
 
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
+  @Override public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     Timber.d("onOptionsItemSelected");
     boolean handled;
     final int itemId = item.getItemId();

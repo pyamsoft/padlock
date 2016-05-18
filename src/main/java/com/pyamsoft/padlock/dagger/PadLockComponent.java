@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import dagger.Component;
 import javax.inject.Named;
