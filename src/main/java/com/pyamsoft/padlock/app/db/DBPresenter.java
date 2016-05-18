@@ -16,15 +16,17 @@
 
 package com.pyamsoft.padlock.app.db;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.pyamsoft.pydroid.base.Presenter;
 
 public interface DBPresenter extends Presenter<DBPresenter.DBView> {
 
-  void attemptDBModification(int position, boolean checked, String packageName, String code,
-      boolean system) throws NullPointerException;
+  void attemptDBModification(int position, boolean checked, @NonNull String packageName,
+      @Nullable String code, boolean system);
 
-  void attemptDBModification(int position, boolean checked, String packageName, String activity,
-      String code, boolean system) throws NullPointerException;
+  void attemptDBModification(int position, boolean checked, @NonNull String packageName,
+      @NonNull String activity, @Nullable String code, boolean system);
 
   interface DBView {
 

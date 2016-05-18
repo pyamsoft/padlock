@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.db;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
@@ -63,8 +64,8 @@ final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements
   }
 
   @Override
-  public void attemptDBModification(int position, boolean newState, String packageName, String code,
-      boolean system) throws NullPointerException {
+  public void attemptDBModification(int position, boolean newState, @NonNull String packageName,
+      @Nullable String code, boolean system) {
     unsubPackageSubscription();
     dbPackageSubscription = Observable.defer(() -> {
       if (newState) {
@@ -94,8 +95,9 @@ final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements
     });
   }
 
-  @Override public void attemptDBModification(int position, boolean checked, String packageName,
-      String activity, String code, boolean system) throws NullPointerException {
+  @Override
+  public void attemptDBModification(int position, boolean checked, @NonNull String packageName,
+      @NonNull String activity, @Nullable String code, boolean system) {
     unsubActivitySubscription();
     dbActivitySubscription = Observable.defer(() -> {
       if (checked) {
