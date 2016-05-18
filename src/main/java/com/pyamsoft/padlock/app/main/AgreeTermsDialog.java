@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.main;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -32,7 +33,7 @@ public class AgreeTermsDialog extends DialogFragment {
     setCancelable(false);
   }
 
-  @NonNull @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+  @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     return new AlertDialog.Builder(getActivity()).setTitle("Notice")
         .setMessage(
             "By using PadLock, you assume the responsibility of remembering your passcode for the applications you choose to protect."
@@ -52,9 +53,9 @@ public class AgreeTermsDialog extends DialogFragment {
 
   public static final class AgreeTermsBus extends RxBus<AgreeTermsEvent> {
 
-    private static final AgreeTermsBus instance = new AgreeTermsBus();
+    @NonNull private static final AgreeTermsBus instance = new AgreeTermsBus();
 
-    public static AgreeTermsBus get() {
+    @CheckResult @NonNull public static AgreeTermsBus get() {
       return instance;
     }
   }
