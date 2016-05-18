@@ -41,13 +41,13 @@ import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.lockscreen.DaggerLockScreenComponent;
 import com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule;
-import com.pyamsoft.pydroid.base.ActivityBase;
+import com.pyamsoft.pydroid.base.NoDonationActivityBase;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public final class LockScreenActivity extends ActivityBase implements LockScreen {
+public final class LockScreenActivity extends NoDonationActivityBase implements LockScreen {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = LockViewDelegate.ENTRY_PACKAGE_NAME;
   @NonNull public static final String ENTRY_ACTIVITY_NAME = LockViewDelegate.ENTRY_ACTIVITY_NAME;
@@ -128,14 +128,6 @@ public final class LockScreenActivity extends ActivityBase implements LockScreen
 
   @Override protected boolean shouldConfirmBackPress() {
     return false;
-  }
-
-  @Override protected boolean isDonationSupported() {
-    return false;
-  }
-
-  @NonNull @Override public String getPlayStoreAppPackage() {
-    return "";
   }
 
   @Override protected void onDestroy() {

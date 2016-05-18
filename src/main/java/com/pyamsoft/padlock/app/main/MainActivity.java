@@ -42,7 +42,7 @@ import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.main.DaggerMainComponent;
 import com.pyamsoft.padlock.dagger.main.MainModule;
-import com.pyamsoft.pydroid.base.ActivityBase;
+import com.pyamsoft.pydroid.base.DonationActivityBase;
 import com.pyamsoft.pydroid.model.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
@@ -51,7 +51,7 @@ import com.pyamsoft.pydroid.util.DrawableUtil;
 import java.lang.ref.WeakReference;
 import javax.inject.Inject;
 
-public class MainActivity extends ActivityBase implements MainPresenter.MainView {
+public class MainActivity extends DonationActivityBase implements MainPresenter.MainView {
 
   private static final String USAGE_TERMS_TAG = "usage_terms";
   private static final int VECTOR_TASK_SIZE = 2;
