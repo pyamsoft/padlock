@@ -16,13 +16,14 @@
 
 package com.pyamsoft.padlock.dagger.settings;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import rx.Observable;
 
 interface SettingsInteractor {
 
-  @WorkerThread @NonNull Observable<Boolean> clearDatabase();
+  @CheckResult @WorkerThread @NonNull Observable<Boolean> clearDatabase();
 
-  @WorkerThread @NonNull Observable<Boolean> clearAll();
+  @CheckResult @WorkerThread @NonNull Observable<Boolean> clearAll();
 }

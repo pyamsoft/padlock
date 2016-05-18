@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.lockscreen;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.dagger.lock.LockInteractor;
@@ -23,12 +24,15 @@ import rx.Observable;
 
 public interface LockScreenInteractor extends LockInteractor {
 
-  @WorkerThread @NonNull Observable<Boolean> unlockEntry(String packageName, String activityName,
-      String attempt, boolean shouldExclude, long ignoreForPeriod);
+  @CheckResult @WorkerThread @NonNull Observable<Boolean> unlockEntry(@NonNull String packageName,
+      @NonNull String activityName, @NonNull String attempt, boolean shouldExclude,
+      long ignoreForPeriod);
 
-  @WorkerThread @NonNull Observable<Boolean> lockEntry(String packageName, String activityName);
+  @CheckResult @WorkerThread @NonNull Observable<Boolean> lockEntry(@NonNull String packageName,
+      @NonNull String activityName);
 
-  @WorkerThread @NonNull Observable<Long> getDefaultIgnoreTime();
+  @CheckResult long getDefaultIgnoreTime();
 
-  @WorkerThread @NonNull Observable<String> getDisplayName(String packageName);
+  @CheckResult @WorkerThread @NonNull Observable<String> getDisplayName(
+      @NonNull String packageName);
 }

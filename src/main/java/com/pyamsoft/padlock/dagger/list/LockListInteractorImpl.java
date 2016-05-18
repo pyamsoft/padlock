@@ -44,6 +44,22 @@ final class LockListInteractorImpl implements LockListInteractor {
     return appContext.getPackageManager();
   }
 
+  @Override public void setSystemVisible(boolean visible) {
+    preferences.setSystemVisible(visible);
+  }
+
+  @Override public boolean hasShownOnBoarding() {
+    return preferences.isOnBoard();
+  }
+
+  @Override public boolean isSystemVisible() {
+    return preferences.isSystemVisible();
+  }
+
+  @Override public void setShownOnBoarding() {
+    preferences.setOnBoard();
+  }
+
   @WorkerThread @Override @NonNull public Observable<List<PackageInfo>> getPackageInfoList() {
     return Observable.defer(() -> Observable.from(getPackageManager().getInstalledPackages(0)))
         .filter(packageInfo -> packageInfo != null)
@@ -61,31 +77,7 @@ final class LockListInteractorImpl implements LockListInteractor {
     return PadLockEntry.queryAll(appContext).first();
   }
 
-  @WorkerThread @Override public boolean isSystemApplication(ApplicationInfo info) {
+  @WorkerThread @Override public boolean isSystemApplication(@NonNull ApplicationInfo info) {
     return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-  }
-
-  @WorkerThread @NonNull @Override public Observable<Boolean> isSystemVisible() {
-    return Observable.defer(() -> Observable.just(preferences.isSystemVisible()))
-        .map(aBoolean -> aBoolean == null ? false : aBoolean);
-  }
-
-  @WorkerThread @Override @NonNull public Observable<Boolean> hasShownOnBoarding() {
-    return Observable.defer(() -> Observable.just(preferences.isOnBoard()))
-        .map(aBoolean -> aBoolean == null ? false : aBoolean);
-  }
-
-  @NonNull @Override public Observable<Boolean> setShownOnBoarding() {
-    return Observable.defer(() -> {
-      preferences.setOnBoard();
-      return Observable.just(true);
-    });
-  }
-
-  @NonNull @Override public Observable<Boolean> setSystemVisible(boolean visible) {
-    return Observable.defer(() -> {
-      preferences.setSystemVisible(visible);
-      return Observable.just(visible);
-    });
   }
 }

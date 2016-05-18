@@ -16,7 +16,9 @@
 
 package com.pyamsoft.padlock.dagger.pin;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.PadLockPreferences;
 import javax.inject.Inject;
 
@@ -28,11 +30,11 @@ final class MasterPinInteractorImpl implements MasterPinInteractor {
     this.preferences = preferences;
   }
 
-  @Override public String getMasterPin() {
+  @CheckResult @Nullable @Override public String getMasterPin() {
     return preferences.getMasterPassword();
   }
 
-  @Override public void setMasterPin(String pin) {
+  @Override public void setMasterPin(@Nullable String pin) {
     preferences.setMasterPassword(pin);
   }
 }

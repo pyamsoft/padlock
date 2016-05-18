@@ -16,13 +16,11 @@
 
 package com.pyamsoft.padlock.dagger.main;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
-import rx.Observable;
+import android.support.annotation.CheckResult;
 
 interface MainInteractor {
 
-  @WorkerThread @NonNull Observable<Boolean> hasAgreed();
+  @CheckResult boolean hasAgreed();
 
-  @WorkerThread @NonNull Observable<Boolean> setAgreed();
+  void setAgreed();
 }

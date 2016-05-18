@@ -16,15 +16,16 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 
 public interface AdapterInteractor<I> {
 
-  @NonNull I get(int position);
+  @CheckResult @NonNull I get(int position);
 
-  void set(int position, I entry);
+  void set(int position, @NonNull I entry);
 
-  int add(I entry);
+  int add(@NonNull I entry);
 
   int remove();
 

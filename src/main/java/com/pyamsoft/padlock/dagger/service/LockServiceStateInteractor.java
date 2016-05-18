@@ -16,7 +16,9 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
+import android.support.annotation.CheckResult;
+
 public interface LockServiceStateInteractor {
 
-  boolean isServiceEnabled();
+  @CheckResult boolean isServiceEnabled();
 }

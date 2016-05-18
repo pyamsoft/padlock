@@ -17,10 +17,8 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
 import javax.inject.Inject;
-import rx.Observable;
 
 final class MainInteractorImpl implements MainInteractor {
 
@@ -30,15 +28,11 @@ final class MainInteractorImpl implements MainInteractor {
     this.preferences = preferences;
   }
 
-  @WorkerThread @NonNull @Override public Observable<Boolean> hasAgreed() {
-    return Observable.defer(() -> Observable.just(preferences.hasAgreed()))
-        .map(aBoolean -> aBoolean == null ? false : aBoolean);
+  @Override public boolean hasAgreed() {
+    return preferences.hasAgreed();
   }
 
-  @NonNull @Override public Observable<Boolean> setAgreed() {
-    return Observable.defer(() -> {
-      preferences.setAgreed();
-      return Observable.just(true);
-    });
+  @Override public void setAgreed() {
+    preferences.setAgreed();
   }
 }

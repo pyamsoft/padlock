@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -27,19 +28,19 @@ import rx.Observable;
 
 interface LockListInteractor {
 
-  @WorkerThread @NonNull Observable<List<PackageInfo>> getPackageInfoList();
+  @CheckResult @WorkerThread @NonNull Observable<List<PackageInfo>> getPackageInfoList();
 
-  @WorkerThread @NonNull Observable<List<PadLockEntry>> getAppEntryList();
+  @CheckResult @WorkerThread @NonNull Observable<List<PadLockEntry>> getAppEntryList();
 
-  @WorkerThread boolean isSystemApplication(ApplicationInfo info);
+  @CheckResult @WorkerThread @NonNull PackageManager getPackageManager();
 
-  @WorkerThread @NonNull PackageManager getPackageManager();
+  @CheckResult boolean isSystemApplication(@NonNull ApplicationInfo info);
 
-  @WorkerThread @NonNull Observable<Boolean> setSystemVisible(boolean visible);
+  @CheckResult boolean hasShownOnBoarding();
 
-  @WorkerThread @NonNull Observable<Boolean> hasShownOnBoarding();
+  @CheckResult boolean isSystemVisible();
 
-  @WorkerThread @NonNull Observable<Boolean> isSystemVisible();
+  void setSystemVisible(boolean visible);
 
-  @WorkerThread @NonNull Observable<Boolean> setShownOnBoarding();
+  void setShownOnBoarding();
 }

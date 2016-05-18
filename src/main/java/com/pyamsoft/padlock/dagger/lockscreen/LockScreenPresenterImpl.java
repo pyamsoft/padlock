@@ -38,7 +38,6 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   private final long ignoreTimeTen;
   private final long ignoreTimeThirty;
 
-  @NonNull private Subscription ignoreSubscription = Subscriptions.empty();
   @NonNull private Subscription unlockSubscription = Subscriptions.empty();
   @NonNull private Subscription lockSubscription = Subscriptions.empty();
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
@@ -58,16 +57,9 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    unsubIgnoreTime();
     unsubUnlock();
     unsubLock();
     unsubDisplayName();
-  }
-
-  private void unsubIgnoreTime() {
-    if (!ignoreSubscription.isUnsubscribed()) {
-      ignoreSubscription.unsubscribe();
-    }
   }
 
   private void unsubUnlock() {
@@ -99,18 +91,9 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
 
   @Override public void setIgnorePeriodFromPreferences(@Nullable Long ignoreTime)
       throws NullPointerException {
-    unsubIgnoreTime();
     if (ignoreTime == null) {
-      ignoreSubscription = lockScreenInteractor.getDefaultIgnoreTime()
-          .subscribeOn(getIoScheduler())
-          .observeOn(getMainScheduler())
-          .subscribe(this::setIgnorePeriod, throwable -> {
-            Timber.e(throwable, "setIgnorePeriodFromPreferences onError");
-            final LockScreen lockScreen = getView();
-            if (lockScreen != null) {
-              lockScreen.setIgnoreTimeError();
-            }
-          });
+      final long defaultIgnoreTime = lockScreenInteractor.getDefaultIgnoreTime();
+      setIgnorePeriod(defaultIgnoreTime);
     } else {
       setIgnorePeriod(ignoreTime);
     }
