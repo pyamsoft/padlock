@@ -22,7 +22,7 @@ import com.pyamsoft.pydroid.base.Presenter;
 
 public interface LockPresenter<I extends LockPresenter.LockView> extends Presenter<I> {
 
-  void loadPackageIcon(String packageName);
+  void loadPackageIcon(@NonNull String packageName);
 
   void submit();
 
