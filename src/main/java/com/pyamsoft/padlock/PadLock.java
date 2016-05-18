@@ -19,7 +19,9 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Service;
 import android.os.StrictMode;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
@@ -29,26 +31,32 @@ import com.pyamsoft.pydroid.crash.CrashHandler;
 
 public final class PadLock extends ApplicationBase {
 
-  private PadLockComponent padLockComponent;
+  @Nullable private PadLockComponent padLockComponent;
 
+  @NonNull @CheckResult
   private static PadLockComponent padLockComponent(final Application application) {
     if (application instanceof PadLock) {
       final PadLock padLock = (PadLock) application;
-      return padLock.padLockComponent;
+      final PadLockComponent component = padLock.padLockComponent;
+      if (component == null) {
+        throw new NullPointerException("PadLockComponent is NULL");
+      }
+
+      return component;
     } else {
       throw new ClassCastException("Cannot cast Application to PadLock");
     }
   }
 
-  public static PadLockComponent padLockComponent(final Activity activity) {
+  @NonNull @CheckResult public static PadLockComponent padLockComponent(final Activity activity) {
     return padLockComponent(activity.getApplication());
   }
 
-  public static PadLockComponent padLockComponent(final Fragment fragment) {
+  @NonNull @CheckResult public static PadLockComponent padLockComponent(final Fragment fragment) {
     return padLockComponent(fragment.getActivity());
   }
 
-  public static PadLockComponent padLockComponent(final Service service) {
+  @NonNull @CheckResult public static PadLockComponent padLockComponent(final Service service) {
     return padLockComponent(service.getApplication());
   }
 

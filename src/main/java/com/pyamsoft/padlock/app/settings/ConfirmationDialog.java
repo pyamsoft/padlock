@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.settings;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -26,7 +27,7 @@ import com.pyamsoft.padlock.model.event.RxBus;
 import com.pyamsoft.pydroid.base.RetainedDialogFragment;
 
 public class ConfirmationDialog extends RetainedDialogFragment {
-  private static final String WHICH = "which_type";
+  @NonNull private static final String WHICH = "which_type";
 
   private int which;
 
@@ -43,7 +44,7 @@ public class ConfirmationDialog extends RetainedDialogFragment {
     which = getArguments().getInt(WHICH, 0);
   }
 
-  @NonNull @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+  @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     return new AlertDialog.Builder(getActivity()).setMessage(
         which == 0 ? "Really clear entire database?" : "Really clear all application settings?")
         .setPositiveButton("Yes", (dialogInterface, i) -> {
@@ -58,9 +59,9 @@ public class ConfirmationDialog extends RetainedDialogFragment {
 
   public static final class ConfirmationDialogBus extends RxBus<ConfirmationEvent> {
 
-    private static final ConfirmationDialogBus instance = new ConfirmationDialogBus();
+    @NonNull private static final ConfirmationDialogBus instance = new ConfirmationDialogBus();
 
-    public static ConfirmationDialogBus get() {
+    @CheckResult @NonNull public static ConfirmationDialogBus get() {
       return instance;
     }
   }
