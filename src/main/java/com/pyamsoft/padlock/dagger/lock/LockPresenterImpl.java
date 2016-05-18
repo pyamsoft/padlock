@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import android.content.Context;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
 import com.pyamsoft.pydroid.base.PresenterImpl;
@@ -45,11 +46,11 @@ public abstract class LockPresenterImpl<I extends LockPresenter.LockView> extend
     this.lockInteractor = lockInteractor;
   }
 
-  @NonNull protected final Scheduler getMainScheduler() {
+  @CheckResult @NonNull protected final Scheduler getMainScheduler() {
     return mainScheduler;
   }
 
-  @NonNull protected final Scheduler getIoScheduler() {
+  @CheckResult @NonNull protected final Scheduler getIoScheduler() {
     return ioScheduler;
   }
 

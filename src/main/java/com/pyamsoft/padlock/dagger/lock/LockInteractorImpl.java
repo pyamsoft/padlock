@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.lock;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.util.Base64;
@@ -39,13 +40,13 @@ public abstract class LockInteractorImpl implements LockInteractor {
     }
   }
 
-  @NonNull protected final String encodeSHA256(@NonNull String attempt) {
+  @CheckResult @NonNull protected final String encodeSHA256(@NonNull String attempt) {
     messageDigest.reset();
     final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
     return Base64.encodeToString(output, Base64.DEFAULT).trim();
   }
 
-  @NonNull @Override @WorkerThread
+  @NonNull @Override @WorkerThread @CheckResult
   public final Observable<Drawable> loadPackageIcon(@NonNull Context context,
       final @NonNull String packageName) {
     return Observable.defer(() -> {
@@ -60,13 +61,13 @@ public abstract class LockInteractorImpl implements LockInteractor {
     });
   }
 
-  @WorkerThread protected final boolean checkSubmissionAttempt(@NonNull String attempt,
+  @CheckResult @WorkerThread protected final boolean checkSubmissionAttempt(@NonNull String attempt,
       @NonNull String encodedPin) {
     final String encodedAttempt = encodeSHA256(attempt);
     return checkEncodedSubmissionAttempt(encodedAttempt, encodedPin);
   }
 
-  @WorkerThread
+  @CheckResult @WorkerThread
   protected final boolean checkEncodedSubmissionAttempt(@NonNull String encodedAttempt,
       @NonNull String encodedPin) {
     return encodedPin.equals(encodedAttempt);

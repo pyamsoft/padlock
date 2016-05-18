@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
@@ -76,8 +77,8 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     onCreateView(presenter, rootView, fragment.getArguments());
   }
 
-  private void onCreateView(final LockPresenter presenter, final View rootView,
-      final Bundle bundle) {
+  private void onCreateView(final @NonNull LockPresenter presenter, @NonNull final View rootView,
+      @NonNull final Bundle bundle) {
     Timber.d("onCreateView");
     this.rootView = rootView;
     unbinder = ButterKnife.bind(this, rootView);
@@ -133,7 +134,7 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     clearDisplay();
   }
 
-  private void getValuesFromBundle(Bundle bundle) {
+  private void getValuesFromBundle(@NonNull Bundle bundle) {
     activityName = bundle.getString(ENTRY_ACTIVITY_NAME);
     packageName = bundle.getString(ENTRY_PACKAGE_NAME);
     Timber.d("Got value activityName: %s", activityName);
@@ -169,15 +170,15 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     rootView = null;
   }
 
-  @NonNull @Override public String getCurrentAttempt() {
+  @CheckResult @NonNull @Override public String getCurrentAttempt() {
     return editText.getText().toString();
   }
 
-  @NonNull @Override public String getPackageName() {
+  @CheckResult @NonNull @Override public String getPackageName() {
     return packageName;
   }
 
-  @NonNull @Override public String getActivityName() {
+  @CheckResult @NonNull @Override public String getActivityName() {
     return activityName;
   }
 
