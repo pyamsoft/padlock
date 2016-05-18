@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.pydroid.base.PresenterImpl;
@@ -29,23 +30,23 @@ public abstract class AdapterPresenterImpl<I> extends PresenterImpl<AdapterPrese
     this.adapterInteractor = adapterInteractor;
   }
 
-  protected void set(int position, I entry) {
+  protected void set(int position, @NonNull I entry) {
     adapterInteractor.set(position, entry);
   }
 
-  @NonNull @Override public I get(int position) {
+  @CheckResult @NonNull @Override public I get(int position) {
     return adapterInteractor.get(position);
   }
 
-  @Override public int add(I entry) {
+  @CheckResult @Override public int add(@NonNull I entry) {
     return adapterInteractor.add(entry);
   }
 
-  @Override public int remove() {
+  @CheckResult @Override public int remove() {
     return adapterInteractor.remove();
   }
 
-  @Override public int size() {
+  @CheckResult @Override public int size() {
     return adapterInteractor.size();
   }
 }

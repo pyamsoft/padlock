@@ -25,9 +25,9 @@ public interface AdapterInteractor<I> {
 
   void set(int position, @NonNull I entry);
 
-  int add(@NonNull I entry);
+  @CheckResult int add(@NonNull I entry);
 
-  int remove();
+  @CheckResult int remove();
 
-  int size();
+  @CheckResult int size();
 }
