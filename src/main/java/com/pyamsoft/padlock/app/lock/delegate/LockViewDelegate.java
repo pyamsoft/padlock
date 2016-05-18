@@ -42,8 +42,6 @@ public interface LockViewDelegate {
 
   void setImageSuccess(@NonNull Drawable drawable);
 
-  void setImageError();
-
   void onCreateView(@NonNull LockPresenter presenter, @NonNull Activity activity,
       @NonNull View rootView);
 

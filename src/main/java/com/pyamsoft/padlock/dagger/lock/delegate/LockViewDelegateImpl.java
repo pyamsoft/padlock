@@ -153,10 +153,6 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     image.setImageDrawable(drawable);
   }
 
-  @Override public void setImageError() {
-    // TODO handle error
-  }
-
   @Override public void onDestroyView() {
     Timber.d("onDestroyView");
     if (unbinder != null) {

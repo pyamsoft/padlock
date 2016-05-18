@@ -30,6 +30,7 @@ import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -140,7 +141,8 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
   }
 
   @Override public void setImageError() {
-    lockViewDelegate.setImageError();
+    Toast.makeText(getActivity(), "Failed to load image", Toast.LENGTH_SHORT).show();
+    dismiss();
   }
 
   @Override public void onSubmitSuccess() {

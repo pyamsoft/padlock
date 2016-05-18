@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app;
+package com.pyamsoft.padlock.app.lockscreen;
 
 import android.app.Dialog;
 import android.os.Bundle;

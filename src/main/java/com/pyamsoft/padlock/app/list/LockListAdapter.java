@@ -28,7 +28,6 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.BaseRecyclerAdapter;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.db.DBProgressDialog;
 import com.pyamsoft.padlock.app.list.info.LockInfoDialog;
