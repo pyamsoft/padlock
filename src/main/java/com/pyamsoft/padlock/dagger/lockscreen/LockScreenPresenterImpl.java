@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.lockscreen;
 
 import android.content.Context;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.lockscreen.LockScreen;
@@ -42,7 +43,7 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   @NonNull private Subscription lockSubscription = Subscriptions.empty();
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
 
-  @Inject public LockScreenPresenterImpl(final Context context,
+  @Inject public LockScreenPresenterImpl(final @NonNull Context context,
       @NonNull final LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("main") Scheduler mainScheduler, @NonNull @Named("io") Scheduler ioScheduler,
       @Named("ignore_none") long ignoreTimeNone, @Named("ignore_five") long ignoreTimeFive,
@@ -74,7 +75,7 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     }
   }
 
-  private void setIgnorePeriod(final long time) throws NullPointerException {
+  private void setIgnorePeriod(final long time) {
     final LockScreen lockScreen = getView();
     if (lockScreen != null) {
       if (time == ignoreTimeFive) {
@@ -166,19 +167,19 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     }
   }
 
-  @Override public long getIgnoreTimeNone() {
+  @CheckResult @Override public long getIgnoreTimeNone() {
     return ignoreTimeNone;
   }
 
-  @Override public long getIgnoreTimeFive() {
+  @CheckResult @Override public long getIgnoreTimeFive() {
     return ignoreTimeFive;
   }
 
-  @Override public long getIgnoreTimeTen() {
+  @CheckResult @Override public long getIgnoreTimeTen() {
     return ignoreTimeTen;
   }
 
-  @Override public long getIgnoreTimeThirty() {
+  @CheckResult @Override public long getIgnoreTimeThirty() {
     return ignoreTimeThirty;
   }
 }

@@ -18,7 +18,9 @@ package com.pyamsoft.padlock.app.lockscreen;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -77,14 +79,14 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
   }
 
-  @Override public void setDisplayName(String name) {
+  @Override public void setDisplayName(@NonNull String name) {
     final ActionBar bar = getSupportActionBar();
     if (bar != null) {
       bar.setTitle(name);
     }
   }
 
-  @Override public void onCreate(final Bundle savedInstanceState) {
+  @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light_Lock);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_lock);
@@ -213,13 +215,13 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     }
   }
 
-  @Override protected void onRestoreInstanceState(Bundle savedInstanceState) {
+  @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
     lockViewDelegate.onRestoreInstanceState(savedInstanceState);
     super.onRestoreInstanceState(savedInstanceState);
   }
 
-  @Override protected void onSaveInstanceState(Bundle outState) {
+  @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
     if (isChangingConfigurations()) {
       lockViewDelegate.onSaveInstanceState(outState);
       ignoreDataHolder.put(0, getIgnorePeriodTime());
@@ -244,7 +246,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     return true;
   }
 
-  @Override public boolean onPrepareOptionsMenu(Menu menu) {
+  @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
     // Set the default checked value
     final Long ignorePeriod = ignoreDataHolder.pop(0);
     presenter.setIgnorePeriodFromPreferences(ignorePeriod);
@@ -341,7 +343,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
         FORGOT_PASSWORD_TAG);
   }
 
-  @Override public long getIgnorePeriodTime() {
+  @CheckResult @Override public long getIgnorePeriodTime() {
     if (menuIgnoreFive != null && menuIgnoreTen != null && menuIgnoreThirty != null) {
       if (menuIgnoreFive.isChecked()) {
         return presenter.getIgnoreTimeFive();
@@ -354,7 +356,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     return presenter.getIgnoreTimeNone();
   }
 
-  @Override public boolean shouldExcludeEntry() {
+  @CheckResult @Override public boolean shouldExcludeEntry() {
     return menuExclude.isChecked();
   }
 }
