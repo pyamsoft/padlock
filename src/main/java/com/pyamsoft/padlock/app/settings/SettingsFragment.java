@@ -1,6 +1,8 @@
 package com.pyamsoft.padlock.app.settings;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.view.LayoutInflater;
@@ -18,8 +20,9 @@ public final class SettingsFragment extends PreferenceFragmentCompat
 
   @Inject SettingsPresenter presenter;
 
-  @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-      Bundle savedInstanceState) {
+  @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
     DaggerSettingsComponent.builder()
         .padLockComponent(PadLock.padLockComponent(this))
         .build()
@@ -43,7 +46,7 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     super.onDestroyView();
   }
 
-  @Override public void onCreatePreferences(Bundle bundle, String s) {
+  @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {
     addPreferencesFromResource(R.xml.preferences);
 
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));

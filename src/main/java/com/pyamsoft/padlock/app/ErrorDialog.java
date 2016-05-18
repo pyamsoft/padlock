@@ -19,12 +19,13 @@ package com.pyamsoft.padlock.app;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
 public final class ErrorDialog extends DialogFragment {
 
-  @NonNull @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+  @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     return new AlertDialog.Builder(getActivity()).setTitle("ERROR")
         .setMessage(
             "An unrecoverable error has occurred when attempting an operation. Please close and re-open PadLock")
