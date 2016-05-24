@@ -96,19 +96,8 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
         reset();
       }
 
-      if (!interactor.isLiveEvent(packageName, className)) {
-        Timber.e("Received dead event");
-        return Observable.empty();
-      }
-
-      if (interactor.isEventCausedByNotificationShade(packageName, className)) {
-        Timber.e("Notification shade. Event will be ignored");
-        return Observable.empty();
-      }
-
-      if (interactor.isWindowFromKeyboard(packageName, className)) {
-        Timber.e("Event for package %s class: %s is caused by InputMethodManager", packageName,
-            className);
+      if (!interactor.isEventFromActivity(packageName, className)) {
+        Timber.e("Event is not caused by an Activity. P: %s, C: %s", packageName, className);
         return Observable.empty();
       }
 
