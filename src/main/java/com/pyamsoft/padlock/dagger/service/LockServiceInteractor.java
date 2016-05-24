@@ -28,17 +28,12 @@ public interface LockServiceInteractor {
   @NonNull String ANDROID_SYSTEM_UI_PACKAGE = "com.android.systemui";
   @NonNull String ANDROID_PACKAGE = "android";
 
-  @CheckResult boolean isEventCausedByNotificationShade(@NonNull String packageName,
-      @NonNull String className);
+  @CheckResult boolean isEventFromActivity(@NonNull String packageName, @NonNull String className);
 
   @CheckResult boolean hasNameChanged(@NonNull String name, @NonNull String oldName);
 
-  @CheckResult boolean isLiveEvent(@NonNull String packageName, @NonNull String className);
-
   @CheckResult boolean isWindowFromLockScreen(@NonNull String packageName,
       @NonNull String className);
-
-  @CheckResult boolean isWindowFromKeyboard(@NonNull String packageName, @NonNull String className);
 
   @CheckResult boolean isDeviceLocked();
 
