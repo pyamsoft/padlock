@@ -31,6 +31,8 @@ public class PadLockPreferences extends ApplicationPreferences {
   @NonNull private final String ignoreTimeDefault;
   @NonNull private final String timeoutTimeKey;
   @NonNull private final String timeoutTimeDefault;
+  @NonNull private final String lockPackageChangeKey;
+  private final boolean lockPackageChangeDefault;
 
   public PadLockPreferences(final @NonNull Context context) {
     super(context);
@@ -39,6 +41,9 @@ public class PadLockPreferences extends ApplicationPreferences {
     ignoreTimeDefault = appContext.getString(R.string.ignore_time_default);
     timeoutTimeKey = appContext.getString(R.string.timeout_time_key);
     timeoutTimeDefault = appContext.getString(R.string.timeout_time_default);
+    lockPackageChangeKey = appContext.getString(R.string.lock_package_change_key);
+    lockPackageChangeDefault =
+        appContext.getResources().getBoolean(R.bool.lock_package_change_default);
   }
 
   public final long getDefaultIgnoreTime() {
@@ -47,6 +52,10 @@ public class PadLockPreferences extends ApplicationPreferences {
 
   public final long getTimeoutPeriod() {
     return Long.parseLong(get(timeoutTimeKey, timeoutTimeDefault));
+  }
+
+  public final boolean getLockOnPackageChange() {
+    return get(lockPackageChangeKey, lockPackageChangeDefault);
   }
 
   public final boolean isSystemVisible() {

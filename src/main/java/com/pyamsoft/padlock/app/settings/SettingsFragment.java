@@ -3,6 +3,7 @@ package com.pyamsoft.padlock.app.settings;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     implements SettingsPresenter.SettingsView {
 
   @Inject SettingsPresenter presenter;
+  private Preference lockPackageChange;
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -62,6 +64,19 @@ public final class SettingsFragment extends PreferenceFragmentCompat
       presenter.confirmSettingsClear();
       return true;
     });
+
+    lockPackageChange = findPreference(getString(R.string.lock_package_change_key));
+  }
+
+  @Override public void onStart() {
+    super.onStart();
+    presenter.initializeLockOnPackageChangePreference();
+  }
+
+  @Override public void setLockOnPackageChangePreferenceSummary(@StringRes int resId) {
+    if (lockPackageChange != null) {
+      lockPackageChange.setSummary(resId);
+    }
   }
 
   @Override public void onConfirmAttempt(int code) {

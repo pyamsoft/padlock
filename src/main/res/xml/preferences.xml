@@ -24,6 +24,11 @@
         android:title="@string/timeout_time_title"/>
     />
 
+    <CheckBoxPreference
+        android:defaultValue="@bool/lock_package_change_default"
+        android:key="@string/lock_package_change_key"
+        android:title="@string/lock_package_change_title"/>
+
   </PreferenceCategory>
 
   <PreferenceCategory
