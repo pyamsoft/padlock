@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.settings;
 
+import android.support.annotation.StringRes;
 import com.pyamsoft.pydroid.base.Presenter;
 
 public interface SettingsPresenter extends Presenter<SettingsPresenter.SettingsView> {
@@ -24,7 +25,11 @@ public interface SettingsPresenter extends Presenter<SettingsPresenter.SettingsV
 
   void confirmSettingsClear();
 
+  void initializeLockOnPackageChangePreference();
+
   interface SettingsView {
+
+    void setLockOnPackageChangePreferenceSummary(@StringRes int resId);
 
     void onConfirmAttempt(int code);
   }

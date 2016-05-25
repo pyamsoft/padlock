@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.settings;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
@@ -49,5 +50,10 @@ final class SettingsInteractorImpl implements SettingsInteractor {
       preferences.clear();
       return Observable.just(true);
     }), (aBoolean, aBoolean2) -> true);
+  }
+
+  @Override public int getLockOnPackageChangeSummaryResource() {
+    return preferences.getLockOnPackageChange() ? R.string.lock_package_change_summary_checked
+        : R.string.lock_package_change_summary_unchecked;
   }
 }
