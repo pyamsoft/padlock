@@ -321,26 +321,23 @@ public class MainActivity extends DonationActivityBase
   }
 
   @NonNull @Override public Spannable getChangeLogText() {
-    return StringUtil.createBuilder("CHANGE LOG");
+    final String title = "What's New in Version 1.1.3";
+    final Spannable spannable = StringUtil.createBuilder(title);
+    StringUtil.boldSpan(spannable, 0, title.length());
+    final int size = StringUtil.getTextSizeFromAppearance(this, android.R.attr.textAppearanceLarge);
+    StringUtil.sizeSpan(spannable, 0, title.length(), size);
+    return spannable;
   }
 
   @Override public int getChangeLogIcon() {
     return R.mipmap.ic_launcher;
   }
 
-  @Override public int getChangeLogBackgroundColor() {
-    return R.color.blue500;
-  }
-
-  @Override public int getChangeLogTextColor() {
-    return android.R.color.white;
-  }
-
-  @NonNull @Override public String getPlayStoreRateLink() {
+  @NonNull @Override public String getChangeLogPackageName() {
     return getPackageName();
   }
 
-  @Override public int getApplicationVersion() {
+  @Override public int getChangeLogVersion() {
     return BuildConfig.VERSION_CODE;
   }
 }
