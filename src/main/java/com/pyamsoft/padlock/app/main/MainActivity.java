@@ -327,9 +327,12 @@ public class MainActivity extends DonationActivityBase
         "BUGFIX: LockScreen will only launch when the Window changes, not when dialogs or keyboards are opened";
     final String line2 =
         "FEATURE: Lock the screen again whenever the Window changes, instead of just when the user switches applications";
+    final String line3 =
+        "BUGFIX: Properly clear all application when using the 'Reset All Settings' option";
 
     // Turn it into a spannable
-    final Spannable spannable = StringUtil.createBuilder(title, "\n\n", line1, "\n\n", line2);
+    final Spannable spannable =
+        StringUtil.createBuilder(title, "\n\n", line1, "\n\n", line2, "\n\n", line3);
 
     int start = 0;
     int end = title.length();
@@ -347,7 +350,7 @@ public class MainActivity extends DonationActivityBase
     StringUtil.colorSpan(spannable, start, end, largeColor);
 
     start += end + 2;
-    end += 2 + line1.length() + 2 + line2.length();
+    end += 2 + line1.length() + 2 + line2.length() + 2 + line3.length();
 
     StringUtil.sizeSpan(spannable, start, end, smallSize);
     StringUtil.colorSpan(spannable, start, end, smallColor);
