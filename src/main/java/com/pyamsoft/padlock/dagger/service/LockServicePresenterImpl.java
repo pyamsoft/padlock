@@ -118,11 +118,19 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
         lastClassName = className;
       }
 
-      if (packageChanged && classChanged || !lockScreenPassed) {
+      // By default, the window will respond to a change event if the class changes
+      Timber.d("Window change if class changed");
+      boolean windowHasChanged = classChanged;
+      if (interactor.isLockOnPackageChangeActive()) {
+        Timber.d("Window change if package changed changed");
+        windowHasChanged &= packageChanged;
+      }
+
+      if (windowHasChanged || !lockScreenPassed) {
         Timber.d("Get list of locked classes with package: %s, class: %s", packageName, className);
         return interactor.getEntry(packageName, className);
       } else {
-        Timber.d("No package change detected");
+        Timber.d("No significant window change detected");
         return Observable.empty();
       }
     }).subscribeOn(ioScheduler).observeOn(mainScheduler).subscribe(padLockEntry -> {
