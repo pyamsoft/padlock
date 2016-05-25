@@ -26,6 +26,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
@@ -35,12 +36,15 @@ import timber.log.Timber;
 final class LockServiceInteractorImpl implements LockServiceInteractor {
 
   @NonNull private final Context appContext;
+  @NonNull private final PadLockPreferences preferences;
   @NonNull private final KeyguardManager keyguard;
   @NonNull private final PackageManager packageManager;
 
   @Inject public LockServiceInteractorImpl(final @NonNull Context context,
-      @NonNull KeyguardManager keyguard, @NonNull PackageManager packageManager) {
+      @NonNull PadLockPreferences preferences, @NonNull KeyguardManager keyguard,
+      @NonNull PackageManager packageManager) {
     this.appContext = context.getApplicationContext();
+    this.preferences = preferences;
     this.keyguard = keyguard;
     this.packageManager = packageManager;
   }
@@ -91,6 +95,10 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
     Timber.d("Window is lock screen: %s, %s", packageName, className);
     return packageName.equals(PadLock.class.getPackage().getName()) && className.equals(
         LockScreenActivity.class.getName());
+  }
+
+  @Override public boolean isLockOnPackageChangeActive() {
+    return preferences.getLockOnPackageChange();
   }
 
   @NonNull @WorkerThread @CheckResult @Override
