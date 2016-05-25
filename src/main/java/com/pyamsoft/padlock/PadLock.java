@@ -91,8 +91,8 @@ public final class PadLock extends ApplicationBase {
   @Override public void onCreate() {
     super.onCreate();
 
-    new CrashHandler(getApplicationContext(), this).register();
     if (buildConfigDebug()) {
+      new CrashHandler(getApplicationContext(), this).register();
       setStrictMode();
     }
 
