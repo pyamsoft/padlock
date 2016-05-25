@@ -322,7 +322,7 @@ public class MainActivity extends DonationActivityBase
 
   @NonNull @Override public Spannable getChangeLogText() {
     // The changelog text
-    final String title = "What's New in Version 1.1.3";
+    final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
     final String line1 =
         "BUGFIX: LockScreen will only launch when the Window changes, not when dialogs or keyboards are opened";
     final String line2 =
