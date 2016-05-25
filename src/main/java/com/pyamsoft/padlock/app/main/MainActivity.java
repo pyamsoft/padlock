@@ -28,6 +28,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -36,6 +37,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.anjlab.android.iab.v3.BillingProcessor;
+import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.LockListFragment;
@@ -45,14 +47,17 @@ import com.pyamsoft.padlock.dagger.main.DaggerMainComponent;
 import com.pyamsoft.padlock.dagger.main.MainModule;
 import com.pyamsoft.pydroid.base.DonationActivityBase;
 import com.pyamsoft.pydroid.model.AsyncDrawable;
+import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.DrawableUtil;
+import com.pyamsoft.pydroid.util.StringUtil;
 import java.lang.ref.WeakReference;
 import javax.inject.Inject;
 
-public class MainActivity extends DonationActivityBase implements MainPresenter.MainView {
+public class MainActivity extends DonationActivityBase
+    implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
   @NonNull private static final String USAGE_TERMS_TAG = "usage_terms";
   private static final int VECTOR_TASK_SIZE = 2;
@@ -289,6 +294,7 @@ public class MainActivity extends DonationActivityBase implements MainPresenter.
 
   @Override protected void onPostResume() {
     super.onPostResume();
+    RatingDialog.showRatingDialog(this, this);
     if (!BillingProcessor.isIabServiceAvailable(this)) {
       showDonationUnavailableDialog();
     }
@@ -312,6 +318,30 @@ public class MainActivity extends DonationActivityBase implements MainPresenter.
   @Override public void showUsageTermsDialog() {
     AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new AgreeTermsDialog(),
         USAGE_TERMS_TAG);
+  }
+
+  @NonNull @Override public Spannable getChangeLogText() {
+    return StringUtil.createBuilder("CHANGE LOG");
+  }
+
+  @Override public int getChangeLogIcon() {
+    return R.mipmap.ic_launcher;
+  }
+
+  @Override public int getChangeLogBackgroundColor() {
+    return R.color.blue500;
+  }
+
+  @Override public int getChangeLogTextColor() {
+    return android.R.color.white;
+  }
+
+  @NonNull @Override public String getPlayStoreRateLink() {
+    return getPackageName();
+  }
+
+  @Override public int getApplicationVersion() {
+    return BuildConfig.VERSION_CODE;
   }
 }
 
