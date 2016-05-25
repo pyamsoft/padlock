@@ -321,11 +321,37 @@ public class MainActivity extends DonationActivityBase
   }
 
   @NonNull @Override public Spannable getChangeLogText() {
+    // The changelog text
     final String title = "What's New in Version 1.1.3";
-    final Spannable spannable = StringUtil.createBuilder(title);
-    StringUtil.boldSpan(spannable, 0, title.length());
-    final int size = StringUtil.getTextSizeFromAppearance(this, android.R.attr.textAppearanceLarge);
-    StringUtil.sizeSpan(spannable, 0, title.length(), size);
+    final String line1 =
+        "BUGFIX: LockScreen will only launch when the Window changes, not when dialogs or keyboards are opened";
+    final String line2 =
+        "FEATURE: Lock the screen again whenever the Window changes, instead of just when the user switches applications";
+
+    // Turn it into a spannable
+    final Spannable spannable = StringUtil.createBuilder(title, "\n\n", line1, "\n\n", line2);
+
+    int start = 0;
+    int end = title.length();
+    final int largeSize =
+        StringUtil.getTextSizeFromAppearance(this, android.R.attr.textAppearanceLarge);
+    final int largeColor =
+        StringUtil.getTextColorFromAppearance(this, android.R.attr.textAppearanceLarge);
+    final int smallSize =
+        StringUtil.getTextSizeFromAppearance(this, android.R.attr.textAppearanceSmall);
+    final int smallColor =
+        StringUtil.getTextColorFromAppearance(this, android.R.attr.textAppearanceSmall);
+
+    StringUtil.boldSpan(spannable, start, end);
+    StringUtil.sizeSpan(spannable, start, end, largeSize);
+    StringUtil.colorSpan(spannable, start, end, largeColor);
+
+    start += end + 2;
+    end += 2 + line1.length() + 2 + line2.length();
+
+    StringUtil.sizeSpan(spannable, start, end, smallSize);
+    StringUtil.colorSpan(spannable, start, end, smallColor);
+
     return spannable;
   }
 
