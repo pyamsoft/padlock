@@ -24,9 +24,7 @@ import dagger.Component;
 
 @ActivityScope @Component(modules = {
     LockServiceModule.class, MasterPinModule.class, LockServiceStateModule.class
-}, dependencies = {
-    PadLockComponent.class
-}) public interface LockServiceComponent {
+}, dependencies = PadLockComponent.class) public interface LockServiceComponent {
 
   void inject(PadLockService padLockService);
 }

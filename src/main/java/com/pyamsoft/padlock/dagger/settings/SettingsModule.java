@@ -18,17 +18,18 @@ package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.settings.SettingsPresenter;
+import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 
 @Module public class SettingsModule {
 
-  @Provides SettingsPresenter provideSettingsPresenter(
+  @ActivityScope @Provides SettingsPresenter provideSettingsPresenter(
       final @NonNull SettingsPresenterImpl presenter) {
     return presenter;
   }
 
-  @Provides SettingsInteractor provideSettingsInteractor(
+  @ActivityScope @Provides SettingsInteractor provideSettingsInteractor(
       final @NonNull SettingsInteractorImpl interactor) {
     return interactor;
   }

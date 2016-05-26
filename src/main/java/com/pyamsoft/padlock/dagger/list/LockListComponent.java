@@ -26,9 +26,7 @@ import dagger.Component;
 
 @ActivityScope @Component(modules = {
     LockListModule.class, LockServiceStateModule.class, MasterPinModule.class, DBModule.class
-}, dependencies = {
-    PadLockComponent.class
-}) public interface LockListComponent {
+}, dependencies = PadLockComponent.class) public interface LockListComponent {
 
   void inject(LockListFragment fragment);
 }

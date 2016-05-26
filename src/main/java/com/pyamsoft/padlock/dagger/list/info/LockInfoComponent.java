@@ -22,9 +22,9 @@ import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.db.DBModule;
 import dagger.Component;
 
-@ActivityScope @Component(modules = { LockInfoModule.class, DBModule.class }, dependencies = {
-    PadLockComponent.class
-}) public interface LockInfoComponent {
+@ActivityScope @Component(modules = {
+    LockInfoModule.class, DBModule.class
+}, dependencies = PadLockComponent.class) public interface LockInfoComponent {
 
   void inject(LockInfoDialog fragment);
 }

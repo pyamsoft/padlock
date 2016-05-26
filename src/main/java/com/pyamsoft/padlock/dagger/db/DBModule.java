@@ -18,16 +18,19 @@ package com.pyamsoft.padlock.dagger.db;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.db.DBPresenter;
+import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 
 @Module public class DBModule {
 
-  @Provides DBPresenter provideDBPresenter(final @NonNull DBPresenterImpl presenter) {
+  @ActivityScope @Provides DBPresenter provideDBPresenter(
+      final @NonNull DBPresenterImpl presenter) {
     return presenter;
   }
 
-  @Provides DBInteractor provideDBInteractor(final @NonNull DBInteractorImpl interactor) {
+  @ActivityScope @Provides DBInteractor provideDBInteractor(
+      final @NonNull DBInteractorImpl interactor) {
     return interactor;
   }
 }

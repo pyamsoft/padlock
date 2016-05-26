@@ -20,27 +20,28 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
+import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 
 @Module public class LockServiceModule {
 
-  @Provides LockServicePresenter provideLockServicePresenter(
+  @ActivityScope @Provides LockServicePresenter provideLockServicePresenter(
       final LockServicePresenterImpl presenter) {
     return presenter;
   }
 
-  @Provides LockServiceInteractor provideLockServiceInteractor(
+  @ActivityScope @Provides LockServiceInteractor provideLockServiceInteractor(
       final LockServiceInteractorImpl interactor) {
     return interactor;
   }
 
-  @Provides KeyguardManager provideKeyguardManager(final Context context) {
+  @ActivityScope @Provides KeyguardManager provideKeyguardManager(final Context context) {
     return (KeyguardManager) context.getApplicationContext()
         .getSystemService(Context.KEYGUARD_SERVICE);
   }
 
-  @Provides PackageManager providePackageManager(final Context context) {
+  @ActivityScope @Provides PackageManager providePackageManager(final Context context) {
     return context.getApplicationContext().getPackageManager();
   }
 }
