@@ -16,12 +16,13 @@
 
 package com.pyamsoft.padlock.dagger.pin;
 
+import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 
 @Module public class MasterPinModule {
 
-  @Provides MasterPinInteractor provideMasterPinInteractor(
+  @ActivityScope @Provides MasterPinInteractor provideMasterPinInteractor(
       final MasterPinInteractorImpl interactor) {
     return interactor;
   }

@@ -21,11 +21,8 @@ import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import dagger.Component;
 
-@ActivityScope @Component(modules = {
-    SettingsModule.class,
-}, dependencies = {
-    PadLockComponent.class
-}) public interface SettingsComponent {
+@ActivityScope @Component(modules = SettingsModule.class, dependencies = PadLockComponent.class)
+public interface SettingsComponent {
 
   void inject(SettingsFragment fragment);
 }

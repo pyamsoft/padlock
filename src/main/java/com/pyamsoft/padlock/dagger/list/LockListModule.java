@@ -18,26 +18,29 @@ package com.pyamsoft.padlock.dagger.list;
 
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
+import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.model.AppEntry;
 import dagger.Module;
 import dagger.Provides;
 
 @Module public class LockListModule {
-  @Provides LockListPresenter provideLockScreenPresenter(final LockListPresenterImpl presenter) {
+
+  @ActivityScope @Provides LockListPresenter provideLockScreenPresenter(
+      final LockListPresenterImpl presenter) {
     return presenter;
   }
 
-  @Provides LockListInteractor provideLockScreenInteractor(
+  @ActivityScope @Provides LockListInteractor provideLockScreenInteractor(
       final LockListInteractorImpl interactor) {
     return interactor;
   }
 
-  @Provides AdapterPresenter<AppEntry> provideAppEntryAdapterPresenter(
+  @ActivityScope @Provides AdapterPresenter<AppEntry> provideAppEntryAdapterPresenter(
       final AppEntryAdapterPresenterImpl adapter) {
     return adapter;
   }
 
-  @Provides AdapterInteractor<AppEntry> provideAppEntryAdapterInteractor(
+  @ActivityScope @Provides AdapterInteractor<AppEntry> provideAppEntryAdapterInteractor(
       final AppEntryAdapterInteractorImpl interactor) {
     return interactor;
   }

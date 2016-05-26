@@ -26,9 +26,7 @@ import dagger.Component;
 
 @ActivityScope @Component(modules = {
     LockScreenModule.class, DBModule.class, MasterPinModule.class, LockViewDelegateModule.class
-}, dependencies = {
-    PadLockComponent.class
-}) public interface LockScreenComponent {
+}, dependencies = PadLockComponent.class) public interface LockScreenComponent {
 
   void inject(LockScreenActivity lockScreenActivity);
 }

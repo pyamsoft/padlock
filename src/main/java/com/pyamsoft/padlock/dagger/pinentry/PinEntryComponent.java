@@ -25,9 +25,7 @@ import dagger.Component;
 
 @ActivityScope @Component(modules = {
     PinEntryModule.class, MasterPinModule.class, LockViewDelegateModule.class
-}, dependencies = {
-    PadLockComponent.class
-}) public interface PinEntryComponent {
+}, dependencies = PadLockComponent.class) public interface PinEntryComponent {
 
   void inject(PinEntryDialog dialog);
 }

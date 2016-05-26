@@ -20,6 +20,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter;
+import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -44,33 +45,33 @@ import javax.inject.Named;
     ignoreTimeThirty = Long.parseLong(ignoreTimes[3]);
   }
 
-  @Provides LockScreenPresenter provideLockScreenPresenter(
+  @ActivityScope @Provides LockScreenPresenter provideLockScreenPresenter(
       final LockScreenPresenterImpl presenter) {
     return presenter;
   }
 
-  @Provides LockScreenInteractor provideLockScreenInteractor(
+  @ActivityScope @Provides LockScreenInteractor provideLockScreenInteractor(
       final LockScreenInteractorImpl interactor) {
     return interactor;
   }
 
-  @Provides @Named("ignore_default") long provideIgnoreDefault() {
+  @ActivityScope @Provides @Named("ignore_default") long provideIgnoreDefault() {
     return defaultIgnoreTime;
   }
 
-  @Provides @Named("ignore_none") long provideIgnoreNone() {
+  @ActivityScope @Provides @Named("ignore_none") long provideIgnoreNone() {
     return ignoreTimeNone;
   }
 
-  @Provides @Named("ignore_five") long provideIgnoreFive() {
+  @ActivityScope @Provides @Named("ignore_five") long provideIgnoreFive() {
     return ignoreTimeFive;
   }
 
-  @Provides @Named("ignore_ten") long provideIgnoreTen() {
+  @ActivityScope @Provides @Named("ignore_ten") long provideIgnoreTen() {
     return ignoreTimeTen;
   }
 
-  @Provides @Named("ignore_thirty") long provideIgnoreThirty() {
+  @ActivityScope @Provides @Named("ignore_thirty") long provideIgnoreThirty() {
     return ignoreTimeThirty;
   }
 }

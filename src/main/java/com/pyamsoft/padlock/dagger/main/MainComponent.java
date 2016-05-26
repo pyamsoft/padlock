@@ -21,9 +21,8 @@ import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import dagger.Component;
 
-@ActivityScope @Component(modules = { MainModule.class }, dependencies = {
-    PadLockComponent.class
-}) public interface MainComponent {
+@ActivityScope @Component(modules = MainModule.class, dependencies = PadLockComponent.class)
+public interface MainComponent {
 
   void inject(MainActivity mainActivity);
 }

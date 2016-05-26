@@ -17,16 +17,19 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import com.pyamsoft.padlock.app.main.MainPresenter;
+import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 
 @Module public class MainModule {
 
-  @Provides MainPresenter providePinEntryPresenter(final MainPresenterImpl presenter) {
+  @ActivityScope @Provides MainPresenter providePinEntryPresenter(
+      final MainPresenterImpl presenter) {
     return presenter;
   }
 
-  @Provides MainInteractor providePinEntryInteractor(final MainInteractorImpl interactor) {
+  @ActivityScope @Provides MainInteractor providePinEntryInteractor(
+      final MainInteractorImpl interactor) {
     return interactor;
   }
 }

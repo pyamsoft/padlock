@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.list.info;
 
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.app.list.info.LockInfoPresenter;
+import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.list.AdapterInteractor;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import dagger.Module;
@@ -25,20 +26,22 @@ import dagger.Provides;
 
 @Module public class LockInfoModule {
 
-  @Provides LockInfoPresenter provideLockInfoPresenter(final LockInfoPresenterImpl presenter) {
+  @ActivityScope @Provides LockInfoPresenter provideLockInfoPresenter(
+      final LockInfoPresenterImpl presenter) {
     return presenter;
   }
 
-  @Provides LockInfoInteractor provideLockInfoInteractor(final LockInfoInteractorImpl interactor) {
+  @ActivityScope @Provides LockInfoInteractor provideLockInfoInteractor(
+      final LockInfoInteractorImpl interactor) {
     return interactor;
   }
 
-  @Provides AdapterPresenter<ActivityEntry> provideActivityEntryAdapterPresenter(
+  @ActivityScope @Provides AdapterPresenter<ActivityEntry> provideActivityEntryAdapterPresenter(
       final ActivityEntryAdapterPresenterImpl adapter) {
     return adapter;
   }
 
-  @Provides AdapterInteractor<ActivityEntry> provideActivityEntryAdapterInteractor(
+  @ActivityScope @Provides AdapterInteractor<ActivityEntry> provideActivityEntryAdapterInteractor(
       final ActivityEntryAdapterInteractorImpl interactor) {
     return interactor;
   }
