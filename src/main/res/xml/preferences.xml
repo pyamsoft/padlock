@@ -31,6 +31,13 @@
         android:summaryOn="@string/lock_package_change_summary_checked"
         android:title="@string/lock_package_change_title"/>
 
+    <CheckBoxPreference
+        android:defaultValue="@bool/lock_device_locked_default"
+        android:key="@string/lock_device_locked_key"
+        android:summaryOff="@string/lock_device_locked_summary_unchecked"
+        android:summaryOn="@string/lock_device_locked_summary_checked"
+        android:title="@string/lock_device_locked_title"/>
+
   </PreferenceCategory>
 
   <PreferenceCategory
