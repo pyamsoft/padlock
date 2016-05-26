@@ -41,4 +41,6 @@ public interface LockServiceInteractor {
       @NonNull String activityName);
 
   @CheckResult boolean isOnlyLockOnPackageChange();
+
+  @CheckResult boolean isLockWhenDeviceLocked();
 }

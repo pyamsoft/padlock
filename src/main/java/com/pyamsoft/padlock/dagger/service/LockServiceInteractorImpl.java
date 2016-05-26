@@ -101,6 +101,10 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
     return preferences.getLockOnPackageChange();
   }
 
+  @Override public boolean isLockWhenDeviceLocked() {
+    return preferences.getLockOnDeviceLocked();
+  }
+
   @NonNull @WorkerThread @CheckResult @Override
   public Observable<PadLockEntry> getEntry(@NonNull String packageName,
       @NonNull String activityName) {

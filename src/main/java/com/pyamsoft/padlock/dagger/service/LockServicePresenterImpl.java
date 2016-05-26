@@ -103,9 +103,11 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
         return Observable.empty();
       }
 
-      if (interactor.isDeviceLocked()) {
-        Timber.i("Device is Locked. Reset state");
-        reset();
+      if (interactor.isLockWhenDeviceLocked()) {
+        if (interactor.isDeviceLocked()) {
+          Timber.i("Device is Locked. Reset state");
+          reset();
+        }
       }
 
       if (!interactor.isEventFromActivity(packageName, className)) {

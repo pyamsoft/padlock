@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.pydroid.base.ApplicationPreferences;
@@ -32,18 +33,26 @@ public class PadLockPreferences extends ApplicationPreferences {
   @NonNull private final String timeoutTimeKey;
   @NonNull private final String timeoutTimeDefault;
   @NonNull private final String lockPackageChangeKey;
+  @NonNull private final String lockDeviceLockedKey;
   private final boolean lockPackageChangeDefault;
+  private final boolean lockDeviceLockedDefault;
 
   public PadLockPreferences(final @NonNull Context context) {
     super(context);
     final Context appContext = context.getApplicationContext();
+    final Resources res = appContext.getResources();
     ignoreTimeKey = appContext.getString(R.string.ignore_time_key);
     ignoreTimeDefault = appContext.getString(R.string.ignore_time_default);
     timeoutTimeKey = appContext.getString(R.string.timeout_time_key);
     timeoutTimeDefault = appContext.getString(R.string.timeout_time_default);
     lockPackageChangeKey = appContext.getString(R.string.lock_package_change_key);
-    lockPackageChangeDefault =
-        appContext.getResources().getBoolean(R.bool.lock_package_change_default);
+    lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default);
+    lockDeviceLockedKey = appContext.getString(R.string.lock_device_locked_key);
+    lockDeviceLockedDefault = res.getBoolean(R.bool.lock_device_locked_default);
+  }
+
+  public final boolean getLockOnDeviceLocked() {
+    return get(lockDeviceLockedKey, lockDeviceLockedDefault);
   }
 
   public final long getDefaultIgnoreTime() {
