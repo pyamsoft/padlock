@@ -77,7 +77,7 @@ public class MainActivity extends DonationActivityBase
   private MainPagerAdapter adapter;
   private Unbinder unbinder;
 
-  @SuppressWarnings("WeakerAccess") public MainActivity() {
+  public MainActivity() {
     lockListFragment = new LockListFragment();
     settingsFragment = new SettingsFragment();
   }
@@ -299,7 +299,7 @@ public class MainActivity extends DonationActivityBase
       showDonationUnavailableDialog();
     }
 
-    if (PadLockService.isEnabled()) {
+    if (PadLockService.isRunning()) {
       showViewPager();
       presenter.showTermsDialog();
     } else {

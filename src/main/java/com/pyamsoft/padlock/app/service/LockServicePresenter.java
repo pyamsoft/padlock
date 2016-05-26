@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.service;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.Presenter;
@@ -27,6 +28,8 @@ public interface LockServicePresenter extends Presenter<LockServicePresenter.Loc
   void setLockScreenNotPassed();
 
   void processAccessibilityEvent(@NonNull String packageName, @NonNull String className);
+
+  @CheckResult boolean isRunning();
 
   interface LockService {
 

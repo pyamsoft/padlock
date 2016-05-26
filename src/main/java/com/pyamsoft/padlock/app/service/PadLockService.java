@@ -32,17 +32,8 @@ public final class PadLockService extends AccessibilityService
     implements LockServicePresenter.LockService {
 
   private static volatile PadLockService instance = null;
-  private static volatile boolean enabled = false;
   @Inject LockServicePresenter presenter;
   @NonNull private Intent lockActivity = new Intent();
-
-  @CheckResult public static synchronized boolean isEnabled() {
-    return enabled;
-  }
-
-  private static void setEnabled(boolean enabled) {
-    PadLockService.enabled = enabled;
-  }
 
   @CheckResult @NonNull public static synchronized PadLockService getInstance() {
     if (instance == null) {
@@ -53,6 +44,10 @@ public final class PadLockService extends AccessibilityService
 
   private static synchronized void setInstance(@Nullable PadLockService i) {
     instance = i;
+  }
+
+  @CheckResult public static boolean isRunning() {
+    return instance != null && instance.presenter.isRunning();
   }
 
   @Override public void onAccessibilityEvent(final @Nullable AccessibilityEvent event) {
@@ -99,12 +94,11 @@ public final class PadLockService extends AccessibilityService
     startActivity(lockActivity);
   }
 
-  @Override public void onDestroy() {
-    super.onDestroy();
+  @Override public boolean onUnbind(Intent intent) {
     Timber.d("onDestroy");
-    setEnabled(false);
     presenter.onDestroyView();
     setInstance(null);
+    return super.onUnbind(intent);
   }
 
   @Override protected void onServiceConnected() {
@@ -117,7 +111,6 @@ public final class PadLockService extends AccessibilityService
         .build()
         .inject(this);
     presenter.onCreateView(this);
-    setEnabled(true);
     setInstance(this);
   }
 

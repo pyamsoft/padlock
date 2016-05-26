@@ -37,6 +37,7 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
 
   @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
 
+  private boolean running;
   private boolean lockScreenPassed;
   @NonNull private String lastPackageName = "";
   @NonNull private String lastClassName = "";
@@ -49,16 +50,27 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
     this.stateInteractor = stateInteractor;
     this.mainScheduler = mainScheduler;
     this.ioScheduler = ioScheduler;
+    running = false;
+  }
+
+  @Override public void onCreateView(@NonNull LockService view) {
+    super.onCreateView(view);
+    running = true;
+  }
+
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+    running = false;
+    unsubLockedEntry();
+  }
+
+  @Override public boolean isRunning() {
+    return running;
   }
 
   private void setLockScreenPassed(boolean b) {
     Timber.d("Set lockScreenPassed: %s", b);
     lockScreenPassed = b;
-  }
-
-  @Override public void onDestroyView() {
-    super.onDestroyView();
-    unsubLockedEntry();
   }
 
   @Override public void setLockScreenPassed() {
