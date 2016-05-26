@@ -40,5 +40,5 @@ public interface LockServiceInteractor {
   @NonNull @CheckResult @WorkerThread Observable<PadLockEntry> getEntry(@NonNull String packageName,
       @NonNull String activityName);
 
-  @CheckResult boolean isLockOnPackageChangeActive();
+  @CheckResult boolean isOnlyLockOnPackageChange();
 }

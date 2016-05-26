@@ -97,7 +97,7 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
         LockScreenActivity.class.getName());
   }
 
-  @Override public boolean isLockOnPackageChangeActive() {
+  @Override public boolean isOnlyLockOnPackageChange() {
     return preferences.getLockOnPackageChange();
   }
 

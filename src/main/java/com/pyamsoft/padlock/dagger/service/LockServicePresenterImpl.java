@@ -121,8 +121,8 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
       // By default, the window will respond to a change event if the class changes
       Timber.d("Window change if class changed");
       boolean windowHasChanged = classChanged;
-      if (interactor.isLockOnPackageChangeActive()) {
-        Timber.d("Window change if package changed changed");
+      if (interactor.isOnlyLockOnPackageChange()) {
+        Timber.d("Window change if package changed");
         windowHasChanged &= packageChanged;
       }
 
