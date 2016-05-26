@@ -36,7 +36,6 @@ import android.widget.LinearLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.anjlab.android.iab.v3.BillingProcessor;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
@@ -295,9 +294,6 @@ public class MainActivity extends DonationActivityBase
   @Override protected void onPostResume() {
     super.onPostResume();
     RatingDialog.showRatingDialog(this, this);
-    if (!BillingProcessor.isIabServiceAvailable(this)) {
-      showDonationUnavailableDialog();
-    }
 
     if (PadLockService.isRunning()) {
       showViewPager();
