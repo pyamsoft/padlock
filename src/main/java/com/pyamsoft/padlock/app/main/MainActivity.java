@@ -326,7 +326,7 @@ public class MainActivity extends DonationActivityBase
     final String line1 =
         "BUGFIX: By default, only lock when package and activity changes. This feature is controlled by the 'Lock on Package Change' setting.";
     final String line2 =
-        "FEATURE: Lock the screen again whenever the Window changes, instead of just when the user switches applications";
+        "FEATURE: Add setting controlling whether or not to lock the application again when the device is locked. This feature is controlled by the 'Lock on Device Locked' setting.";
     final String line3 = "BUGFIX: Settings descriptions are properly updated.";
 
     // Turn it into a spannable
