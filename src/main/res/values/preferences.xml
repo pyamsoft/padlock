@@ -10,9 +10,9 @@
 
   <string-array name="ignore_time_entries">
     <item name="time_none">0</item>
-    <item name="time_none">5</item>
-    <item name="time_none">10</item>
-    <item name="time_none">30</item>
+    <item name="time_five">5</item>
+    <item name="time_ten">10</item>
+    <item name="time_thirty">30</item>
   </string-array>
 
   <string name="ignore_time_title">Ignore Times</string>
@@ -29,9 +29,9 @@
 
   <string-array name="timeout_time_entries">
     <item name="time_none">0</item>
-    <item name="time_none">5</item>
-    <item name="time_none">10</item>
-    <item name="time_none">30</item>
+    <item name="time_five">5</item>
+    <item name="time_ten">10</item>
+    <item name="time_thirty">30</item>
   </string-array>
 
   <string name="timeout_time_title">Timeout Times</string>
