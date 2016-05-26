@@ -324,11 +324,10 @@ public class MainActivity extends DonationActivityBase
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
     final String line1 =
-        "BUGFIX: LockScreen will only launch when the Window changes, not when dialogs or keyboards are opened";
+        "BUGFIX: By default, only lock when package and activity changes. This feature is controlled by the 'Only Lock on Package Changes' setting.";
     final String line2 =
         "FEATURE: Lock the screen again whenever the Window changes, instead of just when the user switches applications";
-    final String line3 =
-        "BUGFIX: Properly clear all application when using the 'Reset All Settings' option";
+    final String line3 = "BUGFIX: Settings descriptions are properly updated.";
 
     // Turn it into a spannable
     final Spannable spannable =
