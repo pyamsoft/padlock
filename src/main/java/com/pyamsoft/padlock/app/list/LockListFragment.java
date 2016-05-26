@@ -205,7 +205,7 @@ public final class LockListFragment extends PageAwareFragment
       return;
     }
 
-    displaySystemItem.setVisible(PadLockService.isEnabled());
+    displaySystemItem.setVisible(PadLockService.isRunning());
     displaySystemItem.setActionView(R.layout.action_view_toolbar_switch);
     displaySystem =
         (SwitchCompat) displaySystemItem.getActionView().findViewById(R.id.action_view_switch);
