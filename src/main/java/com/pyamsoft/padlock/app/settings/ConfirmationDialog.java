@@ -45,8 +45,9 @@ public class ConfirmationDialog extends RetainedDialogFragment {
   }
 
   @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-    return new AlertDialog.Builder(getActivity()).setMessage(
-        which == 0 ? "Really clear entire database?" : "Really clear all application settings?")
+    return new AlertDialog.Builder(getActivity()).setMessage(which == 0
+        ? "Really clear entire database?\n\nYou will have to re-configure all locked applications again"
+        : "Really clear all application settings?\n\nYou will have to manually restart the Accessibility Service component of PadLock")
         .setPositiveButton("Yes", (dialogInterface, i) -> {
           dialogInterface.dismiss();
           ConfirmationDialogBus.get().post(ConfirmationEvent.builder().type(which).build());
