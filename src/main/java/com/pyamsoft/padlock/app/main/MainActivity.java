@@ -324,7 +324,7 @@ public class MainActivity extends DonationActivityBase
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
     final String line1 =
-        "BUGFIX: By default, only lock when package and activity changes. This feature is controlled by the 'Only Lock on Package Changes' setting.";
+        "BUGFIX: By default, only lock when package and activity changes. This feature is controlled by the 'Lock on Package Change' setting.";
     final String line2 =
         "FEATURE: Lock the screen again whenever the Window changes, instead of just when the user switches applications";
     final String line3 = "BUGFIX: Settings descriptions are properly updated.";
