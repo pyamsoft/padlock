@@ -27,6 +27,8 @@
     <CheckBoxPreference
         android:defaultValue="@bool/lock_package_change_default"
         android:key="@string/lock_package_change_key"
+        android:summaryOff="@string/lock_package_change_summary_unchecked"
+        android:summaryOn="@string/lock_package_change_summary_checked"
         android:title="@string/lock_package_change_title"/>
 
   </PreferenceCategory>
