@@ -26,6 +26,4 @@ interface SettingsInteractor {
   @CheckResult @WorkerThread @NonNull Observable<Boolean> clearDatabase();
 
   @CheckResult @WorkerThread @NonNull Observable<Boolean> clearAll();
-
-  @CheckResult int getLockOnPackageChangeSummaryResource();
 }
