@@ -25,9 +25,9 @@ import android.widget.CheckedTextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.list.BaseRecyclerAdapter;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
+import com.pyamsoft.padlock.app.list.BaseRecyclerAdapter;
 import com.pyamsoft.padlock.app.list.LockListItem;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
@@ -91,7 +91,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
 
     holder.checkBox.setOnClickListener(
         view -> dbPresenter.attemptDBModification(position, !holder.checkBox.isChecked(),
-            appEntry.packageName(), activityName, null, appEntry.system()));
+            appEntry.packageName(), entryName, null, appEntry.system()));
   }
 
   @Override public void onViewRecycled(@NonNull ViewHolder holder) {
