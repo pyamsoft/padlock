@@ -320,14 +320,12 @@ public class MainActivity extends DonationActivityBase
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
     final String line1 =
-        "BUGFIX: By default, only lock when package and activity changes. This feature is controlled by the 'Lock on Package Change' setting.";
+        "BUGFIX: Any entries that were managed via the Information dialog were not properly created or deleted in the database. The recent patch should fix this issue";
     final String line2 =
-        "FEATURE: Add setting controlling whether or not to lock the application again when the device is locked. This feature is controlled by the 'Lock on Device Locked' setting.";
-    final String line3 = "BUGFIX: Settings descriptions are properly updated.";
+        "BUGFIX: Entries will be locked even if the package does not change, and the starting Activity was not locked. Basically, things should 'work better' now.";
 
     // Turn it into a spannable
-    final Spannable spannable =
-        StringUtil.createBuilder(title, "\n\n", line1, "\n\n", line2, "\n\n", line3);
+    final Spannable spannable = StringUtil.createBuilder(title, "\n\n", line1, "\n\n", line2);
 
     int start = 0;
     int end = title.length();
@@ -345,7 +343,7 @@ public class MainActivity extends DonationActivityBase
     StringUtil.colorSpan(spannable, start, end, largeColor);
 
     start += end + 2;
-    end += 2 + line1.length() + 2 + line2.length() + 2 + line3.length();
+    end += 2 + line1.length() + 2 + line2.length();
 
     StringUtil.sizeSpan(spannable, start, end, smallSize);
     StringUtil.colorSpan(spannable, start, end, smallColor);
