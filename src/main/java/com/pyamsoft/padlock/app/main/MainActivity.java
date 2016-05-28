@@ -23,7 +23,6 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -71,7 +70,6 @@ public class MainActivity extends DonationActivityBase
   @BindView(R.id.main_service_button) Button serviceButton;
   @BindView(R.id.main_tabs) TabLayout tabLayout;
   @BindView(R.id.toolbar) Toolbar toolbar;
-  @BindView(R.id.appbar) AppBarLayout appBarLayout;
   @Inject MainPresenter presenter;
   private MainPagerAdapter adapter;
   private Unbinder unbinder;
