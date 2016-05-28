@@ -24,6 +24,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
 import com.pyamsoft.padlock.dagger.lock.LockInteractorImpl;
 import com.pyamsoft.padlock.dagger.pin.MasterPinInteractor;
@@ -55,7 +56,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   @WorkerThread @NonNull @Override @CheckResult
   public Observable<Boolean> lockEntry(@NonNull String packageName, @NonNull String activityName) {
     Timber.d("Lock entry: %s %s", packageName, activityName);
-    return PadLockEntry.queryWithPackageActivityName(appContext, packageName, activityName)
+    return PadLockOpenHelper.queryWithPackageActivityName(appContext, packageName, activityName)
         .first()
         .map(padLockEntry -> {
           Timber.d("LOCKED entry, update entry in DB: ", padLockEntry);
@@ -68,7 +69,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
                   .ignoreUntilTime(padLockEntry.ignoreUntilTime())
                   .systemApplication(padLockEntry.systemApplication())
                   .asContentValues();
-          PadLockEntry.updateWithPackageActivityName(appContext, contentValues,
+          PadLockOpenHelper.updateWithPackageActivityName(appContext, contentValues,
               padLockEntry.packageName(), padLockEntry.activityName());
           return true;
         });
@@ -79,7 +80,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       @NonNull String attempt, boolean shouldExclude, long ignoreForPeriod) {
     Timber.d("Attempt unlock: %s %s", packageName, activityName);
     final Observable<PadLockEntry> dbObservable =
-        PadLockEntry.queryWithPackageActivityName(appContext, packageName, activityName).first();
+        PadLockOpenHelper.queryWithPackageActivityName(appContext, packageName, activityName).first();
 
     final Observable<String> masterPinObservable =
         Observable.defer(() -> Observable.just(pinInteractor.getMasterPin()));
@@ -138,7 +139,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
             .ignoreUntilTime(System.currentTimeMillis() + ignoreMinutesInMillis)
             .systemApplication(oldValues.systemApplication())
             .asContentValues();
-    PadLockEntry.updateWithPackageActivityName(appContext, contentValues, oldValues.packageName(),
+    PadLockOpenHelper.updateWithPackageActivityName(appContext, contentValues, oldValues.packageName(),
         oldValues.activityName());
   }
 

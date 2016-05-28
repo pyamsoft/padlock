@@ -28,6 +28,7 @@ import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
+import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
@@ -109,6 +110,6 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
   public Observable<PadLockEntry> getEntry(@NonNull String packageName,
       @NonNull String activityName) {
     Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);
-    return PadLockEntry.queryWithPackageActivityName(appContext, packageName, activityName);
+    return PadLockOpenHelper.queryWithPackageActivityName(appContext, packageName, activityName);
   }
 }

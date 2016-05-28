@@ -25,8 +25,6 @@ public interface LockServicePresenter extends Presenter<LockServicePresenter.Loc
 
   void setLockScreenPassed();
 
-  void setLockScreenNotPassed();
-
   void processAccessibilityEvent(@NonNull String packageName, @NonNull String className);
 
   @CheckResult boolean isRunning();
