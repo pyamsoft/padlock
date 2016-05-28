@@ -25,6 +25,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
+import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import javax.inject.Inject;
@@ -49,7 +50,7 @@ final class DBInteractorImpl implements DBInteractor {
     }
     final ActivityInfo[] activities = packageInfo.activities;
     if (activities != null) {
-      PadLockEntry.newTransaction(appContext, () -> {
+      PadLockOpenHelper.newTransaction(appContext, () -> {
         for (final ActivityInfo info : activities) {
           final String activityName = info.name;
           if (activityName != null && !activityName.equalsIgnoreCase(
@@ -66,7 +67,7 @@ final class DBInteractorImpl implements DBInteractor {
   public void createEntry(@NonNull String packageName, @NonNull String activityName,
       @Nullable String code, boolean system) {
     Timber.d("CREATE: %s %s", packageName, activityName);
-    PadLockEntry.insert(appContext, new PadLockEntry.Marshal().packageName(packageName)
+    PadLockOpenHelper.insert(appContext, new PadLockEntry.Marshal().packageName(packageName)
         .activityName(activityName)
         .lockCode(code)
         .lockUntilTime(0)
@@ -77,12 +78,12 @@ final class DBInteractorImpl implements DBInteractor {
 
   @WorkerThread @Override public void deleteEntry(@NonNull String packageName) {
     Timber.d("DELETE: all %s", packageName);
-    PadLockEntry.deleteWithPackageName(appContext, packageName);
+    PadLockOpenHelper.deleteWithPackageName(appContext, packageName);
   }
 
   @WorkerThread @Override
   public void deleteEntry(@NonNull String packageName, @NonNull String activityName) {
     Timber.d("DELETE: %s %s", packageName, activityName);
-    PadLockEntry.deleteWithPackageActivityName(appContext, packageName, activityName);
+    PadLockOpenHelper.deleteWithPackageActivityName(appContext, packageName, activityName);
   }
 }

@@ -89,7 +89,6 @@ public final class PadLockService extends AccessibilityService
     lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
     lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
 
-    presenter.setLockScreenNotPassed();
     Timber.d("Start lock activity for entry: %s %s", packageName, activityName);
     startActivity(lockActivity);
   }

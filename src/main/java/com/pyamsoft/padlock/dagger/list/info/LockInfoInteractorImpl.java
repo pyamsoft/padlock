@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.list.info;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
@@ -33,6 +34,6 @@ final class LockInfoInteractorImpl implements LockInfoInteractor {
 
   @NonNull @Override
   public Observable<List<PadLockEntry>> getActivityEntries(@NonNull String packageName) {
-    return PadLockEntry.queryWithPackageName(appContext, packageName).first();
+    return PadLockOpenHelper.queryWithPackageName(appContext, packageName).first();
   }
 }

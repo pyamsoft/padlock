@@ -51,6 +51,7 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
     this.mainScheduler = mainScheduler;
     this.ioScheduler = ioScheduler;
     running = false;
+    lockScreenPassed = false;
   }
 
   @Override public void onCreateView(@NonNull LockService view) {
@@ -75,10 +76,6 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
 
   @Override public void setLockScreenPassed() {
     setLockScreenPassed(true);
-  }
-
-  @Override public void setLockScreenNotPassed() {
-    setLockScreenPassed(false);
   }
 
   private void unsubLockedEntry() {
@@ -142,6 +139,7 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
 
       if (windowHasChanged || !lockScreenPassed) {
         Timber.d("Get list of locked classes with package: %s, class: %s", packageName, className);
+        setLockScreenPassed(false);
         return interactor.getEntry(packageName, className);
       } else {
         Timber.d("No significant window change detected");
