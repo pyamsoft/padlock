@@ -18,6 +18,7 @@ package com.pyamsoft.padlock;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.pydroid.base.ApplicationPreferences;
@@ -51,23 +52,23 @@ public class PadLockPreferences extends ApplicationPreferences {
     lockDeviceLockedDefault = res.getBoolean(R.bool.lock_device_locked_default);
   }
 
-  public final boolean getLockOnDeviceLocked() {
+  @CheckResult public final boolean getLockOnDeviceLocked() {
     return get(lockDeviceLockedKey, lockDeviceLockedDefault);
   }
 
-  public final long getDefaultIgnoreTime() {
+  @CheckResult public final long getDefaultIgnoreTime() {
     return Long.parseLong(get(ignoreTimeKey, ignoreTimeDefault));
   }
 
-  public final long getTimeoutPeriod() {
+  @CheckResult public final long getTimeoutPeriod() {
     return Long.parseLong(get(timeoutTimeKey, timeoutTimeDefault));
   }
 
-  public final boolean getLockOnPackageChange() {
+  @CheckResult public final boolean getLockOnPackageChange() {
     return get(lockPackageChangeKey, lockPackageChangeDefault);
   }
 
-  public final boolean isSystemVisible() {
+  @CheckResult public final boolean isSystemVisible() {
     return get(IS_SYSTEM, false);
   }
 
@@ -75,7 +76,7 @@ public class PadLockPreferences extends ApplicationPreferences {
     put(IS_SYSTEM, b);
   }
 
-  public final String getMasterPassword() {
+  @CheckResult public final String getMasterPassword() {
     return get(MASTER_PASSWORD, null);
   }
 
@@ -83,7 +84,7 @@ public class PadLockPreferences extends ApplicationPreferences {
     put(MASTER_PASSWORD, masterPassword);
   }
 
-  public boolean hasAgreed() {
+  @CheckResult public boolean hasAgreed() {
     return get(AGREED, false);
   }
 
@@ -91,7 +92,7 @@ public class PadLockPreferences extends ApplicationPreferences {
     put(AGREED, true);
   }
 
-  public boolean isOnBoard() {
+  @CheckResult public boolean isOnBoard() {
     return get(ONBOARD, false);
   }
 
