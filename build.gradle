@@ -121,7 +121,7 @@ android.applicationVariants.all { variant ->
 redex {
   passes = ["ReBindRefsPass",
             //    Doesn't work yet with Retrolambda
-            //    "BridgePass",
+//            "BridgePass",
             "SynthPass",
             "FinalInlinePass",
             "DelSuperPass",
