@@ -19,7 +19,7 @@ public class AccessibilityFragment extends Fragment {
 
   @NonNull private final Intent accessibilityServiceIntent =
       new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-  @BindView(R.id.main_service_button) Button serviceButton;
+  @Nullable @BindView(R.id.main_service_button) Button serviceButton;
   @Nullable private Unbinder unbinder;
 
   @Nullable @Override
@@ -43,6 +43,9 @@ public class AccessibilityFragment extends Fragment {
   }
 
   private void setupAccessibilityButton() {
+    if (serviceButton == null) {
+      throw new NullPointerException("Service Button is NULL");
+    }
     serviceButton.setOnClickListener(view -> startActivity(accessibilityServiceIntent));
   }
 }

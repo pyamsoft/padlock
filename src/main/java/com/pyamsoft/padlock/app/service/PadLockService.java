@@ -31,15 +31,17 @@ import timber.log.Timber;
 public final class PadLockService extends AccessibilityService
     implements LockServicePresenter.LockService {
 
-  private static volatile PadLockService instance = null;
-  @Inject LockServicePresenter presenter;
+  @Nullable private static volatile PadLockService instance = null;
+  @Nullable @Inject LockServicePresenter presenter;
   @NonNull private Intent lockActivity = new Intent();
 
-  @CheckResult @NonNull public static synchronized PadLockService getInstance() {
+  @SuppressWarnings("ConstantConditions") @CheckResult @NonNull
+  public static synchronized PadLockService getInstance() {
     if (instance == null) {
       throw new NullPointerException("Service instance is NULL");
+    } else {
+      return instance;
     }
-    return instance;
   }
 
   private static synchronized void setInstance(@Nullable PadLockService i) {
@@ -47,7 +49,12 @@ public final class PadLockService extends AccessibilityService
   }
 
   @CheckResult public static boolean isRunning() {
-    return instance != null && instance.presenter.isRunning();
+    final LockServicePresenter lockServicePresenter = getInstance().presenter;
+    if (lockServicePresenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
+
+    return lockServicePresenter.isRunning();
   }
 
   @Override public void onAccessibilityEvent(final @Nullable AccessibilityEvent event) {
@@ -58,6 +65,11 @@ public final class PadLockService extends AccessibilityService
 
     final CharSequence eventPackage = event.getPackageName();
     final CharSequence eventClass = event.getClassName();
+
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
+
     if (eventPackage != null && eventClass != null) {
       presenter.processAccessibilityEvent(eventPackage.toString(), eventClass.toString());
     } else {
@@ -95,7 +107,10 @@ public final class PadLockService extends AccessibilityService
 
   @Override public boolean onUnbind(Intent intent) {
     Timber.d("onDestroy");
-    presenter.onDestroyView();
+    if (presenter != null) {
+      presenter.onDestroyView();
+    }
+
     setInstance(null);
     return super.onUnbind(intent);
   }
@@ -109,11 +124,18 @@ public final class PadLockService extends AccessibilityService
         .padLockComponent(PadLock.padLockComponent(this))
         .build()
         .inject(this);
+
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.onCreateView(this);
     setInstance(this);
   }
 
   @Override public void passLockScreen() {
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.setLockScreenPassed();
   }
 }

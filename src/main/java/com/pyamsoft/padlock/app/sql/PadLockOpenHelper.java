@@ -35,11 +35,11 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
 
   private static final int DATABASE_VERSION = 2;
 
-  public PadLockOpenHelper(final Context context) {
+  public PadLockOpenHelper(final @NonNull Context context) {
     super(context.getApplicationContext(), "padlock_db", null, DATABASE_VERSION);
   }
 
-  private static void upgradeVersion1To2(SQLiteDatabase sqLiteDatabase) {
+  private static void upgradeVersion1To2(@NonNull SQLiteDatabase sqLiteDatabase) {
     Timber.d("Upgrading from Version 1 to 2 drops the displayName column");
 
     // Remove the columns we don't want anymore from the table's list of columns
@@ -152,12 +152,13 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
     PadLockDB.with(appContext).delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
   }
 
-  @Override public void onCreate(SQLiteDatabase sqLiteDatabase) {
+  @Override public void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
     Timber.d("onCreate");
     sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
   }
 
-  @Override public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+  @Override
+  public void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
     Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion);
     if (oldVersion == 1 && newVersion == 2) {
       upgradeVersion1To2(sqLiteDatabase);
