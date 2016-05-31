@@ -48,16 +48,6 @@
       app:layout_behavior="@string/appbar_scrolling_view_behavior"
       >
 
-    <include
-        layout="@layout/layout_accessibility_ask"
-        android:id="@+id/main_enable_service"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone"
-        />
-
   </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>
