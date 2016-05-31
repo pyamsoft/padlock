@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.list;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -67,19 +68,20 @@ public final class LockListFragment extends Fragment
   private static final int KEY_PRESENTER = 0;
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
-  @BindView(R.id.applist_fab) FloatingActionButton fab;
-  @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
-  @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
-  @Inject LockListPresenter presenter;
-  @Inject AdapterPresenter<AppEntry> adapterPresenter;
-  @Inject DBPresenter dbPresenter;
+  @Nullable @BindView(R.id.applist_fab) FloatingActionButton fab;
+  @Nullable @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
+  @Nullable @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
+  @Nullable @Inject LockListPresenter presenter;
+  @Nullable @Inject AdapterPresenter<AppEntry> adapterPresenter;
+  @Nullable @Inject DBPresenter dbPresenter;
   @Nullable private DataHolderFragment<Presenter> presenterDataHolder;
   @Nullable private LockListAdapter adapter;
   @Nullable private LockListLayoutManager lockListLayoutManager;
+  @NonNull private final Handler handler = new Handler();
   @NonNull private final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
-      if (lockListLayoutManager == null) {
-        throw new NullPointerException("LockListLayoutManager is NULL");
+      if (lockListLayoutManager == null || swipeRefreshLayout == null) {
+        throw new NullPointerException("UI component is NULL");
       }
       swipeRefreshLayout.setRefreshing(true);
       lockListLayoutManager.setVerticalScrollEnabled(false);
@@ -92,8 +94,8 @@ public final class LockListFragment extends Fragment
   };
   @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
-      if (lockListLayoutManager == null) {
-        throw new NullPointerException("LockListLayoutManager is NULL");
+      if (lockListLayoutManager == null || swipeRefreshLayout == null) {
+        throw new NullPointerException("UI component is NULL");
       }
       swipeRefreshLayout.setRefreshing(false);
       lockListLayoutManager.setVerticalScrollEnabled(true);
@@ -114,7 +116,11 @@ public final class LockListFragment extends Fragment
       @Nullable Bundle savedInstanceState) {
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.onCreateView(this);
+
     if (adapter == null) {
       throw new NullPointerException("Adapter is NULL");
     }
@@ -137,6 +143,9 @@ public final class LockListFragment extends Fragment
   }
 
   private void setupSwipeRefresh() {
+    if (swipeRefreshLayout == null) {
+      throw new NullPointerException("SwipeRefreshLayout is NULL");
+    }
     swipeRefreshLayout.setColorSchemeResources(R.color.blue500, R.color.amber700, R.color.blue700,
         R.color.amber500);
     swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -148,12 +157,18 @@ public final class LockListFragment extends Fragment
   @Override public void onResume() {
     super.onResume();
     AnimUtil.popShow(fab, 500, 300);
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.onResume();
   }
 
   @Override public void onPause() {
     super.onPause();
     AnimUtil.popHide(fab, 300, 300);
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.onPause();
   }
 
@@ -162,6 +177,9 @@ public final class LockListFragment extends Fragment
     lockListLayoutManager.setVerticalScrollEnabled(true);
     final RecyclerView.ItemDecoration dividerDecoration =
         new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL_LIST);
+    if (recyclerView == null) {
+      throw new NullPointerException("RecyclerView is NULL");
+    }
     recyclerView.setLayoutManager(lockListLayoutManager);
     recyclerView.setAdapter(adapter);
     recyclerView.addItemDecoration(dividerDecoration);
@@ -193,6 +211,9 @@ public final class LockListFragment extends Fragment
       dbPresenter = lockDBPresenter;
     }
 
+    if (adapterPresenter == null || dbPresenter == null) {
+      throw new NullPointerException("Required presenter is NULL");
+    }
     adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
 
     setHasOptionsMenu(true);
@@ -215,10 +236,16 @@ public final class LockListFragment extends Fragment
       Timber.e("Item is NULL");
       return;
     }
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.setSystemVisibilityFromPreference();
   }
 
   private void setSystemCheckListener() {
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     if (displaySystemItem != null) {
       displaySystemItem.setOnMenuItemClickListener(item -> {
         if (item.isChecked()) {
@@ -292,14 +319,14 @@ public final class LockListFragment extends Fragment
       fab.setOnClickListener(null);
     }
 
-    swipeRefreshLayout.setOnRefreshListener(null);
-    swipeRefreshLayout.removeCallbacks(startRefreshRunnable);
-    swipeRefreshLayout.removeCallbacks(stopRefreshRunnable);
+    if (swipeRefreshLayout != null) {
+      swipeRefreshLayout.setOnRefreshListener(null);
+    }
 
     if (adapter != null) {
       adapter.onDestroy();
     }
-    if (!getActivity().isChangingConfigurations()) {
+    if (presenter != null && !getActivity().isChangingConfigurations()) {
       presenter.onDestroyView();
     }
 
@@ -308,6 +335,8 @@ public final class LockListFragment extends Fragment
     if (unbinder != null) {
       unbinder.unbind();
     }
+
+    handler.removeCallbacksAndMessages(null);
   }
 
   private void cancelFabTask() {
@@ -320,6 +349,9 @@ public final class LockListFragment extends Fragment
   }
 
   private void setupFAB() {
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     if (fab != null) {
       fab.setOnClickListener(view -> presenter.clickPinFAB());
       AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(24));
@@ -328,6 +360,9 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void setFABStateEnabled() {
+    if (fab == null) {
+      throw new NullPointerException("FloatingActionButton is NULL");
+    }
     cancelFabTask();
     fabIconTask = new AsyncVectorDrawableTask(fab);
     fabIconTask.execute(
@@ -335,6 +370,9 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void setFABStateDisabled() {
+    if (fab == null) {
+      throw new NullPointerException("FloatingActionButton is NULL");
+    }
     cancelFabTask();
     fabIconTask = new AsyncVectorDrawableTask(fab);
     fabIconTask.execute(
@@ -375,7 +413,7 @@ public final class LockListFragment extends Fragment
     Timber.d("Add entry: %s", entry);
 
     // In case the configuration changes, we do the animation again
-    if (!swipeRefreshLayout.isRefreshing()) {
+    if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
       swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
     }
 
@@ -406,6 +444,9 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void showOnBoarding() {
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     new MaterialShowcaseView.Builder(getActivity()).setTarget(fab)
         .setTargetTouchable(false)
         .setMaskColour(ContextCompat.getColor(getContext(), R.color.blue500))
@@ -428,19 +469,29 @@ public final class LockListFragment extends Fragment
 
   @Override public void onListCleared() {
     Timber.d("onListCleared");
-    swipeRefreshLayout.post(startRefreshRunnable);
-    fab.hide();
+    handler.post(startRefreshRunnable);
+    if (fab != null) {
+      fab.hide();
+    }
   }
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
-    swipeRefreshLayout.post(stopRefreshRunnable);
-    fab.show();
+    handler.post(stopRefreshRunnable);
+    if (fab != null) {
+      fab.show();
+    }
 
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.showOnBoarding();
   }
 
   @Override public void refreshList() {
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     if (adapter == null) {
       throw new NullPointerException("Adapter is NULL");
     }

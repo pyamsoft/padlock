@@ -55,11 +55,11 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
   @NonNull private final Intent home;
-  @BindView(R.id.activity_lock_screen) View rootView;
-  @BindView(R.id.toolbar) Toolbar toolbar;
-  @BindView(R.id.appbar) AppBarLayout appBarLayout;
+  @Nullable @BindView(R.id.activity_lock_screen) View rootView;
+  @Nullable @BindView(R.id.toolbar) Toolbar toolbar;
+  @Nullable @BindView(R.id.appbar) AppBarLayout appBarLayout;
 
-  @Inject LockScreenPresenter presenter;
+  @Nullable @Inject LockScreenPresenter presenter;
   @Inject LockViewDelegate lockViewDelegate;
 
   @Nullable private DataHolderFragment<Long> ignoreDataHolder;
@@ -104,7 +104,14 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
         .build()
         .inject(this);
 
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.onCreateView(this);
+
+    if (rootView == null) {
+      throw new NullPointerException("rootView is NULL");
+    }
     lockViewDelegate.setTextColor(android.R.color.white);
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
@@ -116,6 +123,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @Override protected void onStart() {
     super.onStart();
     Timber.d("onStart");
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.loadDisplayNameFromPackage();
     lockViewDelegate.onStart(presenter);
 
@@ -133,7 +143,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    presenter.onDestroyView();
+    if (presenter != null) {
+      presenter.onDestroyView();
+    }
     lockViewDelegate.onDestroyView();
     failCount = 0;
     if (unbinder != null) {
@@ -168,6 +180,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   private void showSnackbarWithText(String text) {
+    if (rootView == null) {
+      throw new NullPointerException("rootView is NULL");
+    }
     final Snackbar snackbar = Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT);
     final int defaultSnackColor = ContextCompat.getColor(this, R.color.snackbar);
     snackbar.getView().setBackgroundColor(defaultSnackColor);
@@ -208,6 +223,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
     if (failCount > 2) {
+      if (presenter == null) {
+        throw new NullPointerException("Presenter is NULL");
+      }
       presenter.lockEntry();
     }
   }
@@ -249,6 +267,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
     if (ignoreDataHolder == null || excludeDataHolder == null) {
       throw new NullPointerException("Data Holder is NULL");
+    }
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
     }
 
     // Set the default checked value
@@ -346,6 +367,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @CheckResult @Override public long getIgnorePeriodTime() {
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     if (menuIgnoreFive != null && menuIgnoreTen != null && menuIgnoreThirty != null) {
       if (menuIgnoreFive.isChecked()) {
         return presenter.getIgnoreTimeFive();
