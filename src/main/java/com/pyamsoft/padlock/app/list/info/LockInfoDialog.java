@@ -34,7 +34,6 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.GlobalConstants;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.app.list.LockListLayoutManager;
@@ -53,6 +52,9 @@ public class LockInfoDialog extends RetainedDialogFragment
     implements LockInfoPresenter.LockInfoView {
 
   @NonNull private static final String ARG_APP_ENTRY = "app_entry";
+  private static final int DATA_HOLDER_ID_LOCK_INFO_PRESENTER = 0;
+  private static final int DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER = 1;
+  private static final int DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER = 2;
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;
   @BindView(R.id.lock_info_icon) ImageView icon;
@@ -97,15 +99,16 @@ public class LockInfoDialog extends RetainedDialogFragment
     Timber.d("onCreate");
 
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
-    presenterDataHolder = DataHolderFragment.getInstance(getFragmentManager(), Presenter.class);
+    presenterDataHolder =
+        DataHolderFragment.getInstance(getFragmentManager(), "lock_info_presenters");
 
-    final LockInfoPresenter lockInfoPresenter = (LockInfoPresenter) presenterDataHolder.pop(
-        GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_PRESENTER);
+    final LockInfoPresenter lockInfoPresenter =
+        (LockInfoPresenter) presenterDataHolder.pop(DATA_HOLDER_ID_LOCK_INFO_PRESENTER);
     @SuppressWarnings("unchecked") final AdapterPresenter<ActivityEntry>
         activityEntryAdapterPresenter = (AdapterPresenter<ActivityEntry>) presenterDataHolder.pop(
-        GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER);
-    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(
-        GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER);
+        DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER);
+    final DBPresenter lockDBPresenter =
+        (DBPresenter) presenterDataHolder.pop(DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER);
     if (lockInfoPresenter == null
         || activityEntryAdapterPresenter == null
         || lockDBPresenter == null) {
@@ -239,10 +242,9 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     if (getActivity().isChangingConfigurations()) {
-      presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_PRESENTER, presenter);
-      presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER,
-          adapterPresenter);
-      presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER, dbPresenter);
+      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_INFO_PRESENTER, presenter);
+      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER, adapterPresenter);
+      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER, dbPresenter);
     } else {
       presenterDataHolder.clear();
     }

@@ -25,6 +25,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -46,6 +47,7 @@ import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.StringUtil;
 import javax.inject.Inject;
+import timber.log.Timber;
 
 public class MainActivity extends DonationActivityBase
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
@@ -53,16 +55,17 @@ public class MainActivity extends DonationActivityBase
   @NonNull private static final String USAGE_TERMS_TAG = "usage_terms";
   private static final int VECTOR_TASK_SIZE = 2;
 
-  @NonNull private final AsyncVectorDrawableTask[] tasks =
-      new AsyncVectorDrawableTask[VECTOR_TASK_SIZE];
+  @NonNull private final AsyncVectorDrawableTask[] tasks;
+  @Nullable private Unbinder unbinder;
+  private boolean firstCreate;
   @BindView(R.id.main_view) CoordinatorLayout mainView;
   @BindView(R.id.main_enable_service) LinearLayout enableService;
   @BindView(R.id.main_service_button) Button serviceButton;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @Inject MainPresenter presenter;
-  private Unbinder unbinder;
 
   public MainActivity() {
+    tasks = new AsyncVectorDrawableTask[VECTOR_TASK_SIZE];
   }
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
@@ -71,6 +74,8 @@ public class MainActivity extends DonationActivityBase
     setContentView(R.layout.activity_main);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
     unbinder = ButterKnife.bind(this);
+
+    firstCreate = (savedInstanceState == null);
 
     DaggerMainComponent.builder()
         .padLockComponent(PadLock.padLockComponent(this))
@@ -82,9 +87,6 @@ public class MainActivity extends DonationActivityBase
 
     setAppBarState();
     setupAccessibilityButton();
-    getSupportFragmentManager().beginTransaction()
-        .add(R.id.main_view_container, new LockListFragment())
-        .commit();
   }
 
   private void setupAccessibilityButton() {
@@ -99,9 +101,14 @@ public class MainActivity extends DonationActivityBase
     enableService.setVisibility(View.VISIBLE);
   }
 
-  private void showViewPager() {
+  private void showLockList() {
     supportInvalidateOptionsMenu();
     enableService.setVisibility(View.GONE);
+    if (firstCreate) {
+      getSupportFragmentManager().beginTransaction()
+          .replace(R.id.main_view_container, new LockListFragment())
+          .commit();
+    }
   }
 
   private void cancelAsyncVectorTask(int position) {
@@ -179,7 +186,7 @@ public class MainActivity extends DonationActivityBase
     RatingDialog.showRatingDialog(this, this);
 
     if (PadLockService.isRunning()) {
-      showViewPager();
+      showLockList();
       presenter.showTermsDialog();
     } else {
       showAccessibilityPrompt();
@@ -244,6 +251,11 @@ public class MainActivity extends DonationActivityBase
 
   @Override public int getChangeLogVersion() {
     return BuildConfig.VERSION_CODE;
+  }
+
+  @Override public boolean onCreateOptionsMenu(@NonNull Menu menu) {
+    Timber.d("onCreateOptionsMenu");
+    return super.onCreateOptionsMenu(menu);
   }
 }
 

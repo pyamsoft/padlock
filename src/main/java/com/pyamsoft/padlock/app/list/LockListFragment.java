@@ -40,7 +40,6 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.GlobalConstants;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.pinentry.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
@@ -64,6 +63,9 @@ public final class LockListFragment extends Fragment
     implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
 
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
+  private static final int DATA_HOLDER_ID_LOCK_LIST_PRESENTER = 0;
+  private static final int DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER = 1;
+  private static final int DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER = 2;
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
@@ -159,15 +161,16 @@ public final class LockListFragment extends Fragment
     Timber.d("onCreate");
     super.onCreate(savedInstanceState);
 
-    presenterDataHolder = DataHolderFragment.getInstance(getFragmentManager(), Presenter.class);
+    presenterDataHolder =
+        DataHolderFragment.getInstance(getFragmentManager(), "lock_list_presenters");
 
-    final LockListPresenter lockListPresenter = (LockListPresenter) presenterDataHolder.pop(
-        GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_PRESENTER);
+    final LockListPresenter lockListPresenter =
+        (LockListPresenter) presenterDataHolder.pop(DATA_HOLDER_ID_LOCK_LIST_PRESENTER);
     @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry> entryAdapterPresenter =
         (AdapterPresenter<AppEntry>) presenterDataHolder.pop(
-            GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER);
-    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(
-        GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER);
+            DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER);
+    final DBPresenter lockDBPresenter =
+        (DBPresenter) presenterDataHolder.pop(DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER);
     if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
       Timber.d("Create new presenters");
       firstRefresh = true;
@@ -189,6 +192,7 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+    Timber.d("onCreateOptionsMenu");
     super.onCreateOptionsMenu(menu, inflater);
     inflater.inflate(R.menu.locklist_menu, menu);
   }
@@ -406,14 +410,13 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
-    super.onSaveInstanceState(outState);
     if (getActivity().isChangingConfigurations()) {
-      presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_PRESENTER, presenter);
-      presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER,
-          adapterPresenter);
-      presenterDataHolder.put(GlobalConstants.DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER, dbPresenter);
+      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_LIST_PRESENTER, presenter);
+      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER, adapterPresenter);
+      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER, dbPresenter);
     } else {
       presenterDataHolder.clear();
     }
+    super.onSaveInstanceState(outState);
   }
 }
