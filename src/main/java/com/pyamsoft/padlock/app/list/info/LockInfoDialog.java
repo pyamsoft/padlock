@@ -56,6 +56,7 @@ public class LockInfoDialog extends RetainedDialogFragment
   private static final int KEY_PRESENTER = 0;
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
+  @NonNull private final Handler handler = new Handler();
   @Nullable @BindView(R.id.lock_info_close) ImageView close;
   @Nullable @BindView(R.id.lock_info_title) TextView name;
   @Nullable @BindView(R.id.lock_info_icon) ImageView icon;
@@ -70,7 +71,6 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Nullable private LockInfoAdapter adapter;
   @Nullable private AppEntry appEntry;
   @Nullable private LockListLayoutManager layoutManager;
-  @NonNull private final Handler handler = new Handler();
   @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
       if (layoutManager == null || swipeRefreshLayout == null) {
