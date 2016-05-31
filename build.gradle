@@ -35,9 +35,6 @@ buildscript {
 
     // Gradle version checked
     classpath 'com.github.ben-manes:gradle-versions-plugin:0.12.0'
-
-    // Facebook ReDex
-    classpath 'au.com.timmutton:redex:1.1.0'
   }
 }
 
@@ -47,7 +44,6 @@ apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.squareup.sqldelight'
 apply plugin: 'me.tatarka.retrolambda'
-apply plugin: 'redex'
 
 android {
   compileSdkVersion 23
@@ -116,20 +112,6 @@ android.applicationVariants.all { variant ->
       }
     }
   }
-}
-
-redex {
-  passes = ["ReBindRefsPass",
-            //    Doesn't work yet with Retrolambda
-            //            "BridgePass",
-            "SynthPass",
-            "FinalInlinePass",
-            "DelSuperPass",
-            "SingleImplPass",
-            "SimpleInlinePass",
-            "StaticReloPass",
-            "RemoveEmptyClassesPass",
-            "ShortenSrcStringsPass"]
 }
 
 retrolambda {

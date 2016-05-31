@@ -156,7 +156,11 @@ public final class LockListFragment extends Fragment
 
   @Override public void onResume() {
     super.onResume();
+    if (fab == null) {
+      throw new NullPointerException("FAB is NULL");
+    }
     AnimUtil.popShow(fab, 500, 300);
+
     if (presenter == null) {
       throw new NullPointerException("Presenter is NULL");
     }
@@ -165,7 +169,11 @@ public final class LockListFragment extends Fragment
 
   @Override public void onPause() {
     super.onPause();
+    if (fab == null) {
+      throw new NullPointerException("FAB is NULL");
+    }
     AnimUtil.popHide(fab, 300, 300);
+
     if (presenter == null) {
       throw new NullPointerException("Presenter is NULL");
     }
