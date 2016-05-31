@@ -62,15 +62,15 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @Inject LockScreenPresenter presenter;
   @Inject LockViewDelegate lockViewDelegate;
 
-  private DataHolderFragment<Long> ignoreDataHolder;
-  private DataHolderFragment<Boolean> excludeDataHolder;
-  private MenuItem menuIgnoreNone;
-  private MenuItem menuIgnoreFive;
-  private MenuItem menuIgnoreTen;
-  private MenuItem menuIgnoreThirty;
-  private MenuItem menuExclude;
+  @Nullable private DataHolderFragment<Long> ignoreDataHolder;
+  @Nullable private DataHolderFragment<Boolean> excludeDataHolder;
+  @Nullable private MenuItem menuIgnoreNone;
+  @Nullable private MenuItem menuIgnoreFive;
+  @Nullable private MenuItem menuIgnoreTen;
+  @Nullable private MenuItem menuIgnoreThirty;
+  @Nullable private MenuItem menuExclude;
+  @Nullable private Unbinder unbinder;
   private int failCount;
-  private Unbinder unbinder;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -219,6 +219,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
+    if (ignoreDataHolder == null || excludeDataHolder == null) {
+      throw new NullPointerException("Data Holder is NULL");
+    }
     if (isChangingConfigurations()) {
       lockViewDelegate.onSaveInstanceState(outState);
       ignoreDataHolder.put(0, getIgnorePeriodTime());
@@ -244,9 +247,17 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
+    if (ignoreDataHolder == null || excludeDataHolder == null) {
+      throw new NullPointerException("Data Holder is NULL");
+    }
+
     // Set the default checked value
     final Long ignorePeriod = ignoreDataHolder.pop(0);
     presenter.setIgnorePeriodFromPreferences(ignorePeriod);
+
+    if (menuExclude == null) {
+      throw new NullPointerException("Menu Item is NULL");
+    }
 
     final Boolean exclude = excludeDataHolder.pop(0);
     if (exclude != null) {
@@ -348,6 +359,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @CheckResult @Override public boolean shouldExcludeEntry() {
+    if (menuExclude == null) {
+      throw new NullPointerException("Menu Item is NULL");
+    }
     return menuExclude.isChecked();
   }
 }
