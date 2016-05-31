@@ -1,6 +1,8 @@
 # padlock
 Padlock pyamsoft Android application
 
+[![Get it on Google Play](art/google-play-badge.png)][https://play.google.com/store/apps/details?id=com.pyamsoft.padlock]
+
 ## What is Padlock
 
 Padlock is a simple application locker which has the simple goal of providing  
