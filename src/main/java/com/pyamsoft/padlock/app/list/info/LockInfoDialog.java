@@ -65,24 +65,30 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Inject LockInfoPresenter presenter;
   @Inject DBPresenter dbPresenter;
   @Inject AdapterPresenter<ActivityEntry> adapterPresenter;
-  private DataHolderFragment<Presenter> presenterDataHolder;
-  private LockInfoAdapter adapter;
-  private AppEntry appEntry;
-  private boolean firstRefresh;
-  private LockListLayoutManager layoutManager;
+  @Nullable private DataHolderFragment<Presenter> presenterDataHolder;
+  @Nullable private LockInfoAdapter adapter;
+  @Nullable private AppEntry appEntry;
+  @Nullable private LockListLayoutManager layoutManager;
+  @Nullable private Unbinder unbinder;
   @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
+      if (layoutManager == null) {
+        throw new NullPointerException("LockListLayoutManager is NULL");
+      }
       swipeRefreshLayout.setRefreshing(false);
       layoutManager.setVerticalScrollEnabled(true);
     }
   };
   @NonNull private final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
+      if (layoutManager == null) {
+        throw new NullPointerException("LockListLayoutManager is NULL");
+      }
       swipeRefreshLayout.setRefreshing(true);
       layoutManager.setVerticalScrollEnabled(false);
     }
   };
-  private Unbinder unbinder;
+  private boolean firstRefresh;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -126,14 +132,21 @@ public class LockInfoDialog extends RetainedDialogFragment
       adapterPresenter = activityEntryAdapterPresenter;
     }
 
+    if (appEntry == null) {
+      throw new NullPointerException("AppEntry is NULL");
+    }
+
     adapter = new LockInfoAdapter(appEntry, adapterPresenter, dbPresenter);
   }
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    adapter.onCreate();
+    if (adapter == null) {
+      throw new NullPointerException("Adapter is NULL");
+    }
     presenter.onCreateView(this);
+    adapter.onCreate();
     return super.onCreateView(inflater, container, savedInstanceState);
   }
 
@@ -160,7 +173,9 @@ public class LockInfoDialog extends RetainedDialogFragment
     recyclerView.setLayoutManager(null);
     recyclerView.setAdapter(null);
 
-    adapter.onDestroy();
+    if (adapter != null) {
+      adapter.onDestroy();
+    }
 
     if (!getActivity().isChangingConfigurations()) {
       presenter.onDestroyView();
@@ -176,6 +191,9 @@ public class LockInfoDialog extends RetainedDialogFragment
   }
 
   private void initializeForEntry() {
+    if (appEntry == null) {
+      throw new NullPointerException("AppEntry is NULL");
+    }
     close.setOnClickListener(view -> dismiss());
     name.setText(appEntry.name());
     icon.setImageBitmap(appEntry.icon());
@@ -199,6 +217,9 @@ public class LockInfoDialog extends RetainedDialogFragment
   }
 
   @Override public void refreshList() {
+    if (adapter == null) {
+      throw new NullPointerException("Adapter is NULL");
+    }
     final int oldSize = adapter.getItemCount() - 1;
     for (int i = oldSize; i >= 0; --i) {
       adapter.removeItem();
@@ -208,6 +229,9 @@ public class LockInfoDialog extends RetainedDialogFragment
   }
 
   private void repopulateList() {
+    if (appEntry == null) {
+      throw new NullPointerException("AppEntry is NULL");
+    }
     Timber.d("Repopulate list");
     presenter.populateList(appEntry.packageName(), appEntry.activities());
   }
@@ -220,6 +244,9 @@ public class LockInfoDialog extends RetainedDialogFragment
       swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
     }
 
+    if (adapter == null) {
+      throw new NullPointerException("Adapter is NULL");
+    }
     adapter.addItem(entry);
   }
 
@@ -240,6 +267,9 @@ public class LockInfoDialog extends RetainedDialogFragment
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
+    if (presenterDataHolder == null) {
+      throw new NullPointerException("Presenter dataHolder is NULL");
+    }
     if (getActivity().isChangingConfigurations()) {
       presenterDataHolder.put(KEY_PRESENTER, presenter);
       presenterDataHolder.put(KEY_ADAPTER_PRESENTER, adapterPresenter);
