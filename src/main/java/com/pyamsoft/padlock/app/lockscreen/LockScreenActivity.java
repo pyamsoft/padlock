@@ -92,8 +92,8 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     // Init holders here to avoid IllegalStateException
-    ignoreDataHolder = DataHolderFragment.getInstance(this, Long.class);
-    excludeDataHolder = DataHolderFragment.getInstance(this, Boolean.class);
+    ignoreDataHolder = DataHolderFragment.getInstance(this, "ignore_data");
+    excludeDataHolder = DataHolderFragment.getInstance(this, "exclude_data");
 
     unbinder = ButterKnife.bind(this);
 
