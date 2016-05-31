@@ -16,26 +16,21 @@
 
 package com.pyamsoft.padlock.app.main;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.accessibility.AccessibilityFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.main.DaggerMainComponent;
@@ -57,10 +52,6 @@ public class MainActivity extends DonationActivityBase
 
   @NonNull private final AsyncVectorDrawableTask[] tasks;
   @Nullable private Unbinder unbinder;
-  private boolean firstCreate;
-  @BindView(R.id.main_view) CoordinatorLayout mainView;
-  @BindView(R.id.main_enable_service) LinearLayout enableService;
-  @BindView(R.id.main_service_button) Button serviceButton;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @Inject MainPresenter presenter;
 
@@ -75,8 +66,6 @@ public class MainActivity extends DonationActivityBase
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
     unbinder = ButterKnife.bind(this);
 
-    firstCreate = (savedInstanceState == null);
-
     DaggerMainComponent.builder()
         .padLockComponent(PadLock.padLockComponent(this))
         .mainModule(new MainModule())
@@ -86,29 +75,20 @@ public class MainActivity extends DonationActivityBase
     presenter.onCreateView(this);
 
     setAppBarState();
-    setupAccessibilityButton();
-  }
-
-  private void setupAccessibilityButton() {
-    serviceButton.setOnClickListener(view -> {
-      final Intent accessibilityServiceIntent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-      startActivity(accessibilityServiceIntent);
-    });
   }
 
   private void showAccessibilityPrompt() {
     supportInvalidateOptionsMenu();
-    enableService.setVisibility(View.VISIBLE);
+    getSupportFragmentManager().beginTransaction()
+        .replace(R.id.main_view_container, new AccessibilityFragment())
+        .commit();
   }
 
   private void showLockList() {
     supportInvalidateOptionsMenu();
-    enableService.setVisibility(View.GONE);
-    if (firstCreate) {
-      getSupportFragmentManager().beginTransaction()
-          .replace(R.id.main_view_container, new LockListFragment())
-          .commit();
-    }
+    getSupportFragmentManager().beginTransaction()
+        .replace(R.id.main_view_container, new LockListFragment())
+        .commit();
   }
 
   private void cancelAsyncVectorTask(int position) {
