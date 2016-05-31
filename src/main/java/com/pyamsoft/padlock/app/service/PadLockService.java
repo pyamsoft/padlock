@@ -35,13 +35,8 @@ public final class PadLockService extends AccessibilityService
   @Nullable @Inject LockServicePresenter presenter;
   @NonNull private Intent lockActivity = new Intent();
 
-  @SuppressWarnings("ConstantConditions") @CheckResult @NonNull
-  public static synchronized PadLockService getInstance() {
-    if (instance == null) {
-      throw new NullPointerException("Service instance is NULL");
-    } else {
-      return instance;
-    }
+  @Nullable @CheckResult private static synchronized PadLockService getInstance() {
+    return instance;
   }
 
   private static synchronized void setInstance(@Nullable PadLockService i) {
@@ -49,12 +44,13 @@ public final class PadLockService extends AccessibilityService
   }
 
   @CheckResult public static boolean isRunning() {
-    final LockServicePresenter lockServicePresenter = getInstance().presenter;
-    if (lockServicePresenter == null) {
-      throw new NullPointerException("Presenter is NULL");
+    final PadLockService currentInstance = getInstance();
+    if (currentInstance == null) {
+      return false;
     }
 
-    return lockServicePresenter.isRunning();
+    final LockServicePresenter lockServicePresenter = currentInstance.presenter;
+    return lockServicePresenter != null && lockServicePresenter.isRunning();
   }
 
   @Override public void onAccessibilityEvent(final @Nullable AccessibilityEvent event) {
@@ -132,10 +128,17 @@ public final class PadLockService extends AccessibilityService
     setInstance(this);
   }
 
-  @Override public void passLockScreen() {
-    if (presenter == null) {
+  public static void passLockScreen() {
+    final PadLockService currentInstance = getInstance();
+    if (currentInstance == null) {
+      throw new NullPointerException("No current instance available");
+    }
+
+    final LockServicePresenter lockServicePresenter = currentInstance.presenter;
+    if (lockServicePresenter == null) {
       throw new NullPointerException("Presenter is NULL");
     }
-    presenter.setLockScreenPassed();
+
+    lockServicePresenter.setLockScreenPassed();
   }
 }

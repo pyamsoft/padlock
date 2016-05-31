@@ -32,7 +32,5 @@ public interface LockServicePresenter extends Presenter<LockServicePresenter.Loc
   interface LockService {
 
     void startLockScreen(@NonNull PadLockEntry entry);
-
-    void passLockScreen();
   }
 }

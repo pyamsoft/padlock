@@ -38,7 +38,6 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate;
-import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.lockscreen.DaggerLockScreenComponent;
 import com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule;
@@ -237,8 +236,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
       throw new NullPointerException("LockViewDelegate is NULL");
     }
     lockViewDelegate.clearDisplay();
-    final LockServicePresenter.LockService service = PadLockService.getInstance();
-    service.passLockScreen();
+    PadLockService.passLockScreen();
     finish();
   }
 
