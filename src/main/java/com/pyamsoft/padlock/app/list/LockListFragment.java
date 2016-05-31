@@ -248,12 +248,16 @@ public final class LockListFragment extends Fragment
     }
     if (displaySystemItem != null) {
       displaySystemItem.setOnMenuItemClickListener(item -> {
-        if (item.isChecked()) {
-          presenter.setSystemInvisible();
-        } else {
-          presenter.setSystemVisible();
+        if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
+          Timber.d("List is not refreshing. Allow change of system preference");
+          if (item.isChecked()) {
+            presenter.setSystemInvisible();
+          } else {
+            presenter.setSystemVisible();
+          }
+
+          refreshList();
         }
-        refreshList();
         return true;
       });
     }
@@ -272,7 +276,10 @@ public final class LockListFragment extends Fragment
     switch (item.getItemId()) {
       case R.id.menu_settings:
         handled = true;
-        showSettingsScreen();
+        if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
+          Timber.d("List is not refreshing. Do settings click");
+          showSettingsScreen();
+        }
         break;
       default:
         handled = false;
