@@ -69,7 +69,6 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Nullable private LockInfoAdapter adapter;
   @Nullable private AppEntry appEntry;
   @Nullable private LockListLayoutManager layoutManager;
-  @Nullable private Unbinder unbinder;
   @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
       if (layoutManager == null) {
@@ -88,6 +87,7 @@ public class LockInfoDialog extends RetainedDialogFragment
       layoutManager.setVerticalScrollEnabled(false);
     }
   };
+  @Nullable private Unbinder unbinder;
   private boolean firstRefresh;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {

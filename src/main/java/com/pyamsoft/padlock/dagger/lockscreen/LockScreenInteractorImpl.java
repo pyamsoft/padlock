@@ -80,7 +80,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       @NonNull String attempt, boolean shouldExclude, long ignoreForPeriod) {
     Timber.d("Attempt unlock: %s %s", packageName, activityName);
     final Observable<PadLockEntry> dbObservable =
-        PadLockOpenHelper.queryWithPackageActivityName(appContext, packageName, activityName).first();
+        PadLockOpenHelper.queryWithPackageActivityName(appContext, packageName, activityName)
+            .first();
 
     final Observable<String> masterPinObservable =
         Observable.defer(() -> Observable.just(pinInteractor.getMasterPin()));
@@ -139,8 +140,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
             .ignoreUntilTime(System.currentTimeMillis() + ignoreMinutesInMillis)
             .systemApplication(oldValues.systemApplication())
             .asContentValues();
-    PadLockOpenHelper.updateWithPackageActivityName(appContext, contentValues, oldValues.packageName(),
-        oldValues.activityName());
+    PadLockOpenHelper.updateWithPackageActivityName(appContext, contentValues,
+        oldValues.packageName(), oldValues.activityName());
   }
 
   @CheckResult @Override public long getDefaultIgnoreTime() {

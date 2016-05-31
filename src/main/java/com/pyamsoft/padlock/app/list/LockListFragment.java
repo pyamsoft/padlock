@@ -67,6 +67,15 @@ public final class LockListFragment extends Fragment
   private static final int KEY_PRESENTER = 0;
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
+  @BindView(R.id.applist_fab) FloatingActionButton fab;
+  @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
+  @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
+  @Inject LockListPresenter presenter;
+  @Inject AdapterPresenter<AppEntry> adapterPresenter;
+  @Inject DBPresenter dbPresenter;
+  @Nullable private DataHolderFragment<Presenter> presenterDataHolder;
+  @Nullable private LockListAdapter adapter;
+  @Nullable private LockListLayoutManager lockListLayoutManager;
   @NonNull private final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
       if (lockListLayoutManager == null) {
@@ -95,15 +104,6 @@ public final class LockListFragment extends Fragment
       }
     }
   };
-  @BindView(R.id.applist_fab) FloatingActionButton fab;
-  @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
-  @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
-  @Inject LockListPresenter presenter;
-  @Inject AdapterPresenter<AppEntry> adapterPresenter;
-  @Inject DBPresenter dbPresenter;
-  @Nullable private DataHolderFragment<Presenter> presenterDataHolder;
-  @Nullable private LockListAdapter adapter;
-  @Nullable private LockListLayoutManager lockListLayoutManager;
   @Nullable private AsyncVectorDrawableTask fabIconTask;
   @Nullable private Unbinder unbinder;
   @Nullable private MenuItem displaySystemItem;
