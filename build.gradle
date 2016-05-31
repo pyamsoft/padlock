@@ -53,15 +53,15 @@ android {
   compileSdkVersion 23
   buildToolsVersion "23.0.3"
 
-    defaultConfig {
-      applicationId "com.pyamsoft.padlock"
-      minSdkVersion 16
-      targetSdkVersion 23
-      versionCode 13
-      versionName "1.3.0"
-      // For vector drawables
-      vectorDrawables.useSupportLibrary = true
-    }
+  defaultConfig {
+    applicationId "com.pyamsoft.padlock"
+    minSdkVersion 16
+    targetSdkVersion 23
+    versionCode 13
+    versionName "1.3.0"
+    // For vector drawables
+    vectorDrawables.useSupportLibrary = true
+  }
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -121,7 +121,7 @@ android.applicationVariants.all { variant ->
 redex {
   passes = ["ReBindRefsPass",
             //    Doesn't work yet with Retrolambda
-//            "BridgePass",
+            //            "BridgePass",
             "SynthPass",
             "FinalInlinePass",
             "DelSuperPass",
@@ -140,6 +140,9 @@ dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
 
   retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.3.0'
+
+  // JavaPoet to fix an issue
+  apt 'com.squareup:javapoet:1.7.0'
 
   // SQLBrite
   compile 'com.squareup.sqlbrite:sqlbrite:0.6.3'
