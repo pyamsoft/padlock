@@ -46,14 +46,14 @@ import timber.log.Timber;
 
 public class PinEntryDialog extends RetainedDialogFragment implements PinScreen {
 
-  private static final String ARG_PACKAGE = LockViewDelegate.ENTRY_PACKAGE_NAME;
-  private static final String ARG_ACTIVITY = LockViewDelegate.ENTRY_ACTIVITY_NAME;
+  @NonNull private static final String ARG_PACKAGE = LockViewDelegate.ENTRY_PACKAGE_NAME;
+  @NonNull private static final String ARG_ACTIVITY = LockViewDelegate.ENTRY_ACTIVITY_NAME;
 
-  @Inject PinEntryPresenter presenter;
-  @BindView(R.id.lock_pin_entry_toolbar) Toolbar toolbar;
-  @BindView(R.id.lock_pin_entry_close) ImageView close;
-  @Inject LockViewDelegate lockViewDelegate;
-  private Unbinder unbinder;
+  @Nullable @Inject PinEntryPresenter presenter;
+  @Nullable @BindView(R.id.lock_pin_entry_toolbar) Toolbar toolbar;
+  @Nullable @BindView(R.id.lock_pin_entry_close) ImageView close;
+  @Nullable @Inject LockViewDelegate lockViewDelegate;
+  @Nullable private Unbinder unbinder;
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -71,6 +71,10 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
         .padLockComponent(PadLock.padLockComponent(this))
         .build()
         .inject(this);
+
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.setTextColor(android.R.color.black);
 
     setCancelable(true);
@@ -84,7 +88,15 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     @SuppressLint("InflateParams") final View rootView =
         LayoutInflater.from(themedContext).inflate(R.layout.layout_pin_entry, null, false);
     unbinder = ButterKnife.bind(this, rootView);
+
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.onCreateView(this);
+
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
     if (savedInstanceState != null) {
@@ -97,16 +109,28 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.onSaveInstanceState(outState);
     super.onSaveInstanceState(outState);
   }
 
   @Override public void onStart() {
     super.onStart();
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     lockViewDelegate.onStart(presenter);
   }
 
   private void setupToolbar() {
+    if (toolbar == null || close == null) {
+      throw new NullPointerException("Required UI component is NULL");
+    }
     toolbar.setTitle("PIN");
     close.setOnClickListener(view -> {
       Timber.d("onClick Arrow");
@@ -117,26 +141,42 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
   @Override public void onDestroyView() {
     super.onDestroyView();
     Timber.d("Destroy AlertDialog");
-    lockViewDelegate.onDestroyView();
-    presenter.onDestroyView();
+    if (lockViewDelegate != null) {
+      lockViewDelegate.onDestroyView();
+    }
+    if (presenter != null) {
+      presenter.onDestroyView();
+    }
     if (unbinder != null) {
       unbinder.unbind();
     }
   }
 
   @NonNull @Override public String getCurrentAttempt() {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     return lockViewDelegate.getCurrentAttempt();
   }
 
   @Override @NonNull public String getPackageName() {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     return lockViewDelegate.getPackageName();
   }
 
   @Override @NonNull public String getActivityName() {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     return lockViewDelegate.getActivityName();
   }
 
   @Override public void setImageSuccess(@NonNull Drawable drawable) {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.setImageSuccess(drawable);
   }
 
@@ -146,16 +186,25 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
   }
 
   @Override public void onSubmitSuccess() {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.clearDisplay();
     dismiss();
   }
 
   @Override public void onSubmitFailure() {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.clearDisplay();
     dismiss();
   }
 
   @Override public void onSubmitError() {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.clearDisplay();
     dismiss();
   }
