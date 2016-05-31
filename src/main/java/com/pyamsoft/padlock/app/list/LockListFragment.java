@@ -24,6 +24,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
@@ -40,8 +41,10 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.db.DBPresenter;
+import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.pinentry.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
+import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.list.DaggerLockListComponent;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
@@ -234,6 +237,36 @@ public final class LockListFragment extends Fragment
       displaySystemItem.setOnMenuItemClickListener(null);
       displaySystemItem.setChecked(visible);
       setSystemCheckListener();
+    }
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    boolean handled;
+    switch (item.getItemId()) {
+      case R.id.menu_settings:
+        handled = true;
+        showSettingsScreen();
+        break;
+      default:
+        handled = false;
+    }
+    return handled || super.onOptionsItemSelected(item);
+  }
+
+  private void showSettingsScreen() {
+    final FragmentManager fragmentManager = getFragmentManager();
+    if (fragmentManager.findFragmentByTag(MainActivity.SETTINGS_TAG) == null) {
+      fragmentManager.beginTransaction()
+          .replace(R.id.main_view_container, new SettingsFragment())
+          .addToBackStack(null)
+          .commit();
+      final FragmentActivity activity = getActivity();
+      if (activity instanceof MainActivity) {
+        final MainActivity mainActivity = (MainActivity) activity;
+        mainActivity.setActionBarUpEnabled(true);
+      } else {
+        throw new ClassCastException("Activity is not MainActivity");
+      }
     }
   }
 

@@ -47,6 +47,10 @@
   <string name="clear_all_title">Reset All Settings</string>
   <string name="clear_all_summary">Reset all application settings to default</string>
 
+  <string name="upgrade_info_key">upgrade_info</string>
+  <string name="upgrade_info_title">Show Upgrade Information</string>
+  <string name="upgrade_info_summary">Show the most recent upgrade change log</string>
+
   <bool name="lock_package_change_default">true</bool>
   <string name="lock_package_change_key">lock_package_change</string>
   <string name="lock_package_change_title">Lock on Package Change</string>
