@@ -63,9 +63,9 @@ public final class LockListFragment extends Fragment
     implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
 
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
-  private static final int DATA_HOLDER_ID_LOCK_LIST_PRESENTER = 0;
-  private static final int DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER = 1;
-  private static final int DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER = 2;
+  private static final int KEY_PRESENTER = 0;
+  private static final int KEY_ADAPTER_PRESENTER = 1;
+  private static final int KEY_DB_PRESENTER = 2;
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
@@ -161,16 +161,13 @@ public final class LockListFragment extends Fragment
     Timber.d("onCreate");
     super.onCreate(savedInstanceState);
 
-    presenterDataHolder =
-        DataHolderFragment.getInstance(getFragmentManager(), "lock_list_presenters");
+    presenterDataHolder = DataHolderFragment.getInstance(getActivity(), "lock_list_presenters");
 
     final LockListPresenter lockListPresenter =
-        (LockListPresenter) presenterDataHolder.pop(DATA_HOLDER_ID_LOCK_LIST_PRESENTER);
+        (LockListPresenter) presenterDataHolder.pop(KEY_PRESENTER);
     @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry> entryAdapterPresenter =
-        (AdapterPresenter<AppEntry>) presenterDataHolder.pop(
-            DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER);
-    final DBPresenter lockDBPresenter =
-        (DBPresenter) presenterDataHolder.pop(DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER);
+        (AdapterPresenter<AppEntry>) presenterDataHolder.pop(KEY_ADAPTER_PRESENTER);
+    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
     if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
       Timber.d("Create new presenters");
       firstRefresh = true;
@@ -411,9 +408,9 @@ public final class LockListFragment extends Fragment
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     if (getActivity().isChangingConfigurations()) {
-      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_LIST_PRESENTER, presenter);
-      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_LIST_ADAPTER_PRESENTER, adapterPresenter);
-      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_LIST_DB_PRESENTER, dbPresenter);
+      presenterDataHolder.put(KEY_PRESENTER, presenter);
+      presenterDataHolder.put(KEY_ADAPTER_PRESENTER, adapterPresenter);
+      presenterDataHolder.put(KEY_DB_PRESENTER, dbPresenter);
     } else {
       presenterDataHolder.clear();
     }

@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.view.Menu;
@@ -48,6 +49,9 @@ public class MainActivity extends DonationActivityBase
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
   @NonNull private static final String USAGE_TERMS_TAG = "usage_terms";
+  @NonNull private static final String ACCESSIBILITY_TAG = "accessibility";
+  @NonNull private static final String SETTINGS_TAG = "settings";
+  @NonNull private static final String LOCK_LIST_TAG = "lock_list";
   private static final int VECTOR_TASK_SIZE = 2;
 
   @NonNull private final AsyncVectorDrawableTask[] tasks;
@@ -79,16 +83,22 @@ public class MainActivity extends DonationActivityBase
 
   private void showAccessibilityPrompt() {
     supportInvalidateOptionsMenu();
-    getSupportFragmentManager().beginTransaction()
-        .replace(R.id.main_view_container, new AccessibilityFragment())
-        .commit();
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    if (fragmentManager.findFragmentByTag(ACCESSIBILITY_TAG) == null) {
+      fragmentManager.beginTransaction()
+          .replace(R.id.main_view_container, new AccessibilityFragment(), ACCESSIBILITY_TAG)
+          .commit();
+    }
   }
 
   private void showLockList() {
     supportInvalidateOptionsMenu();
-    getSupportFragmentManager().beginTransaction()
-        .replace(R.id.main_view_container, new LockListFragment())
-        .commit();
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    if (fragmentManager.findFragmentByTag(LOCK_LIST_TAG) == null) {
+      fragmentManager.beginTransaction()
+          .replace(R.id.main_view_container, new LockListFragment(), LOCK_LIST_TAG)
+          .commit();
+    }
   }
 
   private void cancelAsyncVectorTask(int position) {
