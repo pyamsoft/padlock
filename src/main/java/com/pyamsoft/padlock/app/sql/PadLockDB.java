@@ -17,30 +17,38 @@
 package com.pyamsoft.padlock.app.sql;
 
 import android.content.Context;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
+import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
 final class PadLockDB {
 
   @NonNull private static final Object lock = new Object();
 
-  private static volatile PadLockDB instance = null;
+  @Nullable private static volatile PadLockDB instance = null;
 
   @NonNull private final BriteDatabase briteDatabase;
 
-  private PadLockDB(final Context context) {
+  private PadLockDB(final @NonNull Context context, final @NonNull Scheduler dbScheduler) {
     final SqlBrite sqlBrite = SqlBrite.create();
     final PadLockOpenHelper openHelper = new PadLockOpenHelper(context.getApplicationContext());
-    briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, Schedulers.io());
+    briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, dbScheduler);
   }
 
-  @NonNull static BriteDatabase with(final Context context) {
+  @CheckResult @NonNull static BriteDatabase with(final @NonNull Context context) {
+    return with(context, Schedulers.io());
+  }
+
+  @CheckResult @SuppressWarnings("ConstantConditions") @NonNull
+  static BriteDatabase with(final @NonNull Context context, final @NonNull Scheduler dbScheduler) {
     if (instance == null) {
       synchronized (lock) {
         if (instance == null) {
-          instance = new PadLockDB(context.getApplicationContext());
+          instance = new PadLockDB(context.getApplicationContext(), dbScheduler);
         }
       }
     }

@@ -20,7 +20,7 @@ import timber.log.Timber;
 public final class SettingsFragment extends PreferenceFragmentCompat
     implements SettingsPresenter.SettingsView {
 
-  @Inject SettingsPresenter presenter;
+  @Nullable @Inject SettingsPresenter presenter;
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -29,22 +29,34 @@ public final class SettingsFragment extends PreferenceFragmentCompat
         .padLockComponent(PadLock.padLockComponent(this))
         .build()
         .inject(this);
+
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.onCreateView(this);
     return super.onCreateView(inflater, container, savedInstanceState);
   }
 
   @Override public void onResume() {
     super.onResume();
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.onResume();
   }
 
   @Override public void onPause() {
     super.onPause();
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
     presenter.onPause();
   }
 
   @Override public void onDestroyView() {
-    presenter.onDestroyView();
+    if (presenter != null) {
+      presenter.onDestroyView();
+    }
     super.onDestroyView();
   }
 
@@ -54,6 +66,9 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));
     clearDb.setOnPreferenceClickListener(preference -> {
       Timber.d("Clear DB onClick");
+      if (presenter == null) {
+        throw new NullPointerException("Presenter is NULL");
+      }
       presenter.confirmDatabaseClear();
       return true;
     });
@@ -61,6 +76,9 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     final Preference resetAll = findPreference(getString(R.string.clear_all_key));
     resetAll.setOnPreferenceClickListener(preference -> {
       Timber.d("Reset settings onClick");
+      if (presenter == null) {
+        throw new NullPointerException("Presenter is NULL");
+      }
       presenter.confirmSettingsClear();
       return true;
     });

@@ -32,7 +32,7 @@ public final class DBProgressDialog extends RetainedDialogFragment {
 
   @NonNull private static final String DB_PROGRESS_TAG = "db_progress";
   @NonNull private static final String APP_NAME = "app_name";
-  private String name;
+  @Nullable private String name;
 
   private static DBProgressDialog newInstance(final String name) {
     final DBProgressDialog fragment = new DBProgressDialog();
