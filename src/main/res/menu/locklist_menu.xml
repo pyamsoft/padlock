@@ -19,8 +19,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
   <item
+      android:id="@+id/menu_settings"
+      android:icon="@drawable/ic_settings_24dp"
+      android:title="@string/settings"
+      app:showAsAction="ifRoom"/>
+
+  <item
       android:id="@+id/menu_is_system"
-      android:title="@string/blank"
-      app:showAsAction="always"/>
+      android:checkable="true"
+      android:title="@string/show_system_applications"
+      app:showAsAction="never"/>
 
 </menu>
