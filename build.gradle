@@ -153,7 +153,7 @@ dependencies {
   // Auto value
   provided 'com.google.auto.value:auto-value:1.2'
   apt 'com.google.auto.value:auto-value:1.2'
-  apt 'com.ryanharter.auto.value:auto-value-parcel:0.2.1'
+  apt 'com.ryanharter.auto.value:auto-value-parcel:0.2.2'
 
   // Dagger2
   // Dagger 2 and Compiler
