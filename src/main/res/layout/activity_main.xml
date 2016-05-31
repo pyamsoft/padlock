@@ -37,12 +37,6 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         />
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/main_tabs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
-
   </android.support.design.widget.AppBarLayout>
 
   <FrameLayout
@@ -61,14 +55,6 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone"
-        />
-
-    <android.support.v4.view.ViewPager
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/main_pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:visibility="gone"
         />
 

@@ -22,6 +22,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -41,7 +42,6 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.GlobalConstants;
 import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.padlock.app.main.PageAwareFragment;
 import com.pyamsoft.padlock.app.pinentry.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
 import com.pyamsoft.padlock.app.service.PadLockService;
@@ -60,7 +60,7 @@ import timber.log.Timber;
 import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
-public final class LockListFragment extends PageAwareFragment
+public final class LockListFragment extends Fragment
     implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
 
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
@@ -306,7 +306,8 @@ public final class LockListFragment extends PageAwareFragment
         new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_lock_open_24dp));
   }
 
-  @Override public void onPinEntryDialogRequested(@NonNull String packageName, @NonNull String activityName) {
+  @Override
+  public void onPinEntryDialogRequested(@NonNull String packageName, @NonNull String activityName) {
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
         PinEntryDialog.newInstance(packageName, activityName), PIN_DIALOG_TAG);
   }
@@ -354,22 +355,6 @@ public final class LockListFragment extends PageAwareFragment
   @Override public void onStop() {
     super.onStop();
     adapter.onStop();
-  }
-
-  @Override public void onPageUnselected() {
-    if (swipeRefreshLayout != null) {
-      if (!swipeRefreshLayout.isRefreshing()) {
-        AnimUtil.popHide(fab, 300, 300);
-      }
-    }
-  }
-
-  @Override public void onPageSelected() {
-    if (swipeRefreshLayout != null) {
-      if (!swipeRefreshLayout.isRefreshing()) {
-        AnimUtil.popShow(fab, 300, 300);
-      }
-    }
   }
 
   @Override public void onListPopulateError() {
