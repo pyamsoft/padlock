@@ -60,7 +60,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @Nullable @BindView(R.id.appbar) AppBarLayout appBarLayout;
 
   @Nullable @Inject LockScreenPresenter presenter;
-  @Inject LockViewDelegate lockViewDelegate;
+  @Nullable @Inject LockViewDelegate lockViewDelegate;
 
   @Nullable private DataHolderFragment<Long> ignoreDataHolder;
   @Nullable private DataHolderFragment<Boolean> excludeDataHolder;
@@ -112,6 +112,10 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     if (rootView == null) {
       throw new NullPointerException("rootView is NULL");
     }
+
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.setTextColor(android.R.color.white);
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
@@ -127,6 +131,10 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
       throw new NullPointerException("Presenter is NULL");
     }
     presenter.loadDisplayNameFromPackage();
+
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.onStart(presenter);
 
     supportInvalidateOptionsMenu();
@@ -146,11 +154,16 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     if (presenter != null) {
       presenter.onDestroyView();
     }
-    lockViewDelegate.onDestroyView();
-    failCount = 0;
+
+    if (lockViewDelegate != null) {
+      lockViewDelegate.onDestroyView();
+    }
+
     if (unbinder != null) {
       unbinder.unbind();
     }
+
+    failCount = 0;
   }
 
   @Override public void finish() {
@@ -160,14 +173,23 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @NonNull @Override public String getPackageName() {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     return lockViewDelegate.getPackageName();
   }
 
   @NonNull @Override public String getActivityName() {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     return lockViewDelegate.getActivityName();
   }
 
   @Override public void setImageSuccess(@NonNull Drawable drawable) {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.setImageSuccess(drawable);
   }
 
@@ -176,6 +198,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @NonNull @Override public String getCurrentAttempt() {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     return lockViewDelegate.getCurrentAttempt();
   }
 
@@ -208,6 +233,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   @Override public void onSubmitSuccess() {
     Timber.d("Unlocked!");
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.clearDisplay();
     final LockServicePresenter.LockService service = PadLockService.getInstance();
     service.passLockScreen();
@@ -216,6 +244,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   @Override public void onSubmitFailure() {
     Timber.e("Failed to unlock");
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.clearDisplay();
     showSnackbarWithText("Error: Invalid PIN");
 
@@ -232,6 +263,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.onRestoreInstanceState(savedInstanceState);
     super.onRestoreInstanceState(savedInstanceState);
   }
@@ -239,6 +273,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
     if (ignoreDataHolder == null || excludeDataHolder == null) {
       throw new NullPointerException("Data Holder is NULL");
+    }
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
     }
     if (isChangingConfigurations()) {
       lockViewDelegate.onSaveInstanceState(outState);
@@ -289,6 +326,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @Override public void onSubmitError() {
+    if (lockViewDelegate == null) {
+      throw new NullPointerException("LockViewDelegate is NULL");
+    }
     lockViewDelegate.clearDisplay();
     AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
   }
