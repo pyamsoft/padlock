@@ -27,7 +27,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,7 +42,6 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.pinentry.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
-import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.list.DaggerLockListComponent;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
@@ -66,17 +64,11 @@ public final class LockListFragment extends Fragment
   private static final int KEY_PRESENTER = 0;
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
-  @BindView(R.id.applist_fab) FloatingActionButton fab;
-  @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
-  @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
-  @Inject LockListPresenter presenter;
-  @Inject AdapterPresenter<AppEntry> adapterPresenter;
-  @Inject DBPresenter dbPresenter;
-  private DataHolderFragment<Presenter> presenterDataHolder;
-  private LockListAdapter adapter;
-  private LockListLayoutManager lockListLayoutManager;
   @NonNull private final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
+      if (lockListLayoutManager == null) {
+        throw new NullPointerException("LockListLayoutManager is NULL");
+      }
       swipeRefreshLayout.setRefreshing(true);
       lockListLayoutManager.setVerticalScrollEnabled(false);
       final FragmentActivity activity = getActivity();
@@ -88,6 +80,9 @@ public final class LockListFragment extends Fragment
   };
   @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
+      if (lockListLayoutManager == null) {
+        throw new NullPointerException("LockListLayoutManager is NULL");
+      }
       swipeRefreshLayout.setRefreshing(false);
       lockListLayoutManager.setVerticalScrollEnabled(true);
       final FragmentActivity activity = getActivity();
@@ -97,10 +92,19 @@ public final class LockListFragment extends Fragment
       }
     }
   };
+  @BindView(R.id.applist_fab) FloatingActionButton fab;
+  @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
+  @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
+  @Inject LockListPresenter presenter;
+  @Inject AdapterPresenter<AppEntry> adapterPresenter;
+  @Inject DBPresenter dbPresenter;
+  @Nullable private DataHolderFragment<Presenter> presenterDataHolder;
+  @Nullable private LockListAdapter adapter;
+  @Nullable private LockListLayoutManager lockListLayoutManager;
+  @Nullable private AsyncVectorDrawableTask fabIconTask;
+  @Nullable private Unbinder unbinder;
+  @Nullable private MenuItem displaySystemItem;
   private boolean firstRefresh;
-  private AsyncVectorDrawableTask fabIconTask;
-  private SwitchCompat displaySystem;
-  private Unbinder unbinder;
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -108,6 +112,9 @@ public final class LockListFragment extends Fragment
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
     presenter.onCreateView(this);
+    if (adapter == null) {
+      throw new NullPointerException("Adapter is NULL");
+    }
     adapter.onCreate();
     return view;
   }
@@ -200,50 +207,42 @@ public final class LockListFragment extends Fragment
   }
 
   private void setupLockListMenuItems(final @NonNull Menu menu) {
-    final MenuItem displaySystemItem = menu.findItem(R.id.menu_is_system);
+    displaySystemItem = menu.findItem(R.id.menu_is_system);
     if (displaySystemItem == null) {
       Timber.e("Item is NULL");
       return;
     }
-
-    displaySystemItem.setVisible(PadLockService.isRunning());
-    displaySystemItem.setActionView(R.layout.action_view_toolbar_switch);
-    displaySystem =
-        (SwitchCompat) displaySystemItem.getActionView().findViewById(R.id.action_view_switch);
-    if (displaySystem == null) {
-      Timber.e("Action view is NULL");
-      return;
-    }
-
-    displaySystem.setEnabled(!swipeRefreshLayout.isRefreshing());
     presenter.setSystemVisibilityFromPreference();
   }
 
   private void setSystemCheckListener() {
-    displaySystem.setOnCheckedChangeListener((buttonView, isChecked) -> {
-      if (isChecked) {
-        presenter.setSystemVisible();
-      } else {
-        presenter.setSystemInvisible();
-      }
-      refreshList();
-    });
+    if (displaySystemItem != null) {
+      displaySystemItem.setOnMenuItemClickListener(item -> {
+        if (item.isChecked()) {
+          presenter.setSystemInvisible();
+        } else {
+          presenter.setSystemVisible();
+        }
+        refreshList();
+        return true;
+      });
+    }
+  }
+
+  private void setSystemVisible(boolean visible) {
+    if (displaySystemItem != null) {
+      displaySystemItem.setOnMenuItemClickListener(null);
+      displaySystemItem.setChecked(visible);
+      setSystemCheckListener();
+    }
   }
 
   @Override public void setSystemVisible() {
-    if (displaySystem != null) {
-      displaySystem.setOnCheckedChangeListener(null);
-      displaySystem.setChecked(true);
-      setSystemCheckListener();
-    }
+    setSystemVisible(true);
   }
 
   @Override public void setSystemInvisible() {
-    if (displaySystem != null) {
-      displaySystem.setOnCheckedChangeListener(null);
-      displaySystem.setChecked(false);
-      setSystemCheckListener();
-    }
+    setSystemVisible(false);
   }
 
   @Override public void onDestroyView() {
@@ -264,7 +263,9 @@ public final class LockListFragment extends Fragment
     swipeRefreshLayout.removeCallbacks(startRefreshRunnable);
     swipeRefreshLayout.removeCallbacks(stopRefreshRunnable);
 
-    adapter.onDestroy();
+    if (adapter != null) {
+      adapter.onDestroy();
+    }
     if (!getActivity().isChangingConfigurations()) {
       presenter.onDestroyView();
     }
@@ -345,16 +346,25 @@ public final class LockListFragment extends Fragment
       swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
     }
 
+    if (adapter == null) {
+      throw new NullPointerException("Adapter is NULL");
+    }
     adapter.addItem(entry);
   }
 
   @Override public void onStart() {
     super.onStart();
+    if (adapter == null) {
+      throw new NullPointerException("Adapter is NULL");
+    }
     adapter.onStart();
   }
 
   @Override public void onStop() {
     super.onStop();
+    if (adapter == null) {
+      throw new NullPointerException("Adapter is NULL");
+    }
     adapter.onStop();
   }
 
@@ -398,6 +408,9 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void refreshList() {
+    if (adapter == null) {
+      throw new NullPointerException("Adapter is NULL");
+    }
     final int oldSize = adapter.getItemCount() - 1;
     for (int i = oldSize; i >= 0; --i) {
       adapter.removeItem();
@@ -407,6 +420,9 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
+    if (presenterDataHolder == null) {
+      throw new NullPointerException("Presenter dataHolder is NULL");
+    }
     if (getActivity().isChangingConfigurations()) {
       presenterDataHolder.put(KEY_PRESENTER, presenter);
       presenterDataHolder.put(KEY_ADAPTER_PRESENTER, adapterPresenter);
