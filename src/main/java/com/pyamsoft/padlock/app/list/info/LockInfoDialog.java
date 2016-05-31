@@ -52,9 +52,9 @@ public class LockInfoDialog extends RetainedDialogFragment
     implements LockInfoPresenter.LockInfoView {
 
   @NonNull private static final String ARG_APP_ENTRY = "app_entry";
-  private static final int DATA_HOLDER_ID_LOCK_INFO_PRESENTER = 0;
-  private static final int DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER = 1;
-  private static final int DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER = 2;
+  private static final int KEY_PRESENTER = 0;
+  private static final int KEY_ADAPTER_PRESENTER = 1;
+  private static final int KEY_DB_PRESENTER = 2;
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;
   @BindView(R.id.lock_info_icon) ImageView icon;
@@ -103,12 +103,11 @@ public class LockInfoDialog extends RetainedDialogFragment
         DataHolderFragment.getInstance(getFragmentManager(), "lock_info_presenters");
 
     final LockInfoPresenter lockInfoPresenter =
-        (LockInfoPresenter) presenterDataHolder.pop(DATA_HOLDER_ID_LOCK_INFO_PRESENTER);
+        (LockInfoPresenter) presenterDataHolder.pop(KEY_PRESENTER);
     @SuppressWarnings("unchecked") final AdapterPresenter<ActivityEntry>
-        activityEntryAdapterPresenter = (AdapterPresenter<ActivityEntry>) presenterDataHolder.pop(
-        DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER);
-    final DBPresenter lockDBPresenter =
-        (DBPresenter) presenterDataHolder.pop(DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER);
+        activityEntryAdapterPresenter =
+        (AdapterPresenter<ActivityEntry>) presenterDataHolder.pop(KEY_ADAPTER_PRESENTER);
+    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
     if (lockInfoPresenter == null
         || activityEntryAdapterPresenter == null
         || lockDBPresenter == null) {
@@ -242,9 +241,9 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     if (getActivity().isChangingConfigurations()) {
-      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_INFO_PRESENTER, presenter);
-      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_INFO_ADAPTER_PRESENTER, adapterPresenter);
-      presenterDataHolder.put(DATA_HOLDER_ID_LOCK_INFO_DB_PRESENTER, dbPresenter);
+      presenterDataHolder.put(KEY_PRESENTER, presenter);
+      presenterDataHolder.put(KEY_ADAPTER_PRESENTER, adapterPresenter);
+      presenterDataHolder.put(KEY_DB_PRESENTER, dbPresenter);
     } else {
       presenterDataHolder.clear();
     }
