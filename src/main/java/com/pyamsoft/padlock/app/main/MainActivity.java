@@ -49,9 +49,9 @@ public class MainActivity extends DonationActivityBase
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
   @NonNull private static final String USAGE_TERMS_TAG = "usage_terms";
-  @NonNull private static final String ACCESSIBILITY_TAG = "accessibility";
-  @NonNull private static final String SETTINGS_TAG = "settings";
-  @NonNull private static final String LOCK_LIST_TAG = "lock_list";
+  @NonNull public static final String ACCESSIBILITY_TAG = "accessibility";
+  @NonNull public static final String SETTINGS_TAG = "settings";
+  @NonNull public static final String LOCK_LIST_TAG = "lock_list";
   private static final int VECTOR_TASK_SIZE = 2;
 
   @NonNull private final AsyncVectorDrawableTask[] tasks;
@@ -94,7 +94,8 @@ public class MainActivity extends DonationActivityBase
   private void showLockList() {
     supportInvalidateOptionsMenu();
     final FragmentManager fragmentManager = getSupportFragmentManager();
-    if (fragmentManager.findFragmentByTag(LOCK_LIST_TAG) == null) {
+    if (fragmentManager.findFragmentByTag(LOCK_LIST_TAG) == null
+        && fragmentManager.findFragmentByTag(SETTINGS_TAG) == null) {
       fragmentManager.beginTransaction()
           .replace(R.id.main_view_container, new LockListFragment(), LOCK_LIST_TAG)
           .commit();
@@ -129,11 +130,26 @@ public class MainActivity extends DonationActivityBase
   private void setAppBarState() {
     setSupportActionBar(toolbar);
     toolbar.setTitle(getString(R.string.app_name));
-    setActionBarUpEnabled(false);
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    final int backStackCount = fragmentManager.getBackStackEntryCount();
+    setActionBarUpEnabled(backStackCount > 0);
   }
 
   @Override protected boolean shouldConfirmBackPress() {
     return true;
+  }
+
+  @Override public void onBackPressed() {
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    final int backStackCount = fragmentManager.getBackStackEntryCount();
+    if (backStackCount > 0) {
+      fragmentManager.popBackStack();
+      if (backStackCount - 1 == 0) {
+        setActionBarUpEnabled(false);
+      }
+    } else {
+      super.onBackPressed();
+    }
   }
 
   @Override public boolean onOptionsItemSelected(final @NonNull MenuItem item) {
