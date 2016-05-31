@@ -77,18 +77,6 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
     sqLiteDatabase.execSQL(dropOldTable);
   }
 
-  @Override public void onCreate(SQLiteDatabase sqLiteDatabase) {
-    Timber.d("onCreate");
-    sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
-  }
-
-  @Override public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-    Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion);
-    if (oldVersion == 1 && newVersion == 2) {
-      upgradeVersion1To2(sqLiteDatabase);
-    }
-  }
-
   @SuppressLint("NewApi") public static void newTransaction(final @NonNull Context context,
       final @NonNull Runnable runnable) {
     final Context appContext = context.getApplicationContext();
@@ -162,5 +150,17 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
   public static void deleteAll(final @NonNull Context context) {
     final Context appContext = context.getApplicationContext();
     PadLockDB.with(appContext).delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
+  }
+
+  @Override public void onCreate(SQLiteDatabase sqLiteDatabase) {
+    Timber.d("onCreate");
+    sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
+  }
+
+  @Override public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+    Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion);
+    if (oldVersion == 1 && newVersion == 2) {
+      upgradeVersion1To2(sqLiteDatabase);
+    }
   }
 }

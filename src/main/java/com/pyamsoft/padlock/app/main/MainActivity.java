@@ -48,16 +48,16 @@ import timber.log.Timber;
 public class MainActivity extends DonationActivityBase
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
-  @NonNull private static final String USAGE_TERMS_TAG = "usage_terms";
-  @NonNull public static final String ACCESSIBILITY_TAG = "accessibility";
   @NonNull public static final String SETTINGS_TAG = "settings";
-  @NonNull public static final String LOCK_LIST_TAG = "lock_list";
+  @NonNull private static final String USAGE_TERMS_TAG = "usage_terms";
+  @NonNull private static final String ACCESSIBILITY_TAG = "accessibility";
+  @NonNull private static final String LOCK_LIST_TAG = "lock_list";
   private static final int VECTOR_TASK_SIZE = 2;
 
   @NonNull private final AsyncVectorDrawableTask[] tasks;
-  @Nullable private Unbinder unbinder;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @Inject MainPresenter presenter;
+  @Nullable private Unbinder unbinder;
 
   public MainActivity() {
     tasks = new AsyncVectorDrawableTask[VECTOR_TASK_SIZE];

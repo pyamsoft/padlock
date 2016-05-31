@@ -43,8 +43,6 @@ public class AccessibilityFragment extends Fragment {
   }
 
   private void setupAccessibilityButton() {
-    serviceButton.setOnClickListener(view -> {
-      startActivity(accessibilityServiceIntent);
-    });
+    serviceButton.setOnClickListener(view -> startActivity(accessibilityServiceIntent));
   }
 }
