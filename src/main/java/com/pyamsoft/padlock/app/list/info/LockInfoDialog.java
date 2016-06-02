@@ -73,19 +73,19 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Nullable private LockListLayoutManager layoutManager;
   @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
-      if (layoutManager == null || swipeRefreshLayout == null) {
-        throw new NullPointerException("UI component is NULL");
-      }
+      assert swipeRefreshLayout != null;
       swipeRefreshLayout.setRefreshing(false);
+
+      assert layoutManager != null;
       layoutManager.setVerticalScrollEnabled(true);
     }
   };
   @NonNull private final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
-      if (layoutManager == null || swipeRefreshLayout == null) {
-        throw new NullPointerException("UI component is NULL");
-      }
+      assert swipeRefreshLayout != null;
       swipeRefreshLayout.setRefreshing(true);
+
+      assert layoutManager != null;
       layoutManager.setVerticalScrollEnabled(false);
     }
   };
@@ -134,28 +134,19 @@ public class LockInfoDialog extends RetainedDialogFragment
       adapterPresenter = activityEntryAdapterPresenter;
     }
 
-    if (appEntry == null) {
-      throw new NullPointerException("AppEntry is NULL");
-    }
-
-    if (adapterPresenter == null || dbPresenter == null) {
-      throw new NullPointerException("Required presenter is NULL");
-    }
-
+    assert appEntry != null;
+    assert adapterPresenter != null;
+    assert dbPresenter != null;
     adapter = new LockInfoAdapter(appEntry, adapterPresenter, dbPresenter);
   }
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     presenter.onCreateView(this);
 
-    if (adapter == null) {
-      throw new NullPointerException("Adapter is NULL");
-    }
+    assert adapter != null;
     adapter.onCreate();
     return super.onCreateView(inflater, container, savedInstanceState);
   }
@@ -205,33 +196,34 @@ public class LockInfoDialog extends RetainedDialogFragment
   }
 
   private void initializeForEntry() {
-    if (appEntry == null) {
-      throw new NullPointerException("AppEntry is NULL");
-    }
+    assert appEntry != null;
 
-    if (close == null || name == null || icon == null || packageName == null || system == null) {
-      throw new NullPointerException("A UI component is NULL");
-    }
+    assert close != null;
     close.setOnClickListener(view -> dismiss());
+
+    assert name != null;
     name.setText(appEntry.name());
+
+    assert icon != null;
     icon.setImageBitmap(appEntry.icon());
+
+    assert packageName != null;
     packageName.setText(appEntry.packageName());
+
+    assert system != null;
     system.setText((appEntry.system() ? "YES" : "NO"));
 
     // Recycler setup
     layoutManager = new LockListLayoutManager(getActivity());
     final RecyclerView.ItemDecoration dividerDecoration =
         new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST);
-    if (recyclerView == null) {
-      throw new NullPointerException("RecyclerView is NULL");
-    }
+
+    assert recyclerView != null;
     recyclerView.setLayoutManager(layoutManager);
     recyclerView.addItemDecoration(dividerDecoration);
     recyclerView.setAdapter(adapter);
 
-    if (swipeRefreshLayout == null) {
-      throw new NullPointerException("SwipeRefreshLayout is NULL");
-    }
+    assert swipeRefreshLayout != null;
     swipeRefreshLayout.setColorSchemeResources(R.color.blue500, R.color.amber700, R.color.blue700,
         R.color.amber500);
     swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -241,9 +233,7 @@ public class LockInfoDialog extends RetainedDialogFragment
   }
 
   @Override public void refreshList() {
-    if (adapter == null) {
-      throw new NullPointerException("Adapter is NULL");
-    }
+    assert adapter != null;
     final int oldSize = adapter.getItemCount() - 1;
     for (int i = oldSize; i >= 0; --i) {
       adapter.removeItem();
@@ -253,13 +243,9 @@ public class LockInfoDialog extends RetainedDialogFragment
   }
 
   private void repopulateList() {
-    if (appEntry == null) {
-      throw new NullPointerException("AppEntry is NULL");
-    }
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
     Timber.d("Repopulate list");
+    assert presenter != null;
+    assert appEntry != null;
     presenter.populateList(appEntry.packageName(), appEntry.activities());
   }
 
@@ -267,13 +253,12 @@ public class LockInfoDialog extends RetainedDialogFragment
     Timber.d("Add entry: %s", entry);
 
     // In case the configuration changes, we do the animation again
-    if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
+    assert swipeRefreshLayout != null;
+    if (!swipeRefreshLayout.isRefreshing()) {
       swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
     }
 
-    if (adapter == null) {
-      throw new NullPointerException("Adapter is NULL");
-    }
+    assert adapter != null;
     adapter.addItem(entry);
   }
 
@@ -294,9 +279,7 @@ public class LockInfoDialog extends RetainedDialogFragment
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
-    if (presenterDataHolder == null) {
-      throw new NullPointerException("Presenter dataHolder is NULL");
-    }
+    assert presenterDataHolder != null;
     if (getActivity().isChangingConfigurations()) {
       presenterDataHolder.put(KEY_PRESENTER, presenter);
       presenterDataHolder.put(KEY_ADAPTER_PRESENTER, adapterPresenter);

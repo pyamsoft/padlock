@@ -31,7 +31,6 @@ import com.pyamsoft.padlock.app.list.BaseRecyclerAdapter;
 import com.pyamsoft.padlock.app.list.LockListItem;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
-import java.lang.ref.WeakReference;
 import timber.log.Timber;
 
 public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.ViewHolder>
@@ -39,11 +38,11 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
 
   @NonNull private final AdapterPresenter<ActivityEntry> adapterPresenter;
   @NonNull private final DBPresenter dbPresenter;
-  @NonNull private final WeakReference<AppEntry> weakEntry;
+  @NonNull private final AppEntry appEntry;
 
   public LockInfoAdapter(@NonNull AppEntry appEntry,
       @NonNull AdapterPresenter<ActivityEntry> adapterPresenter, @NonNull DBPresenter dbPresenter) {
-    this.weakEntry = new WeakReference<>(appEntry);
+    this.appEntry = appEntry;
     this.adapterPresenter = adapterPresenter;
     this.dbPresenter = dbPresenter;
   }
@@ -56,7 +55,6 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
 
   @Override public void onDestroy() {
     super.onDestroy();
-    weakEntry.clear();
 
     adapterPresenter.onDestroyView();
     dbPresenter.onDestroyView();
@@ -74,11 +72,6 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
 
     removeViewActionListeners(holder);
     holder.checkBox.setChecked(entry.locked());
-
-    final AppEntry appEntry = weakEntry.get();
-    if (appEntry == null) {
-      throw new NullPointerException("Cannot bind with NULL app entry");
-    }
 
     String activityName;
     final String entryName = entry.name();
