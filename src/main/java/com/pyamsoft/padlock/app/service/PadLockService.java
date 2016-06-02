@@ -62,11 +62,8 @@ public final class PadLockService extends AccessibilityService
     final CharSequence eventPackage = event.getPackageName();
     final CharSequence eventClass = event.getClassName();
 
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
-
     if (eventPackage != null && eventClass != null) {
+      assert presenter != null;
       presenter.processAccessibilityEvent(eventPackage.toString(), eventClass.toString());
     } else {
       Timber.e("Missing needed data");
@@ -121,24 +118,18 @@ public final class PadLockService extends AccessibilityService
         .build()
         .inject(this);
 
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     presenter.onCreateView(this);
     setInstance(this);
   }
 
   public static void passLockScreen() {
     final PadLockService currentInstance = getInstance();
-    if (currentInstance == null) {
-      throw new NullPointerException("No current instance available");
-    }
 
+    assert currentInstance != null;
     final LockServicePresenter lockServicePresenter = currentInstance.presenter;
-    if (lockServicePresenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
 
+    assert lockServicePresenter != null;
     lockServicePresenter.setLockScreenPassed();
   }
 }

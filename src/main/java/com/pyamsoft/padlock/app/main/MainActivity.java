@@ -76,9 +76,7 @@ public class MainActivity extends DonationActivityBase
         .build()
         .inject(this);
 
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     presenter.onCreateView(this);
 
     setAppBarState();
@@ -117,23 +115,21 @@ public class MainActivity extends DonationActivityBase
   @Override protected void onDestroy() {
     super.onDestroy();
 
-    for (int i = 0; i < VECTOR_TASK_SIZE; ++i) {
-      cancelAsyncVectorTask(i);
-    }
-
-    if (presenter != null && !isChangingConfigurations()) {
+    if (!isChangingConfigurations()) {
+      assert presenter != null;
       presenter.onDestroyView();
     }
 
-    if (unbinder != null) {
-      unbinder.unbind();
+    assert unbinder != null;
+    unbinder.unbind();
+
+    for (int i = 0; i < VECTOR_TASK_SIZE; ++i) {
+      cancelAsyncVectorTask(i);
     }
   }
 
   private void setAppBarState() {
-    if (toolbar == null) {
-      throw new NullPointerException("Toolbar is NULL");
-    }
+    assert toolbar != null;
     setSupportActionBar(toolbar);
     toolbar.setTitle(getString(R.string.app_name));
     final FragmentManager fragmentManager = getSupportFragmentManager();
@@ -178,14 +174,10 @@ public class MainActivity extends DonationActivityBase
 
   @Override protected void onResume() {
     super.onResume();
-    if (toolbar == null) {
-      throw new NullPointerException("Toolbar is NULL");
-    }
+    assert toolbar != null;
     animateActionBarToolbar(toolbar);
 
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     presenter.onResume();
   }
 
@@ -196,22 +188,17 @@ public class MainActivity extends DonationActivityBase
   @Override protected void onPause() {
     super.onPause();
 
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     presenter.onPause();
   }
 
   @Override protected void onPostResume() {
     super.onPostResume();
 
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
-
     RatingDialog.showRatingDialog(this, this);
     if (PadLockService.isRunning()) {
       showLockList();
+      assert presenter != null;
       presenter.showTermsDialog();
     } else {
       showAccessibilityPrompt();
