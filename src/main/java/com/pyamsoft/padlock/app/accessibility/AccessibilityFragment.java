@@ -43,9 +43,7 @@ public class AccessibilityFragment extends Fragment {
   }
 
   private void setupAccessibilityButton() {
-    if (serviceButton == null) {
-      throw new NullPointerException("Service Button is NULL");
-    }
+    assert serviceButton != null;
     serviceButton.setOnClickListener(view -> startActivity(accessibilityServiceIntent));
   }
 }
