@@ -43,7 +43,7 @@ final class PadLockDB {
     return with(context, Schedulers.io());
   }
 
-  @CheckResult @SuppressWarnings("ConstantConditions") @NonNull
+  @SuppressWarnings("ConstantConditions") @CheckResult @NonNull
   static BriteDatabase with(final @NonNull Context context, final @NonNull Scheduler dbScheduler) {
     if (instance == null) {
       synchronized (lock) {
@@ -56,8 +56,8 @@ final class PadLockDB {
     // With double checking, this singleton should be guaranteed non-null
     if (instance == null) {
       throw new NullPointerException("PadLockDB instance is NULL");
+    } else {
+      return instance.briteDatabase;
     }
-
-    return instance.briteDatabase;
   }
 }

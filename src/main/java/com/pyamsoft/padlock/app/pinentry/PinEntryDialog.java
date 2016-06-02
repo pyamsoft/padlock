@@ -72,9 +72,7 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
         .build()
         .inject(this);
 
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.setTextColor(android.R.color.black);
 
     setCancelable(true);
@@ -89,14 +87,10 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
         LayoutInflater.from(themedContext).inflate(R.layout.layout_pin_entry, null, false);
     unbinder = ButterKnife.bind(this, rootView);
 
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     presenter.onCreateView(this);
 
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
     if (savedInstanceState != null) {
@@ -109,29 +103,23 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.onSaveInstanceState(outState);
     super.onSaveInstanceState(outState);
   }
 
   @Override public void onStart() {
     super.onStart();
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert lockViewDelegate != null;
+    assert presenter != null;
     lockViewDelegate.onStart(presenter);
   }
 
   private void setupToolbar() {
-    if (toolbar == null || close == null) {
-      throw new NullPointerException("Required UI component is NULL");
-    }
+    assert toolbar != null;
     toolbar.setTitle("PIN");
+
+    assert close != null;
     close.setOnClickListener(view -> {
       Timber.d("onClick Arrow");
       dismiss();
@@ -153,30 +141,22 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
   }
 
   @NonNull @Override public String getCurrentAttempt() {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     return lockViewDelegate.getCurrentAttempt();
   }
 
   @Override @NonNull public String getPackageName() {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     return lockViewDelegate.getPackageName();
   }
 
   @Override @NonNull public String getActivityName() {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     return lockViewDelegate.getActivityName();
   }
 
   @Override public void setImageSuccess(@NonNull Drawable drawable) {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.setImageSuccess(drawable);
   }
 
@@ -186,25 +166,19 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
   }
 
   @Override public void onSubmitSuccess() {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     dismiss();
   }
 
   @Override public void onSubmitFailure() {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     dismiss();
   }
 
   @Override public void onSubmitError() {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     dismiss();
   }

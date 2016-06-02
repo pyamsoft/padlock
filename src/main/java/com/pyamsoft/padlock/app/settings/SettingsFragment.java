@@ -30,26 +30,20 @@ public final class SettingsFragment extends PreferenceFragmentCompat
         .build()
         .inject(this);
 
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     presenter.onCreateView(this);
     return super.onCreateView(inflater, container, savedInstanceState);
   }
 
   @Override public void onResume() {
     super.onResume();
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     presenter.onResume();
   }
 
   @Override public void onPause() {
     super.onPause();
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     presenter.onPause();
   }
 
@@ -66,9 +60,7 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));
     clearDb.setOnPreferenceClickListener(preference -> {
       Timber.d("Clear DB onClick");
-      if (presenter == null) {
-        throw new NullPointerException("Presenter is NULL");
-      }
+      assert presenter != null;
       presenter.confirmDatabaseClear();
       return true;
     });
@@ -76,9 +68,7 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     final Preference resetAll = findPreference(getString(R.string.clear_all_key));
     resetAll.setOnPreferenceClickListener(preference -> {
       Timber.d("Reset settings onClick");
-      if (presenter == null) {
-        throw new NullPointerException("Presenter is NULL");
-      }
+      assert presenter != null;
       presenter.confirmSettingsClear();
       return true;
     });

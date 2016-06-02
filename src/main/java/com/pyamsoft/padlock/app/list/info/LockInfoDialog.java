@@ -170,27 +170,24 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Override public void onDestroyView() {
     super.onDestroyView();
 
-    if (recyclerView != null) {
-      recyclerView.setOnClickListener(null);
-      recyclerView.setLayoutManager(null);
-      recyclerView.setAdapter(null);
-    }
+    assert recyclerView != null;
+    recyclerView.setOnClickListener(null);
+    recyclerView.setLayoutManager(null);
+    recyclerView.setAdapter(null);
 
-    if (adapter != null) {
-      adapter.onDestroy();
-    }
+    assert adapter != null;
+    adapter.onDestroy();
 
-    if (presenter != null && !getActivity().isChangingConfigurations()) {
+    if (!getActivity().isChangingConfigurations()) {
+      assert presenter != null;
       presenter.onDestroyView();
     }
 
-    if (swipeRefreshLayout != null) {
-      swipeRefreshLayout.setOnRefreshListener(null);
-    }
+    assert swipeRefreshLayout != null;
+    swipeRefreshLayout.setOnRefreshListener(null);
 
-    if (unbinder != null) {
-      unbinder.unbind();
-    }
+    assert unbinder != null;
+    unbinder.unbind();
 
     handler.removeCallbacksAndMessages(null);
   }

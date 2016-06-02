@@ -103,19 +103,13 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
         .build()
         .inject(this);
 
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     presenter.onCreateView(this);
 
-    if (rootView == null) {
-      throw new NullPointerException("rootView is NULL");
-    }
-
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.setTextColor(android.R.color.white);
+
+    assert rootView != null;
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
     ViewCompat.setElevation(appBarLayout, 0);
@@ -126,14 +120,11 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @Override protected void onStart() {
     super.onStart();
     Timber.d("onStart");
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+
+    assert presenter != null;
     presenter.loadDisplayNameFromPackage();
 
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.onStart(presenter);
 
     supportInvalidateOptionsMenu();
@@ -150,17 +141,15 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    if (presenter != null) {
-      presenter.onDestroyView();
-    }
 
-    if (lockViewDelegate != null) {
-      lockViewDelegate.onDestroyView();
-    }
+    assert presenter != null;
+    presenter.onDestroyView();
 
-    if (unbinder != null) {
-      unbinder.unbind();
-    }
+    assert lockViewDelegate != null;
+    lockViewDelegate.onDestroyView();
+
+    assert unbinder != null;
+    unbinder.unbind();
 
     failCount = 0;
   }
@@ -172,23 +161,17 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @NonNull @Override public String getPackageName() {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     return lockViewDelegate.getPackageName();
   }
 
   @NonNull @Override public String getActivityName() {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     return lockViewDelegate.getActivityName();
   }
 
   @Override public void setImageSuccess(@NonNull Drawable drawable) {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.setImageSuccess(drawable);
   }
 
@@ -197,16 +180,12 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @NonNull @Override public String getCurrentAttempt() {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     return lockViewDelegate.getCurrentAttempt();
   }
 
   private void showSnackbarWithText(String text) {
-    if (rootView == null) {
-      throw new NullPointerException("rootView is NULL");
-    }
+    assert rootView != null;
     final Snackbar snackbar = Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT);
     final int defaultSnackColor = ContextCompat.getColor(this, R.color.snackbar);
     snackbar.getView().setBackgroundColor(defaultSnackColor);
@@ -232,9 +211,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   @Override public void onSubmitSuccess() {
     Timber.d("Unlocked!");
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     PadLockService.passLockScreen();
     finish();
@@ -242,9 +219,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   @Override public void onSubmitFailure() {
     Timber.e("Failed to unlock");
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     showSnackbarWithText("Error: Invalid PIN");
 
@@ -252,32 +227,27 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
     if (failCount > 2) {
-      if (presenter == null) {
-        throw new NullPointerException("Presenter is NULL");
-      }
+      assert presenter != null;
       presenter.lockEntry();
     }
   }
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.onRestoreInstanceState(savedInstanceState);
     super.onRestoreInstanceState(savedInstanceState);
   }
 
   @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
-    if (ignoreDataHolder == null || excludeDataHolder == null) {
-      throw new NullPointerException("Data Holder is NULL");
-    }
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
     if (isChangingConfigurations()) {
+      assert lockViewDelegate != null;
       lockViewDelegate.onSaveInstanceState(outState);
+
+      assert ignoreDataHolder != null;
       ignoreDataHolder.put(0, getIgnorePeriodTime());
+
+      assert excludeDataHolder != null;
       excludeDataHolder.put(0, shouldExcludeEntry());
     } else {
       DataHolderFragment.remove(this, Long.class);
@@ -300,23 +270,17 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
-    if (ignoreDataHolder == null || excludeDataHolder == null) {
-      throw new NullPointerException("Data Holder is NULL");
-    }
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
-
     // Set the default checked value
+    assert ignoreDataHolder != null;
     final Long ignorePeriod = ignoreDataHolder.pop(0);
+
+    assert presenter != null;
     presenter.setIgnorePeriodFromPreferences(ignorePeriod);
 
-    if (menuExclude == null) {
-      throw new NullPointerException("Menu Item is NULL");
-    }
-
+    assert excludeDataHolder != null;
     final Boolean exclude = excludeDataHolder.pop(0);
     if (exclude != null) {
+      assert menuExclude != null;
       menuExclude.setChecked(exclude);
     }
 
@@ -324,9 +288,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @Override public void onSubmitError() {
-    if (lockViewDelegate == null) {
-      throw new NullPointerException("LockViewDelegate is NULL");
-    }
+    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
   }
@@ -405,9 +367,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @CheckResult @Override public long getIgnorePeriodTime() {
-    if (presenter == null) {
-      throw new NullPointerException("Presenter is NULL");
-    }
+    assert presenter != null;
     if (menuIgnoreFive != null && menuIgnoreTen != null && menuIgnoreThirty != null) {
       if (menuIgnoreFive.isChecked()) {
         return presenter.getIgnoreTimeFive();
@@ -421,9 +381,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @CheckResult @Override public boolean shouldExcludeEntry() {
-    if (menuExclude == null) {
-      throw new NullPointerException("Menu Item is NULL");
-    }
+    assert menuExclude != null;
     return menuExclude.isChecked();
   }
 }
