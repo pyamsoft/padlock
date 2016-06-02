@@ -38,10 +38,8 @@ public final class PadLock extends ApplicationBase {
     if (application instanceof PadLock) {
       final PadLock padLock = (PadLock) application;
       final PadLockComponent component = padLock.padLockComponent;
-      if (component == null) {
-        throw new NullPointerException("PadLockComponent is NULL");
-      }
 
+      assert component != null;
       return component;
     } else {
       throw new ClassCastException("Cannot cast Application to PadLock");
