@@ -20,7 +20,6 @@
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/orangeA200</item>
-    <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
   </style>
 
   <style name="Base.Theme.PadLock.Light.Menu" parent="@style/ThemeOverlay.AppCompat.Light">
@@ -30,7 +29,9 @@
   </style>
 
   <!-- Normal App Theme -->
-  <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light"/>
+  <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light">
+    <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+  </style>
 
   <!-- Lock Screen -->
   <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
