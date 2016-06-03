@@ -33,20 +33,19 @@ import com.pyamsoft.padlock.app.db.DBProgressDialog;
 import com.pyamsoft.padlock.app.list.info.LockInfoDialog;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.util.AppUtil;
-import java.lang.ref.WeakReference;
 import timber.log.Timber;
 
 public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.ViewHolder>
     implements LockListItem<AppEntry>, DBPresenter.DBView, AdapterPresenter.AdapterView {
 
   @NonNull private final AdapterPresenter<AppEntry> adapterPresenter;
-  @NonNull private final WeakReference<Fragment> weakFragment;
+  @NonNull private final Fragment fragment;
   @NonNull private final DBPresenter dbPresenter;
 
   public LockListAdapter(@NonNull LockListFragment fragment,
       @NonNull AdapterPresenter<AppEntry> adapterPresenter, @NonNull DBPresenter dbPresenter) {
+    this.fragment = fragment;
     this.dbPresenter = dbPresenter;
-    this.weakFragment = new WeakReference<>(fragment);
     this.adapterPresenter = adapterPresenter;
   }
 
@@ -58,8 +57,6 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
   @Override public void onDestroy() {
     super.onDestroy();
-    weakFragment.clear();
-
     adapterPresenter.onDestroyView();
     dbPresenter.onDestroyView();
   }
@@ -111,10 +108,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
   private void accessPackage(final @NonNull AppEntry entry, final int position,
       final boolean checked) {
     // TODO app specific codes
-    final Fragment fragment = weakFragment.get();
-    if (fragment != null) {
-      DBProgressDialog.add(fragment.getFragmentManager(), entry.name());
-    }
+    DBProgressDialog.add(fragment.getFragmentManager(), entry.name());
 
     dbPresenter.attemptDBModification(position, checked, entry.packageName(), null, entry.system());
   }
@@ -136,12 +130,8 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
   }
 
   private void openInfo(@NonNull AppEntry entry) {
-
-    final Fragment fragment = weakFragment.get();
-    if (fragment != null) {
-      AppUtil.guaranteeSingleDialogFragment(fragment.getFragmentManager(),
-          LockInfoDialog.newInstance(entry), "lock_info");
-    }
+    AppUtil.guaranteeSingleDialogFragment(fragment.getFragmentManager(),
+        LockInfoDialog.newInstance(entry), "lock_info");
   }
 
   @Override public int getItemCount() {
@@ -162,30 +152,19 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     Timber.d("onDBCreateEvent");
     adapterPresenter.setLocked(position, true);
     notifyItemChanged(position);
-
-    final Fragment fragment = weakFragment.get();
-    if (fragment != null) {
-      DBProgressDialog.remove(fragment.getFragmentManager());
-    }
+    DBProgressDialog.remove(fragment.getFragmentManager());
   }
 
   @Override public void onDBDeleteEvent(int position) {
     Timber.d("onDBDeleteEvent");
     adapterPresenter.setLocked(position, false);
     notifyItemChanged(position);
-
-    final Fragment fragment = weakFragment.get();
-    if (fragment != null) {
-      DBProgressDialog.remove(fragment.getFragmentManager());
-    }
+    DBProgressDialog.remove(fragment.getFragmentManager());
   }
 
   @Override public void onDBError() {
     Timber.e("onDBError");
-    final Fragment fragment = weakFragment.get();
-    if (fragment != null) {
-      DBProgressDialog.remove(fragment.getFragmentManager());
-    }
+    DBProgressDialog.remove(fragment.getFragmentManager());
   }
 
   static final class ViewHolder extends RecyclerView.ViewHolder {
