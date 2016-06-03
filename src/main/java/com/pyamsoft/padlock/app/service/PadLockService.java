@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.pyamsoft.padlock.app.service;
 
 import android.accessibilityservice.AccessibilityService;
@@ -51,6 +52,16 @@ public final class PadLockService extends AccessibilityService
 
     final LockServicePresenter lockServicePresenter = currentInstance.presenter;
     return lockServicePresenter != null && lockServicePresenter.isRunning();
+  }
+
+  public static void passLockScreen() {
+    final PadLockService currentInstance = getInstance();
+
+    assert currentInstance != null;
+    final LockServicePresenter lockServicePresenter = currentInstance.presenter;
+
+    assert lockServicePresenter != null;
+    lockServicePresenter.setLockScreenPassed();
   }
 
   @Override public void onAccessibilityEvent(final @Nullable AccessibilityEvent event) {
@@ -121,15 +132,5 @@ public final class PadLockService extends AccessibilityService
     assert presenter != null;
     presenter.onCreateView(this);
     setInstance(this);
-  }
-
-  public static void passLockScreen() {
-    final PadLockService currentInstance = getInstance();
-
-    assert currentInstance != null;
-    final LockServicePresenter lockServicePresenter = currentInstance.presenter;
-
-    assert lockServicePresenter != null;
-    lockServicePresenter.setLockScreenPassed();
   }
 }
