@@ -52,12 +52,14 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
   @Override public void onCreate() {
     super.onCreate();
+    Timber.d("onCreate");
     adapterPresenter.onCreateView(this);
     dbPresenter.onCreateView(this);
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
+    Timber.d("onDestroy");
     weakFragment.clear();
 
     adapterPresenter.onDestroyView();
@@ -136,7 +138,6 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
   }
 
   private void openInfo(@NonNull AppEntry entry) {
-
     final Fragment fragment = weakFragment.get();
     if (fragment != null) {
       AppUtil.guaranteeSingleDialogFragment(fragment.getFragmentManager(),
