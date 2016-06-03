@@ -114,35 +114,6 @@ public final class LockListFragment extends Fragment
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    Timber.d("onCreateView");
-
-    presenterDataHolder = DataHolderFragment.getInstance(getActivity(), "lock_list_presenters");
-
-    final LockListPresenter lockListPresenter =
-        (LockListPresenter) presenterDataHolder.pop(KEY_PRESENTER);
-    @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry> entryAdapterPresenter =
-        (AdapterPresenter<AppEntry>) presenterDataHolder.pop(KEY_ADAPTER_PRESENTER);
-    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
-    if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
-      Timber.d("Create new presenters");
-      firstRefresh = true;
-      DaggerLockListComponent.builder()
-          .padLockComponent(PadLock.padLockComponent(this))
-          .build()
-          .inject(this);
-    } else {
-      Timber.d("Load cached presenters");
-      firstRefresh = false;
-      presenter = lockListPresenter;
-      adapterPresenter = entryAdapterPresenter;
-      dbPresenter = lockDBPresenter;
-    }
-
-    assert adapterPresenter != null;
-    assert dbPresenter != null;
-    adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
-
-
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
     assert presenter != null;
@@ -210,6 +181,33 @@ public final class LockListFragment extends Fragment
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     Timber.d("onCreate");
     super.onCreate(savedInstanceState);
+
+    presenterDataHolder = DataHolderFragment.getInstance(getActivity(), "lock_list_presenters");
+
+    final LockListPresenter lockListPresenter =
+        (LockListPresenter) presenterDataHolder.pop(KEY_PRESENTER);
+    @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry> entryAdapterPresenter =
+        (AdapterPresenter<AppEntry>) presenterDataHolder.pop(KEY_ADAPTER_PRESENTER);
+    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
+    if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
+      Timber.d("Create new presenters");
+      firstRefresh = true;
+      DaggerLockListComponent.builder()
+          .padLockComponent(PadLock.padLockComponent(this))
+          .build()
+          .inject(this);
+    } else {
+      Timber.d("Load cached presenters");
+      firstRefresh = false;
+      presenter = lockListPresenter;
+      adapterPresenter = entryAdapterPresenter;
+      dbPresenter = lockDBPresenter;
+    }
+
+    assert adapterPresenter != null;
+    assert dbPresenter != null;
+    adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
+
     setHasOptionsMenu(true);
   }
 
