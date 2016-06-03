@@ -222,15 +222,10 @@ public class MainActivity extends DonationActivityBase
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
     final String line1 =
-        "FEATURE: Settings is separated into its own screen to provide more vertical screen real estate for the lock list";
-    final String line2 = "FEATURE: APK size shrink";
-    final String line3 = "FEATURE: Better handling of prompting for AccessibilityService";
-    final String line4 =
-        "FEATURE: Better handling of situations where UI components are unavailable or the Activity is being re-created";
+        "BUGFIX: Fixed issue where the Lock Info Dialog would not display after navigating to the Settings screen";
 
     // Turn it into a spannable
-    final Spannable spannable =
-        StringUtil.createBuilder(title, "\n\n", line1, "\n\n", line2, "\n\n", line3, "\n\n", line4);
+    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1);
 
     int start = 0;
     int end = title.length();
@@ -248,7 +243,7 @@ public class MainActivity extends DonationActivityBase
     StringUtil.colorSpan(spannable, start, end, largeColor);
 
     start += end + 2;
-    end += 2 + line1.length() + 2 + line2.length() + 2 + line3.length() + 2 + line4.length();
+    end += 2 + line1.length();
 
     StringUtil.sizeSpan(spannable, start, end, smallSize);
     StringUtil.colorSpan(spannable, start, end, smallColor);
