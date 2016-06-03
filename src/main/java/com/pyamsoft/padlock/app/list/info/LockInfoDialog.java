@@ -22,8 +22,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,7 +37,6 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
-import com.pyamsoft.padlock.app.list.LockListLayoutManager;
 import com.pyamsoft.padlock.dagger.list.info.DaggerLockInfoComponent;
 import com.pyamsoft.padlock.dagger.list.info.LockInfoModule;
 import com.pyamsoft.padlock.model.ActivityEntry;
@@ -62,7 +61,6 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Nullable @BindView(R.id.lock_info_icon) ImageView icon;
   @Nullable @BindView(R.id.lock_info_package_name) TextView packageName;
   @Nullable @BindView(R.id.lock_info_system) TextView system;
-  @Nullable @BindView(R.id.lock_info_swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
   @Nullable @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
   @Nullable @Inject LockInfoPresenter presenter;
   @Nullable @Inject DBPresenter dbPresenter;
@@ -70,25 +68,6 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Nullable private DataHolderFragment<Presenter> presenterDataHolder;
   @Nullable private LockInfoAdapter adapter;
   @Nullable private AppEntry appEntry;
-  @Nullable private LockListLayoutManager layoutManager;
-  @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
-    @Override public void run() {
-      assert swipeRefreshLayout != null;
-      swipeRefreshLayout.setRefreshing(false);
-
-      assert layoutManager != null;
-      layoutManager.setVerticalScrollEnabled(true);
-    }
-  };
-  @NonNull private final Runnable startRefreshRunnable = new Runnable() {
-    @Override public void run() {
-      assert swipeRefreshLayout != null;
-      swipeRefreshLayout.setRefreshing(true);
-
-      assert layoutManager != null;
-      layoutManager.setVerticalScrollEnabled(false);
-    }
-  };
   @Nullable private Unbinder unbinder;
   private boolean firstRefresh;
 
@@ -183,9 +162,6 @@ public class LockInfoDialog extends RetainedDialogFragment
       presenter.onDestroyView();
     }
 
-    assert swipeRefreshLayout != null;
-    swipeRefreshLayout.setOnRefreshListener(null);
-
     assert unbinder != null;
     unbinder.unbind();
 
@@ -211,7 +187,7 @@ public class LockInfoDialog extends RetainedDialogFragment
     system.setText((appEntry.system() ? "YES" : "NO"));
 
     // Recycler setup
-    layoutManager = new LockListLayoutManager(getActivity());
+    final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
     final RecyclerView.ItemDecoration dividerDecoration =
         new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST);
 
@@ -219,14 +195,6 @@ public class LockInfoDialog extends RetainedDialogFragment
     recyclerView.setLayoutManager(layoutManager);
     recyclerView.addItemDecoration(dividerDecoration);
     recyclerView.setAdapter(adapter);
-
-    assert swipeRefreshLayout != null;
-    swipeRefreshLayout.setColorSchemeResources(R.color.blue500, R.color.amber700, R.color.blue700,
-        R.color.amber500);
-    swipeRefreshLayout.setOnRefreshListener(() -> {
-      Timber.d("onRefresh");
-      refreshList();
-    });
   }
 
   @Override public void refreshList() {
@@ -249,19 +217,12 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
     Timber.d("Add entry: %s", entry);
 
-    // In case the configuration changes, we do the animation again
-    assert swipeRefreshLayout != null;
-    if (!swipeRefreshLayout.isRefreshing()) {
-      swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
-    }
-
     assert adapter != null;
     adapter.addItem(entry);
   }
 
   @Override public void onListPopulated() {
     Timber.d("Refresh finished");
-    handler.post(stopRefreshRunnable);
   }
 
   @Override public void onListPopulateError() {
@@ -271,7 +232,6 @@ public class LockInfoDialog extends RetainedDialogFragment
 
   @Override public void onListCleared() {
     Timber.d("onListCleared");
-    handler.post(startRefreshRunnable);
   }
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
