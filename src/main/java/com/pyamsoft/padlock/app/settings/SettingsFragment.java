@@ -38,14 +38,17 @@ public final class SettingsFragment extends PreferenceFragmentCompat
 
   @Nullable @Inject SettingsPresenter presenter;
 
-  @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     DaggerSettingsComponent.builder()
         .padLockComponent(PadLock.padLockComponent(this))
         .build()
         .inject(this);
+  }
 
+  @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
     assert presenter != null;
     presenter.onCreateView(this);
     return super.onCreateView(inflater, container, savedInstanceState);
@@ -64,10 +67,10 @@ public final class SettingsFragment extends PreferenceFragmentCompat
   }
 
   @Override public void onDestroyView() {
-    if (presenter != null) {
-      presenter.onDestroyView();
-    }
     super.onDestroyView();
+
+    assert presenter != null;
+    presenter.onDestroyView();
   }
 
   @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {
