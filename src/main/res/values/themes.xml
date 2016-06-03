@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
   <style name="Base.Theme.PadLock.Light" parent="@style/Theme.AppCompat.Light.NoActionBar">
     <item name="colorPrimary">@color/blue500</item>
@@ -23,60 +23,38 @@
     <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
   </style>
 
-  <style name="Base.Theme.PadLock.Light.Crash" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
+  <style name="Base.Theme.PadLock.Light.Menu" parent="@style/ThemeOverlay.AppCompat.Light">
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/orangeA200</item>
-  </style>
-
-  <style name="Base.Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
-    <item name="colorPrimary">@color/blue500</item>
-    <item name="colorPrimaryDark">@color/blue700</item>
-    <item name="colorAccent">@color/orangeA200</item>
-    <item name="android:windowBackground">?attr/colorPrimary</item>
-    <item name="android:buttonBarButtonStyle">@style/Style.PadLock.Lock.KeyPad</item>
-    <item name="android:textViewStyle">@style/Style.PadLock.Lock.Header</item>
-  </style>
-
-  <style name="Base.Theme.PadLock.Light.PINEntry"
-      parent="@style/Theme.AppCompat.Light.Dialog.Alert">
-    <item name="colorPrimary">@color/blue500</item>
-    <item name="colorPrimaryDark">@color/blue700</item>
-    <item name="colorAccent">@color/orangeA200</item>
-    <item name="android:windowBackground">@android:color/white</item>
-    <item name="android:buttonBarButtonStyle">@style/Style.PadLock.PINEntry.KeyPad</item>
-    <item name="android:textViewStyle">@style/Style.PadLock.PINEntry.Header</item>
-  </style>
-
-  <style name="Base.Theme.PadLock.Light.Menu" parent="@style/ThemeOverlay.AppCompat.Light" tools:keep="@style/Base_Theme_PadLock_Light_Menu">
-    <item name="colorPrimary">@color/blue500</item>
-    <item name="colorPrimaryDark">@color/blue700</item>
-    <item name="colorAccent">@color/orangeA200</item>
-    <item name="android:textViewStyle">@android:style/TextAppearance.Medium</item>
-    <item name="android:windowBackground">@android:color/white</item>
   </style>
 
   <!-- Normal App Theme -->
   <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light"/>
 
   <!-- Lock Screen -->
-  <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light.Lock">
+  <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
+    <item name="android:windowBackground">?attr/colorPrimary</item>
+    <item name="android:buttonBarButtonStyle">@style/Style.PadLock.Lock.KeyPad</item>
+    <item name="android:textViewStyle">@style/Style.PadLock.Lock.Header</item>
   </style>
 
   <!-- Lock Screen Menu-->
-  <style name="Theme.PadLock.Light.Menu" parent="@style/Base.Theme.PadLock.Light.Menu" tools:keep="@style/Theme_PadLock_Light_Menu">
+  <style name="Theme.PadLock.Light.Menu" parent="@style/Base.Theme.PadLock.Light.Menu">
+    <item name="android:textViewStyle">@android:style/TextAppearance.Medium</item>
+    <item name="android:windowBackground">@android:color/white</item>
   </style>
 
   <!-- PIN Entry Dialog -->
-  <style name="Theme.PadLock.Light.PINEntry" parent="@style/Base.Theme.PadLock.Light.PINEntry">
+  <style name="Theme.PadLock.Light.PINEntry" parent="@style/Base.Theme.PadLock.Light">
+    <item name="android:windowBackground">@android:color/white</item>
+    <item name="android:buttonBarButtonStyle">@style/Style.PadLock.PINEntry.KeyPad</item>
+    <item name="android:textViewStyle">@style/Style.PadLock.PINEntry.Header</item>
   </style>
 
   <!-- Splash screen-->
   <style name="Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock.Light">
     <item name="android:windowBackground">@drawable/splash_screen</item>
   </style>
-
-  <!-- Crash Dialog theme-->
-  <style name="Theme.PadLock.Light.Crash" parent="@style/Base.Theme.PadLock.Light.Crash"/>
 
 </resources>
