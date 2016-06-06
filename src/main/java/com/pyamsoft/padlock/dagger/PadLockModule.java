@@ -19,6 +19,8 @@ package com.pyamsoft.padlock.dagger;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.base.PackageManagerWrapperImpl;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -50,5 +52,10 @@ import rx.schedulers.Schedulers;
 
   @Singleton @Provides @Named("main") Scheduler provideMainThreadScheduler() {
     return AndroidSchedulers.mainThread();
+  }
+
+  @Singleton @Provides PackageManagerWrapper providePackageManagerWrapper(
+      final PackageManagerWrapperImpl packageManagerWrapper) {
+    return packageManagerWrapper;
   }
 }

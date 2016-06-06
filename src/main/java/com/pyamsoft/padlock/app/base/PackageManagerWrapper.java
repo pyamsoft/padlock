@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.list;
+package com.pyamsoft.padlock.app.base;
 
+import android.graphics.drawable.Drawable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
-import com.pyamsoft.padlock.model.AppEntry;
-import javax.inject.Inject;
+import java.util.List;
 
-final class AppEntryAdapterInteractorImpl extends AdapterInteractorImpl<AppEntry> {
+public interface PackageManagerWrapper {
 
-  @Inject public AppEntryAdapterInteractorImpl(final @NonNull PackageManagerWrapper packageManagerWrapper) {
-    super(packageManagerWrapper);
-  }
+  @CheckResult @NonNull Drawable loadDrawableForPackageOrDefault(@NonNull String packageName);
+
+  @CheckResult @NonNull List<String> getActivityListForPackage(@NonNull String packageName);
 }

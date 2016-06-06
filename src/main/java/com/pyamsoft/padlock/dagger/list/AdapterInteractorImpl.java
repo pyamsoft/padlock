@@ -16,9 +16,9 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +28,8 @@ abstract class AdapterInteractorImpl<I> extends AppIconLoaderInteractorImpl
 
   @NonNull private final List<I> entries;
 
-  protected AdapterInteractorImpl(final @NonNull Context context) {
-    super(context);
+  protected AdapterInteractorImpl(final @NonNull PackageManagerWrapper packageManagerWrapper) {
+    super(packageManagerWrapper);
     this.entries = new ArrayList<>();
   }
 

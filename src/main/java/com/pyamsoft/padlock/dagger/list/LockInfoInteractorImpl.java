@@ -17,26 +17,26 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
+import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
-import timber.log.Timber;
 
-final class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl implements LockInfoInteractor {
+final class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl
+    implements LockInfoInteractor {
 
   @NonNull private final Context appContext;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
-  @Inject public LockInfoInteractorImpl(final @NonNull Context context) {
-    super(context);
+  @Inject public LockInfoInteractorImpl(final @NonNull Context context,
+      @NonNull PackageManagerWrapper packageManagerWrapper) {
+    super(packageManagerWrapper);
+    this.packageManagerWrapper = packageManagerWrapper;
     appContext = context.getApplicationContext();
   }
 
@@ -46,17 +46,8 @@ final class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl implement
   }
 
   @NonNull @Override
-  public Observable<ActivityInfo> getPackageActivities(@NonNull String packageName) {
-    final PackageManager packageManager = appContext.getPackageManager();
-    List<ActivityInfo> activityInfoList;
-    try {
-      final PackageInfo packageInfo =
-          packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
-      activityInfoList = Arrays.asList(packageInfo.activities);
-    } catch (PackageManager.NameNotFoundException e) {
-      Timber.e(e, "Could not get activities for package");
-      activityInfoList = new ArrayList<>();
-    }
-    return Observable.from(activityInfoList);
+  public Observable<String> getPackageActivities(@NonNull String packageName) {
+    return Observable.defer(
+        () -> Observable.from(packageManagerWrapper.getActivityListForPackage(packageName)));
   }
 }

@@ -17,7 +17,9 @@
 package com.pyamsoft.padlock.dagger;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import dagger.Component;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -25,9 +27,11 @@ import rx.Scheduler;
 
 @Singleton @Component(modules = PadLockModule.class) public interface PadLockComponent {
 
-  Context provideContext();
+  @NonNull Context provideContext();
 
-  PadLockPreferences providePreferences();
+  @NonNull PadLockPreferences providePreferences();
+
+  @NonNull PackageManagerWrapper providePackageManagerWrapper();
 
   @Named("main") Scheduler provideMainScheduler();
 

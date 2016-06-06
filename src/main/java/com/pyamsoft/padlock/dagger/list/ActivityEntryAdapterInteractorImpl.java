@@ -16,14 +16,14 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import javax.inject.Inject;
 
 final class ActivityEntryAdapterInteractorImpl extends AdapterInteractorImpl<ActivityEntry> {
 
-  @Inject public ActivityEntryAdapterInteractorImpl(final @NonNull Context context) {
-    super(context);
+  @Inject public ActivityEntryAdapterInteractorImpl(final @NonNull PackageManagerWrapper packageManagerWrapper) {
+    super(packageManagerWrapper);
   }
 }
