@@ -20,14 +20,16 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
-import com.pyamsoft.pydroid.base.PresenterImpl;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenterImpl;
+import java.lang.ref.WeakReference;
 import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
-public abstract class AdapterPresenterImpl<I, VH extends RecyclerView.ViewHolder>
-    extends PresenterImpl<AdapterPresenter.AdapterView> implements AdapterPresenter<I, VH> {
+abstract class AdapterPresenterImpl<I, VH extends RecyclerView.ViewHolder>
+    extends AppIconLoaderPresenterImpl<AdapterPresenter.AdapterView<VH>>
+    implements AdapterPresenter<I, VH> {
 
   @NonNull private final Scheduler ioScheduler;
   @NonNull private final Scheduler mainScheduler;
@@ -37,6 +39,7 @@ public abstract class AdapterPresenterImpl<I, VH extends RecyclerView.ViewHolder
   protected AdapterPresenterImpl(@NonNull AdapterInteractor<I> adapterInteractor,
       @NonNull @Named("io") Scheduler ioScheduler,
       @NonNull @Named("main") Scheduler mainScheduler) {
+    super(adapterInteractor, mainScheduler, ioScheduler);
     this.ioScheduler = ioScheduler;
     this.mainScheduler = mainScheduler;
     this.adapterInteractor = adapterInteractor;
@@ -71,18 +74,21 @@ public abstract class AdapterPresenterImpl<I, VH extends RecyclerView.ViewHolder
   }
 
   @Override public void loadApplicationIcon(@NonNull VH holder, @NonNull String packageName) {
+    final WeakReference<VH> weakViewHolder = new WeakReference<>(holder);
     final Subscription subscription = adapterInteractor.loadPackageIcon(packageName)
         .subscribeOn(ioScheduler)
         .observeOn(mainScheduler)
         .subscribe(drawable -> {
-          final AdapterView view = getView();
-          if (view != null) {
-            view.onApplicationIconLoadedSuccess(holder, drawable);
+          final AdapterView<VH> view = (AdapterView<VH>) getView();
+          final VH viewHolder = weakViewHolder.get();
+          if (view != null && viewHolder != null) {
+            view.onApplicationIconLoadedSuccess(viewHolder, drawable);
           }
         }, throwable -> {
-          final AdapterView view = getView();
-          if (view != null) {
-            view.onApplicationIconLoadedError(holder);
+          final AdapterView<VH> view = (AdapterView<VH>) getView();
+          final VH viewHolder = weakViewHolder.get();
+          if (view != null && viewHolder != null) {
+            view.onApplicationIconLoadedError(viewHolder);
           }
         });
     compositeSubscription.add(subscription);

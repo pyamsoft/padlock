@@ -22,7 +22,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
-import com.pyamsoft.padlock.dagger.lock.IconLoadInteractorImpl;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +31,7 @@ import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-final class LockInfoInteractorImpl extends IconLoadInteractorImpl implements LockInfoInteractor {
+final class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl implements LockInfoInteractor {
 
   @NonNull private final Context appContext;
 

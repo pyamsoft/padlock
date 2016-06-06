@@ -39,7 +39,7 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.service.PadLockService;
-import com.pyamsoft.padlock.dagger.lockscreen.DaggerLockScreenComponent;
+import com.pyamsoft.padlock.dagger.lock.DaggerLockScreenComponent;
 import com.pyamsoft.padlock.dagger.lock.LockScreenModule;
 import com.pyamsoft.pydroid.base.NoDonationActivityBase;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
@@ -168,15 +168,6 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @NonNull @Override public String getActivityName() {
     assert lockViewDelegate != null;
     return lockViewDelegate.getActivityName();
-  }
-
-  @Override public void setImageSuccess(@NonNull Drawable drawable) {
-    assert lockViewDelegate != null;
-    lockViewDelegate.setImageSuccess(drawable);
-  }
-
-  @Override public void setImageError() {
-    AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new ErrorDialog(), "error");
   }
 
   @NonNull @Override public String getCurrentAttempt() {
@@ -383,5 +374,14 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @CheckResult @Override public boolean shouldExcludeEntry() {
     assert menuExclude != null;
     return menuExclude.isChecked();
+  }
+
+  @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
+    assert lockViewDelegate != null;
+    lockViewDelegate.onApplicationIconLoadedSuccess(icon);
+  }
+
+  @Override public void onApplicationIconLoadedError() {
+    AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "error");
   }
 }

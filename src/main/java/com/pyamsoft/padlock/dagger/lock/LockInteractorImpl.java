@@ -21,11 +21,12 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.util.Base64;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public abstract class LockInteractorImpl extends IconLoadInteractorImpl {
+abstract class LockInteractorImpl extends AppIconLoaderInteractorImpl implements LockInteractor {
 
   @NonNull private final MessageDigest messageDigest;
 
@@ -38,21 +39,15 @@ public abstract class LockInteractorImpl extends IconLoadInteractorImpl {
     }
   }
 
-  @CheckResult @NonNull protected final String encodeSHA256(@NonNull String attempt) {
+  @CheckResult @NonNull public String encodeSHA256(@NonNull String attempt) {
     messageDigest.reset();
     final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
     return Base64.encodeToString(output, Base64.DEFAULT).trim();
   }
 
-  @CheckResult @WorkerThread protected final boolean checkSubmissionAttempt(@NonNull String attempt,
-      @NonNull String encodedPin) {
-    final String encodedAttempt = encodeSHA256(attempt);
-    return checkEncodedSubmissionAttempt(encodedAttempt, encodedPin);
-  }
-
   @CheckResult @WorkerThread
-  protected final boolean checkEncodedSubmissionAttempt(@NonNull String encodedAttempt,
-      @NonNull String encodedPin) {
+  public boolean checkSubmissionAttempt(@NonNull String attempt, @NonNull String encodedPin) {
+    final String encodedAttempt = encodeSHA256(attempt);
     return encodedPin.equals(encodedAttempt);
   }
 }

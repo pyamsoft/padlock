@@ -38,13 +38,13 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
   public Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt) {
     return Observable.defer(() -> Observable.just(masterPinInteractor.getMasterPin()))
         .map(masterPin -> {
-          final String encodedMasterPin = encodeSHA256(attempt);
           if (masterPin == null) {
             Timber.d("No existing master pin, create a new one");
+            final String encodedMasterPin = encodeSHA256(attempt);
             masterPinInteractor.setMasterPin(encodedMasterPin);
             return PinEntryEvent.builder().complete(true).type(0).build();
           } else {
-            final boolean success = checkEncodedSubmissionAttempt(encodedMasterPin, masterPin);
+            final boolean success = checkSubmissionAttempt(attempt, masterPin);
             if (success) {
               Timber.d("Clear master pin");
               masterPinInteractor.setMasterPin(null);

@@ -20,9 +20,9 @@ import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenterImpl;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.base.PresenterImpl;
 import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockInfoView>
+final class LockInfoPresenterImpl extends AppIconLoaderPresenterImpl<LockInfoPresenter.LockInfoView>
     implements LockInfoPresenter {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;
@@ -42,11 +42,11 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
   @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
-  @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
 
   @Inject public LockInfoPresenterImpl(final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("main") Scheduler mainScheduler,
       final @NonNull @Named("io") Scheduler ioScheduler) {
+    super(lockInfoInteractor, mainScheduler, ioScheduler);
     this.lockInfoInteractor = lockInfoInteractor;
     this.mainScheduler = mainScheduler;
     this.ioScheduler = ioScheduler;
@@ -55,7 +55,6 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
   @Override public void onDestroyView() {
     super.onDestroyView();
     unsubPopulateList();
-    unsubLoadIcon();
   }
 
   @Override public void populateList(@NonNull String packageName) {
@@ -143,27 +142,5 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
   }
 
   @Override public void loadApplicationIcon(@NonNull String packageName) {
-    loadIconSubscription = lockInfoInteractor.loadPackageIcon(packageName)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
-        .subscribe(drawable -> {
-          final LockInfoView lockInfoView = getView();
-          if (lockInfoView != null) {
-            lockInfoView.onApplicationIconLoadedSuccess(drawable);
-          }
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-          final LockInfoView lockInfoView = getView();
-          if (lockInfoView != null) {
-            lockInfoView.onApplicationIconLoadedError();
-          }
-        });
-  }
-
-  private void unsubLoadIcon() {
-    if (!loadIconSubscription.isUnsubscribed()) {
-      Timber.d("Unsub from load icon event");
-      loadIconSubscription.unsubscribe();
-    }
   }
 }

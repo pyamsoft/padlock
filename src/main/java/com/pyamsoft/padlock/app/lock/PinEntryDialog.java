@@ -36,7 +36,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.dagger.pinentry.DaggerPinEntryComponent;
+import com.pyamsoft.padlock.dagger.lock.DaggerPinEntryComponent;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.model.event.RxBus;
 import com.pyamsoft.pydroid.base.RetainedDialogFragment;
@@ -154,14 +154,14 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     return lockViewDelegate.getActivityName();
   }
 
-  @Override public void setImageSuccess(@NonNull Drawable drawable) {
-    assert lockViewDelegate != null;
-    lockViewDelegate.setImageSuccess(drawable);
-  }
-
-  @Override public void setImageError() {
+  @Override public void onApplicationIconLoadedError() {
     Toast.makeText(getActivity(), "Failed to load image", Toast.LENGTH_SHORT).show();
     dismiss();
+  }
+
+  @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
+    assert lockViewDelegate != null;
+    lockViewDelegate.onApplicationIconLoadedSuccess(icon);
   }
 
   @Override public void onSubmitSuccess() {

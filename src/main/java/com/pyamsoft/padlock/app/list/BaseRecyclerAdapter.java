@@ -16,11 +16,13 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import com.pyamsoft.pydroid.base.ActivityRecyclerAdapter;
 
 public abstract class BaseRecyclerAdapter<T extends RecyclerView.ViewHolder>
-    extends ActivityRecyclerAdapter<T> {
+    extends ActivityRecyclerAdapter<T> implements AdapterPresenter.AdapterView<T> {
 
   @Override public void onCreate() {
 
@@ -35,6 +37,23 @@ public abstract class BaseRecyclerAdapter<T extends RecyclerView.ViewHolder>
   }
 
   @Override public void onStop() {
+
+  }
+
+  @Override public void onApplicationIconLoadedError(@NonNull T holder) {
+
+  }
+
+  @Override public void onApplicationIconLoadedError() {
+
+  }
+
+  @Override
+  public void onApplicationIconLoadedSuccess(@NonNull T holder, @NonNull Drawable drawable) {
+
+  }
+
+  @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
 
   }
 }

@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -46,17 +47,17 @@ final class LockViewDelegateImpl implements LockViewDelegate {
 
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
 
-  @BindView(R.id.lock_image) ImageView image;
-  @BindView(R.id.lock_text_entry) TextInputEditText editText;
-  @BindView(R.id.lock_image_go) ImageView imageGo;
+  @Nullable @BindView(R.id.lock_image) ImageView image;
+  @Nullable @BindView(R.id.lock_text_entry) TextInputEditText editText;
+  @Nullable @BindView(R.id.lock_image_go) ImageView imageGo;
 
   private @ColorRes int textColor;
-  private View rootView;
-  private String activityName;
-  private String packageName;
-  private AsyncVectorDrawableTask arrowGoTask;
-  private Unbinder unbinder;
-  private InputMethodManager imm;
+  @Nullable private View rootView;
+  @Nullable private String activityName;
+  @Nullable private String packageName;
+  @Nullable private AsyncVectorDrawableTask arrowGoTask;
+  @Nullable private Unbinder unbinder;
+  @Nullable private InputMethodManager imm;
 
   @Inject public LockViewDelegateImpl() {
     this.textColor = R.color.orange500;
@@ -85,6 +86,7 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     unbinder = ButterKnife.bind(this, rootView);
     getValuesFromBundle(bundle);
 
+    assert editText != null;
     editText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
       if (keyEvent == null) {
         Timber.e("KeyEvent was not caused by keypress");
@@ -109,6 +111,7 @@ final class LockViewDelegateImpl implements LockViewDelegate {
         .getSystemService(Context.INPUT_METHOD_SERVICE);
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
+    assert imageGo != null;
     imageGo.setOnClickListener(view -> {
       presenter.submit();
       imm.toggleSoftInputFromWindow(rootView.getWindowToken(), 0, 0);
@@ -143,15 +146,13 @@ final class LockViewDelegateImpl implements LockViewDelegate {
   }
 
   @Override public void clearDisplay() {
+    assert editText != null;
     editText.setText("");
   }
 
   @Override public void onStart(@NonNull final LockPresenter presenter) {
-    presenter.loadPackageIcon(packageName);
-  }
-
-  @Override public void setImageSuccess(@NonNull Drawable drawable) {
-    image.setImageDrawable(drawable);
+    assert packageName != null;
+    presenter.loadApplicationIcon(packageName);
   }
 
   @Override public void onDestroyView() {
@@ -163,19 +164,24 @@ final class LockViewDelegateImpl implements LockViewDelegate {
       arrowGoTask.cancel(true);
     }
 
+    assert imm != null;
+    assert rootView != null;
     imm.toggleSoftInputFromWindow(rootView.getWindowToken(), 0, 0);
     rootView = null;
   }
 
   @CheckResult @NonNull @Override public String getCurrentAttempt() {
+    assert editText != null;
     return editText.getText().toString();
   }
 
   @CheckResult @NonNull @Override public String getPackageName() {
+    assert packageName != null;
     return packageName;
   }
 
   @CheckResult @NonNull @Override public String getActivityName() {
+    assert activityName != null;
     return activityName;
   }
 
@@ -187,6 +193,7 @@ final class LockViewDelegateImpl implements LockViewDelegate {
       clearDisplay();
     } else {
       Timber.d("Set attempt %s", attempt);
+      assert editText != null;
       editText.setText(attempt);
     }
   }
@@ -199,5 +206,14 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     } else {
       outState.remove(CODE_DISPLAY);
     }
+  }
+
+  @Override public void onApplicationIconLoadedError() {
+    // TODO
+  }
+
+  @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
+    assert image != null;
+    image.setImageDrawable(icon);
   }
 }
