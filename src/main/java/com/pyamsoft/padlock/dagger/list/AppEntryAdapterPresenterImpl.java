@@ -28,8 +28,9 @@ final class AppEntryAdapterPresenterImpl
 
   @Inject
   public AppEntryAdapterPresenterImpl(@NonNull AdapterInteractor<AppEntry> adapterInteractor,
-      @NonNull @Named("io") Scheduler ioScheduler, @NonNull @Named("main") Scheduler mainScheduler) {
-    super(adapterInteractor, ioScheduler, mainScheduler);
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
+    super(adapterInteractor, mainScheduler, ioScheduler);
   }
 
   @Override public void setLocked(int position, boolean locked) {

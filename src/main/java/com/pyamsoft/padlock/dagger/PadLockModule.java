@@ -30,19 +30,18 @@ import rx.schedulers.Schedulers;
 @Module public class PadLockModule {
 
   @NonNull private final Context appContext;
-  @NonNull private final PadLockPreferences preferences;
 
   public PadLockModule(final @NonNull Context context) {
     appContext = context.getApplicationContext();
-    preferences = new PadLockPreferences(context);
   }
 
   @Singleton @Provides Context provideContext() {
     return appContext;
   }
 
-  @Singleton @Provides PadLockPreferences providePreferences() {
-    return preferences;
+  @Singleton @Provides PadLockPreferences providePreferences(
+      final @NonNull PadLockPreferencesImpl padLockPreferences) {
+    return padLockPreferences;
   }
 
   @Singleton @Provides @Named("io") Scheduler provideIOScheduler() {

@@ -19,8 +19,8 @@ package com.pyamsoft.padlock.dagger.settings;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.padlock.app.settings.SettingsPresenter;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenterImpl;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
-import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;
@@ -29,12 +29,10 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.SettingsView>
+final class SettingsPresenterImpl extends SchedulerPresenterImpl<SettingsPresenter.SettingsView>
     implements SettingsPresenter {
 
   @NonNull private final SettingsInteractor settingsInteractor;
-  @NonNull private final Scheduler mainScheduler;
-  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
   @NonNull private Subscription confirmDialogSubscription = Subscriptions.empty();
@@ -42,9 +40,8 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
   @Inject public SettingsPresenterImpl(@NonNull final SettingsInteractor settingsInteractor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
+    super(mainScheduler, ioScheduler);
     this.settingsInteractor = settingsInteractor;
-    this.mainScheduler = mainScheduler;
-    this.ioScheduler = ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -69,11 +66,15 @@ final class SettingsPresenterImpl extends PresenterImpl<SettingsPresenter.Settin
   }
 
   private Observable<Boolean> clearDatabase() {
-    return settingsInteractor.clearDatabase().subscribeOn(ioScheduler).observeOn(mainScheduler);
+    return settingsInteractor.clearDatabase()
+        .subscribeOn(getIoScheduler())
+        .observeOn(getMainScheduler());
   }
 
   private Observable<Boolean> clearAll() {
-    return settingsInteractor.clearAll().subscribeOn(ioScheduler).observeOn(mainScheduler);
+    return settingsInteractor.clearAll()
+        .subscribeOn(getIoScheduler())
+        .observeOn(getMainScheduler());
   }
 
   private void unregisterFromConfirmDialogBus() {

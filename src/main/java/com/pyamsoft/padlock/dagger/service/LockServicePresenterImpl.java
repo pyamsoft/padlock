@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
-import com.pyamsoft.pydroid.base.PresenterImpl;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenterImpl;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;
@@ -27,13 +27,12 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.LockService>
+final class LockServicePresenterImpl
+    extends SchedulerPresenterImpl<LockServicePresenter.LockService>
     implements LockServicePresenter {
 
   @NonNull private final LockServiceInteractor interactor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
-  @NonNull private final Scheduler mainScheduler;
-  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
 
@@ -46,10 +45,9 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
       @NonNull final LockServiceInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
+    super(mainScheduler, ioScheduler);
     this.interactor = interactor;
     this.stateInteractor = stateInteractor;
-    this.mainScheduler = mainScheduler;
-    this.ioScheduler = ioScheduler;
     running = false;
     lockScreenPassed = false;
   }
@@ -145,7 +143,7 @@ final class LockServicePresenterImpl extends PresenterImpl<LockServicePresenter.
         Timber.d("No significant window change detected");
         return Observable.empty();
       }
-    }).subscribeOn(ioScheduler).observeOn(mainScheduler).subscribe(padLockEntry -> {
+    }).subscribeOn(getIoScheduler()).observeOn(getMainScheduler()).subscribe(padLockEntry -> {
       Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
           padLockEntry.activityName());
       final LockService lockService = getView();

@@ -38,8 +38,6 @@ final class LockInfoPresenterImpl extends AppIconLoaderPresenterImpl<LockInfoPre
     implements LockInfoPresenter {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;
-  @NonNull private final Scheduler mainScheduler;
-  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
 
@@ -48,8 +46,6 @@ final class LockInfoPresenterImpl extends AppIconLoaderPresenterImpl<LockInfoPre
       final @NonNull @Named("io") Scheduler ioScheduler) {
     super(lockInfoInteractor, mainScheduler, ioScheduler);
     this.lockInfoInteractor = lockInfoInteractor;
-    this.mainScheduler = mainScheduler;
-    this.ioScheduler = ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -113,8 +109,8 @@ final class LockInfoPresenterImpl extends AppIconLoaderPresenterImpl<LockInfoPre
             })
             .concatMap(Observable::from)
             .filter(activityEntry -> activityEntry != null)
-            .subscribeOn(ioScheduler)
-            .observeOn(mainScheduler)
+            .subscribeOn(getIoScheduler())
+            .observeOn(getMainScheduler())
             .subscribe(activityEntry -> {
               final LockInfoView lockInfoView = getView();
               if (lockInfoView != null) {
@@ -139,8 +135,5 @@ final class LockInfoPresenterImpl extends AppIconLoaderPresenterImpl<LockInfoPre
       Timber.d("Unsub from populate List event");
       populateListSubscription.unsubscribe();
     }
-  }
-
-  @Override public void loadApplicationIcon(@NonNull String packageName) {
   }
 }

@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.list;
+package com.pyamsoft.padlock.dagger.base;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.list.LockInfoAdapter;
-import com.pyamsoft.padlock.model.ActivityEntry;
-import javax.inject.Inject;
+import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Named;
 import rx.Scheduler;
 
-final class ActivityEntryAdapterPresenterImpl
-    extends AdapterPresenterImpl<ActivityEntry, LockInfoAdapter.ViewHolder> {
+public abstract class SchedulerPresenterImpl<I> extends PresenterImpl<I> {
 
-  @Inject public ActivityEntryAdapterPresenterImpl(
-      @NonNull AdapterInteractor<ActivityEntry> adapterInteractor,
-      @NonNull @Named("main") Scheduler mainScheduler,
+  @NonNull private final Scheduler mainScheduler;
+  @NonNull private final Scheduler ioScheduler;
+
+  protected SchedulerPresenterImpl(@NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
-    super(adapterInteractor, mainScheduler, ioScheduler);
+    this.mainScheduler = mainScheduler;
+    this.ioScheduler = ioScheduler;
   }
 
-  @Override public void setLocked(int position, boolean locked) {
-    set(position, ActivityEntry.builder(get(position)).locked(locked).build());
+  @NonNull protected final Scheduler getMainScheduler() {
+    return mainScheduler;
+  }
+
+  @NonNull protected final Scheduler getIoScheduler() {
+    return ioScheduler;
   }
 }
