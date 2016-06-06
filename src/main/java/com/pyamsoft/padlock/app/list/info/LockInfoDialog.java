@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.list.info;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -64,7 +65,7 @@ public class LockInfoDialog extends RetainedDialogFragment
   @Nullable @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
   @Nullable @Inject LockInfoPresenter presenter;
   @Nullable @Inject DBPresenter dbPresenter;
-  @Nullable @Inject AdapterPresenter<ActivityEntry> adapterPresenter;
+  @Nullable @Inject AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder> adapterPresenter;
   @Nullable private DataHolderFragment<Presenter> presenterDataHolder;
   @Nullable private LockInfoAdapter adapter;
   @Nullable private AppEntry appEntry;
@@ -91,9 +92,10 @@ public class LockInfoDialog extends RetainedDialogFragment
 
     final LockInfoPresenter lockInfoPresenter =
         (LockInfoPresenter) presenterDataHolder.pop(KEY_PRESENTER);
-    @SuppressWarnings("unchecked") final AdapterPresenter<ActivityEntry>
+    @SuppressWarnings("unchecked") final AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder>
         activityEntryAdapterPresenter =
-        (AdapterPresenter<ActivityEntry>) presenterDataHolder.pop(KEY_ADAPTER_PRESENTER);
+        (AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder>) presenterDataHolder.pop(
+            KEY_ADAPTER_PRESENTER);
     final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
     if (lockInfoPresenter == null
         || activityEntryAdapterPresenter == null
@@ -170,6 +172,7 @@ public class LockInfoDialog extends RetainedDialogFragment
 
   private void initializeForEntry() {
     assert appEntry != null;
+    assert presenter != null;
 
     assert close != null;
     close.setOnClickListener(view -> dismiss());
@@ -178,7 +181,7 @@ public class LockInfoDialog extends RetainedDialogFragment
     name.setText(appEntry.name());
 
     assert icon != null;
-    icon.setImageBitmap(appEntry.icon());
+    presenter.loadApplicationIcon(appEntry.packageName());
 
     assert packageName != null;
     packageName.setText(appEntry.packageName());
@@ -244,5 +247,14 @@ public class LockInfoDialog extends RetainedDialogFragment
     } else {
       presenterDataHolder.clear();
     }
+  }
+
+  @Override public void onApplicationIconLoadedError() {
+    // TODO handle
+  }
+
+  @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable drawable) {
+    assert icon != null;
+    icon.setImageDrawable(drawable);
   }
 }

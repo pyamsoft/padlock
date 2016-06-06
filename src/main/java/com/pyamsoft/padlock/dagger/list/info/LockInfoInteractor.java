@@ -18,11 +18,12 @@ package com.pyamsoft.padlock.dagger.list.info;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.dagger.lock.IconLoadInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import rx.Observable;
 
-interface LockInfoInteractor {
+interface LockInfoInteractor extends IconLoadInteractor {
 
   @CheckResult @NonNull Observable<List<PadLockEntry>> getActivityEntries(
       @NonNull String packageName);

@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.lock;
 
-import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
@@ -30,19 +29,17 @@ import timber.log.Timber;
 public abstract class LockPresenterImpl<I extends LockPresenter.LockView> extends PresenterImpl<I>
     implements LockPresenter<I> {
 
-  @NonNull private final LockInteractor lockInteractor;
+  @NonNull private final IconLoadInteractor lockInteractor;
   @NonNull private final Scheduler mainScheduler;
   @NonNull private final Scheduler ioScheduler;
-  @NonNull private final Context appContext;
 
   @NonNull private Subscription imageSubscription = Subscriptions.empty();
 
-  protected LockPresenterImpl(final @NonNull Context context,
-      @NonNull final LockInteractor lockInteractor, @NonNull @Named("main") Scheduler mainScheduler,
+  protected LockPresenterImpl(@NonNull final IconLoadInteractor lockInteractor,
+      @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     this.mainScheduler = mainScheduler;
     this.ioScheduler = ioScheduler;
-    this.appContext = context.getApplicationContext();
     this.lockInteractor = lockInteractor;
   }
 
@@ -61,7 +58,7 @@ public abstract class LockPresenterImpl<I extends LockPresenter.LockView> extend
 
   @Override public final void loadPackageIcon(final @NonNull String packageName) {
     unsubImageSubscription();
-    imageSubscription = lockInteractor.loadPackageIcon(appContext, packageName)
+    imageSubscription = lockInteractor.loadPackageIcon(packageName)
         .subscribeOn(ioScheduler)
         .observeOn(mainScheduler)
         .subscribe(drawable -> {

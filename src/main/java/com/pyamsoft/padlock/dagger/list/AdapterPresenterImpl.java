@@ -18,16 +18,36 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.pydroid.base.PresenterImpl;
+import javax.inject.Named;
+import rx.Scheduler;
+import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 
-public abstract class AdapterPresenterImpl<I> extends PresenterImpl<AdapterPresenter.AdapterView>
-    implements AdapterPresenter<I> {
+public abstract class AdapterPresenterImpl<I, VH extends RecyclerView.ViewHolder>
+    extends PresenterImpl<AdapterPresenter.AdapterView> implements AdapterPresenter<I, VH> {
 
+  @NonNull private final Scheduler ioScheduler;
+  @NonNull private final Scheduler mainScheduler;
   @NonNull private final AdapterInteractor<I> adapterInteractor;
+  @NonNull private final CompositeSubscription compositeSubscription;
 
-  protected AdapterPresenterImpl(@NonNull AdapterInteractor<I> adapterInteractor) {
+  protected AdapterPresenterImpl(@NonNull AdapterInteractor<I> adapterInteractor,
+      @NonNull @Named("io") Scheduler ioScheduler,
+      @NonNull @Named("main") Scheduler mainScheduler) {
+    this.ioScheduler = ioScheduler;
+    this.mainScheduler = mainScheduler;
     this.adapterInteractor = adapterInteractor;
+    compositeSubscription = new CompositeSubscription();
+  }
+
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+    if (!compositeSubscription.isUnsubscribed()) {
+      compositeSubscription.clear();
+    }
   }
 
   protected void set(int position, @NonNull I entry) {
@@ -48,5 +68,23 @@ public abstract class AdapterPresenterImpl<I> extends PresenterImpl<AdapterPrese
 
   @CheckResult @Override public int size() {
     return adapterInteractor.size();
+  }
+
+  @Override public void loadApplicationIcon(@NonNull VH holder, @NonNull String packageName) {
+    final Subscription subscription = adapterInteractor.loadPackageIcon(packageName)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
+        .subscribe(drawable -> {
+          final AdapterView view = getView();
+          if (view != null) {
+            view.onApplicationIconLoadedSuccess(holder, drawable);
+          }
+        }, throwable -> {
+          final AdapterView view = getView();
+          if (view != null) {
+            view.onApplicationIconLoadedError(holder);
+          }
+        });
+    compositeSubscription.add(subscription);
   }
 }

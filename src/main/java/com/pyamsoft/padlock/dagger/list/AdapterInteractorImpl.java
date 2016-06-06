@@ -16,16 +16,20 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
+import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.dagger.lock.IconLoadInteractorImpl;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AdapterInteractorImpl<I> implements AdapterInteractor<I> {
+public abstract class AdapterInteractorImpl<I> extends IconLoadInteractorImpl
+    implements AdapterInteractor<I> {
 
   @NonNull private final List<I> entries;
 
-  protected AdapterInteractorImpl() {
+  protected AdapterInteractorImpl(final @NonNull Context context) {
+    super(context);
     this.entries = new ArrayList<>();
   }
 

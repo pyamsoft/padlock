@@ -46,6 +46,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       @NonNull final PadLockPreferences preferences, @NonNull final DBInteractor dbInteractor,
       @NonNull final MasterPinInteractor masterPinInteractor,
       @Named("ignore_default") long defaultIgnoreTime) {
+    super(context);
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
     this.dbInteractor = dbInteractor;

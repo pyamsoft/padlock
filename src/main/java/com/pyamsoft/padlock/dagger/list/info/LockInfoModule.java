@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.list.info;
 
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
+import com.pyamsoft.padlock.app.list.info.LockInfoAdapter;
 import com.pyamsoft.padlock.app.list.info.LockInfoPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.list.AdapterInteractor;
@@ -36,7 +37,7 @@ import dagger.Provides;
     return interactor;
   }
 
-  @ActivityScope @Provides AdapterPresenter<ActivityEntry> provideActivityEntryAdapterPresenter(
+  @ActivityScope @Provides AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder> provideActivityEntryAdapterPresenter(
       final ActivityEntryAdapterPresenterImpl adapter) {
     return adapter;
   }

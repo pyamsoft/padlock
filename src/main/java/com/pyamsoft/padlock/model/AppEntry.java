@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.model;
 
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
 import android.os.Parcelable;
 import com.google.auto.value.AutoValue;
 import java.util.List;
@@ -36,8 +35,6 @@ import java.util.List;
 
   public abstract String packageName();
 
-  public abstract Bitmap icon();
-
   public abstract List<ActivityInfo> activities();
 
   public abstract boolean system();
@@ -49,8 +46,6 @@ import java.util.List;
     public abstract Builder name(String s);
 
     public abstract Builder packageName(String s);
-
-    public abstract Builder icon(Bitmap d);
 
     public abstract Builder activities(List<ActivityInfo> l);
 

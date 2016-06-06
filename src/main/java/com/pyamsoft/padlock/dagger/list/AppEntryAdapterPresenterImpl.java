@@ -17,14 +17,19 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.list.LockListAdapter;
 import com.pyamsoft.padlock.model.AppEntry;
 import javax.inject.Inject;
+import javax.inject.Named;
+import rx.Scheduler;
 
-final class AppEntryAdapterPresenterImpl extends AdapterPresenterImpl<AppEntry> {
+final class AppEntryAdapterPresenterImpl
+    extends AdapterPresenterImpl<AppEntry, LockListAdapter.ViewHolder> {
 
   @Inject
-  public AppEntryAdapterPresenterImpl(@NonNull AdapterInteractor<AppEntry> adapterInteractor) {
-    super(adapterInteractor);
+  public AppEntryAdapterPresenterImpl(@NonNull AdapterInteractor<AppEntry> adapterInteractor,
+      @NonNull @Named("io") Scheduler ioScheduler, @NonNull @Named("main") Scheduler mainScheduler) {
+    super(adapterInteractor, ioScheduler, mainScheduler);
   }
 
   @Override public void setLocked(int position, boolean locked) {

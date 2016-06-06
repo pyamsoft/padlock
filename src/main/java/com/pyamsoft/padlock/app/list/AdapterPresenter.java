@@ -16,11 +16,14 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import com.pyamsoft.pydroid.base.Presenter;
 
-public interface AdapterPresenter<I> extends Presenter<AdapterPresenter.AdapterView> {
+public interface AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
+    extends Presenter<AdapterPresenter.AdapterView> {
 
   @CheckResult @NonNull I get(int position);
 
@@ -32,6 +35,12 @@ public interface AdapterPresenter<I> extends Presenter<AdapterPresenter.AdapterV
 
   @CheckResult int size();
 
-  interface AdapterView {
+  void loadApplicationIcon(@NonNull VH holder, @NonNull String packageName);
+
+  interface AdapterView<VH extends RecyclerView.ViewHolder> {
+
+    void onApplicationIconLoadedSuccess(@NonNull VH holder, @NonNull Drawable drawable);
+
+    void onApplicationIconLoadedError(@NonNull VH holder);
   }
 }
