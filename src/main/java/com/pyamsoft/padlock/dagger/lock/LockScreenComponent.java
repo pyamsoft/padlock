@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.service;
+package com.pyamsoft.padlock.dagger.lock;
 
-import com.pyamsoft.padlock.app.service.PadLockService;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
-import com.pyamsoft.padlock.dagger.lock.MasterPinModule;
+import com.pyamsoft.padlock.dagger.db.DBModule;
 import dagger.Component;
 
 @ActivityScope @Component(modules = {
-    LockServiceModule.class, MasterPinModule.class, LockServiceStateModule.class
-}, dependencies = PadLockComponent.class) public interface LockServiceComponent {
+    LockScreenModule.class, DBModule.class, MasterPinModule.class, LockViewDelegateModule.class
+}, dependencies = PadLockComponent.class) public interface LockScreenComponent {
 
-  void inject(PadLockService padLockService);
+  void inject(LockScreenActivity lockScreenActivity);
 }

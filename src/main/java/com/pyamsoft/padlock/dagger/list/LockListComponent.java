@@ -20,7 +20,7 @@ import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.db.DBModule;
-import com.pyamsoft.padlock.dagger.pin.MasterPinModule;
+import com.pyamsoft.padlock.dagger.lock.MasterPinModule;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateModule;
 import dagger.Component;
 
