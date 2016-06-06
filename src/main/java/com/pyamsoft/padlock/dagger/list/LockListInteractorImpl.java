@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
@@ -61,16 +60,14 @@ final class LockListInteractorImpl implements LockListInteractor {
     preferences.setOnBoard();
   }
 
-  @WorkerThread @Override @NonNull public Observable<List<PackageInfo>> getPackageInfoList() {
-    return Observable.defer(() -> Observable.from(getPackageManager().getInstalledPackages(0)))
-        .filter(packageInfo -> packageInfo != null)
-        .filter(packageInfo -> {
-          final ApplicationInfo appInfo = packageInfo.applicationInfo;
-          return appInfo != null && !(!appInfo.enabled || (isSystemApplication(appInfo)
-              && !preferences.isSystemVisible()) || appInfo.packageName.equals(
-              LockServiceInteractor.ANDROID_PACKAGE) || appInfo.packageName.equals(
-              LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE));
-        })
+  @WorkerThread @Override @NonNull
+  public Observable<List<ApplicationInfo>> getApplicationInfoList() {
+    return Observable.defer(() -> Observable.from(getPackageManager().getInstalledApplications(0)))
+        .filter(appInfo -> appInfo != null)
+        .filter(appInfo -> appInfo != null && !(!appInfo.enabled || (isSystemApplication(appInfo)
+            && !preferences.isSystemVisible()) || appInfo.packageName.equals(
+            LockServiceInteractor.ANDROID_PACKAGE) || appInfo.packageName.equals(
+            LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE)))
         .toList();
   }
 

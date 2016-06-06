@@ -17,13 +17,19 @@
 package com.pyamsoft.padlock.dagger.list.info;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.dagger.lock.IconLoadInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
+import timber.log.Timber;
 
 final class LockInfoInteractorImpl extends IconLoadInteractorImpl implements LockInfoInteractor {
 
@@ -37,5 +43,20 @@ final class LockInfoInteractorImpl extends IconLoadInteractorImpl implements Loc
   @NonNull @Override
   public Observable<List<PadLockEntry>> getActivityEntries(@NonNull String packageName) {
     return PadLockOpenHelper.queryWithPackageName(appContext, packageName).first();
+  }
+
+  @NonNull @Override
+  public Observable<ActivityInfo> getPackageActivities(@NonNull String packageName) {
+    final PackageManager packageManager = appContext.getPackageManager();
+    List<ActivityInfo> activityInfoList;
+    try {
+      final PackageInfo packageInfo =
+          packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+      activityInfoList = Arrays.asList(packageInfo.activities);
+    } catch (PackageManager.NameNotFoundException e) {
+      Timber.e(e, "Could not get activities for package");
+      activityInfoList = new ArrayList<>();
+    }
+    return Observable.from(activityInfoList);
   }
 }

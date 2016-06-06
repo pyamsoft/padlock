@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.list.info;
 
 import android.content.pm.ActivityInfo;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.info.LockInfoPresenter;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
@@ -59,13 +58,12 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
     unsubLoadIcon();
   }
 
-  @Override
-  public void populateList(@NonNull String packageName, @NonNull List<ActivityInfo> activities) {
+  @Override public void populateList(@NonNull String packageName) {
     unsubPopulateList();
 
     // Filter out the lockscreen and crashlog entries
     final Observable<List<ActivityInfo>> activityInfoObservable =
-        Observable.defer(() -> Observable.from(activities)).filter(activityInfo -> {
+        lockInfoInteractor.getPackageActivities(packageName).filter(activityInfo -> {
           final String name = activityInfo.name;
           return !name.equalsIgnoreCase(LockScreenActivity.class.getName())
               && !name.equalsIgnoreCase(CrashLogActivity.class.getName());

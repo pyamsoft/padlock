@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.list.info;
 
+import android.content.pm.ActivityInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.lock.IconLoadInteractor;
@@ -27,4 +28,6 @@ interface LockInfoInteractor extends IconLoadInteractor {
 
   @CheckResult @NonNull Observable<List<PadLockEntry>> getActivityEntries(
       @NonNull String packageName);
+
+  @CheckResult @NonNull Observable<ActivityInfo> getPackageActivities(@NonNull String packageName);
 }
