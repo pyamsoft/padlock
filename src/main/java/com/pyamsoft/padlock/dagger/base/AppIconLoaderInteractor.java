@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list;
+package com.pyamsoft.padlock.dagger.base;
 
+import android.graphics.drawable.Drawable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.app.base.AppIconLoaderView;
-import com.pyamsoft.padlock.model.ActivityEntry;
+import android.support.annotation.WorkerThread;
+import rx.Observable;
 
-public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {
+public interface AppIconLoaderInteractor {
 
-  void populateList(@NonNull String packageName);
-
-  interface LockInfoView extends LockListCommon, AppIconLoaderView {
-
-    void onEntryAddedToList(@NonNull ActivityEntry entry);
-
-    void onListPopulated();
-
-    void onListPopulateError();
-  }
+  @CheckResult @NonNull @WorkerThread Observable<Drawable> loadPackageIcon(
+      @NonNull String packageName);
 }

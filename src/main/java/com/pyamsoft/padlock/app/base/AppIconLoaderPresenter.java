@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list;
+package com.pyamsoft.padlock.app.base;
 
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import com.pyamsoft.pydroid.base.Presenter;
 
-public interface ImageLoadPresenter {
+public interface AppIconLoaderPresenter<I extends AppIconLoaderView> extends Presenter<I> {
 
   void loadApplicationIcon(@NonNull String packageName);
 }

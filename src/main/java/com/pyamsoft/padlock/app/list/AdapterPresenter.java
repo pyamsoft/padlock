@@ -20,10 +20,11 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 
 public interface AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
-    extends Presenter<AdapterPresenter.AdapterView> {
+    extends AppIconLoaderPresenter<AdapterPresenter.AdapterView<VH>> {
 
   @CheckResult @NonNull I get(int position);
 
@@ -37,7 +38,7 @@ public interface AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
 
   void loadApplicationIcon(@NonNull VH holder, @NonNull String packageName);
 
-  interface AdapterView<VH extends RecyclerView.ViewHolder> {
+  interface AdapterView<VH extends RecyclerView.ViewHolder> extends AppIconLoaderView {
 
     void onApplicationIconLoadedSuccess(@NonNull VH holder, @NonNull Drawable drawable);
 

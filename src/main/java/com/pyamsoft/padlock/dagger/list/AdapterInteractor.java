@@ -18,9 +18,9 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.dagger.lock.IconLoadInteractor;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractor;
 
-public interface AdapterInteractor<I> extends IconLoadInteractor {
+interface AdapterInteractor<I> extends AppIconLoaderInteractor {
 
   @CheckResult @NonNull I get(int position);
 

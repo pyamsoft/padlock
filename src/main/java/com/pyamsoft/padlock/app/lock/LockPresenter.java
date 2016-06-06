@@ -16,27 +16,21 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 
-public interface LockPresenter<I extends LockPresenter.LockView> extends Presenter<I> {
-
-  void loadPackageIcon(@NonNull String packageName);
+public interface LockPresenter<I extends LockPresenter.LockView> extends AppIconLoaderPresenter<I> {
 
   void submit();
 
-  interface LockView {
+  interface LockView extends AppIconLoaderView {
 
     @NonNull String getCurrentAttempt();
 
     @NonNull String getPackageName();
 
     @NonNull String getActivityName();
-
-    void setImageSuccess(@NonNull Drawable drawable);
-
-    void setImageError();
 
     void onSubmitSuccess();
 

@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -125,15 +124,6 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
   @Override public void onDBError() {
     Timber.e("onDBError");
     // TODO handle exception, show error dialog or something
-  }
-
-  @Override public void onApplicationIconLoadedSuccess(@NonNull ViewHolder holder,
-      @NonNull Drawable drawable) {
-    // TODO handle?
-  }
-
-  @Override public void onApplicationIconLoadedError(@NonNull ViewHolder holder) {
-    // TODO handle?
   }
 
   public static final class ViewHolder extends RecyclerView.ViewHolder {

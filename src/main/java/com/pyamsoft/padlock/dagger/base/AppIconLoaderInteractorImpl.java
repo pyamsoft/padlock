@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.lock;
+package com.pyamsoft.padlock.dagger.base;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -24,11 +24,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import rx.Observable;
 
-public abstract class IconLoadInteractorImpl implements IconLoadInteractor {
+public abstract class AppIconLoaderInteractorImpl implements AppIconLoaderInteractor {
 
   @NonNull private final Context appContext;
 
-  protected IconLoadInteractorImpl(@NonNull Context context) {
+  protected AppIconLoaderInteractorImpl(@NonNull Context context) {
     appContext = context.getApplicationContext();
   }
 

@@ -17,16 +17,15 @@
 package com.pyamsoft.padlock.app.lock;
 
 import android.app.Activity;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.View;
-import com.pyamsoft.padlock.app.lock.LockPresenter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 
-public interface LockViewDelegate {
+public interface LockViewDelegate extends AppIconLoaderView {
 
   @NonNull String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull String ENTRY_ACTIVITY_NAME = "entry_activityname";
@@ -40,8 +39,6 @@ public interface LockViewDelegate {
   void setTextColor(@ColorRes int color);
 
   void clearDisplay();
-
-  void setImageSuccess(@NonNull Drawable drawable);
 
   void onCreateView(@NonNull LockPresenter presenter, @NonNull Activity activity,
       @NonNull View rootView);

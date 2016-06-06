@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list;
+package com.pyamsoft.padlock.dagger.lock;
 
-import android.graphics.drawable.Drawable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractor;
 
-public interface ImageLoadView {
+interface LockInteractor extends AppIconLoaderInteractor {
 
-  void onApplicationIconLoadedSuccess(@NonNull Drawable icon);
+  @CheckResult @NonNull String encodeSHA256(@NonNull String attempt);
 
-  void onApplicationIconLoadedError();
+  @CheckResult @WorkerThread boolean checkSubmissionAttempt(@NonNull String attempt,
+      @NonNull String encodedPin);
 }

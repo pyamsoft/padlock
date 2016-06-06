@@ -37,7 +37,7 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.padlock.dagger.list.info.DaggerLockInfoComponent;
+import com.pyamsoft.padlock.dagger.list.DaggerLockInfoComponent;
 import com.pyamsoft.padlock.dagger.list.LockInfoModule;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
