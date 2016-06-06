@@ -24,6 +24,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -40,11 +41,13 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   @NonNull private final PadLockPreferences preferences;
   private final long defaultIgnoreTime;
 
-  @Inject public LockScreenInteractorImpl(final Context context,
-      @NonNull final PadLockPreferences preferences, @NonNull final DBInteractor dbInteractor,
+  @Inject
+  public LockScreenInteractorImpl(final @NonNull PackageManagerWrapper packageManagerWrapper,
+      final @NonNull Context context, @NonNull final PadLockPreferences preferences,
+      @NonNull final DBInteractor dbInteractor,
       @NonNull final MasterPinInteractor masterPinInteractor,
       @Named("ignore_default") long defaultIgnoreTime) {
-    super(context);
+    super(packageManagerWrapper);
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
     this.dbInteractor = dbInteractor;

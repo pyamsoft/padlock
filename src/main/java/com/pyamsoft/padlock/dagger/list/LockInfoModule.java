@@ -36,7 +36,8 @@ import dagger.Provides;
     return interactor;
   }
 
-  @ActivityScope @Provides AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder> provideActivityEntryAdapterPresenter(
+  @ActivityScope @Provides
+  AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder> provideActivityEntryAdapterPresenter(
       final ActivityEntryAdapterPresenterImpl adapter) {
     return adapter;
   }

@@ -16,11 +16,11 @@
 
 package com.pyamsoft.padlock.dagger.lock;
 
-import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.util.Base64;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -30,8 +30,8 @@ abstract class LockInteractorImpl extends AppIconLoaderInteractorImpl implements
 
   @NonNull private final MessageDigest messageDigest;
 
-  protected LockInteractorImpl(final @NonNull Context context) {
-    super(context);
+  protected LockInteractorImpl(final @NonNull PackageManagerWrapper packageManagerWrapper) {
+    super(packageManagerWrapper);
     try {
       messageDigest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {

@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
@@ -57,12 +56,12 @@ final class LockInfoPresenterImpl extends AppIconLoaderPresenterImpl<LockInfoPre
     unsubPopulateList();
 
     // Filter out the lockscreen and crashlog entries
-    final Observable<List<ActivityInfo>> activityInfoObservable =
-        lockInfoInteractor.getPackageActivities(packageName).filter(activityInfo -> {
-          final String name = activityInfo.name;
-          return !name.equalsIgnoreCase(LockScreenActivity.class.getName())
-              && !name.equalsIgnoreCase(CrashLogActivity.class.getName());
-        }).toList();
+    final Observable<List<String>> activityInfoObservable =
+        lockInfoInteractor.getPackageActivities(packageName)
+            .filter(
+                activityEntry -> !activityEntry.equalsIgnoreCase(LockScreenActivity.class.getName())
+                    && !activityEntry.equalsIgnoreCase(CrashLogActivity.class.getName()))
+            .toList();
 
     // Zip together the lists into a list of ActivityEntry objects
     populateListSubscription =
@@ -71,8 +70,7 @@ final class LockInfoPresenterImpl extends AppIconLoaderPresenterImpl<LockInfoPre
               final List<ActivityEntry> entries = new ArrayList<>();
               // KLUDGE super ugly.
               Timber.d("Search set for locked activities");
-              for (final ActivityInfo info : activityInfos) {
-                final String name = info.name;
+              for (final String name : activityInfos) {
                 PadLockEntry foundEntry = null;
                 int foundLocation = -1;
                 for (int i = 0; i < padLockEntries.size(); ++i) {
