@@ -97,11 +97,11 @@ public final class PadLockService extends AccessibilityService
       return;
     }
 
-    lockActivity.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
-    lockActivity.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
-
     final String packageName = entry.packageName();
     final String activityName = entry.activityName();
+
+    // Multiple task flag is needed to launch multiple lock screens on N
+    lockActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
     lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
     lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
 
@@ -123,7 +123,6 @@ public final class PadLockService extends AccessibilityService
     super.onServiceConnected();
     Timber.d("onServiceConnected");
     lockActivity = new Intent(this, LockScreenActivity.class);
-    lockActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     DaggerLockServiceComponent.builder()
         .padLockComponent(PadLock.padLockComponent(this))
         .build()

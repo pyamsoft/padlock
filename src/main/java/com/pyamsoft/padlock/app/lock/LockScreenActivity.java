@@ -154,9 +154,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     failCount = 0;
   }
 
-  @Override public void finish() {
-    Timber.d("Finishing LockActivity");
-    super.finish();
+  @Override public void finishAndRemoveTask() {
+    super.finishAndRemoveTask();
+    Timber.d("Finish and Remove");
     overridePendingTransition(0, 0);
   }
 
@@ -205,7 +205,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     PadLockService.passLockScreen();
-    finish();
+    finishAndRemoveTask();
   }
 
   @Override public void onSubmitFailure() {
@@ -241,8 +241,8 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
       assert excludeDataHolder != null;
       excludeDataHolder.put(0, shouldExcludeEntry());
     } else {
-      DataHolderFragment.remove(this, Long.class);
-      DataHolderFragment.remove(this, Boolean.class);
+      DataHolderFragment.remove(this, "ignore_data");
+      DataHolderFragment.remove(this, "exclude_data");
     }
 
     Timber.d("onSaveInstanceState");
