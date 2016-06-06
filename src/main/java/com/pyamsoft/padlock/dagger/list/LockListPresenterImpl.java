@@ -16,9 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,7 +29,6 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.PresenterImpl;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -96,8 +93,8 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
     unsubscribePopulateList();
 
     Timber.d("Get package info list");
-    final Observable<List<PackageInfo>> packageInfoObservable =
-        lockListInteractor.getPackageInfoList();
+    final Observable<List<ApplicationInfo>> packageInfoObservable =
+        lockListInteractor.getApplicationInfoList();
 
     Timber.d("Get padlock entry list");
     final Observable<List<PadLockEntry>> padlockEntryObservable =
@@ -106,16 +103,16 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
     final PackageManager packageManager = lockListInteractor.getPackageManager();
 
     populateListSubscription = Observable.zip(packageInfoObservable, padlockEntryObservable,
-        (packageInfos, padLockEntries) -> {
+        (applicationInfos, padLockEntries) -> {
 
           final List<AppEntry> appEntries = new ArrayList<>();
           // KLUDGE super ugly.
-          for (final PackageInfo packageInfo : packageInfos) {
+          for (final ApplicationInfo applicationInfo : applicationInfos) {
             PadLockEntry foundEntry = null;
             int foundLocation = -1;
             for (int i = 0; i < padLockEntries.size(); ++i) {
               final PadLockEntry padLockEntry = padLockEntries.get(i);
-              if (padLockEntry.packageName().equals(packageInfo.packageName)) {
+              if (padLockEntry.packageName().equals(applicationInfo.packageName)) {
                 foundEntry = padLockEntry;
                 foundLocation = i;
                 break;
@@ -128,7 +125,7 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
             }
 
             final AppEntry appEntry =
-                createFromPackageInfo(packageManager, packageInfo.applicationInfo, foundEntry != null);
+                createFromPackageInfo(packageManager, applicationInfo, foundEntry != null);
             Timber.d("Add AppEntry: %s", appEntry);
             appEntries.add(appEntry);
           }
@@ -169,31 +166,11 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
       Timber.e("no application info");
       return null;
     }
-    PackageInfo packageInfo;
-    try {
-      packageInfo = packageManager.getPackageInfo(info.packageName, PackageManager.GET_ACTIVITIES);
-    } catch (PackageManager.NameNotFoundException e) {
-      Timber.e(e, "ERROR in createFromPackageInfo");
-      packageInfo = null;
-    }
-
-    List<ActivityInfo> infoList;
-    if (packageInfo == null) {
-      infoList = new ArrayList<>();
-    } else {
-      final ActivityInfo[] infos = packageInfo.activities;
-      if (infos == null) {
-        infoList = new ArrayList<>();
-      } else {
-        infoList = Arrays.asList(infos);
-      }
-    }
 
     Timber.d("Create AppEntry from package info: %s", info.packageName);
     return AppEntry.builder()
         .name(info.loadLabel(packageManager).toString())
         .packageName(info.packageName)
-        .activities(infoList)
         .system(lockListInteractor.isSystemApplication(info))
         .locked(locked)
         .build();

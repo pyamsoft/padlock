@@ -16,19 +16,17 @@
 
 package com.pyamsoft.padlock.app.list.info;
 
-import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.ImageLoadPresenter;
 import com.pyamsoft.padlock.app.list.ImageLoadView;
 import com.pyamsoft.padlock.app.list.LockListCommon;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.pydroid.base.Presenter;
-import java.util.List;
 
 public interface LockInfoPresenter
     extends Presenter<LockInfoPresenter.LockInfoView>, ImageLoadPresenter {
 
-  void populateList(@NonNull String packageName, @NonNull List<ActivityInfo> activities);
+  void populateList(@NonNull String packageName);
 
   interface LockInfoView extends LockListCommon, ImageLoadView {
 

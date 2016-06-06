@@ -16,10 +16,8 @@
 
 package com.pyamsoft.padlock.model;
 
-import android.content.pm.ActivityInfo;
 import android.os.Parcelable;
 import com.google.auto.value.AutoValue;
-import java.util.List;
 
 @AutoValue public abstract class AppEntry implements Parcelable {
 
@@ -35,8 +33,6 @@ import java.util.List;
 
   public abstract String packageName();
 
-  public abstract List<ActivityInfo> activities();
-
   public abstract boolean system();
 
   public abstract boolean locked();
@@ -46,8 +42,6 @@ import java.util.List;
     public abstract Builder name(String s);
 
     public abstract Builder packageName(String s);
-
-    public abstract Builder activities(List<ActivityInfo> l);
 
     public abstract Builder system(boolean b);
 

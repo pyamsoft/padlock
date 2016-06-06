@@ -214,7 +214,7 @@ public class LockInfoDialog extends RetainedDialogFragment
     Timber.d("Repopulate list");
     assert presenter != null;
     assert appEntry != null;
-    presenter.populateList(appEntry.packageName(), appEntry.activities());
+    presenter.populateList(appEntry.packageName());
   }
 
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
