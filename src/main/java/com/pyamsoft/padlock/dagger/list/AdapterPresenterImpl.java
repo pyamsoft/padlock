@@ -31,17 +31,13 @@ abstract class AdapterPresenterImpl<I, VH extends RecyclerView.ViewHolder>
     extends AppIconLoaderPresenterImpl<AdapterPresenter.AdapterView<VH>>
     implements AdapterPresenter<I, VH> {
 
-  @NonNull private final Scheduler ioScheduler;
-  @NonNull private final Scheduler mainScheduler;
   @NonNull private final AdapterInteractor<I> adapterInteractor;
   @NonNull private final CompositeSubscription compositeSubscription;
 
   protected AdapterPresenterImpl(@NonNull AdapterInteractor<I> adapterInteractor,
-      @NonNull @Named("io") Scheduler ioScheduler,
-      @NonNull @Named("main") Scheduler mainScheduler) {
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
     super(adapterInteractor, mainScheduler, ioScheduler);
-    this.ioScheduler = ioScheduler;
-    this.mainScheduler = mainScheduler;
     this.adapterInteractor = adapterInteractor;
     compositeSubscription = new CompositeSubscription();
   }
@@ -76,16 +72,16 @@ abstract class AdapterPresenterImpl<I, VH extends RecyclerView.ViewHolder>
   @Override public void loadApplicationIcon(@NonNull VH holder, @NonNull String packageName) {
     final WeakReference<VH> weakViewHolder = new WeakReference<>(holder);
     final Subscription subscription = adapterInteractor.loadPackageIcon(packageName)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
+        .subscribeOn(getIoScheduler())
+        .observeOn(getMainScheduler())
         .subscribe(drawable -> {
-          final AdapterView<VH> view = (AdapterView<VH>) getView();
+          final AdapterView<VH> view = getView();
           final VH viewHolder = weakViewHolder.get();
           if (view != null && viewHolder != null) {
             view.onApplicationIconLoadedSuccess(viewHolder, drawable);
           }
         }, throwable -> {
-          final AdapterView<VH> view = (AdapterView<VH>) getView();
+          final AdapterView<VH> view = getView();
           final VH viewHolder = weakViewHolder.get();
           if (view != null && viewHolder != null) {
             view.onApplicationIconLoadedError(viewHolder);

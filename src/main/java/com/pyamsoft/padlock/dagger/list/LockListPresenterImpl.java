@@ -24,10 +24,10 @@ import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenterImpl;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.base.PresenterImpl;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -38,13 +38,11 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockList>
+final class LockListPresenterImpl extends SchedulerPresenterImpl<LockListPresenter.LockList>
     implements LockListPresenter {
 
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
-  @NonNull private final Scheduler mainScheduler;
-  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
   @NonNull private Subscription pinEntryBusSubscription = Subscriptions.empty();
@@ -54,10 +52,9 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
       final @NonNull LockServiceStateInteractor stateInteractor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
+    super(mainScheduler, ioScheduler);
     this.lockListInteractor = lockListInteractor;
     this.stateInteractor = stateInteractor;
-    this.mainScheduler = mainScheduler;
-    this.ioScheduler = ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -137,8 +134,8 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
         })
         .concatMap(Observable::from)
         .filter(appEntry -> appEntry != null)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
+        .subscribeOn(getIoScheduler())
+        .observeOn(getMainScheduler())
         .subscribe(appEntry -> {
           final LockList lockList = getView();
           if (lockList != null) {

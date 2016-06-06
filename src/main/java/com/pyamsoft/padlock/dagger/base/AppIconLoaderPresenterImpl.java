@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.dagger.base;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
-import com.pyamsoft.pydroid.base.PresenterImpl;
 import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
@@ -27,20 +26,17 @@ import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 public abstract class AppIconLoaderPresenterImpl<I extends AppIconLoaderView>
-    extends PresenterImpl<I> implements AppIconLoaderPresenter<I> {
+    extends SchedulerPresenterImpl<I> implements AppIconLoaderPresenter<I> {
 
   @NonNull private final AppIconLoaderInteractor interactor;
-  @NonNull private final Scheduler mainScheduler;
-  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
 
   protected AppIconLoaderPresenterImpl(@NonNull AppIconLoaderInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
+    super(mainScheduler, ioScheduler);
     this.interactor = interactor;
-    this.mainScheduler = mainScheduler;
-    this.ioScheduler = ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -50,8 +46,8 @@ public abstract class AppIconLoaderPresenterImpl<I extends AppIconLoaderView>
 
   @Override public void loadApplicationIcon(@NonNull String packageName) {
     loadIconSubscription = interactor.loadPackageIcon(packageName)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
+        .subscribeOn(getIoScheduler())
+        .observeOn(getMainScheduler())
         .subscribe(drawable -> {
           final AppIconLoaderView loaderView = getView();
           if (loaderView != null) {

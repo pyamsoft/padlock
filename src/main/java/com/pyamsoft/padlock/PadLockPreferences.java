@@ -16,87 +16,34 @@
 
 package com.pyamsoft.padlock;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.pydroid.base.ApplicationPreferences;
 
-public class PadLockPreferences extends ApplicationPreferences {
+public interface PadLockPreferences {
 
-  @NonNull private static final String IS_SYSTEM = "is_system";
-  @NonNull private static final String MASTER_PASSWORD = "master_password";
-  @NonNull private static final String AGREED = "agreed";
-  @NonNull private static final String ONBOARD = "onboard";
-  @NonNull private final String ignoreTimeKey;
-  @NonNull private final String ignoreTimeDefault;
-  @NonNull private final String timeoutTimeKey;
-  @NonNull private final String timeoutTimeDefault;
-  @NonNull private final String lockPackageChangeKey;
-  @NonNull private final String lockDeviceLockedKey;
-  private final boolean lockPackageChangeDefault;
-  private final boolean lockDeviceLockedDefault;
+  @CheckResult boolean getLockOnDeviceLocked();
 
-  public PadLockPreferences(final @NonNull Context context) {
-    super(context);
-    final Context appContext = context.getApplicationContext();
-    final Resources res = appContext.getResources();
-    ignoreTimeKey = appContext.getString(R.string.ignore_time_key);
-    ignoreTimeDefault = appContext.getString(R.string.ignore_time_default);
-    timeoutTimeKey = appContext.getString(R.string.timeout_time_key);
-    timeoutTimeDefault = appContext.getString(R.string.timeout_time_default);
-    lockPackageChangeKey = appContext.getString(R.string.lock_package_change_key);
-    lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default);
-    lockDeviceLockedKey = appContext.getString(R.string.lock_device_locked_key);
-    lockDeviceLockedDefault = res.getBoolean(R.bool.lock_device_locked_default);
-  }
+  @CheckResult long getDefaultIgnoreTime();
 
-  @CheckResult public final boolean getLockOnDeviceLocked() {
-    return get(lockDeviceLockedKey, lockDeviceLockedDefault);
-  }
+  @CheckResult long getTimeoutPeriod();
 
-  @CheckResult public final long getDefaultIgnoreTime() {
-    return Long.parseLong(get(ignoreTimeKey, ignoreTimeDefault));
-  }
+  @CheckResult boolean getLockOnPackageChange();
 
-  @CheckResult public final long getTimeoutPeriod() {
-    return Long.parseLong(get(timeoutTimeKey, timeoutTimeDefault));
-  }
+  @CheckResult boolean isSystemVisible();
 
-  @CheckResult public final boolean getLockOnPackageChange() {
-    return get(lockPackageChangeKey, lockPackageChangeDefault);
-  }
+  void setSystemVisible(boolean b);
 
-  @CheckResult public final boolean isSystemVisible() {
-    return get(IS_SYSTEM, false);
-  }
+  @CheckResult String getMasterPassword();
 
-  public final void setSystemVisible(final boolean b) {
-    put(IS_SYSTEM, b);
-  }
+  void setMasterPassword(@Nullable String masterPassword);
 
-  @CheckResult public final String getMasterPassword() {
-    return get(MASTER_PASSWORD, null);
-  }
+  @CheckResult boolean hasAgreed();
 
-  public final void setMasterPassword(final @Nullable String masterPassword) {
-    put(MASTER_PASSWORD, masterPassword);
-  }
+  void setAgreed();
 
-  @CheckResult public boolean hasAgreed() {
-    return get(AGREED, false);
-  }
+  @CheckResult boolean isOnBoard();
 
-  public void setAgreed() {
-    put(AGREED, true);
-  }
+  void setOnBoard();
 
-  @CheckResult public boolean isOnBoard() {
-    return get(ONBOARD, false);
-  }
-
-  public void setOnBoard() {
-    put(ONBOARD, true);
-  }
+  void clearAll();
 }

@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.dagger.db;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.pydroid.base.PresenterImpl;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenterImpl;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;
@@ -28,11 +28,10 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements DBPresenter {
+final class DBPresenterImpl extends SchedulerPresenterImpl<DBPresenter.DBView>
+    implements DBPresenter {
 
   @NonNull private final DBInteractor dbInteractor;
-  @NonNull private final Scheduler mainScheduler;
-  @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription dbPackageSubscription = Subscriptions.empty();
   @NonNull private Subscription dbActivitySubscription = Subscriptions.empty();
@@ -40,9 +39,8 @@ final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements
   @Inject public DBPresenterImpl(final @NonNull DBInteractor dbInteractor,
       final @NonNull @Named("main") Scheduler mainScheduler,
       final @NonNull @Named("io") Scheduler ioScheduler) {
+    super(mainScheduler, ioScheduler);
     this.dbInteractor = dbInteractor;
-    this.mainScheduler = mainScheduler;
-    this.ioScheduler = ioScheduler;
   }
 
   @Override public void onDestroyView() {
@@ -76,7 +74,7 @@ final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements
         dbInteractor.deleteEntry(packageName);
       }
       return Observable.just(newState);
-    }).subscribeOn(ioScheduler).observeOn(mainScheduler).subscribe(created -> {
+    }).subscribeOn(getIoScheduler()).observeOn(getMainScheduler()).subscribe(created -> {
       Timber.d("onNext in DBPresenterImpl with data: ", created);
       final DBView dbView = getView();
       if (dbView != null) {
@@ -108,7 +106,7 @@ final class DBPresenterImpl extends PresenterImpl<DBPresenter.DBView> implements
         dbInteractor.deleteEntry(packageName, activity);
       }
       return Observable.just(checked);
-    }).subscribeOn(ioScheduler).observeOn(mainScheduler).subscribe(created -> {
+    }).subscribeOn(getIoScheduler()).observeOn(getMainScheduler()).subscribe(created -> {
       Timber.d("onNext in DBPresenterImpl with data: ", created);
       final DBView dbView = getView();
       if (dbView != null) {
