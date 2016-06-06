@@ -51,7 +51,7 @@
 
     <!-- Lock Screen Activity -->
     <activity
-        android:name=".app.lockscreen.LockScreenActivity"
+        android:name=".app.lock.LockScreenActivity"
         android:excludeFromRecents="true"
         android:exported="false"
         android:launchMode="singleInstance"

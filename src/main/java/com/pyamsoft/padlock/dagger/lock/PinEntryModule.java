@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.service;
+package com.pyamsoft.padlock.dagger.lock;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.dagger.lock.MasterPinInteractor;
-import javax.inject.Inject;
+import com.pyamsoft.padlock.app.lock.PinEntryPresenter;
+import com.pyamsoft.padlock.dagger.ActivityScope;
+import dagger.Module;
+import dagger.Provides;
 
-final class LockServiceStateInteractorImpl implements LockServiceStateInteractor {
+@Module public class PinEntryModule {
 
-  @NonNull private final MasterPinInteractor pinInteractor;
-
-  @Inject public LockServiceStateInteractorImpl(final @NonNull MasterPinInteractor pinInteractor) {
-    this.pinInteractor = pinInteractor;
+  @ActivityScope @Provides PinEntryPresenter providePinEntryPresenter(
+      final PinEntryPresenterImpl presenter) {
+    return presenter;
   }
 
-  @CheckResult @Override public boolean isServiceEnabled() {
-    return pinInteractor.getMasterPin() != null;
+  @ActivityScope @Provides PinEntryInteractor providePinEntryInteractor(
+      final PinEntryInteractorImpl interactor) {
+    return interactor;
   }
 }
