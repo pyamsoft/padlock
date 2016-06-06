@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.list.info;
 
 import android.content.pm.ActivityInfo;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.info.LockInfoPresenter;
 import com.pyamsoft.padlock.app.lockscreen.LockScreenActivity;
@@ -42,6 +43,7 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
   @NonNull private final Scheduler ioScheduler;
 
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
+  @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
 
   @Inject public LockInfoPresenterImpl(final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("main") Scheduler mainScheduler,
@@ -54,6 +56,7 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
   @Override public void onDestroyView() {
     super.onDestroyView();
     unsubPopulateList();
+    unsubLoadIcon();
   }
 
   @Override
@@ -138,6 +141,31 @@ final class LockInfoPresenterImpl extends PresenterImpl<LockInfoPresenter.LockIn
     if (!populateListSubscription.isUnsubscribed()) {
       Timber.d("Unsub from populate List event");
       populateListSubscription.unsubscribe();
+    }
+  }
+
+  @Override public void loadApplicationIcon(@NonNull String packageName) {
+    loadIconSubscription = lockInfoInteractor.loadPackageIcon(packageName)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
+        .subscribe(drawable -> {
+          final LockInfoView lockInfoView = getView();
+          if (lockInfoView != null) {
+            lockInfoView.onApplicationIconLoadedSuccess(drawable);
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError");
+          final LockInfoView lockInfoView = getView();
+          if (lockInfoView != null) {
+            lockInfoView.onApplicationIconLoadedError();
+          }
+        });
+  }
+
+  private void unsubLoadIcon() {
+    if (!loadIconSubscription.isUnsubscribed()) {
+      Timber.d("Unsub from load icon event");
+      loadIconSubscription.unsubscribe();
     }
   }
 }

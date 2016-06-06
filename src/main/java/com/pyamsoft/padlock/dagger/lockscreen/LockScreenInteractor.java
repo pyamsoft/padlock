@@ -19,10 +19,10 @@ package com.pyamsoft.padlock.dagger.lockscreen;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
-import com.pyamsoft.padlock.dagger.lock.LockInteractor;
+import com.pyamsoft.padlock.dagger.lock.IconLoadInteractor;
 import rx.Observable;
 
-public interface LockScreenInteractor extends LockInteractor {
+public interface LockScreenInteractor extends IconLoadInteractor {
 
   @CheckResult @WorkerThread @NonNull Observable<Boolean> unlockEntry(@NonNull String packageName,
       @NonNull String activityName, @NonNull String attempt, boolean shouldExclude,

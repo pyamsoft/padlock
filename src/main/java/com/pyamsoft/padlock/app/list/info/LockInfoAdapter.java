@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.list.info;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -34,14 +35,16 @@ import com.pyamsoft.padlock.model.AppEntry;
 import timber.log.Timber;
 
 public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.ViewHolder>
-    implements LockListItem<ActivityEntry>, DBPresenter.DBView, AdapterPresenter.AdapterView {
+    implements LockListItem<ActivityEntry>, DBPresenter.DBView,
+    AdapterPresenter.AdapterView<LockInfoAdapter.ViewHolder> {
 
-  @NonNull private final AdapterPresenter<ActivityEntry> adapterPresenter;
+  @NonNull private final AdapterPresenter<ActivityEntry, ViewHolder> adapterPresenter;
   @NonNull private final DBPresenter dbPresenter;
   @NonNull private final AppEntry appEntry;
 
   public LockInfoAdapter(@NonNull AppEntry appEntry,
-      @NonNull AdapterPresenter<ActivityEntry> adapterPresenter, @NonNull DBPresenter dbPresenter) {
+      @NonNull AdapterPresenter<ActivityEntry, ViewHolder> adapterPresenter,
+      @NonNull DBPresenter dbPresenter) {
     this.appEntry = appEntry;
     this.adapterPresenter = adapterPresenter;
     this.dbPresenter = dbPresenter;
@@ -127,7 +130,16 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
     // TODO handle exception, show error dialog or something
   }
 
-  static final class ViewHolder extends RecyclerView.ViewHolder {
+  @Override public void onApplicationIconLoadedSuccess(@NonNull ViewHolder holder,
+      @NonNull Drawable drawable) {
+    // TODO handle?
+  }
+
+  @Override public void onApplicationIconLoadedError(@NonNull ViewHolder holder) {
+    // TODO handle?
+  }
+
+  public static final class ViewHolder extends RecyclerView.ViewHolder {
 
     @BindView(R.id.lock_info_activity_locked) CheckedTextView checkBox;
 

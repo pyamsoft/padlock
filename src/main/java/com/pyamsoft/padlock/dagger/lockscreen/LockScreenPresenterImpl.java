@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.lockscreen;
 
-import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -43,12 +42,11 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   @NonNull private Subscription lockSubscription = Subscriptions.empty();
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
 
-  @Inject public LockScreenPresenterImpl(final @NonNull Context context,
-      @NonNull final LockScreenInteractor lockScreenInteractor,
+  @Inject public LockScreenPresenterImpl(@NonNull final LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("main") Scheduler mainScheduler, @NonNull @Named("io") Scheduler ioScheduler,
       @Named("ignore_none") long ignoreTimeNone, @Named("ignore_five") long ignoreTimeFive,
       @Named("ignore_ten") long ignoreTimeTen, @Named("ignore_thirty") long ignoreTimeThirty) {
-    super(context.getApplicationContext(), lockScreenInteractor, mainScheduler, ioScheduler);
+    super(lockScreenInteractor, mainScheduler, ioScheduler);
     this.ignoreTimeNone = ignoreTimeNone;
     this.ignoreTimeFive = ignoreTimeFive;
     this.ignoreTimeTen = ignoreTimeTen;

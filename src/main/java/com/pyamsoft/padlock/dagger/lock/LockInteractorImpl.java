@@ -17,8 +17,6 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
@@ -26,13 +24,13 @@ import android.util.Base64;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import rx.Observable;
 
-public abstract class LockInteractorImpl implements LockInteractor {
+public abstract class LockInteractorImpl extends IconLoadInteractorImpl {
 
   @NonNull private final MessageDigest messageDigest;
 
-  protected LockInteractorImpl() {
+  protected LockInteractorImpl(final @NonNull Context context) {
+    super(context);
     try {
       messageDigest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {
@@ -44,21 +42,6 @@ public abstract class LockInteractorImpl implements LockInteractor {
     messageDigest.reset();
     final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
     return Base64.encodeToString(output, Base64.DEFAULT).trim();
-  }
-
-  @NonNull @Override @WorkerThread @CheckResult
-  public final Observable<Drawable> loadPackageIcon(@NonNull Context context,
-      final @NonNull String packageName) {
-    return Observable.defer(() -> {
-      final PackageManager packageManager = context.getApplicationContext().getPackageManager();
-      Drawable image;
-      try {
-        image = packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager);
-      } catch (PackageManager.NameNotFoundException e) {
-        image = packageManager.getDefaultActivityIcon();
-      }
-      return Observable.just(image);
-    });
   }
 
   @CheckResult @WorkerThread protected final boolean checkSubmissionAttempt(@NonNull String attempt,

@@ -20,8 +20,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
@@ -106,7 +104,6 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
         lockListInteractor.getAppEntryList();
 
     final PackageManager packageManager = lockListInteractor.getPackageManager();
-    final Drawable defaultIcon = packageManager.getDefaultActivityIcon();
 
     populateListSubscription = Observable.zip(packageInfoObservable, padlockEntryObservable,
         (packageInfos, padLockEntries) -> {
@@ -131,7 +128,7 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
             }
 
             final AppEntry appEntry =
-                createFromPackageInfo(packageManager, packageInfo, defaultIcon, foundEntry != null);
+                createFromPackageInfo(packageManager, packageInfo.applicationInfo, foundEntry != null);
             Timber.d("Add AppEntry: %s", appEntry);
             appEntries.add(appEntry);
           }
@@ -165,20 +162,13 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
         });
   }
 
-  @Nullable private AppEntry createFromPackageInfo(PackageManager packageManager, PackageInfo info,
-      Drawable defaultIcon, boolean locked) {
-    Drawable icon;
-    final ApplicationInfo appInfo = info.applicationInfo;
-    if (appInfo == null) {
+  @Nullable
+  private AppEntry createFromPackageInfo(PackageManager packageManager, ApplicationInfo info,
+      boolean locked) {
+    if (info == null) {
       Timber.e("no application info");
       return null;
     }
-    if (appInfo.icon != 0) {
-      icon = appInfo.loadIcon(packageManager);
-    } else {
-      icon = defaultIcon;
-    }
-
     PackageInfo packageInfo;
     try {
       packageInfo = packageManager.getPackageInfo(info.packageName, PackageManager.GET_ACTIVITIES);
@@ -201,11 +191,10 @@ final class LockListPresenterImpl extends PresenterImpl<LockListPresenter.LockLi
 
     Timber.d("Create AppEntry from package info: %s", info.packageName);
     return AppEntry.builder()
-        .name(appInfo.loadLabel(packageManager).toString())
+        .name(info.loadLabel(packageManager).toString())
         .packageName(info.packageName)
         .activities(infoList)
-        .icon(((BitmapDrawable) icon).getBitmap())
-        .system(lockListInteractor.isSystemApplication(appInfo))
+        .system(lockListInteractor.isSystemApplication(info))
         .locked(locked)
         .build();
   }

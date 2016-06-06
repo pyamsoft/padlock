@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
@@ -37,14 +38,16 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import timber.log.Timber;
 
 public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.ViewHolder>
-    implements LockListItem<AppEntry>, DBPresenter.DBView, AdapterPresenter.AdapterView {
+    implements LockListItem<AppEntry>, DBPresenter.DBView,
+    AdapterPresenter.AdapterView<LockListAdapter.ViewHolder> {
 
-  @NonNull private final AdapterPresenter<AppEntry> adapterPresenter;
+  @NonNull private final AdapterPresenter<AppEntry, ViewHolder> adapterPresenter;
   @NonNull private final Fragment fragment;
   @NonNull private final DBPresenter dbPresenter;
 
   public LockListAdapter(@NonNull LockListFragment fragment,
-      @NonNull AdapterPresenter<AppEntry> adapterPresenter, @NonNull DBPresenter dbPresenter) {
+      @NonNull AdapterPresenter<AppEntry, ViewHolder> adapterPresenter,
+      @NonNull DBPresenter dbPresenter) {
     this.fragment = fragment;
     this.dbPresenter = dbPresenter;
     this.adapterPresenter = adapterPresenter;
@@ -84,7 +87,8 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     final AppEntry entry = adapterPresenter.get(position);
     removeViewActionListeners(holder);
     holder.name.setText(entry.name());
-    holder.icon.setImageBitmap(entry.icon());
+
+    adapterPresenter.loadApplicationIcon(holder, entry.packageName());
 
     holder.toggle.setChecked(entry.locked());
     final CompoundButton.OnCheckedChangeListener listener =
@@ -168,7 +172,16 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     DBProgressDialog.remove(fragment.getFragmentManager());
   }
 
-  static final class ViewHolder extends RecyclerView.ViewHolder {
+  @Override public void onApplicationIconLoadedSuccess(@NonNull ViewHolder holder,
+      @NonNull Drawable drawable) {
+    holder.icon.setImageDrawable(drawable);
+  }
+
+  @Override public void onApplicationIconLoadedError(@NonNull ViewHolder holder) {
+    // TODO handle
+  }
+
+  public static final class ViewHolder extends RecyclerView.ViewHolder {
 
     @BindView(R.id.lock_list_title) TextView name;
     @BindView(R.id.lock_list_icon) ImageView icon;

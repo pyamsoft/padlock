@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.pinentry;
+package com.pyamsoft.padlock.dagger.lock;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.dagger.lock.IconLoadInteractor;
-import com.pyamsoft.padlock.model.event.PinEntryEvent;
+import android.support.annotation.WorkerThread;
 import rx.Observable;
 
-interface PinEntryInteractor extends IconLoadInteractor {
+public interface IconLoadInteractor {
 
-  @CheckResult @NonNull Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt);
+  @CheckResult @NonNull @WorkerThread Observable<Drawable> loadPackageIcon(
+      @NonNull String packageName);
 }

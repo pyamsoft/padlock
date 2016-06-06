@@ -19,16 +19,18 @@ package com.pyamsoft.padlock.dagger.list.info;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
+import com.pyamsoft.padlock.dagger.lock.IconLoadInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
 
-final class LockInfoInteractorImpl implements LockInfoInteractor {
+final class LockInfoInteractorImpl extends IconLoadInteractorImpl implements LockInfoInteractor {
 
   @NonNull private final Context appContext;
 
   @Inject public LockInfoInteractorImpl(final @NonNull Context context) {
+    super(context);
     appContext = context.getApplicationContext();
   }
 

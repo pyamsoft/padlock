@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.pinentry;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.pinentry.PinEntryDialog;
 import com.pyamsoft.padlock.app.pinentry.PinEntryPresenter;
@@ -36,11 +35,10 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
 
   @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
 
-  @Inject
-  public PinEntryPresenterImpl(final Context context, @NonNull final PinEntryInteractor interactor,
+  @Inject public PinEntryPresenterImpl(@NonNull final PinEntryInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
-    super(context.getApplicationContext(), interactor, mainScheduler, ioScheduler);
+    super(interactor, mainScheduler, ioScheduler);
     this.interactor = interactor;
   }
 

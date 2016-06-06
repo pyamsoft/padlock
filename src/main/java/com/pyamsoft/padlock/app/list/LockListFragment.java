@@ -73,7 +73,7 @@ public final class LockListFragment extends Fragment
   @Nullable @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @Nullable @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
   @Nullable @Inject LockListPresenter presenter;
-  @Nullable @Inject AdapterPresenter<AppEntry> adapterPresenter;
+  @Nullable @Inject AdapterPresenter<AppEntry, LockListAdapter.ViewHolder> adapterPresenter;
   @Nullable @Inject DBPresenter dbPresenter;
   @Nullable private DataHolderFragment<Presenter> presenterDataHolder;
   @Nullable private LockListAdapter adapter;
@@ -186,8 +186,10 @@ public final class LockListFragment extends Fragment
 
     final LockListPresenter lockListPresenter =
         (LockListPresenter) presenterDataHolder.pop(KEY_PRESENTER);
-    @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry> entryAdapterPresenter =
-        (AdapterPresenter<AppEntry>) presenterDataHolder.pop(KEY_ADAPTER_PRESENTER);
+    @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry, LockListAdapter.ViewHolder>
+        entryAdapterPresenter =
+        (AdapterPresenter<AppEntry, LockListAdapter.ViewHolder>) presenterDataHolder.pop(
+            KEY_ADAPTER_PRESENTER);
     final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
     if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
       Timber.d("Create new presenters");
