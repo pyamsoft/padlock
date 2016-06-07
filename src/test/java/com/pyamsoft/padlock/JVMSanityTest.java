@@ -16,15 +16,26 @@
 
 package com.pyamsoft.padlock;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+public class JVMSanityTest {
 
-/**
- * To work on unit tests, switch the Test Artifact in the Build Variants view.
- */
-public class ExampleUnitTest {
-  @Test public void addition_isCorrect() throws Exception {
-    assertEquals(4, 2 + 2);
+  /**
+   * Assert that the JVM does sane addition
+   *
+   * @throws Exception
+   */
+  @Test public void test_additionIsCorrect() throws Exception {
+    Assert.assertEquals(4, 2 + 2);
+  }
+
+  /**
+   * Assert that the JVM does sane subtraction
+   *
+   * @throws Exception
+   */
+  @Test public void test_subtractionIsCorrect() throws Exception {
+    Assert.assertEquals(2, 4 - 2);
   }
 }
