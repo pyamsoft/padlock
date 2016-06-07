@@ -57,8 +57,12 @@ android {
     targetSdkVersion 23
     versionCode 15
     versionName "1.4.0"
+
     // For vector drawables
     vectorDrawables.useSupportLibrary = true
+
+    // For unit tests
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
   }
 
   compileOptions {
