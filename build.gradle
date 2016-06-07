@@ -60,9 +60,6 @@ android {
 
     // For vector drawables
     vectorDrawables.useSupportLibrary = true
-
-    // For unit tests
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
   }
 
   compileOptions {
@@ -157,6 +154,21 @@ dependencies {
 
   // Showcase View
   compile 'com.github.deano2390:MaterialShowcaseView:1.1.0'
+
+  // Android Framework Testing
+  androidTestCompile 'com.android.support:support-annotations:23.4.0'
+  androidTestCompile 'com.android.support.test:runner:0.5'
+  androidTestCompile 'com.android.support.test:rules:0.5'
+  androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
+
+  // Roboelectric for Android on JVM
+  testCompile "org.robolectric:robolectric:3.1"
+
+  // JUnit for unit tests
+  testCompile 'junit:junit:4.12'
+
+  // Mockito for unit tests
+  testCompile 'org.mockito:mockito-core:2.0.54-beta'
 
   // PYDroid 1.7.1
   compile project(':PYDroid')
