@@ -23,6 +23,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.View;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 
 public interface LockViewDelegate extends AppIconLoaderView {
@@ -46,7 +47,7 @@ public interface LockViewDelegate extends AppIconLoaderView {
   void onCreateView(@NonNull LockPresenter presenter, @NonNull Fragment fragment,
       @NonNull View rootView);
 
-  void onStart(@NonNull LockPresenter presenter);
+  void onStart(@NonNull AppIconLoaderPresenter presenter);
 
   void onDestroyView();
 

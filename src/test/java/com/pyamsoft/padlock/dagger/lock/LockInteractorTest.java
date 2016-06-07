@@ -17,11 +17,9 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import com.pyamsoft.padlock.BuildConfig;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -32,8 +30,7 @@ import org.robolectric.annotation.Config;
 public class LockInteractorTest {
 
   @Test public void test_sha256Encode() {
-    final PackageManagerWrapper packageManagerWrapper = Mockito.mock(PackageManagerWrapper.class);
-    final LockInteractor interactor = new LockInteractorImpl(packageManagerWrapper) {
+    final LockInteractor interactor = new LockInteractorImpl() {
 
     };
 

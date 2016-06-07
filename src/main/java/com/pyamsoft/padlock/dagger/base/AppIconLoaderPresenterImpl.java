@@ -19,20 +19,21 @@ package com.pyamsoft.padlock.dagger.base;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
+import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public abstract class AppIconLoaderPresenterImpl<I extends AppIconLoaderView>
+public class AppIconLoaderPresenterImpl<I extends AppIconLoaderView>
     extends SchedulerPresenterImpl<I> implements AppIconLoaderPresenter<I> {
 
   @NonNull private final AppIconLoaderInteractor interactor;
 
   @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
 
-  protected AppIconLoaderPresenterImpl(@NonNull AppIconLoaderInteractor interactor,
+  @Inject protected AppIconLoaderPresenterImpl(@NonNull AppIconLoaderInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);

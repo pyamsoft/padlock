@@ -38,6 +38,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.lock.DaggerLockScreenComponent;
 import com.pyamsoft.padlock.dagger.lock.LockScreenModule;
@@ -58,6 +59,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @Nullable @BindView(R.id.toolbar) Toolbar toolbar;
   @Nullable @BindView(R.id.appbar) AppBarLayout appBarLayout;
 
+  @Nullable @Inject AppIconLoaderPresenter<LockScreen> appIconLoaderPresenter;
   @Nullable @Inject LockScreenPresenter presenter;
   @Nullable @Inject LockViewDelegate lockViewDelegate;
 
@@ -106,6 +108,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     assert presenter != null;
     presenter.onCreateView(this);
 
+    assert appIconLoaderPresenter != null;
+    appIconLoaderPresenter.onCreateView(this);
+
     assert lockViewDelegate != null;
     lockViewDelegate.setTextColor(android.R.color.white);
 
@@ -125,7 +130,8 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     presenter.loadDisplayNameFromPackage();
 
     assert lockViewDelegate != null;
-    lockViewDelegate.onStart(presenter);
+    assert appIconLoaderPresenter != null;
+    lockViewDelegate.onStart(appIconLoaderPresenter);
 
     supportInvalidateOptionsMenu();
   }
@@ -144,6 +150,9 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
     assert presenter != null;
     presenter.onDestroyView();
+
+    assert appIconLoaderPresenter != null;
+    appIconLoaderPresenter.onDestroyView();
 
     assert lockViewDelegate != null;
     lockViewDelegate.onDestroyView();

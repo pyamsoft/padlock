@@ -19,9 +19,8 @@ package com.pyamsoft.padlock.dagger.lock;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractor;
 
-interface LockInteractor extends AppIconLoaderInteractor {
+interface LockInteractor {
 
   @CheckResult @NonNull String encodeSHA256(@NonNull String attempt);
 

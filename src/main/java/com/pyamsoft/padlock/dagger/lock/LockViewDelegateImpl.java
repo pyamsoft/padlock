@@ -36,6 +36,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
 import com.pyamsoft.padlock.app.lock.LockViewDelegate;
 import com.pyamsoft.pydroid.model.AsyncDrawable;
@@ -150,7 +151,7 @@ final class LockViewDelegateImpl implements LockViewDelegate {
     editText.setText("");
   }
 
-  @Override public void onStart(@NonNull final LockPresenter presenter) {
+  @Override public void onStart(@NonNull final AppIconLoaderPresenter presenter) {
     assert packageName != null;
     presenter.loadApplicationIcon(packageName);
   }

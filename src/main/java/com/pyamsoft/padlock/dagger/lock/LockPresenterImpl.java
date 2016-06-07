@@ -18,16 +18,15 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenterImpl;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenterImpl;
 import javax.inject.Named;
 import rx.Scheduler;
 
-abstract class LockPresenterImpl<I extends LockPresenter.LockView>
-    extends AppIconLoaderPresenterImpl<I> implements LockPresenter<I> {
+abstract class LockPresenterImpl<I extends LockPresenter.LockView> extends SchedulerPresenterImpl<I>
+    implements LockPresenter<I> {
 
-  protected LockPresenterImpl(@NonNull final LockInteractor lockInteractor,
-      @NonNull @Named("main") Scheduler mainScheduler,
+  protected LockPresenterImpl(@NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
-    super(lockInteractor, mainScheduler, ioScheduler);
+    super(mainScheduler, ioScheduler);
   }
 }
