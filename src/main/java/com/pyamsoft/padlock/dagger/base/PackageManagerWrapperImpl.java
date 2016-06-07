@@ -43,6 +43,7 @@ public final class PackageManagerWrapperImpl implements PackageManagerWrapper {
     try {
       image = packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager);
     } catch (PackageManager.NameNotFoundException e) {
+      Timber.e(e, "PackageManager error");
       image = packageManager.getDefaultActivityIcon();
     }
     return image;
