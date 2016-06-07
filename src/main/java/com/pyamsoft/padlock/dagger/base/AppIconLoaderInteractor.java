@@ -19,11 +19,10 @@ package com.pyamsoft.padlock.dagger.base;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import rx.Observable;
 
 public interface AppIconLoaderInteractor {
 
-  @CheckResult @NonNull @WorkerThread Observable<Drawable> loadPackageIcon(
+  @CheckResult @NonNull Observable<Drawable> loadPackageIcon(
       @NonNull String packageName);
 }
