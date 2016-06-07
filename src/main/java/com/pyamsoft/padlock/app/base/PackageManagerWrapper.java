@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.base;
 
+import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
@@ -23,7 +24,11 @@ import java.util.List;
 
 public interface PackageManagerWrapper {
 
+  @CheckResult @NonNull String loadPackageLabel(@NonNull ApplicationInfo info);
+
   @CheckResult @NonNull Drawable loadDrawableForPackageOrDefault(@NonNull String packageName);
+
+  @CheckResult @NonNull List<ApplicationInfo> getActiveApplications();
 
   @CheckResult @NonNull List<String> getActivityListForPackage(@NonNull String packageName);
 }

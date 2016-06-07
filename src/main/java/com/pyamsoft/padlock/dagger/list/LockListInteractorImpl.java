@@ -18,12 +18,11 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
-import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
@@ -33,15 +32,13 @@ final class LockListInteractorImpl implements LockListInteractor {
 
   @NonNull private final Context appContext;
   @NonNull private final PadLockPreferences preferences;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
-  @Inject public LockListInteractorImpl(final @NonNull Context context,
-      final @NonNull PadLockPreferences preferences) {
+  @Inject public LockListInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper,
+      final @NonNull Context context, final @NonNull PadLockPreferences preferences) {
+    this.packageManagerWrapper = packageManagerWrapper;
     appContext = context.getApplicationContext();
     this.preferences = preferences;
-  }
-
-  @WorkerThread @NonNull @Override public PackageManager getPackageManager() {
-    return appContext.getPackageManager();
   }
 
   @Override public boolean hasShownOnBoarding() {
@@ -62,12 +59,8 @@ final class LockListInteractorImpl implements LockListInteractor {
 
   @WorkerThread @Override @NonNull
   public Observable<List<ApplicationInfo>> getApplicationInfoList() {
-    return Observable.defer(() -> Observable.from(getPackageManager().getInstalledApplications(0)))
-        .filter(appInfo -> appInfo != null)
-        .filter(appInfo -> appInfo != null && !(!appInfo.enabled || (isSystemApplication(appInfo)
-            && !preferences.isSystemVisible()) || appInfo.packageName.equals(
-            LockServiceInteractor.ANDROID_PACKAGE) || appInfo.packageName.equals(
-            LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE)))
+    return Observable.defer(() -> Observable.from(packageManagerWrapper.getActiveApplications()))
+        .filter(applicationInfo -> !isSystemApplication(applicationInfo) || isSystemVisible())
         .toList();
   }
 
@@ -77,5 +70,9 @@ final class LockListInteractorImpl implements LockListInteractor {
 
   @WorkerThread @Override public boolean isSystemApplication(@NonNull ApplicationInfo info) {
     return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+  }
+
+  @NonNull @Override public String loadPackageLabel(@NonNull ApplicationInfo info) {
+    return packageManagerWrapper.loadPackageLabel(info);
   }
 }

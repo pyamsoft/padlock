@@ -18,26 +18,27 @@ package com.pyamsoft.padlock.dagger.base;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class PackageManagerWrapperImpl implements PackageManagerWrapper {
+public final class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
-  @NonNull private final Context appContext;
+  @NonNull private final PackageManager packageManager;
 
   @Inject public PackageManagerWrapperImpl(@NonNull Context context) {
-    this.appContext = context.getApplicationContext();
+    this.packageManager = context.getApplicationContext().getPackageManager();
   }
 
   @NonNull @Override public Drawable loadDrawableForPackageOrDefault(@NonNull String packageName) {
-    final PackageManager packageManager = appContext.getPackageManager();
     Drawable image;
     try {
       image = packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager);
@@ -48,7 +49,6 @@ public class PackageManagerWrapperImpl implements PackageManagerWrapper {
   }
 
   @NonNull @Override public List<String> getActivityListForPackage(@NonNull String packageName) {
-    final PackageManager packageManager = appContext.getPackageManager();
     final List<String> activityEntries = new ArrayList<>();
     try {
       final PackageInfo packageInfo =
@@ -64,5 +64,45 @@ public class PackageManagerWrapperImpl implements PackageManagerWrapper {
       activityEntries.clear();
     }
     return activityEntries;
+  }
+
+  @NonNull @Override public List<ApplicationInfo> getActiveApplications() {
+    final List<Integer> removeIndexes = new ArrayList<>();
+
+    final List<ApplicationInfo> applicationInfos = packageManager.getInstalledApplications(0);
+    final int size = applicationInfos.size();
+    for (int i = 0; i < size; ++i) {
+      final ApplicationInfo info = applicationInfos.get(i);
+      Timber.d("Application: %s", info.packageName);
+      if (!info.enabled) {
+        Timber.d("Application %s at %d is disabled", info.packageName, i);
+        removeIndexes.add(i);
+        continue;
+      }
+
+      if (info.packageName.equals(LockServiceInteractor.ANDROID_PACKAGE)) {
+        Timber.d("Application %s at %d is Android", info.packageName, i);
+        removeIndexes.add(i);
+        continue;
+      }
+
+      if (info.packageName.equals(LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE)) {
+        Timber.d("Application %s at %d is System UI", info.packageName, i);
+        removeIndexes.add(i);
+      }
+    }
+
+    int removedIndexOffset = 0;
+    for (final int index : removeIndexes) {
+      Timber.d("Remove index at %d", index);
+      applicationInfos.remove(index - removedIndexOffset);
+      ++removedIndexOffset;
+    }
+
+    return applicationInfos;
+  }
+
+  @NonNull @Override public String loadPackageLabel(@NonNull ApplicationInfo info) {
+    return info.loadLabel(packageManager).toString();
   }
 }

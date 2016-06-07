@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
@@ -97,8 +96,6 @@ final class LockListPresenterImpl extends SchedulerPresenterImpl<LockListPresent
     final Observable<List<PadLockEntry>> padlockEntryObservable =
         lockListInteractor.getAppEntryList();
 
-    final PackageManager packageManager = lockListInteractor.getPackageManager();
-
     populateListSubscription = Observable.zip(packageInfoObservable, padlockEntryObservable,
         (applicationInfos, padLockEntries) -> {
 
@@ -121,8 +118,7 @@ final class LockListPresenterImpl extends SchedulerPresenterImpl<LockListPresent
               padLockEntries.remove(foundLocation);
             }
 
-            final AppEntry appEntry =
-                createFromPackageInfo(packageManager, applicationInfo, foundEntry != null);
+            final AppEntry appEntry = createFromPackageInfo(applicationInfo, foundEntry != null);
             Timber.d("Add AppEntry: %s", appEntry);
             appEntries.add(appEntry);
           }
@@ -156,17 +152,10 @@ final class LockListPresenterImpl extends SchedulerPresenterImpl<LockListPresent
         });
   }
 
-  @Nullable
-  private AppEntry createFromPackageInfo(PackageManager packageManager, ApplicationInfo info,
-      boolean locked) {
-    if (info == null) {
-      Timber.e("no application info");
-      return null;
-    }
-
+  @Nullable private AppEntry createFromPackageInfo(@NonNull ApplicationInfo info, boolean locked) {
     Timber.d("Create AppEntry from package info: %s", info.packageName);
     return AppEntry.builder()
-        .name(info.loadLabel(packageManager).toString())
+        .name(lockListInteractor.loadPackageLabel(info))
         .packageName(info.packageName)
         .system(lockListInteractor.isSystemApplication(info))
         .locked(locked)

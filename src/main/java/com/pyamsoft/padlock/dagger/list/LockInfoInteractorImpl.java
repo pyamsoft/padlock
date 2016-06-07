@@ -21,7 +21,6 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
-import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;

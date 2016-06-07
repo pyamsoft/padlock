@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
@@ -31,9 +30,9 @@ interface LockListInteractor {
 
   @CheckResult @WorkerThread @NonNull Observable<List<PadLockEntry>> getAppEntryList();
 
-  @CheckResult @WorkerThread @NonNull PackageManager getPackageManager();
-
   @CheckResult boolean isSystemApplication(@NonNull ApplicationInfo info);
+
+  @CheckResult @NonNull String loadPackageLabel(@NonNull ApplicationInfo info);
 
   @CheckResult boolean hasShownOnBoarding();
 
