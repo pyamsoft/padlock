@@ -154,6 +154,6 @@ dependencies {
   // Showcase View
   compile 'com.github.deano2390:MaterialShowcaseView:1.1.0'
 
-  // PYDroid 1.7.0
+  // PYDroid 1.7.1
   compile project(':PYDroid')
 }
