@@ -21,12 +21,14 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import javax.inject.Inject;
 import rx.Observable;
 
-public abstract class AppIconLoaderInteractorImpl implements AppIconLoaderInteractor {
+public class AppIconLoaderInteractorImpl implements AppIconLoaderInteractor {
 
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
+  @Inject
   protected AppIconLoaderInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper) {
     this.packageManagerWrapper = packageManagerWrapper;
   }

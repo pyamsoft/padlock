@@ -36,6 +36,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.dagger.lock.DaggerPinEntryComponent;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.model.event.RxBus;
@@ -49,6 +50,7 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
   @NonNull private static final String ARG_ACTIVITY = LockViewDelegate.ENTRY_ACTIVITY_NAME;
 
   @Nullable @Inject PinEntryPresenter presenter;
+  @Nullable @Inject AppIconLoaderPresenter<PinScreen> appIconLoaderPresenter;
   @Nullable @BindView(R.id.lock_pin_entry_toolbar) Toolbar toolbar;
   @Nullable @BindView(R.id.lock_pin_entry_close) ImageView close;
   @Nullable @Inject LockViewDelegate lockViewDelegate;
@@ -89,6 +91,9 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     assert presenter != null;
     presenter.onCreateView(this);
 
+    assert appIconLoaderPresenter != null;
+    appIconLoaderPresenter.onCreateView(this);
+
     assert lockViewDelegate != null;
     lockViewDelegate.onCreateView(presenter, this, rootView);
 
@@ -110,8 +115,8 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
   @Override public void onStart() {
     super.onStart();
     assert lockViewDelegate != null;
-    assert presenter != null;
-    lockViewDelegate.onStart(presenter);
+    assert appIconLoaderPresenter != null;
+    lockViewDelegate.onStart(appIconLoaderPresenter);
   }
 
   private void setupToolbar() {
@@ -128,15 +133,17 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
   @Override public void onDestroyView() {
     super.onDestroyView();
     Timber.d("Destroy AlertDialog");
-    if (lockViewDelegate != null) {
-      lockViewDelegate.onDestroyView();
-    }
-    if (presenter != null) {
-      presenter.onDestroyView();
-    }
-    if (unbinder != null) {
-      unbinder.unbind();
-    }
+    assert presenter != null;
+    presenter.onDestroyView();
+
+    assert appIconLoaderPresenter != null;
+    appIconLoaderPresenter.onDestroyView();
+
+    assert lockViewDelegate != null;
+    lockViewDelegate.onDestroyView();
+
+    assert unbinder != null;
+    unbinder.unbind();
   }
 
   @NonNull @Override public String getCurrentAttempt() {

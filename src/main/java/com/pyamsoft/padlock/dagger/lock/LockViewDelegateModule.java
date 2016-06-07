@@ -16,13 +16,37 @@
 
 package com.pyamsoft.padlock.dagger.lock;
 
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.LockViewDelegate;
+import com.pyamsoft.padlock.app.lock.PinScreen;
+import com.pyamsoft.padlock.dagger.ActivityScope;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractor;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenterImpl;
 import dagger.Module;
 import dagger.Provides;
 
 @Module public class LockViewDelegateModule {
 
-  @Provides LockViewDelegate provideLockViewDelegate(final LockViewDelegateImpl lockViewDelegate) {
+  @ActivityScope @Provides LockViewDelegate provideLockViewDelegate(
+      final LockViewDelegateImpl lockViewDelegate) {
     return lockViewDelegate;
+  }
+
+  @ActivityScope @Provides
+  AppIconLoaderPresenter<LockScreen> provideLockScreenAppIconLoaderPresenter(
+      final AppIconLoaderPresenterImpl<LockScreen> presenter) {
+    return presenter;
+  }
+
+  @ActivityScope @Provides AppIconLoaderPresenter<PinScreen> providePinScreenAppIconLoaderPresenter(
+      final AppIconLoaderPresenterImpl<PinScreen> presenter) {
+    return presenter;
+  }
+
+  @ActivityScope @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(
+      final AppIconLoaderInteractorImpl interactor) {
+    return interactor;
   }
 }

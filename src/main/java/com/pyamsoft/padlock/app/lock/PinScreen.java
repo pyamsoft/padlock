@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import com.pyamsoft.padlock.app.lock.LockPresenter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 
-public interface PinScreen extends LockPresenter.LockView {
+public interface PinScreen extends LockPresenter.LockView, AppIconLoaderView {
 }

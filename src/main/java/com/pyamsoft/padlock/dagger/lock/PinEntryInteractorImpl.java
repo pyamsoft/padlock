@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import javax.inject.Inject;
 import rx.Observable;
@@ -28,9 +27,7 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
 
   @NonNull private final MasterPinInteractor masterPinInteractor;
 
-  @Inject public PinEntryInteractorImpl(final @NonNull PackageManagerWrapper packageManagerWrapper,
-      @NonNull final MasterPinInteractor masterPinInteractor) {
-    super(packageManagerWrapper);
+  @Inject public PinEntryInteractorImpl(@NonNull final MasterPinInteractor masterPinInteractor) {
     this.masterPinInteractor = masterPinInteractor;
   }
 

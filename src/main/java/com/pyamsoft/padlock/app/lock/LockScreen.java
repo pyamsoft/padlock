@@ -18,9 +18,9 @@ package com.pyamsoft.padlock.app.lock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.lock.LockPresenter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 
-public interface LockScreen extends LockPresenter.LockView {
+public interface LockScreen extends LockPresenter.LockView, AppIconLoaderView {
 
   void onLocked();
 

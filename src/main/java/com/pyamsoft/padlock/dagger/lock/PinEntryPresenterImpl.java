@@ -37,7 +37,7 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
   @Inject public PinEntryPresenterImpl(@NonNull final PinEntryInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
-    super(interactor, mainScheduler, ioScheduler);
+    super(mainScheduler, ioScheduler);
     this.interactor = interactor;
   }
 

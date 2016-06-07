@@ -17,14 +17,13 @@
 package com.pyamsoft.padlock.app.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.app.base.AppIconLoaderView;
+import com.pyamsoft.pydroid.base.Presenter;
 
-public interface LockPresenter<I extends LockPresenter.LockView> extends AppIconLoaderPresenter<I> {
+public interface LockPresenter<I extends LockPresenter.LockView> extends Presenter<I> {
 
   void submit();
 
-  interface LockView extends AppIconLoaderView {
+  interface LockView {
 
     @NonNull String getCurrentAttempt();
 

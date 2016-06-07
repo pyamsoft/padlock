@@ -20,18 +20,15 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.util.Base64;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-abstract class LockInteractorImpl extends AppIconLoaderInteractorImpl implements LockInteractor {
+abstract class LockInteractorImpl implements LockInteractor {
 
   @NonNull private final MessageDigest messageDigest;
 
-  protected LockInteractorImpl(final @NonNull PackageManagerWrapper packageManagerWrapper) {
-    super(packageManagerWrapper);
+  protected LockInteractorImpl() {
     try {
       messageDigest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {

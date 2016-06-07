@@ -45,7 +45,7 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
       @NonNull @Named("main") Scheduler mainScheduler, @NonNull @Named("io") Scheduler ioScheduler,
       @Named("ignore_none") long ignoreTimeNone, @Named("ignore_five") long ignoreTimeFive,
       @Named("ignore_ten") long ignoreTimeTen, @Named("ignore_thirty") long ignoreTimeThirty) {
-    super(lockScreenInteractor, mainScheduler, ioScheduler);
+    super(mainScheduler, ioScheduler);
     this.ignoreTimeNone = ignoreTimeNone;
     this.ignoreTimeFive = ignoreTimeFive;
     this.ignoreTimeTen = ignoreTimeTen;
