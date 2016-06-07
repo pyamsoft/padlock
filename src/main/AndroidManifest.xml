@@ -55,7 +55,6 @@
         android:excludeFromRecents="true"
         android:exported="false"
         android:launchMode="singleTop"
-        android:noHistory="true"
         android:theme="@style/Theme.PadLock.Light.Lock"
         android:windowSoftInputMode="stateVisible"/>
 
@@ -65,7 +64,6 @@
         android:excludeFromRecents="true"
         android:exported="false"
         android:launchMode="singleInstance"
-        android:noHistory="true"
         android:windowSoftInputMode="stateHidden">
       <intent-filter>
         <action android:name="com.pyamsoft.padlock.crash.SEND_LOG"/>
