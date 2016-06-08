@@ -82,7 +82,7 @@ final class LockViewDelegateImpl implements LockViewDelegate {
 
   private void onCreateView(final @NonNull LockPresenter presenter, @NonNull final View rootView,
       @NonNull final Bundle bundle) {
-    Timber.d("onCreateView");
+    Timber.d("bindView");
     this.rootView = rootView;
     unbinder = ButterKnife.bind(this, rootView);
     getValuesFromBundle(bundle);
@@ -157,7 +157,7 @@ final class LockViewDelegateImpl implements LockViewDelegate {
   }
 
   @Override public void onDestroyView() {
-    Timber.d("onDestroyView");
+    Timber.d("unbindView");
     if (unbinder != null) {
       unbinder.unbind();
     }

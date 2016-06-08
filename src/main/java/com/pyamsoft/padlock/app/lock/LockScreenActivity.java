@@ -106,10 +106,10 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
         .inject(this);
 
     assert presenter != null;
-    presenter.onCreateView(this);
+    presenter.bindView(this);
 
     assert appIconLoaderPresenter != null;
-    appIconLoaderPresenter.onCreateView(this);
+    appIconLoaderPresenter.bindView(this);
 
     assert lockViewDelegate != null;
     lockViewDelegate.setTextColor(android.R.color.white);
@@ -149,10 +149,10 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     super.onDestroy();
 
     assert presenter != null;
-    presenter.onDestroyView();
+    presenter.unbindView();
 
     assert appIconLoaderPresenter != null;
-    appIconLoaderPresenter.onDestroyView();
+    appIconLoaderPresenter.unbindView();
 
     assert lockViewDelegate != null;
     lockViewDelegate.onDestroyView();

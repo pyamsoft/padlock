@@ -54,14 +54,14 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
   @Override public void onCreate() {
     super.onCreate();
-    adapterPresenter.onCreateView(this);
-    dbPresenter.onCreateView(this);
+    adapterPresenter.bindView(this);
+    dbPresenter.bindView(this);
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
-    adapterPresenter.onDestroyView();
-    dbPresenter.onDestroyView();
+    adapterPresenter.unbindView();
+    dbPresenter.unbindView();
   }
 
   @Override public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

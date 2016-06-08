@@ -42,8 +42,8 @@ abstract class AdapterPresenterImpl<I, VH extends RecyclerView.ViewHolder>
     compositeSubscription = new CompositeSubscription();
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
+  @Override protected void onUnbind() {
+    super.onUnbind();
     if (!compositeSubscription.isUnsubscribed()) {
       compositeSubscription.clear();
     }
@@ -77,13 +77,13 @@ abstract class AdapterPresenterImpl<I, VH extends RecyclerView.ViewHolder>
         .subscribe(drawable -> {
           final AdapterView<VH> view = getView();
           final VH viewHolder = weakViewHolder.get();
-          if (view != null && viewHolder != null) {
+          if (viewHolder != null) {
             view.onApplicationIconLoadedSuccess(viewHolder, drawable);
           }
         }, throwable -> {
           final AdapterView<VH> view = getView();
           final VH viewHolder = weakViewHolder.get();
-          if (view != null && viewHolder != null) {
+          if (viewHolder != null) {
             view.onApplicationIconLoadedError(viewHolder);
           }
         });

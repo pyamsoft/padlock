@@ -112,7 +112,7 @@ public final class PadLockService extends AccessibilityService
   @Override public boolean onUnbind(Intent intent) {
     Timber.d("onDestroy");
     if (presenter != null) {
-      presenter.onDestroyView();
+      presenter.unbindView();
     }
 
     setInstance(null);
@@ -129,7 +129,7 @@ public final class PadLockService extends AccessibilityService
         .inject(this);
 
     assert presenter != null;
-    presenter.onCreateView(this);
+    presenter.bindView(this);
     setInstance(this);
   }
 }

@@ -44,8 +44,8 @@ final class SettingsPresenterImpl extends SchedulerPresenterImpl<SettingsPresent
     this.settingsInteractor = settingsInteractor;
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unsubscribeConfirmDialog();
   }
 
@@ -128,9 +128,7 @@ final class SettingsPresenterImpl extends SchedulerPresenterImpl<SettingsPresent
 
   private void attemptConfirm(int code) {
     final SettingsView settingsView = getView();
-    if (settingsView != null) {
-      settingsView.onConfirmAttempt(code);
-    }
+    settingsView.onConfirmAttempt(code);
   }
 
   @Override public void confirmDatabaseClear() {

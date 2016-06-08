@@ -47,8 +47,8 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
     }
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unsubPinEntry();
   }
 
@@ -56,22 +56,20 @@ final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
     Timber.d("Attempt PIN submission");
     unsubPinEntry();
     final PinScreen pinScreen = getView();
-    if (pinScreen != null) {
-      pinEntrySubscription = interactor.submitMasterPin(pinScreen.getCurrentAttempt())
-          .filter(pinEntryEvent -> pinEntryEvent != null)
-          .subscribeOn(getIoScheduler())
-          .observeOn(getMainScheduler())
-          .subscribe(pinEntryEvent -> {
-            PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
-            if (pinEntryEvent.complete()) {
-              pinScreen.onSubmitSuccess();
-            } else {
-              pinScreen.onSubmitFailure();
-            }
-          }, throwable -> {
-            Timber.e(throwable, "attemptPinSubmission onError");
-            pinScreen.onSubmitError();
-          });
-    }
+    pinEntrySubscription = interactor.submitMasterPin(pinScreen.getCurrentAttempt())
+        .filter(pinEntryEvent -> pinEntryEvent != null)
+        .subscribeOn(getIoScheduler())
+        .observeOn(getMainScheduler())
+        .subscribe(pinEntryEvent -> {
+          PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
+          if (pinEntryEvent.complete()) {
+            pinScreen.onSubmitSuccess();
+          } else {
+            pinScreen.onSubmitFailure();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "attemptPinSubmission onError");
+          pinScreen.onSubmitError();
+        });
   }
 }
