@@ -40,7 +40,6 @@ import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.dagger.lock.DaggerPinEntryComponent;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.model.event.RxBus;
-import com.pyamsoft.pydroid.base.RetainedDialogFragment;
 import javax.inject.Inject;
 import timber.log.Timber;
 

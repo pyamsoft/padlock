@@ -23,7 +23,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.pydroid.base.ApplicationPreferences;
+import com.pyamsoft.pydroid.base.app.ApplicationPreferences;
 import javax.inject.Inject;
 
 final class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPreferences {

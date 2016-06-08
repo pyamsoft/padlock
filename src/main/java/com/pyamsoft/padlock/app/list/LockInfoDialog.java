@@ -42,7 +42,6 @@ import com.pyamsoft.padlock.dagger.list.LockInfoModule;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
-import com.pyamsoft.pydroid.base.RetainedDialogFragment;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
 import javax.inject.Inject;
