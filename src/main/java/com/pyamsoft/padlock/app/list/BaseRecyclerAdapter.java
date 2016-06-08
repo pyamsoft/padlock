@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.app.list;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import com.pyamsoft.pydroid.base.ActivityRecyclerAdapter;
+import com.pyamsoft.pydroid.base.activity.adapter.ActivityRecyclerAdapter;
 
 public abstract class BaseRecyclerAdapter<T extends RecyclerView.ViewHolder>
     extends ActivityRecyclerAdapter<T> implements AdapterPresenter.AdapterView<T> {

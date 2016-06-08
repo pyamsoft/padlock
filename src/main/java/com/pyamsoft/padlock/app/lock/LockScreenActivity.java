@@ -42,7 +42,7 @@ import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.lock.DaggerLockScreenComponent;
 import com.pyamsoft.padlock.dagger.lock.LockScreenModule;
-import com.pyamsoft.pydroid.base.NoDonationActivityBase;
+import com.pyamsoft.pydroid.base.activity.NoDonationActivityBase;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;

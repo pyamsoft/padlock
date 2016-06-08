@@ -24,7 +24,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 import com.pyamsoft.padlock.model.event.RxBus;
-import com.pyamsoft.pydroid.base.RetainedDialogFragment;
 
 public class ConfirmationDialog extends RetainedDialogFragment {
   @NonNull private static final String WHICH = "which_type";
