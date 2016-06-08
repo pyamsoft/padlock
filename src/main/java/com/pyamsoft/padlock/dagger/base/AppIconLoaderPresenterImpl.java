@@ -40,8 +40,8 @@ public class AppIconLoaderPresenterImpl<I extends AppIconLoaderView>
     this.interactor = interactor;
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unsubLoadIcon();
   }
 
@@ -51,15 +51,11 @@ public class AppIconLoaderPresenterImpl<I extends AppIconLoaderView>
         .observeOn(getMainScheduler())
         .subscribe(drawable -> {
           final AppIconLoaderView loaderView = getView();
-          if (loaderView != null) {
-            loaderView.onApplicationIconLoadedSuccess(drawable);
-          }
+          loaderView.onApplicationIconLoadedSuccess(drawable);
         }, throwable -> {
           Timber.e(throwable, "onError");
           final AppIconLoaderView loaderView = getView();
-          if (loaderView != null) {
-            loaderView.onApplicationIconLoadedError();
-          }
+          loaderView.onApplicationIconLoadedError();
         });
   }
 

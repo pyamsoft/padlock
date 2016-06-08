@@ -89,10 +89,10 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     unbinder = ButterKnife.bind(this, rootView);
 
     assert presenter != null;
-    presenter.onCreateView(this);
+    presenter.bindView(this);
 
     assert appIconLoaderPresenter != null;
-    appIconLoaderPresenter.onCreateView(this);
+    appIconLoaderPresenter.bindView(this);
 
     assert lockViewDelegate != null;
     lockViewDelegate.onCreateView(presenter, this, rootView);
@@ -134,10 +134,10 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     super.onDestroyView();
     Timber.d("Destroy AlertDialog");
     assert presenter != null;
-    presenter.onDestroyView();
+    presenter.unbindView();
 
     assert appIconLoaderPresenter != null;
-    appIconLoaderPresenter.onDestroyView();
+    appIconLoaderPresenter.unbindView();
 
     assert lockViewDelegate != null;
     lockViewDelegate.onDestroyView();

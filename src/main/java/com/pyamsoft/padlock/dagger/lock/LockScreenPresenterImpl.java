@@ -53,8 +53,8 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     this.lockScreenInteractor = lockScreenInteractor;
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unsubUnlock();
     unsubLock();
     unsubDisplayName();
@@ -74,16 +74,14 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
 
   private void setIgnorePeriod(final long time) {
     final LockScreen lockScreen = getView();
-    if (lockScreen != null) {
-      if (time == ignoreTimeFive) {
-        lockScreen.setIgnoreTimeFive();
-      } else if (time == ignoreTimeTen) {
-        lockScreen.setIgnoreTimeTen();
-      } else if (time == ignoreTimeThirty) {
-        lockScreen.setIgnoreTimeThirty();
-      } else {
-        lockScreen.setIgnoreTimeNone();
-      }
+    if (time == ignoreTimeFive) {
+      lockScreen.setIgnoreTimeFive();
+    } else if (time == ignoreTimeTen) {
+      lockScreen.setIgnoreTimeTen();
+    } else if (time == ignoreTimeThirty) {
+      lockScreen.setIgnoreTimeThirty();
+    } else {
+      lockScreen.setIgnoreTimeNone();
     }
   }
 
@@ -100,62 +98,56 @@ final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   @Override public void lockEntry() {
     unsubLock();
     final LockScreen lockScreen = getView();
-    if (lockScreen != null) {
-      lockSubscription =
-          lockScreenInteractor.lockEntry(lockScreen.getPackageName(), lockScreen.getActivityName())
-              .subscribeOn(getIoScheduler())
-              .observeOn(getMainScheduler())
-              .subscribe(unlocked -> {
-                Timber.d("Received lock entry result");
-                if (unlocked) {
-                  lockScreen.onLocked();
-                } else {
-                  lockScreen.onLockedError();
-                }
-              }, throwable -> {
-                Timber.e(throwable, "lockEntry onError");
+    lockSubscription =
+        lockScreenInteractor.lockEntry(lockScreen.getPackageName(), lockScreen.getActivityName())
+            .subscribeOn(getIoScheduler())
+            .observeOn(getMainScheduler())
+            .subscribe(unlocked -> {
+              Timber.d("Received lock entry result");
+              if (unlocked) {
+                lockScreen.onLocked();
+              } else {
                 lockScreen.onLockedError();
-                unsubLock();
-              }, this::unsubLock);
-    }
+              }
+            }, throwable -> {
+              Timber.e(throwable, "lockEntry onError");
+              lockScreen.onLockedError();
+              unsubLock();
+            }, this::unsubLock);
   }
 
   @Override public void submit() {
     unsubUnlock();
     final LockScreen lockScreen = getView();
-    if (lockScreen != null) {
-      unlockSubscription = lockScreenInteractor.unlockEntry(lockScreen.getPackageName(),
-          lockScreen.getActivityName(), lockScreen.getCurrentAttempt(),
-          lockScreen.shouldExcludeEntry(), lockScreen.getIgnorePeriodTime())
-          .subscribeOn(getIoScheduler())
-          .observeOn(getMainScheduler())
-          .subscribe(unlocked -> {
-            Timber.d("Received unlock entry result");
-            if (unlocked) {
-              lockScreen.onSubmitSuccess();
-            } else {
-              lockScreen.onSubmitFailure();
-            }
-          }, throwable -> {
-            Timber.e(throwable, "unlockEntry onError");
-            lockScreen.onSubmitError();
-            unsubUnlock();
-          }, this::unsubUnlock);
-    }
+    unlockSubscription = lockScreenInteractor.unlockEntry(lockScreen.getPackageName(),
+        lockScreen.getActivityName(), lockScreen.getCurrentAttempt(),
+        lockScreen.shouldExcludeEntry(), lockScreen.getIgnorePeriodTime())
+        .subscribeOn(getIoScheduler())
+        .observeOn(getMainScheduler())
+        .subscribe(unlocked -> {
+          Timber.d("Received unlock entry result");
+          if (unlocked) {
+            lockScreen.onSubmitSuccess();
+          } else {
+            lockScreen.onSubmitFailure();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "unlockEntry onError");
+          lockScreen.onSubmitError();
+          unsubUnlock();
+        }, this::unsubUnlock);
   }
 
   @Override public void loadDisplayNameFromPackage() {
     unsubDisplayName();
     final LockScreen lockScreen = getView();
-    if (lockScreen != null) {
-      displayNameSubscription = lockScreenInteractor.getDisplayName(lockScreen.getPackageName())
-          .subscribeOn(getIoScheduler())
-          .observeOn(getMainScheduler())
-          .subscribe(lockScreen::setDisplayName, throwable -> {
-            Timber.e(throwable, "Error loading display name from package");
-            lockScreen.setDisplayName("");
-          });
-    }
+    displayNameSubscription = lockScreenInteractor.getDisplayName(lockScreen.getPackageName())
+        .subscribeOn(getIoScheduler())
+        .observeOn(getMainScheduler())
+        .subscribe(lockScreen::setDisplayName, throwable -> {
+          Timber.e(throwable, "Error loading display name from package");
+          lockScreen.setDisplayName("");
+        });
   }
 
   private void unsubDisplayName() {

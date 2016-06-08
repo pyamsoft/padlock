@@ -52,13 +52,13 @@ final class LockServicePresenterImpl
     lockScreenPassed = false;
   }
 
-  @Override public void onCreateView(@NonNull LockService view) {
-    super.onCreateView(view);
+  @Override protected void onBind() {
+    super.onBind();
     running = true;
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
+  @Override protected void onUnbind() {
+    super.onUnbind();
     running = false;
     unsubLockedEntry();
   }
@@ -147,9 +147,7 @@ final class LockServicePresenterImpl
       Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
           padLockEntry.activityName());
       final LockService lockService = getView();
-      if (lockService != null) {
-        lockService.startLockScreen(padLockEntry);
-      }
+      lockService.startLockScreen(padLockEntry);
     }, throwable -> {
       Timber.e(throwable, "Error getting PadLockEntry for LockScreen");
     });

@@ -47,8 +47,8 @@ final class LockInfoPresenterImpl extends AppIconLoaderPresenterImpl<LockInfoPre
     this.lockInfoInteractor = lockInfoInteractor;
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unsubPopulateList();
   }
 
@@ -111,20 +111,14 @@ final class LockInfoPresenterImpl extends AppIconLoaderPresenterImpl<LockInfoPre
             .observeOn(getMainScheduler())
             .subscribe(activityEntry -> {
               final LockInfoView lockInfoView = getView();
-              if (lockInfoView != null) {
-                lockInfoView.onEntryAddedToList(activityEntry);
-              }
+              lockInfoView.onEntryAddedToList(activityEntry);
             }, throwable -> {
               Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
               final LockInfoView lockInfoView = getView();
-              if (lockInfoView != null) {
-                lockInfoView.onListPopulateError();
-              }
+              lockInfoView.onListPopulateError();
             }, () -> {
               final LockInfoView lockInfoView = getView();
-              if (lockInfoView != null) {
-                lockInfoView.onListPopulated();
-              }
+              lockInfoView.onListPopulated();
             });
   }
 

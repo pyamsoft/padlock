@@ -64,7 +64,7 @@ public class LockScreenPresenterTest {
         });
 
     // Set up the lock screen
-    presenter.onCreateView(mockLockScreen);
+    presenter.bindView(mockLockScreen);
 
     // Mock the return value
     Mockito.when(mockLockScreen.getPackageName()).thenReturn(packageName);
@@ -80,7 +80,7 @@ public class LockScreenPresenterTest {
     presenter.loadDisplayNameFromPackage();
 
     // Cleanup
-    presenter.onDestroyView();
+    presenter.unbindView();
   }
 
   @Test public void test_loadDisplayName() {

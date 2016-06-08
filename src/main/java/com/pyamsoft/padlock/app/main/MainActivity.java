@@ -77,7 +77,7 @@ public class MainActivity extends DonationActivityBase
         .inject(this);
 
     assert presenter != null;
-    presenter.onCreateView(this);
+    presenter.bindView(this);
 
     setAppBarState();
   }
@@ -117,7 +117,7 @@ public class MainActivity extends DonationActivityBase
 
     if (!isChangingConfigurations()) {
       assert presenter != null;
-      presenter.onDestroyView();
+      presenter.unbindView();
     }
 
     assert unbinder != null;

@@ -50,7 +50,7 @@ public final class SettingsFragment extends PreferenceFragmentCompat
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
     assert presenter != null;
-    presenter.onCreateView(this);
+    presenter.bindView(this);
     return super.onCreateView(inflater, container, savedInstanceState);
   }
 
@@ -70,7 +70,7 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     super.onDestroyView();
 
     assert presenter != null;
-    presenter.onDestroyView();
+    presenter.unbindView();
   }
 
   @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {

@@ -42,9 +42,9 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
+import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.list.DaggerLockListComponent;
 import com.pyamsoft.padlock.model.AppEntry;
@@ -117,7 +117,7 @@ public final class LockListFragment extends Fragment
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
     assert presenter != null;
-    presenter.onCreateView(this);
+    presenter.bindView(this);
 
     assert adapter != null;
     adapter.onCreate();
@@ -305,7 +305,6 @@ public final class LockListFragment extends Fragment
     recyclerView.setAdapter(null);
 
     assert fab != null;
-    AppUtil.nullifyCallback(fab);
     fab.setOnClickListener(null);
 
     assert swipeRefreshLayout != null;
@@ -313,10 +312,9 @@ public final class LockListFragment extends Fragment
 
     assert adapter != null;
     adapter.onDestroy();
-    if (!getActivity().isChangingConfigurations()) {
-      assert presenter != null;
-      presenter.onDestroyView();
-    }
+
+    assert presenter != null;
+    presenter.unbindView(!getActivity().isChangingConfigurations());
 
     cancelFabTask();
 

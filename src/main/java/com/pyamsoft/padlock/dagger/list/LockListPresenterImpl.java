@@ -56,8 +56,8 @@ final class LockListPresenterImpl extends SchedulerPresenterImpl<LockListPresent
     this.stateInteractor = stateInteractor;
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unsubscribePopulateList();
   }
 
@@ -134,21 +134,14 @@ final class LockListPresenterImpl extends SchedulerPresenterImpl<LockListPresent
         .observeOn(getMainScheduler())
         .subscribe(appEntry -> {
           final LockList lockList = getView();
-          if (lockList != null) {
-            lockList.onEntryAddedToList(appEntry);
-          }
+          lockList.onEntryAddedToList(appEntry);
         }, throwable -> {
-          // TODO handle error
           Timber.e(throwable, "populateList onError");
           final LockList lockList = getView();
-          if (lockList != null) {
-            lockList.onListPopulated();
-          }
+          lockList.onListPopulated();
         }, () -> {
           final LockList lockList = getView();
-          if (lockList != null) {
-            lockList.onListPopulated();
-          }
+          lockList.onListPopulated();
         });
   }
 
@@ -165,12 +158,10 @@ final class LockListPresenterImpl extends SchedulerPresenterImpl<LockListPresent
   @Override public void setFABStateFromPreference() {
     final boolean enabled = stateInteractor.isServiceEnabled();
     final LockList lockList = getView();
-    if (lockList != null) {
-      if (enabled) {
-        lockList.setFABStateEnabled();
-      } else {
-        lockList.setFABStateDisabled();
-      }
+    if (enabled) {
+      lockList.setFABStateEnabled();
+    } else {
+      lockList.setFABStateDisabled();
     }
   }
 
@@ -185,29 +176,23 @@ final class LockListPresenterImpl extends SchedulerPresenterImpl<LockListPresent
   @Override public void setSystemVisibilityFromPreference() {
     final boolean visible = lockListInteractor.isSystemVisible();
     final LockList lockList = getView();
-    if (lockList != null) {
-      if (visible) {
-        lockList.setSystemVisible();
-      } else {
-        lockList.setSystemInvisible();
-      }
+    if (visible) {
+      lockList.setSystemVisible();
+    } else {
+      lockList.setSystemInvisible();
     }
   }
 
   @Override public void clickPinFAB() {
     final LockList lockList = getView();
-    if (lockList != null) {
-      lockList.onPinFABClicked();
-    }
+    lockList.onPinFABClicked();
   }
 
   @Override public void showOnBoarding() {
     final boolean onboard = lockListInteractor.hasShownOnBoarding();
     final LockList lockList = getView();
-    if (lockList != null) {
-      if (!onboard) {
-        lockList.showOnBoarding();
-      }
+    if (!onboard) {
+      lockList.showOnBoarding();
     }
   }
 
@@ -218,10 +203,8 @@ final class LockListPresenterImpl extends SchedulerPresenterImpl<LockListPresent
           Timber.d("Received confirmation event!");
           if (confirmationEvent.type() == 0 && confirmationEvent.complete()) {
             final LockList lockList = getView();
-            if (lockList != null) {
-              Timber.d("Received database cleared confirmation event, refreshList");
-              lockList.refreshList();
-            }
+            Timber.d("Received database cleared confirmation event, refreshList");
+            lockList.refreshList();
           }
         }, throwable -> {
           Timber.e(throwable, "ConfirmationDialogBus onError");
@@ -239,22 +222,20 @@ final class LockListPresenterImpl extends SchedulerPresenterImpl<LockListPresent
     pinEntryBusSubscription =
         PinEntryDialog.PinEntryBus.get().register().subscribe(pinEntryEvent -> {
           final LockList lockList = getView();
-          if (lockList != null) {
-            if (lockList instanceof MasterPinSubmitCallback) {
-              final MasterPinSubmitCallback callback = (MasterPinSubmitCallback) lockList;
-              switch (pinEntryEvent.type()) {
-                case 0:
-                  if (pinEntryEvent.complete()) {
-                    callback.onCreateMasterPin();
-                  }
-                  break;
-                case 1:
-                  if (pinEntryEvent.complete()) {
-                    callback.onClearMasterPinSuccess();
-                  } else {
-                    callback.onClearMasterPinFailure();
-                  }
-              }
+          if (lockList instanceof MasterPinSubmitCallback) {
+            final MasterPinSubmitCallback callback = (MasterPinSubmitCallback) lockList;
+            switch (pinEntryEvent.type()) {
+              case 0:
+                if (pinEntryEvent.complete()) {
+                  callback.onCreateMasterPin();
+                }
+                break;
+              case 1:
+                if (pinEntryEvent.complete()) {
+                  callback.onClearMasterPinSuccess();
+                } else {
+                  callback.onClearMasterPinFailure();
+                }
             }
           }
         }, throwable -> {

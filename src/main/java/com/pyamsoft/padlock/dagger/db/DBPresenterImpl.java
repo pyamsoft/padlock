@@ -43,8 +43,8 @@ final class DBPresenterImpl extends SchedulerPresenterImpl<DBPresenter.DBView>
     this.dbInteractor = dbInteractor;
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unsubPackageSubscription();
     unsubActivitySubscription();
   }
@@ -77,19 +77,15 @@ final class DBPresenterImpl extends SchedulerPresenterImpl<DBPresenter.DBView>
     }).subscribeOn(getIoScheduler()).observeOn(getMainScheduler()).subscribe(created -> {
       Timber.d("onNext in DBPresenterImpl with data: ", created);
       final DBView dbView = getView();
-      if (dbView != null) {
-        if (created) {
-          dbView.onDBCreateEvent(position);
-        } else {
-          dbView.onDBDeleteEvent(position);
-        }
+      if (created) {
+        dbView.onDBCreateEvent(position);
+      } else {
+        dbView.onDBDeleteEvent(position);
       }
     }, throwable -> {
       Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
       final DBView dbView = getView();
-      if (dbView != null) {
-        dbView.onDBError();
-      }
+      dbView.onDBError();
     });
   }
 
@@ -109,19 +105,15 @@ final class DBPresenterImpl extends SchedulerPresenterImpl<DBPresenter.DBView>
     }).subscribeOn(getIoScheduler()).observeOn(getMainScheduler()).subscribe(created -> {
       Timber.d("onNext in DBPresenterImpl with data: ", created);
       final DBView dbView = getView();
-      if (dbView != null) {
-        if (created) {
-          dbView.onDBCreateEvent(position);
-        } else {
-          dbView.onDBDeleteEvent(position);
-        }
+      if (created) {
+        dbView.onDBCreateEvent(position);
+      } else {
+        dbView.onDBDeleteEvent(position);
       }
     }, throwable -> {
       Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
       final DBView dbView = getView();
-      if (dbView != null) {
-        dbView.onDBError();
-      }
+      dbView.onDBError();
     });
   }
 }

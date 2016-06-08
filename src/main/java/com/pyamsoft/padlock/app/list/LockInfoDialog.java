@@ -124,7 +124,7 @@ public class LockInfoDialog extends RetainedDialogFragment
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
     assert presenter != null;
-    presenter.onCreateView(this);
+    presenter.bindView(this);
 
     assert adapter != null;
     adapter.onCreate();
@@ -158,10 +158,8 @@ public class LockInfoDialog extends RetainedDialogFragment
     assert adapter != null;
     adapter.onDestroy();
 
-    if (!getActivity().isChangingConfigurations()) {
-      assert presenter != null;
-      presenter.onDestroyView();
-    }
+    assert presenter != null;
+    presenter.unbindView(!getActivity().isChangingConfigurations());
 
     assert unbinder != null;
     unbinder.unbind();
