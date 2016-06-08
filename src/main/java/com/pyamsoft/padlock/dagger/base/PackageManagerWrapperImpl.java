@@ -71,6 +71,10 @@ public final class PackageManagerWrapperImpl implements PackageManagerWrapper {
     final List<Integer> removeIndexes = new ArrayList<>();
 
     final List<ApplicationInfo> applicationInfos = packageManager.getInstalledApplications(0);
+    if (applicationInfos == null) {
+      Timber.e("Application list is empty");
+      return new ArrayList<>();
+    }
     final int size = applicationInfos.size();
     for (int i = 0; i < size; ++i) {
       final ApplicationInfo info = applicationInfos.get(i);
