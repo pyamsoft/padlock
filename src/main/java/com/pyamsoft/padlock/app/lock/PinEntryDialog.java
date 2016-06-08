@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.ContextThemeWrapper;
@@ -43,7 +44,7 @@ import com.pyamsoft.padlock.model.event.RxBus;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class PinEntryDialog extends RetainedDialogFragment implements PinScreen {
+public class PinEntryDialog extends DialogFragment implements PinScreen {
 
   @NonNull private static final String ARG_PACKAGE = LockViewDelegate.ENTRY_PACKAGE_NAME;
   @NonNull private static final String ARG_ACTIVITY = LockViewDelegate.ENTRY_ACTIVITY_NAME;
@@ -76,7 +77,6 @@ public class PinEntryDialog extends RetainedDialogFragment implements PinScreen 
     lockViewDelegate.setTextColor(android.R.color.black);
 
     setCancelable(true);
-    setRetainInstance(true);
   }
 
   @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {

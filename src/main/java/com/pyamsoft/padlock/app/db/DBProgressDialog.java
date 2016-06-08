@@ -22,12 +22,13 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import com.pyamsoft.pydroid.util.AppUtil;
 
-public final class DBProgressDialog extends RetainedDialogFragment {
+public final class DBProgressDialog extends DialogFragment {
 
   @NonNull private static final String DB_PROGRESS_TAG = "db_progress";
   @NonNull private static final String APP_NAME = "app_name";
