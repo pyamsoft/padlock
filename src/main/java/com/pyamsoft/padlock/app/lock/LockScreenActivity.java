@@ -25,7 +25,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
@@ -108,10 +107,9 @@ public final class LockScreenActivity extends NoDonationActivityBase
 
     presenter.bindView(this);
     appIconLoaderPresenter.bindView(this);
-    lockViewDelegate.setTextColor(android.R.color.white);
+    lockViewDelegate.setTextColor(android.R.color.black);
     lockViewDelegate.onCreateView(this, this, rootView);
 
-    ViewCompat.setElevation(appBarLayout, 0);
     setSupportActionBar(toolbar);
     failCount = 0;
   }
@@ -138,16 +136,19 @@ public final class LockScreenActivity extends NoDonationActivityBase
 
   @Override protected void onDestroy() {
     super.onDestroy();
+    Timber.d("onDestroy");
 
     presenter.unbindView();
-
     appIconLoaderPresenter.unbindView();
-
     lockViewDelegate.onDestroyView();
-
     unbinder.unbind();
 
     failCount = 0;
+  }
+
+  @Override protected void onStop() {
+    super.onStop();
+    Timber.d("onStop");
   }
 
   @Override public void finishAndRemoveTask() {
