@@ -59,14 +59,14 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         .map(padLockEntry -> {
           Timber.d("LOCKED entry, update entry in DB: ", padLockEntry);
           final long timeOutMinutesInMillis = preferences.getTimeoutPeriod() * 60 * 1000;
-          final ContentValues contentValues =
-              new PadLockEntry.Marshal().packageName(padLockEntry.packageName())
-                  .activityName(padLockEntry.activityName())
-                  .lockCode(padLockEntry.lockCode())
-                  .lockUntilTime(System.currentTimeMillis() + timeOutMinutesInMillis)
-                  .ignoreUntilTime(padLockEntry.ignoreUntilTime())
-                  .systemApplication(padLockEntry.systemApplication())
-                  .asContentValues();
+          final ContentValues contentValues = PadLockEntry.FACTORY.marshal()
+              .packageName(padLockEntry.packageName())
+              .activityName(padLockEntry.activityName())
+              .lockCode(padLockEntry.lockCode())
+              .lockUntilTime(System.currentTimeMillis() + timeOutMinutesInMillis)
+              .ignoreUntilTime(padLockEntry.ignoreUntilTime())
+              .systemApplication(padLockEntry.systemApplication())
+              .asContentValues();
           PadLockOpenHelper.updateWithPackageActivityName(appContext, contentValues,
               padLockEntry.packageName(), padLockEntry.activityName());
           return true;
@@ -130,14 +130,14 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   @WorkerThread
   private void ignoreEntryForTime(final PadLockEntry oldValues, final long ignoreForPeriod) {
     final long ignoreMinutesInMillis = ignoreForPeriod * 60 * 1000;
-    final ContentValues contentValues =
-        new PadLockEntry.Marshal().packageName(oldValues.packageName())
-            .activityName(oldValues.activityName())
-            .lockCode(oldValues.lockCode())
-            .lockUntilTime(oldValues.lockUntilTime())
-            .ignoreUntilTime(System.currentTimeMillis() + ignoreMinutesInMillis)
-            .systemApplication(oldValues.systemApplication())
-            .asContentValues();
+    final ContentValues contentValues = PadLockEntry.FACTORY.marshal()
+        .packageName(oldValues.packageName())
+        .activityName(oldValues.activityName())
+        .lockCode(oldValues.lockCode())
+        .lockUntilTime(oldValues.lockUntilTime())
+        .ignoreUntilTime(System.currentTimeMillis() + ignoreMinutesInMillis)
+        .systemApplication(oldValues.systemApplication())
+        .asContentValues();
     PadLockOpenHelper.updateWithPackageActivityName(appContext, contentValues,
         oldValues.packageName(), oldValues.activityName());
   }

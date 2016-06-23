@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.base;
+package com.pyamsoft.padlock.app.base;
 
 import com.pyamsoft.padlock.BuildConfig;
 import junit.framework.Assert;
@@ -28,7 +28,8 @@ import rx.schedulers.Schedulers;
 public class SchedulerPresenterTest {
 
   @Test public void test_nonNullSchedulers() {
-    final SchedulerPresenterImpl presenter = new SchedulerPresenterImpl(Schedulers.immediate(), Schedulers.immediate()) {
+    final SchedulerPresenter
+        presenter = new SchedulerPresenter(Schedulers.immediate(), Schedulers.immediate()) {
     };
     Assert.assertNotNull(presenter.getIoScheduler());
     Assert.assertNotNull(presenter.getMainScheduler());

@@ -44,17 +44,17 @@ import com.pyamsoft.padlock.model.event.RxBus;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class PinEntryDialog extends DialogFragment implements PinScreen {
+public class PinEntryDialog extends DialogFragment implements PinScreen, LockViewDelegate.Callback {
 
   @NonNull private static final String ARG_PACKAGE = LockViewDelegate.ENTRY_PACKAGE_NAME;
   @NonNull private static final String ARG_ACTIVITY = LockViewDelegate.ENTRY_ACTIVITY_NAME;
 
-  @Nullable @Inject PinEntryPresenter presenter;
-  @Nullable @Inject AppIconLoaderPresenter<PinScreen> appIconLoaderPresenter;
-  @Nullable @BindView(R.id.lock_pin_entry_toolbar) Toolbar toolbar;
-  @Nullable @BindView(R.id.lock_pin_entry_close) ImageView close;
-  @Nullable @Inject LockViewDelegate lockViewDelegate;
-  @Nullable private Unbinder unbinder;
+  @Inject PinEntryPresenter presenter;
+  @Inject AppIconLoaderPresenter<PinScreen> appIconLoaderPresenter;
+  @BindView(R.id.lock_pin_entry_toolbar) Toolbar toolbar;
+  @BindView(R.id.lock_pin_entry_close) ImageView close;
+  @Inject LockViewDelegate lockViewDelegate;
+  private Unbinder unbinder;
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -73,9 +73,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
         .build()
         .inject(this);
 
-    assert lockViewDelegate != null;
     lockViewDelegate.setTextColor(android.R.color.black);
-
     setCancelable(true);
   }
 
@@ -87,14 +85,11 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
         LayoutInflater.from(themedContext).inflate(R.layout.layout_pin_entry, null, false);
     unbinder = ButterKnife.bind(this, rootView);
 
-    assert presenter != null;
     presenter.bindView(this);
 
-    assert appIconLoaderPresenter != null;
     appIconLoaderPresenter.bindView(this);
 
-    assert lockViewDelegate != null;
-    lockViewDelegate.onCreateView(presenter, this, rootView);
+    lockViewDelegate.onCreateView(this, this, rootView);
 
     if (savedInstanceState != null) {
       lockViewDelegate.onRestoreInstanceState(savedInstanceState);
@@ -106,23 +101,18 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
-    assert lockViewDelegate != null;
     lockViewDelegate.onSaveInstanceState(outState);
     super.onSaveInstanceState(outState);
   }
 
   @Override public void onStart() {
     super.onStart();
-    assert lockViewDelegate != null;
-    assert appIconLoaderPresenter != null;
     lockViewDelegate.onStart(appIconLoaderPresenter);
   }
 
   private void setupToolbar() {
-    assert toolbar != null;
     toolbar.setTitle("PIN");
 
-    assert close != null;
     close.setOnClickListener(view -> {
       Timber.d("onClick Arrow");
       dismiss();
@@ -132,32 +122,13 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @Override public void onDestroyView() {
     super.onDestroyView();
     Timber.d("Destroy AlertDialog");
-    assert presenter != null;
     presenter.unbindView();
 
-    assert appIconLoaderPresenter != null;
     appIconLoaderPresenter.unbindView();
 
-    assert lockViewDelegate != null;
     lockViewDelegate.onDestroyView();
 
-    assert unbinder != null;
     unbinder.unbind();
-  }
-
-  @NonNull @Override public String getCurrentAttempt() {
-    assert lockViewDelegate != null;
-    return lockViewDelegate.getCurrentAttempt();
-  }
-
-  @Override @NonNull public String getPackageName() {
-    assert lockViewDelegate != null;
-    return lockViewDelegate.getPackageName();
-  }
-
-  @Override @NonNull public String getActivityName() {
-    assert lockViewDelegate != null;
-    return lockViewDelegate.getActivityName();
   }
 
   @Override public void onApplicationIconLoadedError() {
@@ -166,26 +137,26 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   }
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-    assert lockViewDelegate != null;
     lockViewDelegate.onApplicationIconLoadedSuccess(icon);
   }
 
   @Override public void onSubmitSuccess() {
-    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     dismiss();
   }
 
   @Override public void onSubmitFailure() {
-    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     dismiss();
   }
 
   @Override public void onSubmitError() {
-    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     dismiss();
+  }
+
+  @Override public void onSubmitPressed() {
+    presenter.submit(lockViewDelegate.getCurrentAttempt());
   }
 
   public static final class PinEntryBus extends RxBus<PinEntryEvent> {

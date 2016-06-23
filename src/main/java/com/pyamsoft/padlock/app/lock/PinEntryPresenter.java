@@ -16,5 +16,57 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-public interface PinEntryPresenter extends LockPresenter<PinScreen> {
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.dagger.lock.PinEntryInteractor;
+import javax.inject.Inject;
+import javax.inject.Named;
+import rx.Scheduler;
+import rx.Subscription;
+import rx.subscriptions.Subscriptions;
+import timber.log.Timber;
+
+public final class PinEntryPresenter extends LockPresenter<PinScreen> {
+
+  @NonNull private final PinEntryInteractor interactor;
+
+  @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
+
+  @Inject public PinEntryPresenter(@NonNull final PinEntryInteractor interactor,
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
+    super(mainScheduler, ioScheduler);
+    this.interactor = interactor;
+  }
+
+  private void unsubPinEntry() {
+    if (!pinEntrySubscription.isUnsubscribed()) {
+      pinEntrySubscription.unsubscribe();
+    }
+  }
+
+  @Override protected void onUnbind() {
+    super.onUnbind();
+    unsubPinEntry();
+  }
+
+  public final void submit(@NonNull String currentAttempt) {
+    Timber.d("Attempt PIN submission");
+    unsubPinEntry();
+    final PinScreen pinScreen = getView();
+    pinEntrySubscription = interactor.submitMasterPin(currentAttempt)
+        .filter(pinEntryEvent -> pinEntryEvent != null)
+        .subscribeOn(getIoScheduler())
+        .observeOn(getMainScheduler())
+        .subscribe(pinEntryEvent -> {
+          PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
+          if (pinEntryEvent.complete()) {
+            pinScreen.onSubmitSuccess();
+          } else {
+            pinScreen.onSubmitFailure();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "attemptPinSubmission onError");
+          pinScreen.onSubmitError();
+        });
+  }
 }

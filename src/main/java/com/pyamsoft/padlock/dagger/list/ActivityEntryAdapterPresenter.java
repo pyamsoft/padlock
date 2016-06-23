@@ -17,16 +17,17 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.app.list.LockInfoAdapter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
 
-final class ActivityEntryAdapterPresenterImpl
-    extends AdapterPresenterImpl<ActivityEntry, LockInfoAdapter.ViewHolder> {
+final class ActivityEntryAdapterPresenter
+    extends AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder> {
 
-  @Inject public ActivityEntryAdapterPresenterImpl(
+  @Inject public ActivityEntryAdapterPresenter(
       @NonNull AdapterInteractor<ActivityEntry> adapterInteractor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {

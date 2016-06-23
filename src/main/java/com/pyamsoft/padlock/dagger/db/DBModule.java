@@ -21,12 +21,14 @@ import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Named;
+import rx.Scheduler;
 
 @Module public class DBModule {
 
-  @ActivityScope @Provides DBPresenter provideDBPresenter(
-      final @NonNull DBPresenterImpl presenter) {
-    return presenter;
+  @ActivityScope @Provides DBPresenter provideDBPresenter(final @NonNull DBInteractor interactor,
+      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+    return new DBPresenter(interactor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides DBInteractor provideDBInteractor(

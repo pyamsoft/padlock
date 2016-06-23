@@ -21,12 +21,15 @@ import com.pyamsoft.padlock.app.settings.SettingsPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Named;
+import rx.Scheduler;
 
 @Module public class SettingsModule {
 
   @ActivityScope @Provides SettingsPresenter provideSettingsPresenter(
-      final @NonNull SettingsPresenterImpl presenter) {
-    return presenter;
+      final @NonNull SettingsInteractor interactor, @Named("main") Scheduler mainScheduler,
+      @Named("io") Scheduler ioScheduler) {
+    return new SettingsPresenter(interactor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides SettingsInteractor provideSettingsInteractor(

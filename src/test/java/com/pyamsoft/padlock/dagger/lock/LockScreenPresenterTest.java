@@ -40,7 +40,7 @@ public class LockScreenPresenterTest {
 
   @CheckResult @NonNull public static LockScreenPresenter getLockScreenPresenter(
       final LockScreenInteractor mockInteractor) {
-    return new LockScreenPresenterImpl(mockInteractor, Schedulers.immediate(),
+    return new LockScreenPresenter(mockInteractor, Schedulers.immediate(),
         Schedulers.immediate(), 0, 5, 10, 30);
   }
 
@@ -67,8 +67,6 @@ public class LockScreenPresenterTest {
     presenter.bindView(mockLockScreen);
 
     // Mock the return value
-    Mockito.when(mockLockScreen.getPackageName()).thenReturn(packageName);
-
     Mockito.doAnswer(invocation -> {
       Assert.assertNotNull(invocation.getArguments());
       Assert.assertEquals(1, invocation.getArguments().length);
@@ -77,7 +75,7 @@ public class LockScreenPresenterTest {
     }).when(mockLockScreen).setDisplayName(displayName);
 
     // Actual test
-    presenter.loadDisplayNameFromPackage();
+    presenter.loadDisplayNameFromPackage(packageName);
 
     // Cleanup
     presenter.unbindView();

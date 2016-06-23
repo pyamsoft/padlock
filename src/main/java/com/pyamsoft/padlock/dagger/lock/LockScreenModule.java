@@ -24,6 +24,7 @@ import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
+import rx.Scheduler;
 
 @Module public class LockScreenModule {
 
@@ -46,8 +47,10 @@ import javax.inject.Named;
   }
 
   @ActivityScope @Provides LockScreenPresenter provideLockScreenPresenter(
-      final LockScreenPresenterImpl presenter) {
-    return presenter;
+      final LockScreenInteractor interactor, @Named("main") Scheduler mainScheduler,
+      @Named("io") Scheduler ioScheduler) {
+    return new LockScreenPresenter(interactor, mainScheduler, ioScheduler, ignoreTimeNone,
+        ignoreTimeFive, ignoreTimeTen, ignoreTimeThirty);
   }
 
   @ActivityScope @Provides LockScreenInteractor provideLockScreenInteractor(

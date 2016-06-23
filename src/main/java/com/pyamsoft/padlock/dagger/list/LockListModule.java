@@ -16,19 +16,25 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.app.list.LockListAdapter;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
+import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Named;
+import rx.Scheduler;
 
 @Module public class LockListModule {
 
   @ActivityScope @Provides LockListPresenter provideLockScreenPresenter(
-      final LockListPresenterImpl presenter) {
-    return presenter;
+      @NonNull LockListInteractor interactor, @NonNull LockServiceStateInteractor stateInteractor,
+      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+    return new LockListPresenter(interactor, stateInteractor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides LockListInteractor provideLockScreenInteractor(
@@ -38,12 +44,12 @@ import dagger.Provides;
 
   @ActivityScope @Provides
   AdapterPresenter<AppEntry, LockListAdapter.ViewHolder> provideAppEntryAdapterPresenter(
-      final AppEntryAdapterPresenterImpl adapter) {
+      final AppEntryAdapterPresenter adapter) {
     return adapter;
   }
 
   @ActivityScope @Provides AdapterInteractor<AppEntry> provideAppEntryAdapterInteractor(
-      final AppEntryAdapterInteractorImpl interactor) {
-    return interactor;
+      final PackageManagerWrapper packageManagerWrapper) {
+    return new AdapterInteractorImpl<>(packageManagerWrapper);
   }
 }

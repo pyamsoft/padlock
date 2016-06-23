@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.CheckResult;
 
-interface MainInteractor {
+public interface MainInteractor {
 
   @CheckResult boolean hasAgreed();
 
