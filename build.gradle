@@ -31,7 +31,7 @@ buildscript {
     classpath 'me.tatarka:gradle-retrolambda:3.3.0-beta4'
 
     // Dex count
-    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.5.2'
+    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.5.4'
 
     // Android APT
     classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
@@ -116,6 +116,9 @@ dependencies {
 
   retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.3.0'
 
+  // Needs to compile support annotations into actual project
+  compile 'com.android.support:support-annotations:24.0.0'
+
   // JavaPoet to fix an issue
   apt 'com.squareup:javapoet:1.7.0'
 
@@ -158,7 +161,7 @@ dependencies {
   testCompile 'junit:junit:4.12'
 
   // Mockito for unit tests
-  testCompile 'org.mockito:mockito-core:2.0.54-beta'
+  testCompile 'org.mockito:mockito-core:2.0.71-beta'
 
   // PYDroid 2.2.2
   compile project(':PYDroid')
