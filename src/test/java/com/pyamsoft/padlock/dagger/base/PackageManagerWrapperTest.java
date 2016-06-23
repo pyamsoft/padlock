@@ -21,6 +21,7 @@ import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.BuildConfig;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import java.util.List;
 import org.junit.Assert;
@@ -31,7 +32,8 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-@RunWith(RobolectricGradleTestRunner.class) @Config(constants = BuildConfig.class)
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = PadLock.class)
 public class PackageManagerWrapperTest {
 
   @CheckResult @NonNull public static PackageManagerWrapper getPackageManagerWrapper() {

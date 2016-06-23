@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.lock;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.BuildConfig;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
 import junit.framework.Assert;
@@ -31,7 +32,8 @@ import org.robolectric.annotation.Config;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
-@RunWith(RobolectricGradleTestRunner.class) @Config(constants = BuildConfig.class)
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = PadLock.class)
 public class LockScreenPresenterTest {
 
   @Mock LockScreen mockLockScreen = Mockito.mock(LockScreen.class);

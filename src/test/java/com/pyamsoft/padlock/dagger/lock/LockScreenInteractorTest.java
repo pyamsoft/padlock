@@ -20,6 +20,7 @@ import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.BuildConfig;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
 import java.util.Collections;
@@ -32,7 +33,8 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import rx.observers.TestSubscriber;
 
-@RunWith(RobolectricGradleTestRunner.class) @Config(constants = BuildConfig.class)
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = PadLock.class)
 public class LockScreenInteractorTest {
 
   @CheckResult @NonNull public static LockScreenInteractor getLockScreenInteractor() {

@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.app.base;
 
 import com.pyamsoft.padlock.BuildConfig;
+import com.pyamsoft.padlock.PadLock;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,13 +25,14 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import rx.schedulers.Schedulers;
 
-@RunWith(RobolectricGradleTestRunner.class) @Config(constants = BuildConfig.class)
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = PadLock.class)
 public class SchedulerPresenterTest {
 
   @Test public void test_nonNullSchedulers() {
-    final SchedulerPresenter
-        presenter = new SchedulerPresenter(Schedulers.immediate(), Schedulers.immediate()) {
-    };
+    final SchedulerPresenter presenter =
+        new SchedulerPresenter(Schedulers.immediate(), Schedulers.immediate()) {
+        };
     Assert.assertNotNull(presenter.getIoScheduler());
     Assert.assertNotNull(presenter.getMainScheduler());
   }
