@@ -55,9 +55,9 @@ public class MainActivity extends DonationActivityBase
   private static final int VECTOR_TASK_SIZE = 2;
 
   @NonNull private final AsyncVectorDrawableTask[] tasks;
-  @Nullable @BindView(R.id.toolbar) Toolbar toolbar;
-  @Nullable @Inject MainPresenter presenter;
-  @Nullable private Unbinder unbinder;
+  @BindView(R.id.toolbar) Toolbar toolbar;
+  @Inject MainPresenter presenter;
+  private Unbinder unbinder;
 
   public MainActivity() {
     tasks = new AsyncVectorDrawableTask[VECTOR_TASK_SIZE];
@@ -76,7 +76,6 @@ public class MainActivity extends DonationActivityBase
         .build()
         .inject(this);
 
-    assert presenter != null;
     presenter.bindView(this);
 
     setAppBarState();
@@ -116,11 +115,9 @@ public class MainActivity extends DonationActivityBase
     super.onDestroy();
 
     if (!isChangingConfigurations()) {
-      assert presenter != null;
       presenter.unbindView();
     }
 
-    assert unbinder != null;
     unbinder.unbind();
 
     for (int i = 0; i < VECTOR_TASK_SIZE; ++i) {
@@ -129,7 +126,6 @@ public class MainActivity extends DonationActivityBase
   }
 
   private void setAppBarState() {
-    assert toolbar != null;
     setSupportActionBar(toolbar);
     toolbar.setTitle(getString(R.string.app_name));
     final FragmentManager fragmentManager = getSupportFragmentManager();
@@ -174,10 +170,8 @@ public class MainActivity extends DonationActivityBase
 
   @Override protected void onResume() {
     super.onResume();
-    assert toolbar != null;
     animateActionBarToolbar(toolbar);
 
-    assert presenter != null;
     presenter.onResume();
   }
 
@@ -188,7 +182,6 @@ public class MainActivity extends DonationActivityBase
   @Override protected void onPause() {
     super.onPause();
 
-    assert presenter != null;
     presenter.onPause();
   }
 
@@ -198,7 +191,6 @@ public class MainActivity extends DonationActivityBase
     RatingDialog.showRatingDialog(this, this);
     if (PadLockService.isRunning()) {
       showLockList();
-      assert presenter != null;
       presenter.showTermsDialog();
     } else {
       showAccessibilityPrompt();

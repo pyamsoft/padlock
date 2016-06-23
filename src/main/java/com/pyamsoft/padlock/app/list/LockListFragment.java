@@ -69,21 +69,18 @@ public final class LockListFragment extends Fragment
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
   @NonNull private final Handler handler = new Handler();
-  @Nullable @BindView(R.id.applist_fab) FloatingActionButton fab;
-  @Nullable @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
-  @Nullable @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
-  @Nullable @Inject LockListPresenter presenter;
-  @Nullable @Inject AdapterPresenter<AppEntry, LockListAdapter.ViewHolder> adapterPresenter;
-  @Nullable @Inject DBPresenter dbPresenter;
-  @Nullable private DataHolderFragment<Presenter> presenterDataHolder;
-  @Nullable private LockListAdapter adapter;
-  @Nullable private LockListLayoutManager lockListLayoutManager;
+  @BindView(R.id.applist_fab) FloatingActionButton fab;
+  @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
+  @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
+  @Inject LockListPresenter presenter;
+  @Inject AdapterPresenter<AppEntry, LockListAdapter.ViewHolder> adapterPresenter;
+  @Inject DBPresenter dbPresenter;
+  private DataHolderFragment<Presenter> presenterDataHolder;
+  private LockListAdapter adapter;
+  private LockListLayoutManager lockListLayoutManager;
   @NonNull private final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
-      assert swipeRefreshLayout != null;
       swipeRefreshLayout.setRefreshing(true);
-
-      assert lockListLayoutManager != null;
       lockListLayoutManager.setVerticalScrollEnabled(false);
       final FragmentActivity activity = getActivity();
       if (activity != null) {
@@ -94,10 +91,7 @@ public final class LockListFragment extends Fragment
   };
   @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
-      assert swipeRefreshLayout != null;
       swipeRefreshLayout.setRefreshing(false);
-
-      assert lockListLayoutManager != null;
       lockListLayoutManager.setVerticalScrollEnabled(true);
       final FragmentActivity activity = getActivity();
       if (activity != null) {
@@ -107,8 +101,8 @@ public final class LockListFragment extends Fragment
     }
   };
   @Nullable private AsyncVectorDrawableTask fabIconTask;
-  @Nullable private Unbinder unbinder;
-  @Nullable private MenuItem displaySystemItem;
+  private Unbinder unbinder;
+  private MenuItem displaySystemItem;
   private boolean firstRefresh;
 
   @Nullable @Override
@@ -116,10 +110,8 @@ public final class LockListFragment extends Fragment
       @Nullable Bundle savedInstanceState) {
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
-    assert presenter != null;
     presenter.bindView(this);
 
-    assert adapter != null;
     adapter.onCreate();
     return view;
   }
@@ -139,7 +131,6 @@ public final class LockListFragment extends Fragment
   }
 
   private void setupSwipeRefresh() {
-    assert swipeRefreshLayout != null;
     swipeRefreshLayout.setColorSchemeResources(R.color.blue500, R.color.amber700, R.color.blue700,
         R.color.amber500);
     swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -150,19 +141,15 @@ public final class LockListFragment extends Fragment
 
   @Override public void onResume() {
     super.onResume();
-    assert fab != null;
     AnimUtil.popShow(fab, 500, 300);
 
-    assert presenter != null;
     presenter.onResume();
   }
 
   @Override public void onPause() {
     super.onPause();
-    assert fab != null;
     AnimUtil.popHide(fab, 300, 300);
 
-    assert presenter != null;
     presenter.onPause();
   }
 
@@ -172,7 +159,6 @@ public final class LockListFragment extends Fragment
     final RecyclerView.ItemDecoration dividerDecoration =
         new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL_LIST);
 
-    assert recyclerView != null;
     recyclerView.setLayoutManager(lockListLayoutManager);
     recyclerView.setAdapter(adapter);
     recyclerView.addItemDecoration(dividerDecoration);
@@ -206,8 +192,6 @@ public final class LockListFragment extends Fragment
       dbPresenter = lockDBPresenter;
     }
 
-    assert adapterPresenter != null;
-    assert dbPresenter != null;
     adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
 
     setHasOptionsMenu(true);
@@ -226,16 +210,13 @@ public final class LockListFragment extends Fragment
 
   private void setupLockListMenuItems(final @NonNull Menu menu) {
     displaySystemItem = menu.findItem(R.id.menu_is_system);
-    assert presenter != null;
     presenter.setSystemVisibilityFromPreference();
   }
 
   private void setSystemCheckListener() {
-    assert displaySystemItem != null;
     displaySystemItem.setOnMenuItemClickListener(item -> {
       if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
         Timber.d("List is not refreshing. Allow change of system preference");
-        assert presenter != null;
         if (item.isChecked()) {
           presenter.setSystemInvisible();
         } else {
@@ -249,7 +230,6 @@ public final class LockListFragment extends Fragment
   }
 
   private void setSystemVisible(boolean visible) {
-    assert displaySystemItem != null;
     displaySystemItem.setOnMenuItemClickListener(null);
     displaySystemItem.setChecked(visible);
     setSystemCheckListener();
@@ -299,28 +279,17 @@ public final class LockListFragment extends Fragment
   @Override public void onDestroyView() {
     super.onDestroyView();
 
-    assert recyclerView != null;
     recyclerView.setOnClickListener(null);
     recyclerView.setLayoutManager(null);
     recyclerView.setAdapter(null);
 
-    assert fab != null;
     fab.setOnClickListener(null);
-
-    assert swipeRefreshLayout != null;
     swipeRefreshLayout.setOnRefreshListener(null);
-
-    assert adapter != null;
     adapter.onDestroy();
-
-    assert presenter != null;
     presenter.unbindView(!getActivity().isChangingConfigurations());
 
     cancelFabTask();
-
-    assert unbinder != null;
     unbinder.unbind();
-
     handler.removeCallbacksAndMessages(null);
   }
 
@@ -334,20 +303,14 @@ public final class LockListFragment extends Fragment
   }
 
   private void setupFAB() {
-    assert fab != null;
-    fab.setOnClickListener(view -> {
-      assert presenter != null;
-      presenter.clickPinFAB();
-    });
+    fab.setOnClickListener(view -> presenter.clickPinFAB());
 
     AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(24));
-    assert presenter != null;
     presenter.setFABStateFromPreference();
   }
 
   @Override public void setFABStateEnabled() {
     cancelFabTask();
-    assert fab != null;
     fabIconTask = new AsyncVectorDrawableTask(fab);
     fabIconTask.execute(
         new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_lock_outline_24dp));
@@ -355,7 +318,6 @@ public final class LockListFragment extends Fragment
 
   @Override public void setFABStateDisabled() {
     cancelFabTask();
-    assert fab != null;
     fabIconTask = new AsyncVectorDrawableTask(fab);
     fabIconTask.execute(
         new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_lock_open_24dp));
@@ -395,24 +357,20 @@ public final class LockListFragment extends Fragment
     Timber.d("Add entry: %s", entry);
 
     // In case the configuration changes, we do the animation again
-    assert swipeRefreshLayout != null;
     if (!swipeRefreshLayout.isRefreshing()) {
       swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
     }
 
-    assert adapter != null;
     adapter.addItem(entry);
   }
 
   @Override public void onStart() {
     super.onStart();
-    assert adapter != null;
     adapter.onStart();
   }
 
   @Override public void onStop() {
     super.onStop();
-    assert adapter != null;
     adapter.onStop();
   }
 
@@ -434,7 +392,6 @@ public final class LockListFragment extends Fragment
 
           @Override public void onShowcaseDismissed(MaterialShowcaseView materialShowcaseView) {
             Timber.d("onShowcaseDismissed");
-            assert presenter != null;
             presenter.setOnBoard();
           }
         })
@@ -445,33 +402,27 @@ public final class LockListFragment extends Fragment
   @Override public void onListCleared() {
     Timber.d("onListCleared");
     handler.post(startRefreshRunnable);
-    assert fab != null;
     fab.hide();
   }
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
     handler.post(stopRefreshRunnable);
-    assert fab != null;
     fab.show();
 
-    assert presenter != null;
     presenter.showOnBoarding();
   }
 
   @Override public void refreshList() {
-    assert adapter != null;
     final int oldSize = adapter.getItemCount() - 1;
     for (int i = oldSize; i >= 0; --i) {
       adapter.removeItem();
     }
     onListCleared();
-    assert presenter != null;
     presenter.populateList();
   }
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
-    assert presenterDataHolder != null;
     if (getActivity().isChangingConfigurations()) {
       presenterDataHolder.put(KEY_PRESENTER, presenter);
       presenterDataHolder.put(KEY_ADAPTER_PRESENTER, adapterPresenter);

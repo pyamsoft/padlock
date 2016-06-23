@@ -56,19 +56,19 @@ public class LockInfoDialog extends DialogFragment
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
   @NonNull private final Handler handler = new Handler();
-  @Nullable @BindView(R.id.lock_info_close) ImageView close;
-  @Nullable @BindView(R.id.lock_info_title) TextView name;
-  @Nullable @BindView(R.id.lock_info_icon) ImageView icon;
-  @Nullable @BindView(R.id.lock_info_package_name) TextView packageName;
-  @Nullable @BindView(R.id.lock_info_system) TextView system;
-  @Nullable @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
-  @Nullable @Inject LockInfoPresenter presenter;
-  @Nullable @Inject DBPresenter dbPresenter;
-  @Nullable @Inject AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder> adapterPresenter;
-  @Nullable private DataHolderFragment<Presenter> presenterDataHolder;
-  @Nullable private LockInfoAdapter adapter;
-  @Nullable private AppEntry appEntry;
-  @Nullable private Unbinder unbinder;
+  @BindView(R.id.lock_info_close) ImageView close;
+  @BindView(R.id.lock_info_title) TextView name;
+  @BindView(R.id.lock_info_icon) ImageView icon;
+  @BindView(R.id.lock_info_package_name) TextView packageName;
+  @BindView(R.id.lock_info_system) TextView system;
+  @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
+  @Inject LockInfoPresenter presenter;
+  @Inject DBPresenter dbPresenter;
+  @Inject AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder> adapterPresenter;
+  private DataHolderFragment<Presenter> presenterDataHolder;
+  private LockInfoAdapter adapter;
+  private AppEntry appEntry;
+  private Unbinder unbinder;
   private boolean firstRefresh;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
@@ -114,19 +114,14 @@ public class LockInfoDialog extends DialogFragment
       adapterPresenter = activityEntryAdapterPresenter;
     }
 
-    assert appEntry != null;
-    assert adapterPresenter != null;
-    assert dbPresenter != null;
     adapter = new LockInfoAdapter(appEntry, adapterPresenter, dbPresenter);
   }
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    assert presenter != null;
     presenter.bindView(this);
 
-    assert adapter != null;
     adapter.onCreate();
     return super.onCreateView(inflater, container, savedInstanceState);
   }
@@ -150,40 +145,21 @@ public class LockInfoDialog extends DialogFragment
   @Override public void onDestroyView() {
     super.onDestroyView();
 
-    assert recyclerView != null;
     recyclerView.setOnClickListener(null);
     recyclerView.setLayoutManager(null);
     recyclerView.setAdapter(null);
 
-    assert adapter != null;
     adapter.onDestroy();
-
-    assert presenter != null;
     presenter.unbindView(!getActivity().isChangingConfigurations());
-
-    assert unbinder != null;
     unbinder.unbind();
-
     handler.removeCallbacksAndMessages(null);
   }
 
   private void initializeForEntry() {
-    assert appEntry != null;
-    assert presenter != null;
-
-    assert close != null;
     close.setOnClickListener(view -> dismiss());
-
-    assert name != null;
     name.setText(appEntry.name());
-
-    assert icon != null;
     presenter.loadApplicationIcon(appEntry.packageName());
-
-    assert packageName != null;
     packageName.setText(appEntry.packageName());
-
-    assert system != null;
     system.setText((appEntry.system() ? "YES" : "NO"));
 
     // Recycler setup
@@ -191,14 +167,12 @@ public class LockInfoDialog extends DialogFragment
     final RecyclerView.ItemDecoration dividerDecoration =
         new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST);
 
-    assert recyclerView != null;
     recyclerView.setLayoutManager(layoutManager);
     recyclerView.addItemDecoration(dividerDecoration);
     recyclerView.setAdapter(adapter);
   }
 
   @Override public void refreshList() {
-    assert adapter != null;
     final int oldSize = adapter.getItemCount() - 1;
     for (int i = oldSize; i >= 0; --i) {
       adapter.removeItem();
@@ -209,15 +183,12 @@ public class LockInfoDialog extends DialogFragment
 
   private void repopulateList() {
     Timber.d("Repopulate list");
-    assert presenter != null;
-    assert appEntry != null;
     presenter.populateList(appEntry.packageName());
   }
 
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
     Timber.d("Add entry: %s", entry);
 
-    assert adapter != null;
     adapter.addItem(entry);
   }
 
@@ -236,7 +207,6 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
-    assert presenterDataHolder != null;
     if (getActivity().isChangingConfigurations()) {
       presenterDataHolder.put(KEY_PRESENTER, presenter);
       presenterDataHolder.put(KEY_ADAPTER_PRESENTER, adapterPresenter);
@@ -251,7 +221,6 @@ public class LockInfoDialog extends DialogFragment
   }
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable drawable) {
-    assert icon != null;
     icon.setImageDrawable(drawable);
   }
 }
