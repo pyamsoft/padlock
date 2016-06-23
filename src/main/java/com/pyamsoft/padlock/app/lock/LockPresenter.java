@@ -17,19 +17,19 @@
 package com.pyamsoft.padlock.app.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.padlock.app.base.SchedulerPresenter;
+import javax.inject.Named;
+import rx.Scheduler;
 
-public interface LockPresenter<I extends LockPresenter.LockView> extends Presenter<I> {
+public abstract class LockPresenter<I extends LockPresenter.LockView>
+    extends SchedulerPresenter<I> {
 
-  void submit();
+  protected LockPresenter(@NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
+    super(mainScheduler, ioScheduler);
+  }
 
-  interface LockView {
-
-    @NonNull String getCurrentAttempt();
-
-    @NonNull String getPackageName();
-
-    @NonNull String getActivityName();
+  public interface LockView {
 
     void onSubmitSuccess();
 

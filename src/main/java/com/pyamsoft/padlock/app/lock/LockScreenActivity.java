@@ -48,29 +48,30 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public final class LockScreenActivity extends NoDonationActivityBase implements LockScreen {
+public final class LockScreenActivity extends NoDonationActivityBase
+    implements LockScreen, LockViewDelegate.Callback {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = LockViewDelegate.ENTRY_PACKAGE_NAME;
   @NonNull public static final String ENTRY_ACTIVITY_NAME = LockViewDelegate.ENTRY_ACTIVITY_NAME;
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
   @NonNull private final Intent home;
-  @Nullable @BindView(R.id.activity_lock_screen) View rootView;
-  @Nullable @BindView(R.id.toolbar) Toolbar toolbar;
-  @Nullable @BindView(R.id.appbar) AppBarLayout appBarLayout;
+  @BindView(R.id.activity_lock_screen) View rootView;
+  @BindView(R.id.toolbar) Toolbar toolbar;
+  @BindView(R.id.appbar) AppBarLayout appBarLayout;
 
-  @Nullable @Inject AppIconLoaderPresenter<LockScreen> appIconLoaderPresenter;
-  @Nullable @Inject LockScreenPresenter presenter;
-  @Nullable @Inject LockViewDelegate lockViewDelegate;
+  @Inject AppIconLoaderPresenter<LockScreen> appIconLoaderPresenter;
+  @Inject LockScreenPresenter presenter;
+  @Inject LockViewDelegate lockViewDelegate;
 
-  @Nullable private DataHolderFragment<Long> ignoreDataHolder;
-  @Nullable private DataHolderFragment<Boolean> excludeDataHolder;
-  @Nullable private MenuItem menuIgnoreNone;
-  @Nullable private MenuItem menuIgnoreFive;
-  @Nullable private MenuItem menuIgnoreTen;
-  @Nullable private MenuItem menuIgnoreThirty;
-  @Nullable private MenuItem menuExclude;
-  @Nullable private Unbinder unbinder;
+  private DataHolderFragment<Long> ignoreDataHolder;
+  private DataHolderFragment<Boolean> excludeDataHolder;
+  private MenuItem menuIgnoreNone;
+  private MenuItem menuIgnoreFive;
+  private MenuItem menuIgnoreTen;
+  private MenuItem menuIgnoreThirty;
+  private MenuItem menuExclude;
+  private Unbinder unbinder;
   private int failCount;
 
   public LockScreenActivity() {
@@ -105,17 +106,10 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
         .build()
         .inject(this);
 
-    assert presenter != null;
     presenter.bindView(this);
-
-    assert appIconLoaderPresenter != null;
     appIconLoaderPresenter.bindView(this);
-
-    assert lockViewDelegate != null;
     lockViewDelegate.setTextColor(android.R.color.white);
-
-    assert rootView != null;
-    lockViewDelegate.onCreateView(presenter, this, rootView);
+    lockViewDelegate.onCreateView(this, this, rootView);
 
     ViewCompat.setElevation(appBarLayout, 0);
     setSupportActionBar(toolbar);
@@ -126,11 +120,8 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     super.onStart();
     Timber.d("onStart");
 
-    assert presenter != null;
-    presenter.loadDisplayNameFromPackage();
+    presenter.loadDisplayNameFromPackage(getPackageName());
 
-    assert lockViewDelegate != null;
-    assert appIconLoaderPresenter != null;
     lockViewDelegate.onStart(appIconLoaderPresenter);
 
     supportInvalidateOptionsMenu();
@@ -148,16 +139,12 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   @Override protected void onDestroy() {
     super.onDestroy();
 
-    assert presenter != null;
     presenter.unbindView();
 
-    assert appIconLoaderPresenter != null;
     appIconLoaderPresenter.unbindView();
 
-    assert lockViewDelegate != null;
     lockViewDelegate.onDestroyView();
 
-    assert unbinder != null;
     unbinder.unbind();
 
     failCount = 0;
@@ -169,23 +156,7 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
     overridePendingTransition(0, 0);
   }
 
-  @NonNull @Override public String getPackageName() {
-    assert lockViewDelegate != null;
-    return lockViewDelegate.getPackageName();
-  }
-
-  @NonNull @Override public String getActivityName() {
-    assert lockViewDelegate != null;
-    return lockViewDelegate.getActivityName();
-  }
-
-  @NonNull @Override public String getCurrentAttempt() {
-    assert lockViewDelegate != null;
-    return lockViewDelegate.getCurrentAttempt();
-  }
-
   private void showSnackbarWithText(String text) {
-    assert rootView != null;
     final Snackbar snackbar = Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT);
     final int defaultSnackColor = ContextCompat.getColor(this, R.color.snackbar);
     snackbar.getView().setBackgroundColor(defaultSnackColor);
@@ -211,7 +182,6 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   @Override public void onSubmitSuccess() {
     Timber.d("Unlocked!");
-    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     PadLockService.passLockScreen();
     finishAndRemoveTask();
@@ -219,7 +189,6 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   @Override public void onSubmitFailure() {
     Timber.e("Failed to unlock");
-    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     showSnackbarWithText("Error: Invalid PIN");
 
@@ -227,27 +196,23 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
     if (failCount > 2) {
-      assert presenter != null;
-      presenter.lockEntry();
+      presenter.lockEntry(lockViewDelegate.getAppPackageName(),
+          lockViewDelegate.getAppActivityName());
     }
   }
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
-    assert lockViewDelegate != null;
     lockViewDelegate.onRestoreInstanceState(savedInstanceState);
     super.onRestoreInstanceState(savedInstanceState);
   }
 
   @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
     if (isChangingConfigurations()) {
-      assert lockViewDelegate != null;
       lockViewDelegate.onSaveInstanceState(outState);
 
-      assert ignoreDataHolder != null;
       ignoreDataHolder.put(0, getIgnorePeriodTime());
 
-      assert excludeDataHolder != null;
       excludeDataHolder.put(0, shouldExcludeEntry());
     } else {
       DataHolderFragment.remove(this, "ignore_data");
@@ -271,16 +236,12 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
     // Set the default checked value
-    assert ignoreDataHolder != null;
     final Long ignorePeriod = ignoreDataHolder.pop(0);
 
-    assert presenter != null;
     presenter.setIgnorePeriodFromPreferences(ignorePeriod);
 
-    assert excludeDataHolder != null;
     final Boolean exclude = excludeDataHolder.pop(0);
     if (exclude != null) {
-      assert menuExclude != null;
       menuExclude.setChecked(exclude);
     }
 
@@ -288,7 +249,6 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @Override public void onSubmitError() {
-    assert lockViewDelegate != null;
     lockViewDelegate.clearDisplay();
     AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
   }
@@ -358,7 +318,8 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
 
   private void showInfoDialog() {
     AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(),
-        InfoDialog.newInstance(getPackageName(), getActivityName()), "info_dialog");
+        InfoDialog.newInstance(lockViewDelegate.getAppPackageName(),
+            lockViewDelegate.getAppActivityName()), "info_dialog");
   }
 
   private void showForgotPasscodeDialog() {
@@ -367,7 +328,6 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @CheckResult @Override public long getIgnorePeriodTime() {
-    assert presenter != null;
     if (menuIgnoreFive != null && menuIgnoreTen != null && menuIgnoreThirty != null) {
       if (menuIgnoreFive.isChecked()) {
         return presenter.getIgnoreTimeFive();
@@ -381,16 +341,19 @@ public final class LockScreenActivity extends NoDonationActivityBase implements 
   }
 
   @CheckResult @Override public boolean shouldExcludeEntry() {
-    assert menuExclude != null;
     return menuExclude.isChecked();
   }
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-    assert lockViewDelegate != null;
     lockViewDelegate.onApplicationIconLoadedSuccess(icon);
   }
 
   @Override public void onApplicationIconLoadedError() {
     AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "error");
+  }
+
+  @Override public void onSubmitPressed() {
+    presenter.submit(lockViewDelegate.getAppPackageName(), lockViewDelegate.getAppActivityName(),
+        lockViewDelegate.getCurrentAttempt(), shouldExcludeEntry(), getIgnorePeriodTime());
   }
 }

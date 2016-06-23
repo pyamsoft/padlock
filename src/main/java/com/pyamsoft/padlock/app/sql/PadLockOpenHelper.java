@@ -100,7 +100,7 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
     return PadLockDB.with(appContext)
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName,
             activityName)
-        .mapToOne(PadLockEntry.MAPPER::map)
+        .mapToOne(PadLockEntry.FACTORY.with_package_activity_nameMapper()::map)
         .filter(padLockEntry -> padLockEntry != null);
   }
 
@@ -110,7 +110,7 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
     final Context appContext = context.getApplicationContext();
     return PadLockDB.with(appContext)
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME, packageName)
-        .mapToList(PadLockEntry.MAPPER::map)
+        .mapToList(PadLockEntry.FACTORY.with_package_nameMapper()::map)
         .filter(padLockEntries -> padLockEntries != null);
   }
 
@@ -128,7 +128,7 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
     final Context appContext = context.getApplicationContext();
     return PadLockDB.with(appContext)
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
-        .mapToList(PadLockEntry.MAPPER::map)
+        .mapToList(PadLockEntry.FACTORY.all_entriesMapper()::map)
         .filter(padLockEntries -> padLockEntries != null);
   }
 

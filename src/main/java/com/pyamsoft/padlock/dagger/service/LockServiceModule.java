@@ -23,12 +23,15 @@ import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Named;
+import rx.Scheduler;
 
 @Module public class LockServiceModule {
 
   @ActivityScope @Provides LockServicePresenter provideLockServicePresenter(
-      final LockServicePresenterImpl presenter) {
-    return presenter;
+      LockServiceInteractor interactor, LockServiceStateInteractor stateInteractor,
+      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+    return new LockServicePresenter(stateInteractor, interactor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides LockServiceInteractor provideLockServiceInteractor(

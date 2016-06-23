@@ -32,9 +32,9 @@ import timber.log.Timber;
 public final class PadLockService extends AccessibilityService
     implements LockServicePresenter.LockService {
 
-  @Nullable private static volatile PadLockService instance = null;
-  @Nullable @Inject LockServicePresenter presenter;
-  @NonNull private Intent lockActivity = new Intent();
+  private static volatile PadLockService instance = null;
+  @Inject LockServicePresenter presenter;
+  private Intent lockActivity = new Intent();
 
   @Nullable @CheckResult private static synchronized PadLockService getInstance() {
     return instance;
@@ -45,22 +45,15 @@ public final class PadLockService extends AccessibilityService
   }
 
   @CheckResult public static boolean isRunning() {
-    final PadLockService currentInstance = getInstance();
-    if (currentInstance == null) {
-      return false;
-    }
-
-    final LockServicePresenter lockServicePresenter = currentInstance.presenter;
-    return lockServicePresenter != null && lockServicePresenter.isRunning();
+    return instance != null;
   }
 
   public static void passLockScreen() {
     final PadLockService currentInstance = getInstance();
-
-    assert currentInstance != null;
+    if (currentInstance == null) {
+      throw new NullPointerException("Current service instance is NULL");
+    }
     final LockServicePresenter lockServicePresenter = currentInstance.presenter;
-
-    assert lockServicePresenter != null;
     lockServicePresenter.setLockScreenPassed();
   }
 
@@ -74,7 +67,6 @@ public final class PadLockService extends AccessibilityService
     final CharSequence eventClass = event.getClassName();
 
     if (eventPackage != null && eventClass != null) {
-      assert presenter != null;
       presenter.processAccessibilityEvent(eventPackage.toString(), eventClass.toString());
     } else {
       Timber.e("Missing needed data");
@@ -101,7 +93,7 @@ public final class PadLockService extends AccessibilityService
     final String activityName = entry.activityName();
 
     // Multiple task flag is needed to launch multiple lock screens on N
-    lockActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+    lockActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
     lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
 
@@ -111,9 +103,7 @@ public final class PadLockService extends AccessibilityService
 
   @Override public boolean onUnbind(Intent intent) {
     Timber.d("onDestroy");
-    if (presenter != null) {
-      presenter.unbindView();
-    }
+    presenter.unbindView();
 
     setInstance(null);
     return super.onUnbind(intent);
@@ -128,7 +118,6 @@ public final class PadLockService extends AccessibilityService
         .build()
         .inject(this);
 
-    assert presenter != null;
     presenter.bindView(this);
     setInstance(this);
   }

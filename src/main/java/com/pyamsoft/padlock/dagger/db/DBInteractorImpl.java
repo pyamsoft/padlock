@@ -67,7 +67,8 @@ final class DBInteractorImpl implements DBInteractor {
   public void createEntry(@NonNull String packageName, @NonNull String activityName,
       @Nullable String code, boolean system) {
     Timber.d("CREATE: %s %s", packageName, activityName);
-    PadLockOpenHelper.insert(appContext, new PadLockEntry.Marshal().packageName(packageName)
+    PadLockOpenHelper.insert(appContext, PadLockEntry.FACTORY.marshal()
+        .packageName(packageName)
         .activityName(activityName)
         .lockCode(code)
         .lockUntilTime(0)

@@ -22,12 +22,14 @@ import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 
-abstract class AdapterInteractorImpl<I> extends AppIconLoaderInteractorImpl
+public class AdapterInteractorImpl<I> extends AppIconLoaderInteractorImpl
     implements AdapterInteractor<I> {
 
   @NonNull private final List<I> entries;
 
+  @Inject
   protected AdapterInteractorImpl(final @NonNull PackageManagerWrapper packageManagerWrapper) {
     super(packageManagerWrapper);
     this.entries = new ArrayList<>();

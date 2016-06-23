@@ -21,8 +21,8 @@ import com.google.auto.value.AutoValue;
 
 @AutoValue public abstract class PadLockEntry implements PadLockEntryModel {
 
-  @NonNull public static final Mapper<PadLockEntry> MAPPER =
-      new Mapper<>(AutoValue_PadLockEntry::new);
+  @NonNull public static final Factory<PadLockEntry> FACTORY =
+      new Factory<>(AutoValue_PadLockEntry::new);
 
   // SQLDelight does not yet support delete strings
   @NonNull public static final String DELETE_WITH_PACKAGE_NAME = "packageName = ?";
@@ -33,9 +33,4 @@ import com.google.auto.value.AutoValue;
   // SQLDelight does not yet support update strings
   @NonNull public static final String UPDATE_WITH_PACKAGE_ACTIVITY_NAME =
       "packageName = ? AND activityName = ?;";
-
-  // Empty class just to allow Marshal access
-  public static final class Marshal extends PadLockEntryMarshal<Marshal> {
-
-  }
 }

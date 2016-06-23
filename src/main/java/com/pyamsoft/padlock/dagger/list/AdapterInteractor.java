@@ -20,7 +20,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractor;
 
-interface AdapterInteractor<I> extends AppIconLoaderInteractor {
+public interface AdapterInteractor<I> extends AppIconLoaderInteractor {
 
   @CheckResult @NonNull I get(int position);
 

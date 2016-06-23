@@ -24,7 +24,7 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import rx.Observable;
 
-interface LockListInteractor {
+public interface LockListInteractor {
 
   @CheckResult @WorkerThread @NonNull Observable<List<ApplicationInfo>> getApplicationInfoList();
 

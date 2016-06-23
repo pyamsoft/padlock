@@ -17,9 +17,50 @@
 package com.pyamsoft.padlock.app.base;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractor;
+import javax.inject.Inject;
+import javax.inject.Named;
+import rx.Scheduler;
+import rx.Subscription;
+import rx.subscriptions.Subscriptions;
+import timber.log.Timber;
 
-public interface AppIconLoaderPresenter<I extends AppIconLoaderView> extends Presenter<I> {
+public class AppIconLoaderPresenter<I extends AppIconLoaderView>
+    extends SchedulerPresenter<I> {
 
-  void loadApplicationIcon(@NonNull String packageName);
+  @NonNull private final AppIconLoaderInteractor interactor;
+
+  @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
+
+  @Inject public AppIconLoaderPresenter(@NonNull AppIconLoaderInteractor interactor,
+      @NonNull @Named("main") Scheduler mainScheduler, @NonNull @Named("io") Scheduler ioScheduler) {
+    super(mainScheduler, ioScheduler);
+    this.interactor = interactor;
+  }
+
+  @Override protected void onUnbind() {
+    super.onUnbind();
+    unsubLoadIcon();
+  }
+
+  public final void loadApplicationIcon(@NonNull String packageName) {
+    loadIconSubscription = interactor.loadPackageIcon(packageName)
+        .subscribeOn(getIoScheduler())
+        .observeOn(getMainScheduler())
+        .subscribe(drawable -> {
+          final AppIconLoaderView loaderView = getView();
+          loaderView.onApplicationIconLoadedSuccess(drawable);
+        }, throwable -> {
+          Timber.e(throwable, "onError");
+          final AppIconLoaderView loaderView = getView();
+          loaderView.onApplicationIconLoadedError();
+        });
+  }
+
+  private void unsubLoadIcon() {
+    if (!loadIconSubscription.isUnsubscribed()) {
+      Timber.d("Unsub from load icon event");
+      loadIconSubscription.unsubscribe();
+    }
+  }
 }

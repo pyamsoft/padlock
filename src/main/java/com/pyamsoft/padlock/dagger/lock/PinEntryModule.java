@@ -20,12 +20,14 @@ import com.pyamsoft.padlock.app.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Named;
+import rx.Scheduler;
 
 @Module public class PinEntryModule {
 
-  @ActivityScope @Provides PinEntryPresenter providePinEntryPresenter(
-      final PinEntryPresenterImpl presenter) {
-    return presenter;
+  @ActivityScope @Provides PinEntryPresenter providePinEntryPresenter(PinEntryInteractor interactor,
+      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+    return new PinEntryPresenter(interactor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides PinEntryInteractor providePinEntryInteractor(

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.base;
+package com.pyamsoft.padlock.app.base;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.PresenterImpl;
+import com.pyamsoft.pydroid.base.Presenter;
 import javax.inject.Named;
 import rx.Scheduler;
 
-public abstract class SchedulerPresenterImpl<I> extends PresenterImpl<I> {
+public abstract class SchedulerPresenter<I> extends Presenter<I> {
 
   @NonNull private final Scheduler mainScheduler;
   @NonNull private final Scheduler ioScheduler;
 
-  protected SchedulerPresenterImpl(@NonNull @Named("main") Scheduler mainScheduler,
+  protected SchedulerPresenter(@NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     this.mainScheduler = mainScheduler;
     this.ioScheduler = ioScheduler;
