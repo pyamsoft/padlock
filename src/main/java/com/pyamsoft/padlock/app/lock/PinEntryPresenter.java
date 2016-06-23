@@ -28,7 +28,6 @@ import timber.log.Timber;
 public final class PinEntryPresenter extends LockPresenter<PinScreen> {
 
   @NonNull private final PinEntryInteractor interactor;
-
   @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
 
   @Inject public PinEntryPresenter(@NonNull final PinEntryInteractor interactor,

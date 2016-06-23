@@ -36,7 +36,10 @@ public final class PadLockService extends AccessibilityService
   @Inject LockServicePresenter presenter;
   private Intent lockActivity = new Intent();
 
-  @Nullable @CheckResult private static synchronized PadLockService getInstance() {
+  @NonNull @CheckResult private static synchronized PadLockService getInstance() {
+    if (instance == null) {
+      throw new NullPointerException("Current service instance is NULL");
+    }
     return instance;
   }
 
@@ -49,11 +52,7 @@ public final class PadLockService extends AccessibilityService
   }
 
   public static void passLockScreen() {
-    final PadLockService currentInstance = getInstance();
-    if (currentInstance == null) {
-      throw new NullPointerException("Current service instance is NULL");
-    }
-    final LockServicePresenter lockServicePresenter = currentInstance.presenter;
+    final LockServicePresenter lockServicePresenter = getInstance().presenter;
     lockServicePresenter.setLockScreenPassed();
   }
 

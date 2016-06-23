@@ -28,8 +28,8 @@ public final class InfoDialog extends DialogFragment {
   @NonNull private static final String PKG_NAME = "pkgname";
   @NonNull private static final String ACT_NAME = "actname";
 
-  @Nullable private String activityName;
-  @Nullable private String packageName;
+  private String activityName;
+  private String packageName;
 
   public static InfoDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {

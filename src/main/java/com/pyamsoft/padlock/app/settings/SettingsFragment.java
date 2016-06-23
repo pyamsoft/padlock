@@ -36,7 +36,7 @@ import timber.log.Timber;
 public final class SettingsFragment extends PreferenceFragmentCompat
     implements SettingsPresenter.SettingsView {
 
-  @Nullable @Inject SettingsPresenter presenter;
+  @Inject SettingsPresenter presenter;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -49,27 +49,22 @@ public final class SettingsFragment extends PreferenceFragmentCompat
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    assert presenter != null;
     presenter.bindView(this);
     return super.onCreateView(inflater, container, savedInstanceState);
   }
 
   @Override public void onResume() {
     super.onResume();
-    assert presenter != null;
     presenter.onResume();
   }
 
   @Override public void onPause() {
     super.onPause();
-    assert presenter != null;
     presenter.onPause();
   }
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-
-    assert presenter != null;
     presenter.unbindView();
   }
 
@@ -79,7 +74,6 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));
     clearDb.setOnPreferenceClickListener(preference -> {
       Timber.d("Clear DB onClick");
-      assert presenter != null;
       presenter.confirmDatabaseClear();
       return true;
     });
@@ -87,7 +81,6 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     final Preference resetAll = findPreference(getString(R.string.clear_all_key));
     resetAll.setOnPreferenceClickListener(preference -> {
       Timber.d("Reset settings onClick");
-      assert presenter != null;
       presenter.confirmSettingsClear();
       return true;
     });

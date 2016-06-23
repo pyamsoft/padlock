@@ -35,8 +35,8 @@ public class AccessibilityFragment extends Fragment {
 
   @NonNull private final Intent accessibilityServiceIntent =
       new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-  @Nullable @BindView(R.id.main_service_button) Button serviceButton;
-  @Nullable private Unbinder unbinder;
+  @BindView(R.id.main_service_button) Button serviceButton;
+  private Unbinder unbinder;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -48,9 +48,7 @@ public class AccessibilityFragment extends Fragment {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    if (unbinder != null) {
-      unbinder.unbind();
-    }
+    unbinder.unbind();
   }
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -59,7 +57,6 @@ public class AccessibilityFragment extends Fragment {
   }
 
   private void setupAccessibilityButton() {
-    assert serviceButton != null;
     serviceButton.setOnClickListener(view -> startActivity(accessibilityServiceIntent));
   }
 }

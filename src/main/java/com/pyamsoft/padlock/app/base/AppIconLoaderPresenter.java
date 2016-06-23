@@ -29,7 +29,6 @@ public class AppIconLoaderPresenter<I extends AppIconLoaderView>
     extends SchedulerPresenter<I> {
 
   @NonNull private final AppIconLoaderInteractor interactor;
-
   @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
 
   @Inject public AppIconLoaderPresenter(@NonNull AppIconLoaderInteractor interactor,

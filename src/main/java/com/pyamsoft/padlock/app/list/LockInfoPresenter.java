@@ -37,7 +37,6 @@ import timber.log.Timber;
 public final class LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;
-
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
 
   @Inject public LockInfoPresenter(final @NonNull LockInfoInteractor lockInfoInteractor,
