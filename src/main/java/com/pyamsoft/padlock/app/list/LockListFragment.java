@@ -195,7 +195,7 @@ public final class LockListFragment extends Fragment
       Timber.d("Create new presenters");
       firstRefresh = true;
       DaggerLockListComponent.builder()
-          .padLockComponent(PadLock.padLockComponent(this))
+          .padLockComponent(PadLock.getInstance().getPadLockComponent())
           .build()
           .inject(this);
     } else {

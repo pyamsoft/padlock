@@ -16,14 +16,9 @@
 
 package com.pyamsoft.padlock;
 
-import android.app.Activity;
-import android.app.Application;
-import android.app.Service;
 import android.os.StrictMode;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockModule;
@@ -32,31 +27,27 @@ import com.pyamsoft.pydroid.crash.CrashHandler;
 
 public final class PadLock extends ApplicationBase {
 
-  @Nullable private PadLockComponent padLockComponent;
+  private PadLockComponent padLockComponent;
+  private static volatile PadLock instance = null;
 
-  @NonNull @CheckResult
-  private static PadLockComponent padLockComponent(final Application application) {
-    if (application instanceof PadLock) {
-      final PadLock padLock = (PadLock) application;
-      final PadLockComponent component = padLock.padLockComponent;
-
-      assert component != null;
-      return component;
+  @CheckResult @NonNull public static PadLock getInstance() {
+    if (instance == null) {
+      throw new NullPointerException("PadLock instance is NULL");
     } else {
-      throw new ClassCastException("Cannot cast Application to PadLock");
+      return instance;
     }
   }
 
-  @NonNull @CheckResult public static PadLockComponent padLockComponent(final Activity activity) {
-    return padLockComponent(activity.getApplication());
+  public static void setInstance(PadLock instance) {
+    PadLock.instance = instance;
   }
 
-  @NonNull @CheckResult public static PadLockComponent padLockComponent(final Fragment fragment) {
-    return padLockComponent(fragment.getActivity());
-  }
-
-  @NonNull @CheckResult public static PadLockComponent padLockComponent(final Service service) {
-    return padLockComponent(service.getApplication());
+  @CheckResult @NonNull public final PadLockComponent getPadLockComponent() {
+    if (padLockComponent == null) {
+      throw new NullPointerException("PadLock component is NULL");
+    } else {
+      return padLockComponent;
+    }
   }
 
   @Override protected boolean buildConfigDebug() {
@@ -98,6 +89,8 @@ public final class PadLock extends ApplicationBase {
     // Init the Dagger graph
     padLockComponent =
         DaggerPadLockComponent.builder().padLockModule(new PadLockModule(this)).build();
+
+    setInstance(this);
   }
 
   private void setStrictMode() {

@@ -41,7 +41,7 @@ public final class SettingsFragment extends PreferenceFragmentCompat
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     DaggerSettingsComponent.builder()
-        .padLockComponent(PadLock.padLockComponent(this))
+        .padLockComponent(PadLock.getInstance().getPadLockComponent())
         .build()
         .inject(this);
   }

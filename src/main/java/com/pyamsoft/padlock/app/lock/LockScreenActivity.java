@@ -101,7 +101,7 @@ public final class LockScreenActivity extends NoDonationActivityBase
 
     // Inject Dagger graph
     DaggerLockScreenComponent.builder()
-        .padLockComponent(PadLock.padLockComponent(this))
+        .padLockComponent(PadLock.getInstance().getPadLockComponent())
         .lockScreenModule(new LockScreenModule(this))
         .build()
         .inject(this);
