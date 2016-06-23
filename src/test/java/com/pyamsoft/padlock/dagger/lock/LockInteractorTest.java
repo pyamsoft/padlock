@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import com.pyamsoft.padlock.BuildConfig;
+import com.pyamsoft.padlock.PadLock;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +27,8 @@ import org.robolectric.annotation.Config;
 /**
  * We must run with robo electric because Base64 is in the Android classes
  */
-@RunWith(RobolectricGradleTestRunner.class) @Config(constants = BuildConfig.class)
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = PadLock.class)
 public class LockInteractorTest {
 
   @Test public void test_sha256Encode() {

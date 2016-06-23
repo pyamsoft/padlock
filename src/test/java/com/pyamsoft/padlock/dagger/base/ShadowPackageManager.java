@@ -38,6 +38,16 @@ final class ShadowPackageManager extends DefaultPackageManager
     // TODO add packages to PM
   }
 
+  @Override public int[] getPackageGids(String s, int i) throws NameNotFoundException {
+    System.out.println("Overriden method getPackageGids is STUB");
+    return new int[0];
+  }
+
+  @Override public boolean hasSystemFeature(String s, int i) {
+    System.out.println("Overriden method hasSystemFeature is STUB");
+    return false;
+  }
+
   @NonNull @CheckResult @Override public List<ApplicationInfo> getInstalledApplications(int flags) {
     final List<ApplicationInfo> list = new ArrayList<>();
 
