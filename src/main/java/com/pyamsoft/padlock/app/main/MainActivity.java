@@ -71,7 +71,7 @@ public class MainActivity extends DonationActivityBase
     unbinder = ButterKnife.bind(this);
 
     DaggerMainComponent.builder()
-        .padLockComponent(PadLock.padLockComponent(this))
+        .padLockComponent(PadLock.getInstance().getPadLockComponent())
         .mainModule(new MainModule())
         .build()
         .inject(this);

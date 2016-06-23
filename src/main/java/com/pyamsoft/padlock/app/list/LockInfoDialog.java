@@ -102,7 +102,7 @@ public class LockInfoDialog extends DialogFragment
       Timber.d("Create new presenters");
       firstRefresh = true;
       DaggerLockInfoComponent.builder()
-          .padLockComponent(PadLock.padLockComponent(this))
+          .padLockComponent(PadLock.getInstance().getPadLockComponent())
           .lockInfoModule(new LockInfoModule())
           .build()
           .inject(this);

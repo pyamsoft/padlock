@@ -69,7 +69,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, LockVie
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     DaggerPinEntryComponent.builder()
-        .padLockComponent(PadLock.padLockComponent(this))
+        .padLockComponent(PadLock.getInstance().getPadLockComponent())
         .build()
         .inject(this);
 

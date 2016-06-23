@@ -114,7 +114,7 @@ public final class PadLockService extends AccessibilityService
     Timber.d("onServiceConnected");
     lockActivity = new Intent(this, LockScreenActivity.class);
     DaggerLockServiceComponent.builder()
-        .padLockComponent(PadLock.padLockComponent(this))
+        .padLockComponent(PadLock.getInstance().getPadLockComponent())
         .build()
         .inject(this);
 
