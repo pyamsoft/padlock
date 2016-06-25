@@ -27,7 +27,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.padlock.dagger.settings.DaggerSettingsComponent;
+import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
@@ -74,14 +76,14 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));
     clearDb.setOnPreferenceClickListener(preference -> {
       Timber.d("Clear DB onClick");
-      presenter.confirmDatabaseClear();
+      presenter.clearDatabase();
       return true;
     });
 
     final Preference resetAll = findPreference(getString(R.string.clear_all_key));
     resetAll.setOnPreferenceClickListener(preference -> {
       Timber.d("Reset settings onClick");
-      presenter.confirmSettingsClear();
+      presenter.clearAll();
       return true;
     });
 
@@ -98,8 +100,17 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     });
   }
 
-  @Override public void onConfirmAttempt(int code) {
+  @Override public void showConfirmDialog(int type) {
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
-        ConfirmationDialog.newInstance(code), "confirm_dialog");
+        ConfirmationDialog.newInstance(type), "confirm_dialog");
+  }
+
+  @Override public void onClearAll() {
+    // TODO stop Service on 24
+    android.os.Process.killProcess(android.os.Process.myPid());
+  }
+
+  @Override public void onClearDatabase() {
+    MainPresenter.Bus.get().post(new RefreshEvent());
   }
 }

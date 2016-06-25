@@ -40,7 +40,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.dagger.lock.DaggerPinEntryComponent;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
-import com.pyamsoft.padlock.model.event.RxBus;
+import com.pyamsoft.padlock.model.RxBus;
 import javax.inject.Inject;
 import timber.log.Timber;
 

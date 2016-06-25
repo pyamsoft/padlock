@@ -19,10 +19,8 @@ package com.pyamsoft.padlock.app.settings;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.SchedulerPresenter;
 import com.pyamsoft.padlock.dagger.settings.SettingsInteractor;
-import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
@@ -30,115 +28,99 @@ import timber.log.Timber;
 
 public final class SettingsPresenter extends SchedulerPresenter<SettingsPresenter.SettingsView> {
 
-  @NonNull private final SettingsInteractor settingsInteractor;
+  public static final int CONFIRM_DATABASE = 0;
+  public static final int CONFIRM_ALL = 1;
+  @NonNull private final SettingsInteractor interactor;
+  @NonNull private Subscription confirmBusSubscription = Subscriptions.empty();
+  @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
 
-  @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
-  @NonNull private Subscription confirmDialogSubscription = Subscriptions.empty();
-
-  @Inject public SettingsPresenter(@NonNull final SettingsInteractor settingsInteractor,
-      @NonNull @Named("main") Scheduler mainScheduler,
-      @NonNull @Named("io") Scheduler ioScheduler) {
+  @Inject public SettingsPresenter(@NonNull SettingsInteractor interactor,
+      @NonNull @Named("io") Scheduler ioScheduler,
+      @NonNull @Named("main") Scheduler mainScheduler) {
     super(mainScheduler, ioScheduler);
-    this.settingsInteractor = settingsInteractor;
-  }
-
-  @Override protected void onUnbind() {
-    super.onUnbind();
-    unsubscribeConfirmDialog();
+    this.interactor = interactor;
   }
 
   @Override public void onResume() {
     super.onResume();
-    registerOnConfirmDialogBus();
+    registerOnConfirmEventBus();
   }
 
   @Override public void onPause() {
     super.onPause();
-    unregisterFromConfirmDialogBus();
+    unregisterFromConfirmEventBus();
   }
 
-  private void unsubscribeConfirmDialog() {
-    if (confirmDialogSubscription.isUnsubscribed()) {
-      confirmDialogSubscription.unsubscribe();
+  @Override protected void onUnbind() {
+    super.onUnbind();
+    unsubscribeConfirm();
+  }
+
+  public final void clearAll() {
+    getView().showConfirmDialog(CONFIRM_ALL);
+  }
+
+  public final void clearDatabase() {
+    getView().showConfirmDialog(CONFIRM_DATABASE);
+  }
+
+  void unsubscribeConfirm() {
+    if (!confirmedSubscription.isUnsubscribed()) {
+      confirmedSubscription.unsubscribe();
     }
   }
 
-  private Observable<Boolean> clearDatabase() {
-    return settingsInteractor.clearDatabase()
-        .subscribeOn(getIoScheduler())
-        .observeOn(getMainScheduler());
-  }
-
-  private Observable<Boolean> clearAll() {
-    return settingsInteractor.clearAll()
-        .subscribeOn(getIoScheduler())
-        .observeOn(getMainScheduler());
-  }
-
-  private void unregisterFromConfirmDialogBus() {
-    if (!confirmDialogBusSubscription.isUnsubscribed()) {
-      confirmDialogBusSubscription.unsubscribe();
+  void unregisterFromConfirmEventBus() {
+    if (!confirmBusSubscription.isUnsubscribed()) {
+      confirmBusSubscription.unsubscribe();
     }
   }
 
-  private void registerOnConfirmDialogBus() {
-    unregisterFromConfirmDialogBus();
-    confirmDialogBusSubscription =
-        ConfirmationDialog.ConfirmationDialogBus.get().register().subscribe(confirmationEvent -> {
-          Timber.d("Received confirmation event!");
-          // KLUDGE nested subscriptions are ugly
+  void registerOnConfirmEventBus() {
+    unregisterFromConfirmEventBus();
+    confirmBusSubscription = ConfirmationDialog.Bus.get()
+        .register()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(confirmationEvent -> {
           switch (confirmationEvent.type()) {
-            case 0:
-              if (!confirmationEvent.complete()) {
-                unsubscribeConfirmDialog();
-                Timber.d("Received database cleared confirmation event, clear Database");
-                confirmDialogSubscription = clearDatabase().subscribe(aBoolean -> {
-
-                }, throwable -> Timber.e(throwable,
-                    "ConfirmationDialogBus in clearDatabase onError"), () -> {
-                  Timber.d("ConfirmationDialogBus in clearDatabase onComplete");
-                  ConfirmationDialog.ConfirmationDialogBus.get()
-                      .post(ConfirmationEvent.builder(confirmationEvent).complete(true).build());
-                });
-              }
+            case CONFIRM_DATABASE:
+              unsubscribeConfirm();
+              confirmedSubscription = interactor.clearDatabase()
+                  .subscribeOn(getSubscribeScheduler())
+                  .observeOn(getObserveScheduler())
+                  .subscribe(aBoolean -> {
+                    getView().onClearDatabase();
+                  }, throwable -> {
+                    Timber.e(throwable, "onError");
+                  });
               break;
-            case 1:
-              if (!confirmationEvent.complete()) {
-                unsubscribeConfirmDialog();
-                Timber.d("Received all cleared confirmation event, clear All");
-                confirmDialogSubscription = clearAll().subscribe(aBoolean -> {
-
-                    }, throwable -> Timber.e(throwable, "ConfirmationDialogBus in clearAll onError"),
-                    () -> {
-                      Timber.d("ConfirmationDialogBus in clearAll onComplete");
-                      ConfirmationDialog.ConfirmationDialogBus.get()
-                          .post(
-                              ConfirmationEvent.builder(confirmationEvent).complete(true).build());
-                    });
-              }
+            case CONFIRM_ALL:
+              unsubscribeConfirm();
+              confirmedSubscription = interactor.clearAll()
+                  .subscribeOn(getSubscribeScheduler())
+                  .observeOn(getObserveScheduler())
+                  .subscribe(aBoolean -> {
+                    getView().onClearAll();
+                  }, throwable -> {
+                    Timber.e(throwable, "onError");
+                  });
               break;
             default:
+              throw new IllegalStateException(
+                  "Received invalid confirmation event type: " + confirmationEvent.type());
           }
         }, throwable -> {
-          Timber.e(throwable, "ConfirmationDialogBus onError");
+          Timber.e(throwable, "onError");
         });
-  }
-
-  private void attemptConfirm(int code) {
-    final SettingsView settingsView = getView();
-    settingsView.onConfirmAttempt(code);
-  }
-
-  public final void confirmDatabaseClear() {
-    attemptConfirm(0);
-  }
-
-  public final void confirmSettingsClear() {
-    attemptConfirm(1);
   }
 
   public interface SettingsView {
 
-    void onConfirmAttempt(int code);
+    void showConfirmDialog(int type);
+
+    void onClearAll();
+
+    void onClearDatabase();
   }
 }

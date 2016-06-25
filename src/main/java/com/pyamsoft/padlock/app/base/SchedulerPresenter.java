@@ -23,20 +23,20 @@ import rx.Scheduler;
 
 public abstract class SchedulerPresenter<I> extends Presenter<I> {
 
-  @NonNull private final Scheduler mainScheduler;
-  @NonNull private final Scheduler ioScheduler;
+  @NonNull private final Scheduler observeScheduler;
+  @NonNull private final Scheduler subscribeScheduler;
 
-  protected SchedulerPresenter(@NonNull @Named("main") Scheduler mainScheduler,
-      @NonNull @Named("io") Scheduler ioScheduler) {
-    this.mainScheduler = mainScheduler;
-    this.ioScheduler = ioScheduler;
+  protected SchedulerPresenter(@NonNull @Named("main") Scheduler observeScheduler,
+      @NonNull @Named("io") Scheduler subscribeScheduler) {
+    this.observeScheduler = observeScheduler;
+    this.subscribeScheduler = subscribeScheduler;
   }
 
-  @NonNull protected final Scheduler getMainScheduler() {
-    return mainScheduler;
+  @NonNull protected final Scheduler getObserveScheduler() {
+    return observeScheduler;
   }
 
-  @NonNull protected final Scheduler getIoScheduler() {
-    return ioScheduler;
+  @NonNull protected final Scheduler getSubscribeScheduler() {
+    return subscribeScheduler;
   }
 }

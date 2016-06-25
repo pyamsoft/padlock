@@ -22,7 +22,6 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.base.SchedulerPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
-import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.padlock.dagger.list.LockListInteractor;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
@@ -42,7 +41,6 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
 
-  @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
   @NonNull private Subscription pinEntryBusSubscription = Subscriptions.empty();
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
 
@@ -62,14 +60,12 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
 
   @Override public void onResume() {
     super.onResume();
-    registerOnConfirmDialogBus();
     registerOnPinEntryBus();
   }
 
   @Override public void onPause() {
     super.onPause();
     unregisterFromPinEntryBus();
-    unregisterFromConfirmDialogBus();
   }
 
   private void unsubscribePopulateList() {
@@ -129,8 +125,8 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         })
         .concatMap(Observable::from)
         .filter(appEntry -> appEntry != null)
-        .subscribeOn(getIoScheduler())
-        .observeOn(getMainScheduler())
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
         .subscribe(appEntry -> {
           final LockList lockList = getView();
           lockList.onEntryAddedToList(appEntry);
@@ -195,31 +191,13 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
     }
   }
 
-  private void registerOnConfirmDialogBus() {
-    unregisterFromConfirmDialogBus();
-    confirmDialogBusSubscription =
-        ConfirmationDialog.ConfirmationDialogBus.get().register().subscribe(confirmationEvent -> {
-          Timber.d("Received confirmation event!");
-          if (confirmationEvent.type() == 0 && confirmationEvent.complete()) {
-            final LockList lockList = getView();
-            Timber.d("Received database cleared confirmation event, refreshList");
-            lockList.refreshList();
-          }
-        }, throwable -> {
-          Timber.e(throwable, "ConfirmationDialogBus onError");
-        });
-  }
-
-  private void unregisterFromConfirmDialogBus() {
-    if (!confirmDialogBusSubscription.isUnsubscribed()) {
-      confirmDialogBusSubscription.unsubscribe();
-    }
-  }
-
   private void registerOnPinEntryBus() {
     unregisterFromPinEntryBus();
-    pinEntryBusSubscription =
-        PinEntryDialog.PinEntryBus.get().register().subscribe(pinEntryEvent -> {
+    pinEntryBusSubscription = PinEntryDialog.PinEntryBus.get()
+        .register()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(pinEntryEvent -> {
           final LockList lockList = getView();
           if (lockList instanceof MasterPinSubmitCallback) {
             final MasterPinSubmitCallback callback = (MasterPinSubmitCallback) lockList;

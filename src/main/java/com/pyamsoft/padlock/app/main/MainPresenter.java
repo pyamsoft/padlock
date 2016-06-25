@@ -16,36 +16,62 @@
 
 package com.pyamsoft.padlock.app.main;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
+import com.pyamsoft.padlock.app.base.SchedulerPresenter;
 import com.pyamsoft.padlock.dagger.main.MainInteractor;
-import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.padlock.model.RxBus;
+import com.pyamsoft.padlock.model.event.RefreshEvent;
 import javax.inject.Inject;
+import javax.inject.Named;
+import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class MainPresenter extends Presenter<MainPresenter.MainView> {
+public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
 
   @NonNull private final MainInteractor interactor;
 
-  @NonNull private Subscription confirmDialogBusSubscription = Subscriptions.empty();
   @NonNull private Subscription agreeTermsBusSubscription = Subscriptions.empty();
+  @NonNull private Subscription refreshBus = Subscriptions.empty();
 
-  @Inject public MainPresenter(@NonNull final MainInteractor interactor) {
+  @Inject public MainPresenter(@NonNull final MainInteractor interactor,
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
+    super(mainScheduler, ioScheduler);
     this.interactor = interactor;
   }
 
   @Override public void onResume() {
     super.onResume();
-    registerOnConfirmDialogBus();
     registerOnAgreeTermsBus();
+    registerOnRefreshBus();
   }
 
   @Override public void onPause() {
     super.onPause();
-    unregisterFromConfirmDialogBus();
     unregisterFromAgreeTermsBus();
+    unregisterFromRefreshBus();
+  }
+
+  private void unregisterFromRefreshBus() {
+    if (!refreshBus.isUnsubscribed()) {
+      refreshBus.unsubscribe();
+    }
+  }
+
+  private void registerOnRefreshBus() {
+    unregisterFromRefreshBus();
+    refreshBus = Bus.get()
+        .register()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(refreshEvent -> {
+          getView().forceRefresh();
+        }, throwable -> {
+          Timber.e(throwable, "RefreshBus onError");
+        });
   }
 
   public final void showTermsDialog() {
@@ -58,8 +84,11 @@ public final class MainPresenter extends Presenter<MainPresenter.MainView> {
 
   private void registerOnAgreeTermsBus() {
     unregisterFromAgreeTermsBus();
-    agreeTermsBusSubscription =
-        AgreeTermsDialog.AgreeTermsBus.get().register().subscribe(agreeTermsEvent -> {
+    agreeTermsBusSubscription = AgreeTermsDialog.Bus.get()
+        .register()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(agreeTermsEvent -> {
           if (agreeTermsEvent.agreed()) {
             interactor.setAgreed();
           } else {
@@ -76,29 +105,21 @@ public final class MainPresenter extends Presenter<MainPresenter.MainView> {
     }
   }
 
-  private void registerOnConfirmDialogBus() {
-    unregisterFromConfirmDialogBus();
-    confirmDialogBusSubscription =
-        ConfirmationDialog.ConfirmationDialogBus.get().register().subscribe(confirmationEvent -> {
-          if (confirmationEvent.type() == 1 && confirmationEvent.complete()) {
-            Timber.d("received completed clearAll event. Kill Process");
-            android.os.Process.killProcess(android.os.Process.myPid());
-          }
-        }, throwable -> {
-          Timber.e(throwable, "ConfirmationDialogBus onError");
-        });
-  }
-
-  private void unregisterFromConfirmDialogBus() {
-    if (!confirmDialogBusSubscription.isUnsubscribed()) {
-      confirmDialogBusSubscription.unsubscribe();
-    }
-  }
-
   public interface MainView {
 
     void showUsageTermsDialog();
 
     void onDidNotAgreeToTerms();
+
+    void forceRefresh();
+  }
+
+  public static final class Bus extends RxBus<RefreshEvent> {
+
+    @NonNull private static final Bus instance = new Bus();
+
+    @CheckResult @NonNull public static Bus get() {
+      return instance;
+    }
   }
 }

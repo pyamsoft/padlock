@@ -97,8 +97,8 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     unsubLock();
     final LockScreen lockScreen = getView();
     lockSubscription = lockScreenInteractor.lockEntry(packageName, activityName)
-        .subscribeOn(getIoScheduler())
-        .observeOn(getMainScheduler())
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
         .subscribe(unlocked -> {
           Timber.d("Received lock entry result");
           if (unlocked) {
@@ -120,8 +120,8 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     unlockSubscription =
         lockScreenInteractor.unlockEntry(packageName, activityName, currentAttempt, excludeEntry,
             ignorePeriodTime)
-            .subscribeOn(getIoScheduler())
-            .observeOn(getMainScheduler())
+            .subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
             .subscribe(unlocked -> {
               Timber.d("Received unlock entry result");
               if (unlocked) {
@@ -140,8 +140,8 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     unsubDisplayName();
     final LockScreen lockScreen = getView();
     displayNameSubscription = lockScreenInteractor.getDisplayName(packageName)
-        .subscribeOn(getIoScheduler())
-        .observeOn(getMainScheduler())
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
         .subscribe(lockScreen::setDisplayName, throwable -> {
           Timber.e(throwable, "Error loading display name from package");
           lockScreen.setDisplayName("");

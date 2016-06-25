@@ -106,8 +106,8 @@ public final class LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPres
             })
             .concatMap(Observable::from)
             .filter(activityEntry -> activityEntry != null)
-            .subscribeOn(getIoScheduler())
-            .observeOn(getMainScheduler())
+            .subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
             .subscribe(activityEntry -> {
               final LockInfoView lockInfoView = getView();
               lockInfoView.onEntryAddedToList(activityEntry);

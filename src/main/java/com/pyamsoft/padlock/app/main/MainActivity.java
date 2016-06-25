@@ -49,9 +49,9 @@ public class MainActivity extends DonationActivityBase
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
   @NonNull public static final String SETTINGS_TAG = "settings";
-  @NonNull private static final String USAGE_TERMS_TAG = "usage_terms";
-  @NonNull private static final String ACCESSIBILITY_TAG = "accessibility";
-  @NonNull private static final String LOCK_LIST_TAG = "lock_list";
+  @NonNull public static final String USAGE_TERMS_TAG = "usage_terms";
+  @NonNull public static final String ACCESSIBILITY_TAG = "accessibility";
+  @NonNull public static final String LOCK_LIST_TAG = "lock_list";
   private static final int VECTOR_TASK_SIZE = 2;
 
   @NonNull private final AsyncVectorDrawableTask[] tasks;
@@ -261,6 +261,15 @@ public class MainActivity extends DonationActivityBase
   @Override public boolean onCreateOptionsMenu(@NonNull Menu menu) {
     Timber.d("onCreateOptionsMenu");
     return super.onCreateOptionsMenu(menu);
+  }
+
+  @Override public void forceRefresh() {
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    setActionBarUpEnabled(false);
+    fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    fragmentManager.beginTransaction()
+        .replace(R.id.main_view_container, new LockListFragment(), LOCK_LIST_TAG)
+        .commit();
   }
 }
 

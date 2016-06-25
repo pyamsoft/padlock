@@ -134,7 +134,7 @@ public final class LockServicePresenter
         Timber.d("No significant window change detected");
         return Observable.empty();
       }
-    }).subscribeOn(getIoScheduler()).observeOn(getMainScheduler()).subscribe(padLockEntry -> {
+    }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(padLockEntry -> {
       Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
           padLockEntry.activityName());
       final LockService lockService = getView();

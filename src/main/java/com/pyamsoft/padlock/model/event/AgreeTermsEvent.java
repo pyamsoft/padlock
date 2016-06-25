@@ -16,20 +16,15 @@
 
 package com.pyamsoft.padlock.model.event;
 
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
 @AutoValue public abstract class AgreeTermsEvent {
 
-  public static AgreeTermsEvent.Builder builder() {
-    return new AutoValue_AgreeTermsEvent.Builder().agreed(false);
+  @CheckResult @NonNull public static AgreeTermsEvent create(boolean agreed) {
+    return new AutoValue_AgreeTermsEvent(agreed);
   }
 
   public abstract boolean agreed();
-
-  @AutoValue.Builder public static abstract class Builder {
-
-    public abstract Builder agreed(boolean b);
-
-    public abstract AgreeTermsEvent build();
-  }
 }

@@ -33,7 +33,7 @@ public class SchedulerPresenterTest {
     final SchedulerPresenter presenter =
         new SchedulerPresenter(Schedulers.immediate(), Schedulers.immediate()) {
         };
-    Assert.assertNotNull(presenter.getIoScheduler());
-    Assert.assertNotNull(presenter.getMainScheduler());
+    Assert.assertNotNull(presenter.getSubscribeScheduler());
+    Assert.assertNotNull(presenter.getObserveScheduler());
   }
 }
