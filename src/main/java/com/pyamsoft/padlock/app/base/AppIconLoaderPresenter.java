@@ -44,8 +44,8 @@ public class AppIconLoaderPresenter<I extends AppIconLoaderView>
 
   public final void loadApplicationIcon(@NonNull String packageName) {
     loadIconSubscription = interactor.loadPackageIcon(packageName)
-        .subscribeOn(getIoScheduler())
-        .observeOn(getMainScheduler())
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
         .subscribe(drawable -> {
           final AppIconLoaderView loaderView = getView();
           loaderView.onApplicationIconLoadedSuccess(drawable);

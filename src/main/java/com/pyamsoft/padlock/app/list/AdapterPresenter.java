@@ -73,8 +73,8 @@ public abstract class AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
   public final void loadApplicationIcon(@NonNull VH holder, @NonNull String packageName) {
     final WeakReference<VH> weakViewHolder = new WeakReference<>(holder);
     final Subscription subscription = adapterInteractor.loadPackageIcon(packageName)
-        .subscribeOn(getIoScheduler())
-        .observeOn(getMainScheduler())
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
         .subscribe(drawable -> {
           final AdapterView<VH> view = getView();
           final VH viewHolder = weakViewHolder.get();

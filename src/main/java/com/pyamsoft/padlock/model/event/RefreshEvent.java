@@ -16,15 +16,5 @@
 
 package com.pyamsoft.padlock.model.event;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
-
-@AutoValue public abstract class ConfirmationEvent {
-
-  @CheckResult @NonNull public static ConfirmationEvent create(int type) {
-    return new AutoValue_ConfirmationEvent(type);
-  }
-
-  public abstract int type();
+public class RefreshEvent {
 }

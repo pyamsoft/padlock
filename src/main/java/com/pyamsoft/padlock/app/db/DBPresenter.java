@@ -72,7 +72,7 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
         dbInteractor.deleteEntry(packageName);
       }
       return Observable.just(newState);
-    }).subscribeOn(getIoScheduler()).observeOn(getMainScheduler()).subscribe(created -> {
+    }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
       Timber.d("onNext in DBPresenterImpl with data: ", created);
       final DBView dbView = getView();
       if (created) {
@@ -100,7 +100,7 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
         dbInteractor.deleteEntry(packageName, activity);
       }
       return Observable.just(checked);
-    }).subscribeOn(getIoScheduler()).observeOn(getMainScheduler()).subscribe(created -> {
+    }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
       Timber.d("onNext in DBPresenterImpl with data: ", created);
       final DBView dbView = getView();
       if (created) {

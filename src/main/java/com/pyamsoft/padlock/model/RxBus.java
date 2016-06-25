@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model.event;
+package com.pyamsoft.padlock.model;
 
 import android.support.annotation.NonNull;
 import rx.Observable;
@@ -27,7 +27,11 @@ public abstract class RxBus<T> {
   @NonNull private final Subject<T, T> bus = new SerializedSubject<>(PublishSubject.create());
 
   public void post(@NonNull T event) {
-    if (bus.hasObservers()) {
+    post(event, false);
+  }
+
+  public void post(@NonNull T event, boolean postAnyway) {
+    if (bus.hasObservers() || postAnyway) {
       bus.onNext(event);
     }
   }

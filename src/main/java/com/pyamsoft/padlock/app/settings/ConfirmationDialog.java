@@ -24,7 +24,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
-import com.pyamsoft.padlock.model.event.RxBus;
+import com.pyamsoft.padlock.model.RxBus;
 
 public class ConfirmationDialog extends DialogFragment {
   @NonNull private static final String WHICH = "which_type";
@@ -50,7 +50,7 @@ public class ConfirmationDialog extends DialogFragment {
         : "Really clear all application settings?\n\nYou will have to manually restart the Accessibility Service component of PadLock")
         .setPositiveButton("Yes", (dialogInterface, i) -> {
           dialogInterface.dismiss();
-          ConfirmationDialogBus.get().post(ConfirmationEvent.builder().type(which).build());
+          Bus.get().post(ConfirmationEvent.create(which));
         })
         .setNegativeButton("No", (dialogInterface, i) -> {
           dialogInterface.dismiss();
@@ -58,11 +58,11 @@ public class ConfirmationDialog extends DialogFragment {
         .create();
   }
 
-  public static final class ConfirmationDialogBus extends RxBus<ConfirmationEvent> {
+  public static final class Bus extends RxBus<ConfirmationEvent> {
 
-    @NonNull private static final ConfirmationDialogBus instance = new ConfirmationDialogBus();
+    @NonNull private static final Bus instance = new Bus();
 
-    @CheckResult @NonNull public static ConfirmationDialogBus get() {
+    @CheckResult @NonNull public static Bus get() {
       return instance;
     }
   }

@@ -54,8 +54,8 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
     final PinScreen pinScreen = getView();
     pinEntrySubscription = interactor.submitMasterPin(currentAttempt)
         .filter(pinEntryEvent -> pinEntryEvent != null)
-        .subscribeOn(getIoScheduler())
-        .observeOn(getMainScheduler())
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
         .subscribe(pinEntryEvent -> {
           PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
           if (pinEntryEvent.complete()) {

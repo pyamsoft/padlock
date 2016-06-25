@@ -23,8 +23,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import com.pyamsoft.padlock.model.RxBus;
 import com.pyamsoft.padlock.model.event.AgreeTermsEvent;
-import com.pyamsoft.padlock.model.event.RxBus;
 
 public class AgreeTermsDialog extends DialogFragment {
 
@@ -41,21 +41,21 @@ public class AgreeTermsDialog extends DialogFragment {
                 + " and that pyamsoft can not be held liable.")
         .setPositiveButton("I Understand", (dialogInterface, i) -> {
           dialogInterface.dismiss();
-          AgreeTermsBus.get().post(AgreeTermsEvent.builder().agreed(true).build());
+          Bus.get().post(AgreeTermsEvent.create(true));
         })
         .setNegativeButton("Cancel", (dialogInterface, i) -> {
           dialogInterface.dismiss();
-          AgreeTermsBus.get().post(AgreeTermsEvent.builder().agreed(false).build());
+          Bus.get().post(AgreeTermsEvent.create(false));
         })
         .setCancelable(false)
         .create();
   }
 
-  public static final class AgreeTermsBus extends RxBus<AgreeTermsEvent> {
+  public static final class Bus extends RxBus<AgreeTermsEvent> {
 
-    @NonNull private static final AgreeTermsBus instance = new AgreeTermsBus();
+    @NonNull private static final Bus instance = new Bus();
 
-    @CheckResult @NonNull public static AgreeTermsBus get() {
+    @CheckResult @NonNull public static Bus get() {
       return instance;
     }
   }
