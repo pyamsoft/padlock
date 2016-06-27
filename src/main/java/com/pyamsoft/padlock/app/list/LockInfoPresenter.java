@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
@@ -52,6 +53,20 @@ public final class LockInfoPresenter
     unsubAllInDB();
   }
 
+  @CheckResult private static int findEntryInActivities(@NonNull List<PadLockEntry> padLockEntries,
+      @NonNull String name) {
+    int foundLocation = -1;
+    for (int i = 0; i < padLockEntries.size(); ++i) {
+      final PadLockEntry padLockEntry = padLockEntries.get(i);
+      if (padLockEntry.activityName().equals(name)) {
+        foundLocation = i;
+        break;
+      }
+    }
+
+    return foundLocation;
+  }
+
   public final void populateList(@NonNull String packageName) {
     unsubPopulateList();
 
@@ -67,20 +82,15 @@ public final class LockInfoPresenter
               // KLUDGE super ugly.
               Timber.d("Search set for locked activities");
               for (final String name : activityInfos) {
-                PadLockEntry foundEntry = null;
-                int foundLocation = -1;
-                for (int i = 0; i < padLockEntries.size(); ++i) {
-                  final PadLockEntry padLockEntry = padLockEntries.get(i);
-                  if (padLockEntry.activityName().equals(name)) {
-                    foundEntry = padLockEntry;
-                    foundLocation = i;
-                    break;
-                  }
-                }
+                final int foundLocation = findEntryInActivities(padLockEntries, name);
 
                 // Remove foundEntry from the list as it is already used
+                PadLockEntry foundEntry;
                 if (foundLocation != -1) {
+                  foundEntry = padLockEntries.get(foundLocation);
                   padLockEntries.remove(foundLocation);
+                } else {
+                  foundEntry = null;
                 }
 
                 final ActivityEntry activityEntry =
@@ -140,14 +150,7 @@ public final class LockInfoPresenter
               // KLUDGE super ugly.
               Timber.d("Search set for locked activities");
               for (final String name : activityInfos) {
-                int foundLocation = -1;
-                for (int i = 0; i < padLockEntries.size(); ++i) {
-                  final PadLockEntry padLockEntry = padLockEntries.get(i);
-                  if (padLockEntry.activityName().equals(name)) {
-                    foundLocation = i;
-                    break;
-                  }
-                }
+                final int foundLocation = findEntryInActivities(padLockEntries, name);
 
                 // Remove foundEntry from the list as it is already used
                 if (foundLocation != -1) {

@@ -25,21 +25,23 @@ import android.widget.CheckedTextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.pydroid.util.AppUtil;
 import timber.log.Timber;
 
 public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.ViewHolder>
     implements LockListItem<ActivityEntry>, DBPresenter.DBView,
     AdapterPresenter.AdapterView<LockInfoAdapter.ViewHolder> {
 
-  @NonNull private final DBPresenter.DBView lockInfoDialog;
+  @NonNull private final LockInfoDialog lockInfoDialog;
   @NonNull private final AdapterPresenter<ActivityEntry, ViewHolder> adapterPresenter;
   @NonNull private final DBPresenter dbPresenter;
   @NonNull private final AppEntry appEntry;
 
-  public LockInfoAdapter(@NonNull DBPresenter.DBView lockInfoDialog, @NonNull AppEntry appEntry,
+  public LockInfoAdapter(@NonNull LockInfoDialog lockInfoDialog, @NonNull AppEntry appEntry,
       @NonNull AdapterPresenter<ActivityEntry, ViewHolder> adapterPresenter,
       @NonNull DBPresenter dbPresenter) {
     this.lockInfoDialog = lockInfoDialog;
@@ -134,7 +136,8 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
   }
 
   @Override public void onDBError() {
-    // TODO handle exception, show error dialog or something
+    AppUtil.guaranteeSingleDialogFragment(lockInfoDialog.getFragmentManager(), new ErrorDialog(),
+        "error");
   }
 
   public static final class ViewHolder extends RecyclerView.ViewHolder {
