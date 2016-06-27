@@ -33,24 +33,23 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
 
   @CheckResult @NonNull @Override
   public Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt) {
-    return Observable.defer(() -> Observable.just(masterPinInteractor.getMasterPin()))
-        .map(masterPin -> {
-          if (masterPin == null) {
-            Timber.d("No existing master pin, create a new one");
-            final String encodedMasterPin = encodeSHA256(attempt).toBlocking().first();
-            masterPinInteractor.setMasterPin(encodedMasterPin);
-            return PinEntryEvent.builder().complete(true).type(0).build();
-          } else {
-            final boolean success = checkSubmissionAttempt(attempt, masterPin).toBlocking().first();
-            if (success) {
-              Timber.d("Clear master pin");
-              masterPinInteractor.setMasterPin(null);
-              return PinEntryEvent.builder().complete(true).type(1).build();
-            } else {
-              Timber.d("Failed to clear master pin");
-              return PinEntryEvent.builder().complete(false).type(1).build();
-            }
-          }
-        });
+    return masterPinInteractor.getMasterPin().map(masterPin -> {
+      if (masterPin == null) {
+        Timber.d("No existing master pin, create a new one");
+        final String encodedMasterPin = encodeSHA256(attempt).toBlocking().first();
+        masterPinInteractor.setMasterPin(encodedMasterPin);
+        return PinEntryEvent.builder().complete(true).type(0).build();
+      } else {
+        final boolean success = checkSubmissionAttempt(attempt, masterPin).toBlocking().first();
+        if (success) {
+          Timber.d("Clear master pin");
+          masterPinInteractor.setMasterPin(null);
+          return PinEntryEvent.builder().complete(true).type(1).build();
+        } else {
+          Timber.d("Failed to clear master pin");
+          return PinEntryEvent.builder().complete(false).type(1).build();
+        }
+      }
+    });
   }
 }
