@@ -67,6 +67,9 @@ final class DBInteractorImpl implements DBInteractor {
   @WorkerThread @Override
   public void createEntry(@NonNull String packageName, @NonNull String activityName,
       @Nullable String code, boolean system) {
+    // To prevent double creations from occurring, first call a delete on the DB for packageName, activityName
+    deleteEntry(packageName, activityName);
+
     Timber.d("CREATE: %s %s", packageName, activityName);
     PadLockOpenHelper.insert(appContext, PadLockEntry.FACTORY.marshal()
         .packageName(packageName)
