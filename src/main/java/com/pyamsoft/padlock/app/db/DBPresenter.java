@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.base.SchedulerPresenter;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
+import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;
@@ -30,7 +31,6 @@ import timber.log.Timber;
 
 public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
 
-  @NonNull public static final String PACKAGE_TAG = "PACKAGE";
   @NonNull private final DBInteractor dbInteractor;
 
   @NonNull private Subscription dbPackageSubscription = Subscriptions.empty();
@@ -67,10 +67,10 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
     dbPackageSubscription = Observable.defer(() -> {
       if (newState) {
         Timber.d("Cursor does not have existing DB data, this is an add call");
-        dbInteractor.createEntry(packageName, PACKAGE_TAG, code, system);
+        dbInteractor.createEntry(packageName, PadLockEntry.PACKAGE_TAG, code, system);
       } else {
         Timber.d("Cursor has existing DB data, this is a delete call");
-        dbInteractor.deleteEntry(packageName, PACKAGE_TAG);
+        dbInteractor.deleteEntry(packageName, PadLockEntry.PACKAGE_TAG);
       }
       return Observable.just(newState);
     }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {

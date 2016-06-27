@@ -79,15 +79,6 @@ public final class PadLockService extends AccessibilityService
   }
 
   @Override public void startLockScreen(@NonNull PadLockEntry entry) {
-    final long ignoreUntilTime = entry.ignoreUntilTime();
-    final long currentTime = System.currentTimeMillis();
-    if (currentTime < ignoreUntilTime) {
-      Timber.i("Ignore period has not elapsed yet");
-      Timber.i("Ignore until time: %d", ignoreUntilTime);
-      Timber.i("Current time: %d", currentTime);
-      return;
-    }
-
     final String packageName = entry.packageName();
     final String activityName = entry.activityName();
 
