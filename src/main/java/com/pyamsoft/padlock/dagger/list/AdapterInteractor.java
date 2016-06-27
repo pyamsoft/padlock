@@ -19,16 +19,17 @@ package com.pyamsoft.padlock.dagger.list;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractor;
+import rx.Observable;
 
 public interface AdapterInteractor<I> extends AppIconLoaderInteractor {
 
-  @CheckResult @NonNull I get(int position);
+  @CheckResult @NonNull Observable<I> get(int position);
 
   void set(int position, @NonNull I entry);
 
-  @CheckResult int add(@NonNull I entry);
+  @NonNull @CheckResult Observable<Integer> add(@NonNull I entry);
 
-  @CheckResult int remove();
+  @NonNull @CheckResult Observable<Integer> remove();
 
-  @CheckResult int size();
+  @NonNull @CheckResult Observable<Integer> size();
 }

@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.lock;
 
+import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.PadLock;
 import junit.framework.Assert;
@@ -31,34 +32,32 @@ import org.robolectric.annotation.Config;
 @Config(constants = BuildConfig.class, sdk = 23, application = PadLock.class)
 public class LockInteractorTest {
 
+  private LockInteractorImpl interactor;
+
+  private void run_test_sha256Encode(@NonNull String attempt) {
+    final String encoded = interactor.encodeSHA256(attempt).toBlocking().first();
+    Assert.assertNotNull(encoded);
+    Assert.assertTrue(interactor.checkSubmissionAttempt(attempt, encoded).toBlocking().first());
+  }
+
   @Test public void test_sha256Encode() {
-    final LockInteractor interactor = new LockInteractorImpl() {
+    interactor = new LockInteractorImpl() {
 
     };
 
     String attempt = "";
-    String encoded = interactor.encodeSHA256(attempt);
-    Assert.assertNotNull(encoded);
-    Assert.assertTrue(interactor.checkSubmissionAttempt(attempt, encoded));
+    run_test_sha256Encode(attempt);
 
     attempt = "test";
-    encoded = interactor.encodeSHA256(attempt);
-    Assert.assertNotNull(encoded);
-    Assert.assertTrue(interactor.checkSubmissionAttempt(attempt, encoded));
+    run_test_sha256Encode(attempt);
 
     attempt = "asd9u0290 112-012 -10";
-    encoded = interactor.encodeSHA256(attempt);
-    Assert.assertNotNull(encoded);
-    Assert.assertTrue(interactor.checkSubmissionAttempt(attempt, encoded));
+    run_test_sha256Encode(attempt);
 
     attempt = "\n\tasdiads$";
-    encoded = interactor.encodeSHA256(attempt);
-    Assert.assertNotNull(encoded);
-    Assert.assertTrue(interactor.checkSubmissionAttempt(attempt, encoded));
+    run_test_sha256Encode(attempt);
 
     attempt = "平仮名";
-    encoded = interactor.encodeSHA256(attempt);
-    Assert.assertNotNull(encoded);
-    Assert.assertTrue(interactor.checkSubmissionAttempt(attempt, encoded));
+    run_test_sha256Encode(attempt);
   }
 }

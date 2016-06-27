@@ -19,24 +19,23 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import rx.Observable;
 
 public interface LockListInteractor {
 
-  @CheckResult @WorkerThread @NonNull Observable<List<ApplicationInfo>> getApplicationInfoList();
+  @CheckResult @NonNull Observable<List<ApplicationInfo>> getApplicationInfoList();
 
-  @CheckResult @WorkerThread @NonNull Observable<List<PadLockEntry>> getAppEntryList();
+  @CheckResult @NonNull Observable<List<PadLockEntry>> getAppEntryList();
 
-  @CheckResult boolean isSystemApplication(@NonNull ApplicationInfo info);
+  @CheckResult Observable<Boolean> isSystemApplication(@NonNull ApplicationInfo info);
 
   @CheckResult @NonNull Observable<String> loadPackageLabel(@NonNull ApplicationInfo info);
 
-  @CheckResult boolean hasShownOnBoarding();
+  @CheckResult Observable<Boolean> hasShownOnBoarding();
 
-  @CheckResult boolean isSystemVisible();
+  @CheckResult Observable<Boolean> isSystemVisible();
 
   void setSystemVisible(boolean visible);
 

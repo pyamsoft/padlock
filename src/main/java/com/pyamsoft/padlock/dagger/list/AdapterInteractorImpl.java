@@ -23,6 +23,7 @@ import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import rx.Observable;
 
 public class AdapterInteractorImpl<I> extends AppIconLoaderInteractorImpl
     implements AdapterInteractor<I> {
@@ -35,27 +36,27 @@ public class AdapterInteractorImpl<I> extends AppIconLoaderInteractorImpl
     this.entries = new ArrayList<>();
   }
 
-  @CheckResult @NonNull @Override public I get(int position) {
-    return entries.get(position);
+  @CheckResult @NonNull @Override public Observable<I> get(int position) {
+    return Observable.defer(() -> Observable.just(entries.get(position)));
   }
 
   @Override public void set(int position, @NonNull I entry) {
     entries.set(position, entry);
   }
 
-  @CheckResult @Override public int add(@NonNull I entry) {
+  @NonNull @CheckResult @Override public Observable<Integer> add(@NonNull I entry) {
     final int next = entries.size();
     entries.add(next, entry);
-    return next;
+    return Observable.defer(() -> Observable.just(next));
   }
 
-  @CheckResult @Override public int remove() {
+  @NonNull @CheckResult @Override public Observable<Integer> remove() {
     final int old = entries.size() - 1;
     entries.remove(old);
-    return old;
+    return Observable.defer(() -> Observable.just(old));
   }
 
-  @CheckResult @Override public int size() {
-    return entries.size();
+  @NonNull @CheckResult @Override public Observable<Integer> size() {
+    return Observable.defer(() -> Observable.just(entries.size()));
   }
 }

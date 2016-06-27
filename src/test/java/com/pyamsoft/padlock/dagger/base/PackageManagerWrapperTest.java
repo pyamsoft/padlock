@@ -31,6 +31,7 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import rx.Observable;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 23, application = PadLock.class)
@@ -45,17 +46,18 @@ public class PackageManagerWrapperTest {
 
   @Test public void test_getActiveApplications() {
     final PackageManagerWrapper packageManagerWrapper = getPackageManagerWrapper();
-    final List<ApplicationInfo> applicationInfoList = packageManagerWrapper.getActiveApplications();
+    final Observable<List<ApplicationInfo>> applicationInfoList =
+        packageManagerWrapper.getActiveApplications().toList();
 
     // List is not null
     Assert.assertNotNull(applicationInfoList);
 
     // There should be at least one valid package, at least ourselves
-    Assert.assertNotEquals(0, applicationInfoList.size());
+    Assert.assertNotEquals(0, applicationInfoList.toBlocking().first().size());
 
     // Test case gives a fake which has 2 valid applications where one is system
     // System is filtered out at a later point by the presenter / specific interactor
-    Assert.assertEquals(2, applicationInfoList.size());
+    Assert.assertEquals(2, applicationInfoList.toBlocking().first().size());
   }
 
   @Test public void test_loadDrawableForPackage() {

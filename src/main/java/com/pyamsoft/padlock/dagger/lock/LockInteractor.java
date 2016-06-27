@@ -18,12 +18,12 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
+import rx.Observable;
 
 interface LockInteractor {
 
-  @CheckResult @NonNull String encodeSHA256(@NonNull String attempt);
+  @CheckResult @NonNull Observable<String> encodeSHA256(@NonNull String attempt);
 
-  @CheckResult @WorkerThread boolean checkSubmissionAttempt(@NonNull String attempt,
+  @CheckResult @NonNull Observable<Boolean> checkSubmissionAttempt(@NonNull String attempt,
       @NonNull String encodedPin);
 }
