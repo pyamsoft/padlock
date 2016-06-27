@@ -126,23 +126,24 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
       @NonNull String currentAttempt, boolean excludeEntry, int ignoreOptionIndex) {
     unsubUnlock();
     final LockScreen lockScreen = getView();
-    unlockSubscription =
-        interactor.unlockEntry(packageName, activityName, currentAttempt, excludeEntry,
-            interactor.getIgnoreTimeForIndex(ignoreOptionIndex).toBlocking().first())
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
-            .subscribe(unlocked -> {
-              Timber.d("Received unlock entry result");
-              if (unlocked) {
-                lockScreen.onSubmitSuccess();
-              } else {
-                lockScreen.onSubmitFailure();
-              }
-            }, throwable -> {
-              Timber.e(throwable, "unlockEntry onError");
-              lockScreen.onSubmitError();
-              unsubUnlock();
-            }, this::unsubUnlock);
+    unlockSubscription = interactor.getIgnoreTimeForIndex(ignoreOptionIndex)
+        .flatMap(
+            time -> interactor.unlockEntry(packageName, activityName, currentAttempt, excludeEntry,
+                time))
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(unlocked -> {
+          Timber.d("Received unlock entry result");
+          if (unlocked) {
+            lockScreen.onSubmitSuccess();
+          } else {
+            lockScreen.onSubmitFailure();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "unlockEntry onError");
+          lockScreen.onSubmitError();
+          unsubUnlock();
+        }, this::unsubUnlock);
   }
 
   public final void loadDisplayNameFromPackage(@NonNull String packageName) {

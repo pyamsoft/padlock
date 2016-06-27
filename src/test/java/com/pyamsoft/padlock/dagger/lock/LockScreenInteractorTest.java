@@ -22,6 +22,8 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.base.PackageManagerWrapperImpl;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
 import java.util.Collections;
 import junit.framework.Assert;
@@ -41,6 +43,7 @@ public class LockScreenInteractorTest {
     final Context context = RuntimeEnvironment.application.getApplicationContext();
     final DBInteractor mockDBInteractor = Mockito.mock(DBInteractor.class);
     final PadLockPreferences mockPreferences = Mockito.mock(PadLockPreferences.class);
+    final PackageManagerWrapper packageManagerWrapper = new PackageManagerWrapperImpl(context);
     final MasterPinInteractor mockMasterPinInteractor = Mockito.mock(MasterPinInteractor.class);
     return new LockScreenInteractorImpl(context, mockPreferences, mockDBInteractor,
         mockMasterPinInteractor, packageManagerWrapper);
@@ -51,7 +54,7 @@ public class LockScreenInteractorTest {
     Assert.assertEquals(0L, interactor.getDefaultIgnoreTime().toBlocking().first().longValue());
   }
 
-  @Test public void test_diaplyName() {
+  @Test public void test_displayName() {
     final LockScreenInteractor interactor = getLockScreenInteractor();
 
     // Robolectric returns the packageName
