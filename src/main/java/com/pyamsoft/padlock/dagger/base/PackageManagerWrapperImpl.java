@@ -119,4 +119,16 @@ public final class PackageManagerWrapperImpl implements PackageManagerWrapper {
   @NonNull @Override public Observable<String> loadPackageLabel(@NonNull ApplicationInfo info) {
     return Observable.defer(() -> Observable.just(info.loadLabel(packageManager).toString()));
   }
+
+  @NonNull @Override public Observable<String> loadPackageLabel(@NonNull String packageName) {
+    return Observable.defer(() -> {
+      try {
+        final ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+        return loadPackageLabel(applicationInfo);
+      } catch (PackageManager.NameNotFoundException e) {
+        Timber.e(e, "EXCEPTION");
+        return Observable.just("");
+      }
+    });
+  }
 }

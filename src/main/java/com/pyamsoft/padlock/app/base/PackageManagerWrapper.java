@@ -26,6 +26,8 @@ public interface PackageManagerWrapper {
 
   @CheckResult @NonNull Observable<String> loadPackageLabel(@NonNull ApplicationInfo info);
 
+  @CheckResult @NonNull Observable<String> loadPackageLabel(@NonNull String packageName);
+
   @CheckResult @NonNull Observable<Drawable> loadDrawableForPackageOrDefault(
       @NonNull String packageName);
 
