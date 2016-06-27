@@ -21,6 +21,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
@@ -44,7 +45,7 @@ public final class PadLockDB {
     return briteDatabase;
   }
 
-  public static void setDelegate(@NonNull Delegate delegate) {
+  public static void setDelegate(@Nullable Delegate delegate) {
     instance = delegate;
   }
 
@@ -65,7 +66,7 @@ public final class PadLockDB {
     return instance;
   }
 
-  public static final class Delegate {
+  public static class Delegate {
 
     @NonNull private final PadLockDB database;
 
@@ -73,12 +74,12 @@ public final class PadLockDB {
       this(context, Schedulers.io());
     }
 
-    Delegate(@NonNull Context context, @NonNull Scheduler scheduler) {
+    public Delegate(@NonNull Context context, @NonNull Scheduler scheduler) {
       final Context appContext = context.getApplicationContext();
       this.database = new PadLockDB(appContext, scheduler);
     }
 
-    @SuppressLint("NewApi") public final void newTransaction(final @NonNull Runnable runnable) {
+    @SuppressLint("NewApi") public void newTransaction(final @NonNull Runnable runnable) {
       try (
           final BriteDatabase.Transaction transaction = database.getDatabase().newTransaction()) {
         runnable.run();
@@ -86,12 +87,13 @@ public final class PadLockDB {
       }
     }
 
-    public final void insert(final @NonNull ContentValues contentValues) {
+    public void insert(final @NonNull ContentValues contentValues) {
       database.getDatabase().insert(PadLockEntry.TABLE_NAME, contentValues);
     }
 
-    @NonNull @CheckResult public final Observable<PadLockEntry> queryWithPackageActivityName(
-        final @NonNull String packageName, final @NonNull String activityName) {
+    @NonNull @CheckResult
+    public Observable<PadLockEntry> queryWithPackageActivityName(final @NonNull String packageName,
+        final @NonNull String activityName) {
       return database.getDatabase()
           .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME,
               packageName, activityName)
@@ -100,41 +102,41 @@ public final class PadLockDB {
           .filter(padLockEntry -> padLockEntry != null);
     }
 
-    @NonNull @CheckResult public final Observable<List<PadLockEntry>> queryWithPackageName(
-        final @NonNull String packageName) {
+    @NonNull @CheckResult
+    public Observable<List<PadLockEntry>> queryWithPackageName(final @NonNull String packageName) {
       return database.getDatabase()
           .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME, packageName)
           .mapToList(PadLockEntry.FACTORY.with_package_nameMapper()::map)
           .filter(padLockEntries -> padLockEntries != null);
     }
 
-    public final void updateWithPackageActivityName(final @NonNull ContentValues contentValues,
+    public void updateWithPackageActivityName(final @NonNull ContentValues contentValues,
         final @NonNull String packageName, final @NonNull String activityName) {
       database.getDatabase()
           .update(PadLockEntry.TABLE_NAME, contentValues,
               PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
     }
 
-    @NonNull @CheckResult public final Observable<List<PadLockEntry>> queryAll() {
+    @NonNull @CheckResult public Observable<List<PadLockEntry>> queryAll() {
       return database.getDatabase()
           .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
           .mapToList(PadLockEntry.FACTORY.all_entriesMapper()::map)
           .filter(padLockEntries -> padLockEntries != null);
     }
 
-    public final void deleteWithPackageName(final @NonNull String packageName) {
+    public void deleteWithPackageName(final @NonNull String packageName) {
       database.getDatabase()
           .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME, packageName);
     }
 
-    public final void deleteWithPackageActivityName(final @NonNull String packageName,
+    public void deleteWithPackageActivityName(final @NonNull String packageName,
         final @NonNull String activityName) {
       database.getDatabase()
           .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME,
               packageName, activityName);
     }
 
-    public final void deleteAll() {
+    public void deleteAll() {
       database.getDatabase().delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
     }
   }
