@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.app.list;
 
 import android.content.pm.ApplicationInfo;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.base.SchedulerPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
@@ -143,10 +143,11 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         });
   }
 
-  @Nullable private AppEntry createFromPackageInfo(@NonNull ApplicationInfo info, boolean locked) {
+  @NonNull @CheckResult
+  private AppEntry createFromPackageInfo(@NonNull ApplicationInfo info, boolean locked) {
     Timber.d("Create AppEntry from package info: %s", info.packageName);
     return AppEntry.builder()
-        .name(lockListInteractor.loadPackageLabel(info))
+        .name(lockListInteractor.loadPackageLabel(info).toBlocking().first())
         .packageName(info.packageName)
         .system(lockListInteractor.isSystemApplication(info))
         .locked(locked)
