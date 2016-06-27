@@ -28,7 +28,6 @@ import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
-import javax.inject.Named;
 import rx.Observable;
 import timber.log.Timber;
 
@@ -38,17 +37,17 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   @NonNull private final DBInteractor dbInteractor;
   @NonNull private final Context appContext;
   @NonNull private final PadLockPreferences preferences;
-  private final long defaultIgnoreTime;
+  @NonNull private final long[] ignoreTimes;
+  private int failCount;
 
   @Inject public LockScreenInteractorImpl(final @NonNull Context context,
       @NonNull final PadLockPreferences preferences, @NonNull final DBInteractor dbInteractor,
-      @NonNull final MasterPinInteractor masterPinInteractor,
-      @Named("ignore_default") long defaultIgnoreTime) {
+      @NonNull final MasterPinInteractor masterPinInteractor) {
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
     this.dbInteractor = dbInteractor;
     this.pinInteractor = masterPinInteractor;
-    this.defaultIgnoreTime = defaultIgnoreTime;
+    this.ignoreTimes = preferences.getIgnoreTimes();
   }
 
   @WorkerThread @NonNull @Override @CheckResult
@@ -106,7 +105,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
       // KLUDGE we must do this here as we need the padlock entry
       if (unlocked) {
-        if (ignoreForPeriod != defaultIgnoreTime) {
+        if (ignoreForPeriod != preferences.getDefaultIgnoreTime()) {
           Timber.d("IGNORE requested, update entry in DB");
           ignoreEntryForTime(padLockEntry, ignoreForPeriod);
         }
@@ -156,5 +155,50 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       Timber.e(e, "EXCEPTION");
       return Observable.just("");
     }
+  }
+
+  @Override public long getIgnoreTimeForIndex(int index) {
+    return ignoreTimes[index];
+  }
+
+  @Override public long getIgnoreTimeOne() {
+    return getIgnoreTimeForIndex(1);
+  }
+
+  @Override public long getIgnoreTimeFive() {
+    return getIgnoreTimeForIndex(2);
+  }
+
+  @Override public long getIgnoreTimeTen() {
+    return getIgnoreTimeForIndex(3);
+  }
+
+  @Override public long getIgnoreTimeFifteen() {
+    return getIgnoreTimeForIndex(4);
+  }
+
+  @Override public long getIgnoreTimeTwenty() {
+    return getIgnoreTimeForIndex(5);
+  }
+
+  @Override public long getIgnoreTimeThirty() {
+    return getIgnoreTimeForIndex(6);
+  }
+
+  @Override public long getIgnoreTimeFourtyFive() {
+    return getIgnoreTimeForIndex(7);
+  }
+
+  @Override public long getIgnoreTimeSixty() {
+    return getIgnoreTimeForIndex(8);
+  }
+
+  @Override public int incrementAndGetFailCount() {
+    return ++failCount;
+  }
+
+  @Override public void resetFailCount() {
+    Timber.d("Reset fail count to 0");
+    failCount = 0;
   }
 }

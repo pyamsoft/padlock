@@ -23,6 +23,8 @@ import rx.Observable;
 
 public interface LockScreenInteractor extends LockInteractor {
 
+  int DEFAULT_MAX_FAIL_COUNT = 2;
+
   @CheckResult @WorkerThread @NonNull Observable<Boolean> unlockEntry(@NonNull String packageName,
       @NonNull String activityName, @NonNull String attempt, boolean shouldExclude,
       long ignoreForPeriod);
@@ -34,4 +36,26 @@ public interface LockScreenInteractor extends LockInteractor {
 
   @CheckResult @WorkerThread @NonNull Observable<String> getDisplayName(
       @NonNull String packageName);
+
+  @CheckResult long getIgnoreTimeForIndex(int index);
+
+  @CheckResult long getIgnoreTimeOne();
+
+  @CheckResult long getIgnoreTimeFive();
+
+  @CheckResult long getIgnoreTimeTen();
+
+  @CheckResult long getIgnoreTimeFifteen();
+
+  @CheckResult long getIgnoreTimeTwenty();
+
+  @CheckResult long getIgnoreTimeThirty();
+
+  @CheckResult long getIgnoreTimeFourtyFive();
+
+  @CheckResult long getIgnoreTimeSixty();
+
+  @CheckResult int incrementAndGetFailCount();
+
+  void resetFailCount();
 }
