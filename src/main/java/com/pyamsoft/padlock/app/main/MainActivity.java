@@ -218,9 +218,16 @@ public class MainActivity extends DonationActivityBase
     final String line2 =
         "BUGFIX: Fixed issue in Android N which prevented loading the list of applications";
     final String line3 = "FEATURE: Smaller memory footprint when the list is being populated";
+    final String line4 = "BUGFIX: The LockScreen is now less intrusive.";
+    final String line5 =
+        "FEATURE: Locking an application using the switch on the main list locks the entire 'package'. "
+            + "This means that unlocking one screen of the application unlocks all screens. "
+            + "The only exception to this are the screens that the user chooses to individually "
+            + "lock by checking the box in the Info Dialog.";
 
     // Turn it into a spannable
-    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1, line2, line3);
+    final Spannable spannable =
+        StringUtil.createLineBreakBuilder(title, line1, line2, line3, line4, line5);
 
     int start = 0;
     int end = title.length();
@@ -238,7 +245,16 @@ public class MainActivity extends DonationActivityBase
     StringUtil.colorSpan(spannable, start, end, largeColor);
 
     start += end + 2;
-    end += 2 + line1.length() + 2 + line2.length() + 2 + line3.length();
+    end += 2
+        + line1.length()
+        + 2
+        + line2.length()
+        + 2
+        + line3.length()
+        + 2
+        + line4.length()
+        + 2
+        + line5.length();
 
     StringUtil.sizeSpan(spannable, start, end, smallSize);
     StringUtil.colorSpan(spannable, start, end, smallColor);
