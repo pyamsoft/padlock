@@ -30,7 +30,7 @@ import timber.log.Timber;
 
 public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
 
-  @NonNull private static final String PACKAGE_TAG = "PACKAGE";
+  @NonNull public static final String PACKAGE_TAG = "PACKAGE";
   @NonNull private final DBInteractor dbInteractor;
 
   @NonNull private Subscription dbPackageSubscription = Subscriptions.empty();
