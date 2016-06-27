@@ -208,9 +208,6 @@ public final class LockScreenActivity extends NoDonationActivityBase
     if (isChangingConfigurations()) {
       lockViewDelegate.onSaveInstanceState(outState);
       presenter.saveSelectedOptions(getSelectedIgnoreTimeIndex());
-    } else {
-      DataHolderFragment.remove(this, "ignore_data");
-      DataHolderFragment.remove(this, "exclude_data");
     }
 
     Timber.d("onSaveInstanceState");
