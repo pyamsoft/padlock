@@ -16,48 +16,126 @@
 
 package com.pyamsoft.padlock.app.sql;
 
+import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
+import java.util.List;
+import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
-final class PadLockDB {
-
-  @NonNull private static final Object lock = new Object();
-
-  @Nullable private static volatile PadLockDB instance = null;
+public final class PadLockDB {
 
   @NonNull private final BriteDatabase briteDatabase;
+  private static volatile Delegate instance = null;
 
-  private PadLockDB(final @NonNull Context context, final @NonNull Scheduler dbScheduler) {
+  PadLockDB(final @NonNull Context context, final @NonNull Scheduler dbScheduler) {
     final SqlBrite sqlBrite = SqlBrite.create();
     final PadLockOpenHelper openHelper = new PadLockOpenHelper(context.getApplicationContext());
     briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, dbScheduler);
   }
 
-  @CheckResult @NonNull static BriteDatabase with(final @NonNull Context context) {
+  @NonNull @CheckResult public final BriteDatabase getDatabase() {
+    return briteDatabase;
+  }
+
+  public static void setDelegate(@NonNull Delegate delegate) {
+    instance = delegate;
+  }
+
+  @CheckResult @NonNull public static Delegate with(@NonNull Context context) {
     return with(context, Schedulers.io());
   }
 
-  @SuppressWarnings("ConstantConditions") @CheckResult @NonNull
-  static BriteDatabase with(final @NonNull Context context, final @NonNull Scheduler dbScheduler) {
+  @CheckResult @NonNull
+  public static Delegate with(@NonNull Context context, @NonNull Scheduler scheduler) {
     if (instance == null) {
-      synchronized (lock) {
+      synchronized (Delegate.class) {
         if (instance == null) {
-          instance = new PadLockDB(context.getApplicationContext(), dbScheduler);
+          instance = new Delegate(context, scheduler);
         }
       }
     }
 
-    // With double checking, this singleton should be guaranteed non-null
-    if (instance == null) {
-      throw new NullPointerException("PadLockDB instance is NULL");
-    } else {
-      return instance.briteDatabase;
+    return instance;
+  }
+
+  public static final class Delegate {
+
+    @NonNull private final PadLockDB database;
+
+    Delegate(@NonNull Context context) {
+      this(context, Schedulers.io());
+    }
+
+    Delegate(@NonNull Context context, @NonNull Scheduler scheduler) {
+      final Context appContext = context.getApplicationContext();
+      this.database = new PadLockDB(appContext, scheduler);
+    }
+
+    @SuppressLint("NewApi") public final void newTransaction(final @NonNull Runnable runnable) {
+      try (
+          final BriteDatabase.Transaction transaction = database.getDatabase().newTransaction()) {
+        runnable.run();
+        transaction.markSuccessful();
+      }
+    }
+
+    public final void insert(final @NonNull ContentValues contentValues) {
+      database.getDatabase().insert(PadLockEntry.TABLE_NAME, contentValues);
+    }
+
+    @NonNull @CheckResult public final Observable<PadLockEntry> queryWithPackageActivityName(
+        final @NonNull String packageName, final @NonNull String activityName) {
+      return database.getDatabase()
+          .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME,
+              packageName, activityName)
+          .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_nameMapper()::map,
+              PadLockEntry.empty())
+          .filter(padLockEntry -> padLockEntry != null);
+    }
+
+    @NonNull @CheckResult public final Observable<List<PadLockEntry>> queryWithPackageName(
+        final @NonNull String packageName) {
+      return database.getDatabase()
+          .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME, packageName)
+          .mapToList(PadLockEntry.FACTORY.with_package_nameMapper()::map)
+          .filter(padLockEntries -> padLockEntries != null);
+    }
+
+    public final void updateWithPackageActivityName(final @NonNull ContentValues contentValues,
+        final @NonNull String packageName, final @NonNull String activityName) {
+      database.getDatabase()
+          .update(PadLockEntry.TABLE_NAME, contentValues,
+              PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
+    }
+
+    @NonNull @CheckResult public final Observable<List<PadLockEntry>> queryAll() {
+      return database.getDatabase()
+          .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
+          .mapToList(PadLockEntry.FACTORY.all_entriesMapper()::map)
+          .filter(padLockEntries -> padLockEntries != null);
+    }
+
+    public final void deleteWithPackageName(final @NonNull String packageName) {
+      database.getDatabase()
+          .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME, packageName);
+    }
+
+    public final void deleteWithPackageActivityName(final @NonNull String packageName,
+        final @NonNull String activityName) {
+      database.getDatabase()
+          .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME,
+              packageName, activityName);
+    }
+
+    public final void deleteAll() {
+      database.getDatabase().delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
     }
   }
 }

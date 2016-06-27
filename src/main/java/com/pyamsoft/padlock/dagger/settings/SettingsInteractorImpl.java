@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.dagger.settings;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
+import com.pyamsoft.padlock.app.sql.PadLockDB;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -38,7 +38,7 @@ final class SettingsInteractorImpl implements SettingsInteractor {
   @NonNull @Override public Observable<Boolean> clearDatabase() {
     return Observable.defer(() -> {
       Timber.d("Clear database of all entries");
-      PadLockOpenHelper.deleteAll(appContext);
+      PadLockDB.with(appContext).deleteAll();
       return Observable.just(true);
     });
   }

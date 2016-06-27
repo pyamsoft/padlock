@@ -21,7 +21,7 @@ import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
-import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
+import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
@@ -64,7 +64,7 @@ final class LockListInteractorImpl implements LockListInteractor {
   }
 
   @NonNull @Override public Observable<List<PadLockEntry>> getAppEntryList() {
-    return PadLockOpenHelper.queryAll(appContext).first();
+    return PadLockDB.with(appContext).queryAll().first();
   }
 
   @Override public Observable<Boolean> isSystemApplication(@NonNull ApplicationInfo info) {
