@@ -43,7 +43,7 @@ public class LockScreenInteractorTest {
     final PadLockPreferences mockPreferences = Mockito.mock(PadLockPreferences.class);
     final MasterPinInteractor mockMasterPinInteractor = Mockito.mock(MasterPinInteractor.class);
     return new LockScreenInteractorImpl(context, mockPreferences, mockDBInteractor,
-        mockMasterPinInteractor, 0);
+        mockMasterPinInteractor);
   }
 
   @Test public void test_ignoreTime() {
