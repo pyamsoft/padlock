@@ -110,6 +110,47 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
   public Observable<PadLockEntry> getEntry(@NonNull String packageName,
       @NonNull String activityName) {
     Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);
-    return PadLockOpenHelper.queryWithPackageActivityName(appContext, packageName, activityName);
+    final Observable<PadLockEntry> specificActivityEntry =
+        PadLockOpenHelper.queryWithPackageActivityName(appContext, packageName, activityName)
+            .first();
+    final Observable<PadLockEntry> packageActivityEntry =
+        PadLockOpenHelper.queryWithPackageActivityName(appContext, packageName,
+            PadLockEntry.PACKAGE_TAG).first();
+    return Observable.zip(specificActivityEntry, packageActivityEntry,
+        (specificEntry, packageEntry) -> {
+          Timber.d("Check the specific entry for validity");
+          if (!PadLockEntry.isEmpty(specificEntry)) {
+            Timber.d("Specific entry PN %s, AN %s", specificEntry.packageName(),
+                specificEntry.activityName());
+            return specificEntry;
+          }
+
+          Timber.w("Specific entry is the EMPTY entry, try something else");
+          if (!PadLockEntry.isEmpty(packageEntry)) {
+            Timber.d("Package entry PN %s, AN %s", packageEntry.packageName(),
+                packageEntry.activityName());
+            return packageEntry;
+          }
+
+          Timber.w("Package entry is the EMPTY entry, return NULL");
+          return null;
+        }).filter(entry -> {
+      final boolean filterOut = entry != null;
+      Timber.d("Keep entry if not NULL: %s", filterOut);
+      return filterOut;
+    }).filter(entry -> {
+      Timber.d("Check ignore time for: %s %s", entry.packageName(), entry.activityName());
+      final long ignoreUntilTime = entry.ignoreUntilTime();
+      final long currentTime = System.currentTimeMillis();
+      if (currentTime < ignoreUntilTime) {
+        Timber.d("Ignore period has not elapsed yet");
+        Timber.d("Ignore until time: %d", ignoreUntilTime);
+        Timber.d("Current time: %d", currentTime);
+        return false;
+      }
+
+      Timber.d("Lock: %s %s", entry.packageName(), entry.activityName());
+      return true;
+    });
   }
 }

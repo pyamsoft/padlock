@@ -100,7 +100,7 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
     return PadLockDB.with(appContext)
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName,
             activityName)
-        .mapToOne(PadLockEntry.FACTORY.with_package_activity_nameMapper()::map)
+        .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_nameMapper()::map, PadLockEntry.empty())
         .filter(padLockEntry -> padLockEntry != null);
   }
 

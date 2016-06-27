@@ -16,13 +16,25 @@
 
 package com.pyamsoft.padlock.model.sql;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
 @AutoValue public abstract class PadLockEntry implements PadLockEntryModel {
 
+  @NonNull public static final String PACKAGE_TAG = "PACKAGE";
+  @NonNull public static final String PACKAGE_EMPTY = "EMPTY";
+  @NonNull public static final String ACTIVITY_EMPTY = "EMPTY";
   @NonNull public static final Factory<PadLockEntry> FACTORY =
       new Factory<>(AutoValue_PadLockEntry::new);
+
+  @NonNull @CheckResult public static PadLockEntry empty() {
+    return new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false);
+  }
+
+  @CheckResult public static boolean isEmpty(@NonNull PadLockEntry entry) {
+    return entry.packageName().equals(PACKAGE_EMPTY) && entry.activityName().equals(ACTIVITY_EMPTY);
+  }
 
   // SQLDelight does not yet support delete strings
   @NonNull public static final String DELETE_WITH_PACKAGE_NAME = "packageName = ?";
