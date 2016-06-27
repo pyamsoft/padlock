@@ -39,7 +39,6 @@ import com.pyamsoft.padlock.dagger.main.MainModule;
 import com.pyamsoft.pydroid.base.activity.DonationActivityBase;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
-import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.StringUtil;
 import javax.inject.Inject;
@@ -181,7 +180,6 @@ public class MainActivity extends DonationActivityBase
 
   @Override protected void onPause() {
     super.onPause();
-
     presenter.onPause();
   }
 
@@ -195,14 +193,6 @@ public class MainActivity extends DonationActivityBase
     } else {
       showAccessibilityPrompt();
     }
-  }
-
-  @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
-    if (isFinishing()) {
-      DataHolderFragment.removeAll(this);
-    }
-
-    super.onSaveInstanceState(outState);
   }
 
   @Override public void showUsageTermsDialog() {
