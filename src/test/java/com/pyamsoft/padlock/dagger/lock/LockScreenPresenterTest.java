@@ -42,18 +42,7 @@ public class LockScreenPresenterTest {
 
   @CheckResult @NonNull public static LockScreenPresenter getLockScreenPresenter(
       final LockScreenInteractor mockInteractor) {
-    return new LockScreenPresenter(mockInteractor, Schedulers.immediate(),
-        Schedulers.immediate(), 0, 5, 10, 30);
-  }
-
-  @Test public void test_ignoreTimes() {
-    mockInteractor = Mockito.mock(LockScreenInteractor.class);
-    presenter = getLockScreenPresenter(mockInteractor);
-
-    Assert.assertEquals(0, presenter.getIgnoreTimeNone());
-    Assert.assertEquals(5, presenter.getIgnoreTimeFive());
-    Assert.assertEquals(10, presenter.getIgnoreTimeTen());
-    Assert.assertEquals(30, presenter.getIgnoreTimeThirty());
+    return new LockScreenPresenter(mockInteractor, Schedulers.immediate(), Schedulers.immediate());
   }
 
   public void run_test_loadDisplayName(String packageName, String displayName) {
