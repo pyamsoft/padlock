@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.dagger.lock.LockScreenInteractor;
@@ -29,26 +28,18 @@ import timber.log.Timber;
 
 public final class LockScreenPresenter extends LockPresenter<LockScreen> {
 
-  @NonNull private final LockScreenInteractor lockScreenInteractor;
-  private final long ignoreTimeNone;
-  private final long ignoreTimeFive;
-  private final long ignoreTimeTen;
-  private final long ignoreTimeThirty;
+  @NonNull private final LockScreenInteractor interactor;
 
   @NonNull private Subscription unlockSubscription = Subscriptions.empty();
   @NonNull private Subscription lockSubscription = Subscriptions.empty();
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
 
   @Inject public LockScreenPresenter(@NonNull final LockScreenInteractor lockScreenInteractor,
-      @NonNull @Named("main") Scheduler mainScheduler, @NonNull @Named("io") Scheduler ioScheduler,
-      @Named("ignore_none") long ignoreTimeNone, @Named("ignore_five") long ignoreTimeFive,
-      @Named("ignore_ten") long ignoreTimeTen, @Named("ignore_thirty") long ignoreTimeThirty) {
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);
-    this.ignoreTimeNone = ignoreTimeNone;
-    this.ignoreTimeFive = ignoreTimeFive;
-    this.ignoreTimeTen = ignoreTimeTen;
-    this.ignoreTimeThirty = ignoreTimeThirty;
-    this.lockScreenInteractor = lockScreenInteractor;
+    this.interactor = lockScreenInteractor;
+    interactor.resetFailCount();
   }
 
   @Override protected void onUnbind() {
@@ -56,6 +47,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     unsubUnlock();
     unsubLock();
     unsubDisplayName();
+    interactor.resetFailCount();
   }
 
   private void unsubUnlock() {
@@ -72,21 +64,35 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
 
   private void setIgnorePeriod(final long time) {
     final LockScreen lockScreen = getView();
-    if (time == ignoreTimeFive) {
+    if (time == interactor.getIgnoreTimeOne()) {
+      lockScreen.setIgnoreTimeOne();
+    } else if (time == interactor.getIgnoreTimeFive()) {
       lockScreen.setIgnoreTimeFive();
-    } else if (time == ignoreTimeTen) {
+    } else if (time == interactor.getIgnoreTimeTen()) {
       lockScreen.setIgnoreTimeTen();
-    } else if (time == ignoreTimeThirty) {
+    } else if (time == interactor.getIgnoreTimeFifteen()) {
+      lockScreen.setIgnoreTimeFifteen();
+    } else if (time == interactor.getIgnoreTimeTwenty()) {
+      lockScreen.setIgnoreTimeTwenty();
+    } else if (time == interactor.getIgnoreTimeThirty()) {
       lockScreen.setIgnoreTimeThirty();
+    } else if (time == interactor.getIgnoreTimeFourtyFive()) {
+      lockScreen.setIgnoreTimeFourtyFive();
+    } else if (time == interactor.getIgnoreTimeSixty()) {
+      lockScreen.setIgnoreTimeSixty();
     } else {
       lockScreen.setIgnoreTimeNone();
     }
   }
 
-  public final void setIgnorePeriodFromPreferences(@Nullable Long ignoreTime)
-      throws NullPointerException {
+  public final void saveSelectedOptions(int selectedIndex) {
+    final long time = interactor.getIgnoreTimeForIndex(selectedIndex);
+    getView().onSaveMenuSelections(time);
+  }
+
+  public final void setIgnorePeriodFromPreferences(@Nullable Long ignoreTime) {
     if (ignoreTime == null) {
-      final long defaultIgnoreTime = lockScreenInteractor.getDefaultIgnoreTime();
+      final long defaultIgnoreTime = interactor.getDefaultIgnoreTime();
       setIgnorePeriod(defaultIgnoreTime);
     } else {
       setIgnorePeriod(ignoreTime);
@@ -95,31 +101,33 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
 
   public final void lockEntry(@NonNull String packageName, @NonNull String activityName) {
     unsubLock();
-    final LockScreen lockScreen = getView();
-    lockSubscription = lockScreenInteractor.lockEntry(packageName, activityName)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(unlocked -> {
-          Timber.d("Received lock entry result");
-          if (unlocked) {
-            lockScreen.onLocked();
-          } else {
+    if (interactor.incrementAndGetFailCount() > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT) {
+      final LockScreen lockScreen = getView();
+      lockSubscription = interactor.lockEntry(packageName, activityName)
+          .subscribeOn(getSubscribeScheduler())
+          .observeOn(getObserveScheduler())
+          .subscribe(unlocked -> {
+            Timber.d("Received lock entry result");
+            if (unlocked) {
+              lockScreen.onLocked();
+            } else {
+              lockScreen.onLockedError();
+            }
+          }, throwable -> {
+            Timber.e(throwable, "lockEntry onError");
             lockScreen.onLockedError();
-          }
-        }, throwable -> {
-          Timber.e(throwable, "lockEntry onError");
-          lockScreen.onLockedError();
-          unsubLock();
-        }, this::unsubLock);
+            unsubLock();
+          }, this::unsubLock);
+    }
   }
 
   public final void submit(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String currentAttempt, boolean excludeEntry, long ignorePeriodTime) {
+      @NonNull String currentAttempt, boolean excludeEntry, int ignoreOptionIndex) {
     unsubUnlock();
     final LockScreen lockScreen = getView();
     unlockSubscription =
-        lockScreenInteractor.unlockEntry(packageName, activityName, currentAttempt, excludeEntry,
-            ignorePeriodTime)
+        interactor.unlockEntry(packageName, activityName, currentAttempt, excludeEntry,
+            interactor.getIgnoreTimeForIndex(ignoreOptionIndex))
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
             .subscribe(unlocked -> {
@@ -139,7 +147,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
   public final void loadDisplayNameFromPackage(@NonNull String packageName) {
     unsubDisplayName();
     final LockScreen lockScreen = getView();
-    displayNameSubscription = lockScreenInteractor.getDisplayName(packageName)
+    displayNameSubscription = interactor.getDisplayName(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(lockScreen::setDisplayName, throwable -> {
@@ -152,21 +160,5 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     if (!displayNameSubscription.isUnsubscribed()) {
       displayNameSubscription.unsubscribe();
     }
-  }
-
-  @CheckResult public long getIgnoreTimeNone() {
-    return ignoreTimeNone;
-  }
-
-  @CheckResult public long getIgnoreTimeFive() {
-    return ignoreTimeFive;
-  }
-
-  @CheckResult public long getIgnoreTimeTen() {
-    return ignoreTimeTen;
-  }
-
-  @CheckResult public long getIgnoreTimeThirty() {
-    return ignoreTimeThirty;
   }
 }

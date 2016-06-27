@@ -38,6 +38,7 @@ final class PadLockPreferencesImpl extends ApplicationPreferences implements Pad
   @NonNull private final String timeoutTimeDefault;
   @NonNull private final String lockPackageChangeKey;
   @NonNull private final String lockDeviceLockedKey;
+  @NonNull private final long[] ignoreTimes;
   private final boolean lockPackageChangeDefault;
   private final boolean lockDeviceLockedDefault;
 
@@ -53,6 +54,16 @@ final class PadLockPreferencesImpl extends ApplicationPreferences implements Pad
     lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default);
     lockDeviceLockedKey = appContext.getString(R.string.lock_device_locked_key);
     lockDeviceLockedDefault = res.getBoolean(R.bool.lock_device_locked_default);
+
+    final String[] stringIgnoreTimes = res.getStringArray(R.array.ignore_time_entries);
+    ignoreTimes = new long[stringIgnoreTimes.length];
+    for (int i = 0; i < stringIgnoreTimes.length; ++i) {
+      ignoreTimes[i] = Long.parseLong(stringIgnoreTimes[i]);
+    }
+  }
+
+  @NonNull @Override public long[] getIgnoreTimes() {
+    return ignoreTimes;
   }
 
   @Override @CheckResult public final boolean getLockOnDeviceLocked() {

@@ -40,7 +40,6 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.lock.DaggerLockScreenComponent;
-import com.pyamsoft.padlock.dagger.lock.LockScreenModule;
 import com.pyamsoft.pydroid.base.activity.NoDonationActivityBase;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -66,12 +65,16 @@ public final class LockScreenActivity extends NoDonationActivityBase
   private DataHolderFragment<Long> ignoreDataHolder;
   private DataHolderFragment<Boolean> excludeDataHolder;
   private MenuItem menuIgnoreNone;
+  private MenuItem menuIgnoreOne;
   private MenuItem menuIgnoreFive;
   private MenuItem menuIgnoreTen;
+  private MenuItem menuIgnoreFifteen;
+  private MenuItem menuIgnoreTwenty;
   private MenuItem menuIgnoreThirty;
+  private MenuItem menuIgnoreFourtyFive;
+  private MenuItem menuIgnoreSixty;
   private MenuItem menuExclude;
   private Unbinder unbinder;
-  private int failCount;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -101,7 +104,6 @@ public final class LockScreenActivity extends NoDonationActivityBase
     // Inject Dagger graph
     DaggerLockScreenComponent.builder()
         .padLockComponent(PadLock.getInstance().getPadLockComponent())
-        .lockScreenModule(new LockScreenModule(this))
         .build()
         .inject(this);
 
@@ -111,7 +113,6 @@ public final class LockScreenActivity extends NoDonationActivityBase
     lockViewDelegate.onCreateView(this, this, rootView);
 
     setSupportActionBar(toolbar);
-    failCount = 0;
   }
 
   @Override protected void onStart() {
@@ -119,9 +120,7 @@ public final class LockScreenActivity extends NoDonationActivityBase
     Timber.d("onStart");
 
     presenter.loadDisplayNameFromPackage(getPackageName());
-
     lockViewDelegate.onStart(appIconLoaderPresenter);
-
     supportInvalidateOptionsMenu();
   }
 
@@ -142,8 +141,6 @@ public final class LockScreenActivity extends NoDonationActivityBase
     appIconLoaderPresenter.unbindView();
     lockViewDelegate.onDestroyView();
     unbinder.unbind();
-
-    failCount = 0;
   }
 
   @Override protected void onStop() {
@@ -193,13 +190,9 @@ public final class LockScreenActivity extends NoDonationActivityBase
     lockViewDelegate.clearDisplay();
     showSnackbarWithText("Error: Invalid PIN");
 
-    ++failCount;
-
     // Once fail count is tripped once, continue to update it every time following until time elapses
-    if (failCount > 2) {
-      presenter.lockEntry(lockViewDelegate.getAppPackageName(),
-          lockViewDelegate.getAppActivityName());
-    }
+    presenter.lockEntry(lockViewDelegate.getAppPackageName(),
+        lockViewDelegate.getAppActivityName());
   }
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
@@ -211,10 +204,7 @@ public final class LockScreenActivity extends NoDonationActivityBase
   @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
     if (isChangingConfigurations()) {
       lockViewDelegate.onSaveInstanceState(outState);
-
-      ignoreDataHolder.put(0, getIgnorePeriodTime());
-
-      excludeDataHolder.put(0, shouldExcludeEntry());
+      presenter.saveSelectedOptions(getSelectedIgnoreTimeIndex());
     } else {
       DataHolderFragment.remove(this, "ignore_data");
       DataHolderFragment.remove(this, "exclude_data");
@@ -228,9 +218,14 @@ public final class LockScreenActivity extends NoDonationActivityBase
     Timber.d("onCreateOptionsMenu");
     getMenuInflater().inflate(R.menu.lockscreen_menu, menu);
     menuIgnoreNone = menu.findItem(R.id.menu_ignore_none);
+    menuIgnoreOne = menu.findItem(R.id.menu_ignore_one);
     menuIgnoreFive = menu.findItem(R.id.menu_ignore_five);
     menuIgnoreTen = menu.findItem(R.id.menu_ignore_ten);
+    menuIgnoreFifteen = menu.findItem(R.id.menu_ignore_fifteen);
+    menuIgnoreTwenty = menu.findItem(R.id.menu_ignore_twenty);
     menuIgnoreThirty = menu.findItem(R.id.menu_ignore_thirty);
+    menuIgnoreFourtyFive = menu.findItem(R.id.menu_ignore_fourtyfive);
+    menuIgnoreSixty = menu.findItem(R.id.menu_ignore_sixty);
     menuExclude = menu.findItem(R.id.menu_exclude);
     return true;
   }
@@ -238,7 +233,6 @@ public final class LockScreenActivity extends NoDonationActivityBase
   @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
     // Set the default checked value
     final Long ignorePeriod = ignoreDataHolder.pop(0);
-
     presenter.setIgnorePeriodFromPreferences(ignorePeriod);
 
     final Boolean exclude = excludeDataHolder.pop(0);
@@ -260,61 +254,84 @@ public final class LockScreenActivity extends NoDonationActivityBase
     }
   }
 
+  @Override public void setIgnoreTimeOne() {
+    menuIgnoreOne.setChecked(true);
+  }
+
   @Override public void setIgnoreTimeFive() {
-    if (menuIgnoreFive != null) {
-      menuIgnoreFive.setChecked(true);
-    }
+    menuIgnoreFive.setChecked(true);
   }
 
   @Override public void setIgnoreTimeTen() {
-    if (menuIgnoreTen != null) {
-      menuIgnoreTen.setChecked(true);
-    }
+    menuIgnoreTen.setChecked(true);
+  }
+
+  @Override public void setIgnoreTimeFifteen() {
+    menuIgnoreFifteen.setChecked(true);
+  }
+
+  @Override public void setIgnoreTimeTwenty() {
+    menuIgnoreTwenty.setChecked(true);
   }
 
   @Override public void setIgnoreTimeThirty() {
-    if (menuIgnoreThirty != null) {
-      menuIgnoreThirty.setChecked(true);
-    }
+    menuIgnoreThirty.setChecked(true);
+  }
+
+  @Override public void setIgnoreTimeFourtyFive() {
+    menuIgnoreFourtyFive.setChecked(true);
+  }
+
+  @Override public void setIgnoreTimeSixty() {
+    menuIgnoreSixty.setChecked(true);
+  }
+
+  @Override public void onSaveMenuSelections(long ignoreTime) {
+    ignoreDataHolder.put(0, ignoreTime);
+    excludeDataHolder.put(0, menuExclude.isChecked());
   }
 
   @Override public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     Timber.d("onOptionsItemSelected");
-    boolean handled;
     final int itemId = item.getItemId();
     switch (itemId) {
       case R.id.menu_lockscreen_forgot:
         showForgotPasscodeDialog();
-        handled = true;
-        break;
-      case R.id.menu_ignore_none:
-        item.setChecked(true);
-        handled = true;
-        break;
-      case R.id.menu_ignore_five:
-        item.setChecked(true);
-        handled = true;
-        break;
-      case R.id.menu_ignore_ten:
-        item.setChecked(true);
-        handled = true;
-        break;
-      case R.id.menu_ignore_thirty:
-        item.setChecked(true);
-        handled = true;
         break;
       case R.id.menu_exclude:
         item.setChecked(!item.isChecked());
-        handled = true;
         break;
       case R.id.menu_lockscreen_info:
         showInfoDialog();
-        handled = true;
         break;
       default:
-        handled = false;
+        item.setChecked(true);
     }
-    return handled || super.onOptionsItemSelected(item);
+    return true;
+  }
+
+  @CheckResult private int getSelectedIgnoreTimeIndex() {
+    int index;
+    if (menuIgnoreOne.isChecked()) {
+      index = 1;
+    } else if (menuIgnoreFive.isChecked()) {
+      index = 2;
+    } else if (menuIgnoreTen.isChecked()) {
+      index = 3;
+    } else if (menuIgnoreFifteen.isChecked()) {
+      index = 4;
+    } else if (menuIgnoreTwenty.isChecked()) {
+      index = 5;
+    } else if (menuIgnoreThirty.isChecked()) {
+      index = 6;
+    } else if (menuIgnoreFourtyFive.isChecked()) {
+      index = 7;
+    } else if (menuIgnoreSixty.isChecked()) {
+      index = 8;
+    } else {
+      index = 0;
+    }
+    return index;
   }
 
   private void showInfoDialog() {
@@ -328,23 +345,6 @@ public final class LockScreenActivity extends NoDonationActivityBase
         FORGOT_PASSWORD_TAG);
   }
 
-  @CheckResult @Override public long getIgnorePeriodTime() {
-    if (menuIgnoreFive != null && menuIgnoreTen != null && menuIgnoreThirty != null) {
-      if (menuIgnoreFive.isChecked()) {
-        return presenter.getIgnoreTimeFive();
-      } else if (menuIgnoreTen.isChecked()) {
-        return presenter.getIgnoreTimeTen();
-      } else if (menuIgnoreThirty.isChecked()) {
-        return presenter.getIgnoreTimeThirty();
-      }
-    }
-    return presenter.getIgnoreTimeNone();
-  }
-
-  @CheckResult @Override public boolean shouldExcludeEntry() {
-    return menuExclude.isChecked();
-  }
-
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
     lockViewDelegate.onApplicationIconLoadedSuccess(icon);
   }
@@ -355,6 +355,7 @@ public final class LockScreenActivity extends NoDonationActivityBase
 
   @Override public void onSubmitPressed() {
     presenter.submit(lockViewDelegate.getAppPackageName(), lockViewDelegate.getAppActivityName(),
-        lockViewDelegate.getCurrentAttempt(), shouldExcludeEntry(), getIgnorePeriodTime());
+        lockViewDelegate.getCurrentAttempt(), menuExclude.isChecked(),
+        getSelectedIgnoreTimeIndex());
   }
 }

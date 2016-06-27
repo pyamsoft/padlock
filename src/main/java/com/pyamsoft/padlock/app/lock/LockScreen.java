@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 
@@ -28,15 +27,23 @@ public interface LockScreen extends LockPresenter.LockView, AppIconLoaderView {
 
   void setIgnoreTimeNone();
 
+  void setIgnoreTimeOne();
+
   void setIgnoreTimeFive();
 
   void setIgnoreTimeTen();
 
+  void setIgnoreTimeFifteen();
+
+  void setIgnoreTimeTwenty();
+
   void setIgnoreTimeThirty();
 
-  @CheckResult long getIgnorePeriodTime();
+  void setIgnoreTimeFourtyFive();
 
-  @CheckResult boolean shouldExcludeEntry();
+  void setIgnoreTimeSixty();
+
+  void onSaveMenuSelections(long ignoreTime);
 
   void setDisplayName(@NonNull String name);
 }
