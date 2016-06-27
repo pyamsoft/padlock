@@ -26,9 +26,6 @@ import javax.inject.Named;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
-import rx.functions.Func1;
-import rx.functions.Func2;
-import rx.functions.Func4;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -87,93 +84,70 @@ public final class LockServicePresenter
       @NonNull String className) {
     unsubLockedEntry();
     final Observable<Boolean> windowEventObservable =
-        stateInteractor.isServiceEnabled().filter(new Func1<Boolean, Boolean>() {
-          @Override public Boolean call(Boolean enabled) {
-            if (!enabled) {
-              Timber.e("Service is not user-enabled");
-              reset();
-            }
-            return enabled;
+        stateInteractor.isServiceEnabled().filter(enabled -> {
+          if (!enabled) {
+            Timber.e("Service is not user-enabled");
+            reset();
           }
-        }).zipWith(interactor.isLockWhenDeviceLocked(), new Func2<Boolean, Boolean, Boolean>() {
-          @Override public Boolean call(Boolean enabled, Boolean lockWhenDeviceLocked) {
-            Timber.d("Check if device should reset on lock");
-            return enabled && lockWhenDeviceLocked;
+          return enabled;
+        }).zipWith(interactor.isLockWhenDeviceLocked(), (enabled, lockWhenDeviceLocked) -> {
+          Timber.d("Check if device should reset on lock");
+          return enabled && lockWhenDeviceLocked;
+        }).zipWith(interactor.isDeviceLocked(), (isLockWhenDeviceLocked, isDeviceLocked) -> {
+          if (isLockWhenDeviceLocked && isDeviceLocked) {
+            Timber.d("Device is Locked. Reset state");
+            reset();
           }
-        }).zipWith(interactor.isDeviceLocked(), new Func2<Boolean, Boolean, Boolean>() {
-          @Override public Boolean call(Boolean isLockWhenDeviceLocked, Boolean isDeviceLocked) {
-            if (isLockWhenDeviceLocked && isDeviceLocked) {
-              Timber.d("Device is Locked. Reset state");
-              reset();
-            }
 
-            // Always return true here to continue
-            return true;
+          // Always return true here to continue
+          return true;
+        }).flatMap(aBoolean -> {
+          Timber.d("Check if event is from activity");
+          return interactor.isEventFromActivity(packageName, className);
+        }).filter(fromActivity -> {
+          if (!fromActivity) {
+            Timber.e("Event is not caused by an Activity. P: %s, C: %s", packageName, className);
           }
-        }).flatMap(new Func1<Boolean, Observable<Boolean>>() {
-          @Override public Observable<Boolean> call(Boolean aBoolean) {
-            Timber.d("Check if event is from activity");
-            return interactor.isEventFromActivity(packageName, className);
+          return fromActivity;
+        }).flatMap(aBoolean -> {
+          Timber.d("Check if window is from lock screen");
+          return interactor.isWindowFromLockScreen(packageName, className);
+        }).filter(isLockScreen -> {
+          if (isLockScreen) {
+            Timber.e("Event for package %s class: %s is caused by LockScreen", packageName,
+                className);
           }
-        }).filter(new Func1<Boolean, Boolean>() {
-          @Override public Boolean call(Boolean fromActivity) {
-            if (!fromActivity) {
-              Timber.e("Event is not caused by an Activity. P: %s, C: %s", packageName, className);
-            }
-            return fromActivity;
-          }
-        }).flatMap(new Func1<Boolean, Observable<Boolean>>() {
-          @Override public Observable<Boolean> call(Boolean aBoolean) {
-            Timber.d("Check if window is from lock screen");
-            return interactor.isWindowFromLockScreen(packageName, className);
-          }
-        }).filter(new Func1<Boolean, Boolean>() {
-          @Override public Boolean call(Boolean isLockScreen) {
-            if (isLockScreen) {
-              Timber.e("Event for package %s class: %s is caused by LockScreen", packageName,
-                  className);
-            }
-            return !isLockScreen;
-          }
+          return !isLockScreen;
         });
 
     lockedEntrySubscription = Observable.zip(windowEventObservable,
         interactor.hasNameChanged(packageName, lastPackageName),
         interactor.hasNameChanged(className, lastClassName), interactor.isOnlyLockOnPackageChange(),
-        new Func4<Boolean, Boolean, Boolean, Boolean, Boolean>() {
-          @Override public Boolean call(Boolean windowEventObserved, Boolean packageChanged,
-              Boolean classChanged, Boolean lockOnPackageChange) {
-            if (packageChanged) {
-              Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName);
-              lastPackageName = packageName;
-            }
-            if (classChanged) {
-              Timber.d("Last Class: %s - New Class: %s", lastClassName, className);
-              lastClassName = className;
-            }
+        (windowEventObserved, packageChanged, classChanged, lockOnPackageChange) -> {
+          if (packageChanged) {
+            Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName);
+            lastPackageName = packageName;
+          }
+          if (classChanged) {
+            Timber.d("Last Class: %s - New Class: %s", lastClassName, className);
+            lastClassName = className;
+          }
 
-            Timber.d("Window change if class changed");
-            boolean windowHasChanged = classChanged;
-            if (lockOnPackageChange) {
-              Timber.d("Window change if package changed");
-              windowHasChanged &= packageChanged;
-            }
+          Timber.d("Window change if class changed");
+          boolean windowHasChanged = classChanged;
+          if (lockOnPackageChange) {
+            Timber.d("Window change if package changed");
+            windowHasChanged &= packageChanged;
+          }
 
-            return windowHasChanged;
-          }
+          return windowHasChanged;
         })
-        .filter(new Func1<Boolean, Boolean>() {
-          @Override public Boolean call(Boolean windowHasChanged) {
-            return windowHasChanged || !lockScreenPassed;
-          }
-        })
-        .flatMap(new Func1<Boolean, Observable<PadLockEntry>>() {
-          @Override public Observable<PadLockEntry> call(Boolean aBoolean) {
-            Timber.d("Get list of locked classes with package: %s, class: %s", packageName,
-                className);
-            setLockScreenPassed(false);
-            return interactor.getEntry(packageName, className);
-          }
+        .filter(windowHasChanged -> windowHasChanged || !lockScreenPassed)
+        .flatMap(aBoolean -> {
+          Timber.d("Get list of locked classes with package: %s, class: %s", packageName,
+              className);
+          setLockScreenPassed(false);
+          return interactor.getEntry(packageName, className);
         })
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
