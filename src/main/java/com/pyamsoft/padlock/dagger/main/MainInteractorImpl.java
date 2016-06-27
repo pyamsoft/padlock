@@ -20,6 +20,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import javax.inject.Inject;
+import rx.Observable;
 
 final class MainInteractorImpl implements MainInteractor {
 
@@ -29,8 +30,8 @@ final class MainInteractorImpl implements MainInteractor {
     this.preferences = preferences;
   }
 
-  @CheckResult @Override public boolean hasAgreed() {
-    return preferences.hasAgreed();
+  @NonNull @CheckResult @Override public Observable<Boolean> hasAgreed() {
+    return Observable.defer(() -> Observable.just(preferences.hasAgreed()));
   }
 
   @Override public void setAgreed() {

@@ -24,7 +24,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
@@ -53,32 +52,36 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
   /**
    * Return true if the window event is caused by an Activity
    */
-  @Override public boolean isEventFromActivity(@NonNull String packageName,
+  @NonNull @Override public Observable<Boolean> isEventFromActivity(@NonNull String packageName,
       @NonNull String className) {
-    if (packageName.isEmpty() || className.isEmpty()) {
-      return false;
-    }
+    return Observable.defer(() -> {
+      if (packageName.isEmpty() || className.isEmpty()) {
+        return Observable.just(false);
+      }
 
-    final ComponentName componentName = new ComponentName(packageName, className);
-    try {
-      final ActivityInfo activityInfo = packageManager.getActivityInfo(componentName, 0);
-      return activityInfo != null;
-    } catch (PackageManager.NameNotFoundException e) {
-      return false;
-    }
+      final ComponentName componentName = new ComponentName(packageName, className);
+      try {
+        final ActivityInfo activityInfo = packageManager.getActivityInfo(componentName, 0);
+        return Observable.just(activityInfo != null);
+      } catch (PackageManager.NameNotFoundException e) {
+        return Observable.just(false);
+      }
+    });
   }
 
   /**
    * Return true if the device is currently locked
    */
-  @CheckResult @Override public boolean isDeviceLocked() {
-    boolean locked = false;
-    Timber.d("Check if device is currently locked in some secure manner");
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-      Timber.d("Device has isDeviceLocked() call");
-      locked = keyguard.isDeviceLocked();
-    }
-    return locked || keyguard.inKeyguardRestrictedInputMode();
+  @NonNull @CheckResult @Override public Observable<Boolean> isDeviceLocked() {
+    return Observable.defer(() -> {
+      boolean locked = false;
+      Timber.d("Check if device is currently locked in some secure manner");
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+        Timber.d("Device has isDeviceLocked() call");
+        locked = keyguard.isDeviceLocked();
+      }
+      return Observable.just(locked || keyguard.inKeyguardRestrictedInputMode());
+    });
   }
 
   /**
@@ -86,27 +89,27 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
    * This will prevent the lock screen from opening twice when the same
    * app opens multiple activities for example.
    */
-  @CheckResult @Override public boolean hasNameChanged(@NonNull String name,
+  @NonNull @CheckResult @Override public Observable<Boolean> hasNameChanged(@NonNull String name,
       @NonNull String oldName) {
-    return !name.equals(oldName);
+    return Observable.defer(() -> Observable.just(!name.equals(oldName)));
   }
 
-  @Override
-  public boolean isWindowFromLockScreen(@NonNull String packageName, @NonNull String className) {
-    Timber.d("Window is lock screen: %s, %s", packageName, className);
-    return packageName.equals(PadLock.class.getPackage().getName()) && className.equals(
-        LockScreenActivity.class.getName());
+  @NonNull @Override public Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
+      @NonNull String className) {
+    return Observable.defer(() -> Observable.just(
+        packageName.equals(PadLock.class.getPackage().getName()) && className.equals(
+            LockScreenActivity.class.getName())));
   }
 
-  @Override public boolean isOnlyLockOnPackageChange() {
-    return preferences.getLockOnPackageChange();
+  @NonNull @Override public Observable<Boolean> isOnlyLockOnPackageChange() {
+    return Observable.defer(() -> Observable.just(preferences.getLockOnPackageChange()));
   }
 
-  @Override public boolean isLockWhenDeviceLocked() {
-    return preferences.getLockOnDeviceLocked();
+  @NonNull @Override public Observable<Boolean> isLockWhenDeviceLocked() {
+    return Observable.defer(() -> Observable.just(preferences.getLockOnDeviceLocked()));
   }
 
-  @NonNull @WorkerThread @CheckResult @Override
+  @NonNull @CheckResult @Override
   public Observable<PadLockEntry> getEntry(@NonNull String packageName,
       @NonNull String activityName) {
     Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);

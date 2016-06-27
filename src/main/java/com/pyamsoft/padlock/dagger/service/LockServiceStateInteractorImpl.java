@@ -20,6 +20,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.lock.MasterPinInteractor;
 import javax.inject.Inject;
+import rx.Observable;
 
 final class LockServiceStateInteractorImpl implements LockServiceStateInteractor {
 
@@ -29,7 +30,7 @@ final class LockServiceStateInteractorImpl implements LockServiceStateInteractor
     this.pinInteractor = pinInteractor;
   }
 
-  @CheckResult @Override public boolean isServiceEnabled() {
-    return pinInteractor.getMasterPin() != null;
+  @NonNull @CheckResult @Override public Observable<Boolean> isServiceEnabled() {
+    return pinInteractor.getMasterPin().map(pin -> pin != null);
   }
 }

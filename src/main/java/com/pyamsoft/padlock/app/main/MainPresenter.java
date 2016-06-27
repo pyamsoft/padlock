@@ -35,6 +35,7 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
 
   @NonNull private Subscription agreeTermsBusSubscription = Subscriptions.empty();
   @NonNull private Subscription refreshBus = Subscriptions.empty();
+  @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
 
   @Inject public MainPresenter(@NonNull final MainInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
@@ -53,6 +54,11 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
     super.onPause();
     unregisterFromAgreeTermsBus();
     unregisterFromRefreshBus();
+  }
+
+  @Override protected void onUnbind() {
+    super.onUnbind();
+    unsubscribeAgreeTerms();
   }
 
   private void unregisterFromRefreshBus() {
@@ -75,11 +81,19 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
   }
 
   public final void showTermsDialog() {
-    final boolean agreed = interactor.hasAgreed();
-    final MainView mainView = getView();
-    if (!agreed) {
-      mainView.showUsageTermsDialog();
-    }
+    unsubscribeAgreeTerms();
+    agreeTermsSubscription = interactor.hasAgreed()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(agreed -> {
+          final MainView mainView = getView();
+          if (!agreed) {
+            mainView.showUsageTermsDialog();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError");
+          // TODO error
+        });
   }
 
   private void registerOnAgreeTermsBus() {
@@ -97,6 +111,12 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
         }, throwable -> {
           Timber.e(throwable, "AgreeTermsBus onError");
         });
+  }
+
+  private void unsubscribeAgreeTerms() {
+    if (!agreeTermsSubscription.isUnsubscribed()) {
+      agreeTermsSubscription.unsubscribe();
+    }
   }
 
   private void unregisterFromAgreeTermsBus() {

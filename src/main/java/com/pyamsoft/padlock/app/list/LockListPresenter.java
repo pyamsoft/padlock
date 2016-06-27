@@ -45,6 +45,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
   @NonNull private Subscription onboardSubscription = Subscriptions.empty();
+  @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
 
   @Inject public LockListPresenter(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -60,6 +61,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
     unsubscribePopulateList();
     unsubscribeSystemVisible();
     unsubscribeOnboard();
+    unsubscribeFabSubscription();
   }
 
   @Override public void onResume() {
@@ -170,12 +172,27 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
   }
 
   public final void setFABStateFromPreference() {
-    final boolean enabled = stateInteractor.isServiceEnabled();
-    final LockList lockList = getView();
-    if (enabled) {
-      lockList.setFABStateEnabled();
-    } else {
-      lockList.setFABStateDisabled();
+    unsubscribeFabSubscription();
+    fabStateSubscription = stateInteractor.isServiceEnabled()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(enabled -> {
+          final LockList lockList = getView();
+          if (enabled) {
+            lockList.setFABStateEnabled();
+          } else {
+            lockList.setFABStateDisabled();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError");
+          // TODO  different error
+          getView().onListPopulateError();
+        });
+  }
+
+  private void unsubscribeFabSubscription() {
+    if (!fabStateSubscription.isUnsubscribed()) {
+      fabStateSubscription.unsubscribe();
     }
   }
 
