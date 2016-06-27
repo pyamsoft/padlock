@@ -42,6 +42,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
@@ -376,7 +377,7 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void onListPopulateError() {
-    // TODO handle list populate error
+    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
   @Override public void showOnBoarding() {

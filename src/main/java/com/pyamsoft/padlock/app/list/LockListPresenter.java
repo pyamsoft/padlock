@@ -94,24 +94,26 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
     populateListSubscription = Observable.zip(packageInfoObservable, padlockEntryObservable,
         (applicationInfos, padLockEntries) -> {
 
-          final List<AppEntry> appEntries = new ArrayList<>();
           // KLUDGE super ugly.
+          final List<AppEntry> appEntries = new ArrayList<>();
           for (final ApplicationInfo applicationInfo : applicationInfos) {
-            PadLockEntry foundEntry = null;
             int foundLocation = -1;
             for (int i = 0; i < padLockEntries.size(); ++i) {
               final PadLockEntry padLockEntry = padLockEntries.get(i);
               if (padLockEntry.packageName().equals(applicationInfo.packageName)
                   && padLockEntry.activityName().equals(PadLockEntry.PACKAGE_TAG)) {
-                foundEntry = padLockEntry;
                 foundLocation = i;
                 break;
               }
             }
 
             // Remove any already found entries
+            PadLockEntry foundEntry;
             if (foundLocation != -1) {
+              foundEntry = padLockEntries.get(foundLocation);
               padLockEntries.remove(foundLocation);
+            } else {
+              foundEntry = null;
             }
 
             final AppEntry appEntry = createFromPackageInfo(applicationInfo, foundEntry != null);

@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -25,6 +24,8 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.View;
@@ -37,8 +38,10 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
+import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.pydroid.model.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
+import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -53,6 +56,7 @@ public final class LockViewDelegate implements AppIconLoaderView {
   @BindView(R.id.lock_image_go) ImageView imageGo;
 
   private @ColorRes int textColor;
+  private FragmentManager fragmentManager;
   private View rootView;
   private String activityName;
   private String packageName;
@@ -69,13 +73,15 @@ public final class LockViewDelegate implements AppIconLoaderView {
     this.textColor = textColor;
   }
 
-  public final void onCreateView(@NonNull Callback callback, @NonNull Activity activity,
+  public final void onCreateView(@NonNull Callback callback, @NonNull FragmentActivity activity,
       @NonNull View rootView) {
+    fragmentManager = activity.getSupportFragmentManager();
     onCreateView(callback, rootView, activity.getIntent().getExtras());
   }
 
   public final void onCreateView(@NonNull Callback callback, @NonNull Fragment fragment,
       @NonNull View rootView) {
+    fragmentManager = fragment.getFragmentManager();
     onCreateView(callback, rootView, fragment.getArguments());
   }
 
@@ -199,7 +205,7 @@ public final class LockViewDelegate implements AppIconLoaderView {
   }
 
   @Override public void onApplicationIconLoadedError() {
-    // TODO
+    AppUtil.guaranteeSingleDialogFragment(fragmentManager, new ErrorDialog(), "error");
   }
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
