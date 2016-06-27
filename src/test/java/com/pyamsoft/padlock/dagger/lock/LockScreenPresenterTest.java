@@ -84,4 +84,10 @@ public class LockScreenPresenterTest {
     displayName = "Example";
     run_test_loadDisplayName(packageName, displayName);
   }
+
+  @Test public void test_unlock() {
+    mockInteractor = Mockito.mock(LockScreenInteractor.class);
+    presenter = getLockScreenPresenter(mockInteractor);
+
+  }
 }
