@@ -63,7 +63,6 @@ public final class LockViewDelegate implements AppIconLoaderView {
   private AsyncVectorDrawableTask arrowGoTask;
   private Unbinder unbinder;
   private InputMethodManager imm;
-  Callback callback;
 
   @Inject public LockViewDelegate() {
     this.textColor = R.color.orange500;
@@ -88,7 +87,6 @@ public final class LockViewDelegate implements AppIconLoaderView {
   private void onCreateView(@NonNull Callback callback, @NonNull View rootView,
       @NonNull Bundle bundle) {
     Timber.d("bindView");
-    this.callback = callback;
     this.rootView = rootView;
     unbinder = ButterKnife.bind(this, rootView);
     getValuesFromBundle(bundle);
@@ -165,7 +163,6 @@ public final class LockViewDelegate implements AppIconLoaderView {
     }
 
     unbinder.unbind();
-    callback = null;
     imm.toggleSoftInputFromWindow(rootView.getWindowToken(), 0, 0);
     rootView = null;
   }

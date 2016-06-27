@@ -50,10 +50,6 @@ public final class LockServicePresenter
     lockScreenPassed = false;
   }
 
-  @Override protected void onBind() {
-    super.onBind();
-  }
-
   @Override protected void onUnbind() {
     super.onUnbind();
     unsubLockedEntry();
