@@ -32,6 +32,7 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.db.DBProgressDialog;
 import com.pyamsoft.padlock.model.AppEntry;
@@ -185,7 +186,8 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
   }
 
   @Override public void onApplicationIconLoadedError(@NonNull ViewHolder holder) {
-    // TODO handle
+    AppUtil.guaranteeSingleDialogFragment(fragment.getFragmentManager(), new ErrorDialog(),
+        "error");
   }
 
   public static final class ViewHolder extends RecyclerView.ViewHolder {
