@@ -20,6 +20,7 @@ import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.base.SchedulerPresenter;
+import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.dagger.list.LockListInteractor;
@@ -101,7 +102,8 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
             int foundLocation = -1;
             for (int i = 0; i < padLockEntries.size(); ++i) {
               final PadLockEntry padLockEntry = padLockEntries.get(i);
-              if (padLockEntry.packageName().equals(applicationInfo.packageName)) {
+              if (padLockEntry.packageName().equals(applicationInfo.packageName)
+                  && padLockEntry.activityName().equals(DBPresenter.PACKAGE_TAG)) {
                 foundEntry = padLockEntry;
                 foundLocation = i;
                 break;
