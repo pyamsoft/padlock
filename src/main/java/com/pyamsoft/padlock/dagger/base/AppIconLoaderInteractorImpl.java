@@ -35,7 +35,6 @@ public class AppIconLoaderInteractorImpl implements AppIconLoaderInteractor {
 
   @NonNull @WorkerThread @CheckResult
   public final Observable<Drawable> loadPackageIcon(final @NonNull String packageName) {
-    return Observable.defer(
-        () -> Observable.just(packageManagerWrapper.loadDrawableForPackageOrDefault(packageName)));
+    return packageManagerWrapper.loadDrawableForPackageOrDefault(packageName);
   }
 }

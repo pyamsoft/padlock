@@ -20,15 +20,16 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import java.util.List;
+import rx.Observable;
 
 public interface PackageManagerWrapper {
 
-  @CheckResult @NonNull String loadPackageLabel(@NonNull ApplicationInfo info);
+  @CheckResult @NonNull Observable<String> loadPackageLabel(@NonNull ApplicationInfo info);
 
-  @CheckResult @NonNull Drawable loadDrawableForPackageOrDefault(@NonNull String packageName);
+  @CheckResult @NonNull Observable<Drawable> loadDrawableForPackageOrDefault(
+      @NonNull String packageName);
 
-  @CheckResult @NonNull List<ApplicationInfo> getActiveApplications();
+  @CheckResult @NonNull Observable<ApplicationInfo> getActiveApplications();
 
-  @CheckResult @NonNull List<String> getActivityListForPackage(@NonNull String packageName);
+  @CheckResult @NonNull Observable<String> getActivityListForPackage(@NonNull String packageName);
 }

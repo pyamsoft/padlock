@@ -47,8 +47,7 @@ final class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl
   }
 
   @NonNull @Override public Observable<String> getPackageActivities(@NonNull String packageName) {
-    return Observable.defer(
-        () -> Observable.from(packageManagerWrapper.getActivityListForPackage(packageName)))
+    return packageManagerWrapper.getActivityListForPackage(packageName)
         .filter(activityEntry -> !activityEntry.equalsIgnoreCase(LockScreenActivity.class.getName())
             && !activityEntry.equalsIgnoreCase(CrashLogActivity.class.getName()));
   }

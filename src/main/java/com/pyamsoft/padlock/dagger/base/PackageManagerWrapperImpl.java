@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import rx.Observable;
 import timber.log.Timber;
 
 public final class PackageManagerWrapperImpl implements PackageManagerWrapper {
@@ -38,76 +39,84 @@ public final class PackageManagerWrapperImpl implements PackageManagerWrapper {
     this.packageManager = context.getApplicationContext().getPackageManager();
   }
 
-  @NonNull @Override public Drawable loadDrawableForPackageOrDefault(@NonNull String packageName) {
-    Drawable image;
-    try {
-      image = packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager);
-    } catch (PackageManager.NameNotFoundException e) {
-      Timber.e(e, "PackageManager error");
-      image = packageManager.getDefaultActivityIcon();
-    }
-    return image;
+  @NonNull @Override
+  public Observable<Drawable> loadDrawableForPackageOrDefault(@NonNull String packageName) {
+    return Observable.defer(() -> {
+      Drawable image;
+      try {
+        image = packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager);
+      } catch (PackageManager.NameNotFoundException e) {
+        Timber.e(e, "PackageManager error");
+        image = packageManager.getDefaultActivityIcon();
+      }
+      return Observable.just(image);
+    });
   }
 
-  @NonNull @Override public List<String> getActivityListForPackage(@NonNull String packageName) {
-    final List<String> activityEntries = new ArrayList<>();
-    try {
-      final PackageInfo packageInfo =
-          packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
-      final ActivityInfo[] activities = packageInfo.activities;
-      if (activities != null) {
-        for (final ActivityInfo activityInfo : activities) {
-          activityEntries.add(activityInfo.name);
+  @NonNull @Override
+  public Observable<String> getActivityListForPackage(@NonNull String packageName) {
+    return Observable.defer(() -> {
+      final List<String> activityEntries = new ArrayList<>();
+      try {
+        final PackageInfo packageInfo =
+            packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+        final ActivityInfo[] activities = packageInfo.activities;
+        if (activities != null) {
+          for (final ActivityInfo activityInfo : activities) {
+            activityEntries.add(activityInfo.name);
+          }
+        }
+      } catch (PackageManager.NameNotFoundException e) {
+        Timber.e(e, "PackageManager error");
+        activityEntries.clear();
+      }
+      return Observable.from(activityEntries);
+    });
+  }
+
+  @NonNull @Override public Observable<ApplicationInfo> getActiveApplications() {
+    return Observable.defer(() -> {
+      final List<Integer> removeIndexes = new ArrayList<>();
+
+      final List<ApplicationInfo> applicationInfos = packageManager.getInstalledApplications(0);
+      if (applicationInfos == null) {
+        Timber.e("Application list is empty");
+        return Observable.empty();
+      }
+      final int size = applicationInfos.size();
+      for (int i = 0; i < size; ++i) {
+        final ApplicationInfo info = applicationInfos.get(i);
+        Timber.d("Application: %s", info.packageName);
+        if (!info.enabled) {
+          Timber.d("Application %s at %d is disabled", info.packageName, i);
+          removeIndexes.add(i);
+          continue;
+        }
+
+        if (info.packageName.equals(LockServiceInteractor.ANDROID_PACKAGE)) {
+          Timber.d("Application %s at %d is Android", info.packageName, i);
+          removeIndexes.add(i);
+          continue;
+        }
+
+        if (info.packageName.equals(LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE)) {
+          Timber.d("Application %s at %d is System UI", info.packageName, i);
+          removeIndexes.add(i);
         }
       }
-    } catch (PackageManager.NameNotFoundException e) {
-      Timber.e(e, "PackageManager error");
-      activityEntries.clear();
-    }
-    return activityEntries;
+
+      int removedIndexOffset = 0;
+      for (final int index : removeIndexes) {
+        Timber.d("Remove index at %d", index);
+        applicationInfos.remove(index - removedIndexOffset);
+        ++removedIndexOffset;
+      }
+
+      return Observable.from(applicationInfos);
+    });
   }
 
-  @NonNull @Override public List<ApplicationInfo> getActiveApplications() {
-    final List<Integer> removeIndexes = new ArrayList<>();
-
-    final List<ApplicationInfo> applicationInfos = packageManager.getInstalledApplications(0);
-    if (applicationInfos == null) {
-      Timber.e("Application list is empty");
-      return new ArrayList<>();
-    }
-    final int size = applicationInfos.size();
-    for (int i = 0; i < size; ++i) {
-      final ApplicationInfo info = applicationInfos.get(i);
-      Timber.d("Application: %s", info.packageName);
-      if (!info.enabled) {
-        Timber.d("Application %s at %d is disabled", info.packageName, i);
-        removeIndexes.add(i);
-        continue;
-      }
-
-      if (info.packageName.equals(LockServiceInteractor.ANDROID_PACKAGE)) {
-        Timber.d("Application %s at %d is Android", info.packageName, i);
-        removeIndexes.add(i);
-        continue;
-      }
-
-      if (info.packageName.equals(LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE)) {
-        Timber.d("Application %s at %d is System UI", info.packageName, i);
-        removeIndexes.add(i);
-      }
-    }
-
-    int removedIndexOffset = 0;
-    for (final int index : removeIndexes) {
-      Timber.d("Remove index at %d", index);
-      applicationInfos.remove(index - removedIndexOffset);
-      ++removedIndexOffset;
-    }
-
-    return applicationInfos;
-  }
-
-  @NonNull @Override public String loadPackageLabel(@NonNull ApplicationInfo info) {
-    return info.loadLabel(packageManager).toString();
+  @NonNull @Override public Observable<String> loadPackageLabel(@NonNull ApplicationInfo info) {
+    return Observable.defer(() -> Observable.just(info.loadLabel(packageManager).toString()));
   }
 }

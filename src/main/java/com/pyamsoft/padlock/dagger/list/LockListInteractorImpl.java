@@ -59,7 +59,7 @@ final class LockListInteractorImpl implements LockListInteractor {
 
   @WorkerThread @Override @NonNull
   public Observable<List<ApplicationInfo>> getApplicationInfoList() {
-    return Observable.defer(() -> Observable.from(packageManagerWrapper.getActiveApplications()))
+    return packageManagerWrapper.getActiveApplications()
         .filter(applicationInfo -> !isSystemApplication(applicationInfo) || isSystemVisible())
         .toList();
   }
@@ -72,7 +72,7 @@ final class LockListInteractorImpl implements LockListInteractor {
     return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
   }
 
-  @NonNull @Override public String loadPackageLabel(@NonNull ApplicationInfo info) {
+  @NonNull @Override public Observable<String> loadPackageLabel(@NonNull ApplicationInfo info) {
     return packageManagerWrapper.loadPackageLabel(info);
   }
 }
