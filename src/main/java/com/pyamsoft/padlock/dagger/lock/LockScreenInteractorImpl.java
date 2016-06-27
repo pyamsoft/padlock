@@ -149,14 +149,16 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @WorkerThread @NonNull @Override @CheckResult
   public Observable<String> getDisplayName(@NonNull String packageName) {
-    final PackageManager packageManager = appContext.getPackageManager();
-    try {
-      final ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
-      return Observable.just(applicationInfo.loadLabel(packageManager).toString());
-    } catch (PackageManager.NameNotFoundException e) {
-      Timber.e(e, "EXCEPTION");
-      return Observable.just("");
-    }
+    return Observable.defer(() -> {
+      final PackageManager packageManager = appContext.getPackageManager();
+      try {
+        final ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+        return Observable.just(applicationInfo.loadLabel(packageManager).toString());
+      } catch (PackageManager.NameNotFoundException e) {
+        Timber.e(e, "EXCEPTION");
+        return Observable.just("");
+      }
+    });
   }
 
   @Override public long getIgnoreTimeForIndex(int index) {
