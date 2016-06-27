@@ -38,6 +38,7 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.lock.DaggerLockScreenComponent;
 import com.pyamsoft.pydroid.base.activity.NoDonationActivityBase;
