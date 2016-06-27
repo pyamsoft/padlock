@@ -83,8 +83,11 @@ public final class LockScreenActivity extends NoDonationActivityBase
   }
 
   @Override public void setDisplayName(@NonNull String name) {
+    Timber.d("Set toolbar name %s", name);
+    toolbar.setTitle(name);
     final ActionBar bar = getSupportActionBar();
     if (bar != null) {
+      Timber.d("Set actionbar name %s", name);
       bar.setTitle(name);
     }
   }
@@ -119,7 +122,7 @@ public final class LockScreenActivity extends NoDonationActivityBase
     super.onStart();
     Timber.d("onStart");
 
-    presenter.loadDisplayNameFromPackage(getPackageName());
+    presenter.loadDisplayNameFromPackage(lockViewDelegate.getAppPackageName());
     lockViewDelegate.onStart(appIconLoaderPresenter);
     supportInvalidateOptionsMenu();
   }
