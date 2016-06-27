@@ -22,13 +22,13 @@ import android.support.annotation.WorkerThread;
 
 public interface DBInteractor {
 
-  @WorkerThread void createEntry(@NonNull String packageName, @Nullable String code,
+  @WorkerThread void createActivityEntries(@NonNull String packageName, @Nullable String code,
       boolean system);
 
   @WorkerThread void createEntry(@NonNull String packageName, @NonNull String activityName,
       @Nullable String code, boolean system);
 
-  @WorkerThread void deleteEntry(@NonNull String packageName);
+  @WorkerThread void deleteActivityEntries(@NonNull String packageName);
 
   @WorkerThread void deleteEntry(@NonNull String packageName, @NonNull String activityName);
 }

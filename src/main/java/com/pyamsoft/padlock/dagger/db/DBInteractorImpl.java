@@ -40,7 +40,8 @@ final class DBInteractorImpl implements DBInteractor {
   }
 
   @WorkerThread @SuppressLint("NewApi") @Override
-  public void createEntry(@NonNull String packageName, @Nullable String code, boolean system) {
+  public void createActivityEntries(@NonNull String packageName, @Nullable String code,
+      boolean system) {
     final PackageManager packageManager = appContext.getPackageManager();
     final PackageInfo packageInfo;
     try {
@@ -77,7 +78,7 @@ final class DBInteractorImpl implements DBInteractor {
         .asContentValues());
   }
 
-  @WorkerThread @Override public void deleteEntry(@NonNull String packageName) {
+  @WorkerThread @Override public void deleteActivityEntries(@NonNull String packageName) {
     Timber.d("DELETE: all %s", packageName);
     PadLockOpenHelper.deleteWithPackageName(appContext, packageName);
   }

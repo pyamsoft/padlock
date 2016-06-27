@@ -30,6 +30,7 @@ import timber.log.Timber;
 
 public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
 
+  @NonNull private static final String PACKAGE_TAG = "PACKAGE";
   @NonNull private final DBInteractor dbInteractor;
 
   @NonNull private Subscription dbPackageSubscription = Subscriptions.empty();
@@ -66,10 +67,10 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
     dbPackageSubscription = Observable.defer(() -> {
       if (newState) {
         Timber.d("Cursor does not have existing DB data, this is an add call");
-        dbInteractor.createEntry(packageName, code, system);
+        dbInteractor.createEntry(packageName, PACKAGE_TAG, code, system);
       } else {
         Timber.d("Cursor has existing DB data, this is a delete call");
-        dbInteractor.deleteEntry(packageName);
+        dbInteractor.deleteEntry(packageName, PACKAGE_TAG);
       }
       return Observable.just(newState);
     }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
