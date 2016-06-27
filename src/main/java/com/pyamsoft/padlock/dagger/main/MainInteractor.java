@@ -17,10 +17,12 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import rx.Observable;
 
 public interface MainInteractor {
 
-  @CheckResult boolean hasAgreed();
+  @CheckResult @NonNull Observable<Boolean> hasAgreed();
 
   void setAgreed();
 }

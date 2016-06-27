@@ -26,6 +26,9 @@ import javax.inject.Named;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.functions.Func1;
+import rx.functions.Func2;
+import rx.functions.Func4;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -80,68 +83,108 @@ public final class LockServicePresenter
     lastClassName = "";
   }
 
-  public final void processAccessibilityEvent(@NonNull String packageName, @NonNull String className) {
+  public final void processAccessibilityEvent(@NonNull String packageName,
+      @NonNull String className) {
     unsubLockedEntry();
-    lockedEntrySubscription = Observable.defer(() -> {
-      if (!stateInteractor.isServiceEnabled()) {
-        Timber.e("Service is not user-enabled");
-        reset();
-        return Observable.empty();
-      }
+    final Observable<Boolean> windowEventObservable =
+        stateInteractor.isServiceEnabled().filter(new Func1<Boolean, Boolean>() {
+          @Override public Boolean call(Boolean enabled) {
+            if (!enabled) {
+              Timber.e("Service is not user-enabled");
+              reset();
+            }
+            return enabled;
+          }
+        }).zipWith(interactor.isLockWhenDeviceLocked(), new Func2<Boolean, Boolean, Boolean>() {
+          @Override public Boolean call(Boolean enabled, Boolean lockWhenDeviceLocked) {
+            Timber.d("Check if device should reset on lock");
+            return enabled && lockWhenDeviceLocked;
+          }
+        }).zipWith(interactor.isDeviceLocked(), new Func2<Boolean, Boolean, Boolean>() {
+          @Override public Boolean call(Boolean isLockWhenDeviceLocked, Boolean isDeviceLocked) {
+            if (isLockWhenDeviceLocked && isDeviceLocked) {
+              Timber.d("Device is Locked. Reset state");
+              reset();
+            }
 
-      if (interactor.isLockWhenDeviceLocked()) {
-        if (interactor.isDeviceLocked()) {
-          Timber.i("Device is Locked. Reset state");
-          reset();
-        }
-      }
+            // Always return true here to continue
+            return true;
+          }
+        }).flatMap(new Func1<Boolean, Observable<Boolean>>() {
+          @Override public Observable<Boolean> call(Boolean aBoolean) {
+            Timber.d("Check if event is from activity");
+            return interactor.isEventFromActivity(packageName, className);
+          }
+        }).filter(new Func1<Boolean, Boolean>() {
+          @Override public Boolean call(Boolean fromActivity) {
+            if (!fromActivity) {
+              Timber.e("Event is not caused by an Activity. P: %s, C: %s", packageName, className);
+            }
+            return fromActivity;
+          }
+        }).flatMap(new Func1<Boolean, Observable<Boolean>>() {
+          @Override public Observable<Boolean> call(Boolean aBoolean) {
+            Timber.d("Check if window is from lock screen");
+            return interactor.isWindowFromLockScreen(packageName, className);
+          }
+        }).filter(new Func1<Boolean, Boolean>() {
+          @Override public Boolean call(Boolean isLockScreen) {
+            if (isLockScreen) {
+              Timber.e("Event for package %s class: %s is caused by LockScreen", packageName,
+                  className);
+            }
+            return !isLockScreen;
+          }
+        });
 
-      if (!interactor.isEventFromActivity(packageName, className)) {
-        Timber.e("Event is not caused by an Activity. P: %s, C: %s", packageName, className);
-        return Observable.empty();
-      }
+    lockedEntrySubscription = Observable.zip(windowEventObservable,
+        interactor.hasNameChanged(packageName, lastPackageName),
+        interactor.hasNameChanged(className, lastClassName), interactor.isOnlyLockOnPackageChange(),
+        new Func4<Boolean, Boolean, Boolean, Boolean, Boolean>() {
+          @Override public Boolean call(Boolean windowEventObserved, Boolean packageChanged,
+              Boolean classChanged, Boolean lockOnPackageChange) {
+            if (packageChanged) {
+              Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName);
+              lastPackageName = packageName;
+            }
+            if (classChanged) {
+              Timber.d("Last Class: %s - New Class: %s", lastClassName, className);
+              lastClassName = className;
+            }
 
-      if (interactor.isWindowFromLockScreen(packageName, className)) {
-        Timber.e("Event for package %s class: %s is caused by LockScreen", packageName, className);
-        return Observable.empty();
-      }
+            Timber.d("Window change if class changed");
+            boolean windowHasChanged = classChanged;
+            if (lockOnPackageChange) {
+              Timber.d("Window change if package changed");
+              windowHasChanged &= packageChanged;
+            }
 
-      final boolean packageChanged = interactor.hasNameChanged(packageName, lastPackageName);
-      if (packageChanged) {
-        Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName);
-        lastPackageName = packageName;
-      }
-
-      final boolean classChanged = interactor.hasNameChanged(className, lastClassName);
-      if (classChanged) {
-        Timber.d("Last Class: %s - New Class: %s", lastClassName, className);
-        lastClassName = className;
-      }
-
-      // By default, the window will respond to a change event if the class changes
-      Timber.d("Window change if class changed");
-      boolean windowHasChanged = classChanged;
-      if (interactor.isOnlyLockOnPackageChange()) {
-        Timber.d("Window change if package changed");
-        windowHasChanged &= packageChanged;
-      }
-
-      if (windowHasChanged || !lockScreenPassed) {
-        Timber.d("Get list of locked classes with package: %s, class: %s", packageName, className);
-        setLockScreenPassed(false);
-        return interactor.getEntry(packageName, className);
-      } else {
-        Timber.d("No significant window change detected");
-        return Observable.empty();
-      }
-    }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(padLockEntry -> {
-      Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
-          padLockEntry.activityName());
-      final LockService lockService = getView();
-      lockService.startLockScreen(padLockEntry);
-    }, throwable -> {
-      Timber.e(throwable, "Error getting PadLockEntry for LockScreen");
-    });
+            return windowHasChanged;
+          }
+        })
+        .filter(new Func1<Boolean, Boolean>() {
+          @Override public Boolean call(Boolean windowHasChanged) {
+            return windowHasChanged || !lockScreenPassed;
+          }
+        })
+        .flatMap(new Func1<Boolean, Observable<PadLockEntry>>() {
+          @Override public Observable<PadLockEntry> call(Boolean aBoolean) {
+            Timber.d("Get list of locked classes with package: %s, class: %s", packageName,
+                className);
+            setLockScreenPassed(false);
+            return interactor.getEntry(packageName, className);
+          }
+        })
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(padLockEntry -> {
+          Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
+              padLockEntry.activityName());
+          final LockService lockService = getView();
+          lockService.startLockScreen(padLockEntry);
+        }, throwable -> {
+          Timber.e(throwable, "Error getting PadLockEntry for LockScreen");
+        });
   }
 
   public interface LockService {

@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import rx.Observable;
 
@@ -28,19 +27,21 @@ public interface LockServiceInteractor {
   @NonNull String ANDROID_SYSTEM_UI_PACKAGE = "com.android.systemui";
   @NonNull String ANDROID_PACKAGE = "android";
 
-  @CheckResult boolean isEventFromActivity(@NonNull String packageName, @NonNull String className);
-
-  @CheckResult boolean hasNameChanged(@NonNull String name, @NonNull String oldName);
-
-  @CheckResult boolean isWindowFromLockScreen(@NonNull String packageName,
+  @NonNull @CheckResult Observable<Boolean> isEventFromActivity(@NonNull String packageName,
       @NonNull String className);
 
-  @CheckResult boolean isDeviceLocked();
+  @NonNull @CheckResult Observable<Boolean> hasNameChanged(@NonNull String name,
+      @NonNull String oldName);
 
-  @NonNull @CheckResult @WorkerThread Observable<PadLockEntry> getEntry(@NonNull String packageName,
+  @NonNull @CheckResult Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
+      @NonNull String className);
+
+  @NonNull @CheckResult Observable<Boolean> isDeviceLocked();
+
+  @NonNull @CheckResult Observable<Boolean> isOnlyLockOnPackageChange();
+
+  @NonNull @CheckResult Observable<Boolean> isLockWhenDeviceLocked();
+
+  @NonNull @CheckResult Observable<PadLockEntry> getEntry(@NonNull String packageName,
       @NonNull String activityName);
-
-  @CheckResult boolean isOnlyLockOnPackageChange();
-
-  @CheckResult boolean isLockWhenDeviceLocked();
 }
