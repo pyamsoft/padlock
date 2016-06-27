@@ -17,6 +17,8 @@
 package com.pyamsoft.padlock.app.list;
 
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
@@ -40,7 +42,9 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     implements LockListItem<AppEntry>, DBPresenter.DBView,
     AdapterPresenter.AdapterView<LockListAdapter.ViewHolder> {
 
+  private static final long DB_PROGRESS_DELAY = 500L;
   @NonNull private final AdapterPresenter<AppEntry, ViewHolder> adapterPresenter;
+  @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull private final Fragment fragment;
   @NonNull private final DBPresenter dbPresenter;
 
@@ -60,6 +64,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
   @Override public void onDestroy() {
     super.onDestroy();
+    handler.removeCallbacksAndMessages(null);
     adapterPresenter.unbindView();
     dbPresenter.unbindView();
   }
@@ -156,19 +161,22 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     Timber.d("onDBCreateEvent");
     adapterPresenter.setLocked(position, true);
     notifyItemChanged(position);
-    DBProgressDialog.remove(fragment.getFragmentManager());
+    handler.postDelayed(() -> DBProgressDialog.remove(fragment.getFragmentManager()),
+        DB_PROGRESS_DELAY);
   }
 
   @Override public void onDBDeleteEvent(int position) {
     Timber.d("onDBDeleteEvent");
     adapterPresenter.setLocked(position, false);
     notifyItemChanged(position);
-    DBProgressDialog.remove(fragment.getFragmentManager());
+    handler.postDelayed(() -> DBProgressDialog.remove(fragment.getFragmentManager()),
+        DB_PROGRESS_DELAY);
   }
 
   @Override public void onDBError() {
     Timber.e("onDBError");
-    DBProgressDialog.remove(fragment.getFragmentManager());
+    handler.postDelayed(() -> DBProgressDialog.remove(fragment.getFragmentManager()),
+        DB_PROGRESS_DELAY);
   }
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull ViewHolder holder,
