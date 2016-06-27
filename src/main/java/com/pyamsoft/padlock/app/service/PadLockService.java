@@ -84,6 +84,12 @@ public final class PadLockService extends AccessibilityService
 
     // Multiple task flag is needed to launch multiple lock screens on N
     lockActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+    // If the activity being launched does not lock PadLock, clear the task
+    if (!packageName.equals(getPackageName())) {
+      Timber.d("Clear task");
+      lockActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+    }
     lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
     lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
 
