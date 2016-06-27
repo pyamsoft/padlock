@@ -27,7 +27,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
-import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
+import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
@@ -114,11 +114,10 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
       @NonNull String activityName) {
     Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);
     final Observable<PadLockEntry> specificActivityEntry =
-        PadLockOpenHelper.queryWithPackageActivityName(appContext, packageName, activityName)
-            .first();
-    final Observable<PadLockEntry> packageActivityEntry =
-        PadLockOpenHelper.queryWithPackageActivityName(appContext, packageName,
-            PadLockEntry.PACKAGE_TAG).first();
+        PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
+    final Observable<PadLockEntry> packageActivityEntry = PadLockDB.with(appContext)
+        .queryWithPackageActivityName(packageName, PadLockEntry.PACKAGE_TAG)
+        .first();
     return Observable.zip(specificActivityEntry, packageActivityEntry,
         (specificEntry, packageEntry) -> {
           Timber.d("Check the specific entry for validity");

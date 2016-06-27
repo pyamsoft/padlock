@@ -16,22 +16,16 @@
 
 package com.pyamsoft.padlock.app.sql;
 
-import android.annotation.SuppressLint;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.squareup.sqlbrite.BriteDatabase;
-import java.util.List;
 import java.util.Locale;
-import rx.Observable;
 import timber.log.Timber;
 
-public final class PadLockOpenHelper extends SQLiteOpenHelper {
+final class PadLockOpenHelper extends SQLiteOpenHelper {
 
   private static final int DATABASE_VERSION = 3;
 
@@ -106,81 +100,5 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
 
     Timber.d("EXEC SQL: %s", dropOldTable);
     sqLiteDatabase.execSQL(dropOldTable);
-  }
-
-  @SuppressLint("NewApi") public static void newTransaction(final @NonNull Context context,
-      final @NonNull Runnable runnable) {
-    final Context appContext = context.getApplicationContext();
-    try (
-        final BriteDatabase.Transaction transaction = PadLockDB.with(appContext).newTransaction()) {
-      runnable.run();
-      transaction.markSuccessful();
-    }
-  }
-
-  public static void insert(final @NonNull Context context,
-      final @NonNull ContentValues contentValues) {
-    final Context appContext = context.getApplicationContext();
-    PadLockDB.with(appContext).insert(PadLockEntry.TABLE_NAME, contentValues);
-  }
-
-  @NonNull @CheckResult public static Observable<PadLockEntry> queryWithPackageActivityName(
-      final @NonNull Context context, final @NonNull String packageName,
-      final @NonNull String activityName) {
-    final Context appContext = context.getApplicationContext();
-    return PadLockDB.with(appContext)
-        .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName,
-            activityName)
-        .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_nameMapper()::map,
-            PadLockEntry.empty())
-        .filter(padLockEntry -> padLockEntry != null);
-  }
-
-  @NonNull @CheckResult
-  public static Observable<List<PadLockEntry>> queryWithPackageName(final @NonNull Context context,
-      final @NonNull String packageName) {
-    final Context appContext = context.getApplicationContext();
-    return PadLockDB.with(appContext)
-        .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME, packageName)
-        .mapToList(PadLockEntry.FACTORY.with_package_nameMapper()::map)
-        .filter(padLockEntries -> padLockEntries != null);
-  }
-
-  public static void updateWithPackageActivityName(final @NonNull Context context,
-      final @NonNull ContentValues contentValues, final @NonNull String packageName,
-      final @NonNull String activityName) {
-    final Context appContext = context.getApplicationContext();
-    PadLockDB.with(appContext)
-        .update(PadLockEntry.TABLE_NAME, contentValues,
-            PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
-  }
-
-  @NonNull @CheckResult
-  public static Observable<List<PadLockEntry>> queryAll(final @NonNull Context context) {
-    final Context appContext = context.getApplicationContext();
-    return PadLockDB.with(appContext)
-        .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
-        .mapToList(PadLockEntry.FACTORY.all_entriesMapper()::map)
-        .filter(padLockEntries -> padLockEntries != null);
-  }
-
-  public static void deleteWithPackageName(final @NonNull Context context,
-      final @NonNull String packageName) {
-    final Context appContext = context.getApplicationContext();
-    PadLockDB.with(appContext)
-        .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME, packageName);
-  }
-
-  public static void deleteWithPackageActivityName(final @NonNull Context context,
-      final @NonNull String packageName, final @NonNull String activityName) {
-    final Context appContext = context.getApplicationContext();
-    PadLockDB.with(appContext)
-        .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME,
-            packageName, activityName);
-  }
-
-  public static void deleteAll(final @NonNull Context context) {
-    final Context appContext = context.getApplicationContext();
-    PadLockDB.with(appContext).delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
   }
 }

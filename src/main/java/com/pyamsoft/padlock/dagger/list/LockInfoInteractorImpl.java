@@ -20,7 +20,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
-import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
+import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.crash.CrashLogActivity;
@@ -43,7 +43,7 @@ final class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl
 
   @NonNull @Override
   public Observable<List<PadLockEntry>> getActivityEntries(@NonNull String packageName) {
-    return PadLockOpenHelper.queryWithPackageName(appContext, packageName).first();
+    return PadLockDB.with(appContext).queryWithPackageName(packageName).first();
   }
 
   @NonNull @Override public Observable<String> getPackageActivities(@NonNull String packageName) {

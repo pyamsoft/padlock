@@ -25,7 +25,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
-import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
+import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import javax.inject.Inject;
@@ -51,7 +51,7 @@ final class DBInteractorImpl implements DBInteractor {
     }
     final ActivityInfo[] activities = packageInfo.activities;
     if (activities != null) {
-      PadLockOpenHelper.newTransaction(appContext, () -> {
+      PadLockDB.with(appContext).newTransaction(() -> {
         for (final ActivityInfo info : activities) {
           final String activityName = info.name;
           if (activityName != null && !activityName.equalsIgnoreCase(
@@ -71,24 +71,25 @@ final class DBInteractorImpl implements DBInteractor {
     deleteEntry(packageName, activityName);
 
     Timber.d("CREATE: %s %s", packageName, activityName);
-    PadLockOpenHelper.insert(appContext, PadLockEntry.FACTORY.marshal()
-        .packageName(packageName)
-        .activityName(activityName)
-        .lockCode(code)
-        .lockUntilTime(0)
-        .ignoreUntilTime(0)
-        .systemApplication(system)
-        .asContentValues());
+    PadLockDB.with(appContext)
+        .insert(PadLockEntry.FACTORY.marshal()
+            .packageName(packageName)
+            .activityName(activityName)
+            .lockCode(code)
+            .lockUntilTime(0)
+            .ignoreUntilTime(0)
+            .systemApplication(system)
+            .asContentValues());
   }
 
   @WorkerThread @Override public void deleteActivityEntries(@NonNull String packageName) {
     Timber.d("DELETE: all %s", packageName);
-    PadLockOpenHelper.deleteWithPackageName(appContext, packageName);
+    PadLockDB.with(appContext).deleteWithPackageName(packageName);
   }
 
   @WorkerThread @Override
   public void deleteEntry(@NonNull String packageName, @NonNull String activityName) {
     Timber.d("DELETE: %s %s", packageName, activityName);
-    PadLockOpenHelper.deleteWithPackageActivityName(appContext, packageName, activityName);
+    PadLockDB.with(appContext).deleteWithPackageActivityName(packageName, activityName);
   }
 }
