@@ -41,6 +41,7 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
 
   @Override public void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
     Timber.d("onCreate");
+    Timber.d("EXEC SQL: %s", PadLockEntry.CREATE_TABLE);
     sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
   }
 
@@ -59,7 +60,7 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
     }
   }
 
-  private static void upgradeVersion2To3(SQLiteDatabase sqLiteDatabase) {
+  private void upgradeVersion2To3(SQLiteDatabase sqLiteDatabase) {
     Timber.d("Upgrading from Version 2 to 3 drops the whole table");
 
     final String dropOldTable =
@@ -68,11 +69,10 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
     sqLiteDatabase.execSQL(dropOldTable);
 
     // Creating the table again
-    Timber.d("EXEC SQL: %s", PadLockEntry.CREATE_TABLE);
-    sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
+    onCreate(sqLiteDatabase);
   }
 
-  private static void upgradeVersion1To2(@NonNull SQLiteDatabase sqLiteDatabase) {
+  private void upgradeVersion1To2(@NonNull SQLiteDatabase sqLiteDatabase) {
     Timber.d("Upgrading from Version 1 to 2 drops the displayName column");
 
     // Remove the columns we don't want anymore from the table's list of columns
@@ -98,9 +98,7 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
     Timber.d("EXEC SQL: %s", alterTable);
     sqLiteDatabase.execSQL(alterTable);
 
-    // Creating the table on its new format (no redundant columns)
-    Timber.d("EXEC SQL: %s", PadLockEntry.CREATE_TABLE);
-    sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
+    onCreate(sqLiteDatabase);
 
     // Populating the table with the data
     Timber.d("EXEC SQL: %s", insertIntoNewTable);
