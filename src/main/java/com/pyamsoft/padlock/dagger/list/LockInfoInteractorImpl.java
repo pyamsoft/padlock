@@ -19,9 +19,11 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
@@ -44,9 +46,10 @@ final class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl
     return PadLockOpenHelper.queryWithPackageName(appContext, packageName).first();
   }
 
-  @NonNull @Override
-  public Observable<String> getPackageActivities(@NonNull String packageName) {
+  @NonNull @Override public Observable<String> getPackageActivities(@NonNull String packageName) {
     return Observable.defer(
-        () -> Observable.from(packageManagerWrapper.getActivityListForPackage(packageName)));
+        () -> Observable.from(packageManagerWrapper.getActivityListForPackage(packageName)))
+        .filter(activityEntry -> !activityEntry.equalsIgnoreCase(LockScreenActivity.class.getName())
+            && !activityEntry.equalsIgnoreCase(CrashLogActivity.class.getName()));
   }
 }

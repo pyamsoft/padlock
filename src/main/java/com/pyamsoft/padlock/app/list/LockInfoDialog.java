@@ -27,6 +27,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,22 +50,26 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public class LockInfoDialog extends DialogFragment
-    implements LockInfoPresenter.LockInfoView {
+    implements LockInfoPresenter.LockInfoView, DBPresenter.DBView {
 
   @NonNull private static final String ARG_APP_ENTRY = "app_entry";
   private static final int KEY_PRESENTER = 0;
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
   @NonNull private final Handler handler = new Handler();
+
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;
   @BindView(R.id.lock_info_icon) ImageView icon;
   @BindView(R.id.lock_info_package_name) TextView packageName;
   @BindView(R.id.lock_info_system) TextView system;
   @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
+  @BindView(R.id.lock_info_toggleall) SwitchCompat toggleAll;
+
   @Inject LockInfoPresenter presenter;
   @Inject DBPresenter dbPresenter;
   @Inject AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder> adapterPresenter;
+
   private DataHolderFragment<Presenter> presenterDataHolder;
   private LockInfoAdapter adapter;
   private AppEntry appEntry;
@@ -114,7 +119,7 @@ public class LockInfoDialog extends DialogFragment
       adapterPresenter = activityEntryAdapterPresenter;
     }
 
-    adapter = new LockInfoAdapter(appEntry, adapterPresenter, dbPresenter);
+    adapter = new LockInfoAdapter(this, appEntry, adapterPresenter, dbPresenter);
   }
 
   @Nullable @Override
@@ -170,6 +175,8 @@ public class LockInfoDialog extends DialogFragment
     recyclerView.setLayoutManager(layoutManager);
     recyclerView.addItemDecoration(dividerDecoration);
     recyclerView.setAdapter(adapter);
+
+    presenter.setToggleAllState(appEntry.packageName());
   }
 
   @Override public void refreshList() {
@@ -222,5 +229,42 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable drawable) {
     icon.setImageDrawable(drawable);
+  }
+
+  @Override public void onDBCreateEvent(int position) {
+    if (position >= 0) {
+      throw new RuntimeException(
+          "LockInfoDialog should not be handling onDBCreateEvent for position: " + position);
+    }
+    refreshList();
+  }
+
+  @Override public void onDBDeleteEvent(int position) {
+    if (position >= 0) {
+      throw new RuntimeException(
+          "LockInfoDialog should not be handling onDBDeleteEvent for position: " + position);
+    }
+    refreshList();
+  }
+
+  @Override public void onDBError() {
+    // TODO handle. But can we even get the error from the adapter?
+  }
+
+  private void safeChangeToggleAllState(boolean enabled) {
+    toggleAll.setOnCheckedChangeListener(null);
+    toggleAll.setChecked(enabled);
+    toggleAll.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+      dbPresenter.attemptDBAllModification(isChecked, appEntry.packageName(), null,
+          appEntry.system());
+    });
+  }
+
+  @Override public void enableToggleAll() {
+    safeChangeToggleAllState(true);
+  }
+
+  @Override public void disableToggleAll() {
+    safeChangeToggleAllState(false);
   }
 }

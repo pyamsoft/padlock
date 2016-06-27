@@ -34,13 +34,15 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
     implements LockListItem<ActivityEntry>, DBPresenter.DBView,
     AdapterPresenter.AdapterView<LockInfoAdapter.ViewHolder> {
 
+  @NonNull private final DBPresenter.DBView lockInfoDialog;
   @NonNull private final AdapterPresenter<ActivityEntry, ViewHolder> adapterPresenter;
   @NonNull private final DBPresenter dbPresenter;
   @NonNull private final AppEntry appEntry;
 
-  public LockInfoAdapter(@NonNull AppEntry appEntry,
+  public LockInfoAdapter(@NonNull DBPresenter.DBView lockInfoDialog, @NonNull AppEntry appEntry,
       @NonNull AdapterPresenter<ActivityEntry, ViewHolder> adapterPresenter,
       @NonNull DBPresenter dbPresenter) {
+    this.lockInfoDialog = lockInfoDialog;
     this.appEntry = appEntry;
     this.adapterPresenter = adapterPresenter;
     this.dbPresenter = dbPresenter;
@@ -110,19 +112,28 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
   }
 
   @Override public void onDBCreateEvent(int position) {
-    Timber.d("onDBCreateEvent");
-    adapterPresenter.setLocked(position, true);
-    notifyItemChanged(position);
+    if (position < 0) {
+      Timber.d("Pass create event to dialog");
+      lockInfoDialog.onDBCreateEvent(position);
+    } else {
+      Timber.d("onDBCreateEvent");
+      adapterPresenter.setLocked(position, true);
+      notifyItemChanged(position);
+    }
   }
 
   @Override public void onDBDeleteEvent(int position) {
-    Timber.d("onDBDeleteEvent");
-    adapterPresenter.setLocked(position, false);
-    notifyItemChanged(position);
+    if (position < 0) {
+      Timber.d("Pass delete event to dialog");
+      lockInfoDialog.onDBDeleteEvent(position);
+    } else {
+      Timber.d("onDBDeleteEvent");
+      adapterPresenter.setLocked(position, false);
+      notifyItemChanged(position);
+    }
   }
 
   @Override public void onDBError() {
-    Timber.e("onDBError");
     // TODO handle exception, show error dialog or something
   }
 

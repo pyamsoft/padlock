@@ -19,11 +19,9 @@ package com.pyamsoft.padlock.app.list;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.dagger.list.LockInfoInteractor;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -34,10 +32,12 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {
+public final class LockInfoPresenter
+    extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
+  @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
 
   @Inject public LockInfoPresenter(final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("main") Scheduler mainScheduler,
@@ -49,6 +49,7 @@ public final class LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPres
   @Override protected void onUnbind() {
     super.onUnbind();
     unsubPopulateList();
+    unsubAllInDB();
   }
 
   public final void populateList(@NonNull String packageName) {
@@ -56,11 +57,7 @@ public final class LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPres
 
     // Filter out the lockscreen and crashlog entries
     final Observable<List<String>> activityInfoObservable =
-        lockInfoInteractor.getPackageActivities(packageName)
-            .filter(
-                activityEntry -> !activityEntry.equalsIgnoreCase(LockScreenActivity.class.getName())
-                    && !activityEntry.equalsIgnoreCase(CrashLogActivity.class.getName()))
-            .toList();
+        lockInfoInteractor.getPackageActivities(packageName).toList();
 
     // Zip together the lists into a list of ActivityEntry objects
     populateListSubscription =
@@ -128,6 +125,59 @@ public final class LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPres
     }
   }
 
+  public final void setToggleAllState(@NonNull String packageName) {
+    unsubAllInDB();
+
+    // Filter out the lockscreen and crashlog entries
+    final Observable<List<String>> activityInfoObservable =
+        lockInfoInteractor.getPackageActivities(packageName).toList();
+
+    // Zip together the lists into a list of ActivityEntry objects
+    allInDBSubscription =
+        Observable.zip(lockInfoInteractor.getActivityEntries(packageName), activityInfoObservable,
+            (padLockEntries, activityInfos) -> {
+              int count = 0;
+              // KLUDGE super ugly.
+              Timber.d("Search set for locked activities");
+              for (final String name : activityInfos) {
+                int foundLocation = -1;
+                for (int i = 0; i < padLockEntries.size(); ++i) {
+                  final PadLockEntry padLockEntry = padLockEntries.get(i);
+                  if (padLockEntry.activityName().equals(name)) {
+                    foundLocation = i;
+                    break;
+                  }
+                }
+
+                // Remove foundEntry from the list as it is already used
+                if (foundLocation != -1) {
+                  padLockEntries.remove(foundLocation);
+                  ++count;
+                }
+              }
+
+              return count == activityInfos.size();
+            })
+            .subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
+            .subscribe(allIn -> {
+              if (allIn) {
+                getView().enableToggleAll();
+              } else {
+                getView().disableToggleAll();
+              }
+            }, throwable -> {
+              Timber.e(throwable, "onError");
+              // TODO maybe different error
+              getView().onListPopulateError();
+            });
+  }
+
+  private void unsubAllInDB() {
+    if (!allInDBSubscription.isUnsubscribed()) {
+      allInDBSubscription.unsubscribe();
+    }
+  }
 
   public interface LockInfoView extends LockListCommon, AppIconLoaderView {
 
@@ -136,5 +186,9 @@ public final class LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPres
     void onListPopulated();
 
     void onListPopulateError();
+
+    void enableToggleAll();
+
+    void disableToggleAll();
   }
 }
