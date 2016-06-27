@@ -18,44 +18,42 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import rx.Observable;
 
 public interface LockScreenInteractor extends LockInteractor {
 
   int DEFAULT_MAX_FAIL_COUNT = 2;
 
-  @CheckResult @WorkerThread @NonNull Observable<Boolean> unlockEntry(@NonNull String packageName,
+  @CheckResult @NonNull Observable<Boolean> unlockEntry(@NonNull String packageName,
       @NonNull String activityName, @NonNull String attempt, boolean shouldExclude,
       long ignoreForPeriod);
 
-  @CheckResult @WorkerThread @NonNull Observable<Boolean> lockEntry(@NonNull String packageName,
+  @CheckResult @NonNull Observable<Boolean> lockEntry(@NonNull String packageName,
       @NonNull String activityName);
 
-  @CheckResult long getDefaultIgnoreTime();
+  @CheckResult @NonNull Observable<Long> getDefaultIgnoreTime();
 
-  @CheckResult @WorkerThread @NonNull Observable<String> getDisplayName(
-      @NonNull String packageName);
+  @CheckResult @NonNull Observable<String> getDisplayName(@NonNull String packageName);
 
-  @CheckResult long getIgnoreTimeForIndex(int index);
+  @CheckResult @NonNull Observable<Long> getIgnoreTimeForIndex(int index);
 
-  @CheckResult long getIgnoreTimeOne();
+  @CheckResult @NonNull Observable<Long> getIgnoreTimeOne();
 
-  @CheckResult long getIgnoreTimeFive();
+  @CheckResult @NonNull Observable<Long> getIgnoreTimeFive();
 
-  @CheckResult long getIgnoreTimeTen();
+  @CheckResult @NonNull Observable<Long> getIgnoreTimeTen();
 
-  @CheckResult long getIgnoreTimeFifteen();
+  @CheckResult @NonNull Observable<Long> getIgnoreTimeFifteen();
 
-  @CheckResult long getIgnoreTimeTwenty();
+  @CheckResult @NonNull Observable<Long> getIgnoreTimeTwenty();
 
-  @CheckResult long getIgnoreTimeThirty();
+  @CheckResult @NonNull Observable<Long> getIgnoreTimeThirty();
 
-  @CheckResult long getIgnoreTimeFourtyFive();
+  @CheckResult @NonNull Observable<Long> getIgnoreTimeFourtyFive();
 
-  @CheckResult long getIgnoreTimeSixty();
+  @CheckResult @NonNull Observable<Long> getIgnoreTimeSixty();
 
-  @CheckResult int incrementAndGetFailCount();
+  @CheckResult @NonNull Observable<Integer> incrementAndGetFailCount();
 
   void resetFailCount();
 }

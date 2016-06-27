@@ -17,11 +17,13 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import rx.Observable;
 
 public interface MasterPinInteractor {
 
-  @Nullable @CheckResult String getMasterPin();
+  @NonNull @CheckResult Observable<String> getMasterPin();
 
   void setMasterPin(@Nullable String pin);
 }

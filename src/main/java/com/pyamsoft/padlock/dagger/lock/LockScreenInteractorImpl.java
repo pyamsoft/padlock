@@ -81,9 +81,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
             .first()
             .cache();
 
-    final Observable<String> masterPinObservable =
-        Observable.defer(() -> Observable.just(pinInteractor.getMasterPin()));
-
+    final Observable<String> masterPinObservable = pinInteractor.getMasterPin();
     final Observable<Boolean> unlockObservable =
         Observable.zip(dbObservable, masterPinObservable, (padLockEntry, masterPin) -> {
           final long lockUntilTime = padLockEntry.lockUntilTime();
@@ -119,7 +117,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     // KLUDGE we must do this here as we need the padlock entry
     return unlockObservable.zipWith(dbObservable, (unlocked, entry) -> {
       if (unlocked) {
-        if (ignoreForPeriod != getIgnoreTimeNone()) {
+        if (ignoreForPeriod != getIgnoreTimeNone().toBlocking().first()) {
           Timber.d("IGNORE requested, update entry in DB");
           ignoreEntryForTime(entry, ignoreForPeriod);
         }
@@ -146,8 +144,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         oldValues.packageName(), oldValues.activityName());
   }
 
-  @CheckResult @Override public long getDefaultIgnoreTime() {
-    return preferences.getDefaultIgnoreTime();
+  @NonNull @CheckResult @Override public Observable<Long> getDefaultIgnoreTime() {
+    return Observable.defer(() -> Observable.just(preferences.getDefaultIgnoreTime()));
   }
 
   @WorkerThread @NonNull @Override @CheckResult
@@ -164,48 +162,48 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     });
   }
 
-  @Override public long getIgnoreTimeForIndex(int index) {
-    return ignoreTimes[index];
-  }
-
-  @CheckResult private long getIgnoreTimeNone() {
+  @CheckResult @NonNull private Observable<Long> getIgnoreTimeNone() {
     return getIgnoreTimeForIndex(0);
   }
 
-  @Override public long getIgnoreTimeOne() {
+  @NonNull @Override public Observable<Long> getIgnoreTimeForIndex(int index) {
+    return Observable.defer(() -> Observable.just(ignoreTimes[index]));
+  }
+
+  @NonNull @Override public Observable<Long> getIgnoreTimeOne() {
     return getIgnoreTimeForIndex(1);
   }
 
-  @Override public long getIgnoreTimeFive() {
+  @NonNull @Override public Observable<Long> getIgnoreTimeFive() {
     return getIgnoreTimeForIndex(2);
   }
 
-  @Override public long getIgnoreTimeTen() {
+  @NonNull @Override public Observable<Long> getIgnoreTimeTen() {
     return getIgnoreTimeForIndex(3);
   }
 
-  @Override public long getIgnoreTimeFifteen() {
+  @NonNull @Override public Observable<Long> getIgnoreTimeFifteen() {
     return getIgnoreTimeForIndex(4);
   }
 
-  @Override public long getIgnoreTimeTwenty() {
+  @NonNull @Override public Observable<Long> getIgnoreTimeTwenty() {
     return getIgnoreTimeForIndex(5);
   }
 
-  @Override public long getIgnoreTimeThirty() {
+  @NonNull @Override public Observable<Long> getIgnoreTimeThirty() {
     return getIgnoreTimeForIndex(6);
   }
 
-  @Override public long getIgnoreTimeFourtyFive() {
+  @NonNull @Override public Observable<Long> getIgnoreTimeFourtyFive() {
     return getIgnoreTimeForIndex(7);
   }
 
-  @Override public long getIgnoreTimeSixty() {
+  @NonNull @Override public Observable<Long> getIgnoreTimeSixty() {
     return getIgnoreTimeForIndex(8);
   }
 
-  @Override public int incrementAndGetFailCount() {
-    return ++failCount;
+  @NonNull @Override public Observable<Integer> incrementAndGetFailCount() {
+    return Observable.defer(() -> Observable.just(++failCount));
   }
 
   @Override public void resetFailCount() {

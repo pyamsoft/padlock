@@ -64,21 +64,21 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
 
   private void setIgnorePeriod(final long time) {
     final LockScreen lockScreen = getView();
-    if (time == interactor.getIgnoreTimeOne()) {
+    if (time == interactor.getIgnoreTimeOne().toBlocking().first()) {
       lockScreen.setIgnoreTimeOne();
-    } else if (time == interactor.getIgnoreTimeFive()) {
+    } else if (time == interactor.getIgnoreTimeFive().toBlocking().first()) {
       lockScreen.setIgnoreTimeFive();
-    } else if (time == interactor.getIgnoreTimeTen()) {
+    } else if (time == interactor.getIgnoreTimeTen().toBlocking().first()) {
       lockScreen.setIgnoreTimeTen();
-    } else if (time == interactor.getIgnoreTimeFifteen()) {
+    } else if (time == interactor.getIgnoreTimeFifteen().toBlocking().first()) {
       lockScreen.setIgnoreTimeFifteen();
-    } else if (time == interactor.getIgnoreTimeTwenty()) {
+    } else if (time == interactor.getIgnoreTimeTwenty().toBlocking().first()) {
       lockScreen.setIgnoreTimeTwenty();
-    } else if (time == interactor.getIgnoreTimeThirty()) {
+    } else if (time == interactor.getIgnoreTimeThirty().toBlocking().first()) {
       lockScreen.setIgnoreTimeThirty();
-    } else if (time == interactor.getIgnoreTimeFourtyFive()) {
+    } else if (time == interactor.getIgnoreTimeFourtyFive().toBlocking().first()) {
       lockScreen.setIgnoreTimeFourtyFive();
-    } else if (time == interactor.getIgnoreTimeSixty()) {
+    } else if (time == interactor.getIgnoreTimeSixty().toBlocking().first()) {
       lockScreen.setIgnoreTimeSixty();
     } else {
       lockScreen.setIgnoreTimeNone();
@@ -86,13 +86,13 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
   }
 
   public final void saveSelectedOptions(int selectedIndex) {
-    final long time = interactor.getIgnoreTimeForIndex(selectedIndex);
+    final long time = interactor.getIgnoreTimeForIndex(selectedIndex).toBlocking().first();
     getView().onSaveMenuSelections(time);
   }
 
   public final void setIgnorePeriodFromPreferences(@Nullable Long ignoreTime) {
     if (ignoreTime == null) {
-      final long defaultIgnoreTime = interactor.getDefaultIgnoreTime();
+      final long defaultIgnoreTime = interactor.getDefaultIgnoreTime().toBlocking().first();
       setIgnorePeriod(defaultIgnoreTime);
     } else {
       setIgnorePeriod(ignoreTime);
@@ -101,7 +101,8 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
 
   public final void lockEntry(@NonNull String packageName, @NonNull String activityName) {
     unsubLock();
-    if (interactor.incrementAndGetFailCount() > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT) {
+    if (interactor.incrementAndGetFailCount().toBlocking().first()
+        > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT) {
       final LockScreen lockScreen = getView();
       lockSubscription = interactor.lockEntry(packageName, activityName)
           .subscribeOn(getSubscribeScheduler())
@@ -127,7 +128,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     final LockScreen lockScreen = getView();
     unlockSubscription =
         interactor.unlockEntry(packageName, activityName, currentAttempt, excludeEntry,
-            interactor.getIgnoreTimeForIndex(ignoreOptionIndex))
+            interactor.getIgnoreTimeForIndex(ignoreOptionIndex).toBlocking().first())
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
             .subscribe(unlocked -> {

@@ -21,6 +21,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.PadLockPreferences;
 import javax.inject.Inject;
+import rx.Observable;
 
 final class MasterPinInteractorImpl implements MasterPinInteractor {
 
@@ -30,8 +31,8 @@ final class MasterPinInteractorImpl implements MasterPinInteractor {
     this.preferences = preferences;
   }
 
-  @CheckResult @Nullable @Override public String getMasterPin() {
-    return preferences.getMasterPassword();
+  @CheckResult @NonNull @Override public Observable<String> getMasterPin() {
+    return Observable.defer(() -> Observable.just(preferences.getMasterPassword()));
   }
 
   @Override public void setMasterPin(@Nullable String pin) {
