@@ -33,10 +33,43 @@ import timber.log.Timber;
 
 public final class PadLockOpenHelper extends SQLiteOpenHelper {
 
-  private static final int DATABASE_VERSION = 2;
+  private static final int DATABASE_VERSION = 3;
 
   public PadLockOpenHelper(final @NonNull Context context) {
     super(context.getApplicationContext(), "padlock_db", null, DATABASE_VERSION);
+  }
+
+  @Override public void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
+    Timber.d("onCreate");
+    sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
+  }
+
+  @Override
+  public void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+    Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion);
+    int currentVersion = oldVersion;
+    if (currentVersion == 1 && newVersion >= 2) {
+      upgradeVersion1To2(sqLiteDatabase);
+      ++currentVersion;
+    }
+
+    if (currentVersion == 2 && newVersion >= 3) {
+      upgradeVersion2To3(sqLiteDatabase);
+      ++currentVersion;
+    }
+  }
+
+  private static void upgradeVersion2To3(SQLiteDatabase sqLiteDatabase) {
+    Timber.d("Upgrading from Version 2 to 3 drops the whole table");
+
+    final String dropOldTable =
+        String.format(Locale.getDefault(), "DROP TABLE %s", PadLockEntry.TABLE_NAME);
+    Timber.d("EXEC SQL: %s", dropOldTable);
+    sqLiteDatabase.execSQL(dropOldTable);
+
+    // Creating the table again
+    Timber.d("EXEC SQL: %s", PadLockEntry.CREATE_TABLE);
+    sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
   }
 
   private static void upgradeVersion1To2(@NonNull SQLiteDatabase sqLiteDatabase) {
@@ -100,7 +133,8 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
     return PadLockDB.with(appContext)
         .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName,
             activityName)
-        .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_nameMapper()::map, PadLockEntry.empty())
+        .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_nameMapper()::map,
+            PadLockEntry.empty())
         .filter(padLockEntry -> padLockEntry != null);
   }
 
@@ -150,18 +184,5 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
   public static void deleteAll(final @NonNull Context context) {
     final Context appContext = context.getApplicationContext();
     PadLockDB.with(appContext).delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
-  }
-
-  @Override public void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
-    Timber.d("onCreate");
-    sqLiteDatabase.execSQL(PadLockEntry.CREATE_TABLE);
-  }
-
-  @Override
-  public void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-    Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion);
-    if (oldVersion == 1 && newVersion == 2) {
-      upgradeVersion1To2(sqLiteDatabase);
-    }
   }
 }
