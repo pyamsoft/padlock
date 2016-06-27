@@ -95,6 +95,11 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
             return "";
           }
 
+          if (PadLockEntry.isEmpty(padLockEntry)) {
+            Timber.e("Entry is the EMPTY entry");
+            return "";
+          }
+
           final String appCode = padLockEntry.lockCode();
           String pin;
           if (appCode == null) {

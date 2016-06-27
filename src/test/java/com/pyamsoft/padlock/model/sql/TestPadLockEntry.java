@@ -21,7 +21,11 @@ import android.support.annotation.NonNull;
 
 public abstract class TestPadLockEntry extends PadLockEntry {
 
-  @CheckResult @NonNull public static PadLockEntry testEntry() {
+  @CheckResult @NonNull public static PadLockEntry test() {
     return new AutoValue_PadLockEntry("com.example.test", "TestActvity", null, 0, 0, false);
+  }
+
+  @CheckResult @NonNull public static PadLockEntry empty() {
+    return new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false);
   }
 }

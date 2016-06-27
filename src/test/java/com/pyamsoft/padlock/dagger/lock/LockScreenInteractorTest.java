@@ -82,7 +82,7 @@ public class LockScreenInteractorTest {
     testSubscriber.assertReceivedOnNext(Collections.singletonList(packageName + ".PadLock"));
   }
 
-  void init_test_unlock() {
+  void init_test_unlock(boolean testingResponse) {
     reinit();
     // Create a fake delegate
     final PadLockDB.Delegate delegate = new PadLockDB.Delegate(context, Schedulers.immediate()) {
@@ -94,7 +94,7 @@ public class LockScreenInteractorTest {
             //System.out.println(
             //    "FAKE queryWithPackageActivityName(  _packageName_ , _activityName_ )");
             subscriber.onStart();
-            subscriber.onNext(TestPadLockEntry.testEntry());
+            subscriber.onNext(testingResponse ? TestPadLockEntry.test() : TestPadLockEntry.empty());
             subscriber.onCompleted();
           }
         }));
@@ -107,11 +107,11 @@ public class LockScreenInteractorTest {
         .thenReturn(new long[] { 0, 1, 5, 10, 15, 20, 30, 45, 60 });
   }
 
-  @Test public void test_unlockFail() {
-    init_test_unlock();
+  @Test public void test_unlockEmptyFail() {
     String packageName = "com.pyamsoft.padlock";
     String activityName = packageName + ".app.main.MainActivity";
 
+    init_test_unlock(false);
     final LockScreenInteractor interactor = getLockScreenInteractor();
 
     // Mock master pin methods
@@ -125,18 +125,41 @@ public class LockScreenInteractorTest {
           }
         }));
 
-    interactor.unlockEntry(packageName, activityName, "", false, 0).subscribe(result -> {
-      //System.out.println("Result for interactor unlockEntry should be false");
-      Assert.assertNotNull(result);
-      Assert.assertFalse(result);
-    }, Throwable::printStackTrace);
+    final TestSubscriber<Boolean> testSubscriber = TestSubscriber.create();
+    interactor.unlockEntry(packageName, activityName, "BOB", false, 0).subscribe(testSubscriber);
+    testSubscriber.assertNoErrors();
+    testSubscriber.assertValue(false);
+  }
+
+  @Test public void test_unlockFail() {
+    String packageName = "com.pyamsoft.padlock";
+    String activityName = packageName + ".app.main.MainActivity";
+
+    init_test_unlock(true);
+    final LockScreenInteractor interactor = getLockScreenInteractor();
+
+    // Mock master pin methods
+    Mockito.when(mockMasterPinInteractor.getMasterPin())
+        .thenReturn(Observable.create(new Observable.OnSubscribe<String>() {
+          @Override public void call(Subscriber<? super String> subscriber) {
+            //System.out.println("MOCK getMasterPin()");
+            subscriber.onStart();
+            subscriber.onNext(interactor.encodeSHA256("BOB").toBlocking().first());
+            subscriber.onCompleted();
+          }
+        }));
+
+    final TestSubscriber<Boolean> testSubscriber = TestSubscriber.create();
+    interactor.unlockEntry(packageName, activityName, "", false, 0).subscribe(testSubscriber);
+    testSubscriber.assertNoErrors();
+    testSubscriber.assertValue(false);
   }
 
   @Test public void test_unlockSuccess() {
-    init_test_unlock();
     String packageName = "com.pyamsoft.padlock";
     String activityName = packageName + ".app.main.MainActivity";
 
+    init_test_unlock(true);
     final LockScreenInteractor interactor = getLockScreenInteractor();
 
     // Mock master pin methods
@@ -150,10 +173,9 @@ public class LockScreenInteractorTest {
           }
         }));
 
-    interactor.unlockEntry(packageName, activityName, "BOB", false, 0).subscribe(result -> {
-      //System.out.println("Result for interactor unlockEntry should be true");
-      Assert.assertNotNull(result);
-      Assert.assertTrue(result);
-    }, Throwable::printStackTrace);
+    final TestSubscriber<Boolean> testSubscriber = TestSubscriber.create();
+    interactor.unlockEntry(packageName, activityName, "BOB", false, 0).subscribe(testSubscriber);
+    testSubscriber.assertNoErrors();
+    testSubscriber.assertValue(true);
   }
 }
