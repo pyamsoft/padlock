@@ -43,7 +43,7 @@ public class LockScreenInteractorTest {
     final PadLockPreferences mockPreferences = Mockito.mock(PadLockPreferences.class);
     final MasterPinInteractor mockMasterPinInteractor = Mockito.mock(MasterPinInteractor.class);
     return new LockScreenInteractorImpl(context, mockPreferences, mockDBInteractor,
-        mockMasterPinInteractor);
+        mockMasterPinInteractor, packageManagerWrapper);
   }
 
   @Test public void test_ignoreTime() {
@@ -54,6 +54,7 @@ public class LockScreenInteractorTest {
   @Test public void test_diaplyName() {
     final LockScreenInteractor interactor = getLockScreenInteractor();
 
+    // Robolectric returns the packageName
     String packageName = "com.pyamsoft.padlock";
     TestSubscriber<String> testSubscriber = new TestSubscriber<>();
     interactor.getDisplayName(packageName).subscribe(testSubscriber);

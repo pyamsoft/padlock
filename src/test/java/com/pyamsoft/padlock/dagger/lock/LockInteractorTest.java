@@ -45,19 +45,10 @@ public class LockInteractorTest {
 
     };
 
-    String attempt = "";
-    run_test_sha256Encode(attempt);
-
-    attempt = "test";
-    run_test_sha256Encode(attempt);
-
-    attempt = "asd9u0290 112-012 -10";
-    run_test_sha256Encode(attempt);
-
-    attempt = "\n\tasdiads$";
-    run_test_sha256Encode(attempt);
-
-    attempt = "平仮名";
-    run_test_sha256Encode(attempt);
+    run_test_sha256Encode("");
+    run_test_sha256Encode("test");
+    run_test_sha256Encode("asd9u0290 112-012 -10");
+    run_test_sha256Encode("\n\tasdiads$");
+    run_test_sha256Encode("平仮名");
   }
 }

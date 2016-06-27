@@ -18,12 +18,11 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import com.pyamsoft.padlock.dagger.db.DBInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -38,11 +37,14 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   @NonNull private final Context appContext;
   @NonNull private final PadLockPreferences preferences;
   @NonNull private final long[] ignoreTimes;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
   private int failCount;
 
   @Inject public LockScreenInteractorImpl(final @NonNull Context context,
       @NonNull final PadLockPreferences preferences, @NonNull final DBInteractor dbInteractor,
-      @NonNull final MasterPinInteractor masterPinInteractor) {
+      @NonNull final MasterPinInteractor masterPinInteractor,
+      @NonNull PackageManagerWrapper packageManagerWrapper) {
+    this.packageManagerWrapper = packageManagerWrapper;
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
     this.dbInteractor = dbInteractor;
@@ -150,16 +152,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @WorkerThread @NonNull @Override @CheckResult
   public Observable<String> getDisplayName(@NonNull String packageName) {
-    return Observable.defer(() -> {
-      final PackageManager packageManager = appContext.getPackageManager();
-      try {
-        final ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
-        return Observable.just(applicationInfo.loadLabel(packageManager).toString());
-      } catch (PackageManager.NameNotFoundException e) {
-        Timber.e(e, "EXCEPTION");
-        return Observable.just("");
-      }
-    });
+    return packageManagerWrapper.loadPackageLabel(packageName);
   }
 
   @CheckResult @NonNull private Observable<Long> getIgnoreTimeNone() {
