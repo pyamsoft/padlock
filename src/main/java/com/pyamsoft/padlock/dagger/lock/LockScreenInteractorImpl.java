@@ -105,7 +105,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
       // KLUDGE we must do this here as we need the padlock entry
       if (unlocked) {
-        if (ignoreForPeriod != preferences.getDefaultIgnoreTime()) {
+        if (ignoreForPeriod != getIgnoreTimeNone()) {
           Timber.d("IGNORE requested, update entry in DB");
           ignoreEntryForTime(padLockEntry, ignoreForPeriod);
         }
@@ -129,6 +129,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   @WorkerThread
   private void ignoreEntryForTime(final PadLockEntry oldValues, final long ignoreForPeriod) {
     final long ignoreMinutesInMillis = ignoreForPeriod * 60 * 1000;
+    Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
+        ignoreMinutesInMillis);
     final ContentValues contentValues = PadLockEntry.FACTORY.marshal()
         .packageName(oldValues.packageName())
         .activityName(oldValues.activityName())
@@ -159,6 +161,10 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @Override public long getIgnoreTimeForIndex(int index) {
     return ignoreTimes[index];
+  }
+
+  @CheckResult private long getIgnoreTimeNone() {
+    return getIgnoreTimeForIndex(0);
   }
 
   @Override public long getIgnoreTimeOne() {
