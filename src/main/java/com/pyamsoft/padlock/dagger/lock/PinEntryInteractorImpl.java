@@ -37,11 +37,11 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
         .map(masterPin -> {
           if (masterPin == null) {
             Timber.d("No existing master pin, create a new one");
-            final String encodedMasterPin = encodeSHA256(attempt);
+            final String encodedMasterPin = encodeSHA256(attempt).toBlocking().first();
             masterPinInteractor.setMasterPin(encodedMasterPin);
             return PinEntryEvent.builder().complete(true).type(0).build();
           } else {
-            final boolean success = checkSubmissionAttempt(attempt, masterPin);
+            final boolean success = checkSubmissionAttempt(attempt, masterPin).toBlocking().first();
             if (success) {
               Timber.d("Clear master pin");
               masterPinInteractor.setMasterPin(null);

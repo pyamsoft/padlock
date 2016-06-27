@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
@@ -41,12 +40,12 @@ final class LockListInteractorImpl implements LockListInteractor {
     this.preferences = preferences;
   }
 
-  @Override public boolean hasShownOnBoarding() {
-    return preferences.isOnBoard();
+  @Override public Observable<Boolean> hasShownOnBoarding() {
+    return Observable.defer(() -> Observable.just(preferences.isOnBoard()));
   }
 
-  @Override public boolean isSystemVisible() {
-    return preferences.isSystemVisible();
+  @Override public Observable<Boolean> isSystemVisible() {
+    return Observable.defer(() -> Observable.just(preferences.isSystemVisible()));
   }
 
   @Override public void setSystemVisible(boolean visible) {
@@ -57,19 +56,19 @@ final class LockListInteractorImpl implements LockListInteractor {
     preferences.setOnBoard();
   }
 
-  @WorkerThread @Override @NonNull
-  public Observable<List<ApplicationInfo>> getApplicationInfoList() {
+  @Override @NonNull public Observable<List<ApplicationInfo>> getApplicationInfoList() {
     return packageManagerWrapper.getActiveApplications()
-        .filter(applicationInfo -> !isSystemApplication(applicationInfo) || isSystemVisible())
+        .filter(applicationInfo -> !isSystemApplication(applicationInfo).toBlocking().first()
+            || isSystemVisible().toBlocking().first())
         .toList();
   }
 
-  @WorkerThread @NonNull @Override public Observable<List<PadLockEntry>> getAppEntryList() {
+  @NonNull @Override public Observable<List<PadLockEntry>> getAppEntryList() {
     return PadLockOpenHelper.queryAll(appContext).first();
   }
 
-  @WorkerThread @Override public boolean isSystemApplication(@NonNull ApplicationInfo info) {
-    return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+  @Override public Observable<Boolean> isSystemApplication(@NonNull ApplicationInfo info) {
+    return Observable.defer(() -> Observable.just((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0));
   }
 
   @NonNull @Override public Observable<String> loadPackageLabel(@NonNull ApplicationInfo info) {

@@ -18,11 +18,11 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import android.util.Base64;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import rx.Observable;
 
 abstract class LockInteractorImpl implements LockInteractor {
 
@@ -36,15 +36,16 @@ abstract class LockInteractorImpl implements LockInteractor {
     }
   }
 
-  @CheckResult @NonNull public String encodeSHA256(@NonNull String attempt) {
-    messageDigest.reset();
-    final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
-    return Base64.encodeToString(output, Base64.DEFAULT).trim();
+  @CheckResult @NonNull public Observable<String> encodeSHA256(@NonNull String attempt) {
+    return Observable.defer(() -> {
+      messageDigest.reset();
+      final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
+      return Observable.just(Base64.encodeToString(output, Base64.DEFAULT).trim());
+    });
   }
 
-  @CheckResult @WorkerThread
-  public boolean checkSubmissionAttempt(@NonNull String attempt, @NonNull String encodedPin) {
-    final String encodedAttempt = encodeSHA256(attempt);
-    return encodedPin.equals(encodedAttempt);
+  @NonNull @CheckResult public Observable<Boolean> checkSubmissionAttempt(@NonNull String attempt,
+      @NonNull String encodedPin) {
+    return encodeSHA256(attempt).map(encodedPin::equals);
   }
 }

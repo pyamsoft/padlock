@@ -43,6 +43,8 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
 
   @NonNull private Subscription pinEntryBusSubscription = Subscriptions.empty();
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
+  @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
+  @NonNull private Subscription onboardSubscription = Subscriptions.empty();
 
   @Inject public LockListPresenter(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -56,6 +58,8 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
   @Override protected void onUnbind() {
     super.onUnbind();
     unsubscribePopulateList();
+    unsubscribeSystemVisible();
+    unsubscribeOnboard();
   }
 
   @Override public void onResume() {
@@ -70,8 +74,19 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
 
   private void unsubscribePopulateList() {
     if (!populateListSubscription.isUnsubscribed()) {
-      Timber.d("unsub pop list");
       populateListSubscription.unsubscribe();
+    }
+  }
+
+  private void unsubscribeSystemVisible() {
+    if (!systemVisibleSubscription.isUnsubscribed()) {
+      systemVisibleSubscription.unsubscribe();
+    }
+  }
+
+  private void unsubscribeOnboard() {
+    if (!onboardSubscription.isUnsubscribed()) {
+      onboardSubscription.unsubscribe();
     }
   }
 
@@ -149,7 +164,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
     return AppEntry.builder()
         .name(lockListInteractor.loadPackageLabel(info).toBlocking().first())
         .packageName(info.packageName)
-        .system(lockListInteractor.isSystemApplication(info))
+        .system(lockListInteractor.isSystemApplication(info).toBlocking().first())
         .locked(locked)
         .build();
   }
@@ -173,13 +188,21 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
   }
 
   public final void setSystemVisibilityFromPreference() {
-    final boolean visible = lockListInteractor.isSystemVisible();
-    final LockList lockList = getView();
-    if (visible) {
-      lockList.setSystemVisible();
-    } else {
-      lockList.setSystemInvisible();
-    }
+    unsubscribeSystemVisible();
+    systemVisibleSubscription = lockListInteractor.isSystemVisible()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(visible -> {
+          final LockList lockList = getView();
+          if (visible) {
+            lockList.setSystemVisible();
+          } else {
+            lockList.setSystemInvisible();
+          }
+        }, throwable -> {
+          // TODO different error
+          getView().onListPopulateError();
+        });
   }
 
   public final void clickPinFAB() {
@@ -188,11 +211,19 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
   }
 
   public final void showOnBoarding() {
-    final boolean onboard = lockListInteractor.hasShownOnBoarding();
-    final LockList lockList = getView();
-    if (!onboard) {
-      lockList.showOnBoarding();
-    }
+    unsubscribeOnboard();
+    onboardSubscription = lockListInteractor.hasShownOnBoarding()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(onboard -> {
+          final LockList lockList = getView();
+          if (!onboard) {
+            lockList.showOnBoarding();
+          }
+        }, throwable -> {
+          // TODO different error
+          getView().onListPopulateError();
+        });
   }
 
   private void registerOnPinEntryBus() {

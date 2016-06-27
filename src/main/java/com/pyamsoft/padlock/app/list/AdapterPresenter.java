@@ -55,19 +55,19 @@ public abstract class AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
   }
 
   @CheckResult @NonNull public final I get(int position) {
-    return adapterInteractor.get(position);
+    return adapterInteractor.get(position).toBlocking().first();
   }
 
   @CheckResult public final int add(@NonNull I entry) {
-    return adapterInteractor.add(entry);
+    return adapterInteractor.add(entry).toBlocking().first();
   }
 
   @CheckResult public final int remove() {
-    return adapterInteractor.remove();
+    return adapterInteractor.remove().toBlocking().first();
   }
 
   @CheckResult public final int size() {
-    return adapterInteractor.size();
+    return adapterInteractor.size().toBlocking().first();
   }
 
   public final void loadApplicationIcon(@NonNull VH holder, @NonNull String packageName) {
