@@ -18,7 +18,7 @@
 <resources>
 
   <string-array name="ignore_time">
-    <item name="time_none">Do Not Ignore</item>
+    <item name="time_none">@string/do_not_ignore</item>
     <item name="time_one">@string/ignore_for_1_minute</item>
     <item name="time_five">@string/ignore_for_5_minutes</item>
     <item name="time_ten">@string/ignore_for_10_minutes</item>
