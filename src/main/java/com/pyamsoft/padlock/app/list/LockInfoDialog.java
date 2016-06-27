@@ -254,10 +254,9 @@ public class LockInfoDialog extends DialogFragment
   private void safeChangeToggleAllState(boolean enabled) {
     toggleAll.setOnCheckedChangeListener(null);
     toggleAll.setChecked(enabled);
-    toggleAll.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-      dbPresenter.attemptDBAllModification(isChecked, appEntry.packageName(), null,
-          appEntry.system());
-    });
+    toggleAll.setOnCheckedChangeListener(
+        (compoundButton, isChecked) -> dbPresenter.attemptDBAllModification(isChecked,
+            appEntry.packageName(), null, appEntry.system()));
   }
 
   @Override public void enableToggleAll() {

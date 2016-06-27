@@ -48,7 +48,7 @@ public class LockScreenInteractorTest {
 
   @Test public void test_ignoreTime() {
     final LockScreenInteractor interactor = getLockScreenInteractor();
-    Assert.assertEquals(0, interactor.getDefaultIgnoreTime());
+    Assert.assertEquals(0L, interactor.getDefaultIgnoreTime().toBlocking().first().longValue());
   }
 
   @Test public void test_diaplyName() {
