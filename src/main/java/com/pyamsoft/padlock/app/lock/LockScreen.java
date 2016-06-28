@@ -21,6 +21,8 @@ import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 
 public interface LockScreen extends LockPresenter.LockView, AppIconLoaderView {
 
+  void onPostUnlock();
+
   void onLocked();
 
   void onLockedError();

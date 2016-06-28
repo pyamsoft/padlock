@@ -126,7 +126,7 @@ public class LockScreenInteractorTest {
         }));
 
     final TestSubscriber<Boolean> testSubscriber = TestSubscriber.create();
-    interactor.unlockEntry(packageName, activityName, "BOB", false, 0).subscribe(testSubscriber);
+    interactor.unlockEntry(packageName, activityName, "BOB").subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValue(false);
   }
@@ -150,7 +150,7 @@ public class LockScreenInteractorTest {
         }));
 
     final TestSubscriber<Boolean> testSubscriber = TestSubscriber.create();
-    interactor.unlockEntry(packageName, activityName, "", false, 0).subscribe(testSubscriber);
+    interactor.unlockEntry(packageName, activityName, "").subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValue(false);
   }
@@ -174,7 +174,7 @@ public class LockScreenInteractorTest {
         }));
 
     final TestSubscriber<Boolean> testSubscriber = TestSubscriber.create();
-    interactor.unlockEntry(packageName, activityName, "BOB", false, 0).subscribe(testSubscriber);
+    interactor.unlockEntry(packageName, activityName, "BOB").subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValue(true);
   }
