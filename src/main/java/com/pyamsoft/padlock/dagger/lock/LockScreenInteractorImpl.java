@@ -78,61 +78,60 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @WorkerThread @NonNull @Override @CheckResult
   public Observable<Boolean> unlockEntry(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String attempt, boolean shouldExclude, long ignoreForPeriod) {
+      @NonNull String attempt) {
     Timber.d("Attempt unlock: %s %s", packageName, activityName);
-    final Observable<PadLockEntry> dbObservable = PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, activityName)
-        .first()
-        .cache();
+    final Observable<PadLockEntry> dbObservable =
+        PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
 
     final Observable<String> masterPinObservable = pinInteractor.getMasterPin();
-    final Observable<Boolean> unlockObservable =
-        Observable.zip(dbObservable, masterPinObservable, (padLockEntry, masterPin) -> {
-          final long lockUntilTime = padLockEntry.lockUntilTime();
-          Timber.d("Check entry is not locked");
-          if (System.currentTimeMillis() < lockUntilTime) {
-            Timber.e("Entry is still locked. Fail unlock");
-            return "";
-          }
-
-          if (PadLockEntry.isEmpty(padLockEntry)) {
-            Timber.e("Entry is the EMPTY entry");
-            return "";
-          }
-
-          final String appCode = padLockEntry.lockCode();
-          String pin;
-          if (appCode == null) {
-            Timber.d("No app specific code, use Master PIN");
-            pin = masterPin;
-          } else {
-            Timber.d("App specific code present, compare attempt");
-            pin = appCode;
-          }
-          return pin;
-        }).flatMap(pin -> checkSubmissionAttempt(attempt, pin)).map(unlocked -> {
-          if (unlocked) {
-            Timber.d("Run finishing unlock hooks");
-
-            if (shouldExclude) {
-              Timber.d("EXCLUDE requested, delete entry from DB");
-              dbInteractor.deleteEntry(packageName, activityName);
-            }
-          }
-
-          return unlocked;
-        });
-
-    // KLUDGE we must do this here as we need the padlock entry
-    return unlockObservable.zipWith(dbObservable, (unlocked, entry) -> {
-      if (unlocked) {
-        if (ignoreForPeriod != getIgnoreTimeNone().toBlocking().first()) {
-          Timber.d("IGNORE requested, update entry in DB");
-          ignoreEntryForTime(entry, ignoreForPeriod);
-        }
+    return Observable.zip(dbObservable, masterPinObservable, (padLockEntry, masterPin) -> {
+      final long lockUntilTime = padLockEntry.lockUntilTime();
+      Timber.d("Check entry is not locked");
+      if (System.currentTimeMillis() < lockUntilTime) {
+        Timber.e("Entry is still locked. Fail unlock");
+        return null;
       }
 
-      return unlocked;
+      if (PadLockEntry.isEmpty(padLockEntry)) {
+        Timber.e("Entry is the EMPTY entry");
+        return null;
+      }
+
+      final String appCode = padLockEntry.lockCode();
+      String pin;
+      if (appCode == null) {
+        Timber.d("No app specific code, use Master PIN");
+        pin = masterPin;
+      } else {
+        Timber.d("App specific code present, compare attempt");
+        pin = appCode;
+      }
+      return pin;
+    }).filter(pin -> pin != null).flatMap(pin -> checkSubmissionAttempt(attempt, pin));
+  }
+
+  @NonNull @Override
+  public Observable<Boolean> postUnlock(@NonNull String packageName, @NonNull String activityName,
+      boolean exclude, long ignoreTime) {
+    Timber.d("Post unlock: %s %s", packageName, activityName);
+    final Observable<PadLockEntry> dbObservable =
+        PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
+    return Observable.defer(() -> {
+      Timber.d("Run finishing unlock hooks");
+
+      if (exclude) {
+        Timber.d("EXCLUDE requested, delete entry from DB");
+        dbInteractor.deleteEntry(packageName, activityName);
+      }
+
+      // Prepare the ignore time for next part
+      return getIgnoreTimeNone();
+    }).zipWith(dbObservable, (ignoreNone, entry) -> {
+      if (ignoreTime != ignoreNone) {
+        Timber.d("IGNORE requested, update entry in DB");
+        ignoreEntryForTime(entry, ignoreTime);
+      }
+      return true;
     });
   }
 

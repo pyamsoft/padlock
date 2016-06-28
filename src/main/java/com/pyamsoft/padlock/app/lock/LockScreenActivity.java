@@ -186,6 +186,13 @@ public final class LockScreenActivity extends NoDonationActivityBase
     Timber.d("Unlocked!");
     lockViewDelegate.clearDisplay();
     PadLockService.passLockScreen();
+    presenter.postUnlock(lockViewDelegate.getAppPackageName(),
+        lockViewDelegate.getAppActivityName(), menuExclude.isChecked(),
+        getSelectedIgnoreTimeIndex());
+  }
+
+  @Override public void onPostUnlock() {
+    Timber.d("POST Unlock Finished!");
     finishAndRemoveTask();
   }
 
@@ -356,7 +363,6 @@ public final class LockScreenActivity extends NoDonationActivityBase
 
   @Override public void onSubmitPressed() {
     presenter.submit(lockViewDelegate.getAppPackageName(), lockViewDelegate.getAppActivityName(),
-        lockViewDelegate.getCurrentAttempt(), menuExclude.isChecked(),
-        getSelectedIgnoreTimeIndex());
+        lockViewDelegate.getCurrentAttempt());
   }
 }

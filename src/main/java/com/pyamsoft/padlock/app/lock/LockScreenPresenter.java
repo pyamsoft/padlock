@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.functions.Action1;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -30,6 +31,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
 
   @NonNull private final LockScreenInteractor interactor;
 
+  @NonNull private Subscription postUnlockSubscription = Subscriptions.empty();
   @NonNull private Subscription unlockSubscription = Subscriptions.empty();
   @NonNull private Subscription lockSubscription = Subscriptions.empty();
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
@@ -47,7 +49,14 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     unsubUnlock();
     unsubLock();
     unsubDisplayName();
+    unsubPostUnlock();
     interactor.resetFailCount();
+  }
+
+  private void unsubPostUnlock() {
+    if (!postUnlockSubscription.isUnsubscribed()) {
+      postUnlockSubscription.unsubscribe();
+    }
   }
 
   private void unsubUnlock() {
@@ -123,13 +132,10 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
   }
 
   public final void submit(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String currentAttempt, boolean excludeEntry, int ignoreOptionIndex) {
+      @NonNull String currentAttempt) {
     unsubUnlock();
     final LockScreen lockScreen = getView();
-    unlockSubscription = interactor.getIgnoreTimeForIndex(ignoreOptionIndex)
-        .flatMap(
-            time -> interactor.unlockEntry(packageName, activityName, currentAttempt, excludeEntry,
-                time))
+    unlockSubscription = interactor.unlockEntry(packageName, activityName, currentAttempt)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(unlocked -> {
@@ -155,6 +161,23 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
         .subscribe(lockScreen::setDisplayName, throwable -> {
           Timber.e(throwable, "Error loading display name from package");
           lockScreen.setDisplayName("");
+        });
+  }
+
+  public void postUnlock(@NonNull String packageName, @NonNull String activityName,
+      boolean shouldExclude, int ignoreIndex) {
+    unsubPostUnlock();
+    postUnlockSubscription = interactor.getIgnoreTimeForIndex(ignoreIndex)
+        .flatMap(time -> interactor.postUnlock(packageName, activityName, shouldExclude, time))
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(new Action1<Boolean>() {
+          @Override public void call(Boolean ignore) {
+            getView().onPostUnlock();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "Error postunlock");
+          getView().onLockedError();
         });
   }
 

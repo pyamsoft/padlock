@@ -25,8 +25,10 @@ public interface LockScreenInteractor extends LockInteractor {
   int DEFAULT_MAX_FAIL_COUNT = 2;
 
   @CheckResult @NonNull Observable<Boolean> unlockEntry(@NonNull String packageName,
-      @NonNull String activityName, @NonNull String attempt, boolean shouldExclude,
-      long ignoreForPeriod);
+      @NonNull String activityName, @NonNull String attempt);
+
+  @CheckResult @NonNull Observable<Boolean> postUnlock(@NonNull String packageName,
+      @NonNull String activityName, boolean exclude, long ignoreTime);
 
   @CheckResult @NonNull Observable<Boolean> lockEntry(@NonNull String packageName,
       @NonNull String activityName);
