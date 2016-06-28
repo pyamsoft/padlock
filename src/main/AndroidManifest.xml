@@ -51,7 +51,15 @@
 
     <!-- Lock Screen Activity -->
     <activity
-        android:name=".app.lock.LockScreenActivity"
+        android:name=".app.lock.LockScreenActivity1"
+        android:exported="false"
+        android:launchMode="singleInstance"
+        android:noHistory="true"
+        android:theme="@style/Theme.PadLock.Light.Lock"
+        android:windowSoftInputMode="stateVisible"/>
+
+    <activity
+        android:name=".app.lock.LockScreenActivity2"
         android:exported="false"
         android:launchMode="singleInstance"
         android:noHistory="true"

@@ -24,6 +24,8 @@ import android.support.annotation.Nullable;
 import android.view.accessibility.AccessibilityEvent;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.dagger.service.DaggerLockServiceComponent;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
@@ -35,6 +37,7 @@ public final class PadLockService extends AccessibilityService
   private static volatile PadLockService instance = null;
   @Inject LockServicePresenter presenter;
   private Intent lockActivity;
+  private Intent lockActivity2;
 
   @NonNull @CheckResult private static synchronized PadLockService getInstance() {
     if (instance == null) {
@@ -83,17 +86,30 @@ public final class PadLockService extends AccessibilityService
     final String activityName = entry.activityName();
 
     // Multiple task flag is needed to launch multiple lock screens on N
-    lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
-    lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
+    if (LockScreenActivity1.isActive()) {
+      lockActivity.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
+      lockActivity.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
+      lockActivity2.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
+      lockActivity2.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
 
-    Timber.d("Start lock activity for entry: %s %s", packageName, activityName);
-    startActivity(lockActivity);
+      Timber.d("Start lock activity 2 for entry: %s %s", packageName, activityName);
+      startActivity(lockActivity2);
+    } else {
+      lockActivity2.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
+      lockActivity2.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
+      lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
+      lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
+
+      Timber.d("Start lock activity for entry: %s %s", packageName, activityName);
+      startActivity(lockActivity);
+    }
   }
 
   @Override public boolean onUnbind(Intent intent) {
     Timber.d("onDestroy");
     presenter.unbindView();
     lockActivity = null;
+    lockActivity2 = null;
 
     setInstance(null);
     return super.onUnbind(intent);
@@ -103,7 +119,9 @@ public final class PadLockService extends AccessibilityService
     super.onServiceConnected();
     Timber.d("onServiceConnected");
     lockActivity =
-        new Intent(this, LockScreenActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        new Intent(this, LockScreenActivity1.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    lockActivity2 =
+        new Intent(this, LockScreenActivity2.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     DaggerLockServiceComponent.builder()
         .padLockComponent(PadLock.getInstance().getPadLockComponent())
         .build()
