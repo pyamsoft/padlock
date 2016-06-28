@@ -22,6 +22,8 @@ import android.support.annotation.Nullable;
 
 public interface PadLockPreferences {
 
+  @CheckResult boolean isExperimentalNSupported();
+
   @CheckResult @NonNull long[] getIgnoreTimes();
 
   @CheckResult boolean getLockOnDeviceLocked();
