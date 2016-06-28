@@ -17,16 +17,15 @@
 package com.pyamsoft.padlock.dagger.service;
 
 import android.app.KeyguardManager;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity;
+import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
@@ -38,15 +37,15 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
   @NonNull private final Context appContext;
   @NonNull private final PadLockPreferences preferences;
   @NonNull private final KeyguardManager keyguard;
-  @NonNull private final PackageManager packageManager;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject public LockServiceInteractorImpl(final @NonNull Context context,
       @NonNull PadLockPreferences preferences, @NonNull KeyguardManager keyguard,
-      @NonNull PackageManager packageManager) {
+      @NonNull PackageManagerWrapper packageManagerWrapper) {
+    this.packageManagerWrapper = packageManagerWrapper;
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
     this.keyguard = keyguard;
-    this.packageManager = packageManager;
   }
 
   /**
@@ -54,19 +53,8 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
    */
   @NonNull @Override public Observable<Boolean> isEventFromActivity(@NonNull String packageName,
       @NonNull String className) {
-    return Observable.defer(() -> {
-      if (packageName.isEmpty() || className.isEmpty()) {
-        return Observable.just(false);
-      }
-
-      final ComponentName componentName = new ComponentName(packageName, className);
-      try {
-        final ActivityInfo activityInfo = packageManager.getActivityInfo(componentName, 0);
-        return Observable.just(activityInfo != null);
-      } catch (PackageManager.NameNotFoundException e) {
-        return Observable.just(false);
-      }
-    });
+    return packageManagerWrapper.getActivityInfo(packageName, className)
+        .map(activityInfo -> activityInfo != null);
   }
 
   /**
@@ -96,9 +84,15 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
 
   @NonNull @Override public Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
       @NonNull String className) {
-    return Observable.defer(() -> Observable.just(
-        packageName.equals(PadLock.class.getPackage().getName()) && className.equals(
-            LockScreenActivity.class.getName())));
+    return Observable.defer(() -> {
+      final boolean lockScreen1 =
+          packageName.equals(PadLock.class.getPackage().getName()) && className.equals(
+              LockScreenActivity1.class.getName());
+      final boolean lockScreen2 =
+          packageName.equals(PadLock.class.getPackage().getName()) && className.equals(
+              LockScreenActivity2.class.getName());
+      return Observable.just(lockScreen1 || lockScreen2);
+    });
   }
 
   @NonNull @Override public Observable<Boolean> isOnlyLockOnPackageChange() {
