@@ -44,10 +44,10 @@ final class SettingsInteractorImpl implements SettingsInteractor {
   }
 
   @NonNull @Override public Observable<Boolean> clearAll() {
-    return Observable.zip(clearDatabase(), Observable.defer(() -> {
+    return clearDatabase().map(aBoolean -> {
       Timber.d("Clear all preferences");
       preferences.clearAll();
-      return Observable.just(true);
-    }), (aBoolean, aBoolean2) -> true);
+      return true;
+    });
   }
 }
