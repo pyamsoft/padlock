@@ -34,7 +34,7 @@ public final class PadLockService extends AccessibilityService
 
   private static volatile PadLockService instance = null;
   @Inject LockServicePresenter presenter;
-  private Intent lockActivity = new Intent();
+  private Intent lockActivity;
 
   @NonNull @CheckResult private static synchronized PadLockService getInstance() {
     if (instance == null) {
@@ -82,8 +82,6 @@ public final class PadLockService extends AccessibilityService
     final String packageName = entry.packageName();
     final String activityName = entry.activityName();
 
-    lockActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
     // Multiple task flag is needed to launch multiple lock screens on N
     lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
     lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
@@ -95,6 +93,7 @@ public final class PadLockService extends AccessibilityService
   @Override public boolean onUnbind(Intent intent) {
     Timber.d("onDestroy");
     presenter.unbindView();
+    lockActivity = null;
 
     setInstance(null);
     return super.onUnbind(intent);
@@ -103,7 +102,8 @@ public final class PadLockService extends AccessibilityService
   @Override protected void onServiceConnected() {
     super.onServiceConnected();
     Timber.d("onServiceConnected");
-    lockActivity = new Intent(this, LockScreenActivity.class);
+    lockActivity =
+        new Intent(this, LockScreenActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     DaggerLockServiceComponent.builder()
         .padLockComponent(PadLock.getInstance().getPadLockComponent())
         .build()
