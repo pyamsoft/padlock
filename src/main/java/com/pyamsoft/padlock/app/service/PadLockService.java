@@ -84,25 +84,29 @@ public final class PadLockService extends AccessibilityService
   @Override public void startLockScreen(@NonNull PadLockEntry entry) {
     final String packageName = entry.packageName();
     final String activityName = entry.activityName();
+    presenter.launchCorrectLockScreen(packageName, activityName);
+  }
 
-    // Multiple task flag is needed to launch multiple lock screens on N
-    if (LockScreenActivity1.isActive()) {
-      lockActivity.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
-      lockActivity.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
-      lockActivity2.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
-      lockActivity2.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
+  @Override
+  public void startLockScreen1(@NonNull String packageName, @NonNull String activityName) {
+    lockActivity2.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
+    lockActivity2.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
+    lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
+    lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
 
-      Timber.d("Start lock activity 2 for entry: %s %s", packageName, activityName);
-      startActivity(lockActivity2);
-    } else {
-      lockActivity2.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
-      lockActivity2.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
-      lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
-      lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
+    Timber.d("Start lock activity for entry: %s %s", packageName, activityName);
+    startActivity(lockActivity);
+  }
 
-      Timber.d("Start lock activity for entry: %s %s", packageName, activityName);
-      startActivity(lockActivity);
-    }
+  @Override
+  public void startLockScreen2(@NonNull String packageName, @NonNull String activityName) {
+    lockActivity.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
+    lockActivity.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
+    lockActivity2.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
+    lockActivity2.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
+
+    Timber.d("Start lock activity 2 for entry: %s %s", packageName, activityName);
+    startActivity(lockActivity2);
   }
 
   @Override public boolean onUnbind(Intent intent) {

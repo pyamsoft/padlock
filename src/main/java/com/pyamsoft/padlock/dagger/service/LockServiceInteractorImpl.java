@@ -155,4 +155,8 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
       return true;
     });
   }
+
+  @NonNull @Override public Observable<Boolean> isExperimentalNSupported() {
+    return Observable.defer(() -> Observable.just(preferences.isExperimentalNSupported()));
+  }
 }

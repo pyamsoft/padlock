@@ -38,9 +38,11 @@ final class PadLockPreferencesImpl extends ApplicationPreferences implements Pad
   @NonNull private final String timeoutTimeDefault;
   @NonNull private final String lockPackageChangeKey;
   @NonNull private final String lockDeviceLockedKey;
+  @NonNull private final String nSupportKey;
   @NonNull private final long[] ignoreTimes;
   private final boolean lockPackageChangeDefault;
   private final boolean lockDeviceLockedDefault;
+  private final boolean nSupportDefault;
 
   @Inject public PadLockPreferencesImpl(final @NonNull Context context) {
     super(context);
@@ -54,12 +56,18 @@ final class PadLockPreferencesImpl extends ApplicationPreferences implements Pad
     lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default);
     lockDeviceLockedKey = appContext.getString(R.string.lock_device_locked_key);
     lockDeviceLockedDefault = res.getBoolean(R.bool.lock_device_locked_default);
+    nSupportKey = appContext.getString(R.string.n_support_key);
+    nSupportDefault = res.getBoolean(R.bool.n_support_default);
 
     final String[] stringIgnoreTimes = res.getStringArray(R.array.ignore_time_entries);
     ignoreTimes = new long[stringIgnoreTimes.length];
     for (int i = 0; i < stringIgnoreTimes.length; ++i) {
       ignoreTimes[i] = Long.parseLong(stringIgnoreTimes[i]);
     }
+  }
+
+  @Override public boolean isExperimentalNSupported() {
+    return get(nSupportKey, nSupportDefault);
   }
 
   @NonNull @Override public long[] getIgnoreTimes() {

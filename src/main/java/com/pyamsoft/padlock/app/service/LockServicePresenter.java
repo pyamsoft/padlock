@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.service;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.SchedulerPresenter;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -35,6 +36,7 @@ public final class LockServicePresenter
   @NonNull private final LockServiceInteractor interactor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
   @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
+  @NonNull private Subscription pickCorrectSubscription = Subscriptions.empty();
 
   @NonNull private String lastPackageName = "";
   @NonNull private String lastClassName = "";
@@ -53,6 +55,7 @@ public final class LockServicePresenter
   @Override protected void onUnbind() {
     super.onUnbind();
     unsubLockedEntry();
+    unsubPickCorrect();
   }
 
   private void setLockScreenPassed(boolean b) {
@@ -67,6 +70,12 @@ public final class LockServicePresenter
   private void unsubLockedEntry() {
     if (!lockedEntrySubscription.isUnsubscribed()) {
       lockedEntrySubscription.unsubscribe();
+    }
+  }
+
+  private void unsubPickCorrect() {
+    if (!pickCorrectSubscription.isUnsubscribed()) {
+      pickCorrectSubscription.unsubscribe();
     }
   }
 
@@ -157,8 +166,30 @@ public final class LockServicePresenter
         });
   }
 
+  public void launchCorrectLockScreen(@NonNull String packageName, @NonNull String activityName) {
+    unsubPickCorrect();
+    interactor.isExperimentalNSupported()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .map(nSupported -> nSupported && LockScreenActivity1.isActive())
+        .subscribe(launchActivity2 -> {
+          if (launchActivity2) {
+            getView().startLockScreen2(packageName, activityName);
+          } else {
+            getView().startLockScreen1(packageName, activityName);
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError");
+          // TODO error
+        });
+  }
+
   public interface LockService {
 
     void startLockScreen(@NonNull PadLockEntry entry);
+
+    void startLockScreen1(@NonNull String packageName, @NonNull String activityName);
+
+    void startLockScreen2(@NonNull String packageName, @NonNull String activityName);
   }
 }
