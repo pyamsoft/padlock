@@ -35,4 +35,5 @@
   <string name="lock_code_hint">Enter Lock Code</string>
   <string name="show_system_applications">Show System Applications</string>
   <string name="settings">Settings</string>
+  <string name="toggle_all">Toggle All</string>
 </resources>
