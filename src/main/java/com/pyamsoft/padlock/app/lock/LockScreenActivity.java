@@ -145,11 +145,8 @@ public final class LockScreenActivity extends NoDonationActivityBase
     appIconLoaderPresenter.unbindView();
     lockViewDelegate.onDestroyView();
     unbinder.unbind();
-  }
 
-  @Override protected void onStop() {
-    super.onStop();
-    Timber.d("onStop");
+    Timber.d("Clear currently locked");
   }
 
   @Override public void finishAndRemoveTask() {
