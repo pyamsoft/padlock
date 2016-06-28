@@ -47,7 +47,7 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public final class LockScreenActivity extends NoDonationActivityBase
+public abstract class LockScreenActivity extends NoDonationActivityBase
     implements LockScreen, LockViewDelegate.Callback {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = LockViewDelegate.ENTRY_PACKAGE_NAME;
