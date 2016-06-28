@@ -128,7 +128,7 @@ public class LockScreenInteractorTest {
     final TestSubscriber<Boolean> testSubscriber = TestSubscriber.create();
     interactor.unlockEntry(packageName, activityName, "BOB").subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
-    testSubscriber.assertValue(false);
+    testSubscriber.assertNoValues();
   }
 
   @Test public void test_unlockFail() {
