@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.base;
 
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
@@ -32,6 +33,9 @@ public interface PackageManagerWrapper {
       @NonNull String packageName);
 
   @CheckResult @NonNull Observable<ApplicationInfo> getActiveApplications();
+
+  @CheckResult @NonNull Observable<ActivityInfo> getActivityInfo(@NonNull String packageName,
+      @NonNull String activityName);
 
   @CheckResult @NonNull Observable<String> getActivityListForPackage(@NonNull String packageName);
 }

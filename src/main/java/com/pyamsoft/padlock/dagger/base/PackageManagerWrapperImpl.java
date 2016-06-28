@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.base;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -128,6 +129,23 @@ public final class PackageManagerWrapperImpl implements PackageManagerWrapper {
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "EXCEPTION");
         return Observable.just("");
+      }
+    });
+  }
+
+  @NonNull @Override public Observable<ActivityInfo> getActivityInfo(@NonNull String packageName,
+      @NonNull String activityName) {
+    return Observable.defer(() -> {
+      if (packageName.isEmpty() || activityName.isEmpty()) {
+        return Observable.empty();
+      }
+
+      final ComponentName componentName = new ComponentName(packageName, activityName);
+      try {
+        final ActivityInfo activityInfo = packageManager.getActivityInfo(componentName, 0);
+        return Observable.just(activityInfo);
+      } catch (PackageManager.NameNotFoundException e) {
+        return Observable.empty();
       }
     });
   }
