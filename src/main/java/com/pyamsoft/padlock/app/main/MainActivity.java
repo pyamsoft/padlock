@@ -208,7 +208,7 @@ public class MainActivity extends DonationActivityBase
     final String line2 =
         "BUGFIX: Fixed issue in Android N which prevented loading the list of applications";
     final String line3 = "FEATURE: Smaller memory footprint when the list is being populated";
-    final String line4 = "BUGFIX: The LockScreen is now less intrusive.";
+    final String line4 = "FEATURE: Experimental Android N support.";
     final String line5 =
         "FEATURE: Locking an application using the switch on the main list locks the entire 'package'. "
             + "This means that unlocking one screen of the application unlocks all screens. "
