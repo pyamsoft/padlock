@@ -39,7 +39,6 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
-import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.lock.DaggerLockScreenComponent;
 import com.pyamsoft.pydroid.base.activity.NoDonationActivityBase;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
@@ -182,15 +181,9 @@ public abstract class LockScreenActivity extends NoDonationActivityBase
   @Override public void onSubmitSuccess() {
     Timber.d("Unlocked!");
     lockViewDelegate.clearDisplay();
-    PadLockService.passLockScreen();
     presenter.postUnlock(lockViewDelegate.getAppPackageName(),
         lockViewDelegate.getAppActivityName(), menuExclude.isChecked(),
         getSelectedIgnoreTimeIndex());
-  }
-
-  @Override public void onPostUnlock() {
-    Timber.d("POST Unlock Finished!");
-    finishAndRemoveTask();
   }
 
   @Override public void onSubmitFailure() {

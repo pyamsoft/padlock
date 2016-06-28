@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.app.lock;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.app.service.PadLockService;
 import timber.log.Timber;
 
 public class LockScreenActivity2 extends LockScreenActivity {
@@ -44,5 +45,11 @@ public class LockScreenActivity2 extends LockScreenActivity {
     super.onDestroy();
     Timber.d("LockScreenActivity2 destroy");
     setActive(false);
+  }
+
+  @Override public void onPostUnlock() {
+    Timber.d("POST Unlock Finished! 2");
+    PadLockService.passLockScreen();
+    finishAndRemoveTask();
   }
 }
