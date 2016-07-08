@@ -45,15 +45,19 @@ public class AdapterInteractorImpl<I> extends AppIconLoaderInteractorImpl
   }
 
   @NonNull @CheckResult @Override public Observable<Integer> add(@NonNull I entry) {
-    final int next = entries.size();
-    entries.add(next, entry);
-    return Observable.defer(() -> Observable.just(next));
+    return Observable.defer(() -> {
+      final int next = entries.size();
+      entries.add(next, entry);
+      return Observable.just(next);
+    });
   }
 
   @NonNull @CheckResult @Override public Observable<Integer> remove() {
-    final int old = entries.size() - 1;
-    entries.remove(old);
-    return Observable.defer(() -> Observable.just(old));
+    return Observable.defer(() -> {
+      final int old = entries.size() - 1;
+      entries.remove(old);
+      return Observable.just(old);
+    });
   }
 
   @NonNull @CheckResult @Override public Observable<Integer> size() {
