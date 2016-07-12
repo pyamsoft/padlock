@@ -82,9 +82,9 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
       }
     }).map(aLong -> {
       // TODO do something with result
-      return true;
+      return create;
     }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
-      Timber.d("onNext in DBPresenterImpl with data: ", created);
+      Timber.d("onNext in DBPresenterImpl with data: %s", created);
       final DBView dbView = getView();
       final int position = -1;
       if (created) {
@@ -113,9 +113,9 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
       }
     }).map(aLong -> {
       // TODO do something with result
-      return true;
+      return create;
     }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
-      Timber.d("onNext in DBPresenterImpl with data: ", created);
+      Timber.d("onNext in DBPresenterImpl with data: %s", created);
       final DBView dbView = getView();
       if (created) {
         dbView.onDBCreateEvent(position);
@@ -142,9 +142,9 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
       }
     }).map(aLong -> {
       // TODO do something with result
-      return true;
+      return create;
     }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
-      Timber.d("onNext in DBPresenterImpl with data: ", created);
+      Timber.d("onNext in DBPresenterImpl with data: %s", created);
       final DBView dbView = getView();
       if (created) {
         dbView.onDBCreateEvent(position);
