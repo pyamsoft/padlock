@@ -95,15 +95,16 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
 
     adapterPresenter.loadApplicationIcon(holder, entry.packageName());
 
+    holder.toggle.setOnCheckedChangeListener(null);
     holder.toggle.setChecked(entry.locked());
     final CompoundButton.OnCheckedChangeListener listener =
         new CompoundButton.OnCheckedChangeListener() {
           @Override
           public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
             // Don't check it yet, get auth first
-            holder.toggle.setOnCheckedChangeListener(null);
-            holder.toggle.setChecked(!b);
-            holder.toggle.setOnCheckedChangeListener(this);
+            compoundButton.setOnCheckedChangeListener(null);
+            compoundButton.setChecked(!b);
+            compoundButton.setOnCheckedChangeListener(this);
 
             // Authorize for package access
             authorizeAccess(holder, true, b);

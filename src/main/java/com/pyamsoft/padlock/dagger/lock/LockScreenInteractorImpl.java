@@ -69,9 +69,12 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
               .ignoreUntilTime(padLockEntry.ignoreUntilTime())
               .systemApplication(padLockEntry.systemApplication())
               .asContentValues();
-          PadLockDB.with(appContext)
+          return PadLockDB.with(appContext)
               .updateWithPackageActivityName(contentValues, padLockEntry.packageName(),
                   padLockEntry.activityName());
+        })
+        .map(integer -> {
+          // TODO use result of update
           return true;
         });
   }
@@ -129,14 +132,19 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     }).zipWith(dbObservable, (ignoreNone, entry) -> {
       if (ignoreTime != ignoreNone) {
         Timber.d("IGNORE requested, update entry in DB");
-        ignoreEntryForTime(entry, ignoreTime);
+        return ignoreEntryForTime(entry, ignoreTime);
+      } else {
+        // TODO return a value that will be a noop/success
+        return 1;
       }
+    }).map(integer -> {
+      // TODO do something with integer result
       return true;
     });
   }
 
-  @WorkerThread
-  private void ignoreEntryForTime(final PadLockEntry oldValues, final long ignoreForPeriod) {
+  @WorkerThread @CheckResult
+  private int ignoreEntryForTime(final PadLockEntry oldValues, final long ignoreForPeriod) {
     final long ignoreMinutesInMillis = ignoreForPeriod * 60 * 1000;
     Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
         ignoreMinutesInMillis);
@@ -148,7 +156,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         .ignoreUntilTime(System.currentTimeMillis() + ignoreMinutesInMillis)
         .systemApplication(oldValues.systemApplication())
         .asContentValues();
-    PadLockDB.with(appContext)
+    return PadLockDB.with(appContext)
         .updateWithPackageActivityName(contentValues, oldValues.packageName(),
             oldValues.activityName());
   }

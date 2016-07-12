@@ -16,19 +16,20 @@
 
 package com.pyamsoft.padlock.dagger.db;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import javax.inject.Inject;
+import rx.Observable;
+import rx.functions.Func1;
 import timber.log.Timber;
 
 final class DBInteractorImpl implements DBInteractor {
@@ -39,8 +40,8 @@ final class DBInteractorImpl implements DBInteractor {
     appContext = context.getApplicationContext();
   }
 
-  @WorkerThread @SuppressLint("NewApi") @Override
-  public void createActivityEntries(@NonNull String packageName, @Nullable String code,
+  @NonNull @CheckResult @Override
+  public Observable<Long> createActivityEntries(@NonNull String packageName, @Nullable String code,
       boolean system) {
     final PackageManager packageManager = appContext.getPackageManager();
     final PackageInfo packageInfo;
@@ -49,47 +50,63 @@ final class DBInteractorImpl implements DBInteractor {
     } catch (PackageManager.NameNotFoundException e) {
       throw new RuntimeException("PackageManager threw exception: ", e);
     }
+
     final ActivityInfo[] activities = packageInfo.activities;
     if (activities != null) {
       PadLockDB.with(appContext).newTransaction(() -> {
+        // KLUDGE ignored result
+        Observable<Long> result = Observable.empty();
         for (final ActivityInfo info : activities) {
           final String activityName = info.name;
           if (activityName != null && !activityName.equalsIgnoreCase(
               LockScreenActivity.class.getName()) && !activityName.equalsIgnoreCase(
               CrashLogActivity.class.getName())) {
-            createEntry(packageName, activityName, code, system);
+            result = result.mergeWith(createEntry(packageName, activityName, code, system));
           }
         }
       });
+
+      // KLUDGE useless result
+      return Observable.just(-1L);
+    } else {
+      return Observable.empty();
     }
   }
 
-  @WorkerThread @Override
-  public void createEntry(@NonNull String packageName, @NonNull String activityName,
+  @NonNull @CheckResult @Override
+  public Observable<Long> createEntry(@NonNull String packageName, @NonNull String activityName,
       @Nullable String code, boolean system) {
+
     // To prevent double creations from occurring, first call a delete on the DB for packageName, activityName
-    deleteEntry(packageName, activityName);
-
-    Timber.d("CREATE: %s %s", packageName, activityName);
-    PadLockDB.with(appContext)
-        .insert(PadLockEntry.FACTORY.marshal()
-            .packageName(packageName)
-            .activityName(activityName)
-            .lockCode(code)
-            .lockUntilTime(0)
-            .ignoreUntilTime(0)
-            .systemApplication(system)
-            .asContentValues());
+    return deleteEntry(packageName, activityName).map(new Func1<Integer, Long>() {
+      @Override public Long call(Integer integer) {
+        Timber.d("CREATE: %s %s", packageName, activityName);
+        return PadLockDB.with(appContext)
+            .insert(PadLockEntry.FACTORY.marshal()
+                .packageName(packageName)
+                .activityName(activityName)
+                .lockCode(code)
+                .lockUntilTime(0)
+                .ignoreUntilTime(0)
+                .systemApplication(system)
+                .asContentValues());
+      }
+    });
   }
 
-  @WorkerThread @Override public void deleteActivityEntries(@NonNull String packageName) {
-    Timber.d("DELETE: all %s", packageName);
-    PadLockDB.with(appContext).deleteWithPackageName(packageName);
+  @NonNull @Override public Observable<Integer> deleteActivityEntries(@NonNull String packageName) {
+    return Observable.defer(() -> {
+      Timber.d("DELETE: all %s", packageName);
+      return Observable.just(PadLockDB.with(appContext).deleteWithPackageName(packageName));
+    });
   }
 
-  @WorkerThread @Override
-  public void deleteEntry(@NonNull String packageName, @NonNull String activityName) {
-    Timber.d("DELETE: %s %s", packageName, activityName);
-    PadLockDB.with(appContext).deleteWithPackageActivityName(packageName, activityName);
+  @NonNull @Override public Observable<Integer> deleteEntry(@NonNull String packageName,
+      @NonNull String activityName) {
+    return Observable.defer(() -> {
+      Timber.d("DELETE: all %s", packageName);
+      return Observable.just(
+          PadLockDB.with(appContext).deleteWithPackageActivityName(packageName, activityName));
+    });
   }
 }
