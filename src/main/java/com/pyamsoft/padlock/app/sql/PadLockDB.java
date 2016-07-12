@@ -87,8 +87,8 @@ public final class PadLockDB {
       }
     }
 
-    public void insert(final @NonNull ContentValues contentValues) {
-      database.getDatabase().insert(PadLockEntry.TABLE_NAME, contentValues);
+    @CheckResult public long insert(final @NonNull ContentValues contentValues) {
+      return database.getDatabase().insert(PadLockEntry.TABLE_NAME, contentValues);
     }
 
     @NonNull @CheckResult
@@ -110,9 +110,10 @@ public final class PadLockDB {
           .filter(padLockEntries -> padLockEntries != null);
     }
 
-    public void updateWithPackageActivityName(final @NonNull ContentValues contentValues,
+    @CheckResult
+    public int updateWithPackageActivityName(final @NonNull ContentValues contentValues,
         final @NonNull String packageName, final @NonNull String activityName) {
-      database.getDatabase()
+      return database.getDatabase()
           .update(PadLockEntry.TABLE_NAME, contentValues,
               PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
     }
@@ -124,20 +125,20 @@ public final class PadLockDB {
           .filter(padLockEntries -> padLockEntries != null);
     }
 
-    public void deleteWithPackageName(final @NonNull String packageName) {
-      database.getDatabase()
+    @CheckResult public int deleteWithPackageName(final @NonNull String packageName) {
+      return database.getDatabase()
           .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME, packageName);
     }
 
-    public void deleteWithPackageActivityName(final @NonNull String packageName,
+    @CheckResult public int deleteWithPackageActivityName(final @NonNull String packageName,
         final @NonNull String activityName) {
-      database.getDatabase()
+      return database.getDatabase()
           .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME,
               packageName, activityName);
     }
 
-    public void deleteAll() {
-      database.getDatabase().delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
+    @CheckResult public int deleteAll() {
+      return database.getDatabase().delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
     }
   }
 }

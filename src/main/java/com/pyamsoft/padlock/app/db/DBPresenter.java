@@ -75,12 +75,14 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
     dbAllSubscription = Observable.defer(() -> {
       if (create) {
         Timber.d("Cursor does not have existing DB data, this is an add call");
-        dbInteractor.createActivityEntries(packageName, code, system);
+        return dbInteractor.createActivityEntries(packageName, code, system);
       } else {
         Timber.d("Cursor has existing DB data, this is a delete call");
-        dbInteractor.deleteActivityEntries(packageName);
+        return dbInteractor.deleteActivityEntries(packageName).map(Integer::longValue);
       }
-      return Observable.just(create);
+    }).map(aLong -> {
+      // TODO do something with result
+      return true;
     }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
       Timber.d("onNext in DBPresenterImpl with data: ", created);
       final DBView dbView = getView();
@@ -103,12 +105,15 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
     dbPackageSubscription = Observable.defer(() -> {
       if (create) {
         Timber.d("Cursor does not have existing DB data, this is an add call");
-        dbInteractor.createEntry(packageName, PadLockEntry.PACKAGE_TAG, code, system);
+        return dbInteractor.createEntry(packageName, PadLockEntry.PACKAGE_TAG, code, system);
       } else {
         Timber.d("Cursor has existing DB data, this is a delete call");
-        dbInteractor.deleteEntry(packageName, PadLockEntry.PACKAGE_TAG);
+        return dbInteractor.deleteEntry(packageName, PadLockEntry.PACKAGE_TAG)
+            .map(Integer::longValue);
       }
-      return Observable.just(create);
+    }).map(aLong -> {
+      // TODO do something with result
+      return true;
     }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
       Timber.d("onNext in DBPresenterImpl with data: ", created);
       final DBView dbView = getView();
@@ -130,12 +135,14 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
     dbActivitySubscription = Observable.defer(() -> {
       if (create) {
         Timber.d("Cursor does not have existing DB data, this is an add call");
-        dbInteractor.createEntry(packageName, activity, code, system);
+        return dbInteractor.createEntry(packageName, activity, code, system);
       } else {
         Timber.d("Cursor has existing DB data, this is a delete call");
-        dbInteractor.deleteEntry(packageName, activity);
+        return dbInteractor.deleteEntry(packageName, activity).map(Integer::longValue);
       }
-      return Observable.just(create);
+    }).map(aLong -> {
+      // TODO do something with result
+      return true;
     }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
       Timber.d("onNext in DBPresenterImpl with data: ", created);
       final DBView dbView = getView();

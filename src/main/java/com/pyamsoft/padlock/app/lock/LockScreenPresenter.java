@@ -23,7 +23,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
-import rx.functions.Action1;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -171,10 +170,8 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
         .flatMap(time -> interactor.postUnlock(packageName, activityName, shouldExclude, time))
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(new Action1<Boolean>() {
-          @Override public void call(Boolean ignore) {
-            getView().onPostUnlock();
-          }
+        .subscribe(ignore -> {
+          getView().onPostUnlock();
         }, throwable -> {
           Timber.e(throwable, "Error postunlock");
           getView().onLockedError();
