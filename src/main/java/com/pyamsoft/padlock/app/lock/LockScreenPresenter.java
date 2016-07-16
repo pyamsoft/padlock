@@ -171,6 +171,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(ignore -> {
+          Timber.d("onPostUnlock");
           getView().onPostUnlock();
         }, throwable -> {
           Timber.e(throwable, "Error postunlock");

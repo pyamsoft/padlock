@@ -138,10 +138,10 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
       Timber.d("Check ignore time for: %s %s", entry.packageName(), entry.activityName());
       final long ignoreUntilTime = entry.ignoreUntilTime();
       final long currentTime = System.currentTimeMillis();
+      Timber.d("Ignore until time: %d", ignoreUntilTime);
+      Timber.d("Current time: %d", currentTime);
       if (currentTime < ignoreUntilTime) {
         Timber.d("Ignore period has not elapsed yet");
-        Timber.d("Ignore until time: %d", ignoreUntilTime);
-        Timber.d("Current time: %d", currentTime);
         return false;
       }
 
