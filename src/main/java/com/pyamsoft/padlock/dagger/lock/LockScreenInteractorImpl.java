@@ -130,24 +130,32 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         Timber.d("EXCLUDE not requested");
         return Observable.just(1);
       }
-    }).flatMap(integer -> {
-      // TODO Do something with DB result
-      return getIgnoreTimeNone();
-    }).zipWith(dbObservable, (ignoreNone, entry) -> {
-      if (ignoreTime != ignoreNone && !PadLockEntry.isEmpty(entry)) {
+    }).flatMap(deleteResult -> {
+      // Ignore time is requested
+      if (ignoreTime != 0) {
+        Timber.d("Get entry to update");
+        return dbObservable;
+      } else {
+        Timber.d("No update requested, empty entry");
+        return Observable.just(PadLockEntry.empty());
+      }
+    }).flatMap(entry -> {
+      if (!PadLockEntry.isEmpty(entry)) {
         Timber.d("IGNORE requested, update entry in DB");
         return ignoreEntryForTime(entry, ignoreTime);
       } else {
-        // TODO return a value that will be a noop/success
-        return 1;
+        Timber.d("IGNORE not requested");
+        return Observable.just(1);
       }
     }).map(integer -> {
       // TODO do something with integer result
+      Timber.d("Result for update: %d", integer);
       return true;
     });
   }
 
-  @NonNull @CheckResult private Observable<Integer> ignoreEntryForTime(final PadLockEntry oldValues,
+  @NonNull @CheckResult
+  private Observable<Integer> ignoreEntryForTime(@NonNull PadLockEntry oldValues,
       final long ignoreForPeriod) {
     final long ignoreMinutesInMillis = ignoreForPeriod * 60 * 1000;
     Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
@@ -172,10 +180,6 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   @WorkerThread @NonNull @Override @CheckResult
   public Observable<String> getDisplayName(@NonNull String packageName) {
     return packageManagerWrapper.loadPackageLabel(packageName);
-  }
-
-  @CheckResult @NonNull private Observable<Long> getIgnoreTimeNone() {
-    return getIgnoreTimeForIndex(0);
   }
 
   @NonNull @Override public Observable<Long> getIgnoreTimeForIndex(int index) {
