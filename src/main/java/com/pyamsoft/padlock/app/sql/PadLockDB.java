@@ -69,10 +69,6 @@ public final class PadLockDB {
 
     @NonNull private final PadLockDB database;
 
-    Delegate(@NonNull Context context) {
-      this(context, Schedulers.io());
-    }
-
     public Delegate(@NonNull Context context, @NonNull Scheduler scheduler) {
       final Context appContext = context.getApplicationContext();
       this.database = new PadLockDB(appContext, scheduler);
