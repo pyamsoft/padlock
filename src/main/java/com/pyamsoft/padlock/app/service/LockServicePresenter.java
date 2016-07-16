@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.service;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.SchedulerPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
@@ -171,7 +172,9 @@ public final class LockServicePresenter
     interactor.isExperimentalNSupported()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .map(nSupported -> nSupported && LockScreenActivity1.isActive())
+        .map(nSupported -> nSupported
+            && LockScreenActivity1.isActive()
+            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
         .subscribe(launchActivity2 -> {
           if (launchActivity2) {
             getView().startLockScreen2(packageName, activityName);
