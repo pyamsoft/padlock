@@ -150,6 +150,9 @@ public class LockInfoDialog extends DialogFragment
   @Override public void onDestroyView() {
     super.onDestroyView();
 
+    // KLUDGE If dialog is killed with back button, it may not have finished adding all of the individual
+    // KLUDGE entries from the Toggle All
+
     recyclerView.setOnClickListener(null);
     recyclerView.setLayoutManager(null);
     recyclerView.setAdapter(null);
