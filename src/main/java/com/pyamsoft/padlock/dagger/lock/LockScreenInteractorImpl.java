@@ -134,7 +134,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       // TODO Do something with DB result
       return getIgnoreTimeNone();
     }).zipWith(dbObservable, (ignoreNone, entry) -> {
-      if (ignoreTime != ignoreNone) {
+      if (ignoreTime != ignoreNone && !PadLockEntry.isEmpty(entry)) {
         Timber.d("IGNORE requested, update entry in DB");
         return ignoreEntryForTime(entry, ignoreTime);
       } else {

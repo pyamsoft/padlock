@@ -38,7 +38,7 @@ final class SettingsInteractorImpl implements SettingsInteractor {
   @NonNull @Override public Observable<Boolean> clearDatabase() {
     return Observable.defer(() -> {
       Timber.d("Clear database of all entries");
-      return Observable.just(PadLockDB.with(appContext).deleteAll());
+      return PadLockDB.with(appContext).deleteAll();
     }).map(integer -> {
       // TODO do something with result
       return true;
