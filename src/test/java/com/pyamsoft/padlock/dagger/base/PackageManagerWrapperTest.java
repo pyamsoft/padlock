@@ -27,7 +27,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -39,7 +38,7 @@ public class PackageManagerWrapperTest {
 
   @CheckResult @NonNull public static PackageManagerWrapper getPackageManagerWrapper() {
     RuntimeEnvironment.setRobolectricPackageManager(
-        new ShadowPackageManager(Robolectric.getShadowsAdapter()));
+        new ShadowPackageManager(RuntimeEnvironment.getSystemResourceLoader()));
     final Context context = RuntimeEnvironment.application.getApplicationContext();
     return new PackageManagerWrapperImpl(context);
   }

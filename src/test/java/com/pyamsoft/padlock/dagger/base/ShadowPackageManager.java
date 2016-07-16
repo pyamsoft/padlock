@@ -25,17 +25,15 @@ import com.pyamsoft.padlock.R;
 import java.util.ArrayList;
 import java.util.List;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.ShadowsAdapter;
+import org.robolectric.res.ResourceLoader;
 import org.robolectric.res.builder.DefaultPackageManager;
 import org.robolectric.res.builder.RobolectricPackageManager;
 
 final class ShadowPackageManager extends DefaultPackageManager
     implements RobolectricPackageManager {
 
-  ShadowPackageManager(ShadowsAdapter shadowsAdapter) {
-    super(shadowsAdapter);
-
-    // TODO add packages to PM
+  public ShadowPackageManager(ResourceLoader appResourceLoader) {
+    super(appResourceLoader);
   }
 
   @Override public int[] getPackageGids(String s, int i) throws NameNotFoundException {
