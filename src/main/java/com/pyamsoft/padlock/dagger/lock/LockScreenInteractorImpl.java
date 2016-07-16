@@ -121,13 +121,17 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
     return Observable.defer(() -> {
       Timber.d("Run finishing unlock hooks");
-
-      if (exclude) {
+      return Observable.just(exclude);
+    }).flatMap(exclude1 -> {
+      if (exclude1) {
         Timber.d("EXCLUDE requested, delete entry from DB");
-        dbInteractor.deleteEntry(packageName, activityName);
+        return dbInteractor.deleteEntry(packageName, activityName);
+      } else {
+        Timber.d("EXCLUDE not requested");
+        return Observable.just(1);
       }
-
-      // Prepare the ignore time for next part
+    }).flatMap(integer -> {
+      // TODO Do something with DB result
       return getIgnoreTimeNone();
     }).zipWith(dbObservable, (ignoreNone, entry) -> {
       if (ignoreTime != ignoreNone) {
@@ -143,8 +147,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     });
   }
 
-  @WorkerThread @CheckResult
-  private int ignoreEntryForTime(final PadLockEntry oldValues, final long ignoreForPeriod) {
+  @NonNull @CheckResult private Observable<Integer> ignoreEntryForTime(final PadLockEntry oldValues,
+      final long ignoreForPeriod) {
     final long ignoreMinutesInMillis = ignoreForPeriod * 60 * 1000;
     Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
         ignoreMinutesInMillis);

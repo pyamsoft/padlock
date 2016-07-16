@@ -78,10 +78,6 @@ public final class PadLockDB {
       this.database = new PadLockDB(appContext, scheduler);
     }
 
-    @CheckResult @NonNull public BriteDatabase.Transaction newTransaction() {
-      return database.getDatabase().newTransaction();
-    }
-
     @CheckResult public long insert(final @NonNull ContentValues contentValues) {
       return database.getDatabase().insert(PadLockEntry.TABLE_NAME, contentValues);
     }
@@ -105,12 +101,12 @@ public final class PadLockDB {
           .filter(padLockEntries -> padLockEntries != null);
     }
 
-    @CheckResult
-    public int updateWithPackageActivityName(final @NonNull ContentValues contentValues,
-        final @NonNull String packageName, final @NonNull String activityName) {
-      return database.getDatabase()
+    @NonNull @CheckResult public Observable<Integer> updateWithPackageActivityName(
+        final @NonNull ContentValues contentValues, final @NonNull String packageName,
+        final @NonNull String activityName) {
+      return Observable.defer(() -> Observable.just(database.getDatabase()
           .update(PadLockEntry.TABLE_NAME, contentValues,
-              PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
+              PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)));
     }
 
     @NonNull @CheckResult public Observable<List<PadLockEntry>> queryAll() {
@@ -120,20 +116,23 @@ public final class PadLockDB {
           .filter(padLockEntries -> padLockEntries != null);
     }
 
-    @CheckResult public int deleteWithPackageName(final @NonNull String packageName) {
-      return database.getDatabase()
-          .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME, packageName);
+    @NonNull @CheckResult
+    public Observable<Integer> deleteWithPackageName(final @NonNull String packageName) {
+      return Observable.defer(() -> Observable.just(database.getDatabase()
+          .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME, packageName)));
     }
 
-    @CheckResult public int deleteWithPackageActivityName(final @NonNull String packageName,
+    @NonNull @CheckResult
+    public Observable<Integer> deleteWithPackageActivityName(final @NonNull String packageName,
         final @NonNull String activityName) {
-      return database.getDatabase()
+      return Observable.defer(() -> Observable.just(database.getDatabase()
           .delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME,
-              packageName, activityName);
+              packageName, activityName)));
     }
 
-    @CheckResult public int deleteAll() {
-      return database.getDatabase().delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
+    @NonNull @CheckResult public Observable<Integer> deleteAll() {
+      return Observable.defer(() -> Observable.just(
+          database.getDatabase().delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL)));
     }
   }
 }

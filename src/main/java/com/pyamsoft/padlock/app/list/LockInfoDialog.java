@@ -161,7 +161,12 @@ public class LockInfoDialog extends DialogFragment
   }
 
   private void initializeForEntry() {
-    close.setOnClickListener(view -> dismiss());
+    close.setOnClickListener(view -> {
+      // Only close if list is displayed
+      if (recyclerView.isClickable()) {
+        dismiss();
+      }
+    });
     name.setText(appEntry.name());
     presenter.loadApplicationIcon(appEntry.packageName());
     packageName.setText(appEntry.packageName());
