@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.sql;
 
-import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.support.annotation.CheckResult;
@@ -32,17 +31,13 @@ import rx.schedulers.Schedulers;
 
 public final class PadLockDB {
 
-  @NonNull private final BriteDatabase briteDatabase;
   private static volatile Delegate instance = null;
+  @NonNull private final BriteDatabase briteDatabase;
 
   PadLockDB(final @NonNull Context context, final @NonNull Scheduler dbScheduler) {
     final SqlBrite sqlBrite = SqlBrite.create();
     final PadLockOpenHelper openHelper = new PadLockOpenHelper(context.getApplicationContext());
     briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, dbScheduler);
-  }
-
-  @NonNull @CheckResult public final BriteDatabase getDatabase() {
-    return briteDatabase;
   }
 
   public static void setDelegate(@Nullable Delegate delegate) {
@@ -66,6 +61,10 @@ public final class PadLockDB {
     return instance;
   }
 
+  @NonNull @CheckResult public final BriteDatabase getDatabase() {
+    return briteDatabase;
+  }
+
   public static class Delegate {
 
     @NonNull private final PadLockDB database;
@@ -79,12 +78,8 @@ public final class PadLockDB {
       this.database = new PadLockDB(appContext, scheduler);
     }
 
-    @SuppressLint("NewApi") public void newTransaction(final @NonNull Runnable runnable) {
-      try (
-          final BriteDatabase.Transaction transaction = database.getDatabase().newTransaction()) {
-        runnable.run();
-        transaction.markSuccessful();
-      }
+    @CheckResult @NonNull public BriteDatabase.Transaction newTransaction() {
+      return database.getDatabase().newTransaction();
     }
 
     @CheckResult public long insert(final @NonNull ContentValues contentValues) {

@@ -190,17 +190,18 @@ public class LockInfoDialog extends DialogFragment
 
   private void repopulateList() {
     Timber.d("Repopulate list");
+    recyclerView.setClickable(false);
     presenter.populateList(appEntry.packageName());
   }
 
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
     Timber.d("Add entry: %s", entry);
-
     adapter.addItem(entry);
   }
 
   @Override public void onListPopulated() {
     Timber.d("Refresh finished");
+    recyclerView.setClickable(true);
   }
 
   @Override public void onListPopulateError() {
@@ -254,9 +255,18 @@ public class LockInfoDialog extends DialogFragment
   private void safeChangeToggleAllState(boolean enabled) {
     toggleAll.setOnCheckedChangeListener(null);
     toggleAll.setChecked(enabled);
-    toggleAll.setOnCheckedChangeListener(
-        (compoundButton, isChecked) -> dbPresenter.attemptDBAllModification(isChecked,
-            appEntry.packageName(), null, appEntry.system()));
+    toggleAll.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+      recyclerView.setClickable(false);
+
+      // Clear All
+      final int size = adapter.getItemCount();
+      for (int i = 0; i < size; ++i) {
+        adapter.removeItem();
+      }
+
+      dbPresenter.attemptDBAllModification(isChecked, appEntry.packageName(), null,
+          appEntry.system());
+    });
   }
 
   @Override public void enableToggleAll() {

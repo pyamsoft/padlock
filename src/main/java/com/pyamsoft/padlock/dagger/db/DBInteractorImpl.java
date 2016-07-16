@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.db;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
@@ -23,10 +24,12 @@ import android.content.pm.PackageManager;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.crash.CrashLogActivity;
+import com.squareup.sqlbrite.BriteDatabase;
 import javax.inject.Inject;
 import rx.Observable;
 import rx.functions.Func1;
@@ -40,7 +43,7 @@ final class DBInteractorImpl implements DBInteractor {
     appContext = context.getApplicationContext();
   }
 
-  @NonNull @CheckResult @Override
+  @SuppressLint("NewApi") @NonNull @CheckResult @Override
   public Observable<Long> createActivityEntries(@NonNull String packageName, @Nullable String code,
       boolean system) {
     final PackageManager packageManager = appContext.getPackageManager();
@@ -52,23 +55,28 @@ final class DBInteractorImpl implements DBInteractor {
     }
 
     final ActivityInfo[] activities = packageInfo.activities;
+    Observable<Long> result = Observable.empty();
     if (activities != null) {
-      PadLockDB.with(appContext).newTransaction(() -> {
-        // KLUDGE ignored result
-        Observable<Long> result = Observable.empty();
+      try (final BriteDatabase.Transaction transaction = PadLockDB.with(appContext)
+          .newTransaction()) {
         for (final ActivityInfo info : activities) {
           final String activityName = info.name;
           if (activityName != null && !activityName.equalsIgnoreCase(
-              LockScreenActivity.class.getName()) && !activityName.equalsIgnoreCase(
+              LockScreenActivity1.class.getName()) && !activityName.equals(
+              LockScreenActivity2.class.getName()) && !activityName.equalsIgnoreCase(
               CrashLogActivity.class.getName())) {
+            Timber.d("Add entry for %s, %s", packageName, activityName);
             result = result.mergeWith(createEntry(packageName, activityName, code, system));
           }
         }
-      });
-
+        Timber.d("Transaction success");
+        transaction.markSuccessful();
+      }
       // KLUDGE useless result
-      return Observable.just(-1L);
+      Timber.d("Popular result");
+      return result;
     } else {
+      Timber.d("Useless result");
       return Observable.empty();
     }
   }

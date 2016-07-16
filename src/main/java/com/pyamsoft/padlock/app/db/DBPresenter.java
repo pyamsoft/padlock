@@ -85,17 +85,20 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
       return create;
     }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
       Timber.d("onNext in DBPresenterImpl with data: %s", created);
-      final DBView dbView = getView();
-      final int position = -1;
-      if (created) {
-        dbView.onDBCreateEvent(position);
-      } else {
-        dbView.onDBDeleteEvent(position);
-      }
+      // KLUDGE do nothing for onnext
     }, throwable -> {
       Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
       final DBView dbView = getView();
       dbView.onDBError();
+    }, () -> {
+      Timber.d("onComplete in DBPresenterImpl with data: %s", create);
+      final DBView dbView = getView();
+      final int position = -1;
+      if (create) {
+        dbView.onDBCreateEvent(position);
+      } else {
+        dbView.onDBDeleteEvent(position);
+      }
     });
   }
 
