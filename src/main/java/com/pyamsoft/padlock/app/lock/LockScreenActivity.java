@@ -148,9 +148,9 @@ public abstract class LockScreenActivity extends NoDonationActivityBase
     Timber.d("Clear currently locked");
   }
 
-  @Override public void finishAndRemoveTask() {
-    super.finishAndRemoveTask();
-    Timber.d("Finish and Remove");
+  @Override public void finish() {
+    super.finish();
+    Timber.d("Finish");
     overridePendingTransition(0, 0);
   }
 
