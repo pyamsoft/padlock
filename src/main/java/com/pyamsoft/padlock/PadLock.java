@@ -23,6 +23,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.config.Configuration;
+import com.birbit.android.jobqueue.network.NetworkUtil;
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService;
 import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
 import com.google.android.gms.common.ConnectionResult;
@@ -54,14 +55,6 @@ public final class PadLock extends ApplicationBase {
     PadLock.instance = instance;
   }
 
-  @CheckResult @NonNull public final PadLockComponent getPadLockComponent() {
-    if (padLockComponent == null) {
-      throw new NullPointerException("PadLock component is NULL");
-    } else {
-      return padLockComponent;
-    }
-  }
-
   @CheckResult @NonNull
   private static JobManager createJobManager(@NonNull Application application) {
     final Configuration.Builder builder = new Configuration.Builder(application).minConsumerCount(1)
@@ -86,8 +79,19 @@ public final class PadLock extends ApplicationBase {
       }
     }
 
+    // We don't actually use the network
+    builder.networkUtil(context -> NetworkUtil.DISCONNECTED);
+
     Timber.d("Create a new JobManager");
     return new JobManager(builder.build());
+  }
+
+  @CheckResult @NonNull public final PadLockComponent getPadLockComponent() {
+    if (padLockComponent == null) {
+      throw new NullPointerException("PadLock component is NULL");
+    } else {
+      return padLockComponent;
+    }
   }
 
   @NonNull @CheckResult public synchronized final JobManager getJobManager() {

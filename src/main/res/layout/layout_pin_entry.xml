@@ -36,7 +36,7 @@
         android:layout_gravity="center"
         android:contentDescription="@string/blank"
         android:padding="16dp"
-        android:src="?attr/homeAsUpIndicator"
+        app:srcCompat="?attr/homeAsUpIndicator"
         />
 
     <android.support.v7.widget.Toolbar

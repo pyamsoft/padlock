@@ -50,6 +50,6 @@ public class LockScreenActivity2 extends LockScreenActivity {
   @Override public void onPostUnlock() {
     Timber.d("POST Unlock Finished! 2");
     PadLockService.passLockScreen();
-    finishAndRemoveTask();
+    finish();
   }
 }
