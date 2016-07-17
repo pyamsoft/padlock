@@ -38,7 +38,6 @@ import com.pyamsoft.padlock.dagger.main.DaggerMainComponent;
 import com.pyamsoft.padlock.dagger.main.MainModule;
 import com.pyamsoft.pydroid.base.activity.DonationActivityBase;
 import com.pyamsoft.pydroid.support.RatingDialog;
-import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.StringUtil;
 import javax.inject.Inject;
@@ -51,16 +50,10 @@ public class MainActivity extends DonationActivityBase
   @NonNull public static final String USAGE_TERMS_TAG = "usage_terms";
   @NonNull public static final String ACCESSIBILITY_TAG = "accessibility";
   @NonNull public static final String LOCK_LIST_TAG = "lock_list";
-  private static final int VECTOR_TASK_SIZE = 2;
 
-  @NonNull private final AsyncVectorDrawableTask[] tasks;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @Inject MainPresenter presenter;
   private Unbinder unbinder;
-
-  public MainActivity() {
-    tasks = new AsyncVectorDrawableTask[VECTOR_TASK_SIZE];
-  }
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
@@ -101,15 +94,6 @@ public class MainActivity extends DonationActivityBase
     }
   }
 
-  private void cancelAsyncVectorTask(int position) {
-    if (tasks[position] != null) {
-      if (!tasks[position].isCancelled()) {
-        tasks[position].cancel(true);
-      }
-      tasks[position] = null;
-    }
-  }
-
   @Override protected void onDestroy() {
     super.onDestroy();
 
@@ -118,10 +102,6 @@ public class MainActivity extends DonationActivityBase
     }
 
     unbinder.unbind();
-
-    for (int i = 0; i < VECTOR_TASK_SIZE; ++i) {
-      cancelAsyncVectorTask(i);
-    }
   }
 
   private void setAppBarState() {

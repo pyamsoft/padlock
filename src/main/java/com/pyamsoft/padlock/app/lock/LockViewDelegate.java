@@ -40,6 +40,7 @@ import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.pydroid.model.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncTaskMap;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
@@ -50,6 +51,7 @@ public final class LockViewDelegate implements AppIconLoaderView {
   @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
+  @NonNull private final AsyncTaskMap taskMap = new AsyncTaskMap();
 
   @BindView(R.id.lock_image) ImageView image;
   @BindView(R.id.lock_text_entry) TextInputEditText editText;
@@ -60,7 +62,6 @@ public final class LockViewDelegate implements AppIconLoaderView {
   private View rootView;
   private String activityName;
   private String packageName;
-  private AsyncVectorDrawableTask arrowGoTask;
   private Unbinder unbinder;
   private InputMethodManager imm;
 
@@ -129,14 +130,10 @@ public final class LockViewDelegate implements AppIconLoaderView {
       }
     });
 
-    // Load the go arrow
-    if (arrowGoTask != null) {
-      arrowGoTask.cancel(true);
-    }
-
-    arrowGoTask = new AsyncVectorDrawableTask(imageGo);
+    final AsyncVectorDrawableTask arrowGoTask = new AsyncVectorDrawableTask(imageGo);
     arrowGoTask.execute(new AsyncDrawable(rootView.getContext().getApplicationContext(),
         R.drawable.ic_arrow_forward_24dp));
+    taskMap.put("arrow", arrowGoTask);
 
     clearDisplay();
   }
@@ -158,13 +155,11 @@ public final class LockViewDelegate implements AppIconLoaderView {
 
   public final void onDestroyView() {
     Timber.d("unbindView");
-    if (arrowGoTask != null) {
-      arrowGoTask.cancel(true);
-    }
 
-    unbinder.unbind();
+    taskMap.clear();
     imm.toggleSoftInputFromWindow(rootView.getWindowToken(), 0, 0);
     rootView = null;
+    unbinder.unbind();
   }
 
   @CheckResult @NonNull public String getCurrentAttempt() {
