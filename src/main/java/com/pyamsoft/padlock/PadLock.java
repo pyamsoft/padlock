@@ -150,6 +150,7 @@ public final class PadLock extends ApplicationBase {
         .penaltyLog()
         .penaltyDeath()
         .permitDiskReads()
+        .permitDiskWrites()
         .penaltyFlashScreen()
         .build());
     StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());

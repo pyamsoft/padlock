@@ -66,6 +66,11 @@ final class PadLockPreferencesImpl extends ApplicationPreferences implements Pad
     }
   }
 
+  @Override public boolean isRecheckEnabled() {
+    // TODO
+    return true;
+  }
+
   @Override public boolean isExperimentalNSupported() {
     return get(nSupportKey, nSupportDefault);
   }
