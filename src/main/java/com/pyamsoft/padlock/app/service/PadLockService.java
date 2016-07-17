@@ -61,8 +61,9 @@ public final class PadLockService extends AccessibilityService
 
   public static void recheck(@NonNull String packageName, @NonNull String className) {
     if (!packageName.isEmpty() && !className.isEmpty()) {
-      final LockServicePresenter lockServicePresenter = getInstance().presenter;
-      lockServicePresenter.processAccessibilityEvent(packageName, className);
+      Timber.d("Run recheck for: %s %s", packageName, className);
+      //final LockServicePresenter lockServicePresenter = getInstance().presenter;
+      //lockServicePresenter.processAccessibilityEvent(packageName, className);
     }
   }
 
