@@ -21,12 +21,14 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
+import com.pyamsoft.padlock.dagger.lock.RecheckJob;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
@@ -46,6 +48,17 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
     this.keyguard = keyguard;
+  }
+
+  /**
+   * Clean up the lock service, cancel background jobs
+   */
+  @Override public void cleanup() {
+    Timber.d("Cleanup LockService");
+    Timber.d("Cancel ALL jobs in background");
+    PadLock.getInstance()
+        .getJobManager()
+        .cancelJobsInBackground(null, TagConstraint.ANY, RecheckJob.TAG_ALL);
   }
 
   /**

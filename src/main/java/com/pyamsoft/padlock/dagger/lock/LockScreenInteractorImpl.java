@@ -189,7 +189,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       long recheckTime) {
     return Observable.defer(() -> {
       // Cancel any old recheck job for the class, but not the package
-      final String classTag = RecheckJob.CLASS_TAG_PREFIX + entry.activityName();
+      final String classTag = RecheckJob.TAG_CLASS_PREFIX + entry.activityName();
       Timber.d("Cancel jobs with class tag: %s", classTag);
       PadLock.getInstance().getJobManager().cancelJobs(TagConstraint.ANY, classTag);
 

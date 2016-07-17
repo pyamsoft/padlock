@@ -30,8 +30,9 @@ import timber.log.Timber;
 public final class RecheckJob extends Job {
 
   public static final int PRIORITY = 1;
-  @NonNull public static final String PACKAGE_TAG_PREFIX = "P: ";
-  @NonNull public static final String CLASS_TAG_PREFIX = "C: ";
+  @NonNull public static final String TAG_ALL = "ALL";
+  @NonNull public static final String TAG_PACKAGE_PREFIX = "P: ";
+  @NonNull public static final String TAG_CLASS_PREFIX = "C: ";
 
   @NonNull private final String packageName;
   @NonNull private final String className;
@@ -39,7 +40,7 @@ public final class RecheckJob extends Job {
   private RecheckJob(@NonNull String packageName, @NonNull String className, long delay) {
     super(new Params(PRIORITY).setDelayMs(delay)
         .setRequiresNetwork(false)
-        .addTags(PACKAGE_TAG_PREFIX + packageName, CLASS_TAG_PREFIX + className));
+        .addTags(TAG_PACKAGE_PREFIX + packageName, TAG_CLASS_PREFIX + className, TAG_ALL));
     this.packageName = packageName;
     this.className = className;
   }

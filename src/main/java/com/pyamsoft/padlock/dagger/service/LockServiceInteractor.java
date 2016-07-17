@@ -27,6 +27,8 @@ public interface LockServiceInteractor {
   @NonNull String ANDROID_SYSTEM_UI_PACKAGE = "com.android.systemui";
   @NonNull String ANDROID_PACKAGE = "android";
 
+  void cleanup();
+
   @NonNull @CheckResult Observable<Boolean> isEventFromActivity(@NonNull String packageName,
       @NonNull String className);
 
