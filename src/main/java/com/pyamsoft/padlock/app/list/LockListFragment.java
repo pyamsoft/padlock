@@ -53,6 +53,7 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.model.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncTaskMap;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
@@ -71,6 +72,7 @@ public final class LockListFragment extends Fragment
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
+  @NonNull private final AsyncTaskMap taskMap = new AsyncTaskMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
@@ -102,7 +104,6 @@ public final class LockListFragment extends Fragment
       }
     }
   };
-  @Nullable private AsyncVectorDrawableTask fabIconTask;
   private Unbinder unbinder;
   private MenuItem displaySystemItem;
   private boolean firstRefresh;
@@ -290,18 +291,9 @@ public final class LockListFragment extends Fragment
     adapter.onDestroy();
     presenter.unbindView(!getActivity().isChangingConfigurations());
 
-    cancelFabTask();
+    taskMap.clear();
     unbinder.unbind();
     handler.removeCallbacksAndMessages(null);
-  }
-
-  private void cancelFabTask() {
-    if (fabIconTask != null) {
-      if (!fabIconTask.isCancelled()) {
-        fabIconTask.cancel(true);
-      }
-      fabIconTask = null;
-    }
   }
 
   private void setupFAB() {
@@ -312,17 +304,17 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void setFABStateEnabled() {
-    cancelFabTask();
-    fabIconTask = new AsyncVectorDrawableTask(fab);
+    final AsyncVectorDrawableTask fabIconTask = new AsyncVectorDrawableTask(fab);
     fabIconTask.execute(
         new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_lock_outline_24dp));
+    taskMap.put("fab", fabIconTask);
   }
 
   @Override public void setFABStateDisabled() {
-    cancelFabTask();
-    fabIconTask = new AsyncVectorDrawableTask(fab);
+    final AsyncVectorDrawableTask fabIconTask = new AsyncVectorDrawableTask(fab);
     fabIconTask.execute(
         new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_lock_open_24dp));
+    taskMap.put("fab", fabIconTask);
   }
 
   @Override

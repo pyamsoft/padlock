@@ -167,6 +167,6 @@ dependencies {
   // Mockito for unit tests
   testCompile 'org.mockito:mockito-core:2.0.86-beta'
 
-  // PYDroid 2.2.2
+  // PYDroid 2.3.0
   compile project(':PYDroid')
 }
