@@ -55,6 +55,13 @@
         android:title="@string/lock_device_locked_title"/>
 
     <CheckBoxPreference
+        android:defaultValue="@bool/recheck_default"
+        android:key="@string/recheck_key"
+        android:summaryOff="@string/recheck_summary_unchecked"
+        android:summaryOn="@string/recheck_summary_checked"
+        android:title="@string/recheck_title"/>
+
+    <CheckBoxPreference
         android:defaultValue="@bool/n_support_default"
         android:key="@string/n_support_key"
         android:summaryOff="@string/n_support_summary_unchecked"

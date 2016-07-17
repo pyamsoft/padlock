@@ -39,9 +39,11 @@ final class PadLockPreferencesImpl extends ApplicationPreferences implements Pad
   @NonNull private final String lockPackageChangeKey;
   @NonNull private final String lockDeviceLockedKey;
   @NonNull private final String nSupportKey;
+  @NonNull private final String recheckKey;
   @NonNull private final long[] ignoreTimes;
   private final boolean lockPackageChangeDefault;
   private final boolean lockDeviceLockedDefault;
+  private final boolean recheckDefault;
   private final boolean nSupportDefault;
 
   @Inject public PadLockPreferencesImpl(final @NonNull Context context) {
@@ -56,6 +58,8 @@ final class PadLockPreferencesImpl extends ApplicationPreferences implements Pad
     lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default);
     lockDeviceLockedKey = appContext.getString(R.string.lock_device_locked_key);
     lockDeviceLockedDefault = res.getBoolean(R.bool.lock_device_locked_default);
+    recheckKey = appContext.getString(R.string.recheck_key);
+    recheckDefault = res.getBoolean(R.bool.recheck_default);
     nSupportKey = appContext.getString(R.string.n_support_key);
     nSupportDefault = res.getBoolean(R.bool.n_support_default);
 
@@ -67,8 +71,7 @@ final class PadLockPreferencesImpl extends ApplicationPreferences implements Pad
   }
 
   @Override public boolean isRecheckEnabled() {
-    // TODO
-    return true;
+    return get(recheckKey, recheckDefault);
   }
 
   @Override public boolean isExperimentalNSupported() {

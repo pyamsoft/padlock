@@ -85,6 +85,12 @@
   <string name="timeout_time_key">timeout_time</string>
   <string name="timeout_time_default">0</string>
 
+  <string name="recheck_title">Check locking periodically</string>
+  <string name="recheck_summary_checked">Check if the current application should be locked after the Ignore period</string>
+  <string name="recheck_summary_unchecked">Do not check if the current application should be locked after the Ignore period</string>
+  <string name="recheck_key">recheck</string>
+  <bool name="recheck_default">false</bool>
+
   <string name="clear_db_key">clear_db</string>
   <string name="clear_db_title">Reset Database</string>
   <string name="clear_db_summary">Reset the locked applications database</string>
