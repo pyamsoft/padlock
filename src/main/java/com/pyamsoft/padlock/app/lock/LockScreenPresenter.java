@@ -18,11 +18,9 @@ package com.pyamsoft.padlock.app.lock;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 import com.pyamsoft.padlock.dagger.lock.LockScreenInteractor;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
@@ -166,14 +164,10 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
   }
 
   public void postUnlock(@NonNull String packageName, @NonNull String activityName,
-      boolean shouldExclude, int ignoreIndex, int recheckIndex) {
+      boolean shouldExclude, int ignoreIndex) {
     unsubPostUnlock();
-    final Observable<Long> ignore = interactor.getIgnoreTimeForIndex(ignoreIndex);
-    // TODO resolve recheck time from unique interactor function
-    final Observable<Long> recheck = interactor.getIgnoreTimeForIndex(recheckIndex);
-    postUnlockSubscription = Observable.zip(ignore, recheck, Pair::new)
-        .flatMap(pair -> interactor.postUnlock(packageName, activityName, shouldExclude, pair.first,
-            pair.second))
+    postUnlockSubscription = interactor.getIgnoreTimeForIndex(ignoreIndex)
+        .flatMap(time -> interactor.postUnlock(packageName, activityName, shouldExclude, time))
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(result -> {

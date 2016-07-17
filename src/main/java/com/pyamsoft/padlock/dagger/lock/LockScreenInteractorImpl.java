@@ -118,7 +118,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @NonNull @Override
   public Observable<Boolean> postUnlock(@NonNull String packageName, @NonNull String activityName,
-      boolean exclude, long ignoreTime, long recheckTime) {
+      boolean exclude, long ignoreTime) {
     Timber.d("Post unlock: %s %s", packageName, activityName);
     final Observable<PadLockEntry> dbObservable = PadLockDB.with(appContext)
         .queryWithPackageActivityName(packageName, activityName)
@@ -146,9 +146,12 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       }
     }).flatMap(entry -> {
       if (!PadLockEntry.isEmpty(entry)) {
-        queueRecheckJob(entry, recheckTime);
+        final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
+        Timber.d("Recheck requested, queue job");
+        queueRecheckJob(entry, ignoreMinutesInMillis);
+
         Timber.d("IGNORE requested, update entry in DB");
-        return ignoreEntryForTime(entry, ignoreTime);
+        return ignoreEntryForTime(entry, ignoreMinutesInMillis);
       } else {
         Timber.d("IGNORE not requested");
         return Observable.just(1);
@@ -174,8 +177,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @NonNull @CheckResult
   private Observable<Integer> ignoreEntryForTime(@NonNull PadLockEntry oldValues,
-      final long ignoreForPeriod) {
-    final long ignoreMinutesInMillis = ignoreForPeriod * 60 * 1000;
+      final long ignoreMinutesInMillis) {
     Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
         ignoreMinutesInMillis);
     final ContentValues contentValues = PadLockEntry.FACTORY.marshal()
