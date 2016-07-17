@@ -38,6 +38,8 @@ public final class PadLockService extends AccessibilityService
   @Inject LockServicePresenter presenter;
   private Intent lockActivity;
   private Intent lockActivity2;
+  @Nullable private String packageName;
+  @Nullable private String className;
 
   @NonNull @CheckResult private static synchronized PadLockService getInstance() {
     if (instance == null) {
@@ -61,9 +63,20 @@ public final class PadLockService extends AccessibilityService
 
   public static void recheck(@NonNull String packageName, @NonNull String className) {
     if (!packageName.isEmpty() && !className.isEmpty()) {
-      Timber.d("Run recheck for: %s %s", packageName, className);
-      //final LockServicePresenter lockServicePresenter = getInstance().presenter;
-      //lockServicePresenter.processAccessibilityEvent(packageName, className);
+      final PadLockService service = getInstance();
+      Timber.d("Recheck was requested for: %s, %s", packageName, className);
+      Timber.d("Check against current window values: %s, %s", service.packageName,
+          service.className);
+      if (service.packageName != null && service.className != null) {
+        if (service.packageName.equals(packageName) && (service.className.equals(className)
+            || className.equals(PadLockEntry.PACKAGE_TAG))) {
+          // We can replace the actual passed classname with the stored classname because:
+          // either it is equal to the passed name or the passed name is PACKAGE
+          // which will respond to any class name
+          Timber.d("Run recheck for: %s %s", service.packageName, service.className);
+          service.presenter.processAccessibilityEvent(service.packageName, service.className, true);
+        }
+      }
     }
   }
 
@@ -77,15 +90,13 @@ public final class PadLockService extends AccessibilityService
     final CharSequence eventClass = event.getClassName();
 
     if (eventPackage != null && eventClass != null) {
-      final String packageName = eventPackage.toString();
-      final String className = eventClass.toString();
-      if (!packageName.isEmpty() && !className.isEmpty()) {
-        presenter.processAccessibilityEvent(packageName, className);
+      final String pName = eventPackage.toString();
+      final String cName = eventClass.toString();
+      if (!pName.isEmpty() && !cName.isEmpty()) {
+        presenter.processAccessibilityEvent(pName, cName, false);
       }
     } else {
       Timber.e("Missing needed data");
-      Timber.e("Package: %s", eventPackage);
-      Timber.e("Class: %s", eventClass);
     }
   }
 
@@ -97,6 +108,15 @@ public final class PadLockService extends AccessibilityService
     final String packageName = entry.packageName();
     final String activityName = entry.activityName();
     presenter.launchCorrectLockScreen(packageName, activityName);
+  }
+
+  @Override
+  public void updateCurrentWindowValues(@NonNull String packageName, @NonNull String className) {
+    // KLUDGE this is a very kludgy way of doing this
+    // KLUDGE API18 has support for view nodes which would make this better
+    this.packageName = packageName;
+    this.className = className;
+    Timber.d("Set current window values: %s, %s", packageName, className);
   }
 
   @Override

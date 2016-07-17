@@ -87,7 +87,7 @@ public final class LockServicePresenter
   }
 
   public final void processAccessibilityEvent(@NonNull String packageName,
-      @NonNull String className) {
+      @NonNull String className, boolean forcedRecheck) {
     unsubLockedEntry();
     final Observable<Boolean> windowEventObservable =
         stateInteractor.isServiceEnabled().filter(enabled -> {
@@ -124,6 +124,9 @@ public final class LockServicePresenter
                 className);
           }
           return !isLockScreen;
+        }).doOnNext(valid -> {
+          Timber.d("Window has passed checks so far: %s", valid);
+          getView().updateCurrentWindowValues(packageName, className);
         });
 
     lockedEntrySubscription = Observable.zip(windowEventObservable,
@@ -144,6 +147,11 @@ public final class LockServicePresenter
           if (lockOnPackageChange) {
             Timber.d("Window change if package changed");
             windowHasChanged &= packageChanged;
+          }
+
+          if (forcedRecheck) {
+            Timber.d("Pass filter via forced recheck");
+            windowHasChanged = true;
           }
 
           return windowHasChanged;
@@ -188,6 +196,8 @@ public final class LockServicePresenter
   }
 
   public interface LockService {
+
+    void updateCurrentWindowValues(@NonNull String packageName, @NonNull String className);
 
     void startLockScreen(@NonNull PadLockEntry entry);
 
