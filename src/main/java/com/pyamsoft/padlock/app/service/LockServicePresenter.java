@@ -57,6 +57,7 @@ public final class LockServicePresenter
     super.onUnbind();
     unsubLockedEntry();
     unsubPickCorrect();
+    interactor.cleanup();
   }
 
   private void setLockScreenPassed(boolean b) {
