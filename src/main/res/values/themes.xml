@@ -36,19 +36,14 @@
 
   <!-- Lock Screen -->
   <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
-    <item name="android:buttonBarButtonStyle">@style/Style.PadLock.Lock.KeyPad</item>
-    <item name="android:textViewStyle">@style/Style.PadLock.Lock.Header</item>
   </style>
 
   <!-- Lock Screen Menu-->
   <style name="Theme.PadLock.Light.Menu" parent="@style/Base.Theme.PadLock.Light.Menu">
-    <item name="android:textViewStyle">@android:style/TextAppearance.Medium</item>
   </style>
 
   <!-- PIN Entry Dialog -->
   <style name="Theme.PadLock.Light.PINEntry" parent="@style/Base.Theme.PadLock.Light">
-    <item name="android:buttonBarButtonStyle">@style/Style.PadLock.PINEntry.KeyPad</item>
-    <item name="android:textViewStyle">@style/Style.PadLock.PINEntry.Header</item>
   </style>
 
   <!-- Splash screen-->
