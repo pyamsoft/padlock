@@ -16,19 +16,31 @@
 
 package com.pyamsoft.padlock;
 
+import android.app.Application;
+import android.os.Build;
 import android.os.StrictMode;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.birbit.android.jobqueue.JobManager;
+import com.birbit.android.jobqueue.config.Configuration;
+import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService;
+import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.pyamsoft.padlock.app.service.job.PadLockFrameworkJobSchedulerService;
+import com.pyamsoft.padlock.app.service.job.PadLockGCMJobSchedulerService;
 import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockModule;
 import com.pyamsoft.pydroid.base.app.ApplicationBase;
 import com.pyamsoft.pydroid.crash.CrashHandler;
+import timber.log.Timber;
 
 public final class PadLock extends ApplicationBase {
 
-  private PadLockComponent padLockComponent;
   private static volatile PadLock instance = null;
+  private PadLockComponent padLockComponent;
+  private JobManager jobManager;
 
   @CheckResult @NonNull public static PadLock getInstance() {
     if (instance == null) {
@@ -47,6 +59,42 @@ public final class PadLock extends ApplicationBase {
       throw new NullPointerException("PadLock component is NULL");
     } else {
       return padLockComponent;
+    }
+  }
+
+  @CheckResult @NonNull
+  private static JobManager createJobManager(@NonNull Application application) {
+    final Configuration.Builder builder = new Configuration.Builder(application).minConsumerCount(1)
+        .maxConsumerCount(4)
+        .loadFactor(4)
+        .consumerKeepAlive(120);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      Timber.d("Create scheduler using JobScheduler framework");
+      builder.scheduler(FrameworkJobSchedulerService.createSchedulerFor(application,
+          PadLockFrameworkJobSchedulerService.class));
+    } else {
+      final int googleAvailable =
+          GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(application);
+      if (googleAvailable == ConnectionResult.SUCCESS) {
+        Timber.d("Create scheduler using Google play services");
+
+        // Batch by default
+        builder.scheduler(GcmJobSchedulerService.createSchedulerFor(application,
+            PadLockGCMJobSchedulerService.class));
+      } else {
+        Timber.e("Could not create a scheduler to use with the JobScheduler");
+      }
+    }
+
+    Timber.d("Create a new JobManager");
+    return new JobManager(builder.build());
+  }
+
+  @NonNull @CheckResult public synchronized final JobManager getJobManager() {
+    if (jobManager == null) {
+      throw new NullPointerException("JobManager is NULL");
+    } else {
+      return jobManager;
     }
   }
 
@@ -89,6 +137,10 @@ public final class PadLock extends ApplicationBase {
     // Init the Dagger graph
     padLockComponent =
         DaggerPadLockComponent.builder().padLockModule(new PadLockModule(this)).build();
+
+    // Job Manager
+    jobManager = createJobManager(this);
+    Timber.d("Created new JobManager with scheduler: %s", jobManager.getScheduler());
 
     setInstance(this);
   }

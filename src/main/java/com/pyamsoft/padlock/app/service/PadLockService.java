@@ -59,6 +59,13 @@ public final class PadLockService extends AccessibilityService
     lockServicePresenter.setLockScreenPassed();
   }
 
+  public static void recheck(@NonNull String packageName, @NonNull String className) {
+    if (!packageName.isEmpty() && !className.isEmpty()) {
+      final LockServicePresenter lockServicePresenter = getInstance().presenter;
+      lockServicePresenter.processAccessibilityEvent(packageName, className);
+    }
+  }
+
   @Override public void onAccessibilityEvent(final @Nullable AccessibilityEvent event) {
     if (event == null) {
       Timber.e("AccessibilityEvent is NULL");
@@ -69,7 +76,11 @@ public final class PadLockService extends AccessibilityService
     final CharSequence eventClass = event.getClassName();
 
     if (eventPackage != null && eventClass != null) {
-      presenter.processAccessibilityEvent(eventPackage.toString(), eventClass.toString());
+      final String packageName = eventPackage.toString();
+      final String className = eventClass.toString();
+      if (!packageName.isEmpty() && !className.isEmpty()) {
+        presenter.processAccessibilityEvent(packageName, className);
+      }
     } else {
       Timber.e("Missing needed data");
       Timber.e("Package: %s", eventPackage);
