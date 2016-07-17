@@ -183,7 +183,7 @@ public abstract class LockScreenActivity extends NoDonationActivityBase
     lockViewDelegate.clearDisplay();
     presenter.postUnlock(lockViewDelegate.getAppPackageName(),
         lockViewDelegate.getAppActivityName(), menuExclude.isChecked(),
-        getSelectedIgnoreTimeIndex());
+        getSelectedIgnoreTimeIndex(), getSelectedIgnoreTimeIndex());
   }
 
   @Override public void onSubmitFailure() {

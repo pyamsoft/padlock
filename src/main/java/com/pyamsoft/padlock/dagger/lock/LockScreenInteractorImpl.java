@@ -21,6 +21,9 @@ import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
+import com.birbit.android.jobqueue.Job;
+import com.birbit.android.jobqueue.TagConstraint;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
@@ -115,10 +118,12 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @NonNull @Override
   public Observable<Boolean> postUnlock(@NonNull String packageName, @NonNull String activityName,
-      boolean exclude, long ignoreTime) {
+      boolean exclude, long ignoreTime, long recheckTime) {
     Timber.d("Post unlock: %s %s", packageName, activityName);
-    final Observable<PadLockEntry> dbObservable =
-        PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
+    final Observable<PadLockEntry> dbObservable = PadLockDB.with(appContext)
+        .queryWithPackageActivityName(packageName, activityName)
+        .first()
+        .cache();
     return Observable.defer(() -> {
       Timber.d("Run finishing unlock hooks");
       return Observable.just(exclude);
@@ -141,6 +146,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       }
     }).flatMap(entry -> {
       if (!PadLockEntry.isEmpty(entry)) {
+        queueRecheckJob(entry, recheckTime);
         Timber.d("IGNORE requested, update entry in DB");
         return ignoreEntryForTime(entry, ignoreTime);
       } else {
@@ -152,6 +158,18 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       Timber.d("Result for update: %d", integer);
       return true;
     });
+  }
+
+  // KLUDGE void, probably should return Observable to the stream
+  @WorkerThread private void queueRecheckJob(PadLockEntry entry, long recheckTime) {
+    // Cancel any old recheck job for the class, but not the package
+    final String classTag = RecheckJob.CLASS_TAG_PREFIX + entry.activityName();
+    Timber.d("Cancel jobs with class tag: %s", classTag);
+    PadLock.getInstance().getJobManager().cancelJobs(TagConstraint.ANY, classTag);
+
+    // Queue up a new recheck job
+    final Job recheck = RecheckJob.create(entry.packageName(), entry.activityName(), recheckTime);
+    PadLock.getInstance().getJobManager().addJob(recheck);
   }
 
   @NonNull @CheckResult
