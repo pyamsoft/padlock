@@ -116,10 +116,15 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     }).filter(pin -> pin != null).flatMap(pin -> checkSubmissionAttempt(attempt, pin));
   }
 
+  @CheckResult @NonNull private Observable<Boolean> isRecheckEnabled() {
+    return Observable.defer(() -> Observable.just(preferences.isRecheckEnabled()));
+  }
+
   @NonNull @Override
   public Observable<Boolean> postUnlock(@NonNull String packageName, @NonNull String activityName,
       boolean exclude, long ignoreTime) {
     Timber.d("Post unlock: %s %s", packageName, activityName);
+    final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
     final Observable<PadLockEntry> dbObservable = PadLockDB.with(appContext)
         .queryWithPackageActivityName(packageName, activityName)
         .first()
@@ -146,33 +151,55 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       }
     }).flatMap(entry -> {
       if (!PadLockEntry.isEmpty(entry)) {
-        final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
-        Timber.d("Recheck requested, queue job");
-        queueRecheckJob(entry, ignoreMinutesInMillis);
-
         Timber.d("IGNORE requested, update entry in DB");
         return ignoreEntryForTime(entry, ignoreMinutesInMillis);
       } else {
         Timber.d("IGNORE not requested");
         return Observable.just(1);
       }
-    }).map(integer -> {
+    }).flatMap(ignoreResult -> {
       // TODO do something with integer result
-      Timber.d("Result for update: %d", integer);
+      Timber.d("Result for update: %d", ignoreResult);
+      return isRecheckEnabled();
+    }).flatMap(recheckAllowed -> {
+      if (ignoreTime != 0 && recheckAllowed) {
+        Timber.d("Get entry to recheck");
+        return dbObservable;
+      } else {
+        Timber.d("No update requested, empty entry");
+        return Observable.just(PadLockEntry.empty());
+      }
+    }).flatMap(entry -> {
+      if (!PadLockEntry.isEmpty(entry)) {
+        Timber.d("RECHECK requested, queue new job");
+        return queueRecheckJob(entry, ignoreMinutesInMillis);
+      } else {
+        Timber.d("RECHECK not requested");
+        return Observable.just(1);
+      }
+    }).map(recheckResult -> {
+      // TODO do something with integer result
+      Timber.d("Result for recheck: %d", recheckResult);
       return true;
     });
   }
 
   // KLUDGE void, probably should return Observable to the stream
-  @WorkerThread private void queueRecheckJob(PadLockEntry entry, long recheckTime) {
-    // Cancel any old recheck job for the class, but not the package
-    final String classTag = RecheckJob.CLASS_TAG_PREFIX + entry.activityName();
-    Timber.d("Cancel jobs with class tag: %s", classTag);
-    PadLock.getInstance().getJobManager().cancelJobs(TagConstraint.ANY, classTag);
+  @CheckResult @NonNull private Observable<Integer> queueRecheckJob(PadLockEntry entry,
+      long recheckTime) {
+    return Observable.defer(() -> {
+      // Cancel any old recheck job for the class, but not the package
+      final String classTag = RecheckJob.CLASS_TAG_PREFIX + entry.activityName();
+      Timber.d("Cancel jobs with class tag: %s", classTag);
+      PadLock.getInstance().getJobManager().cancelJobs(TagConstraint.ANY, classTag);
 
-    // Queue up a new recheck job
-    final Job recheck = RecheckJob.create(entry.packageName(), entry.activityName(), recheckTime);
-    PadLock.getInstance().getJobManager().addJob(recheck);
+      // Queue up a new recheck job
+      final Job recheck = RecheckJob.create(entry.packageName(), entry.activityName(), recheckTime);
+      PadLock.getInstance().getJobManager().addJob(recheck);
+
+      // KLUDGE Just return something valid for now
+      return Observable.just(1);
+    });
   }
 
   @NonNull @CheckResult
