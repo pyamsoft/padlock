@@ -183,21 +183,13 @@ public class MainActivity extends DonationActivityBase
   @NonNull @Override public Spannable getChangeLogText() {
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
-    final String line1 =
-        "BUGFIX: Fixed issue where the Lock Info Dialog would not display after navigating to the Settings screen";
-    final String line2 =
-        "BUGFIX: Fixed issue in Android N which prevented loading the list of applications";
-    final String line3 = "FEATURE: Smaller memory footprint when the list is being populated";
-    final String line4 = "FEATURE: Experimental Android N support.";
-    final String line5 =
-        "FEATURE: Locking an application using the switch on the main list locks the entire 'package'. "
-            + "This means that unlocking one screen of the application unlocks all screens. "
-            + "The only exception to this are the screens that the user chooses to individually "
-            + "lock by checking the box in the Info Dialog.";
+    final String line1 = "BUGFIX: Fixed crashes on devices below Lollipop";
+    final String line2 = "BUGFIX: Faster loading and properly disposing of icons";
+    final String line3 =
+        "FEATURE: Periodically re-check the active application and lock it if necessary";
 
     // Turn it into a spannable
-    final Spannable spannable =
-        StringUtil.createLineBreakBuilder(title, line1, line2, line3, line4, line5);
+    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1, line2, line3);
 
     int start = 0;
     int end = title.length();
@@ -215,16 +207,7 @@ public class MainActivity extends DonationActivityBase
     StringUtil.colorSpan(spannable, start, end, largeColor);
 
     start += end + 2;
-    end += 2
-        + line1.length()
-        + 2
-        + line2.length()
-        + 2
-        + line3.length()
-        + 2
-        + line4.length()
-        + 2
-        + line5.length();
+    end += 2 + line1.length() + 2 + line2.length() + 2 + line3.length();
 
     StringUtil.sizeSpan(spannable, start, end, smallSize);
     StringUtil.colorSpan(spannable, start, end, smallColor);
