@@ -41,3 +41,7 @@
 -dontwarn autovalue.shaded.**
 -dontwarn com.google.auto.value.processor.**
 
+# Silence some okio warnings
+-dontwarn java.nio.file.**
+-dontwarn org.codehaus.mojo.**
+
