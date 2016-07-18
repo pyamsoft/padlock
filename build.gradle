@@ -56,8 +56,8 @@ android {
     applicationId "com.pyamsoft.padlock"
     minSdkVersion 16
     targetSdkVersion 24
-    versionCode 15
-    versionName "1.4.0"
+    versionCode 16
+    versionName "1.5.0"
 
     // For vector drawables
     vectorDrawables.useSupportLibrary = true
@@ -122,9 +122,6 @@ dependencies {
 
   // Needs to compile support annotations into actual project
   compile 'com.android.support:support-annotations:24.0.0'
-
-  // JavaPoet to fix an issue
-  apt 'com.squareup:javapoet:1.7.0'
 
   // SQLBrite
   compile 'com.squareup.sqlbrite:sqlbrite:0.7.0'
