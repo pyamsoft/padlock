@@ -56,21 +56,21 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
     this.stateInteractor = stateInteractor;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onUnbind(@NonNull LockList view) {
+    super.onUnbind(view);
     unsubscribePopulateList();
     unsubscribeSystemVisible();
     unsubscribeOnboard();
     unsubscribeFabSubscription();
   }
 
-  @Override public void onResume() {
-    super.onResume();
+  @Override protected void onResume(@NonNull LockList view) {
+    super.onResume(view);
     registerOnPinEntryBus();
   }
 
-  @Override public void onPause() {
-    super.onPause();
+  @Override protected void onPause(@NonNull LockList view) {
+    super.onPause(view);
     unregisterFromPinEntryBus();
   }
 

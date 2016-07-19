@@ -146,14 +146,14 @@ public final class LockListFragment extends Fragment
     super.onResume();
     AnimUtil.popShow(fab, 500, 300);
 
-    presenter.onResume();
+    presenter.resume();
   }
 
   @Override public void onPause() {
     super.onPause();
     AnimUtil.popHide(fab, 300, 300);
 
-    presenter.onPause();
+    presenter.pause();
   }
 
   private void setupRecyclerView() {

@@ -43,8 +43,8 @@ public abstract class AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
     compositeSubscription = new CompositeSubscription();
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onUnbind(@NonNull AdapterView<VH> view) {
+    super.onUnbind(view);
     if (!compositeSubscription.isUnsubscribed()) {
       compositeSubscription.clear();
     }

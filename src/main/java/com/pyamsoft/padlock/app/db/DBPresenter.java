@@ -44,8 +44,8 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
     this.dbInteractor = dbInteractor;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onUnbind(@NonNull DBView view) {
+    super.onUnbind(view);
     unsubPackageSubscription();
     unsubActivitySubscription();
     unsubAllSubscription();

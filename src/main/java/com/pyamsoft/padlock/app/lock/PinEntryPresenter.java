@@ -43,8 +43,8 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
     }
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onUnbind(@NonNull PinScreen view) {
+    super.onUnbind(view);
     unsubPinEntry();
   }
 

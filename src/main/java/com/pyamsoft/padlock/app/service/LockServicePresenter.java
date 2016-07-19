@@ -53,8 +53,8 @@ public final class LockServicePresenter
     lockScreenPassed = false;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onUnbind(@NonNull LockService view) {
+    super.onUnbind(view);
     unsubLockedEntry();
     unsubPickCorrect();
     interactor.cleanup();

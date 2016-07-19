@@ -47,8 +47,8 @@ public final class LockInfoPresenter
     this.lockInfoInteractor = lockInfoInteractor;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onUnbind(@NonNull LockInfoView view) {
+    super.onUnbind(view);
     unsubPopulateList();
     unsubAllInDB();
   }
