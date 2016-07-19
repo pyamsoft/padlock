@@ -25,20 +25,20 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public class AppIconLoaderPresenter<I extends AppIconLoaderView>
-    extends SchedulerPresenter<I> {
+public class AppIconLoaderPresenter<I extends AppIconLoaderView> extends SchedulerPresenter<I> {
 
   @NonNull private final AppIconLoaderInteractor interactor;
   @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
 
   @Inject public AppIconLoaderPresenter(@NonNull AppIconLoaderInteractor interactor,
-      @NonNull @Named("main") Scheduler mainScheduler, @NonNull @Named("io") Scheduler ioScheduler) {
+      @NonNull @Named("main") Scheduler mainScheduler,
+      @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);
     this.interactor = interactor;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onUnbind(@NonNull I view) {
+    super.onUnbind(view);
     unsubLoadIcon();
   }
 

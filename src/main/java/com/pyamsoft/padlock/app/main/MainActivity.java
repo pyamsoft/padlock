@@ -151,7 +151,7 @@ public class MainActivity extends DonationActivityBase
     super.onResume();
     animateActionBarToolbar(toolbar);
 
-    presenter.onResume();
+    presenter.resume();
   }
 
   @Override public void onDidNotAgreeToTerms() {
@@ -160,7 +160,7 @@ public class MainActivity extends DonationActivityBase
 
   @Override protected void onPause() {
     super.onPause();
-    presenter.onPause();
+    presenter.pause();
   }
 
   @Override protected void onPostResume() {

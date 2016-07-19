@@ -41,18 +41,18 @@ public final class SettingsPresenter extends SchedulerPresenter<SettingsPresente
     this.interactor = interactor;
   }
 
-  @Override public void onResume() {
-    super.onResume();
+  @Override protected void onResume(@NonNull SettingsView view) {
+    super.onResume(view);
     registerOnConfirmEventBus();
   }
 
-  @Override public void onPause() {
-    super.onPause();
+  @Override protected void onPause(@NonNull SettingsView view) {
+    super.onPause(view);
     unregisterFromConfirmEventBus();
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onUnbind(@NonNull SettingsView view) {
+    super.onUnbind(view);
     unsubscribeConfirm();
   }
 

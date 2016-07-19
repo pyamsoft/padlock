@@ -43,8 +43,8 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     interactor.resetFailCount();
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onUnbind(@NonNull LockScreen view) {
+    super.onUnbind(view);
     unsubUnlock();
     unsubLock();
     unsubDisplayName();

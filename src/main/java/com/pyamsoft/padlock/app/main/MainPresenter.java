@@ -44,20 +44,20 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
     this.interactor = interactor;
   }
 
-  @Override public void onResume() {
-    super.onResume();
+  @Override protected void onResume(@NonNull MainView view) {
+    super.onResume(view);
     registerOnAgreeTermsBus();
     registerOnRefreshBus();
   }
 
-  @Override public void onPause() {
-    super.onPause();
+  @Override protected void onPause(@NonNull MainView view) {
+    super.onPause(view);
     unregisterFromAgreeTermsBus();
     unregisterFromRefreshBus();
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onUnbind(@NonNull MainView view) {
+    super.onUnbind(view);
     unsubscribeAgreeTerms();
   }
 
