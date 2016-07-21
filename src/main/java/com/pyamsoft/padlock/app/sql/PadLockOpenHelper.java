@@ -25,12 +25,13 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.Locale;
 import timber.log.Timber;
 
-final class PadLockOpenHelper extends SQLiteOpenHelper {
+public final class PadLockOpenHelper extends SQLiteOpenHelper {
 
+  @NonNull public static final String DB_NAME = "padlock_db";
   private static final int DATABASE_VERSION = 3;
 
   public PadLockOpenHelper(final @NonNull Context context) {
-    super(context.getApplicationContext(), "padlock_db", null, DATABASE_VERSION);
+    super(context.getApplicationContext(), DB_NAME, null, DATABASE_VERSION);
   }
 
   @Override public void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
