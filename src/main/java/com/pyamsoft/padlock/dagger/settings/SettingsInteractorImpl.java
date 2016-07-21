@@ -20,6 +20,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
+import com.pyamsoft.padlock.app.sql.PadLockOpenHelper;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -41,7 +42,7 @@ final class SettingsInteractorImpl implements SettingsInteractor {
       return PadLockDB.with(appContext).deleteAll();
     }).map(integer -> {
       // TODO do something with result
-      return true;
+      return appContext.deleteDatabase(PadLockOpenHelper.DB_NAME);
     });
   }
 
