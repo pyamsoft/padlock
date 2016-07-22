@@ -34,8 +34,6 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.accessibility.AccessibilityFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
-import com.pyamsoft.padlock.dagger.main.DaggerMainComponent;
-import com.pyamsoft.padlock.dagger.main.MainModule;
 import com.pyamsoft.pydroid.base.activity.DonationActivityBase;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -62,11 +60,7 @@ public class MainActivity extends DonationActivityBase
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
     unbinder = ButterKnife.bind(this);
 
-    DaggerMainComponent.builder()
-        .padLockComponent(PadLock.getInstance().getPadLockComponent())
-        .mainModule(new MainModule())
-        .build()
-        .inject(this);
+    PadLock.getInstance().getPadLockComponent().plusMain().inject(this);
 
     presenter.bindView(this);
 

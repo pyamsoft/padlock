@@ -18,13 +18,12 @@ package com.pyamsoft.padlock.dagger.service;
 
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.ActivityScope;
-import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.lock.MasterPinModule;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@ActivityScope @Component(modules = {
-    LockServiceModule.class, MasterPinModule.class, LockServiceStateModule.class
-}, dependencies = PadLockComponent.class) public interface LockServiceComponent {
+@ActivityScope @Subcomponent(modules = {
+    LockServiceModule.class, MasterPinModule.class, LockServiceStateModule.class})
+public interface LockServiceComponent {
 
   void inject(PadLockService padLockService);
 }

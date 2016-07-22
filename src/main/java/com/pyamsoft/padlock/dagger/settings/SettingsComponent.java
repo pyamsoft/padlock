@@ -18,11 +18,9 @@ package com.pyamsoft.padlock.dagger.settings;
 
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.ActivityScope;
-import com.pyamsoft.padlock.dagger.PadLockComponent;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@ActivityScope @Component(modules = SettingsModule.class, dependencies = PadLockComponent.class)
-public interface SettingsComponent {
+@ActivityScope @Subcomponent(modules = SettingsModule.class) public interface SettingsComponent {
 
   void inject(SettingsFragment fragment);
 }

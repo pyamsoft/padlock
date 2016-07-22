@@ -26,7 +26,6 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
-import com.pyamsoft.padlock.dagger.service.DaggerLockServiceComponent;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -158,10 +157,8 @@ public final class PadLockService extends AccessibilityService
         new Intent(this, LockScreenActivity1.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     lockActivity2 =
         new Intent(this, LockScreenActivity2.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    DaggerLockServiceComponent.builder()
-        .padLockComponent(PadLock.getInstance().getPadLockComponent())
-        .build()
-        .inject(this);
+
+    PadLock.getInstance().getPadLockComponent().plusLockService().inject(this);
 
     presenter.bindView(this);
     setInstance(this);

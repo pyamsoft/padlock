@@ -39,8 +39,6 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.padlock.dagger.list.DaggerLockInfoComponent;
-import com.pyamsoft.padlock.dagger.list.LockInfoModule;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
@@ -106,11 +104,8 @@ public class LockInfoDialog extends DialogFragment
         || lockDBPresenter == null) {
       Timber.d("Create new presenters");
       firstRefresh = true;
-      DaggerLockInfoComponent.builder()
-          .padLockComponent(PadLock.getInstance().getPadLockComponent())
-          .lockInfoModule(new LockInfoModule())
-          .build()
-          .inject(this);
+
+      PadLock.getInstance().getPadLockComponent().plusLockInfo().inject(this);
     } else {
       Timber.d("Load cached presenters");
       firstRefresh = false;
