@@ -48,7 +48,6 @@ import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
-import com.pyamsoft.padlock.dagger.list.DaggerLockListComponent;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
@@ -183,10 +182,7 @@ public final class LockListFragment extends Fragment
     if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
       Timber.d("Create new presenters");
       firstRefresh = true;
-      DaggerLockListComponent.builder()
-          .padLockComponent(PadLock.getInstance().getPadLockComponent())
-          .build()
-          .inject(this);
+      PadLock.getInstance().getPadLockComponent().plusLockList().inject(this);
     } else {
       Timber.d("Load cached presenters");
       firstRefresh = false;

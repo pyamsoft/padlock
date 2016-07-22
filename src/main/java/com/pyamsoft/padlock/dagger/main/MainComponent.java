@@ -18,11 +18,9 @@ package com.pyamsoft.padlock.dagger.main;
 
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.dagger.ActivityScope;
-import com.pyamsoft.padlock.dagger.PadLockComponent;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@ActivityScope @Component(modules = MainModule.class, dependencies = PadLockComponent.class)
-public interface MainComponent {
+@ActivityScope @Subcomponent(modules = MainModule.class) public interface MainComponent {
 
   void inject(MainActivity mainActivity);
 }

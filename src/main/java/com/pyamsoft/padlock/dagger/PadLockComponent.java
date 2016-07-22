@@ -16,23 +16,36 @@
 
 package com.pyamsoft.padlock.dagger;
 
-import android.content.Context;
-import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.list.LockInfoComponent;
+import com.pyamsoft.padlock.dagger.list.LockListComponent;
+import com.pyamsoft.padlock.dagger.lock.LockScreenComponent;
+import com.pyamsoft.padlock.dagger.lock.PinEntryComponent;
+import com.pyamsoft.padlock.dagger.main.MainComponent;
+import com.pyamsoft.padlock.dagger.service.LockServiceComponent;
+import com.pyamsoft.padlock.dagger.settings.SettingsComponent;
 import dagger.Component;
-import javax.inject.Named;
 import javax.inject.Singleton;
-import rx.Scheduler;
 
 @Singleton @Component(modules = PadLockModule.class) public interface PadLockComponent {
 
-  Context provideContext();
+  // Subcomponent Settings
+  SettingsComponent plusSettings();
 
-  PadLockPreferences providePreferences();
+  // Subcomponent LockService
+  LockServiceComponent plusLockService();
 
-  PackageManagerWrapper providePackageManagerWrapper();
+  // Subcomponent Main
+  MainComponent plusMain();
 
-  @Named("main") Scheduler provideMainScheduler();
+  // Subcomponent LockScreen
+  LockScreenComponent plusLockScreen();
 
-  @Named("io") Scheduler provideIoScheduler();
+  // Subcomponent PinEntry
+  PinEntryComponent plusPinEntry();
+
+  // Subcomponent LockList
+  LockListComponent plusLockList();
+
+  // Subcomponent LockInfo
+  LockInfoComponent plusLockInfo();
 }

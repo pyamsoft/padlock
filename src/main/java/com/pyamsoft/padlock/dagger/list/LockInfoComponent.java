@@ -18,13 +18,12 @@ package com.pyamsoft.padlock.dagger.list;
 
 import com.pyamsoft.padlock.app.list.LockInfoDialog;
 import com.pyamsoft.padlock.dagger.ActivityScope;
-import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.db.DBModule;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@ActivityScope @Component(modules = {
+@ActivityScope @Subcomponent(modules = {
     LockInfoModule.class, DBModule.class
-}, dependencies = PadLockComponent.class) public interface LockInfoComponent {
+}) public interface LockInfoComponent {
 
   void inject(LockInfoDialog fragment);
 }

@@ -38,9 +38,8 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.dagger.lock.DaggerPinEntryComponent;
-import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.model.RxBus;
+import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -68,10 +67,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, LockVie
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    DaggerPinEntryComponent.builder()
-        .padLockComponent(PadLock.getInstance().getPadLockComponent())
-        .build()
-        .inject(this);
+    PadLock.getInstance().getPadLockComponent().plusPinEntry().inject(this);
 
     lockViewDelegate.setTextColor(android.R.color.black);
     setCancelable(true);

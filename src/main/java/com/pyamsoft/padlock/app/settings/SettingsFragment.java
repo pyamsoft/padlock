@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainPresenter;
-import com.pyamsoft.padlock.dagger.settings.DaggerSettingsComponent;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -42,10 +41,8 @@ public final class SettingsFragment extends PreferenceFragmentCompat
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    DaggerSettingsComponent.builder()
-        .padLockComponent(PadLock.getInstance().getPadLockComponent())
-        .build()
-        .inject(this);
+
+    PadLock.getInstance().getPadLockComponent().plusSettings().inject(this);
   }
 
   @Override

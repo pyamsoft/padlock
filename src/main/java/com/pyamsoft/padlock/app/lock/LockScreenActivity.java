@@ -39,7 +39,6 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
-import com.pyamsoft.padlock.dagger.lock.DaggerLockScreenComponent;
 import com.pyamsoft.pydroid.base.activity.NoDonationActivityBase;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -105,10 +104,7 @@ public abstract class LockScreenActivity extends NoDonationActivityBase
     unbinder = ButterKnife.bind(this);
 
     // Inject Dagger graph
-    DaggerLockScreenComponent.builder()
-        .padLockComponent(PadLock.getInstance().getPadLockComponent())
-        .build()
-        .inject(this);
+    PadLock.getInstance().getPadLockComponent().plusLockScreen().inject(this);
 
     presenter.bindView(this);
     appIconLoaderPresenter.bindView(this);

@@ -18,13 +18,12 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.dagger.ActivityScope;
-import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.db.DBModule;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@ActivityScope @Component(modules = {
+@ActivityScope @Subcomponent(modules = {
     LockScreenModule.class, DBModule.class, MasterPinModule.class, LockViewDelegateModule.class
-}, dependencies = PadLockComponent.class) public interface LockScreenComponent {
+}) public interface LockScreenComponent {
 
   void inject(LockScreenActivity lockScreenActivity);
 }
