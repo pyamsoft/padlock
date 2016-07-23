@@ -50,4 +50,11 @@
 
   </FrameLayout>
 
+  <com.pyamsoft.pydroid.support.AdvertisementView
+      android:id="@+id/ad_view"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize"
+      android:layout_gravity="bottom"
+      />
+
 </android.support.design.widget.CoordinatorLayout>

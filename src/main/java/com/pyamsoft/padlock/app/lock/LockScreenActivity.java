@@ -26,6 +26,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -39,13 +40,12 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
-import com.pyamsoft.pydroid.base.activity.NoDonationActivityBase;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public abstract class LockScreenActivity extends NoDonationActivityBase
+public abstract class LockScreenActivity extends AppCompatActivity
     implements LockScreen, LockViewDelegate.Callback {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = LockViewDelegate.ENTRY_PACKAGE_NAME;
@@ -126,10 +126,6 @@ public abstract class LockScreenActivity extends NoDonationActivityBase
   @Override public void onBackPressed() {
     Timber.d("onBackPressed");
     getApplicationContext().startActivity(home);
-  }
-
-  @Override protected boolean shouldConfirmBackPress() {
-    return false;
   }
 
   @Override protected void onDestroy() {

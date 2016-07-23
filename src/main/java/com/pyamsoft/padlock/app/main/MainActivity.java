@@ -35,6 +35,7 @@ import com.pyamsoft.padlock.app.accessibility.AccessibilityFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.pydroid.base.activity.DonationActivityBase;
+import com.pyamsoft.pydroid.support.AdvertisementView;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.StringUtil;
@@ -49,6 +50,7 @@ public class MainActivity extends DonationActivityBase
   @NonNull public static final String ACCESSIBILITY_TAG = "accessibility";
   @NonNull public static final String LOCK_LIST_TAG = "lock_list";
 
+  @BindView(R.id.ad_view) AdvertisementView adView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @Inject MainPresenter presenter;
   private Unbinder unbinder;
@@ -64,6 +66,7 @@ public class MainActivity extends DonationActivityBase
 
     presenter.bindView(this);
 
+    adView.create();
     setAppBarState();
   }
 
@@ -95,6 +98,7 @@ public class MainActivity extends DonationActivityBase
       presenter.unbindView();
     }
 
+    adView.destroy();
     unbinder.unbind();
   }
 
@@ -139,6 +143,14 @@ public class MainActivity extends DonationActivityBase
 
   @NonNull @Override public String getPlayStoreAppPackage() {
     return getPackageName();
+  }
+
+  @Override public void showAd() {
+    adView.show(false);
+  }
+
+  @Override public void hideAd() {
+    adView.hide();
   }
 
   @Override protected void onResume() {

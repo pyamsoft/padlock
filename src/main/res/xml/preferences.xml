@@ -73,6 +73,14 @@
   <PreferenceCategory
       android:title="PadLock Settings">
 
+    <SwitchPreferenceCompat
+        android:defaultValue="@bool/adview_default"
+        android:key="@string/adview_key"
+        android:summaryOff="@string/adview_summary_unchecked"
+        android:summaryOn="@string/adview_summary_checked"
+        android:title="@string/adview_title"
+        />
+
     <Preference
         android:key="@string/upgrade_info_key"
         android:summary="@string/upgrade_info_summary"
