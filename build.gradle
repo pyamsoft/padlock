@@ -128,7 +128,7 @@ dependencies {
 
   // RxJava
   // rxandroid pulls in sometimes old rxjava
-  compile 'io.reactivex:rxjava:1.1.7'
+  compile 'io.reactivex:rxjava:1.1.8'
   compile 'io.reactivex:rxandroid:1.2.1'
   compile 'com.artemzin.rxjava:proguard-rules:1.1.7.0'
 
@@ -162,8 +162,8 @@ dependencies {
   testCompile 'junit:junit:4.12'
 
   // Mockito for unit tests
-  testCompile 'org.mockito:mockito-core:2.0.86-beta'
+  testCompile 'org.mockito:mockito-core:2.0.87-beta'
 
-  // PYDroid 2.4.1
+  // PYDroid 3.0.1
   compile project(':PYDroid')
 }
