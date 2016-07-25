@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.app.service;
 
 import android.os.Build;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.SchedulerPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
@@ -41,6 +42,8 @@ public final class LockServicePresenter
 
   @NonNull private String lastPackageName = "";
   @NonNull private String lastClassName = "";
+  @NonNull private String activePackageName = "";
+  @NonNull private String activeClassName = "";
   private boolean lockScreenPassed;
 
   @Inject public LockServicePresenter(@NonNull final LockServiceStateInteractor stateInteractor,
@@ -87,6 +90,14 @@ public final class LockServicePresenter
     lastClassName = "";
   }
 
+  @NonNull @CheckResult public String getActiveClassName() {
+    return activeClassName;
+  }
+
+  @NonNull @CheckResult public String getActivePackageName() {
+    return activePackageName;
+  }
+
   public final void processAccessibilityEvent(@NonNull String packageName,
       @NonNull String className, boolean forcedRecheck) {
     unsubLockedEntry();
@@ -125,9 +136,11 @@ public final class LockServicePresenter
                 className);
           }
           return !isLockScreen;
-        }).doOnNext(valid -> {
+        }).map(valid -> {
           Timber.d("Window has passed checks so far: %s", valid);
-          getView().updateCurrentWindowValues(packageName, className);
+          activePackageName = packageName;
+          activeClassName = className;
+          return valid;
         });
 
     lockedEntrySubscription = Observable.zip(windowEventObservable,
@@ -197,8 +210,6 @@ public final class LockServicePresenter
   }
 
   public interface LockService {
-
-    void updateCurrentWindowValues(@NonNull String packageName, @NonNull String className);
 
     void startLockScreen(@NonNull PadLockEntry entry);
 
