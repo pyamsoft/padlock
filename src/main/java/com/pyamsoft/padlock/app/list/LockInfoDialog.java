@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -44,6 +46,7 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
+import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -56,6 +59,7 @@ public class LockInfoDialog extends DialogFragment
   private static final int KEY_DB_PRESENTER = 2;
   @NonNull private final Handler handler = new Handler();
 
+  @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;
   @BindView(R.id.lock_info_icon) ImageView icon;
@@ -131,9 +135,7 @@ public class LockInfoDialog extends DialogFragment
     final View rootView =
         LayoutInflater.from(getActivity()).inflate(R.layout.dialog_lockinfo, null, false);
     unbinder = ButterKnife.bind(this, rootView);
-
     initializeForEntry();
-
     if (firstRefresh) {
       firstRefresh = false;
       refreshList();
@@ -159,6 +161,7 @@ public class LockInfoDialog extends DialogFragment
   }
 
   private void initializeForEntry() {
+    ViewCompat.setElevation(toolbar, AppUtil.convertToDP(getContext(), 4));
     close.setOnClickListener(view -> {
       // Only close if list is displayed
       if (recyclerView.isClickable()) {
