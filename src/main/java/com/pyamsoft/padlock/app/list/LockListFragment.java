@@ -56,7 +56,6 @@ import com.pyamsoft.pydroid.tool.AsyncTaskMap;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
-import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -143,14 +142,14 @@ public final class LockListFragment extends Fragment
 
   @Override public void onResume() {
     super.onResume();
-    AnimUtil.popShow(fab, 500, 300);
+    fab.postDelayed(() -> fab.show(), 300L);
 
     presenter.resume();
   }
 
   @Override public void onPause() {
     super.onPause();
-    AnimUtil.popHide(fab, 300, 300);
+    fab.postDelayed(() -> fab.hide(), 300L);
 
     presenter.pause();
   }
@@ -392,13 +391,13 @@ public final class LockListFragment extends Fragment
   @Override public void onListCleared() {
     Timber.d("onListCleared");
     handler.post(startRefreshRunnable);
-    fab.hide();
+    fab.post(() -> fab.hide());
   }
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
     handler.post(stopRefreshRunnable);
-    fab.show();
+    fab.post(() -> fab.show());
 
     presenter.showOnBoarding();
   }
