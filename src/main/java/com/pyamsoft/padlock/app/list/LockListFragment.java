@@ -142,15 +142,13 @@ public final class LockListFragment extends Fragment
 
   @Override public void onResume() {
     super.onResume();
-    fab.postDelayed(() -> fab.show(), 300L);
-
+    handler.postDelayed(() -> fab.show(), 300L);
     presenter.resume();
   }
 
   @Override public void onPause() {
     super.onPause();
-    fab.postDelayed(() -> fab.hide(), 300L);
-
+    handler.postDelayed(() -> fab.hide(), 300L);
     presenter.pause();
   }
 
@@ -287,8 +285,8 @@ public final class LockListFragment extends Fragment
     presenter.unbindView(!getActivity().isChangingConfigurations());
 
     taskMap.clear();
-    unbinder.unbind();
     handler.removeCallbacksAndMessages(null);
+    unbinder.unbind();
   }
 
   private void setupFAB() {
@@ -391,13 +389,13 @@ public final class LockListFragment extends Fragment
   @Override public void onListCleared() {
     Timber.d("onListCleared");
     handler.post(startRefreshRunnable);
-    fab.post(() -> fab.hide());
+    handler.post(() -> fab.hide());
   }
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
     handler.post(stopRefreshRunnable);
-    fab.post(() -> fab.show());
+    handler.post(() -> fab.show());
 
     presenter.showOnBoarding();
   }
