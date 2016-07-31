@@ -106,6 +106,7 @@ public final class LockListFragment extends Fragment
   private Unbinder unbinder;
   private MenuItem displaySystemItem;
   private boolean firstRefresh;
+  private boolean showHint = false;
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -146,7 +147,9 @@ public final class LockListFragment extends Fragment
     handler.postDelayed(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
       @Override public void onShown(FloatingActionButton fab) {
         super.onShown(fab);
-        hintFab.show();
+        if (showHint) {
+          hintFab.show();
+        }
       }
     }), 300L);
     presenter.resume();
@@ -157,7 +160,9 @@ public final class LockListFragment extends Fragment
     handler.postDelayed(() -> fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
       @Override public void onHidden(FloatingActionButton fab) {
         super.onHidden(fab);
-        hintFab.hide();
+        if (showHint) {
+          hintFab.hide();
+        }
       }
     }), 300L);
     presenter.pause();
@@ -309,12 +314,16 @@ public final class LockListFragment extends Fragment
     AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(24) {
       @Override public void onHiddenHook() {
         super.onHiddenHook();
-        hintFab.hide();
+        if (showHint) {
+          hintFab.hide();
+        }
       }
 
       @Override public void onShownHook() {
         super.onShownHook();
-        hintFab.show();
+        if (showHint) {
+          hintFab.show();
+        }
       }
     });
 
@@ -322,6 +331,7 @@ public final class LockListFragment extends Fragment
     hintIconTask.execute(
         new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_hint_edit_24dp));
     taskMap.put("hint", hintIconTask);
+    hintFab.setVisibility(View.GONE);
 
     presenter.setFABStateFromPreference();
   }
@@ -331,6 +341,8 @@ public final class LockListFragment extends Fragment
     fabIconTask.execute(
         new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_lock_outline_24dp));
     taskMap.put("fab", fabIconTask);
+    showHint = true;
+    hintFab.setVisibility(View.VISIBLE);
   }
 
   @Override public void setFABStateDisabled() {
@@ -338,6 +350,8 @@ public final class LockListFragment extends Fragment
     fabIconTask.execute(
         new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_lock_open_24dp));
     taskMap.put("fab", fabIconTask);
+    hintFab.setVisibility(View.GONE);
+    showHint = false;
   }
 
   @Override
@@ -422,7 +436,9 @@ public final class LockListFragment extends Fragment
     handler.post(() -> fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
       @Override public void onHidden(FloatingActionButton fab) {
         super.onHidden(fab);
-        hintFab.hide();
+        if (showHint) {
+          hintFab.hide();
+        }
       }
     }));
   }
@@ -433,7 +449,9 @@ public final class LockListFragment extends Fragment
     handler.post(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
       @Override public void onShown(FloatingActionButton fab) {
         super.onShown(fab);
-        hintFab.show();
+        if (showHint) {
+          hintFab.show();
+        }
       }
     }));
 
