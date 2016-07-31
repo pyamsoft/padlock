@@ -72,6 +72,7 @@ public final class LockListFragment extends Fragment
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull private final AsyncTaskMap taskMap = new AsyncTaskMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
+  @BindView(R.id.applist_hint_fab) FloatingActionButton hintFab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
   @Inject LockListPresenter presenter;
@@ -142,13 +143,23 @@ public final class LockListFragment extends Fragment
 
   @Override public void onResume() {
     super.onResume();
-    handler.postDelayed(() -> fab.show(), 300L);
+    handler.postDelayed(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
+      @Override public void onShown(FloatingActionButton fab) {
+        super.onShown(fab);
+        hintFab.show();
+      }
+    }), 300L);
     presenter.resume();
   }
 
   @Override public void onPause() {
     super.onPause();
-    handler.postDelayed(() -> fab.hide(), 300L);
+    handler.postDelayed(() -> fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
+      @Override public void onHidden(FloatingActionButton fab) {
+        super.onHidden(fab);
+        hintFab.hide();
+      }
+    }), 300L);
     presenter.pause();
   }
 
@@ -280,6 +291,7 @@ public final class LockListFragment extends Fragment
     recyclerView.setAdapter(null);
 
     fab.setOnClickListener(null);
+    hintFab.setOnClickListener(null);
     swipeRefreshLayout.setOnRefreshListener(null);
     adapter.onDestroy();
     presenter.unbindView(!getActivity().isChangingConfigurations());
@@ -291,8 +303,26 @@ public final class LockListFragment extends Fragment
 
   private void setupFAB() {
     fab.setOnClickListener(view -> presenter.clickPinFAB());
+    hintFab.setOnClickListener(
+        view -> Toast.makeText(view.getContext(), "Hint Clicked", Toast.LENGTH_SHORT).show());
 
-    AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(24));
+    AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(24) {
+      @Override public void onHiddenHook() {
+        super.onHiddenHook();
+        hintFab.hide();
+      }
+
+      @Override public void onShownHook() {
+        super.onShownHook();
+        hintFab.show();
+      }
+    });
+
+    final AsyncVectorDrawableTask hintIconTask = new AsyncVectorDrawableTask(hintFab);
+    hintIconTask.execute(
+        new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_hint_edit_24dp));
+    taskMap.put("hint", hintIconTask);
+
     presenter.setFABStateFromPreference();
   }
 
@@ -389,13 +419,23 @@ public final class LockListFragment extends Fragment
   @Override public void onListCleared() {
     Timber.d("onListCleared");
     handler.post(startRefreshRunnable);
-    handler.post(() -> fab.hide());
+    handler.post(() -> fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
+      @Override public void onHidden(FloatingActionButton fab) {
+        super.onHidden(fab);
+        hintFab.hide();
+      }
+    }));
   }
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
     handler.post(stopRefreshRunnable);
-    handler.post(() -> fab.show());
+    handler.post(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
+      @Override public void onShown(FloatingActionButton fab) {
+        super.onShown(fab);
+        hintFab.show();
+      }
+    }));
 
     presenter.showOnBoarding();
   }
