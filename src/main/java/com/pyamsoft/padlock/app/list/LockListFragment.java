@@ -107,6 +107,24 @@ public final class LockListFragment extends Fragment
   private MenuItem displaySystemItem;
   private boolean firstRefresh;
   private boolean showHint = false;
+  @NonNull private final FloatingActionButton.OnVisibilityChangedListener
+      visibilityChangedListener = new FloatingActionButton.OnVisibilityChangedListener() {
+    @Override public void onShown(FloatingActionButton fab) {
+      super.onShown(fab);
+      if (showHint) {
+        hintFab.show();
+      }
+
+      presenter.showOnBoarding();
+    }
+
+    @Override public void onHidden(FloatingActionButton fab) {
+      super.onHidden(fab);
+      if (showHint) {
+        hintFab.hide();
+      }
+    }
+  };
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -144,27 +162,13 @@ public final class LockListFragment extends Fragment
 
   @Override public void onResume() {
     super.onResume();
-    handler.postDelayed(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
-      @Override public void onShown(FloatingActionButton fab) {
-        super.onShown(fab);
-        if (showHint) {
-          hintFab.show();
-        }
-      }
-    }), 300L);
+    handler.postDelayed(() -> fab.show(visibilityChangedListener), 300L);
     presenter.resume();
   }
 
   @Override public void onPause() {
     super.onPause();
-    handler.postDelayed(() -> fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
-      @Override public void onHidden(FloatingActionButton fab) {
-        super.onHidden(fab);
-        if (showHint) {
-          hintFab.hide();
-        }
-      }
-    }), 300L);
+    handler.postDelayed(() -> fab.hide(visibilityChangedListener), 300L);
     presenter.pause();
   }
 
@@ -410,6 +414,7 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void showOnBoarding() {
+    Timber.d("Show onboarding");
     new MaterialShowcaseView.Builder(getActivity()).setTarget(fab)
         .setTargetTouchable(false)
         .setMaskColour(ContextCompat.getColor(getContext(), R.color.blue500))
@@ -433,29 +438,13 @@ public final class LockListFragment extends Fragment
   @Override public void onListCleared() {
     Timber.d("onListCleared");
     handler.post(startRefreshRunnable);
-    handler.post(() -> fab.hide(new FloatingActionButton.OnVisibilityChangedListener() {
-      @Override public void onHidden(FloatingActionButton fab) {
-        super.onHidden(fab);
-        if (showHint) {
-          hintFab.hide();
-        }
-      }
-    }));
+    handler.post(() -> fab.hide(visibilityChangedListener));
   }
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
     handler.post(stopRefreshRunnable);
-    handler.post(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
-      @Override public void onShown(FloatingActionButton fab) {
-        super.onShown(fab);
-        if (showHint) {
-          hintFab.show();
-        }
-      }
-    }));
-
-    presenter.showOnBoarding();
+    handler.post(() -> fab.show(visibilityChangedListener));
   }
 
   @Override public void refreshList() {
