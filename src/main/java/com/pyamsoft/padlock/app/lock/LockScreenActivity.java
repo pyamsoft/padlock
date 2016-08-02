@@ -50,6 +50,9 @@ public abstract class LockScreenActivity extends AppCompatActivity
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = LockViewDelegate.ENTRY_PACKAGE_NAME;
   @NonNull public static final String ENTRY_ACTIVITY_NAME = LockViewDelegate.ENTRY_ACTIVITY_NAME;
+  @NonNull public static final String ENTRY_REAL_NAME = "real_name";
+  @NonNull public static final String ENTRY_LOCK_CODE = "lock_code";
+  @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
   @NonNull private final Intent home;
@@ -74,6 +77,12 @@ public abstract class LockScreenActivity extends AppCompatActivity
   private MenuItem menuIgnoreSixty;
   private MenuItem menuExclude;
   private Unbinder unbinder;
+
+  private String lockedPackageName;
+  private String lockedActivityName;
+  private String lockedRealName;
+  private String lockedCode;
+  private boolean lockedSystem;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -110,15 +119,36 @@ public abstract class LockScreenActivity extends AppCompatActivity
     appIconLoaderPresenter.bindView(this);
     lockViewDelegate.setTextColor(android.R.color.black);
     lockViewDelegate.onCreateView(this, this, rootView);
+    getValuesFromBundle();
 
     setSupportActionBar(toolbar);
+  }
+
+  private void getValuesFromBundle() {
+    final Bundle bundle = getIntent().getExtras();
+    lockedPackageName = bundle.getString(ENTRY_PACKAGE_NAME);
+    lockedActivityName = bundle.getString(ENTRY_ACTIVITY_NAME);
+    lockedRealName = bundle.getString(ENTRY_REAL_NAME);
+    lockedCode = bundle.getString(ENTRY_LOCK_CODE);
+
+    final String lockedStringSystem = bundle.getString(ENTRY_IS_SYSTEM);
+
+    if (lockedPackageName == null
+        || lockedActivityName == null
+        || lockedRealName == null
+        || lockedStringSystem == null) {
+      throw new NullPointerException("Missing required lock attributes");
+    }
+
+    // So that we can make sure a boolean is passed
+    lockedSystem = Boolean.valueOf(lockedStringSystem);
   }
 
   @Override protected void onStart() {
     super.onStart();
     Timber.d("onStart");
 
-    presenter.loadDisplayNameFromPackage(lockViewDelegate.getAppPackageName());
+    presenter.loadDisplayNameFromPackage(lockedPackageName);
     lockViewDelegate.onStart(appIconLoaderPresenter);
     supportInvalidateOptionsMenu();
   }
@@ -174,11 +204,8 @@ public abstract class LockScreenActivity extends AppCompatActivity
     Timber.d("Unlocked!");
     lockViewDelegate.clearDisplay();
 
-    // TODO add required info
-    // TODO lock code, is system
-    presenter.postUnlock(lockViewDelegate.getAppPackageName(),
-        lockViewDelegate.getAppActivityName(), null, false, menuExclude.isChecked(),
-        getSelectedIgnoreTimeIndex());
+    presenter.postUnlock(lockedPackageName, lockedActivityName, lockedRealName, lockedCode,
+        lockedSystem, menuExclude.isChecked(), getSelectedIgnoreTimeIndex());
   }
 
   @Override public void onSubmitFailure() {
@@ -187,8 +214,7 @@ public abstract class LockScreenActivity extends AppCompatActivity
     showSnackbarWithText("Error: Invalid PIN");
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
-    presenter.lockEntry(lockViewDelegate.getAppPackageName(),
-        lockViewDelegate.getAppActivityName());
+    presenter.lockEntry(lockedPackageName, lockedActivityName);
   }
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
@@ -329,8 +355,7 @@ public abstract class LockScreenActivity extends AppCompatActivity
 
   private void showInfoDialog() {
     AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(),
-        InfoDialog.newInstance(lockViewDelegate.getAppPackageName(),
-            lockViewDelegate.getAppActivityName()), "info_dialog");
+        InfoDialog.newInstance(lockedPackageName, lockedActivityName), "info_dialog");
   }
 
   private void showForgotPasscodeDialog() {
@@ -347,7 +372,6 @@ public abstract class LockScreenActivity extends AppCompatActivity
   }
 
   @Override public void onSubmitPressed() {
-    presenter.submit(lockViewDelegate.getAppPackageName(), lockViewDelegate.getAppActivityName(),
-        lockViewDelegate.getCurrentAttempt());
+    presenter.submit(lockedPackageName, lockedActivityName, lockViewDelegate.getCurrentAttempt());
   }
 }

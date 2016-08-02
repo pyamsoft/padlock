@@ -160,6 +160,14 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
 
       Timber.d("Lock: %s %s", entry.packageName(), entry.activityName());
       return true;
+    }).filter(entry -> {
+      if (entry.activityName().equals(PadLockEntry.PACKAGE_TAG) && entry.whitelist()) {
+        throw new RuntimeException(
+            "PACKAGE entry for package: " + entry.packageName() + " cannot be whitelisted");
+      }
+
+      Timber.d("Filter out whitelisted packages");
+      return !entry.whitelist();
     });
   }
 

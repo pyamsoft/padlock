@@ -182,14 +182,13 @@ public final class LockServicePresenter
         .subscribe(padLockEntry -> {
           Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
               padLockEntry.activityName());
-          final LockService lockService = getView();
-          lockService.startLockScreen(padLockEntry);
+          launchCorrectLockScreen(padLockEntry, className);
         }, throwable -> {
           Timber.e(throwable, "Error getting PadLockEntry for LockScreen");
         });
   }
 
-  public void launchCorrectLockScreen(@NonNull String packageName, @NonNull String activityName) {
+  void launchCorrectLockScreen(@NonNull PadLockEntry entry, @NonNull String realName) {
     unsubPickCorrect();
     pickCorrectSubscription = interactor.isExperimentalNSupported()
         .subscribeOn(getSubscribeScheduler())
@@ -199,9 +198,9 @@ public final class LockServicePresenter
             && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
         .subscribe(launchActivity2 -> {
           if (launchActivity2) {
-            getView().startLockScreen2(packageName, activityName);
+            getView().startLockScreen2(entry, realName);
           } else {
-            getView().startLockScreen1(packageName, activityName);
+            getView().startLockScreen1(entry, realName);
           }
         }, throwable -> {
           Timber.e(throwable, "onError");
@@ -211,10 +210,8 @@ public final class LockServicePresenter
 
   public interface LockService {
 
-    void startLockScreen(@NonNull PadLockEntry entry);
+    void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName);
 
-    void startLockScreen1(@NonNull String packageName, @NonNull String activityName);
-
-    void startLockScreen2(@NonNull String packageName, @NonNull String activityName);
+    void startLockScreen2(@NonNull PadLockEntry entry, @NonNull String realName);
   }
 }

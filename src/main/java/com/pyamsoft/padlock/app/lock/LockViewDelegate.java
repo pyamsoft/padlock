@@ -60,7 +60,6 @@ public final class LockViewDelegate implements AppIconLoaderView {
   private @ColorRes int textColor;
   private FragmentManager fragmentManager;
   private View rootView;
-  private String activityName;
   private String packageName;
   private Unbinder unbinder;
   private InputMethodManager imm;
@@ -139,9 +138,7 @@ public final class LockViewDelegate implements AppIconLoaderView {
   }
 
   private void getValuesFromBundle(@NonNull Bundle bundle) {
-    activityName = bundle.getString(ENTRY_ACTIVITY_NAME);
     packageName = bundle.getString(ENTRY_PACKAGE_NAME);
-    Timber.d("Got value activityName: %s", activityName);
     Timber.d("Got value packageName: %s", packageName);
   }
 
@@ -164,14 +161,6 @@ public final class LockViewDelegate implements AppIconLoaderView {
 
   @CheckResult @NonNull public String getCurrentAttempt() {
     return editText.getText().toString();
-  }
-
-  @CheckResult @NonNull public String getAppPackageName() {
-    return packageName;
-  }
-
-  @CheckResult @NonNull public String getAppActivityName() {
-    return activityName;
   }
 
   public final void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {

@@ -113,7 +113,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @NonNull @Override
   public Observable<Boolean> postUnlock(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, boolean isSystem, boolean exclude, long ignoreTime) {
+      @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean exclude,
+      long ignoreTime) {
     Timber.d("Post unlock: %s %s", packageName, activityName);
     final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
     final Observable<PadLockEntry> dbObservable = PadLockDB.with(appContext)
@@ -126,7 +127,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     }).flatMap(exclude1 -> {
       if (exclude1) {
         Timber.d("EXCLUDE requested, whitelist entry in DB");
-        return whitelistEntry(packageName, activityName, lockCode, isSystem);
+        return whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
       } else {
         Timber.d("EXCLUDE not requested");
         return Observable.just(0L);
@@ -135,7 +136,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       Timber.d("Whitelist result: %s", whitelistResult == 0L ? "NOTHING" : "SUCCESS");
       // TODO do something with long result
       // Ignore time is requested
-      if (ignoreTime != 0 && !exclude) {
+      if (ignoreTime != 0) {
         Timber.d("Get entry to update");
         return dbObservable;
       } else {
@@ -155,7 +156,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       // TODO do something with integer result
       return isRecheckEnabled();
     }).flatMap(recheckAllowed -> {
-      if (ignoreTime != 0 && recheckAllowed && !exclude) {
+      if (ignoreTime != 0 && recheckAllowed) {
         Timber.d("Get entry to recheck");
         return dbObservable;
       } else {
@@ -179,16 +180,17 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   }
 
   @CheckResult @NonNull
-  private Observable<Long> whitelistEntry(String packageName, String activityName, String lockCode,
-      boolean isSystem) {
+  private Observable<Long> whitelistEntry(@NonNull String packageName, @NonNull String activityName,
+      @NonNull String realName, @Nullable String lockCode, boolean isSystem) {
+    Timber.d("Get entry for %s %s (real %s)", packageName, activityName, realName);
     return PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, activityName)
+        .queryWithPackageActivityName(packageName, realName)
         .first()
         .flatMap(padLockEntry -> {
           if (PadLockEntry.isEmpty(padLockEntry)) {
             Timber.d("No entry currently exists, create new one and whitelist it");
             return PadLockDB.with(appContext)
-                .insert(packageName, activityName, lockCode, 0, 0, isSystem, true);
+                .insert(packageName, realName, lockCode, 0, 0, isSystem, true);
           } else {
             Timber.d("Entry exists, update it");
             return PadLockDB.with(appContext)
