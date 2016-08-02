@@ -78,6 +78,25 @@ public final class PadLockService extends AccessibilityService
     }
   }
 
+  private static void craftIntent(@NonNull Intent removeIntent, @NonNull Intent addIntent,
+      @NonNull PadLockEntry entry, @NonNull String realName) {
+    removeIntent.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
+    removeIntent.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
+    removeIntent.removeExtra(LockScreenActivity.ENTRY_LOCK_CODE);
+    removeIntent.removeExtra(LockScreenActivity.ENTRY_IS_SYSTEM);
+    removeIntent.removeExtra(LockScreenActivity.ENTRY_REAL_NAME);
+    addIntent.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName());
+    addIntent.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName());
+    addIntent.putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode());
+    addIntent.putExtra(LockScreenActivity.ENTRY_IS_SYSTEM,
+        Boolean.toString(entry.systemApplication()));
+    addIntent.putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName);
+
+    if (entry.whitelist()) {
+      throw new RuntimeException("Cannot launch LockScreen for whitelisted applications");
+    }
+  }
+
   @Override public void onAccessibilityEvent(final @Nullable AccessibilityEvent event) {
     if (event == null) {
       Timber.e("AccessibilityEvent is NULL");
@@ -102,31 +121,17 @@ public final class PadLockService extends AccessibilityService
     Timber.e("onInterrupt");
   }
 
-  @Override public void startLockScreen(@NonNull PadLockEntry entry) {
-    final String packageName = entry.packageName();
-    final String activityName = entry.activityName();
-    presenter.launchCorrectLockScreen(packageName, activityName);
-  }
-
-  @Override
-  public void startLockScreen1(@NonNull String packageName, @NonNull String activityName) {
-    lockActivity2.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
-    lockActivity2.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
-    lockActivity.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
-    lockActivity.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
-
-    Timber.d("Start lock activity for entry: %s %s", packageName, activityName);
+  @Override public void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName) {
+    craftIntent(lockActivity2, lockActivity, entry, realName);
+    Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
+        entry.activityName(), realName);
     startActivity(lockActivity);
   }
 
-  @Override
-  public void startLockScreen2(@NonNull String packageName, @NonNull String activityName) {
-    lockActivity.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
-    lockActivity.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
-    lockActivity2.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, packageName);
-    lockActivity2.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, activityName);
-
-    Timber.d("Start lock activity 2 for entry: %s %s", packageName, activityName);
+  @Override public void startLockScreen2(@NonNull PadLockEntry entry, @NonNull String realName) {
+    craftIntent(lockActivity, lockActivity2, entry, realName);
+    Timber.d("Start lock activity 2 for entry: %s %s (real %s)", entry.packageName(),
+        entry.activityName(), realName);
     startActivity(lockActivity2);
   }
 
