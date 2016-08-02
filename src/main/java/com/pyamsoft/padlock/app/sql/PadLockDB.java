@@ -74,8 +74,10 @@ public final class PadLockDB {
       this.database = new PadLockDB(appContext, scheduler);
     }
 
-    @CheckResult public long insert(final @NonNull ContentValues contentValues) {
-      return database.getDatabase().insert(PadLockEntry.TABLE_NAME, contentValues);
+    @CheckResult @NonNull
+    public Observable<Long> insert(final @NonNull ContentValues contentValues) {
+      return Observable.defer(() -> Observable.just(
+          database.getDatabase().insert(PadLockEntry.TABLE_NAME, contentValues)));
     }
 
     @NonNull @CheckResult
