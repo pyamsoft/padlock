@@ -173,8 +173,11 @@ public abstract class LockScreenActivity extends AppCompatActivity
   @Override public void onSubmitSuccess() {
     Timber.d("Unlocked!");
     lockViewDelegate.clearDisplay();
+
+    // TODO add required info
+    // TODO lock code, is system
     presenter.postUnlock(lockViewDelegate.getAppPackageName(),
-        lockViewDelegate.getAppActivityName(), menuExclude.isChecked(),
+        lockViewDelegate.getAppActivityName(), null, false, menuExclude.isChecked(),
         getSelectedIgnoreTimeIndex());
   }
 

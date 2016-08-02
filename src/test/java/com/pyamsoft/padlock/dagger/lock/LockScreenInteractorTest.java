@@ -60,8 +60,7 @@ public class LockScreenInteractorTest {
   }
 
   @CheckResult @NonNull public LockScreenInteractor getLockScreenInteractor() {
-    return new LockScreenInteractorImpl(context, mockPreferences, mockDBInteractor,
-        mockMasterPinInteractor, packageManagerWrapper);
+    return new LockScreenInteractorImpl(context, mockPreferences, mockMasterPinInteractor, packageManagerWrapper);
   }
 
   @Test public void test_ignoreTime() {

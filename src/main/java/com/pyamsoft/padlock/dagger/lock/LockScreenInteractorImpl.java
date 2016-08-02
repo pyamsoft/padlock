@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.lock;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.TagConstraint;
@@ -26,7 +27,6 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
-import com.pyamsoft.padlock.dagger.db.DBInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
@@ -35,7 +35,6 @@ import timber.log.Timber;
 final class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenInteractor {
 
   @NonNull private final MasterPinInteractor pinInteractor;
-  @NonNull private final DBInteractor dbInteractor;
   @NonNull private final Context appContext;
   @NonNull private final PadLockPreferences preferences;
   @NonNull private final long[] ignoreTimes;
@@ -43,13 +42,12 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
   private int failCount;
 
   @Inject public LockScreenInteractorImpl(final @NonNull Context context,
-      @NonNull final PadLockPreferences preferences, @NonNull final DBInteractor dbInteractor,
+      @NonNull final PadLockPreferences preferences,
       @NonNull final MasterPinInteractor masterPinInteractor,
       @NonNull PackageManagerWrapper packageManagerWrapper) {
     this.packageManagerWrapper = packageManagerWrapper;
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
-    this.dbInteractor = dbInteractor;
     this.pinInteractor = masterPinInteractor;
     this.ignoreTimes = preferences.getIgnoreTimes();
   }
@@ -115,7 +113,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
 
   @NonNull @Override
   public Observable<Boolean> postUnlock(@NonNull String packageName, @NonNull String activityName,
-      boolean exclude, long ignoreTime) {
+      @Nullable String lockCode, boolean isSystem, boolean exclude, long ignoreTime) {
     Timber.d("Post unlock: %s %s", packageName, activityName);
     final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
     final Observable<PadLockEntry> dbObservable = PadLockDB.with(appContext)
@@ -127,15 +125,17 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       return Observable.just(exclude);
     }).flatMap(exclude1 -> {
       if (exclude1) {
-        Timber.d("EXCLUDE requested, delete entry from DB");
-        return dbInteractor.deleteEntry(packageName, activityName);
+        Timber.d("EXCLUDE requested, whitelist entry in DB");
+        return whitelistEntry(packageName, activityName, lockCode, isSystem);
       } else {
         Timber.d("EXCLUDE not requested");
-        return Observable.just(1);
+        return Observable.just(0L);
       }
-    }).flatMap(deleteResult -> {
+    }).flatMap(whitelistResult -> {
+      Timber.d("Whitelist result: %s", whitelistResult == 0L ? "NOTHING" : "SUCCESS");
+      // TODO do something with long result
       // Ignore time is requested
-      if (ignoreTime != 0) {
+      if (ignoreTime != 0 && !exclude) {
         Timber.d("Get entry to update");
         return dbObservable;
       } else {
@@ -148,14 +148,14 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         return ignoreEntryForTime(entry, ignoreMinutesInMillis);
       } else {
         Timber.d("IGNORE not requested");
-        return Observable.just(1);
+        return Observable.just(0);
       }
     }).flatMap(ignoreResult -> {
+      Timber.d("Ignore result: %s", ignoreResult == 0 ? "NOTHING" : "SUCCESS");
       // TODO do something with integer result
-      Timber.d("Result for update: %d", ignoreResult);
       return isRecheckEnabled();
     }).flatMap(recheckAllowed -> {
-      if (ignoreTime != 0 && recheckAllowed) {
+      if (ignoreTime != 0 && recheckAllowed && !exclude) {
         Timber.d("Get entry to recheck");
         return dbObservable;
       } else {
@@ -168,13 +168,37 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         return queueRecheckJob(entry, ignoreMinutesInMillis);
       } else {
         Timber.d("RECHECK not requested");
-        return Observable.just(1);
+        return Observable.just(0);
       }
     }).map(recheckResult -> {
+      Timber.d("Recheck queued: %s", recheckResult == 0 ? "NO" : "YES");
       // TODO do something with integer result
       Timber.d("Result for recheck: %d", recheckResult);
       return true;
     });
+  }
+
+  @CheckResult @NonNull
+  private Observable<Long> whitelistEntry(String packageName, String activityName, String lockCode,
+      boolean isSystem) {
+    return PadLockDB.with(appContext)
+        .queryWithPackageActivityName(packageName, activityName)
+        .first()
+        .flatMap(padLockEntry -> {
+          if (PadLockEntry.isEmpty(padLockEntry)) {
+            Timber.d("No entry currently exists, create new one and whitelist it");
+            return PadLockDB.with(appContext)
+                .insert(packageName, activityName, lockCode, 0, 0, isSystem, true);
+          } else {
+            Timber.d("Entry exists, update it");
+            return PadLockDB.with(appContext)
+                .updateWithPackageActivityName(padLockEntry.packageName(),
+                    padLockEntry.activityName(), padLockEntry.lockCode(),
+                    padLockEntry.lockUntilTime(), padLockEntry.ignoreUntilTime(),
+                    padLockEntry.systemApplication(), true)
+                .map(Integer::longValue);
+          }
+        });
   }
 
   // KLUDGE void, probably should return Observable to the stream

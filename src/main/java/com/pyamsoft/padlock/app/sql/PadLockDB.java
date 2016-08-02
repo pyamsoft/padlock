@@ -88,6 +88,21 @@ public final class PadLockDB {
           .insert(PadLockEntry.TABLE_NAME, PadLockEntry.FACTORY.marshal(entry).asContentValues())));
     }
 
+    @CheckResult @NonNull
+    public Observable<Integer> updateWithPackageActivityName(@NonNull String packageName,
+        @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
+        long ignoreUntilTime, boolean isSystem, boolean whitelist) {
+      final PadLockEntry entry =
+          PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
+              ignoreUntilTime, isSystem, whitelist);
+      if (PadLockEntry.isEmpty(entry)) {
+        throw new RuntimeException("Cannot update EMPTY entry");
+      }
+      return Observable.defer(() -> Observable.just(database.getDatabase()
+          .update(PadLockEntry.TABLE_NAME, PadLockEntry.FACTORY.marshal(entry).asContentValues(),
+              PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)));
+    }
+
     @NonNull @CheckResult
     public Observable<PadLockEntry> queryWithPackageActivityName(final @NonNull String packageName,
         final @NonNull String activityName) {
@@ -105,20 +120,6 @@ public final class PadLockDB {
           .createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME, packageName)
           .mapToList(PadLockEntry.FACTORY.with_package_nameMapper()::map)
           .filter(padLockEntries -> padLockEntries != null);
-    }
-
-    public Observable<Integer> updateWithPackageActivityName(@NonNull String packageName,
-        @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
-        long ignoreUntilTime, boolean isSystem, boolean whitelist) {
-      final PadLockEntry entry =
-          PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
-              ignoreUntilTime, isSystem, whitelist);
-      if (PadLockEntry.isEmpty(entry)) {
-        throw new RuntimeException("Cannot update EMPTY entry");
-      }
-      return Observable.defer(() -> Observable.just(database.getDatabase()
-          .update(PadLockEntry.TABLE_NAME, PadLockEntry.FACTORY.marshal(entry).asContentValues(),
-              PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)));
     }
 
     @NonNull @CheckResult public Observable<List<PadLockEntry>> queryAll() {
