@@ -28,7 +28,7 @@ import timber.log.Timber;
 public final class PadLockOpenHelper extends SQLiteOpenHelper {
 
   @NonNull public static final String DB_NAME = "padlock_db";
-  private static final int DATABASE_VERSION = 3;
+  private static final int DATABASE_VERSION = 4;
 
   public PadLockOpenHelper(final @NonNull Context context) {
     super(context.getApplicationContext(), DB_NAME, null, DATABASE_VERSION);
@@ -53,6 +53,21 @@ public final class PadLockOpenHelper extends SQLiteOpenHelper {
       upgradeVersion2To3(sqLiteDatabase);
       ++currentVersion;
     }
+
+    if (currentVersion == 3 && newVersion >= 4) {
+      upgradeVersion3To4(sqLiteDatabase);
+      ++currentVersion;
+    }
+  }
+
+  private void upgradeVersion3To4(SQLiteDatabase sqLiteDatabase) {
+    Timber.d("Upgrading from Version 2 to 3 adds whitelist column");
+    final String alterWithWhitelist = String.format(Locale.getDefault(),
+        "ALTER TABLE %s ADD COLUMN %S INTEGER NOT NULL DEFAULT 0", PadLockEntry.TABLE_NAME,
+        PadLockEntry.WHITELIST);
+
+    Timber.d("EXEC SQL: %s", alterWithWhitelist);
+    sqLiteDatabase.execSQL(alterWithWhitelist);
   }
 
   private void upgradeVersion2To3(SQLiteDatabase sqLiteDatabase) {

@@ -24,10 +24,10 @@ import rx.Observable;
 public interface DBInteractor {
 
   @NonNull @CheckResult Observable<Long> createActivityEntries(@NonNull String packageName,
-      @Nullable String code, boolean system);
+      @Nullable String code, boolean system, boolean whitelist);
 
   @NonNull @CheckResult Observable<Long> createEntry(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String code, boolean system);
+      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist);
 
   @NonNull @CheckResult Observable<Integer> deleteActivityEntries(@NonNull String packageName);
 

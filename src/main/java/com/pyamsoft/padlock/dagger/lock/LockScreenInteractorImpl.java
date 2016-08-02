@@ -205,7 +205,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         .updateWithPackageActivityName(oldValues.packageName(), oldValues.activityName(),
             oldValues.lockCode(), oldValues.lockUntilTime(),
             System.currentTimeMillis() + ignoreMinutesInMillis, oldValues.systemApplication(),
-            false);
+            oldValues.whitelist());
   }
 
   @NonNull @CheckResult @Override public Observable<Long> getDefaultIgnoreTime() {

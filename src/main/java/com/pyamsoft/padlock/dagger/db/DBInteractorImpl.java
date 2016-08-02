@@ -39,21 +39,21 @@ final class DBInteractorImpl implements DBInteractor {
 
   @NonNull @CheckResult @Override
   public Observable<Long> createActivityEntries(@NonNull String packageName, @Nullable String code,
-      boolean system) {
+      boolean system, boolean whitelist) {
     return packageManagerWrapper.getActivityListForPackage(packageName)
         .filter(s -> s != null && !s.isEmpty())
-        .concatMap(activityName -> createEntry(packageName, activityName, code, system));
+        .concatMap(activityName -> createEntry(packageName, activityName, code, system, whitelist));
   }
 
   @NonNull @CheckResult @Override
   public Observable<Long> createEntry(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String code, boolean system) {
+      @Nullable String code, boolean system, boolean whitelist) {
 
     // To prevent double creations from occurring, first call a delete on the DB for packageName, activityName
     return deleteEntry(packageName, activityName).flatMap(integer -> {
       Timber.d("CREATE: %s %s", packageName, activityName);
       return PadLockDB.with(appContext)
-          .insert(packageName, activityName, code, 0, 0, system, false);
+          .insert(packageName, activityName, code, 0, 0, system, whitelist);
     });
   }
 
