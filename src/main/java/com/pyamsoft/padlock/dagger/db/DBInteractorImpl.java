@@ -51,7 +51,7 @@ final class DBInteractorImpl implements DBInteractor {
       @Nullable String code, boolean system) {
 
     // To prevent double creations from occurring, first call a delete on the DB for packageName, activityName
-    return deleteEntry(packageName, activityName).map(integer -> {
+    return deleteEntry(packageName, activityName).flatMap(integer -> {
       Timber.d("CREATE: %s %s", packageName, activityName);
       return PadLockDB.with(appContext)
           .insert(PadLockEntry.FACTORY.marshal()
@@ -72,7 +72,7 @@ final class DBInteractorImpl implements DBInteractor {
 
   @NonNull @Override public Observable<Integer> deleteEntry(@NonNull String packageName,
       @NonNull String activityName) {
-    Timber.d("DELETE: all %s", packageName);
+    Timber.d("DELETE: entry %s", packageName);
     return PadLockDB.with(appContext).deleteWithPackageActivityName(packageName, activityName);
   }
 }

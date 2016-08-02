@@ -191,7 +191,7 @@ public final class LockServicePresenter
 
   public void launchCorrectLockScreen(@NonNull String packageName, @NonNull String activityName) {
     unsubPickCorrect();
-    interactor.isExperimentalNSupported()
+    pickCorrectSubscription = interactor.isExperimentalNSupported()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .map(nSupported -> nSupported
