@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.sql;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
@@ -75,9 +74,18 @@ public final class PadLockDB {
     }
 
     @CheckResult @NonNull
-    public Observable<Long> insert(final @NonNull ContentValues contentValues) {
-      return Observable.defer(() -> Observable.just(
-          database.getDatabase().insert(PadLockEntry.TABLE_NAME, contentValues)));
+    public Observable<Long> insert(@NonNull String packageName, @NonNull String activityName,
+        @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem,
+        boolean whitelist) {
+      final PadLockEntry entry =
+          PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
+              ignoreUntilTime, isSystem);
+      if (PadLockEntry.isEmpty(entry)) {
+        throw new RuntimeException("Cannot insert EMPTY entry");
+      }
+
+      return Observable.defer(() -> Observable.just(database.getDatabase()
+          .insert(PadLockEntry.TABLE_NAME, PadLockEntry.FACTORY.marshal(entry).asContentValues())));
     }
 
     @NonNull @CheckResult
@@ -99,11 +107,17 @@ public final class PadLockDB {
           .filter(padLockEntries -> padLockEntries != null);
     }
 
-    @NonNull @CheckResult public Observable<Integer> updateWithPackageActivityName(
-        final @NonNull ContentValues contentValues, final @NonNull String packageName,
-        final @NonNull String activityName) {
+    public Observable<Integer> updateWithPackageActivityName(@NonNull String packageName,
+        @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
+        long ignoreUntilTime, boolean isSystem, boolean whitelist) {
+      final PadLockEntry entry =
+          PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
+              ignoreUntilTime, isSystem);
+      if (PadLockEntry.isEmpty(entry)) {
+        throw new RuntimeException("Cannot update EMPTY entry");
+      }
       return Observable.defer(() -> Observable.just(database.getDatabase()
-          .update(PadLockEntry.TABLE_NAME, contentValues,
+          .update(PadLockEntry.TABLE_NAME, PadLockEntry.FACTORY.marshal(entry).asContentValues(),
               PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)));
     }
 

@@ -22,7 +22,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -54,14 +53,7 @@ final class DBInteractorImpl implements DBInteractor {
     return deleteEntry(packageName, activityName).flatMap(integer -> {
       Timber.d("CREATE: %s %s", packageName, activityName);
       return PadLockDB.with(appContext)
-          .insert(PadLockEntry.FACTORY.marshal()
-              .packageName(packageName)
-              .activityName(activityName)
-              .lockCode(code)
-              .lockUntilTime(0)
-              .ignoreUntilTime(0)
-              .systemApplication(system)
-              .asContentValues());
+          .insert(packageName, activityName, code, 0, 0, system, false);
     });
   }
 
