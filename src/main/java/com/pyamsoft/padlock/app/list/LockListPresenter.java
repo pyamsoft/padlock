@@ -157,6 +157,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         }, () -> {
           final LockList lockList = getView();
           lockList.onListPopulated();
+          unsubscribePopulateList();
         });
   }
 
@@ -187,7 +188,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
           Timber.e(throwable, "onError");
           // TODO  different error
           getView().onListPopulateError();
-        });
+        }, this::unsubscribeFabSubscription);
   }
 
   private void unsubscribeFabSubscription() {
@@ -219,7 +220,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         }, throwable -> {
           // TODO different error
           getView().onListPopulateError();
-        });
+        }, this::unsubscribeSystemVisible);
   }
 
   public final void clickPinFAB() {
@@ -240,7 +241,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         }, throwable -> {
           // TODO different error
           getView().onListPopulateError();
-        });
+        }, this::unsubscribeOnboard);
   }
 
   private void registerOnPinEntryBus() {

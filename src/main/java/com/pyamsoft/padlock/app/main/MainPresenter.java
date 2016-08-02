@@ -93,7 +93,7 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
         }, throwable -> {
           Timber.e(throwable, "onError");
           // TODO error
-        });
+        }, this::unsubscribeAgreeTerms);
   }
 
   private void registerOnAgreeTermsBus() {

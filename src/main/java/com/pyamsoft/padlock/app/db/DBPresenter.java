@@ -99,6 +99,7 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
       } else {
         dbView.onDBDeleteEvent(position);
       }
+      unsubAllSubscription();
     });
   }
 
@@ -129,7 +130,7 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
       Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
       final DBView dbView = getView();
       dbView.onDBError();
-    });
+    }, this::unsubPackageSubscription);
   }
 
   public final void attemptDBModification(int position, boolean create, @NonNull String packageName,
@@ -158,7 +159,7 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
       Timber.e(throwable, "Error in DBPresenterImpl attemptDBModification");
       final DBView dbView = getView();
       dbView.onDBError();
-    });
+    }, this::unsubActivitySubscription);
   }
 
   public interface DBView {

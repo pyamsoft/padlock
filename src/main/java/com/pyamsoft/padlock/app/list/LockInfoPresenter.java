@@ -47,12 +47,6 @@ public final class LockInfoPresenter
     this.lockInfoInteractor = lockInfoInteractor;
   }
 
-  @Override protected void onUnbind(@NonNull LockInfoView view) {
-    super.onUnbind(view);
-    unsubPopulateList();
-    unsubAllInDB();
-  }
-
   @CheckResult private static int findEntryInActivities(@NonNull List<PadLockEntry> padLockEntries,
       @NonNull String name) {
     int foundLocation = -1;
@@ -65,6 +59,12 @@ public final class LockInfoPresenter
     }
 
     return foundLocation;
+  }
+
+  @Override protected void onUnbind(@NonNull LockInfoView view) {
+    super.onUnbind(view);
+    unsubPopulateList();
+    unsubAllInDB();
   }
 
   public final void populateList(@NonNull String packageName) {
@@ -125,6 +125,7 @@ public final class LockInfoPresenter
             }, () -> {
               final LockInfoView lockInfoView = getView();
               lockInfoView.onListPopulated();
+              unsubPopulateList();
             });
   }
 
@@ -173,7 +174,7 @@ public final class LockInfoPresenter
               Timber.e(throwable, "onError");
               // TODO maybe different error
               getView().onListPopulateError();
-            });
+            }, this::unsubAllInDB);
   }
 
   private void unsubAllInDB() {

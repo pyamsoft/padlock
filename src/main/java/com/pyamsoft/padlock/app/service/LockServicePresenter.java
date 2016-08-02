@@ -185,7 +185,7 @@ public final class LockServicePresenter
           launchCorrectLockScreen(padLockEntry, className);
         }, throwable -> {
           Timber.e(throwable, "Error getting PadLockEntry for LockScreen");
-        });
+        }, this::unsubLockedEntry);
   }
 
   void launchCorrectLockScreen(@NonNull PadLockEntry entry, @NonNull String realName) {
@@ -205,7 +205,7 @@ public final class LockServicePresenter
         }, throwable -> {
           Timber.e(throwable, "onError");
           // TODO error
-        });
+        }, this::unsubPickCorrect);
   }
 
   public interface LockService {

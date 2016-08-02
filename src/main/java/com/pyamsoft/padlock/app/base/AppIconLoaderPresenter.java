@@ -43,6 +43,7 @@ public class AppIconLoaderPresenter<I extends AppIconLoaderView> extends Schedul
   }
 
   public final void loadApplicationIcon(@NonNull String packageName) {
+    unsubLoadIcon();
     loadIconSubscription = interactor.loadPackageIcon(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -53,12 +54,11 @@ public class AppIconLoaderPresenter<I extends AppIconLoaderView> extends Schedul
           Timber.e(throwable, "onError");
           final AppIconLoaderView loaderView = getView();
           loaderView.onApplicationIconLoadedError();
-        });
+        }, this::unsubLoadIcon);
   }
 
   private void unsubLoadIcon() {
     if (!loadIconSubscription.isUnsubscribed()) {
-      Timber.d("Unsub from load icon event");
       loadIconSubscription.unsubscribe();
     }
   }
