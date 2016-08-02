@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.lock;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
@@ -64,17 +63,11 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
         .map(padLockEntry -> {
           Timber.d("LOCKED entry, update entry in DB: ", padLockEntry);
           final long timeOutMinutesInMillis = preferences.getTimeoutPeriod() * 60 * 1000;
-          final ContentValues contentValues = PadLockEntry.FACTORY.marshal()
-              .packageName(padLockEntry.packageName())
-              .activityName(padLockEntry.activityName())
-              .lockCode(padLockEntry.lockCode())
-              .lockUntilTime(System.currentTimeMillis() + timeOutMinutesInMillis)
-              .ignoreUntilTime(padLockEntry.ignoreUntilTime())
-              .systemApplication(padLockEntry.systemApplication())
-              .asContentValues();
           return PadLockDB.with(appContext)
-              .updateWithPackageActivityName(contentValues, padLockEntry.packageName(),
-                  padLockEntry.activityName());
+              .updateWithPackageActivityName(padLockEntry.packageName(),
+                  padLockEntry.activityName(), padLockEntry.lockCode(),
+                  System.currentTimeMillis() + timeOutMinutesInMillis,
+                  padLockEntry.ignoreUntilTime(), padLockEntry.systemApplication(), false);
         })
         .map(integer -> {
           // TODO use result of update
@@ -208,17 +201,11 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       final long ignoreMinutesInMillis) {
     Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
         ignoreMinutesInMillis);
-    final ContentValues contentValues = PadLockEntry.FACTORY.marshal()
-        .packageName(oldValues.packageName())
-        .activityName(oldValues.activityName())
-        .lockCode(oldValues.lockCode())
-        .lockUntilTime(oldValues.lockUntilTime())
-        .ignoreUntilTime(System.currentTimeMillis() + ignoreMinutesInMillis)
-        .systemApplication(oldValues.systemApplication())
-        .asContentValues();
     return PadLockDB.with(appContext)
-        .updateWithPackageActivityName(contentValues, oldValues.packageName(),
-            oldValues.activityName());
+        .updateWithPackageActivityName(oldValues.packageName(), oldValues.activityName(),
+            oldValues.lockCode(), oldValues.lockUntilTime(),
+            System.currentTimeMillis() + ignoreMinutesInMillis, oldValues.systemApplication(),
+            false);
   }
 
   @NonNull @CheckResult @Override public Observable<Long> getDefaultIgnoreTime() {
