@@ -79,7 +79,7 @@ public final class PadLockDB {
         boolean whitelist) {
       final PadLockEntry entry =
           PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
-              ignoreUntilTime, isSystem);
+              ignoreUntilTime, isSystem, whitelist);
       if (PadLockEntry.isEmpty(entry)) {
         throw new RuntimeException("Cannot insert EMPTY entry");
       }
@@ -112,7 +112,7 @@ public final class PadLockDB {
         long ignoreUntilTime, boolean isSystem, boolean whitelist) {
       final PadLockEntry entry =
           PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
-              ignoreUntilTime, isSystem);
+              ignoreUntilTime, isSystem, whitelist);
       if (PadLockEntry.isEmpty(entry)) {
         throw new RuntimeException("Cannot update EMPTY entry");
       }

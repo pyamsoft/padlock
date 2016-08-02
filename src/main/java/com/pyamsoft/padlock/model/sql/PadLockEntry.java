@@ -29,7 +29,7 @@ import com.google.auto.value.AutoValue;
       new Factory<>(AutoValue_PadLockEntry::new);
 
   @NonNull @CheckResult public static PadLockEntry empty() {
-    return new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false);
+    return new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false);
   }
 
   @CheckResult public static boolean isEmpty(@NonNull PadLockEntry entry) {

@@ -5,7 +5,8 @@ CREATE TABLE padlock_entry (
   lockCode TEXT,
   lockUntilTime INTEGER NOT NULL,
   ignoreUntilTime INTEGER NOT NULL,
-  systemApplication INTEGER AS Boolean NOT NULL
+  systemApplication INTEGER AS Boolean NOT NULL,
+  whitelist INTEGER AS Boolean NOT NULL
 );
 
 -- Get all entries in the table
