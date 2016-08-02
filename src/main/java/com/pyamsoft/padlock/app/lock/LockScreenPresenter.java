@@ -160,16 +160,17 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
         .subscribe(lockScreen::setDisplayName, throwable -> {
           Timber.e(throwable, "Error loading display name from package");
           lockScreen.setDisplayName("");
-        });
+        }, this::unsubDisplayName);
   }
 
   public void postUnlock(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName,
-      @Nullable String lockCode, boolean isSystem, boolean shouldExclude, int ignoreIndex) {
+      @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
+      int ignoreIndex) {
     unsubPostUnlock();
     postUnlockSubscription = interactor.getIgnoreTimeForIndex(ignoreIndex)
-        .flatMap(time -> interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
-            shouldExclude, time))
+        .flatMap(
+            time -> interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
+                shouldExclude, time))
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(result -> {
@@ -178,7 +179,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
         }, throwable -> {
           Timber.e(throwable, "Error postunlock");
           getView().onLockedError();
-        });
+        }, this::unsubPostUnlock);
   }
 
   private void unsubDisplayName() {

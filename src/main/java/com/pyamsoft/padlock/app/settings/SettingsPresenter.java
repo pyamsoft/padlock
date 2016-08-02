@@ -104,7 +104,7 @@ public final class SettingsPresenter extends SchedulerPresenter<SettingsPresente
                     getView().onClearAll();
                   }, throwable -> {
                     Timber.e(throwable, "onError");
-                  });
+                  }, this::unsubscribeConfirm);
               break;
             default:
               throw new IllegalStateException(

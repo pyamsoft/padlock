@@ -66,6 +66,6 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
         }, throwable -> {
           Timber.e(throwable, "attemptPinSubmission onError");
           pinScreen.onSubmitError();
-        });
+        }, this::unsubPinEntry);
   }
 }
