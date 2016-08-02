@@ -164,10 +164,11 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
   }
 
   public void postUnlock(@NonNull String packageName, @NonNull String activityName,
-      boolean shouldExclude, int ignoreIndex) {
+      @Nullable String lockCode, boolean isSystem, boolean shouldExclude, int ignoreIndex) {
     unsubPostUnlock();
     postUnlockSubscription = interactor.getIgnoreTimeForIndex(ignoreIndex)
-        .flatMap(time -> interactor.postUnlock(packageName, activityName, shouldExclude, time))
+        .flatMap(time -> interactor.postUnlock(packageName, activityName, lockCode, isSystem,
+            shouldExclude, time))
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(result -> {
