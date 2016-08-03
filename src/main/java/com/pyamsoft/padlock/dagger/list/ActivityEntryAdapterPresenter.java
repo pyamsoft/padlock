@@ -34,7 +34,11 @@ final class ActivityEntryAdapterPresenter
     super(adapterInteractor, mainScheduler, ioScheduler);
   }
 
+  @Override public void setLocked(int position, ActivityEntry.ActivityLockState state) {
+    set(position, ActivityEntry.builder(get(position)).lockState(state).build());
+  }
+
   @Override public void setLocked(int position, boolean locked) {
-    set(position, ActivityEntry.builder(get(position)).locked(locked).build());
+    throw new RuntimeException("Do not use this function here");
   }
 }

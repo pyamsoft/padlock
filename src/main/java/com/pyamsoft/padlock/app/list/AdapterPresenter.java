@@ -23,6 +23,7 @@ import android.support.v7.widget.RecyclerView;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 import com.pyamsoft.padlock.dagger.list.AdapterInteractor;
+import com.pyamsoft.padlock.model.ActivityEntry;
 import java.lang.ref.WeakReference;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -92,6 +93,8 @@ public abstract class AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
   }
 
   public abstract void setLocked(int position, boolean locked);
+
+  public abstract void setLocked(int position, ActivityEntry.ActivityLockState state);
 
   public interface AdapterView<VH extends RecyclerView.ViewHolder> extends AppIconLoaderView {
 
