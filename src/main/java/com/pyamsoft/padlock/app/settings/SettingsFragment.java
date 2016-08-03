@@ -75,14 +75,14 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));
     clearDb.setOnPreferenceClickListener(preference -> {
       Timber.d("Clear DB onClick");
-      presenter.clearDatabase();
+      presenter.requestClearDatabase();
       return true;
     });
 
     final Preference resetAll = findPreference(getString(R.string.clear_all_key));
     resetAll.setOnPreferenceClickListener(preference -> {
       Timber.d("Reset settings onClick");
-      presenter.clearAll();
+      presenter.requestClearAll();
       return true;
     });
 
