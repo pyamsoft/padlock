@@ -40,7 +40,7 @@ public final class PadLockDB {
     briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, dbScheduler);
   }
 
-  static void setDelegate(@Nullable Delegate delegate) {
+  public static void setDelegate(@Nullable Delegate delegate) {
     instance = delegate;
   }
 

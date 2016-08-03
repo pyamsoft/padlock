@@ -93,8 +93,18 @@ public final class LockInfoPresenter
                   foundEntry = null;
                 }
 
+                ActivityEntry.ActivityLockState state;
+                if (foundEntry == null) {
+                  state = ActivityEntry.ActivityLockState.DEFAULT;
+                } else {
+                  if (foundEntry.whitelist()) {
+                    state = ActivityEntry.ActivityLockState.WHITELISTED;
+                  } else {
+                    state = ActivityEntry.ActivityLockState.LOCKED;
+                  }
+                }
                 final ActivityEntry activityEntry =
-                    ActivityEntry.builder().locked(foundEntry != null).name(name).build();
+                    ActivityEntry.builder().lockState(state).name(name).build();
                 Timber.d("Add ActivityEntry: %s", activityEntry);
                 entries.add(activityEntry);
               }

@@ -76,7 +76,19 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
     final ActivityEntry entry = adapterPresenter.get(position);
 
     removeViewActionListeners(holder);
-    //holder.checkBox.setChecked(entry.locked());
+    switch (entry.lockState()) {
+      case DEFAULT:
+        holder.defaultLockState.setChecked(true);
+        break;
+      case WHITELISTED:
+        holder.whiteLockState.setChecked(true);
+        break;
+      case LOCKED:
+        holder.blackLockState.setChecked(true);
+        break;
+      default:
+        throw new IllegalStateException("Illegal enum state");
+    }
 
     String activityName;
     final String entryName = entry.name();
@@ -85,10 +97,11 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
     } else {
       activityName = entryName;
     }
-    holder.checkBox.setText(activityName);
+    holder.name.setText(activityName);
 
-    //holder.checkBox.setOnClickListener(
-    //    view -> dbPresenter.attemptDBModification(position, !holder.checkBox.isChecked(),
+    // TODO set on check change listener
+    //holder.name.setOnClickListener(
+    //    view -> dbPresenter.attemptDBModification(position, !holder.name.isChecked(),
     //        appEntry.packageName(), entryName, null, appEntry.system()));
   }
 
@@ -98,7 +111,9 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
   }
 
   private void removeViewActionListeners(@NonNull ViewHolder holder) {
-    holder.checkBox.setOnClickListener(null);
+    holder.defaultLockState.setOnCheckedChangeListener(null);
+    holder.whiteLockState.setOnCheckedChangeListener(null);
+    holder.blackLockState.setOnCheckedChangeListener(null);
   }
 
   @Override public int getItemCount() {
@@ -132,6 +147,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
       lockInfoDialog.onDBDeleteEvent(position);
     } else {
       Timber.d("onDBDeleteEvent");
+      // TODO move to activitystate
       adapterPresenter.setLocked(position, false);
       notifyItemChanged(position);
     }
@@ -144,7 +160,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
 
   public static final class ViewHolder extends RecyclerView.ViewHolder {
 
-    @BindView(R.id.lock_info_activity) TextView checkBox;
+    @BindView(R.id.lock_info_activity) TextView name;
     @BindView(R.id.lock_info_tristate_radiogroup) RadioGroup triStateGroup;
     @BindView(R.id.lock_info_radio_default) RadioButton defaultLockState;
     @BindView(R.id.lock_info_radio_white) RadioButton whiteLockState;
