@@ -42,7 +42,14 @@ final class SettingsInteractorImpl implements SettingsInteractor {
       return PadLockDB.with(appContext).deleteAll();
     }).map(integer -> {
       // TODO do something with result
+      Timber.d("Database is cleared: %s", integer);
       return appContext.deleteDatabase(PadLockOpenHelper.DB_NAME);
+    }).map(deleteResult -> {
+      Timber.d("Database is deleted: %s", deleteResult);
+      PadLockDB.with(appContext).close();
+
+      // TODO just return something valid
+      return true;
     });
   }
 

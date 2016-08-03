@@ -27,6 +27,7 @@ import java.util.List;
 import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 public final class PadLockDB {
 
@@ -39,7 +40,7 @@ public final class PadLockDB {
     briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, dbScheduler);
   }
 
-  public static void setDelegate(@Nullable Delegate delegate) {
+  static void setDelegate(@Nullable Delegate delegate) {
     instance = delegate;
   }
 
@@ -69,6 +70,7 @@ public final class PadLockDB {
     @NonNull private final PadLockDB database;
 
     public Delegate(@NonNull Context context, @NonNull Scheduler scheduler) {
+      Timber.d("Create new PadLockDB Delegate");
       final Context appContext = context.getApplicationContext();
       this.database = new PadLockDB(appContext, scheduler);
     }
@@ -146,6 +148,12 @@ public final class PadLockDB {
     @NonNull @CheckResult public Observable<Integer> deleteAll() {
       return Observable.defer(() -> Observable.just(
           database.getDatabase().delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL)));
+    }
+
+    public void close() {
+      Timber.d("Close and recycle database connection");
+      database.getDatabase().close();
+      setDelegate(null);
     }
   }
 }

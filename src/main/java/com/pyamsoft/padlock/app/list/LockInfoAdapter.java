@@ -21,7 +21,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckedTextView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.pyamsoft.padlock.R;
@@ -74,7 +76,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
     final ActivityEntry entry = adapterPresenter.get(position);
 
     removeViewActionListeners(holder);
-    holder.checkBox.setChecked(entry.locked());
+    //holder.checkBox.setChecked(entry.locked());
 
     String activityName;
     final String entryName = entry.name();
@@ -85,9 +87,9 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
     }
     holder.checkBox.setText(activityName);
 
-    holder.checkBox.setOnClickListener(
-        view -> dbPresenter.attemptDBModification(position, !holder.checkBox.isChecked(),
-            appEntry.packageName(), entryName, null, appEntry.system()));
+    //holder.checkBox.setOnClickListener(
+    //    view -> dbPresenter.attemptDBModification(position, !holder.checkBox.isChecked(),
+    //        appEntry.packageName(), entryName, null, appEntry.system()));
   }
 
   @Override public void onViewRecycled(@NonNull ViewHolder holder) {
@@ -142,7 +144,11 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
 
   public static final class ViewHolder extends RecyclerView.ViewHolder {
 
-    @BindView(R.id.lock_info_activity_locked) CheckedTextView checkBox;
+    @BindView(R.id.lock_info_activity) TextView checkBox;
+    @BindView(R.id.lock_info_tristate_radiogroup) RadioGroup triStateGroup;
+    @BindView(R.id.lock_info_radio_default) RadioButton defaultLockState;
+    @BindView(R.id.lock_info_radio_white) RadioButton whiteLockState;
+    @BindView(R.id.lock_info_radio_black) RadioButton blackLockState;
 
     public ViewHolder(@NonNull View itemView) {
       super(itemView);

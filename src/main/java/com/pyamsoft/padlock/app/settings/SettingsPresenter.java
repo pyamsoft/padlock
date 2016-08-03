@@ -56,11 +56,11 @@ public final class SettingsPresenter extends SchedulerPresenter<SettingsPresente
     unsubscribeConfirm();
   }
 
-  public final void clearAll() {
+  public final void requestClearAll() {
     getView().showConfirmDialog(CONFIRM_ALL);
   }
 
-  public final void clearDatabase() {
+  public final void requestClearDatabase() {
     getView().showConfirmDialog(CONFIRM_DATABASE);
   }
 
@@ -85,26 +85,10 @@ public final class SettingsPresenter extends SchedulerPresenter<SettingsPresente
         .subscribe(confirmationEvent -> {
           switch (confirmationEvent.type()) {
             case CONFIRM_DATABASE:
-              unsubscribeConfirm();
-              confirmedSubscription = interactor.clearDatabase()
-                  .subscribeOn(getSubscribeScheduler())
-                  .observeOn(getObserveScheduler())
-                  .subscribe(aBoolean -> {
-                    getView().onClearDatabase();
-                  }, throwable -> {
-                    Timber.e(throwable, "onError");
-                  });
+              clearDatabase();
               break;
             case CONFIRM_ALL:
-              unsubscribeConfirm();
-              confirmedSubscription = interactor.clearAll()
-                  .subscribeOn(getSubscribeScheduler())
-                  .observeOn(getObserveScheduler())
-                  .subscribe(aBoolean -> {
-                    getView().onClearAll();
-                  }, throwable -> {
-                    Timber.e(throwable, "onError");
-                  }, this::unsubscribeConfirm);
+              clearAll();
               break;
             default:
               throw new IllegalStateException(
@@ -113,6 +97,30 @@ public final class SettingsPresenter extends SchedulerPresenter<SettingsPresente
         }, throwable -> {
           Timber.e(throwable, "onError");
         });
+  }
+
+  private void clearAll() {
+    unsubscribeConfirm();
+    confirmedSubscription = interactor.clearAll()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(aBoolean -> {
+          getView().onClearAll();
+        }, throwable -> {
+          Timber.e(throwable, "onError");
+        }, this::unsubscribeConfirm);
+  }
+
+  void clearDatabase() {
+    unsubscribeConfirm();
+    confirmedSubscription = interactor.clearDatabase()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(aBoolean -> {
+          getView().onClearDatabase();
+        }, throwable -> {
+          Timber.e(throwable, "onError");
+        }, this::unsubscribeConfirm);
   }
 
   public interface SettingsView {
