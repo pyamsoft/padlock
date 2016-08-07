@@ -319,14 +319,20 @@ public final class LockListFragment extends Fragment
       @Override public void onHiddenHook() {
         super.onHiddenHook();
         if (showHint) {
-          hintFab.hide();
+          // Fab may be gone
+          if (hintFab != null) {
+            hintFab.hide();
+          }
         }
       }
 
       @Override public void onShownHook() {
         super.onShownHook();
         if (showHint) {
-          hintFab.show();
+          // Fab may be gone
+          if (hintFab != null) {
+            hintFab.show();
+          }
         }
       }
     });
