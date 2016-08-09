@@ -25,4 +25,6 @@ public interface PinEntryInteractor extends LockInteractor {
 
   @CheckResult @NonNull Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt,
       @NonNull String reentry, @NonNull String hint);
+
+  @CheckResult @NonNull Observable<Boolean> hasMasterPin();
 }

@@ -29,6 +29,7 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
 
   @NonNull private final PinEntryInteractor interactor;
   @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
+  @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
 
   @Inject public PinEntryPresenter(@NonNull final PinEntryInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
@@ -43,9 +44,16 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
     }
   }
 
+  private void unsubPinCheck() {
+    if (!pinCheckSubscription.isUnsubscribed()) {
+      pinCheckSubscription.unsubscribe();
+    }
+  }
+
   @Override protected void onUnbind(@NonNull PinScreen view) {
     super.onUnbind(view);
     unsubPinEntry();
+    unsubPinCheck();
   }
 
   public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
@@ -68,5 +76,23 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
           Timber.e(throwable, "attemptPinSubmission onError");
           pinScreen.onSubmitError();
         }, this::unsubPinEntry);
+  }
+
+  public void hideUnimportantViews() {
+    Timber.d("Check if we have a master");
+    unsubPinCheck();
+    pinCheckSubscription = interactor.hasMasterPin()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(hasMaster -> {
+          if (hasMaster) {
+            getView().hideExtraPinEntryViews();
+          } else {
+            getView().showExtraPinEntryViews();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError hideUnimportantViews");
+          // TODO
+        }, this::unsubPinCheck);
   }
 }

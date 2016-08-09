@@ -129,30 +129,43 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
         .getSystemService(Context.INPUT_METHOD_SERVICE);
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
-    // Only the hint needs to have its IME action set
-    setupHintEntry();
     setupGoArrow();
-
     clearDisplay();
+    setupToolbar();
 
     if (savedInstanceState != null) {
       onRestoreInstanceState(savedInstanceState);
     }
 
-    setupToolbar();
+    presenter.hideUnimportantViews();
+
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
   }
 
-  private void setupHintEntry() {
-    pinHintText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+  @Override public void showExtraPinEntryViews() {
+    Timber.d("No active master, show extra views");
+    pinReentry.setVisibility(View.VISIBLE);
+    pinHint.setVisibility(View.VISIBLE);
+    setupSubmissionView(pinHintText);
+  }
+
+  @Override public void hideExtraPinEntryViews() {
+    Timber.d("Active master, hide extra views");
+    pinReentry.setVisibility(View.GONE);
+    pinHint.setVisibility(View.GONE);
+    setupSubmissionView(pinEntryText);
+  }
+
+  private void setupSubmissionView(@NonNull EditText view) {
+    view.setOnEditorActionListener((textView, actionId, keyEvent) -> {
       if (keyEvent == null) {
         Timber.e("KeyEvent was not caused by keypress");
         return false;
       }
 
       if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
-        presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint());
         Timber.d("KeyEvent is Enter pressed");
+        presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint());
         return true;
       }
 
