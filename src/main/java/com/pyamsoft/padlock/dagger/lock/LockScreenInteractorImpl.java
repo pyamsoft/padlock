@@ -287,4 +287,8 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     Timber.d("Reset fail count to 0");
     failCount = 0;
   }
+
+  @NonNull @Override public Observable<String> getHint() {
+    return pinInteractor.getHint();
+  }
 }

@@ -34,6 +34,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
   @NonNull private Subscription unlockSubscription = Subscriptions.empty();
   @NonNull private Subscription lockSubscription = Subscriptions.empty();
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
+  @NonNull private Subscription hintSubscription = Subscriptions.empty();
 
   @Inject public LockScreenPresenter(@NonNull final LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("main") Scheduler mainScheduler,
@@ -68,6 +69,24 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     if (!lockSubscription.isUnsubscribed()) {
       lockSubscription.unsubscribe();
     }
+  }
+
+  private void unsubHint() {
+    if (!hintSubscription.isUnsubscribed()) {
+      hintSubscription.unsubscribe();
+    }
+  }
+
+  public void displayLockedHint() {
+    unsubHint();
+    hintSubscription = interactor.getHint()
+        .map(s -> s == null ? "" : s)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(hint -> getView().setDisplayHint(hint), throwable -> {
+          Timber.e(throwable, "onError displayLockedHint");
+          // TODO
+        }, this::unsubHint);
   }
 
   private void setIgnorePeriod(final long time) {
