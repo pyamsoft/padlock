@@ -36,7 +36,6 @@
         android:listSelector="@android:color/transparent"
         />
 
-
   </android.support.v4.widget.SwipeRefreshLayout>
 
   <android.support.design.widget.FloatingActionButton
@@ -47,21 +46,6 @@
       android:layout_margin="@dimen/fab_margin"
       app:elevation="6dp"
       app:fabSize="normal"
-      app:pressedTranslationZ="12dp"
-      />
-
-  <android.support.design.widget.FloatingActionButton
-      android:id="@+id/applist_hint_fab"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="bottom|end"
-      android:layout_marginBottom="88dp"
-      android:layout_marginEnd="24dp"
-      android:layout_marginRight="24dp"
-      app:elevation="6dp"
-      app:fabSize="mini"
-      app:layout_anchor="@id/applist_fab"
-      app:layout_anchorGravity="top|center_horizontal"
       app:pressedTranslationZ="12dp"
       />
 
