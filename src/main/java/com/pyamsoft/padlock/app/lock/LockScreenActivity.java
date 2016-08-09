@@ -35,6 +35,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -52,6 +53,7 @@ import com.pyamsoft.pydroid.tool.AsyncTaskMap;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
+import java.util.Locale;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -73,6 +75,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   @BindView(R.id.lock_image) ImageView image;
   @BindView(R.id.lock_text) TextInputLayout textLayout;
   @BindView(R.id.lock_image_go) ImageView imageGo;
+  @BindView(R.id.lock_display_hint) TextView hintDisplay;
 
   @Inject AppIconLoaderPresenter<LockScreen> appIconLoaderPresenter;
   @Inject LockScreenPresenter presenter;
@@ -183,6 +186,16 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     clearDisplay();
 
     setSupportActionBar(toolbar);
+
+    // Hide hint to begin with
+    hintDisplay.setVisibility(View.GONE);
+    presenter.displayLockedHint();
+  }
+
+  @Override public void setDisplayHint(@NonNull String hint) {
+    Timber.d("Settings hint");
+    hintDisplay.setText(
+        String.format(Locale.getDefault(), "Hint: %s", hint.isEmpty() ? "NO HINT" : hint));
   }
 
   public final void clearDisplay() {
@@ -277,6 +290,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     Timber.e("Failed to unlock");
     clearDisplay();
     showSnackbarWithText("Error: Invalid PIN");
+    hintDisplay.setVisibility(View.VISIBLE);
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
     presenter.lockEntry(lockedPackageName, lockedActivityName);

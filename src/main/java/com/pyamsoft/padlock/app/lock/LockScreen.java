@@ -48,4 +48,6 @@ public interface LockScreen extends LockPresenter.LockView, AppIconLoaderView {
   void onSaveMenuSelections(long ignoreTime);
 
   void setDisplayName(@NonNull String name);
+
+  void setDisplayHint(@NonNull String hint);
 }

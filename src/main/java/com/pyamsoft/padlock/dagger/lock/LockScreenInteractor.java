@@ -59,5 +59,7 @@ public interface LockScreenInteractor extends LockInteractor {
 
   @CheckResult @NonNull Observable<Integer> incrementAndGetFailCount();
 
+  @CheckResult @NonNull Observable<String> getHint();
+
   void resetFailCount();
 }
