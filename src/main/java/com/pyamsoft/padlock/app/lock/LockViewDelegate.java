@@ -48,8 +48,6 @@ import timber.log.Timber;
 
 public final class LockViewDelegate implements AppIconLoaderView {
 
-  @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
-  @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private final AsyncTaskMap taskMap = new AsyncTaskMap();
 
@@ -138,7 +136,7 @@ public final class LockViewDelegate implements AppIconLoaderView {
   }
 
   private void getValuesFromBundle(@NonNull Bundle bundle) {
-    packageName = bundle.getString(ENTRY_PACKAGE_NAME);
+    packageName = bundle.getString("");
     Timber.d("Got value packageName: %s", packageName);
   }
 
