@@ -48,7 +48,8 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
     unsubPinEntry();
   }
 
-  public final void submit(@NonNull String currentAttempt) {
+  public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
+      @NonNull String hint) {
     Timber.d("Attempt PIN submission");
     unsubPinEntry();
     final PinScreen pinScreen = getView();

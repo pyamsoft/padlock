@@ -48,8 +48,8 @@ import timber.log.Timber;
 public abstract class LockScreenActivity extends AppCompatActivity
     implements LockScreen, LockViewDelegate.Callback {
 
-  @NonNull public static final String ENTRY_PACKAGE_NAME = LockViewDelegate.ENTRY_PACKAGE_NAME;
-  @NonNull public static final String ENTRY_ACTIVITY_NAME = LockViewDelegate.ENTRY_ACTIVITY_NAME;
+  @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
+  @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
   @NonNull public static final String ENTRY_REAL_NAME = "real_name";
   @NonNull public static final String ENTRY_LOCK_CODE = "lock_code";
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
