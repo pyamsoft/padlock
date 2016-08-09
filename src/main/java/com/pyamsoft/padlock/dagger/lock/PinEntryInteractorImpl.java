@@ -43,6 +43,10 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
     });
   }
 
+  @NonNull @Override public Observable<Boolean> hasMasterPin() {
+    return masterPinInteractor.getMasterPin().map(s -> s != null);
+  }
+
   @CheckResult @NonNull
   private PinEntryEvent attemptClearPin(@NonNull String masterPin, @NonNull String attempt) {
     final boolean success = checkSubmissionAttempt(attempt, masterPin).toBlocking().first();
