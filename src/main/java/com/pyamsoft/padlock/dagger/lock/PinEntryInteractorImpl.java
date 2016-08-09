@@ -31,25 +31,50 @@ final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntr
     this.masterPinInteractor = masterPinInteractor;
   }
 
-  @CheckResult @NonNull @Override
-  public Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt) {
+  @Override @CheckResult @NonNull
+  public Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt, @NonNull String reentry,
+      @NonNull String hint) {
     return masterPinInteractor.getMasterPin().map(masterPin -> {
       if (masterPin == null) {
-        Timber.d("No existing master pin, create a new one");
-        final String encodedMasterPin = encodeSHA256(attempt).toBlocking().first();
-        masterPinInteractor.setMasterPin(encodedMasterPin);
-        return PinEntryEvent.builder().complete(true).type(0).build();
+        return attemptCreatePin(attempt, reentry, hint);
       } else {
-        final boolean success = checkSubmissionAttempt(attempt, masterPin).toBlocking().first();
-        if (success) {
-          Timber.d("Clear master pin");
-          masterPinInteractor.setMasterPin(null);
-          return PinEntryEvent.builder().complete(true).type(1).build();
-        } else {
-          Timber.d("Failed to clear master pin");
-          return PinEntryEvent.builder().complete(false).type(1).build();
-        }
+        return attemptClearPin(masterPin, attempt);
       }
     });
+  }
+
+  @CheckResult @NonNull
+  private PinEntryEvent attemptClearPin(@NonNull String masterPin, @NonNull String attempt) {
+    final boolean success = checkSubmissionAttempt(attempt, masterPin).toBlocking().first();
+    if (success) {
+      Timber.d("Clear master pin");
+      masterPinInteractor.setMasterPin(null);
+      masterPinInteractor.setHint(null);
+      return PinEntryEvent.builder().complete(true).type(1).build();
+    } else {
+      Timber.d("Failed to clear master pin");
+      return PinEntryEvent.builder().complete(false).type(1).build();
+    }
+  }
+
+  @CheckResult @NonNull
+  private PinEntryEvent attemptCreatePin(@NonNull String attempt, @NonNull String reentry,
+      @NonNull String hint) {
+    Timber.d("No existing master pin, attempt to create a new one");
+    if (attempt.equals(reentry)) {
+      Timber.d("Entry and Re-Entry match, create");
+      final String encodedMasterPin = encodeSHA256(attempt).toBlocking().first();
+      masterPinInteractor.setMasterPin(encodedMasterPin);
+
+      if (!hint.isEmpty()) {
+        Timber.d("User provided hint, save it");
+        masterPinInteractor.setHint(hint);
+      }
+
+      return PinEntryEvent.builder().complete(true).type(0).build();
+    } else {
+      Timber.e("Entry and re-entry do not match");
+      return PinEntryEvent.builder().complete(false).type(0).build();
+    }
   }
 }

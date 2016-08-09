@@ -26,4 +26,8 @@ public interface MasterPinInteractor {
   @NonNull @CheckResult Observable<String> getMasterPin();
 
   void setMasterPin(@Nullable String pin);
+
+  @NonNull @CheckResult Observable<String> getHint();
+
+  void setHint(@Nullable String hint);
 }

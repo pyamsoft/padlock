@@ -315,12 +315,16 @@ public final class LockListFragment extends Fragment
         PinEntryDialog.newInstance(packageName, activityName), PIN_DIALOG_TAG);
   }
 
-  @Override public void onCreateMasterPin() {
+  @Override public void onCreateMasterPinSuccess() {
     setFABStateEnabled();
     final View v = getView();
     if (v != null) {
       Snackbar.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT).show();
     }
+  }
+
+  @Override public void onCreateMasterPinFailure() {
+    Toast.makeText(getContext(), "Error: Mismatched PIN", Toast.LENGTH_SHORT).show();
   }
 
   @Override public void onClearMasterPinSuccess() {
