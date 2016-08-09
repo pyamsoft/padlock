@@ -58,9 +58,10 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     return PadLockDB.with(appContext)
         .queryWithPackageActivityName(packageName, activityName)
         .first()
-        .map(padLockEntry -> {
-          Timber.d("LOCKED entry, update entry in DB: ", padLockEntry);
+        .flatMap(padLockEntry -> {
           final long timeOutMinutesInMillis = preferences.getTimeoutPeriod() * 60 * 1000;
+          Timber.d("LOCKED entry, update entry in DB: %s", padLockEntry);
+          Timber.d("lock for %d", timeOutMinutesInMillis);
           return PadLockDB.with(appContext)
               .updateWithPackageActivityName(padLockEntry.packageName(),
                   padLockEntry.activityName(), padLockEntry.lockCode(),
@@ -68,6 +69,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
                   padLockEntry.ignoreUntilTime(), padLockEntry.systemApplication(), false);
         })
         .map(integer -> {
+          Timber.d("Result of update: %d", integer);
           // TODO use result of update
           return true;
         });
@@ -83,7 +85,7 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
     final Observable<String> masterPinObservable = pinInteractor.getMasterPin();
     return Observable.zip(dbObservable, masterPinObservable, (padLockEntry, masterPin) -> {
       final long lockUntilTime = padLockEntry.lockUntilTime();
-      Timber.d("Check entry is not locked");
+      Timber.d("Check entry is not locked: %d", lockUntilTime);
       if (System.currentTimeMillis() < lockUntilTime) {
         Timber.e("Entry is still locked. Fail unlock");
         return null;
