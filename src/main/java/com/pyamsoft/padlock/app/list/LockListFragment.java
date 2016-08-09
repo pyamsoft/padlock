@@ -112,7 +112,9 @@ public final class LockListFragment extends Fragment
     @Override public void onShown(FloatingActionButton fab) {
       super.onShown(fab);
       if (showHint) {
-        hintFab.show();
+        if (hintFab != null) {
+          hintFab.show();
+        }
       }
 
       presenter.showOnBoarding();
@@ -121,7 +123,9 @@ public final class LockListFragment extends Fragment
     @Override public void onHidden(FloatingActionButton fab) {
       super.onHidden(fab);
       if (showHint) {
-        hintFab.hide();
+        if (hintFab != null) {
+          hintFab.hide();
+        }
       }
     }
   };
