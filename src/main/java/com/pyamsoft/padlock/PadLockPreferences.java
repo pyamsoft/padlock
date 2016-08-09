@@ -44,6 +44,10 @@ public interface PadLockPreferences {
 
   void setMasterPassword(@Nullable String masterPassword);
 
+  @CheckResult String getHint();
+
+  void setHint(@Nullable String hint);
+
   @CheckResult boolean hasAgreed();
 
   void setAgreed();

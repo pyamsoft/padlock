@@ -30,6 +30,7 @@ final class PadLockPreferencesImpl extends ApplicationPreferences implements Pad
 
   @NonNull private static final String IS_SYSTEM = "is_system";
   @NonNull private static final String MASTER_PASSWORD = "master_password";
+  @NonNull private static final String HINT = "hint";
   @NonNull private static final String AGREED = "agreed";
   @NonNull private static final String ONBOARD = "onboard";
   @NonNull private final String ignoreTimeKey;
@@ -68,6 +69,14 @@ final class PadLockPreferencesImpl extends ApplicationPreferences implements Pad
     for (int i = 0; i < stringIgnoreTimes.length; ++i) {
       ignoreTimes[i] = Long.parseLong(stringIgnoreTimes[i]);
     }
+  }
+
+  @Override public String getHint() {
+    return get(HINT, null);
+  }
+
+  @Override public void setHint(@Nullable String hint) {
+    put(HINT, hint);
   }
 
   @Override public boolean isRecheckEnabled() {

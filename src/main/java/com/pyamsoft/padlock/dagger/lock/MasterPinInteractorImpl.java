@@ -38,4 +38,12 @@ final class MasterPinInteractorImpl implements MasterPinInteractor {
   @Override public void setMasterPin(@Nullable String pin) {
     preferences.setMasterPassword(pin);
   }
+
+  @CheckResult @NonNull @Override public Observable<String> getHint() {
+    return Observable.defer(() -> Observable.just(preferences.getHint()));
+  }
+
+  @Override public void setHint(@Nullable String hint) {
+    preferences.setHint(hint);
+  }
 }

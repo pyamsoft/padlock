@@ -257,7 +257,9 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
             switch (pinEntryEvent.type()) {
               case 0:
                 if (pinEntryEvent.complete()) {
-                  callback.onCreateMasterPin();
+                  callback.onCreateMasterPinSuccess();
+                } else {
+                  callback.onCreateMasterPinFailure();
                 }
                 break;
               case 1:

@@ -23,5 +23,6 @@ import rx.Observable;
 
 public interface PinEntryInteractor extends LockInteractor {
 
-  @CheckResult @NonNull Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt);
+  @CheckResult @NonNull Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt,
+      @NonNull String reentry, @NonNull String hint);
 }

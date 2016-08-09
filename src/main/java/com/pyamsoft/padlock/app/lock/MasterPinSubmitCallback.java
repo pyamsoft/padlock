@@ -18,7 +18,9 @@ package com.pyamsoft.padlock.app.lock;
 
 public interface MasterPinSubmitCallback {
 
-  void onCreateMasterPin();
+  void onCreateMasterPinSuccess();
+
+  void onCreateMasterPinFailure();
 
   void onClearMasterPinSuccess();
 

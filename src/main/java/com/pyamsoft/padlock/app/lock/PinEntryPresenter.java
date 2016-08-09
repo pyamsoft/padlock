@@ -53,7 +53,7 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
     Timber.d("Attempt PIN submission");
     unsubPinEntry();
     final PinScreen pinScreen = getView();
-    pinEntrySubscription = interactor.submitMasterPin(currentAttempt)
+    pinEntrySubscription = interactor.submitMasterPin(currentAttempt, reEntryAttempt, hint)
         .filter(pinEntryEvent -> pinEntryEvent != null)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
