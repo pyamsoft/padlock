@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.lock;
+package com.pyamsoft.padlock.dagger.base;
 
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreen;
-import com.pyamsoft.padlock.app.lock.LockViewDelegate;
 import com.pyamsoft.padlock.app.lock.PinScreen;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractor;
@@ -28,11 +27,7 @@ import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module public class LockViewDelegateModule {
-
-  @ActivityScope @Provides LockViewDelegate provideLockViewDelegate() {
-    return new LockViewDelegate();
-  }
+@Module public class AppIconLoaderModule {
 
   @ActivityScope @Provides
   AppIconLoaderPresenter<LockScreen> provideLockScreenAppIconLoaderPresenter(

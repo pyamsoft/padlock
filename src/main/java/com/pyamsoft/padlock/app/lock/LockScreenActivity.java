@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.lock;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -23,15 +24,21 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,29 +47,35 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
+import com.pyamsoft.pydroid.model.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncTaskMap;
+import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public abstract class LockScreenActivity extends AppCompatActivity
-    implements LockScreen, LockViewDelegate.Callback {
+public abstract class LockScreenActivity extends AppCompatActivity implements LockScreen {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
   @NonNull public static final String ENTRY_REAL_NAME = "real_name";
   @NonNull public static final String ENTRY_LOCK_CODE = "lock_code";
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
+  @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
   @NonNull private final Intent home;
-  @BindView(R.id.activity_lock_screen) View rootView;
+  @NonNull private final AsyncTaskMap taskMap;
+  @BindView(R.id.activity_lock_screen) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.appbar) AppBarLayout appBarLayout;
+  @BindView(R.id.lock_image) ImageView image;
+  @BindView(R.id.lock_text) TextInputLayout textLayout;
+  @BindView(R.id.lock_image_go) ImageView imageGo;
 
   @Inject AppIconLoaderPresenter<LockScreen> appIconLoaderPresenter;
   @Inject LockScreenPresenter presenter;
-  @Inject LockViewDelegate lockViewDelegate;
 
   private DataHolderFragment<Long> ignoreDataHolder;
   private DataHolderFragment<Boolean> excludeDataHolder;
@@ -76,6 +89,7 @@ public abstract class LockScreenActivity extends AppCompatActivity
   private MenuItem menuIgnoreFourtyFive;
   private MenuItem menuIgnoreSixty;
   private MenuItem menuExclude;
+  private EditText editText;
   private Unbinder unbinder;
 
   private String lockedPackageName;
@@ -83,11 +97,13 @@ public abstract class LockScreenActivity extends AppCompatActivity
   private String lockedRealName;
   private String lockedCode;
   private boolean lockedSystem;
+  private InputMethodManager imm;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
     home.addCategory(Intent.CATEGORY_HOME);
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    taskMap = new AsyncTaskMap();
   }
 
   @Override public void setDisplayName(@NonNull String name) {
@@ -117,11 +133,60 @@ public abstract class LockScreenActivity extends AppCompatActivity
 
     presenter.bindView(this);
     appIconLoaderPresenter.bindView(this);
-    lockViewDelegate.setTextColor(android.R.color.black);
-    lockViewDelegate.onCreateView(this, this, rootView);
     getValuesFromBundle();
 
+    editText = textLayout.getEditText();
+    if (editText == null) {
+      throw new NullPointerException("Edit text is NULL");
+    }
+
+    editText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+      if (keyEvent == null) {
+        Timber.e("KeyEvent was not caused by keypress");
+        return false;
+      }
+
+      if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
+        Timber.d("KeyEvent is Enter pressed");
+        presenter.submit(lockedPackageName, lockedActivityName, getCurrentAttempt());
+        return true;
+      }
+
+      Timber.d("Do not handle key event");
+      return false;
+    });
+
+    // Force the keyboard
+    imm =
+        (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
+    imageGo.setOnClickListener(view -> {
+      presenter.submit(lockedPackageName, lockedActivityName, getCurrentAttempt());
+      imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
+    });
+
+    // Force keyboard focus
+    editText.requestFocus();
+
+    editText.setOnFocusChangeListener((view, hasFocus) -> {
+      if (hasFocus) {
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+      }
+    });
+
+    final AsyncVectorDrawableTask arrowGoTask = new AsyncVectorDrawableTask(imageGo);
+    arrowGoTask.execute(
+        new AsyncDrawable(getApplicationContext(), R.drawable.ic_arrow_forward_24dp));
+    taskMap.put("arrow", arrowGoTask);
+
+    clearDisplay();
+
     setSupportActionBar(toolbar);
+  }
+
+  public final void clearDisplay() {
+    editText.setText("");
   }
 
   private void getValuesFromBundle() {
@@ -149,7 +214,7 @@ public abstract class LockScreenActivity extends AppCompatActivity
     Timber.d("onStart");
 
     presenter.loadDisplayNameFromPackage(lockedPackageName);
-    lockViewDelegate.onStart(appIconLoaderPresenter);
+    appIconLoaderPresenter.loadApplicationIcon(lockedPackageName);
     supportInvalidateOptionsMenu();
   }
 
@@ -162,12 +227,12 @@ public abstract class LockScreenActivity extends AppCompatActivity
     super.onDestroy();
     Timber.d("onDestroy");
 
+    Timber.d("Clear currently locked");
+    taskMap.clear();
+    imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
     presenter.unbindView();
     appIconLoaderPresenter.unbindView();
-    lockViewDelegate.onDestroyView();
     unbinder.unbind();
-
-    Timber.d("Clear currently locked");
   }
 
   @Override public void finish() {
@@ -202,7 +267,7 @@ public abstract class LockScreenActivity extends AppCompatActivity
 
   @Override public void onSubmitSuccess() {
     Timber.d("Unlocked!");
-    lockViewDelegate.clearDisplay();
+    clearDisplay();
 
     presenter.postUnlock(lockedPackageName, lockedActivityName, lockedRealName, lockedCode,
         lockedSystem, menuExclude.isChecked(), getSelectedIgnoreTimeIndex());
@@ -210,7 +275,7 @@ public abstract class LockScreenActivity extends AppCompatActivity
 
   @Override public void onSubmitFailure() {
     Timber.e("Failed to unlock");
-    lockViewDelegate.clearDisplay();
+    clearDisplay();
     showSnackbarWithText("Error: Invalid PIN");
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
@@ -219,18 +284,30 @@ public abstract class LockScreenActivity extends AppCompatActivity
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
-    lockViewDelegate.onRestoreInstanceState(savedInstanceState);
+    final String attempt = savedInstanceState.getString(CODE_DISPLAY, null);
+    if (attempt == null) {
+      Timber.d("Empty attempt");
+      clearDisplay();
+    } else {
+      Timber.d("Set attempt %s", attempt);
+      editText.setText(attempt);
+    }
     super.onRestoreInstanceState(savedInstanceState);
   }
 
   @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
     if (isChangingConfigurations()) {
-      lockViewDelegate.onSaveInstanceState(outState);
+      final String attempt = getCurrentAttempt();
+      outState.putString(CODE_DISPLAY, attempt);
       presenter.saveSelectedOptions(getSelectedIgnoreTimeIndex());
     }
 
     Timber.d("onSaveInstanceState");
     super.onSaveInstanceState(outState);
+  }
+
+  @CheckResult @NonNull private String getCurrentAttempt() {
+    return editText.getText().toString();
   }
 
   @Override public boolean onCreateOptionsMenu(@NonNull Menu menu) {
@@ -263,7 +340,7 @@ public abstract class LockScreenActivity extends AppCompatActivity
   }
 
   @Override public void onSubmitError() {
-    lockViewDelegate.clearDisplay();
+    clearDisplay();
     AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
   }
 
@@ -364,14 +441,10 @@ public abstract class LockScreenActivity extends AppCompatActivity
   }
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-    lockViewDelegate.onApplicationIconLoadedSuccess(icon);
+    image.setImageDrawable(icon);
   }
 
   @Override public void onApplicationIconLoadedError() {
     AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "error");
-  }
-
-  @Override public void onSubmitPressed() {
-    presenter.submit(lockedPackageName, lockedActivityName, lockViewDelegate.getCurrentAttempt());
   }
 }

@@ -18,10 +18,11 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.dagger.ActivityScope;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderModule;
 import dagger.Subcomponent;
 
 @ActivityScope @Subcomponent(modules = {
-    PinEntryModule.class, MasterPinModule.class, LockViewDelegateModule.class
+    PinEntryModule.class, MasterPinModule.class, AppIconLoaderModule.class
 }) public interface PinEntryComponent {
 
   void inject(PinEntryDialog dialog);
