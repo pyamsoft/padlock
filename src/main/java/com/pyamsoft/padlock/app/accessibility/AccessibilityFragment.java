@@ -21,7 +21,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,12 +30,15 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
 
-public class AccessibilityFragment extends Fragment {
+public class AccessibilityFragment extends ActionBarFragment {
 
+  @NonNull public static final String TAG = "AccessibilityFragment";
   @NonNull private final Intent accessibilityServiceIntent =
       new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
   @BindView(R.id.main_service_button) Button serviceButton;
+  @BindView(R.id.toolbar) Toolbar toolbar;
   private Unbinder unbinder;
 
   @Nullable @Override
@@ -53,7 +56,18 @@ public class AccessibilityFragment extends Fragment {
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    setAppBarState();
     setupAccessibilityButton();
+  }
+
+  @Override public void onResume() {
+    super.onResume();
+    setActionBarUpEnabled(false);
+  }
+
+  private void setAppBarState() {
+    setActionBar(toolbar);
+    toolbar.setTitle(getString(R.string.app_name));
   }
 
   private void setupAccessibilityButton() {

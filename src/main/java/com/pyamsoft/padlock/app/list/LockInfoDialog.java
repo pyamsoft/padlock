@@ -90,13 +90,16 @@ public class LockInfoDialog extends DialogFragment
     return fragment;
   }
 
-  @Nullable @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
+  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
     presenterDataHolder =
         DataHolderFragment.getInstance(getFragmentManager(), "lock_info_presenters");
+  }
 
+  @Nullable @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
     final LockInfoPresenter lockInfoPresenter =
         (LockInfoPresenter) presenterDataHolder.pop(KEY_PRESENTER);
     @SuppressWarnings("unchecked") final AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder>

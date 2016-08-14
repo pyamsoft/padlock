@@ -16,11 +16,11 @@
 
 package com.pyamsoft.padlock.dagger.settings;
 
-import com.pyamsoft.padlock.app.settings.SettingsFragment;
+import com.pyamsoft.padlock.app.settings.SettingsPreferenceFragment;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Subcomponent;
 
-@ActivityScope @Subcomponent(modules = SettingsModule.class) public interface SettingsComponent {
+@ActivityScope @Subcomponent(modules = SettingsPreferenceModule.class) public interface SettingsPreferenceComponent {
 
-  void inject(SettingsFragment fragment);
+  void inject(SettingsPreferenceFragment fragment);
 }

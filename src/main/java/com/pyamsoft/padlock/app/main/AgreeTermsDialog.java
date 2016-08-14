@@ -28,6 +28,8 @@ import com.pyamsoft.padlock.model.event.AgreeTermsEvent;
 
 public class AgreeTermsDialog extends DialogFragment {
 
+  @NonNull public static final String TAG = "AgreeTermsDialog";
+
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setCancelable(false);

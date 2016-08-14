@@ -22,14 +22,14 @@ import com.pyamsoft.padlock.dagger.lock.LockScreenComponent;
 import com.pyamsoft.padlock.dagger.lock.PinEntryComponent;
 import com.pyamsoft.padlock.dagger.main.MainComponent;
 import com.pyamsoft.padlock.dagger.service.LockServiceComponent;
-import com.pyamsoft.padlock.dagger.settings.SettingsComponent;
+import com.pyamsoft.padlock.dagger.settings.SettingsPreferenceComponent;
 import dagger.Component;
 import javax.inject.Singleton;
 
 @Singleton @Component(modules = PadLockModule.class) public interface PadLockComponent {
 
   // Subcomponent Settings
-  SettingsComponent plusSettings();
+  SettingsPreferenceComponent plusSettings();
 
   // Subcomponent LockService
   LockServiceComponent plusLockService();
