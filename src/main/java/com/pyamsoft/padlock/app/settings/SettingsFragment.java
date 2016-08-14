@@ -17,19 +17,16 @@
 package com.pyamsoft.padlock.app.settings;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.SwitchPreferenceCompat;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainActivity;
-import com.pyamsoft.padlock.app.main.MainPresenter;
+import com.pyamsoft.padlock.dagger.main.MainPresenter;
+import com.pyamsoft.padlock.dagger.settings.SettingsPresenter;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -40,19 +37,6 @@ public final class SettingsFragment extends PreferenceFragmentCompat
     implements SettingsPresenter.SettingsView {
 
   @Inject SettingsPresenter presenter;
-
-  @Override public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    PadLock.getInstance().getPadLockComponent().plusSettings().inject(this);
-  }
-
-  @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    presenter.bindView(this);
-    return super.onCreateView(inflater, container, savedInstanceState);
-  }
 
   @Override public void onResume() {
     super.onResume();
@@ -71,6 +55,9 @@ public final class SettingsFragment extends PreferenceFragmentCompat
 
   @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {
     addPreferencesFromResource(R.xml.preferences);
+
+    PadLock.getInstance().getPadLockComponent().plusSettings().inject(this);
+    presenter.bindView(this);
 
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));
     clearDb.setOnPreferenceClickListener(preference -> {

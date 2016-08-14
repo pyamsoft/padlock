@@ -43,11 +43,13 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
-import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
+import com.pyamsoft.padlock.dagger.db.DBPresenter;
+import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
+import com.pyamsoft.padlock.dagger.list.LockListPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
@@ -109,10 +111,32 @@ public final class LockListFragment extends Fragment
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
+    presenterDataHolder = DataHolderFragment.getInstance(getActivity(), "lock_list_presenters");
+
+    final LockListPresenter lockListPresenter =
+        (LockListPresenter) presenterDataHolder.pop(KEY_PRESENTER);
+    @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry, LockListAdapter.ViewHolder>
+        entryAdapterPresenter =
+        (AdapterPresenter<AppEntry, LockListAdapter.ViewHolder>) presenterDataHolder.pop(
+            KEY_ADAPTER_PRESENTER);
+    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
+    if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
+      Timber.d("Create new presenters");
+      firstRefresh = true;
+      PadLock.getInstance().getPadLockComponent().plusLockList().inject(this);
+    } else {
+      Timber.d("Load cached presenters");
+      firstRefresh = false;
+      presenter = lockListPresenter;
+      adapterPresenter = entryAdapterPresenter;
+      dbPresenter = lockDBPresenter;
+    }
+
+    adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
+
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
     presenter.bindView(this);
-
     adapter.onCreate();
     return view;
   }
@@ -164,32 +188,7 @@ public final class LockListFragment extends Fragment
   }
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
-    Timber.d("onCreate");
     super.onCreate(savedInstanceState);
-
-    presenterDataHolder = DataHolderFragment.getInstance(getActivity(), "lock_list_presenters");
-
-    final LockListPresenter lockListPresenter =
-        (LockListPresenter) presenterDataHolder.pop(KEY_PRESENTER);
-    @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry, LockListAdapter.ViewHolder>
-        entryAdapterPresenter =
-        (AdapterPresenter<AppEntry, LockListAdapter.ViewHolder>) presenterDataHolder.pop(
-            KEY_ADAPTER_PRESENTER);
-    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
-    if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
-      Timber.d("Create new presenters");
-      firstRefresh = true;
-      PadLock.getInstance().getPadLockComponent().plusLockList().inject(this);
-    } else {
-      Timber.d("Load cached presenters");
-      firstRefresh = false;
-      presenter = lockListPresenter;
-      adapterPresenter = entryAdapterPresenter;
-      dbPresenter = lockDBPresenter;
-    }
-
-    adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
-
     setHasOptionsMenu(true);
   }
 
@@ -399,7 +398,12 @@ public final class LockListFragment extends Fragment
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
     handler.post(stopRefreshRunnable);
-    handler.post(() -> fab.show());
+    handler.post(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
+      @Override public void onShown(FloatingActionButton fab) {
+        super.onShown(fab);
+        presenter.showOnBoarding();
+      }
+    }));
   }
 
   @Override public void refreshList() {

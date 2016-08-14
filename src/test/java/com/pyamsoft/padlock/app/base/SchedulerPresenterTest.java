@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.base;
 
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

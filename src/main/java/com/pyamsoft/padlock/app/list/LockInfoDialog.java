@@ -40,7 +40,9 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.db.DBPresenter;
+import com.pyamsoft.padlock.dagger.db.DBPresenter;
+import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
+import com.pyamsoft.padlock.dagger.list.LockInfoPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
@@ -88,10 +90,9 @@ public class LockInfoDialog extends DialogFragment
     return fragment;
   }
 
-  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    Timber.d("onCreate");
-
+  @Nullable @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
     presenterDataHolder =
         DataHolderFragment.getInstance(getFragmentManager(), "lock_info_presenters");
@@ -119,13 +120,8 @@ public class LockInfoDialog extends DialogFragment
     }
 
     adapter = new LockInfoAdapter(this, appEntry, adapterPresenter, dbPresenter);
-  }
 
-  @Nullable @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
     presenter.bindView(this);
-
     adapter.onCreate();
     return super.onCreateView(inflater, container, savedInstanceState);
   }

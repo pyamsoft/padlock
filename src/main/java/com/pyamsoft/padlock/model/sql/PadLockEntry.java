@@ -27,6 +27,14 @@ import com.google.auto.value.AutoValue;
   @NonNull public static final String ACTIVITY_EMPTY = "EMPTY";
   @NonNull public static final Factory<PadLockEntry> FACTORY =
       new Factory<>(AutoValue_PadLockEntry::new);
+  // SQLDelight does not yet support delete strings
+  @NonNull public static final String DELETE_WITH_PACKAGE_NAME = "packageName = ?";
+  @NonNull public static final String DELETE_WITH_PACKAGE_ACTIVITY_NAME =
+      "packageName = ? AND activityName = ?;";
+  @NonNull public static final String DELETE_ALL = "1=1";
+  // SQLDelight does not yet support update strings
+  @NonNull public static final String UPDATE_WITH_PACKAGE_ACTIVITY_NAME =
+      "packageName = ? AND activityName = ?;";
 
   @NonNull @CheckResult public static PadLockEntry empty() {
     return new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false);
@@ -35,14 +43,4 @@ import com.google.auto.value.AutoValue;
   @CheckResult public static boolean isEmpty(@NonNull PadLockEntry entry) {
     return entry.packageName().equals(PACKAGE_EMPTY) && entry.activityName().equals(ACTIVITY_EMPTY);
   }
-
-  // SQLDelight does not yet support delete strings
-  @NonNull public static final String DELETE_WITH_PACKAGE_NAME = "packageName = ?";
-  @NonNull public static final String DELETE_WITH_PACKAGE_ACTIVITY_NAME =
-      "packageName = ? AND activityName = ?;";
-  @NonNull public static final String DELETE_ALL = "1=1";
-
-  // SQLDelight does not yet support update strings
-  @NonNull public static final String UPDATE_WITH_PACKAGE_ACTIVITY_NAME =
-      "packageName = ? AND activityName = ?;";
 }

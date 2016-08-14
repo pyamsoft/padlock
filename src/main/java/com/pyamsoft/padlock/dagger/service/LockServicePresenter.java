@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.service;
+package com.pyamsoft.padlock.dagger.service;
 
 import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.SchedulerPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
-import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
-import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -46,7 +44,7 @@ public final class LockServicePresenter
   @NonNull private String activeClassName = "";
   private boolean lockScreenPassed;
 
-  @Inject public LockServicePresenter(@NonNull final LockServiceStateInteractor stateInteractor,
+  @Inject LockServicePresenter(@NonNull final LockServiceStateInteractor stateInteractor,
       @NonNull final LockServiceInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
@@ -63,28 +61,28 @@ public final class LockServicePresenter
     interactor.cleanup();
   }
 
-  private void setLockScreenPassed(boolean b) {
+  void setLockScreenPassed(boolean b) {
     Timber.d("Set lockScreenPassed: %s", b);
     lockScreenPassed = b;
   }
 
-  public final void setLockScreenPassed() {
+  public void setLockScreenPassed() {
     setLockScreenPassed(true);
   }
 
-  private void unsubLockedEntry() {
+  void unsubLockedEntry() {
     if (!lockedEntrySubscription.isUnsubscribed()) {
       lockedEntrySubscription.unsubscribe();
     }
   }
 
-  private void unsubPickCorrect() {
+  void unsubPickCorrect() {
     if (!pickCorrectSubscription.isUnsubscribed()) {
       pickCorrectSubscription.unsubscribe();
     }
   }
 
-  private void reset() {
+  void reset() {
     Timber.i("Reset name state");
     lastPackageName = "";
     lastClassName = "";
@@ -98,8 +96,8 @@ public final class LockServicePresenter
     return activePackageName;
   }
 
-  public final void processAccessibilityEvent(@NonNull String packageName,
-      @NonNull String className, boolean forcedRecheck) {
+  public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
+      boolean forcedRecheck) {
     unsubLockedEntry();
     final Observable<Boolean> windowEventObservable =
         stateInteractor.isServiceEnabled().filter(enabled -> {

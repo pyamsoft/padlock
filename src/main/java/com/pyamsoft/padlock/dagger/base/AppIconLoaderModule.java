@@ -16,12 +16,9 @@
 
 package com.pyamsoft.padlock.dagger.base;
 
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.PinScreen;
 import com.pyamsoft.padlock.dagger.ActivityScope;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractor;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

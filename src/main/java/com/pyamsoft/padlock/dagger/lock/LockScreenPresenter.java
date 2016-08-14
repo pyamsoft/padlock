@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.lock;
+package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.dagger.lock.LockScreenInteractor;
+import com.pyamsoft.padlock.app.lock.LockScreen;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -36,7 +36,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
   @NonNull private Subscription hintSubscription = Subscriptions.empty();
 
-  @Inject public LockScreenPresenter(@NonNull final LockScreenInteractor lockScreenInteractor,
+  @Inject LockScreenPresenter(@NonNull final LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);
@@ -53,25 +53,25 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     interactor.resetFailCount();
   }
 
-  private void unsubPostUnlock() {
+  void unsubPostUnlock() {
     if (!postUnlockSubscription.isUnsubscribed()) {
       postUnlockSubscription.unsubscribe();
     }
   }
 
-  private void unsubUnlock() {
+  void unsubUnlock() {
     if (!unlockSubscription.isUnsubscribed()) {
       unlockSubscription.unsubscribe();
     }
   }
 
-  private void unsubLock() {
+  void unsubLock() {
     if (!lockSubscription.isUnsubscribed()) {
       lockSubscription.unsubscribe();
     }
   }
 
-  private void unsubHint() {
+  void unsubHint() {
     if (!hintSubscription.isUnsubscribed()) {
       hintSubscription.unsubscribe();
     }
@@ -89,7 +89,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
         }, this::unsubHint);
   }
 
-  private void setIgnorePeriod(final long time) {
+  void setIgnorePeriod(final long time) {
     final LockScreen lockScreen = getView();
     if (time == interactor.getIgnoreTimeOne().toBlocking().first()) {
       lockScreen.setIgnoreTimeOne();
@@ -112,12 +112,12 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     }
   }
 
-  public final void saveSelectedOptions(int selectedIndex) {
+  public void saveSelectedOptions(int selectedIndex) {
     final long time = interactor.getIgnoreTimeForIndex(selectedIndex).toBlocking().first();
     getView().onSaveMenuSelections(time);
   }
 
-  public final void setIgnorePeriodFromPreferences(@Nullable Long ignoreTime) {
+  public void setIgnorePeriodFromPreferences(@Nullable Long ignoreTime) {
     if (ignoreTime == null) {
       final long defaultIgnoreTime = interactor.getDefaultIgnoreTime().toBlocking().first();
       setIgnorePeriod(defaultIgnoreTime);
@@ -126,7 +126,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     }
   }
 
-  public final void lockEntry(@NonNull String packageName, @NonNull String activityName) {
+  public void lockEntry(@NonNull String packageName, @NonNull String activityName) {
     unsubLock();
     if (interactor.incrementAndGetFailCount().toBlocking().first()
         > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT) {
@@ -149,7 +149,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     }
   }
 
-  public final void submit(@NonNull String packageName, @NonNull String activityName,
+  public void submit(@NonNull String packageName, @NonNull String activityName,
       @NonNull String currentAttempt) {
     unsubUnlock();
     final LockScreen lockScreen = getView();
@@ -170,7 +170,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
         }, this::unsubUnlock);
   }
 
-  public final void loadDisplayNameFromPackage(@NonNull String packageName) {
+  public void loadDisplayNameFromPackage(@NonNull String packageName) {
     unsubDisplayName();
     final LockScreen lockScreen = getView();
     displayNameSubscription = interactor.getDisplayName(packageName)
@@ -201,7 +201,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
         }, this::unsubPostUnlock);
   }
 
-  private void unsubDisplayName() {
+  void unsubDisplayName() {
     if (!displayNameSubscription.isUnsubscribed()) {
       displayNameSubscription.unsubscribe();
     }

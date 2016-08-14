@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list;
+package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
-import com.pyamsoft.padlock.dagger.list.LockInfoInteractor;
+import com.pyamsoft.padlock.app.list.LockListCommon;
+import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.ArrayList;
@@ -40,14 +40,14 @@ public final class LockInfoPresenter
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
 
-  @Inject public LockInfoPresenter(final @NonNull LockInfoInteractor lockInfoInteractor,
+  @Inject LockInfoPresenter(final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("main") Scheduler mainScheduler,
       final @NonNull @Named("io") Scheduler ioScheduler) {
     super(lockInfoInteractor, mainScheduler, ioScheduler);
     this.lockInfoInteractor = lockInfoInteractor;
   }
 
-  @CheckResult private static int findEntryInActivities(@NonNull List<PadLockEntry> padLockEntries,
+  @CheckResult static int findEntryInActivities(@NonNull List<PadLockEntry> padLockEntries,
       @NonNull String name) {
     int foundLocation = -1;
     for (int i = 0; i < padLockEntries.size(); ++i) {
@@ -67,7 +67,7 @@ public final class LockInfoPresenter
     unsubAllInDB();
   }
 
-  public final void populateList(@NonNull String packageName) {
+  public void populateList(@NonNull String packageName) {
     unsubPopulateList();
 
     // Filter out the lockscreen and crashlog entries
@@ -139,14 +139,14 @@ public final class LockInfoPresenter
             });
   }
 
-  private void unsubPopulateList() {
+  void unsubPopulateList() {
     if (!populateListSubscription.isUnsubscribed()) {
       Timber.d("Unsub from populate List event");
       populateListSubscription.unsubscribe();
     }
   }
 
-  public final void setToggleAllState(@NonNull String packageName) {
+  public void setToggleAllState(@NonNull String packageName) {
     unsubAllInDB();
 
     // Filter out the lockscreen and crashlog entries
@@ -187,7 +187,7 @@ public final class LockInfoPresenter
             }, this::unsubAllInDB);
   }
 
-  private void unsubAllInDB() {
+  void unsubAllInDB() {
     if (!allInDBSubscription.isUnsubscribed()) {
       allInDBSubscription.unsubscribe();
     }
