@@ -377,6 +377,7 @@ public final class LockListFragment extends ActionBarFragment
 
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
+    // KLUDGE dismissed when orientation is changed
     new MaterialShowcaseView.Builder(getActivity()).setTarget(fab)
         .setTargetTouchable(false)
         .setMaskColour(ContextCompat.getColor(getContext(), R.color.blue500))
