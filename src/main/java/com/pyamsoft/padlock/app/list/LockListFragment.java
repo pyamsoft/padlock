@@ -180,7 +180,12 @@ public final class LockListFragment extends ActionBarFragment
 
   @Override public void onResume() {
     super.onResume();
-    handler.postDelayed(() -> fab.show(), 300L);
+    handler.postDelayed(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
+      @Override public void onShown(FloatingActionButton fab) {
+        super.onShown(fab);
+        presenter.showOnBoarding();
+      }
+    }), 300L);
     presenter.resume();
     setActionBarUpEnabled(false);
   }
@@ -260,7 +265,7 @@ public final class LockListFragment extends ActionBarFragment
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
       fragmentManager.beginTransaction()
-          .add(R.id.main_view_container, new SettingsFragment())
+          .replace(R.id.main_view_container, new SettingsFragment(), SettingsFragment.TAG)
           .addToBackStack(null)
           .commit();
     }
