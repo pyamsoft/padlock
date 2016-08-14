@@ -23,6 +23,5 @@ import rx.Observable;
 
 public interface AppIconLoaderInteractor {
 
-  @CheckResult @NonNull Observable<Drawable> loadPackageIcon(
-      @NonNull String packageName);
+  @CheckResult @NonNull Observable<Drawable> loadPackageIcon(@NonNull String packageName);
 }

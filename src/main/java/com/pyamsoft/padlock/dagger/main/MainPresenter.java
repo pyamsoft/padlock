@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.main;
+package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.SchedulerPresenter;
-import com.pyamsoft.padlock.dagger.main.MainInteractor;
+import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
 import com.pyamsoft.padlock.model.RxBus;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import javax.inject.Inject;
@@ -37,7 +37,7 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
   @NonNull private Subscription refreshBus = Subscriptions.empty();
   @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
 
-  @Inject public MainPresenter(@NonNull final MainInteractor interactor,
+  @Inject MainPresenter(@NonNull final MainInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);
@@ -61,13 +61,13 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
     unsubscribeAgreeTerms();
   }
 
-  private void unregisterFromRefreshBus() {
+  void unregisterFromRefreshBus() {
     if (!refreshBus.isUnsubscribed()) {
       refreshBus.unsubscribe();
     }
   }
 
-  private void registerOnRefreshBus() {
+  void registerOnRefreshBus() {
     unregisterFromRefreshBus();
     refreshBus = Bus.get()
         .register()
@@ -80,7 +80,7 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
         });
   }
 
-  public final void showTermsDialog() {
+  public void showTermsDialog() {
     unsubscribeAgreeTerms();
     agreeTermsSubscription = interactor.hasAgreed()
         .subscribeOn(getSubscribeScheduler())
@@ -96,7 +96,7 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
         }, this::unsubscribeAgreeTerms);
   }
 
-  private void registerOnAgreeTermsBus() {
+  void registerOnAgreeTermsBus() {
     unregisterFromAgreeTermsBus();
     agreeTermsBusSubscription = AgreeTermsDialog.Bus.get()
         .register()
@@ -113,13 +113,13 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
         });
   }
 
-  private void unsubscribeAgreeTerms() {
+  void unsubscribeAgreeTerms() {
     if (!agreeTermsSubscription.isUnsubscribed()) {
       agreeTermsSubscription.unsubscribe();
     }
   }
 
-  private void unregisterFromAgreeTermsBus() {
+  void unregisterFromAgreeTermsBus() {
     if (!agreeTermsBusSubscription.isUnsubscribed()) {
       agreeTermsBusSubscription.unsubscribe();
     }

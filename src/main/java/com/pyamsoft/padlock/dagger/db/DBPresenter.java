@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.db;
+package com.pyamsoft.padlock.dagger.db;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.app.base.SchedulerPresenter;
-import com.pyamsoft.padlock.dagger.db.DBInteractor;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -51,25 +50,25 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
     unsubAllSubscription();
   }
 
-  private void unsubAllSubscription() {
+  void unsubAllSubscription() {
     if (!dbAllSubscription.isUnsubscribed()) {
       dbAllSubscription.unsubscribe();
     }
   }
 
-  private void unsubActivitySubscription() {
+  void unsubActivitySubscription() {
     if (!dbActivitySubscription.isUnsubscribed()) {
       dbActivitySubscription.unsubscribe();
     }
   }
 
-  private void unsubPackageSubscription() {
+  void unsubPackageSubscription() {
     if (!dbPackageSubscription.isUnsubscribed()) {
       dbPackageSubscription.unsubscribe();
     }
   }
 
-  public final void attemptDBAllModification(boolean create, @NonNull String packageName,
+  public void attemptDBAllModification(boolean create, @NonNull String packageName,
       @Nullable String code, boolean system) {
     unsubAllSubscription();
     dbAllSubscription = Observable.defer(() -> {
@@ -103,7 +102,7 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
     });
   }
 
-  public final void attemptDBModification(int position, boolean create, @NonNull String packageName,
+  public void attemptDBModification(int position, boolean create, @NonNull String packageName,
       @Nullable String code, boolean system) {
     unsubPackageSubscription();
     dbPackageSubscription = Observable.defer(() -> {
@@ -133,7 +132,7 @@ public final class DBPresenter extends SchedulerPresenter<DBPresenter.DBView> {
     }, this::unsubPackageSubscription);
   }
 
-  public final void attemptDBModification(int position, boolean create, @NonNull String packageName,
+  public void attemptDBModification(int position, boolean create, @NonNull String packageName,
       @NonNull String activity, @Nullable String code, boolean system) {
     unsubActivitySubscription();
     dbActivitySubscription = Observable.defer(() -> {

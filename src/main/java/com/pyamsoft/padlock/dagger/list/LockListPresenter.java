@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list;
+package com.pyamsoft.padlock.dagger.list;
 
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.SchedulerPresenter;
+import com.pyamsoft.padlock.app.list.LockListCommon;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
-import com.pyamsoft.padlock.dagger.list.LockListInteractor;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -47,7 +47,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
   @NonNull private Subscription onboardSubscription = Subscriptions.empty();
   @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
 
-  @Inject public LockListPresenter(final @NonNull LockListInteractor lockListInteractor,
+  @Inject LockListPresenter(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
@@ -74,29 +74,29 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
     unregisterFromPinEntryBus();
   }
 
-  private void unsubscribePopulateList() {
+  void unsubscribePopulateList() {
     if (!populateListSubscription.isUnsubscribed()) {
       populateListSubscription.unsubscribe();
     }
   }
 
-  private void unsubscribeSystemVisible() {
+  void unsubscribeSystemVisible() {
     if (!systemVisibleSubscription.isUnsubscribed()) {
       systemVisibleSubscription.unsubscribe();
     }
   }
 
-  private void unsubscribeOnboard() {
+  void unsubscribeOnboard() {
     if (!onboardSubscription.isUnsubscribed()) {
       onboardSubscription.unsubscribe();
     }
   }
 
-  private void setSystemVisible(boolean visible) {
+  void setSystemVisible(boolean visible) {
     lockListInteractor.setSystemVisible(visible);
   }
 
-  public final void populateList() {
+  public void populateList() {
     Timber.d("populateList");
     unsubscribePopulateList();
 
@@ -161,8 +161,8 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         });
   }
 
-  @NonNull @CheckResult
-  private AppEntry createFromPackageInfo(@NonNull ApplicationInfo info, boolean locked) {
+  @NonNull @CheckResult AppEntry createFromPackageInfo(@NonNull ApplicationInfo info,
+      boolean locked) {
     Timber.d("Create AppEntry from package info: %s", info.packageName);
     return AppEntry.builder()
         .name(lockListInteractor.loadPackageLabel(info).toBlocking().first())
@@ -172,7 +172,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         .build();
   }
 
-  public final void setFABStateFromPreference() {
+  public void setFABStateFromPreference() {
     unsubscribeFabSubscription();
     fabStateSubscription = stateInteractor.isServiceEnabled()
         .subscribeOn(getSubscribeScheduler())
@@ -191,21 +191,21 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         }, this::unsubscribeFabSubscription);
   }
 
-  private void unsubscribeFabSubscription() {
+  void unsubscribeFabSubscription() {
     if (!fabStateSubscription.isUnsubscribed()) {
       fabStateSubscription.unsubscribe();
     }
   }
 
-  public final void setSystemVisible() {
+  public void setSystemVisible() {
     setSystemVisible(true);
   }
 
-  public final void setSystemInvisible() {
+  public void setSystemInvisible() {
     setSystemVisible(false);
   }
 
-  public final void setSystemVisibilityFromPreference() {
+  public void setSystemVisibilityFromPreference() {
     unsubscribeSystemVisible();
     systemVisibleSubscription = lockListInteractor.isSystemVisible()
         .subscribeOn(getSubscribeScheduler())
@@ -223,12 +223,12 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         }, this::unsubscribeSystemVisible);
   }
 
-  public final void clickPinFAB() {
+  public void clickPinFAB() {
     final LockList lockList = getView();
     lockList.onPinFABClicked();
   }
 
-  public final void showOnBoarding() {
+  public void showOnBoarding() {
     unsubscribeOnboard();
     onboardSubscription = lockListInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
@@ -244,7 +244,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         }, this::unsubscribeOnboard);
   }
 
-  private void registerOnPinEntryBus() {
+  void registerOnPinEntryBus() {
     unregisterFromPinEntryBus();
     pinEntryBusSubscription = PinEntryDialog.PinEntryBus.get()
         .register()
@@ -275,7 +275,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         });
   }
 
-  private void unregisterFromPinEntryBus() {
+  void unregisterFromPinEntryBus() {
     if (!pinEntryBusSubscription.isUnsubscribed()) {
       pinEntryBusSubscription.unsubscribe();
     }

@@ -18,9 +18,7 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
-import com.pyamsoft.padlock.app.list.AdapterPresenter;
 import com.pyamsoft.padlock.app.list.LockInfoAdapter;
-import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import dagger.Module;

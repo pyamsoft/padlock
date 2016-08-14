@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.settings;
+package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.SchedulerPresenter;
-import com.pyamsoft.padlock.dagger.settings.SettingsInteractor;
+import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -34,7 +34,7 @@ public final class SettingsPresenter extends SchedulerPresenter<SettingsPresente
   @NonNull private Subscription confirmBusSubscription = Subscriptions.empty();
   @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
 
-  @Inject public SettingsPresenter(@NonNull SettingsInteractor interactor,
+  @Inject SettingsPresenter(@NonNull SettingsInteractor interactor,
       @NonNull @Named("io") Scheduler ioScheduler,
       @NonNull @Named("main") Scheduler mainScheduler) {
     super(mainScheduler, ioScheduler);
@@ -56,11 +56,11 @@ public final class SettingsPresenter extends SchedulerPresenter<SettingsPresente
     unsubscribeConfirm();
   }
 
-  public final void requestClearAll() {
+  public void requestClearAll() {
     getView().showConfirmDialog(CONFIRM_ALL);
   }
 
-  public final void requestClearDatabase() {
+  public void requestClearDatabase() {
     getView().showConfirmDialog(CONFIRM_DATABASE);
   }
 
@@ -99,7 +99,7 @@ public final class SettingsPresenter extends SchedulerPresenter<SettingsPresente
         });
   }
 
-  private void clearAll() {
+  void clearAll() {
     unsubscribeConfirm();
     confirmedSubscription = interactor.clearAll()
         .subscribeOn(getSubscribeScheduler())

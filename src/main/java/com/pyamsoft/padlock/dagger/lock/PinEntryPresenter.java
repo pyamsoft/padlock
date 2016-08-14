@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.lock;
+package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.dagger.lock.PinEntryInteractor;
+import com.pyamsoft.padlock.app.lock.PinEntryDialog;
+import com.pyamsoft.padlock.app.lock.PinScreen;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -31,20 +32,20 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
   @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
   @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
 
-  @Inject public PinEntryPresenter(@NonNull final PinEntryInteractor interactor,
+  @Inject PinEntryPresenter(@NonNull final PinEntryInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);
     this.interactor = interactor;
   }
 
-  private void unsubPinEntry() {
+  void unsubPinEntry() {
     if (!pinEntrySubscription.isUnsubscribed()) {
       pinEntrySubscription.unsubscribe();
     }
   }
 
-  private void unsubPinCheck() {
+  void unsubPinCheck() {
     if (!pinCheckSubscription.isUnsubscribed()) {
       pinCheckSubscription.unsubscribe();
     }

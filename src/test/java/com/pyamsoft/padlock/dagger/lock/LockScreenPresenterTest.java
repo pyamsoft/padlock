@@ -21,7 +21,6 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.app.lock.LockScreen;
-import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.lock;
+package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.SchedulerPresenter;
+import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
 import javax.inject.Named;
 import rx.Scheduler;
 
 public abstract class LockPresenter<I extends LockPresenter.LockView>
     extends SchedulerPresenter<I> {
 
-  protected LockPresenter(@NonNull @Named("main") Scheduler mainScheduler,
+  LockPresenter(@NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);
   }
