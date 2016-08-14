@@ -29,8 +29,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.BuildConfig;
-import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.accessibility.AccessibilityFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
@@ -60,7 +60,7 @@ public class MainActivity extends DonationActivityBase
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
     unbinder = ButterKnife.bind(this);
 
-    PadLock.getInstance().getPadLockComponent().plusMain().inject(this);
+    Singleton.Dagger.with(this).plusMain().inject(this);
 
     presenter.bindView(this);
     setAppBarState();
@@ -139,10 +139,6 @@ public class MainActivity extends DonationActivityBase
         handled = false;
     }
     return handled || super.onOptionsItemSelected(item);
-  }
-
-  @NonNull @Override public String getPlayStoreAppPackage() {
-    return getPackageName();
   }
 
   @Override protected void onResume() {

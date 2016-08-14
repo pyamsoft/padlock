@@ -22,8 +22,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.SwitchPreferenceCompat;
-import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.dagger.main.MainPresenter;
 import com.pyamsoft.padlock.dagger.settings.SettingsPresenter;
@@ -56,7 +56,7 @@ public final class SettingsFragment extends PreferenceFragmentCompat
   @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {
     addPreferencesFromResource(R.xml.preferences);
 
-    PadLock.getInstance().getPadLockComponent().plusSettings().inject(this);
+    Singleton.Dagger.with(getContext()).plusSettings().inject(this);
     presenter.bindView(this);
 
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));

@@ -23,8 +23,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.TagConstraint;
-import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -213,11 +213,11 @@ final class LockScreenInteractorImpl extends LockInteractorImpl implements LockS
       final String packageTag = RecheckJob.TAG_CLASS_PREFIX + entry.packageName();
       final String classTag = RecheckJob.TAG_CLASS_PREFIX + entry.activityName();
       Timber.d("Cancel jobs with package tag: %s and class tag: %s", packageTag, classTag);
-      PadLock.getInstance().getJobManager().cancelJobs(TagConstraint.ALL, packageTag, classTag);
+      Singleton.Jobs.with(appContext).cancelJobs(TagConstraint.ALL, packageTag, classTag);
 
       // Queue up a new recheck job
       final Job recheck = RecheckJob.create(entry.packageName(), entry.activityName(), recheckTime);
-      PadLock.getInstance().getJobManager().addJob(recheck);
+      Singleton.Jobs.with(appContext).addJob(recheck);
 
       // KLUDGE Just return something valid for now
       return Observable.just(1);

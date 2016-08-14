@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.base;
+package com.pyamsoft.padlock.dagger.base;
 
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.PadLock;
@@ -23,10 +23,11 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import rx.schedulers.Schedulers;
 
-@RunWith(RobolectricGradleTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 23, application = PadLock.class)
 public class SchedulerPresenterTest {
 

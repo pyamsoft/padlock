@@ -41,8 +41,8 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.dagger.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.model.RxBus;
@@ -89,7 +89,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    PadLock.getInstance().getPadLockComponent().plusPinEntry().inject(this);
+    Singleton.Dagger.with(getContext()).plusPinEntry().inject(this);
     packageName = getArguments().getString(ENTRY_PACKAGE_NAME);
     if (packageName == null) {
       throw new NullPointerException("Package name is NULL");
