@@ -26,15 +26,16 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class SettingsPresenter extends SchedulerPresenter<SettingsPresenter.SettingsView> {
+public final class SettingsPreferencePresenter
+    extends SchedulerPresenter<SettingsPreferencePresenter.SettingsView> {
 
   public static final int CONFIRM_DATABASE = 0;
   public static final int CONFIRM_ALL = 1;
-  @NonNull private final SettingsInteractor interactor;
+  @NonNull private final SettingsPreferenceInteractor interactor;
   @NonNull private Subscription confirmBusSubscription = Subscriptions.empty();
   @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
 
-  @Inject SettingsPresenter(@NonNull SettingsInteractor interactor,
+  @Inject SettingsPreferencePresenter(@NonNull SettingsPreferenceInteractor interactor,
       @NonNull @Named("io") Scheduler ioScheduler,
       @NonNull @Named("main") Scheduler mainScheduler) {
     super(mainScheduler, ioScheduler);

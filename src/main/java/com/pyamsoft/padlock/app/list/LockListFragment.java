@@ -24,12 +24,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,13 +45,13 @@ import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
-import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.db.DBPresenter;
 import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
 import com.pyamsoft.padlock.dagger.list.LockListPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.model.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncTaskMap;
@@ -64,9 +64,10 @@ import timber.log.Timber;
 import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
-public final class LockListFragment extends Fragment
+public final class LockListFragment extends ActionBarFragment
     implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
 
+  @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
   private static final int KEY_PRESENTER = 0;
   private static final int KEY_ADAPTER_PRESENTER = 1;
@@ -76,6 +77,7 @@ public final class LockListFragment extends Fragment
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
+  @BindView(R.id.toolbar) Toolbar toolbar;
   @Inject LockListPresenter presenter;
   @Inject AdapterPresenter<AppEntry, LockListAdapter.ViewHolder> adapterPresenter;
   @Inject DBPresenter dbPresenter;
@@ -108,10 +110,16 @@ public final class LockListFragment extends Fragment
   private MenuItem displaySystemItem;
   private boolean firstRefresh;
 
+  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setHasOptionsMenu(true);
+
+    presenterDataHolder = DataHolderFragment.getInstance(getActivity(), "lock_list_presenters");
+  }
+
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    presenterDataHolder = DataHolderFragment.getInstance(getActivity(), "lock_list_presenters");
 
     final LockListPresenter lockListPresenter =
         (LockListPresenter) presenterDataHolder.pop(KEY_PRESENTER);
@@ -144,6 +152,7 @@ public final class LockListFragment extends Fragment
   @SuppressLint("ShowToast") @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    setAppBarState();
     setupRecyclerView();
     setupSwipeRefresh();
     setupFAB();
@@ -153,6 +162,11 @@ public final class LockListFragment extends Fragment
       firstRefresh = false;
       refreshList();
     }
+  }
+
+  private void setAppBarState() {
+    setActionBar(toolbar);
+    toolbar.setTitle(getString(R.string.app_name));
   }
 
   private void setupSwipeRefresh() {
@@ -168,6 +182,7 @@ public final class LockListFragment extends Fragment
     super.onResume();
     handler.postDelayed(() -> fab.show(), 300L);
     presenter.resume();
+    setActionBarUpEnabled(false);
   }
 
   @Override public void onPause() {
@@ -185,11 +200,6 @@ public final class LockListFragment extends Fragment
     recyclerView.setLayoutManager(lockListLayoutManager);
     recyclerView.setAdapter(adapter);
     recyclerView.addItemDecoration(dividerDecoration);
-  }
-
-  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setHasOptionsMenu(true);
   }
 
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -248,18 +258,11 @@ public final class LockListFragment extends Fragment
 
   private void showSettingsScreen() {
     final FragmentManager fragmentManager = getFragmentManager();
-    if (fragmentManager.findFragmentByTag(MainActivity.SETTINGS_TAG) == null) {
+    if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
       fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, new SettingsFragment())
+          .add(R.id.main_view_container, new SettingsFragment())
           .addToBackStack(null)
           .commit();
-      final FragmentActivity activity = getActivity();
-      if (activity instanceof MainActivity) {
-        final MainActivity mainActivity = (MainActivity) activity;
-        mainActivity.setActionBarUpEnabled(true);
-      } else {
-        throw new ClassCastException("Activity is not MainActivity");
-      }
     }
   }
 

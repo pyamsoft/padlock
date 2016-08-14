@@ -23,16 +23,16 @@ import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module public class SettingsModule {
+@Module public class SettingsPreferenceModule {
 
-  @ActivityScope @Provides SettingsPresenter provideSettingsPresenter(
-      final @NonNull SettingsInteractor interactor, @Named("main") Scheduler mainScheduler,
+  @ActivityScope @Provides SettingsPreferencePresenter provideSettingsPresenter(
+      final @NonNull SettingsPreferenceInteractor interactor, @Named("main") Scheduler mainScheduler,
       @Named("io") Scheduler ioScheduler) {
-    return new SettingsPresenter(interactor, mainScheduler, ioScheduler);
+    return new SettingsPreferencePresenter(interactor, mainScheduler, ioScheduler);
   }
 
-  @ActivityScope @Provides SettingsInteractor provideSettingsInteractor(
-      final @NonNull SettingsInteractorImpl interactor) {
+  @ActivityScope @Provides SettingsPreferenceInteractor provideSettingsInteractor(
+      final @NonNull SettingsPrefrenceInteractorImpl interactor) {
     return interactor;
   }
 }

@@ -21,19 +21,16 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.view.Menu;
 import android.view.MenuItem;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.accessibility.AccessibilityFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
+import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.main.MainPresenter;
 import com.pyamsoft.pydroid.base.activity.DonationActivityBase;
 import com.pyamsoft.pydroid.support.RatingDialog;
@@ -45,25 +42,16 @@ import timber.log.Timber;
 public class MainActivity extends DonationActivityBase
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
-  @NonNull public static final String SETTINGS_TAG = "settings";
-  @NonNull public static final String USAGE_TERMS_TAG = "usage_terms";
-  @NonNull public static final String ACCESSIBILITY_TAG = "accessibility";
-  @NonNull public static final String LOCK_LIST_TAG = "lock_list";
-
-  @BindView(R.id.toolbar) Toolbar toolbar;
   @Inject MainPresenter presenter;
-  private Unbinder unbinder;
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
     super.onCreate(savedInstanceState);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
-    unbinder = ButterKnife.bind(this);
 
     Singleton.Dagger.with(this).plusMain().inject(this);
 
     presenter.bindView(this);
-    setAppBarState();
   }
 
   @Override protected int bindActivityToView() {
@@ -74,9 +62,9 @@ public class MainActivity extends DonationActivityBase
   private void showAccessibilityPrompt() {
     supportInvalidateOptionsMenu();
     final FragmentManager fragmentManager = getSupportFragmentManager();
-    if (fragmentManager.findFragmentByTag(ACCESSIBILITY_TAG) == null) {
+    if (fragmentManager.findFragmentByTag(AccessibilityFragment.TAG) == null) {
       fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, new AccessibilityFragment(), ACCESSIBILITY_TAG)
+          .replace(R.id.main_view_container, new AccessibilityFragment(), AccessibilityFragment.TAG)
           .commit();
     }
   }
@@ -84,10 +72,10 @@ public class MainActivity extends DonationActivityBase
   private void showLockList() {
     supportInvalidateOptionsMenu();
     final FragmentManager fragmentManager = getSupportFragmentManager();
-    if (fragmentManager.findFragmentByTag(LOCK_LIST_TAG) == null
-        && fragmentManager.findFragmentByTag(SETTINGS_TAG) == null) {
+    if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
       fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, new LockListFragment(), LOCK_LIST_TAG)
+          .replace(R.id.main_view_container, new LockListFragment(), LockListFragment.TAG)
           .commit();
     }
   }
@@ -98,16 +86,6 @@ public class MainActivity extends DonationActivityBase
     if (!isChangingConfigurations()) {
       presenter.unbindView();
     }
-
-    unbinder.unbind();
-  }
-
-  private void setAppBarState() {
-    setSupportActionBar(toolbar);
-    toolbar.setTitle(getString(R.string.app_name));
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    final int backStackCount = fragmentManager.getBackStackEntryCount();
-    setActionBarUpEnabled(backStackCount > 0);
   }
 
   @Override protected boolean shouldConfirmBackPress() {
@@ -119,9 +97,6 @@ public class MainActivity extends DonationActivityBase
     final int backStackCount = fragmentManager.getBackStackEntryCount();
     if (backStackCount > 0) {
       fragmentManager.popBackStack();
-      if (backStackCount - 1 == 0) {
-        setActionBarUpEnabled(false);
-      }
     } else {
       super.onBackPressed();
     }
@@ -143,7 +118,6 @@ public class MainActivity extends DonationActivityBase
 
   @Override protected void onResume() {
     super.onResume();
-    animateActionBarToolbar(toolbar);
     presenter.resume();
   }
 
@@ -170,7 +144,7 @@ public class MainActivity extends DonationActivityBase
 
   @Override public void showUsageTermsDialog() {
     AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new AgreeTermsDialog(),
-        USAGE_TERMS_TAG);
+        AgreeTermsDialog.TAG);
   }
 
   @NonNull @Override public Spannable getChangeLogText() {
@@ -227,10 +201,9 @@ public class MainActivity extends DonationActivityBase
 
   @Override public void forceRefresh() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
-    setActionBarUpEnabled(false);
     fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     fragmentManager.beginTransaction()
-        .replace(R.id.main_view_container, new LockListFragment(), LOCK_LIST_TAG)
+        .replace(R.id.main_view_container, new LockListFragment(), LockListFragment.TAG)
         .commit();
   }
 }
