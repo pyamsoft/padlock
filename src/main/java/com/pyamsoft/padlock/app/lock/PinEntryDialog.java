@@ -28,7 +28,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -37,6 +36,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -63,7 +63,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @NonNull private final AsyncTaskMap taskMap = new AsyncTaskMap();
   @Inject PinEntryPresenter presenter;
   @Inject AppIconLoaderPresenter<PinScreen> appIconLoaderPresenter;
-  @BindView(R.id.pin_entry_toolbar) Toolbar toolbar;
+  @BindView(R.id.pin_entry_toolbar) TextView toolbar;
   @BindView(R.id.pin_entry_close) ImageView close;
   @BindView(R.id.pin_image) ImageView image;
   @BindView(R.id.pin_image_go) ImageView go;
@@ -130,6 +130,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
         .getSystemService(Context.INPUT_METHOD_SERVICE);
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
+    setupCloseButton();
     setupGoArrow();
     clearDisplay();
     setupToolbar();
@@ -141,6 +142,17 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     presenter.hideUnimportantViews();
 
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
+  }
+
+  private void setupCloseButton() {
+    close.setOnClickListener(view -> {
+      Timber.d("onClick Arrow");
+      dismiss();
+    });
+
+    final AsyncVectorDrawableTask task = new AsyncVectorDrawableTask(close, android.R.color.black);
+    task.execute(new AsyncDrawable(getContext(), R.drawable.ic_close_24dp));
+    taskMap.put("close", task);
   }
 
   @Override public void showExtraPinEntryViews() {
@@ -244,12 +256,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   }
 
   private void setupToolbar() {
-    toolbar.setTitle("PIN");
-
-    close.setOnClickListener(view -> {
-      Timber.d("onClick Arrow");
-      dismiss();
-    });
+    toolbar.setText("PIN");
   }
 
   @Override public void onDestroyView() {

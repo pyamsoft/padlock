@@ -58,6 +58,7 @@ import com.pyamsoft.pydroid.tool.AsyncTaskMap;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
+import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -188,6 +189,7 @@ public final class LockListFragment extends ActionBarFragment
     }), 300L);
     presenter.resume();
     setActionBarUpEnabled(false);
+    AnimUtil.animateActionBarToolbar(toolbar);
   }
 
   @Override public void onPause() {

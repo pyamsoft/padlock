@@ -28,6 +28,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
+import com.pyamsoft.pydroid.util.AnimUtil;
 
 public class SettingsFragment extends ActionBarFragment {
 
@@ -57,6 +58,7 @@ public class SettingsFragment extends ActionBarFragment {
   @Override public void onResume() {
     super.onResume();
     setActionBarUpEnabled(true);
+    AnimUtil.animateActionBarToolbar(toolbar);
   }
 
   private void setAppBarState() {
