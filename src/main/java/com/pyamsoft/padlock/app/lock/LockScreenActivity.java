@@ -44,8 +44,8 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.dagger.lock.LockScreenPresenter;
@@ -133,7 +133,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     unbinder = ButterKnife.bind(this);
 
     // Inject Dagger graph
-    PadLock.getInstance().getPadLockComponent().plusLockScreen().inject(this);
+    Singleton.Dagger.with(this).plusLockScreen().inject(this);
 
     presenter.bindView(this);
     appIconLoaderPresenter.bindView(this);

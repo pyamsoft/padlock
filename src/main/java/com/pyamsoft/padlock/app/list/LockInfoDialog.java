@@ -38,8 +38,8 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.dagger.db.DBPresenter;
 import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
 import com.pyamsoft.padlock.dagger.list.LockInfoPresenter;
@@ -110,7 +110,7 @@ public class LockInfoDialog extends DialogFragment
       Timber.d("Create new presenters");
       firstRefresh = true;
 
-      PadLock.getInstance().getPadLockComponent().plusLockInfo().inject(this);
+      Singleton.Dagger.with(getContext()).plusLockInfo().inject(this);
     } else {
       Timber.d("Load cached presenters");
       firstRefresh = false;

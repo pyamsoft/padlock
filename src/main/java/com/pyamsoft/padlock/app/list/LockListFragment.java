@@ -40,8 +40,8 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
@@ -123,7 +123,7 @@ public final class LockListFragment extends Fragment
     if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
       Timber.d("Create new presenters");
       firstRefresh = true;
-      PadLock.getInstance().getPadLockComponent().plusLockList().inject(this);
+      Singleton.Dagger.with(getContext()).plusLockList().inject(this);
     } else {
       Timber.d("Load cached presenters");
       firstRefresh = false;

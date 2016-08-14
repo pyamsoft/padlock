@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
@@ -56,8 +57,7 @@ final class LockServiceInteractorImpl implements LockServiceInteractor {
   @Override public void cleanup() {
     Timber.d("Cleanup LockService");
     Timber.d("Cancel ALL jobs in background");
-    PadLock.getInstance()
-        .getJobManager()
+    Singleton.Jobs.with(appContext)
         .cancelJobsInBackground(null, TagConstraint.ANY, RecheckJob.TAG_ALL);
   }
 

@@ -22,7 +22,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.accessibility.AccessibilityEvent;
-import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
@@ -154,7 +154,7 @@ public final class PadLockService extends AccessibilityService
     lockActivity2 =
         new Intent(this, LockScreenActivity2.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-    PadLock.getInstance().getPadLockComponent().plusLockService().inject(this);
+    Singleton.Dagger.with(this).plusLockService().inject(this);
 
     presenter.bindView(this);
     setInstance(this);
