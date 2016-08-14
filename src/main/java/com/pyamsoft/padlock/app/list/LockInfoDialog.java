@@ -31,7 +31,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -78,7 +77,6 @@ public class LockInfoDialog extends DialogFragment
   private LockInfoAdapter adapter;
   private AppEntry appEntry;
   private Unbinder unbinder;
-  private boolean firstRefresh;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -97,9 +95,8 @@ public class LockInfoDialog extends DialogFragment
         DataHolderFragment.getInstance(getFragmentManager(), "lock_info_presenters");
   }
 
-  @Nullable @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
+  @SuppressLint("InflateParams") @NonNull @Override
+  public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     final LockInfoPresenter lockInfoPresenter =
         (LockInfoPresenter) presenterDataHolder.pop(KEY_PRESENTER);
     @SuppressWarnings("unchecked") final AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder>
@@ -107,6 +104,7 @@ public class LockInfoDialog extends DialogFragment
         (AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder>) presenterDataHolder.pop(
             KEY_ADAPTER_PRESENTER);
     final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
+    final boolean firstRefresh;
     if (lockInfoPresenter == null
         || activityEntryAdapterPresenter == null
         || lockDBPresenter == null) {
@@ -126,17 +124,12 @@ public class LockInfoDialog extends DialogFragment
 
     presenter.bindView(this);
     adapter.onCreate();
-    return super.onCreateView(inflater, container, savedInstanceState);
-  }
 
-  @SuppressLint("InflateParams") @NonNull @Override
-  public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     final View rootView =
         LayoutInflater.from(getActivity()).inflate(R.layout.dialog_lockinfo, null, false);
     unbinder = ButterKnife.bind(this, rootView);
     initializeForEntry();
     if (firstRefresh) {
-      firstRefresh = false;
       refreshList();
     }
 
