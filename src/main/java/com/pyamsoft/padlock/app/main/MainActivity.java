@@ -17,13 +17,20 @@
 package com.pyamsoft.padlock.app.main;
 
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.Singleton;
@@ -34,6 +41,7 @@ import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.main.MainPresenter;
 import com.pyamsoft.pydroid.base.activity.DonationActivityBase;
 import com.pyamsoft.pydroid.support.RatingDialog;
+import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.StringUtil;
 import javax.inject.Inject;
@@ -42,21 +50,31 @@ import timber.log.Timber;
 public class MainActivity extends DonationActivityBase
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
+  @BindView(R.id.toolbar) Toolbar toolbar;
   @Inject MainPresenter presenter;
+  private Unbinder unbinder;
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
     super.onCreate(savedInstanceState);
+    unbinder = ButterKnife.bind(this);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     Singleton.Dagger.with(this).plusMain().inject(this);
 
     presenter.bindView(this);
+
+    setAppBarState();
   }
 
   @Override protected int bindActivityToView() {
     setContentView(R.layout.activity_main);
     return R.id.ad_view;
+  }
+
+  private void setAppBarState() {
+    setSupportActionBar(toolbar);
+    toolbar.setTitle(getString(R.string.app_name));
   }
 
   private void showAccessibilityPrompt() {
@@ -80,12 +98,26 @@ public class MainActivity extends DonationActivityBase
     }
   }
 
+  @CheckResult @NonNull public View getSettingsMenuItemView() {
+    final View amv = toolbar.getChildAt(1);
+    if (amv != null && amv instanceof ActionMenuView) {
+      final ActionMenuView actions = (ActionMenuView) amv;
+      // Settings gear is the second item
+      return actions.getChildAt(1);
+    } else {
+      throw new RuntimeException("Could not locate view for Settings menu item");
+    }
+  }
+
+
   @Override protected void onDestroy() {
     super.onDestroy();
 
     if (!isChangingConfigurations()) {
       presenter.unbindView();
     }
+
+    unbinder.unbind();
   }
 
   @Override protected boolean shouldConfirmBackPress() {
@@ -132,6 +164,8 @@ public class MainActivity extends DonationActivityBase
 
   @Override protected void onPostResume() {
     super.onPostResume();
+
+    AnimUtil.animateActionBarToolbar(toolbar);
 
     RatingDialog.showRatingDialog(this, this);
     if (PadLockService.isRunning()) {

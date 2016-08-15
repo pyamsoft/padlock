@@ -21,17 +21,13 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
-import com.pyamsoft.pydroid.util.AnimUtil;
 
 public class AccessibilityFragment extends ActionBarFragment {
 
@@ -39,37 +35,21 @@ public class AccessibilityFragment extends ActionBarFragment {
   @NonNull private final Intent accessibilityServiceIntent =
       new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
   @BindView(R.id.main_service_button) Button serviceButton;
-  @BindView(R.id.toolbar) Toolbar toolbar;
-  private Unbinder unbinder;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    final View view = inflater.inflate(R.layout.fragment_accessibility_ask, container, false);
-    unbinder = ButterKnife.bind(this, view);
-    return view;
-  }
-
-  @Override public void onDestroyView() {
-    super.onDestroyView();
-    unbinder.unbind();
+    return inflater.inflate(R.layout.fragment_accessibility_ask, container, false);
   }
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    setAppBarState();
     setupAccessibilityButton();
   }
 
   @Override public void onResume() {
     super.onResume();
     setActionBarUpEnabled(false);
-    AnimUtil.animateActionBarToolbar(toolbar);
-  }
-
-  private void setAppBarState() {
-    setActionBar(toolbar);
-    toolbar.setTitle(getString(R.string.app_name));
   }
 
   private void setupAccessibilityButton() {

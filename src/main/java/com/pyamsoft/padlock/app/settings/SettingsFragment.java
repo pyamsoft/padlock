@@ -21,22 +21,15 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.pydroid.base.fragment.CircularRevealFragment;
-import com.pyamsoft.pydroid.util.AnimUtil;
 
 public class SettingsFragment extends CircularRevealFragment {
 
   @NonNull public static final String TAG = "SettingsFragment";
-  @BindView(R.id.toolbar) Toolbar toolbar;
-  private Unbinder unbinder;
 
   @CheckResult @NonNull
   public static Fragment newInstance(@NonNull View fromView, @NonNull View containerView) {
@@ -48,31 +41,17 @@ public class SettingsFragment extends CircularRevealFragment {
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    final View view = inflater.inflate(R.layout.fragment_settings, container, false);
-    unbinder = ButterKnife.bind(this, view);
-    return view;
-  }
-
-  @Override public void onDestroyView() {
-    super.onDestroyView();
-    unbinder.unbind();
+    return inflater.inflate(R.layout.fragment_settings, container, false);
   }
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    setAppBarState();
     displayPreferenceFragment();
   }
 
   @Override public void onResume() {
     super.onResume();
     setActionBarUpEnabled(true);
-    AnimUtil.animateActionBarToolbar(toolbar);
-  }
-
-  private void setAppBarState() {
-    setActionBar(toolbar);
-    toolbar.setTitle(getString(R.string.app_name));
   }
 
   // KLUDGE child fragment, not the nicest
