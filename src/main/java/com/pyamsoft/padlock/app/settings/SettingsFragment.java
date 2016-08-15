@@ -17,8 +17,10 @@
 package com.pyamsoft.padlock.app.settings;
 
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,14 +29,21 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
+import com.pyamsoft.pydroid.base.fragment.CircularRevealFragment;
 import com.pyamsoft.pydroid.util.AnimUtil;
 
-public class SettingsFragment extends ActionBarFragment {
+public class SettingsFragment extends CircularRevealFragment {
 
   @NonNull public static final String TAG = "SettingsFragment";
   @BindView(R.id.toolbar) Toolbar toolbar;
   private Unbinder unbinder;
+
+  @CheckResult @NonNull
+  public static Fragment newInstance(@NonNull View fromView, @NonNull View containerView) {
+    final Fragment fragment = new SettingsFragment();
+    fragment.setArguments(bundleArguments(fromView, containerView, 0));
+    return fragment;
+  }
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
