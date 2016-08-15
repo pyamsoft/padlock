@@ -20,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -28,6 +29,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -265,11 +267,25 @@ public final class LockListFragment extends ActionBarFragment
 
   private void showSettingsScreen() {
     final FragmentManager fragmentManager = getFragmentManager();
-    if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
+    final View containerView = getView();
+    if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null && containerView != null) {
       fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, new SettingsFragment(), SettingsFragment.TAG)
+          .replace(R.id.main_view_container,
+              SettingsFragment.newInstance(getSettingsMenuItemView(), containerView),
+              SettingsFragment.TAG)
           .addToBackStack(null)
           .commit();
+    }
+  }
+
+  @CheckResult @NonNull private View getSettingsMenuItemView() {
+    final View amv = toolbar.getChildAt(1);
+    if (amv != null && amv instanceof ActionMenuView) {
+      final ActionMenuView actions = (ActionMenuView) amv;
+      // Settings gear is the second item
+      return actions.getChildAt(1);
+    } else {
+      throw new RuntimeException("Could not locate view for Settings menu item");
     }
   }
 
