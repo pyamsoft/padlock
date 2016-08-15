@@ -105,6 +105,10 @@ android {
   packagingOptions {
     exclude 'META-INF/services/javax.annotation.processing.Processor'
   }
+
+  dexOptions {
+    javaMaxHeapSize "1g"
+  }
 }
 
 retrolambda {
@@ -163,6 +167,6 @@ dependencies {
   // Mockito for unit tests
   testCompile 'org.mockito:mockito-core:2.0.99-beta'
 
-  // PYDroid 3.0.3
+  // PYDroid 3.0.4
   compile project(':PYDroid')
 }
