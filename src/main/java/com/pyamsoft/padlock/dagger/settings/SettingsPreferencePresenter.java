@@ -27,7 +27,7 @@ import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 public final class SettingsPreferencePresenter
-    extends SchedulerPresenter<SettingsPreferencePresenter.SettingsView> {
+    extends SchedulerPresenter<SettingsPreferencePresenter.SettingsPreferenceView> {
 
   public static final int CONFIRM_DATABASE = 0;
   public static final int CONFIRM_ALL = 1;
@@ -42,17 +42,17 @@ public final class SettingsPreferencePresenter
     this.interactor = interactor;
   }
 
-  @Override protected void onResume(@NonNull SettingsView view) {
+  @Override protected void onResume(@NonNull SettingsPreferenceView view) {
     super.onResume(view);
     registerOnConfirmEventBus();
   }
 
-  @Override protected void onPause(@NonNull SettingsView view) {
+  @Override protected void onPause(@NonNull SettingsPreferenceView view) {
     super.onPause(view);
     unregisterFromConfirmEventBus();
   }
 
-  @Override protected void onUnbind(@NonNull SettingsView view) {
+  @Override protected void onUnbind(@NonNull SettingsPreferenceView view) {
     super.onUnbind(view);
     unsubscribeConfirm();
   }
@@ -124,7 +124,7 @@ public final class SettingsPreferencePresenter
         }, this::unsubscribeConfirm);
   }
 
-  public interface SettingsView {
+  public interface SettingsPreferenceView {
 
     void showConfirmDialog(int type);
 
