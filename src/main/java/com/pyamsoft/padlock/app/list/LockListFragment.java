@@ -16,11 +16,9 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -29,9 +27,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,6 +43,7 @@ import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
+import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.db.DBPresenter;
 import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
@@ -60,7 +57,6 @@ import com.pyamsoft.pydroid.tool.AsyncTaskMap;
 import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
-import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -80,7 +76,6 @@ public final class LockListFragment extends ActionBarFragment
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
-  @BindView(R.id.toolbar) Toolbar toolbar;
   @Inject LockListPresenter presenter;
   @Inject AdapterPresenter<AppEntry, LockListAdapter.ViewHolder> adapterPresenter;
   @Inject DBPresenter dbPresenter;
@@ -152,10 +147,8 @@ public final class LockListFragment extends ActionBarFragment
     return view;
   }
 
-  @SuppressLint("ShowToast") @Override
-  public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+  @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    setAppBarState();
     setupRecyclerView();
     setupSwipeRefresh();
     setupFAB();
@@ -165,11 +158,6 @@ public final class LockListFragment extends ActionBarFragment
       firstRefresh = false;
       refreshList();
     }
-  }
-
-  private void setAppBarState() {
-    setActionBar(toolbar);
-    toolbar.setTitle(getString(R.string.app_name));
   }
 
   private void setupSwipeRefresh() {
@@ -191,7 +179,6 @@ public final class LockListFragment extends ActionBarFragment
     }), 300L);
     presenter.resume();
     setActionBarUpEnabled(false);
-    AnimUtil.animateActionBarToolbar(toolbar);
   }
 
   @Override public void onPause() {
@@ -266,26 +253,20 @@ public final class LockListFragment extends ActionBarFragment
   }
 
   private void showSettingsScreen() {
-    final FragmentManager fragmentManager = getFragmentManager();
-    final View containerView = getView();
-    if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null && containerView != null) {
-      fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container,
-              SettingsFragment.newInstance(getSettingsMenuItemView(), containerView),
-              SettingsFragment.TAG)
-          .addToBackStack(null)
-          .commit();
-    }
-  }
-
-  @CheckResult @NonNull private View getSettingsMenuItemView() {
-    final View amv = toolbar.getChildAt(1);
-    if (amv != null && amv instanceof ActionMenuView) {
-      final ActionMenuView actions = (ActionMenuView) amv;
-      // Settings gear is the second item
-      return actions.getChildAt(1);
-    } else {
-      throw new RuntimeException("Could not locate view for Settings menu item");
+    final FragmentActivity fragmentActivity = getActivity();
+    if (fragmentActivity instanceof MainActivity) {
+      final MainActivity mainActivity = (MainActivity) fragmentActivity;
+      final FragmentManager fragmentManager = getFragmentManager();
+      final View containerView = getView();
+      final View menuItemView = mainActivity.getSettingsMenuItemView();
+      if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
+          && containerView != null) {
+        fragmentManager.beginTransaction()
+            .replace(R.id.main_view_container,
+                SettingsFragment.newInstance(menuItemView, containerView), SettingsFragment.TAG)
+            .addToBackStack(null)
+            .commit();
+      }
     }
   }
 
