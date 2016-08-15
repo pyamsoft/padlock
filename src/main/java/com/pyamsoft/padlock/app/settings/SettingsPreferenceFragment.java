@@ -34,7 +34,7 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public final class SettingsPreferenceFragment extends PreferenceFragmentCompat
-    implements SettingsPreferencePresenter.SettingsView {
+    implements SettingsPreferencePresenter.SettingsPreferenceView {
 
   @Inject SettingsPreferencePresenter presenter;
 
