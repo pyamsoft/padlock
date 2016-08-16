@@ -121,7 +121,7 @@ dependencies {
   retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.3.0'
 
   // Job Scheduling
-  compile 'com.birbit:android-priority-jobqueue:2.0.0-beta3'
+  compile 'com.birbit:android-priority-jobqueue:2.0.0'
   compile 'com.google.android.gms:play-services-gcm:9.4.0'
 
   // Needs to compile support annotations into actual project
@@ -132,7 +132,7 @@ dependencies {
 
   // RxJava
   // rxandroid pulls in sometimes old rxjava
-  compile 'io.reactivex:rxjava:1.1.8'
+  compile 'io.reactivex:rxjava:1.1.9'
   compile 'io.reactivex:rxandroid:1.2.1'
 
   // Auto value
@@ -165,7 +165,7 @@ dependencies {
   testCompile 'junit:junit:4.12'
 
   // Mockito for unit tests
-  testCompile 'org.mockito:mockito-core:2.0.99-beta'
+  testCompile 'org.mockito:mockito-core:2.0.104-beta'
 
   // PYDroid 3.0.4
   compile project(':PYDroid')
