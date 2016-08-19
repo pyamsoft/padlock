@@ -47,10 +47,10 @@ import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.dagger.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.model.RxBus;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
-import com.pyamsoft.pydroid.model.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncTaskMap;
-import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
+import com.pyamsoft.pydroid.tool.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import javax.inject.Inject;
+import rx.Subscription;
 import timber.log.Timber;
 
 public class PinEntryDialog extends DialogFragment implements PinScreen {
@@ -60,7 +60,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
-  @NonNull private final AsyncTaskMap taskMap = new AsyncTaskMap();
+  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @Inject PinEntryPresenter presenter;
   @Inject AppIconLoaderPresenter<PinScreen> appIconLoaderPresenter;
   @BindView(R.id.pin_entry_toolbar) TextView toolbar;
@@ -150,8 +150,10 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
       dismiss();
     });
 
-    final AsyncVectorDrawableTask task = new AsyncVectorDrawableTask(close, android.R.color.black);
-    task.execute(new AsyncDrawable(getContext(), R.drawable.ic_close_24dp));
+    final Subscription task = AsyncDrawable.with(getContext())
+        .load(R.drawable.ic_close_24dp)
+        .tint(android.R.color.black)
+        .into(close);
     taskMap.put("close", task);
   }
 
@@ -197,10 +199,9 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     // Force keyboard focus
     pinEntryText.requestFocus();
 
-    final AsyncVectorDrawableTask arrowGoTask = new AsyncVectorDrawableTask(go);
-    arrowGoTask.execute(
-        new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_arrow_forward_24dp));
-    taskMap.put("arrow", arrowGoTask);
+    final Subscription task =
+        AsyncDrawable.with(getContext()).load(R.drawable.ic_arrow_forward_24dp).into(go);
+    taskMap.put("arrow", task);
   }
 
   private void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
