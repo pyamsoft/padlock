@@ -49,13 +49,13 @@ import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.dagger.lock.LockScreenPresenter;
-import com.pyamsoft.pydroid.model.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncTaskMap;
-import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
+import com.pyamsoft.pydroid.tool.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.Locale;
 import javax.inject.Inject;
+import rx.Subscription;
 import timber.log.Timber;
 
 public abstract class LockScreenActivity extends AppCompatActivity implements LockScreen {
@@ -69,7 +69,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
   @NonNull private final Intent home;
-  @NonNull private final AsyncTaskMap taskMap;
+  @NonNull private final AsyncDrawableMap taskMap;
   @BindView(R.id.activity_lock_screen) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.appbar) AppBarLayout appBarLayout;
@@ -107,7 +107,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     home = new Intent(Intent.ACTION_MAIN);
     home.addCategory(Intent.CATEGORY_HOME);
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    taskMap = new AsyncTaskMap();
+    taskMap = new AsyncDrawableMap();
   }
 
   @Override public void setDisplayName(@NonNull String name) {
@@ -179,9 +179,8 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
       }
     });
 
-    final AsyncVectorDrawableTask arrowGoTask = new AsyncVectorDrawableTask(imageGo);
-    arrowGoTask.execute(
-        new AsyncDrawable(getApplicationContext(), R.drawable.ic_arrow_forward_24dp));
+    final Subscription arrowGoTask =
+        AsyncDrawable.with(this).load(R.drawable.ic_arrow_forward_24dp).into(imageGo);
     taskMap.put("arrow", arrowGoTask);
 
     clearDisplay();

@@ -45,13 +45,13 @@ import com.pyamsoft.padlock.dagger.list.LockInfoPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
-import com.pyamsoft.pydroid.model.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncTaskMap;
-import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
+import com.pyamsoft.pydroid.tool.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
+import rx.Subscription;
 import timber.log.Timber;
 
 public class LockInfoDialog extends DialogFragment
@@ -62,7 +62,7 @@ public class LockInfoDialog extends DialogFragment
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
   @NonNull private final Handler handler = new Handler();
-  @NonNull private final AsyncTaskMap taskMap = new AsyncTaskMap();
+  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
 
   @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
@@ -166,8 +166,8 @@ public class LockInfoDialog extends DialogFragment
       }
     });
 
-    final AsyncVectorDrawableTask task = new AsyncVectorDrawableTask(close);
-    task.execute(new AsyncDrawable(getContext(), R.drawable.ic_close_24dp));
+    final Subscription task =
+        AsyncDrawable.with(getContext()).load(R.drawable.ic_close_24dp).into(close);
     taskMap.put("close", task);
 
     name.setText(appEntry.name());

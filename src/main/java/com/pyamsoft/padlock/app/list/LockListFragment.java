@@ -52,13 +52,13 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
 import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
-import com.pyamsoft.pydroid.model.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncTaskMap;
-import com.pyamsoft.pydroid.tool.AsyncVectorDrawableTask;
+import com.pyamsoft.pydroid.tool.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
+import rx.Subscription;
 import timber.log.Timber;
 import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
@@ -72,7 +72,7 @@ public final class LockListFragment extends ActionBarFragment
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
-  @NonNull private final AsyncTaskMap taskMap = new AsyncTaskMap();
+  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
@@ -302,16 +302,14 @@ public final class LockListFragment extends ActionBarFragment
   }
 
   @Override public void setFABStateEnabled() {
-    final AsyncVectorDrawableTask fabIconTask = new AsyncVectorDrawableTask(fab);
-    fabIconTask.execute(
-        new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_lock_outline_24dp));
+    final Subscription fabIconTask =
+        AsyncDrawable.with(getContext()).load(R.drawable.ic_lock_outline_24dp).into(fab);
     taskMap.put("fab", fabIconTask);
   }
 
   @Override public void setFABStateDisabled() {
-    final AsyncVectorDrawableTask fabIconTask = new AsyncVectorDrawableTask(fab);
-    fabIconTask.execute(
-        new AsyncDrawable(getContext().getApplicationContext(), R.drawable.ic_lock_open_24dp));
+    final Subscription fabIconTask =
+        AsyncDrawable.with(getContext()).load(R.drawable.ic_lock_open_24dp).into(fab);
     taskMap.put("fab", fabIconTask);
   }
 
