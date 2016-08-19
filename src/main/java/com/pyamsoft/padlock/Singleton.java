@@ -110,7 +110,7 @@ public class Singleton {
 
     @CheckResult @NonNull public static PadLockComponent with(@NonNull Context context) {
       if (instance == null) {
-        synchronized (Jobs.class) {
+        synchronized (Dagger.class) {
           if (instance == null) {
             instance = new Dagger(context.getApplicationContext());
           }
