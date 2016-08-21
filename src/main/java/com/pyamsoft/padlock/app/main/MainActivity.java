@@ -92,8 +92,12 @@ public class MainActivity extends DonationActivityBase
     final FragmentManager fragmentManager = getSupportFragmentManager();
     if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
+      final View decorView = getWindow().getDecorView();
+      final int cX = decorView.getLeft() + decorView.getWidth() / 2;
+      final int cY = decorView.getBottom() + decorView.getHeight() / 2;
       fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, new LockListFragment(), LockListFragment.TAG)
+          .replace(R.id.main_view_container, LockListFragment.newInstance(cX, cY),
+              LockListFragment.TAG)
           .commit();
     }
   }
@@ -108,7 +112,6 @@ public class MainActivity extends DonationActivityBase
       throw new RuntimeException("Could not locate view for Settings menu item");
     }
   }
-
 
   @Override protected void onDestroy() {
     super.onDestroy();
@@ -236,9 +239,7 @@ public class MainActivity extends DonationActivityBase
   @Override public void forceRefresh() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-    fragmentManager.beginTransaction()
-        .replace(R.id.main_view_container, new LockListFragment(), LockListFragment.TAG)
-        .commit();
+    showLockList();
   }
 }
 
