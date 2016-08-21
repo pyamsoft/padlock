@@ -49,7 +49,7 @@ import com.pyamsoft.padlock.dagger.db.DBPresenter;
 import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
 import com.pyamsoft.padlock.dagger.list.LockListPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.pydroid.base.presenter.Presenter;
 import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;

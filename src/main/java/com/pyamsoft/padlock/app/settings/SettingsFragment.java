@@ -25,16 +25,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.pydroid.base.fragment.CircularRevealFragment;
+import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
+import com.pyamsoft.pydroid.base.fragment.CircularRevealFragmentUtil;
 
-public class SettingsFragment extends CircularRevealFragment {
+public class SettingsFragment extends ActionBarFragment {
 
   @NonNull public static final String TAG = "SettingsFragment";
 
   @CheckResult @NonNull
   public static Fragment newInstance(@NonNull View fromView, @NonNull View containerView) {
     final Fragment fragment = new SettingsFragment();
-    fragment.setArguments(bundleArguments(fromView, containerView, 0));
+    fragment.setArguments(CircularRevealFragmentUtil.bundleArguments(fromView, containerView, 0));
     return fragment;
   }
 
@@ -46,6 +47,7 @@ public class SettingsFragment extends CircularRevealFragment {
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    CircularRevealFragmentUtil.runCircularRevealOnViewCreated(view, getArguments());
     displayPreferenceFragment();
   }
 
