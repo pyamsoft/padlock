@@ -49,8 +49,9 @@ import com.pyamsoft.padlock.dagger.db.DBPresenter;
 import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
 import com.pyamsoft.padlock.dagger.list.LockListPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.base.presenter.Presenter;
 import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
+import com.pyamsoft.pydroid.base.fragment.CircularRevealFragmentUtil;
+import com.pyamsoft.pydroid.base.presenter.Presenter;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
@@ -108,6 +109,13 @@ public final class LockListFragment extends ActionBarFragment
   private MenuItem displaySystemItem;
   private boolean firstRefresh;
 
+  public static LockListFragment newInstance(int cX, int cY) {
+    final Bundle args = CircularRevealFragmentUtil.bundleArguments(cX, cY, 0);
+    final LockListFragment fragment = new LockListFragment();
+    fragment.setArguments(args);
+    return fragment;
+  }
+
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
@@ -149,6 +157,7 @@ public final class LockListFragment extends ActionBarFragment
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    CircularRevealFragmentUtil.runCircularRevealOnViewCreated(view, getArguments());
     setupRecyclerView();
     setupSwipeRefresh();
     setupFAB();
