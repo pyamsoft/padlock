@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.ActionMenuView;
@@ -28,6 +29,7 @@ import android.text.Spannable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -50,6 +52,7 @@ import timber.log.Timber;
 public class MainActivity extends DonationActivityBase
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
+  @BindView(R.id.main_root) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @Inject MainPresenter presenter;
   private Unbinder unbinder;
@@ -88,18 +91,25 @@ public class MainActivity extends DonationActivityBase
   }
 
   private void showLockList() {
-    supportInvalidateOptionsMenu();
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
-      final View decorView = getWindow().getDecorView();
-      final int cX = decorView.getLeft() + decorView.getWidth() / 2;
-      final int cY = decorView.getBottom() + decorView.getHeight() / 2;
-      fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, LockListFragment.newInstance(cX, cY),
-              LockListFragment.TAG)
-          .commit();
-    }
+    rootView.getViewTreeObserver()
+        .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+          @Override public void onGlobalLayout() {
+            rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+            supportInvalidateOptionsMenu();
+            final FragmentManager fragmentManager = getSupportFragmentManager();
+            if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
+                && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
+              final View decorView = getWindow().getDecorView();
+              final int cX = decorView.getLeft() + decorView.getWidth() / 2;
+              final int cY = decorView.getBottom() + decorView.getHeight() / 2;
+              fragmentManager.beginTransaction()
+                  .replace(R.id.main_view_container, LockListFragment.newInstance(cX, cY),
+                      LockListFragment.TAG)
+                  .commit();
+            }
+          }
+        });
   }
 
   @CheckResult @NonNull public View getSettingsMenuItemView() {

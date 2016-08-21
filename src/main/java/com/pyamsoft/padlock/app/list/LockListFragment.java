@@ -110,7 +110,7 @@ public final class LockListFragment extends ActionBarFragment
   private boolean firstRefresh;
 
   public static LockListFragment newInstance(int cX, int cY) {
-    final Bundle args = CircularRevealFragmentUtil.bundleArguments(cX, cY, 0);
+    final Bundle args = CircularRevealFragmentUtil.bundleArguments(cX, cY, 600L);
     final LockListFragment fragment = new LockListFragment();
     fragment.setArguments(args);
     return fragment;
