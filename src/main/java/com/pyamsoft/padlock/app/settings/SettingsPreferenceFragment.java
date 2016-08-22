@@ -20,6 +20,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.SwitchPreferenceCompat;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.dagger.main.MainPresenter;
@@ -50,12 +53,16 @@ public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenc
     presenter.unbindView();
   }
 
-  @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {
-    addPreferencesFromResource(R.xml.preferences);
-
+  @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
+      Bundle savedInstanceState) {
     Singleton.Dagger.with(getContext()).plusSettings().inject(this);
     presenter.bindView(this);
 
+    return super.onCreateView(inflater, container, savedInstanceState);
+  }
+
+  @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));
     clearDb.setOnPreferenceClickListener(preference -> {
       Timber.d("Clear DB onClick");
@@ -76,6 +83,10 @@ public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenc
     final SwitchPreferenceCompat showAds =
         (SwitchPreferenceCompat) findPreference(getString(R.string.adview_key));
     showAds.setOnPreferenceChangeListener((preference, newValue) -> toggleAdVisibility(newValue));
+  }
+
+  @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {
+    addPreferencesFromResource(R.xml.preferences);
   }
 
   @Override public void showConfirmDialog(int type) {
