@@ -59,7 +59,7 @@ public class SettingsFragment extends ActionBarFragment {
   // KLUDGE child fragment, not the nicest
   private void displayPreferenceFragment() {
     getChildFragmentManager().beginTransaction()
-        .add(R.id.settings_preferences_container, new SettingsPreferenceFragment())
+        .replace(R.id.settings_preferences_container, new SettingsPreferenceFragment())
         .commit();
   }
 }

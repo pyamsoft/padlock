@@ -184,7 +184,6 @@ public class MainActivity extends DonationActivityBase
     super.onPostResume();
 
     AnimUtil.animateActionBarToolbar(toolbar);
-
     RatingDialog.showRatingDialog(this, this);
     if (PadLockService.isRunning()) {
       showLockList();
