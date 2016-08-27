@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.list;
+package com.pyamsoft.padlock.dagger.db;
 
 import com.pyamsoft.padlock.app.list.DBPresenterLoader;
-import com.pyamsoft.padlock.app.list.AppEntryAdapterPresenterLoader;
-import com.pyamsoft.padlock.app.list.LockListPresenterLoader;
 import com.pyamsoft.padlock.dagger.ActivityScope;
-import com.pyamsoft.padlock.dagger.db.DBModule;
-import com.pyamsoft.padlock.dagger.lock.MasterPinModule;
-import com.pyamsoft.padlock.dagger.service.LockServiceStateModule;
 import dagger.Subcomponent;
 
-@ActivityScope @Subcomponent(modules = {
-    LockListModule.class, LockServiceStateModule.class, MasterPinModule.class, DBModule.class
-}) public interface LockListComponent {
-
-  void inject(LockListPresenterLoader loader);
+@ActivityScope @Subcomponent(modules = DBModule.class) public interface DbComponent {
 
   void inject(DBPresenterLoader loader);
-
-  void inject(AppEntryAdapterPresenterLoader loader);
 }
 

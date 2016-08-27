@@ -14,29 +14,44 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.base;
+package com.pyamsoft.padlock.app.list;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.presenter.Presenter;
-import javax.inject.Named;
-import rx.Scheduler;
 
-public abstract class SchedulerPresenter<I> extends Presenter<I> {
+public interface LockListPresenter extends Presenter<LockListPresenter.LockList> {
 
-  @NonNull private final Scheduler observeScheduler;
-  @NonNull private final Scheduler subscribeScheduler;
+  void populateList();
 
-  protected SchedulerPresenter(@NonNull @Named("main") Scheduler observeScheduler,
-      @NonNull @Named("io") Scheduler subscribeScheduler) {
-    this.observeScheduler = observeScheduler;
-    this.subscribeScheduler = subscribeScheduler;
-  }
+  void setFABStateFromPreference();
 
-  @NonNull protected final Scheduler getObserveScheduler() {
-    return observeScheduler;
-  }
+  void setSystemVisible();
 
-  @NonNull protected final Scheduler getSubscribeScheduler() {
-    return subscribeScheduler;
+  void setSystemInvisible();
+
+  void setSystemVisibilityFromPreference();
+
+  void clickPinFAB();
+
+  void showOnBoarding();
+
+  void setOnBoard();
+
+  interface LockList extends LockListCommon {
+
+    void setFABStateEnabled();
+
+    void setFABStateDisabled();
+
+    void setSystemVisible();
+
+    void setSystemInvisible();
+
+    void onPinFABClicked();
+
+    void onEntryAddedToList(@NonNull AppEntry entry);
+
+    void showOnBoarding();
   }
 }

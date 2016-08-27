@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlock.dagger.base;
 
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.PinScreen;
 import com.pyamsoft.padlock.dagger.ActivityScope;
@@ -30,13 +32,20 @@ import rx.Scheduler;
   AppIconLoaderPresenter<LockScreen> provideLockScreenAppIconLoaderPresenter(
       final AppIconLoaderInteractor interactor, @Named("main") Scheduler mainScheduler,
       @Named("io") Scheduler ioScheduler) {
-    return new AppIconLoaderPresenter<>(interactor, mainScheduler, ioScheduler);
+    return new AppIconLoaderPresenterImpl<>(interactor, mainScheduler, ioScheduler);
+  }
+
+  @ActivityScope @Provides
+  AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> provideLockInfoViewAppIconLoaderPresenter(
+      final AppIconLoaderInteractor interactor, @Named("main") Scheduler mainScheduler,
+      @Named("io") Scheduler ioScheduler) {
+    return new AppIconLoaderPresenterImpl<>(interactor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides AppIconLoaderPresenter<PinScreen> providePinScreenAppIconLoaderPresenter(
       final AppIconLoaderInteractor interactor, @Named("main") Scheduler mainScheduler,
       @Named("io") Scheduler ioScheduler) {
-    return new AppIconLoaderPresenter<>(interactor, mainScheduler, ioScheduler);
+    return new AppIconLoaderPresenterImpl<>(interactor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(

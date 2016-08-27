@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.lock;
+package com.pyamsoft.padlock.app.list;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
-import javax.inject.Named;
-import rx.Scheduler;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderView;
+import com.pyamsoft.padlock.model.ActivityEntry;
 
-public abstract class LockPresenter<I extends LockPresenter.LockView>
-    extends SchedulerPresenter<I> {
+public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {
 
-  LockPresenter(@NonNull @Named("main") Scheduler mainScheduler,
-      @NonNull @Named("io") Scheduler ioScheduler) {
-    super(mainScheduler, ioScheduler);
-  }
+  void populateList(@NonNull String packageName);
 
-  public interface LockView {
+  void setToggleAllState(@NonNull String packageName);
 
-    void onSubmitSuccess();
+  interface LockInfoView extends LockListCommon, AppIconLoaderView {
 
-    void onSubmitFailure();
+    void onEntryAddedToList(@NonNull ActivityEntry entry);
 
-    void onSubmitError();
+    void onListPopulated();
+
+    void onListPopulateError();
+
+    void enableToggleAll();
+
+    void disableToggleAll();
   }
 }

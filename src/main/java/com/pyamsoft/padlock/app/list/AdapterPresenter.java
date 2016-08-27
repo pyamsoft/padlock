@@ -17,35 +17,30 @@
 package com.pyamsoft.padlock.app.list;
 
 import android.graphics.drawable.Drawable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import com.pyamsoft.pydroid.base.activity.adapter.ActivityRecyclerAdapter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderView;
+import com.pyamsoft.pydroid.base.presenter.Presenter;
 
-public abstract class BaseRecyclerAdapter<T extends RecyclerView.ViewHolder>
-    extends ActivityRecyclerAdapter<T> implements AdapterPresenter.AdapterView<T> {
+public interface AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
+    extends Presenter<AdapterPresenter.AdapterView<VH>> {
 
-  @Override public void onStart() {
+  @CheckResult @NonNull I get(int position);
 
-  }
+  @CheckResult int add(@NonNull I entry);
 
-  @Override public void onStop() {
+  @CheckResult int remove();
 
-  }
+  @CheckResult int size();
 
-  @Override public void onApplicationIconLoadedError(@NonNull T holder) {
+  void loadApplicationIcon(@NonNull VH holder, @NonNull String packageName);
 
-  }
 
-  @Override public void onApplicationIconLoadedError() {
+  interface AdapterView<VH extends RecyclerView.ViewHolder> extends AppIconLoaderView {
 
-  }
+    void onApplicationIconLoadedSuccess(@NonNull VH holder, @NonNull Drawable drawable);
 
-  @Override
-  public void onApplicationIconLoadedSuccess(@NonNull T holder, @NonNull Drawable drawable) {
-
-  }
-
-  @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-
+    void onApplicationIconLoadedError(@NonNull VH holder);
   }
 }

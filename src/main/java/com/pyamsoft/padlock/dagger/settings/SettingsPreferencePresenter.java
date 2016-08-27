@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
-import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
+import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -42,18 +42,18 @@ public final class SettingsPreferencePresenter
     this.interactor = interactor;
   }
 
-  @Override protected void onResume(@NonNull SettingsPreferenceView view) {
-    super.onResume(view);
+  @Override protected void onBind(@NonNull SettingsPreferenceView view) {
     registerOnConfirmEventBus();
-  }
-
-  @Override protected void onPause(@NonNull SettingsPreferenceView view) {
-    super.onPause(view);
-    unregisterFromConfirmEventBus();
+    super.onBind(view);
   }
 
   @Override protected void onUnbind(@NonNull SettingsPreferenceView view) {
     super.onUnbind(view);
+    unregisterFromConfirmEventBus();
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
     unsubscribeConfirm();
   }
 

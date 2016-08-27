@@ -20,8 +20,8 @@ import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
-import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;
@@ -54,8 +54,8 @@ public final class LockServicePresenter
     lockScreenPassed = false;
   }
 
-  @Override protected void onUnbind(@NonNull LockService view) {
-    super.onUnbind(view);
+  @Override protected void onDestroy() {
+    super.onDestroy();
     unsubLockedEntry();
     unsubPickCorrect();
     interactor.cleanup();

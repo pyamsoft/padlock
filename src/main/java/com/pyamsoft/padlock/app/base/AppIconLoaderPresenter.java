@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.db;
+package com.pyamsoft.padlock.app.base;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.dagger.ActivityScope;
-import dagger.Module;
-import dagger.Provides;
-import javax.inject.Named;
-import rx.Scheduler;
+import com.pyamsoft.pydroid.base.presenter.Presenter;
 
-@Module public class DBModule {
+public interface AppIconLoaderPresenter<I extends AppIconLoaderView> extends Presenter<I> {
 
-  @ActivityScope @Provides DBPresenter provideDBPresenter(final @NonNull DBInteractor interactor,
-      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
-    return new DBPresenterImpl(interactor, mainScheduler, ioScheduler);
-  }
-
-  @ActivityScope @Provides DBInteractor provideDBInteractor(
-      final @NonNull DBInteractorImpl interactor) {
-    return interactor;
-  }
+  void loadApplicationIcon(@NonNull String packageName);
 }

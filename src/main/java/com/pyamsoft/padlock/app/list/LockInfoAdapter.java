@@ -29,7 +29,6 @@ import butterknife.ButterKnife;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.dagger.db.DBPresenter;
-import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -40,28 +39,26 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
     AdapterPresenter.AdapterView<LockInfoAdapter.ViewHolder> {
 
   @NonNull private final LockInfoDialog lockInfoDialog;
-  @NonNull private final AdapterPresenter<ActivityEntry, ViewHolder> adapterPresenter;
+  @NonNull private final ActivityEntryAdapterPresenter adapterPresenter;
   @NonNull private final DBPresenter dbPresenter;
   @NonNull private final AppEntry appEntry;
 
   public LockInfoAdapter(@NonNull LockInfoDialog lockInfoDialog, @NonNull AppEntry appEntry,
-      @NonNull AdapterPresenter<ActivityEntry, ViewHolder> adapterPresenter,
-      @NonNull DBPresenter dbPresenter) {
+      @NonNull ActivityEntryAdapterPresenter adapterPresenter, @NonNull DBPresenter dbPresenter) {
     this.lockInfoDialog = lockInfoDialog;
     this.appEntry = appEntry;
     this.adapterPresenter = adapterPresenter;
     this.dbPresenter = dbPresenter;
   }
 
-  @Override public void onCreate() {
-    super.onCreate();
+  @Override public void onStart() {
+    super.onStart();
     dbPresenter.bindView(this);
     adapterPresenter.bindView(this);
   }
 
-  @Override public void onDestroy() {
-    super.onDestroy();
-
+  @Override public void onStop() {
+    super.onStop();
     adapterPresenter.unbindView();
     dbPresenter.unbindView();
   }
@@ -137,7 +134,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
       lockInfoDialog.onDBCreateEvent(position);
     } else {
       Timber.d("onDBCreateEvent");
-      adapterPresenter.setLocked(position, true);
+      adapterPresenter.setLocked(position, ActivityEntry.ActivityLockState.LOCKED);
       notifyItemChanged(position);
     }
   }
@@ -149,7 +146,7 @@ public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.V
     } else {
       Timber.d("onDBDeleteEvent");
       // TODO move to activitystate
-      adapterPresenter.setLocked(position, false);
+      adapterPresenter.setLocked(position, ActivityEntry.ActivityLockState.DEFAULT);
       notifyItemChanged(position);
     }
   }

@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger;
 
+import com.pyamsoft.padlock.dagger.db.DbComponent;
 import com.pyamsoft.padlock.dagger.list.LockInfoComponent;
 import com.pyamsoft.padlock.dagger.list.LockListComponent;
 import com.pyamsoft.padlock.dagger.lock.LockScreenComponent;
@@ -48,4 +49,7 @@ import javax.inject.Singleton;
 
   // Subcomponent LockInfo
   LockInfoComponent plusLockInfo();
+
+  // Subcomponent DBComponent
+  DbComponent plusDbComponent();
 }

@@ -17,7 +17,9 @@
 package com.pyamsoft.padlock.dagger.base;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
+import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -25,12 +27,13 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public class AppIconLoaderPresenter<I extends AppIconLoaderView> extends SchedulerPresenter<I> {
+class AppIconLoaderPresenterImpl<I extends AppIconLoaderView> extends SchedulerPresenter<I>
+    implements AppIconLoaderPresenter<I> {
 
-  @NonNull private final AppIconLoaderInteractor interactor;
-  @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
+  @NonNull final AppIconLoaderInteractor interactor;
+  @NonNull Subscription loadIconSubscription = Subscriptions.empty();
 
-  @Inject public AppIconLoaderPresenter(@NonNull AppIconLoaderInteractor interactor,
+  @Inject public AppIconLoaderPresenterImpl(@NonNull AppIconLoaderInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);
@@ -42,7 +45,7 @@ public class AppIconLoaderPresenter<I extends AppIconLoaderView> extends Schedul
     unsubLoadIcon();
   }
 
-  public final void loadApplicationIcon(@NonNull String packageName) {
+  @Override public void loadApplicationIcon(@NonNull String packageName) {
     unsubLoadIcon();
     loadIconSubscription = interactor.loadPackageIcon(packageName)
         .subscribeOn(getSubscribeScheduler())
@@ -57,7 +60,7 @@ public class AppIconLoaderPresenter<I extends AppIconLoaderView> extends Schedul
         }, this::unsubLoadIcon);
   }
 
-  private void unsubLoadIcon() {
+  void unsubLoadIcon() {
     if (!loadIconSubscription.isUnsubscribed()) {
       loadIconSubscription.unsubscribe();
     }

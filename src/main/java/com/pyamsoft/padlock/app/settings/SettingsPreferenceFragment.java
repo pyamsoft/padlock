@@ -38,16 +38,6 @@ public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenc
 
   @Inject SettingsPreferencePresenter presenter;
 
-  @Override public void onResume() {
-    super.onResume();
-    presenter.resume();
-  }
-
-  @Override public void onPause() {
-    super.onPause();
-    presenter.pause();
-  }
-
   @Override public void onDestroyView() {
     super.onDestroyView();
     presenter.unbindView();

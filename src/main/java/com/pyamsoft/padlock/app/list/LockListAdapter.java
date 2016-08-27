@@ -35,7 +35,6 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.db.DBProgressDialog;
 import com.pyamsoft.padlock.dagger.db.DBPresenter;
-import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.util.AppUtil;
 import timber.log.Timber;
@@ -45,27 +44,26 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     AdapterPresenter.AdapterView<LockListAdapter.ViewHolder> {
 
   private static final long DB_PROGRESS_DELAY = 500L;
-  @NonNull private final AdapterPresenter<AppEntry, ViewHolder> adapterPresenter;
+  @NonNull private final AppEntryAdapterPresenter adapterPresenter;
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull private final Fragment fragment;
   @NonNull private final DBPresenter dbPresenter;
 
   public LockListAdapter(@NonNull LockListFragment fragment,
-      @NonNull AdapterPresenter<AppEntry, ViewHolder> adapterPresenter,
-      @NonNull DBPresenter dbPresenter) {
+      @NonNull AppEntryAdapterPresenter adapterPresenter, @NonNull DBPresenter dbPresenter) {
     this.fragment = fragment;
     this.dbPresenter = dbPresenter;
     this.adapterPresenter = adapterPresenter;
   }
 
-  @Override public void onCreate() {
-    super.onCreate();
+  @Override public void onStart() {
+    super.onStart();
     adapterPresenter.bindView(this);
     dbPresenter.bindView(this);
   }
 
-  @Override public void onDestroy() {
-    super.onDestroy();
+  @Override public void onStop() {
+    super.onStop();
     handler.removeCallbacksAndMessages(null);
     adapterPresenter.unbindView();
     dbPresenter.unbindView();
@@ -125,7 +123,7 @@ public final class LockListAdapter extends BaseRecyclerAdapter<LockListAdapter.V
     dbPresenter.attemptDBModification(position, checked, entry.packageName(), null, entry.system());
   }
 
-  private void authorizeAccess(final @NonNull ViewHolder holder, final boolean accessPackage,
+  void authorizeAccess(final @NonNull ViewHolder holder, final boolean accessPackage,
       final boolean checked) {
     // TODO some kind of observable which can confirm correct passcode entry
 
