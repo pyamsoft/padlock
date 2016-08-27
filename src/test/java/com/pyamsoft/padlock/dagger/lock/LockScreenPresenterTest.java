@@ -20,13 +20,14 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreen;
+import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import rx.Observable;
@@ -37,12 +38,15 @@ import rx.schedulers.Schedulers;
 public class LockScreenPresenterTest {
 
   @Mock LockScreen mockLockScreen = Mockito.mock(LockScreen.class);
+  @Mock AppIconLoaderPresenter mockAppIconLoaderPresenter;
   @Mock LockScreenInteractor mockInteractor;
   LockScreenPresenter presenter;
 
   @CheckResult @NonNull public static LockScreenPresenter getLockScreenPresenter(
+      final AppIconLoaderPresenter<LockScreen> mockAppIconLoaderPresenter,
       final LockScreenInteractor mockInteractor) {
-    return new LockScreenPresenter(mockInteractor, Schedulers.immediate(), Schedulers.immediate());
+    return new LockScreenPresenterImpl(mockAppIconLoaderPresenter, mockInteractor,
+        Schedulers.immediate(), Schedulers.immediate());
   }
 
   public void run_test_loadDisplayName(String packageName, String displayName) {
@@ -74,7 +78,8 @@ public class LockScreenPresenterTest {
 
   @Test public void test_loadDisplayName() {
     mockInteractor = Mockito.mock(LockScreenInteractor.class);
-    presenter = getLockScreenPresenter(mockInteractor);
+    mockAppIconLoaderPresenter = Mockito.mock(AppIconLoaderPresenter.class);
+    presenter = getLockScreenPresenter(mockAppIconLoaderPresenter, mockInteractor);
 
     String packageName = "com.pyamsoft.padlock";
     String displayName = "PadLock";
@@ -87,7 +92,7 @@ public class LockScreenPresenterTest {
 
   @Test public void test_unlock() {
     mockInteractor = Mockito.mock(LockScreenInteractor.class);
-    presenter = getLockScreenPresenter(mockInteractor);
-
+    mockAppIconLoaderPresenter = Mockito.mock(AppIconLoaderPresenter.class);
+    presenter = getLockScreenPresenter(mockAppIconLoaderPresenter, mockInteractor);
   }
 }

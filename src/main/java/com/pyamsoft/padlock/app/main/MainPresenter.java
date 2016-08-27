@@ -16,23 +16,18 @@
 
 package com.pyamsoft.padlock.app.main;
 
-import android.content.Context;
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import com.pyamsoft.pydroid.base.presenter.Presenter;
 
-public class MainPresenterLoader extends PresenterLoader<MainPresenter> {
+public interface MainPresenter extends Presenter<MainPresenter.MainView> {
 
-  @Inject Provider<MainPresenter> presenterProvider;
+  void showTermsDialog();
 
-  public MainPresenterLoader(@NonNull Context context) {
-    super(context);
-  }
+  interface MainView {
 
-  @NonNull @Override protected MainPresenter loadPresenter() {
-    Singleton.Dagger.with(getContext()).plusMain().inject(this);
-    return presenterProvider.get();
+    void showUsageTermsDialog();
+
+    void onDidNotAgreeToTerms();
+
+    void forceRefresh();
   }
 }

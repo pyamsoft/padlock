@@ -31,7 +31,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class LockServicePresenterImpl
+final class LockServicePresenterImpl
     extends SchedulerPresenter<LockServicePresenter.LockService> implements LockServicePresenter {
 
   @NonNull private final LockServiceInteractor interactor;

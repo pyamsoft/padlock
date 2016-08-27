@@ -16,6 +16,10 @@
 
 package com.pyamsoft.padlock.dagger.lock;
 
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.lock.LockScreen;
+import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
@@ -25,9 +29,9 @@ import rx.Scheduler;
 @Module public class LockScreenModule {
 
   @ActivityScope @Provides LockScreenPresenter provideLockScreenPresenter(
-      final LockScreenInteractor interactor, @Named("main") Scheduler mainScheduler,
-      @Named("io") Scheduler ioScheduler) {
-    return new LockScreenPresenter(interactor, mainScheduler, ioScheduler);
+      @NonNull AppIconLoaderPresenter<LockScreen> iconLoader, final LockScreenInteractor interactor,
+      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+    return new LockScreenPresenterImpl(iconLoader, interactor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides LockScreenInteractor provideLockScreenInteractor(

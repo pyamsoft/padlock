@@ -17,7 +17,9 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
+import com.pyamsoft.padlock.app.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.app.lock.PinScreen;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,16 +28,19 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class PinEntryPresenter extends LockPresenter<PinScreen> {
+public final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
+    implements PinEntryPresenter {
 
-  @NonNull private final PinEntryInteractor interactor;
-  @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
-  @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
+  @NonNull final AppIconLoaderPresenter<PinScreen> iconLoader;
+  @NonNull final PinEntryInteractor interactor;
+  @NonNull Subscription pinEntrySubscription = Subscriptions.empty();
+  @NonNull Subscription pinCheckSubscription = Subscriptions.empty();
 
-  @Inject PinEntryPresenter(@NonNull final PinEntryInteractor interactor,
-      @NonNull @Named("main") Scheduler mainScheduler,
+  @Inject PinEntryPresenterImpl(@NonNull AppIconLoaderPresenter<PinScreen> iconLoader,
+      @NonNull final PinEntryInteractor interactor, @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);
+    this.iconLoader = iconLoader;
     this.interactor = interactor;
   }
 
@@ -51,13 +56,24 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
     }
   }
 
+  @Override protected void onBind(@NonNull PinScreen view) {
+    super.onBind(view);
+    iconLoader.bindView(view);
+  }
+
   @Override protected void onUnbind(@NonNull PinScreen view) {
     super.onUnbind(view);
+    iconLoader.unbindView();
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    iconLoader.destroyView();
     unsubPinEntry();
     unsubPinCheck();
   }
 
-  public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
+  @Override public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
       @NonNull String hint) {
     Timber.d("Attempt PIN submission");
     unsubPinEntry();
@@ -79,7 +95,7 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
         }, this::unsubPinEntry);
   }
 
-  public void hideUnimportantViews() {
+  @Override public void hideUnimportantViews() {
     Timber.d("Check if we have a master");
     unsubPinCheck();
     pinCheckSubscription = interactor.hasMasterPin()
@@ -95,5 +111,9 @@ public final class PinEntryPresenter extends LockPresenter<PinScreen> {
           Timber.e(throwable, "onError hideUnimportantViews");
           // TODO
         }, this::unsubPinCheck);
+  }
+
+  @Override public void loadApplicationIcon(@NonNull String packageName) {
+    iconLoader.loadApplicationIcon(packageName);
   }
 }

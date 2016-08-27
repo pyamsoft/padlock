@@ -16,39 +16,23 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.os.Bundle;
+import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.AppIconLoaderView;
+import com.pyamsoft.padlock.Singleton;
+import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
-public interface LockScreen extends LockPresenter.LockView{
+public class PinScreenPresenterLoader extends PresenterLoader<PinEntryPresenter> {
 
-  void onPostUnlock();
+  @Inject Provider<PinEntryPresenter> presenterProvider;
 
-  void onLocked();
+  public PinScreenPresenterLoader(@NonNull Context context) {
+    super(context);
+  }
 
-  void onLockedError();
-
-  void setIgnoreTimeNone();
-
-  void setIgnoreTimeOne();
-
-  void setIgnoreTimeFive();
-
-  void setIgnoreTimeTen();
-
-  void setIgnoreTimeFifteen();
-
-  void setIgnoreTimeTwenty();
-
-  void setIgnoreTimeThirty();
-
-  void setIgnoreTimeFourtyFive();
-
-  void setIgnoreTimeSixty();
-
-  void onSaveMenuSelections(@NonNull Bundle outState, long ignoreTime);
-
-  void setDisplayName(@NonNull String name);
-
-  void setDisplayHint(@NonNull String hint);
+  @NonNull @Override protected PinEntryPresenter loadPresenter() {
+    Singleton.Dagger.with(getContext()).plusPinEntry().inject(this);
+    return presenterProvider.get();
+  }
 }

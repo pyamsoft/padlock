@@ -16,9 +16,12 @@
 
 package com.pyamsoft.padlock.dagger.lock;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreen;
+import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -26,30 +29,44 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class LockScreenPresenter extends LockPresenter<LockScreen> {
+final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
+    implements LockScreenPresenter {
 
-  @NonNull private final LockScreenInteractor interactor;
+  @NonNull final LockScreenInteractor interactor;
+  @NonNull final AppIconLoaderPresenter<LockScreen> iconLoader;
 
-  @NonNull private Subscription postUnlockSubscription = Subscriptions.empty();
-  @NonNull private Subscription unlockSubscription = Subscriptions.empty();
-  @NonNull private Subscription lockSubscription = Subscriptions.empty();
-  @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
-  @NonNull private Subscription hintSubscription = Subscriptions.empty();
+  @NonNull Subscription postUnlockSubscription = Subscriptions.empty();
+  @NonNull Subscription unlockSubscription = Subscriptions.empty();
+  @NonNull Subscription lockSubscription = Subscriptions.empty();
+  @NonNull Subscription displayNameSubscription = Subscriptions.empty();
+  @NonNull Subscription hintSubscription = Subscriptions.empty();
 
-  @Inject LockScreenPresenter(@NonNull final LockScreenInteractor lockScreenInteractor,
-      @NonNull @Named("main") Scheduler mainScheduler,
-      @NonNull @Named("io") Scheduler ioScheduler) {
+  @Inject LockScreenPresenterImpl(
+      @NonNull AppIconLoaderPresenter<LockScreen> iconLoader, @NonNull final LockScreenInteractor lockScreenInteractor,
+      @NonNull @Named("main") Scheduler mainScheduler, @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);
+    this.iconLoader = iconLoader;
     this.interactor = lockScreenInteractor;
     interactor.resetFailCount();
   }
 
+  @Override protected void onBind(@NonNull LockScreen view) {
+    super.onBind(view);
+    iconLoader.bindView(view);
+  }
+
   @Override protected void onUnbind(@NonNull LockScreen view) {
     super.onUnbind(view);
+    iconLoader.unbindView();
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
     unsubUnlock();
     unsubLock();
     unsubDisplayName();
     unsubPostUnlock();
+    iconLoader.destroyView();
     interactor.resetFailCount();
   }
 
@@ -77,7 +94,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     }
   }
 
-  public void displayLockedHint() {
+  @Override public void displayLockedHint() {
     unsubHint();
     hintSubscription = interactor.getHint()
         .map(s -> s == null ? "" : s)
@@ -112,13 +129,14 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     }
   }
 
-  public void saveSelectedOptions(int selectedIndex) {
+  @Override public void saveSelectedOptions(@NonNull Bundle outState, int selectedIndex) {
+    // KLUDGE blocking
     final long time = interactor.getIgnoreTimeForIndex(selectedIndex).toBlocking().first();
-    getView().onSaveMenuSelections(time);
+    getView().onSaveMenuSelections(outState, time);
   }
 
-  public void setIgnorePeriodFromPreferences(@Nullable Long ignoreTime) {
-    if (ignoreTime == null) {
+  @Override public void setIgnorePeriodFromPreferences(long ignoreTime) {
+    if (ignoreTime == -1) {
       final long defaultIgnoreTime = interactor.getDefaultIgnoreTime().toBlocking().first();
       setIgnorePeriod(defaultIgnoreTime);
     } else {
@@ -126,7 +144,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     }
   }
 
-  public void lockEntry(@NonNull String packageName, @NonNull String activityName) {
+  @Override public void lockEntry(@NonNull String packageName, @NonNull String activityName) {
     unsubLock();
     if (interactor.incrementAndGetFailCount().toBlocking().first()
         > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT) {
@@ -149,7 +167,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     }
   }
 
-  public void submit(@NonNull String packageName, @NonNull String activityName,
+  @Override public void submit(@NonNull String packageName, @NonNull String activityName,
       @NonNull String currentAttempt) {
     unsubUnlock();
     final LockScreen lockScreen = getView();
@@ -170,7 +188,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
         }, this::unsubUnlock);
   }
 
-  public void loadDisplayNameFromPackage(@NonNull String packageName) {
+  @Override public void loadDisplayNameFromPackage(@NonNull String packageName) {
     unsubDisplayName();
     final LockScreen lockScreen = getView();
     displayNameSubscription = interactor.getDisplayName(packageName)
@@ -182,7 +200,7 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
         }, this::unsubDisplayName);
   }
 
-  public void postUnlock(@NonNull String packageName, @NonNull String activityName,
+  @Override public void postUnlock(@NonNull String packageName, @NonNull String activityName,
       @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
       int ignoreIndex) {
     unsubPostUnlock();
@@ -205,5 +223,9 @@ public final class LockScreenPresenter extends LockPresenter<LockScreen> {
     if (!displayNameSubscription.isUnsubscribed()) {
       displayNameSubscription.unsubscribe();
     }
+  }
+
+  @Override public void loadApplicationIcon(@NonNull String packageName) {
+    iconLoader.loadApplicationIcon(packageName);
   }
 }
