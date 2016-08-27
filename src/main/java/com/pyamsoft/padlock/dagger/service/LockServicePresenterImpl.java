@@ -20,6 +20,7 @@ import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
+import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import javax.inject.Inject;
@@ -30,8 +31,8 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class LockServicePresenter
-    extends SchedulerPresenter<LockServicePresenter.LockService> {
+public final class LockServicePresenterImpl
+    extends SchedulerPresenter<LockServicePresenter.LockService> implements LockServicePresenter {
 
   @NonNull private final LockServiceInteractor interactor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
@@ -44,7 +45,7 @@ public final class LockServicePresenter
   @NonNull private String activeClassName = "";
   private boolean lockScreenPassed;
 
-  @Inject LockServicePresenter(@NonNull final LockServiceStateInteractor stateInteractor,
+  @Inject LockServicePresenterImpl(@NonNull final LockServiceStateInteractor stateInteractor,
       @NonNull final LockServiceInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
@@ -66,7 +67,7 @@ public final class LockServicePresenter
     lockScreenPassed = b;
   }
 
-  public void setLockScreenPassed() {
+  @Override public void setLockScreenPassed() {
     setLockScreenPassed(true);
   }
 
@@ -88,14 +89,15 @@ public final class LockServicePresenter
     lastClassName = "";
   }
 
-  @NonNull @CheckResult public String getActiveClassName() {
+  @Override @NonNull @CheckResult public String getActiveClassName() {
     return activeClassName;
   }
 
-  @NonNull @CheckResult public String getActivePackageName() {
+  @Override @NonNull @CheckResult public String getActivePackageName() {
     return activePackageName;
   }
 
+  @Override
   public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
       boolean forcedRecheck) {
     unsubLockedEntry();
@@ -204,12 +206,5 @@ public final class LockServicePresenter
           Timber.e(throwable, "onError");
           // TODO error
         }, this::unsubPickCorrect);
-  }
-
-  public interface LockService {
-
-    void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName);
-
-    void startLockScreen2(@NonNull PadLockEntry entry, @NonNull String realName);
   }
 }
