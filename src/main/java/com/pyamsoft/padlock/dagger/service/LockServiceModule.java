@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.service;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
@@ -29,7 +30,7 @@ import rx.Scheduler;
   @ActivityScope @Provides LockServicePresenter provideLockServicePresenter(
       LockServiceInteractor interactor, LockServiceStateInteractor stateInteractor,
       @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
-    return new LockServicePresenter(stateInteractor, interactor, mainScheduler, ioScheduler);
+    return new LockServicePresenterImpl(stateInteractor, interactor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides LockServiceInteractor provideLockServiceInteractor(
