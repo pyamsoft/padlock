@@ -294,19 +294,20 @@ public final class LockListFragment extends ActionBarFragment
   }
 
   private void showSettingsScreen() {
-    final FragmentActivity fragmentActivity = getActivity();
-    if (fragmentActivity instanceof MainActivity) {
-      final MainActivity mainActivity = (MainActivity) fragmentActivity;
-      final FragmentManager fragmentManager = getFragmentManager();
-      final View containerView = getView();
-      final View menuItemView = mainActivity.getSettingsMenuItemView();
-      if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
-          && containerView != null) {
-        fragmentManager.beginTransaction()
-            .replace(R.id.main_view_container,
-                SettingsFragment.newInstance(menuItemView, containerView), SettingsFragment.TAG)
-            .addToBackStack(null)
-            .commit();
+    final FragmentManager fragmentManager = getFragmentManager();
+    if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
+      final FragmentActivity fragmentActivity = getActivity();
+      if (fragmentActivity instanceof MainActivity) {
+        final MainActivity mainActivity = (MainActivity) fragmentActivity;
+        final View containerView = getView();
+        final View menuItemView = mainActivity.getSettingsMenuItemView();
+        if (containerView != null) {
+          fragmentManager.beginTransaction()
+              .replace(R.id.main_view_container,
+                  SettingsFragment.newInstance(menuItemView, containerView), SettingsFragment.TAG)
+              .addToBackStack(null)
+              .commit();
+        }
       }
     }
   }
