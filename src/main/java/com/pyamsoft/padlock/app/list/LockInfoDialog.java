@@ -24,6 +24,8 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,16 +40,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.dagger.db.DBPresenter;
-import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
-import com.pyamsoft.padlock.dagger.list.LockInfoPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.base.presenter.Presenter;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
-import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
@@ -75,9 +72,8 @@ public class LockInfoDialog extends DialogFragment
 
   @Inject LockInfoPresenter presenter;
   @Inject DBPresenter dbPresenter;
-  @Inject AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder> adapterPresenter;
-
-  private DataHolderFragment<Presenter> presenterDataHolder;
+  @Inject ActivityEntryAdapterPresenter adapterPresenter;
+  boolean firstRefresh;
   private LockInfoAdapter adapter;
   private AppEntry appEntry;
   private Unbinder unbinder;
@@ -95,48 +91,65 @@ public class LockInfoDialog extends DialogFragment
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
-    presenterDataHolder =
-        DataHolderFragment.getInstance(getFragmentManager(), "lock_info_presenters");
   }
 
   @SuppressLint("InflateParams") @NonNull @Override
   public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-    final LockInfoPresenter lockInfoPresenter =
-        (LockInfoPresenter) presenterDataHolder.pop(KEY_PRESENTER);
-    @SuppressWarnings("unchecked") final AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder>
-        activityEntryAdapterPresenter =
-        (AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder>) presenterDataHolder.pop(
-            KEY_ADAPTER_PRESENTER);
-    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
-    final boolean firstRefresh;
-    if (lockInfoPresenter == null
-        || activityEntryAdapterPresenter == null
-        || lockDBPresenter == null) {
-      Timber.d("Create new presenters");
-      firstRefresh = true;
+    getLoaderManager().initLoader(KEY_PRESENTER, null,
+        new LoaderManager.LoaderCallbacks<LockInfoPresenter>() {
+          @Override public Loader<LockInfoPresenter> onCreateLoader(int id, Bundle args) {
+            firstRefresh = true;
+            return new LockInfoPresenterLoader(getContext());
+          }
 
-      Singleton.Dagger.with(getContext()).plusLockInfo().inject(this);
-    } else {
-      Timber.d("Load cached presenters");
-      firstRefresh = false;
-      presenter = lockInfoPresenter;
-      dbPresenter = lockDBPresenter;
-      adapterPresenter = activityEntryAdapterPresenter;
-    }
+          @Override
+          public void onLoadFinished(Loader<LockInfoPresenter> loader, LockInfoPresenter data) {
+            presenter = data;
+          }
 
-    adapter = new LockInfoAdapter(this, appEntry, adapterPresenter, dbPresenter);
+          @Override public void onLoaderReset(Loader<LockInfoPresenter> loader) {
+            presenter = null;
+          }
+        });
 
-    presenter.bindView(this);
-    adapter.onCreate();
+    getLoaderManager().initLoader(KEY_ADAPTER_PRESENTER, null,
+        new LoaderManager.LoaderCallbacks<ActivityEntryAdapterPresenter>() {
+          @Override
+          public Loader<ActivityEntryAdapterPresenter> onCreateLoader(int id, Bundle args) {
+            firstRefresh = true;
+            return new ActivityEntryAdapterPresenterLoader(getContext());
+          }
+
+          @Override public void onLoadFinished(Loader<ActivityEntryAdapterPresenter> loader,
+              ActivityEntryAdapterPresenter data) {
+            adapterPresenter = data;
+          }
+
+          @Override public void onLoaderReset(Loader<ActivityEntryAdapterPresenter> loader) {
+            adapterPresenter = null;
+          }
+        });
+
+    getLoaderManager().initLoader(KEY_DB_PRESENTER, null,
+        new LoaderManager.LoaderCallbacks<DBPresenter>() {
+          @Override public Loader<DBPresenter> onCreateLoader(int id, Bundle args) {
+            firstRefresh = true;
+            return new DBPresenterLoader(getContext());
+          }
+
+          @Override public void onLoadFinished(Loader<DBPresenter> loader, DBPresenter data) {
+            dbPresenter = data;
+          }
+
+          @Override public void onLoaderReset(Loader<DBPresenter> loader) {
+            dbPresenter = null;
+          }
+        });
 
     final View rootView =
         LayoutInflater.from(getActivity()).inflate(R.layout.dialog_lockinfo, null, false);
     unbinder = ButterKnife.bind(this, rootView);
     initializeForEntry();
-    if (firstRefresh) {
-      refreshList();
-    }
-
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
   }
 
@@ -150,11 +163,29 @@ public class LockInfoDialog extends DialogFragment
     recyclerView.setLayoutManager(null);
     recyclerView.setAdapter(null);
 
-    adapter.onDestroy();
-    presenter.unbindView(!getActivity().isChangingConfigurations());
     handler.removeCallbacksAndMessages(null);
     taskMap.clear();
     unbinder.unbind();
+  }
+
+  @Override public void onResume() {
+    super.onResume();
+    presenter.bindView(this);
+    adapter = new LockInfoAdapter(this, appEntry, adapterPresenter, dbPresenter);
+    adapter.onStart();
+
+    recyclerView.setAdapter(adapter);
+    presenter.loadApplicationIcon(appEntry.packageName());
+    presenter.setToggleAllState(appEntry.packageName());
+    if (firstRefresh) {
+      refreshList();
+    }
+  }
+
+  @Override public void onPause() {
+    super.onPause();
+    presenter.unbindView();
+    adapter.onStop();
   }
 
   private void initializeForEntry() {
@@ -171,7 +202,6 @@ public class LockInfoDialog extends DialogFragment
     taskMap.put("close", task);
 
     name.setText(appEntry.name());
-    presenter.loadApplicationIcon(appEntry.packageName());
     packageName.setText(appEntry.packageName());
     system.setText((appEntry.system() ? "YES" : "NO"));
 
@@ -182,9 +212,6 @@ public class LockInfoDialog extends DialogFragment
 
     recyclerView.setLayoutManager(layoutManager);
     recyclerView.addItemDecoration(dividerDecoration);
-    recyclerView.setAdapter(adapter);
-
-    presenter.setToggleAllState(appEntry.packageName());
   }
 
   @Override public void refreshList() {
@@ -219,17 +246,6 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void onListCleared() {
     Timber.d("onListCleared");
-  }
-
-  @Override public void onSaveInstanceState(@NonNull Bundle outState) {
-    super.onSaveInstanceState(outState);
-    if (getActivity().isChangingConfigurations()) {
-      presenterDataHolder.put(KEY_PRESENTER, presenter);
-      presenterDataHolder.put(KEY_ADAPTER_PRESENTER, adapterPresenter);
-      presenterDataHolder.put(KEY_DB_PRESENTER, dbPresenter);
-    } else {
-      presenterDataHolder.clear();
-    }
   }
 
   @Override public void onApplicationIconLoadedError() {

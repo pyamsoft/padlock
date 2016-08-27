@@ -16,29 +16,27 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import android.graphics.drawable.Drawable;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import com.pyamsoft.padlock.app.base.AppIconLoaderView;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.model.ActivityEntry;
+import com.pyamsoft.padlock.app.list.AdapterPresenter;
+import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import java.lang.ref.WeakReference;
 import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
-public abstract class AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
-    extends AppIconLoaderPresenter<AdapterPresenter.AdapterView<VH>> {
+abstract class AdapterPresenterImpl<I, VH extends RecyclerView.ViewHolder>
+    extends SchedulerPresenter<AdapterPresenter.AdapterView<VH>>
+    implements AdapterPresenter<I, VH> {
 
   @NonNull private final AdapterInteractor<I> adapterInteractor;
   @NonNull private final CompositeSubscription compositeSubscription;
 
-  AdapterPresenter(@NonNull AdapterInteractor<I> adapterInteractor,
+  AdapterPresenterImpl(@NonNull AdapterInteractor<I> adapterInteractor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
-    super(adapterInteractor, mainScheduler, ioScheduler);
+    super(mainScheduler, ioScheduler);
     this.adapterInteractor = adapterInteractor;
     compositeSubscription = new CompositeSubscription();
   }
@@ -54,23 +52,23 @@ public abstract class AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
     adapterInteractor.set(position, entry);
   }
 
-  @CheckResult @NonNull public I get(int position) {
+  @Override @NonNull public I get(int position) {
     return adapterInteractor.get(position).toBlocking().first();
   }
 
-  @CheckResult public int add(@NonNull I entry) {
+  @Override public int add(@NonNull I entry) {
     return adapterInteractor.add(entry).toBlocking().first();
   }
 
-  @CheckResult public int remove() {
+  @Override public int remove() {
     return adapterInteractor.remove().toBlocking().first();
   }
 
-  @CheckResult public int size() {
+  @Override public int size() {
     return adapterInteractor.size().toBlocking().first();
   }
 
-  public void loadApplicationIcon(@NonNull VH holder, @NonNull String packageName) {
+  @Override public void loadApplicationIcon(@NonNull VH holder, @NonNull String packageName) {
     final WeakReference<VH> weakViewHolder = new WeakReference<>(holder);
     final Subscription subscription = adapterInteractor.loadPackageIcon(packageName)
         .subscribeOn(getSubscribeScheduler())
@@ -89,16 +87,5 @@ public abstract class AdapterPresenter<I, VH extends RecyclerView.ViewHolder>
           }
         });
     compositeSubscription.add(subscription);
-  }
-
-  public abstract void setLocked(int position, boolean locked);
-
-  public abstract void setLocked(int position, ActivityEntry.ActivityLockState state);
-
-  public interface AdapterView<VH extends RecyclerView.ViewHolder> extends AppIconLoaderView {
-
-    void onApplicationIconLoadedSuccess(@NonNull VH holder, @NonNull Drawable drawable);
-
-    void onApplicationIconLoadedError(@NonNull VH holder);
   }
 }

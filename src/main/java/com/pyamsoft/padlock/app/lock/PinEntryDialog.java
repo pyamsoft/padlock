@@ -43,7 +43,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.dagger.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;

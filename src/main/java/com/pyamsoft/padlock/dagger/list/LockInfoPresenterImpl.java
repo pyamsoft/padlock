@@ -18,11 +18,11 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.AppIconLoaderView;
-import com.pyamsoft.padlock.app.list.LockListCommon;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -33,17 +33,20 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class LockInfoPresenter
-    extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {
+final class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInfoView>
+    implements LockInfoPresenter {
 
-  @NonNull private final LockInfoInteractor lockInfoInteractor;
-  @NonNull private Subscription populateListSubscription = Subscriptions.empty();
-  @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
+  @NonNull final LockInfoInteractor lockInfoInteractor;
+  @NonNull final AppIconLoaderPresenter<LockInfoView> iconLoader;
+  @NonNull Subscription populateListSubscription = Subscriptions.empty();
+  @NonNull Subscription allInDBSubscription = Subscriptions.empty();
 
-  @Inject LockInfoPresenter(final @NonNull LockInfoInteractor lockInfoInteractor,
+  @Inject LockInfoPresenterImpl(@NonNull AppIconLoaderPresenter<LockInfoView> iconLoader,
+      final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("main") Scheduler mainScheduler,
       final @NonNull @Named("io") Scheduler ioScheduler) {
-    super(lockInfoInteractor, mainScheduler, ioScheduler);
+    super(mainScheduler, ioScheduler);
+    this.iconLoader = iconLoader;
     this.lockInfoInteractor = lockInfoInteractor;
   }
 
@@ -61,13 +64,23 @@ public final class LockInfoPresenter
     return foundLocation;
   }
 
+  @Override protected void onBind(@NonNull LockInfoView view) {
+    super.onBind(view);
+    iconLoader.bindView(view);
+  }
+
   @Override protected void onUnbind(@NonNull LockInfoView view) {
     super.onUnbind(view);
+    iconLoader.unbindView();
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
     unsubPopulateList();
     unsubAllInDB();
   }
 
-  public void populateList(@NonNull String packageName) {
+  @Override public void populateList(@NonNull String packageName) {
     unsubPopulateList();
 
     // Filter out the lockscreen and crashlog entries
@@ -146,7 +159,7 @@ public final class LockInfoPresenter
     }
   }
 
-  public void setToggleAllState(@NonNull String packageName) {
+  @Override public void setToggleAllState(@NonNull String packageName) {
     unsubAllInDB();
 
     // Filter out the lockscreen and crashlog entries
@@ -193,16 +206,7 @@ public final class LockInfoPresenter
     }
   }
 
-  public interface LockInfoView extends LockListCommon, AppIconLoaderView {
-
-    void onEntryAddedToList(@NonNull ActivityEntry entry);
-
-    void onListPopulated();
-
-    void onListPopulateError();
-
-    void enableToggleAll();
-
-    void disableToggleAll();
+  @Override public void loadApplicationIcon(@NonNull String packageName) {
+    iconLoader.loadApplicationIcon(packageName);
   }
 }

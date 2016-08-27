@@ -17,8 +17,10 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
-import com.pyamsoft.padlock.app.list.LockInfoAdapter;
+import com.pyamsoft.padlock.app.list.ActivityEntryAdapterPresenter;
+import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import dagger.Module;
@@ -29,9 +31,10 @@ import rx.Scheduler;
 @Module public class LockInfoModule {
 
   @ActivityScope @Provides LockInfoPresenter provideLockInfoPresenter(
+      @NonNull AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> iconLoader,
       LockInfoInteractor infoInteractor, @Named("main") Scheduler mainScheduler,
       @Named("io") Scheduler ioScheduler) {
-    return new LockInfoPresenter(infoInteractor, mainScheduler, ioScheduler);
+    return new LockInfoPresenterImpl(iconLoader, infoInteractor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides LockInfoInteractor provideLockInfoInteractor(
@@ -39,11 +42,10 @@ import rx.Scheduler;
     return interactor;
   }
 
-  @ActivityScope @Provides
-  AdapterPresenter<ActivityEntry, LockInfoAdapter.ViewHolder> provideActivityEntryAdapterPresenter(
+  @ActivityScope @Provides ActivityEntryAdapterPresenter provideActivityEntryAdapterPresenter(
       final AdapterInteractor<ActivityEntry> interactor, @Named("main") Scheduler mainScheduler,
       @Named("io") Scheduler ioScheduler) {
-    return new ActivityEntryAdapterPresenter(interactor, mainScheduler, ioScheduler);
+    return new ActivityEntryAdapterPresenterImpl(interactor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides AdapterInteractor<ActivityEntry> provideActivityEntryAdapterInteractor(

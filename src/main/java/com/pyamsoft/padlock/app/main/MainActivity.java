@@ -161,18 +161,8 @@ public class MainActivity extends DonationActivityBase
     return handled || super.onOptionsItemSelected(item);
   }
 
-  @Override protected void onResume() {
-    super.onResume();
-    presenter.resume();
-  }
-
   @Override public void onDidNotAgreeToTerms() {
     finish();
-  }
-
-  @Override protected void onPause() {
-    super.onPause();
-    presenter.pause();
   }
 
   @Override protected void onPostResume() {

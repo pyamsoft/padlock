@@ -25,7 +25,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -39,26 +41,20 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.dagger.db.DBPresenter;
-import com.pyamsoft.padlock.dagger.list.AdapterPresenter;
-import com.pyamsoft.padlock.dagger.list.LockListPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.base.fragment.CircularRevealFragmentUtil;
-import com.pyamsoft.pydroid.base.presenter.Presenter;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
-import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
 import com.pyamsoft.pydroid.util.AppUtil;
-import javax.inject.Inject;
 import rx.Subscription;
 import timber.log.Timber;
 import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
@@ -72,18 +68,14 @@ public final class LockListFragment extends ActionBarFragment
   private static final int KEY_PRESENTER = 0;
   private static final int KEY_ADAPTER_PRESENTER = 1;
   private static final int KEY_DB_PRESENTER = 2;
-  @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
-  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
+  @NonNull final Handler handler = new Handler(Looper.getMainLooper());
+  @NonNull final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
-  @Inject LockListPresenter presenter;
-  @Inject AdapterPresenter<AppEntry, LockListAdapter.ViewHolder> adapterPresenter;
-  @Inject DBPresenter dbPresenter;
-  private DataHolderFragment<Presenter> presenterDataHolder;
-  private LockListAdapter adapter;
-  private LockListLayoutManager lockListLayoutManager;
-  @NonNull private final Runnable startRefreshRunnable = new Runnable() {
+  LockListAdapter adapter;
+  LockListLayoutManager lockListLayoutManager;
+  @NonNull final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
       swipeRefreshLayout.setRefreshing(true);
       lockListLayoutManager.setVerticalScrollEnabled(false);
@@ -94,7 +86,7 @@ public final class LockListFragment extends ActionBarFragment
       }
     }
   };
-  @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
+  @NonNull final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
       swipeRefreshLayout.setRefreshing(false);
       lockListLayoutManager.setVerticalScrollEnabled(true);
@@ -105,9 +97,13 @@ public final class LockListFragment extends ActionBarFragment
       }
     }
   };
+
+  LockListPresenter presenter;
+  AppEntryAdapterPresenter adapterPresenter;
+  DBPresenter dbPresenter;
+  boolean firstRefresh;
   private Unbinder unbinder;
   private MenuItem displaySystemItem;
-  private boolean firstRefresh;
 
   public static LockListFragment newInstance(int cX, int cY) {
     final Bundle args = CircularRevealFragmentUtil.bundleArguments(cX, cY, 600L);
@@ -119,54 +115,105 @@ public final class LockListFragment extends ActionBarFragment
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-
-    presenterDataHolder = DataHolderFragment.getInstance(getActivity(), "lock_list_presenters");
   }
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
+    getLoaderManager().initLoader(KEY_PRESENTER, null,
+        new LoaderManager.LoaderCallbacks<LockListPresenter>() {
+          @Override public Loader<LockListPresenter> onCreateLoader(int id, Bundle args) {
+            firstRefresh = true;
+            return new LockListPresenterLoader(getContext());
+          }
 
-    final LockListPresenter lockListPresenter =
-        (LockListPresenter) presenterDataHolder.pop(KEY_PRESENTER);
-    @SuppressWarnings("unchecked") final AdapterPresenter<AppEntry, LockListAdapter.ViewHolder>
-        entryAdapterPresenter =
-        (AdapterPresenter<AppEntry, LockListAdapter.ViewHolder>) presenterDataHolder.pop(
-            KEY_ADAPTER_PRESENTER);
-    final DBPresenter lockDBPresenter = (DBPresenter) presenterDataHolder.pop(KEY_DB_PRESENTER);
-    if (lockListPresenter == null || entryAdapterPresenter == null || lockDBPresenter == null) {
-      Timber.d("Create new presenters");
-      firstRefresh = true;
-      Singleton.Dagger.with(getContext()).plusLockList().inject(this);
-    } else {
-      Timber.d("Load cached presenters");
-      firstRefresh = false;
-      presenter = lockListPresenter;
-      adapterPresenter = entryAdapterPresenter;
-      dbPresenter = lockDBPresenter;
-    }
+          @Override
+          public void onLoadFinished(Loader<LockListPresenter> loader, LockListPresenter data) {
+            presenter = data;
+          }
 
-    adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
+          @Override public void onLoaderReset(Loader<LockListPresenter> loader) {
+            presenter = null;
+          }
+        });
+
+    getLoaderManager().initLoader(KEY_ADAPTER_PRESENTER, null,
+        new LoaderManager.LoaderCallbacks<AppEntryAdapterPresenter>() {
+          @Override public Loader<AppEntryAdapterPresenter> onCreateLoader(int id, Bundle args) {
+            firstRefresh = true;
+            return new AppEntryAdapterPresenterLoader(getContext());
+          }
+
+          @Override public void onLoadFinished(Loader<AppEntryAdapterPresenter> loader,
+              AppEntryAdapterPresenter data) {
+            adapterPresenter = data;
+          }
+
+          @Override public void onLoaderReset(Loader<AppEntryAdapterPresenter> loader) {
+            adapterPresenter = null;
+          }
+        });
+
+    getLoaderManager().initLoader(KEY_DB_PRESENTER, null,
+        new LoaderManager.LoaderCallbacks<DBPresenter>() {
+          @Override public Loader<DBPresenter> onCreateLoader(int id, Bundle args) {
+            firstRefresh = true;
+            return new DBPresenterLoader(getContext());
+          }
+
+          @Override public void onLoadFinished(Loader<DBPresenter> loader, DBPresenter data) {
+            dbPresenter = data;
+          }
+
+          @Override public void onLoaderReset(Loader<DBPresenter> loader) {
+            dbPresenter = null;
+          }
+        });
 
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
-    presenter.bindView(this);
-    adapter.onCreate();
     return view;
   }
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     CircularRevealFragmentUtil.runCircularRevealOnViewCreated(view, getArguments());
+
     setupRecyclerView();
     setupSwipeRefresh();
     setupFAB();
+  }
+
+  @Override public void onResume() {
+    super.onResume();
+    adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
+    presenter.bindView(this);
+    adapter.onStart();
+
+    presenter.setFABStateFromPreference();
+    recyclerView.setAdapter(adapter);
 
     if (firstRefresh) {
       Timber.d("Do initial refresh");
       firstRefresh = false;
       refreshList();
     }
+
+    handler.postDelayed(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
+      @Override public void onShown(FloatingActionButton fab) {
+        super.onShown(fab);
+        presenter.showOnBoarding();
+      }
+    }), 300L);
+    setActionBarUpEnabled(false);
+  }
+
+  @Override public void onPause() {
+    super.onPause();
+    handler.postDelayed(() -> fab.hide(), 300L);
+
+    presenter.unbindView();
+    adapter.onStop();
   }
 
   private void setupSwipeRefresh() {
@@ -178,24 +225,6 @@ public final class LockListFragment extends ActionBarFragment
     });
   }
 
-  @Override public void onResume() {
-    super.onResume();
-    handler.postDelayed(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
-      @Override public void onShown(FloatingActionButton fab) {
-        super.onShown(fab);
-        presenter.showOnBoarding();
-      }
-    }), 300L);
-    presenter.resume();
-    setActionBarUpEnabled(false);
-  }
-
-  @Override public void onPause() {
-    super.onPause();
-    handler.postDelayed(() -> fab.hide(), 300L);
-    presenter.pause();
-  }
-
   private void setupRecyclerView() {
     lockListLayoutManager = new LockListLayoutManager(getContext());
     lockListLayoutManager.setVerticalScrollEnabled(true);
@@ -203,7 +232,6 @@ public final class LockListFragment extends ActionBarFragment
         new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL_LIST);
 
     recyclerView.setLayoutManager(lockListLayoutManager);
-    recyclerView.setAdapter(adapter);
     recyclerView.addItemDecoration(dividerDecoration);
   }
 
@@ -296,9 +324,6 @@ public final class LockListFragment extends ActionBarFragment
 
     fab.setOnClickListener(null);
     swipeRefreshLayout.setOnRefreshListener(null);
-    adapter.onDestroy();
-    presenter.unbindView(!getActivity().isChangingConfigurations());
-
     taskMap.clear();
     handler.removeCallbacksAndMessages(null);
     unbinder.unbind();
@@ -307,7 +332,6 @@ public final class LockListFragment extends ActionBarFragment
   private void setupFAB() {
     fab.setOnClickListener(view -> presenter.clickPinFAB());
     AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(24));
-    presenter.setFABStateFromPreference();
   }
 
   @Override public void setFABStateEnabled() {
@@ -367,16 +391,6 @@ public final class LockListFragment extends ActionBarFragment
     adapter.addItem(entry);
   }
 
-  @Override public void onStart() {
-    super.onStart();
-    adapter.onStart();
-  }
-
-  @Override public void onStop() {
-    super.onStop();
-    adapter.onStop();
-  }
-
   @Override public void onListPopulateError() {
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
@@ -428,16 +442,5 @@ public final class LockListFragment extends ActionBarFragment
     }
     onListCleared();
     presenter.populateList();
-  }
-
-  @Override public void onSaveInstanceState(@NonNull Bundle outState) {
-    if (getActivity().isChangingConfigurations()) {
-      presenterDataHolder.put(KEY_PRESENTER, presenter);
-      presenterDataHolder.put(KEY_ADAPTER_PRESENTER, adapterPresenter);
-      presenterDataHolder.put(KEY_DB_PRESENTER, dbPresenter);
-    } else {
-      presenterDataHolder.clear();
-    }
-    super.onSaveInstanceState(outState);
   }
 }

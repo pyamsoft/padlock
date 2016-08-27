@@ -18,7 +18,8 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
-import com.pyamsoft.padlock.app.list.LockListAdapter;
+import com.pyamsoft.padlock.app.list.AppEntryAdapterPresenter;
+import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
@@ -32,7 +33,7 @@ import rx.Scheduler;
   @ActivityScope @Provides LockListPresenter provideLockScreenPresenter(
       @NonNull LockListInteractor interactor, @NonNull LockServiceStateInteractor stateInteractor,
       @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
-    return new LockListPresenter(interactor, stateInteractor, mainScheduler, ioScheduler);
+    return new LockListPresenterImpl(interactor, stateInteractor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides LockListInteractor provideLockScreenInteractor(
@@ -40,9 +41,8 @@ import rx.Scheduler;
     return interactor;
   }
 
-  @ActivityScope @Provides
-  AdapterPresenter<AppEntry, LockListAdapter.ViewHolder> provideAppEntryAdapterPresenter(
-      final AppEntryAdapterPresenter adapter) {
+  @ActivityScope @Provides AppEntryAdapterPresenter provideAppEntryAdapterPresenter(
+      final AppEntryAdapterPresenterImpl adapter) {
     return adapter;
   }
 

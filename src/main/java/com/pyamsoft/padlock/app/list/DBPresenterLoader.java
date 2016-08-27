@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.db;
+package com.pyamsoft.padlock.app.list;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.dagger.ActivityScope;
-import dagger.Module;
-import dagger.Provides;
-import javax.inject.Named;
-import rx.Scheduler;
+import com.pyamsoft.padlock.Singleton;
+import com.pyamsoft.padlock.dagger.db.DBPresenter;
+import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
-@Module public class DBModule {
+public class DBPresenterLoader extends PresenterLoader<DBPresenter> {
 
-  @ActivityScope @Provides DBPresenter provideDBPresenter(final @NonNull DBInteractor interactor,
-      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
-    return new DBPresenterImpl(interactor, mainScheduler, ioScheduler);
+  @Inject Provider<DBPresenter> presenterProvider;
+
+  public DBPresenterLoader(@NonNull Context context) {
+    super(context);
   }
 
-  @ActivityScope @Provides DBInteractor provideDBInteractor(
-      final @NonNull DBInteractorImpl interactor) {
-    return interactor;
+  @NonNull @Override protected DBPresenter loadPresenter() {
+    Singleton.Dagger.with(getContext()).plusDbComponent().inject(this);
+    return presenterProvider.get();
   }
 }

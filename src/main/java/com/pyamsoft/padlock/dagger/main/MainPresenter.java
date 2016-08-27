@@ -19,8 +19,8 @@ package com.pyamsoft.padlock.dagger.main;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
-import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
+import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import com.pyamsoft.pydroid.tool.RxBus;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -44,20 +44,20 @@ public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainVi
     this.interactor = interactor;
   }
 
-  @Override protected void onResume(@NonNull MainView view) {
-    super.onResume(view);
+  @Override protected void onBind(@NonNull MainView view) {
+    super.onBind(view);
     registerOnAgreeTermsBus();
     registerOnRefreshBus();
   }
 
-  @Override protected void onPause(@NonNull MainView view) {
-    super.onPause(view);
+  @Override protected void onUnbind(@NonNull MainView view) {
+    super.onUnbind(view);
     unregisterFromAgreeTermsBus();
     unregisterFromRefreshBus();
   }
 
-  @Override protected void onUnbind(@NonNull MainView view) {
-    super.onUnbind(view);
+  @Override protected void onDestroy() {
+    super.onDestroy();
     unsubscribeAgreeTerms();
   }
 

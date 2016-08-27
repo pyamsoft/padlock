@@ -19,13 +19,13 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.list.LockListCommon;
+import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
-import com.pyamsoft.padlock.dagger.base.SchedulerPresenter;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -36,18 +36,19 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class LockListPresenter extends SchedulerPresenter<LockListPresenter.LockList> {
+final class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockList>
+    implements LockListPresenter {
 
-  @NonNull private final LockListInteractor lockListInteractor;
-  @NonNull private final LockServiceStateInteractor stateInteractor;
+  @NonNull final LockListInteractor lockListInteractor;
+  @NonNull final LockServiceStateInteractor stateInteractor;
 
-  @NonNull private Subscription pinEntryBusSubscription = Subscriptions.empty();
-  @NonNull private Subscription populateListSubscription = Subscriptions.empty();
-  @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
-  @NonNull private Subscription onboardSubscription = Subscriptions.empty();
-  @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
+  @NonNull Subscription pinEntryBusSubscription = Subscriptions.empty();
+  @NonNull Subscription populateListSubscription = Subscriptions.empty();
+  @NonNull Subscription systemVisibleSubscription = Subscriptions.empty();
+  @NonNull Subscription onboardSubscription = Subscriptions.empty();
+  @NonNull Subscription fabStateSubscription = Subscriptions.empty();
 
-  @Inject LockListPresenter(final @NonNull LockListInteractor lockListInteractor,
+  @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
@@ -56,22 +57,22 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
     this.stateInteractor = stateInteractor;
   }
 
+  @Override protected void onBind(@NonNull LockList view) {
+    super.onBind(view);
+    registerOnPinEntryBus(view);
+  }
+
   @Override protected void onUnbind(@NonNull LockList view) {
     super.onUnbind(view);
+    unregisterFromPinEntryBus();
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
     unsubscribePopulateList();
     unsubscribeSystemVisible();
     unsubscribeOnboard();
     unsubscribeFabSubscription();
-  }
-
-  @Override protected void onResume(@NonNull LockList view) {
-    super.onResume(view);
-    registerOnPinEntryBus();
-  }
-
-  @Override protected void onPause(@NonNull LockList view) {
-    super.onPause(view);
-    unregisterFromPinEntryBus();
   }
 
   void unsubscribePopulateList() {
@@ -96,7 +97,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
     lockListInteractor.setSystemVisible(visible);
   }
 
-  public void populateList() {
+  @Override public void populateList() {
     Timber.d("populateList");
     unsubscribePopulateList();
 
@@ -172,7 +173,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         .build();
   }
 
-  public void setFABStateFromPreference() {
+  @Override public void setFABStateFromPreference() {
     unsubscribeFabSubscription();
     fabStateSubscription = stateInteractor.isServiceEnabled()
         .subscribeOn(getSubscribeScheduler())
@@ -197,15 +198,15 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
     }
   }
 
-  public void setSystemVisible() {
+  @Override public void setSystemVisible() {
     setSystemVisible(true);
   }
 
-  public void setSystemInvisible() {
+  @Override public void setSystemInvisible() {
     setSystemVisible(false);
   }
 
-  public void setSystemVisibilityFromPreference() {
+  @Override public void setSystemVisibilityFromPreference() {
     unsubscribeSystemVisible();
     systemVisibleSubscription = lockListInteractor.isSystemVisible()
         .subscribeOn(getSubscribeScheduler())
@@ -223,12 +224,12 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         }, this::unsubscribeSystemVisible);
   }
 
-  public void clickPinFAB() {
+  @Override public void clickPinFAB() {
     final LockList lockList = getView();
     lockList.onPinFABClicked();
   }
 
-  public void showOnBoarding() {
+  @Override public void showOnBoarding() {
     unsubscribeOnboard();
     onboardSubscription = lockListInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
@@ -244,16 +245,15 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
         }, this::unsubscribeOnboard);
   }
 
-  void registerOnPinEntryBus() {
+  void registerOnPinEntryBus(@NonNull LockList view) {
     unregisterFromPinEntryBus();
     pinEntryBusSubscription = PinEntryDialog.PinEntryBus.get()
         .register()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(pinEntryEvent -> {
-          final LockList lockList = getView();
-          if (lockList instanceof MasterPinSubmitCallback) {
-            final MasterPinSubmitCallback callback = (MasterPinSubmitCallback) lockList;
+          if (view instanceof MasterPinSubmitCallback) {
+            final MasterPinSubmitCallback callback = (MasterPinSubmitCallback) view;
             switch (pinEntryEvent.type()) {
               case 0:
                 if (pinEntryEvent.complete()) {
@@ -281,24 +281,7 @@ public final class LockListPresenter extends SchedulerPresenter<LockListPresente
     }
   }
 
-  public final void setOnBoard() {
+  @Override public void setOnBoard() {
     lockListInteractor.setShownOnBoarding();
-  }
-
-  public interface LockList extends LockListCommon {
-
-    void setFABStateEnabled();
-
-    void setFABStateDisabled();
-
-    void setSystemVisible();
-
-    void setSystemInvisible();
-
-    void onPinFABClicked();
-
-    void onEntryAddedToList(@NonNull AppEntry entry);
-
-    void showOnBoarding();
   }
 }
