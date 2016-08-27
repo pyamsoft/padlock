@@ -18,37 +18,42 @@ package com.pyamsoft.padlock.app.settings;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.SwitchPreferenceCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.dagger.main.MainBus;
-import com.pyamsoft.padlock.dagger.settings.SettingsPreferencePresenter;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.base.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
-import javax.inject.Inject;
 import timber.log.Timber;
 
 public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragment
     implements SettingsPreferencePresenter.SettingsPreferenceView {
 
-  @Inject SettingsPreferencePresenter presenter;
-
-  @Override public void onDestroyView() {
-    super.onDestroyView();
-    presenter.unbindView();
-  }
+  SettingsPreferencePresenter presenter;
 
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
-    Singleton.Dagger.with(getContext()).plusSettings().inject(this);
-    presenter.bindView(this);
+    getLoaderManager().initLoader(0, null,
+        new LoaderManager.LoaderCallbacks<SettingsPreferencePresenter>() {
+          @Override public Loader<SettingsPreferencePresenter> onCreateLoader(int id, Bundle args) {
+            return new SettingsPreferencePresenterLoader(getContext());
+          }
 
+          @Override public void onLoadFinished(Loader<SettingsPreferencePresenter> loader,
+              SettingsPreferencePresenter data) {
+            presenter = data;
+          }
+
+          @Override public void onLoaderReset(Loader<SettingsPreferencePresenter> loader) {
+            presenter = null;
+          }
+        });
     return super.onCreateView(inflater, container, savedInstanceState);
   }
 
@@ -92,5 +97,15 @@ public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenc
 
   @Override public void onClearDatabase() {
     MainBus.get().post(new RefreshEvent());
+  }
+
+  @Override public void onStart() {
+    super.onStart();
+    presenter.bindView(this);
+  }
+
+  @Override public void onStop() {
+    super.onStop();
+    presenter.unbindView();
   }
 }

@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
+import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
 import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,8 +27,9 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class SettingsPreferencePresenter
-    extends SchedulerPresenter<SettingsPreferencePresenter.SettingsPreferenceView> {
+final class SettingsPreferencePresenterImpl
+    extends SchedulerPresenter<SettingsPreferencePresenter.SettingsPreferenceView>
+    implements SettingsPreferencePresenter {
 
   public static final int CONFIRM_DATABASE = 0;
   public static final int CONFIRM_ALL = 1;
@@ -35,7 +37,7 @@ public final class SettingsPreferencePresenter
   @NonNull private Subscription confirmBusSubscription = Subscriptions.empty();
   @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
 
-  @Inject SettingsPreferencePresenter(@NonNull SettingsPreferenceInteractor interactor,
+  @Inject SettingsPreferencePresenterImpl(@NonNull SettingsPreferenceInteractor interactor,
       @NonNull @Named("io") Scheduler ioScheduler,
       @NonNull @Named("main") Scheduler mainScheduler) {
     super(mainScheduler, ioScheduler);
@@ -57,11 +59,11 @@ public final class SettingsPreferencePresenter
     unsubscribeConfirm();
   }
 
-  public void requestClearAll() {
+  @Override public void requestClearAll() {
     getView().showConfirmDialog(CONFIRM_ALL);
   }
 
-  public void requestClearDatabase() {
+  @Override public void requestClearDatabase() {
     getView().showConfirmDialog(CONFIRM_DATABASE);
   }
 
@@ -122,14 +124,5 @@ public final class SettingsPreferencePresenter
         }, throwable -> {
           Timber.e(throwable, "onError");
         }, this::unsubscribeConfirm);
-  }
-
-  public interface SettingsPreferenceView {
-
-    void showConfirmDialog(int type);
-
-    void onClearAll();
-
-    void onClearDatabase();
   }
 }
