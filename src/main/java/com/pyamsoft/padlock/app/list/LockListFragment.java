@@ -104,7 +104,6 @@ public final class LockListFragment extends ActionBarFragment
   boolean firstRefresh;
   Unbinder unbinder;
   MenuItem displaySystemItem;
-  Menu menu;
 
   public static LockListFragment newInstance(int cX, int cY) {
     final Bundle args = CircularRevealFragmentUtil.bundleArguments(cX, cY, 600L);
@@ -211,7 +210,7 @@ public final class LockListFragment extends ActionBarFragment
     }), 300L);
     setActionBarUpEnabled(false);
 
-    setupLockListMenuItems(menu);
+    getActivity().supportInvalidateOptionsMenu();
   }
 
   @Override public void onPause() {
@@ -250,7 +249,9 @@ public final class LockListFragment extends ActionBarFragment
 
   @Override public void onPrepareOptionsMenu(@NonNull Menu menu) {
     super.onPrepareOptionsMenu(menu);
-    this.menu = menu;
+    if (isResumed()) {
+      setupLockListMenuItems(menu);
+    }
   }
 
   private void setupLockListMenuItems(final @NonNull Menu menu) {
@@ -400,6 +401,7 @@ public final class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onListPopulateError() {
+    Timber.e("onListPopulateError");
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 

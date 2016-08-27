@@ -240,7 +240,7 @@ final class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.L
             lockList.showOnBoarding();
           }
         }, throwable -> {
-          // TODO different error
+          Timber.e(throwable, "onError");
           getView().onListPopulateError();
         }, this::unsubscribeOnboard);
   }
