@@ -48,16 +48,16 @@ public class SettingsFragment extends ActionBarFragment {
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     CircularRevealFragmentUtil.runCircularRevealOnViewCreated(view, getArguments());
-    displayPreferenceFragment();
   }
 
   @Override public void onResume() {
     super.onResume();
     setActionBarUpEnabled(true);
+    displayPreferenceFragment();
   }
 
-  // KLUDGE child fragment, not the nicest
   private void displayPreferenceFragment() {
+    // KLUDGE child fragment, not the nicest
     if (getChildFragmentManager().findFragmentByTag(SettingsPreferenceFragment.TAG) == null) {
       getChildFragmentManager().beginTransaction()
           .add(R.id.settings_preferences_container, new SettingsPreferenceFragment(),

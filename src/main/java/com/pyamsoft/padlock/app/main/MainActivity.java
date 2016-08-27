@@ -111,15 +111,15 @@ public class MainActivity extends DonationActivityBase
   }
 
   private void showLockList() {
-    rootView.getViewTreeObserver()
-        .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-          @Override public void onGlobalLayout() {
-            rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
+      rootView.getViewTreeObserver()
+          .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override public void onGlobalLayout() {
+              rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-            supportInvalidateOptionsMenu();
-            final FragmentManager fragmentManager = getSupportFragmentManager();
-            if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
-                && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
+              supportInvalidateOptionsMenu();
               final View decorView = getWindow().getDecorView();
               final int cX = decorView.getLeft() + decorView.getWidth() / 2;
               final int cY = decorView.getBottom() + decorView.getHeight() / 2;
@@ -128,8 +128,8 @@ public class MainActivity extends DonationActivityBase
                       LockListFragment.TAG)
                   .commit();
             }
-          }
-        });
+          });
+    }
   }
 
   @CheckResult @NonNull public View getSettingsMenuItemView() {
