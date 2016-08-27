@@ -42,11 +42,11 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
+import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
-import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.base.fragment.CircularRevealFragmentUtil;
@@ -199,6 +199,7 @@ public final class LockListFragment extends ActionBarFragment
       refreshList();
     }
 
+    handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
       @Override public void onShown(FloatingActionButton fab) {
         super.onShown(fab);
@@ -210,6 +211,7 @@ public final class LockListFragment extends ActionBarFragment
 
   @Override public void onPause() {
     super.onPause();
+    handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> fab.hide(), 300L);
 
     presenter.unbindView();

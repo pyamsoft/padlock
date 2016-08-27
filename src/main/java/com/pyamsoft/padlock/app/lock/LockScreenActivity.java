@@ -78,7 +78,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   LockScreenPresenter presenter;
   InputMethodManager imm;
 
-  long ignorePeriod;
+  long ignorePeriod = -1;
   boolean exclude;
 
   MenuItem menuIgnoreNone;

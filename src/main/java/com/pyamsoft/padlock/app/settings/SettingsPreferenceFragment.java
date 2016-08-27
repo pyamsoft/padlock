@@ -99,13 +99,13 @@ public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenc
     MainBus.get().post(new RefreshEvent());
   }
 
-  @Override public void onStart() {
-    super.onStart();
+  @Override public void onResume() {
+    super.onResume();
     presenter.bindView(this);
   }
 
-  @Override public void onStop() {
-    super.onStop();
+  @Override public void onPause() {
+    super.onPause();
     presenter.unbindView();
   }
 }
