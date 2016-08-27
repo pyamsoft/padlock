@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.app.settings;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -35,6 +36,7 @@ import timber.log.Timber;
 public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragment
     implements SettingsPreferencePresenter.SettingsPreferenceView {
 
+  @NonNull public static final String TAG = "SettingsPreferenceFragment";
   SettingsPreferencePresenter presenter;
 
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,

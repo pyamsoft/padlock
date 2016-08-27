@@ -177,7 +177,9 @@ public final class LockListFragment extends ActionBarFragment
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    CircularRevealFragmentUtil.runCircularRevealOnViewCreated(view, getArguments());
+    if (firstRefresh) {
+      CircularRevealFragmentUtil.runCircularRevealOnViewCreated(view, getArguments());
+    }
 
     setupRecyclerView();
     setupSwipeRefresh();
