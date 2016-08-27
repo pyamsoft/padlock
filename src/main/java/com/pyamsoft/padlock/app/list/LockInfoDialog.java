@@ -170,11 +170,14 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void onResume() {
     super.onResume();
+    if (adapter == null) {
+      adapter = new LockInfoAdapter(this, appEntry, adapterPresenter, dbPresenter);
+      recyclerView.setAdapter(adapter);
+    }
+
     presenter.bindView(this);
-    adapter = new LockInfoAdapter(this, appEntry, adapterPresenter, dbPresenter);
     adapter.onStart();
 
-    recyclerView.setAdapter(adapter);
     presenter.loadApplicationIcon(appEntry.packageName());
     presenter.setToggleAllState(appEntry.packageName());
     if (firstRefresh) {
