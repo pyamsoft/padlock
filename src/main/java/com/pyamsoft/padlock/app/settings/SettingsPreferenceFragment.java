@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.settings;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.SwitchPreferenceCompat;
 import android.view.LayoutInflater;
@@ -25,7 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.dagger.main.MainPresenter;
+import com.pyamsoft.padlock.dagger.main.MainBus;
 import com.pyamsoft.padlock.dagger.settings.SettingsPreferencePresenter;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.base.fragment.ActionBarSettingsPreferenceFragment;
@@ -90,6 +91,6 @@ public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenc
   }
 
   @Override public void onClearDatabase() {
-    MainPresenter.Bus.get().post(new RefreshEvent());
+    MainBus.get().post(new RefreshEvent());
   }
 }

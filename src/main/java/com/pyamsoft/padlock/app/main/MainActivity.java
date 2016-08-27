@@ -22,6 +22,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
@@ -35,7 +37,6 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.accessibility.AccessibilityFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
@@ -46,7 +47,6 @@ import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.StringUtil;
-import javax.inject.Inject;
 import timber.log.Timber;
 
 public class MainActivity extends DonationActivityBase
@@ -54,7 +54,7 @@ public class MainActivity extends DonationActivityBase
 
   @BindView(R.id.main_root) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
-  @Inject MainPresenter presenter;
+  MainPresenter presenter;
   private Unbinder unbinder;
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
@@ -63,9 +63,20 @@ public class MainActivity extends DonationActivityBase
     unbinder = ButterKnife.bind(this);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    Singleton.Dagger.with(this).plusMain().inject(this);
+    getSupportLoaderManager().initLoader(0, null,
+        new LoaderManager.LoaderCallbacks<MainPresenter>() {
+          @Override public Loader<MainPresenter> onCreateLoader(int id, Bundle args) {
+            return new MainPresenterLoader(getApplicationContext());
+          }
 
-    presenter.bindView(this);
+          @Override public void onLoadFinished(Loader<MainPresenter> loader, MainPresenter data) {
+            presenter = data;
+          }
+
+          @Override public void onLoaderReset(Loader<MainPresenter> loader) {
+            presenter = null;
+          }
+        });
 
     setAppBarState();
   }
@@ -73,6 +84,16 @@ public class MainActivity extends DonationActivityBase
   @Override protected int bindActivityToView() {
     setContentView(R.layout.activity_main);
     return R.id.ad_view;
+  }
+
+  @Override protected void onStart() {
+    super.onStart();
+    presenter.bindView(this);
+  }
+
+  @Override protected void onStop() {
+    super.onStop();
+    presenter.unbindView();
   }
 
   private void setAppBarState() {
@@ -125,11 +146,6 @@ public class MainActivity extends DonationActivityBase
 
   @Override protected void onDestroy() {
     super.onDestroy();
-
-    if (!isChangingConfigurations()) {
-      presenter.unbindView();
-    }
-
     unbinder.unbind();
   }
 
