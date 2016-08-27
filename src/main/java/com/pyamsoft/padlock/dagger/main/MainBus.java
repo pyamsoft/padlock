@@ -16,11 +16,16 @@
 
 package com.pyamsoft.padlock.dagger.main;
 
-import com.pyamsoft.padlock.app.main.MainPresenterLoader;
-import com.pyamsoft.padlock.dagger.ActivityScope;
-import dagger.Subcomponent;
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.model.event.RefreshEvent;
+import com.pyamsoft.pydroid.tool.RxBus;
 
-@ActivityScope @Subcomponent(modules = MainModule.class) public interface MainComponent {
+public final class MainBus extends RxBus<RefreshEvent> {
 
-  void inject(MainPresenterLoader loader);
+  @NonNull private static final MainBus instance = new MainBus();
+
+  @CheckResult @NonNull public static MainBus get() {
+    return instance;
+  }
 }

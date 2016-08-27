@@ -16,130 +16,18 @@
 
 package com.pyamsoft.padlock.dagger.main;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
-import com.pyamsoft.padlock.model.event.RefreshEvent;
-import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
-import com.pyamsoft.pydroid.tool.RxBus;
-import javax.inject.Inject;
-import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
-import timber.log.Timber;
+import com.pyamsoft.pydroid.base.presenter.Presenter;
 
-public final class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
+public interface MainPresenter extends Presenter<MainPresenter.MainView> {
 
-  @NonNull private final MainInteractor interactor;
+  void showTermsDialog();
 
-  @NonNull private Subscription agreeTermsBusSubscription = Subscriptions.empty();
-  @NonNull private Subscription refreshBus = Subscriptions.empty();
-  @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
-
-  @Inject MainPresenter(@NonNull final MainInteractor interactor,
-      @NonNull @Named("main") Scheduler mainScheduler,
-      @NonNull @Named("io") Scheduler ioScheduler) {
-    super(mainScheduler, ioScheduler);
-    this.interactor = interactor;
-  }
-
-  @Override protected void onBind(@NonNull MainView view) {
-    super.onBind(view);
-    registerOnAgreeTermsBus();
-    registerOnRefreshBus();
-  }
-
-  @Override protected void onUnbind(@NonNull MainView view) {
-    super.onUnbind(view);
-    unregisterFromAgreeTermsBus();
-    unregisterFromRefreshBus();
-  }
-
-  @Override protected void onDestroy() {
-    super.onDestroy();
-    unsubscribeAgreeTerms();
-  }
-
-  void unregisterFromRefreshBus() {
-    if (!refreshBus.isUnsubscribed()) {
-      refreshBus.unsubscribe();
-    }
-  }
-
-  void registerOnRefreshBus() {
-    unregisterFromRefreshBus();
-    refreshBus = Bus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(refreshEvent -> {
-          getView().forceRefresh();
-        }, throwable -> {
-          Timber.e(throwable, "RefreshBus onError");
-        });
-  }
-
-  public void showTermsDialog() {
-    unsubscribeAgreeTerms();
-    agreeTermsSubscription = interactor.hasAgreed()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(agreed -> {
-          final MainView mainView = getView();
-          if (!agreed) {
-            mainView.showUsageTermsDialog();
-          }
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-          // TODO error
-        }, this::unsubscribeAgreeTerms);
-  }
-
-  void registerOnAgreeTermsBus() {
-    unregisterFromAgreeTermsBus();
-    agreeTermsBusSubscription = AgreeTermsDialog.Bus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(agreeTermsEvent -> {
-          if (agreeTermsEvent.agreed()) {
-            interactor.setAgreed();
-          } else {
-            getView().onDidNotAgreeToTerms();
-          }
-        }, throwable -> {
-          Timber.e(throwable, "AgreeTermsBus onError");
-        });
-  }
-
-  void unsubscribeAgreeTerms() {
-    if (!agreeTermsSubscription.isUnsubscribed()) {
-      agreeTermsSubscription.unsubscribe();
-    }
-  }
-
-  void unregisterFromAgreeTermsBus() {
-    if (!agreeTermsBusSubscription.isUnsubscribed()) {
-      agreeTermsBusSubscription.unsubscribe();
-    }
-  }
-
-  public interface MainView {
+  interface MainView {
 
     void showUsageTermsDialog();
 
     void onDidNotAgreeToTerms();
 
     void forceRefresh();
-  }
-
-  public static final class Bus extends RxBus<RefreshEvent> {
-
-    @NonNull private static final Bus instance = new Bus();
-
-    @CheckResult @NonNull public static Bus get() {
-      return instance;
-    }
   }
 }
