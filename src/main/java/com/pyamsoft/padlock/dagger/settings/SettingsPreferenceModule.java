@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
@@ -26,9 +27,9 @@ import rx.Scheduler;
 @Module public class SettingsPreferenceModule {
 
   @ActivityScope @Provides SettingsPreferencePresenter provideSettingsPresenter(
-      final @NonNull SettingsPreferenceInteractor interactor, @Named("main") Scheduler mainScheduler,
-      @Named("io") Scheduler ioScheduler) {
-    return new SettingsPreferencePresenter(interactor, mainScheduler, ioScheduler);
+      final @NonNull SettingsPreferenceInteractor interactor,
+      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+    return new SettingsPreferencePresenterImpl(interactor, mainScheduler, ioScheduler);
   }
 
   @ActivityScope @Provides SettingsPreferenceInteractor provideSettingsInteractor(

@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.settings;
+package com.pyamsoft.padlock.app.settings;
 
-import com.pyamsoft.padlock.app.settings.SettingsPreferenceFragment;
-import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenterLoader;
-import com.pyamsoft.padlock.dagger.ActivityScope;
-import dagger.Subcomponent;
+import com.pyamsoft.pydroid.base.presenter.Presenter;
 
-@ActivityScope @Subcomponent(modules = SettingsPreferenceModule.class) public interface SettingsPreferenceComponent {
+public interface SettingsPreferencePresenter
+    extends Presenter<SettingsPreferencePresenter.SettingsPreferenceView> {
 
-  void inject(SettingsPreferencePresenterLoader loader);
+  void requestClearAll();
+
+  void requestClearDatabase();
+
+  interface SettingsPreferenceView {
+
+    void showConfirmDialog(int type);
+
+    void onClearAll();
+
+    void onClearDatabase();
+  }
 }
