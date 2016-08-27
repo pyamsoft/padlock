@@ -188,13 +188,16 @@ public final class LockListFragment extends ActionBarFragment
 
   @Override public void onResume() {
     super.onResume();
-    adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
+
+    if (adapter == null) {
+      adapter = new LockListAdapter(this, adapterPresenter, dbPresenter);
+      recyclerView.setAdapter(adapter);
+    }
+
     presenter.bindView(this);
     adapter.onStart();
 
     presenter.setFABStateFromPreference();
-    recyclerView.setAdapter(adapter);
-
     if (firstRefresh) {
       Timber.d("Do initial refresh");
       firstRefresh = false;
