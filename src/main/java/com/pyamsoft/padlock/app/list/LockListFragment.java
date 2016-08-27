@@ -102,8 +102,9 @@ public final class LockListFragment extends ActionBarFragment
   AppEntryAdapterPresenter adapterPresenter;
   DBPresenter dbPresenter;
   boolean firstRefresh;
-  private Unbinder unbinder;
-  private MenuItem displaySystemItem;
+  Unbinder unbinder;
+  MenuItem displaySystemItem;
+  Menu menu;
 
   public static LockListFragment newInstance(int cX, int cY) {
     final Bundle args = CircularRevealFragmentUtil.bundleArguments(cX, cY, 600L);
@@ -209,6 +210,8 @@ public final class LockListFragment extends ActionBarFragment
       }
     }), 300L);
     setActionBarUpEnabled(false);
+
+    setupLockListMenuItems(menu);
   }
 
   @Override public void onPause() {
@@ -247,7 +250,7 @@ public final class LockListFragment extends ActionBarFragment
 
   @Override public void onPrepareOptionsMenu(@NonNull Menu menu) {
     super.onPrepareOptionsMenu(menu);
-    setupLockListMenuItems(menu);
+    this.menu = menu;
   }
 
   private void setupLockListMenuItems(final @NonNull Menu menu) {

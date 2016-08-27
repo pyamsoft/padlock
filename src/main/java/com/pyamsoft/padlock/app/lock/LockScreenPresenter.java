@@ -26,6 +26,7 @@ public interface LockScreenPresenter
 
   void displayLockedHint();
 
+  // KLUDGE doesnt persist over restarts, doesnt correctly store into bundle
   void saveSelectedOptions(@NonNull Bundle outState, int selectedIndex);
 
   void setIgnorePeriodFromPreferences(long ignoreTime);
