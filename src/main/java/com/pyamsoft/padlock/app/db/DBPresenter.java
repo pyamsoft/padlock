@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.db;
+package com.pyamsoft.padlock.app.db;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

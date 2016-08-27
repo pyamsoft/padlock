@@ -76,6 +76,7 @@ final class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.L
 
   @Override protected void onDestroy() {
     super.onDestroy();
+    iconLoader.destroyView();
     unsubPopulateList();
     unsubAllInDB();
   }

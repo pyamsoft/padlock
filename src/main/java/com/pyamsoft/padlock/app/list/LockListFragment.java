@@ -46,7 +46,7 @@ import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
-import com.pyamsoft.padlock.dagger.db.DBPresenter;
+import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.base.fragment.CircularRevealFragmentUtil;

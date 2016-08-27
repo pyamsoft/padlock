@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.main;
+package com.pyamsoft.padlock.app.lock;
 
+import com.pyamsoft.padlock.app.base.AppIconLoaderView;
 import com.pyamsoft.pydroid.base.presenter.Presenter;
 
-public interface MainPresenter extends Presenter<MainPresenter.MainView> {
+public interface LockPresenter<I extends LockPresenter.LockView> extends Presenter<I> {
 
-  void showTermsDialog();
+  interface LockView extends AppIconLoaderView {
 
-  interface MainView {
+    void onSubmitSuccess();
 
-    void showUsageTermsDialog();
+    void onSubmitFailure();
 
-    void onDidNotAgreeToTerms();
-
-    void forceRefresh();
+    void onSubmitError();
   }
 }

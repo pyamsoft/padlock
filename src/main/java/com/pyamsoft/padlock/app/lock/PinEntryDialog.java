@@ -27,6 +27,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
@@ -42,14 +44,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.dagger.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.tool.RxBus;
-import javax.inject.Inject;
 import rx.Subscription;
 import timber.log.Timber;
 
@@ -61,8 +59,6 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
-  @Inject PinEntryPresenter presenter;
-  @Inject AppIconLoaderPresenter<PinScreen> appIconLoaderPresenter;
   @BindView(R.id.pin_entry_toolbar) TextView toolbar;
   @BindView(R.id.pin_entry_close) ImageView close;
   @BindView(R.id.pin_image) ImageView image;
@@ -70,12 +66,14 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @BindView(R.id.pin_entry_code) TextInputLayout pinEntry;
   @BindView(R.id.pin_reentry_code) TextInputLayout pinReentry;
   @BindView(R.id.pin_hint) TextInputLayout pinHint;
-  private Unbinder unbinder;
-  private String packageName;
-  private InputMethodManager imm;
-  private EditText pinEntryText;
-  private EditText pinReentryText;
-  private EditText pinHintText;
+
+  Unbinder unbinder;
+  String packageName;
+  InputMethodManager imm;
+  EditText pinEntryText;
+  EditText pinReentryText;
+  EditText pinHintText;
+  PinEntryPresenter presenter;
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -89,7 +87,6 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Singleton.Dagger.with(getContext()).plusPinEntry().inject(this);
     packageName = getArguments().getString(ENTRY_PACKAGE_NAME);
     if (packageName == null) {
       throw new NullPointerException("Package name is NULL");
@@ -122,9 +119,6 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
       throw new NullPointerException("No pin hint edit text");
     }
 
-    presenter.bindView(this);
-    appIconLoaderPresenter.bindView(this);
-
     // Force the keyboard
     imm = (InputMethodManager) getContext().getApplicationContext()
         .getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -139,7 +133,20 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
       onRestoreInstanceState(savedInstanceState);
     }
 
-    presenter.hideUnimportantViews();
+    getLoaderManager().initLoader(0, null, new LoaderManager.LoaderCallbacks<PinEntryPresenter>() {
+      @Override public Loader<PinEntryPresenter> onCreateLoader(int id, Bundle args) {
+        return new PinScreenPresenterLoader(getContext());
+      }
+
+      @Override
+      public void onLoadFinished(Loader<PinEntryPresenter> loader, PinEntryPresenter data) {
+        presenter = data;
+      }
+
+      @Override public void onLoaderReset(Loader<PinEntryPresenter> loader) {
+        presenter = null;
+      }
+    });
 
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
   }
@@ -251,9 +258,16 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     return pinHintText.getText().toString();
   }
 
-  @Override public void onStart() {
-    super.onStart();
-    appIconLoaderPresenter.loadApplicationIcon(packageName);
+  @Override public void onResume() {
+    super.onResume();
+    presenter.bindView(this);
+    presenter.loadApplicationIcon(packageName);
+    presenter.hideUnimportantViews();
+  }
+
+  @Override public void onPause() {
+    super.onPause();
+    presenter.unbindView();
   }
 
   private void setupToolbar() {
@@ -265,8 +279,6 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     Timber.d("Destroy AlertDialog");
     taskMap.clear();
     imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0, 0);
-    presenter.unbindView();
-    appIconLoaderPresenter.unbindView();
     unbinder.unbind();
   }
 

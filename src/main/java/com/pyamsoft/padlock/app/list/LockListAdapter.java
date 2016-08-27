@@ -34,7 +34,7 @@ import butterknife.ButterKnife;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.db.DBProgressDialog;
-import com.pyamsoft.padlock.dagger.db.DBPresenter;
+import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.util.AppUtil;
 import timber.log.Timber;

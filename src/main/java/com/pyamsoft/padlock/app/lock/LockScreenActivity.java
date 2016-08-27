@@ -27,7 +27,9 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -45,16 +47,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
-import com.pyamsoft.padlock.dagger.lock.LockScreenPresenter;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
-import com.pyamsoft.pydroid.tool.DataHolderFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.Locale;
-import javax.inject.Inject;
 import rx.Subscription;
 import timber.log.Timber;
 
@@ -68,7 +65,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
-  @NonNull private final Intent home;
+  @NonNull final Intent home;
   @NonNull private final AsyncDrawableMap taskMap;
   @BindView(R.id.activity_lock_screen) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
@@ -78,30 +75,29 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   @BindView(R.id.lock_image_go) ImageView imageGo;
   @BindView(R.id.lock_display_hint) TextView hintDisplay;
 
-  @Inject AppIconLoaderPresenter<LockScreen> appIconLoaderPresenter;
-  @Inject LockScreenPresenter presenter;
+  LockScreenPresenter presenter;
+  InputMethodManager imm;
 
-  private DataHolderFragment<Long> ignoreDataHolder;
-  private DataHolderFragment<Boolean> excludeDataHolder;
-  private MenuItem menuIgnoreNone;
-  private MenuItem menuIgnoreOne;
-  private MenuItem menuIgnoreFive;
-  private MenuItem menuIgnoreTen;
-  private MenuItem menuIgnoreFifteen;
-  private MenuItem menuIgnoreTwenty;
-  private MenuItem menuIgnoreThirty;
-  private MenuItem menuIgnoreFourtyFive;
-  private MenuItem menuIgnoreSixty;
-  private MenuItem menuExclude;
-  private EditText editText;
-  private Unbinder unbinder;
+  long ignorePeriod;
+  boolean exclude;
 
-  private String lockedPackageName;
-  private String lockedActivityName;
-  private String lockedRealName;
-  private String lockedCode;
-  private boolean lockedSystem;
-  private InputMethodManager imm;
+  MenuItem menuIgnoreNone;
+  MenuItem menuIgnoreOne;
+  MenuItem menuIgnoreFive;
+  MenuItem menuIgnoreTen;
+  MenuItem menuIgnoreFifteen;
+  MenuItem menuIgnoreTwenty;
+  MenuItem menuIgnoreThirty;
+  MenuItem menuIgnoreFourtyFive;
+  MenuItem menuIgnoreSixty;
+  MenuItem menuExclude;
+  EditText editText;
+  Unbinder unbinder;
+  String lockedPackageName;
+  String lockedActivityName;
+  String lockedRealName;
+  String lockedCode;
+  boolean lockedSystem;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -126,17 +122,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     setContentView(R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    // Init holders here to avoid IllegalStateException
-    ignoreDataHolder = DataHolderFragment.getInstance(this, "ignore_data");
-    excludeDataHolder = DataHolderFragment.getInstance(this, "exclude_data");
-
     unbinder = ButterKnife.bind(this);
-
-    // Inject Dagger graph
-    Singleton.Dagger.with(this).plusLockScreen().inject(this);
-
-    presenter.bindView(this);
-    appIconLoaderPresenter.bindView(this);
     getValuesFromBundle();
 
     editText = textLayout.getEditText();
@@ -189,7 +175,22 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
 
     // Hide hint to begin with
     hintDisplay.setVisibility(View.GONE);
-    presenter.displayLockedHint();
+
+    getSupportLoaderManager().initLoader(0, null,
+        new LoaderManager.LoaderCallbacks<LockScreenPresenter>() {
+          @Override public Loader<LockScreenPresenter> onCreateLoader(int id, Bundle args) {
+            return new LockScreenPresenterLoader(getApplicationContext());
+          }
+
+          @Override
+          public void onLoadFinished(Loader<LockScreenPresenter> loader, LockScreenPresenter data) {
+            presenter = data;
+          }
+
+          @Override public void onLoaderReset(Loader<LockScreenPresenter> loader) {
+            presenter = null;
+          }
+        });
   }
 
   @Override public void setDisplayHint(@NonNull String hint) {
@@ -208,6 +209,8 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     lockedActivityName = bundle.getString(ENTRY_ACTIVITY_NAME);
     lockedRealName = bundle.getString(ENTRY_REAL_NAME);
     lockedCode = bundle.getString(ENTRY_LOCK_CODE);
+    ignorePeriod = bundle.getLong("IGNORE", -1);
+    exclude = bundle.getBoolean("EXCLUDE", false);
 
     final String lockedStringSystem = bundle.getString(ENTRY_IS_SYSTEM);
 
@@ -225,10 +228,17 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   @Override protected void onStart() {
     super.onStart();
     Timber.d("onStart");
+    presenter.bindView(this);
+    presenter.displayLockedHint();
 
     presenter.loadDisplayNameFromPackage(lockedPackageName);
-    appIconLoaderPresenter.loadApplicationIcon(lockedPackageName);
+    presenter.loadApplicationIcon(lockedPackageName);
     supportInvalidateOptionsMenu();
+  }
+
+  @Override protected void onStop() {
+    super.onStop();
+    presenter.unbindView();
   }
 
   @Override public void onBackPressed() {
@@ -243,8 +253,6 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     Timber.d("Clear currently locked");
     taskMap.clear();
     imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
-    presenter.unbindView();
-    appIconLoaderPresenter.unbindView();
     unbinder.unbind();
   }
 
@@ -313,7 +321,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     if (isChangingConfigurations()) {
       final String attempt = getCurrentAttempt();
       outState.putString(CODE_DISPLAY, attempt);
-      presenter.saveSelectedOptions(getSelectedIgnoreTimeIndex());
+      presenter.saveSelectedOptions(outState, getSelectedIgnoreTimeIndex());
     }
 
     Timber.d("onSaveInstanceState");
@@ -342,13 +350,8 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
 
   @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
     // Set the default checked value
-    final Long ignorePeriod = ignoreDataHolder.pop(0);
     presenter.setIgnorePeriodFromPreferences(ignorePeriod);
-
-    final Boolean exclude = excludeDataHolder.pop(0);
-    if (exclude != null) {
-      menuExclude.setChecked(exclude);
-    }
+    menuExclude.setChecked(exclude);
 
     return super.onPrepareOptionsMenu(menu);
   }
@@ -396,9 +399,9 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     menuIgnoreSixty.setChecked(true);
   }
 
-  @Override public void onSaveMenuSelections(long ignoreTime) {
-    ignoreDataHolder.put(0, ignoreTime);
-    excludeDataHolder.put(0, menuExclude.isChecked());
+  @Override public void onSaveMenuSelections(@NonNull Bundle outState, long ignoreTime) {
+    outState.putLong("IGNORE", ignoreTime);
+    outState.putBoolean("EXCLUDE", menuExclude.isChecked());
   }
 
   @Override public boolean onOptionsItemSelected(@NonNull MenuItem item) {

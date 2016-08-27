@@ -16,39 +16,13 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.AppIconLoaderView;
+import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 
-public interface LockScreen extends LockPresenter.LockView{
+public interface PinEntryPresenter
+    extends LockPresenter<PinScreen>, AppIconLoaderPresenter<PinScreen> {
 
-  void onPostUnlock();
+  void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt, @NonNull String hint);
 
-  void onLocked();
-
-  void onLockedError();
-
-  void setIgnoreTimeNone();
-
-  void setIgnoreTimeOne();
-
-  void setIgnoreTimeFive();
-
-  void setIgnoreTimeTen();
-
-  void setIgnoreTimeFifteen();
-
-  void setIgnoreTimeTwenty();
-
-  void setIgnoreTimeThirty();
-
-  void setIgnoreTimeFourtyFive();
-
-  void setIgnoreTimeSixty();
-
-  void onSaveMenuSelections(@NonNull Bundle outState, long ignoreTime);
-
-  void setDisplayName(@NonNull String name);
-
-  void setDisplayHint(@NonNull String hint);
+  void hideUnimportantViews();
 }

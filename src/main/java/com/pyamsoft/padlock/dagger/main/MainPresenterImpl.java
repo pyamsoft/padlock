@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
+import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
