@@ -17,26 +17,28 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
+import com.pyamsoft.padlock.dagger.iconloader.AppIconLoaderInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
 
-class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl
-    implements LockInfoInteractor {
+class LockInfoInteractorImpl implements LockInfoInteractor {
 
   @NonNull final Context appContext;
   @NonNull final PackageManagerWrapper packageManagerWrapper;
+  @NonNull final AppIconLoaderInteractor iconLoaderInteractor;
 
-  @Inject LockInfoInteractorImpl(final @NonNull Context context,
-      @NonNull PackageManagerWrapper packageManagerWrapper) {
-    super(packageManagerWrapper);
+  @Inject LockInfoInteractorImpl(@NonNull AppIconLoaderInteractor iconLoaderInteractor,
+      final @NonNull Context context, @NonNull PackageManagerWrapper packageManagerWrapper) {
+    this.iconLoaderInteractor = iconLoaderInteractor;
     this.packageManagerWrapper = packageManagerWrapper;
     appContext = context.getApplicationContext();
   }
@@ -52,5 +54,9 @@ class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl
             activityEntry -> !activityEntry.equalsIgnoreCase(LockScreenActivity1.class.getName())
                 && !activityEntry.equalsIgnoreCase(LockScreenActivity2.class.getName())
                 && !activityEntry.equalsIgnoreCase(CrashLogActivity.class.getName()));
+  }
+
+  @NonNull @Override public Observable<Drawable> loadPackageIcon(@NonNull String packageName) {
+    return iconLoaderInteractor.loadPackageIcon(packageName);
   }
 }

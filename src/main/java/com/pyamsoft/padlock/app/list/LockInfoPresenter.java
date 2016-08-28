@@ -17,6 +17,8 @@
 package com.pyamsoft.padlock.app.list;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.ActivityEntry;
 
 public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {

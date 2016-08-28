@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.dagger.iconloader.AppIconLoaderInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import rx.Observable;

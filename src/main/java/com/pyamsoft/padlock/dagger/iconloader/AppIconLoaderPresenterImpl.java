@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.list;
+package com.pyamsoft.padlock.dagger.iconloader;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.list.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.app.list.AppIconLoaderView;
+import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
