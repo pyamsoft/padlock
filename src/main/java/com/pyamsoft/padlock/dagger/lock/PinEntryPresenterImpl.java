@@ -64,13 +64,13 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
   @Override protected void onUnbind(@NonNull PinScreen view) {
     super.onUnbind(view);
     iconLoader.unbindView();
+    unsubPinEntry();
+    unsubPinCheck();
   }
 
   @Override protected void onDestroy() {
     super.onDestroy();
     iconLoader.destroyView();
-    unsubPinEntry();
-    unsubPinCheck();
   }
 
   @Override public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,

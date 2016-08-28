@@ -72,13 +72,13 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
   @Override protected void onUnbind(@NonNull LockInfoView view) {
     super.onUnbind(view);
     iconLoader.unbindView();
+    unsubPopulateList();
+    unsubAllInDB();
   }
 
   @Override protected void onDestroy() {
     super.onDestroy();
     iconLoader.destroyView();
-    unsubPopulateList();
-    unsubAllInDB();
   }
 
   @Override public void populateList(@NonNull String packageName) {
