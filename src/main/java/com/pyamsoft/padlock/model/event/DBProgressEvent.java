@@ -24,9 +24,12 @@ import com.pyamsoft.padlock.model.AppEntry;
 @AutoValue public abstract class DBProgressEvent {
 
   @CheckResult @NonNull
-  public static DBProgressEvent create(int position, boolean checked, @NonNull AppEntry entry) {
-    return new AutoValue_DBProgressEvent(position, checked, entry);
+  public static DBProgressEvent create(boolean individual, int position, boolean checked,
+      @NonNull AppEntry entry) {
+    return new AutoValue_DBProgressEvent(individual, position, checked, entry);
   }
+
+  public abstract boolean individual();
 
   public abstract int position();
 

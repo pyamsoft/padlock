@@ -99,7 +99,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   void accessPackage(int position, boolean checked) {
     // TODO app specific codes
-    DBProgressBus.get().post(DBProgressEvent.create(position, checked, entry));
+    DBProgressBus.get().post(DBProgressEvent.create(false, position, checked, entry));
   }
 
   void openInfo() {
