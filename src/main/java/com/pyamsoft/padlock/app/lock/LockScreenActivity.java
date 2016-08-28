@@ -209,8 +209,6 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     lockedActivityName = bundle.getString(ENTRY_ACTIVITY_NAME);
     lockedRealName = bundle.getString(ENTRY_REAL_NAME);
     lockedCode = bundle.getString(ENTRY_LOCK_CODE);
-    ignorePeriod = bundle.getLong("IGNORE", -1);
-    exclude = bundle.getBoolean("EXCLUDE", false);
 
     final String lockedStringSystem = bundle.getString(ENTRY_IS_SYSTEM);
 
@@ -223,6 +221,9 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
 
     // So that we can make sure a boolean is passed
     lockedSystem = Boolean.valueOf(lockedStringSystem);
+
+    // Reload options
+    supportInvalidateOptionsMenu();
   }
 
   @Override protected void onStart() {
@@ -306,6 +307,8 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
+    ignorePeriod = savedInstanceState.getLong("IGNORE", -1);
+    exclude = savedInstanceState.getBoolean("EXCLUDE", false);
     final String attempt = savedInstanceState.getString(CODE_DISPLAY, null);
     if (attempt == null) {
       Timber.d("Empty attempt");
@@ -349,10 +352,8 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   }
 
   @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
-    // Set the default checked value
     presenter.setIgnorePeriodFromPreferences(ignorePeriod);
     menuExclude.setChecked(exclude);
-
     return super.onPrepareOptionsMenu(menu);
   }
 
@@ -400,6 +401,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   }
 
   @Override public void onSaveMenuSelections(@NonNull Bundle outState, long ignoreTime) {
+    Timber.d("onSaveMenuSelections");
     outState.putLong("IGNORE", ignoreTime);
     outState.putBoolean("EXCLUDE", menuExclude.isChecked());
   }
