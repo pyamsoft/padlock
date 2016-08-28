@@ -19,6 +19,8 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.bus.DBProgressBus;
+import com.pyamsoft.padlock.app.bus.LockInfoBus;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
@@ -47,6 +49,8 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @NonNull Subscription systemVisibleSubscription = Subscriptions.empty();
   @NonNull Subscription onboardSubscription = Subscriptions.empty();
   @NonNull Subscription fabStateSubscription = Subscriptions.empty();
+  @NonNull Subscription dbProgressBus = Subscriptions.empty();
+  @NonNull Subscription lockInfoDisplayBus = Subscriptions.empty();
 
   @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -60,11 +64,15 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @Override protected void onBind(@NonNull LockList view) {
     super.onBind(view);
     registerOnPinEntryBus(view);
+    registerOnDbProgressBus(view);
+    registerOnLockInfoDisplayBus(view);
   }
 
   @Override protected void onUnbind(@NonNull LockList view) {
     super.onUnbind(view);
     unregisterFromPinEntryBus();
+    unregisterFromDBProgressBus();
+    unregisterFromLockInfoDispalyBus();
   }
 
   @Override protected void onDestroy() {
@@ -73,6 +81,45 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     unsubscribeSystemVisible();
     unsubscribeOnboard();
     unsubscribeFabSubscription();
+  }
+
+  void registerOnLockInfoDisplayBus(@NonNull LockList view) {
+    unregisterFromLockInfoDispalyBus();
+    lockInfoDisplayBus = LockInfoBus.get()
+        .register()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(lockInfoDisplayEvent -> {
+          view.displayLockInfoDialog(lockInfoDisplayEvent.entry());
+        }, throwable -> {
+          Timber.e(throwable, "onError registerOnLockInfoDisplayBus");
+        });
+  }
+
+  void unregisterFromLockInfoDispalyBus() {
+    if (!lockInfoDisplayBus.isUnsubscribed()) {
+      lockInfoDisplayBus.unsubscribe();
+    }
+  }
+
+  void registerOnDbProgressBus(@NonNull LockList view) {
+    unregisterFromDBProgressBus();
+    dbProgressBus = DBProgressBus.get()
+        .register()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(dbProgressEvent -> {
+          view.displayDBProgressDialog(dbProgressEvent.position(), dbProgressEvent.checked(),
+              dbProgressEvent.entry());
+        }, throwable -> {
+          Timber.e(throwable, "onError registerOnDbProgressBus");
+        });
+  }
+
+  void unregisterFromDBProgressBus() {
+    if (!dbProgressBus.isUnsubscribed()) {
+      dbProgressBus.unsubscribe();
+    }
   }
 
   void unsubscribePopulateList() {
