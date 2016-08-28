@@ -28,6 +28,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.mikepenz.fastadapter.items.AbstractItem;
+import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.bus.DBProgressBus;
@@ -42,6 +43,8 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHolder> {
+
+  @NonNull static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
   @NonNull final AppEntry entry;
 
@@ -104,6 +107,16 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   void openInfo() {
     LockInfoBus.get().post(LockInfoDisplayEvent.create(entry));
+  }
+
+  @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
+    return FACTORY;
+  }
+
+  protected static class ItemFactory implements ViewHolderFactory<ViewHolder> {
+    public ViewHolder create(View v) {
+      return new ViewHolder(v);
+    }
   }
 
   public static final class ViewHolder extends RecyclerView.ViewHolder
