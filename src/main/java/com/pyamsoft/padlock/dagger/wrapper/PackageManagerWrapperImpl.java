@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger;
+package com.pyamsoft.padlock.dagger.wrapper;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,7 +24,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
 import java.util.ArrayList;
 import java.util.List;

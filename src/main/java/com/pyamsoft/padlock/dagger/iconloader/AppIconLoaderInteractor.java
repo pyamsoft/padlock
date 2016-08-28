@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model.sql;
+package com.pyamsoft.padlock.dagger.iconloader;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import rx.Observable;
 
-public abstract class TestPadLockEntry extends PadLockEntry {
+public interface AppIconLoaderInteractor {
 
-  @CheckResult @NonNull public static PadLockEntry test() {
-    return new AutoValue_PadLockEntry("com.example.test", "TestActvity", null, 0, 0, false, false);
-  }
-
-  @CheckResult @NonNull public static PadLockEntry empty() {
-    return new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false);
-  }
+  @CheckResult @NonNull Observable<Drawable> loadPackageIcon(@NonNull String packageName);
 }

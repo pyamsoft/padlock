@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.list.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;

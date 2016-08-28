@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list;
+package com.pyamsoft.padlock.dagger.wrapper;
 
-import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
+import dagger.Module;
+import dagger.Provides;
+import javax.inject.Singleton;
 
-public interface AppIconLoaderView {
+@Module public class PackageManagerWrapperModule {
 
-  void onApplicationIconLoadedSuccess(@NonNull Drawable icon);
-
-  void onApplicationIconLoadedError();
+  @Singleton @Provides PackageManagerWrapper providePackageManagerWrapper(
+      final PackageManagerWrapperImpl packageManagerWrapper) {
+    return packageManagerWrapper;
+  }
 }

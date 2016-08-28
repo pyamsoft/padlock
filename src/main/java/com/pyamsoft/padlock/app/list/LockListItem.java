@@ -31,6 +31,7 @@ import com.mikepenz.fastadapter.items.AbstractItem;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.bus.DBProgressBus;
 import com.pyamsoft.padlock.app.bus.LockInfoBus;
+import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.event.DBProgressEvent;
 import com.pyamsoft.padlock.model.event.LockInfoDisplayEvent;
