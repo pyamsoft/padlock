@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.service;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -51,6 +52,12 @@ public final class PadLockService extends AccessibilityService
 
   @CheckResult public static boolean isRunning() {
     return instance != null;
+  }
+
+  public static void finish() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      getInstance().disableSelf();
+    }
   }
 
   public static void passLockScreen() {

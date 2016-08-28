@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlock.app.settings;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,8 +29,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.loader.SettingsPreferencePresenterLoader;
 import com.pyamsoft.padlock.app.bus.MainBus;
+import com.pyamsoft.padlock.app.loader.SettingsPreferencePresenterLoader;
+import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.base.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -94,8 +97,11 @@ public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenc
   }
 
   @Override public void onClearAll() {
-    // TODO stop Service on 24
-    android.os.Process.killProcess(android.os.Process.myPid());
+    Timber.d("Everything is cleared, kill self");
+    PadLockService.finish();
+    final ActivityManager activityManager = (ActivityManager) getContext().getApplicationContext()
+        .getSystemService(Context.ACTIVITY_SERVICE);
+    activityManager.clearApplicationUserData();
   }
 
   @Override public void onClearDatabase() {
