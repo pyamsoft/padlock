@@ -25,7 +25,7 @@ import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
@@ -35,14 +35,14 @@ import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-final class LockServiceInteractorImpl implements LockServiceInteractor {
+class LockServiceInteractorImpl implements LockServiceInteractor {
 
-  @NonNull private final Context appContext;
-  @NonNull private final PadLockPreferences preferences;
-  @NonNull private final KeyguardManager keyguard;
-  @NonNull private final PackageManagerWrapper packageManagerWrapper;
+  @NonNull final Context appContext;
+  @NonNull final PadLockPreferences preferences;
+  @NonNull final KeyguardManager keyguard;
+  @NonNull final PackageManagerWrapper packageManagerWrapper;
 
-  @Inject public LockServiceInteractorImpl(final @NonNull Context context,
+  @Inject LockServiceInteractorImpl(final @NonNull Context context,
       @NonNull PadLockPreferences preferences, @NonNull KeyguardManager keyguard,
       @NonNull PackageManagerWrapper packageManagerWrapper) {
     this.packageManagerWrapper = packageManagerWrapper;

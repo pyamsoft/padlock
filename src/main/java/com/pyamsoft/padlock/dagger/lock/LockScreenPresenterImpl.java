@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.dagger.lock;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.list.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
 import javax.inject.Inject;
@@ -29,7 +29,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
+class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
     implements LockScreenPresenter {
 
   @NonNull final LockScreenInteractor interactor;

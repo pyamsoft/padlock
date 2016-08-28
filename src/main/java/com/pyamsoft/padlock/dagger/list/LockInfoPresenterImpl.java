@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.list.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -33,7 +33,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInfoView>
+class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInfoView>
     implements LockInfoPresenter {
 
   @NonNull final LockInfoInteractor lockInfoInteractor;

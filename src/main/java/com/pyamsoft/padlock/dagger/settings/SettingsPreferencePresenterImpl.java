@@ -27,15 +27,15 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class SettingsPreferencePresenterImpl
+class SettingsPreferencePresenterImpl
     extends SchedulerPresenter<SettingsPreferencePresenter.SettingsPreferenceView>
     implements SettingsPreferencePresenter {
 
-  public static final int CONFIRM_DATABASE = 0;
-  public static final int CONFIRM_ALL = 1;
-  @NonNull private final SettingsPreferenceInteractor interactor;
-  @NonNull private Subscription confirmBusSubscription = Subscriptions.empty();
-  @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
+  static final int CONFIRM_DATABASE = 0;
+  static final int CONFIRM_ALL = 1;
+  @NonNull final SettingsPreferenceInteractor interactor;
+  @NonNull Subscription confirmBusSubscription = Subscriptions.empty();
+  @NonNull Subscription confirmedSubscription = Subscriptions.empty();
 
   @Inject SettingsPreferencePresenterImpl(@NonNull SettingsPreferenceInteractor interactor,
       @NonNull @Named("io") Scheduler ioScheduler,

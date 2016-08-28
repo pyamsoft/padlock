@@ -22,7 +22,7 @@ import com.pyamsoft.pydroid.base.app.ApplicationBase;
 import com.pyamsoft.pydroid.crash.CrashHandler;
 import com.squareup.leakcanary.LeakCanary;
 
-public final class PadLock extends ApplicationBase {
+public class PadLock extends ApplicationBase {
 
   @Override protected boolean buildConfigDebug() {
     return BuildConfig.DEBUG;
@@ -58,7 +58,7 @@ public final class PadLock extends ApplicationBase {
     }
   }
 
-  private void setStrictMode() {
+  void setStrictMode() {
     StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll()
         .penaltyLog()
         .penaltyDeath()

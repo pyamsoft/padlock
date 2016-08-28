@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.list.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.app.lock.PinScreen;
@@ -28,7 +28,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public final class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
+class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
     implements PinEntryPresenter {
 
   @NonNull final AppIconLoaderPresenter<PinScreen> iconLoader;

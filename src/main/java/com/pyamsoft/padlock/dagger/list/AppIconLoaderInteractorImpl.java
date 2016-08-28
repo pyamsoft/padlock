@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.base;
+package com.pyamsoft.padlock.dagger.list;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.PackageManagerWrapper;
 import javax.inject.Inject;
 import rx.Observable;
 
-public class AppIconLoaderInteractorImpl implements AppIconLoaderInteractor {
+class AppIconLoaderInteractorImpl implements AppIconLoaderInteractor {
 
-  @NonNull private final PackageManagerWrapper packageManagerWrapper;
+  @NonNull final PackageManagerWrapper packageManagerWrapper;
 
   @Inject
   protected AppIconLoaderInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper) {

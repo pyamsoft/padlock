@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import com.pyamsoft.padlock.app.lock.LockScreenPresenterLoader;
 import com.pyamsoft.padlock.dagger.ActivityScope;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderModule;
+import com.pyamsoft.padlock.dagger.list.AppIconLoaderModule;
 import com.pyamsoft.padlock.dagger.db.DBModule;
 import dagger.Subcomponent;
 

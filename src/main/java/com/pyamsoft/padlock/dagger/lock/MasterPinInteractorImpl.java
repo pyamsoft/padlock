@@ -23,11 +23,11 @@ import com.pyamsoft.padlock.PadLockPreferences;
 import javax.inject.Inject;
 import rx.Observable;
 
-final class MasterPinInteractorImpl implements MasterPinInteractor {
+class MasterPinInteractorImpl implements MasterPinInteractor {
 
-  @NonNull private final PadLockPreferences preferences;
+  @NonNull final PadLockPreferences preferences;
 
-  @Inject public MasterPinInteractorImpl(@NonNull final PadLockPreferences preferences) {
+  @Inject MasterPinInteractorImpl(@NonNull final PadLockPreferences preferences) {
     this.preferences = preferences;
   }
 

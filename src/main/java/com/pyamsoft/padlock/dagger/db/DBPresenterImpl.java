@@ -29,7 +29,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class DBPresenterImpl extends SchedulerPresenter<DBPresenter.DBView>
+class DBPresenterImpl extends SchedulerPresenter<DBPresenter.DBView>
     implements DBPresenter {
 
   @NonNull final DBInteractor dbInteractor;
