@@ -21,9 +21,9 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.bus.DBProgressBus;
 import com.pyamsoft.padlock.app.bus.LockInfoBus;
+import com.pyamsoft.padlock.app.bus.PinEntryBus;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
-import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -296,7 +296,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
 
   void registerOnPinEntryBus(@NonNull LockList view) {
     unregisterFromPinEntryBus();
-    pinEntryBusSubscription = PinEntryDialog.PinEntryBus.get()
+    pinEntryBusSubscription = PinEntryBus.get()
         .register()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

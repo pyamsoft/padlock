@@ -61,15 +61,15 @@ import timber.log.Timber;
 import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
-public final class LockListFragment extends ActionBarFragment
+public class LockListFragment extends ActionBarFragment
     implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback,
     DBPresenter.DBView {
 
   @NonNull public static final String TAG = "LockListFragment";
-  @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
-  private static final int KEY_PRESENTER = 0;
-  private static final int KEY_ADAPTER_PRESENTER = 1;
-  private static final int KEY_DB_PRESENTER = 2;
+  @NonNull static final String PIN_DIALOG_TAG = "pin_dialog";
+  static final int KEY_PRESENTER = 0;
+  static final int KEY_ADAPTER_PRESENTER = 1;
+  static final int KEY_DB_PRESENTER = 2;
   @NonNull final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
@@ -221,7 +221,7 @@ public final class LockListFragment extends ActionBarFragment
     dbPresenter.unbindView();
   }
 
-  private void setupSwipeRefresh() {
+  void setupSwipeRefresh() {
     swipeRefreshLayout.setColorSchemeResources(R.color.blue500, R.color.amber700, R.color.blue700,
         R.color.amber500);
     swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -230,7 +230,7 @@ public final class LockListFragment extends ActionBarFragment
     });
   }
 
-  private void setupRecyclerView() {
+  void setupRecyclerView() {
     lockListLayoutManager = new LockListLayoutManager(getContext());
     lockListLayoutManager.setVerticalScrollEnabled(true);
     final RecyclerView.ItemDecoration dividerDecoration =
@@ -253,12 +253,12 @@ public final class LockListFragment extends ActionBarFragment
     }
   }
 
-  private void setupLockListMenuItems(final @NonNull Menu menu) {
+  void setupLockListMenuItems(final @NonNull Menu menu) {
     displaySystemItem = menu.findItem(R.id.menu_is_system);
     presenter.setSystemVisibilityFromPreference();
   }
 
-  private void setSystemCheckListener() {
+  void setSystemCheckListener() {
     displaySystemItem.setOnMenuItemClickListener(item -> {
       if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
         Timber.d("List is not refreshing. Allow change of system preference");
@@ -274,7 +274,7 @@ public final class LockListFragment extends ActionBarFragment
     });
   }
 
-  private void setSystemVisible(boolean visible) {
+  void setSystemVisible(boolean visible) {
     displaySystemItem.setOnMenuItemClickListener(null);
     displaySystemItem.setChecked(visible);
     setSystemCheckListener();
@@ -296,7 +296,7 @@ public final class LockListFragment extends ActionBarFragment
     return handled || super.onOptionsItemSelected(item);
   }
 
-  private void showSettingsScreen() {
+  void showSettingsScreen() {
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
       final FragmentActivity fragmentActivity = getActivity();
@@ -337,7 +337,7 @@ public final class LockListFragment extends ActionBarFragment
     unbinder.unbind();
   }
 
-  private void setupFAB() {
+  void setupFAB() {
     fab.setOnClickListener(view -> presenter.clickPinFAB());
     AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(24));
   }

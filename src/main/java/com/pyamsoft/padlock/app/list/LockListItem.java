@@ -45,7 +45,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   @NonNull final AppEntry entry;
 
-  public LockListItem(@NonNull AppEntry entry) {
+  LockListItem(@NonNull AppEntry entry) {
     this.entry = entry;
   }
 
@@ -122,7 +122,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
       appIconLoaderPresenter.bindView(this);
     }
 
-    public void loadImage(@NonNull String packageName) {
+    void loadImage(@NonNull String packageName) {
       appIconLoaderPresenter.loadApplicationIcon(packageName);
     }
 

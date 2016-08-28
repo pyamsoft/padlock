@@ -18,14 +18,15 @@ package com.pyamsoft.padlock.app.bus;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.event.RefreshEvent;
+import com.pyamsoft.padlock.app.lock.PinEntryDialog;
+import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.tool.RxBus;
 
-public class MainBus extends RxBus<RefreshEvent> {
+public class PinEntryBus extends RxBus<PinEntryEvent> {
 
-  @NonNull private static final MainBus instance = new MainBus();
+  @NonNull private static final PinEntryBus instance = new PinEntryBus();
 
-  @CheckResult @NonNull public static MainBus get() {
+  @CheckResult @NonNull public static PinEntryBus get() {
     return instance;
   }
 }

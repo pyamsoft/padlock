@@ -109,7 +109,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
     }).filter(pin -> pin != null).flatMap(pin -> checkSubmissionAttempt(attempt, pin));
   }
 
-  @CheckResult @NonNull private Observable<Boolean> isRecheckEnabled() {
+  @CheckResult @NonNull Observable<Boolean> isRecheckEnabled() {
     return Observable.defer(() -> Observable.just(preferences.isRecheckEnabled()));
   }
 
@@ -182,7 +182,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   @CheckResult @NonNull
-  private Observable<Long> whitelistEntry(@NonNull String packageName, @NonNull String activityName,
+  Observable<Long> whitelistEntry(@NonNull String packageName, @NonNull String activityName,
       @NonNull String realName, @Nullable String lockCode, boolean isSystem) {
     Timber.d("Get entry for %s %s (real %s)", packageName, activityName, realName);
     return PadLockDB.with(appContext)
@@ -206,7 +206,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   // KLUDGE void, probably should return Observable to the stream
-  @CheckResult @NonNull private Observable<Integer> queueRecheckJob(PadLockEntry entry,
+  @CheckResult @NonNull Observable<Integer> queueRecheckJob(PadLockEntry entry,
       long recheckTime) {
     return Observable.defer(() -> {
       // Cancel any old recheck job for the class, but not the package
@@ -225,7 +225,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   @NonNull @CheckResult
-  private Observable<Integer> ignoreEntryForTime(@NonNull PadLockEntry oldValues,
+  Observable<Integer> ignoreEntryForTime(@NonNull PadLockEntry oldValues,
       final long ignoreMinutesInMillis) {
     Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
         ignoreMinutesInMillis);

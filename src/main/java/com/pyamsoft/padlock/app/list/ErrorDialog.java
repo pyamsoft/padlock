@@ -23,7 +23,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
-public final class ErrorDialog extends DialogFragment {
+public class ErrorDialog extends DialogFragment {
 
   @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     return new AlertDialog.Builder(getActivity()).setTitle("ERROR")

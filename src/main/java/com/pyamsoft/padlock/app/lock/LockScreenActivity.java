@@ -62,11 +62,11 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   @NonNull public static final String ENTRY_REAL_NAME = "real_name";
   @NonNull public static final String ENTRY_LOCK_CODE = "lock_code";
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
-  @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
-  @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
+  @NonNull static final String CODE_DISPLAY = "CODE_DISPLAY";
+  @NonNull static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
   @NonNull final Intent home;
-  @NonNull private final AsyncDrawableMap taskMap;
+  @NonNull final AsyncDrawableMap taskMap;
   @BindView(R.id.activity_lock_screen) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.appbar) AppBarLayout appBarLayout;

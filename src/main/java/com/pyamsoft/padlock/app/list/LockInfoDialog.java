@@ -54,12 +54,12 @@ import timber.log.Timber;
 public class LockInfoDialog extends DialogFragment
     implements LockInfoPresenter.LockInfoView, DBPresenter.DBView {
 
-  @NonNull private static final String ARG_APP_ENTRY = "app_entry";
-  private static final int KEY_PRESENTER = 0;
-  private static final int KEY_ADAPTER_PRESENTER = 1;
-  private static final int KEY_DB_PRESENTER = 2;
-  @NonNull private final Handler handler = new Handler();
-  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
+  @NonNull static final String ARG_APP_ENTRY = "app_entry";
+  static final int KEY_PRESENTER = 0;
+  static final int KEY_ADAPTER_PRESENTER = 1;
+  static final int KEY_DB_PRESENTER = 2;
+  @NonNull final Handler handler = new Handler();
+  @NonNull final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;
@@ -187,7 +187,7 @@ public class LockInfoDialog extends DialogFragment
     dbPresenter.unbindView();
   }
 
-  private void initializeForEntry() {
+  void initializeForEntry() {
     ViewCompat.setElevation(toolbar, AppUtil.convertToDP(getContext(), 4));
     close.setOnClickListener(view -> {
       // Only close if list is displayed
@@ -223,7 +223,7 @@ public class LockInfoDialog extends DialogFragment
     repopulateList();
   }
 
-  private void repopulateList() {
+  void repopulateList() {
     Timber.d("Repopulate list");
     recyclerView.setClickable(false);
     presenter.populateList(appEntry.packageName());
@@ -276,7 +276,7 @@ public class LockInfoDialog extends DialogFragment
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  private void safeChangeToggleAllState(boolean enabled) {
+  void safeChangeToggleAllState(boolean enabled) {
     toggleAll.setOnCheckedChangeListener(null);
     toggleAll.setChecked(enabled);
     toggleAll.setOnCheckedChangeListener((compoundButton, isChecked) -> {

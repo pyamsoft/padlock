@@ -54,7 +54,7 @@ public class MainActivity extends DonationActivityBase
   @BindView(R.id.main_root) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   MainPresenter presenter;
-  private Unbinder unbinder;
+  Unbinder unbinder;
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
@@ -95,12 +95,12 @@ public class MainActivity extends DonationActivityBase
     presenter.unbindView();
   }
 
-  private void setAppBarState() {
+  void setAppBarState() {
     setSupportActionBar(toolbar);
     toolbar.setTitle(getString(R.string.app_name));
   }
 
-  private void showAccessibilityPrompt() {
+  void showAccessibilityPrompt() {
     supportInvalidateOptionsMenu();
     final FragmentManager fragmentManager = getSupportFragmentManager();
     if (fragmentManager.findFragmentByTag(AccessibilityFragment.TAG) == null) {
@@ -110,7 +110,7 @@ public class MainActivity extends DonationActivityBase
     }
   }
 
-  private void showLockList() {
+  void showLockList() {
     if (rootView.isLaidOut()) {
       realShowLockList();
     } else {

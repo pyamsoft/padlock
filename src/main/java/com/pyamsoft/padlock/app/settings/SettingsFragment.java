@@ -56,7 +56,7 @@ public class SettingsFragment extends ActionBarFragment {
     displayPreferenceFragment();
   }
 
-  private void displayPreferenceFragment() {
+  void displayPreferenceFragment() {
     // KLUDGE child fragment, not the nicest
     if (getChildFragmentManager().findFragmentByTag(SettingsPreferenceFragment.TAG) == null) {
       getChildFragmentManager().beginTransaction()

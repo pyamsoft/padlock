@@ -31,13 +31,13 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import java.util.List;
 
-public class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
+class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   @NonNull static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
   @NonNull final String packageName;
   @NonNull final ActivityEntry entry;
 
-  public LockInfoItem(@NonNull String packageName, @NonNull ActivityEntry entry) {
+  LockInfoItem(@NonNull String packageName, @NonNull ActivityEntry entry) {
     this.packageName = packageName;
     this.entry = entry;
   }
