@@ -33,7 +33,7 @@ class AppIconLoaderPresenterImpl<I extends AppIconLoaderView> extends SchedulerP
   @NonNull final AppIconLoaderInteractor interactor;
   @NonNull Subscription loadIconSubscription = Subscriptions.empty();
 
-  @Inject public AppIconLoaderPresenterImpl(@NonNull AppIconLoaderInteractor interactor,
+  @Inject AppIconLoaderPresenterImpl(@NonNull AppIconLoaderInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {
     super(mainScheduler, ioScheduler);

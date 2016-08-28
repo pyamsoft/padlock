@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.iconloader;
 
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.list.LockInfoPresenter;
+import com.pyamsoft.padlock.app.list.LockListItem;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.PinScreen;
 import com.pyamsoft.padlock.dagger.ActivityScope;
@@ -43,6 +44,13 @@ import rx.Scheduler;
   }
 
   @ActivityScope @Provides AppIconLoaderPresenter<PinScreen> providePinScreenAppIconLoaderPresenter(
+      final AppIconLoaderInteractor interactor, @Named("main") Scheduler mainScheduler,
+      @Named("io") Scheduler ioScheduler) {
+    return new AppIconLoaderPresenterImpl<>(interactor, mainScheduler, ioScheduler);
+  }
+
+  @ActivityScope @Provides
+  AppIconLoaderPresenter<LockListItem.ViewHolder> provideViewHolderAppIconLoaderPresenter(
       final AppIconLoaderInteractor interactor, @Named("main") Scheduler mainScheduler,
       @Named("io") Scheduler ioScheduler) {
     return new AppIconLoaderPresenterImpl<>(interactor, mainScheduler, ioScheduler);
