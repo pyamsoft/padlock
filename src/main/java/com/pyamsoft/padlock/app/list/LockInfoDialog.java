@@ -21,6 +21,7 @@ import android.app.Dialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -40,14 +41,16 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.pydroid.base.activity.adapter.ListAdapterLoader;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
+import com.pyamsoft.pydroid.tool.RxBus;
 import com.pyamsoft.pydroid.util.AppUtil;
-import javax.inject.Inject;
 import rx.Subscription;
 import timber.log.Timber;
 
@@ -60,7 +63,6 @@ public class LockInfoDialog extends DialogFragment
   private static final int KEY_DB_PRESENTER = 2;
   @NonNull private final Handler handler = new Handler();
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
-
   @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;
@@ -70,13 +72,12 @@ public class LockInfoDialog extends DialogFragment
   @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
   @BindView(R.id.lock_info_toggleall) SwitchCompat toggleAll;
 
-  @Inject LockInfoPresenter presenter;
-  @Inject DBPresenter dbPresenter;
-  @Inject ActivityEntryAdapterPresenter adapterPresenter;
+  LockInfoPresenter presenter;
+  DBPresenter dbPresenter;
+  LockInfoAdapter fastItemAdapter;
   boolean firstRefresh;
-  private LockInfoAdapter adapter;
-  private AppEntry appEntry;
-  private Unbinder unbinder;
+  AppEntry appEntry;
+  Unbinder unbinder;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -113,20 +114,22 @@ public class LockInfoDialog extends DialogFragment
         });
 
     getLoaderManager().initLoader(KEY_ADAPTER_PRESENTER, null,
-        new LoaderManager.LoaderCallbacks<ActivityEntryAdapterPresenter>() {
+        new LoaderManager.LoaderCallbacks<LockInfoAdapter>() {
+          @Override public Loader<LockInfoAdapter> onCreateLoader(int id, Bundle args) {
+            return new ListAdapterLoader<LockInfoAdapter>(getContext()) {
+              @NonNull @Override protected LockInfoAdapter loadAdapter() {
+                return new LockInfoAdapter();
+              }
+            };
+          }
+
           @Override
-          public Loader<ActivityEntryAdapterPresenter> onCreateLoader(int id, Bundle args) {
-            firstRefresh = true;
-            return new ActivityEntryAdapterPresenterLoader(getContext());
+          public void onLoadFinished(Loader<LockInfoAdapter> loader, LockInfoAdapter data) {
+            fastItemAdapter = data;
           }
 
-          @Override public void onLoadFinished(Loader<ActivityEntryAdapterPresenter> loader,
-              ActivityEntryAdapterPresenter data) {
-            adapterPresenter = data;
-          }
-
-          @Override public void onLoaderReset(Loader<ActivityEntryAdapterPresenter> loader) {
-            adapterPresenter = null;
+          @Override public void onLoaderReset(Loader<LockInfoAdapter> loader) {
+            fastItemAdapter = null;
           }
         });
 
@@ -170,14 +173,10 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void onResume() {
     super.onResume();
-    if (adapter == null) {
-      adapter = new LockInfoAdapter(this, appEntry, adapterPresenter, dbPresenter);
-      recyclerView.setAdapter(adapter);
-    }
-
     presenter.bindView(this);
-    adapter.onStart();
+    dbPresenter.bindView(this);
 
+    recyclerView.setAdapter(fastItemAdapter);
     presenter.loadApplicationIcon(appEntry.packageName());
     presenter.setToggleAllState(appEntry.packageName());
     if (firstRefresh) {
@@ -188,7 +187,7 @@ public class LockInfoDialog extends DialogFragment
   @Override public void onPause() {
     super.onPause();
     presenter.unbindView();
-    adapter.onStop();
+    dbPresenter.unbindView();
   }
 
   private void initializeForEntry() {
@@ -218,10 +217,11 @@ public class LockInfoDialog extends DialogFragment
   }
 
   @Override public void refreshList() {
-    final int oldSize = adapter.getItemCount() - 1;
+    final int oldSize = fastItemAdapter.getItemCount() - 1;
     for (int i = oldSize; i >= 0; --i) {
-      adapter.removeItem();
+      fastItemAdapter.remove(i);
     }
+
     onListCleared();
     repopulateList();
   }
@@ -234,7 +234,7 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
     Timber.d("Add entry: %s", entry);
-    adapter.addItem(entry);
+    fastItemAdapter.add(new LockInfoItem(appEntry.packageName(), entry));
   }
 
   @Override public void onListPopulated() {
@@ -261,22 +261,22 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void onDBCreateEvent(int position) {
     if (position >= 0) {
-      throw new RuntimeException(
-          "LockInfoDialog should not be handling onDBCreateEvent for position: " + position);
+      fastItemAdapter.onDBCreateEvent(position);
+    } else {
+      refreshList();
     }
-    refreshList();
   }
 
   @Override public void onDBDeleteEvent(int position) {
     if (position >= 0) {
-      throw new RuntimeException(
-          "LockInfoDialog should not be handling onDBDeleteEvent for position: " + position);
+      fastItemAdapter.onDBDeleteEvent(position);
+    } else {
+      refreshList();
     }
-    refreshList();
   }
 
   @Override public void onDBError() {
-    // TODO handle. But can we even get the error from the adapter?
+    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
   private void safeChangeToggleAllState(boolean enabled) {
@@ -286,9 +286,9 @@ public class LockInfoDialog extends DialogFragment
       recyclerView.setClickable(false);
 
       // Clear All
-      final int size = adapter.getItemCount();
-      for (int i = 0; i < size; ++i) {
-        adapter.removeItem();
+      final int oldSize = fastItemAdapter.getItemCount() - 1;
+      for (int i = oldSize; i >= 0; --i) {
+        fastItemAdapter.remove(i);
       }
 
       dbPresenter.attemptDBAllModification(isChecked, appEntry.packageName(), null,
@@ -302,5 +302,26 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void disableToggleAll() {
     safeChangeToggleAllState(false);
+  }
+
+  public static class Bus extends RxBus<Bus.DisplayEvent> {
+
+    @NonNull private static final Bus instance = new Bus();
+
+    @CheckResult @NonNull public static Bus get() {
+      return instance;
+    }
+
+    public static class DisplayEvent {
+      @NonNull private final AppEntry entry;
+
+      public DisplayEvent(@NonNull AppEntry entry) {
+        this.entry = entry;
+      }
+
+      @NonNull @CheckResult public AppEntry getEntry() {
+        return entry;
+      }
+    }
   }
 }

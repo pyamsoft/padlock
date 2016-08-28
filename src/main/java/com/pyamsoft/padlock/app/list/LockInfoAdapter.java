@@ -16,157 +16,32 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.base.ErrorDialog;
+import com.mikepenz.fastadapter.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
-import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.util.AppUtil;
-import timber.log.Timber;
 
-public final class LockInfoAdapter extends BaseRecyclerAdapter<LockInfoAdapter.ViewHolder>
-    implements LockListItem<ActivityEntry>, DBPresenter.DBView,
-    AdapterPresenter.AdapterView<LockInfoAdapter.ViewHolder> {
-
-  @NonNull private final LockInfoDialog lockInfoDialog;
-  @NonNull private final ActivityEntryAdapterPresenter adapterPresenter;
-  @NonNull private final DBPresenter dbPresenter;
-  @NonNull private final AppEntry appEntry;
-
-  public LockInfoAdapter(@NonNull LockInfoDialog lockInfoDialog, @NonNull AppEntry appEntry,
-      @NonNull ActivityEntryAdapterPresenter adapterPresenter, @NonNull DBPresenter dbPresenter) {
-    this.lockInfoDialog = lockInfoDialog;
-    this.appEntry = appEntry;
-    this.adapterPresenter = adapterPresenter;
-    this.dbPresenter = dbPresenter;
-  }
-
-  @Override public void onStart() {
-    super.onStart();
-    dbPresenter.bindView(this);
-    adapterPresenter.bindView(this);
-  }
-
-  @Override public void onStop() {
-    super.onStop();
-    adapterPresenter.unbindView();
-    dbPresenter.unbindView();
-  }
-
-  @Override public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-    final View view = LayoutInflater.from(parent.getContext())
-        .inflate(R.layout.adapter_item_lockinfo, parent, false);
-    return new ViewHolder(view);
-  }
-
-  @Override public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-    Timber.d("onBindViewHolder: %d", position);
-    final ActivityEntry entry = adapterPresenter.get(position);
-
-    removeViewActionListeners(holder);
-    switch (entry.lockState()) {
-      case DEFAULT:
-        holder.defaultLockState.setChecked(true);
-        break;
-      case WHITELISTED:
-        holder.whiteLockState.setChecked(true);
-        break;
-      case LOCKED:
-        holder.blackLockState.setChecked(true);
-        break;
-      default:
-        throw new IllegalStateException("Illegal enum state");
-    }
-
-    String activityName;
-    final String entryName = entry.name();
-    if (entryName.startsWith(appEntry.packageName())) {
-      activityName = entryName.replace(appEntry.packageName(), "");
-    } else {
-      activityName = entryName;
-    }
-    holder.name.setText(activityName);
-
-    // TODO set on check change listener
-    //holder.name.setOnClickListener(
-    //    view -> dbPresenter.attemptDBModification(position, !holder.name.isChecked(),
-    //        appEntry.packageName(), entryName, null, appEntry.system()));
-  }
-
-  @Override public void onViewRecycled(@NonNull ViewHolder holder) {
-    super.onViewRecycled(holder);
-    removeViewActionListeners(holder);
-  }
-
-  private void removeViewActionListeners(@NonNull ViewHolder holder) {
-    holder.defaultLockState.setOnCheckedChangeListener(null);
-    holder.whiteLockState.setOnCheckedChangeListener(null);
-    holder.blackLockState.setOnCheckedChangeListener(null);
-  }
-
-  @Override public int getItemCount() {
-    return adapterPresenter.size();
-  }
-
-  @Override public void addItem(@NonNull ActivityEntry entry) {
-    final int next = adapterPresenter.add(entry);
-    notifyItemInserted(next);
-  }
-
-  @Override public void removeItem() {
-    final int old = adapterPresenter.remove();
-    notifyItemRemoved(old);
-  }
+public final class LockInfoAdapter extends FastItemAdapter<LockInfoItem>
+    implements DBPresenter.DBView {
 
   @Override public void onDBCreateEvent(int position) {
-    if (position < 0) {
-      Timber.d("Pass create event to dialog");
-      lockInfoDialog.onDBCreateEvent(position);
-    } else {
-      Timber.d("onDBCreateEvent");
-      adapterPresenter.setLocked(position, ActivityEntry.ActivityLockState.LOCKED);
-      notifyItemChanged(position);
-    }
+    final LockInfoItem oldItem = getItem(position);
+    final LockInfoItem newItem = new LockInfoItem(oldItem.packageName,
+        ActivityEntry.builder(oldItem.entry)
+            .lockState(ActivityEntry.ActivityLockState.LOCKED)
+            .build());
+    set(position, newItem);
   }
 
   @Override public void onDBDeleteEvent(int position) {
-    if (position < 0) {
-      Timber.d("Pass delete event to dialog");
-      lockInfoDialog.onDBDeleteEvent(position);
-    } else {
-      Timber.d("onDBDeleteEvent");
-      // TODO move to activitystate
-      adapterPresenter.setLocked(position, ActivityEntry.ActivityLockState.DEFAULT);
-      notifyItemChanged(position);
-    }
+    final LockInfoItem oldItem = getItem(position);
+    final LockInfoItem newItem = new LockInfoItem(oldItem.packageName,
+        ActivityEntry.builder(oldItem.entry)
+            .lockState(ActivityEntry.ActivityLockState.DEFAULT)
+            .build());
+    set(position, newItem);
   }
 
   @Override public void onDBError() {
-    AppUtil.guaranteeSingleDialogFragment(lockInfoDialog.getFragmentManager(), new ErrorDialog(),
-        "error");
-  }
-
-  public static final class ViewHolder extends RecyclerView.ViewHolder {
-
-    @BindView(R.id.lock_info_activity) TextView name;
-    @BindView(R.id.lock_info_tristate_radiogroup) RadioGroup triStateGroup;
-    @BindView(R.id.lock_info_radio_default) RadioButton defaultLockState;
-    @BindView(R.id.lock_info_radio_white) RadioButton whiteLockState;
-    @BindView(R.id.lock_info_radio_black) RadioButton blackLockState;
-
-    public ViewHolder(@NonNull View itemView) {
-      super(itemView);
-      ButterKnife.bind(this, itemView);
-    }
+    throw new RuntimeException("Not handled");
   }
 }

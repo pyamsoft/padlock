@@ -20,12 +20,15 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.pydroid.tool.RxBus;
 import com.pyamsoft.pydroid.util.AppUtil;
 
 public final class DBProgressDialog extends DialogFragment {
@@ -71,5 +74,38 @@ public final class DBProgressDialog extends DialogFragment {
     dialog.setIndeterminate(true);
     dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
     return dialog;
+  }
+
+  public static class Bus extends RxBus<Bus.DisplayEvent> {
+
+    @NonNull private static final Bus instance = new Bus();
+
+    @CheckResult @NonNull public static Bus get() {
+      return instance;
+    }
+
+    public static class DisplayEvent {
+      private final int position;
+      private final boolean checked;
+      @NonNull private final AppEntry entry;
+
+      public DisplayEvent(int position, boolean checked, @NonNull AppEntry entry) {
+        this.position = position;
+        this.checked = checked;
+        this.entry = entry;
+      }
+
+      @CheckResult public int getPosition() {
+        return position;
+      }
+
+      @CheckResult public boolean isChecked() {
+        return checked;
+      }
+
+      @CheckResult @NonNull public AppEntry getEntry() {
+        return entry;
+      }
+    }
   }
 }
