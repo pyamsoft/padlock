@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.lock;
+package com.pyamsoft.padlock.dagger.job;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;

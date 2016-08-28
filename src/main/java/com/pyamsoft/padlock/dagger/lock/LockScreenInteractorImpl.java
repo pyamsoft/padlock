@@ -27,6 +27,7 @@ import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
+import com.pyamsoft.padlock.dagger.job.RecheckJob;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;

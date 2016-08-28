@@ -29,7 +29,7 @@ import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
-import com.pyamsoft.padlock.dagger.lock.RecheckJob;
+import com.pyamsoft.padlock.dagger.job.RecheckJob;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
