@@ -39,7 +39,6 @@ import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.accessibility.AccessibilityFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
-import com.pyamsoft.padlock.app.loader.MainPresenterLoader;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.pydroid.base.activity.DonationActivityBase;

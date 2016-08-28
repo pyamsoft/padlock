@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.bus.MainBus;
-import com.pyamsoft.padlock.app.loader.SettingsPreferencePresenterLoader;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.base.fragment.ActionBarSettingsPreferenceFragment;

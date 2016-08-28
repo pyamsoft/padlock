@@ -48,7 +48,6 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
-import com.pyamsoft.padlock.app.loader.LockScreenPresenterLoader;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.util.AppUtil;
