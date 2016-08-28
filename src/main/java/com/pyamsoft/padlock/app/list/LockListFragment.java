@@ -177,6 +177,7 @@ public final class LockListFragment extends ActionBarFragment
     presenter.bindView(this);
 
     presenter.setFABStateFromPreference();
+    presenter.showOnBoarding();
     if (firstRefresh) {
       Timber.d("Do initial refresh");
       firstRefresh = false;
@@ -184,12 +185,7 @@ public final class LockListFragment extends ActionBarFragment
     }
 
     handler.removeCallbacksAndMessages(null);
-    handler.postDelayed(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
-      @Override public void onShown(FloatingActionButton fab) {
-        super.onShown(fab);
-        presenter.showOnBoarding();
-      }
-    }), 300L);
+    handler.postDelayed(() -> fab.show(), 300L);
     setActionBarUpEnabled(false);
 
     getActivity().supportInvalidateOptionsMenu();
@@ -389,8 +385,8 @@ public final class LockListFragment extends ActionBarFragment
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
     // KLUDGE dismissed when orientation is changed
-    new MaterialShowcaseView.Builder(getActivity()).setTarget(fab)
-        .setTargetTouchable(false)
+    new MaterialShowcaseView.Builder(getActivity()).setTargetTouchable(false)
+        .setTarget(fab)
         .setMaskColour(ContextCompat.getColor(getContext(), R.color.blue500))
         .setTitleText(R.string.app_name)
         .setContentText(R.string.getting_started)
@@ -402,7 +398,9 @@ public final class LockListFragment extends ActionBarFragment
 
           @Override public void onShowcaseDismissed(MaterialShowcaseView materialShowcaseView) {
             Timber.d("onShowcaseDismissed");
-            presenter.setOnBoard();
+            if (presenter != null) {
+              presenter.setOnBoard();
+            }
           }
         })
         .build()
@@ -418,12 +416,7 @@ public final class LockListFragment extends ActionBarFragment
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
     handler.post(stopRefreshRunnable);
-    handler.post(() -> fab.show(new FloatingActionButton.OnVisibilityChangedListener() {
-      @Override public void onShown(FloatingActionButton fab) {
-        super.onShown(fab);
-        presenter.showOnBoarding();
-      }
-    }));
+    handler.post(() -> fab.show());
   }
 
   @Override public void refreshList() {
