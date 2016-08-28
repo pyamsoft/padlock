@@ -18,24 +18,23 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderInteractorImpl;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.crash.CrashLogActivity;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
 
-final class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl
+class LockInfoInteractorImpl extends AppIconLoaderInteractorImpl
     implements LockInfoInteractor {
 
-  @NonNull private final Context appContext;
-  @NonNull private final PackageManagerWrapper packageManagerWrapper;
+  @NonNull final Context appContext;
+  @NonNull final PackageManagerWrapper packageManagerWrapper;
 
-  @Inject public LockInfoInteractorImpl(final @NonNull Context context,
+  @Inject LockInfoInteractorImpl(final @NonNull Context context,
       @NonNull PackageManagerWrapper packageManagerWrapper) {
     super(packageManagerWrapper);
     this.packageManagerWrapper = packageManagerWrapper;

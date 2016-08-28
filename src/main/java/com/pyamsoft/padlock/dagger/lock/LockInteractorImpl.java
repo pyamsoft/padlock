@@ -26,9 +26,9 @@ import rx.Observable;
 
 abstract class LockInteractorImpl implements LockInteractor {
 
-  @NonNull private final MessageDigest messageDigest;
+  @NonNull final MessageDigest messageDigest;
 
-  protected LockInteractorImpl() {
+  LockInteractorImpl() {
     try {
       messageDigest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {

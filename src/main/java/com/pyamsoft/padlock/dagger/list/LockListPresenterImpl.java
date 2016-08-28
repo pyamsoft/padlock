@@ -36,7 +36,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockList>
+class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockList>
     implements LockListPresenter {
 
   @NonNull final LockListInteractor lockListInteractor;

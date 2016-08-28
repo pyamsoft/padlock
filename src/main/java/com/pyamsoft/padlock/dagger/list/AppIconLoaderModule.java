@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.base;
+package com.pyamsoft.padlock.dagger.list;
 
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.list.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.PinScreen;

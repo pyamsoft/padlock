@@ -25,12 +25,12 @@ import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-final class SettingsPrefrenceInteractorImpl implements SettingsPreferenceInteractor {
+class SettingsPrefrenceInteractorImpl implements SettingsPreferenceInteractor {
 
   @NonNull final PadLockPreferences preferences;
   @NonNull final Context appContext;
 
-  @Inject public SettingsPrefrenceInteractorImpl(final @NonNull Context context,
+  @Inject SettingsPrefrenceInteractorImpl(final @NonNull Context context,
       final @NonNull PadLockPreferences preferences) {
     appContext = context.getApplicationContext();
     this.preferences = preferences;

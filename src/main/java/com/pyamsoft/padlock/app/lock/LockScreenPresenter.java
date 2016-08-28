@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.app.lock;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.list.AppIconLoaderPresenter;
 
 public interface LockScreenPresenter
     extends LockPresenter<LockScreen>, AppIconLoaderPresenter<LockScreen> {

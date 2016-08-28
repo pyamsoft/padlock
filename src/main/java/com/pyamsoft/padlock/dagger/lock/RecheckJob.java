@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.Set;
 import timber.log.Timber;
 
-public final class RecheckJob extends Job {
+public class RecheckJob extends Job {
 
   public static final int PRIORITY = 1;
   @NonNull public static final String TAG_ALL = "ALL";

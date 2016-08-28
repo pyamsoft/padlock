@@ -31,19 +31,19 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class LockServicePresenterImpl
+class LockServicePresenterImpl
     extends SchedulerPresenter<LockServicePresenter.LockService> implements LockServicePresenter {
 
-  @NonNull private final LockServiceInteractor interactor;
-  @NonNull private final LockServiceStateInteractor stateInteractor;
-  @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
-  @NonNull private Subscription pickCorrectSubscription = Subscriptions.empty();
+  @NonNull final LockServiceInteractor interactor;
+  @NonNull final LockServiceStateInteractor stateInteractor;
+  @NonNull Subscription lockedEntrySubscription = Subscriptions.empty();
+  @NonNull Subscription pickCorrectSubscription = Subscriptions.empty();
 
-  @NonNull private String lastPackageName = "";
-  @NonNull private String lastClassName = "";
-  @NonNull private String activePackageName = "";
-  @NonNull private String activeClassName = "";
-  private boolean lockScreenPassed;
+  @NonNull String lastPackageName = "";
+  @NonNull String lastClassName = "";
+  @NonNull String activePackageName = "";
+  @NonNull String activeClassName = "";
+  boolean lockScreenPassed;
 
   @Inject LockServicePresenterImpl(@NonNull final LockServiceStateInteractor stateInteractor,
       @NonNull final LockServiceInteractor interactor,

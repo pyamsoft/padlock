@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.base;
+package com.pyamsoft.padlock.app.list;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.base.presenter.Presenter;

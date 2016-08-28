@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.base;
+package com.pyamsoft.padlock.dagger;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,7 +24,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +32,9 @@ import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-public final class PackageManagerWrapperImpl implements PackageManagerWrapper {
+class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
-  @NonNull private final PackageManager packageManager;
+  @NonNull final PackageManager packageManager;
 
   @Inject public PackageManagerWrapperImpl(@NonNull Context context) {
     this.packageManager = context.getApplicationContext().getPackageManager();

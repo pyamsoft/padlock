@@ -25,23 +25,23 @@ import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-final class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenInteractor {
+class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenInteractor {
 
-  @NonNull private final MasterPinInteractor pinInteractor;
-  @NonNull private final Context appContext;
-  @NonNull private final PadLockPreferences preferences;
-  @NonNull private final long[] ignoreTimes;
-  @NonNull private final PackageManagerWrapper packageManagerWrapper;
-  private int failCount;
+  @NonNull final MasterPinInteractor pinInteractor;
+  @NonNull final Context appContext;
+  @NonNull final PadLockPreferences preferences;
+  @NonNull final long[] ignoreTimes;
+  @NonNull final PackageManagerWrapper packageManagerWrapper;
+  int failCount;
 
-  @Inject public LockScreenInteractorImpl(final @NonNull Context context,
+  @Inject LockScreenInteractorImpl(final @NonNull Context context,
       @NonNull final PadLockPreferences preferences,
       @NonNull final MasterPinInteractor masterPinInteractor,
       @NonNull PackageManagerWrapper packageManagerWrapper) {

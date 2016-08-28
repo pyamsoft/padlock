@@ -20,20 +20,20 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
 
-final class LockListInteractorImpl implements LockListInteractor {
+class LockListInteractorImpl implements LockListInteractor {
 
-  @NonNull private final Context appContext;
-  @NonNull private final PadLockPreferences preferences;
-  @NonNull private final PackageManagerWrapper packageManagerWrapper;
+  @NonNull final Context appContext;
+  @NonNull final PadLockPreferences preferences;
+  @NonNull final PackageManagerWrapper packageManagerWrapper;
 
-  @Inject public LockListInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper,
+  @Inject LockListInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper,
       final @NonNull Context context, final @NonNull PadLockPreferences preferences) {
     this.packageManagerWrapper = packageManagerWrapper;
     appContext = context.getApplicationContext();

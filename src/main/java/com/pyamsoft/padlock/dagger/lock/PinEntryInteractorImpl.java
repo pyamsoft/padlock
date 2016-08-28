@@ -23,11 +23,11 @@ import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-final class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntryInteractor {
+class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntryInteractor {
 
-  @NonNull private final MasterPinInteractor masterPinInteractor;
+  @NonNull final MasterPinInteractor masterPinInteractor;
 
-  @Inject public PinEntryInteractorImpl(@NonNull final MasterPinInteractor masterPinInteractor) {
+  @Inject PinEntryInteractorImpl(@NonNull final MasterPinInteractor masterPinInteractor) {
     this.masterPinInteractor = masterPinInteractor;
   }
 

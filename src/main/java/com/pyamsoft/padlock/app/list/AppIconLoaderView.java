@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.base;
+package com.pyamsoft.padlock.app.list;
 
 import android.graphics.drawable.Drawable;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import rx.Observable;
 
-public interface AppIconLoaderInteractor {
+public interface AppIconLoaderView {
 
-  @CheckResult @NonNull Observable<Drawable> loadPackageIcon(@NonNull String packageName);
+  void onApplicationIconLoadedSuccess(@NonNull Drawable icon);
+
+  void onApplicationIconLoadedError();
 }

@@ -20,18 +20,18 @@ import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-final class DBInteractorImpl implements DBInteractor {
+class DBInteractorImpl implements DBInteractor {
 
-  @NonNull private final Context appContext;
-  @NonNull private final PackageManagerWrapper packageManagerWrapper;
+  @NonNull final Context appContext;
+  @NonNull final PackageManagerWrapper packageManagerWrapper;
 
-  @Inject public DBInteractorImpl(final @NonNull Context context,
+  @Inject DBInteractorImpl(final @NonNull Context context,
       @NonNull PackageManagerWrapper packageManagerWrapper) {
     this.packageManagerWrapper = packageManagerWrapper;
     appContext = context.getApplicationContext();

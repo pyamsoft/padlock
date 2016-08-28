@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.app.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.app.list.AppIconLoaderPresenter;
 
 public interface PinEntryPresenter
     extends LockPresenter<PinScreen>, AppIconLoaderPresenter<PinScreen> {

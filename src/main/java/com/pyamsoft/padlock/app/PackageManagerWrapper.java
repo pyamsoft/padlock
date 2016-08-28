@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.base;
+package com.pyamsoft.padlock.app;
 
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;

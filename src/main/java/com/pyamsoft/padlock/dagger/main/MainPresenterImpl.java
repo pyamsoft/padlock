@@ -28,7 +28,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-final class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
+class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     implements MainPresenter {
 
   @NonNull final MainInteractor interactor;

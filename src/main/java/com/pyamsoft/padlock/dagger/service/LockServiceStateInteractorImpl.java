@@ -22,11 +22,11 @@ import com.pyamsoft.padlock.dagger.lock.MasterPinInteractor;
 import javax.inject.Inject;
 import rx.Observable;
 
-final class LockServiceStateInteractorImpl implements LockServiceStateInteractor {
+class LockServiceStateInteractorImpl implements LockServiceStateInteractor {
 
-  @NonNull private final MasterPinInteractor pinInteractor;
+  @NonNull final MasterPinInteractor pinInteractor;
 
-  @Inject public LockServiceStateInteractorImpl(final @NonNull MasterPinInteractor pinInteractor) {
+  @Inject LockServiceStateInteractorImpl(final @NonNull MasterPinInteractor pinInteractor) {
     this.pinInteractor = pinInteractor;
   }
 

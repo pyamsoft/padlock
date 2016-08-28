@@ -22,11 +22,11 @@ import com.pyamsoft.padlock.PadLockPreferences;
 import javax.inject.Inject;
 import rx.Observable;
 
-final class MainInteractorImpl implements MainInteractor {
+class MainInteractorImpl implements MainInteractor {
 
-  @NonNull private final PadLockPreferences preferences;
+  @NonNull final PadLockPreferences preferences;
 
-  @Inject public MainInteractorImpl(final @NonNull PadLockPreferences preferences) {
+  @Inject MainInteractorImpl(final @NonNull PadLockPreferences preferences) {
     this.preferences = preferences;
   }
 
