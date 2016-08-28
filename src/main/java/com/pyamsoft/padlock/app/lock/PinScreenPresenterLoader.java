@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.loader;
+package com.pyamsoft.padlock.app.lock;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.app.list.LockListPresenter;
+import com.pyamsoft.padlock.app.lock.PinEntryPresenter;
 import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class LockListPresenterLoader extends PresenterLoader<LockListPresenter> {
+public class PinScreenPresenterLoader extends PresenterLoader<PinEntryPresenter> {
 
-  @Inject Provider<LockListPresenter> presenterProvider;
+  @Inject Provider<PinEntryPresenter> presenterProvider;
 
-  public LockListPresenterLoader(@NonNull Context context) {
+  PinScreenPresenterLoader(@NonNull Context context) {
     super(context);
   }
 
-  @NonNull @Override protected LockListPresenter loadPresenter() {
-    Singleton.Dagger.with(getContext()).plusLockList().inject(this);
+  @NonNull @Override protected PinEntryPresenter loadPresenter() {
+    Singleton.Dagger.with(getContext()).plusPinEntry().inject(this);
     return presenterProvider.get();
   }
 }
