@@ -109,9 +109,7 @@ final class SettingsPreferencePresenterImpl
         .observeOn(getObserveScheduler())
         .subscribe(aBoolean -> {
           getView().onClearAll();
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-        }, this::unsubscribeConfirm);
+        }, throwable -> Timber.e(throwable, "onError"), this::unsubscribeConfirm);
   }
 
   void clearDatabase() {
@@ -121,8 +119,6 @@ final class SettingsPreferencePresenterImpl
         .observeOn(getObserveScheduler())
         .subscribe(aBoolean -> {
           getView().onClearDatabase();
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-        }, this::unsubscribeConfirm);
+        }, throwable -> Timber.e(throwable, "onError"), this::unsubscribeConfirm);
   }
 }

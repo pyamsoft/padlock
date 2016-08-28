@@ -112,24 +112,31 @@ public class MainActivity extends DonationActivityBase
   }
 
   private void showLockList() {
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
+    if (rootView.isLaidOut()) {
+      realShowLockList();
+    } else {
       rootView.getViewTreeObserver()
           .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override public void onGlobalLayout() {
               rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-              supportInvalidateOptionsMenu();
-              final View decorView = getWindow().getDecorView();
-              final int cX = decorView.getLeft() + decorView.getWidth() / 2;
-              final int cY = decorView.getBottom() + decorView.getHeight() / 2;
-              fragmentManager.beginTransaction()
-                  .replace(R.id.main_view_container, LockListFragment.newInstance(cX, cY),
-                      LockListFragment.TAG)
-                  .commit();
+              realShowLockList();
             }
           });
+    }
+  }
+
+  void realShowLockList() {
+    supportInvalidateOptionsMenu();
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
+      final View decorView = getWindow().getDecorView();
+      final int cX = decorView.getLeft() + decorView.getWidth() / 2;
+      final int cY = decorView.getBottom() + decorView.getHeight() / 2;
+      fragmentManager.beginTransaction()
+          .replace(R.id.main_view_container, LockListFragment.newInstance(cX, cY),
+              LockListFragment.TAG)
+          .commit();
     }
   }
 
