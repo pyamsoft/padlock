@@ -73,10 +73,6 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     unregisterFromPinEntryBus();
     unregisterFromDBProgressBus();
     unregisterFromLockInfoDispalyBus();
-  }
-
-  @Override protected void onDestroy() {
-    super.onDestroy();
     unsubscribePopulateList();
     unsubscribeSystemVisible();
     unsubscribeOnboard();

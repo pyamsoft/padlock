@@ -55,10 +55,14 @@ class LockServicePresenterImpl
     lockScreenPassed = false;
   }
 
-  @Override protected void onDestroy() {
-    super.onDestroy();
+  @Override protected void onUnbind(@NonNull LockService view) {
+    super.onUnbind(view);
     unsubLockedEntry();
     unsubPickCorrect();
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
     interactor.cleanup();
   }
 

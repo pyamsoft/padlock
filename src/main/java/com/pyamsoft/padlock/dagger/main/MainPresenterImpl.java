@@ -54,10 +54,6 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     super.onUnbind(view);
     unregisterFromAgreeTermsBus();
     unregisterFromRefreshBus();
-  }
-
-  @Override protected void onDestroy() {
-    super.onDestroy();
     unsubscribeAgreeTerms();
   }
 

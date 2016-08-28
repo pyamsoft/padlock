@@ -58,14 +58,14 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen>
   @Override protected void onUnbind(@NonNull LockScreen view) {
     super.onUnbind(view);
     iconLoader.unbindView();
-  }
-
-  @Override protected void onDestroy() {
-    super.onDestroy();
     unsubUnlock();
     unsubLock();
     unsubDisplayName();
     unsubPostUnlock();
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
     iconLoader.destroyView();
     interactor.resetFailCount();
   }
