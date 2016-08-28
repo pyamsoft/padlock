@@ -430,6 +430,9 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onListCleared() {
+    Timber.d("Prepare for refresh");
+    firstRefresh = true;
+
     Timber.d("onListCleared");
     handler.post(startRefreshRunnable);
     handler.post(() -> fab.hide());
@@ -439,6 +442,9 @@ public class LockListFragment extends ActionBarFragment
     Timber.d("onListPopulated");
     handler.post(stopRefreshRunnable);
     handler.post(() -> fab.show());
+
+    Timber.d("We have refreshed");
+    firstRefresh = false;
   }
 
   @Override public void refreshList() {
