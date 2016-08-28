@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import com.pyamsoft.padlock.app.list.ActivityEntryAdapterPresenterLoader;
 import com.pyamsoft.padlock.app.list.LockInfoPresenterLoader;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.base.AppIconLoaderModule;
@@ -28,7 +27,5 @@ import dagger.Subcomponent;
 }) public interface LockInfoComponent {
 
   void inject(LockInfoPresenterLoader loader);
-
-  void inject(ActivityEntryAdapterPresenterLoader loader);
 }
 

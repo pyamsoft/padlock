@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.dagger.list;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.base.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.base.PackageManagerWrapper;
-import com.pyamsoft.padlock.app.list.ActivityEntryAdapterPresenter;
 import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.model.ActivityEntry;
@@ -40,16 +39,5 @@ import rx.Scheduler;
   @ActivityScope @Provides LockInfoInteractor provideLockInfoInteractor(
       final LockInfoInteractorImpl interactor) {
     return interactor;
-  }
-
-  @ActivityScope @Provides ActivityEntryAdapterPresenter provideActivityEntryAdapterPresenter(
-      final AdapterInteractor<ActivityEntry> interactor, @Named("main") Scheduler mainScheduler,
-      @Named("io") Scheduler ioScheduler) {
-    return new ActivityEntryAdapterPresenterImpl(interactor, mainScheduler, ioScheduler);
-  }
-
-  @ActivityScope @Provides AdapterInteractor<ActivityEntry> provideActivityEntryAdapterInteractor(
-      @NonNull PackageManagerWrapper packageManagerWrapper) {
-    return new AdapterInteractorImpl<>(packageManagerWrapper);
   }
 }
