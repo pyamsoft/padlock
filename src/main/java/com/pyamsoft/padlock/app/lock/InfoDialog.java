@@ -23,13 +23,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
-public final class InfoDialog extends DialogFragment {
+public class InfoDialog extends DialogFragment {
 
-  @NonNull private static final String PKG_NAME = "pkgname";
-  @NonNull private static final String ACT_NAME = "actname";
+  @NonNull static final String PKG_NAME = "pkgname";
+  @NonNull static final String ACT_NAME = "actname";
 
-  private String activityName;
-  private String packageName;
+  String activityName;
+  String packageName;
 
   public static InfoDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {

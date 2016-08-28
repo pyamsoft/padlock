@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.bus.PinEntryBus;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.app.lock.PinScreen;
 import javax.inject.Inject;
@@ -83,7 +83,7 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(pinEntryEvent -> {
-          PinEntryDialog.PinEntryBus.get().post(pinEntryEvent);
+          PinEntryBus.get().post(pinEntryEvent);
           if (pinEntryEvent.complete()) {
             pinScreen.onSubmitSuccess();
           } else {

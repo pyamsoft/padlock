@@ -36,7 +36,7 @@ import com.pyamsoft.pydroid.base.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import timber.log.Timber;
 
-public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragment
+public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragment
     implements SettingsPreferencePresenter.SettingsPreferenceView {
 
   @NonNull public static final String TAG = "SettingsPreferenceFragment";

@@ -26,9 +26,9 @@ import com.pyamsoft.padlock.app.bus.ConfirmDialogBus;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 
 public class ConfirmationDialog extends DialogFragment {
-  @NonNull private static final String WHICH = "which_type";
+  @NonNull static final String WHICH = "which_type";
 
-  private int which;
+  int which;
 
   public static ConfirmationDialog newInstance(final int which) {
     final ConfirmationDialog fragment = new ConfirmationDialog();

@@ -55,10 +55,10 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
-  @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
-  @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
-  @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
-  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
+  @NonNull static final String CODE_DISPLAY = "CODE_DISPLAY";
+  @NonNull static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
+  @NonNull static final String HINT_DISPLAY = "HINT_DISPLAY";
+  @NonNull final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.pin_entry_toolbar) TextView toolbar;
   @BindView(R.id.pin_entry_close) ImageView close;
   @BindView(R.id.pin_image) ImageView image;
@@ -151,7 +151,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
   }
 
-  private void setupCloseButton() {
+  void setupCloseButton() {
     close.setOnClickListener(view -> {
       Timber.d("onClick Arrow");
       dismiss();
@@ -178,7 +178,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     setupSubmissionView(pinEntryText);
   }
 
-  private void setupSubmissionView(@NonNull EditText view) {
+  void setupSubmissionView(@NonNull EditText view) {
     view.setOnEditorActionListener((textView, actionId, keyEvent) -> {
       if (keyEvent == null) {
         Timber.e("KeyEvent was not caused by keypress");
@@ -196,7 +196,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     });
   }
 
-  private void setupGoArrow() {
+  void setupGoArrow() {
     go.setOnClickListener(view -> {
       presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint());
       imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0,
@@ -211,7 +211,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     taskMap.put("arrow", task);
   }
 
-  private void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+  void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
     final String attempt = savedInstanceState.getString(CODE_DISPLAY, null);
     final String reentry = savedInstanceState.getString(CODE_REENTRY_DISPLAY, null);
@@ -240,21 +240,21 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   /**
    * Clear the display of all text entry fields
    */
-  private void clearDisplay() {
+  void clearDisplay() {
     pinEntryText.setText("");
     pinReentryText.setText("");
     pinHintText.setText("");
   }
 
-  @CheckResult @NonNull private String getCurrentAttempt() {
+  @CheckResult @NonNull String getCurrentAttempt() {
     return pinEntryText.getText().toString();
   }
 
-  @CheckResult @NonNull private String getCurrentReentry() {
+  @CheckResult @NonNull String getCurrentReentry() {
     return pinReentryText.getText().toString();
   }
 
-  @CheckResult @NonNull private String getCurrentHint() {
+  @CheckResult @NonNull String getCurrentHint() {
     return pinHintText.getText().toString();
   }
 
@@ -270,7 +270,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     presenter.unbindView();
   }
 
-  private void setupToolbar() {
+  void setupToolbar() {
     toolbar.setText("PIN");
   }
 
@@ -304,14 +304,5 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @Override public void onSubmitError() {
     clearDisplay();
     dismiss();
-  }
-
-  public static final class PinEntryBus extends RxBus<PinEntryEvent> {
-
-    @NonNull private static final PinEntryBus instance = new PinEntryBus();
-
-    @CheckResult @NonNull public static PinEntryBus get() {
-      return instance;
-    }
   }
 }

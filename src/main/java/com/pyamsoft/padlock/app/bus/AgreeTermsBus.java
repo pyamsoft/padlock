@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
 import com.pyamsoft.padlock.model.event.AgreeTermsEvent;
 import com.pyamsoft.pydroid.tool.RxBus;
 
-public final class AgreeTermsBus extends RxBus<AgreeTermsEvent> {
+public class AgreeTermsBus extends RxBus<AgreeTermsEvent> {
 
   @NonNull private static final AgreeTermsBus instance = new AgreeTermsBus();
 

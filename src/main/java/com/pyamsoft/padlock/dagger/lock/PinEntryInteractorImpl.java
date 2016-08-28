@@ -48,7 +48,7 @@ class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntryInter
   }
 
   @CheckResult @NonNull
-  private PinEntryEvent attemptClearPin(@NonNull String masterPin, @NonNull String attempt) {
+  PinEntryEvent attemptClearPin(@NonNull String masterPin, @NonNull String attempt) {
     final boolean success = checkSubmissionAttempt(attempt, masterPin).toBlocking().first();
     if (success) {
       Timber.d("Clear master pin");
@@ -62,7 +62,7 @@ class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntryInter
   }
 
   @CheckResult @NonNull
-  private PinEntryEvent attemptCreatePin(@NonNull String attempt, @NonNull String reentry,
+  PinEntryEvent attemptCreatePin(@NonNull String attempt, @NonNull String reentry,
       @NonNull String hint) {
     Timber.d("No existing master pin, attempt to create a new one");
     if (attempt.equals(reentry)) {

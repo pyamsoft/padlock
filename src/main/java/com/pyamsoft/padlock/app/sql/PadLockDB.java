@@ -29,10 +29,10 @@ import rx.Scheduler;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public final class PadLockDB {
+public class PadLockDB {
 
-  private static volatile Delegate instance = null;
-  @NonNull private final BriteDatabase briteDatabase;
+  static volatile Delegate instance = null;
+  @NonNull final BriteDatabase briteDatabase;
 
   PadLockDB(final @NonNull Context context, final @NonNull Scheduler dbScheduler) {
     final SqlBrite sqlBrite = SqlBrite.create();
@@ -67,7 +67,7 @@ public final class PadLockDB {
 
   public static class Delegate {
 
-    @NonNull private final PadLockDB database;
+    @NonNull final PadLockDB database;
 
     public Delegate(@NonNull Context context, @NonNull Scheduler scheduler) {
       Timber.d("Create new PadLockDB Delegate");

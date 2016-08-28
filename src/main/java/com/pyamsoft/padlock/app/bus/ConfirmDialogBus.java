@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 import com.pyamsoft.pydroid.tool.RxBus;
 
-public final class ConfirmDialogBus extends RxBus<ConfirmationEvent> {
+public class ConfirmDialogBus extends RxBus<ConfirmationEvent> {
 
   @NonNull private static final ConfirmDialogBus instance = new ConfirmDialogBus();
 

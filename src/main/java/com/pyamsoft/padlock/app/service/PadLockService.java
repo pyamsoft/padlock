@@ -31,22 +31,22 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public final class PadLockService extends AccessibilityService
+public class PadLockService extends AccessibilityService
     implements LockServicePresenter.LockService {
 
-  private static volatile PadLockService instance = null;
+  static volatile PadLockService instance = null;
   @Inject LockServicePresenter presenter;
-  private Intent lockActivity;
-  private Intent lockActivity2;
+  Intent lockActivity;
+  Intent lockActivity2;
 
-  @NonNull @CheckResult private static synchronized PadLockService getInstance() {
+  @NonNull @CheckResult static synchronized PadLockService getInstance() {
     if (instance == null) {
       throw new NullPointerException("Current service instance is NULL");
     }
     return instance;
   }
 
-  private static synchronized void setInstance(@Nullable PadLockService i) {
+  static synchronized void setInstance(@Nullable PadLockService i) {
     instance = i;
   }
 
@@ -85,7 +85,7 @@ public final class PadLockService extends AccessibilityService
     }
   }
 
-  private static void craftIntent(@NonNull Intent removeIntent, @NonNull Intent addIntent,
+  static void craftIntent(@NonNull Intent removeIntent, @NonNull Intent addIntent,
       @NonNull PadLockEntry entry, @NonNull String realName) {
     removeIntent.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
     removeIntent.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
@@ -145,6 +145,7 @@ public final class PadLockService extends AccessibilityService
   @Override public boolean onUnbind(Intent intent) {
     Timber.d("onDestroy");
     presenter.unbindView();
+    presenter.destroyView();
     lockActivity = null;
     lockActivity2 = null;
 
