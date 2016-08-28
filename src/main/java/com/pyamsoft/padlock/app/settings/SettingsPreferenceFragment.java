@@ -27,7 +27,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.dagger.main.MainBus;
+import com.pyamsoft.padlock.app.loader.SettingsPreferencePresenterLoader;
+import com.pyamsoft.padlock.app.bus.MainBus;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.base.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -98,7 +99,7 @@ public final class SettingsPreferenceFragment extends ActionBarSettingsPreferenc
   }
 
   @Override public void onClearDatabase() {
-    MainBus.get().post(new RefreshEvent());
+    MainBus.get().post(RefreshEvent.create());
   }
 
   @Override public void onResume() {

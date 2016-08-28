@@ -16,8 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.settings;
 
-import com.pyamsoft.padlock.app.settings.SettingsPreferenceFragment;
-import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenterLoader;
+import com.pyamsoft.padlock.app.loader.SettingsPreferencePresenterLoader;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import dagger.Subcomponent;
 

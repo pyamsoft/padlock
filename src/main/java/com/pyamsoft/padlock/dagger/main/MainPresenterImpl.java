@@ -17,7 +17,8 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
+import com.pyamsoft.padlock.app.bus.AgreeTermsBus;
+import com.pyamsoft.padlock.app.bus.MainBus;
 import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import javax.inject.Inject;
@@ -97,7 +98,7 @@ final class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
 
   void registerOnAgreeTermsBus() {
     unregisterFromAgreeTermsBus();
-    agreeTermsBusSubscription = AgreeTermsDialog.Bus.get()
+    agreeTermsBusSubscription = AgreeTermsBus.get()
         .register()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

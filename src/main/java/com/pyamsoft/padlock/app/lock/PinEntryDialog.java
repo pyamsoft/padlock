@@ -44,6 +44,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.loader.PinScreenPresenterLoader;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;

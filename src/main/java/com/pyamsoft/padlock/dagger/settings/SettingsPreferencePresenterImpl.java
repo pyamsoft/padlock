@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
+import com.pyamsoft.padlock.app.bus.ConfirmDialogBus;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
 import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import javax.inject.Inject;
@@ -81,7 +81,7 @@ final class SettingsPreferencePresenterImpl
 
   void registerOnConfirmEventBus() {
     unregisterFromConfirmEventBus();
-    confirmBusSubscription = ConfirmationDialog.Bus.get()
+    confirmBusSubscription = ConfirmDialogBus.get()
         .register()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

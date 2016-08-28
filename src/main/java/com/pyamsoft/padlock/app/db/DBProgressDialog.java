@@ -75,37 +75,4 @@ public final class DBProgressDialog extends DialogFragment {
     dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
     return dialog;
   }
-
-  public static class Bus extends RxBus<Bus.DisplayEvent> {
-
-    @NonNull private static final Bus instance = new Bus();
-
-    @CheckResult @NonNull public static Bus get() {
-      return instance;
-    }
-
-    public static class DisplayEvent {
-      private final int position;
-      private final boolean checked;
-      @NonNull private final AppEntry entry;
-
-      public DisplayEvent(int position, boolean checked, @NonNull AppEntry entry) {
-        this.position = position;
-        this.checked = checked;
-        this.entry = entry;
-      }
-
-      @CheckResult public int getPosition() {
-        return position;
-      }
-
-      @CheckResult public boolean isChecked() {
-        return checked;
-      }
-
-      @CheckResult @NonNull public AppEntry getEntry() {
-        return entry;
-      }
-    }
-  }
 }
