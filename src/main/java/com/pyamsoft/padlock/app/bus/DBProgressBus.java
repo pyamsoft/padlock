@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.list;
+package com.pyamsoft.padlock.app.bus;
 
-import android.content.Context;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import com.pyamsoft.padlock.model.event.DBProgressEvent;
+import com.pyamsoft.pydroid.tool.RxBus;
 
-public class DBPresenterLoader extends PresenterLoader<DBPresenter> {
+public class DBProgressBus extends RxBus<DBProgressEvent> {
 
-  @Inject Provider<DBPresenter> presenterProvider;
+  @NonNull private static final DBProgressBus instance = new DBProgressBus();
 
-  public DBPresenterLoader(@NonNull Context context) {
-    super(context);
-  }
-
-  @NonNull @Override protected DBPresenter loadPresenter() {
-    Singleton.Dagger.with(getContext()).plusDbComponent().inject(this);
-    return presenterProvider.get();
+  @CheckResult @NonNull public static DBProgressBus get() {
+    return instance;
   }
 }

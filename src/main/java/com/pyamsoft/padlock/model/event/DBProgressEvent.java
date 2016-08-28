@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.lock;
+package com.pyamsoft.padlock.model.event;
 
-import com.pyamsoft.padlock.app.loader.LockScreenPresenterLoader;
-import com.pyamsoft.padlock.dagger.ActivityScope;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderModule;
-import com.pyamsoft.padlock.dagger.db.DBModule;
-import dagger.Subcomponent;
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import com.google.auto.value.AutoValue;
+import com.pyamsoft.padlock.model.AppEntry;
 
-@ActivityScope @Subcomponent(modules = {
-    LockScreenModule.class, DBModule.class, MasterPinModule.class, AppIconLoaderModule.class
-}) public interface LockScreenComponent {
+@AutoValue public abstract class DBProgressEvent {
 
-  void inject(LockScreenPresenterLoader loader);
+  @CheckResult @NonNull
+  public static DBProgressEvent create(int position, boolean checked, @NonNull AppEntry entry) {
+    return new AutoValue_DBProgressEvent(position, checked, entry);
+  }
+
+  public abstract int position();
+
+  public abstract boolean checked();
+
+  public abstract AppEntry entry();
 }

@@ -43,6 +43,7 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.ErrorDialog;
 import com.pyamsoft.padlock.app.db.DBPresenter;
+import com.pyamsoft.padlock.app.loader.DBPresenterLoader;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.activity.adapter.ListAdapterLoader;
@@ -302,26 +303,5 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void disableToggleAll() {
     safeChangeToggleAllState(false);
-  }
-
-  public static class Bus extends RxBus<Bus.DisplayEvent> {
-
-    @NonNull private static final Bus instance = new Bus();
-
-    @CheckResult @NonNull public static Bus get() {
-      return instance;
-    }
-
-    public static class DisplayEvent {
-      @NonNull private final AppEntry entry;
-
-      public DisplayEvent(@NonNull AppEntry entry) {
-        this.entry = entry;
-      }
-
-      @NonNull @CheckResult public AppEntry getEntry() {
-        return entry;
-      }
-    }
   }
 }

@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.main;
+package com.pyamsoft.padlock.app.bus;
 
-import android.content.Context;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import com.pyamsoft.padlock.model.event.LockInfoDisplayEvent;
+import com.pyamsoft.pydroid.tool.RxBus;
 
-public class MainPresenterLoader extends PresenterLoader<MainPresenter> {
+public class LockInfoBus extends RxBus<LockInfoDisplayEvent> {
 
-  @Inject Provider<MainPresenter> presenterProvider;
+  @NonNull private static final LockInfoBus instance = new LockInfoBus();
 
-  public MainPresenterLoader(@NonNull Context context) {
-    super(context);
-  }
-
-  @NonNull @Override protected MainPresenter loadPresenter() {
-    Singleton.Dagger.with(getContext()).plusMain().inject(this);
-    return presenterProvider.get();
+  @CheckResult @NonNull public static LockInfoBus get() {
+    return instance;
   }
 }

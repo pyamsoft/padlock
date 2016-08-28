@@ -14,15 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model.event;
+package com.pyamsoft.padlock.app.loader;
 
-import android.support.annotation.CheckResult;
+import android.content.Context;
 import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
+import com.pyamsoft.padlock.Singleton;
+import com.pyamsoft.padlock.app.main.MainPresenter;
+import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
-@AutoValue public abstract class RefreshEvent {
+public class MainPresenterLoader extends PresenterLoader<MainPresenter> {
 
-  @CheckResult @NonNull public static RefreshEvent create() {
-    return new AutoValue_RefreshEvent();
+  @Inject Provider<MainPresenter> presenterProvider;
+
+  public MainPresenterLoader(@NonNull Context context) {
+    super(context);
+  }
+
+  @NonNull @Override protected MainPresenter loadPresenter() {
+    Singleton.Dagger.with(getContext()).plusMain().inject(this);
+    return presenterProvider.get();
   }
 }

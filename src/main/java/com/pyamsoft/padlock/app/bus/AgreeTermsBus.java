@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.lock;
+package com.pyamsoft.padlock.app.bus;
 
-import com.pyamsoft.padlock.app.loader.LockScreenPresenterLoader;
-import com.pyamsoft.padlock.dagger.ActivityScope;
-import com.pyamsoft.padlock.dagger.base.AppIconLoaderModule;
-import com.pyamsoft.padlock.dagger.db.DBModule;
-import dagger.Subcomponent;
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
+import com.pyamsoft.padlock.model.event.AgreeTermsEvent;
+import com.pyamsoft.pydroid.tool.RxBus;
 
-@ActivityScope @Subcomponent(modules = {
-    LockScreenModule.class, DBModule.class, MasterPinModule.class, AppIconLoaderModule.class
-}) public interface LockScreenComponent {
+public final class AgreeTermsBus extends RxBus<AgreeTermsEvent> {
 
-  void inject(LockScreenPresenterLoader loader);
+  @NonNull private static final AgreeTermsBus instance = new AgreeTermsBus();
+
+  @CheckResult @NonNull public static AgreeTermsBus get() {
+    return instance;
+  }
 }

@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.settings;
+package com.pyamsoft.padlock.app.loader;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.Singleton;
+import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
 import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class SettingsPreferencePresenterLoader
-    extends PresenterLoader<SettingsPreferencePresenter> {
+public class LockScreenPresenterLoader extends PresenterLoader<LockScreenPresenter> {
 
-  @Inject Provider<SettingsPreferencePresenter> presenterProvider;
+  @Inject Provider<LockScreenPresenter> presenterProvider;
 
-  public SettingsPreferencePresenterLoader(@NonNull Context context) {
+  public LockScreenPresenterLoader(@NonNull Context context) {
     super(context);
   }
 
-  @NonNull @Override protected SettingsPreferencePresenter loadPresenter() {
-    Singleton.Dagger.with(getContext()).plusSettings().inject(this);
+  @NonNull @Override protected LockScreenPresenter loadPresenter() {
+    Singleton.Dagger.with(getContext()).plusLockScreen().inject(this);
     return presenterProvider.get();
   }
 }

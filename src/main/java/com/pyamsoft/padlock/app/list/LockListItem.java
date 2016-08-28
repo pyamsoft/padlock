@@ -30,8 +30,11 @@ import butterknife.Unbinder;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.base.AppIconLoaderView;
-import com.pyamsoft.padlock.app.db.DBProgressDialog;
+import com.pyamsoft.padlock.app.bus.DBProgressBus;
+import com.pyamsoft.padlock.app.bus.LockInfoBus;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.padlock.model.event.DBProgressEvent;
+import com.pyamsoft.padlock.model.event.LockInfoDisplayEvent;
 import java.util.List;
 import timber.log.Timber;
 
@@ -99,13 +102,12 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     // TODO app specific codes
 
     // TODO when received post, modify DB package values
-    DBProgressDialog.Bus.get()
-        .post(new DBProgressDialog.Bus.DisplayEvent(position, checked, entry));
+    DBProgressBus.get().post(DBProgressEvent.create(position, checked, entry));
   }
 
   void openInfo() {
     // TODO when received post, show LockInfoDialog for entry
-    LockInfoDialog.Bus.get().post(new LockInfoDialog.Bus.DisplayEvent(entry));
+    LockInfoBus.get().post(LockInfoDisplayEvent.create(entry));
   }
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {

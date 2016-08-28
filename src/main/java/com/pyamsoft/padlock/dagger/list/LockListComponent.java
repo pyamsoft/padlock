@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import com.pyamsoft.padlock.app.list.DBPresenterLoader;
+import com.pyamsoft.padlock.app.loader.DBPresenterLoader;
 import com.pyamsoft.padlock.app.list.LockListPresenterLoader;
 import com.pyamsoft.padlock.dagger.ActivityScope;
 import com.pyamsoft.padlock.dagger.db.DBModule;
