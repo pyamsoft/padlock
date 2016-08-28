@@ -29,17 +29,19 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.bus.DBProgressBus;
 import com.pyamsoft.padlock.app.bus.LockInfoBus;
+import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.event.DBProgressEvent;
 import com.pyamsoft.padlock.model.event.LockInfoDisplayEvent;
 import java.util.List;
+import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHolder>
-    implements AppIconLoaderView {
+public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHolder> {
 
   @NonNull final AppEntry entry;
 
@@ -58,10 +60,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   @Override public void bindView(ViewHolder holder, List payloads) {
     super.bindView(holder, payloads);
     holder.name.setText(entry.name());
-
-    // TODO load application icon
-    //adapterPresenter.loadApplicationIcon(holder, entry.packageName());
-
+    holder.loadImage(entry.packageName());
     holder.toggle.setOnCheckedChangeListener(null);
     holder.toggle.setChecked(entry.locked());
     final CompoundButton.OnCheckedChangeListener listener =
@@ -107,24 +106,32 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     LockInfoBus.get().post(LockInfoDisplayEvent.create(entry));
   }
 
-  @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-
-  }
-
-  @Override public void onApplicationIconLoadedError() {
-
-  }
-
-  protected static final class ViewHolder extends RecyclerView.ViewHolder {
+  public static final class ViewHolder extends RecyclerView.ViewHolder
+      implements AppIconLoaderView {
 
     @NonNull final Unbinder unbinder;
     @BindView(R.id.lock_list_title) TextView name;
     @BindView(R.id.lock_list_icon) ImageView icon;
     @BindView(R.id.lock_list_toggle) SwitchCompat toggle;
+    @Inject AppIconLoaderPresenter<ViewHolder> appIconLoaderPresenter;
 
     public ViewHolder(View itemView) {
       super(itemView);
       unbinder = ButterKnife.bind(this, itemView);
+      Singleton.Dagger.with(itemView.getContext()).plusAppIconLoaderComponent().inject(this);
+      appIconLoaderPresenter.bindView(this);
+    }
+
+    public void loadImage(@NonNull String packageName) {
+      appIconLoaderPresenter.loadApplicationIcon(packageName);
+    }
+
+    @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
+      this.icon.setImageDrawable(icon);
+    }
+
+    @Override public void onApplicationIconLoadedError() {
+      Timber.e("Failed to load icon into ViewHolder");
     }
   }
 }
