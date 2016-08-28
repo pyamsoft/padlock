@@ -24,24 +24,13 @@
 # The addition of !code/allocation/variable is needed to prevent this
 -optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*,!code/allocation/variable
 
-# https://code.google.com/p/android/issues/detail?id=194513
-# ProGuard include the legacy HTTP jar even if it is not used.
-# This creates an issue where there are 7 duplicate classes and
-# causes the build to fail.
-# Because the duplicate classes are Note and not Warning level,
-# we must ignore the Note classes here.
--dontnote android.net.http.*
--dontnote org.apache.commons.codec.**
--dontnote org.apache.http.**
-
 # RetroLambda
--dontwarn java.lang.invoke.*
-
-# Auto value
--dontwarn autovalue.shaded.**
--dontwarn com.google.auto.value.processor.**
+# Lint will spit out a large amount of errors with parsing. These can safely be ignored.
+-dontwarn java.lang.invoke.LambdaForm$Hidden
 
 # Silence some okio warnings
--dontwarn java.nio.file.**
--dontwarn org.codehaus.mojo.**
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+-dontwarn java.nio.file.Files
+-dontwarn java.nio.file.Path
+-dontwarn java.nio.file.OpenOption
 
