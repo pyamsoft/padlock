@@ -100,13 +100,10 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   void accessPackage(int position, boolean checked) {
     // TODO app specific codes
-
-    // TODO when received post, modify DB package values
     DBProgressBus.get().post(DBProgressEvent.create(position, checked, entry));
   }
 
   void openInfo() {
-    // TODO when received post, show LockInfoDialog for entry
     LockInfoBus.get().post(LockInfoDisplayEvent.create(entry));
   }
 

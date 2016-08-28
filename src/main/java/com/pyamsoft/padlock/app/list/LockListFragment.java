@@ -41,6 +41,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.db.DBPresenter;
+import com.pyamsoft.padlock.app.db.DBProgressDialog;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
@@ -60,12 +62,14 @@ import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
 public final class LockListFragment extends ActionBarFragment
-    implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
+    implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback,
+    DBPresenter.DBView {
 
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
   private static final int KEY_PRESENTER = 0;
   private static final int KEY_ADAPTER_PRESENTER = 1;
+  private static final int KEY_DB_PRESENTER = 2;
   @NonNull final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
@@ -96,6 +100,7 @@ public final class LockListFragment extends ActionBarFragment
     }
   };
 
+  DBPresenter dbPresenter;
   LockListPresenter presenter;
   boolean firstRefresh;
   Unbinder unbinder;
@@ -153,6 +158,22 @@ public final class LockListFragment extends ActionBarFragment
           }
         });
 
+    getLoaderManager().initLoader(KEY_DB_PRESENTER, null,
+        new LoaderManager.LoaderCallbacks<DBPresenter>() {
+          @Override public Loader<DBPresenter> onCreateLoader(int id, Bundle args) {
+            firstRefresh = true;
+            return new DBPresenterLoader(getContext());
+          }
+
+          @Override public void onLoadFinished(Loader<DBPresenter> loader, DBPresenter data) {
+            dbPresenter = data;
+          }
+
+          @Override public void onLoaderReset(Loader<DBPresenter> loader) {
+            dbPresenter = null;
+          }
+        });
+
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
     return view;
@@ -174,6 +195,7 @@ public final class LockListFragment extends ActionBarFragment
 
     recyclerView.setAdapter(fastItemAdapter);
     presenter.bindView(this);
+    dbPresenter.bindView(this);
 
     presenter.setFABStateFromPreference();
     presenter.showOnBoarding();
@@ -196,6 +218,7 @@ public final class LockListFragment extends ActionBarFragment
     handler.postDelayed(() -> fab.hide(), 300L);
 
     presenter.unbindView();
+    dbPresenter.unbindView();
   }
 
   private void setupSwipeRefresh() {
@@ -426,5 +449,31 @@ public final class LockListFragment extends ActionBarFragment
 
     onListCleared();
     presenter.populateList();
+  }
+
+  @Override public void onDBCreateEvent(int position) {
+    handler.postDelayed(() -> DBProgressDialog.remove(getFragmentManager()), 500L);
+    fastItemAdapter.onDBCreateEvent(position);
+  }
+
+  @Override public void onDBDeleteEvent(int position) {
+    handler.postDelayed(() -> DBProgressDialog.remove(getFragmentManager()), 500L);
+    fastItemAdapter.onDBDeleteEvent(position);
+  }
+
+  @Override public void onDBError() {
+    handler.postDelayed(() -> DBProgressDialog.remove(getFragmentManager()), 500L);
+    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
+  }
+
+  @Override
+  public void displayDBProgressDialog(int position, boolean checked, @NonNull AppEntry entry) {
+    DBProgressDialog.add(getFragmentManager(), entry.name());
+    dbPresenter.attemptDBModification(position, checked, entry.packageName(), null, entry.system());
+  }
+
+  @Override public void displayLockInfoDialog(@NonNull AppEntry entry) {
+    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), LockInfoDialog.newInstance(entry),
+        "lock_info");
   }
 }

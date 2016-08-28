@@ -36,7 +36,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
   @NonNull final PackageManager packageManager;
 
-  @Inject public PackageManagerWrapperImpl(@NonNull Context context) {
+  @Inject PackageManagerWrapperImpl(@NonNull Context context) {
     this.packageManager = context.getApplicationContext().getPackageManager();
   }
 
