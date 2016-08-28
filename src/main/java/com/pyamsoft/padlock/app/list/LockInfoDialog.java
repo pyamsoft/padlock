@@ -43,7 +43,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.base.activity.adapter.ListAdapterLoader;
+import com.pyamsoft.pydroid.base.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
