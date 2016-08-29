@@ -24,6 +24,7 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
@@ -37,14 +38,14 @@ public class PadLockDB {
   @NonNull private final SqlBrite sqlBrite;
   @NonNull private final PadLockOpenHelper openHelper;
   @NonNull private final Scheduler dbScheduler;
+  @NonNull private final AtomicInteger openCount;
   @SuppressWarnings("WeakerAccess") volatile BriteDatabase briteDatabase;
-  private volatile int openCount;
 
   private PadLockDB(final @NonNull Context context, final @NonNull Scheduler scheduler) {
     sqlBrite = SqlBrite.create();
     openHelper = new PadLockOpenHelper(context.getApplicationContext());
     dbScheduler = scheduler;
-    openCount = 0;
+    openCount = new AtomicInteger(0);
   }
 
   public static void setDB(@Nullable PadLockDB delegate) {
@@ -74,15 +75,13 @@ public class PadLockDB {
       briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, dbScheduler);
     }
 
-    ++openCount;
-    Timber.d("Increment open count to: %d", openCount);
+    Timber.d("Increment open count to: %d", openCount.incrementAndGet());
   }
 
   @SuppressWarnings("WeakerAccess") synchronized void closeDatabase() {
-    --openCount;
-    Timber.d("Decrement open count to: %d", openCount);
+    Timber.d("Decrement open count to: %d", openCount.decrementAndGet());
 
-    if (openCount == 0) {
+    if (openCount.get() == 0) {
       close();
     }
   }
