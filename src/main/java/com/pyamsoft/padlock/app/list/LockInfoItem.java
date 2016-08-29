@@ -20,7 +20,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -97,7 +96,6 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
     @NonNull final Unbinder unbinder;
     @BindView(R.id.lock_info_activity) TextView name;
-    @BindView(R.id.lock_info_tristate_radiogroup) RadioGroup triStateGroup;
     @BindView(R.id.lock_info_radio_default) RadioButton defaultLockState;
     @BindView(R.id.lock_info_radio_white) RadioButton whiteLockState;
     @BindView(R.id.lock_info_radio_black) RadioButton blackLockState;

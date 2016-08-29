@@ -107,7 +107,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     }
 
     pinReentryText = pinReentry.getEditText();
-    if (pinReentry == null) {
+    if (pinReentryText == null) {
       throw new NullPointerException("No pin re-entry edit text");
     }
 

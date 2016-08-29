@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
@@ -69,7 +68,6 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @NonNull private final AsyncDrawableMap taskMap;
   @BindView(R.id.activity_lock_screen) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
-  @BindView(R.id.appbar) AppBarLayout appBarLayout;
   @BindView(R.id.lock_image) ImageView image;
   @BindView(R.id.lock_text) TextInputLayout textLayout;
   @BindView(R.id.lock_image_go) ImageView imageGo;
