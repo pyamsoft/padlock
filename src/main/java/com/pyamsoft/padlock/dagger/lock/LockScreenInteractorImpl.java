@@ -118,10 +118,10 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
       long ignoreTime) {
     Timber.d("Post unlock: %s %s", packageName, activityName);
     final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
-    final Observable<PadLockEntry> dbObservable = PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, activityName)
-        .first()
-        .cache();
+    final Observable<PadLockEntry> dbObservable =
+        PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName)
+            .first()
+            .cache();
     return Observable.defer(() -> {
       Timber.d("Run finishing unlock hooks");
       return Observable.just(exclude);
@@ -184,22 +184,19 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
       @NonNull String activityName, @NonNull String realName, @Nullable String lockCode,
       boolean isSystem) {
     Timber.d("Get entry for %s %s (real %s)", packageName, activityName, realName);
-    return PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, realName)
+    return PadLockDB.with(appContext).queryWithPackageActivityName(packageName, realName)
         .first()
         .flatMap(padLockEntry -> {
           if (PadLockEntry.isEmpty(padLockEntry)) {
             Timber.d("No entry currently exists, create new one and whitelist it");
-            return PadLockDB.with(appContext)
-                .insert(packageName, realName, lockCode, 0, 0, isSystem, true);
+            return PadLockDB.with(appContext).insert(packageName, realName, lockCode, 0, 0,
+                isSystem, true);
           } else {
             Timber.d("Entry exists, update it");
-            return PadLockDB.with(appContext)
-                .updateWithPackageActivityName(padLockEntry.packageName(),
-                    padLockEntry.activityName(), padLockEntry.lockCode(),
-                    padLockEntry.lockUntilTime(), padLockEntry.ignoreUntilTime(),
-                    padLockEntry.systemApplication(), true)
-                .map(Integer::longValue);
+            return PadLockDB.with(appContext).updateWithPackageActivityName(
+                padLockEntry.packageName(), padLockEntry.activityName(), padLockEntry.lockCode(),
+                padLockEntry.lockUntilTime(), padLockEntry.ignoreUntilTime(),
+                padLockEntry.systemApplication(), true).map(Integer::longValue);
           }
         });
   }
@@ -226,11 +223,10 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
       final long ignoreMinutesInMillis) {
     Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
         ignoreMinutesInMillis);
-    return PadLockDB.with(appContext)
-        .updateWithPackageActivityName(oldValues.packageName(), oldValues.activityName(),
-            oldValues.lockCode(), oldValues.lockUntilTime(),
-            System.currentTimeMillis() + ignoreMinutesInMillis, oldValues.systemApplication(),
-            oldValues.whitelist());
+    return PadLockDB.with(appContext).updateWithPackageActivityName(
+        oldValues.packageName(), oldValues.activityName(), oldValues.lockCode(),
+        oldValues.lockUntilTime(), System.currentTimeMillis() + ignoreMinutesInMillis,
+        oldValues.systemApplication(), oldValues.whitelist());
   }
 
   @NonNull @CheckResult @Override public Observable<Long> getDefaultIgnoreTime() {

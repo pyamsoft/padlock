@@ -66,6 +66,7 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
    */
   @NonNull @Override public Observable<Boolean> isEventFromActivity(@NonNull String packageName,
       @NonNull String className) {
+    Timber.d("Check event from activity: %s %s", packageName, className);
     return packageManagerWrapper.getActivityInfo(packageName, className)
         .map(activityInfo -> activityInfo != null);
   }
@@ -122,8 +123,8 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
     Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);
     final Observable<PadLockEntry> specificActivityEntry =
         PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
-    final Observable<PadLockEntry> packageActivityEntry = PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, PadLockEntry.PACKAGE_TAG)
+    final Observable<PadLockEntry> packageActivityEntry = PadLockDB.with(
+        appContext).queryWithPackageActivityName(packageName, PadLockEntry.PACKAGE_TAG)
         .first();
     return Observable.zip(specificActivityEntry, packageActivityEntry,
         (specificEntry, packageEntry) -> {
