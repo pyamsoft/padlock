@@ -16,10 +16,9 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-public interface LockScreen extends LockPresenter.LockView{
+public interface LockScreen extends LockPresenter.LockView {
 
   void onPostUnlock();
 
@@ -27,25 +26,7 @@ public interface LockScreen extends LockPresenter.LockView{
 
   void onLockedError();
 
-  void setIgnoreTimeNone();
-
-  void setIgnoreTimeOne();
-
-  void setIgnoreTimeFive();
-
-  void setIgnoreTimeTen();
-
-  void setIgnoreTimeFifteen();
-
-  void setIgnoreTimeTwenty();
-
-  void setIgnoreTimeThirty();
-
-  void setIgnoreTimeFourtyFive();
-
-  void setIgnoreTimeSixty();
-
-  void onSaveMenuSelections(@NonNull Bundle outState, long ignoreTime);
+  void initializeWithIgnoreTime(long time);
 
   void setDisplayName(@NonNull String name);
 

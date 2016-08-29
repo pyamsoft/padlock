@@ -35,27 +35,27 @@ public interface LockScreenInteractor extends LockInteractor {
   @CheckResult @NonNull Observable<Boolean> lockEntry(@NonNull String packageName,
       @NonNull String activityName);
 
-  @CheckResult @NonNull Observable<Long> getDefaultIgnoreTime();
-
   @CheckResult @NonNull Observable<String> getDisplayName(@NonNull String packageName);
 
-  @CheckResult @NonNull Observable<Long> getIgnoreTimeForIndex(int index);
+  @CheckResult @NonNull Observable<Long> getDefaultIgnoreTime();
 
-  @CheckResult @NonNull Observable<Long> getIgnoreTimeOne();
+  //@CheckResult @NonNull Observable<Long> getIgnoreTimeForIndex(int index);
 
-  @CheckResult @NonNull Observable<Long> getIgnoreTimeFive();
-
-  @CheckResult @NonNull Observable<Long> getIgnoreTimeTen();
-
-  @CheckResult @NonNull Observable<Long> getIgnoreTimeFifteen();
-
-  @CheckResult @NonNull Observable<Long> getIgnoreTimeTwenty();
-
-  @CheckResult @NonNull Observable<Long> getIgnoreTimeThirty();
-
-  @CheckResult @NonNull Observable<Long> getIgnoreTimeFourtyFive();
-
-  @CheckResult @NonNull Observable<Long> getIgnoreTimeSixty();
+  //@CheckResult @NonNull Observable<Long> getIgnoreTimeOne();
+  //
+  //@CheckResult @NonNull Observable<Long> getIgnoreTimeFive();
+  //
+  //@CheckResult @NonNull Observable<Long> getIgnoreTimeTen();
+  //
+  //@CheckResult @NonNull Observable<Long> getIgnoreTimeFifteen();
+  //
+  //@CheckResult @NonNull Observable<Long> getIgnoreTimeTwenty();
+  //
+  //@CheckResult @NonNull Observable<Long> getIgnoreTimeThirty();
+  //
+  //@CheckResult @NonNull Observable<Long> getIgnoreTimeFourtyFive();
+  //
+  //@CheckResult @NonNull Observable<Long> getIgnoreTimeSixty();
 
   @CheckResult @NonNull Observable<Integer> incrementAndGetFailCount();
 
