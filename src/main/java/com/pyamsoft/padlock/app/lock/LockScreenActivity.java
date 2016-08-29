@@ -48,6 +48,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.ErrorDialog;
+import com.pyamsoft.pydroid.base.activity.ActivityBase;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -55,7 +56,7 @@ import java.util.Locale;
 import rx.Subscription;
 import timber.log.Timber;
 
-public abstract class LockScreenActivity extends AppCompatActivity implements LockScreen {
+public abstract class LockScreenActivity extends ActivityBase implements LockScreen {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
