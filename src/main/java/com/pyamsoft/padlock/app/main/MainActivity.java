@@ -110,30 +110,30 @@ public class MainActivity extends DonationActivityBase
     }
   }
 
-  void showLockList() {
+  void showLockList(boolean forceRefresh) {
     if (rootView.isLaidOut()) {
-      realShowLockList();
+      realShowLockList(forceRefresh);
     } else {
       rootView.getViewTreeObserver()
           .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override public void onGlobalLayout() {
               rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-              realShowLockList();
+              realShowLockList(forceRefresh);
             }
           });
     }
   }
 
-  void realShowLockList() {
+  void realShowLockList(boolean forceRefresh) {
     supportInvalidateOptionsMenu();
     final FragmentManager fragmentManager = getSupportFragmentManager();
     if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
+        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null || forceRefresh) {
       final View decorView = getWindow().getDecorView();
       final int cX = decorView.getLeft() + decorView.getWidth() / 2;
       final int cY = decorView.getBottom() + decorView.getHeight() / 2;
       fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, LockListFragment.newInstance(cX, cY),
+          .replace(R.id.main_view_container, LockListFragment.newInstance(cX, cY, forceRefresh),
               LockListFragment.TAG)
           .commit();
     }
@@ -193,7 +193,7 @@ public class MainActivity extends DonationActivityBase
     AnimUtil.animateActionBarToolbar(toolbar);
     RatingDialog.showRatingDialog(this, this);
     if (PadLockService.isRunning()) {
-      showLockList();
+      showLockList(false);
       presenter.showTermsDialog();
     } else {
       showAccessibilityPrompt();
@@ -260,8 +260,8 @@ public class MainActivity extends DonationActivityBase
   @Override public void forceRefresh() {
     Timber.d("Force lock list refresh");
     final FragmentManager fragmentManager = getSupportFragmentManager();
-    fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-    showLockList();
+    fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    showLockList(true);
   }
 }
 
