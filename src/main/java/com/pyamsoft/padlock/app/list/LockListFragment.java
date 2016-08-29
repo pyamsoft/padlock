@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.app.list;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -106,9 +107,11 @@ public class LockListFragment extends ActionBarFragment
   Unbinder unbinder;
   MenuItem displaySystemItem;
 
-  public static LockListFragment newInstance(int cX, int cY) {
+  @CheckResult @NonNull
+  public static LockListFragment newInstance(int cX, int cY, boolean forceRefresh) {
     final Bundle args = CircularRevealFragmentUtil.bundleArguments(cX, cY, 600L);
     final LockListFragment fragment = new LockListFragment();
+    args.putBoolean("FORCE_REFRESH", forceRefresh);
     fragment.setArguments(args);
     return fragment;
   }
@@ -181,6 +184,12 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    final boolean forceRefresh = getArguments().getBoolean("FORCE_REFRESH", false);
+    if (forceRefresh) {
+      Timber.d("Force a list refresh");
+      firstRefresh = true;
+    }
+
     if (firstRefresh) {
       CircularRevealFragmentUtil.runCircularRevealOnViewCreated(view, getArguments());
     }
