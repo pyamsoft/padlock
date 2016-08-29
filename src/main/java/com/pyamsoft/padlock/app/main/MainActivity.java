@@ -258,6 +258,7 @@ public class MainActivity extends DonationActivityBase
   }
 
   @Override public void forceRefresh() {
+    Timber.d("Force lock list refresh");
     final FragmentManager fragmentManager = getSupportFragmentManager();
     fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     showLockList();

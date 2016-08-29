@@ -52,8 +52,7 @@ class DBInteractorImpl implements DBInteractor {
     // To prevent double creations from occurring, first call a delete on the DB for packageName, activityName
     return deleteEntry(packageName, activityName).flatMap(integer -> {
       Timber.d("CREATE: %s %s", packageName, activityName);
-      return PadLockDB.with(appContext)
-          .insert(packageName, activityName, code, 0, 0, system, whitelist);
+      return PadLockDB.with(appContext).insert(packageName, activityName, code, 0, 0, system, whitelist);
     });
   }
 
