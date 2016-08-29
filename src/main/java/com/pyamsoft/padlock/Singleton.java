@@ -61,7 +61,7 @@ public class Singleton {
       if (instance == null) {
         throw new NullPointerException("Jobs instance is NULL");
       } else {
-        return instance.jobManager;
+        return instance.getJobManager();
       }
     }
 
@@ -94,6 +94,10 @@ public class Singleton {
 
       Timber.d("Create a new JobManager");
       return new JobManager(builder.build());
+    }
+
+    @NonNull @CheckResult JobManager getJobManager() {
+      return jobManager;
     }
   }
 

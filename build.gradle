@@ -91,11 +91,6 @@ dependencies {
 
   retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.3.0'
 
-  // Leak Canary
-  debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
-  releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-  testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-
   // Job Scheduling
   compile 'com.birbit:android-priority-jobqueue:2.0.0'
   compile 'com.google.android.gms:play-services-gcm:9.4.0'
@@ -111,14 +106,11 @@ dependencies {
   apt 'com.google.auto.value:auto-value:1.3-rc2'
   apt 'com.ryanharter.auto.value:auto-value-parcel:0.2.4-rc2'
 
-  // Dagger2
-  // Dagger 2 and Compiler
-  compile 'com.google.dagger:dagger:2.6.1'
-  apt "com.google.dagger:dagger-compiler:2.6.1"
-
   // Butterknife
-  compile 'com.jakewharton:butterknife:8.4.0'
   apt 'com.jakewharton:butterknife-compiler:8.4.0'
+
+  // Dagger
+  apt "com.google.dagger:dagger-compiler:2.6.1"
 
   // Showcase View
   compile 'com.github.deano2390:MaterialShowcaseView:1.1.0'
