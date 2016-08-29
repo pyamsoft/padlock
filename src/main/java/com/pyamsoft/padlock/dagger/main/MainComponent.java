@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import com.pyamsoft.padlock.app.main.MainPresenterLoader;
-import com.pyamsoft.padlock.dagger.ActivityScope;
+import com.pyamsoft.pydroid.base.app.ActivityScope;
 import dagger.Subcomponent;
 
 @ActivityScope @Subcomponent(modules = MainModule.class) public interface MainComponent {

@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import com.pyamsoft.padlock.app.lock.LockScreenPresenterLoader;
-import com.pyamsoft.padlock.dagger.ActivityScope;
+import com.pyamsoft.pydroid.base.app.ActivityScope;
 import com.pyamsoft.padlock.dagger.iconloader.AppIconLoaderModule;
 import com.pyamsoft.padlock.dagger.db.DBModule;
 import dagger.Subcomponent;

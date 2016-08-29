@@ -16,9 +16,8 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import com.pyamsoft.padlock.app.list.DBPresenterLoader;
 import com.pyamsoft.padlock.app.list.LockListPresenterLoader;
-import com.pyamsoft.padlock.dagger.ActivityScope;
+import com.pyamsoft.pydroid.base.app.ActivityScope;
 import com.pyamsoft.padlock.dagger.db.DBModule;
 import com.pyamsoft.padlock.dagger.lock.MasterPinModule;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateModule;

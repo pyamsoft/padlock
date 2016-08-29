@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.dagger.db;
 
 import com.pyamsoft.padlock.app.list.DBPresenterLoader;
-import com.pyamsoft.padlock.dagger.ActivityScope;
+import com.pyamsoft.pydroid.base.app.ActivityScope;
 import dagger.Subcomponent;
 
 @ActivityScope @Subcomponent(modules = DBModule.class) public interface DbComponent {

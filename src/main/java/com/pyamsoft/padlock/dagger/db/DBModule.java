@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.dagger.db;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.padlock.dagger.ActivityScope;
+import com.pyamsoft.pydroid.base.app.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

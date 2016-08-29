@@ -54,7 +54,6 @@ public class PadLock extends ApplicationBase {
     if (buildConfigDebug()) {
       new CrashHandler(getApplicationContext(), this).register();
       setStrictMode();
-      LeakCanary.install(this);
     }
   }
 
