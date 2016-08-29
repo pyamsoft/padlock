@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.bus.ConfirmDialogBus;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
 import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
@@ -31,11 +32,11 @@ class SettingsPreferencePresenterImpl
     extends SchedulerPresenter<SettingsPreferencePresenter.SettingsPreferenceView>
     implements SettingsPreferencePresenter {
 
-  static final int CONFIRM_DATABASE = 0;
-  static final int CONFIRM_ALL = 1;
-  @NonNull final SettingsPreferenceInteractor interactor;
-  @NonNull Subscription confirmBusSubscription = Subscriptions.empty();
-  @NonNull Subscription confirmedSubscription = Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") static final int CONFIRM_DATABASE = 0;
+  @SuppressWarnings("WeakerAccess") static final int CONFIRM_ALL = 1;
+  @NonNull private final SettingsPreferenceInteractor interactor;
+  @NonNull private Subscription confirmBusSubscription = Subscriptions.empty();
+  @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
 
   @Inject SettingsPreferencePresenterImpl(@NonNull SettingsPreferenceInteractor interactor,
       @NonNull @Named("io") Scheduler ioScheduler,
@@ -63,19 +64,19 @@ class SettingsPreferencePresenterImpl
     getView().showConfirmDialog(CONFIRM_DATABASE);
   }
 
-  void unsubscribeConfirm() {
+  @SuppressWarnings("WeakerAccess") void unsubscribeConfirm() {
     if (!confirmedSubscription.isUnsubscribed()) {
       confirmedSubscription.unsubscribe();
     }
   }
 
-  void unregisterFromConfirmEventBus() {
+  private void unregisterFromConfirmEventBus() {
     if (!confirmBusSubscription.isUnsubscribed()) {
       confirmBusSubscription.unsubscribe();
     }
   }
 
-  void registerOnConfirmEventBus() {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnConfirmEventBus() {
     unregisterFromConfirmEventBus();
     confirmBusSubscription = ConfirmDialogBus.get()
         .register()
@@ -98,23 +99,21 @@ class SettingsPreferencePresenterImpl
         });
   }
 
-  void clearAll() {
+  @SuppressWarnings("WeakerAccess") void clearAll() {
     unsubscribeConfirm();
     confirmedSubscription = interactor.clearAll()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(aBoolean -> {
-          getView().onClearAll();
-        }, throwable -> Timber.e(throwable, "onError"), this::unsubscribeConfirm);
+        .subscribe(aBoolean -> getView().onClearAll(), throwable -> Timber.e(throwable, "onError"),
+            this::unsubscribeConfirm);
   }
 
-  void clearDatabase() {
+  @SuppressWarnings("WeakerAccess") void clearDatabase() {
     unsubscribeConfirm();
     confirmedSubscription = interactor.clearDatabase()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(aBoolean -> {
-          getView().onClearDatabase();
-        }, throwable -> Timber.e(throwable, "onError"), this::unsubscribeConfirm);
+        .subscribe(aBoolean -> getView().onClearDatabase(),
+            throwable -> Timber.e(throwable, "onError"), this::unsubscribeConfirm);
   }
 }

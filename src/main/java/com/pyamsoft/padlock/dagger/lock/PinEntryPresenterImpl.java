@@ -28,13 +28,12 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
-    implements PinEntryPresenter {
+class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinEntryPresenter {
 
-  @NonNull final AppIconLoaderPresenter<PinScreen> iconLoader;
-  @NonNull final PinEntryInteractor interactor;
-  @NonNull Subscription pinEntrySubscription = Subscriptions.empty();
-  @NonNull Subscription pinCheckSubscription = Subscriptions.empty();
+  @NonNull private final AppIconLoaderPresenter<PinScreen> iconLoader;
+  @NonNull private final PinEntryInteractor interactor;
+  @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
+  @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
 
   @Inject PinEntryPresenterImpl(@NonNull AppIconLoaderPresenter<PinScreen> iconLoader,
       @NonNull final PinEntryInteractor interactor, @NonNull @Named("main") Scheduler mainScheduler,
@@ -44,13 +43,13 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen>
     this.interactor = interactor;
   }
 
-  void unsubPinEntry() {
+  @SuppressWarnings("WeakerAccess") void unsubPinEntry() {
     if (!pinEntrySubscription.isUnsubscribed()) {
       pinEntrySubscription.unsubscribe();
     }
   }
 
-  void unsubPinCheck() {
+  @SuppressWarnings("WeakerAccess") void unsubPinCheck() {
     if (!pinCheckSubscription.isUnsubscribed()) {
       pinCheckSubscription.unsubscribe();
     }

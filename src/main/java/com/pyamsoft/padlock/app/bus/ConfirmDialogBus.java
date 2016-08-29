@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.app.bus;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.settings.ConfirmationDialog;
 import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 import com.pyamsoft.pydroid.tool.RxBus;
 

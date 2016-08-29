@@ -20,8 +20,7 @@ import com.mikepenz.fastadapter.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 
-public class LockInfoAdapter extends FastItemAdapter<LockInfoItem>
-    implements DBPresenter.DBView {
+public class LockInfoAdapter extends FastItemAdapter<LockInfoItem> implements DBPresenter.DBView {
 
   @Override public void onDBCreateEvent(int position) {
     final LockInfoItem oldItem = getItem(position);

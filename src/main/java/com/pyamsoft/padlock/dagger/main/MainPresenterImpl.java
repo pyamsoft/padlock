@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.bus.AgreeTermsBus;
 import com.pyamsoft.padlock.app.bus.MainBus;
 import com.pyamsoft.padlock.app.main.MainPresenter;
@@ -31,11 +32,11 @@ import timber.log.Timber;
 class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     implements MainPresenter {
 
-  @NonNull final MainInteractor interactor;
+  @SuppressWarnings("WeakerAccess") @NonNull final MainInteractor interactor;
 
-  @NonNull Subscription agreeTermsBusSubscription = Subscriptions.empty();
-  @NonNull Subscription refreshBus = Subscriptions.empty();
-  @NonNull Subscription agreeTermsSubscription = Subscriptions.empty();
+  @NonNull private Subscription agreeTermsBusSubscription = Subscriptions.empty();
+  @NonNull private Subscription refreshBus = Subscriptions.empty();
+  @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
 
   @Inject MainPresenterImpl(@NonNull final MainInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
@@ -57,13 +58,13 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     unsubscribeAgreeTerms();
   }
 
-  void unregisterFromRefreshBus() {
+  private void unregisterFromRefreshBus() {
     if (!refreshBus.isUnsubscribed()) {
       refreshBus.unsubscribe();
     }
   }
 
-  void registerOnRefreshBus() {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnRefreshBus() {
     unregisterFromRefreshBus();
     refreshBus = MainBus.get()
         .register()
@@ -92,7 +93,7 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
         }, this::unsubscribeAgreeTerms);
   }
 
-  void registerOnAgreeTermsBus() {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnAgreeTermsBus() {
     unregisterFromAgreeTermsBus();
     agreeTermsBusSubscription = AgreeTermsBus.get()
         .register()
@@ -109,13 +110,13 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
         });
   }
 
-  void unsubscribeAgreeTerms() {
+  @SuppressWarnings("WeakerAccess") void unsubscribeAgreeTerms() {
     if (!agreeTermsSubscription.isUnsubscribed()) {
       agreeTermsSubscription.unsubscribe();
     }
   }
 
-  void unregisterFromAgreeTermsBus() {
+  private void unregisterFromAgreeTermsBus() {
     if (!agreeTermsBusSubscription.isUnsubscribed()) {
       agreeTermsBusSubscription.unsubscribe();
     }

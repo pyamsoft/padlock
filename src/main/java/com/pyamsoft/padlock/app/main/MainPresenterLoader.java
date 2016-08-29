@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.app.main;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;

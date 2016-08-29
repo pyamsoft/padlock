@@ -26,7 +26,7 @@ import rx.Observable;
 
 abstract class LockInteractorImpl implements LockInteractor {
 
-  @NonNull final MessageDigest messageDigest;
+  @SuppressWarnings("WeakerAccess") @NonNull final MessageDigest messageDigest;
 
   LockInteractorImpl() {
     try {
@@ -36,7 +36,7 @@ abstract class LockInteractorImpl implements LockInteractor {
     }
   }
 
-  @CheckResult @NonNull public Observable<String> encodeSHA256(@NonNull String attempt) {
+  @Override @CheckResult @NonNull public Observable<String> encodeSHA256(@NonNull String attempt) {
     return Observable.defer(() -> {
       messageDigest.reset();
       final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
@@ -44,7 +44,8 @@ abstract class LockInteractorImpl implements LockInteractor {
     });
   }
 
-  @NonNull @CheckResult public Observable<Boolean> checkSubmissionAttempt(@NonNull String attempt,
+  @Override @NonNull @CheckResult
+  public Observable<Boolean> checkSubmissionAttempt(@NonNull String attempt,
       @NonNull String encodedPin) {
     return encodeSHA256(attempt).map(encodedPin::equals);
   }

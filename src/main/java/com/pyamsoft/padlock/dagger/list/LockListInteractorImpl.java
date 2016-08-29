@@ -20,8 +20,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
@@ -29,9 +29,9 @@ import rx.Observable;
 
 class LockListInteractorImpl implements LockListInteractor {
 
-  @NonNull final Context appContext;
-  @NonNull final PadLockPreferences preferences;
-  @NonNull final PackageManagerWrapper packageManagerWrapper;
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @NonNull private final Context appContext;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject LockListInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper,
       final @NonNull Context context, final @NonNull PadLockPreferences preferences) {

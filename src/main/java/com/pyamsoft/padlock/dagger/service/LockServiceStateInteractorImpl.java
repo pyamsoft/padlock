@@ -24,7 +24,7 @@ import rx.Observable;
 
 class LockServiceStateInteractorImpl implements LockServiceStateInteractor {
 
-  @NonNull final MasterPinInteractor pinInteractor;
+  @NonNull private final MasterPinInteractor pinInteractor;
 
   @Inject LockServiceStateInteractorImpl(final @NonNull MasterPinInteractor pinInteractor) {
     this.pinInteractor = pinInteractor;

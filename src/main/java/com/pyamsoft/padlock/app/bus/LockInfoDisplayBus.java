@@ -21,11 +21,11 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.event.LockInfoDisplayEvent;
 import com.pyamsoft.pydroid.tool.RxBus;
 
-public class LockInfoBus extends RxBus<LockInfoDisplayEvent> {
+public class LockInfoDisplayBus extends RxBus<LockInfoDisplayEvent> {
 
-  @NonNull private static final LockInfoBus instance = new LockInfoBus();
+  @NonNull private static final LockInfoDisplayBus instance = new LockInfoDisplayBus();
 
-  @CheckResult @NonNull public static LockInfoBus get() {
+  @CheckResult @NonNull public static LockInfoDisplayBus get() {
     return instance;
   }
 }

@@ -28,7 +28,7 @@ import timber.log.Timber;
 public class PadLockOpenHelper extends SQLiteOpenHelper {
 
   @NonNull public static final String DB_NAME = "padlock_db";
-  static final int DATABASE_VERSION = 4;
+  private static final int DATABASE_VERSION = 4;
 
   public PadLockOpenHelper(final @NonNull Context context) {
     super(context.getApplicationContext(), DB_NAME, null, DATABASE_VERSION);
@@ -60,7 +60,7 @@ public class PadLockOpenHelper extends SQLiteOpenHelper {
     }
   }
 
-  void upgradeVersion3To4(SQLiteDatabase sqLiteDatabase) {
+  private void upgradeVersion3To4(SQLiteDatabase sqLiteDatabase) {
     Timber.d("Upgrading from Version 2 to 3 adds whitelist column");
     final String alterWithWhitelist = String.format(Locale.getDefault(),
         "ALTER TABLE %s ADD COLUMN %S INTEGER NOT NULL DEFAULT 0", PadLockEntry.TABLE_NAME,
@@ -70,7 +70,7 @@ public class PadLockOpenHelper extends SQLiteOpenHelper {
     sqLiteDatabase.execSQL(alterWithWhitelist);
   }
 
-  void upgradeVersion2To3(SQLiteDatabase sqLiteDatabase) {
+  private void upgradeVersion2To3(SQLiteDatabase sqLiteDatabase) {
     Timber.d("Upgrading from Version 2 to 3 drops the whole table");
 
     final String dropOldTable =
@@ -82,7 +82,7 @@ public class PadLockOpenHelper extends SQLiteOpenHelper {
     onCreate(sqLiteDatabase);
   }
 
-  void upgradeVersion1To2(@NonNull SQLiteDatabase sqLiteDatabase) {
+  private void upgradeVersion1To2(@NonNull SQLiteDatabase sqLiteDatabase) {
     Timber.d("Upgrading from Version 1 to 2 drops the displayName column");
 
     // Remove the columns we don't want anymore from the table's list of columns

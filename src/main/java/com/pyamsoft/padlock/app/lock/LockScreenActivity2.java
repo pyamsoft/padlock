@@ -24,13 +24,13 @@ import timber.log.Timber;
 
 public class LockScreenActivity2 extends LockScreenActivity {
 
-  static boolean active = false;
+  private static boolean active = false;
 
   @CheckResult public static boolean isActive() {
     return active;
   }
 
-  static void setActive(boolean active) {
+  private static void setActive(boolean active) {
     Timber.d("Set Active: %s", active);
     LockScreenActivity2.active = active;
   }

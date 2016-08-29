@@ -34,7 +34,7 @@ import timber.log.Timber;
 
 class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
-  @NonNull final PackageManager packageManager;
+  @SuppressWarnings("WeakerAccess") @NonNull final PackageManager packageManager;
 
   @Inject PackageManagerWrapperImpl(@NonNull Context context) {
     this.packageManager = context.getApplicationContext().getPackageManager();

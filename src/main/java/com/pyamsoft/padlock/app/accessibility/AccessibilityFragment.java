@@ -34,10 +34,10 @@ import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
 public class AccessibilityFragment extends ActionBarFragment {
 
   @NonNull public static final String TAG = "AccessibilityFragment";
-  @NonNull final Intent accessibilityServiceIntent =
+  @SuppressWarnings("WeakerAccess") @NonNull final Intent accessibilityServiceIntent =
       new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
   @BindView(R.id.main_service_button) Button serviceButton;
-  Unbinder unbinder;
+  private Unbinder unbinder;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -62,7 +62,7 @@ public class AccessibilityFragment extends ActionBarFragment {
     setActionBarUpEnabled(false);
   }
 
-  void setupAccessibilityButton() {
+  private void setupAccessibilityButton() {
     serviceButton.setOnClickListener(view -> startActivity(accessibilityServiceIntent));
   }
 }

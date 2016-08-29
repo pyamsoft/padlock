@@ -32,7 +32,7 @@ import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.bus.DBProgressBus;
-import com.pyamsoft.padlock.app.bus.LockInfoBus;
+import com.pyamsoft.padlock.app.bus.LockInfoDisplayBus;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.AppEntry;
@@ -44,7 +44,7 @@ import timber.log.Timber;
 
 public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHolder> {
 
-  @NonNull static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
+  @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
   @NonNull final AppEntry entry;
 
@@ -87,7 +87,8 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
         view -> authorizeAccess(holder.getAdapterPosition(), false, false));
   }
 
-  void authorizeAccess(int position, boolean accessPackage, boolean checked) {
+  @SuppressWarnings("WeakerAccess") void authorizeAccess(int position, boolean accessPackage,
+      boolean checked) {
     // TODO some kind of observable which can confirm correct passcode entry
 
     Timber.d("Access authorized");
@@ -100,21 +101,22 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     }
   }
 
-  void accessPackage(int position, boolean checked) {
+  private void accessPackage(int position, boolean checked) {
     // TODO app specific codes
     DBProgressBus.get().post(DBProgressEvent.create(false, position, checked, entry));
   }
 
-  void openInfo() {
-    LockInfoBus.get().post(LockInfoDisplayEvent.create(entry));
+  private void openInfo() {
+    LockInfoDisplayBus.get().post(LockInfoDisplayEvent.create(entry));
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
     return FACTORY;
   }
 
-  protected static class ItemFactory implements ViewHolderFactory<ViewHolder> {
-    public ViewHolder create(View v) {
+  @SuppressWarnings("WeakerAccess") protected static class ItemFactory
+      implements ViewHolderFactory<ViewHolder> {
+    @Override public ViewHolder create(View v) {
       return new ViewHolder(v);
     }
   }

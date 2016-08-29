@@ -40,7 +40,7 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     implements SettingsPreferencePresenter.SettingsPreferenceView {
 
   @NonNull public static final String TAG = "SettingsPreferenceFragment";
-  SettingsPreferencePresenter presenter;
+  @SuppressWarnings("WeakerAccess") SettingsPreferencePresenter presenter;
 
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {

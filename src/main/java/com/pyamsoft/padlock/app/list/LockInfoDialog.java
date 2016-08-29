@@ -20,7 +20,6 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -54,12 +53,11 @@ import timber.log.Timber;
 public class LockInfoDialog extends DialogFragment
     implements LockInfoPresenter.LockInfoView, DBPresenter.DBView {
 
-  @NonNull static final String ARG_APP_ENTRY = "app_entry";
-  static final int KEY_PRESENTER = 0;
-  static final int KEY_ADAPTER_PRESENTER = 1;
-  static final int KEY_DB_PRESENTER = 2;
-  @NonNull final Handler handler = new Handler();
-  @NonNull final AsyncDrawableMap taskMap = new AsyncDrawableMap();
+  @NonNull private static final String ARG_APP_ENTRY = "app_entry";
+  private static final int KEY_PRESENTER = 0;
+  private static final int KEY_ADAPTER_PRESENTER = 1;
+  private static final int KEY_DB_PRESENTER = 2;
+  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;
@@ -69,12 +67,12 @@ public class LockInfoDialog extends DialogFragment
   @BindView(R.id.lock_info_recycler) RecyclerView recyclerView;
   @BindView(R.id.lock_info_toggleall) SwitchCompat toggleAll;
 
-  LockInfoPresenter presenter;
-  DBPresenter dbPresenter;
-  LockInfoAdapter fastItemAdapter;
-  boolean firstRefresh;
-  AppEntry appEntry;
-  Unbinder unbinder;
+  @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
+  @SuppressWarnings("WeakerAccess") DBPresenter dbPresenter;
+  @SuppressWarnings("WeakerAccess") LockInfoAdapter fastItemAdapter;
+  @SuppressWarnings("WeakerAccess") boolean firstRefresh;
+  @SuppressWarnings("WeakerAccess") AppEntry appEntry;
+  private Unbinder unbinder;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -163,7 +161,6 @@ public class LockInfoDialog extends DialogFragment
     recyclerView.setLayoutManager(null);
     recyclerView.setAdapter(null);
 
-    handler.removeCallbacksAndMessages(null);
     taskMap.clear();
     unbinder.unbind();
   }
@@ -187,7 +184,7 @@ public class LockInfoDialog extends DialogFragment
     dbPresenter.unbindView();
   }
 
-  void initializeForEntry() {
+  private void initializeForEntry() {
     ViewCompat.setElevation(toolbar, AppUtil.convertToDP(getContext(), 4));
     close.setOnClickListener(view -> {
       // Only close if list is displayed
@@ -223,7 +220,7 @@ public class LockInfoDialog extends DialogFragment
     repopulateList();
   }
 
-  void repopulateList() {
+  private void repopulateList() {
     Timber.d("Repopulate list");
     recyclerView.setClickable(false);
     presenter.populateList(appEntry.packageName());
@@ -276,7 +273,7 @@ public class LockInfoDialog extends DialogFragment
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  void safeChangeToggleAllState(boolean enabled) {
+  private void safeChangeToggleAllState(boolean enabled) {
     toggleAll.setOnCheckedChangeListener(null);
     toggleAll.setChecked(enabled);
     toggleAll.setOnCheckedChangeListener((compoundButton, isChecked) -> {

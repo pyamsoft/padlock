@@ -22,8 +22,8 @@ import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import javax.inject.Named;
 import rx.Scheduler;
 
-abstract class LockPresenterImpl<I extends LockPresenter.LockView>
-    extends SchedulerPresenter<I> implements LockPresenter<I> {
+abstract class LockPresenterImpl<I extends LockPresenter.LockView> extends SchedulerPresenter<I>
+    implements LockPresenter<I> {
 
   LockPresenterImpl(@NonNull @Named("main") Scheduler mainScheduler,
       @NonNull @Named("io") Scheduler ioScheduler) {

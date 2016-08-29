@@ -25,10 +25,10 @@ import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.job.RecheckJob;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
@@ -37,10 +37,10 @@ import timber.log.Timber;
 
 class LockServiceInteractorImpl implements LockServiceInteractor {
 
-  @NonNull final Context appContext;
-  @NonNull final PadLockPreferences preferences;
-  @NonNull final KeyguardManager keyguard;
-  @NonNull final PackageManagerWrapper packageManagerWrapper;
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final KeyguardManager keyguard;
+  @NonNull private final Context appContext;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject LockServiceInteractorImpl(final @NonNull Context context,
       @NonNull PadLockPreferences preferences, @NonNull KeyguardManager keyguard,
@@ -123,8 +123,8 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
     Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);
     final Observable<PadLockEntry> specificActivityEntry =
         PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
-    final Observable<PadLockEntry> packageActivityEntry = PadLockDB.with(
-        appContext).queryWithPackageActivityName(packageName, PadLockEntry.PACKAGE_TAG)
+    final Observable<PadLockEntry> packageActivityEntry = PadLockDB.with(appContext)
+        .queryWithPackageActivityName(packageName, PadLockEntry.PACKAGE_TAG)
         .first();
     return Observable.zip(specificActivityEntry, packageActivityEntry,
         (specificEntry, packageEntry) -> {

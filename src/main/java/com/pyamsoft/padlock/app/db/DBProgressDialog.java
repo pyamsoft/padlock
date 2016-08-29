@@ -27,17 +27,15 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.tool.RxBus;
 import com.pyamsoft.pydroid.util.AppUtil;
 
 public class DBProgressDialog extends DialogFragment {
 
-  @NonNull static final String DB_PROGRESS_TAG = "db_progress";
-  @NonNull static final String APP_NAME = "app_name";
-  String name;
+  @NonNull private static final String DB_PROGRESS_TAG = "db_progress";
+  @NonNull private static final String APP_NAME = "app_name";
+  private String name;
 
-  static DBProgressDialog newInstance(final String name) {
+  @CheckResult @NonNull private static DBProgressDialog newInstance(final String name) {
     final DBProgressDialog fragment = new DBProgressDialog();
     final Bundle args = new Bundle();
     args.putString(APP_NAME, name);

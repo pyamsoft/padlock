@@ -20,7 +20,6 @@ import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.base.app.ApplicationBase;
 import com.pyamsoft.pydroid.crash.CrashHandler;
-import com.squareup.leakcanary.LeakCanary;
 
 public class PadLock extends ApplicationBase {
 
@@ -57,7 +56,7 @@ public class PadLock extends ApplicationBase {
     }
   }
 
-  void setStrictMode() {
+  private void setStrictMode() {
     StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll()
         .penaltyLog()
         .penaltyDeath()

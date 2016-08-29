@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.lock;
+package com.pyamsoft.padlock.app.bus;
 
-import android.content.Context;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import com.pyamsoft.padlock.model.event.LockInfoSelectEvent;
+import com.pyamsoft.pydroid.tool.RxBus;
 
-public class PinScreenPresenterLoader extends PresenterLoader<PinEntryPresenter> {
+public class LockInfoSelectBus extends RxBus<LockInfoSelectEvent> {
 
-  @Inject Provider<PinEntryPresenter> presenterProvider;
+  @NonNull private static final LockInfoSelectBus instance = new LockInfoSelectBus();
 
-  PinScreenPresenterLoader(@NonNull Context context) {
-    super(context);
-  }
-
-  @NonNull @Override protected PinEntryPresenter loadPresenter() {
-    Singleton.Dagger.with(getContext()).plusPinEntry().inject(this);
-    return presenterProvider.get();
+  @CheckResult @NonNull public static LockInfoSelectBus get() {
+    return instance;
   }
 }

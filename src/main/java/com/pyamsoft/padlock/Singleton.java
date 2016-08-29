@@ -124,8 +124,12 @@ public class Singleton {
       if (instance == null) {
         throw new NullPointerException("Dagger instance is NULL");
       } else {
-        return instance.component;
+        return instance.getComponent();
       }
+    }
+
+    @NonNull @CheckResult final PadLockComponent getComponent() {
+      return component;
     }
   }
 }

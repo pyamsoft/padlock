@@ -31,9 +31,9 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
 
     void onEntryAddedToList(@NonNull ActivityEntry entry);
 
-    void onListPopulated();
+    @Override void onListPopulated();
 
-    void onListPopulateError();
+    @Override void onListPopulateError();
 
     void enableToggleAll();
 

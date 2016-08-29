@@ -20,7 +20,8 @@ import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenterLoader;
 import com.pyamsoft.pydroid.base.app.ActivityScope;
 import dagger.Subcomponent;
 
-@ActivityScope @Subcomponent(modules = SettingsPreferenceModule.class) public interface SettingsPreferenceComponent {
+@ActivityScope @Subcomponent(modules = SettingsPreferenceModule.class)
+public interface SettingsPreferenceComponent {
 
   void inject(SettingsPreferencePresenterLoader loader);
 }

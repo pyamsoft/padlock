@@ -30,8 +30,8 @@ import timber.log.Timber;
 class AppIconLoaderPresenterImpl<I extends AppIconLoaderView> extends SchedulerPresenter<I>
     implements AppIconLoaderPresenter<I> {
 
-  @NonNull final AppIconLoaderInteractor interactor;
-  @NonNull Subscription loadIconSubscription = Subscriptions.empty();
+  @NonNull private final AppIconLoaderInteractor interactor;
+  @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
 
   @Inject AppIconLoaderPresenterImpl(@NonNull AppIconLoaderInteractor interactor,
       @NonNull @Named("main") Scheduler mainScheduler,
@@ -60,7 +60,7 @@ class AppIconLoaderPresenterImpl<I extends AppIconLoaderView> extends SchedulerP
         }, this::unsubLoadIcon);
   }
 
-  void unsubLoadIcon() {
+  @SuppressWarnings("WeakerAccess") void unsubLoadIcon() {
     if (!loadIconSubscription.isUnsubscribed()) {
       loadIconSubscription.unsubscribe();
     }

@@ -25,7 +25,7 @@ import timber.log.Timber;
 
 class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntryInteractor {
 
-  @NonNull final MasterPinInteractor masterPinInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull final MasterPinInteractor masterPinInteractor;
 
   @Inject PinEntryInteractorImpl(@NonNull final MasterPinInteractor masterPinInteractor) {
     this.masterPinInteractor = masterPinInteractor;
@@ -34,7 +34,7 @@ class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntryInter
   @Override @CheckResult @NonNull
   public Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt, @NonNull String reentry,
       @NonNull String hint) {
-    return masterPinInteractor.getMasterPin().map(masterPin -> {
+    return masterPinInteractor.getMasterPin().flatMap(masterPin -> {
       if (masterPin == null) {
         return attemptCreatePin(attempt, reentry, hint);
       } else {
@@ -47,38 +47,41 @@ class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntryInter
     return masterPinInteractor.getMasterPin().map(s -> s != null);
   }
 
-  @CheckResult @NonNull
-  PinEntryEvent attemptClearPin(@NonNull String masterPin, @NonNull String attempt) {
-    final boolean success = checkSubmissionAttempt(attempt, masterPin).toBlocking().first();
-    if (success) {
-      Timber.d("Clear master pin");
-      masterPinInteractor.setMasterPin(null);
-      masterPinInteractor.setHint(null);
-      return PinEntryEvent.builder().complete(true).type(1).build();
-    } else {
-      Timber.d("Failed to clear master pin");
-      return PinEntryEvent.builder().complete(false).type(1).build();
-    }
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<PinEntryEvent> attemptClearPin(
+      @NonNull String masterPin, @NonNull String attempt) {
+    return checkSubmissionAttempt(attempt, masterPin).map(success -> {
+      if (success) {
+        Timber.d("Clear master pin");
+        masterPinInteractor.setMasterPin(null);
+        masterPinInteractor.setHint(null);
+        return PinEntryEvent.builder().complete(true).type(1).build();
+      } else {
+        Timber.d("Failed to clear master pin");
+        return PinEntryEvent.builder().complete(false).type(1).build();
+      }
+    });
   }
 
-  @CheckResult @NonNull
-  PinEntryEvent attemptCreatePin(@NonNull String attempt, @NonNull String reentry,
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
+  Observable<PinEntryEvent> attemptCreatePin(@NonNull String attempt, @NonNull String reentry,
       @NonNull String hint) {
-    Timber.d("No existing master pin, attempt to create a new one");
-    if (attempt.equals(reentry)) {
-      Timber.d("Entry and Re-Entry match, create");
-      final String encodedMasterPin = encodeSHA256(attempt).toBlocking().first();
-      masterPinInteractor.setMasterPin(encodedMasterPin);
+    return Observable.defer(() -> {
+      Timber.d("No existing master pin, attempt to create a new one");
+      if (attempt.equals(reentry)) {
+        Timber.d("Entry and Re-Entry match, create");
+        final String encodedMasterPin = encodeSHA256(attempt).toBlocking().first();
+        masterPinInteractor.setMasterPin(encodedMasterPin);
 
-      if (!hint.isEmpty()) {
-        Timber.d("User provided hint, save it");
-        masterPinInteractor.setHint(hint);
+        if (!hint.isEmpty()) {
+          Timber.d("User provided hint, save it");
+          masterPinInteractor.setHint(hint);
+        }
+
+        return Observable.just(PinEntryEvent.builder().complete(true).type(0).build());
+      } else {
+        Timber.e("Entry and re-entry do not match");
+        return Observable.just(PinEntryEvent.builder().complete(false).type(0).build());
       }
-
-      return PinEntryEvent.builder().complete(true).type(0).build();
-    } else {
-      Timber.e("Entry and re-entry do not match");
-      return PinEntryEvent.builder().complete(false).type(0).build();
-    }
+    });
   }
 }

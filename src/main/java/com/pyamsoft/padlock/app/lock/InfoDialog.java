@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.lock;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -25,13 +26,13 @@ import android.support.v7.app.AlertDialog;
 
 public class InfoDialog extends DialogFragment {
 
-  @NonNull static final String PKG_NAME = "pkgname";
-  @NonNull static final String ACT_NAME = "actname";
+  @NonNull private static final String PKG_NAME = "pkgname";
+  @NonNull private static final String ACT_NAME = "actname";
 
-  String activityName;
-  String packageName;
+  private String activityName;
+  private String packageName;
 
-  public static InfoDialog newInstance(final @NonNull String packageName,
+  @CheckResult @NonNull public static InfoDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
     final InfoDialog fragment = new InfoDialog();
     final Bundle args = new Bundle();

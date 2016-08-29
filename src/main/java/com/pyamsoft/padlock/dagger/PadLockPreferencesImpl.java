@@ -28,23 +28,23 @@ import javax.inject.Inject;
 
 class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPreferences {
 
-  @NonNull static final String IS_SYSTEM = "is_system";
-  @NonNull static final String MASTER_PASSWORD = "master_password";
-  @NonNull static final String HINT = "hint";
-  @NonNull static final String AGREED = "agreed";
-  @NonNull static final String ONBOARD = "onboard";
-  @NonNull final String ignoreTimeKey;
-  @NonNull final String ignoreTimeDefault;
-  @NonNull final String timeoutTimeKey;
-  @NonNull final String timeoutTimeDefault;
-  @NonNull final String lockPackageChangeKey;
-  @NonNull final String lockDeviceLockedKey;
-  @NonNull final String nSupportKey;
-  @NonNull final String recheckKey;
-  final boolean lockPackageChangeDefault;
-  final boolean lockDeviceLockedDefault;
-  final boolean recheckDefault;
-  final boolean nSupportDefault;
+  @NonNull private static final String IS_SYSTEM = "is_system";
+  @NonNull private static final String MASTER_PASSWORD = "master_password";
+  @NonNull private static final String HINT = "hint";
+  @NonNull private static final String AGREED = "agreed";
+  @NonNull private static final String ONBOARD = "onboard";
+  @NonNull private final String ignoreTimeKey;
+  @NonNull private final String ignoreTimeDefault;
+  @NonNull private final String timeoutTimeKey;
+  @NonNull private final String timeoutTimeDefault;
+  @NonNull private final String lockPackageChangeKey;
+  @NonNull private final String lockDeviceLockedKey;
+  @NonNull private final String nSupportKey;
+  @NonNull private final String recheckKey;
+  private final boolean lockPackageChangeDefault;
+  private final boolean lockDeviceLockedDefault;
+  private final boolean recheckDefault;
+  private final boolean nSupportDefault;
 
   @Inject PadLockPreferencesImpl(final @NonNull Context context) {
     super(context);

@@ -31,15 +31,14 @@ import timber.log.Timber;
 
 class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements LockScreenPresenter {
 
-  @NonNull final LockScreenInteractor interactor;
-  @NonNull final AppIconLoaderPresenter<LockScreen> iconLoader;
-
-  @NonNull Subscription postUnlockSubscription = Subscriptions.empty();
-  @NonNull Subscription unlockSubscription = Subscriptions.empty();
-  @NonNull Subscription lockSubscription = Subscriptions.empty();
-  @NonNull Subscription displayNameSubscription = Subscriptions.empty();
-  @NonNull Subscription hintSubscription = Subscriptions.empty();
-  @NonNull Subscription ignoreTimeSubscription = Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull final LockScreenInteractor interactor;
+  @NonNull private final AppIconLoaderPresenter<LockScreen> iconLoader;
+  @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
+  @NonNull private Subscription hintSubscription = Subscriptions.empty();
+  @NonNull private Subscription ignoreTimeSubscription = Subscriptions.empty();
+  @NonNull private Subscription postUnlockSubscription = Subscriptions.empty();
+  @NonNull private Subscription unlockSubscription = Subscriptions.empty();
+  @NonNull private Subscription lockSubscription = Subscriptions.empty();
 
   @Inject LockScreenPresenterImpl(@NonNull AppIconLoaderPresenter<LockScreen> iconLoader,
       @NonNull final LockScreenInteractor lockScreenInteractor,
@@ -72,25 +71,25 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
     interactor.resetFailCount();
   }
 
-  void unsubPostUnlock() {
+  @SuppressWarnings("WeakerAccess") void unsubPostUnlock() {
     if (!postUnlockSubscription.isUnsubscribed()) {
       postUnlockSubscription.unsubscribe();
     }
   }
 
-  void unsubUnlock() {
+  @SuppressWarnings("WeakerAccess") void unsubUnlock() {
     if (!unlockSubscription.isUnsubscribed()) {
       unlockSubscription.unsubscribe();
     }
   }
 
-  void unsubLock() {
+  @SuppressWarnings("WeakerAccess") void unsubLock() {
     if (!lockSubscription.isUnsubscribed()) {
       lockSubscription.unsubscribe();
     }
   }
 
-  void unsubHint() {
+  @SuppressWarnings("WeakerAccess") void unsubHint() {
     if (!hintSubscription.isUnsubscribed()) {
       hintSubscription.unsubscribe();
     }
@@ -119,7 +118,7 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
         }, this::unsubIgnoreTime);
   }
 
-  void unsubIgnoreTime() {
+  @SuppressWarnings("WeakerAccess") void unsubIgnoreTime() {
     if (!ignoreTimeSubscription.isUnsubscribed()) {
       ignoreTimeSubscription.unsubscribe();
     }
@@ -127,25 +126,23 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
 
   @Override public void lockEntry(@NonNull String packageName, @NonNull String activityName) {
     unsubLock();
-    if (interactor.incrementAndGetFailCount().toBlocking().first()
-        > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT) {
-      final LockScreen lockScreen = getView();
-      lockSubscription = interactor.lockEntry(packageName, activityName)
-          .subscribeOn(getSubscribeScheduler())
-          .observeOn(getObserveScheduler())
-          .subscribe(unlocked -> {
-            Timber.d("Received lock entry result");
-            if (unlocked) {
-              lockScreen.onLocked();
-            } else {
-              lockScreen.onLockedError();
-            }
-          }, throwable -> {
-            Timber.e(throwable, "lockEntry onError");
-            lockScreen.onLockedError();
-            unsubLock();
-          }, this::unsubLock);
-    }
+    lockSubscription = interactor.incrementAndGetFailCount()
+        .filter(count -> count > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT)
+        .flatMap(integer -> interactor.lockEntry(packageName, activityName))
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(unlocked -> {
+          Timber.d("Received lock entry result");
+          if (unlocked) {
+            getView().onLocked();
+          } else {
+            getView().onLockedError();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "lockEntry onError");
+          getView().onLockedError();
+          unsubLock();
+        }, this::unsubLock);
   }
 
   @Override public void submit(@NonNull String packageName, @NonNull String activityName,
@@ -171,13 +168,12 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
 
   @Override public void loadDisplayNameFromPackage(@NonNull String packageName) {
     unsubDisplayName();
-    final LockScreen lockScreen = getView();
     displayNameSubscription = interactor.getDisplayName(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(lockScreen::setDisplayName, throwable -> {
+        .subscribe(s -> getView().setDisplayName(s), throwable -> {
           Timber.e(throwable, "Error loading display name from package");
-          lockScreen.setDisplayName("");
+          getView().setDisplayName("");
         }, this::unsubDisplayName);
   }
 
@@ -200,7 +196,7 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
         }, this::unsubPostUnlock);
   }
 
-  void unsubDisplayName() {
+  @SuppressWarnings("WeakerAccess") void unsubDisplayName() {
     if (!displayNameSubscription.isUnsubscribed()) {
       displayNameSubscription.unsubscribe();
     }

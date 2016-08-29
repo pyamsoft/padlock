@@ -22,6 +22,7 @@ import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.view.accessibility.AccessibilityEvent;
 import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
@@ -34,18 +35,19 @@ import timber.log.Timber;
 public class PadLockService extends AccessibilityService
     implements LockServicePresenter.LockService {
 
-  static volatile PadLockService instance = null;
+  private static volatile PadLockService instance = null;
   @Inject LockServicePresenter presenter;
-  Intent lockActivity;
-  Intent lockActivity2;
+  private Intent lockActivity;
+  private Intent lockActivity2;
 
-  @NonNull @CheckResult static synchronized PadLockService getInstance() {
+  @NonNull @CheckResult private static synchronized PadLockService getInstance() {
     if (instance == null) {
       throw new NullPointerException("Current service instance is NULL");
     }
     return instance;
   }
 
+  @VisibleForTesting @SuppressWarnings("WeakerAccess")
   static synchronized void setInstance(@Nullable PadLockService i) {
     instance = i;
   }
@@ -85,7 +87,7 @@ public class PadLockService extends AccessibilityService
     }
   }
 
-  static void craftIntent(@NonNull Intent removeIntent, @NonNull Intent addIntent,
+  private static void craftIntent(@NonNull Intent removeIntent, @NonNull Intent addIntent,
       @NonNull PadLockEntry entry, @NonNull String realName) {
     removeIntent.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
     removeIntent.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);

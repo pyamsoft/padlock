@@ -26,14 +26,14 @@ import rx.Observable;
 
 class AppIconLoaderInteractorImpl implements AppIconLoaderInteractor {
 
-  @NonNull final PackageManagerWrapper packageManagerWrapper;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject
   protected AppIconLoaderInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper) {
     this.packageManagerWrapper = packageManagerWrapper;
   }
 
-  @NonNull @WorkerThread @CheckResult
+  @Override @NonNull @WorkerThread @CheckResult
   public final Observable<Drawable> loadPackageIcon(final @NonNull String packageName) {
     return packageManagerWrapper.loadDrawableForPackageOrDefault(packageName);
   }

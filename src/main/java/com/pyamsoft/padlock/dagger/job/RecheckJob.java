@@ -29,15 +29,14 @@ import timber.log.Timber;
 
 public class RecheckJob extends Job {
 
-  public static final int PRIORITY = 1;
   @NonNull public static final String TAG_ALL = "ALL";
-  @NonNull public static final String TAG_PACKAGE_PREFIX = "P: ";
   @NonNull public static final String TAG_CLASS_PREFIX = "C: ";
+  private static final int PRIORITY = 1;
+  @NonNull private static final String TAG_PACKAGE_PREFIX = "P: ";
+  @NonNull private final String packageName;
+  @NonNull private final String className;
 
-  @NonNull final String packageName;
-  @NonNull final String className;
-
-  RecheckJob(@NonNull String packageName, @NonNull String className, long delay) {
+  private RecheckJob(@NonNull String packageName, @NonNull String className, long delay) {
     super(new Params(PRIORITY).setDelayMs(delay)
         .setRequiresNetwork(false)
         .addTags(TAG_PACKAGE_PREFIX + packageName, TAG_CLASS_PREFIX + className, TAG_ALL));

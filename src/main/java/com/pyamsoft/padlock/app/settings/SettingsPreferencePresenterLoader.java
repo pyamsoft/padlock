@@ -23,7 +23,8 @@ import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class SettingsPreferencePresenterLoader extends PresenterLoader<SettingsPreferencePresenter> {
+public class SettingsPreferencePresenterLoader
+    extends PresenterLoader<SettingsPreferencePresenter> {
 
   @Inject Provider<SettingsPreferencePresenter> presenterProvider;
 
