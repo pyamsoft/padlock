@@ -28,7 +28,6 @@ import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -41,14 +40,14 @@ import com.pyamsoft.padlock.app.accessibility.AccessibilityFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
-import com.pyamsoft.pydroid.base.activity.DonationActivityBase;
+import com.pyamsoft.pydroid.base.activity.DonationActivity;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.StringUtil;
 import timber.log.Timber;
 
-public class MainActivity extends DonationActivityBase
+public class MainActivity extends DonationActivity
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
   @BindView(R.id.main_root) CoordinatorLayout rootView;
@@ -250,11 +249,6 @@ public class MainActivity extends DonationActivityBase
 
   @Override public int getChangeLogVersion() {
     return BuildConfig.VERSION_CODE;
-  }
-
-  @Override public boolean onCreateOptionsMenu(@NonNull Menu menu) {
-    Timber.d("onCreateOptionsMenu");
-    return super.onCreateOptionsMenu(menu);
   }
 
   @Override public void forceRefresh() {

@@ -250,7 +250,6 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-    Timber.d("onCreateOptionsMenu");
     super.onCreateOptionsMenu(menu, inflater);
     inflater.inflate(R.menu.locklist_menu, menu);
   }
