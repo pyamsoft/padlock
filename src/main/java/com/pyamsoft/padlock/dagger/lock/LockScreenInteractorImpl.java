@@ -25,8 +25,8 @@ import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.job.RecheckJob;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
@@ -38,7 +38,6 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   @NonNull final MasterPinInteractor pinInteractor;
   @NonNull final Context appContext;
   @NonNull final PadLockPreferences preferences;
-  @NonNull final long[] ignoreTimes;
   @NonNull final PackageManagerWrapper packageManagerWrapper;
   int failCount;
 
@@ -50,7 +49,6 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
     this.pinInteractor = masterPinInteractor;
-    this.ignoreTimes = preferences.getIgnoreTimes();
   }
 
   @WorkerThread @NonNull @Override @CheckResult
@@ -182,9 +180,9 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
     });
   }
 
-  @CheckResult @NonNull
-  Observable<Long> whitelistEntry(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName, @Nullable String lockCode, boolean isSystem) {
+  @CheckResult @NonNull Observable<Long> whitelistEntry(@NonNull String packageName,
+      @NonNull String activityName, @NonNull String realName, @Nullable String lockCode,
+      boolean isSystem) {
     Timber.d("Get entry for %s %s (real %s)", packageName, activityName, realName);
     return PadLockDB.with(appContext)
         .queryWithPackageActivityName(packageName, realName)
@@ -207,8 +205,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   // KLUDGE void, probably should return Observable to the stream
-  @CheckResult @NonNull Observable<Integer> queueRecheckJob(PadLockEntry entry,
-      long recheckTime) {
+  @CheckResult @NonNull Observable<Integer> queueRecheckJob(PadLockEntry entry, long recheckTime) {
     return Observable.defer(() -> {
       // Cancel any old recheck job for the class, but not the package
       final String packageTag = RecheckJob.TAG_CLASS_PREFIX + entry.packageName();
@@ -225,8 +222,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
     });
   }
 
-  @NonNull @CheckResult
-  Observable<Integer> ignoreEntryForTime(@NonNull PadLockEntry oldValues,
+  @NonNull @CheckResult Observable<Integer> ignoreEntryForTime(@NonNull PadLockEntry oldValues,
       final long ignoreMinutesInMillis) {
     Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
         ignoreMinutesInMillis);
@@ -244,42 +240,6 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   @WorkerThread @NonNull @Override @CheckResult
   public Observable<String> getDisplayName(@NonNull String packageName) {
     return packageManagerWrapper.loadPackageLabel(packageName);
-  }
-
-  @NonNull @Override public Observable<Long> getIgnoreTimeForIndex(int index) {
-    return Observable.defer(() -> Observable.just(ignoreTimes[index]));
-  }
-
-  @NonNull @Override public Observable<Long> getIgnoreTimeOne() {
-    return getIgnoreTimeForIndex(1);
-  }
-
-  @NonNull @Override public Observable<Long> getIgnoreTimeFive() {
-    return getIgnoreTimeForIndex(2);
-  }
-
-  @NonNull @Override public Observable<Long> getIgnoreTimeTen() {
-    return getIgnoreTimeForIndex(3);
-  }
-
-  @NonNull @Override public Observable<Long> getIgnoreTimeFifteen() {
-    return getIgnoreTimeForIndex(4);
-  }
-
-  @NonNull @Override public Observable<Long> getIgnoreTimeTwenty() {
-    return getIgnoreTimeForIndex(5);
-  }
-
-  @NonNull @Override public Observable<Long> getIgnoreTimeThirty() {
-    return getIgnoreTimeForIndex(6);
-  }
-
-  @NonNull @Override public Observable<Long> getIgnoreTimeFourtyFive() {
-    return getIgnoreTimeForIndex(7);
-  }
-
-  @NonNull @Override public Observable<Long> getIgnoreTimeSixty() {
-    return getIgnoreTimeForIndex(8);
   }
 
   @NonNull @Override public Observable<Integer> incrementAndGetFailCount() {

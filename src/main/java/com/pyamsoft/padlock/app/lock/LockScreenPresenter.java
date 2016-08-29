@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
@@ -26,10 +25,7 @@ public interface LockScreenPresenter
 
   void displayLockedHint();
 
-  // KLUDGE doesnt persist over restarts, doesnt correctly store into bundle
-  void saveSelectedOptions(@NonNull Bundle outState, int selectedIndex);
-
-  void setIgnorePeriodFromPreferences(long ignoreTime);
+  void createWithDefaultIgnoreTime();
 
   void lockEntry(@NonNull String packageName, @NonNull String activityName);
 
@@ -40,5 +36,5 @@ public interface LockScreenPresenter
 
   void postUnlock(@NonNull String packageName, @NonNull String activityName,
       @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
-      int ignoreIndex);
+      long ignoreTime);
 }

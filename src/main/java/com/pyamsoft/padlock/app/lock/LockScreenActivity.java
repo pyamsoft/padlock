@@ -98,6 +98,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   String lockedRealName;
   String lockedCode;
   boolean lockedSystem;
+  long[] ignoreTimes;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -123,6 +124,14 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     unbinder = ButterKnife.bind(this);
+
+    final String[] stringIgnoreTimes =
+        getApplicationContext().getResources().getStringArray(R.array.ignore_time_entries);
+    ignoreTimes = new long[stringIgnoreTimes.length];
+    for (int i = 0; i < stringIgnoreTimes.length; ++i) {
+      ignoreTimes[i] = Long.parseLong(stringIgnoreTimes[i]);
+    }
+
     getValuesFromBundle();
 
     editText = textLayout.getEditText();
@@ -203,7 +212,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     editText.setText("");
   }
 
-  private void getValuesFromBundle() {
+  void getValuesFromBundle() {
     final Bundle bundle = getIntent().getExtras();
     lockedPackageName = bundle.getString(ENTRY_PACKAGE_NAME);
     lockedActivityName = bundle.getString(ENTRY_ACTIVITY_NAME);
@@ -263,7 +272,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     overridePendingTransition(0, 0);
   }
 
-  private void showSnackbarWithText(String text) {
+  void showSnackbarWithText(String text) {
     final Snackbar snackbar = Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT);
     final int defaultSnackColor = ContextCompat.getColor(this, R.color.snackbar);
     snackbar.getView().setBackgroundColor(defaultSnackColor);
@@ -292,7 +301,7 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     clearDisplay();
 
     presenter.postUnlock(lockedPackageName, lockedActivityName, lockedRealName, lockedCode,
-        lockedSystem, menuExclude.isChecked(), getSelectedIgnoreTimeIndex());
+        lockedSystem, menuExclude.isChecked(), getIgnoreTimeFromSelectedIndex());
   }
 
   @Override public void onSubmitFailure() {
@@ -323,15 +332,17 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
     if (isChangingConfigurations()) {
       final String attempt = getCurrentAttempt();
+      final long ignoreTime = getIgnoreTimeFromSelectedIndex();
       outState.putString(CODE_DISPLAY, attempt);
-      presenter.saveSelectedOptions(outState, getSelectedIgnoreTimeIndex());
+      outState.putLong("IGNORE", ignoreTime);
+      outState.putBoolean("EXCLUDE", menuExclude.isChecked());
     }
 
     Timber.d("onSaveInstanceState");
     super.onSaveInstanceState(outState);
   }
 
-  @CheckResult @NonNull private String getCurrentAttempt() {
+  @CheckResult @NonNull String getCurrentAttempt() {
     return editText.getText().toString();
   }
 
@@ -352,7 +363,15 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   }
 
   @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
-    presenter.setIgnorePeriodFromPreferences(ignorePeriod);
+    if (presenter != null) {
+      if (ignorePeriod == -1) {
+        Timber.d("No previous selection, load ignore time from preference");
+        presenter.createWithDefaultIgnoreTime();
+      } else {
+        initializeWithIgnoreTime(ignorePeriod);
+      }
+    }
+
     menuExclude.setChecked(exclude);
     return super.onPrepareOptionsMenu(menu);
   }
@@ -360,50 +379,6 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
   @Override public void onSubmitError() {
     clearDisplay();
     AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
-  }
-
-  @Override public void setIgnoreTimeNone() {
-    if (menuIgnoreNone != null) {
-      menuIgnoreNone.setChecked(true);
-    }
-  }
-
-  @Override public void setIgnoreTimeOne() {
-    menuIgnoreOne.setChecked(true);
-  }
-
-  @Override public void setIgnoreTimeFive() {
-    menuIgnoreFive.setChecked(true);
-  }
-
-  @Override public void setIgnoreTimeTen() {
-    menuIgnoreTen.setChecked(true);
-  }
-
-  @Override public void setIgnoreTimeFifteen() {
-    menuIgnoreFifteen.setChecked(true);
-  }
-
-  @Override public void setIgnoreTimeTwenty() {
-    menuIgnoreTwenty.setChecked(true);
-  }
-
-  @Override public void setIgnoreTimeThirty() {
-    menuIgnoreThirty.setChecked(true);
-  }
-
-  @Override public void setIgnoreTimeFourtyFive() {
-    menuIgnoreFourtyFive.setChecked(true);
-  }
-
-  @Override public void setIgnoreTimeSixty() {
-    menuIgnoreSixty.setChecked(true);
-  }
-
-  @Override public void onSaveMenuSelections(@NonNull Bundle outState, long ignoreTime) {
-    Timber.d("onSaveMenuSelections");
-    outState.putLong("IGNORE", ignoreTime);
-    outState.putBoolean("EXCLUDE", menuExclude.isChecked());
   }
 
   @Override public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -425,9 +400,11 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     return true;
   }
 
-  @CheckResult private int getSelectedIgnoreTimeIndex() {
-    int index;
-    if (menuIgnoreOne.isChecked()) {
+  @CheckResult long getIgnoreTimeFromSelectedIndex() {
+    final int index;
+    if (menuIgnoreNone.isChecked()) {
+      index = 0;
+    } else if (menuIgnoreOne.isChecked()) {
       index = 1;
     } else if (menuIgnoreFive.isChecked()) {
       index = 2;
@@ -444,17 +421,42 @@ public abstract class LockScreenActivity extends AppCompatActivity implements Lo
     } else if (menuIgnoreSixty.isChecked()) {
       index = 8;
     } else {
-      index = 0;
+      throw new RuntimeException("Invalid index for option selection");
     }
-    return index;
+
+    return ignoreTimes[index];
   }
 
-  private void showInfoDialog() {
+  @Override public void initializeWithIgnoreTime(long time) {
+    if (time == ignoreTimes[0]) {
+      menuIgnoreNone.setChecked(true);
+    } else if (time == ignoreTimes[1]) {
+      menuIgnoreOne.setChecked(true);
+    } else if (time == ignoreTimes[2]) {
+      menuIgnoreFive.setChecked(true);
+    } else if (time == ignoreTimes[3]) {
+      menuIgnoreTen.setChecked(true);
+    } else if (time == ignoreTimes[4]) {
+      menuIgnoreFifteen.setChecked(true);
+    } else if (time == ignoreTimes[5]) {
+      menuIgnoreTwenty.setChecked(true);
+    } else if (time == ignoreTimes[6]) {
+      menuIgnoreThirty.setChecked(true);
+    } else if (time == ignoreTimes[7]) {
+      menuIgnoreFourtyFive.setChecked(true);
+    } else if (time == ignoreTimes[8]) {
+      menuIgnoreSixty.setChecked(true);
+    } else {
+      throw new RuntimeException("Invalid index for ignore time");
+    }
+  }
+
+  void showInfoDialog() {
     AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(),
         InfoDialog.newInstance(lockedPackageName, lockedActivityName), "info_dialog");
   }
 
-  private void showForgotPasscodeDialog() {
+  void showForgotPasscodeDialog() {
     AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new ForgotPasswordDialog(),
         FORGOT_PASSWORD_TAG);
   }
