@@ -33,6 +33,7 @@ public class PadLockDB {
 
   @NonNull static final Object lock = new Object();
   static volatile PadLockDB instance = null;
+
   @NonNull private final SqlBrite sqlBrite;
   @NonNull private final PadLockOpenHelper openHelper;
   @NonNull private final Scheduler dbScheduler;
