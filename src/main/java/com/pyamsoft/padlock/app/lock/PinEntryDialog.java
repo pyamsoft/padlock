@@ -44,21 +44,19 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
-import com.pyamsoft.pydroid.tool.RxBus;
 import rx.Subscription;
 import timber.log.Timber;
 
 public class PinEntryDialog extends DialogFragment implements PinScreen {
 
-  @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
-  @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
-  @NonNull static final String CODE_DISPLAY = "CODE_DISPLAY";
-  @NonNull static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
-  @NonNull static final String HINT_DISPLAY = "HINT_DISPLAY";
-  @NonNull final AsyncDrawableMap taskMap = new AsyncDrawableMap();
+  @NonNull private static final String ENTRY_PACKAGE_NAME = "entry_packagename";
+  @NonNull private static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
+  @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
+  @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
+  @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
+  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.pin_entry_toolbar) TextView toolbar;
   @BindView(R.id.pin_entry_close) ImageView close;
   @BindView(R.id.pin_image) ImageView image;
@@ -66,14 +64,13 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @BindView(R.id.pin_entry_code) TextInputLayout pinEntry;
   @BindView(R.id.pin_reentry_code) TextInputLayout pinReentry;
   @BindView(R.id.pin_hint) TextInputLayout pinHint;
-
-  Unbinder unbinder;
-  String packageName;
-  InputMethodManager imm;
-  EditText pinEntryText;
-  EditText pinReentryText;
-  EditText pinHintText;
-  PinEntryPresenter presenter;
+  @SuppressWarnings("WeakerAccess") InputMethodManager imm;
+  @SuppressWarnings("WeakerAccess") PinEntryPresenter presenter;
+  private Unbinder unbinder;
+  private String packageName;
+  private EditText pinEntryText;
+  private EditText pinReentryText;
+  private EditText pinHintText;
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -151,7 +148,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     return new AlertDialog.Builder(getActivity()).setView(rootView).create();
   }
 
-  void setupCloseButton() {
+  private void setupCloseButton() {
     close.setOnClickListener(view -> {
       Timber.d("onClick Arrow");
       dismiss();
@@ -178,7 +175,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     setupSubmissionView(pinEntryText);
   }
 
-  void setupSubmissionView(@NonNull EditText view) {
+  private void setupSubmissionView(@NonNull EditText view) {
     view.setOnEditorActionListener((textView, actionId, keyEvent) -> {
       if (keyEvent == null) {
         Timber.e("KeyEvent was not caused by keypress");
@@ -196,7 +193,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     });
   }
 
-  void setupGoArrow() {
+  private void setupGoArrow() {
     go.setOnClickListener(view -> {
       presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint());
       imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0,
@@ -211,7 +208,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     taskMap.put("arrow", task);
   }
 
-  void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+  private void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
     final String attempt = savedInstanceState.getString(CODE_DISPLAY, null);
     final String reentry = savedInstanceState.getString(CODE_REENTRY_DISPLAY, null);
@@ -240,21 +237,21 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   /**
    * Clear the display of all text entry fields
    */
-  void clearDisplay() {
+  private void clearDisplay() {
     pinEntryText.setText("");
     pinReentryText.setText("");
     pinHintText.setText("");
   }
 
-  @CheckResult @NonNull String getCurrentAttempt() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull String getCurrentAttempt() {
     return pinEntryText.getText().toString();
   }
 
-  @CheckResult @NonNull String getCurrentReentry() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull String getCurrentReentry() {
     return pinReentryText.getText().toString();
   }
 
-  @CheckResult @NonNull String getCurrentHint() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull String getCurrentHint() {
     return pinHintText.getText().toString();
   }
 
@@ -270,7 +267,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     presenter.unbindView();
   }
 
-  void setupToolbar() {
+  private void setupToolbar() {
     toolbar.setText("PIN");
   }
 

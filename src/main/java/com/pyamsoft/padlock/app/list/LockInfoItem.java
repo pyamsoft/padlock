@@ -33,7 +33,7 @@ import java.util.List;
 
 class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
-  @NonNull static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
+  @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
   @NonNull final String packageName;
   @NonNull final ActivityEntry entry;
 
@@ -86,8 +86,9 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     return FACTORY;
   }
 
-  protected static class ItemFactory implements ViewHolderFactory<ViewHolder> {
-    public ViewHolder create(View v) {
+  @SuppressWarnings("WeakerAccess") protected static class ItemFactory
+      implements ViewHolderFactory<ViewHolder> {
+    @Override public ViewHolder create(View v) {
       return new ViewHolder(v);
     }
   }

@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.bus;
+package com.pyamsoft.padlock.model.event;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.event.PinEntryEvent;
-import com.pyamsoft.pydroid.tool.RxBus;
+import com.google.auto.value.AutoValue;
+import com.pyamsoft.padlock.model.ActivityEntry;
+import com.pyamsoft.padlock.model.AppEntry;
 
-public class PinEntryBus extends RxBus<PinEntryEvent> {
+@AutoValue public abstract class LockInfoSelectEvent {
 
-  @NonNull private static final PinEntryBus instance = new PinEntryBus();
-
-  @CheckResult @NonNull public static PinEntryBus get() {
-    return instance;
+  @CheckResult @NonNull
+  public static LockInfoSelectEvent create(int position, boolean checked, @NonNull AppEntry entry,
+      @NonNull ActivityEntry.ActivityLockState state) {
+    return new AutoValue_LockInfoSelectEvent(position, checked, entry, state);
   }
+
+  public abstract int position();
+
+  public abstract boolean checked();
+
+  public abstract AppEntry entry();
+
+  public abstract ActivityEntry.ActivityLockState lockState();
 }

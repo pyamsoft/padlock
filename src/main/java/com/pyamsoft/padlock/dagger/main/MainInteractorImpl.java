@@ -24,7 +24,7 @@ import rx.Observable;
 
 class MainInteractorImpl implements MainInteractor {
 
-  @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
 
   @Inject MainInteractorImpl(final @NonNull PadLockPreferences preferences) {
     this.preferences = preferences;

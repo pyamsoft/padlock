@@ -18,8 +18,8 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
-import com.pyamsoft.pydroid.base.app.ActivityScope;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
+import com.pyamsoft.pydroid.base.app.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

@@ -31,7 +31,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
@@ -63,11 +62,11 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @NonNull public static final String ENTRY_REAL_NAME = "real_name";
   @NonNull public static final String ENTRY_LOCK_CODE = "lock_code";
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
-  @NonNull static final String CODE_DISPLAY = "CODE_DISPLAY";
-  @NonNull static final String FORGOT_PASSWORD_TAG = "forgot_password";
+  @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
+  @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
-  @NonNull final Intent home;
-  @NonNull final AsyncDrawableMap taskMap;
+  @NonNull private final Intent home;
+  @NonNull private final AsyncDrawableMap taskMap;
   @BindView(R.id.activity_lock_screen) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.appbar) AppBarLayout appBarLayout;
@@ -76,32 +75,30 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @BindView(R.id.lock_image_go) ImageView imageGo;
   @BindView(R.id.lock_display_hint) TextView hintDisplay;
 
-  LockScreenPresenter presenter;
-  InputMethodManager imm;
+  @SuppressWarnings("WeakerAccess") LockScreenPresenter presenter;
+  @SuppressWarnings("WeakerAccess") InputMethodManager imm;
+  @SuppressWarnings("WeakerAccess") String lockedActivityName;
+  private long ignorePeriod = -1;
+  private boolean exclude;
+  private MenuItem menuIgnoreNone;
+  private MenuItem menuIgnoreOne;
+  private MenuItem menuIgnoreFive;
+  private MenuItem menuIgnoreTen;
+  private MenuItem menuIgnoreFifteen;
+  private MenuItem menuIgnoreTwenty;
+  private MenuItem menuIgnoreThirty;
+  private MenuItem menuIgnoreFourtyFive;
+  private MenuItem menuIgnoreSixty;
+  private MenuItem menuExclude;
+  private EditText editText;
+  private Unbinder unbinder;
+  private String lockedPackageName;
+  private String lockedRealName;
+  private String lockedCode;
+  private boolean lockedSystem;
+  private long[] ignoreTimes;
 
-  long ignorePeriod = -1;
-  boolean exclude;
-
-  MenuItem menuIgnoreNone;
-  MenuItem menuIgnoreOne;
-  MenuItem menuIgnoreFive;
-  MenuItem menuIgnoreTen;
-  MenuItem menuIgnoreFifteen;
-  MenuItem menuIgnoreTwenty;
-  MenuItem menuIgnoreThirty;
-  MenuItem menuIgnoreFourtyFive;
-  MenuItem menuIgnoreSixty;
-  MenuItem menuExclude;
-  EditText editText;
-  Unbinder unbinder;
-  String lockedPackageName;
-  String lockedActivityName;
-  String lockedRealName;
-  String lockedCode;
-  boolean lockedSystem;
-  long[] ignoreTimes;
-
-  public LockScreenActivity() {
+  LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
     home.addCategory(Intent.CATEGORY_HOME);
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -209,11 +206,11 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
         String.format(Locale.getDefault(), "Hint: %s", hint.isEmpty() ? "NO HINT" : hint));
   }
 
-  public final void clearDisplay() {
+  private void clearDisplay() {
     editText.setText("");
   }
 
-  void getValuesFromBundle() {
+  private void getValuesFromBundle() {
     final Bundle bundle = getIntent().getExtras();
     lockedPackageName = bundle.getString(ENTRY_PACKAGE_NAME);
     lockedActivityName = bundle.getString(ENTRY_ACTIVITY_NAME);
@@ -273,7 +270,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     overridePendingTransition(0, 0);
   }
 
-  void showSnackbarWithText(String text) {
+  private void showSnackbarWithText(String text) {
     final Snackbar snackbar = Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT);
     final int defaultSnackColor = ContextCompat.getColor(this, R.color.snackbar);
     snackbar.getView().setBackgroundColor(defaultSnackColor);
@@ -343,7 +340,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     super.onSaveInstanceState(outState);
   }
 
-  @CheckResult @NonNull String getCurrentAttempt() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull String getCurrentAttempt() {
     return editText.getText().toString();
   }
 
@@ -401,7 +398,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     return true;
   }
 
-  @CheckResult long getIgnoreTimeFromSelectedIndex() {
+  @CheckResult private long getIgnoreTimeFromSelectedIndex() {
     final int index;
     if (menuIgnoreNone.isChecked()) {
       index = 0;
@@ -452,12 +449,12 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     }
   }
 
-  void showInfoDialog() {
+  private void showInfoDialog() {
     AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(),
         InfoDialog.newInstance(lockedPackageName, lockedActivityName), "info_dialog");
   }
 
-  void showForgotPasscodeDialog() {
+  private void showForgotPasscodeDialog() {
     AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new ForgotPasswordDialog(),
         FORGOT_PASSWORD_TAG);
   }

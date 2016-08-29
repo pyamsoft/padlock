@@ -67,18 +67,18 @@ public class LockListFragment extends ActionBarFragment
     DBPresenter.DBView {
 
   @NonNull public static final String TAG = "LockListFragment";
-  @NonNull static final String PIN_DIALOG_TAG = "pin_dialog";
-  static final int KEY_PRESENTER = 0;
-  static final int KEY_ADAPTER_PRESENTER = 1;
-  static final int KEY_DB_PRESENTER = 2;
-  @NonNull final Handler handler = new Handler(Looper.getMainLooper());
-  @NonNull final AsyncDrawableMap taskMap = new AsyncDrawableMap();
+  @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
+  private static final int KEY_PRESENTER = 0;
+  private static final int KEY_ADAPTER_PRESENTER = 1;
+  private static final int KEY_DB_PRESENTER = 2;
+  @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
+  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
-  LockListAdapter fastItemAdapter;
-  LockListLayoutManager lockListLayoutManager;
-  @NonNull final Runnable startRefreshRunnable = new Runnable() {
+  @SuppressWarnings("WeakerAccess") LockListAdapter fastItemAdapter;
+  @SuppressWarnings("WeakerAccess") LockListLayoutManager lockListLayoutManager;
+  @NonNull private final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
       swipeRefreshLayout.setRefreshing(true);
       lockListLayoutManager.setVerticalScrollEnabled(false);
@@ -89,7 +89,7 @@ public class LockListFragment extends ActionBarFragment
       }
     }
   };
-  @NonNull final Runnable stopRefreshRunnable = new Runnable() {
+  @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
       swipeRefreshLayout.setRefreshing(false);
       lockListLayoutManager.setVerticalScrollEnabled(true);
@@ -101,11 +101,11 @@ public class LockListFragment extends ActionBarFragment
     }
   };
 
-  DBPresenter dbPresenter;
-  LockListPresenter presenter;
-  boolean firstRefresh;
-  Unbinder unbinder;
-  MenuItem displaySystemItem;
+  @SuppressWarnings("WeakerAccess") DBPresenter dbPresenter;
+  @SuppressWarnings("WeakerAccess") LockListPresenter presenter;
+  @SuppressWarnings("WeakerAccess") boolean firstRefresh;
+  private Unbinder unbinder;
+  private MenuItem displaySystemItem;
 
   @CheckResult @NonNull
   public static LockListFragment newInstance(int cX, int cY, boolean forceRefresh) {
@@ -230,7 +230,7 @@ public class LockListFragment extends ActionBarFragment
     dbPresenter.unbindView();
   }
 
-  void setupSwipeRefresh() {
+  private void setupSwipeRefresh() {
     swipeRefreshLayout.setColorSchemeResources(R.color.blue500, R.color.amber700, R.color.blue700,
         R.color.amber500);
     swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -239,7 +239,7 @@ public class LockListFragment extends ActionBarFragment
     });
   }
 
-  void setupRecyclerView() {
+  private void setupRecyclerView() {
     lockListLayoutManager = new LockListLayoutManager(getContext());
     lockListLayoutManager.setVerticalScrollEnabled(true);
     final RecyclerView.ItemDecoration dividerDecoration =
@@ -261,12 +261,12 @@ public class LockListFragment extends ActionBarFragment
     }
   }
 
-  void setupLockListMenuItems(final @NonNull Menu menu) {
+  private void setupLockListMenuItems(final @NonNull Menu menu) {
     displaySystemItem = menu.findItem(R.id.menu_is_system);
     presenter.setSystemVisibilityFromPreference();
   }
 
-  void setSystemCheckListener() {
+  private void setSystemCheckListener() {
     displaySystemItem.setOnMenuItemClickListener(item -> {
       if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
         Timber.d("List is not refreshing. Allow change of system preference");
@@ -282,7 +282,7 @@ public class LockListFragment extends ActionBarFragment
     });
   }
 
-  void setSystemVisible(boolean visible) {
+  @SuppressWarnings("WeakerAccess") void setSystemVisible(boolean visible) {
     displaySystemItem.setOnMenuItemClickListener(null);
     displaySystemItem.setChecked(visible);
     setSystemCheckListener();
@@ -304,7 +304,7 @@ public class LockListFragment extends ActionBarFragment
     return handled || super.onOptionsItemSelected(item);
   }
 
-  void showSettingsScreen() {
+  private void showSettingsScreen() {
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
       final FragmentActivity fragmentActivity = getActivity();
@@ -345,7 +345,7 @@ public class LockListFragment extends ActionBarFragment
     unbinder.unbind();
   }
 
-  void setupFAB() {
+  private void setupFAB() {
     fab.setOnClickListener(view -> presenter.clickPinFAB());
     AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(24));
   }

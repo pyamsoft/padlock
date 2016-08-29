@@ -19,8 +19,9 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.bus.DBProgressBus;
-import com.pyamsoft.padlock.app.bus.LockInfoBus;
+import com.pyamsoft.padlock.app.bus.LockInfoDisplayBus;
 import com.pyamsoft.padlock.app.bus.PinEntryBus;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
@@ -41,16 +42,16 @@ import timber.log.Timber;
 class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockList>
     implements LockListPresenter {
 
-  @NonNull final LockListInteractor lockListInteractor;
-  @NonNull final LockServiceStateInteractor stateInteractor;
+  @NonNull private final LockListInteractor lockListInteractor;
+  @NonNull private final LockServiceStateInteractor stateInteractor;
 
-  @NonNull Subscription pinEntryBusSubscription = Subscriptions.empty();
-  @NonNull Subscription populateListSubscription = Subscriptions.empty();
-  @NonNull Subscription systemVisibleSubscription = Subscriptions.empty();
-  @NonNull Subscription onboardSubscription = Subscriptions.empty();
-  @NonNull Subscription fabStateSubscription = Subscriptions.empty();
-  @NonNull Subscription dbProgressBus = Subscriptions.empty();
-  @NonNull Subscription lockInfoDisplayBus = Subscriptions.empty();
+  @NonNull private Subscription pinEntryBusSubscription = Subscriptions.empty();
+  @NonNull private Subscription populateListSubscription = Subscriptions.empty();
+  @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
+  @NonNull private Subscription onboardSubscription = Subscriptions.empty();
+  @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
+  @NonNull private Subscription dbProgressBus = Subscriptions.empty();
+  @NonNull private Subscription lockInfoDisplayBus = Subscriptions.empty();
 
   @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -79,9 +80,10 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     unsubscribeFabSubscription();
   }
 
-  void registerOnLockInfoDisplayBus(@NonNull LockList view) {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnLockInfoDisplayBus(
+      @NonNull LockList view) {
     unregisterFromLockInfoDispalyBus();
-    lockInfoDisplayBus = LockInfoBus.get()
+    lockInfoDisplayBus = LockInfoDisplayBus.get()
         .register()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -92,13 +94,14 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         });
   }
 
-  void unregisterFromLockInfoDispalyBus() {
+  private void unregisterFromLockInfoDispalyBus() {
     if (!lockInfoDisplayBus.isUnsubscribed()) {
       lockInfoDisplayBus.unsubscribe();
     }
   }
 
-  void registerOnDbProgressBus(@NonNull LockList view) {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnDbProgressBus(
+      @NonNull LockList view) {
     unregisterFromDBProgressBus();
     dbProgressBus = DBProgressBus.get()
         .register()
@@ -114,31 +117,31 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         });
   }
 
-  void unregisterFromDBProgressBus() {
+  private void unregisterFromDBProgressBus() {
     if (!dbProgressBus.isUnsubscribed()) {
       dbProgressBus.unsubscribe();
     }
   }
 
-  void unsubscribePopulateList() {
+  @SuppressWarnings("WeakerAccess") void unsubscribePopulateList() {
     if (!populateListSubscription.isUnsubscribed()) {
       populateListSubscription.unsubscribe();
     }
   }
 
-  void unsubscribeSystemVisible() {
+  @SuppressWarnings("WeakerAccess") void unsubscribeSystemVisible() {
     if (!systemVisibleSubscription.isUnsubscribed()) {
       systemVisibleSubscription.unsubscribe();
     }
   }
 
-  void unsubscribeOnboard() {
+  @SuppressWarnings("WeakerAccess") void unsubscribeOnboard() {
     if (!onboardSubscription.isUnsubscribed()) {
       onboardSubscription.unsubscribe();
     }
   }
 
-  void setSystemVisible(boolean visible) {
+  @SuppressWarnings("WeakerAccess") void setSystemVisible(boolean visible) {
     lockListInteractor.setSystemVisible(visible);
   }
 
@@ -207,8 +210,8 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         });
   }
 
-  @NonNull @CheckResult AppEntry createFromPackageInfo(@NonNull ApplicationInfo info,
-      boolean locked) {
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult AppEntry createFromPackageInfo(
+      @NonNull ApplicationInfo info, boolean locked) {
     Timber.d("Create AppEntry from package info: %s", info.packageName);
     return AppEntry.builder()
         .name(lockListInteractor.loadPackageLabel(info).toBlocking().first())
@@ -237,7 +240,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         }, this::unsubscribeFabSubscription);
   }
 
-  void unsubscribeFabSubscription() {
+  @SuppressWarnings("WeakerAccess") void unsubscribeFabSubscription() {
     if (!fabStateSubscription.isUnsubscribed()) {
       fabStateSubscription.unsubscribe();
     }
@@ -290,7 +293,8 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         }, this::unsubscribeOnboard);
   }
 
-  void registerOnPinEntryBus(@NonNull LockList view) {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnPinEntryBus(
+      @NonNull LockList view) {
     unregisterFromPinEntryBus();
     pinEntryBusSubscription = PinEntryBus.get()
         .register()
@@ -320,7 +324,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         });
   }
 
-  void unregisterFromPinEntryBus() {
+  private void unregisterFromPinEntryBus() {
     if (!pinEntryBusSubscription.isUnsubscribed()) {
       pinEntryBusSubscription.unsubscribe();
     }

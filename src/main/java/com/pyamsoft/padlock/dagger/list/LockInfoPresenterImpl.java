@@ -36,10 +36,10 @@ import timber.log.Timber;
 class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInfoView>
     implements LockInfoPresenter {
 
-  @NonNull final LockInfoInteractor lockInfoInteractor;
-  @NonNull final AppIconLoaderPresenter<LockInfoView> iconLoader;
-  @NonNull Subscription populateListSubscription = Subscriptions.empty();
-  @NonNull Subscription allInDBSubscription = Subscriptions.empty();
+  @NonNull private final LockInfoInteractor lockInfoInteractor;
+  @NonNull private final AppIconLoaderPresenter<LockInfoView> iconLoader;
+  @NonNull private Subscription populateListSubscription = Subscriptions.empty();
+  @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
 
   @Inject LockInfoPresenterImpl(@NonNull AppIconLoaderPresenter<LockInfoView> iconLoader,
       final @NonNull LockInfoInteractor lockInfoInteractor,
@@ -50,7 +50,8 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
     this.lockInfoInteractor = lockInfoInteractor;
   }
 
-  @CheckResult static int findEntryInActivities(@NonNull List<PadLockEntry> padLockEntries,
+  @SuppressWarnings("WeakerAccess") @CheckResult
+  static int findEntryInActivities(@NonNull List<PadLockEntry> padLockEntries,
       @NonNull String name) {
     int foundLocation = -1;
     for (int i = 0; i < padLockEntries.size(); ++i) {
@@ -153,7 +154,7 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
             });
   }
 
-  void unsubPopulateList() {
+  @SuppressWarnings("WeakerAccess") void unsubPopulateList() {
     if (!populateListSubscription.isUnsubscribed()) {
       Timber.d("Unsub from populate List event");
       populateListSubscription.unsubscribe();
@@ -201,7 +202,7 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
             }, this::unsubAllInDB);
   }
 
-  void unsubAllInDB() {
+  @SuppressWarnings("WeakerAccess") void unsubAllInDB() {
     if (!allInDBSubscription.isUnsubscribed()) {
       allInDBSubscription.unsubscribe();
     }

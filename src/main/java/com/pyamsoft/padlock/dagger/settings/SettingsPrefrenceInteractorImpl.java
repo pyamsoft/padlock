@@ -27,8 +27,8 @@ import timber.log.Timber;
 
 class SettingsPrefrenceInteractorImpl implements SettingsPreferenceInteractor {
 
-  @NonNull final PadLockPreferences preferences;
-  @NonNull final Context appContext;
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
 
   @Inject SettingsPrefrenceInteractorImpl(final @NonNull Context context,
       final @NonNull PadLockPreferences preferences) {

@@ -25,7 +25,7 @@ import rx.Observable;
 
 class MasterPinInteractorImpl implements MasterPinInteractor {
 
-  @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
 
   @Inject MasterPinInteractorImpl(@NonNull final PadLockPreferences preferences) {
     this.preferences = preferences;

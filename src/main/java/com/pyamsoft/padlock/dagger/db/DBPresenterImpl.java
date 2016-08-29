@@ -29,13 +29,12 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class DBPresenterImpl extends SchedulerPresenter<DBPresenter.DBView>
-    implements DBPresenter {
+class DBPresenterImpl extends SchedulerPresenter<DBPresenter.DBView> implements DBPresenter {
 
-  @NonNull final DBInteractor dbInteractor;
-  @NonNull Subscription dbAllSubscription = Subscriptions.empty();
-  @NonNull Subscription dbPackageSubscription = Subscriptions.empty();
-  @NonNull Subscription dbActivitySubscription = Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull final DBInteractor dbInteractor;
+  @NonNull private Subscription dbAllSubscription = Subscriptions.empty();
+  @NonNull private Subscription dbPackageSubscription = Subscriptions.empty();
+  @NonNull private Subscription dbActivitySubscription = Subscriptions.empty();
 
   @Inject DBPresenterImpl(final @NonNull DBInteractor dbInteractor,
       final @NonNull @Named("main") Scheduler mainScheduler,
@@ -51,19 +50,19 @@ class DBPresenterImpl extends SchedulerPresenter<DBPresenter.DBView>
     unsubAllSubscription();
   }
 
-  void unsubAllSubscription() {
+  @SuppressWarnings("WeakerAccess") void unsubAllSubscription() {
     if (!dbAllSubscription.isUnsubscribed()) {
       dbAllSubscription.unsubscribe();
     }
   }
 
-  void unsubActivitySubscription() {
+  @SuppressWarnings("WeakerAccess") void unsubActivitySubscription() {
     if (!dbActivitySubscription.isUnsubscribed()) {
       dbActivitySubscription.unsubscribe();
     }
   }
 
-  void unsubPackageSubscription() {
+  @SuppressWarnings("WeakerAccess") void unsubPackageSubscription() {
     if (!dbPackageSubscription.isUnsubscribed()) {
       dbPackageSubscription.unsubscribe();
     }

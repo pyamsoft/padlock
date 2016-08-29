@@ -19,10 +19,10 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.iconloader.AppIconLoaderInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.crash.CrashLogActivity;
@@ -32,9 +32,9 @@ import rx.Observable;
 
 class LockInfoInteractorImpl implements LockInfoInteractor {
 
-  @NonNull final Context appContext;
-  @NonNull final PackageManagerWrapper packageManagerWrapper;
-  @NonNull final AppIconLoaderInteractor iconLoaderInteractor;
+  @NonNull private final Context appContext;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
+  @NonNull private final AppIconLoaderInteractor iconLoaderInteractor;
 
   @Inject LockInfoInteractorImpl(@NonNull AppIconLoaderInteractor iconLoaderInteractor,
       final @NonNull Context context, @NonNull PackageManagerWrapper packageManagerWrapper) {

@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.app.bus;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.main.AgreeTermsDialog;
 import com.pyamsoft.padlock.model.event.AgreeTermsEvent;
 import com.pyamsoft.pydroid.tool.RxBus;
 

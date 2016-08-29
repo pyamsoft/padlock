@@ -20,16 +20,16 @@ import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
 class DBInteractorImpl implements DBInteractor {
 
-  @NonNull final Context appContext;
-  @NonNull final PackageManagerWrapper packageManagerWrapper;
+  @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject DBInteractorImpl(final @NonNull Context context,
       @NonNull PackageManagerWrapper packageManagerWrapper) {
@@ -52,7 +52,8 @@ class DBInteractorImpl implements DBInteractor {
     // To prevent double creations from occurring, first call a delete on the DB for packageName, activityName
     return deleteEntry(packageName, activityName).flatMap(integer -> {
       Timber.d("CREATE: %s %s", packageName, activityName);
-      return PadLockDB.with(appContext).insert(packageName, activityName, code, 0, 0, system, whitelist);
+      return PadLockDB.with(appContext)
+          .insert(packageName, activityName, code, 0, 0, system, whitelist);
     });
   }
 

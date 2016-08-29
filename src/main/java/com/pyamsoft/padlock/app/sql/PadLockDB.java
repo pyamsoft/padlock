@@ -31,16 +31,16 @@ import timber.log.Timber;
 
 public class PadLockDB {
 
-  @NonNull static final Object lock = new Object();
-  static volatile PadLockDB instance = null;
+  @NonNull private static final Object lock = new Object();
+  private static volatile PadLockDB instance = null;
 
   @NonNull private final SqlBrite sqlBrite;
   @NonNull private final PadLockOpenHelper openHelper;
   @NonNull private final Scheduler dbScheduler;
-  volatile BriteDatabase briteDatabase;
-  volatile int openCount;
+  @SuppressWarnings("WeakerAccess") volatile BriteDatabase briteDatabase;
+  private volatile int openCount;
 
-  PadLockDB(final @NonNull Context context, final @NonNull Scheduler scheduler) {
+  private PadLockDB(final @NonNull Context context, final @NonNull Scheduler scheduler) {
     sqlBrite = SqlBrite.create();
     openHelper = new PadLockOpenHelper(context.getApplicationContext());
     dbScheduler = scheduler;
@@ -55,7 +55,7 @@ public class PadLockDB {
     return with(context, Schedulers.io());
   }
 
-  @CheckResult @NonNull
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
   public static PadLockDB with(@NonNull Context context, @NonNull Scheduler scheduler) {
     if (instance == null) {
       synchronized (lock) {
@@ -68,7 +68,7 @@ public class PadLockDB {
     return instance;
   }
 
-  synchronized void openDatabase() {
+  private synchronized void openDatabase() {
     if (briteDatabase == null) {
       Timber.d("Open new Database instance");
       briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, dbScheduler);
@@ -78,7 +78,7 @@ public class PadLockDB {
     Timber.d("Increment open count to: %d", openCount);
   }
 
-  synchronized void closeDatabase() {
+  @SuppressWarnings("WeakerAccess") synchronized void closeDatabase() {
     --openCount;
     Timber.d("Decrement open count to: %d", openCount);
 

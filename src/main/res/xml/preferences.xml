@@ -73,6 +73,7 @@
   <PreferenceCategory
       android:title="PadLock Settings">
 
+    <!--suppress AndroidElementNotAllowed -->
     <SwitchPreferenceCompat
         android:defaultValue="@bool/adview_default"
         android:key="@string/adview_key"

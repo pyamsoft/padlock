@@ -31,19 +31,18 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class LockServicePresenterImpl
-    extends SchedulerPresenter<LockServicePresenter.LockService> implements LockServicePresenter {
+class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.LockService>
+    implements LockServicePresenter {
 
-  @NonNull final LockServiceInteractor interactor;
-  @NonNull final LockServiceStateInteractor stateInteractor;
-  @NonNull Subscription lockedEntrySubscription = Subscriptions.empty();
-  @NonNull Subscription pickCorrectSubscription = Subscriptions.empty();
-
-  @NonNull String lastPackageName = "";
-  @NonNull String lastClassName = "";
-  @NonNull String activePackageName = "";
-  @NonNull String activeClassName = "";
-  boolean lockScreenPassed;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockServiceInteractor interactor;
+  @NonNull private final LockServiceStateInteractor stateInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull String lastPackageName = "";
+  @SuppressWarnings("WeakerAccess") @NonNull String lastClassName = "";
+  @SuppressWarnings("WeakerAccess") @NonNull String activePackageName = "";
+  @SuppressWarnings("WeakerAccess") @NonNull String activeClassName = "";
+  @SuppressWarnings("WeakerAccess") boolean lockScreenPassed;
+  @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
+  @NonNull private Subscription pickCorrectSubscription = Subscriptions.empty();
 
   @Inject LockServicePresenterImpl(@NonNull final LockServiceStateInteractor stateInteractor,
       @NonNull final LockServiceInteractor interactor,
@@ -66,7 +65,7 @@ class LockServicePresenterImpl
     interactor.cleanup();
   }
 
-  void setLockScreenPassed(boolean b) {
+  @SuppressWarnings("WeakerAccess") void setLockScreenPassed(boolean b) {
     Timber.d("Set lockScreenPassed: %s", b);
     lockScreenPassed = b;
   }
@@ -75,19 +74,19 @@ class LockServicePresenterImpl
     setLockScreenPassed(true);
   }
 
-  void unsubLockedEntry() {
+  @SuppressWarnings("WeakerAccess") void unsubLockedEntry() {
     if (!lockedEntrySubscription.isUnsubscribed()) {
       lockedEntrySubscription.unsubscribe();
     }
   }
 
-  void unsubPickCorrect() {
+  @SuppressWarnings("WeakerAccess") void unsubPickCorrect() {
     if (!pickCorrectSubscription.isUnsubscribed()) {
       pickCorrectSubscription.unsubscribe();
     }
   }
 
-  void reset() {
+  @SuppressWarnings("WeakerAccess") void reset() {
     Timber.i("Reset name state");
     lastPackageName = "";
     lastClassName = "";
@@ -184,15 +183,15 @@ class LockServicePresenterImpl
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(padLockEntry -> {
-          Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
-              padLockEntry.activityName());
-          launchCorrectLockScreen(padLockEntry, className);
-        }, throwable -> {
-          Timber.e(throwable, "Error getting PadLockEntry for LockScreen");
-        }, this::unsubLockedEntry);
+              Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
+                  padLockEntry.activityName());
+              launchCorrectLockScreen(padLockEntry, className);
+            }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"),
+            this::unsubLockedEntry);
   }
 
-  void launchCorrectLockScreen(@NonNull PadLockEntry entry, @NonNull String realName) {
+  @SuppressWarnings("WeakerAccess") void launchCorrectLockScreen(@NonNull PadLockEntry entry,
+      @NonNull String realName) {
     unsubPickCorrect();
     pickCorrectSubscription = interactor.isExperimentalNSupported()
         .subscribeOn(getSubscribeScheduler())

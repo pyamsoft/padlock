@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.service.job;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.JobManager;
@@ -23,7 +24,8 @@ import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
 import com.pyamsoft.padlock.Singleton;
 import timber.log.Timber;
 
-public class PadLockGCMJobSchedulerService extends GcmJobSchedulerService {
+@SuppressLint("Registered") public class PadLockGCMJobSchedulerService
+    extends GcmJobSchedulerService {
 
   @NonNull @Override protected JobManager getJobManager() {
     return Singleton.Jobs.with(this);

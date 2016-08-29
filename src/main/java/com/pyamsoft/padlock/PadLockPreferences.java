@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock;
 
 import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 public interface PadLockPreferences {

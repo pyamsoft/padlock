@@ -22,7 +22,7 @@ import android.support.v7.widget.LinearLayoutManager;
 
 class LockListLayoutManager extends LinearLayoutManager {
 
-  boolean verticalScrollEnabled = true;
+  private boolean verticalScrollEnabled = true;
 
   LockListLayoutManager(@NonNull Context context) {
     super(context);
