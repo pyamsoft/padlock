@@ -443,7 +443,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     } else if (time == ignoreTimes[8]) {
       menuIgnoreSixty.setChecked(true);
     } else {
-      throw new RuntimeException("Invalid index for ignore time");
+      throw new RuntimeException("Invalid index for ignore time: " + time);
     }
   }
 
