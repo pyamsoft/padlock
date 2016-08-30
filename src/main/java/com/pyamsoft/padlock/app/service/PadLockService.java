@@ -77,7 +77,7 @@ public class PadLockService extends AccessibilityService
       final String serviceClass = presenter.getActiveClassName();
       Timber.d("Check against current window values: %s, %s", servicePackage, serviceClass);
       if (servicePackage.equals(packageName) && (serviceClass.equals(className) || className.equals(
-          PadLockEntry.PACKAGE_TAG))) {
+          PadLockEntry.PACKAGE_ACTIVITY_NAME))) {
         // We can replace the actual passed classname with the stored classname because:
         // either it is equal to the passed name or the passed name is PACKAGE
         // which will respond to any class name

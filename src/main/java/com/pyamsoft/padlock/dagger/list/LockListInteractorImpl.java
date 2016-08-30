@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
@@ -26,11 +27,12 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
+import timber.log.Timber;
 
 class LockListInteractorImpl implements LockListInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
-  @NonNull private final Context appContext;
+  @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject LockListInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper,
@@ -40,12 +42,44 @@ class LockListInteractorImpl implements LockListInteractor {
     this.preferences = preferences;
   }
 
-  @Override public Observable<Boolean> hasShownOnBoarding() {
+  @NonNull @Override public Observable<Boolean> hasShownOnBoarding() {
     return Observable.defer(() -> Observable.just(preferences.isOnBoard()));
   }
 
-  @Override public Observable<Boolean> isSystemVisible() {
+  @NonNull @Override public Observable<Boolean> isSystemVisible() {
     return Observable.defer(() -> Observable.just(preferences.isSystemVisible()));
+  }
+
+  @NonNull @Override
+  public Observable<Boolean> modifyDatabase(@NonNull String packageName, @Nullable String code,
+      boolean system) {
+    return PadLockDB.with(appContext)
+        .queryWithPackageActivityName(packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME)
+        .first()
+        .flatMap(entry -> {
+          if (PadLockEntry.isEmpty(entry)) {
+            Timber.d("Empty entry, create a new entry");
+            // We create a new entry with no whitelist as there is no whitelist option available from the main lock list UI
+
+            // Map the observable to a boolean, in an observable
+            return PadLockDB.with(appContext)
+                .insert(packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME, code, 0, 0, system, false)
+                .map(result -> {
+                  Timber.d("Insert result: %d", result);
+                  return true;
+                });
+          } else {
+            Timber.d("Entry already exists, delete it");
+
+            // Map the observable to a boolean, in an observable
+            return PadLockDB.with(appContext)
+                .deleteWithPackageActivityName(packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME)
+                .map(result -> {
+                  Timber.d("Delete result: %d", result);
+                  return false;
+                });
+          }
+        });
   }
 
   @Override public void setSystemVisible(boolean visible) {
@@ -67,7 +101,7 @@ class LockListInteractorImpl implements LockListInteractor {
     return PadLockDB.with(appContext).queryAll().first();
   }
 
-  @Override public Observable<Boolean> isSystemApplication(@NonNull ApplicationInfo info) {
+  @NonNull @Override public Observable<Boolean> isSystemApplication(@NonNull ApplicationInfo info) {
     return Observable.defer(() -> Observable.just((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0));
   }
 

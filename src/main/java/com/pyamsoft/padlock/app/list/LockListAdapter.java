@@ -17,26 +17,21 @@
 package com.pyamsoft.padlock.app.list;
 
 import com.mikepenz.fastadapter.adapters.FastItemAdapter;
-import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
 
-class LockListAdapter extends FastItemAdapter<LockListItem> implements DBPresenter.DBView {
+class LockListAdapter extends FastItemAdapter<LockListItem> implements LockListDatabaseView {
 
-  @Override public void onDBCreateEvent(int position) {
+  @Override public void onDatabaseEntryCreated(int position) {
     final LockListItem oldItem = getItem(position);
     final LockListItem newItem =
         new LockListItem(AppEntry.builder(oldItem.entry).locked(true).build());
     set(position, newItem);
   }
 
-  @Override public void onDBDeleteEvent(int position) {
+  @Override public void onDatabaseEntryDeleted(int position) {
     final LockListItem oldItem = getItem(position);
     final LockListItem newItem =
         new LockListItem(AppEntry.builder(oldItem.entry).locked(false).build());
     set(position, newItem);
-  }
-
-  @Override public void onDBError() {
-    throw new RuntimeException("Not handled");
   }
 }
