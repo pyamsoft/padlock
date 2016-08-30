@@ -9,7 +9,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expgetResources()s or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -48,20 +47,18 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
 
   @Inject PadLockPreferencesImpl(final @NonNull Context context) {
     super(context);
-    final Context appContext = context.getApplicationContext();
-    final Resources res = appContext.getResources();
-    ignoreTimeKey = appContext.getString(R.string.ignore_time_key);
-    ignoreTimeDefault = appContext.getString(R.string.ignore_time_default);
-    timeoutTimeKey = appContext.getString(R.string.timeout_time_key);
-    timeoutTimeDefault = appContext.getString(R.string.timeout_time_default);
-    lockPackageChangeKey = appContext.getString(R.string.lock_package_change_key);
-    lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default);
-    lockDeviceLockedKey = appContext.getString(R.string.lock_device_locked_key);
-    lockDeviceLockedDefault = res.getBoolean(R.bool.lock_device_locked_default);
-    recheckKey = appContext.getString(R.string.recheck_key);
-    recheckDefault = res.getBoolean(R.bool.recheck_default);
-    nSupportKey = appContext.getString(R.string.n_support_key);
-    nSupportDefault = res.getBoolean(R.bool.n_support_default);
+    ignoreTimeKey = getResources().getString(R.string.ignore_time_key);
+    ignoreTimeDefault = getResources().getString(R.string.ignore_time_default);
+    timeoutTimeKey = getResources().getString(R.string.timeout_time_key);
+    timeoutTimeDefault = getResources().getString(R.string.timeout_time_default);
+    lockPackageChangeKey = getResources().getString(R.string.lock_package_change_key);
+    lockPackageChangeDefault = getResources().getBoolean(R.bool.lock_package_change_default);
+    lockDeviceLockedKey = getResources().getString(R.string.lock_device_locked_key);
+    lockDeviceLockedDefault = getResources().getBoolean(R.bool.lock_device_locked_default);
+    recheckKey = getResources().getString(R.string.recheck_key);
+    recheckDefault = getResources().getBoolean(R.bool.recheck_default);
+    nSupportKey = getResources().getString(R.string.n_support_key);
+    nSupportDefault = getResources().getBoolean(R.bool.n_support_default);
   }
 
   @Override public String getHint() {
