@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger;
 
-import com.pyamsoft.padlock.dagger.db.DbComponent;
 import com.pyamsoft.padlock.dagger.iconloader.AppIconLoaderComponent;
 import com.pyamsoft.padlock.dagger.list.LockInfoComponent;
 import com.pyamsoft.padlock.dagger.list.LockListComponent;
@@ -52,9 +51,6 @@ public interface PadLockComponent {
 
   // Subcomponent LockInfo
   LockInfoComponent plusLockInfo();
-
-  // Subcomponent DBComponent
-  DbComponent plusDbComponent();
 
   // Subcomponent AppIconLoader
   AppIconLoaderComponent plusAppIconLoaderComponent();

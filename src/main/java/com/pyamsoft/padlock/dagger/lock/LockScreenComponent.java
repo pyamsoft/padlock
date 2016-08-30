@@ -17,13 +17,12 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import com.pyamsoft.padlock.app.lock.LockScreenPresenterLoader;
-import com.pyamsoft.padlock.dagger.db.DBModule;
 import com.pyamsoft.padlock.dagger.iconloader.AppIconLoaderModule;
 import com.pyamsoft.pydroid.base.app.ActivityScope;
 import dagger.Subcomponent;
 
 @ActivityScope @Subcomponent(modules = {
-    LockScreenModule.class, DBModule.class, MasterPinModule.class, AppIconLoaderModule.class
+    LockScreenModule.class, MasterPinModule.class, AppIconLoaderModule.class
 }) public interface LockScreenComponent {
 
   void inject(LockScreenPresenterLoader loader);

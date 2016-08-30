@@ -17,14 +17,13 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import com.pyamsoft.padlock.app.list.LockListPresenterLoader;
-import com.pyamsoft.padlock.dagger.db.DBModule;
 import com.pyamsoft.padlock.dagger.lock.MasterPinModule;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateModule;
 import com.pyamsoft.pydroid.base.app.ActivityScope;
 import dagger.Subcomponent;
 
 @ActivityScope @Subcomponent(modules = {
-    LockListModule.class, LockServiceStateModule.class, MasterPinModule.class, DBModule.class
+    LockListModule.class, LockServiceStateModule.class, MasterPinModule.class
 }) public interface LockListComponent {
 
   void inject(LockListPresenterLoader loader);
