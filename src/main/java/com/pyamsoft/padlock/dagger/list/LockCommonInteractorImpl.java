@@ -41,59 +41,75 @@ abstract class LockCommonInteractorImpl implements LockCommonInteractor {
   @NonNull @Override
   public Observable<LockState> modifySingleDatabaseEntry(@NonNull String packageName,
       @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
-      boolean forceDelete) {
+      boolean forceLock) {
     final Observable<PadLockEntry> padLockEntryObservable =
         PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
 
     if (whitelist) {
-      // Whitelist creations count as database creation events
+      Timber.d("Whitelist call");
       return padLockEntryObservable.flatMap(entry -> {
         if (PadLockEntry.isEmpty(entry)) {
-          Timber.d("Empty entry, create a WHITELISTED entry for: %s %s", packageName, activityName);
-          // We create a new entry with whitelist
-          // Map the observable to a boolean, in an observable
-          return PadLockDB.with(appContext)
-              .insert(packageName, activityName, code, 0, 0, system, true)
-              .map(result -> {
-                Timber.d("Insert result: %d", result);
-                return LockState.WHITELISTED;
-              });
+          return createNewEntry(packageName, activityName, code, system, true);
         } else {
-          Timber.d("Entry already exists for: %s %s, WHITELIST it", packageName, activityName);
-          return PadLockDB.with(appContext)
-              .updateWithPackageActivityName(entry.packageName(), entry.activityName(),
-                  entry.lockCode(), entry.lockUntilTime(), entry.ignoreUntilTime(),
-                  entry.systemApplication(), true)
-              .map(result -> {
-                Timber.d("Update result: %d", result);
-                return LockState.WHITELISTED;
-              });
+          return updateExistingEntry(entry, true);
+        }
+      });
+    } else if (forceLock) {
+      Timber.d("Force lock call");
+      return padLockEntryObservable.flatMap(entry -> {
+        if (PadLockEntry.isEmpty(entry)) {
+          return createNewEntry(packageName, activityName, code, system, false);
+        } else {
+          return updateExistingEntry(entry, false);
         }
       });
     } else {
+      Timber.d("Normal call");
       return padLockEntryObservable.flatMap(entry -> {
-        if (PadLockEntry.isEmpty(entry) && !forceDelete) {
-          Timber.d("Empty entry, create a new entry for: %s %s", packageName, activityName);
-          // We create a new entry with no whitelist
-          // Map the observable to a boolean, in an observable
-          return PadLockDB.with(appContext)
-              .insert(packageName, activityName, code, 0, 0, system, false)
-              .map(result -> {
-                Timber.d("Insert result: %d", result);
-                return LockState.LOCKED;
-              });
+        if (PadLockEntry.isEmpty(entry)) {
+          return createNewEntry(packageName, activityName, code, system, false);
         } else {
-          Timber.d("Entry already exists for: %s %s, delete it", packageName, activityName);
-
-          // Map the observable to a boolean, in an observable
-          return PadLockDB.with(appContext)
-              .deleteWithPackageActivityName(packageName, activityName)
-              .map(result -> {
-                Timber.d("Delete result: %d", result);
-                return LockState.DEFAULT;
-              });
+          return deleteEntry(packageName, activityName);
         }
       });
     }
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<LockState> createNewEntry(
+      @NonNull String packageName, @NonNull String activityName, @Nullable String code,
+      boolean system, boolean whitelist) {
+    Timber.d("Empty entry, create a new entry for: %s %s", packageName, activityName);
+    return PadLockDB.with(appContext)
+        .insert(packageName, activityName, code, 0, 0, system, whitelist)
+        .map(result -> {
+          Timber.d("Insert result: %d", result);
+          Timber.d("Whitelist: %s", whitelist);
+          return whitelist ? LockState.WHITELISTED : LockState.LOCKED;
+        });
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<LockState> updateExistingEntry(
+      @NonNull PadLockEntry entry, boolean whitelist) {
+    Timber.d("Entry already exists for: %s %s, update it", entry.packageName(),
+        entry.activityName());
+    return PadLockDB.with(appContext)
+        .updateWithPackageActivityName(entry.packageName(), entry.activityName(), entry.lockCode(),
+            entry.lockUntilTime(), entry.ignoreUntilTime(), entry.systemApplication(), whitelist)
+        .map(result -> {
+          Timber.d("Update result: %d", result);
+          Timber.d("Whitelist: %s", whitelist);
+          return whitelist ? LockState.WHITELISTED : LockState.LOCKED;
+        });
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<LockState> deleteEntry(
+      @NonNull String packageName, @NonNull String activityName) {
+    Timber.d("Entry already exists for: %s %s, delete it", packageName, activityName);
+    return PadLockDB.with(appContext)
+        .deleteWithPackageActivityName(packageName, activityName)
+        .map(result -> {
+          Timber.d("Delete result: %d", result);
+          return LockState.DEFAULT;
+        });
   }
 }
