@@ -69,7 +69,7 @@ public class PadLockDB {
     return instance;
   }
 
-  private synchronized void openDatabase() {
+  @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
     if (briteDatabase == null) {
       Timber.d("Open new Database instance");
       briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, dbScheduler);
@@ -90,8 +90,6 @@ public class PadLockDB {
   public Observable<Long> insert(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem,
       boolean whitelist) {
-    openDatabase();
-
     final PadLockEntry entry =
         PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
             ignoreUntilTime, isSystem, whitelist);
@@ -99,11 +97,14 @@ public class PadLockDB {
       throw new RuntimeException("Cannot insert EMPTY entry");
     }
 
-    return Observable.defer(() -> {
+    return deleteWithPackageActivityName(packageName, activityName).map(deleted -> {
+      Timber.d("Delete result: %d", deleted);
+
+      openDatabase();
       final long result = briteDatabase.insert(PadLockEntry.TABLE_NAME,
           PadLockEntry.FACTORY.marshal(entry).asContentValues());
       closeDatabase();
-      return Observable.just(result);
+      return result;
     });
   }
 
@@ -111,8 +112,6 @@ public class PadLockDB {
   public Observable<Integer> updateWithPackageActivityName(@NonNull String packageName,
       @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
       long ignoreUntilTime, boolean isSystem, boolean whitelist) {
-    openDatabase();
-
     final PadLockEntry entry =
         PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
             ignoreUntilTime, isSystem, whitelist);
@@ -120,6 +119,7 @@ public class PadLockDB {
       throw new RuntimeException("Cannot update EMPTY entry");
     }
 
+    openDatabase();
     return Observable.defer(() -> {
       final int result = briteDatabase.update(PadLockEntry.TABLE_NAME,
           PadLockEntry.FACTORY.marshal(entry).asContentValues(),
@@ -138,11 +138,11 @@ public class PadLockDB {
         PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)
         .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_nameMapper()::map,
             PadLockEntry.empty())
-        .filter(padLockEntry -> padLockEntry != null)
         .map(entry -> {
           closeDatabase();
           return entry;
-        });
+        })
+        .filter(padLockEntry -> padLockEntry != null);
   }
 
   @NonNull @CheckResult
@@ -152,11 +152,11 @@ public class PadLockDB {
     return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME,
         packageName)
         .mapToList(PadLockEntry.FACTORY.with_package_nameMapper()::map)
-        .filter(padLockEntries -> padLockEntries != null)
         .map(padLockEntries -> {
           closeDatabase();
           return padLockEntries;
-        });
+        })
+        .filter(padLockEntries -> padLockEntries != null);
   }
 
   @NonNull @CheckResult public Observable<List<PadLockEntry>> queryAll() {
@@ -164,11 +164,11 @@ public class PadLockDB {
 
     return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
         .mapToList(PadLockEntry.FACTORY.all_entriesMapper()::map)
-        .filter(padLockEntries -> padLockEntries != null)
         .map(padLockEntries -> {
           closeDatabase();
           return padLockEntries;
-        });
+        })
+        .filter(padLockEntries -> padLockEntries != null);
   }
 
   @NonNull @CheckResult
