@@ -50,8 +50,8 @@ class SettingsPreferencePresenterImpl
     super.onBind(view);
   }
 
-  @Override protected void onUnbind(@NonNull SettingsPreferenceView view) {
-    super.onUnbind(view);
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unregisterFromConfirmEventBus();
     unsubscribeConfirm();
   }

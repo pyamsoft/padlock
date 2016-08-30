@@ -54,8 +54,8 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
     lockScreenPassed = false;
   }
 
-  @Override protected void onUnbind(@NonNull LockService view) {
-    super.onUnbind(view);
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unsubLockedEntry();
     unsubPickCorrect();
   }

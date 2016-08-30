@@ -51,8 +51,8 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     registerOnRefreshBus();
   }
 
-  @Override protected void onUnbind(@NonNull MainView view) {
-    super.onUnbind(view);
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unregisterFromAgreeTermsBus();
     unregisterFromRefreshBus();
     unsubscribeAgreeTerms();

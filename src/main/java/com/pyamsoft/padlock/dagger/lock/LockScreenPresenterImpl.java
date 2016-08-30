@@ -55,8 +55,8 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
     iconLoader.bindView(view);
   }
 
-  @Override protected void onUnbind(@NonNull LockScreen view) {
-    super.onUnbind(view);
+  @Override protected void onUnbind() {
+    super.onUnbind();
     iconLoader.unbindView();
     unsubIgnoreTime();
     unsubUnlock();
