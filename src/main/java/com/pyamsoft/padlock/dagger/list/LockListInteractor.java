@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import rx.Observable;
@@ -29,13 +30,19 @@ public interface LockListInteractor {
 
   @CheckResult @NonNull Observable<List<PadLockEntry>> getAppEntryList();
 
-  @CheckResult Observable<Boolean> isSystemApplication(@NonNull ApplicationInfo info);
+  @CheckResult @NonNull Observable<Boolean> isSystemApplication(@NonNull ApplicationInfo info);
 
   @CheckResult @NonNull Observable<String> loadPackageLabel(@NonNull ApplicationInfo info);
 
-  @CheckResult Observable<Boolean> hasShownOnBoarding();
+  @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding();
 
-  @CheckResult Observable<Boolean> isSystemVisible();
+  @CheckResult @NonNull Observable<Boolean> isSystemVisible();
+
+  /**
+   * Returns a boolean observable where True means created and False means deleted
+   */
+  @CheckResult @NonNull Observable<Boolean> modifyDatabase(@NonNull String packageName,
+      @Nullable String code, boolean system);
 
   void setSystemVisible(boolean visible);
 

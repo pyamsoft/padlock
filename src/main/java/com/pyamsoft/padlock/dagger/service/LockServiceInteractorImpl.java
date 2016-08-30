@@ -124,7 +124,7 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
     final Observable<PadLockEntry> specificActivityEntry =
         PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
     final Observable<PadLockEntry> packageActivityEntry = PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, PadLockEntry.PACKAGE_TAG)
+        .queryWithPackageActivityName(packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME)
         .first();
     return Observable.zip(specificActivityEntry, packageActivityEntry,
         (specificEntry, packageEntry) -> {
@@ -162,7 +162,7 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
       Timber.d("Lock: %s %s", entry.packageName(), entry.activityName());
       return true;
     }).filter(entry -> {
-      if (entry.activityName().equals(PadLockEntry.PACKAGE_TAG) && entry.whitelist()) {
+      if (entry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME) && entry.whitelist()) {
         throw new RuntimeException(
             "PACKAGE entry for package: " + entry.packageName() + " cannot be whitelisted");
       }

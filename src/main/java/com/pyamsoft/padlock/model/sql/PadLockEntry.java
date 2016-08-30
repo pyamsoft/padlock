@@ -22,7 +22,10 @@ import com.google.auto.value.AutoValue;
 
 @AutoValue public abstract class PadLockEntry implements PadLockEntryModel {
 
-  @NonNull public static final String PACKAGE_TAG = "PACKAGE";
+  /**
+   * The activity name of the PACKAGE entry in the database
+   */
+  @NonNull public static final String PACKAGE_ACTIVITY_NAME = "PACKAGE";
   @NonNull public static final Factory<PadLockEntry> FACTORY =
       new Factory<>(AutoValue_PadLockEntry::new);
   // SQLDelight does not yet support delete strings

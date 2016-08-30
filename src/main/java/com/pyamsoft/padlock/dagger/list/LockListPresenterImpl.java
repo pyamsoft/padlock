@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.bus.DBProgressBus;
 import com.pyamsoft.padlock.app.bus.LockInfoDisplayBus;
@@ -52,6 +53,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
   @NonNull private Subscription dbProgressBus = Subscriptions.empty();
   @NonNull private Subscription lockInfoDisplayBus = Subscriptions.empty();
+  @NonNull private Subscription databaseSubscription = Subscriptions.empty();
 
   @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -78,6 +80,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     unsubscribeSystemVisible();
     unsubscribeOnboard();
     unsubscribeFabSubscription();
+    unsubDatabaseSubscription();
   }
 
   @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnLockInfoDisplayBus(
@@ -167,7 +170,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
             for (int i = 0; i < padLockEntries.size(); ++i) {
               final PadLockEntry padLockEntry = padLockEntries.get(i);
               if (padLockEntry.packageName().equals(applicationInfo.packageName)
-                  && padLockEntry.activityName().equals(PadLockEntry.PACKAGE_TAG)) {
+                  && padLockEntry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
                 foundLocation = i;
                 break;
               }
@@ -332,5 +335,30 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
 
   @Override public void setOnBoard() {
     lockListInteractor.setShownOnBoarding();
+  }
+
+  @Override
+  public void modifyDatabaseEntry(int position, @NonNull String packageName, @Nullable String code,
+      boolean system) {
+    unsubDatabaseSubscription();
+    databaseSubscription = lockListInteractor.modifyDatabase(packageName, code, system)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(created -> {
+          if (created) {
+            getView().onDatabaseEntryCreated(position);
+          } else {
+            getView().onDatabaseEntryDeleted(position);
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError modifyDatabaseEntry");
+          getView().onDatabaseEntryError(position);
+        }, this::unsubDatabaseSubscription);
+  }
+
+  @SuppressWarnings("WeakerAccess") void unsubDatabaseSubscription() {
+    if (!databaseSubscription.isUnsubscribed()) {
+      databaseSubscription.isUnsubscribed();
+    }
   }
 }

@@ -109,10 +109,10 @@ class DBPresenterImpl extends SchedulerPresenter<DBPresenter.DBView> implements 
     dbPackageSubscription = Observable.defer(() -> {
       if (create) {
         Timber.d("Cursor does not have existing DB data, this is an add call");
-        return dbInteractor.createEntry(packageName, PadLockEntry.PACKAGE_TAG, code, system, false);
+        return dbInteractor.createEntry(packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system, false);
       } else {
         Timber.d("Cursor has existing DB data, this is a delete call");
-        return dbInteractor.deleteEntry(packageName, PadLockEntry.PACKAGE_TAG)
+        return dbInteractor.deleteEntry(packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME)
             .map(Integer::longValue);
       }
     }).map(aLong -> {
