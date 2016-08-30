@@ -53,22 +53,19 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
 
   @WorkerThread @NonNull @Override @CheckResult
   public Observable<Boolean> lockEntry(@NonNull String packageName, @NonNull String activityName) {
-    Timber.d("Lock entry: %s %s", packageName, activityName);
     return PadLockDB.with(appContext)
         .queryWithPackageActivityName(packageName, activityName)
         .first()
         .flatMap(padLockEntry -> {
           final long timeOutMinutesInMillis = preferences.getTimeoutPeriod() * 60 * 1000;
-          Timber.d("LOCKED entry, update entry in DB: %s", padLockEntry);
-          Timber.d("lock for %d", timeOutMinutesInMillis);
-          return PadLockDB.with(appContext)
-              .updateWithPackageActivityName(padLockEntry.packageName(),
-                  padLockEntry.activityName(), padLockEntry.lockCode(),
-                  System.currentTimeMillis() + timeOutMinutesInMillis,
-                  padLockEntry.ignoreUntilTime(), padLockEntry.systemApplication(), false);
+          Timber.d("Lock %s %s for %d", padLockEntry.packageName(), padLockEntry.activityName(),
+              timeOutMinutesInMillis);
+          return updateEntry(padLockEntry, System.currentTimeMillis() + timeOutMinutesInMillis,
+              padLockEntry.ignoreUntilTime(), false);
         })
         .map(integer -> {
           Timber.d("Result of update: %d", integer);
+
           // TODO use result of update
           return true;
         });
@@ -108,103 +105,65 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
     }).filter(pin -> pin != null).flatMap(pin -> checkSubmissionAttempt(attempt, pin));
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Boolean> isRecheckEnabled() {
-    return Observable.defer(() -> Observable.just(preferences.isRecheckEnabled()));
-  }
-
   @NonNull @Override
   public Observable<Boolean> postUnlock(@NonNull String packageName, @NonNull String activityName,
       @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean exclude,
       long ignoreTime) {
-    Timber.d("Post unlock: %s %s", packageName, activityName);
-    final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
-    final Observable<PadLockEntry> dbObservable = PadLockDB.with(appContext)
+    return PadLockDB.with(appContext)
         .queryWithPackageActivityName(packageName, activityName)
         .first()
-        .cache();
-    return Observable.defer(() -> {
-      Timber.d("Run finishing unlock hooks");
-      return Observable.just(exclude);
-    }).flatMap(exclude1 -> {
-      if (exclude1) {
-        Timber.d("EXCLUDE requested, whitelist entry in DB");
-        return whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
-      } else {
-        Timber.d("EXCLUDE not requested");
-        return Observable.just(0L);
-      }
-    }).flatMap(whitelistResult -> {
-      Timber.d("Whitelist result: %s", whitelistResult == 0L ? "NOTHING" : "SUCCESS");
-      // TODO do something with long result
-      // Ignore time is requested
-      if (ignoreTime != 0) {
-        Timber.d("Get entry to update");
-        return dbObservable;
-      } else {
-        Timber.d("No update requested, empty entry");
-        return Observable.just(PadLockEntry.empty());
-      }
-    }).flatMap(entry -> {
-      if (!PadLockEntry.isEmpty(entry)) {
-        Timber.d("IGNORE requested, update entry in DB");
-        return ignoreEntryForTime(entry, ignoreMinutesInMillis);
-      } else {
-        Timber.d("IGNORE not requested");
-        return Observable.just(0);
-      }
-    }).flatMap(ignoreResult -> {
-      Timber.d("Ignore result: %s", ignoreResult == 0 ? "NOTHING" : "SUCCESS");
-      // TODO do something with integer result
-      return isRecheckEnabled();
-    }).flatMap(recheckAllowed -> {
-      if (ignoreTime != 0 && recheckAllowed) {
-        Timber.d("Get entry to recheck");
-        return dbObservable;
-      } else {
-        Timber.d("No update requested, empty entry");
-        return Observable.just(PadLockEntry.empty());
-      }
-    }).flatMap(entry -> {
-      if (!PadLockEntry.isEmpty(entry)) {
-        Timber.d("RECHECK requested, queue new job");
-        return queueRecheckJob(entry, ignoreMinutesInMillis);
-      } else {
-        Timber.d("RECHECK not requested");
-        return Observable.just(0);
-      }
-    }).map(recheckResult -> {
-      Timber.d("Recheck queued: %s", recheckResult == 0 ? "NO" : "YES");
-      // TODO do something with integer result
-      Timber.d("Result for recheck: %d", recheckResult);
-      return true;
-    });
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> whitelistEntry(
-      @NonNull String packageName, @NonNull String activityName, @NonNull String realName,
-      @Nullable String lockCode, boolean isSystem) {
-    Timber.d("Get entry for %s %s (real %s)", packageName, activityName, realName);
-    return PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, realName)
-        .first()
-        .flatMap(padLockEntry -> {
-          if (PadLockEntry.isEmpty(padLockEntry)) {
-            Timber.d("No entry currently exists, create new one and whitelist it");
-            return PadLockDB.with(appContext)
-                .insert(packageName, realName, lockCode, 0, 0, isSystem, true);
+        .flatMap(entry -> {
+          Timber.d("Run finishing unlock hooks");
+          final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
+          final Observable<Long> whitelistObservable;
+          if (exclude) {
+            whitelistObservable =
+                whitelistEntry(entry, packageName, activityName, realName, lockCode, isSystem);
           } else {
-            Timber.d("Entry exists, update it");
-            return PadLockDB.with(appContext)
-                .updateWithPackageActivityName(padLockEntry.packageName(),
-                    padLockEntry.activityName(), padLockEntry.lockCode(),
-                    padLockEntry.lockUntilTime(), padLockEntry.ignoreUntilTime(),
-                    padLockEntry.systemApplication(), true)
-                .map(Integer::longValue);
+            whitelistObservable = Observable.just(0L);
           }
+
+          final Observable<Integer> ignoreObservable;
+          if (ignoreTime != 0 && !exclude) {
+            ignoreObservable = ignoreEntryForTime(entry, ignoreMinutesInMillis);
+          } else {
+            ignoreObservable = Observable.just(0);
+          }
+
+          final Observable<Integer> recheckObservable;
+          if (ignoreTime != 0 && preferences.isRecheckEnabled() && !exclude) {
+            recheckObservable = queueRecheckJob(entry, ignoreMinutesInMillis);
+          } else {
+            recheckObservable = Observable.just(0);
+          }
+
+          return Observable.zip(ignoreObservable, recheckObservable, whitelistObservable,
+              (ignore, recheck, whitelist) -> {
+                Timber.d("Result of Ignore: %d", ignore);
+                Timber.d("Result of Recheck: %d", recheck);
+                Timber.d("Result of Whitelist: %d", whitelist);
+
+                // KLUDGE Just return something valid for now
+                return true;
+              });
         });
   }
 
-  // KLUDGE void, probably should return Observable to the stream
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> whitelistEntry(
+      @NonNull PadLockEntry entry, @NonNull String packageName, @NonNull String activityName,
+      @NonNull String realName, @Nullable String lockCode, boolean isSystem) {
+    Timber.d("Get entry for %s %s (real %s)", packageName, activityName, realName);
+    if (PadLockEntry.isEmpty(entry)) {
+      Timber.d("No entry currently exists, create new one and whitelist it");
+      return PadLockDB.with(appContext)
+          .insert(packageName, realName, lockCode, 0, 0, isSystem, true);
+    } else {
+      Timber.d("Entry exists, update it");
+      return updateEntry(entry, entry.lockUntilTime(), entry.ignoreUntilTime(), true).map(
+          Integer::longValue);
+    }
+  }
+
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Integer> queueRecheckJob(
       PadLockEntry entry, long recheckTime) {
     return Observable.defer(() -> {
@@ -224,14 +183,19 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Integer> ignoreEntryForTime(
-      @NonNull PadLockEntry oldValues, final long ignoreMinutesInMillis) {
+      @NonNull PadLockEntry oldValues, long ignoreMinutesInMillis) {
     Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
         ignoreMinutesInMillis);
+    return updateEntry(oldValues, oldValues.lockUntilTime(),
+        System.currentTimeMillis() + ignoreMinutesInMillis, oldValues.whitelist());
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Integer> updateEntry(
+      @NonNull PadLockEntry values, long lockUntilTime, long ignoreUntilTime, boolean whitelist) {
     return PadLockDB.with(appContext)
-        .updateWithPackageActivityName(oldValues.packageName(), oldValues.activityName(),
-            oldValues.lockCode(), oldValues.lockUntilTime(),
-            System.currentTimeMillis() + ignoreMinutesInMillis, oldValues.systemApplication(),
-            oldValues.whitelist());
+        .updateWithPackageActivityName(values.packageName(), values.activityName(),
+            values.lockCode(), lockUntilTime, ignoreUntilTime, values.systemApplication(),
+            whitelist);
   }
 
   @NonNull @CheckResult @Override public Observable<Long> getDefaultIgnoreTime() {
