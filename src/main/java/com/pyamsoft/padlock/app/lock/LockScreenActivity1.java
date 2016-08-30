@@ -26,6 +26,9 @@ public class LockScreenActivity1 extends LockScreenActivity {
 
   private static boolean active = false;
 
+  public LockScreenActivity1() {
+  }
+
   @CheckResult public static boolean isActive() {
     return active;
   }
