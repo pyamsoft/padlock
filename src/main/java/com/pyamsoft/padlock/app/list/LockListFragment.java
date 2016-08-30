@@ -42,8 +42,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.db.DBPresenter;
-import com.pyamsoft.padlock.app.db.DBProgressDialog;
 import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
@@ -445,23 +443,19 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onDatabaseEntryCreated(int position) {
-    handler.postDelayed(() -> DBProgressDialog.remove(getFragmentManager()), 500L);
     fastItemAdapter.onDatabaseEntryCreated(position);
   }
 
   @Override public void onDatabaseEntryDeleted(int position) {
-    handler.postDelayed(() -> DBProgressDialog.remove(getFragmentManager()), 500L);
     fastItemAdapter.onDatabaseEntryDeleted(position);
   }
 
   @Override public void onDatabaseEntryError(int position) {
-    handler.postDelayed(() -> DBProgressDialog.remove(getFragmentManager()), 500L);
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  @Override
-  public void displayDBProgressDialog(int position, boolean checked, @NonNull AppEntry entry) {
-    DBProgressDialog.add(getFragmentManager(), entry.name());
+  @Override public void processDatabaseModifyEvent(int position, @NonNull AppEntry entry) {
+    //DBProgressDialog.add(getFragmentManager(), entry.name());
     presenter.modifyDatabaseEntry(position, entry.packageName(), null, entry.system());
   }
 

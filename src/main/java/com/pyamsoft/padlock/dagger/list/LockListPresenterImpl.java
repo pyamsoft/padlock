@@ -112,8 +112,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         .observeOn(getObserveScheduler())
         .subscribe(dbProgressEvent -> {
           if (!dbProgressEvent.individual()) {
-            view.displayDBProgressDialog(dbProgressEvent.position(), dbProgressEvent.checked(),
-                dbProgressEvent.entry());
+            view.processDatabaseModifyEvent(dbProgressEvent.position(), dbProgressEvent.entry());
           }
         }, throwable -> {
           Timber.e(throwable, "onError registerOnDbProgressBus");

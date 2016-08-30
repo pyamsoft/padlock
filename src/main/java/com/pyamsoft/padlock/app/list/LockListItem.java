@@ -76,34 +76,31 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
             compoundButton.setOnCheckedChangeListener(this);
 
             // Authorize for package access
-            authorizeAccess(holder.getAdapterPosition(), true, b);
+            authorizeAccess(holder.getAdapterPosition(), true);
           }
         };
 
     holder.toggle.setOnCheckedChangeListener(listener);
-    holder.name.setOnClickListener(
-        view -> authorizeAccess(holder.getAdapterPosition(), false, false));
-    holder.icon.setOnClickListener(
-        view -> authorizeAccess(holder.getAdapterPosition(), false, false));
+    holder.name.setOnClickListener(view -> authorizeAccess(holder.getAdapterPosition(), false));
+    holder.icon.setOnClickListener(view -> authorizeAccess(holder.getAdapterPosition(), false));
   }
 
-  @SuppressWarnings("WeakerAccess") void authorizeAccess(int position, boolean accessPackage,
-      boolean checked) {
+  @SuppressWarnings("WeakerAccess") void authorizeAccess(int position, boolean accessPackage) {
     // TODO some kind of observable which can confirm correct passcode entry
 
     Timber.d("Access authorized");
     if (accessPackage) {
       Timber.d("Access package");
-      accessPackage(position, checked);
+      accessPackage(position);
     } else {
       Timber.d("Access activities");
       openInfo();
     }
   }
 
-  private void accessPackage(int position, boolean checked) {
+  private void accessPackage(int position) {
     // TODO app specific codes
-    DBProgressBus.get().post(DBProgressEvent.create(false, position, checked, entry));
+    DBProgressBus.get().post(DBProgressEvent.create(false, position, entry));
   }
 
   private void openInfo() {
