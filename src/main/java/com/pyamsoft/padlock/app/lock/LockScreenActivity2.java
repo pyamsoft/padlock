@@ -24,6 +24,9 @@ import timber.log.Timber;
 
 public class LockScreenActivity2 extends LockScreenActivity {
 
+  public LockScreenActivity2() {
+  }
+
   private static boolean active = false;
 
   @CheckResult public static boolean isActive() {
