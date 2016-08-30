@@ -60,8 +60,8 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
     iconLoader.bindView(view);
   }
 
-  @Override protected void onUnbind(@NonNull PinScreen view) {
-    super.onUnbind(view);
+  @Override protected void onUnbind() {
+    super.onUnbind();
     iconLoader.unbindView();
     unsubPinEntry();
     unsubPinCheck();

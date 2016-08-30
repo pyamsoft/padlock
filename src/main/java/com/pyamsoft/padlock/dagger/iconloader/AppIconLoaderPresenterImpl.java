@@ -40,8 +40,8 @@ class AppIconLoaderPresenterImpl<I extends AppIconLoaderView> extends SchedulerP
     this.interactor = interactor;
   }
 
-  @Override protected void onUnbind(@NonNull I view) {
-    super.onUnbind(view);
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unsubLoadIcon();
   }
 

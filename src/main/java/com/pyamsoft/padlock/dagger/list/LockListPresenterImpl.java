@@ -71,8 +71,8 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     registerOnLockInfoDisplayBus(view);
   }
 
-  @Override protected void onUnbind(@NonNull LockList view) {
-    super.onUnbind(view);
+  @Override protected void onUnbind() {
+    super.onUnbind();
     unregisterFromPinEntryBus();
     unregisterFromDBProgressBus();
     unregisterFromLockInfoDispalyBus();
