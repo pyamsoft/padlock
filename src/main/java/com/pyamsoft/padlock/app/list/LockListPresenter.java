@@ -60,7 +60,7 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
 
     void displayLockInfoDialog(@NonNull AppEntry entry);
 
-    void displayDBProgressDialog(int position, boolean checked, @NonNull AppEntry entry);
+    void processDatabaseModifyEvent(int position, @NonNull AppEntry entry);
 
     void onDatabaseEntryError(int position);
   }
