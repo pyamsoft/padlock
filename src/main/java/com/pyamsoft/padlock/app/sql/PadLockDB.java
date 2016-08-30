@@ -208,6 +208,7 @@ public class PadLockDB {
 
   public void close() {
     Timber.d("Close and recycle database connection");
+    openCount.set(0);
     if (briteDatabase != null) {
       briteDatabase.close();
       briteDatabase = null;
