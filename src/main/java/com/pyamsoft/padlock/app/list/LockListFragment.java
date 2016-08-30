@@ -386,6 +386,7 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onListPopulateError() {
     Timber.e("onListPopulateError");
+    onListPopulated();
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
@@ -455,7 +456,8 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void processDatabaseModifyEvent(int position, @NonNull AppEntry entry) {
-    //DBProgressDialog.add(getFragmentManager(), entry.name());
+    Timber.d("Received a database modify event request for %s at %d", entry.packageName(),
+        position);
     presenter.modifyDatabaseEntry(position, entry.packageName(), null, entry.system());
   }
 

@@ -17,26 +17,35 @@
 package com.pyamsoft.padlock.app.list;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.ActivityEntry;
+import com.pyamsoft.padlock.model.LockState;
 
 public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {
+
+  int GROUP_POSITION = -1;
 
   void populateList(@NonNull String packageName);
 
   void setToggleAllState(@NonNull String packageName);
 
-  interface LockInfoView extends LockListCommon, AppIconLoaderView {
+  void modifyDatabaseEntry(int position, @NonNull String packageName, @NonNull String activityName,
+      @Nullable String code, boolean system, boolean whitelist, boolean forceDelete);
+
+  void modifyDatabaseGroup(boolean allCreate, @NonNull String packageName, @Nullable String code,
+      boolean system);
+
+  interface LockInfoView extends LockListCommon, AppIconLoaderView, LockListDatabaseErrorView,
+      LockListDatabaseWhitelistView {
 
     void onEntryAddedToList(@NonNull ActivityEntry entry);
-
-    @Override void onListPopulated();
-
-    @Override void onListPopulateError();
 
     void enableToggleAll();
 
     void disableToggleAll();
+
+    void processDatabaseModifyEvent(int position, @NonNull String activityName, @NonNull LockState lockState);
   }
 }

@@ -17,30 +17,36 @@
 package com.pyamsoft.padlock.app.list;
 
 import com.mikepenz.fastadapter.adapters.FastItemAdapter;
-import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
+import com.pyamsoft.padlock.model.LockState;
 
-public class LockInfoAdapter extends FastItemAdapter<LockInfoItem> implements DBPresenter.DBView {
+class LockInfoAdapter extends FastItemAdapter<LockInfoItem>
+    implements LockListDatabaseWhitelistView {
 
-  @Override public void onDBCreateEvent(int position) {
+  @Override public void onDatabaseEntryCreated(int position) {
     final LockInfoItem oldItem = getItem(position);
     final LockInfoItem newItem = new LockInfoItem(oldItem.packageName,
         ActivityEntry.builder(oldItem.entry)
-            .lockState(ActivityEntry.ActivityLockState.LOCKED)
+            .lockState(LockState.LOCKED)
             .build());
     set(position, newItem);
   }
 
-  @Override public void onDBDeleteEvent(int position) {
+  @Override public void onDatabaseEntryDeleted(int position) {
     final LockInfoItem oldItem = getItem(position);
     final LockInfoItem newItem = new LockInfoItem(oldItem.packageName,
         ActivityEntry.builder(oldItem.entry)
-            .lockState(ActivityEntry.ActivityLockState.DEFAULT)
+            .lockState(LockState.DEFAULT)
             .build());
     set(position, newItem);
   }
 
-  @Override public void onDBError() {
-    throw new RuntimeException("Not handled");
+  @Override public void onDatabaseEntryWhitelisted(int position) {
+    final LockInfoItem oldItem = getItem(position);
+    final LockInfoItem newItem = new LockInfoItem(oldItem.packageName,
+        ActivityEntry.builder(oldItem.entry)
+            .lockState(LockState.WHITELISTED)
+            .build());
+    set(position, newItem);
   }
 }

@@ -16,28 +16,14 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import java.util.List;
+import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.model.LockState;
 import rx.Observable;
 
-public interface LockListInteractor extends LockCommonInteractor {
+interface LockCommonInteractor {
 
-  @CheckResult @NonNull Observable<List<ApplicationInfo>> getApplicationInfoList();
-
-  @CheckResult @NonNull Observable<List<PadLockEntry>> getAppEntryList();
-
-  @CheckResult @NonNull Observable<Boolean> isSystemApplication(@NonNull ApplicationInfo info);
-
-  @CheckResult @NonNull Observable<String> loadPackageLabel(@NonNull ApplicationInfo info);
-
-  @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding();
-
-  @CheckResult @NonNull Observable<Boolean> isSystemVisible();
-
-  void setSystemVisible(boolean visible);
-
-  void setShownOnBoarding();
+  @CheckResult @NonNull Observable<LockState> modifySingleDatabaseEntry(@NonNull String packageName,
+      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist, boolean forceDelete);
 }

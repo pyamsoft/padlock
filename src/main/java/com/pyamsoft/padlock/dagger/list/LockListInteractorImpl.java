@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
@@ -27,18 +26,16 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
-import timber.log.Timber;
 
-class LockListInteractorImpl implements LockListInteractor {
+class LockListInteractorImpl extends LockCommonInteractorImpl implements LockListInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
-  @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject LockListInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper,
       final @NonNull Context context, final @NonNull PadLockPreferences preferences) {
+    super(context);
     this.packageManagerWrapper = packageManagerWrapper;
-    appContext = context.getApplicationContext();
     this.preferences = preferences;
   }
 
@@ -48,38 +45,6 @@ class LockListInteractorImpl implements LockListInteractor {
 
   @NonNull @Override public Observable<Boolean> isSystemVisible() {
     return Observable.defer(() -> Observable.just(preferences.isSystemVisible()));
-  }
-
-  @NonNull @Override
-  public Observable<Boolean> modifyDatabase(@NonNull String packageName, @Nullable String code,
-      boolean system) {
-    return PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME)
-        .first()
-        .flatMap(entry -> {
-          if (PadLockEntry.isEmpty(entry)) {
-            Timber.d("Empty entry, create a new entry");
-            // We create a new entry with no whitelist as there is no whitelist option available from the main lock list UI
-
-            // Map the observable to a boolean, in an observable
-            return PadLockDB.with(appContext)
-                .insert(packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME, code, 0, 0, system, false)
-                .map(result -> {
-                  Timber.d("Insert result: %d", result);
-                  return true;
-                });
-          } else {
-            Timber.d("Entry already exists, delete it");
-
-            // Map the observable to a boolean, in an observable
-            return PadLockDB.with(appContext)
-                .deleteWithPackageActivityName(packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME)
-                .map(result -> {
-                  Timber.d("Delete result: %d", result);
-                  return false;
-                });
-          }
-        });
   }
 
   @Override public void setSystemVisible(boolean visible) {
@@ -98,7 +63,7 @@ class LockListInteractorImpl implements LockListInteractor {
   }
 
   @NonNull @Override public Observable<List<PadLockEntry>> getAppEntryList() {
-    return PadLockDB.with(appContext).queryAll().first();
+    return PadLockDB.with(getAppContext()).queryAll().first();
   }
 
   @NonNull @Override public Observable<Boolean> isSystemApplication(@NonNull ApplicationInfo info) {
