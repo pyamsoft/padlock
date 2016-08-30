@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model.event;
+package com.pyamsoft.padlock.model;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
-import com.pyamsoft.padlock.model.AppEntry;
-
-@AutoValue public abstract class DBProgressEvent {
-
-  @CheckResult @NonNull
-  public static DBProgressEvent create(int position, @NonNull AppEntry entry) {
-    return new AutoValue_DBProgressEvent(position, entry);
-  }
-
-  public abstract int position();
-
-  public abstract AppEntry entry();
+public enum LockState {
+  DEFAULT, WHITELISTED, LOCKED
 }

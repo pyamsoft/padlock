@@ -19,22 +19,19 @@ package com.pyamsoft.padlock.model.event;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
-import com.pyamsoft.padlock.model.ActivityEntry;
-import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.padlock.model.LockState;
 
 @AutoValue public abstract class LockInfoSelectEvent {
 
   @CheckResult @NonNull
-  public static LockInfoSelectEvent create(int position, boolean checked, @NonNull AppEntry entry,
-      @NonNull ActivityEntry.ActivityLockState state) {
-    return new AutoValue_LockInfoSelectEvent(position, checked, entry, state);
+  public static LockInfoSelectEvent create(int position, @NonNull String activityName,
+      @NonNull LockState lockState) {
+    return new AutoValue_LockInfoSelectEvent(position, activityName, lockState);
   }
 
   public abstract int position();
 
-  public abstract boolean checked();
+  public abstract String activityName();
 
-  public abstract AppEntry entry();
-
-  public abstract ActivityEntry.ActivityLockState lockState();
+  public abstract LockState lockState();
 }

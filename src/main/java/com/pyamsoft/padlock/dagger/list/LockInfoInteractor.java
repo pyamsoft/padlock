@@ -18,15 +18,21 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.dagger.iconloader.AppIconLoaderInteractor;
+import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import rx.Observable;
 
-public interface LockInfoInteractor extends AppIconLoaderInteractor {
+public interface LockInfoInteractor extends LockCommonInteractor {
 
   @CheckResult @NonNull Observable<List<PadLockEntry>> getActivityEntries(
       @NonNull String packageName);
 
   @CheckResult @NonNull Observable<String> getPackageActivities(@NonNull String packageName);
+
+  /**
+   * Returns a boolean observable where True means created and False means deleted
+   */
+  @CheckResult @NonNull Observable<Boolean> modifyDatabaseGroup(boolean allCreate,
+      @NonNull String packageName, @Nullable String code, boolean system);
 }

@@ -111,9 +111,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(dbProgressEvent -> {
-          if (!dbProgressEvent.individual()) {
-            view.processDatabaseModifyEvent(dbProgressEvent.position(), dbProgressEvent.entry());
-          }
+          view.processDatabaseModifyEvent(dbProgressEvent.position(), dbProgressEvent.entry());
         }, throwable -> {
           Timber.e(throwable, "onError registerOnDbProgressBus");
         });
@@ -340,14 +338,22 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   public void modifyDatabaseEntry(int position, @NonNull String packageName, @Nullable String code,
       boolean system) {
     unsubDatabaseSubscription();
-    databaseSubscription = lockListInteractor.modifyDatabase(packageName, code, system)
+
+    // No whitelisting for modifications from the List
+    databaseSubscription = lockListInteractor.modifySingleDatabaseEntry(packageName,
+        PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system, false, false)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(created -> {
-          if (created) {
-            getView().onDatabaseEntryCreated(position);
-          } else {
-            getView().onDatabaseEntryDeleted(position);
+        .subscribe(lockState -> {
+          switch (lockState) {
+            case DEFAULT:
+              getView().onDatabaseEntryDeleted(position);
+              break;
+            case LOCKED:
+              getView().onDatabaseEntryCreated(position);
+              break;
+            case WHITELISTED:
+              throw new RuntimeException("Whitelist results are not handled");
           }
         }, throwable -> {
           Timber.e(throwable, "onError modifyDatabaseEntry");

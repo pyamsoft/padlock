@@ -42,7 +42,7 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
   void modifyDatabaseEntry(int position, @NonNull String packageName, @Nullable String code,
       boolean system);
 
-  interface LockList extends LockListCommon, LockListDatabaseView {
+  interface LockList extends LockListCommon, LockListDatabaseErrorView {
 
     void setFABStateEnabled();
 
@@ -61,7 +61,5 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
     void displayLockInfoDialog(@NonNull AppEntry entry);
 
     void processDatabaseModifyEvent(int position, @NonNull AppEntry entry);
-
-    void onDatabaseEntryError(int position);
   }
 }

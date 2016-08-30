@@ -27,8 +27,12 @@ import butterknife.Unbinder;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.bus.LockInfoSelectBus;
 import com.pyamsoft.padlock.model.ActivityEntry;
+import com.pyamsoft.padlock.model.LockState;
+import com.pyamsoft.padlock.model.event.LockInfoSelectEvent;
 import java.util.List;
+import timber.log.Timber;
 
 class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
@@ -75,10 +79,32 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     }
     holder.name.setText(activityName);
 
-    // TODO set on check change listener
-    //holder.name.setOnClickListener(
-    //    view -> dbPresenter.attemptDBModification(position, !holder.name.isChecked(),
-    //        appEntry.packageName(), entryName, null, appEntry.system()));
+    holder.defaultLockState.setOnCheckedChangeListener((compoundButton, b) -> {
+      if (b) {
+        Timber.d("Post default event to LockInfoSelectBus");
+        LockInfoSelectBus.get()
+            .post(LockInfoSelectEvent.create(holder.getAdapterPosition(), entryName,
+                LockState.DEFAULT));
+      }
+    });
+
+    holder.whiteLockState.setOnCheckedChangeListener((compoundButton, b) -> {
+      if (b) {
+        Timber.d("Post whitelist event to LockInfoSelectBus");
+        LockInfoSelectBus.get()
+            .post(LockInfoSelectEvent.create(holder.getAdapterPosition(), entryName,
+                LockState.WHITELISTED));
+      }
+    });
+
+    holder.blackLockState.setOnCheckedChangeListener((compoundButton, b) -> {
+      if (b) {
+        Timber.d("Post blacklist event to LockInfoSelectBus");
+        LockInfoSelectBus.get()
+            .post(LockInfoSelectEvent.create(holder.getAdapterPosition(), entryName,
+                LockState.LOCKED));
+      }
+    });
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {

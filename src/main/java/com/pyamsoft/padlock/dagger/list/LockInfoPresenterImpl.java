@@ -18,9 +18,13 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import com.pyamsoft.padlock.app.bus.LockInfoSelectBus;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
+import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
 import java.util.ArrayList;
@@ -40,6 +44,8 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
   @NonNull private final AppIconLoaderPresenter<LockInfoView> iconLoader;
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
+  @NonNull private Subscription databaseSubscription = Subscriptions.empty();
+  @NonNull private Subscription databaseBus = Subscriptions.empty();
 
   @Inject LockInfoPresenterImpl(@NonNull AppIconLoaderPresenter<LockInfoView> iconLoader,
       final @NonNull LockInfoInteractor lockInfoInteractor,
@@ -68,11 +74,13 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
   @Override protected void onBind(@NonNull LockInfoView view) {
     super.onBind(view);
     iconLoader.bindView(view);
+    registerOnDatabaseBus(view);
   }
 
   @Override protected void onUnbind(@NonNull LockInfoView view) {
     super.onUnbind(view);
     iconLoader.unbindView();
+    unregisterFromDBProgressBus();
     unsubPopulateList();
     unsubAllInDB();
   }
@@ -80,6 +88,27 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
   @Override protected void onDestroy() {
     super.onDestroy();
     iconLoader.destroyView();
+  }
+
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnDatabaseBus(
+      @NonNull LockInfoView view) {
+    unregisterFromDBProgressBus();
+    databaseBus = LockInfoSelectBus.get()
+        .register()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(lockInfoSelectEvent -> {
+          view.processDatabaseModifyEvent(lockInfoSelectEvent.position(),
+              lockInfoSelectEvent.activityName(), lockInfoSelectEvent.lockState());
+        }, throwable -> {
+          Timber.e(throwable, "onError registerOnDbProgressBus");
+        });
+  }
+
+  private void unregisterFromDBProgressBus() {
+    if (!databaseBus.isUnsubscribed()) {
+      databaseBus.unsubscribe();
+    }
   }
 
   @Override public void populateList(@NonNull String packageName) {
@@ -108,14 +137,14 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
                   foundEntry = null;
                 }
 
-                ActivityEntry.ActivityLockState state;
+                LockState state;
                 if (foundEntry == null) {
-                  state = ActivityEntry.ActivityLockState.DEFAULT;
+                  state = LockState.DEFAULT;
                 } else {
                   if (foundEntry.whitelist()) {
-                    state = ActivityEntry.ActivityLockState.WHITELISTED;
+                    state = LockState.WHITELISTED;
                   } else {
-                    state = ActivityEntry.ActivityLockState.LOCKED;
+                    state = LockState.LOCKED;
                   }
                 }
                 final ActivityEntry activityEntry =
@@ -200,6 +229,60 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
               // TODO maybe different error
               getView().onListPopulateError();
             }, this::unsubAllInDB);
+  }
+
+  @Override public void modifyDatabaseEntry(int position, @NonNull String packageName,
+      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
+      boolean forceDelete) {
+    unsubDatabaseSubscription();
+    unsubDatabaseSubscription();
+    databaseSubscription =
+        lockInfoInteractor.modifySingleDatabaseEntry(packageName, activityName, code, system,
+            whitelist, forceDelete)
+            .subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
+            .subscribe(lockState -> {
+              switch (lockState) {
+                case DEFAULT:
+                  getView().onDatabaseEntryDeleted(position);
+                  break;
+                case WHITELISTED:
+                  getView().onDatabaseEntryWhitelisted(position);
+                  break;
+                case LOCKED:
+                  getView().onDatabaseEntryCreated(position);
+                  break;
+              }
+            }, throwable -> {
+              Timber.e(throwable, "onError modifyDatabaseEntry");
+              getView().onDatabaseEntryError(position);
+            }, this::unsubDatabaseSubscription);
+  }
+
+  @Override public void modifyDatabaseGroup(boolean allCreate, @NonNull String packageName,
+      @Nullable String code, boolean system) {
+    unsubDatabaseSubscription();
+
+    databaseSubscription =
+        lockInfoInteractor.modifyDatabaseGroup(allCreate, packageName, code, system)
+            .subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
+            .subscribe(created -> {
+              if (created) {
+                getView().onDatabaseEntryCreated(GROUP_POSITION);
+              } else {
+                getView().onDatabaseEntryDeleted(GROUP_POSITION);
+              }
+            }, throwable -> {
+              Timber.e(throwable, "onError modifyDatabaseGroup");
+              getView().onDatabaseEntryError(GROUP_POSITION);
+            }, this::unsubDatabaseSubscription);
+  }
+
+  @SuppressWarnings("WeakerAccess") void unsubDatabaseSubscription() {
+    if (!databaseSubscription.isUnsubscribed()) {
+      databaseSubscription.isUnsubscribed();
+    }
   }
 
   @SuppressWarnings("WeakerAccess") void unsubAllInDB() {

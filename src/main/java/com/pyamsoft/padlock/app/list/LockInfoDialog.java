@@ -39,9 +39,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.db.DBPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.base.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
@@ -50,13 +50,11 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import rx.Subscription;
 import timber.log.Timber;
 
-public class LockInfoDialog extends DialogFragment
-    implements LockInfoPresenter.LockInfoView, DBPresenter.DBView {
+public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.LockInfoView {
 
   @NonNull private static final String ARG_APP_ENTRY = "app_entry";
   private static final int KEY_PRESENTER = 0;
   private static final int KEY_ADAPTER_PRESENTER = 1;
-  private static final int KEY_DB_PRESENTER = 2;
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
@@ -68,7 +66,6 @@ public class LockInfoDialog extends DialogFragment
   @BindView(R.id.lock_info_toggleall) SwitchCompat toggleAll;
 
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
-  @SuppressWarnings("WeakerAccess") DBPresenter dbPresenter;
   @SuppressWarnings("WeakerAccess") LockInfoAdapter fastItemAdapter;
   @SuppressWarnings("WeakerAccess") boolean firstRefresh;
   @SuppressWarnings("WeakerAccess") AppEntry appEntry;
@@ -128,22 +125,6 @@ public class LockInfoDialog extends DialogFragment
           }
         });
 
-    getLoaderManager().initLoader(KEY_DB_PRESENTER, null,
-        new LoaderManager.LoaderCallbacks<DBPresenter>() {
-          @Override public Loader<DBPresenter> onCreateLoader(int id, Bundle args) {
-            firstRefresh = true;
-            return new DBPresenterLoader(getContext());
-          }
-
-          @Override public void onLoadFinished(Loader<DBPresenter> loader, DBPresenter data) {
-            dbPresenter = data;
-          }
-
-          @Override public void onLoaderReset(Loader<DBPresenter> loader) {
-            dbPresenter = null;
-          }
-        });
-
     final View rootView =
         LayoutInflater.from(getActivity()).inflate(R.layout.dialog_lockinfo, null, false);
     unbinder = ButterKnife.bind(this, rootView);
@@ -168,7 +149,6 @@ public class LockInfoDialog extends DialogFragment
   @Override public void onResume() {
     super.onResume();
     presenter.bindView(this);
-    dbPresenter.bindView(this);
 
     recyclerView.setAdapter(fastItemAdapter);
     presenter.loadApplicationIcon(appEntry.packageName());
@@ -181,7 +161,6 @@ public class LockInfoDialog extends DialogFragment
   @Override public void onPause() {
     super.onPause();
     presenter.unbindView();
-    dbPresenter.unbindView();
   }
 
   private void initializeForEntry() {
@@ -239,6 +218,7 @@ public class LockInfoDialog extends DialogFragment
   @Override public void onListPopulateError() {
     Timber.e("onListPopulateError");
     onListPopulated();
+    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
   @Override public void onListCleared() {
@@ -253,23 +233,31 @@ public class LockInfoDialog extends DialogFragment
     icon.setImageDrawable(drawable);
   }
 
-  @Override public void onDBCreateEvent(int position) {
-    if (position >= 0) {
-      fastItemAdapter.onDBCreateEvent(position);
-    } else {
+  @Override public void onDatabaseEntryCreated(int position) {
+    if (position == LockInfoPresenter.GROUP_POSITION) {
       refreshList();
+    } else {
+      fastItemAdapter.onDatabaseEntryCreated(position);
     }
   }
 
-  @Override public void onDBDeleteEvent(int position) {
-    if (position >= 0) {
-      fastItemAdapter.onDBDeleteEvent(position);
-    } else {
+  @Override public void onDatabaseEntryDeleted(int position) {
+    if (position == LockInfoPresenter.GROUP_POSITION) {
       refreshList();
+    } else {
+      fastItemAdapter.onDatabaseEntryDeleted(position);
     }
   }
 
-  @Override public void onDBError() {
+  @Override public void onDatabaseEntryWhitelisted(int position) {
+    if (position == LockInfoPresenter.GROUP_POSITION) {
+      refreshList();
+    } else {
+      fastItemAdapter.onDatabaseEntryWhitelisted(position);
+    }
+  }
+
+  @Override public void onDatabaseEntryError(int position) {
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
@@ -285,8 +273,7 @@ public class LockInfoDialog extends DialogFragment
         fastItemAdapter.remove(i);
       }
 
-      dbPresenter.attemptDBAllModification(isChecked, appEntry.packageName(), null,
-          appEntry.system());
+      presenter.modifyDatabaseGroup(isChecked, appEntry.packageName(), null, appEntry.system());
     });
   }
 
@@ -296,5 +283,15 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void disableToggleAll() {
     safeChangeToggleAllState(false);
+  }
+
+  @Override public void processDatabaseModifyEvent(int position, @NonNull String activityName,
+      @NonNull LockState lockState) {
+    Timber.d("Received a database modify event request for %s %s at %d", appEntry.packageName(),
+        activityName, position);
+    final boolean whitelist = lockState.equals(LockState.WHITELISTED);
+    final boolean forceDelete = lockState.equals(LockState.DEFAULT);
+    presenter.modifyDatabaseEntry(position, appEntry.packageName(), activityName, null,
+        appEntry.system(), whitelist, forceDelete);
   }
 }

@@ -30,17 +30,13 @@ import com.google.auto.value.AutoValue;
 
   public abstract String name();
 
-  public abstract ActivityLockState lockState();
-
-  public enum ActivityLockState {
-    DEFAULT, WHITELISTED, LOCKED
-  }
+  public abstract LockState lockState();
 
   @AutoValue.Builder public static abstract class Builder {
 
     public abstract Builder name(String s);
 
-    public abstract Builder lockState(ActivityLockState state);
+    public abstract Builder lockState(LockState state);
 
     public abstract ActivityEntry build();
   }
