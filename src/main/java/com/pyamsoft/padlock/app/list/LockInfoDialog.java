@@ -290,8 +290,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     Timber.d("Received a database modify event request for %s %s at %d", appEntry.packageName(),
         activityName, position);
     final boolean whitelist = lockState.equals(LockState.WHITELISTED);
-    final boolean forceDelete = lockState.equals(LockState.DEFAULT);
+    final boolean forceLock = lockState.equals(LockState.LOCKED);
     presenter.modifyDatabaseEntry(position, appEntry.packageName(), activityName, null,
-        appEntry.system(), whitelist, forceDelete);
+        appEntry.system(), whitelist, forceLock);
   }
 }

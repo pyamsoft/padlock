@@ -55,6 +55,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   @Override public void bindView(ViewHolder holder, List payloads) {
     super.bindView(holder, payloads);
+    recycleOldItem(holder);
 
     switch (entry.lockState()) {
       case DEFAULT:
@@ -105,6 +106,14 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
                 LockState.LOCKED));
       }
     });
+  }
+
+  private void recycleOldItem(@NonNull ViewHolder holder) {
+    holder.name.setText(null);
+    holder.name.setOnClickListener(null);
+    holder.blackLockState.setOnCheckedChangeListener(null);
+    holder.whiteLockState.setOnCheckedChangeListener(null);
+    holder.defaultLockState.setOnCheckedChangeListener(null);
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
