@@ -29,8 +29,8 @@ import com.pyamsoft.padlock.app.bus.MainBus;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.base.fragment.ActionBarSettingsPreferenceFragment;
-import com.pyamsoft.pydroid.persist.PersistLoader;
-import com.pyamsoft.pydroid.persist.PersistentCache;
+import com.pyamsoft.pydroid.base.app.PersistLoader;
+import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.util.AppUtil;
 import timber.log.Timber;
 
