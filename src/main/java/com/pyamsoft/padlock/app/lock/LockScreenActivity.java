@@ -46,10 +46,10 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.ErrorDialog;
 import com.pyamsoft.pydroid.base.activity.ActivityBase;
 import com.pyamsoft.pydroid.base.app.PersistLoader;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.PersistentCache;
 import java.util.Locale;
 import rx.Subscription;
 import timber.log.Timber;
@@ -121,7 +121,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     setContentView(R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    loadedKey = PersistentCache.load(KEY_LOCK_ACTIVITY, savedInstanceState, new PersistLoader.Callback<LockScreenPresenter>() {
+    loadedKey = PersistentCache.load(KEY_LOCK_ACTIVITY, savedInstanceState,
+        new PersistLoader.Callback<LockScreenPresenter>() {
           @NonNull @Override public PersistLoader<LockScreenPresenter> createLoader() {
             return new LockScreenPresenterLoader(getApplicationContext());
           }
@@ -393,27 +394,32 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   }
 
   @CheckResult private long getIgnoreTimeFromSelectedIndex() {
-    final int index;
-    if (menuIgnoreNone.isChecked()) {
+    int index;
+    try {
+      if (menuIgnoreNone.isChecked()) {
+        index = 0;
+      } else if (menuIgnoreOne.isChecked()) {
+        index = 1;
+      } else if (menuIgnoreFive.isChecked()) {
+        index = 2;
+      } else if (menuIgnoreTen.isChecked()) {
+        index = 3;
+      } else if (menuIgnoreFifteen.isChecked()) {
+        index = 4;
+      } else if (menuIgnoreTwenty.isChecked()) {
+        index = 5;
+      } else if (menuIgnoreThirty.isChecked()) {
+        index = 6;
+      } else if (menuIgnoreFourtyFive.isChecked()) {
+        index = 7;
+      } else if (menuIgnoreSixty.isChecked()) {
+        index = 8;
+      } else {
+        throw new RuntimeException("Invalid index for option selection");
+      }
+    } catch (NullPointerException e) {
+      Timber.e(e, "NULL menu item");
       index = 0;
-    } else if (menuIgnoreOne.isChecked()) {
-      index = 1;
-    } else if (menuIgnoreFive.isChecked()) {
-      index = 2;
-    } else if (menuIgnoreTen.isChecked()) {
-      index = 3;
-    } else if (menuIgnoreFifteen.isChecked()) {
-      index = 4;
-    } else if (menuIgnoreTwenty.isChecked()) {
-      index = 5;
-    } else if (menuIgnoreThirty.isChecked()) {
-      index = 6;
-    } else if (menuIgnoreFourtyFive.isChecked()) {
-      index = 7;
-    } else if (menuIgnoreSixty.isChecked()) {
-      index = 8;
-    } else {
-      throw new RuntimeException("Invalid index for option selection");
     }
 
     return ignoreTimes[index];
