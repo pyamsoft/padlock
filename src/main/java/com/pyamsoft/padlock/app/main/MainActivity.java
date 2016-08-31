@@ -40,10 +40,10 @@ import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.pydroid.base.activity.DonationActivity;
 import com.pyamsoft.pydroid.base.app.PersistLoader;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.util.StringUtil;
 import timber.log.Timber;
 
@@ -63,7 +63,8 @@ public class MainActivity extends DonationActivity
     unbinder = ButterKnife.bind(this);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    loaderKey = PersistentCache.load(KEY_MAIN, savedInstanceState, new PersistLoader.Callback<MainPresenter>() {
+    loaderKey = PersistentCache.load(KEY_MAIN, savedInstanceState,
+        new PersistLoader.Callback<MainPresenter>() {
           @NonNull @Override public PersistLoader<MainPresenter> createLoader() {
             return new MainPresenterLoader(getApplicationContext());
           }
@@ -212,10 +213,11 @@ public class MainActivity extends DonationActivity
   @NonNull @Override public Spannable getChangeLogText() {
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
-    final String line1 = "BUGFIX: Fixed crashes on devices below Lollipop";
-    final String line2 = "BUGFIX: Faster loading and properly disposing of icons";
-    final String line3 =
-        "FEATURE: Periodically re-check the active application and lock it if necessary";
+    final String line1 =
+        "FEATURE: Lock screen whitelisting! By selecting an entry for exclusion you 'whitelist' it "
+            + "from PadLock. PadLock will selectively ignore the selected screen and not lock it. PadLock will still lock the rest of the applications";
+    final String line2 = "BUGFIX: Less memory consumption";
+    final String line3 = "BUGFIX: Less battery consumption";
 
     // Turn it into a spannable
     final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1, line2, line3);
