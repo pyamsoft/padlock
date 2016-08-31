@@ -19,11 +19,11 @@ package com.pyamsoft.padlock.app.lock;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
+import com.pyamsoft.pydroid.persist.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class PinScreenPresenterLoader extends PresenterLoader<PinEntryPresenter> {
+public class PinScreenPresenterLoader extends PersistLoader<PinEntryPresenter> {
 
   @Inject Provider<PinEntryPresenter> presenterProvider;
 
@@ -31,7 +31,7 @@ public class PinScreenPresenterLoader extends PresenterLoader<PinEntryPresenter>
     super(context);
   }
 
-  @NonNull @Override protected PinEntryPresenter loadPresenter() {
+  @NonNull @Override public PinEntryPresenter loadPersistent() {
     Singleton.Dagger.with(getContext()).plusPinEntry().inject(this);
     return presenterProvider.get();
   }

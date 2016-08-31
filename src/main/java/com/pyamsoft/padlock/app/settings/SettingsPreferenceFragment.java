@@ -21,18 +21,16 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.SwitchPreferenceCompat;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.bus.MainBus;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.base.fragment.ActionBarSettingsPreferenceFragment;
+import com.pyamsoft.pydroid.persist.PersistLoader;
+import com.pyamsoft.pydroid.persist.PersistentCache;
 import com.pyamsoft.pydroid.util.AppUtil;
 import timber.log.Timber;
 
@@ -40,26 +38,23 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     implements SettingsPreferencePresenter.SettingsPreferenceView {
 
   @NonNull public static final String TAG = "SettingsPreferenceFragment";
+  @NonNull private static final String KEY_SETTINGS = "key_settings";
   @SuppressWarnings("WeakerAccess") SettingsPreferencePresenter presenter;
+  private long loadedKey;
 
-  @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-      Bundle savedInstanceState) {
-    getLoaderManager().initLoader(0, null,
-        new LoaderManager.LoaderCallbacks<SettingsPreferencePresenter>() {
-          @Override public Loader<SettingsPreferencePresenter> onCreateLoader(int id, Bundle args) {
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    loadedKey = PersistentCache.load(savedInstanceState, KEY_SETTINGS,
+        new PersistLoader.Callback<SettingsPreferencePresenter>() {
+          @NonNull @Override public PersistLoader<SettingsPreferencePresenter> createLoader() {
             return new SettingsPreferencePresenterLoader(getContext());
           }
 
-          @Override public void onLoadFinished(Loader<SettingsPreferencePresenter> loader,
-              SettingsPreferencePresenter data) {
-            presenter = data;
-          }
-
-          @Override public void onLoaderReset(Loader<SettingsPreferencePresenter> loader) {
-            presenter = null;
+          @Override public void onPersistentLoaded(@NonNull SettingsPreferencePresenter persist) {
+            presenter = persist;
           }
         });
-    return super.onCreateView(inflater, container, savedInstanceState);
   }
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -107,13 +102,25 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     MainBus.get().post(RefreshEvent.create());
   }
 
-  @Override public void onResume() {
-    super.onResume();
+  @Override public void onStart() {
+    super.onStart();
     presenter.bindView(this);
   }
 
-  @Override public void onPause() {
-    super.onPause();
+  @Override public void onStop() {
+    super.onStop();
     presenter.unbindView();
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    if (!getActivity().isChangingConfigurations()) {
+      PersistentCache.unload(loadedKey);
+    }
+  }
+
+  @Override public void onSaveInstanceState(Bundle outState) {
+    PersistentCache.saveKey(outState, loadedKey, KEY_SETTINGS);
+    super.onSaveInstanceState(outState);
   }
 }

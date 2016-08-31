@@ -19,11 +19,11 @@ package com.pyamsoft.padlock.app.main;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
+import com.pyamsoft.pydroid.persist.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class MainPresenterLoader extends PresenterLoader<MainPresenter> {
+public class MainPresenterLoader extends PersistLoader<MainPresenter> {
 
   @Inject Provider<MainPresenter> presenterProvider;
 
@@ -31,7 +31,7 @@ public class MainPresenterLoader extends PresenterLoader<MainPresenter> {
     super(context);
   }
 
-  @NonNull @Override protected MainPresenter loadPresenter() {
+  @NonNull @Override public MainPresenter loadPersistent() {
     Singleton.Dagger.with(getContext()).plusMain().inject(this);
     return presenterProvider.get();
   }

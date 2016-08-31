@@ -69,7 +69,7 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    iconLoader.destroyView();
+    iconLoader.destroy();
   }
 
   @Override public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,

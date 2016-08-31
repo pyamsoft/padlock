@@ -19,12 +19,11 @@ package com.pyamsoft.padlock.app.settings;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
+import com.pyamsoft.pydroid.persist.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class SettingsPreferencePresenterLoader
-    extends PresenterLoader<SettingsPreferencePresenter> {
+public class SettingsPreferencePresenterLoader extends PersistLoader<SettingsPreferencePresenter> {
 
   @Inject Provider<SettingsPreferencePresenter> presenterProvider;
 
@@ -32,7 +31,7 @@ public class SettingsPreferencePresenterLoader
     super(context);
   }
 
-  @NonNull @Override protected SettingsPreferencePresenter loadPresenter() {
+  @NonNull @Override public SettingsPreferencePresenter loadPersistent() {
     Singleton.Dagger.with(getContext()).plusSettings().inject(this);
     return presenterProvider.get();
   }

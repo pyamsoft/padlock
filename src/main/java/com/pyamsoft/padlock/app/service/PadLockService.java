@@ -147,7 +147,7 @@ public class PadLockService extends AccessibilityService
   @Override public boolean onUnbind(Intent intent) {
     Timber.d("onDestroy");
     presenter.unbindView();
-    presenter.destroyView();
+    presenter.destroy();
     lockActivity = null;
     lockActivity2 = null;
 
