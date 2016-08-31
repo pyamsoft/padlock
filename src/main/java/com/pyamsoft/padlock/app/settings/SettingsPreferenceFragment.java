@@ -45,8 +45,7 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    loadedKey = PersistentCache.load(savedInstanceState, KEY_SETTINGS,
-        new PersistLoader.Callback<SettingsPreferencePresenter>() {
+    loadedKey = PersistentCache.load(KEY_SETTINGS, savedInstanceState, new PersistLoader.Callback<SettingsPreferencePresenter>() {
           @NonNull @Override public PersistLoader<SettingsPreferencePresenter> createLoader() {
             return new SettingsPreferencePresenterLoader(getContext());
           }
@@ -120,7 +119,7 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(outState, loadedKey, KEY_SETTINGS);
+    PersistentCache.saveKey(KEY_SETTINGS, outState, loadedKey);
     super.onSaveInstanceState(outState);
   }
 }

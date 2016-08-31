@@ -87,8 +87,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     super.onCreate(savedInstanceState);
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
 
-    loadedPresenterKey = PersistentCache.load(savedInstanceState, KEY_LOCK_INFO,
-        new PersistLoader.Callback<LockInfoPresenter>() {
+    loadedPresenterKey = PersistentCache.load(KEY_LOCK_INFO, savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
           @NonNull @Override public PersistLoader<LockInfoPresenter> createLoader() {
             firstRefresh = true;
             return new LockInfoPresenterLoader(getContext());
@@ -99,8 +98,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
           }
         });
 
-    loadedAdapterKey = PersistentCache.load(savedInstanceState, KEY_ADAPTER_PRESENTER,
-        new PersistLoader.Callback<LockInfoAdapter>() {
+    loadedAdapterKey = PersistentCache.load(KEY_ADAPTER_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockInfoAdapter>() {
           @NonNull @Override public PersistLoader<LockInfoAdapter> createLoader() {
             return new ListAdapterLoader<LockInfoAdapter>(getContext()) {
               @NonNull @Override public LockInfoAdapter loadPersistent() {
@@ -164,8 +162,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(outState, loadedPresenterKey, KEY_LOCK_INFO);
-    PersistentCache.saveKey(outState, loadedAdapterKey, KEY_ADAPTER_PRESENTER);
+    PersistentCache.saveKey(KEY_LOCK_INFO, outState, loadedPresenterKey);
+    PersistentCache.saveKey(KEY_ADAPTER_PRESENTER, outState, loadedAdapterKey);
     super.onSaveInstanceState(outState);
   }
 
