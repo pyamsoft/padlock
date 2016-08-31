@@ -22,8 +22,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
@@ -41,6 +39,8 @@ import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.pydroid.base.activity.DonationActivity;
+import com.pyamsoft.pydroid.persist.PersistLoader;
+import com.pyamsoft.pydroid.persist.PersistentCache;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -50,10 +50,12 @@ import timber.log.Timber;
 public class MainActivity extends DonationActivity
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
+  @NonNull private static final String KEY_MAIN = "key_main_presenter";
   @BindView(R.id.main_root) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
   private Unbinder unbinder;
+  private long loaderKey;
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
@@ -61,18 +63,14 @@ public class MainActivity extends DonationActivity
     unbinder = ButterKnife.bind(this);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    getSupportLoaderManager().initLoader(0, null,
-        new LoaderManager.LoaderCallbacks<MainPresenter>() {
-          @Override public Loader<MainPresenter> onCreateLoader(int id, Bundle args) {
+    loaderKey = PersistentCache.load(savedInstanceState, KEY_MAIN,
+        new PersistLoader.Callback<MainPresenter>() {
+          @NonNull @Override public PersistLoader<MainPresenter> createLoader() {
             return new MainPresenterLoader(getApplicationContext());
           }
 
-          @Override public void onLoadFinished(Loader<MainPresenter> loader, MainPresenter data) {
-            presenter = data;
-          }
-
-          @Override public void onLoaderReset(Loader<MainPresenter> loader) {
-            presenter = null;
+          @Override public void onPersistentLoaded(@NonNull MainPresenter persist) {
+            presenter = persist;
           }
         });
 
@@ -82,6 +80,11 @@ public class MainActivity extends DonationActivity
   @Override protected int bindActivityToView() {
     setContentView(R.layout.activity_main);
     return R.id.ad_view;
+  }
+
+  @Override protected void onSaveInstanceState(Bundle outState) {
+    PersistentCache.saveKey(outState, loaderKey, KEY_MAIN);
+    super.onSaveInstanceState(outState);
   }
 
   @Override protected void onStart() {
@@ -151,6 +154,9 @@ public class MainActivity extends DonationActivity
 
   @Override protected void onDestroy() {
     super.onDestroy();
+    if (!isChangingConfigurations()) {
+      PersistentCache.unload(loaderKey);
+    }
     unbinder.unbind();
   }
 

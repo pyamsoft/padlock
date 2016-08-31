@@ -87,7 +87,7 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    iconLoader.destroyView();
+    iconLoader.destroy();
   }
 
   @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnDatabaseBus(

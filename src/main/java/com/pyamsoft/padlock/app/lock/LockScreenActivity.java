@@ -26,9 +26,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
@@ -47,6 +45,8 @@ import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.ErrorDialog;
 import com.pyamsoft.pydroid.base.activity.ActivityBase;
+import com.pyamsoft.pydroid.persist.PersistLoader;
+import com.pyamsoft.pydroid.persist.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -63,6 +63,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
+  @NonNull private static final String KEY_LOCK_ACTIVITY = "lock_screen";
 
   @NonNull private final Intent home;
   @NonNull private final AsyncDrawableMap taskMap;
@@ -95,6 +96,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   private String lockedCode;
   private boolean lockedSystem;
   private long[] ignoreTimes;
+  private long loadedKey;
 
   LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -118,6 +120,17 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
+
+    loadedKey = PersistentCache.load(savedInstanceState, KEY_LOCK_ACTIVITY,
+        new PersistLoader.Callback<LockScreenPresenter>() {
+          @NonNull @Override public PersistLoader<LockScreenPresenter> createLoader() {
+            return new LockScreenPresenterLoader(getApplicationContext());
+          }
+
+          @Override public void onPersistentLoaded(@NonNull LockScreenPresenter persist) {
+            presenter = persist;
+          }
+        });
 
     unbinder = ButterKnife.bind(this);
 
@@ -180,22 +193,6 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
 
     // Hide hint to begin with
     hintDisplay.setVisibility(View.GONE);
-
-    getSupportLoaderManager().initLoader(0, null,
-        new LoaderManager.LoaderCallbacks<LockScreenPresenter>() {
-          @Override public Loader<LockScreenPresenter> onCreateLoader(int id, Bundle args) {
-            return new LockScreenPresenterLoader(getApplicationContext());
-          }
-
-          @Override
-          public void onLoadFinished(Loader<LockScreenPresenter> loader, LockScreenPresenter data) {
-            presenter = data;
-          }
-
-          @Override public void onLoaderReset(Loader<LockScreenPresenter> loader) {
-            presenter = null;
-          }
-        });
   }
 
   @Override public void setDisplayHint(@NonNull String hint) {
@@ -255,6 +252,9 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @Override protected void onDestroy() {
     super.onDestroy();
     Timber.d("onDestroy");
+    if (!isChangingConfigurations()) {
+      PersistentCache.unload(loadedKey);
+    }
 
     Timber.d("Clear currently locked");
     taskMap.clear();
@@ -326,15 +326,12 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   }
 
   @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
-    if (isChangingConfigurations()) {
-      final String attempt = getCurrentAttempt();
-      final long ignoreTime = getIgnoreTimeFromSelectedIndex();
-      outState.putString(CODE_DISPLAY, attempt);
-      outState.putLong("IGNORE", ignoreTime);
-      outState.putBoolean("EXCLUDE", menuExclude.isChecked());
-    }
-
-    Timber.d("onSaveInstanceState");
+    final String attempt = getCurrentAttempt();
+    final long ignoreTime = getIgnoreTimeFromSelectedIndex();
+    outState.putString(CODE_DISPLAY, attempt);
+    outState.putLong("IGNORE", ignoreTime);
+    outState.putBoolean("EXCLUDE", menuExclude.isChecked());
+    PersistentCache.saveKey(outState, loadedKey, KEY_LOCK_ACTIVITY);
     super.onSaveInstanceState(outState);
   }
 

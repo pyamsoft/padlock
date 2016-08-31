@@ -26,9 +26,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -51,6 +49,8 @@ import com.pyamsoft.pydroid.base.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.base.fragment.CircularRevealFragmentUtil;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
+import com.pyamsoft.pydroid.persist.PersistLoader;
+import com.pyamsoft.pydroid.persist.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
@@ -65,8 +65,8 @@ public class LockListFragment extends ActionBarFragment
 
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
-  private static final int KEY_PRESENTER = 0;
-  private static final int KEY_ADAPTER_PRESENTER = 1;
+  @NonNull private static final String KEY_ADAPTER_PRESENTER = "lock_list_adapter_presenter";
+  @NonNull private static final String KEY_LOCK_LIST = "key_lock_list";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
@@ -101,6 +101,8 @@ public class LockListFragment extends ActionBarFragment
   @SuppressWarnings("WeakerAccess") boolean firstRefresh;
   private Unbinder unbinder;
   private MenuItem displaySystemItem;
+  private long loadedPresenterKey;
+  private long loadedAdapterKey;
 
   @CheckResult @NonNull
   public static LockListFragment newInstance(int cX, int cY, boolean forceRefresh) {
@@ -114,48 +116,38 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-  }
 
-  @Nullable @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    getLoaderManager().initLoader(KEY_PRESENTER, null,
-        new LoaderManager.LoaderCallbacks<LockListPresenter>() {
-          @Override public Loader<LockListPresenter> onCreateLoader(int id, Bundle args) {
+    loadedPresenterKey = PersistentCache.load(savedInstanceState, KEY_LOCK_LIST,
+        new PersistLoader.Callback<LockListPresenter>() {
+          @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
             firstRefresh = true;
             return new LockListPresenterLoader(getContext());
           }
 
-          @Override
-          public void onLoadFinished(Loader<LockListPresenter> loader, LockListPresenter data) {
-            presenter = data;
-          }
-
-          @Override public void onLoaderReset(Loader<LockListPresenter> loader) {
-            presenter = null;
+          @Override public void onPersistentLoaded(@NonNull LockListPresenter persist) {
+            presenter = persist;
           }
         });
 
-    getLoaderManager().initLoader(KEY_ADAPTER_PRESENTER, null,
-        new LoaderManager.LoaderCallbacks<LockListAdapter>() {
-          @Override public Loader<LockListAdapter> onCreateLoader(int id, Bundle args) {
+    loadedAdapterKey = PersistentCache.load(savedInstanceState, KEY_ADAPTER_PRESENTER,
+        new PersistLoader.Callback<LockListAdapter>() {
+          @NonNull @Override public PersistLoader<LockListAdapter> createLoader() {
             return new ListAdapterLoader<LockListAdapter>(getContext()) {
-              @NonNull @Override protected LockListAdapter loadAdapter() {
+              @NonNull @Override public LockListAdapter loadPersistent() {
                 return new LockListAdapter();
               }
             };
           }
 
-          @Override
-          public void onLoadFinished(Loader<LockListAdapter> loader, LockListAdapter data) {
-            fastItemAdapter = data;
-          }
-
-          @Override public void onLoaderReset(Loader<LockListAdapter> loader) {
-            fastItemAdapter = null;
+          @Override public void onPersistentLoaded(@NonNull LockListAdapter persist) {
+            fastItemAdapter = persist;
           }
         });
+  }
 
+  @Nullable @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
     final View view = inflater.inflate(R.layout.fragment_applist, container, false);
     unbinder = ButterKnife.bind(this, view);
     return view;
@@ -178,9 +170,8 @@ public class LockListFragment extends ActionBarFragment
     setupFAB();
   }
 
-  @Override public void onResume() {
-    super.onResume();
-
+  @Override public void onStart() {
+    super.onStart();
     recyclerView.setAdapter(fastItemAdapter);
     presenter.bindView(this);
 
@@ -191,7 +182,15 @@ public class LockListFragment extends ActionBarFragment
       firstRefresh = false;
       refreshList();
     }
+  }
 
+  @Override public void onStop() {
+    super.onStop();
+    presenter.unbindView();
+  }
+
+  @Override public void onResume() {
+    super.onResume();
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> fab.show(), 300L);
     setActionBarUpEnabled(false);
@@ -203,8 +202,6 @@ public class LockListFragment extends ActionBarFragment
     super.onPause();
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> fab.hide(), 300L);
-
-    presenter.unbindView();
   }
 
   private void setupSwipeRefresh() {
@@ -308,6 +305,12 @@ public class LockListFragment extends ActionBarFragment
     setSystemVisible(false);
   }
 
+  @Override public void onSaveInstanceState(Bundle outState) {
+    PersistentCache.saveKey(outState, loadedPresenterKey, KEY_LOCK_LIST);
+    PersistentCache.saveKey(outState, loadedAdapterKey, KEY_ADAPTER_PRESENTER);
+    super.onSaveInstanceState(outState);
+  }
+
   @Override public void onDestroyView() {
     super.onDestroyView();
 
@@ -320,6 +323,14 @@ public class LockListFragment extends ActionBarFragment
     taskMap.clear();
     handler.removeCallbacksAndMessages(null);
     unbinder.unbind();
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    if (!getActivity().isChangingConfigurations()) {
+      PersistentCache.unload(loadedPresenterKey);
+      PersistentCache.unload(loadedAdapterKey);
+    }
   }
 
   private void setupFAB() {

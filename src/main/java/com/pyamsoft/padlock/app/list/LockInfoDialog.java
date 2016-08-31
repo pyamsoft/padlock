@@ -23,8 +23,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -43,6 +41,8 @@ import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.base.app.ListAdapterLoader;
+import com.pyamsoft.pydroid.persist.PersistLoader;
+import com.pyamsoft.pydroid.persist.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
 import com.pyamsoft.pydroid.tool.DividerItemDecoration;
@@ -53,8 +53,8 @@ import timber.log.Timber;
 public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.LockInfoView {
 
   @NonNull private static final String ARG_APP_ENTRY = "app_entry";
-  private static final int KEY_PRESENTER = 0;
-  private static final int KEY_ADAPTER_PRESENTER = 1;
+  @NonNull private static final String KEY_ADAPTER_PRESENTER = "lock_info_adapter_key";
+  @NonNull private static final String KEY_LOCK_INFO = "key_lock_info";
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
@@ -70,6 +70,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @SuppressWarnings("WeakerAccess") boolean firstRefresh;
   @SuppressWarnings("WeakerAccess") AppEntry appEntry;
   private Unbinder unbinder;
+  private long loadedPresenterKey;
+  private long loadedAdapterKey;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -84,47 +86,37 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
-  }
 
-  @SuppressLint("InflateParams") @NonNull @Override
-  public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-    getLoaderManager().initLoader(KEY_PRESENTER, null,
-        new LoaderManager.LoaderCallbacks<LockInfoPresenter>() {
-          @Override public Loader<LockInfoPresenter> onCreateLoader(int id, Bundle args) {
+    loadedPresenterKey = PersistentCache.load(savedInstanceState, KEY_LOCK_INFO,
+        new PersistLoader.Callback<LockInfoPresenter>() {
+          @NonNull @Override public PersistLoader<LockInfoPresenter> createLoader() {
             firstRefresh = true;
             return new LockInfoPresenterLoader(getContext());
           }
 
-          @Override
-          public void onLoadFinished(Loader<LockInfoPresenter> loader, LockInfoPresenter data) {
-            presenter = data;
-          }
-
-          @Override public void onLoaderReset(Loader<LockInfoPresenter> loader) {
-            presenter = null;
+          @Override public void onPersistentLoaded(@NonNull LockInfoPresenter persist) {
+            presenter = persist;
           }
         });
 
-    getLoaderManager().initLoader(KEY_ADAPTER_PRESENTER, null,
-        new LoaderManager.LoaderCallbacks<LockInfoAdapter>() {
-          @Override public Loader<LockInfoAdapter> onCreateLoader(int id, Bundle args) {
+    loadedAdapterKey = PersistentCache.load(savedInstanceState, KEY_ADAPTER_PRESENTER,
+        new PersistLoader.Callback<LockInfoAdapter>() {
+          @NonNull @Override public PersistLoader<LockInfoAdapter> createLoader() {
             return new ListAdapterLoader<LockInfoAdapter>(getContext()) {
-              @NonNull @Override protected LockInfoAdapter loadAdapter() {
+              @NonNull @Override public LockInfoAdapter loadPersistent() {
                 return new LockInfoAdapter();
               }
             };
           }
 
-          @Override
-          public void onLoadFinished(Loader<LockInfoAdapter> loader, LockInfoAdapter data) {
-            fastItemAdapter = data;
-          }
-
-          @Override public void onLoaderReset(Loader<LockInfoAdapter> loader) {
-            fastItemAdapter = null;
+          @Override public void onPersistentLoaded(@NonNull LockInfoAdapter persist) {
+            fastItemAdapter = persist;
           }
         });
+  }
 
+  @SuppressLint("InflateParams") @NonNull @Override
+  public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     final View rootView =
         LayoutInflater.from(getActivity()).inflate(R.layout.dialog_lockinfo, null, false);
     unbinder = ButterKnife.bind(this, rootView);
@@ -146,8 +138,16 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     unbinder.unbind();
   }
 
-  @Override public void onResume() {
-    super.onResume();
+  @Override public void onDestroy() {
+    super.onDestroy();
+    if (!getActivity().isChangingConfigurations()) {
+      PersistentCache.unload(loadedPresenterKey);
+      PersistentCache.unload(loadedAdapterKey);
+    }
+  }
+
+  @Override public void onStart() {
+    super.onStart();
     presenter.bindView(this);
 
     recyclerView.setAdapter(fastItemAdapter);
@@ -158,9 +158,15 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     }
   }
 
-  @Override public void onPause() {
-    super.onPause();
+  @Override public void onStop() {
+    super.onStop();
     presenter.unbindView();
+  }
+
+  @Override public void onSaveInstanceState(Bundle outState) {
+    PersistentCache.saveKey(outState, loadedPresenterKey, KEY_LOCK_INFO);
+    PersistentCache.saveKey(outState, loadedAdapterKey, KEY_ADAPTER_PRESENTER);
+    super.onSaveInstanceState(outState);
   }
 
   private void initializeForEntry() {

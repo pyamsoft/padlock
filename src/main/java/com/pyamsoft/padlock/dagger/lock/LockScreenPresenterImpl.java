@@ -67,7 +67,7 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    iconLoader.destroyView();
+    iconLoader.destroy();
     interactor.resetFailCount();
   }
 

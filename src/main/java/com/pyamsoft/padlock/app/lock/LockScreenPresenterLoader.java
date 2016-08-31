@@ -19,11 +19,11 @@ package com.pyamsoft.padlock.app.lock;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.pydroid.base.presenter.PresenterLoader;
+import com.pyamsoft.pydroid.persist.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class LockScreenPresenterLoader extends PresenterLoader<LockScreenPresenter> {
+public class LockScreenPresenterLoader extends PersistLoader<LockScreenPresenter> {
 
   @Inject Provider<LockScreenPresenter> presenterProvider;
 
@@ -31,7 +31,7 @@ public class LockScreenPresenterLoader extends PresenterLoader<LockScreenPresent
     super(context);
   }
 
-  @NonNull @Override protected LockScreenPresenter loadPresenter() {
+  @NonNull @Override public LockScreenPresenter loadPersistent() {
     Singleton.Dagger.with(getContext()).plusLockScreen().inject(this);
     return presenterProvider.get();
   }
