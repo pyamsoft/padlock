@@ -121,8 +121,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     setContentView(R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    loadedKey = PersistentCache.load(savedInstanceState, KEY_LOCK_ACTIVITY,
-        new PersistLoader.Callback<LockScreenPresenter>() {
+    loadedKey = PersistentCache.load(KEY_LOCK_ACTIVITY, savedInstanceState, new PersistLoader.Callback<LockScreenPresenter>() {
           @NonNull @Override public PersistLoader<LockScreenPresenter> createLoader() {
             return new LockScreenPresenterLoader(getApplicationContext());
           }
@@ -331,7 +330,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     outState.putString(CODE_DISPLAY, attempt);
     outState.putLong("IGNORE", ignoreTime);
     outState.putBoolean("EXCLUDE", menuExclude.isChecked());
-    PersistentCache.saveKey(outState, loadedKey, KEY_LOCK_ACTIVITY);
+    PersistentCache.saveKey(KEY_LOCK_ACTIVITY, outState, loadedKey);
     super.onSaveInstanceState(outState);
   }
 

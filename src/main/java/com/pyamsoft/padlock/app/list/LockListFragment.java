@@ -117,8 +117,7 @@ public class LockListFragment extends ActionBarFragment
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
 
-    loadedPresenterKey = PersistentCache.load(savedInstanceState, KEY_LOCK_LIST,
-        new PersistLoader.Callback<LockListPresenter>() {
+    loadedPresenterKey = PersistentCache.load(KEY_LOCK_LIST, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
           @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
             firstRefresh = true;
             return new LockListPresenterLoader(getContext());
@@ -129,8 +128,7 @@ public class LockListFragment extends ActionBarFragment
           }
         });
 
-    loadedAdapterKey = PersistentCache.load(savedInstanceState, KEY_ADAPTER_PRESENTER,
-        new PersistLoader.Callback<LockListAdapter>() {
+    loadedAdapterKey = PersistentCache.load(KEY_ADAPTER_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListAdapter>() {
           @NonNull @Override public PersistLoader<LockListAdapter> createLoader() {
             return new ListAdapterLoader<LockListAdapter>(getContext()) {
               @NonNull @Override public LockListAdapter loadPersistent() {
@@ -306,8 +304,8 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(outState, loadedPresenterKey, KEY_LOCK_LIST);
-    PersistentCache.saveKey(outState, loadedAdapterKey, KEY_ADAPTER_PRESENTER);
+    PersistentCache.saveKey(KEY_LOCK_LIST, outState, loadedPresenterKey);
+    PersistentCache.saveKey(KEY_ADAPTER_PRESENTER, outState, loadedAdapterKey);
     super.onSaveInstanceState(outState);
   }
 

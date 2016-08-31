@@ -63,8 +63,7 @@ public class MainActivity extends DonationActivity
     unbinder = ButterKnife.bind(this);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    loaderKey = PersistentCache.load(savedInstanceState, KEY_MAIN,
-        new PersistLoader.Callback<MainPresenter>() {
+    loaderKey = PersistentCache.load(KEY_MAIN, savedInstanceState, new PersistLoader.Callback<MainPresenter>() {
           @NonNull @Override public PersistLoader<MainPresenter> createLoader() {
             return new MainPresenterLoader(getApplicationContext());
           }
@@ -83,7 +82,7 @@ public class MainActivity extends DonationActivity
   }
 
   @Override protected void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(outState, loaderKey, KEY_MAIN);
+    PersistentCache.saveKey(KEY_MAIN, outState, loaderKey);
     super.onSaveInstanceState(outState);
   }
 
