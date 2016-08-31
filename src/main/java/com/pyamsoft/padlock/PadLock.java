@@ -20,6 +20,7 @@ import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.base.app.ApplicationBase;
 import com.pyamsoft.pydroid.crash.CrashHandler;
+import com.squareup.leakcanary.LeakCanary;
 
 public class PadLock extends ApplicationBase {
 
@@ -47,13 +48,11 @@ public class PadLock extends ApplicationBase {
     return "PadLock Crash Log Report";
   }
 
-  @Override public void onCreate() {
-    super.onCreate();
-
-    if (buildConfigDebug()) {
-      new CrashHandler(getApplicationContext(), this).register();
-      setStrictMode();
-    }
+  @Override protected void installInDebugMode() {
+    super.installInDebugMode();
+    new CrashHandler(getApplicationContext(), this).register();
+    setStrictMode();
+    LeakCanary.install(this);
   }
 
   private void setStrictMode() {
