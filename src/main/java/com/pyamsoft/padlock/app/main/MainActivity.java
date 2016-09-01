@@ -43,7 +43,7 @@ import com.pyamsoft.pydroid.base.app.PersistLoader;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.PersistentCache;
+import com.pyamsoft.pydroid.tool.PersistentCache;
 import com.pyamsoft.pydroid.util.StringUtil;
 import timber.log.Timber;
 
