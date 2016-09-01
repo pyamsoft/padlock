@@ -22,7 +22,7 @@
 
 # Don't obfuscate causes the gradle build to fail after the optimization step
 # The addition of !code/allocation/variable is needed to prevent this
--optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*,!code/allocation/variable,!class/unboxing/enum
+-optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*,!code/allocation/variable
 
 # RetroLambda
 # Lint will spit out a large amount of errors with parsing. These can safely be ignored.
