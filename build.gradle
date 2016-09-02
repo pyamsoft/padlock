@@ -138,3 +138,6 @@ dependencies {
   // PYDroid 3.4.2
   compile project(':PYDroid')
 }
+
+// AdView
+apply plugin: 'com.google.gms.google-services'

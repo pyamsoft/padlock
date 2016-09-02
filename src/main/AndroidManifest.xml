@@ -20,16 +20,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.pyamsoft.padlock">
 
-  <!-- Remove the INTERNET permission -->
-  <uses-permission
-      android:name="android.permission.INTERNET"
-      tools:node="remove"/>
-
-  <!-- Remove the ACCESS_NETWORK_STATE permission -->
-  <uses-permission
-      android:name="android.permission.ACCESS_NETWORK_STATE"
-      tools:node="remove"/>
-
   <!-- For Billing Service -->
   <uses-permission android:name="com.android.vending.BILLING"/>
 

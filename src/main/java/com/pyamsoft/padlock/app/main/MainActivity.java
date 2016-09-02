@@ -41,9 +41,9 @@ import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.pydroid.base.activity.DonationActivity;
 import com.pyamsoft.pydroid.base.app.PersistLoader;
 import com.pyamsoft.pydroid.support.RatingDialog;
+import com.pyamsoft.pydroid.tool.PersistentCache;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.tool.PersistentCache;
 import com.pyamsoft.pydroid.util.StringUtil;
 import timber.log.Timber;
 
@@ -80,6 +80,18 @@ public class MainActivity extends DonationActivity
   @Override protected int bindActivityToView() {
     setContentView(R.layout.activity_main);
     return R.id.ad_view;
+  }
+
+  @NonNull @Override protected String provideAdViewUnitId() {
+    return getString(R.string.banner_ad_id);
+  }
+
+  @Override protected int provideAdViewResId() {
+    return R.layout.banner_ad;
+  }
+
+  @Override protected boolean isAdDebugMode() {
+    return BuildConfig.DEBUG;
   }
 
   @Override protected void onSaveInstanceState(Bundle outState) {
