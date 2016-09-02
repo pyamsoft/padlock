@@ -221,14 +221,10 @@ public class MainActivity extends DonationActivity
   @NonNull @Override public Spannable getChangeLogText() {
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
-    final String line1 =
-        "FEATURE: Lock screen whitelisting! By selecting an entry for exclusion you 'whitelist' it "
-            + "from PadLock. PadLock will selectively ignore the selected screen and not lock it. PadLock will still lock the rest of the applications";
-    final String line2 = "BUGFIX: Less memory consumption";
-    final String line3 = "BUGFIX: Less battery consumption";
+    final String line1 = "FEATURE: Added advertisements (can be disabled from Settings)";
 
     // Turn it into a spannable
-    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1, line2, line3);
+    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1);
 
     int start = 0;
     int end = title.length();
@@ -246,7 +242,7 @@ public class MainActivity extends DonationActivity
     StringUtil.colorSpan(spannable, start, end, largeColor);
 
     start += end + 2;
-    end += 2 + line1.length() + 2 + line2.length() + 2 + line3.length();
+    end += 2 + line1.length();
 
     StringUtil.sizeSpan(spannable, start, end, smallSize);
     StringUtil.colorSpan(spannable, start, end, smallColor);
