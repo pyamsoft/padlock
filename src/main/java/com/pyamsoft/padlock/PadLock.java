@@ -17,40 +17,17 @@
 package com.pyamsoft.padlock;
 
 import android.os.StrictMode;
-import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.app.CrashHandlerApplication;
-import com.pyamsoft.pydroid.crash.CrashHandler;
+import com.pyamsoft.pydroid.base.app.ApplicationBase;
 import com.squareup.leakcanary.LeakCanary;
 
-public class PadLock extends CrashHandlerApplication {
+public class PadLock extends ApplicationBase {
 
   @Override protected boolean buildConfigDebug() {
     return BuildConfig.DEBUG;
   }
 
-  @NonNull @Override public String appName() {
-    return getString(R.string.app_name);
-  }
-
-  @NonNull @Override public String buildConfigApplicationId() {
-    return BuildConfig.APPLICATION_ID;
-  }
-
-  @NonNull @Override public String buildConfigVersionName() {
-    return BuildConfig.VERSION_NAME;
-  }
-
-  @Override public int buildConfigVersionCode() {
-    return BuildConfig.VERSION_CODE;
-  }
-
-  @Override public String crashLogSubject() {
-    return "PadLock Crash Log Report";
-  }
-
   @Override protected void installInDebugMode() {
     super.installInDebugMode();
-    new CrashHandler(getApplicationContext(), this).register();
     setStrictMode();
     LeakCanary.install(this);
   }

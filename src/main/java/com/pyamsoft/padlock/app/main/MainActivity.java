@@ -86,10 +86,6 @@ public class MainActivity extends DonationActivity
     return getString(R.string.banner_ad_id);
   }
 
-  @Override protected int provideAdViewResId() {
-    return R.layout.banner_ad;
-  }
-
   @Override protected boolean isAdDebugMode() {
     return BuildConfig.DEBUG;
   }
