@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock;
 
-import android.os.StrictMode;
 import com.pyamsoft.pydroid.base.app.ApplicationBase;
 import com.squareup.leakcanary.LeakCanary;
 
@@ -28,18 +27,6 @@ public class PadLock extends ApplicationBase {
 
   @Override protected void installInDebugMode() {
     super.installInDebugMode();
-    setStrictMode();
     LeakCanary.install(this);
-  }
-
-  private void setStrictMode() {
-    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll()
-        .penaltyLog()
-        .penaltyDeath()
-        .permitDiskReads()
-        .permitDiskWrites()
-        .penaltyFlashScreen()
-        .build());
-    StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build());
   }
 }
