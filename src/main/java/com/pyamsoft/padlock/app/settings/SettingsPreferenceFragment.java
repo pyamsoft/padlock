@@ -19,19 +19,23 @@ package com.pyamsoft.padlock.app.settings;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.SwitchPreferenceCompat;
 import android.view.View;
+import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.bus.MainBus;
+import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.service.PadLockService;
+import com.pyamsoft.padlock.bus.MainBus;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
-import com.pyamsoft.pydroid.model.Licenses;
-import com.pyamsoft.pydroid.base.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarSettingsPreferenceFragment;
+import com.pyamsoft.pydroid.base.PersistLoader;
+import com.pyamsoft.pydroid.model.Licenses;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
@@ -86,6 +90,10 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     showAboutLicenses.setOnPreferenceClickListener(
         preference -> showAboutLicensesFragment(R.id.settings_preferences_container,
             AboutLibrariesFragment.Styling.LIGHT, Licenses.ANDROID, Licenses.PYDROID));
+
+    final Preference checkVersion = findPreference(getString(R.string.check_version_key));
+    checkVersion.setOnPreferenceClickListener(
+        preference -> checkForUpdate(BuildConfig.VERSION_CODE));
   }
 
   @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {
@@ -117,6 +125,27 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
   @Override public void onStop() {
     super.onStop();
     presenter.unbindView();
+  }
+
+  @CheckResult @NonNull MainActivity getMainActivity() {
+    final FragmentActivity activity = getActivity();
+    if (activity instanceof MainActivity) {
+      return (MainActivity) activity;
+    } else {
+      throw new RuntimeException("No main activity");
+    }
+  }
+
+  @NonNull @Override public String provideApplicationName() {
+    return getMainActivity().provideApplicationName();
+  }
+
+  @NonNull @Override public String provideProjectName() {
+    return getMainActivity().provideProjectName();
+  }
+
+  @Override public boolean isDebugMode() {
+    return getMainActivity().isDebugMode();
   }
 
   @Override public void onDestroy() {
