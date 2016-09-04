@@ -47,4 +47,5 @@
 -keepattributes Exceptions
 
 # Keep GSON serialized class
--keep class com.pyamsoft.pydroid.licensecheck.LicenseCheckResponse { *; }
+-keep class com.pyamsoft.pydroid.version.VersionCheckResponse { *; }
+
