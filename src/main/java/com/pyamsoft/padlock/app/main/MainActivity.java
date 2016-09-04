@@ -106,11 +106,15 @@ public class MainActivity extends DonationActivity
     presenter.unbindView();
   }
 
-  @NonNull @Override protected String provideProjectName() {
-    return "padlock";
+  @NonNull @Override public String provideProjectName() {
+    return provideApplicationName().toLowerCase();
   }
 
-  @Override protected int getCurrentApplicationVersion() {
+  @NonNull @Override public String provideApplicationName() {
+    return "PadLock";
+  }
+
+  @Override public int getCurrentApplicationVersion() {
     return BuildConfig.VERSION_CODE;
   }
 

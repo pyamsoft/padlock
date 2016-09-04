@@ -87,6 +87,10 @@
         android:title="@string/about_license_title"/>
 
     <Preference
+        android:key="@string/check_version_key"
+        android:title="@string/check_version_title"/>
+
+    <Preference
         android:key="@string/upgrade_info_key"
         android:summary="@string/upgrade_info_summary"
         android:title="@string/upgrade_info_title"/>
