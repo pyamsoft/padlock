@@ -18,10 +18,10 @@ package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
-import com.pyamsoft.padlock.app.bus.AgreeTermsBus;
-import com.pyamsoft.padlock.app.bus.MainBus;
+import com.pyamsoft.padlock.bus.AgreeTermsBus;
+import com.pyamsoft.padlock.bus.MainBus;
 import com.pyamsoft.padlock.app.main.MainPresenter;
-import com.pyamsoft.pydroid.app.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroid.dagger.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;

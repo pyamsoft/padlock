@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.bus.PinEntryBus;
+import com.pyamsoft.padlock.bus.PinEntryBus;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.app.lock.PinScreen;

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.bus;
+package com.pyamsoft.padlock.bus;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.event.LockInfoSelectEvent;
-import com.pyamsoft.pydroid.tool.RxBus;
+import com.pyamsoft.padlock.model.event.DBProgressEvent;
+import com.pyamsoft.pydroid.bus.RxBus;
 
-public class LockInfoSelectBus extends RxBus<LockInfoSelectEvent> {
+public class DBProgressBus extends RxBus<DBProgressEvent> {
 
-  @NonNull private static final LockInfoSelectBus instance = new LockInfoSelectBus();
+  @NonNull private static final DBProgressBus instance = new DBProgressBus();
 
-  @CheckResult @NonNull public static LockInfoSelectBus get() {
+  @CheckResult @NonNull public static DBProgressBus get() {
     return instance;
   }
 }

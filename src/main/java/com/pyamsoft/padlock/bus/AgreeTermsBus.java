@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.bus;
+package com.pyamsoft.padlock.bus;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.event.PinEntryEvent;
-import com.pyamsoft.pydroid.tool.RxBus;
+import com.pyamsoft.padlock.model.event.AgreeTermsEvent;
+import com.pyamsoft.pydroid.bus.RxBus;
 
-public class PinEntryBus extends RxBus<PinEntryEvent> {
+public class AgreeTermsBus extends RxBus<AgreeTermsEvent> {
 
-  @NonNull private static final PinEntryBus instance = new PinEntryBus();
+  @NonNull private static final AgreeTermsBus instance = new AgreeTermsBus();
 
-  @CheckResult @NonNull public static PinEntryBus get() {
+  @CheckResult @NonNull public static AgreeTermsBus get() {
     return instance;
   }
 }

@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock;
 
-import com.pyamsoft.pydroid.app.ApplicationBase;
+import com.pyamsoft.pydroid.base.ApplicationBase;
 import com.squareup.leakcanary.LeakCanary;
 
 public class PadLock extends ApplicationBase {
