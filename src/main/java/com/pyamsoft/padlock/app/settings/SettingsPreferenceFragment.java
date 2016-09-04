@@ -28,10 +28,12 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.bus.MainBus;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
-import com.pyamsoft.pydroid.base.fragment.ActionBarSettingsPreferenceFragment;
-import com.pyamsoft.pydroid.base.app.PersistLoader;
-import com.pyamsoft.pydroid.tool.PersistentCache;
+import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
+import com.pyamsoft.pydroid.about.Licenses;
+import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.app.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
 
 public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragment
@@ -45,7 +47,8 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    loadedKey = PersistentCache.load(KEY_SETTINGS, savedInstanceState, new PersistLoader.Callback<SettingsPreferencePresenter>() {
+    loadedKey = PersistentCache.load(KEY_SETTINGS, savedInstanceState,
+        new PersistLoader.Callback<SettingsPreferencePresenter>() {
           @NonNull @Override public PersistLoader<SettingsPreferencePresenter> createLoader() {
             return new SettingsPreferencePresenterLoader(getContext());
           }
@@ -78,6 +81,11 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     final SwitchPreferenceCompat showAds =
         (SwitchPreferenceCompat) findPreference(getString(R.string.adview_key));
     showAds.setOnPreferenceChangeListener((preference, newValue) -> toggleAdVisibility(newValue));
+
+    final Preference showAboutLicenses = findPreference(getString(R.string.about_license_key));
+    showAboutLicenses.setOnPreferenceClickListener(
+        preference -> showAboutLicensesFragment(R.id.settings_preferences_container,
+            AboutLibrariesFragment.Styling.LIGHT, Licenses.ANDROID, Licenses.PYDROID));
   }
 
   @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {

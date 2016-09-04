@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.app.list;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.pydroid.base.app.PersistLoader;
+import com.pyamsoft.pydroid.app.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
 

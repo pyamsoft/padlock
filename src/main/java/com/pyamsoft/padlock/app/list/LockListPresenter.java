@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.app.list;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.base.presenter.Presenter;
+import com.pyamsoft.pydroid.app.presenter.Presenter;
 
 public interface LockListPresenter extends Presenter<LockListPresenter.LockList> {
 

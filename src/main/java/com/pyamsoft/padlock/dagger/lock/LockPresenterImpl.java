@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockPresenter;
-import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroid.app.presenter.SchedulerPresenter;
 import javax.inject.Named;
 import rx.Scheduler;
 

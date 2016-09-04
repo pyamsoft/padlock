@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.dagger.service;
 import android.app.KeyguardManager;
 import android.content.Context;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
-import com.pyamsoft.pydroid.base.app.ActivityScope;
+import com.pyamsoft.pydroid.app.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

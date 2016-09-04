@@ -83,6 +83,10 @@
         />
 
     <Preference
+        android:key="@string/about_license_key"
+        android:title="@string/about_license_title"/>
+
+    <Preference
         android:key="@string/upgrade_info_key"
         android:summary="@string/upgrade_info_summary"
         android:title="@string/upgrade_info_title"/>

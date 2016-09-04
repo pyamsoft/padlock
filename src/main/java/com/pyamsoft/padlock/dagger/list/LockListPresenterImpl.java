@@ -29,7 +29,7 @@ import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroid.app.presenter.SchedulerPresenter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
