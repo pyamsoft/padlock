@@ -26,7 +26,7 @@ import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroid.app.presenter.SchedulerPresenter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;

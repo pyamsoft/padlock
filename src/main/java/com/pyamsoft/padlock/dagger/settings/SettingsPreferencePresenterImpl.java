@@ -20,7 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.bus.ConfirmDialogBus;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
-import com.pyamsoft.pydroid.base.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroid.app.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;

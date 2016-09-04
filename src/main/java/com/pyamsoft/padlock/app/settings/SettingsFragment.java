@@ -21,12 +21,13 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
-import com.pyamsoft.pydroid.base.fragment.CircularRevealFragmentUtil;
+import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
+import com.pyamsoft.pydroid.util.CircularRevealFragmentUtil;
 
 public class SettingsFragment extends ActionBarFragment {
 
@@ -58,9 +59,10 @@ public class SettingsFragment extends ActionBarFragment {
 
   private void displayPreferenceFragment() {
     // KLUDGE child fragment, not the nicest
-    if (getChildFragmentManager().findFragmentByTag(SettingsPreferenceFragment.TAG) == null) {
-      getChildFragmentManager().beginTransaction()
-          .add(R.id.settings_preferences_container, new SettingsPreferenceFragment(),
+    final FragmentManager fragmentManager = getChildFragmentManager();
+    if (fragmentManager.findFragmentByTag(SettingsPreferenceFragment.TAG) == null) {
+      fragmentManager.beginTransaction()
+          .replace(R.id.settings_preferences_container, new SettingsPreferenceFragment(),
               SettingsPreferenceFragment.TAG)
           .commit();
     }

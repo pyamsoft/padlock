@@ -38,12 +38,13 @@ import com.pyamsoft.padlock.app.accessibility.AccessibilityFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
-import com.pyamsoft.pydroid.base.activity.DonationActivity;
-import com.pyamsoft.pydroid.base.app.PersistLoader;
+import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
+import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.app.activity.DonationActivity;
 import com.pyamsoft.pydroid.support.RatingDialog;
-import com.pyamsoft.pydroid.tool.PersistentCache;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.util.StringUtil;
 import timber.log.Timber;
 
@@ -137,8 +138,9 @@ public class MainActivity extends DonationActivity
   @SuppressWarnings("WeakerAccess") void realShowLockList(boolean forceRefresh) {
     supportInvalidateOptionsMenu();
     final FragmentManager fragmentManager = getSupportFragmentManager();
-    if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null || forceRefresh) {
+    if ((fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) == null) || forceRefresh) {
       final View decorView = getWindow().getDecorView();
       final int cX = decorView.getLeft() + decorView.getWidth() / 2;
       final int cY = decorView.getBottom() + decorView.getHeight() / 2;

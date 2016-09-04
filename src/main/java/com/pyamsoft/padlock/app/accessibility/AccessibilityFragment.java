@@ -29,7 +29,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.pydroid.base.fragment.ActionBarFragment;
+import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 
 public class AccessibilityFragment extends ActionBarFragment {
 

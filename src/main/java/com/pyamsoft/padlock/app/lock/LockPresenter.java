@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.app.lock;
 
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
-import com.pyamsoft.pydroid.base.presenter.Presenter;
+import com.pyamsoft.pydroid.app.presenter.Presenter;
 
 public interface LockPresenter<I extends LockPresenter.LockView> extends Presenter<I> {
 
