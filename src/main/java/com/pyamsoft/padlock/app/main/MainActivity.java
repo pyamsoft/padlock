@@ -39,8 +39,8 @@ import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
-import com.pyamsoft.pydroid.base.PersistLoader;
 import com.pyamsoft.pydroid.app.activity.DonationActivity;
+import com.pyamsoft.pydroid.base.PersistLoader;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -104,6 +104,14 @@ public class MainActivity extends DonationActivity
   @Override protected void onStop() {
     super.onStop();
     presenter.unbindView();
+  }
+
+  @NonNull @Override protected String provideProjectName() {
+    return "padlock";
+  }
+
+  @Override protected int getCurrentApplicationVersion() {
+    return BuildConfig.VERSION_CODE;
   }
 
   private void setAppBarState() {
