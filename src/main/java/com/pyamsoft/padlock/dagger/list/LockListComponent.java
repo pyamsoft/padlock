@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.dagger.list;
 import com.pyamsoft.padlock.app.list.LockListPresenterLoader;
 import com.pyamsoft.padlock.dagger.lock.MasterPinModule;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateModule;
-import com.pyamsoft.pydroid.app.ActivityScope;
+import com.pyamsoft.pydroid.dagger.ActivityScope;
 import dagger.Subcomponent;
 
 @ActivityScope @Subcomponent(modules = {

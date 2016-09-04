@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import com.pyamsoft.padlock.app.main.MainPresenter;
-import com.pyamsoft.pydroid.app.ActivityScope;
+import com.pyamsoft.pydroid.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.bus;
+package com.pyamsoft.padlock.bus;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.event.AgreeTermsEvent;
-import com.pyamsoft.pydroid.tool.RxBus;
+import com.pyamsoft.padlock.model.event.ConfirmationEvent;
+import com.pyamsoft.pydroid.bus.RxBus;
 
-public class AgreeTermsBus extends RxBus<AgreeTermsEvent> {
+public class ConfirmDialogBus extends RxBus<ConfirmationEvent> {
 
-  @NonNull private static final AgreeTermsBus instance = new AgreeTermsBus();
+  @NonNull private static final ConfirmDialogBus instance = new ConfirmDialogBus();
 
-  @CheckResult @NonNull public static AgreeTermsBus get() {
+  @CheckResult @NonNull public static ConfirmDialogBus get() {
     return instance;
   }
 }

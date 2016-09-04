@@ -18,9 +18,9 @@ package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
-import com.pyamsoft.padlock.app.bus.ConfirmDialogBus;
+import com.pyamsoft.padlock.bus.ConfirmDialogBus;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
-import com.pyamsoft.pydroid.app.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroid.dagger.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;

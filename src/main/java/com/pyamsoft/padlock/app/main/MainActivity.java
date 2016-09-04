@@ -39,7 +39,7 @@ import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.base.PersistLoader;
 import com.pyamsoft.pydroid.app.activity.DonationActivity;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;

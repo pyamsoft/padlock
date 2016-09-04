@@ -27,7 +27,7 @@ import butterknife.Unbinder;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.bus.LockInfoSelectBus;
+import com.pyamsoft.padlock.bus.LockInfoSelectBus;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.event.LockInfoSelectEvent;
