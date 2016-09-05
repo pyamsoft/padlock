@@ -139,8 +139,9 @@ dependencies {
   // Mockito for unit tests
   testCompile 'org.mockito:mockito-core:2.0.111-beta'
 
-  // PYDroid 3.5.1
-  compile project(':PYDroid')
+  // PYDroid 3.6.0
+  debugCompile project(path: ':PYDroid', configuration: "debug")
+  releaseCompile project(path: ':PYDroid', configuration: "release")
 }
 
 // AdView

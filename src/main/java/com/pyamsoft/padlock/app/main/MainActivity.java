@@ -87,10 +87,6 @@ public class MainActivity extends DonationActivity
     return getString(R.string.banner_ad_id);
   }
 
-  @Override protected boolean isAdDebugMode() {
-    return BuildConfig.DEBUG;
-  }
-
   @Override protected void onSaveInstanceState(Bundle outState) {
     PersistentCache.saveKey(KEY_MAIN, outState, loaderKey);
     super.onSaveInstanceState(outState);
@@ -104,10 +100,6 @@ public class MainActivity extends DonationActivity
   @Override protected void onStop() {
     super.onStop();
     presenter.unbindView();
-  }
-
-  @NonNull @Override public String provideProjectName() {
-    return provideApplicationName().toLowerCase();
   }
 
   @NonNull @Override public String provideApplicationName() {
@@ -266,14 +258,6 @@ public class MainActivity extends DonationActivity
 
   @Override public int getChangeLogIcon() {
     return R.mipmap.ic_launcher;
-  }
-
-  @NonNull @Override public String getChangeLogPackageName() {
-    return getPackageName();
-  }
-
-  @Override public int getChangeLogVersion() {
-    return BuildConfig.VERSION_CODE;
   }
 
   @Override public void forceRefresh() {
