@@ -86,6 +86,12 @@
           android:resource="@xml/padlock"/>
     </service>
 
+    <provider
+        android:name=".PadLockSingleInitProvider"
+        android:authorities="com.pyamsoft.padlock.PadLock"
+        android:exported="false"
+        android:syncable="false"/>
+
   </application>
 
 </manifest>
