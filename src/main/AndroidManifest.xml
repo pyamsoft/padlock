@@ -35,11 +35,6 @@
       android:theme="@style/Theme.PadLock.Light"
       tools:ignore="GoogleAppIndexingWarning">
 
-    <!-- Remove the Google API activity -->
-    <activity
-        android:name="com.google.android.gms.common.api.GoogleApiActivity"
-        tools:node="remove"/>
-
     <!-- Main Activity -->
     <activity
         android:name=".app.main.MainActivity"
