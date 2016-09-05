@@ -95,11 +95,6 @@ dependencies {
   compile 'com.google.firebase:firebase-core:9.4.0'
   compile 'com.google.firebase:firebase-crash:9.4.0'
 
-  // Leak Canary
-  debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
-  releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-  testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-
   // Job Scheduling
   compile 'com.birbit:android-priority-jobqueue:2.0.0'
   compile 'com.google.android.gms:play-services-gcm:9.4.0'

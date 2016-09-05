@@ -22,7 +22,7 @@ import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.TagConstraint;
-import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.PadLockSingleInitProvider;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
@@ -100,10 +100,10 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
       @NonNull String className) {
     return Observable.defer(() -> {
       final boolean lockScreen1 =
-          packageName.equals(PadLock.class.getPackage().getName()) && className.equals(
+          packageName.equals(PadLockSingleInitProvider.class.getPackage().getName()) && className.equals(
               LockScreenActivity1.class.getName());
       final boolean lockScreen2 =
-          packageName.equals(PadLock.class.getPackage().getName()) && className.equals(
+          packageName.equals(PadLockSingleInitProvider.class.getPackage().getName()) && className.equals(
               LockScreenActivity2.class.getName());
       return Observable.just(lockScreen1 || lockScreen2);
     });

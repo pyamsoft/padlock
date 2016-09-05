@@ -16,8 +16,7 @@
 
 package com.pyamsoft.padlock;
 
-import com.pyamsoft.pydroid.base.ApplicationBase;
+import com.pyamsoft.pydroid.base.SingleInitContentProvider;
 
-public class PadLock extends ApplicationBase {
-
+public class PadLockSingleInitProvider extends SingleInitContentProvider {
 }
