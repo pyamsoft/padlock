@@ -21,10 +21,6 @@ import com.squareup.leakcanary.LeakCanary;
 
 public class PadLock extends ApplicationBase {
 
-  @Override protected boolean buildConfigDebug() {
-    return BuildConfig.DEBUG;
-  }
-
   @Override protected void installInDebugMode() {
     super.installInDebugMode();
     LeakCanary.install(this);
