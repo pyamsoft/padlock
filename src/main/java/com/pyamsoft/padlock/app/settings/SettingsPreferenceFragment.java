@@ -89,6 +89,7 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
             Licenses.PYDROID, Licenses.GOOGLE_PLAY_SERVICES, Licenses.ANDROID_IN_APP_BILLING,
             Licenses.AUTO_VALUE, Licenses.BUTTERKNIFE, Licenses.DAGGER, Licenses.FAST_ADAPTER,
             Licenses.FAST_ADAPTER, Licenses.FIREBASE, Licenses.LEAK_CANARY, Licenses.RETROFIT2,
+            Licenses.SQLBRITE, Licenses.SQLDELIGHT, Licenses.ANDROID_PRIORITY_JOBQUEUE,
             Licenses.RXANDROID, Licenses.RXJAVA));
 
     final Preference checkVersion = findPreference(getString(R.string.check_version_key));
