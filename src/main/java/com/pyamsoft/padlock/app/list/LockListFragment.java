@@ -66,6 +66,7 @@ public class LockListFragment extends ActionBarFragment
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
   @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
+@NonNull  private static final String KEY_PRESENTER = "key_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
@@ -117,7 +118,7 @@ public class LockListFragment extends ActionBarFragment
     setHasOptionsMenu(true);
 
     loadedPresenterKey =
-        PersistentCache.load(savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
+        PersistentCache.load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
           @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
             firstRefresh = true;
             return new LockListPresenterLoader(getContext());
@@ -305,7 +306,7 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(outState, loadedPresenterKey);
+    PersistentCache.saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
     PersistentCache.saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
     super.onSaveInstanceState(outState);
   }

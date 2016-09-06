@@ -43,9 +43,9 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.pydroid.base.PersistLoader;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
+import com.pyamsoft.pydroid.util.PersistentCache;
 import rx.Subscription;
 import timber.log.Timber;
 
@@ -56,6 +56,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
+  @NonNull private static final String KEY_PIN_DIALOG = "key_pin_dialog";
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.pin_entry_toolbar) TextView toolbar;
   @BindView(R.id.pin_entry_close) ImageView close;
@@ -92,7 +93,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
     setCancelable(true);
 
-    loadedKey = PersistentCache.load(savedInstanceState, new PersistLoader.Callback<PinEntryPresenter>() {
+    loadedKey = PersistentCache.load(KEY_PIN_DIALOG, savedInstanceState,
+        new PersistLoader.Callback<PinEntryPresenter>() {
           @NonNull @Override public PersistLoader<PinEntryPresenter> createLoader() {
             return new PinScreenPresenterLoader(getContext());
           }
@@ -224,7 +226,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
-    PersistentCache.saveKey(outState, loadedKey);
+    PersistentCache.saveKey(outState, KEY_PIN_DIALOG, loadedKey);
     outState.putString(CODE_DISPLAY, getCurrentAttempt());
     outState.putString(CODE_REENTRY_DISPLAY, getCurrentReentry());
     outState.putString(HINT_DISPLAY, getCurrentHint());

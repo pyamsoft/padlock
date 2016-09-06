@@ -49,6 +49,7 @@ import timber.log.Timber;
 public class MainActivity extends DonationActivity
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
+  @NonNull private static final String KEY_PRESENTER = "key_main_presenter";
   @BindView(R.id.main_root) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
@@ -61,7 +62,7 @@ public class MainActivity extends DonationActivity
     unbinder = ButterKnife.bind(this);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    loaderKey = PersistentCache.load(savedInstanceState,
+    loaderKey = PersistentCache.load(KEY_PRESENTER, savedInstanceState,
         new PersistLoader.Callback<MainPresenter>() {
           @NonNull @Override public PersistLoader<MainPresenter> createLoader() {
             return new MainPresenterLoader(getApplicationContext());
@@ -85,7 +86,7 @@ public class MainActivity extends DonationActivity
   }
 
   @Override protected void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(outState, loaderKey);
+    PersistentCache.saveKey(outState, KEY_PRESENTER, loaderKey);
     super.onSaveInstanceState(outState);
   }
 
