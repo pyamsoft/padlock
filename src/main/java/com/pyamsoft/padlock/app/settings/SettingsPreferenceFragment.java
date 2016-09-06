@@ -41,12 +41,12 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
 
   @NonNull public static final String TAG = "SettingsPreferenceFragment";
   @SuppressWarnings("WeakerAccess") SettingsPreferencePresenter presenter;
-  private String loadedKey;
+  private long loadedKey;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    loadedKey = PersistentCache.load(loadedKey, savedInstanceState,
+    loadedKey = PersistentCache.load(savedInstanceState,
         new PersistLoader.Callback<SettingsPreferencePresenter>() {
           @NonNull @Override public PersistLoader<SettingsPreferencePresenter> createLoader() {
             return new SettingsPreferencePresenterLoader(getContext());
