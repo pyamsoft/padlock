@@ -54,6 +54,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
 
   @NonNull private static final String ARG_APP_ENTRY = "app_entry";
   @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
+  @NonNull private static final String KEY_PRESENTER = "key_presenter";
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
@@ -87,7 +88,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
 
     loadedPresenterKey =
-        PersistentCache.load(savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
+        PersistentCache.load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
           @NonNull @Override public PersistLoader<LockInfoPresenter> createLoader() {
             firstRefresh = true;
             return new LockInfoPresenterLoader(getContext());
@@ -163,7 +164,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(outState, loadedPresenterKey);
+    PersistentCache.saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
     PersistentCache.saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
     super.onSaveInstanceState(outState);
   }
