@@ -34,9 +34,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.accessibility.AccessibilityFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
-import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.app.activity.DonationActivity;
@@ -75,6 +73,8 @@ public class MainActivity extends DonationActivity
         });
 
     setAppBarState();
+
+    showLockList(false);
   }
 
   @Override protected int bindActivityToView() {
@@ -112,16 +112,6 @@ public class MainActivity extends DonationActivity
   private void setAppBarState() {
     setSupportActionBar(toolbar);
     toolbar.setTitle(getString(R.string.app_name));
-  }
-
-  private void showAccessibilityPrompt() {
-    supportInvalidateOptionsMenu();
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    if (fragmentManager.findFragmentByTag(AccessibilityFragment.TAG) == null) {
-      fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, new AccessibilityFragment(), AccessibilityFragment.TAG)
-          .commit();
-    }
   }
 
   private void showLockList(boolean forceRefresh) {
@@ -202,20 +192,15 @@ public class MainActivity extends DonationActivity
   }
 
   @Override public void onDidNotAgreeToTerms() {
+    Timber.e("Did not agree to terms");
     finish();
   }
 
   @Override protected void onPostResume() {
     super.onPostResume();
-
     AnimUtil.animateActionBarToolbar(toolbar);
     RatingDialog.showRatingDialog(this, this);
-    if (PadLockService.isRunning()) {
-      showLockList(false);
-      presenter.showTermsDialog();
-    } else {
-      showAccessibilityPrompt();
-    }
+    presenter.showTermsDialog();
   }
 
   @Override public void showUsageTermsDialog() {
