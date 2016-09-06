@@ -40,14 +40,13 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     implements SettingsPreferencePresenter.SettingsPreferenceView {
 
   @NonNull public static final String TAG = "SettingsPreferenceFragment";
-  @NonNull private static final String KEY_SETTINGS = "key_settings";
   @SuppressWarnings("WeakerAccess") SettingsPreferencePresenter presenter;
-  private long loadedKey;
+  private String loadedKey;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    loadedKey = PersistentCache.load(KEY_SETTINGS, savedInstanceState,
+    loadedKey = PersistentCache.load(loadedKey, savedInstanceState,
         new PersistLoader.Callback<SettingsPreferencePresenter>() {
           @NonNull @Override public PersistLoader<SettingsPreferencePresenter> createLoader() {
             return new SettingsPreferencePresenterLoader(getContext());
@@ -135,7 +134,7 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(KEY_SETTINGS, outState, loadedKey);
+    PersistentCache.saveKey(outState, loadedKey);
     super.onSaveInstanceState(outState);
   }
 }

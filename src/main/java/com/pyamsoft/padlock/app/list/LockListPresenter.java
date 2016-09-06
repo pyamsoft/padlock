@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.app.list;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.dagger.presenter.Presenter;
+import com.pyamsoft.pydroid.base.Presenter;
 
 public interface LockListPresenter extends Presenter<LockListPresenter.LockList> {
 
@@ -52,7 +52,9 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
 
     void setSystemInvisible();
 
-    void onPinFABClicked();
+    void onCreatePinDialog();
+
+    void onCreateAccessibilityDialog();
 
     void onEntryAddedToList(@NonNull AppEntry entry);
 

@@ -21,11 +21,12 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import com.pyamsoft.padlock.app.list.LockListPresenter;
+import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
+import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.bus.DBProgressBus;
 import com.pyamsoft.padlock.bus.LockInfoDisplayBus;
 import com.pyamsoft.padlock.bus.PinEntryBus;
-import com.pyamsoft.padlock.app.list.LockListPresenter;
-import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -273,8 +274,11 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   }
 
   @Override public void clickPinFAB() {
-    final LockList lockList = getView();
-    lockList.onPinFABClicked();
+    if (PadLockService.isRunning()) {
+      getView().onCreatePinDialog();
+    } else {
+      getView().onCreateAccessibilityDialog();
+    }
   }
 
   @Override public void showOnBoarding() {

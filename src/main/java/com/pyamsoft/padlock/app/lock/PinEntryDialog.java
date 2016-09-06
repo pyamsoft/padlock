@@ -56,7 +56,6 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
-  @NonNull private static final String KEY_PIN_ENTRY = "key_pin_entry";
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.pin_entry_toolbar) TextView toolbar;
   @BindView(R.id.pin_entry_close) ImageView close;
@@ -72,7 +71,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   private EditText pinEntryText;
   private EditText pinReentryText;
   private EditText pinHintText;
-  private long loadedKey;
+  private String loadedKey;
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -93,7 +92,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
     setCancelable(true);
 
-    loadedKey = PersistentCache.load(KEY_PIN_ENTRY, savedInstanceState, new PersistLoader.Callback<PinEntryPresenter>() {
+    loadedKey = PersistentCache.load(loadedKey, savedInstanceState, new PersistLoader.Callback<PinEntryPresenter>() {
           @NonNull @Override public PersistLoader<PinEntryPresenter> createLoader() {
             return new PinScreenPresenterLoader(getContext());
           }
@@ -225,7 +224,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
-    PersistentCache.saveKey(KEY_PIN_ENTRY, outState, loadedKey);
+    PersistentCache.saveKey(outState, loadedKey);
     outState.putString(CODE_DISPLAY, getCurrentAttempt());
     outState.putString(CODE_REENTRY_DISPLAY, getCurrentReentry());
     outState.putString(HINT_DISPLAY, getCurrentHint());

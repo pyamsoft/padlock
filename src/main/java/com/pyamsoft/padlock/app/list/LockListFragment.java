@@ -45,16 +45,16 @@ import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.base.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.app.fragment.CircularRevealFragmentUtil;
-import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
+import com.pyamsoft.pydroid.app.widget.DividerItemDecoration;
+import com.pyamsoft.pydroid.base.ListAdapterLoader;
 import com.pyamsoft.pydroid.base.PersistLoader;
-import com.pyamsoft.pydroid.util.PersistentCache;
+import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
-import com.pyamsoft.pydroid.app.widget.DividerItemDecoration;
 import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.PersistentCache;
 import rx.Subscription;
 import timber.log.Timber;
 import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
@@ -65,8 +65,6 @@ public class LockListFragment extends ActionBarFragment
 
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
-  @NonNull private static final String KEY_ADAPTER_PRESENTER = "lock_list_adapter_presenter";
-  @NonNull private static final String KEY_LOCK_LIST = "key_lock_list";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
@@ -101,8 +99,8 @@ public class LockListFragment extends ActionBarFragment
   @SuppressWarnings("WeakerAccess") boolean firstRefresh;
   private Unbinder unbinder;
   private MenuItem displaySystemItem;
-  private long loadedPresenterKey;
-  private long loadedAdapterKey;
+  private String loadedPresenterKey;
+  private String loadedAdapterKey;
 
   @CheckResult @NonNull
   public static LockListFragment newInstance(int cX, int cY, boolean forceRefresh) {
@@ -117,7 +115,8 @@ public class LockListFragment extends ActionBarFragment
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
 
-    loadedPresenterKey = PersistentCache.load(KEY_LOCK_LIST, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
+    loadedPresenterKey = PersistentCache.load(loadedPresenterKey, savedInstanceState,
+        new PersistLoader.Callback<LockListPresenter>() {
           @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
             firstRefresh = true;
             return new LockListPresenterLoader(getContext());
@@ -128,7 +127,8 @@ public class LockListFragment extends ActionBarFragment
           }
         });
 
-    loadedAdapterKey = PersistentCache.load(KEY_ADAPTER_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListAdapter>() {
+    loadedAdapterKey = PersistentCache.load(loadedAdapterKey, savedInstanceState,
+        new PersistLoader.Callback<LockListAdapter>() {
           @NonNull @Override public PersistLoader<LockListAdapter> createLoader() {
             return new ListAdapterLoader<LockListAdapter>(getContext()) {
               @NonNull @Override public LockListAdapter loadPersistent() {
@@ -304,8 +304,8 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(KEY_LOCK_LIST, outState, loadedPresenterKey);
-    PersistentCache.saveKey(KEY_ADAPTER_PRESENTER, outState, loadedAdapterKey);
+    PersistentCache.saveKey(outState, loadedPresenterKey);
+    PersistentCache.saveKey(outState, loadedAdapterKey);
     super.onSaveInstanceState(outState);
   }
 
@@ -348,6 +348,15 @@ public class LockListFragment extends ActionBarFragment
     taskMap.put("fab", fabIconTask);
   }
 
+  @Override public void onCreateAccessibilityDialog() {
+    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new AccessibilityRequestDialog(),
+        "accessibility");
+  }
+
+  @Override public void onCreatePinDialog() {
+    onPinEntryDialogRequested(getContext().getPackageName(), getActivity().getClass().getName());
+  }
+
   @Override
   public void onPinEntryDialogRequested(@NonNull String packageName, @NonNull String activityName) {
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
@@ -376,10 +385,6 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onClearMasterPinFailure() {
     Toast.makeText(getContext(), "Error: Invalid PIN", Toast.LENGTH_SHORT).show();
-  }
-
-  @Override public void onPinFABClicked() {
-    onPinEntryDialogRequested(getContext().getPackageName(), getActivity().getClass().getName());
   }
 
   @Override public void onEntryAddedToList(@NonNull AppEntry entry) {
