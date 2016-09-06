@@ -95,7 +95,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   private String lockedCode;
   private boolean lockedSystem;
   private long[] ignoreTimes;
-  private String loadedKey;
+  private long loadedKey;
 
   LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -120,7 +120,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     setContentView(R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    loadedKey = PersistentCache.load(loadedKey, savedInstanceState,
+    loadedKey = PersistentCache.load(savedInstanceState,
         new PersistLoader.Callback<LockScreenPresenter>() {
           @NonNull @Override public PersistLoader<LockScreenPresenter> createLoader() {
             return new LockScreenPresenterLoader(getApplicationContext());

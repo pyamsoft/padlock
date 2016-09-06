@@ -53,7 +53,7 @@ public class MainActivity extends DonationActivity
   @BindView(R.id.toolbar) Toolbar toolbar;
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
   private Unbinder unbinder;
-  private String loaderKey;
+  private long loaderKey;
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
@@ -61,7 +61,7 @@ public class MainActivity extends DonationActivity
     unbinder = ButterKnife.bind(this);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    loaderKey = PersistentCache.load(loaderKey, savedInstanceState,
+    loaderKey = PersistentCache.load(savedInstanceState,
         new PersistLoader.Callback<MainPresenter>() {
           @NonNull @Override public PersistLoader<MainPresenter> createLoader() {
             return new MainPresenterLoader(getApplicationContext());
@@ -73,8 +73,6 @@ public class MainActivity extends DonationActivity
         });
 
     setAppBarState();
-
-    showLockList(false);
   }
 
   @Override protected int bindActivityToView() {
@@ -94,6 +92,7 @@ public class MainActivity extends DonationActivity
   @Override protected void onStart() {
     super.onStart();
     presenter.bindView(this);
+    showLockList(false);
   }
 
   @Override protected void onStop() {

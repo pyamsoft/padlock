@@ -53,6 +53,7 @@ import timber.log.Timber;
 public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.LockInfoView {
 
   @NonNull private static final String ARG_APP_ENTRY = "app_entry";
+  @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
@@ -68,8 +69,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @SuppressWarnings("WeakerAccess") boolean firstRefresh;
   @SuppressWarnings("WeakerAccess") AppEntry appEntry;
   private Unbinder unbinder;
-  private String loadedPresenterKey;
-  private String loadedAdapterKey;
+  private long loadedPresenterKey;
+  private long loadedAdapterKey;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -85,8 +86,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     super.onCreate(savedInstanceState);
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
 
-    loadedPresenterKey = PersistentCache.load(loadedPresenterKey, savedInstanceState,
-        new PersistLoader.Callback<LockInfoPresenter>() {
+    loadedPresenterKey =
+        PersistentCache.load(savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
           @NonNull @Override public PersistLoader<LockInfoPresenter> createLoader() {
             firstRefresh = true;
             return new LockInfoPresenterLoader(getContext());
@@ -97,7 +98,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
           }
         });
 
-    loadedAdapterKey = PersistentCache.load(loadedAdapterKey, savedInstanceState,
+    loadedAdapterKey = PersistentCache.load(KEY_LOAD_ADAPTER, savedInstanceState,
         new PersistLoader.Callback<LockInfoAdapter>() {
           @NonNull @Override public PersistLoader<LockInfoAdapter> createLoader() {
             return new ListAdapterLoader<LockInfoAdapter>(getContext()) {
@@ -163,7 +164,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
 
   @Override public void onSaveInstanceState(Bundle outState) {
     PersistentCache.saveKey(outState, loadedPresenterKey);
-    PersistentCache.saveKey(outState, loadedAdapterKey);
+    PersistentCache.saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
     super.onSaveInstanceState(outState);
   }
 

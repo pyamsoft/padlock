@@ -71,7 +71,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   private EditText pinEntryText;
   private EditText pinReentryText;
   private EditText pinHintText;
-  private String loadedKey;
+  private long loadedKey;
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -92,7 +92,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
     setCancelable(true);
 
-    loadedKey = PersistentCache.load(loadedKey, savedInstanceState, new PersistLoader.Callback<PinEntryPresenter>() {
+    loadedKey = PersistentCache.load(savedInstanceState, new PersistLoader.Callback<PinEntryPresenter>() {
           @NonNull @Override public PersistLoader<PinEntryPresenter> createLoader() {
             return new PinScreenPresenterLoader(getContext());
           }
