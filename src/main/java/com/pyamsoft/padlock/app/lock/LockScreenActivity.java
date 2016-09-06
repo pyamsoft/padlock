@@ -63,7 +63,6 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
-  @NonNull private static final String KEY_LOCK_ACTIVITY = "lock_screen";
 
   @NonNull private final Intent home;
   @NonNull private final AsyncDrawableMap taskMap;
@@ -96,7 +95,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   private String lockedCode;
   private boolean lockedSystem;
   private long[] ignoreTimes;
-  private long loadedKey;
+  private String loadedKey;
 
   LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -121,7 +120,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     setContentView(R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    loadedKey = PersistentCache.load(KEY_LOCK_ACTIVITY, savedInstanceState,
+    loadedKey = PersistentCache.load(loadedKey, savedInstanceState,
         new PersistLoader.Callback<LockScreenPresenter>() {
           @NonNull @Override public PersistLoader<LockScreenPresenter> createLoader() {
             return new LockScreenPresenterLoader(getApplicationContext());
@@ -331,7 +330,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     outState.putString(CODE_DISPLAY, attempt);
     outState.putLong("IGNORE", ignoreTime);
     outState.putBoolean("EXCLUDE", menuExclude.isChecked());
-    PersistentCache.saveKey(KEY_LOCK_ACTIVITY, outState, loadedKey);
+    PersistentCache.saveKey(outState, loadedKey);
     super.onSaveInstanceState(outState);
   }
 

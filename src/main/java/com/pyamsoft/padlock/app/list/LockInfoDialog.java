@@ -40,21 +40,19 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
+import com.pyamsoft.pydroid.app.widget.DividerItemDecoration;
 import com.pyamsoft.pydroid.base.ListAdapterLoader;
 import com.pyamsoft.pydroid.base.PersistLoader;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
-import com.pyamsoft.pydroid.app.widget.DividerItemDecoration;
 import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.PersistentCache;
 import rx.Subscription;
 import timber.log.Timber;
 
 public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.LockInfoView {
 
   @NonNull private static final String ARG_APP_ENTRY = "app_entry";
-  @NonNull private static final String KEY_ADAPTER_PRESENTER = "lock_info_adapter_key";
-  @NonNull private static final String KEY_LOCK_INFO = "key_lock_info";
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
@@ -70,8 +68,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @SuppressWarnings("WeakerAccess") boolean firstRefresh;
   @SuppressWarnings("WeakerAccess") AppEntry appEntry;
   private Unbinder unbinder;
-  private long loadedPresenterKey;
-  private long loadedAdapterKey;
+  private String loadedPresenterKey;
+  private String loadedAdapterKey;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -87,7 +85,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     super.onCreate(savedInstanceState);
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
 
-    loadedPresenterKey = PersistentCache.load(KEY_LOCK_INFO, savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
+    loadedPresenterKey = PersistentCache.load(loadedPresenterKey, savedInstanceState,
+        new PersistLoader.Callback<LockInfoPresenter>() {
           @NonNull @Override public PersistLoader<LockInfoPresenter> createLoader() {
             firstRefresh = true;
             return new LockInfoPresenterLoader(getContext());
@@ -98,7 +97,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
           }
         });
 
-    loadedAdapterKey = PersistentCache.load(KEY_ADAPTER_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockInfoAdapter>() {
+    loadedAdapterKey = PersistentCache.load(loadedAdapterKey, savedInstanceState,
+        new PersistLoader.Callback<LockInfoAdapter>() {
           @NonNull @Override public PersistLoader<LockInfoAdapter> createLoader() {
             return new ListAdapterLoader<LockInfoAdapter>(getContext()) {
               @NonNull @Override public LockInfoAdapter loadPersistent() {
@@ -162,8 +162,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(KEY_LOCK_INFO, outState, loadedPresenterKey);
-    PersistentCache.saveKey(KEY_ADAPTER_PRESENTER, outState, loadedAdapterKey);
+    PersistentCache.saveKey(outState, loadedPresenterKey);
+    PersistentCache.saveKey(outState, loadedAdapterKey);
     super.onSaveInstanceState(outState);
   }
 
