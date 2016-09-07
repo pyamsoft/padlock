@@ -20,6 +20,7 @@ import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
@@ -34,21 +35,15 @@ public class PadLockDB {
 
   @NonNull private static final Object lock = new Object();
   private static volatile PadLockDB instance = null;
-
-  @NonNull private final SqlBrite sqlBrite;
-  @NonNull private final PadLockOpenHelper openHelper;
-  @NonNull private final Scheduler dbScheduler;
+  @SuppressWarnings("WeakerAccess") @NonNull final BriteDatabase briteDatabase;
   @NonNull private final AtomicInteger openCount;
-  @SuppressWarnings("WeakerAccess") volatile BriteDatabase briteDatabase;
 
   private PadLockDB(final @NonNull Context context, final @NonNull Scheduler scheduler) {
-    sqlBrite = SqlBrite.create();
-    openHelper = new PadLockOpenHelper(context.getApplicationContext());
-    dbScheduler = scheduler;
+    briteDatabase = SqlBrite.create().wrapDatabaseHelper(new PadLockOpenHelper(context), scheduler);
     openCount = new AtomicInteger(0);
   }
 
-  public static void setDB(@Nullable PadLockDB delegate) {
+  @VisibleForTesting static void setDB(@Nullable PadLockDB delegate) {
     instance = delegate;
   }
 
@@ -70,11 +65,6 @@ public class PadLockDB {
   }
 
   @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
-    if (briteDatabase == null) {
-      Timber.d("Open new Database instance");
-      briteDatabase = sqlBrite.wrapDatabaseHelper(openHelper, dbScheduler);
-    }
-
     Timber.d("Increment open count to: %d", openCount.incrementAndGet());
   }
 
@@ -212,9 +202,6 @@ public class PadLockDB {
   public void close() {
     Timber.d("Close and recycle database connection");
     openCount.set(0);
-    if (briteDatabase != null) {
-      briteDatabase.close();
-      briteDatabase = null;
-    }
+    briteDatabase.close();
   }
 }
