@@ -38,10 +38,8 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
   @NonNull private final String timeoutTimeKey;
   @NonNull private final String timeoutTimeDefault;
   @NonNull private final String lockPackageChangeKey;
-  @NonNull private final String lockDeviceLockedKey;
   @NonNull private final String recheckKey;
   private final boolean lockPackageChangeDefault;
-  private final boolean lockDeviceLockedDefault;
   private final boolean recheckDefault;
 
   @Inject PadLockPreferencesImpl(final @NonNull Context context) {
@@ -52,8 +50,6 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
     timeoutTimeDefault = getResources().getString(R.string.timeout_time_default);
     lockPackageChangeKey = getResources().getString(R.string.lock_package_change_key);
     lockPackageChangeDefault = getResources().getBoolean(R.bool.lock_package_change_default);
-    lockDeviceLockedKey = getResources().getString(R.string.lock_device_locked_key);
-    lockDeviceLockedDefault = getResources().getBoolean(R.bool.lock_device_locked_default);
     recheckKey = getResources().getString(R.string.recheck_key);
     recheckDefault = getResources().getBoolean(R.bool.recheck_default);
   }
@@ -68,10 +64,6 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
 
   @Override public boolean isRecheckEnabled() {
     return get(recheckKey, recheckDefault);
-  }
-
-  @Override @CheckResult public final boolean getLockOnDeviceLocked() {
-    return get(lockDeviceLockedKey, lockDeviceLockedDefault);
   }
 
   @Override @CheckResult public final long getDefaultIgnoreTime() {
