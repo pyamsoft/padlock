@@ -84,10 +84,10 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         Timber.e("Application list is empty");
         return Observable.empty();
       }
+
       final int size = applicationInfos.size();
       for (int i = 0; i < size; ++i) {
         final ApplicationInfo info = applicationInfos.get(i);
-        Timber.d("Application: %s", info.packageName);
         if (!info.enabled) {
           Timber.d("Application %s at %d is disabled", info.packageName, i);
           removeIndexes.add(i);
@@ -113,6 +113,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         ++removedIndexOffset;
       }
 
+      Timber.d("Application size: %d", applicationInfos.size());
       return Observable.from(applicationInfos);
     });
   }

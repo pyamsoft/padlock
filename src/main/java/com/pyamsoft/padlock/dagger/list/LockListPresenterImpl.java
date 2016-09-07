@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import android.content.pm.ApplicationInfo;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -183,7 +182,8 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
               foundEntry = null;
             }
 
-            final AppEntry appEntry = createFromPackageInfo(applicationInfo, foundEntry != null);
+            final AppEntry appEntry =
+                lockListInteractor.createFromPackageInfo(applicationInfo, foundEntry != null);
             Timber.d("Add AppEntry: %s", appEntry);
             appEntries.add(appEntry);
           }
@@ -209,17 +209,6 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
           lockList.onListPopulated();
           unsubscribePopulateList();
         });
-  }
-
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult AppEntry createFromPackageInfo(
-      @NonNull ApplicationInfo info, boolean locked) {
-    Timber.d("Create AppEntry from package info: %s", info.packageName);
-    return AppEntry.builder()
-        .name(lockListInteractor.loadPackageLabel(info).toBlocking().first())
-        .packageName(info.packageName)
-        .system(lockListInteractor.isSystemApplication(info).toBlocking().first())
-        .locked(locked)
-        .build();
   }
 
   @Override public void setFABStateFromPreference() {
