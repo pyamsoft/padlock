@@ -118,7 +118,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
           final Observable<Long> whitelistObservable;
           if (exclude) {
             whitelistObservable =
-                whitelistEntry(entry, packageName, activityName, realName, lockCode, isSystem);
+                whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
           } else {
             whitelistObservable = Observable.just(0L);
           }
@@ -150,18 +150,10 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> whitelistEntry(
-      @NonNull PadLockEntry entry, @NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName, @Nullable String lockCode, boolean isSystem) {
-    Timber.d("Get entry for %s %s (real %s)", packageName, activityName, realName);
-    if (PadLockEntry.isEmpty(entry)) {
-      Timber.d("No entry currently exists, create new one and whitelist it");
-      return PadLockDB.with(appContext)
-          .insert(packageName, realName, lockCode, 0, 0, isSystem, true);
-    } else {
-      Timber.d("Entry exists, update it");
-      return updateEntry(entry, entry.lockUntilTime(), entry.ignoreUntilTime(), true).map(
-          Integer::longValue);
-    }
+      @NonNull String packageName, @NonNull String activityName, @NonNull String realName,
+      @Nullable String lockCode, boolean isSystem) {
+    Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName);
+    return PadLockDB.with(appContext).insert(packageName, realName, lockCode, 0, 0, isSystem, true);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Integer> queueRecheckJob(
@@ -192,6 +184,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Integer> updateEntry(
       @NonNull PadLockEntry values, long lockUntilTime, long ignoreUntilTime, boolean whitelist) {
+    Timber.d("Update entry: %s, %s", values.packageName(), values.activityName());
     return PadLockDB.with(appContext)
         .updateWithPackageActivityName(values.packageName(), values.activityName(),
             values.lockCode(), lockUntilTime, ignoreUntilTime, values.systemApplication(),
