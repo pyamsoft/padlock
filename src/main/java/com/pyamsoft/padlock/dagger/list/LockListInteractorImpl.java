@@ -59,6 +59,14 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
     preferences.setOnBoard();
   }
 
+  @Override public void setZeroActivityVisible(boolean visible) {
+    preferences.setZeroActivityVisible(visible);
+  }
+
+  @NonNull @Override public Observable<Boolean> isZeroActivityVisible() {
+    return Observable.defer(() -> Observable.just(preferences.isZeroActivityVisible()));
+  }
+
   @Override @NonNull public Observable<List<ApplicationInfo>> getApplicationInfoList() {
     return packageManagerWrapper.getActiveApplications().filter(applicationInfo -> {
       // KLUDGE Blocking
@@ -77,11 +85,14 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
       }
     }).filter(applicationInfo -> {
       // KLUDGE blocking
-      if (packageManagerWrapper.getActivityListForPackage(applicationInfo.packageName)
-          .toList()
-          .toBlocking()
-          .first()
-          .size() == 0) {
+      final List<String> activityList =
+          packageManagerWrapper.getActivityListForPackage(applicationInfo.packageName)
+              .toList()
+              .toBlocking()
+              .first();
+
+      final boolean isZeroActivityVisible = isZeroActivityVisible().toBlocking().first();
+      if (activityList.size() == 0 && !isZeroActivityVisible) {
         Timber.w("Exclude package %s because it has no activities", applicationInfo.packageName);
         return false;
       } else {
