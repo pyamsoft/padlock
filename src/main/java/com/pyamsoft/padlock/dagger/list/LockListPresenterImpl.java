@@ -54,6 +54,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @NonNull private Subscription dbProgressBus = Subscriptions.empty();
   @NonNull private Subscription lockInfoDisplayBus = Subscriptions.empty();
   @NonNull private Subscription databaseSubscription = Subscriptions.empty();
+  @NonNull private Subscription zeroActivitySubscription = Subscriptions.empty();
 
   @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -78,6 +79,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     unregisterFromLockInfoDispalyBus();
     unsubscribePopulateList();
     unsubscribeSystemVisible();
+    unsubscribeZeroActivity();
     unsubscribeOnboard();
     unsubscribeFabSubscription();
     unsubDatabaseSubscription();
@@ -139,10 +141,6 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     if (!onboardSubscription.isUnsubscribed()) {
       onboardSubscription.unsubscribe();
     }
-  }
-
-  @SuppressWarnings("WeakerAccess") void setSystemVisible(boolean visible) {
-    lockListInteractor.setSystemVisible(visible);
   }
 
   @Override public void populateList() {
@@ -237,11 +235,11 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   }
 
   @Override public void setSystemVisible() {
-    setSystemVisible(true);
+    lockListInteractor.setSystemVisible(true);
   }
 
   @Override public void setSystemInvisible() {
-    setSystemVisible(false);
+    lockListInteractor.setSystemVisible(false);
   }
 
   @Override public void setSystemVisibilityFromPreference() {
@@ -260,6 +258,38 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
           // TODO different error
           getView().onListPopulateError();
         }, this::unsubscribeSystemVisible);
+  }
+
+  @Override public void setZeroActivityHidden() {
+    lockListInteractor.setZeroActivityVisible(false);
+  }
+
+  @Override public void setZeroActivityShown() {
+    lockListInteractor.setZeroActivityVisible(true);
+  }
+
+  @Override public void setZeroActivityFromPreference() {
+    unsubscribeZeroActivity();
+    zeroActivitySubscription = lockListInteractor.isZeroActivityVisible()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(visible -> {
+          final LockList lockList = getView();
+          if (visible) {
+            lockList.setZeroActivityShown();
+          } else {
+            lockList.setZeroActivityHidden();
+          }
+        }, throwable -> {
+          // TODO different error
+          getView().onListPopulateError();
+        }, this::unsubscribeZeroActivity);
+  }
+
+  @SuppressWarnings("WeakerAccess") void unsubscribeZeroActivity() {
+    if (!zeroActivitySubscription.isUnsubscribed()) {
+      zeroActivitySubscription.unsubscribe();
+    }
   }
 
   @Override public void clickPinFAB() {

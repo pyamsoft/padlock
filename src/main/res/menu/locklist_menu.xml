@@ -31,4 +31,10 @@
       android:title="@string/show_system_applications"
       app:showAsAction="never"/>
 
+  <item
+      android:id="@+id/menu_show_zero_activity"
+      android:checkable="true"
+      android:title="Show Entries with No Activities"
+      app:showAsAction="never"/>
+
 </menu>

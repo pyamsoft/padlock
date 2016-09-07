@@ -28,6 +28,7 @@ import javax.inject.Inject;
 class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPreferences {
 
   @NonNull private static final String IS_SYSTEM = "is_system";
+  @NonNull private static final String ZERO_ACTIVITY = "zero_activity";
   @NonNull private static final String MASTER_PASSWORD = "master_password";
   @NonNull private static final String HINT = "hint";
   @NonNull private static final String AGREED = "agreed";
@@ -91,6 +92,14 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
 
   @Override public final void setSystemVisible(final boolean b) {
     put(IS_SYSTEM, b);
+  }
+
+  @Override public boolean isZeroActivityVisible() {
+    return get(ZERO_ACTIVITY, false);
+  }
+
+  @Override public void setZeroActivityVisible(boolean b) {
+    put(ZERO_ACTIVITY, b);
   }
 
   @Override @CheckResult public final String getMasterPassword() {

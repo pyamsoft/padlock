@@ -66,7 +66,7 @@ public class LockListFragment extends ActionBarFragment
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
   @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
-@NonNull  private static final String KEY_PRESENTER = "key_presenter";
+  @NonNull private static final String KEY_PRESENTER = "key_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
@@ -101,6 +101,7 @@ public class LockListFragment extends ActionBarFragment
   @SuppressWarnings("WeakerAccess") boolean firstRefresh;
   private Unbinder unbinder;
   private MenuItem displaySystemItem;
+  private MenuItem displayZeroActivityItem;
   private long loadedPresenterKey;
   private long loadedAdapterKey;
 
@@ -117,8 +118,8 @@ public class LockListFragment extends ActionBarFragment
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
 
-    loadedPresenterKey =
-        PersistentCache.load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
+    loadedPresenterKey = PersistentCache.load(KEY_PRESENTER, savedInstanceState,
+        new PersistLoader.Callback<LockListPresenter>() {
           @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
             firstRefresh = true;
             return new LockListPresenterLoader(getContext());
@@ -237,7 +238,9 @@ public class LockListFragment extends ActionBarFragment
 
   private void setupLockListMenuItems(final @NonNull Menu menu) {
     displaySystemItem = menu.findItem(R.id.menu_is_system);
+    displayZeroActivityItem = menu.findItem(R.id.menu_show_zero_activity);
     presenter.setSystemVisibilityFromPreference();
+    presenter.setZeroActivityFromPreference();
   }
 
   private void setSystemCheckListener() {
@@ -256,10 +259,32 @@ public class LockListFragment extends ActionBarFragment
     });
   }
 
+  private void setZeroActivityCheckListener() {
+    displayZeroActivityItem.setOnMenuItemClickListener(item -> {
+      if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
+        Timber.d("List is not refreshing. Allow change of system preference");
+        if (item.isChecked()) {
+          presenter.setZeroActivityHidden();
+        } else {
+          presenter.setZeroActivityShown();
+        }
+
+        refreshList();
+      }
+      return true;
+    });
+  }
+
   @SuppressWarnings("WeakerAccess") void setSystemVisible(boolean visible) {
     displaySystemItem.setOnMenuItemClickListener(null);
     displaySystemItem.setChecked(visible);
     setSystemCheckListener();
+  }
+
+  @SuppressWarnings("WeakerAccess") void setZeroActivityVisible(boolean visible) {
+    displayZeroActivityItem.setOnMenuItemClickListener(null);
+    displayZeroActivityItem.setChecked(visible);
+    setZeroActivityCheckListener();
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -303,6 +328,14 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void setSystemInvisible() {
     setSystemVisible(false);
+  }
+
+  @Override public void setZeroActivityHidden() {
+    setZeroActivityVisible(false);
+  }
+
+  @Override public void setZeroActivityShown() {
+    setZeroActivityVisible(true);
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
