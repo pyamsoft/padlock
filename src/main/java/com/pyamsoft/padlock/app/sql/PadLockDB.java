@@ -97,6 +97,7 @@ public class PadLockDB {
       throw new RuntimeException("Cannot insert EMPTY entry");
     }
 
+    Timber.i("DB: INSERT");
     return deleteWithPackageActivityName(packageName, activityName).map(deleted -> {
       Timber.d("Delete result: %d", deleted);
 
@@ -119,6 +120,7 @@ public class PadLockDB {
       throw new RuntimeException("Cannot update EMPTY entry");
     }
 
+    Timber.i("DB: UPDATE");
     openDatabase();
     return Observable.defer(() -> {
       final int result = briteDatabase.update(PadLockEntry.TABLE_NAME,
@@ -132,8 +134,8 @@ public class PadLockDB {
   @NonNull @CheckResult
   public Observable<PadLockEntry> queryWithPackageActivityName(final @NonNull String packageName,
       final @NonNull String activityName) {
+    Timber.i("DB: QUERY");
     openDatabase();
-
     return briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
         PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)
         .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_nameMapper()::map,
@@ -147,8 +149,8 @@ public class PadLockDB {
 
   @NonNull @CheckResult
   public Observable<List<PadLockEntry>> queryWithPackageName(final @NonNull String packageName) {
+    Timber.i("DB: QUERY");
     openDatabase();
-
     return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME,
         packageName)
         .mapToList(PadLockEntry.FACTORY.with_package_nameMapper()::map)
@@ -173,8 +175,8 @@ public class PadLockDB {
 
   @NonNull @CheckResult
   public Observable<Integer> deleteWithPackageName(final @NonNull String packageName) {
+    Timber.i("DB: DELETE");
     openDatabase();
-
     return Observable.defer(() -> {
       final int result =
           briteDatabase.delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME,
@@ -187,8 +189,8 @@ public class PadLockDB {
   @NonNull @CheckResult
   public Observable<Integer> deleteWithPackageActivityName(final @NonNull String packageName,
       final @NonNull String activityName) {
+    Timber.i("DB: DELETE");
     openDatabase();
-
     return Observable.defer(() -> {
       final int result = briteDatabase.delete(PadLockEntry.TABLE_NAME,
           PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
@@ -198,6 +200,7 @@ public class PadLockDB {
   }
 
   @NonNull @CheckResult public Observable<Integer> deleteAll() {
+    Timber.i("DB: DELETE");
     openDatabase();
     return Observable.defer(() -> {
       final int result = briteDatabase.delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
