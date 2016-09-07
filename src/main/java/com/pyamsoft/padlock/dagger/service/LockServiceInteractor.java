@@ -38,11 +38,7 @@ public interface LockServiceInteractor {
   @NonNull @CheckResult Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
       @NonNull String className);
 
-  @NonNull @CheckResult Observable<Boolean> isDeviceLocked();
-
   @NonNull @CheckResult Observable<Boolean> isOnlyLockOnPackageChange();
-
-  @NonNull @CheckResult Observable<Boolean> isLockWhenDeviceLocked();
 
   @NonNull @CheckResult Observable<PadLockEntry> getEntry(@NonNull String packageName,
       @NonNull String activityName);

@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
-import com.pyamsoft.padlock.app.service.PadLockService;
+import com.pyamsoft.padlock.app.service.ScreenOnOffReceiver;
 import com.pyamsoft.padlock.dagger.lock.MasterPinModule;
 import com.pyamsoft.pydroid.dagger.ActivityScope;
 import dagger.Subcomponent;
@@ -25,5 +25,5 @@ import dagger.Subcomponent;
     LockServiceModule.class, MasterPinModule.class, LockServiceStateModule.class
 }) public interface LockServiceComponent {
 
-  void inject(PadLockService padLockService);
+  void inject(ScreenOnOffReceiver receiver);
 }

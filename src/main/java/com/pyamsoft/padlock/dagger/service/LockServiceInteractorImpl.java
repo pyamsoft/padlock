@@ -18,12 +18,11 @@ package com.pyamsoft.padlock.dagger.service;
 
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.TagConstraint;
-import com.pyamsoft.padlock.PadLockSingleInitProvider;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.PadLockSingleInitProvider;
 import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
@@ -72,21 +71,6 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   }
 
   /**
-   * Return true if the device is currently locked
-   */
-  @NonNull @CheckResult @Override public Observable<Boolean> isDeviceLocked() {
-    return Observable.defer(() -> {
-      boolean locked = false;
-      Timber.d("Check if device is currently locked in some secure manner");
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-        Timber.d("Device has isDeviceLocked() call");
-        locked = keyguard.isDeviceLocked();
-      }
-      return Observable.just(locked || keyguard.inKeyguardRestrictedInputMode());
-    });
-  }
-
-  /**
    * If the screen has changed, update the last package.
    * This will prevent the lock screen from opening twice when the same
    * app opens multiple activities for example.
@@ -100,21 +84,17 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
       @NonNull String className) {
     return Observable.defer(() -> {
       final boolean lockScreen1 =
-          packageName.equals(PadLockSingleInitProvider.class.getPackage().getName()) && className.equals(
-              LockScreenActivity1.class.getName());
+          packageName.equals(PadLockSingleInitProvider.class.getPackage().getName())
+              && className.equals(LockScreenActivity1.class.getName());
       final boolean lockScreen2 =
-          packageName.equals(PadLockSingleInitProvider.class.getPackage().getName()) && className.equals(
-              LockScreenActivity2.class.getName());
+          packageName.equals(PadLockSingleInitProvider.class.getPackage().getName())
+              && className.equals(LockScreenActivity2.class.getName());
       return Observable.just(lockScreen1 || lockScreen2);
     });
   }
 
   @NonNull @Override public Observable<Boolean> isOnlyLockOnPackageChange() {
     return Observable.defer(() -> Observable.just(preferences.getLockOnPackageChange()));
-  }
-
-  @NonNull @Override public Observable<Boolean> isLockWhenDeviceLocked() {
-    return Observable.defer(() -> Observable.just(preferences.getLockOnDeviceLocked()));
   }
 
   @NonNull @CheckResult @Override

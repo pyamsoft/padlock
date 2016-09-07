@@ -23,6 +23,7 @@ import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.dagger.presenter.SchedulerPresenter;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;
@@ -103,18 +104,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
             reset();
           }
           return enabled;
-        }).zipWith(interactor.isLockWhenDeviceLocked(), (enabled, lockWhenDeviceLocked) -> {
-          Timber.d("Check if device should reset on lock");
-          return enabled && lockWhenDeviceLocked;
-        }).zipWith(interactor.isDeviceLocked(), (isLockWhenDeviceLocked, isDeviceLocked) -> {
-          if (isLockWhenDeviceLocked && isDeviceLocked) {
-            Timber.d("Device is Locked. Reset state");
-            reset();
-          }
-
-          // Always return true here to continue
-          return true;
-        }).flatMap(aBoolean -> {
+        }).flatMap(enabled -> {
           Timber.d("Check if event is from activity");
           return interactor.isEventFromActivity(packageName, className);
         }).filter(fromActivity -> {
