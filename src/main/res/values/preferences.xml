@@ -109,10 +109,4 @@
   <string name="lock_package_change_summary_checked">Check for locked applications only when package has changed</string>
   <string name="lock_package_change_summary_unchecked">Check for locked applications when the window changes</string>
 
-  <bool name="lock_device_locked_default">true</bool>
-  <string name="lock_device_locked_key">lock_device_locked</string>
-  <string name="lock_device_locked_title">Lock on Device Locked</string>
-  <string name="lock_device_locked_summary_checked">Check for locked applications when device is locked</string>
-  <string name="lock_device_locked_summary_unchecked">Do not check for locked applications when device is locked</string>
-
 </resources>
