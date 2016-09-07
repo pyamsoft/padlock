@@ -171,8 +171,4 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
       return !entry.whitelist();
     });
   }
-
-  @NonNull @Override public Observable<Boolean> isExperimentalNSupported() {
-    return Observable.defer(() -> Observable.just(preferences.isExperimentalNSupported()));
-  }
 }

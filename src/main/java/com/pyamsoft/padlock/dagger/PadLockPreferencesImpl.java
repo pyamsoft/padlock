@@ -38,12 +38,10 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
   @NonNull private final String timeoutTimeDefault;
   @NonNull private final String lockPackageChangeKey;
   @NonNull private final String lockDeviceLockedKey;
-  @NonNull private final String nSupportKey;
   @NonNull private final String recheckKey;
   private final boolean lockPackageChangeDefault;
   private final boolean lockDeviceLockedDefault;
   private final boolean recheckDefault;
-  private final boolean nSupportDefault;
 
   @Inject PadLockPreferencesImpl(final @NonNull Context context) {
     super(context);
@@ -57,8 +55,6 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
     lockDeviceLockedDefault = getResources().getBoolean(R.bool.lock_device_locked_default);
     recheckKey = getResources().getString(R.string.recheck_key);
     recheckDefault = getResources().getBoolean(R.bool.recheck_default);
-    nSupportKey = getResources().getString(R.string.n_support_key);
-    nSupportDefault = getResources().getBoolean(R.bool.n_support_default);
   }
 
   @Override public String getHint() {
@@ -71,10 +67,6 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
 
   @Override public boolean isRecheckEnabled() {
     return get(recheckKey, recheckDefault);
-  }
-
-  @Override public boolean isExperimentalNSupported() {
-    return get(nSupportKey, nSupportDefault);
   }
 
   @Override @CheckResult public final boolean getLockOnDeviceLocked() {
