@@ -24,21 +24,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.view.accessibility.AccessibilityEvent;
-import com.pyamsoft.padlock.Singleton;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import javax.inject.Inject;
 import timber.log.Timber;
 
-public class PadLockService extends AccessibilityService
-    implements LockServicePresenter.LockService {
+public class PadLockService extends AccessibilityService {
 
   private static volatile PadLockService instance = null;
-  @Inject LockServicePresenter presenter;
-  private Intent lockActivity;
-  private Intent lockActivity2;
+  private ScreenOnOffReceiver screenOnOffReceiver;
 
   @NonNull @CheckResult private static synchronized PadLockService getInstance() {
     if (instance == null) {
@@ -63,46 +54,12 @@ public class PadLockService extends AccessibilityService
   }
 
   public static void passLockScreen() {
-    final LockServicePresenter lockServicePresenter = getInstance().presenter;
-    lockServicePresenter.setLockScreenPassed();
+    getInstance().getScreenOnOffReceiver().passLockScreen();
   }
 
   public static void recheck(@NonNull String packageName, @NonNull String className) {
     if (!packageName.isEmpty() && !className.isEmpty()) {
-      final PadLockService service = getInstance();
-      final LockServicePresenter presenter = service.presenter;
-      Timber.d("Recheck was requested for: %s, %s", packageName, className);
-
-      final String servicePackage = presenter.getActivePackageName();
-      final String serviceClass = presenter.getActiveClassName();
-      Timber.d("Check against current window values: %s, %s", servicePackage, serviceClass);
-      if (servicePackage.equals(packageName) && (serviceClass.equals(className) || className.equals(
-          PadLockEntry.PACKAGE_ACTIVITY_NAME))) {
-        // We can replace the actual passed classname with the stored classname because:
-        // either it is equal to the passed name or the passed name is PACKAGE
-        // which will respond to any class name
-        Timber.d("Run recheck for: %s %s", servicePackage, serviceClass);
-        service.presenter.processAccessibilityEvent(servicePackage, serviceClass, true);
-      }
-    }
-  }
-
-  private static void craftIntent(@NonNull Intent removeIntent, @NonNull Intent addIntent,
-      @NonNull PadLockEntry entry, @NonNull String realName) {
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_LOCK_CODE);
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_IS_SYSTEM);
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_REAL_NAME);
-    addIntent.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName());
-    addIntent.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName());
-    addIntent.putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode());
-    addIntent.putExtra(LockScreenActivity.ENTRY_IS_SYSTEM,
-        Boolean.toString(entry.systemApplication()));
-    addIntent.putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName);
-
-    if (entry.whitelist()) {
-      throw new RuntimeException("Cannot launch LockScreen for whitelisted applications");
+      getInstance().getScreenOnOffReceiver().recheck(packageName, className);
     }
   }
 
@@ -119,7 +76,7 @@ public class PadLockService extends AccessibilityService
       final String pName = eventPackage.toString();
       final String cName = eventClass.toString();
       if (!pName.isEmpty() && !cName.isEmpty()) {
-        presenter.processAccessibilityEvent(pName, cName, false);
+        screenOnOffReceiver.processAccessibilityEvent(pName, cName, false);
       }
     } else {
       Timber.e("Missing needed data");
@@ -130,42 +87,36 @@ public class PadLockService extends AccessibilityService
     Timber.e("onInterrupt");
   }
 
-  @Override public void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName) {
-    craftIntent(lockActivity2, lockActivity, entry, realName);
-    Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
-        entry.activityName(), realName);
-    startActivity(lockActivity);
-  }
-
-  @Override public void startLockScreen2(@NonNull PadLockEntry entry, @NonNull String realName) {
-    craftIntent(lockActivity, lockActivity2, entry, realName);
-    Timber.d("Start lock activity 2 for entry: %s %s (real %s)", entry.packageName(),
-        entry.activityName(), realName);
-    startActivity(lockActivity2);
-  }
-
   @Override public boolean onUnbind(Intent intent) {
-    Timber.d("onDestroy");
-    presenter.unbindView();
-    presenter.destroy();
-    lockActivity = null;
-    lockActivity2 = null;
-
+    Timber.d("onUnbind");
     setInstance(null);
+    screenOnOffReceiver.unregister();
     return super.onUnbind(intent);
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    Timber.d("onDestroy");
+    screenOnOffReceiver.destroy();
   }
 
   @Override protected void onServiceConnected() {
     super.onServiceConnected();
     Timber.d("onServiceConnected");
-    lockActivity =
-        new Intent(this, LockScreenActivity1.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    lockActivity2 =
-        new Intent(this, LockScreenActivity2.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    if (screenOnOffReceiver != null) {
+      screenOnOffReceiver.unregister();
+      screenOnOffReceiver.destroy();
+    }
 
-    Singleton.Dagger.with(this).plusLockService().inject(this);
-
-    presenter.bindView(this);
+    screenOnOffReceiver = new ScreenOnOffReceiver(getApplicationContext());
+    screenOnOffReceiver.register();
     setInstance(this);
+  }
+
+  @CheckResult @NonNull ScreenOnOffReceiver getScreenOnOffReceiver() {
+    if (screenOnOffReceiver == null) {
+      throw new NullPointerException("ScreenOnOffReceiver is NULL");
+    }
+    return screenOnOffReceiver;
   }
 }
