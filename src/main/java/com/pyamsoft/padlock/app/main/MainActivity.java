@@ -211,7 +211,8 @@ public class MainActivity extends DonationActivity
   @NonNull @Override public Spannable getChangeLogText() {
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
-    final String line1 = "FEATURE: Added advertisements (can be disabled from Settings)";
+    final String line1 =
+        "BUGFIX: Fixed an issue where whitelisting an Entry would cause the Lock Screen to fail.";
 
     // Turn it into a spannable
     final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1);
