@@ -23,8 +23,6 @@ public interface PadLockPreferences {
 
   @CheckResult boolean isRecheckEnabled();
 
-  @CheckResult boolean isExperimentalNSupported();
-
   @CheckResult boolean getLockOnDeviceLocked();
 
   @CheckResult long getDefaultIgnoreTime();

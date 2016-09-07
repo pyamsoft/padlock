@@ -42,7 +42,6 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
   @SuppressWarnings("WeakerAccess") @NonNull String activeClassName = "";
   @SuppressWarnings("WeakerAccess") boolean lockScreenPassed;
   @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
-  @NonNull private Subscription pickCorrectSubscription = Subscriptions.empty();
 
   @Inject LockServicePresenterImpl(@NonNull final LockServiceStateInteractor stateInteractor,
       @NonNull final LockServiceInteractor interactor,
@@ -57,7 +56,6 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
   @Override protected void onUnbind() {
     super.onUnbind();
     unsubLockedEntry();
-    unsubPickCorrect();
   }
 
   @Override protected void onDestroy() {
@@ -77,12 +75,6 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
   @SuppressWarnings("WeakerAccess") void unsubLockedEntry() {
     if (!lockedEntrySubscription.isUnsubscribed()) {
       lockedEntrySubscription.unsubscribe();
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubPickCorrect() {
-    if (!pickCorrectSubscription.isUnsubscribed()) {
-      pickCorrectSubscription.unsubscribe();
     }
   }
 
@@ -192,22 +184,10 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
 
   @SuppressWarnings("WeakerAccess") void launchCorrectLockScreen(@NonNull PadLockEntry entry,
       @NonNull String realName) {
-    unsubPickCorrect();
-    pickCorrectSubscription = interactor.isExperimentalNSupported()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .map(nSupported -> nSupported
-            && LockScreenActivity1.isActive()
-            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        .subscribe(launchActivity2 -> {
-          if (launchActivity2) {
-            getView().startLockScreen2(entry, realName);
-          } else {
-            getView().startLockScreen1(entry, realName);
-          }
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-          // TODO error
-        }, this::unsubPickCorrect);
+    if (LockScreenActivity1.isActive() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      getView().startLockScreen2(entry, realName);
+    } else {
+      getView().startLockScreen1(entry, realName);
+    }
   }
 }

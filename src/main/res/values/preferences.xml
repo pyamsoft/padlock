@@ -115,10 +115,4 @@
   <string name="lock_device_locked_summary_checked">Check for locked applications when device is locked</string>
   <string name="lock_device_locked_summary_unchecked">Do not check for locked applications when device is locked</string>
 
-  <bool name="n_support_default">false</bool>
-  <string name="n_support_key">n_support</string>
-  <string name="n_support_title">Experimental N Support</string>
-  <string name="n_support_summary_checked">Android N experimental support is enabled</string>
-  <string name="n_support_summary_unchecked">Android N experimental support is disabled</string>
-
 </resources>
