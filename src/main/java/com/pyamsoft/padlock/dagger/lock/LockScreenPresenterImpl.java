@@ -177,13 +177,12 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
   }
 
   @Override public void postUnlock(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
-      long ignoreTime) {
+      @NonNull String realName, @Nullable String lockCode, long lockUntilTime, boolean isSystem,
+      boolean shouldExclude, long ignoreTime) {
     unsubPostUnlock();
     postUnlockSubscription = Observable.defer(() -> Observable.just(ignoreTime))
-        .flatMap(
-            time -> interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
-                shouldExclude, time))
+        .flatMap(time -> interactor.postUnlock(packageName, activityName, realName, lockCode,
+            lockUntilTime, isSystem, shouldExclude, time))
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(result -> {

@@ -28,7 +28,6 @@ import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.job.RecheckJob;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -97,46 +96,44 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
 
   @NonNull @Override
   public Observable<Boolean> postUnlock(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean exclude,
-      long ignoreTime) {
-    return PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, activityName)
-        .first()
-        .flatMap(entry -> {
-          Timber.d("Run finishing unlock hooks");
-          final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
-          final Observable<Long> whitelistObservable;
-          if (exclude) {
-            whitelistObservable =
-                whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
-          } else {
-            whitelistObservable = Observable.just(0L);
-          }
+      @NonNull String realName, @Nullable String lockCode, long lockUntilTime, boolean isSystem,
+      boolean selectedExclude, long selectedIgnoreTime) {
+    return Observable.defer(() -> {
+      Timber.d("Run finishing unlock hooks");
+      final long ignoreMinutesInMillis = selectedIgnoreTime * 60 * 1000;
+      final Observable<Long> whitelistObservable;
+      if (selectedExclude) {
+        whitelistObservable =
+            whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
+      } else {
+        whitelistObservable = Observable.just(0L);
+      }
 
-          final Observable<Integer> ignoreObservable;
-          if (ignoreTime != 0 && !exclude) {
-            ignoreObservable = ignoreEntryForTime(entry, ignoreMinutesInMillis);
-          } else {
-            ignoreObservable = Observable.just(0);
-          }
+      final Observable<Integer> ignoreObservable;
+      if (selectedIgnoreTime != 0 && !selectedExclude) {
+        ignoreObservable = ignoreEntryForTime(packageName, activityName, lockCode, lockUntilTime,
+            ignoreMinutesInMillis, isSystem);
+      } else {
+        ignoreObservable = Observable.just(0);
+      }
 
-          final Observable<Integer> recheckObservable;
-          if (ignoreTime != 0 && preferences.isRecheckEnabled() && !exclude) {
-            recheckObservable = queueRecheckJob(entry, ignoreMinutesInMillis);
-          } else {
-            recheckObservable = Observable.just(0);
-          }
+      final Observable<Integer> recheckObservable;
+      if (selectedIgnoreTime != 0 && preferences.isRecheckEnabled() && !selectedExclude) {
+        recheckObservable = queueRecheckJob(packageName, activityName, ignoreMinutesInMillis);
+      } else {
+        recheckObservable = Observable.just(0);
+      }
 
-          return Observable.zip(ignoreObservable, recheckObservable, whitelistObservable,
-              (ignore, recheck, whitelist) -> {
-                Timber.d("Result of Ignore: %d", ignore);
-                Timber.d("Result of Recheck: %d", recheck);
-                Timber.d("Result of Whitelist: %d", whitelist);
+      return Observable.zip(ignoreObservable, recheckObservable, whitelistObservable,
+          (ignore, recheck, whitelist) -> {
+            Timber.d("Result of Whitelist: %d", whitelist);
+            Timber.d("Result of Ignore: %d", ignore);
+            Timber.d("Result of Recheck: %d", recheck);
 
-                // KLUDGE Just return something valid for now
-                return true;
-              });
-        });
+            // KLUDGE Just return something valid for now
+            return true;
+          });
+    });
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> whitelistEntry(
@@ -147,16 +144,16 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Integer> queueRecheckJob(
-      PadLockEntry entry, long recheckTime) {
+      @NonNull String packageName, @NonNull String activityName, long recheckTime) {
     return Observable.defer(() -> {
       // Cancel any old recheck job for the class, but not the package
-      final String packageTag = RecheckJob.TAG_CLASS_PREFIX + entry.packageName();
-      final String classTag = RecheckJob.TAG_CLASS_PREFIX + entry.activityName();
+      final String packageTag = RecheckJob.TAG_CLASS_PREFIX + packageName;
+      final String classTag = RecheckJob.TAG_CLASS_PREFIX + activityName;
       Timber.d("Cancel jobs with package tag: %s and class tag: %s", packageTag, classTag);
       jobManager.cancelJobs(TagConstraint.ALL, packageTag, classTag);
 
       // Queue up a new recheck job
-      final Job recheck = RecheckJob.create(entry.packageName(), entry.activityName(), recheckTime);
+      final Job recheck = RecheckJob.create(packageName, activityName, recheckTime);
       jobManager.addJob(recheck);
 
       // KLUDGE Just return something valid for now
@@ -165,20 +162,14 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Integer> ignoreEntryForTime(
-      @NonNull PadLockEntry oldValues, long ignoreMinutesInMillis) {
-    Timber.d("Ignore %s %s for %d", oldValues.packageName(), oldValues.activityName(),
+      @NonNull String packageName, @NonNull String activityName, @Nullable String lockCode,
+      long lockUntilTime, long ignoreMinutesInMillis, boolean isSystem) {
+    final long newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis;
+    Timber.d("Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
         ignoreMinutesInMillis);
-    return updateEntry(oldValues, oldValues.lockUntilTime(),
-        System.currentTimeMillis() + ignoreMinutesInMillis, oldValues.whitelist());
-  }
-
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Integer> updateEntry(
-      @NonNull PadLockEntry values, long lockUntilTime, long ignoreUntilTime, boolean whitelist) {
-    Timber.d("Update entry: %s, %s", values.packageName(), values.activityName());
     return PadLockDB.with(appContext)
-        .updateWithPackageActivityName(values.packageName(), values.activityName(),
-            values.lockCode(), lockUntilTime, ignoreUntilTime, values.systemApplication(),
-            whitelist);
+        .updateWithPackageActivityName(packageName, activityName, lockCode, lockUntilTime,
+            newIgnoreTime, isSystem, false);
   }
 
   @NonNull @CheckResult @Override public Observable<Long> getDefaultIgnoreTime() {

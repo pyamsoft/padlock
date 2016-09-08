@@ -302,7 +302,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     clearDisplay();
 
     presenter.postUnlock(lockedPackageName, lockedActivityName, lockedRealName, lockedCode,
-        lockedSystem, menuExclude.isChecked(), getIgnoreTimeFromSelectedIndex());
+        lockUntilTime, lockedSystem, menuExclude.isChecked(), getIgnoreTimeFromSelectedIndex());
   }
 
   @Override public void onSubmitFailure() {
