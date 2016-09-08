@@ -25,7 +25,7 @@ import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.sql.PadLockDB;
+import com.pyamsoft.padlock.dagger.sql.PadLockDB;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.job.RecheckJob;
 import javax.inject.Inject;
