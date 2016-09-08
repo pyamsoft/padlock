@@ -28,6 +28,26 @@ WHERE packageName = ?
 AND activityName = ?
 LIMIT 1;
 
+-- Get either the package with specific name of the PACKAGE entry
+-- SQLite only has bindings so we must make do
+-- ?1 package name
+-- ?2 the PadLock PACKAGE_TAG, see model.PadLockEntry
+-- ?3 the specific activity name
+-- ?4 the PadLock PACKAGE_TAG, see model.PadLockEntry
+-- ?5 the specific activity name
+with_package_activity_name_default:
+SELECT *
+FROM padlock_entry
+WHERE packageName = ?1
+AND (activityName = ?2 OR activityName = ?3)
+ORDER BY
+  CASE
+    WHEN activityName = ?4 THEN 1
+    WHEN activityName = ?5 THEN 0
+  END
+ASC
+LIMIT 1;
+
 -- Get the lock code for an entry
 with_lock_code:
 SELECT lockCode
