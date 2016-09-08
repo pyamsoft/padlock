@@ -61,6 +61,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @NonNull public static final String ENTRY_REAL_NAME = "real_name";
   @NonNull public static final String ENTRY_LOCK_CODE = "lock_code";
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
+  @NonNull public static final String ENTRY_LOCK_UNTIL_TIME = "lock_until_time";
+  @NonNull public static final String ENTRY_IGNORE_UNTIL_TIME = "ignore_until_time";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
   @NonNull private static final String KEY_LOCK_PRESENTER = "key_lock_presenter";
@@ -97,6 +99,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   private boolean lockedSystem;
   private long[] ignoreTimes;
   private long loadedKey;
+  private long lockUntilTime;
+  private long ignoreUntilTime;
 
   LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -212,18 +216,13 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     lockedActivityName = bundle.getString(ENTRY_ACTIVITY_NAME);
     lockedRealName = bundle.getString(ENTRY_REAL_NAME);
     lockedCode = bundle.getString(ENTRY_LOCK_CODE);
+    lockUntilTime = bundle.getLong(ENTRY_LOCK_UNTIL_TIME, 0);
+    ignoreUntilTime = bundle.getLong(ENTRY_IGNORE_UNTIL_TIME, 0);
+    lockedSystem = bundle.getBoolean(ENTRY_IS_SYSTEM, false);
 
-    final String lockedStringSystem = bundle.getString(ENTRY_IS_SYSTEM);
-
-    if (lockedPackageName == null
-        || lockedActivityName == null
-        || lockedRealName == null
-        || lockedStringSystem == null) {
+    if (lockedPackageName == null || lockedActivityName == null || lockedRealName == null) {
       throw new NullPointerException("Missing required lock attributes");
     }
-
-    // So that we can make sure a boolean is passed
-    lockedSystem = Boolean.valueOf(lockedStringSystem);
 
     // Reload options
     supportInvalidateOptionsMenu();
@@ -284,7 +283,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     snackbar.show();
   }
 
-  @Override public void onLocked() {
+  @Override public void onLocked(long lockUntilTime) {
+    this.lockUntilTime = lockUntilTime;
     showSnackbarWithText("This entry is temporarily locked");
   }
 
@@ -308,7 +308,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     hintDisplay.setVisibility(View.VISIBLE);
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
-    presenter.lockEntry(lockedPackageName, lockedActivityName);
+    presenter.lockEntry(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
+        ignoreUntilTime, lockedSystem);
   }
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {

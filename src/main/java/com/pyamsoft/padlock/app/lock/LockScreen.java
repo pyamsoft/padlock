@@ -22,7 +22,7 @@ public interface LockScreen extends LockPresenter.LockView {
 
   void onPostUnlock();
 
-  void onLocked();
+  void onLocked(long lockUntilTime);
 
   void onLockedError();
 
