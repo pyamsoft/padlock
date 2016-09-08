@@ -38,7 +38,7 @@ public class PadLockDB {
   @SuppressWarnings("WeakerAccess") @NonNull final BriteDatabase briteDatabase;
   @NonNull private final AtomicInteger openCount;
 
-  private PadLockDB(final @NonNull Context context, final @NonNull Scheduler scheduler) {
+  @VisibleForTesting PadLockDB(final @NonNull Context context, final @NonNull Scheduler scheduler) {
     briteDatabase = SqlBrite.create().wrapDatabaseHelper(new PadLockOpenHelper(context), scheduler);
     openCount = new AtomicInteger(0);
   }
@@ -62,6 +62,10 @@ public class PadLockDB {
     }
 
     return instance;
+  }
+
+  @SuppressWarnings("WeakerAccess") @VisibleForTesting @CheckResult int getOpenCount() {
+    return openCount.get();
   }
 
   @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
@@ -100,7 +104,7 @@ public class PadLockDB {
   }
 
   @CheckResult @NonNull
-  public Observable<Integer> updateWithPackageActivityName(@NonNull String packageName,
+  public Observable<Integer> updateEntry(@NonNull String packageName,
       @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
       long ignoreUntilTime, boolean isSystem, boolean whitelist) {
     final PadLockEntry entry =
@@ -190,7 +194,7 @@ public class PadLockDB {
         .filter(padLockEntries -> padLockEntries != null);
   }
 
-  @NonNull @CheckResult
+  @NonNull @CheckResult @Deprecated
   public Observable<Integer> deleteWithPackageName(final @NonNull String packageName) {
     Timber.i("DB: DELETE");
     openDatabase();

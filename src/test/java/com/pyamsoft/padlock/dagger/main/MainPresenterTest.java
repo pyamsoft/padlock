@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.main;
 
-import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.TestPadLock;
@@ -27,21 +26,22 @@ import com.pyamsoft.padlock.model.event.RefreshEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import static com.pyamsoft.padlock.TestUtils.log;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(application = TestPadLock.class, sdk = 23, constants = BuildConfig.class)
 public class MainPresenterTest {
 
-  @Rule @NonNull public final ExpectedException expectedException = ExpectedException.none();
   @Inject @Named("agree") MainPresenterImpl agreePresenter;
   @Inject @Named("not_agree") MainPresenterImpl notAgreePresenter;
 
@@ -54,9 +54,9 @@ public class MainPresenterTest {
   /**
    * Make sure that the usage terms are shown when they are not agreed to
    */
-  @Test public void showUsageTerms() {
-    Assert.assertNotNull(notAgreePresenter);
-    Assert.assertFalse(notAgreePresenter.isBound());
+  @Test public void testShowUsageTerms() throws Exception {
+    assertNotNull(notAgreePresenter);
+    assertFalse(notAgreePresenter.isBound());
 
     // KLUDGE Kind of ugly
     final AtomicBoolean usageTermsShown = new AtomicBoolean(false);
@@ -75,21 +75,21 @@ public class MainPresenterTest {
       }
     });
 
-    Assert.assertFalse(usageTermsShown.get());
+    assertFalse(usageTermsShown.get());
     notAgreePresenter.showTermsDialog();
-    Assert.assertTrue(usageTermsShown.get());
+    assertTrue(usageTermsShown.get());
   }
 
   /**
    * Make sure that any exceptions are swalloed when showing usage terms
    */
-  @Test public void swallowExceptionUsageTerms() {
-    Assert.assertNotNull(notAgreePresenter);
-    Assert.assertFalse(notAgreePresenter.isBound());
+  @Test public void testSwallowExceptionUsageTerms() throws Exception {
+    assertNotNull(notAgreePresenter);
+    assertFalse(notAgreePresenter.isBound());
 
     notAgreePresenter.bindView(new MainPresenter.MainView() {
       @Override public void showUsageTermsDialog() {
-        System.out.println("Throw exception, swallow with RX");
+        log("Throw exception, swallow with RX");
         throw new RuntimeException("Should not be here");
       }
 
@@ -108,9 +108,9 @@ public class MainPresenterTest {
   /**
    * Make sure refresh is handled
    */
-  @Test public void forceRefresh() {
-    Assert.assertNotNull(notAgreePresenter);
-    Assert.assertFalse(notAgreePresenter.isBound());
+  @Test public void testForceRefresh() throws Exception {
+    assertNotNull(notAgreePresenter);
+    assertFalse(notAgreePresenter.isBound());
 
     // KLUDGE Kind of ugly
     final AtomicBoolean forcedRefresh = new AtomicBoolean(false);
@@ -127,17 +127,17 @@ public class MainPresenterTest {
       }
     });
 
-    Assert.assertFalse(forcedRefresh.get());
+    assertFalse(forcedRefresh.get());
     MainBus.get().post(RefreshEvent.create());
-    Assert.assertTrue(forcedRefresh.get());
+    assertTrue(forcedRefresh.get());
   }
 
   /**
    * Make sure any exceptions are swallowed
    */
-  @Test public void swallowExceptionForceRefresh() {
-    Assert.assertNotNull(notAgreePresenter);
-    Assert.assertFalse(notAgreePresenter.isBound());
+  @Test public void testSwallowExceptionForceRefresh() throws Exception {
+    assertNotNull(notAgreePresenter);
+    assertFalse(notAgreePresenter.isBound());
 
     notAgreePresenter.bindView(new MainPresenter.MainView() {
       @Override public void showUsageTermsDialog() {
@@ -148,7 +148,7 @@ public class MainPresenterTest {
       }
 
       @Override public void forceRefresh() {
-        System.out.println("Throw exception, swallow with RX");
+        log("Throw exception, swallow with RX");
         throw new RuntimeException("Should not be here");
       }
     });

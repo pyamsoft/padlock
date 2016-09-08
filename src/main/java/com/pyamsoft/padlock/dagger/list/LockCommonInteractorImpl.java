@@ -97,7 +97,7 @@ abstract class LockCommonInteractorImpl implements LockCommonInteractor {
           }
 
           return PadLockDB.with(appContext)
-              .updateWithPackageActivityName(entry.packageName(), entry.activityName(),
+              .updateEntry(entry.packageName(), entry.activityName(),
                   entry.lockCode(), entry.lockUntilTime(), entry.ignoreUntilTime(),
                   entry.systemApplication(), whitelist)
               .map(result -> {

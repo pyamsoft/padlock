@@ -62,7 +62,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
           Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
               timeOutMinutesInMillis);
           return PadLockDB.with(appContext)
-              .updateWithPackageActivityName(packageName, activityName, lockCode, newLockUntilTime,
+              .updateEntry(packageName, activityName, lockCode, newLockUntilTime,
                   ignoreUntilTime, isSystem, false)
               .map(integer -> {
                 Timber.d("Update result: %s", integer);
@@ -168,7 +168,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
     Timber.d("Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
         ignoreMinutesInMillis);
     return PadLockDB.with(appContext)
-        .updateWithPackageActivityName(packageName, activityName, lockCode, lockUntilTime,
+        .updateEntry(packageName, activityName, lockCode, lockUntilTime,
             newIgnoreTime, isSystem, false);
   }
 
