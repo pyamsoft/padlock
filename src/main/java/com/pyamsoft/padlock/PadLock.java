@@ -19,9 +19,9 @@ package com.pyamsoft.padlock;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.ApplicationBase;
+import com.pyamsoft.pydroid.base.PYDroidApplication;
 
-public abstract class PadLock extends ApplicationBase implements IPadLock {
+public abstract class PadLock extends PYDroidApplication implements IPadLock {
 
   @NonNull @CheckResult public static IPadLock get(@NonNull Context context) {
     final Context appContext = context.getApplicationContext();

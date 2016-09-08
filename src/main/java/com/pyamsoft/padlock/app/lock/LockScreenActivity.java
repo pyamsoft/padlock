@@ -121,16 +121,17 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     setContentView(R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    loadedKey = PersistentCache.load(KEY_LOCK_PRESENTER, savedInstanceState,
-        new PersistLoader.Callback<LockScreenPresenter>() {
-          @NonNull @Override public PersistLoader<LockScreenPresenter> createLoader() {
-            return new LockScreenPresenterLoader(getApplicationContext());
-          }
+    loadedKey = PersistentCache.get()
+        .load(KEY_LOCK_PRESENTER, savedInstanceState,
+            new PersistLoader.Callback<LockScreenPresenter>() {
+              @NonNull @Override public PersistLoader<LockScreenPresenter> createLoader() {
+                return new LockScreenPresenterLoader(getApplicationContext());
+              }
 
-          @Override public void onPersistentLoaded(@NonNull LockScreenPresenter persist) {
-            presenter = persist;
-          }
-        });
+              @Override public void onPersistentLoaded(@NonNull LockScreenPresenter persist) {
+                presenter = persist;
+              }
+            });
 
     unbinder = ButterKnife.bind(this);
 
@@ -253,7 +254,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     super.onDestroy();
     Timber.d("onDestroy");
     if (!isChangingConfigurations()) {
-      PersistentCache.unload(loadedKey);
+      PersistentCache.get().unload(loadedKey);
     }
 
     Timber.d("Clear currently locked");
@@ -331,7 +332,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     outState.putString(CODE_DISPLAY, attempt);
     outState.putLong("IGNORE", ignoreTime);
     outState.putBoolean("EXCLUDE", menuExclude.isChecked());
-    PersistentCache.saveKey(outState, KEY_LOCK_PRESENTER, loadedKey);
+    PersistentCache.get().saveKey(outState, KEY_LOCK_PRESENTER, loadedKey);
     super.onSaveInstanceState(outState);
   }
 
