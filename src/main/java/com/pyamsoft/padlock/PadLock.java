@@ -43,7 +43,7 @@ public class PadLock extends PYDroidApplication implements IPadLock {
     super.onCreate();
     Timber.w("CREATE NEW PADLOCK APPLICATION");
     if (!FirebaseApp.getApps(getApplicationContext()).isEmpty()) {
-      Timber.w("INIT NEW FIREBASE APPLICATION");
+      Timber.i("INIT NEW FIREBASE APPLICATION");
       component = DaggerPadLockComponent.builder()
           .padLockModule(new PadLockModule(getApplicationContext()))
           .build();
