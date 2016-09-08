@@ -36,6 +36,6 @@ public interface LockScreenPresenter
   void loadDisplayNameFromPackage(@NonNull String packageName);
 
   void postUnlock(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
-      long ignoreTime);
+      @NonNull String realName, @Nullable String lockCode, long lockUntilTime, boolean isSystem,
+      boolean shouldExclude, long ignoreTime);
 }
