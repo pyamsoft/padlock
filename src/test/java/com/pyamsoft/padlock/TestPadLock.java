@@ -18,6 +18,7 @@ package com.pyamsoft.padlock;
 
 import android.app.Application;
 import android.support.annotation.NonNull;
+import com.google.firebase.FirebaseApp;
 import com.pyamsoft.padlock.dagger.DaggerTestPadLockComponent;
 import com.pyamsoft.padlock.dagger.TestPadLockComponent;
 import com.pyamsoft.padlock.dagger.TestPadLockModule;
@@ -29,13 +30,18 @@ public class TestPadLock extends Application implements IPadLock {
 
   @Override public void onCreate() {
     super.onCreate();
-    component = DaggerTestPadLockComponent.builder()
-        .testPackageManagerWrapperModule(new TestPackageManagerWrapperModule())
-        .testPadLockModule(new TestPadLockModule(getApplicationContext()))
-        .build();
+    if (!FirebaseApp.getApps(getApplicationContext()).isEmpty()) {
+      component = DaggerTestPadLockComponent.builder()
+          .testPackageManagerWrapperModule(new TestPackageManagerWrapperModule())
+          .testPadLockModule(new TestPadLockModule(getApplicationContext()))
+          .build();
+    }
   }
 
   @SuppressWarnings("unchecked") @NonNull @Override public TestPadLockComponent provideComponent() {
+    if (component == null) {
+      throw new NullPointerException("TestPadLockComponent is NULL");
+    }
     return component;
   }
 }
