@@ -25,5 +25,6 @@ import rx.Observable;
 interface LockCommonInteractor {
 
   @CheckResult @NonNull Observable<LockState> modifySingleDatabaseEntry(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist, boolean forceDelete);
+      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
+      boolean forceDelete);
 }

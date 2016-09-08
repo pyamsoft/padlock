@@ -21,7 +21,6 @@ import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService;
 import com.pyamsoft.padlock.PadLock;
-import com.pyamsoft.padlock.PadLockActual;
 import javax.inject.Inject;
 
 @SuppressLint("Registered") public class PadLockFrameworkJobSchedulerService

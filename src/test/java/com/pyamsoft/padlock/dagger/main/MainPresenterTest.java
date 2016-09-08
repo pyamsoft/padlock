@@ -50,7 +50,7 @@ public class MainPresenterTest {
     presenter.bindView(new MainPresenter.MainView() {
 
       @Override public void showUsageTermsDialog() {
-       usageTermsShown = true;
+        usageTermsShown = true;
       }
 
       @Override public void onDidNotAgreeToTerms() {
