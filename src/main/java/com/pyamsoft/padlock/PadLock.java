@@ -19,7 +19,7 @@ package com.pyamsoft.padlock;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.PYDroidApplication;
+import com.pyamsoft.pydroid.lib.PYDroidApplication;
 
 public abstract class PadLock extends PYDroidApplication implements IPadLock {
 
