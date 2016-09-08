@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.app.main;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.Singleton;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.pydroid.base.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -32,7 +32,7 @@ public class MainPresenterLoader extends PersistLoader<MainPresenter> {
   }
 
   @NonNull @Override public MainPresenter loadPersistent() {
-    Singleton.Dagger.with(getContext()).plusMain().inject(this);
+    PadLock.getComponent(getContext()).plusMain().inject(this);
     return presenterProvider.get();
   }
 }

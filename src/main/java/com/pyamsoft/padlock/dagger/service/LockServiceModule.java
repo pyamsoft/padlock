@@ -16,8 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
-import android.app.KeyguardManager;
-import android.content.Context;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.pydroid.dagger.ActivityScope;
 import dagger.Module;
@@ -36,10 +34,5 @@ import rx.Scheduler;
   @ActivityScope @Provides LockServiceInteractor provideLockServiceInteractor(
       final LockServiceInteractorImpl interactor) {
     return interactor;
-  }
-
-  @ActivityScope @Provides KeyguardManager provideKeyguardManager(final Context context) {
-    return (KeyguardManager) context.getApplicationContext()
-        .getSystemService(Context.KEYGUARD_SERVICE);
   }
 }
