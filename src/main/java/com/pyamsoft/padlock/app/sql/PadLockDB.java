@@ -88,10 +88,10 @@ public class PadLockDB {
     }
 
     Timber.i("DB: INSERT");
-    return deleteWithPackageActivityName(packageName, activityName).map(deleted -> {
-      Timber.d("Delete result: %d", deleted);
 
-      openDatabase();
+    openDatabase();
+    return deleteWithPackageActivityNameUnguarded(packageName, activityName).map(deleted -> {
+      Timber.d("Delete result: %d", deleted);
       final long result = briteDatabase.insert(PadLockEntry.TABLE_NAME,
           PadLockEntry.FACTORY.marshal(entry).asContentValues());
       closeDatabase();
@@ -208,10 +208,18 @@ public class PadLockDB {
       final @NonNull String activityName) {
     Timber.i("DB: DELETE");
     openDatabase();
+    return deleteWithPackageActivityNameUnguarded(packageName, activityName).map(integer -> {
+      closeDatabase();
+      return integer;
+    });
+  }
+
+  @VisibleForTesting @NonNull @CheckResult
+  Observable<Integer> deleteWithPackageActivityNameUnguarded(@NonNull String packageName,
+      @NonNull String activityName) {
     return Observable.defer(() -> {
       final int result = briteDatabase.delete(PadLockEntry.TABLE_NAME,
           PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
-      closeDatabase();
       return Observable.just(result);
     });
   }
