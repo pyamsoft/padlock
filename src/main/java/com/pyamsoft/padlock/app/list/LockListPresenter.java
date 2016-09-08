@@ -45,8 +45,8 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
 
   void setZeroActivityFromPreference();
 
-  void modifyDatabaseEntry(int position, @NonNull String packageName, @Nullable String code,
-      boolean system);
+  void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
+      @Nullable String code, boolean system);
 
   interface LockList extends LockListCommon, LockListDatabaseErrorView {
 
@@ -72,6 +72,6 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
 
     void displayLockInfoDialog(@NonNull AppEntry entry);
 
-    void processDatabaseModifyEvent(int position, @NonNull AppEntry entry);
+    void processDatabaseModifyEvent(boolean isChecked, int position, @NonNull AppEntry entry);
   }
 }

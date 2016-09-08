@@ -39,34 +39,31 @@ abstract class LockCommonInteractorImpl implements LockCommonInteractor {
   }
 
   @NonNull @Override
-  public Observable<LockState> modifySingleDatabaseEntry(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
-      boolean forceLock) {
-    final Observable<PadLockEntry> padLockEntryObservable =
-        PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
-
+  public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
+      @NonNull String packageName, @NonNull String activityName, @Nullable String code,
+      boolean system, boolean whitelist, boolean forceLock) {
     if (whitelist) {
       Timber.d("Whitelist call");
-      return padLockEntryObservable.flatMap(entry -> {
-        if (PadLockEntry.isEmpty(entry)) {
+      return Observable.defer(() -> {
+        if (notInDatabase) {
           return createNewEntry(packageName, activityName, code, system, true);
         } else {
-          return updateExistingEntry(entry, true);
+          return updateExistingEntry(packageName, activityName, true);
         }
       });
     } else if (forceLock) {
       Timber.d("Force lock call");
-      return padLockEntryObservable.flatMap(entry -> {
-        if (PadLockEntry.isEmpty(entry)) {
+      return Observable.defer(() -> {
+        if (notInDatabase) {
           return createNewEntry(packageName, activityName, code, system, false);
         } else {
-          return updateExistingEntry(entry, false);
+          return updateExistingEntry(packageName, activityName, false);
         }
       });
     } else {
       Timber.d("Normal call");
-      return padLockEntryObservable.flatMap(entry -> {
-        if (PadLockEntry.isEmpty(entry)) {
+      return Observable.defer(() -> {
+        if (notInDatabase) {
           return createNewEntry(packageName, activityName, code, system, false);
         } else {
           return deleteEntry(packageName, activityName);
@@ -89,16 +86,25 @@ abstract class LockCommonInteractorImpl implements LockCommonInteractor {
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<LockState> updateExistingEntry(
-      @NonNull PadLockEntry entry, boolean whitelist) {
-    Timber.d("Entry already exists for: %s %s, update it", entry.packageName(),
-        entry.activityName());
+      @NonNull String packageName, @NonNull String activityName, boolean whitelist) {
+    Timber.d("Entry already exists for: %s %s, update it", packageName, activityName);
     return PadLockDB.with(appContext)
-        .updateWithPackageActivityName(entry.packageName(), entry.activityName(), entry.lockCode(),
-            entry.lockUntilTime(), entry.ignoreUntilTime(), entry.systemApplication(), whitelist)
-        .map(result -> {
-          Timber.d("Update result: %d", result);
-          Timber.d("Whitelist: %s", whitelist);
-          return whitelist ? LockState.WHITELISTED : LockState.LOCKED;
+        .queryWithPackageActivityName(packageName, activityName)
+        .first()
+        .flatMap(entry -> {
+          if (PadLockEntry.isEmpty(entry)) {
+            throw new RuntimeException("PadLock entry is empty but update was called");
+          }
+
+          return PadLockDB.with(appContext)
+              .updateWithPackageActivityName(entry.packageName(), entry.activityName(),
+                  entry.lockCode(), entry.lockUntilTime(), entry.ignoreUntilTime(),
+                  entry.systemApplication(), whitelist)
+              .map(result -> {
+                Timber.d("Update result: %d", result);
+                Timber.d("Whitelist: %s", whitelist);
+                return whitelist ? LockState.WHITELISTED : LockState.LOCKED;
+              });
         });
   }
 

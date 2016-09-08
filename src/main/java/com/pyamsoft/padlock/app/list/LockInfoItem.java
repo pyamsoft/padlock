@@ -85,7 +85,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
         Timber.d("Post default event to LockInfoSelectBus");
         LockInfoSelectBus.get()
             .post(LockInfoSelectEvent.create(holder.getAdapterPosition(), entryName,
-                LockState.DEFAULT));
+                entry.lockState(), LockState.DEFAULT));
       }
     });
 
@@ -94,7 +94,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
         Timber.d("Post whitelist event to LockInfoSelectBus");
         LockInfoSelectBus.get()
             .post(LockInfoSelectEvent.create(holder.getAdapterPosition(), entryName,
-                LockState.WHITELISTED));
+                entry.lockState(), LockState.WHITELISTED));
       }
     });
 
@@ -103,7 +103,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
         Timber.d("Post blacklist event to LockInfoSelectBus");
         LockInfoSelectBus.get()
             .post(LockInfoSelectEvent.create(holder.getAdapterPosition(), entryName,
-                LockState.LOCKED));
+                entry.lockState(), LockState.LOCKED));
       }
     });
   }

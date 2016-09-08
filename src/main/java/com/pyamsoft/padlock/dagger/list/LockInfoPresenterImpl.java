@@ -99,7 +99,8 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
         .observeOn(getObserveScheduler())
         .subscribe(lockInfoSelectEvent -> {
           view.processDatabaseModifyEvent(lockInfoSelectEvent.position(),
-              lockInfoSelectEvent.activityName(), lockInfoSelectEvent.lockState());
+              lockInfoSelectEvent.activityName(), lockInfoSelectEvent.previouslockState(),
+              lockInfoSelectEvent.newlockState());
         }, throwable -> {
           Timber.e(throwable, "onError registerOnDbProgressBus");
         });
@@ -231,14 +232,15 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
             }, this::unsubAllInDB);
   }
 
-  @Override public void modifyDatabaseEntry(int position, @NonNull String packageName,
+  @Override
+  public void modifyDatabaseEntry(boolean isDefault, int position, @NonNull String packageName,
       @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
       boolean forceDelete) {
     unsubDatabaseSubscription();
     unsubDatabaseSubscription();
     databaseSubscription =
-        lockInfoInteractor.modifySingleDatabaseEntry(packageName, activityName, code, system,
-            whitelist, forceDelete)
+        lockInfoInteractor.modifySingleDatabaseEntry(isDefault, packageName, activityName, code,
+            system, whitelist, forceDelete)
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
             .subscribe(lockState -> {

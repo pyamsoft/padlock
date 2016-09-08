@@ -292,12 +292,13 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   }
 
   @Override public void processDatabaseModifyEvent(int position, @NonNull String activityName,
-      @NonNull LockState lockState) {
-    Timber.d("Received a database modify event request for %s %s at %d", appEntry.packageName(),
-        activityName, position);
-    final boolean whitelist = lockState.equals(LockState.WHITELISTED);
-    final boolean forceLock = lockState.equals(LockState.LOCKED);
-    presenter.modifyDatabaseEntry(position, appEntry.packageName(), activityName, null,
+      @NonNull LockState previousLockState, @NonNull LockState newLockState) {
+    Timber.d("Received a database modify event request for %s %s at %d [%s]",
+        appEntry.packageName(), activityName, position, newLockState.name());
+    final boolean whitelist = newLockState.equals(LockState.WHITELISTED);
+    final boolean forceLock = newLockState.equals(LockState.LOCKED);
+    final boolean wasDefault = previousLockState.equals(LockState.DEFAULT);
+    presenter.modifyDatabaseEntry(wasDefault, position, appEntry.packageName(), activityName, null,
         appEntry.system(), whitelist, forceLock);
   }
 }

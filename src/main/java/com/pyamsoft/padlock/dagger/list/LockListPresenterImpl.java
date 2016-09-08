@@ -113,7 +113,8 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(dbProgressEvent -> {
-          view.processDatabaseModifyEvent(dbProgressEvent.position(), dbProgressEvent.entry());
+          view.processDatabaseModifyEvent(dbProgressEvent.isChecked(), dbProgressEvent.position(),
+              dbProgressEvent.entry());
         }, throwable -> {
           Timber.e(throwable, "onError registerOnDbProgressBus");
         });
@@ -358,12 +359,12 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   }
 
   @Override
-  public void modifyDatabaseEntry(int position, @NonNull String packageName, @Nullable String code,
-      boolean system) {
+  public void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
+      @Nullable String code, boolean system) {
     unsubDatabaseSubscription();
 
     // No whitelisting for modifications from the List
-    databaseSubscription = lockListInteractor.modifySingleDatabaseEntry(packageName,
+    databaseSubscription = lockListInteractor.modifySingleDatabaseEntry(isChecked, packageName,
         PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system, false, false)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

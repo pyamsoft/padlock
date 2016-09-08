@@ -78,13 +78,15 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
             compoundButton.setOnCheckedChangeListener(this);
 
             // Authorize for package access
-            authorizeAccess(holder.getAdapterPosition(), true);
+            authorizeAccess(holder.getAdapterPosition(), true, b);
           }
         };
 
     holder.toggle.setOnCheckedChangeListener(listener);
-    holder.name.setOnClickListener(view -> authorizeAccess(holder.getAdapterPosition(), false));
-    holder.icon.setOnClickListener(view -> authorizeAccess(holder.getAdapterPosition(), false));
+    holder.name.setOnClickListener(
+        view -> authorizeAccess(holder.getAdapterPosition(), false, false));
+    holder.icon.setOnClickListener(
+        view -> authorizeAccess(holder.getAdapterPosition(), false, false));
   }
 
   private void recycleOldItem(@NonNull ViewHolder holder) {
@@ -95,22 +97,23 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     holder.toggle.setOnCheckedChangeListener(null);
   }
 
-  @SuppressWarnings("WeakerAccess") void authorizeAccess(int position, boolean accessPackage) {
+  @SuppressWarnings("WeakerAccess") void authorizeAccess(int position, boolean accessPackage,
+      boolean isChecked) {
     // TODO some kind of observable which can confirm correct passcode entry
 
     Timber.d("Access authorized");
     if (accessPackage) {
       Timber.d("Access package");
-      accessPackage(position);
+      accessPackage(position, isChecked);
     } else {
       Timber.d("Access activities");
       openInfo();
     }
   }
 
-  private void accessPackage(int position) {
+  private void accessPackage(int position, boolean isChecked) {
     // TODO app specific codes
-    DBProgressBus.get().post(DBProgressEvent.create(position, entry));
+    DBProgressBus.get().post(DBProgressEvent.create(isChecked, position, entry));
   }
 
   private void openInfo() {
