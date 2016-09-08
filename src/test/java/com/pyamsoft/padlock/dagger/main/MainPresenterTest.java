@@ -25,7 +25,6 @@ import com.pyamsoft.padlock.bus.MainBus;
 import com.pyamsoft.padlock.dagger.TestPadLockComponent;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.junit.Assert;
@@ -155,37 +154,5 @@ public class MainPresenterTest {
     });
 
     MainBus.get().post(RefreshEvent.create());
-  }
-
-  /**
-   * Make sure bus continues even after exception
-   */
-  @Test public void continueBusForceRefresh() {
-    Assert.assertNotNull(notAgreePresenter);
-    Assert.assertFalse(notAgreePresenter.isBound());
-
-    final AtomicInteger count = new AtomicInteger(0);
-    notAgreePresenter.bindView(new MainPresenter.MainView() {
-      @Override public void showUsageTermsDialog() {
-      }
-
-      @Override public void onDidNotAgreeToTerms() {
-
-      }
-
-      @Override public void forceRefresh() {
-        count.incrementAndGet();
-        System.out.println("Throw exception, swallow with RX");
-        throw new RuntimeException("Should not be here");
-      }
-    });
-
-    Assert.assertEquals(count.get(), 0);
-
-    MainBus.get().post(RefreshEvent.create());
-    Assert.assertEquals(count.get(), 1);
-
-    MainBus.get().post(RefreshEvent.create());
-    Assert.assertEquals(count.get(), 2);
   }
 }

@@ -58,7 +58,7 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     unsubscribeAgreeTerms();
   }
 
-  private void unregisterFromRefreshBus() {
+  void unregisterFromRefreshBus() {
     if (!refreshBus.isUnsubscribed()) {
       refreshBus.unsubscribe();
     }
@@ -74,7 +74,7 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
           getView().forceRefresh();
         }, throwable -> {
           Timber.e(throwable, "RefreshBus onError");
-        });
+        }, this::unregisterFromRefreshBus);
   }
 
   @Override public void showTermsDialog() {
