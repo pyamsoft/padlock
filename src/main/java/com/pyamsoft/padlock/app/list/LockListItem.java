@@ -31,10 +31,10 @@ import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.bus.DBProgressBus;
-import com.pyamsoft.padlock.bus.LockInfoDisplayBus;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
+import com.pyamsoft.padlock.bus.DBProgressBus;
+import com.pyamsoft.padlock.bus.LockInfoDisplayBus;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.event.DBProgressEvent;
 import com.pyamsoft.padlock.model.event.LockInfoDisplayEvent;
@@ -140,7 +140,10 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     public ViewHolder(View itemView) {
       super(itemView);
       unbinder = ButterKnife.bind(this, itemView);
-      PadLock.getComponent(itemView.getContext()).plusAppIconLoaderComponent().inject(this);
+      PadLock.get(itemView.getContext())
+          .provideComponent()
+          .plusAppIconLoaderComponent()
+          .inject(this);
       appIconLoaderPresenter.bindView(this);
     }
 

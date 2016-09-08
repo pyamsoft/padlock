@@ -34,6 +34,6 @@ import javax.inject.Inject;
 
   @Override public void onCreate() {
     super.onCreate();
-    PadLock.getComponent(this).plusJobComponent().inject(this);
+    PadLock.get(this).provideComponent().plusJobComponent().inject(this);
   }
 }

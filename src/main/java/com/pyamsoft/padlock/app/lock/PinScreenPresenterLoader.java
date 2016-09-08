@@ -32,7 +32,7 @@ public class PinScreenPresenterLoader extends PersistLoader<PinEntryPresenter> {
   }
 
   @NonNull @Override public PinEntryPresenter loadPersistent() {
-    PadLock.getComponent(getContext()).plusPinEntry().inject(this);
+    PadLock.get(getContext()).provideComponent().plusPinEntry().inject(this);
     return presenterProvider.get();
   }
 }

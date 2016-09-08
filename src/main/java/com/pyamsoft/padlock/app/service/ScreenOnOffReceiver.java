@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.PadLockActual;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
@@ -56,7 +57,7 @@ public class ScreenOnOffReceiver extends BroadcastReceiver
     lockActivity2 =
         new Intent(appContext, LockScreenActivity2.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-    PadLock.getComponent(appContext).plusLockService().inject(this);
+    PadLock.get(appContext).provideComponent().plusLockService().inject(this);
   }
 
   private static void craftIntent(@NonNull Intent removeIntent, @NonNull Intent addIntent,

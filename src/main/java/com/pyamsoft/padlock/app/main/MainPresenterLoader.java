@@ -32,7 +32,7 @@ public class MainPresenterLoader extends PersistLoader<MainPresenter> {
   }
 
   @NonNull @Override public MainPresenter loadPersistent() {
-    PadLock.getComponent(getContext()).plusMain().inject(this);
+    PadLock.get(getContext()).provideComponent().plusMain().inject(this);
     return presenterProvider.get();
   }
 }
