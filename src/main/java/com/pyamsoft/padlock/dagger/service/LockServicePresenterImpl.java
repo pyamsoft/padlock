@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.service;
 
 import android.os.Build;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
@@ -84,12 +83,8 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
     lastClassName = "";
   }
 
-  @Override @NonNull @CheckResult public String getActiveClassName() {
-    return activeClassName;
-  }
-
-  @Override @NonNull @CheckResult public String getActivePackageName() {
-    return activePackageName;
+  @Override public void getActiveNames(@NonNull String packageName, @NonNull String className) {
+    getView().onActiveNamesRetrieved(packageName, activePackageName, className, activeClassName);
   }
 
   @Override

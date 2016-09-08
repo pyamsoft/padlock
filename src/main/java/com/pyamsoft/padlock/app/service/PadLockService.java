@@ -69,18 +69,7 @@ public class PadLockService extends AccessibilityService
   public static void recheck(@NonNull String packageName, @NonNull String className) {
     if (!packageName.isEmpty() && !className.isEmpty()) {
       Timber.d("Recheck was requested for: %s, %s", packageName, className);
-      final LockServicePresenter presenter = getInstance().getPresenter();
-      final String servicePackage = presenter.getActivePackageName();
-      final String serviceClass = presenter.getActiveClassName();
-      Timber.d("Check against current window values: %s, %s", servicePackage, serviceClass);
-      if (servicePackage.equals(packageName) && (serviceClass.equals(className) || className.equals(
-          PadLockEntry.PACKAGE_ACTIVITY_NAME))) {
-        // We can replace the actual passed classname with the stored classname because:
-        // either it is equal to the passed name or the passed name is PACKAGE
-        // which will respond to any class name
-        Timber.d("Run recheck for: %s %s", servicePackage, serviceClass);
-        presenter.processAccessibilityEvent(servicePackage, serviceClass, true);
-      }
+      getInstance().getPresenter().getActiveNames(packageName, className);
     }
   }
 
@@ -180,5 +169,19 @@ public class PadLockService extends AccessibilityService
     Timber.d("Start lock activity 2 for entry: %s %s (real %s)", entry.packageName(),
         entry.activityName(), realName);
     getApplicationContext().startActivity(lockActivity2);
+  }
+
+  @Override
+  public void onActiveNamesRetrieved(@NonNull String packageName, @NonNull String activePackage,
+      @NonNull String className, @NonNull String activeClass) {
+    Timber.d("Check against current window values: %s, %s", activePackage, activeClass);
+    if (activePackage.equals(packageName) && (activeClass.equals(className) || className.equals(
+        PadLockEntry.PACKAGE_ACTIVITY_NAME))) {
+      // We can replace the actual passed classname with the stored classname because:
+      // either it is equal to the passed name or the passed name is PACKAGE
+      // which will respond to any class name
+      Timber.d("Run recheck for: %s %s", activePackage, activeClass);
+      presenter.processAccessibilityEvent(activePackage, activeClass, true);
+    }
   }
 }

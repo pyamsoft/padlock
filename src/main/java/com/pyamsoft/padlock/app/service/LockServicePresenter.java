@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.service;
 
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.base.Presenter;
@@ -25,9 +24,7 @@ public interface LockServicePresenter extends Presenter<LockServicePresenter.Loc
 
   void setLockScreenPassed();
 
-  @NonNull @CheckResult String getActiveClassName();
-
-  @NonNull @CheckResult String getActivePackageName();
+  void getActiveNames(@NonNull String packageName, @NonNull String className);
 
   void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
       boolean forcedRecheck);
@@ -37,5 +34,8 @@ public interface LockServicePresenter extends Presenter<LockServicePresenter.Loc
     void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName);
 
     void startLockScreen2(@NonNull PadLockEntry entry, @NonNull String realName);
+
+    void onActiveNamesRetrieved(@NonNull String packageName, @NonNull String activePackage,
+        @NonNull String className, @NonNull String activeClass);
   }
 }
