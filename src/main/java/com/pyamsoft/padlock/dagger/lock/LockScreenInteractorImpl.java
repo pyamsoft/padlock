@@ -22,9 +22,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import com.birbit.android.jobqueue.Job;
+import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.job.RecheckJob;
@@ -37,14 +37,16 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
 
   @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final JobManager jobManager;
   @NonNull private final MasterPinInteractor pinInteractor;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @SuppressWarnings("WeakerAccess") int failCount;
 
   @Inject LockScreenInteractorImpl(final @NonNull Context context,
-      @NonNull final PadLockPreferences preferences,
+      @NonNull final PadLockPreferences preferences, @NonNull JobManager jobManager,
       @NonNull final MasterPinInteractor masterPinInteractor,
       @NonNull PackageManagerWrapper packageManagerWrapper) {
+    this.jobManager = jobManager;
     this.packageManagerWrapper = packageManagerWrapper;
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
@@ -163,11 +165,11 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
       final String packageTag = RecheckJob.TAG_CLASS_PREFIX + entry.packageName();
       final String classTag = RecheckJob.TAG_CLASS_PREFIX + entry.activityName();
       Timber.d("Cancel jobs with package tag: %s and class tag: %s", packageTag, classTag);
-      Singleton.Jobs.with(appContext).cancelJobs(TagConstraint.ALL, packageTag, classTag);
+      jobManager.cancelJobs(TagConstraint.ALL, packageTag, classTag);
 
       // Queue up a new recheck job
       final Job recheck = RecheckJob.create(entry.packageName(), entry.activityName(), recheckTime);
-      Singleton.Jobs.with(appContext).addJob(recheck);
+      jobManager.addJob(recheck);
 
       // KLUDGE Just return something valid for now
       return Observable.just(1);

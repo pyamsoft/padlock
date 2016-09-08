@@ -23,6 +23,7 @@ import com.pyamsoft.padlock.dagger.lock.LockScreenComponent;
 import com.pyamsoft.padlock.dagger.lock.PinEntryComponent;
 import com.pyamsoft.padlock.dagger.main.MainComponent;
 import com.pyamsoft.padlock.dagger.service.LockServiceComponent;
+import com.pyamsoft.padlock.dagger.service.job.JobComponent;
 import com.pyamsoft.padlock.dagger.settings.SettingsPreferenceComponent;
 import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapperModule;
 import dagger.Component;
@@ -54,4 +55,6 @@ public interface PadLockComponent {
 
   // Subcomponent AppIconLoader
   AppIconLoaderComponent plusAppIconLoaderComponent();
+
+  JobComponent plusJobComponent();
 }

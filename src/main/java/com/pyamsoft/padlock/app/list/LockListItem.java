@@ -29,8 +29,8 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.bus.DBProgressBus;
 import com.pyamsoft.padlock.bus.LockInfoDisplayBus;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
@@ -140,7 +140,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     public ViewHolder(View itemView) {
       super(itemView);
       unbinder = ButterKnife.bind(this, itemView);
-      Singleton.Dagger.with(itemView.getContext()).plusAppIconLoaderComponent().inject(this);
+      PadLock.getComponent(itemView.getContext()).plusAppIconLoaderComponent().inject(this);
       appIconLoaderPresenter.bindView(this);
     }
 

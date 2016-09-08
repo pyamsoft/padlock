@@ -16,14 +16,13 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.PadLockSingleInitProvider;
-import com.pyamsoft.padlock.Singleton;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.sql.PadLockDB;
@@ -37,17 +36,17 @@ import timber.log.Timber;
 class LockServiceInteractorImpl implements LockServiceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
-  @SuppressWarnings("WeakerAccess") @NonNull final KeyguardManager keyguard;
+  @SuppressWarnings("WeakerAccess") @NonNull final JobManager jobManager;
   @NonNull private final Context appContext;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject LockServiceInteractorImpl(final @NonNull Context context,
-      @NonNull PadLockPreferences preferences, @NonNull KeyguardManager keyguard,
+      @NonNull PadLockPreferences preferences, @NonNull JobManager jobManager,
       @NonNull PackageManagerWrapper packageManagerWrapper) {
+    this.jobManager = jobManager;
     this.packageManagerWrapper = packageManagerWrapper;
     this.appContext = context.getApplicationContext();
     this.preferences = preferences;
-    this.keyguard = keyguard;
   }
 
   /**
@@ -56,8 +55,7 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   @Override public void cleanup() {
     Timber.d("Cleanup LockService");
     Timber.d("Cancel ALL jobs in background");
-    Singleton.Jobs.with(appContext)
-        .cancelJobsInBackground(null, TagConstraint.ANY, RecheckJob.TAG_ALL);
+    jobManager.cancelJobsInBackground(null, TagConstraint.ANY, RecheckJob.TAG_ALL);
   }
 
   /**

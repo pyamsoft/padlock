@@ -16,25 +16,23 @@
 
 package com.pyamsoft.padlock;
 
+import android.content.Context;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
-import com.pyamsoft.padlock.dagger.PadLockModule;
-import timber.log.Timber;
+import com.pyamsoft.pydroid.base.ApplicationBase;
 
-public class PadLock extends PadLockBase {
+abstract class PadLockBase extends ApplicationBase {
 
-  private PadLockComponent component;
-
-  @Override public void onCreate() {
-    super.onCreate();
-    Timber.w("CREATE NEW PADLOCK APPLICATION");
-    component = DaggerPadLockComponent.builder()
-        .padLockModule(new PadLockModule(getApplicationContext()))
-        .build();
+  @NonNull @CheckResult public static PadLockComponent getComponent(@NonNull Context context) {
+    final Context appContext = context.getApplicationContext();
+    if (appContext instanceof PadLockBase) {
+      final PadLockBase application = (PadLockBase) appContext;
+      return application.provideComponent();
+    } else {
+      throw new ClassCastException("Cannot cast Application Context to PadLockBase");
+    }
   }
 
-  @NonNull @Override PadLockComponent provideComponent() {
-    return component;
-  }
+  @CheckResult @NonNull abstract PadLockComponent provideComponent();
 }

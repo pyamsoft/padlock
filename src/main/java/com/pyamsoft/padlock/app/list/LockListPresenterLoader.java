@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.app.list;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.Singleton;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.pydroid.base.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -32,7 +32,7 @@ public class LockListPresenterLoader extends PersistLoader<LockListPresenter> {
   }
 
   @NonNull @Override public LockListPresenter loadPersistent() {
-    Singleton.Dagger.with(getContext()).plusLockList().inject(this);
+    PadLock.getComponent(getContext()).plusLockList().inject(this);
     return presenterProvider.get();
   }
 }

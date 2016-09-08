@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.Singleton;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
@@ -29,7 +29,8 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class ScreenOnOffReceiver extends BroadcastReceiver implements LockServicePresenter.LockService {
+public class ScreenOnOffReceiver extends BroadcastReceiver
+    implements LockServicePresenter.LockService {
 
   @NonNull private final static IntentFilter SCREEN_FILTER;
 
@@ -55,7 +56,7 @@ public class ScreenOnOffReceiver extends BroadcastReceiver implements LockServic
     lockActivity2 =
         new Intent(appContext, LockScreenActivity2.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-    Singleton.Dagger.with(appContext).plusLockService().inject(this);
+    PadLock.getComponent(appContext).plusLockService().inject(this);
   }
 
   private static void craftIntent(@NonNull Intent removeIntent, @NonNull Intent addIntent,
