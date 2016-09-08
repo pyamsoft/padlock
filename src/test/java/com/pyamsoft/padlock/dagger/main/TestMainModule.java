@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import com.pyamsoft.padlock.app.main.MainPresenter;
-import com.pyamsoft.pydroid.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -27,14 +26,39 @@ import rx.Scheduler;
 
 @Module public class TestMainModule {
 
-  @ActivityScope @Provides MainPresenter providePinEntryPresenter(final MainInteractor interactor,
-      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+  @Provides MainPresenter provideMainPresenter() {
+    throw new RuntimeException("Use Impl class to test");
+  }
+
+  @Named("agree") @Provides MainPresenterImpl provideMainPresenterAgree(
+      @Named("agree") MainInteractor interactor, @Named("main") Scheduler mainScheduler,
+      @Named("io") Scheduler ioScheduler) {
     return new MainPresenterImpl(interactor, mainScheduler, ioScheduler);
   }
 
-  @ActivityScope @Provides MainInteractor providePinEntryInteractor() {
+  @Named("not_agree") @Provides MainPresenterImpl provideMainPresenterNotAgree(
+      @Named("not_agree") MainInteractor interactor, @Named("main") Scheduler mainScheduler,
+      @Named("io") Scheduler ioScheduler) {
+    return new MainPresenterImpl(interactor, mainScheduler, ioScheduler);
+  }
+
+  @Named("not_agree") @Provides MainInteractor provideMainInteractorNotAgree() {
     final MainInteractor interactor = Mockito.mock(MainInteractor.class);
     Mockito.when(interactor.hasAgreed()).thenReturn(Observable.just(false));
+    Mockito.doAnswer(invocation -> {
+      System.out.println("AGREE TERMS");
+      return null;
+    }).when(interactor).setAgreed();
+    return interactor;
+  }
+
+  @Named("agree") @Provides MainInteractor provideMainInteractorAgree() {
+    final MainInteractor interactor = Mockito.mock(MainInteractor.class);
+    Mockito.when(interactor.hasAgreed()).thenReturn(Observable.just(true));
+    Mockito.doAnswer(invocation -> {
+      System.out.println("AGREE TERMS");
+      return null;
+    }).when(interactor).setAgreed();
     return interactor;
   }
 }

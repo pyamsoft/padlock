@@ -24,8 +24,7 @@ import org.mockito.Mockito;
 
 @Module public class TestPackageManagerWrapperModule {
 
-  @Singleton @Provides PackageManagerWrapper providePackageManagerWrapper(
-      PackageManagerWrapperImpl packageManagerWrapper) {
+  @Provides PackageManagerWrapper providePackageManagerWrapper() {
     final PackageManagerWrapper mockManagerWrapper = Mockito.mock(PackageManagerWrapper.class);
     return mockManagerWrapper;
   }

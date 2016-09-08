@@ -16,19 +16,19 @@
 
 package com.pyamsoft.padlock;
 
+import android.app.Application;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.DaggerTestPadLockComponent;
 import com.pyamsoft.padlock.dagger.TestPadLockComponent;
 import com.pyamsoft.padlock.dagger.TestPadLockModule;
 import com.pyamsoft.padlock.dagger.wrapper.TestPackageManagerWrapperModule;
 
-public class TestPadLock extends PadLock {
+public class TestPadLock extends Application implements IPadLock {
 
   private TestPadLockComponent component;
 
   @Override public void onCreate() {
     super.onCreate();
-    System.out.println("NEW TESTING PADLOCK");
     component = DaggerTestPadLockComponent.builder()
         .testPackageManagerWrapperModule(new TestPackageManagerWrapperModule())
         .testPadLockModule(new TestPadLockModule(getApplicationContext()))
