@@ -99,54 +99,41 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   public Observable<PadLockEntry> getEntry(@NonNull String packageName,
       @NonNull String activityName) {
     Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);
-    final Observable<PadLockEntry> specificActivityEntry =
-        PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
-    final Observable<PadLockEntry> packageActivityEntry = PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME)
-        .first();
-    return Observable.zip(specificActivityEntry, packageActivityEntry,
-        (specificEntry, packageEntry) -> {
-          Timber.d("Check the specific entry for validity");
-          if (!PadLockEntry.isEmpty(specificEntry)) {
-            Timber.d("Specific entry PN %s, AN %s", specificEntry.packageName(),
-                specificEntry.activityName());
-            return specificEntry;
+    return PadLockDB.with(appContext)
+        .queryWithPackageActivityNameDefault(packageName, activityName)
+        .first()
+        .map(entry -> {
+          if (PadLockEntry.isEmpty(entry)) {
+            Timber.w("Returned entry is EMPTY");
+            return null;
           }
 
-          Timber.w("Specific entry is the EMPTY entry, try something else");
-          if (!PadLockEntry.isEmpty(packageEntry)) {
-            Timber.d("Package entry PN %s, AN %s", packageEntry.packageName(),
-                packageEntry.activityName());
-            return packageEntry;
+          Timber.d("Default entry PN %s, AN %s", entry.packageName(), entry.activityName());
+          return entry;
+        })
+        .filter(entry -> entry != null)
+        .filter(entry -> {
+          Timber.d("Check ignore time for: %s %s", entry.packageName(), entry.activityName());
+          final long ignoreUntilTime = entry.ignoreUntilTime();
+          final long currentTime = System.currentTimeMillis();
+          Timber.d("Ignore until time: %d", ignoreUntilTime);
+          Timber.d("Current time: %d", currentTime);
+          if (currentTime < ignoreUntilTime) {
+            Timber.d("Ignore period has not elapsed yet");
+            return false;
           }
 
-          Timber.w("Package entry is the EMPTY entry, return NULL");
-          return null;
-        }).filter(entry -> {
-      final boolean filterOut = entry != null;
-      Timber.d("Keep entry if not NULL: %s", filterOut);
-      return filterOut;
-    }).filter(entry -> {
-      Timber.d("Check ignore time for: %s %s", entry.packageName(), entry.activityName());
-      final long ignoreUntilTime = entry.ignoreUntilTime();
-      final long currentTime = System.currentTimeMillis();
-      Timber.d("Ignore until time: %d", ignoreUntilTime);
-      Timber.d("Current time: %d", currentTime);
-      if (currentTime < ignoreUntilTime) {
-        Timber.d("Ignore period has not elapsed yet");
-        return false;
-      }
+          return true;
+        })
+        .filter(entry -> {
+          if (entry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)
+              && entry.whitelist()) {
+            throw new RuntimeException(
+                "PACKAGE entry for package: " + entry.packageName() + " cannot be whitelisted");
+          }
 
-      Timber.d("Lock: %s %s", entry.packageName(), entry.activityName());
-      return true;
-    }).filter(entry -> {
-      if (entry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME) && entry.whitelist()) {
-        throw new RuntimeException(
-            "PACKAGE entry for package: " + entry.packageName() + " cannot be whitelisted");
-      }
-
-      Timber.d("Filter out whitelisted packages");
-      return !entry.whitelist();
-    });
+          Timber.d("Filter out if whitelisted packages");
+          return !entry.whitelist();
+        });
   }
 }
