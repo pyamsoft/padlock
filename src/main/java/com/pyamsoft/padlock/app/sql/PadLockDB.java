@@ -137,6 +137,33 @@ public class PadLockDB {
         .filter(padLockEntry -> padLockEntry != null);
   }
 
+  /**
+   * Get either the package with specific name of the PACKAGE entry
+   *
+   * SQLite only has bindings so we must make do
+   * ?1 package name
+   * ?2 the PadLock PACKAGE_TAG, see model.PadLockEntry
+   * ?3 the specific activity name
+   * ?4 the PadLock PACKAGE_TAG, see model.PadLockEntry
+   * ?5 the specific activity name
+   */
+  @NonNull @CheckResult public Observable<PadLockEntry> queryWithPackageActivityNameDefault(
+      final @NonNull String packageName, final @NonNull String activityName) {
+    Timber.i("DB: QUERY");
+    openDatabase();
+    return briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
+        PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT, packageName,
+        PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName, PadLockEntry.PACKAGE_ACTIVITY_NAME,
+        activityName)
+        .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_name_defaultMapper()::map,
+            PadLockEntry.empty())
+        .map(entry -> {
+          closeDatabase();
+          return entry;
+        })
+        .filter(padLockEntry -> padLockEntry != null);
+  }
+
   @NonNull @CheckResult
   public Observable<List<PadLockEntry>> queryWithPackageName(final @NonNull String packageName) {
     Timber.i("DB: QUERY");
