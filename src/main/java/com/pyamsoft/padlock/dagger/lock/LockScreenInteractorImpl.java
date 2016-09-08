@@ -72,35 +72,24 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
         });
   }
 
-  @WorkerThread @NonNull @Override @CheckResult
+  @WorkerThread @NonNull @Override
   public Observable<Boolean> unlockEntry(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String attempt) {
-    Timber.d("Attempt unlock: %s %s", packageName, activityName);
-    final Observable<PadLockEntry> dbObservable =
-        PadLockDB.with(appContext).queryWithPackageActivityName(packageName, activityName).first();
-
-    final Observable<String> masterPinObservable = pinInteractor.getMasterPin();
-    return Observable.zip(dbObservable, masterPinObservable, (padLockEntry, masterPin) -> {
-      final long lockUntilTime = padLockEntry.lockUntilTime();
+      @Nullable String lockCode, long lockUntilTime, @NonNull String attempt) {
+    return pinInteractor.getMasterPin().map(masterPin -> {
+      Timber.d("Attempt unlock: %s %s", packageName, activityName);
       Timber.d("Check entry is not locked: %d", lockUntilTime);
       if (System.currentTimeMillis() < lockUntilTime) {
         Timber.e("Entry is still locked. Fail unlock");
         return null;
       }
 
-      if (PadLockEntry.isEmpty(padLockEntry)) {
-        Timber.e("Entry is the EMPTY entry");
-        return null;
-      }
-
-      final String appCode = padLockEntry.lockCode();
       String pin;
-      if (appCode == null) {
+      if (lockCode == null) {
         Timber.d("No app specific code, use Master PIN");
         pin = masterPin;
       } else {
         Timber.d("App specific code present, compare attempt");
-        pin = appCode;
+        pin = lockCode;
       }
       return pin;
     }).filter(pin -> pin != null).flatMap(pin -> checkSubmissionAttempt(attempt, pin));

@@ -144,24 +144,25 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
   }
 
   @Override public void submit(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String currentAttempt) {
+      @Nullable String lockCode, long lockUntilTime, @NonNull String currentAttempt) {
     unsubUnlock();
     final LockScreen lockScreen = getView();
-    unlockSubscription = interactor.unlockEntry(packageName, activityName, currentAttempt)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(unlocked -> {
-          Timber.d("Received unlock entry result");
-          if (unlocked) {
-            lockScreen.onSubmitSuccess();
-          } else {
-            lockScreen.onSubmitFailure();
-          }
-        }, throwable -> {
-          Timber.e(throwable, "unlockEntry onError");
-          lockScreen.onSubmitError();
-          unsubUnlock();
-        }, this::unsubUnlock);
+    unlockSubscription =
+        interactor.unlockEntry(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
+            .subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
+            .subscribe(unlocked -> {
+              Timber.d("Received unlock entry result");
+              if (unlocked) {
+                lockScreen.onSubmitSuccess();
+              } else {
+                lockScreen.onSubmitFailure();
+              }
+            }, throwable -> {
+              Timber.e(throwable, "unlockEntry onError");
+              lockScreen.onSubmitError();
+              unsubUnlock();
+            }, this::unsubUnlock);
   }
 
   @Override public void loadDisplayNameFromPackage(@NonNull String packageName) {
