@@ -32,7 +32,7 @@ public class LockScreenPresenterLoader extends PersistLoader<LockScreenPresenter
   }
 
   @NonNull @Override public LockScreenPresenter loadPersistent() {
-    PadLock.getComponent(getContext()).plusLockScreen().inject(this);
+    PadLock.get(getContext()).provideComponent().plusLockScreen().inject(this);
     return presenterProvider.get();
   }
 }

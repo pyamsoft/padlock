@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock;
+package com.pyamsoft.padlock.dagger;
 
-import android.content.Context;
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.ApplicationBase;
+import com.pyamsoft.padlock.dagger.main.TestMainComponent;
+import com.pyamsoft.padlock.dagger.wrapper.TestPackageManagerWrapperModule;
+import dagger.Component;
+import javax.inject.Singleton;
 
-public abstract class PadLock extends ApplicationBase implements IPadLock {
+@Singleton @Component(modules = { TestPadLockModule.class, TestPackageManagerWrapperModule.class })
+public interface TestPadLockComponent extends PadLockComponent {
 
-  @NonNull @CheckResult public static IPadLock get(@NonNull Context context) {
-    final Context appContext = context.getApplicationContext();
-    if (appContext instanceof IPadLock) {
-      return (IPadLock) appContext;
-    } else {
-      throw new ClassCastException("Cannot cast Application Context to PadLockBase");
-    }
-  }
+  @Override TestMainComponent plusMain();
 }

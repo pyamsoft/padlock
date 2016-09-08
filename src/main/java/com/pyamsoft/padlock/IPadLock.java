@@ -16,26 +16,11 @@
 
 package com.pyamsoft.padlock;
 
-import org.junit.Assert;
-import org.junit.Test;
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.dagger.PadLockComponent;
 
-public class JVMSanityTest {
+public interface IPadLock {
 
-  /**
-   * Assert that the JVM does sane addition
-   *
-   * @throws Exception
-   */
-  @Test public void test_additionIsCorrect() throws Exception {
-    Assert.assertEquals(4, 2 + 2);
-  }
-
-  /**
-   * Assert that the JVM does sane subtraction
-   *
-   * @throws Exception
-   */
-  @Test public void test_subtractionIsCorrect() throws Exception {
-    Assert.assertEquals(2, 4 - 2);
-  }
+  @CheckResult @NonNull <T extends PadLockComponent> T provideComponent();
 }

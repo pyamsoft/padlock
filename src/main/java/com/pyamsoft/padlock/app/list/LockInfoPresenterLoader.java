@@ -32,7 +32,7 @@ public class LockInfoPresenterLoader extends PersistLoader<LockInfoPresenter> {
   }
 
   @NonNull @Override public LockInfoPresenter loadPersistent() {
-    PadLock.getComponent(getContext()).plusLockInfo().inject(this);
+    PadLock.get(getContext()).provideComponent().plusLockInfo().inject(this);
     return presenterProvider.get();
   }
 }
