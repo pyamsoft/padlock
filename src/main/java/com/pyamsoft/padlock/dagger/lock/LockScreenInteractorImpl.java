@@ -54,22 +54,21 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   @WorkerThread @NonNull @Override @CheckResult
-  public Observable<Boolean> lockEntry(@NonNull String packageName, @NonNull String activityName) {
-    return PadLockDB.with(appContext)
-        .queryWithPackageActivityName(packageName, activityName)
-        .first()
-        .flatMap(padLockEntry -> {
-          final long timeOutMinutesInMillis = preferences.getTimeoutPeriod() * 60 * 1000;
-          Timber.d("Lock %s %s for %d", padLockEntry.packageName(), padLockEntry.activityName(),
+  public Observable<Long> lockEntry(@NonNull String packageName, @NonNull String activityName,
+      @Nullable String lockCode, long oldLockUntilTime, long ignoreUntilTime, boolean isSystem) {
+    return Observable.defer(() -> Observable.just(preferences.getTimeoutPeriod()))
+        .map(period -> period * 60 * 1000)
+        .flatMap(timeOutMinutesInMillis -> {
+          final long newLockUntilTime = System.currentTimeMillis() + timeOutMinutesInMillis;
+          Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
               timeOutMinutesInMillis);
-          return updateEntry(padLockEntry, System.currentTimeMillis() + timeOutMinutesInMillis,
-              padLockEntry.ignoreUntilTime(), false);
-        })
-        .map(integer -> {
-          Timber.d("Result of update: %d", integer);
-
-          // TODO use result of update
-          return true;
+          return PadLockDB.with(appContext)
+              .updateWithPackageActivityName(packageName, activityName, lockCode, newLockUntilTime,
+                  ignoreUntilTime, isSystem, false)
+              .map(integer -> {
+                Timber.d("Update result: %s", integer);
+                return newLockUntilTime;
+              });
         });
   }
 

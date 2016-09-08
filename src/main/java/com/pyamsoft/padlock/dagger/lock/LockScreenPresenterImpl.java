@@ -124,20 +124,18 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
     }
   }
 
-  @Override public void lockEntry(@NonNull String packageName, @NonNull String activityName) {
+  @Override public void lockEntry(@NonNull String packageName, @NonNull String activityName,
+      @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem) {
     unsubLock();
     lockSubscription = interactor.incrementAndGetFailCount()
         .filter(count -> count > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT)
-        .flatMap(integer -> interactor.lockEntry(packageName, activityName))
+        .flatMap(integer -> interactor.lockEntry(packageName, activityName, lockCode, lockUntilTime,
+            ignoreUntilTime, isSystem))
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(unlocked -> {
+        .subscribe(lockTime -> {
           Timber.d("Received lock entry result");
-          if (unlocked) {
-            getView().onLocked();
-          } else {
-            getView().onLockedError();
-          }
+          getView().onLocked(lockTime);
         }, throwable -> {
           Timber.e(throwable, "lockEntry onError");
           getView().onLockedError();

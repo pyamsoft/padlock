@@ -27,7 +27,8 @@ public interface LockScreenPresenter
 
   void createWithDefaultIgnoreTime();
 
-  void lockEntry(@NonNull String packageName, @NonNull String activityName);
+  void lockEntry(@NonNull String packageName, @NonNull String activityName,
+      @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem);
 
   void submit(@NonNull String packageName, @NonNull String activityName,
       @NonNull String currentAttempt);

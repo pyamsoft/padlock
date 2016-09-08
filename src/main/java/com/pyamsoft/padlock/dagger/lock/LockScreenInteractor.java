@@ -32,8 +32,9 @@ public interface LockScreenInteractor extends LockInteractor {
       @NonNull String activityName, @NonNull String realName, @Nullable String lockCode,
       boolean isSystem, boolean exclude, long ignoreTime);
 
-  @CheckResult @NonNull Observable<Boolean> lockEntry(@NonNull String packageName,
-      @NonNull String activityName);
+  @CheckResult @NonNull Observable<Long> lockEntry(@NonNull String packageName,
+      @NonNull String activityName, @Nullable String lockCode, long lastLockUntilTime,
+      long ignoreUntilTime, boolean isSystem);
 
   @CheckResult @NonNull Observable<String> getDisplayName(@NonNull String packageName);
 

@@ -80,12 +80,16 @@ public class PadLockService extends AccessibilityService
     removeIntent.removeExtra(LockScreenActivity.ENTRY_LOCK_CODE);
     removeIntent.removeExtra(LockScreenActivity.ENTRY_IS_SYSTEM);
     removeIntent.removeExtra(LockScreenActivity.ENTRY_REAL_NAME);
+    removeIntent.removeExtra(LockScreenActivity.ENTRY_IGNORE_UNTIL_TIME);
+    removeIntent.removeExtra(LockScreenActivity.ENTRY_LOCK_UNTIL_TIME);
+
     addIntent.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName());
     addIntent.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName());
     addIntent.putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode());
-    addIntent.putExtra(LockScreenActivity.ENTRY_IS_SYSTEM,
-        Boolean.toString(entry.systemApplication()));
+    addIntent.putExtra(LockScreenActivity.ENTRY_IS_SYSTEM, entry.systemApplication());
     addIntent.putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName);
+    addIntent.putExtra(LockScreenActivity.ENTRY_LOCK_UNTIL_TIME, entry.lockUntilTime());
+    addIntent.putExtra(LockScreenActivity.ENTRY_IGNORE_UNTIL_TIME, entry.ignoreUntilTime());
 
     if (entry.whitelist()) {
       throw new RuntimeException("Cannot launch LockScreen for whitelisted applications");
