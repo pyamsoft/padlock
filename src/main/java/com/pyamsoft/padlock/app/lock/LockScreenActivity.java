@@ -285,6 +285,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
 
   @Override public void onLocked(long lockUntilTime) {
     this.lockUntilTime = lockUntilTime;
+    getIntent().removeExtra(ENTRY_LOCK_UNTIL_TIME);
+    getIntent().putExtra(ENTRY_LOCK_UNTIL_TIME, lockUntilTime);
     showSnackbarWithText("This entry is temporarily locked");
   }
 
