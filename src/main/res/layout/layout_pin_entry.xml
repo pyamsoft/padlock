@@ -33,8 +33,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:contentDescription="@string/blank"
         android:layout_margin="16dp"
+        android:contentDescription="@string/blank"
         />
 
     <TextView

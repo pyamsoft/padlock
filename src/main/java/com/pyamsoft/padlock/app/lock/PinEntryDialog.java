@@ -93,7 +93,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
     setCancelable(true);
 
-    loadedKey = PersistentCache.load(KEY_PIN_DIALOG, savedInstanceState,
+    loadedKey = PersistentCache.get().load(KEY_PIN_DIALOG, savedInstanceState,
         new PersistLoader.Callback<PinEntryPresenter>() {
           @NonNull @Override public PersistLoader<PinEntryPresenter> createLoader() {
             return new PinScreenPresenterLoader(getContext());
@@ -226,7 +226,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
-    PersistentCache.saveKey(outState, KEY_PIN_DIALOG, loadedKey);
+    PersistentCache.get().saveKey(outState, KEY_PIN_DIALOG, loadedKey);
     outState.putString(CODE_DISPLAY, getCurrentAttempt());
     outState.putString(CODE_REENTRY_DISPLAY, getCurrentReentry());
     outState.putString(HINT_DISPLAY, getCurrentHint());
@@ -282,7 +282,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @Override public void onDestroy() {
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.unload(loadedKey);
+      PersistentCache.get().unload(loadedKey);
     }
   }
 

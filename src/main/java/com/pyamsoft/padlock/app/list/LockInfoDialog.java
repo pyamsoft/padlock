@@ -88,7 +88,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
 
     loadedPresenterKey =
-        PersistentCache.load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
+        PersistentCache.get().load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
           @NonNull @Override public PersistLoader<LockInfoPresenter> createLoader() {
             firstRefresh = true;
             return new LockInfoPresenterLoader(getContext());
@@ -99,7 +99,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
           }
         });
 
-    loadedAdapterKey = PersistentCache.load(KEY_LOAD_ADAPTER, savedInstanceState,
+    loadedAdapterKey = PersistentCache.get().load(KEY_LOAD_ADAPTER, savedInstanceState,
         new PersistLoader.Callback<LockInfoAdapter>() {
           @NonNull @Override public PersistLoader<LockInfoAdapter> createLoader() {
             return new ListAdapterLoader<LockInfoAdapter>(getContext()) {
@@ -141,8 +141,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @Override public void onDestroy() {
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.unload(loadedPresenterKey);
-      PersistentCache.unload(loadedAdapterKey);
+      PersistentCache.get().unload(loadedPresenterKey);
+      PersistentCache.get().unload(loadedAdapterKey);
     }
   }
 
@@ -164,8 +164,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
-    PersistentCache.saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
+    PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
+    PersistentCache.get().saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
     super.onSaveInstanceState(outState);
   }
 
