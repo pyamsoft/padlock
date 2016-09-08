@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.sql;
+package com.pyamsoft.padlock.dagger.sql;
 
 import android.content.Context;
 import android.support.annotation.CheckResult;
