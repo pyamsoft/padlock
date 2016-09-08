@@ -30,8 +30,8 @@ public interface LockScreenPresenter
   void lockEntry(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem);
 
-  void submit(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String currentAttempt);
+  void submit(@NonNull String packageName, @NonNull String activityName, @Nullable String lockCode,
+      long lockUntilTime, @NonNull String currentAttempt);
 
   void loadDisplayNameFromPackage(@NonNull String packageName);
 

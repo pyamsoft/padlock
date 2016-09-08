@@ -161,7 +161,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
 
       if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
         Timber.d("KeyEvent is Enter pressed");
-        presenter.submit(lockedPackageName, lockedActivityName, getCurrentAttempt());
+        presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
+            getCurrentAttempt());
         return true;
       }
 
@@ -175,7 +176,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
     imageGo.setOnClickListener(view -> {
-      presenter.submit(lockedPackageName, lockedActivityName, getCurrentAttempt());
+      presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
+          getCurrentAttempt());
       imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
     });
 
