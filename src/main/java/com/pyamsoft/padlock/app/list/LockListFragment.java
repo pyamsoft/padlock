@@ -504,10 +504,10 @@ public class LockListFragment extends ActionBarFragment
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  @Override public void processDatabaseModifyEvent(int position, @NonNull AppEntry entry) {
-    Timber.d("Received a database modify event request for %s at %d", entry.packageName(),
-        position);
-    presenter.modifyDatabaseEntry(position, entry.packageName(), null, entry.system());
+  @Override public void processDatabaseModifyEvent(boolean isChecked, int position, @NonNull AppEntry entry) {
+    Timber.d("Received a database modify event request for %s at %d [%s]", entry.packageName(),
+        position, isChecked ? "LOCK" : "NO LOCK");
+    presenter.modifyDatabaseEntry(isChecked, position, entry.packageName(), null, entry.system());
   }
 
   @Override public void displayLockInfoDialog(@NonNull AppEntry entry) {

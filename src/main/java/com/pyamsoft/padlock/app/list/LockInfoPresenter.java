@@ -31,8 +31,9 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
 
   void setToggleAllState(@NonNull String packageName);
 
-  void modifyDatabaseEntry(int position, @NonNull String packageName, @NonNull String activityName,
-      @Nullable String code, boolean system, boolean whitelist, boolean forceDelete);
+  void modifyDatabaseEntry(boolean isNotDefault, int position, @NonNull String packageName,
+      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
+      boolean forceDelete);
 
   void modifyDatabaseGroup(boolean allCreate, @NonNull String packageName, @Nullable String code,
       boolean system);
@@ -47,6 +48,6 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
     void disableToggleAll();
 
     void processDatabaseModifyEvent(int position, @NonNull String activityName,
-        @NonNull LockState lockState);
+        @NonNull LockState previousLockState, @NonNull LockState newLockState);
   }
 }
