@@ -16,10 +16,9 @@
 
 package com.pyamsoft.padlock.dagger.main;
 
-import com.pyamsoft.pydroid.dagger.ActivityScope;
 import dagger.Subcomponent;
 
-@ActivityScope @Subcomponent(modules = TestMainModule.class) public interface TestMainComponent
+@Subcomponent(modules = TestMainModule.class) public interface TestMainComponent
     extends MainComponent {
 
   void inject(MainPresenterTest test);

@@ -21,7 +21,7 @@ import com.pyamsoft.padlock.dagger.wrapper.TestPackageManagerWrapperModule;
 import dagger.Component;
 import javax.inject.Singleton;
 
-@Singleton @Component(modules = { TestPadLockModule.class, TestPackageManagerWrapperModule.class })
+@Component(modules = { TestPadLockModule.class, TestPackageManagerWrapperModule.class })
 public interface TestPadLockComponent extends PadLockComponent {
 
   @Override TestMainComponent plusMain();

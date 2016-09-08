@@ -17,87 +17,44 @@
 package com.pyamsoft.padlock.dagger;
 
 import android.content.Context;
-import android.os.Build;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
 import com.birbit.android.jobqueue.JobManager;
-import com.birbit.android.jobqueue.config.Configuration;
-import com.birbit.android.jobqueue.network.NetworkUtil;
-import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService;
-import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.service.job.PadLockFrameworkJobSchedulerService;
-import com.pyamsoft.padlock.app.service.job.PadLockGCMJobSchedulerService;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
-import javax.inject.Singleton;
 import org.mockito.Mockito;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
-import timber.log.Timber;
 
 @Module public class TestPadLockModule {
 
   @NonNull private final Context appContext;
-  @NonNull private final JobManager jobManager;
 
   public TestPadLockModule(@NonNull Context context) {
     this.appContext = context.getApplicationContext();
-    jobManager = createJobManager(appContext);
   }
 
-  @Singleton @Provides Context provideContext() {
+  @Provides Context provideContext() {
     return appContext;
   }
 
-  @Singleton @Named("io") @Provides Scheduler provideIOScheduler() {
+  @Named("io") @Provides Scheduler provideIOScheduler() {
     return Schedulers.immediate();
   }
 
-  @Singleton @Named("main") @Provides Scheduler provideMainThreadScheduler() {
+  @Named("main") @Provides Scheduler provideMainThreadScheduler() {
     return Schedulers.immediate();
   }
 
-  @Singleton @Provides PadLockPreferences providePreferences() {
+  @Provides PadLockPreferences providePreferences() {
     final PadLockPreferences mockPreferences = Mockito.mock(PadLockPreferences.class);
     return mockPreferences;
   }
 
-  @VisibleForTesting @CheckResult @NonNull JobManager createJobManager(@NonNull Context context) {
-    final Configuration.Builder builder = new Configuration.Builder(context).minConsumerCount(1)
-        .maxConsumerCount(4)
-        .loadFactor(4)
-        .consumerKeepAlive(120);
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      Timber.d("Create scheduler using JobScheduler framework");
-      builder.scheduler(FrameworkJobSchedulerService.createSchedulerFor(context,
-          PadLockFrameworkJobSchedulerService.class));
-    } else {
-      final int googleAvailable =
-          GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context);
-      if (googleAvailable == ConnectionResult.SUCCESS) {
-        Timber.d("Create scheduler using Google play services");
-
-        // Batch by default
-        builder.scheduler(GcmJobSchedulerService.createSchedulerFor(context,
-            PadLockGCMJobSchedulerService.class));
-      } else {
-        Timber.e("Could not create a scheduler to use with the JobScheduler");
-      }
-    }
-
-    // We don't actually use the network
-    builder.networkUtil(context1 -> NetworkUtil.DISCONNECTED);
-
-    Timber.d("Create a new JobManager");
-    return new JobManager(builder.build());
-  }
-
-  @Singleton @Provides JobManager provideJobManager() {
-    return jobManager;
+  @Provides JobManager provideJobManager() {
+    // KLUDGE Should not really be mocking this, we dont own it
+    final JobManager mockJobManager = Mockito.mock(JobManager.class);
+    return mockJobManager;
   }
 }
