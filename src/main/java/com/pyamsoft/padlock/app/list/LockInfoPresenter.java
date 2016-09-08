@@ -46,6 +46,7 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
 
     void disableToggleAll();
 
-    void processDatabaseModifyEvent(int position, @NonNull String activityName, @NonNull LockState lockState);
+    void processDatabaseModifyEvent(int position, @NonNull String activityName,
+        @NonNull LockState lockState);
   }
 }

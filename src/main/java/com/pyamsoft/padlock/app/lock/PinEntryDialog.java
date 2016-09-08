@@ -93,8 +93,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
     setCancelable(true);
 
-    loadedKey = PersistentCache.get().load(KEY_PIN_DIALOG, savedInstanceState,
-        new PersistLoader.Callback<PinEntryPresenter>() {
+    loadedKey = PersistentCache.get()
+        .load(KEY_PIN_DIALOG, savedInstanceState, new PersistLoader.Callback<PinEntryPresenter>() {
           @NonNull @Override public PersistLoader<PinEntryPresenter> createLoader() {
             return new PinScreenPresenterLoader(getContext());
           }

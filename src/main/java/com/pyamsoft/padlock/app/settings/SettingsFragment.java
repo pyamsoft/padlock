@@ -26,8 +26,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.pydroid.base.ActionBarFragment;
 import com.pyamsoft.pydroid.app.fragment.CircularRevealFragmentUtil;
+import com.pyamsoft.pydroid.base.ActionBarFragment;
 
 public class SettingsFragment extends ActionBarFragment {
 

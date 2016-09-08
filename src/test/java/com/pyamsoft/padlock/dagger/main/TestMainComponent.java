@@ -22,6 +22,5 @@ import dagger.Subcomponent;
 @ActivityScope @Subcomponent(modules = TestMainModule.class) public interface TestMainComponent
     extends MainComponent {
 
-
   void inject(MainPresenterTest test);
 }

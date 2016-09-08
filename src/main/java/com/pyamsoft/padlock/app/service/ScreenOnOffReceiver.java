@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLock;
-import com.pyamsoft.padlock.PadLockActual;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;

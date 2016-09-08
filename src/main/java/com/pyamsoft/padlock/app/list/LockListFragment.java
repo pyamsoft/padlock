@@ -45,9 +45,9 @@ import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.base.ActionBarFragment;
 import com.pyamsoft.pydroid.app.fragment.CircularRevealFragmentUtil;
 import com.pyamsoft.pydroid.app.widget.DividerItemDecoration;
+import com.pyamsoft.pydroid.base.ActionBarFragment;
 import com.pyamsoft.pydroid.base.ListAdapterLoader;
 import com.pyamsoft.pydroid.base.PersistLoader;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
@@ -118,8 +118,8 @@ public class LockListFragment extends ActionBarFragment
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
 
-    loadedPresenterKey = PersistentCache.get().load(KEY_PRESENTER, savedInstanceState,
-        new PersistLoader.Callback<LockListPresenter>() {
+    loadedPresenterKey = PersistentCache.get()
+        .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
           @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
             firstRefresh = true;
             return new LockListPresenterLoader(getContext());
@@ -130,8 +130,8 @@ public class LockListFragment extends ActionBarFragment
           }
         });
 
-    loadedAdapterKey = PersistentCache.get().load(KEY_LOAD_ADAPTER, savedInstanceState,
-        new PersistLoader.Callback<LockListAdapter>() {
+    loadedAdapterKey = PersistentCache.get()
+        .load(KEY_LOAD_ADAPTER, savedInstanceState, new PersistLoader.Callback<LockListAdapter>() {
           @NonNull @Override public PersistLoader<LockListAdapter> createLoader() {
             return new ListAdapterLoader<LockListAdapter>(getContext()) {
               @NonNull @Override public LockListAdapter loadPersistent() {
