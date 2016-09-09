@@ -45,7 +45,6 @@ import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.app.fragment.CircularRevealFragmentUtil;
 import com.pyamsoft.pydroid.app.widget.DividerItemDecoration;
 import com.pyamsoft.pydroid.base.ActionBarFragment;
 import com.pyamsoft.pydroid.base.ListAdapterLoader;
@@ -105,10 +104,9 @@ public class LockListFragment extends ActionBarFragment
   private long loadedPresenterKey;
   private long loadedAdapterKey;
 
-  @CheckResult @NonNull
-  public static LockListFragment newInstance(int cX, int cY, boolean forceRefresh) {
-    final Bundle args = CircularRevealFragmentUtil.bundleArguments(cX, cY, 600L);
+  @CheckResult @NonNull public static LockListFragment newInstance(boolean forceRefresh) {
     final LockListFragment fragment = new LockListFragment();
+    final Bundle args = new Bundle();
     args.putBoolean("FORCE_REFRESH", forceRefresh);
     fragment.setArguments(args);
     return fragment;
@@ -160,10 +158,6 @@ public class LockListFragment extends ActionBarFragment
     if (forceRefresh) {
       Timber.d("Force a list refresh");
       firstRefresh = true;
-    }
-
-    if (firstRefresh) {
-      CircularRevealFragmentUtil.runCircularRevealOnViewCreated(view, getArguments());
     }
 
     setupRecyclerView();
@@ -504,7 +498,8 @@ public class LockListFragment extends ActionBarFragment
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  @Override public void processDatabaseModifyEvent(boolean isChecked, int position, @NonNull AppEntry entry) {
+  @Override
+  public void processDatabaseModifyEvent(boolean isChecked, int position, @NonNull AppEntry entry) {
     Timber.d("Received a database modify event request for %s at %d [%s]", entry.packageName(),
         position, isChecked ? "LOCK" : "NO LOCK");
     presenter.modifyDatabaseEntry(isChecked, position, entry.packageName(), null, entry.system());
