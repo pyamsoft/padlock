@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.ActionMenuView;
@@ -28,7 +27,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -36,9 +34,9 @@ import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
-import com.pyamsoft.pydroid.lib.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.app.activity.DonationActivity;
 import com.pyamsoft.pydroid.base.PersistLoader;
+import com.pyamsoft.pydroid.lib.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -50,7 +48,6 @@ public class MainActivity extends DonationActivity
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
   @NonNull private static final String KEY_PRESENTER = "key_main_presenter";
-  @BindView(R.id.main_root) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
   private Unbinder unbinder;
@@ -115,32 +112,15 @@ public class MainActivity extends DonationActivity
   }
 
   private void showLockList(boolean forceRefresh) {
-    if (rootView.isLaidOut()) {
-      realShowLockList(forceRefresh);
-    } else {
-      rootView.getViewTreeObserver()
-          .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override public void onGlobalLayout() {
-              rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-              realShowLockList(forceRefresh);
-            }
-          });
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess") void realShowLockList(boolean forceRefresh) {
     supportInvalidateOptionsMenu();
     final FragmentManager fragmentManager = getSupportFragmentManager();
     if ((fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
         && fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) == null) || forceRefresh) {
-      final View decorView = getWindow().getDecorView();
-      final int cX = decorView.getLeft() + decorView.getWidth() / 2;
-      final int cY = decorView.getBottom() + decorView.getHeight() / 2;
       fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, LockListFragment.newInstance(cX, cY, forceRefresh),
+          .replace(R.id.main_view_container, LockListFragment.newInstance(forceRefresh),
               LockListFragment.TAG)
-          .commit();
+          .commitNow();
     }
   }
 
