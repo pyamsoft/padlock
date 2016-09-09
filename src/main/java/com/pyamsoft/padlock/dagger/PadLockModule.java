@@ -44,10 +44,14 @@ import timber.log.Timber;
 
   @NonNull private final Context appContext;
   @NonNull private final JobManager jobManager;
+  @NonNull private final PadLockDB padLockDB;
+  @NonNull private final PadLockPreferences preferences;
 
   public PadLockModule(final @NonNull Context context) {
     appContext = context.getApplicationContext();
+    preferences = new PadLockPreferencesImpl(appContext);
     jobManager = createJobManager(context.getApplicationContext());
+    padLockDB = new PadLockDB(appContext, Schedulers.io());
   }
 
   @VisibleForTesting @CheckResult @NonNull JobManager createJobManager(@NonNull Context context) {
@@ -88,9 +92,12 @@ import timber.log.Timber;
     return appContext;
   }
 
-  @Singleton @Provides PadLockPreferences providePreferences(
-      final @NonNull PadLockPreferencesImpl padLockPreferences) {
-    return padLockPreferences;
+  @Singleton @Provides PadLockPreferences providePreferences() {
+    return preferences;
+  }
+
+  @Singleton @Provides PadLockDB providePadLockDB() {
+    return padLockDB;
   }
 
   @Singleton @Provides @Named("io") Scheduler provideIOScheduler() {

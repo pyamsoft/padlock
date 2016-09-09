@@ -17,9 +17,13 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import android.support.annotation.NonNull;
+import com.birbit.android.jobqueue.JobManager;
+import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.pydroid.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
@@ -35,7 +39,9 @@ import rx.Scheduler;
   }
 
   @ActivityScope @Provides LockScreenInteractor provideLockScreenInteractor(
-      final LockScreenInteractorImpl interactor) {
-    return interactor;
+      PadLockPreferences preference, JobManager jobManager, MasterPinInteractor masterPinInteractor,
+      PackageManagerWrapper packageManagerWrapper, PadLockDB padLockDB) {
+    return new LockScreenInteractorImpl(preference, jobManager, masterPinInteractor,
+        packageManagerWrapper, padLockDB);
   }
 }

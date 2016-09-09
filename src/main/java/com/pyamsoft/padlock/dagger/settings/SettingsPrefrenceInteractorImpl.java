@@ -19,8 +19,7 @@ package com.pyamsoft.padlock.dagger.settings;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.dagger.sql.PadLockDB;
-import com.pyamsoft.padlock.dagger.sql.PadLockOpenHelper;
+import com.pyamsoft.padlock.dagger.PadLockDB;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -28,25 +27,23 @@ import timber.log.Timber;
 class SettingsPrefrenceInteractorImpl implements SettingsPreferenceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
   @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
 
-  @Inject SettingsPrefrenceInteractorImpl(final @NonNull Context context,
-      final @NonNull PadLockPreferences preferences) {
-    appContext = context.getApplicationContext();
+  @Inject SettingsPrefrenceInteractorImpl(@NonNull Context context, @NonNull PadLockDB padLockDB,
+      @NonNull PadLockPreferences preferences) {
+    this.appContext = context.getApplicationContext();
+    this.padLockDB = padLockDB;
     this.preferences = preferences;
   }
 
   @NonNull @Override public Observable<Boolean> clearDatabase() {
     return Observable.defer(() -> {
       Timber.d("Clear database of all entries");
-      return PadLockDB.with(appContext).deleteAll();
-    }).map(integer -> {
-      // TODO do something with result
-      Timber.d("Database is cleared: %s", integer);
-      return appContext.deleteDatabase(PadLockOpenHelper.DB_NAME);
+      return padLockDB.deleteAll();
     }).map(deleteResult -> {
-      Timber.d("Database is deleted: %s", deleteResult);
-      PadLockDB.with(appContext).close();
+      Timber.d("Database is cleared: %s", deleteResult);
+      padLockDB.deleteDatabase();
 
       // TODO just return something valid
       return true;
