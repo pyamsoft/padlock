@@ -126,14 +126,14 @@ public class PadLockDB {
   }
 
   @NonNull @CheckResult
-  public Observable<PadLockEntry> queryWithPackageActivityName(final @NonNull String packageName,
-      final @NonNull String activityName) {
+  public Observable<PadLockEntry.WithPackageActivityName> queryWithPackageActivityName(
+      final @NonNull String packageName, final @NonNull String activityName) {
     Timber.i("DB: QUERY");
     openDatabase();
     return briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
         PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)
-        .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_nameMapper()::map,
-            PadLockEntry.empty())
+        .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_MAPPER::map,
+            PadLockEntry.WithPackageActivityName.empty())
         .map(entry -> {
           closeDatabase();
           return entry;

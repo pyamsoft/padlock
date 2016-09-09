@@ -41,8 +41,11 @@ import com.squareup.sqldelight.RowMapper;
       FACTORY.all_entriesMapper(AutoValue_PadLockEntry_AllEntries::new);
   @NonNull public static final RowMapper<WithPackageName> WITH_PACKAGE_NAME_MAPPER =
       FACTORY.with_package_nameMapper(AutoValue_PadLockEntry_WithPackageName::new);
-  @NonNull private static final String PACKAGE_EMPTY = "EMPTY";
-  @NonNull private static final String ACTIVITY_EMPTY = "EMPTY";
+  @NonNull public static final RowMapper<WithPackageActivityName>
+      WITH_PACKAGE_ACTIVITY_NAME_MAPPER =
+      FACTORY.with_package_activity_nameMapper(AutoValue_PadLockEntry_WithPackageActivityName::new);
+  @NonNull static final String PACKAGE_EMPTY = "EMPTY";
+  @NonNull static final String ACTIVITY_EMPTY = "EMPTY";
 
   @NonNull @CheckResult public static PadLockEntry empty() {
     return new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false);
@@ -58,5 +61,19 @@ import com.squareup.sqldelight.RowMapper;
 
   @AutoValue public static abstract class WithPackageName implements With_package_nameModel {
 
+  }
+
+  @AutoValue public static abstract class WithPackageActivityName
+      implements With_package_activity_nameModel {
+
+    @NonNull @CheckResult public static WithPackageActivityName empty() {
+      return new AutoValue_PadLockEntry_WithPackageActivityName(PACKAGE_EMPTY, ACTIVITY_EMPTY, null,
+          0, 0, false);
+    }
+
+    @CheckResult public static boolean isEmpty(@NonNull WithPackageActivityName entry) {
+      return entry.packageName().equals(PACKAGE_EMPTY) && entry.activityName()
+          .equals(ACTIVITY_EMPTY);
+    }
   }
 }

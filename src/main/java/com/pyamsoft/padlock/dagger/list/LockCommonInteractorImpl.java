@@ -91,7 +91,7 @@ abstract class LockCommonInteractorImpl implements LockCommonInteractor {
         .queryWithPackageActivityName(packageName, activityName)
         .first()
         .flatMap(entry -> {
-          if (PadLockEntry.isEmpty(entry)) {
+          if (PadLockEntry.WithPackageActivityName.isEmpty(entry)) {
             throw new RuntimeException("PadLock entry is empty but update was called");
           }
 
