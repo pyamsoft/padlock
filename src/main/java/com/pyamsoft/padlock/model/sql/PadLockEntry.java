@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.model.sql;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
+import com.squareup.sqldelight.RowMapper;
 
 @AutoValue public abstract class PadLockEntry implements PadLockEntryModel {
 
@@ -36,6 +37,8 @@ import com.google.auto.value.AutoValue;
   // SQLDelight does not yet support update strings
   @NonNull public static final String UPDATE_WITH_PACKAGE_ACTIVITY_NAME =
       "packageName = ? AND activityName = ?;";
+  @NonNull public static final RowMapper<AllEntries> ALL_ENTRIES_MAPPER =
+      FACTORY.all_entriesMapper(AutoValue_PadLockEntry_AllEntries::new);
   @NonNull private static final String PACKAGE_EMPTY = "EMPTY";
   @NonNull private static final String ACTIVITY_EMPTY = "EMPTY";
 
@@ -45,5 +48,9 @@ import com.google.auto.value.AutoValue;
 
   @CheckResult public static boolean isEmpty(@NonNull PadLockEntry entry) {
     return entry.packageName().equals(PACKAGE_EMPTY) && entry.activityName().equals(ACTIVITY_EMPTY);
+  }
+
+  @AutoValue public static abstract class AllEntries implements All_entriesModel {
+
   }
 }

@@ -29,7 +29,7 @@ public interface LockListInteractor extends LockCommonInteractor {
 
   @CheckResult @NonNull Observable<List<ApplicationInfo>> getApplicationInfoList();
 
-  @CheckResult @NonNull Observable<List<PadLockEntry>> getAppEntryList();
+  @CheckResult @NonNull Observable<List<PadLockEntry.AllEntries>> getAppEntryList();
 
   @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding();
 

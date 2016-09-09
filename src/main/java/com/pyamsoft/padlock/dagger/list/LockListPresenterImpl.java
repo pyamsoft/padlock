@@ -153,7 +153,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         lockListInteractor.getApplicationInfoList();
 
     Timber.d("Get padlock entry list");
-    final Observable<List<PadLockEntry>> padlockEntryObservable =
+    final Observable<List<PadLockEntry.AllEntries>> padlockEntryObservable =
         lockListInteractor.getAppEntryList();
 
     populateListSubscription = Observable.zip(packageInfoObservable, padlockEntryObservable,
@@ -164,7 +164,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
           for (final ApplicationInfo applicationInfo : applicationInfos) {
             int foundLocation = -1;
             for (int i = 0; i < padLockEntries.size(); ++i) {
-              final PadLockEntry padLockEntry = padLockEntries.get(i);
+              final PadLockEntry.AllEntries padLockEntry = padLockEntries.get(i);
               if (padLockEntry.packageName().equals(applicationInfo.packageName)
                   && padLockEntry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
                 foundLocation = i;
@@ -173,7 +173,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
             }
 
             // Remove any already found entries
-            PadLockEntry foundEntry;
+            PadLockEntry.AllEntries foundEntry;
             if (foundLocation != -1) {
               foundEntry = padLockEntries.get(foundLocation);
               padLockEntries.remove(foundLocation);
