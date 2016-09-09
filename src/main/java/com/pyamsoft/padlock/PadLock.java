@@ -33,7 +33,7 @@ public class PadLock extends PYDroidApplication implements IPadLock {
     if (appContext instanceof IPadLock) {
       return (IPadLock) appContext;
     } else {
-      throw new ClassCastException("Cannot cast Application Context to PadLockBase");
+      throw new ClassCastException("Cannot cast Application Context to IPadLock");
     }
   }
 
