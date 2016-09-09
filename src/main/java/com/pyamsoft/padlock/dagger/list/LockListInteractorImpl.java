@@ -101,7 +101,7 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
     }).toList();
   }
 
-  @NonNull @Override public Observable<List<PadLockEntry>> getAppEntryList() {
+  @NonNull @Override public Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
     return PadLockDB.with(getAppContext()).queryAll().first();
   }
 

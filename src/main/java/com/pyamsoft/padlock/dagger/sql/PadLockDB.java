@@ -182,11 +182,11 @@ public class PadLockDB {
         .filter(padLockEntries -> padLockEntries != null);
   }
 
-  @NonNull @CheckResult public Observable<List<PadLockEntry>> queryAll() {
+  @NonNull @CheckResult public Observable<List<PadLockEntry.AllEntries>> queryAll() {
     Timber.i("DB: QUERY");
     openDatabase();
     return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
-        .mapToList(PadLockEntry.FACTORY.all_entriesMapper()::map)
+        .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map)
         .map(padLockEntries -> {
           closeDatabase();
           return padLockEntries;
