@@ -20,5 +20,4 @@
     android:accessibilityEventTypes="typeWindowStateChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:description="@string/accessibility_description"
-    android:notificationTimeout="300"
-    android:settingsActivity="com.pyamsoft.padlock.app.main.MainActivity"/>
+    android:notificationTimeout="300"/>
