@@ -38,4 +38,8 @@
   <string name="show_system_applications">Show System Applications</string>
   <string name="settings">Settings</string>
   <string name="toggle_all">Toggle All</string>
+  <string name="stat_package_name">Package Name:</string>
+  <string name="stat_real_name">Name:</string>
+  <string name="stat_locked_by">Locked by Entry:</string>
+  <string name="stat_system">Is System Application:</string>
 </resources>
