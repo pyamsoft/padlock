@@ -79,6 +79,9 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @SuppressWarnings("WeakerAccess") LockScreenPresenter presenter;
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") String lockedActivityName;
+  @SuppressWarnings("WeakerAccess") String lockedPackageName;
+  @SuppressWarnings("WeakerAccess") String lockedCode;
+  @SuppressWarnings("WeakerAccess") long lockUntilTime;
   private long ignorePeriod = -1;
   private boolean exclude;
   private MenuItem menuIgnoreNone;
@@ -93,13 +96,10 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   private MenuItem menuExclude;
   private EditText editText;
   private Unbinder unbinder;
-  private String lockedPackageName;
-  private String lockedRealName;
-  private String lockedCode;
-  private boolean lockedSystem;
   private long[] ignoreTimes;
   private long loadedKey;
-  private long lockUntilTime;
+  private String lockedRealName;
+  private boolean lockedSystem;
   private long ignoreUntilTime;
 
   LockScreenActivity() {
@@ -457,7 +457,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
 
   private void showInfoDialog() {
     AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(),
-        InfoDialog.newInstance(lockedPackageName, lockedActivityName), "info_dialog");
+        LockedStatDialog.newInstance(toolbar.getTitle().toString(), lockedPackageName,
+            lockedActivityName, lockedRealName, lockedSystem, image.getDrawable()), "info_dialog");
   }
 
   private void showForgotPasscodeDialog() {
