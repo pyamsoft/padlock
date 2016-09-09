@@ -104,9 +104,9 @@ public class PadLockDB {
   }
 
   @CheckResult @NonNull
-  public Observable<Integer> updateEntry(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
-      long ignoreUntilTime, boolean isSystem, boolean whitelist) {
+  public Observable<Integer> updateEntry(@NonNull String packageName, @NonNull String activityName,
+      @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem,
+      boolean whitelist) {
     final PadLockEntry entry =
         PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
             ignoreUntilTime, isSystem, whitelist);

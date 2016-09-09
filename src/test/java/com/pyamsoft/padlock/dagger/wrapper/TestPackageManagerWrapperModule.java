@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.dagger.wrapper;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
-import javax.inject.Singleton;
 import org.mockito.Mockito;
 
 @Module public class TestPackageManagerWrapperModule {

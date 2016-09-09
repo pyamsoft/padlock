@@ -25,8 +25,7 @@ import com.pyamsoft.padlock.model.LockState;
 
   @CheckResult @NonNull
   public static LockInfoSelectEvent create(int position, @NonNull String activityName,
-      @NonNull LockState oldLockState,
-      @NonNull LockState lockState) {
+      @NonNull LockState oldLockState, @NonNull LockState lockState) {
     return new AutoValue_LockInfoSelectEvent(position, activityName, oldLockState, lockState);
   }
 
