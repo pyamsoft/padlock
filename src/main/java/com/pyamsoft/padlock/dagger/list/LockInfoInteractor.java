@@ -25,7 +25,7 @@ import rx.Observable;
 
 public interface LockInfoInteractor extends LockCommonInteractor {
 
-  @CheckResult @NonNull Observable<List<PadLockEntry>> getActivityEntries(
+  @CheckResult @NonNull Observable<List<PadLockEntry.WithPackageName>> getActivityEntries(
       @NonNull String packageName);
 
   @CheckResult @NonNull Observable<String> getPackageActivities(@NonNull String packageName);

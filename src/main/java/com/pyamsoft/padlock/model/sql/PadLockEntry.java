@@ -39,6 +39,8 @@ import com.squareup.sqldelight.RowMapper;
       "packageName = ? AND activityName = ?;";
   @NonNull public static final RowMapper<AllEntries> ALL_ENTRIES_MAPPER =
       FACTORY.all_entriesMapper(AutoValue_PadLockEntry_AllEntries::new);
+  @NonNull public static final RowMapper<WithPackageName> WITH_PACKAGE_NAME_MAPPER =
+      FACTORY.with_package_nameMapper(AutoValue_PadLockEntry_WithPackageName::new);
   @NonNull private static final String PACKAGE_EMPTY = "EMPTY";
   @NonNull private static final String ACTIVITY_EMPTY = "EMPTY";
 
@@ -51,6 +53,10 @@ import com.squareup.sqldelight.RowMapper;
   }
 
   @AutoValue public static abstract class AllEntries implements All_entriesModel {
+
+  }
+
+  @AutoValue public static abstract class WithPackageName implements With_package_nameModel {
 
   }
 }
