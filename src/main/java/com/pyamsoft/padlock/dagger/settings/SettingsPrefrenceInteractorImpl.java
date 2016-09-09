@@ -28,11 +28,9 @@ class SettingsPrefrenceInteractorImpl implements SettingsPreferenceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
-  @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
 
-  @Inject SettingsPrefrenceInteractorImpl(@NonNull Context context, @NonNull PadLockDB padLockDB,
+  @Inject SettingsPrefrenceInteractorImpl(@NonNull PadLockDB padLockDB,
       @NonNull PadLockPreferences preferences) {
-    this.appContext = context.getApplicationContext();
     this.padLockDB = padLockDB;
     this.preferences = preferences;
   }
