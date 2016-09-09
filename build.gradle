@@ -137,7 +137,7 @@ dependencies {
   testCompile "com.google.dagger:dagger:2.6.1"
   testCompile "com.google.dagger:dagger-compiler:2.6.1"
 
-  // PYDroid 3.7.1
+  // PYDroid 3.7.4
   debugCompile project(path: ':PYDroid', configuration: "debug")
   releaseCompile project(path: ':PYDroid', configuration: "release")
 }

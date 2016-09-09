@@ -52,14 +52,12 @@
 
   </RadioGroup>
 
-  <TextView
+  <com.pyamsoft.pydroid.app.widget.NoLeakTextView
       android:id="@+id/lock_info_activity"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_alignParentLeft="true"
       android:layout_alignParentStart="true"
       android:layout_centerVertical="true"
-      android:layout_toLeftOf="@id/lock_info_tristate_radiogroup"
       android:layout_toStartOf="@id/lock_info_tristate_radiogroup"
       android:gravity="start|center_vertical"
       android:textAppearance="?android:attr/textAppearanceSmall"
