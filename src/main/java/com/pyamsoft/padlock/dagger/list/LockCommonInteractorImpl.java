@@ -38,8 +38,7 @@ abstract class LockCommonInteractorImpl implements LockCommonInteractor {
     return appContext;
   }
 
-  @NonNull @Override
-  public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
+  @NonNull @Override public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
       @NonNull String packageName, @NonNull String activityName, @Nullable String code,
       boolean system, boolean whitelist, boolean forceLock) {
     if (whitelist) {
@@ -97,9 +96,9 @@ abstract class LockCommonInteractorImpl implements LockCommonInteractor {
           }
 
           return PadLockDB.with(appContext)
-              .updateEntry(entry.packageName(), entry.activityName(),
-                  entry.lockCode(), entry.lockUntilTime(), entry.ignoreUntilTime(),
-                  entry.systemApplication(), whitelist)
+              .updateEntry(entry.packageName(), entry.activityName(), entry.lockCode(),
+                  entry.lockUntilTime(), entry.ignoreUntilTime(), entry.systemApplication(),
+                  whitelist)
               .map(result -> {
                 Timber.d("Update result: %d", result);
                 Timber.d("Whitelist: %s", whitelist);

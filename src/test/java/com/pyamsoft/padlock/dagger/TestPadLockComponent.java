@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.dagger;
 import com.pyamsoft.padlock.dagger.main.TestMainComponent;
 import com.pyamsoft.padlock.dagger.wrapper.TestPackageManagerWrapperModule;
 import dagger.Component;
-import javax.inject.Singleton;
 
 @Component(modules = { TestPadLockModule.class, TestPackageManagerWrapperModule.class })
 public interface TestPadLockComponent extends PadLockComponent {

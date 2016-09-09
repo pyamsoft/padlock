@@ -25,9 +25,9 @@ import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.dagger.sql.PadLockDB;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.job.RecheckJob;
+import com.pyamsoft.padlock.dagger.sql.PadLockDB;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -62,8 +62,8 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
           Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
               timeOutMinutesInMillis);
           return PadLockDB.with(appContext)
-              .updateEntry(packageName, activityName, lockCode, newLockUntilTime,
-                  ignoreUntilTime, isSystem, false)
+              .updateEntry(packageName, activityName, lockCode, newLockUntilTime, ignoreUntilTime,
+                  isSystem, false)
               .map(integer -> {
                 Timber.d("Update result: %s", integer);
                 return newLockUntilTime;
@@ -168,8 +168,8 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
     Timber.d("Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
         ignoreMinutesInMillis);
     return PadLockDB.with(appContext)
-        .updateEntry(packageName, activityName, lockCode, lockUntilTime,
-            newIgnoreTime, isSystem, false);
+        .updateEntry(packageName, activityName, lockCode, lockUntilTime, newIgnoreTime, isSystem,
+            false);
   }
 
   @NonNull @CheckResult @Override public Observable<Long> getDefaultIgnoreTime() {
