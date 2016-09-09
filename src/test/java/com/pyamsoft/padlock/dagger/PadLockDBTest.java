@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.sql;
+package com.pyamsoft.padlock.dagger;
 
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.TestPadLock;
+import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import org.junit.Before;

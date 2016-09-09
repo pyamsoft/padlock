@@ -30,9 +30,11 @@ import rx.schedulers.Schedulers;
 @Module public class TestPadLockModule {
 
   @NonNull private final Context appContext;
+  @NonNull private final PadLockDB padLockDB;
 
   public TestPadLockModule(@NonNull Context context) {
     this.appContext = context.getApplicationContext();
+    padLockDB = new PadLockDB(appContext, Schedulers.immediate());
   }
 
   @Provides Context provideContext() {
@@ -56,5 +58,9 @@ import rx.schedulers.Schedulers;
     // KLUDGE Should not really be mocking this, we dont own it
     final JobManager mockJobManager = Mockito.mock(JobManager.class);
     return mockJobManager;
+  }
+
+  @Provides PadLockDB providePadLockDB() {
+    return padLockDB;
   }
 }

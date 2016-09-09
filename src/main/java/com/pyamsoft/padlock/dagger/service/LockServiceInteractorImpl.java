@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
-import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.JobManager;
@@ -26,8 +25,8 @@ import com.pyamsoft.padlock.PadLockSingleInitProvider;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.job.RecheckJob;
-import com.pyamsoft.padlock.dagger.sql.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
@@ -37,15 +36,15 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final JobManager jobManager;
-  @NonNull private final Context appContext;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
+  @NonNull private final PadLockDB padLockDB;
 
-  @Inject LockServiceInteractorImpl(final @NonNull Context context,
-      @NonNull PadLockPreferences preferences, @NonNull JobManager jobManager,
-      @NonNull PackageManagerWrapper packageManagerWrapper) {
+  @Inject LockServiceInteractorImpl(@NonNull PadLockPreferences preferences,
+      @NonNull JobManager jobManager, @NonNull PackageManagerWrapper packageManagerWrapper,
+      @NonNull PadLockDB padLockDB) {
     this.jobManager = jobManager;
     this.packageManagerWrapper = packageManagerWrapper;
-    this.appContext = context.getApplicationContext();
+    this.padLockDB = padLockDB;
     this.preferences = preferences;
   }
 
@@ -99,8 +98,7 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   public Observable<PadLockEntry> getEntry(@NonNull String packageName,
       @NonNull String activityName) {
     Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);
-    return PadLockDB.with(appContext)
-        .queryWithPackageActivityNameDefault(packageName, activityName)
+    return padLockDB.queryWithPackageActivityNameDefault(packageName, activityName)
         .first()
         .map(entry -> {
           if (PadLockEntry.isEmpty(entry)) {

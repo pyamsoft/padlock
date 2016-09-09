@@ -16,14 +16,13 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
-import com.pyamsoft.padlock.dagger.sql.PadLockDB;
+import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
@@ -36,9 +35,10 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @NonNull final PackageManagerWrapper packageManagerWrapper;
 
-  @Inject LockListInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper,
-      final @NonNull Context context, final @NonNull PadLockPreferences preferences) {
-    super(context);
+  @Inject LockListInteractorImpl(PadLockDB padLockDB,
+      @NonNull PackageManagerWrapper packageManagerWrapper,
+      @NonNull PadLockPreferences preferences) {
+    super(padLockDB);
     this.packageManagerWrapper = packageManagerWrapper;
     this.preferences = preferences;
   }
@@ -102,7 +102,7 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
   }
 
   @NonNull @Override public Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
-    return PadLockDB.with(getAppContext()).queryAll().first();
+    return getPadLockDB().queryAll().first();
   }
 
   @CheckResult boolean isSystemApplication(@NonNull ApplicationInfo info) {

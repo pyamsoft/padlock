@@ -16,8 +16,11 @@
 
 package com.pyamsoft.padlock.dagger.settings;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
+import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.pydroid.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
@@ -32,8 +35,8 @@ import rx.Scheduler;
     return new SettingsPreferencePresenterImpl(interactor, mainScheduler, ioScheduler);
   }
 
-  @ActivityScope @Provides SettingsPreferenceInteractor provideSettingsInteractor(
-      final @NonNull SettingsPrefrenceInteractorImpl interactor) {
-    return interactor;
+  @ActivityScope @Provides SettingsPreferenceInteractor provideSettingsInteractor(Context context,
+      PadLockDB padLockDB, PadLockPreferences preferences) {
+    return new SettingsPrefrenceInteractorImpl(context, padLockDB, preferences);
   }
 }

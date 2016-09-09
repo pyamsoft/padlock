@@ -16,13 +16,12 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
-import com.pyamsoft.padlock.dagger.sql.PadLockDB;
+import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
@@ -33,15 +32,15 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
 
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
-  @Inject LockInfoInteractorImpl(final @NonNull Context context,
+  @Inject LockInfoInteractorImpl(PadLockDB padLockDB,
       @NonNull PackageManagerWrapper packageManagerWrapper) {
-    super(context);
+    super(padLockDB);
     this.packageManagerWrapper = packageManagerWrapper;
   }
 
   @NonNull @Override public Observable<List<PadLockEntry.WithPackageName>> getActivityEntries(
       @NonNull String packageName) {
-    return PadLockDB.with(getAppContext()).queryWithPackageName(packageName).first();
+    return getPadLockDB().queryWithPackageName(packageName).first();
   }
 
   @NonNull @Override public Observable<String> getPackageActivities(@NonNull String packageName) {
@@ -59,8 +58,7 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
         Timber.d("Modify the database to create entry for: %s %s", packageName, activityName);
 
         // No whitelisting for the package grouping, its an all or nothing
-        return PadLockDB.with(getAppContext())
-            .insert(packageName, activityName, code, 0, 0, system, false)
+        return getPadLockDB().insert(packageName, activityName, code, 0, 0, system, false)
             .map(result -> {
               Timber.d("Create result: %d", result);
               return true;
@@ -68,8 +66,7 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
       } else {
         Timber.d("Modify the database to delete entry for: %s %s", packageName, activityName);
 
-        return PadLockDB.with(getAppContext())
-            .deleteWithPackageActivityName(packageName, activityName)
+        return getPadLockDB().deleteWithPackageActivityName(packageName, activityName)
             .map(result -> {
               Timber.d("Delete result: %d", result);
               return false;

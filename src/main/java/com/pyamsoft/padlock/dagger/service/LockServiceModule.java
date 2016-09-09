@@ -16,7 +16,11 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
+import com.birbit.android.jobqueue.JobManager;
+import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.pydroid.dagger.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
@@ -32,7 +36,8 @@ import rx.Scheduler;
   }
 
   @ActivityScope @Provides LockServiceInteractor provideLockServiceInteractor(
-      final LockServiceInteractorImpl interactor) {
-    return interactor;
+      PadLockPreferences preference, JobManager jobManager,
+      PackageManagerWrapper packageManagerWrapper, PadLockDB padLockDB) {
+    return new LockServiceInteractorImpl(preference, jobManager, packageManagerWrapper, padLockDB);
   }
 }
