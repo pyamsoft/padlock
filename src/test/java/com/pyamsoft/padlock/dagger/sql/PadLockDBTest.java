@@ -302,14 +302,14 @@ public class PadLockDBTest {
       insertDummy(i);
     }
 
-    TestSubscriber<List<PadLockEntry>> testSubscriber = new TestSubscriber<>();
+    TestSubscriber<List<PadLockEntry.WithPackageName>> testSubscriber = new TestSubscriber<>();
     db.queryWithPackageName("TEST").first().
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
     assertEquals(0, db.getOpenCount());
 
-    TestSubscriber<PadLockEntry> flatTestSubscriber = new TestSubscriber<>();
+    TestSubscriber<PadLockEntry.WithPackageName> flatTestSubscriber = new TestSubscriber<>();
     db.queryWithPackageName("TEST").first().flatMap(Observable::from).
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(flatTestSubscriber);
     flatTestSubscriber.assertNoErrors();

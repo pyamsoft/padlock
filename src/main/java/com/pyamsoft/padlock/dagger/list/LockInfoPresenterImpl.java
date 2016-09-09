@@ -57,11 +57,11 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult
-  static int findEntryInActivities(@NonNull List<PadLockEntry> padLockEntries,
+  static int findEntryInActivities(@NonNull List<PadLockEntry.WithPackageName> padLockEntries,
       @NonNull String name) {
     int foundLocation = -1;
     for (int i = 0; i < padLockEntries.size(); ++i) {
-      final PadLockEntry padLockEntry = padLockEntries.get(i);
+      final PadLockEntry.WithPackageName padLockEntry = padLockEntries.get(i);
       if (padLockEntry.activityName().equals(name)) {
         foundLocation = i;
         break;
@@ -130,7 +130,7 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
                 final int foundLocation = findEntryInActivities(padLockEntries, name);
 
                 // Remove foundEntry from the list as it is already used
-                PadLockEntry foundEntry;
+                PadLockEntry.WithPackageName foundEntry;
                 if (foundLocation != -1) {
                   foundEntry = padLockEntries.get(foundLocation);
                   padLockEntries.remove(foundLocation);

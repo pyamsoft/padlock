@@ -168,18 +168,15 @@ public class PadLockDB {
         .filter(padLockEntry -> padLockEntry != null);
   }
 
-  @NonNull @CheckResult
-  public Observable<List<PadLockEntry>> queryWithPackageName(final @NonNull String packageName) {
+  @NonNull @CheckResult public Observable<List<PadLockEntry.WithPackageName>> queryWithPackageName(
+      final @NonNull String packageName) {
     Timber.i("DB: QUERY");
     openDatabase();
     return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME,
-        packageName)
-        .mapToList(PadLockEntry.FACTORY.with_package_nameMapper()::map)
-        .map(padLockEntries -> {
-          closeDatabase();
-          return padLockEntries;
-        })
-        .filter(padLockEntries -> padLockEntries != null);
+        packageName).mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map).map(padLockEntries -> {
+      closeDatabase();
+      return padLockEntries;
+    }).filter(padLockEntries -> padLockEntries != null);
   }
 
   @NonNull @CheckResult public Observable<List<PadLockEntry.AllEntries>> queryAll() {

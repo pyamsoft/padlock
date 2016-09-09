@@ -16,7 +16,7 @@ FROM padlock_entry;
 
 -- Get all entries with the package name
 with_package_name:
-SELECT *
+SELECT activityName, whitelist
 FROM padlock_entry
 WHERE packageName = ?;
 
