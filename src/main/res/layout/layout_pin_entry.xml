@@ -37,7 +37,7 @@
         android:contentDescription="@string/blank"
         />
 
-    <TextView
+    <com.pyamsoft.pydroid.app.widget.NoLeakTextView
         android:id="@+id/pin_entry_toolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -73,9 +73,7 @@
           android:layout_width="40dp"
           android:layout_height="40dp"
           android:layout_alignParentEnd="true"
-          android:layout_alignParentRight="true"
           android:layout_centerVertical="true"
-          android:layout_marginLeft="8dp"
           android:layout_marginStart="8dp"
           android:contentDescription="@string/blank"
           />
@@ -84,16 +82,14 @@
           android:id="@+id/pin_entry_code"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_alignParentLeft="true"
           android:layout_alignParentStart="true"
           android:layout_alignParentTop="true"
-          android:layout_toLeftOf="@id/pin_image_go"
           android:layout_toStartOf="@id/pin_image_go"
           android:gravity="center_horizontal"
           android:hint="@string/lock_code_hint"
           >
 
-        <android.support.design.widget.TextInputEditText
+        <com.pyamsoft.pydroid.app.widget.NoLeakTextInputEditText
             android:id="@+id/pin_entry_code_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -110,16 +106,14 @@
           android:id="@+id/pin_reentry_code"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_alignParentLeft="true"
           android:layout_alignParentStart="true"
           android:layout_below="@id/pin_entry_code"
-          android:layout_toLeftOf="@id/pin_image_go"
           android:layout_toStartOf="@id/pin_image_go"
           android:gravity="center_horizontal"
-          android:hint="Re-Enter Lock Code"
+          android:hint="@string/reenter_lock_code_hint"
           >
 
-        <android.support.design.widget.TextInputEditText
+        <com.pyamsoft.pydroid.app.widget.NoLeakTextInputEditText
             android:id="@+id/pin_reentry_code_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -136,16 +130,14 @@
           android:id="@+id/pin_hint"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_alignParentLeft="true"
           android:layout_alignParentStart="true"
           android:layout_below="@id/pin_reentry_code"
-          android:layout_toLeftOf="@id/pin_image_go"
           android:layout_toStartOf="@id/pin_image_go"
           android:gravity="center_horizontal"
-          android:hint="Optional Lock Code Hint"
+          android:hint="@string/optional_lock_code_hint"
           >
 
-        <android.support.design.widget.TextInputEditText
+        <com.pyamsoft.pydroid.app.widget.NoLeakTextInputEditText
             android:id="@+id/pin_hint_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
