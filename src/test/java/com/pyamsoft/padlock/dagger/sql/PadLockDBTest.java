@@ -345,12 +345,13 @@ public class PadLockDBTest {
       insertDummy(i);
     }
 
-    TestSubscriber<PadLockEntry> testSubscriber = new TestSubscriber<>();
+    TestSubscriber<PadLockEntry.WithPackageActivityName> testSubscriber = new TestSubscriber<>();
     db.queryWithPackageActivityName("TEST", "1").first().
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
-    assertFalse(PadLockEntry.isEmpty(testSubscriber.getOnNextEvents().get(0)));
+    assertFalse(
+        PadLockEntry.WithPackageActivityName.isEmpty(testSubscriber.getOnNextEvents().get(0)));
     assertEquals(0, db.getOpenCount());
 
     testSubscriber = new TestSubscriber<>();
@@ -358,7 +359,8 @@ public class PadLockDBTest {
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
-    assertFalse(PadLockEntry.isEmpty(testSubscriber.getOnNextEvents().get(0)));
+    assertFalse(
+        PadLockEntry.WithPackageActivityName.isEmpty(testSubscriber.getOnNextEvents().get(0)));
     assertEquals(0, db.getOpenCount());
 
     testSubscriber = new TestSubscriber<>();
@@ -366,7 +368,8 @@ public class PadLockDBTest {
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
-    assertFalse(PadLockEntry.isEmpty(testSubscriber.getOnNextEvents().get(0)));
+    assertFalse(
+        PadLockEntry.WithPackageActivityName.isEmpty(testSubscriber.getOnNextEvents().get(0)));
     assertEquals(0, db.getOpenCount());
 
     testSubscriber = new TestSubscriber<>();
@@ -374,7 +377,8 @@ public class PadLockDBTest {
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
-    assertTrue(PadLockEntry.isEmpty(testSubscriber.getOnNextEvents().get(0)));
+    assertTrue(
+        PadLockEntry.WithPackageActivityName.isEmpty(testSubscriber.getOnNextEvents().get(0)));
     assertEquals(0, db.getOpenCount());
   }
 
@@ -450,11 +454,13 @@ public class PadLockDBTest {
     testSubscriber.assertValue(1);
     assertEquals(0, db.getOpenCount());
 
-    TestSubscriber<PadLockEntry> entryTestSubscriber = new TestSubscriber<>();
+    TestSubscriber<PadLockEntry.WithPackageActivityName> entryTestSubscriber =
+        new TestSubscriber<>();
     db.queryWithPackageActivityName("TEST", "1").first().
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(entryTestSubscriber);
     entryTestSubscriber.assertNoErrors();
-    assertFalse(PadLockEntry.isEmpty(entryTestSubscriber.getOnNextEvents().get(0)));
+    assertFalse(
+        PadLockEntry.WithPackageActivityName.isEmpty(entryTestSubscriber.getOnNextEvents().get(0)));
     assertEquals("TESTING", entryTestSubscriber.getOnNextEvents().get(0).lockCode());
     assertEquals(0, db.getOpenCount());
 
