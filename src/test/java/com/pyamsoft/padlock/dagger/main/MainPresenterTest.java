@@ -47,7 +47,7 @@ public class MainPresenterTest {
 
   @Before public void setup() {
     final TestPadLockComponent testPadLockComponent =
-        PadLock.get(RuntimeEnvironment.application).provideComponent();
+        TestPadLock.get(RuntimeEnvironment.application).provideComponent();
     testPadLockComponent.plusMain().inject(this);
   }
 

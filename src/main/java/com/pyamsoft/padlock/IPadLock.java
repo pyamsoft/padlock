@@ -20,7 +20,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 
-public interface IPadLock {
+public interface IPadLock<T extends PadLockComponent> {
 
-  @CheckResult @NonNull <T extends PadLockComponent> T provideComponent();
+  @CheckResult @NonNull T provideComponent();
 }

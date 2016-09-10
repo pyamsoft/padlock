@@ -24,14 +24,14 @@ import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockModule;
 import com.pyamsoft.pydroid.lib.PYDroidApplication;
 
-public class PadLock extends PYDroidApplication implements IPadLock {
+public class PadLock extends PYDroidApplication implements IPadLock<PadLockComponent> {
 
   private PadLockComponent component;
 
-  @NonNull @CheckResult public static IPadLock get(@NonNull Context context) {
+  @NonNull @CheckResult public static IPadLock<PadLockComponent> get(@NonNull Context context) {
     final Context appContext = context.getApplicationContext();
     if (appContext instanceof IPadLock) {
-      return (IPadLock) appContext;
+      return PadLock.class.cast(appContext);
     } else {
       throw new ClassCastException("Cannot cast Application Context to IPadLock");
     }
@@ -44,7 +44,7 @@ public class PadLock extends PYDroidApplication implements IPadLock {
         .build();
   }
 
-  @SuppressWarnings("unchecked") @NonNull @Override public PadLockComponent provideComponent() {
+  @NonNull @Override public PadLockComponent provideComponent() {
     if (component == null) {
       throw new NullPointerException("PadLockComponent is NULL");
     }

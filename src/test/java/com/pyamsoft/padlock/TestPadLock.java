@@ -17,15 +17,26 @@
 package com.pyamsoft.padlock;
 
 import android.app.Application;
+import android.content.Context;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.DaggerTestPadLockComponent;
 import com.pyamsoft.padlock.dagger.TestPadLockComponent;
 import com.pyamsoft.padlock.dagger.TestPadLockModule;
 import com.pyamsoft.padlock.dagger.wrapper.TestPackageManagerWrapperModule;
 
-public class TestPadLock extends Application implements IPadLock {
+public class TestPadLock extends Application implements IPadLock<TestPadLockComponent> {
 
   private TestPadLockComponent component;
+
+  @NonNull @CheckResult public static IPadLock<TestPadLockComponent> get(@NonNull Context context) {
+    final Context appContext = context.getApplicationContext();
+    if (appContext instanceof IPadLock) {
+      return TestPadLock.class.cast(appContext);
+    } else {
+      throw new ClassCastException("Cannot cast Application Context to IPadLock");
+    }
+  }
 
   @Override public void onCreate() {
     super.onCreate();
@@ -35,7 +46,7 @@ public class TestPadLock extends Application implements IPadLock {
         .build();
   }
 
-  @SuppressWarnings("unchecked") @NonNull @Override public TestPadLockComponent provideComponent() {
+  @NonNull @Override public TestPadLockComponent provideComponent() {
     if (component == null) {
       throw new NullPointerException("TestPadLockComponent is NULL");
     }
