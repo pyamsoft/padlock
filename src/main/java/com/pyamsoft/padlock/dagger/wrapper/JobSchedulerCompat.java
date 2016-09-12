@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.service.job;
+package com.pyamsoft.padlock.dagger.wrapper;
 
-import android.annotation.SuppressLint;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.JobManager;
+import com.birbit.android.jobqueue.TagConstraint;
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService;
-import com.pyamsoft.padlock.PadLock;
-import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
-import javax.inject.Inject;
+import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
 
-@SuppressLint("Registered") public class PadLockFrameworkJobSchedulerService
-    extends FrameworkJobSchedulerService {
+public interface JobSchedulerCompat {
 
-  @Inject JobSchedulerCompat jobSchedulerCompat;
+  @CheckResult @NonNull JobManager provideManagerToService(
+      @NonNull FrameworkJobSchedulerService service);
 
-  @NonNull @Override protected JobManager getJobManager() {
-    return jobSchedulerCompat.provideManagerToService(this);
-  }
+  @CheckResult @NonNull JobManager provideManagerToService(@NonNull GcmJobSchedulerService service);
 
-  @Override public void onCreate() {
-    super.onCreate();
-    PadLock.get(this).provideComponent().plusJobComponent().inject(this);
-  }
+  void cancelJobsInBackground(@NonNull TagConstraint constraint, @NonNull String... tags);
+
+  void cancelJobs(@NonNull TagConstraint constraint, @NonNull String... tags);
+
+  void addJob(@NonNull Job job);
 }

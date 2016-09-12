@@ -25,12 +25,14 @@ import com.pyamsoft.padlock.dagger.main.MainComponent;
 import com.pyamsoft.padlock.dagger.service.LockServiceComponent;
 import com.pyamsoft.padlock.dagger.service.job.JobComponent;
 import com.pyamsoft.padlock.dagger.settings.SettingsPreferenceComponent;
+import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompatModule;
 import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapperModule;
 import dagger.Component;
 import javax.inject.Singleton;
 
-@Singleton @Component(modules = { PadLockModule.class, PackageManagerWrapperModule.class })
-public interface PadLockComponent {
+@Singleton @Component(modules = {
+    PadLockModule.class, PackageManagerWrapperModule.class, JobSchedulerCompatModule.class
+}) public interface PadLockComponent {
 
   // Subcomponent Settings
   SettingsPreferenceComponent plusSettings();

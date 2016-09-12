@@ -20,6 +20,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.pyamsoft.padlock">
 
+  <!-- Start on Boot -->
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
   <!-- For Billing Service -->
   <uses-permission android:name="com.android.vending.BILLING"/>
 
@@ -86,6 +89,21 @@
         android:authorities="com.pyamsoft.padlock.PadLockSingleInitProvider"
         android:exported="false"
         android:syncable="false"/>
+
+    <!-- Framework Job Scheduler -->
+    <service
+        android:name=".app.service.job.PadLockFrameworkJobSchedulerService"
+        android:permission="android.permission.BIND_JOB_SERVICE"/>
+
+    <!-- GCM Job Scheduler -->
+    <service
+        android:name=".app.service.job.PadLockGCMJobSchedulerService"
+        android:exported="true"
+        android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
+      <intent-filter>
+        <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY"/>
+      </intent-filter>
+    </service>
 
   </application>
 

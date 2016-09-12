@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger;
 
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.TestPadLock;
-import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import org.junit.Before;
@@ -42,12 +41,12 @@ import static org.junit.Assert.fail;
 @Config(application = TestPadLock.class, sdk = 23, constants = BuildConfig.class)
 public class PadLockDBTest {
 
-  private PadLockDB db;
+  private PadLockDBImpl db;
   private Scheduler subscribeScheduler;
   private Scheduler observeScheduler;
 
   @Before public void setup() {
-    db = new PadLockDB(RuntimeEnvironment.application, Schedulers.immediate());
+    db = new PadLockDBImpl(RuntimeEnvironment.application, Schedulers.immediate());
     subscribeScheduler = Schedulers.immediate();
     observeScheduler = Schedulers.immediate();
   }

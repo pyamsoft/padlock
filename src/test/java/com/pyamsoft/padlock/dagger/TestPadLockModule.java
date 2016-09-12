@@ -30,11 +30,9 @@ import rx.schedulers.Schedulers;
 @Module public class TestPadLockModule {
 
   @NonNull private final Context appContext;
-  @NonNull private final PadLockDB padLockDB;
 
   public TestPadLockModule(@NonNull Context context) {
     this.appContext = context.getApplicationContext();
-    padLockDB = new PadLockDB(appContext, Schedulers.immediate());
   }
 
   @Provides Context provideContext() {
@@ -61,6 +59,7 @@ import rx.schedulers.Schedulers;
   }
 
   @Provides PadLockDB providePadLockDB() {
-    return padLockDB;
+    final PadLockDB mockPadLockDB = Mockito.mock(PadLockDB.class);
+    return mockPadLockDB;
   }
 }
