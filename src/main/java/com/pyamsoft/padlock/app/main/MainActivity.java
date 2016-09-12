@@ -192,10 +192,12 @@ public class MainActivity extends DonationActivity
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
     final String line1 =
-        "BUGFIX: Fixed an issue where whitelisting an Entry would cause the Lock Screen to fail.";
+        "FEATURE: More information on lock screen information dialog";
+    final String line2 =
+        "BUGFIX: Lower battery consumption";
 
     // Turn it into a spannable
-    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1);
+    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1, line2);
 
     int start = 0;
     int end = title.length();
@@ -213,7 +215,7 @@ public class MainActivity extends DonationActivity
     StringUtil.colorSpan(spannable, start, end, largeColor);
 
     start += end + 2;
-    end += 2 + line1.length();
+    end += 2 + line1.length() + 2 + line2.length();
 
     StringUtil.sizeSpan(spannable, start, end, smallSize);
     StringUtil.colorSpan(spannable, start, end, smallColor);
