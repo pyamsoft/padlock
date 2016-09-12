@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
-import com.birbit.android.jobqueue.JobManager;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
