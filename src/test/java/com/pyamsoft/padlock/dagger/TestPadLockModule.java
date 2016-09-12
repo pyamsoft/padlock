@@ -20,6 +20,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.JobManager;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -52,10 +53,10 @@ import rx.schedulers.Schedulers;
     return mockPreferences;
   }
 
-  @Provides JobManager provideJobManager() {
+  @Provides JobSchedulerCompat provideJobSchedulerCompat() {
     // KLUDGE Should not really be mocking this, we dont own it
-    final JobManager mockJobManager = Mockito.mock(JobManager.class);
-    return mockJobManager;
+    final JobSchedulerCompat mockJobSchedulerCompat = Mockito.mock(JobSchedulerCompat.class);
+    return mockJobSchedulerCompat;
   }
 
   @Provides PadLockDB providePadLockDB() {
