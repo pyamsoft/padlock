@@ -26,12 +26,10 @@ import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.birbit.android.jobqueue.config.Configuration;
-import com.birbit.android.jobqueue.log.CustomLogger;
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService;
 import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.app.service.job.PadLockFrameworkJobSchedulerService;
 import com.pyamsoft.padlock.app.service.job.PadLockGCMJobSchedulerService;
 import javax.inject.Inject;
@@ -47,27 +45,7 @@ class JobSchedulerCompatImpl implements JobSchedulerCompat {
 
   @VisibleForTesting @CheckResult @NonNull JobManager createJobManager(@NonNull Context context) {
     final Configuration.Builder builder =
-        new Configuration.Builder(context.getApplicationContext()).customLogger(new CustomLogger() {
-          @Override public boolean isDebugEnabled() {
-            return BuildConfig.DEBUG;
-          }
-
-          @Override public void d(String text, Object... args) {
-            Timber.d(text, args);
-          }
-
-          @Override public void e(Throwable t, String text, Object... args) {
-            Timber.e(t, text, args);
-          }
-
-          @Override public void e(String text, Object... args) {
-            Timber.e(text, args);
-          }
-
-          @Override public void v(String text, Object... args) {
-            Timber.v(text, args);
-          }
-        });
+        new Configuration.Builder(context.getApplicationContext());
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       Timber.d("Create scheduler using JobScheduler framework");
