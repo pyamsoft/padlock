@@ -91,19 +91,9 @@ class JobSchedulerCompatImpl implements JobSchedulerCompat {
     return new JobManager(builder.build());
   }
 
-  @NonNull JobManager provideManagerToServiceInternal(@NonNull Service service) {
+  @Override @NonNull public JobManager provideManagerToService(@NonNull Service service) {
     Timber.d("Provide JobManager instance to service: %s", service);
     return jobManager;
-  }
-
-  @NonNull @Override
-  public JobManager provideManagerToService(@NonNull FrameworkJobSchedulerService service) {
-    return provideManagerToServiceInternal(service);
-  }
-
-  @NonNull @Override
-  public JobManager provideManagerToService(@NonNull GcmJobSchedulerService service) {
-    return provideManagerToServiceInternal(service);
   }
 
   @Override

@@ -16,20 +16,16 @@
 
 package com.pyamsoft.padlock.dagger.wrapper;
 
+import android.app.Service;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
-import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService;
-import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
 
 public interface JobSchedulerCompat {
 
-  @CheckResult @NonNull JobManager provideManagerToService(
-      @NonNull FrameworkJobSchedulerService service);
-
-  @CheckResult @NonNull JobManager provideManagerToService(@NonNull GcmJobSchedulerService service);
+  @CheckResult @NonNull JobManager provideManagerToService(@NonNull Service service);
 
   void cancelJobsInBackground(@NonNull TagConstraint constraint, @NonNull String... tags);
 
