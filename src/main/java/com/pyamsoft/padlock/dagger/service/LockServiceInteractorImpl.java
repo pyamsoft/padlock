@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.PadLockSingleInitProvider;
@@ -27,6 +26,7 @@ import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.job.RecheckJob;
+import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
@@ -35,14 +35,14 @@ import timber.log.Timber;
 class LockServiceInteractorImpl implements LockServiceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
-  @SuppressWarnings("WeakerAccess") @NonNull final JobManager jobManager;
+  @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final PadLockDB padLockDB;
 
   @Inject LockServiceInteractorImpl(@NonNull PadLockPreferences preferences,
-      @NonNull JobManager jobManager, @NonNull PackageManagerWrapper packageManagerWrapper,
-      @NonNull PadLockDB padLockDB) {
-    this.jobManager = jobManager;
+      @NonNull JobSchedulerCompat jobSchedulerCompat,
+      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB) {
+    this.jobSchedulerCompat = jobSchedulerCompat;
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
     this.preferences = preferences;
@@ -54,7 +54,7 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   @Override public void cleanup() {
     Timber.d("Cleanup LockService");
     Timber.d("Cancel ALL jobs in background");
-    jobManager.cancelJobsInBackground(null, TagConstraint.ANY, RecheckJob.TAG_ALL);
+    jobSchedulerCompat.cancelJobsInBackground(TagConstraint.ANY, RecheckJob.TAG_ALL);
   }
 
   /**

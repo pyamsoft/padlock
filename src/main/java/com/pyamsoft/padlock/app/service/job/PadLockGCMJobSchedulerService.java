@@ -21,15 +21,16 @@ import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
 import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
 import javax.inject.Inject;
 
 @SuppressLint("Registered") public class PadLockGCMJobSchedulerService
     extends GcmJobSchedulerService {
 
-  @Inject JobManager jobManager;
+  @Inject JobSchedulerCompat jobSchedulerCompat;
 
   @NonNull @Override protected JobManager getJobManager() {
-    return jobManager;
+    return jobSchedulerCompat.provideManagerToService(this);
   }
 
   @Override public void onCreate() {

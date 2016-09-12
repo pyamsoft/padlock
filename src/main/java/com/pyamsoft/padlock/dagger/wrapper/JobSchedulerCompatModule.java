@@ -17,14 +17,13 @@
 package com.pyamsoft.padlock.dagger.wrapper;
 
 import android.content.Context;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
 
-@Module public class PackageManagerWrapperModule {
+@Module public class JobSchedulerCompatModule {
 
-  @Singleton @Provides PackageManagerWrapper providePackageManagerWrapper(Context context) {
-    return new PackageManagerWrapperImpl(context);
+  @Singleton @Provides JobSchedulerCompat provideJobSchedulerCompat(Context context) {
+    return new JobSchedulerCompatImpl(context);
   }
 }
