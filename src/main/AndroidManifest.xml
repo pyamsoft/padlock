@@ -34,9 +34,7 @@
       android:allowBackup="false"
       android:icon="@mipmap/ic_launcher"
       android:label="@string/app_name"
-      android:supportsRtl="false"
-      android:theme="@style/Theme.PadLock.Light"
-      tools:ignore="GoogleAppIndexingWarning">
+      android:theme="@style/Theme.PadLock.Light">
 
     <!-- Main Activity -->
     <activity
@@ -44,7 +42,7 @@
         android:excludeFromRecents="false"
         android:exported="true"
         android:label="@string/app_name"
-        android:launchMode="singleTop"
+        android:launchMode="singleTask"
         android:noHistory="false"
         android:theme="@style/Theme.PadLock.Light.Splash">
       <intent-filter>
