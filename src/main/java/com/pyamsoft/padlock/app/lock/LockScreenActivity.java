@@ -336,7 +336,15 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     final long ignoreTime = getIgnoreTimeFromSelectedIndex();
     outState.putString(CODE_DISPLAY, attempt);
     outState.putLong("IGNORE", ignoreTime);
-    outState.putBoolean("EXCLUDE", menuExclude.isChecked());
+
+    boolean exclude;
+    try {
+      exclude = menuExclude.isChecked();
+    } catch (NullPointerException e) {
+      exclude = false;
+    }
+    outState.putBoolean("EXCLUDE", exclude);
+
     PersistentCache.get().saveKey(outState, KEY_LOCK_PRESENTER, loadedKey);
     super.onSaveInstanceState(outState);
   }
