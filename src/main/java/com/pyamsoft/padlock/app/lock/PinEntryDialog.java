@@ -108,7 +108,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     Timber.d("Init dialog");
     final ContextWrapper themedContext =
-        new ContextThemeWrapper(getContext(), R.style.Theme_PadLock_Light_PINEntry);
+        new ContextThemeWrapper(getContext(), R.style.Theme_PadLock_Light);
     @SuppressLint("InflateParams") final View rootView =
         LayoutInflater.from(themedContext).inflate(R.layout.layout_pin_entry, null, false);
     unbinder = ButterKnife.bind(this, rootView);

@@ -17,7 +17,6 @@
   -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.pyamsoft.padlock">
 
   <!-- Start on Boot -->
@@ -58,7 +57,6 @@
         android:exported="false"
         android:launchMode="singleInstance"
         android:noHistory="true"
-        android:theme="@style/Theme.PadLock.Light.Lock"
         android:windowSoftInputMode="stateVisible"/>
 
     <activity
@@ -67,7 +65,6 @@
         android:exported="false"
         android:launchMode="singleInstance"
         android:noHistory="true"
-        android:theme="@style/Theme.PadLock.Light.Lock"
         android:windowSoftInputMode="stateVisible"/>
 
     <!-- Accessibility Service -->
