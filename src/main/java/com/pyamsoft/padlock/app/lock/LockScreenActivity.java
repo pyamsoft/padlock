@@ -83,7 +83,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @SuppressWarnings("WeakerAccess") String lockedCode;
   @SuppressWarnings("WeakerAccess") long lockUntilTime;
   private long ignorePeriod = -1;
-  private boolean exclude;
+  private boolean excludeEntry;
   private MenuItem menuIgnoreNone;
   private MenuItem menuIgnoreOne;
   private MenuItem menuIgnoreFive;
@@ -319,7 +319,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
     ignorePeriod = savedInstanceState.getLong("IGNORE", -1);
-    exclude = savedInstanceState.getBoolean("EXCLUDE", false);
+    excludeEntry = savedInstanceState.getBoolean("EXCLUDE", false);
     final String attempt = savedInstanceState.getString(CODE_DISPLAY, null);
     if (attempt == null) {
       Timber.d("Empty attempt");
@@ -379,7 +379,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
       }
     }
 
-    menuExclude.setChecked(exclude);
+    menuExclude.setChecked(excludeEntry);
     return super.onPrepareOptionsMenu(menu);
   }
 
