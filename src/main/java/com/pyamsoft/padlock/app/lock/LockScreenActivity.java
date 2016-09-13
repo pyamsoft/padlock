@@ -120,7 +120,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   }
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
-    setTheme(R.style.Theme_PadLock_Light_Lock);
+    setTheme(R.style.Theme_PadLock_Light);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);

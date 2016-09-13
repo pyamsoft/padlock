@@ -17,7 +17,7 @@
   -->
 <resources>
 
-  <style name="Base.Theme.PadLock.Light" parent="@style/Theme.AppCompat.Light.NoActionBar">
+  <style name="Base.Theme.PadLock.Light" parent="@style/Theme.Design.Light.NoActionBar">
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/orangeA200</item>
@@ -34,16 +34,8 @@
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
   </style>
 
-  <!-- Lock Screen -->
-  <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
-  </style>
-
   <!-- Lock Screen Menu-->
   <style name="Theme.PadLock.Light.Menu" parent="@style/Base.Theme.PadLock.Light.Menu">
-  </style>
-
-  <!-- PIN Entry Dialog -->
-  <style name="Theme.PadLock.Light.PINEntry" parent="@style/Base.Theme.PadLock.Light">
   </style>
 
   <!-- Splash screen-->
