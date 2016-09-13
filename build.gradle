@@ -95,6 +95,9 @@ dependencies {
   // Error-Prone compiler
   errorprone 'com.google.errorprone:error_prone_core:2.0.12'
 
+  // Needs to compile support annotations into actual project
+  compile 'com.android.support:support-annotations:24.2.1'
+
   // Firebase Crash and Analytics
   compile 'com.google.firebase:firebase-core:9.4.0'
   compile 'com.google.firebase:firebase-crash:9.4.0'
@@ -102,9 +105,6 @@ dependencies {
   // Job Scheduling
   compile 'com.birbit:android-priority-jobqueue:2.0.0'
   compile 'com.google.android.gms:play-services-gcm:9.4.0'
-
-  // Needs to compile support annotations into actual project
-  compile 'com.android.support:support-annotations:24.2.0'
 
   // SQLBrite
   compile 'com.squareup.sqlbrite:sqlbrite:0.7.0'
@@ -118,13 +118,13 @@ dependencies {
   apt 'com.jakewharton:butterknife-compiler:8.4.0'
 
   // Dagger
-  apt "com.google.dagger:dagger-compiler:2.6.1"
+  apt "com.google.dagger:dagger-compiler:2.7"
 
   // Showcase View
   compile 'com.github.deano2390:MaterialShowcaseView:1.1.0'
 
   // Android Framework Testing
-  androidTestCompile 'com.android.support:support-annotations:24.2.0'
+  androidTestCompile 'com.android.support:support-annotations:24.2.1'
   androidTestCompile 'com.android.support.test:runner:0.5'
   androidTestCompile 'com.android.support.test:rules:0.5'
   androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
@@ -137,9 +137,6 @@ dependencies {
 
   // Mockito for unit tests
   testCompile 'org.mockito:mockito-core:2.0.111-beta'
-
-  testCompile "com.google.dagger:dagger:2.6.1"
-  testCompile "com.google.dagger:dagger-compiler:2.6.1"
 
   // PYDroid 3.7.6
   debugCompile project(path: ':PYDroid', configuration: "debug")
