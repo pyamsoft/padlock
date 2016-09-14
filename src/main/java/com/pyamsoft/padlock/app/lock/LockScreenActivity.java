@@ -371,7 +371,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
 
   @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
     if (presenter != null) {
-      if (ignorePeriod == -1) {
+      if (ignorePeriod == -1 && presenter.isBound()) {
         Timber.d("No previous selection, load ignore time from preference");
         presenter.createWithDefaultIgnoreTime();
       } else {
@@ -459,7 +459,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     } else if (time == ignoreTimes[8]) {
       menuIgnoreSixty.setChecked(true);
     } else {
-      throw new RuntimeException("Invalid index for ignore time: " + time);
+      Timber.e("No valid ignore time, initialize to None");
+      menuIgnoreNone.setChecked(true);
     }
   }
 
