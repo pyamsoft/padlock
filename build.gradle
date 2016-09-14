@@ -138,7 +138,7 @@ dependencies {
   // Mockito for unit tests
   testCompile 'org.mockito:mockito-core:2.0.111-beta'
 
-  // PYDroid 3.7.6
+  // PYDroid 3.7.7
   debugCompile project(path: ':PYDroid', configuration: "debug")
   releaseCompile project(path: ':PYDroid', configuration: "release")
 }
