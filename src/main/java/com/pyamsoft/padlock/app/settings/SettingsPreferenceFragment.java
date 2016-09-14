@@ -86,7 +86,7 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
 
     final Preference showAboutLicenses = findPreference(getString(R.string.about_license_key));
     showAboutLicenses.setOnPreferenceClickListener(
-        preference -> showAboutLicensesFragment(R.id.settings_preferences_container,
+        preference -> showAboutLicensesFragment(R.id.main_view_container,
             AboutLibrariesFragment.Styling.LIGHT, Licenses.ANDROID, Licenses.ANDROID_SUPPORT,
             Licenses.PYDROID, Licenses.GOOGLE_PLAY_SERVICES, Licenses.ANDROID_IN_APP_BILLING,
             Licenses.AUTO_VALUE, Licenses.BUTTERKNIFE, Licenses.DAGGER, Licenses.FAST_ADAPTER,
