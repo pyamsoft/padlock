@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.job;
 
+import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -49,29 +50,40 @@ public class RecheckJob extends Job {
     return new RecheckJob(packageName, className, delay);
   }
 
-  @Override public void onAdded() {
-    Timber.d("New recheck job added for: %s %s", packageName, className);
-    Timber.d("To run in: %d", getDelayInMs());
-  }
-
-  @Override public void onRun() throws Throwable {
-    PadLockService.recheck(packageName, className);
-  }
-
-  @Override protected void onCancel(int cancelReason, @Nullable Throwable throwable) {
+  @CallSuper @Override public void onAdded() {
     final Set<String> tags = getTags();
+    String tagString;
     if (tags != null) {
-      Timber.w("Job is cancelled %s %s", getId(), Arrays.toString(tags.toArray()));
+      tagString = Arrays.toString(tags.toArray());
+    } else {
+      tagString = "<NO TAGS>";
     }
+    Timber.w("Job is added %s %s (%d)", getId(), tagString, getDelayInMs());
+  }
+
+  @CallSuper @Override protected void onCancel(int cancelReason, @Nullable Throwable throwable) {
+    final Set<String> tags = getTags();
+    String tagString;
+    if (tags != null) {
+      tagString = Arrays.toString(tags.toArray());
+    } else {
+      tagString = "<NO TAGS>";
+    }
+    Timber.w("Job is cancelled %s %s (%d)", getId(), tagString, getDelayInMs());
+
     if (throwable != null) {
       Timber.e(throwable, "JOB CANCELLED");
     }
   }
 
   @Override
-  protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount,
+  protected final RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount,
       int maxRunCount) {
     Timber.w("Cancel job on retry attempt");
     return RetryConstraint.CANCEL;
+  }
+
+  @Override public void onRun() throws Throwable {
+    PadLockService.recheck(packageName, className);
   }
 }
