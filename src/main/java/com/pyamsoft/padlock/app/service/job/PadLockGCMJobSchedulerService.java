@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.service.job;
 
-import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
@@ -24,8 +23,7 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
 import javax.inject.Inject;
 
-@SuppressLint("Registered") public class PadLockGCMJobSchedulerService
-    extends GcmJobSchedulerService {
+public class PadLockGCMJobSchedulerService extends GcmJobSchedulerService {
 
   @Inject JobSchedulerCompat jobSchedulerCompat;
 
