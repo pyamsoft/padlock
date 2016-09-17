@@ -67,7 +67,7 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
     return Observable.defer(() -> Observable.just(preferences.isZeroActivityVisible()));
   }
 
-  @Override @NonNull public Observable<List<ApplicationInfo>> getApplicationInfoList() {
+  @Override @NonNull public Observable<List<String>> getApplicationInfoList() {
     return packageManagerWrapper.getActiveApplications().filter(applicationInfo -> {
       // KLUDGE Blocking
       final boolean systemVisible = isSystemVisible().toBlocking().first();
@@ -98,7 +98,7 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
       } else {
         return true;
       }
-    }).toList();
+    }).map(applicationInfo -> applicationInfo.packageName).toList();
   }
 
   @NonNull @Override public Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
@@ -110,11 +110,16 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
   }
 
   @WorkerThread @NonNull @Override
-  public AppEntry createFromPackageInfo(@NonNull ApplicationInfo info, boolean locked) {
-    Timber.d("Create AppEntry from package info: %s", info.packageName);
+  public AppEntry createFromPackageInfo(@NonNull String packageName, boolean locked) {
+    Timber.d("Create AppEntry from package info: %s", packageName);
+
+    // KLUDGE blocking
+    final ApplicationInfo info =
+        packageManagerWrapper.getApplicationInfo(packageName).toBlocking().first();
+
     return AppEntry.builder()
         .name(packageManagerWrapper.loadPackageLabel(info).toBlocking().first())
-        .packageName(info.packageName)
+        .packageName(packageName)
         .system(isSystemApplication(info))
         .locked(locked)
         .build();

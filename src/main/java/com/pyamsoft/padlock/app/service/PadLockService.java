@@ -117,11 +117,23 @@ public class PadLockService extends AccessibilityService
       final String pName = eventPackage.toString();
       final String cName = eventClass.toString();
       if (!pName.isEmpty() && !cName.isEmpty()) {
-        presenter.processAccessibilityEvent(pName, cName, false);
+        final LockServicePresenter.MultiLock multiLock = getMultiLockAvailability();
+        presenter.processAccessibilityEvent(pName, cName, LockServicePresenter.Recheck.NOT_FORCE,
+            multiLock);
       }
     } else {
       Timber.e("Missing needed data");
     }
+  }
+
+  @NonNull @CheckResult private LockServicePresenter.MultiLock getMultiLockAvailability() {
+    final LockServicePresenter.MultiLock multiLock;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      multiLock = LockServicePresenter.MultiLock.ENABLED;
+    } else {
+      multiLock = LockServicePresenter.MultiLock.DISABLED;
+    }
+    return multiLock;
   }
 
   @Override public void onInterrupt() {
@@ -185,7 +197,8 @@ public class PadLockService extends AccessibilityService
       // either it is equal to the passed name or the passed name is PACKAGE
       // which will respond to any class name
       Timber.d("Run recheck for: %s %s", activePackage, activeClass);
-      presenter.processAccessibilityEvent(activePackage, activeClass, true);
+      presenter.processAccessibilityEvent(activePackage, activeClass,
+          LockServicePresenter.Recheck.FORCE, getMultiLockAvailability());
     }
   }
 }
