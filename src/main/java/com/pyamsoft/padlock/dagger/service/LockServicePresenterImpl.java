@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
-import android.os.Build;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
@@ -89,7 +88,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
 
   @Override
   public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
-      boolean forcedRecheck) {
+      @NonNull Recheck forcedRecheck, @NonNull MultiLock multiLock) {
     unsubLockedEntry();
     final Observable<Boolean> windowEventObservable =
         stateInteractor.isServiceEnabled().filter(enabled -> {
@@ -142,7 +141,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
             windowHasChanged &= packageChanged;
           }
 
-          if (forcedRecheck) {
+          if (forcedRecheck.equals(Recheck.FORCE)) {
             Timber.d("Pass filter via forced recheck");
             windowHasChanged = true;
           }
@@ -161,14 +160,14 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
         .subscribe(padLockEntry -> {
               Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
                   padLockEntry.activityName());
-              launchCorrectLockScreen(padLockEntry, className);
+              launchCorrectLockScreen(padLockEntry, className, multiLock);
             }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"),
             this::unsubLockedEntry);
   }
 
   @SuppressWarnings("WeakerAccess") void launchCorrectLockScreen(@NonNull PadLockEntry entry,
-      @NonNull String realName) {
-    if (LockScreenActivity1.isActive() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      @NonNull String realName, @NonNull MultiLock multiLock) {
+    if (LockScreenActivity1.isActive() && multiLock.equals(MultiLock.ENABLED)) {
       getView().startLockScreen2(entry, realName);
     } else {
       getView().startLockScreen1(entry, realName);

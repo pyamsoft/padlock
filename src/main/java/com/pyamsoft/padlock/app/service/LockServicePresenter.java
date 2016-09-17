@@ -22,12 +22,21 @@ import com.pyamsoft.pydroid.base.Presenter;
 
 public interface LockServicePresenter extends Presenter<LockServicePresenter.LockService> {
 
+  enum Recheck {
+    FORCE, NOT_FORCE
+  }
+
+  enum MultiLock {
+    ENABLED,
+    DISABLED
+  }
+
   void setLockScreenPassed();
 
   void getActiveNames(@NonNull String packageName, @NonNull String className);
 
   void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
-      boolean forcedRecheck);
+      @NonNull Recheck forcedRecheck, @NonNull MultiLock multiLock);
 
   interface LockService {
 

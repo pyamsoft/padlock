@@ -34,6 +34,8 @@ public interface PackageManagerWrapper {
 
   @CheckResult @NonNull Observable<ApplicationInfo> getActiveApplications();
 
+  @CheckResult @NonNull Observable<ApplicationInfo> getApplicationInfo(@NonNull String packageName);
+
   @CheckResult @NonNull Observable<ActivityInfo> getActivityInfo(@NonNull String packageName,
       @NonNull String activityName);
 

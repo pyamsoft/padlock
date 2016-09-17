@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -149,7 +148,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     unsubscribePopulateList();
 
     Timber.d("Get package info list");
-    final Observable<List<ApplicationInfo>> packageInfoObservable =
+    final Observable<List<String>> packageInfoObservable =
         lockListInteractor.getApplicationInfoList();
 
     Timber.d("Get padlock entry list");
@@ -157,16 +156,16 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         lockListInteractor.getAppEntryList();
 
     populateListSubscription = Observable.zip(packageInfoObservable, padlockEntryObservable,
-        (applicationInfos, padLockEntries) -> {
+        (packageNames, padLockEntries) -> {
 
           // KLUDGE super ugly.
           final List<AppEntry> appEntries = new ArrayList<>();
-          for (final ApplicationInfo applicationInfo : applicationInfos) {
+          for (final String applPackageName : packageNames) {
             int foundLocation = -1;
             for (int i = 0; i < padLockEntries.size(); ++i) {
               final PadLockEntry.AllEntries padLockEntry = padLockEntries.get(i);
-              if (padLockEntry.packageName().equals(applicationInfo.packageName)
-                  && padLockEntry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
+              if (padLockEntry.packageName().equals(applPackageName) && padLockEntry.activityName()
+                  .equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
                 foundLocation = i;
                 break;
               }
@@ -182,7 +181,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
             }
 
             final AppEntry appEntry =
-                lockListInteractor.createFromPackageInfo(applicationInfo, foundEntry != null);
+                lockListInteractor.createFromPackageInfo(applPackageName, foundEntry != null);
             Timber.d("Add AppEntry: %s", appEntry);
             appEntries.add(appEntry);
           }
