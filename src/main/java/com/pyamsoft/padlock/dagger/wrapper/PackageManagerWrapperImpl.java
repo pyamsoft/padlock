@@ -23,9 +23,15 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -75,46 +81,72 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
     });
   }
 
-  @NonNull @Override public Observable<ApplicationInfo> getActiveApplications() {
+  @WorkerThread @NonNull @CheckResult Observable<ApplicationInfo> getInstalledApplications() {
     return Observable.defer(() -> {
-      final List<Integer> removeIndexes = new ArrayList<>();
+      final Process process;
+      boolean caughtPermissionDenial = false;
+      final List<String> packageNames = new ArrayList<>();
+      try {
+        // The adb shell command pm list packages returns a list of packages in the following format:
+        //
+        // package:<package name>
+        //
+        // but it is not a victim of BinderTransaction failures so it will be able to better handle
+        // large sets of applications.
+        final String command = "pm list packages";
+        process = Runtime.getRuntime().exec(command);
+        try (final BufferedReader bufferedReader = new BufferedReader(
+            new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+          Timber.d("Read results of exec: '%s'", command);
+          String line = bufferedReader.readLine();
+          while (line != null && !line.isEmpty()) {
+            if (line.startsWith("Permission Denial")) {
+              Timber.e("Command resulted in permission denial");
+              caughtPermissionDenial = true;
+              break;
+            }
+            Timber.d("%s", line);
+            packageNames.add(line);
+            line = bufferedReader.readLine();
+          }
+        }
 
-      final List<ApplicationInfo> applicationInfos = packageManager.getInstalledApplications(0);
-      if (applicationInfos == null) {
-        Timber.e("Application list is empty");
+        if (caughtPermissionDenial) {
+          throw new IllegalStateException("Error running command: " + command);
+        }
+
+        // Will always be 0
+      } catch (IOException e) {
+        Timber.e(e, "Error running shell command");
+        packageNames.clear();
+      }
+
+      return Observable.just(packageNames);
+    })
+        .flatMap(Observable::from)
+        .map(packageNameWithPrefix -> packageNameWithPrefix.replaceFirst("^package:", ""))
+        .flatMap(this::getApplicationInfo);
+  }
+
+  @NonNull @Override public Observable<ApplicationInfo> getActiveApplications() {
+    return getInstalledApplications().flatMap(info -> {
+      if (!info.enabled) {
+        Timber.i("Application %s is disabled", info.packageName);
         return Observable.empty();
       }
 
-      final int size = applicationInfos.size();
-      for (int i = 0; i < size; ++i) {
-        final ApplicationInfo info = applicationInfos.get(i);
-        if (!info.enabled) {
-          Timber.d("Application %s at %d is disabled", info.packageName, i);
-          removeIndexes.add(i);
-          continue;
-        }
-
-        if (info.packageName.equals(LockServiceInteractor.ANDROID_PACKAGE)) {
-          Timber.d("Application %s at %d is Android", info.packageName, i);
-          removeIndexes.add(i);
-          continue;
-        }
-
-        if (info.packageName.equals(LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE)) {
-          Timber.d("Application %s at %d is System UI", info.packageName, i);
-          removeIndexes.add(i);
-        }
+      if (info.packageName.equals(LockServiceInteractor.ANDROID_PACKAGE)) {
+        Timber.i("Application %s is Android", info.packageName);
+        return Observable.empty();
       }
 
-      int removedIndexOffset = 0;
-      for (final int index : removeIndexes) {
-        Timber.d("Remove index at %d", index);
-        applicationInfos.remove(index - removedIndexOffset);
-        ++removedIndexOffset;
+      if (info.packageName.equals(LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE)) {
+        Timber.i("Application %s is System UI", info.packageName);
+        return Observable.empty();
       }
 
-      Timber.d("Application size: %d", applicationInfos.size());
-      return Observable.from(applicationInfos);
+      Timber.d("Successfully processed application: %s", info.packageName);
+      return Observable.just(info);
     });
   }
 
