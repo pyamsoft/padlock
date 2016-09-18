@@ -192,7 +192,7 @@ public class MainActivity extends DonationActivity
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
     final String line1 =
-        "CHANGE: Pro Version applications!\nAdvertisements can be disabled from the settings screen once the Pro version of the application is installed";
+        "CHANGE: Pro Version applications! Advertisements can be disabled from the settings screen once the Pro version of the application is installed";
     final String line2 = "BUGFIX: Clean up memory management";
     final String line3 =
         "BUGFIX: Fix bug caused when Info dialog is launched many times in quick succession";
