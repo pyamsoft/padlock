@@ -50,14 +50,11 @@ class AppIconLoaderPresenterImpl<I extends AppIconLoaderView> extends SchedulerP
     loadIconSubscription = interactor.loadPackageIcon(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(drawable -> {
-          final AppIconLoaderView loaderView = getView();
-          loaderView.onApplicationIconLoadedSuccess(drawable);
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-          final AppIconLoaderView loaderView = getView();
-          loaderView.onApplicationIconLoadedError();
-        }, this::unsubLoadIcon);
+        .subscribe(drawable -> getView(i -> i.onApplicationIconLoadedSuccess(drawable)),
+            throwable -> {
+              Timber.e(throwable, "onError");
+              getView(I::onApplicationIconLoadedError);
+            }, this::unsubLoadIcon);
   }
 
   @SuppressWarnings("WeakerAccess") void unsubLoadIcon() {

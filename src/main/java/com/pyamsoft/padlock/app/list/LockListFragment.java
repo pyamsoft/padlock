@@ -40,7 +40,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
@@ -60,7 +59,7 @@ import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
 public class LockListFragment extends ActionBarFragment
-    implements LockListPresenter.LockList, PinEntryDialogRequest, MasterPinSubmitCallback {
+    implements LockListPresenter.LockList, PinEntryDialogRequest {
 
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";

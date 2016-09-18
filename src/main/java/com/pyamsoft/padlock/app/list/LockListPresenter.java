@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.base.Presenter;
 
@@ -48,7 +49,7 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
   void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
       @Nullable String code, boolean system);
 
-  interface LockList extends LockListCommon, LockListDatabaseErrorView {
+  interface LockList extends LockListCommon, LockListDatabaseErrorView, MasterPinSubmitCallback {
 
     void setFABStateEnabled();
 
