@@ -32,7 +32,7 @@ import timber.log.Timber;
 class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements LockScreenPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockScreenInteractor interactor;
-  @NonNull private final AppIconLoaderPresenter<LockScreen> iconLoader;
+  @NonNull final AppIconLoaderPresenter<LockScreen> iconLoader;
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
   @NonNull private Subscription hintSubscription = Subscriptions.empty();
   @NonNull private Subscription ignoreTimeSubscription = Subscriptions.empty();
@@ -50,9 +50,9 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
     interactor.resetFailCount();
   }
 
-  @Override protected void onBind(@NonNull LockScreen view) {
-    super.onBind(view);
-    iconLoader.bindView(view);
+  @Override protected void onBind() {
+    super.onBind();
+    getView(iconLoader::bindView);
   }
 
   @Override protected void onUnbind() {
@@ -101,7 +101,7 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
         .map(s -> s == null ? "" : s)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(hint -> getView().setDisplayHint(hint), throwable -> {
+        .subscribe(hint -> getView(lockScreen -> lockScreen.setDisplayHint(hint)), throwable -> {
           Timber.e(throwable, "onError displayLockedHint");
           // TODO
         }, this::unsubHint);
@@ -112,10 +112,11 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
     ignoreTimeSubscription = interactor.getDefaultIgnoreTime()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(time -> getView().initializeWithIgnoreTime(time), throwable -> {
-          Timber.e(throwable, "onError createWithDefaultIgnoreTime");
-          // TODO
-        }, this::unsubIgnoreTime);
+        .subscribe(time -> getView(lockScreen -> lockScreen.initializeWithIgnoreTime(time)),
+            throwable -> {
+              Timber.e(throwable, "onError createWithDefaultIgnoreTime");
+              // TODO
+            }, this::unsubIgnoreTime);
   }
 
   @SuppressWarnings("WeakerAccess") void unsubIgnoreTime() {
@@ -135,10 +136,10 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
         .observeOn(getObserveScheduler())
         .subscribe(lockTime -> {
           Timber.d("Received lock entry result");
-          getView().onLocked(lockTime);
+          getView(lockScreen -> lockScreen.onLocked(lockTime));
         }, throwable -> {
           Timber.e(throwable, "lockEntry onError");
-          getView().onLockedError();
+          getView(LockScreen::onLockedError);
           unsubLock();
         }, this::unsubLock);
   }
@@ -146,21 +147,20 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
   @Override public void submit(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, @NonNull String currentAttempt) {
     unsubUnlock();
-    final LockScreen lockScreen = getView();
     unlockSubscription =
         interactor.unlockEntry(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
-            .subscribe(unlocked -> {
+            .subscribe(unlocked -> getView(lockScreen -> {
               Timber.d("Received unlock entry result");
               if (unlocked) {
                 lockScreen.onSubmitSuccess();
               } else {
                 lockScreen.onSubmitFailure();
               }
-            }, throwable -> {
+            }), throwable -> {
               Timber.e(throwable, "unlockEntry onError");
-              lockScreen.onSubmitError();
+              getView(LockScreen::onSubmitError);
               unsubUnlock();
             }, this::unsubUnlock);
   }
@@ -170,9 +170,9 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
     displayNameSubscription = interactor.getDisplayName(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(s -> getView().setDisplayName(s), throwable -> {
+        .subscribe(s -> getView(lockScreen -> lockScreen.setDisplayName(s)), throwable -> {
           Timber.e(throwable, "Error loading display name from package");
-          getView().setDisplayName("");
+          getView(lockScreen -> lockScreen.setDisplayName(""));
         }, this::unsubDisplayName);
   }
 
@@ -187,10 +187,10 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
         .observeOn(getObserveScheduler())
         .subscribe(result -> {
           Timber.d("onPostUnlock");
-          getView().onPostUnlock();
+          getView(LockScreen::onPostUnlock);
         }, throwable -> {
           Timber.e(throwable, "Error postunlock");
-          getView().onLockedError();
+          getView(LockScreen::onLockedError);
         }, this::unsubPostUnlock);
   }
 

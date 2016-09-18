@@ -45,8 +45,8 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     this.interactor = interactor;
   }
 
-  @Override protected void onBind(@NonNull MainView view) {
-    super.onBind(view);
+  @Override protected void onBind() {
+    super.onBind();
     registerOnAgreeTermsBus();
     registerOnRefreshBus();
   }
@@ -70,11 +70,8 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
         .register()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(refreshEvent -> {
-          getView().forceRefresh();
-        }, throwable -> {
-          Timber.e(throwable, "RefreshBus onError");
-        }, this::unregisterFromRefreshBus);
+        .subscribe(refreshEvent -> getView(MainView::forceRefresh),
+            throwable -> Timber.e(throwable, "RefreshBus onError"), this::unregisterFromRefreshBus);
   }
 
   @Override public void showTermsDialog() {
@@ -83,9 +80,8 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(agreed -> {
-          final MainView mainView = getView();
           if (!agreed) {
-            mainView.showUsageTermsDialog();
+            getView(MainView::showUsageTermsDialog);
           }
         }, throwable -> {
           Timber.e(throwable, "onError");
@@ -103,7 +99,7 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
           if (agreeTermsEvent.agreed()) {
             interactor.setAgreed();
           } else {
-            getView().onDidNotAgreeToTerms();
+            getView(MainView::onDidNotAgreeToTerms);
           }
         }, throwable -> {
           Timber.e(throwable, "AgreeTermsBus onError");

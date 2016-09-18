@@ -30,7 +30,7 @@ import timber.log.Timber;
 
 class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinEntryPresenter {
 
-  @NonNull private final AppIconLoaderPresenter<PinScreen> iconLoader;
+  @NonNull final AppIconLoaderPresenter<PinScreen> iconLoader;
   @NonNull private final PinEntryInteractor interactor;
   @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
   @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
@@ -55,9 +55,9 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
     }
   }
 
-  @Override protected void onBind(@NonNull PinScreen view) {
-    super.onBind(view);
-    iconLoader.bindView(view);
+  @Override protected void onBind() {
+    super.onBind();
+    getView(iconLoader::bindView);
   }
 
   @Override protected void onUnbind() {
@@ -76,21 +76,22 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
       @NonNull String hint) {
     Timber.d("Attempt PIN submission");
     unsubPinEntry();
-    final PinScreen pinScreen = getView();
     pinEntrySubscription = interactor.submitMasterPin(currentAttempt, reEntryAttempt, hint)
         .filter(pinEntryEvent -> pinEntryEvent != null)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(pinEntryEvent -> {
           PinEntryBus.get().post(pinEntryEvent);
-          if (pinEntryEvent.complete()) {
-            pinScreen.onSubmitSuccess();
-          } else {
-            pinScreen.onSubmitFailure();
-          }
+          getView(pinScreen -> {
+            if (pinEntryEvent.complete()) {
+              pinScreen.onSubmitSuccess();
+            } else {
+              pinScreen.onSubmitFailure();
+            }
+          });
         }, throwable -> {
           Timber.e(throwable, "attemptPinSubmission onError");
-          pinScreen.onSubmitError();
+          getView(PinScreen::onSubmitError);
         }, this::unsubPinEntry);
   }
 
@@ -100,13 +101,13 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
     pinCheckSubscription = interactor.hasMasterPin()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(hasMaster -> {
+        .subscribe(hasMaster -> getView(pinScreen -> {
           if (hasMaster) {
-            getView().hideExtraPinEntryViews();
+            pinScreen.hideExtraPinEntryViews();
           } else {
-            getView().showExtraPinEntryViews();
+            pinScreen.showExtraPinEntryViews();
           }
-        }, throwable -> {
+        }), throwable -> {
           Timber.e(throwable, "onError hideUnimportantViews");
           // TODO
         }, this::unsubPinCheck);

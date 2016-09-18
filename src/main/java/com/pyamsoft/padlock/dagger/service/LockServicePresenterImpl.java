@@ -83,7 +83,9 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
   }
 
   @Override public void getActiveNames(@NonNull String packageName, @NonNull String className) {
-    getView().onActiveNamesRetrieved(packageName, activePackageName, className, activeClassName);
+    getView(
+        lockService -> lockService.onActiveNamesRetrieved(packageName, activePackageName, className,
+            activeClassName));
   }
 
   @Override
@@ -167,10 +169,12 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
 
   @SuppressWarnings("WeakerAccess") void launchCorrectLockScreen(@NonNull PadLockEntry entry,
       @NonNull String realName, @NonNull MultiLock multiLock) {
-    if (LockScreenActivity1.isActive() && multiLock.equals(MultiLock.ENABLED)) {
-      getView().startLockScreen2(entry, realName);
-    } else {
-      getView().startLockScreen1(entry, realName);
-    }
+    getView(lockService -> {
+      if (LockScreenActivity1.isActive() && multiLock.equals(MultiLock.ENABLED)) {
+        lockService.startLockScreen2(entry, realName);
+      } else {
+        lockService.startLockScreen1(entry, realName);
+      }
+    });
   }
 }

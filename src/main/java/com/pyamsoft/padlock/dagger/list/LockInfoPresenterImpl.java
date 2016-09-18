@@ -40,8 +40,8 @@ import timber.log.Timber;
 class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInfoView>
     implements LockInfoPresenter {
 
+  @NonNull final AppIconLoaderPresenter<LockInfoView> iconLoader;
   @NonNull private final LockInfoInteractor lockInfoInteractor;
-  @NonNull private final AppIconLoaderPresenter<LockInfoView> iconLoader;
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
   @NonNull private Subscription databaseSubscription = Subscriptions.empty();
@@ -71,16 +71,17 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
     return foundLocation;
   }
 
-  @Override protected void onBind(@NonNull LockInfoView view) {
-    super.onBind(view);
-    iconLoader.bindView(view);
-    registerOnDatabaseBus(view);
+  @Override protected void onBind() {
+    super.onBind();
+    getView(iconLoader::bindView);
+    registerOnDatabaseBus();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
     iconLoader.unbindView();
     unregisterFromDBProgressBus();
+    unsubDatabaseSubscription();
     unsubPopulateList();
     unsubAllInDB();
   }
@@ -90,17 +91,16 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
     iconLoader.destroy();
   }
 
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnDatabaseBus(
-      @NonNull LockInfoView view) {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnDatabaseBus() {
     unregisterFromDBProgressBus();
     databaseBus = LockInfoSelectBus.get()
         .register()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(lockInfoSelectEvent -> {
-          view.processDatabaseModifyEvent(lockInfoSelectEvent.position(),
-              lockInfoSelectEvent.activityName(), lockInfoSelectEvent.previouslockState(),
-              lockInfoSelectEvent.newlockState());
+          getView(lockInfoView -> lockInfoView.processDatabaseModifyEvent(
+              lockInfoSelectEvent.position(), lockInfoSelectEvent.activityName(),
+              lockInfoSelectEvent.previouslockState(), lockInfoSelectEvent.newlockState()));
         }, throwable -> {
           Timber.e(throwable, "onError registerOnDbProgressBus");
         });
@@ -170,16 +170,12 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
             .filter(activityEntry -> activityEntry != null)
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
-            .subscribe(activityEntry -> {
-              final LockInfoView lockInfoView = getView();
-              lockInfoView.onEntryAddedToList(activityEntry);
-            }, throwable -> {
+            .subscribe(activityEntry -> getView(
+                lockInfoView -> lockInfoView.onEntryAddedToList(activityEntry)), throwable -> {
               Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
-              final LockInfoView lockInfoView = getView();
-              lockInfoView.onListPopulateError();
+              getView(LockInfoView::onListPopulateError);
             }, () -> {
-              final LockInfoView lockInfoView = getView();
-              lockInfoView.onListPopulated();
+              getView(LockInfoView::onListPopulated);
               unsubPopulateList();
             });
   }
@@ -219,16 +215,16 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
             })
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
-            .subscribe(allIn -> {
+            .subscribe(allIn -> getView(lockInfoView -> {
               if (allIn) {
-                getView().enableToggleAll();
+                lockInfoView.enableToggleAll();
               } else {
-                getView().disableToggleAll();
+                lockInfoView.disableToggleAll();
               }
-            }, throwable -> {
+            }), throwable -> {
               Timber.e(throwable, "onError");
               // TODO maybe different error
-              getView().onListPopulateError();
+              getView(LockInfoView::onListPopulateError);
             }, this::unsubAllInDB);
   }
 
@@ -236,7 +232,6 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
   public void modifyDatabaseEntry(boolean isDefault, int position, @NonNull String packageName,
       @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
       boolean forceDelete) {
-    unsubDatabaseSubscription();
     unsubDatabaseSubscription();
     databaseSubscription =
         lockInfoInteractor.modifySingleDatabaseEntry(isDefault, packageName, activityName, code,
@@ -246,18 +241,18 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
             .subscribe(lockState -> {
               switch (lockState) {
                 case DEFAULT:
-                  getView().onDatabaseEntryDeleted(position);
+                  getView(lockInfoView -> lockInfoView.onDatabaseEntryDeleted(position));
                   break;
                 case WHITELISTED:
-                  getView().onDatabaseEntryWhitelisted(position);
+                  getView(lockInfoView -> lockInfoView.onDatabaseEntryWhitelisted(position));
                   break;
                 case LOCKED:
-                  getView().onDatabaseEntryCreated(position);
+                  getView(lockInfoView -> lockInfoView.onDatabaseEntryCreated(position));
                   break;
               }
             }, throwable -> {
               Timber.e(throwable, "onError modifyDatabaseEntry");
-              getView().onDatabaseEntryError(position);
+              getView(lockInfoView -> lockInfoView.onDatabaseEntryError(position));
             }, this::unsubDatabaseSubscription);
   }
 
@@ -271,13 +266,13 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
             .observeOn(getObserveScheduler())
             .subscribe(created -> {
               if (created) {
-                getView().onDatabaseEntryCreated(GROUP_POSITION);
+                getView(lockInfoView -> lockInfoView.onDatabaseEntryCreated(GROUP_POSITION));
               } else {
-                getView().onDatabaseEntryDeleted(GROUP_POSITION);
+                getView(lockInfoView -> lockInfoView.onDatabaseEntryDeleted(GROUP_POSITION));
               }
             }, throwable -> {
               Timber.e(throwable, "onError modifyDatabaseGroup");
-              getView().onDatabaseEntryError(GROUP_POSITION);
+              getView(lockInfoView -> lockInfoView.onDatabaseEntryError(GROUP_POSITION));
             }, this::unsubDatabaseSubscription);
   }
 

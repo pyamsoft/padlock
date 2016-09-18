@@ -45,9 +45,9 @@ class SettingsPreferencePresenterImpl
     this.interactor = interactor;
   }
 
-  @Override protected void onBind(@NonNull SettingsPreferenceView view) {
+  @Override protected void onBind() {
+    super.onBind();
     registerOnConfirmEventBus();
-    super.onBind(view);
   }
 
   @Override protected void onUnbind() {
@@ -57,11 +57,11 @@ class SettingsPreferencePresenterImpl
   }
 
   @Override public void requestClearAll() {
-    getView().showConfirmDialog(CONFIRM_ALL);
+    getView(settingsPreferenceView -> settingsPreferenceView.showConfirmDialog(CONFIRM_ALL));
   }
 
   @Override public void requestClearDatabase() {
-    getView().showConfirmDialog(CONFIRM_DATABASE);
+    getView(settingsPreferenceView -> settingsPreferenceView.showConfirmDialog(CONFIRM_DATABASE));
   }
 
   @SuppressWarnings("WeakerAccess") void unsubscribeConfirm() {
@@ -104,8 +104,8 @@ class SettingsPreferencePresenterImpl
     confirmedSubscription = interactor.clearAll()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(aBoolean -> getView().onClearAll(), throwable -> Timber.e(throwable, "onError"),
-            this::unsubscribeConfirm);
+        .subscribe(aBoolean -> getView(SettingsPreferenceView::onClearAll),
+            throwable -> Timber.e(throwable, "onError"), this::unsubscribeConfirm);
   }
 
   @SuppressWarnings("WeakerAccess") void clearDatabase() {
@@ -113,7 +113,7 @@ class SettingsPreferencePresenterImpl
     confirmedSubscription = interactor.clearDatabase()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(aBoolean -> getView().onClearDatabase(),
+        .subscribe(aBoolean -> getView(SettingsPreferenceView::onClearDatabase),
             throwable -> Timber.e(throwable, "onError"), this::unsubscribeConfirm);
   }
 }

@@ -20,7 +20,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
-import com.pyamsoft.padlock.app.lock.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.bus.DBProgressBus;
 import com.pyamsoft.padlock.bus.LockInfoDisplayBus;
@@ -64,11 +63,11 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     this.stateInteractor = stateInteractor;
   }
 
-  @Override protected void onBind(@NonNull LockList view) {
-    super.onBind(view);
-    registerOnPinEntryBus(view);
-    registerOnDbProgressBus(view);
-    registerOnLockInfoDisplayBus(view);
+  @Override protected void onBind() {
+    super.onBind();
+    registerOnPinEntryBus();
+    registerOnDbProgressBus();
+    registerOnLockInfoDisplayBus();
   }
 
   @Override protected void onUnbind() {
@@ -84,15 +83,14 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     unsubDatabaseSubscription();
   }
 
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnLockInfoDisplayBus(
-      @NonNull LockList view) {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnLockInfoDisplayBus() {
     unregisterFromLockInfoDispalyBus();
     lockInfoDisplayBus = LockInfoDisplayBus.get()
         .register()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(lockInfoDisplayEvent -> {
-          view.displayLockInfoDialog(lockInfoDisplayEvent.entry());
+          getView(lockList -> lockList.displayLockInfoDialog(lockInfoDisplayEvent.entry()));
         }, throwable -> {
           Timber.e(throwable, "onError registerOnLockInfoDisplayBus");
         });
@@ -104,16 +102,15 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     }
   }
 
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnDbProgressBus(
-      @NonNull LockList view) {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnDbProgressBus() {
     unregisterFromDBProgressBus();
     dbProgressBus = DBProgressBus.get()
         .register()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(dbProgressEvent -> {
-          view.processDatabaseModifyEvent(dbProgressEvent.isChecked(), dbProgressEvent.position(),
-              dbProgressEvent.entry());
+          getView(lockList -> lockList.processDatabaseModifyEvent(dbProgressEvent.isChecked(),
+              dbProgressEvent.position(), dbProgressEvent.entry()));
         }, throwable -> {
           Timber.e(throwable, "onError registerOnDbProgressBus");
         });
@@ -195,18 +192,14 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         .filter(appEntry -> appEntry != null)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(appEntry -> {
-          final LockList lockList = getView();
-          lockList.onEntryAddedToList(appEntry);
-        }, throwable -> {
-          Timber.e(throwable, "populateList onError");
-          final LockList lockList = getView();
-          lockList.onListPopulated();
-        }, () -> {
-          final LockList lockList = getView();
-          lockList.onListPopulated();
-          unsubscribePopulateList();
-        });
+        .subscribe(appEntry -> getView(lockList -> lockList.onEntryAddedToList(appEntry)),
+            throwable -> {
+              Timber.e(throwable, "populateList onError");
+              getView(LockList::onListPopulated);
+            }, () -> {
+              getView(LockList::onListPopulated);
+              unsubscribePopulateList();
+            });
   }
 
   @Override public void setFABStateFromPreference() {
@@ -214,17 +207,16 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     fabStateSubscription = stateInteractor.isServiceEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(enabled -> {
-          final LockList lockList = getView();
+        .subscribe(enabled -> getView(lockList -> {
           if (enabled) {
             lockList.setFABStateEnabled();
           } else {
             lockList.setFABStateDisabled();
           }
-        }, throwable -> {
+        }), throwable -> {
           Timber.e(throwable, "onError");
           // TODO  different error
-          getView().onListPopulateError();
+          getView(LockList::onListPopulateError);
         }, this::unsubscribeFabSubscription);
   }
 
@@ -247,16 +239,15 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     systemVisibleSubscription = lockListInteractor.isSystemVisible()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(visible -> {
-          final LockList lockList = getView();
+        .subscribe(visible -> getView(lockList -> {
           if (visible) {
             lockList.setSystemVisible();
           } else {
             lockList.setSystemInvisible();
           }
-        }, throwable -> {
+        }), throwable -> {
           // TODO different error
-          getView().onListPopulateError();
+          getView(LockList::onListPopulateError);
         }, this::unsubscribeSystemVisible);
   }
 
@@ -273,16 +264,15 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     zeroActivitySubscription = lockListInteractor.isZeroActivityVisible()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(visible -> {
-          final LockList lockList = getView();
+        .subscribe(visible -> getView(lockList -> {
           if (visible) {
             lockList.setZeroActivityShown();
           } else {
             lockList.setZeroActivityHidden();
           }
-        }, throwable -> {
+        }), throwable -> {
           // TODO different error
-          getView().onListPopulateError();
+          getView(LockList::onListPopulateError);
         }, this::unsubscribeZeroActivity);
   }
 
@@ -293,11 +283,13 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   }
 
   @Override public void clickPinFAB() {
-    if (PadLockService.isRunning()) {
-      getView().onCreatePinDialog();
-    } else {
-      getView().onCreateAccessibilityDialog();
-    }
+    getView(lockList -> {
+      if (PadLockService.isRunning()) {
+        lockList.onCreatePinDialog();
+      } else {
+        lockList.onCreateAccessibilityDialog();
+      }
+    });
   }
 
   @Override public void showOnBoarding() {
@@ -305,43 +297,40 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     onboardSubscription = lockListInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(onboard -> {
-          final LockList lockList = getView();
+        .subscribe(onboard -> getView(lockList -> {
           if (!onboard) {
             lockList.showOnBoarding();
           }
-        }, throwable -> {
+        }), throwable -> {
           Timber.e(throwable, "onError");
-          getView().onListPopulateError();
+          getView(LockList::onListPopulateError);
         }, this::unsubscribeOnboard);
   }
 
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnPinEntryBus(
-      @NonNull LockList view) {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnPinEntryBus() {
     unregisterFromPinEntryBus();
     pinEntryBusSubscription = PinEntryBus.get()
         .register()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(pinEntryEvent -> {
-          if (view instanceof MasterPinSubmitCallback) {
-            final MasterPinSubmitCallback callback = (MasterPinSubmitCallback) view;
+          getView(lockList -> {
             switch (pinEntryEvent.type()) {
               case 0:
                 if (pinEntryEvent.complete()) {
-                  callback.onCreateMasterPinSuccess();
+                  lockList.onCreateMasterPinSuccess();
                 } else {
-                  callback.onCreateMasterPinFailure();
+                  lockList.onCreateMasterPinFailure();
                 }
                 break;
               case 1:
                 if (pinEntryEvent.complete()) {
-                  callback.onClearMasterPinSuccess();
+                  lockList.onClearMasterPinSuccess();
                 } else {
-                  callback.onClearMasterPinFailure();
+                  lockList.onClearMasterPinFailure();
                 }
             }
-          }
+          });
         }, throwable -> {
           Timber.e(throwable, "PinEntryBus onError");
         });
@@ -370,17 +359,17 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         .subscribe(lockState -> {
           switch (lockState) {
             case DEFAULT:
-              getView().onDatabaseEntryDeleted(position);
+              getView(lockList -> lockList.onDatabaseEntryDeleted(position));
               break;
             case LOCKED:
-              getView().onDatabaseEntryCreated(position);
+              getView(lockList -> lockList.onDatabaseEntryCreated(position));
               break;
             case WHITELISTED:
               throw new RuntimeException("Whitelist results are not handled");
           }
         }, throwable -> {
           Timber.e(throwable, "onError modifyDatabaseEntry");
-          getView().onDatabaseEntryError(position);
+          getView(lockList -> lockList.onDatabaseEntryError(position));
         }, this::unsubDatabaseSubscription);
   }
 
