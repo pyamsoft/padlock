@@ -220,7 +220,7 @@ public class MainActivity extends DonationActivity
     return spannable;
   }
 
-  @Override public int getChangeLogIcon() {
+  @Override public int getApplicationIcon() {
     return R.mipmap.ic_launcher;
   }
 
