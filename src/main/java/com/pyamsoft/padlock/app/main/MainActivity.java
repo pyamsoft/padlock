@@ -192,15 +192,16 @@ public class MainActivity extends DonationActivity
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
     final String line1 =
-        "CHANGE: Pro Version applications! Advertisements can be disabled from the settings screen once the Pro version of the application is installed";
+        "CHANGE: Pro Version applications!\nAdvertisements can be disabled from the settings screen once the Pro version of the application is installed";
     final String line2 = "BUGFIX: Clean up memory management";
     final String line3 =
         "BUGFIX: Fix bug caused when Info dialog is launched many times in quick succession";
     final String line4 = "BUGFIX: Fix memory management in Info dialog";
-    final String line5 = "BUGFIX: Safer navigation from screen to screen (less crash potential)";
+    final String line5 = "BUGFIX: Safer navigation from screen to screen";
 
     // Turn it into a spannable
-    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1, line2);
+    final Spannable spannable =
+        StringUtil.createLineBreakBuilder(title, line1, line2, line3, line4, line5);
 
     int start = 0;
     int end = title.length();
