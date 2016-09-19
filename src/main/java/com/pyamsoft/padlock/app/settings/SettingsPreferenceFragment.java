@@ -31,7 +31,7 @@ import com.pyamsoft.padlock.model.event.RefreshEvent;
 import com.pyamsoft.pydroid.base.PersistLoader;
 import com.pyamsoft.pydroid.lib.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.lib.ActionBarSettingsPreferenceFragment;
-import com.pyamsoft.pydroid.model.Licenses;
+import com.pyamsoft.pydroid.lib.Licenses;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
@@ -88,7 +88,7 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     showAboutLicenses.setOnPreferenceClickListener(
         preference -> showAboutLicensesFragment(R.id.main_view_container,
             AboutLibrariesFragment.Styling.LIGHT, Licenses.ANDROID, Licenses.ANDROID_SUPPORT,
-            Licenses.PYDROID, Licenses.GOOGLE_PLAY_SERVICES, Licenses.ANDROID_IN_APP_BILLING,
+            Licenses.PYDROID, Licenses.GOOGLE_PLAY_SERVICES, Licenses.ANDROID_CHECKOUT,
             Licenses.AUTO_VALUE, Licenses.BUTTERKNIFE, Licenses.DAGGER, Licenses.FAST_ADAPTER,
             Licenses.FIREBASE, Licenses.LEAK_CANARY, Licenses.RETROFIT2, Licenses.SQLBRITE,
             Licenses.SQLDELIGHT, Licenses.ANDROID_PRIORITY_JOBQUEUE, Licenses.RXANDROID,

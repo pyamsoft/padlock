@@ -20,7 +20,6 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.PadLockSingleInitProvider;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;

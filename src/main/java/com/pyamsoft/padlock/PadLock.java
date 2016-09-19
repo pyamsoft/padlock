@@ -19,6 +19,8 @@ package com.pyamsoft.padlock;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockModule;
@@ -49,5 +51,9 @@ public class PadLock extends PYDroidApplication implements IPadLock<PadLockCompo
       throw new NullPointerException("PadLockComponent is NULL");
     }
     return component;
+  }
+
+  @Nullable @Override public String provideGoogleOpenSourceLicenses() {
+    return GoogleApiAvailability.getInstance().getOpenSourceSoftwareLicenseInfo(this);
   }
 }
