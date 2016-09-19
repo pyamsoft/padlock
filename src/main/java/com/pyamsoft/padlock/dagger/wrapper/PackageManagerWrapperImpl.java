@@ -43,7 +43,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
   @SuppressWarnings("WeakerAccess") @NonNull final PackageManager packageManager;
 
   @Inject PackageManagerWrapperImpl(@NonNull Context context) {
-    this.packageManager = context.getApplicationContext().getPackageManager();
+    packageManager = context.getApplicationContext().getPackageManager();
   }
 
   @NonNull @Override
@@ -74,8 +74,10 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
           }
         }
       } catch (PackageManager.NameNotFoundException e) {
-        Timber.e(e, "PackageManager error");
+        Timber.e(e, "PackageManager error %s", packageName);
         activityEntries.clear();
+      } catch (RuntimeException e) {
+        Timber.e(e, "PackageManager error, return what we have for %s", packageName);
       }
       return Observable.from(activityEntries);
     });
