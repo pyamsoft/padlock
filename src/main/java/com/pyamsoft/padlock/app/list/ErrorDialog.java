@@ -31,6 +31,7 @@ public class ErrorDialog extends DialogFragment {
             "An unrecoverable error has occurred when attempting an operation. Please close and re-open PadLock")
         .setPositiveButton("Okay", (dialogInterface, i) -> {
           dialogInterface.dismiss();
+          getActivity().finish();
         })
         .create();
   }
