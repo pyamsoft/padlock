@@ -130,9 +130,8 @@ dependencies {
   // Dagger
   apt "com.google.dagger:dagger-compiler:$dagger"
 
-  // Showcase View
-  // TODO Remove in favor of tap target view
-  compile "com.github.deano2390:MaterialShowcaseView:1.1.0"
+  // Tap Target View
+  compile 'com.getkeepsafe.taptargetview:taptargetview:1.0.1'
 
   // Android Framework Testing
   androidTestCompile "com.android.support:support-annotations:$supportLib"
