@@ -60,7 +60,7 @@
 
   </android.support.design.widget.CoordinatorLayout>
 
-  <com.pyamsoft.pydroid.support.AdvertisementView
+  <com.pyamsoft.pydroid.lib.AdvertisementView
       android:id="@+id/ad_view"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"

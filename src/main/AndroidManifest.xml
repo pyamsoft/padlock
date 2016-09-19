@@ -75,12 +75,6 @@
           android:resource="@xml/padlock"/>
     </service>
 
-    <provider
-        android:name=".PadLockSingleInitProvider"
-        android:authorities="com.pyamsoft.padlock.PadLockSingleInitProvider"
-        android:exported="false"
-        android:syncable="false"/>
-
     <!-- Framework Job Scheduler -->
     <service
         android:name=".app.service.job.PadLockFrameworkJobSchedulerService"
