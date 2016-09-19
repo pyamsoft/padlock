@@ -52,7 +52,9 @@ import timber.log.Timber;
 
 public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.LockInfoView {
 
-  @NonNull private static final String ARG_APP_ENTRY = "app_entry";
+  @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
+  @NonNull private static final String ARG_APP_NAME = "app_name";
+  @NonNull private static final String ARG_APP_SYSTEM = "app_system";
   @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
   @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
@@ -68,16 +70,21 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") LockInfoAdapter fastItemAdapter;
   @SuppressWarnings("WeakerAccess") boolean firstRefresh;
-  @SuppressWarnings("WeakerAccess") AppEntry appEntry;
   private Unbinder unbinder;
   private long loadedPresenterKey;
   private long loadedAdapterKey;
+
+  private String appPackageName;
+  private String appName;
+  private boolean appIsSystem;
 
   public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
     final Bundle args = new Bundle();
 
-    args.putParcelable(ARG_APP_ENTRY, appEntry);
+    args.putString(ARG_APP_PACKAGE_NAME, appEntry.packageName());
+    args.putString(ARG_APP_NAME, appEntry.name());
+    args.putBoolean(ARG_APP_SYSTEM, appEntry.system());
 
     fragment.setArguments(args);
     return fragment;
@@ -85,7 +92,13 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    appEntry = getArguments().getParcelable(ARG_APP_ENTRY);
+    appPackageName = getArguments().getString(ARG_APP_PACKAGE_NAME, null);
+    appName = getArguments().getString(ARG_APP_NAME, null);
+    appIsSystem = getArguments().getBoolean(ARG_APP_SYSTEM, false);
+
+    if (appPackageName == null || appName == null) {
+      throw new NullPointerException("App information is NULL");
+    }
 
     loadedPresenterKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
@@ -151,8 +164,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     presenter.bindView(this);
 
     recyclerView.setAdapter(fastItemAdapter);
-    presenter.loadApplicationIcon(appEntry.packageName());
-    presenter.setToggleAllState(appEntry.packageName());
+    presenter.loadApplicationIcon(appPackageName);
+    presenter.setToggleAllState(appPackageName);
     if (firstRefresh) {
       refreshList();
     }
@@ -182,9 +195,9 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
         AsyncDrawable.with(getContext()).load(R.drawable.ic_close_24dp).into(close);
     taskMap.put("close", task);
 
-    name.setText(appEntry.name());
-    packageName.setText(appEntry.packageName());
-    system.setText((appEntry.system() ? "YES" : "NO"));
+    name.setText(appName);
+    packageName.setText(appPackageName);
+    system.setText((appIsSystem ? "YES" : "NO"));
 
     // Recycler setup
     final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -208,12 +221,12 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   private void repopulateList() {
     Timber.d("Repopulate list");
     recyclerView.setClickable(false);
-    presenter.populateList(appEntry.packageName());
+    presenter.populateList(appPackageName);
   }
 
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
     Timber.d("Add entry: %s", entry);
-    fastItemAdapter.add(new LockInfoItem(appEntry.packageName(), entry));
+    fastItemAdapter.add(new LockInfoItem(appPackageName, entry));
   }
 
   @Override public void onListPopulated() {
@@ -279,7 +292,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
         fastItemAdapter.remove(i);
       }
 
-      presenter.modifyDatabaseGroup(isChecked, appEntry.packageName(), null, appEntry.system());
+      presenter.modifyDatabaseGroup(isChecked, appPackageName, null, appIsSystem);
     });
   }
 
@@ -293,12 +306,12 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
 
   @Override public void processDatabaseModifyEvent(int position, @NonNull String activityName,
       @NonNull LockState previousLockState, @NonNull LockState newLockState) {
-    Timber.d("Received a database modify event request for %s %s at %d [%s]",
-        appEntry.packageName(), activityName, position, newLockState.name());
+    Timber.d("Received a database modify event request for %s %s at %d [%s]", appPackageName,
+        activityName, position, newLockState.name());
     final boolean whitelist = newLockState.equals(LockState.WHITELISTED);
     final boolean forceLock = newLockState.equals(LockState.LOCKED);
     final boolean wasDefault = previousLockState.equals(LockState.DEFAULT);
-    presenter.modifyDatabaseEntry(wasDefault, position, appEntry.packageName(), activityName, null,
-        appEntry.system(), whitelist, forceLock);
+    presenter.modifyDatabaseEntry(wasDefault, position, appPackageName, activityName, null,
+        appIsSystem, whitelist, forceLock);
   }
 }

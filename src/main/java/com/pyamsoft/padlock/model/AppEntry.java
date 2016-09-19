@@ -16,10 +16,9 @@
 
 package com.pyamsoft.padlock.model;
 
-import android.os.Parcelable;
 import com.google.auto.value.AutoValue;
 
-@AutoValue public abstract class AppEntry implements Parcelable {
+@AutoValue public abstract class AppEntry {
 
   public static Builder builder() {
     return new AutoValue_AppEntry.Builder();
