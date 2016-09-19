@@ -38,6 +38,7 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
@@ -431,27 +432,23 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
-    // TODO replace with tap target view
-    //new MaterialShowcaseView.Builder(getActivity()).setTargetTouchable(false)
-    //    .setTarget(fab)
-    //    .setMaskColour(ContextCompat.getColor(getContext(), R.color.blue500))
-    //    .setTitleText(R.string.app_name)
-    //    .setContentText(R.string.getting_started)
-    //    .setDismissText(R.string.got_it)
-    //    .setListener(new IShowcaseListener() {
-    //      @Override public void onShowcaseDisplayed(MaterialShowcaseView materialShowcaseView) {
-    //        Timber.d("onShowcaseDisplayed");
-    //      }
-    //
-    //      @Override public void onShowcaseDismissed(MaterialShowcaseView materialShowcaseView) {
-    //        Timber.d("onShowcaseDismissed");
-    //        if (presenter != null) {
-    //          presenter.setOnBoard();
-    //        }
-    //      }
-    //    })
-    //    .build()
-    //    .show(getActivity());
+    new TapTargetView.Builder(getActivity()).title(R.string.getting_started)
+        .description(R.string.getting_started_desc)
+        .drawShadow(true)
+        .listener(new TapTargetView.Listener() {
+          @Override public void onTargetClick(TapTargetView view) {
+            view.dismiss(true);
+            if (presenter != null) {
+              presenter.setOnBoard();
+            }
+          }
+
+          @Override public void onTargetLongClick(TapTargetView view) {
+
+          }
+        })
+        .cancelable(false)
+        .showFor(fab);
   }
 
   @Override public void onListCleared() {
