@@ -84,20 +84,20 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
         }
       }
     }).filter(applicationInfo -> {
-      // KLUDGE blocking
-      final List<String> activityList =
-          packageManagerWrapper.getActivityListForPackage(applicationInfo.packageName)
-              .toList()
-              .toBlocking()
-              .first();
-
       final boolean isZeroActivityVisible = isZeroActivityVisible().toBlocking().first();
-      if (activityList.size() == 0 && !isZeroActivityVisible) {
-        Timber.w("Exclude package %s because it has no activities", applicationInfo.packageName);
-        return false;
-      } else {
-        return true;
+      if (!isZeroActivityVisible) {
+        // KLUDGE blocking
+        final List<String> activityList =
+            packageManagerWrapper.getActivityListForPackage(applicationInfo.packageName)
+                .toList()
+                .toBlocking()
+                .first();
+        if (activityList.size() == 0) {
+          Timber.w("Exclude package %s because it has no activities", applicationInfo.packageName);
+          return false;
+        }
       }
+      return true;
     }).map(applicationInfo -> applicationInfo.packageName).toList();
   }
 
