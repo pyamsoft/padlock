@@ -418,7 +418,7 @@ public class LockListFragment extends ActionBarFragment
 
     // In case the configuration changes, we do the animation again
     if (!swipeRefreshLayout.isRefreshing()) {
-      swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
+      swipeRefreshLayout.setRefreshing(true);
     }
 
     fastItemAdapter.add(new LockListItem(entry));
@@ -435,6 +435,7 @@ public class LockListFragment extends ActionBarFragment
     new TapTargetView.Builder(getActivity()).title(R.string.getting_started)
         .description(R.string.getting_started_desc)
         .drawShadow(true)
+        .tintTarget(true)
         .listener(new TapTargetView.Listener() {
           @Override public void onTargetClick(TapTargetView view) {
             view.dismiss(true);
