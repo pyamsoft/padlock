@@ -80,11 +80,11 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
       @NonNull String className) {
     return Observable.defer(() -> {
       final boolean lockScreen1 =
-          packageName.equals(PadLockSingleInitProvider.class.getPackage().getName())
-              && className.equals(LockScreenActivity1.class.getName());
+          packageName.equals(LockScreenActivity1.class.getPackage().getName()) && className.equals(
+              LockScreenActivity1.class.getName());
       final boolean lockScreen2 =
-          packageName.equals(PadLockSingleInitProvider.class.getPackage().getName())
-              && className.equals(LockScreenActivity2.class.getName());
+          packageName.equals(LockScreenActivity2.class.getPackage().getName()) && className.equals(
+              LockScreenActivity2.class.getName());
       return Observable.just(lockScreen1 || lockScreen2);
     });
   }
