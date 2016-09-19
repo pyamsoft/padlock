@@ -36,8 +36,8 @@ android {
     applicationId "com.pyamsoft.padlock"
     minSdkVersion 19
     targetSdkVersion 24
-    versionCode 33
-    versionName "1.7.3"
+    versionCode 34
+    versionName "1.7.4"
 
     // For vector drawables
     vectorDrawables.useSupportLibrary = true
