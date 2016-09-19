@@ -112,7 +112,6 @@ dependencies {
   // Auto value
   provided "com.google.auto.value:auto-value:$autoValue"
   apt "com.google.auto.value:auto-value:$autoValue"
-  apt "com.ryanharter.auto.value:auto-value-parcel:$autoValueParcel"
 
   // Butterknife
   apt "com.jakewharton:butterknife-compiler:$butterknife"
