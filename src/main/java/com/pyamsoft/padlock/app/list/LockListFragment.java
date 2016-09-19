@@ -26,7 +26,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -55,8 +54,6 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import rx.Subscription;
 import timber.log.Timber;
-import uk.co.deanwild.materialshowcaseview.IShowcaseListener;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
 public class LockListFragment extends ActionBarFragment
     implements LockListPresenter.LockList, PinEntryDialogRequest {
@@ -434,27 +431,27 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
-    // KLUDGE dismissed when orientation is changed
-    new MaterialShowcaseView.Builder(getActivity()).setTargetTouchable(false)
-        .setTarget(fab)
-        .setMaskColour(ContextCompat.getColor(getContext(), R.color.blue500))
-        .setTitleText(R.string.app_name)
-        .setContentText(R.string.getting_started)
-        .setDismissText(R.string.got_it)
-        .setListener(new IShowcaseListener() {
-          @Override public void onShowcaseDisplayed(MaterialShowcaseView materialShowcaseView) {
-            Timber.d("onShowcaseDisplayed");
-          }
-
-          @Override public void onShowcaseDismissed(MaterialShowcaseView materialShowcaseView) {
-            Timber.d("onShowcaseDismissed");
-            if (presenter != null) {
-              presenter.setOnBoard();
-            }
-          }
-        })
-        .build()
-        .show(getActivity());
+    // TODO replace with tap target view
+    //new MaterialShowcaseView.Builder(getActivity()).setTargetTouchable(false)
+    //    .setTarget(fab)
+    //    .setMaskColour(ContextCompat.getColor(getContext(), R.color.blue500))
+    //    .setTitleText(R.string.app_name)
+    //    .setContentText(R.string.getting_started)
+    //    .setDismissText(R.string.got_it)
+    //    .setListener(new IShowcaseListener() {
+    //      @Override public void onShowcaseDisplayed(MaterialShowcaseView materialShowcaseView) {
+    //        Timber.d("onShowcaseDisplayed");
+    //      }
+    //
+    //      @Override public void onShowcaseDismissed(MaterialShowcaseView materialShowcaseView) {
+    //        Timber.d("onShowcaseDismissed");
+    //        if (presenter != null) {
+    //          presenter.setOnBoard();
+    //        }
+    //      }
+    //    })
+    //    .build()
+    //    .show(getActivity());
   }
 
   @Override public void onListCleared() {
