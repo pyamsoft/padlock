@@ -44,7 +44,7 @@ import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.app.widget.DividerItemDecoration;
+import com.pyamsoft.pydroid.widget.DividerItemDecoration;
 import com.pyamsoft.pydroid.base.ActionBarFragment;
 import com.pyamsoft.pydroid.base.ListAdapterLoader;
 import com.pyamsoft.pydroid.base.PersistLoader;

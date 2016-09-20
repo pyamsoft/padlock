@@ -40,7 +40,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
-import com.pyamsoft.pydroid.app.widget.DividerItemDecoration;
+import com.pyamsoft.pydroid.widget.DividerItemDecoration;
 import com.pyamsoft.pydroid.base.ListAdapterLoader;
 import com.pyamsoft.pydroid.base.PersistLoader;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
