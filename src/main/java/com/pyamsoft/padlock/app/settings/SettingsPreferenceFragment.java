@@ -87,12 +87,12 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     final Preference showAboutLicenses = findPreference(getString(R.string.about_license_key));
     showAboutLicenses.setOnPreferenceClickListener(
         preference -> showAboutLicensesFragment(R.id.main_view_container,
-            AboutLibrariesFragment.Styling.LIGHT, Licenses.ANDROID, Licenses.ANDROID_SUPPORT,
-            Licenses.PYDROID, Licenses.GOOGLE_PLAY_SERVICES, Licenses.ANDROID_CHECKOUT,
-            Licenses.AUTO_VALUE, Licenses.BUTTERKNIFE, Licenses.DAGGER, Licenses.FAST_ADAPTER,
-            Licenses.FIREBASE, Licenses.LEAK_CANARY, Licenses.RETROFIT2, Licenses.SQLBRITE,
-            Licenses.SQLDELIGHT, Licenses.ANDROID_PRIORITY_JOBQUEUE, Licenses.RXANDROID,
-            Licenses.RXJAVA));
+            AboutLibrariesFragment.Styling.LIGHT, Licenses.Id.ANDROID, Licenses.Id.ANDROID_SUPPORT,
+            Licenses.Id.PYDROID, Licenses.Id.GOOGLE_PLAY_SERVICES, Licenses.Id.ANDROID_CHECKOUT,
+            Licenses.Id.AUTO_VALUE, Licenses.Id.BUTTERKNIFE, Licenses.Id.DAGGER,
+            Licenses.Id.FAST_ADAPTER, Licenses.Id.FIREBASE, Licenses.Id.LEAK_CANARY,
+            Licenses.Id.RETROFIT2, Licenses.Id.SQLBRITE, Licenses.Id.SQLDELIGHT,
+            Licenses.Id.ANDROID_PRIORITY_JOBQUEUE, Licenses.Id.RXANDROID, Licenses.Id.RXJAVA));
 
     final Preference checkVersion = findPreference(getString(R.string.check_version_key));
     checkVersion.setOnPreferenceClickListener(preference -> checkForUpdate());
