@@ -72,7 +72,7 @@
           android:hint="@string/lock_code_hint"
           >
 
-        <com.pyamsoft.pydroid.app.widget.NoLeakTextInputEditText
+        <com.pyamsoft.pydroid.widget.NoLeakTextInputEditText
             android:id="@+id/lock_text_entry"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -95,7 +95,7 @@
 
     </LinearLayout>
 
-    <com.pyamsoft.pydroid.app.widget.NoLeakTextView
+    <com.pyamsoft.pydroid.widget.NoLeakTextView
         android:id="@+id/lock_display_hint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
