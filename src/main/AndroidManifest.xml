@@ -90,6 +90,12 @@
       </intent-filter>
     </service>
 
+    <provider
+        android:name=".PadLockSingleInitProvider"
+        android:authorities="com.pyamsoft.padlock.PadLockSingleInitProvider"
+        android:exported="false"
+        android:syncable="false"/>
+
   </application>
 
 </manifest>

@@ -39,8 +39,8 @@ public class PadLock extends PYDroidApplication implements IPadLock<PadLockCompo
     }
   }
 
-  @Override protected void onFirstCreate() {
-    super.onFirstCreate();
+  @Override protected void createApplicationComponents() {
+    super.createApplicationComponents();
     component = DaggerPadLockComponent.builder()
         .padLockModule(new PadLockModule(getApplicationContext()))
         .build();
