@@ -435,6 +435,7 @@ public class LockListFragment extends ActionBarFragment
     new TapTargetView.Builder(getActivity()).title(R.string.getting_started)
         .description(R.string.getting_started_desc)
         .drawShadow(true)
+        .tintTarget(false)
         .listener(new TapTargetView.Listener() {
           @Override public void onTargetClick(TapTargetView view) {
             view.dismiss(true);
