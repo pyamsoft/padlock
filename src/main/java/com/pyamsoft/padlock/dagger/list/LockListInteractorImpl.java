@@ -33,7 +33,7 @@ import timber.log.Timber;
 class LockListInteractorImpl extends LockCommonInteractorImpl implements LockListInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
-  @NonNull final PackageManagerWrapper packageManagerWrapper;
+  @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManagerWrapper;
 
   @Inject LockListInteractorImpl(PadLockDB padLockDB,
       @NonNull PackageManagerWrapper packageManagerWrapper,
