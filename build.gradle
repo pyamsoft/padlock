@@ -130,9 +130,6 @@ dependencies {
   // Dagger
   apt "com.google.dagger:dagger-compiler:$dagger"
 
-  // Tap Target View
-  compile 'com.getkeepsafe.taptargetview:taptargetview:1.0.1'
-
   // Android Framework Testing
   androidTestCompile "com.android.support:support-annotations:$supportLib"
   androidTestCompile "com.android.support.test:runner:$androidTestRunner"
