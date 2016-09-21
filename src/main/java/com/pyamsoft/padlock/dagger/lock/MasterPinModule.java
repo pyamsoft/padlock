@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.lock;
 
-import com.pyamsoft.pydroid.dagger.ActivityScope;
+import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 

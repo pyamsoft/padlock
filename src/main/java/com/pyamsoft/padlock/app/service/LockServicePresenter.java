@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.app.service;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface LockServicePresenter extends Presenter<LockServicePresenter.LockService> {
 

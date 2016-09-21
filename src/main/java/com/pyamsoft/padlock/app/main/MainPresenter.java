@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.app.main;
 
-import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface MainPresenter extends Presenter<MainPresenter.MainView> {
 

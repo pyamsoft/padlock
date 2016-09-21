@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.app.settings;
 
-import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface SettingsPreferencePresenter
     extends Presenter<SettingsPreferencePresenter.SettingsPreferenceView> {

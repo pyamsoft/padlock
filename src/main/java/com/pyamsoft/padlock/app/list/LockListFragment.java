@@ -45,12 +45,11 @@ import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.widget.DividerItemDecoration;
-import com.pyamsoft.pydroid.base.ActionBarFragment;
-import com.pyamsoft.pydroid.base.ListAdapterLoader;
-import com.pyamsoft.pydroid.base.PersistLoader;
+import com.pyamsoft.pydroid.ActionBarFragment;
+import com.pyamsoft.pydroid.ListAdapterLoader;
+import com.pyamsoft.pydroid.PersistLoader;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
+import com.pyamsoft.pydroid.util.AsyncDrawable;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import rx.Subscription;
@@ -64,7 +63,8 @@ public class LockListFragment extends ActionBarFragment
   @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
-  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
+  @NonNull private final AsyncDrawable.Mapper
+      taskMap = new AsyncDrawable.Mapper();
   @BindView(R.id.applist_fab) FloatingActionButton fab;
   @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
   @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
