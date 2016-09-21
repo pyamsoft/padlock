@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
-import com.pyamsoft.pydroid.dagger.ActivityScope;
+import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

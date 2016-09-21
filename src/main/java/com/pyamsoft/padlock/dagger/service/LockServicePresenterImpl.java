@@ -20,7 +20,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.dagger.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;

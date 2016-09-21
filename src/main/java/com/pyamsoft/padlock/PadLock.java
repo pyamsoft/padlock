@@ -24,7 +24,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockModule;
-import com.pyamsoft.pydroid.lib.PYDroidApplication;
+import com.pyamsoft.pydroid.PYDroidApplication;
 
 public class PadLock extends PYDroidApplication implements IPadLock<PadLockComponent> {
 

@@ -21,7 +21,7 @@ import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.app.list.LockListItem;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.PinScreen;
-import com.pyamsoft.pydroid.dagger.ActivityScope;
+import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

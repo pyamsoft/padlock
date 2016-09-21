@@ -42,9 +42,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.pydroid.base.PersistLoader;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
+import com.pyamsoft.pydroid.PersistLoader;
+import com.pyamsoft.pydroid.util.AsyncDrawable;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import rx.Subscription;
 import timber.log.Timber;
@@ -57,7 +56,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
   @NonNull private static final String KEY_PIN_DIALOG = "key_pin_dialog";
-  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
+  @NonNull private final AsyncDrawable.Mapper
+      taskMap = new AsyncDrawable.Mapper();
   @BindView(R.id.pin_entry_toolbar) TextView toolbar;
   @BindView(R.id.pin_entry_close) ImageView close;
   @BindView(R.id.pin_image) ImageView image;

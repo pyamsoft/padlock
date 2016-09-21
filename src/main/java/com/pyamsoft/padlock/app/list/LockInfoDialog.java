@@ -41,10 +41,9 @@ import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.widget.DividerItemDecoration;
-import com.pyamsoft.pydroid.base.ListAdapterLoader;
-import com.pyamsoft.pydroid.base.PersistLoader;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
+import com.pyamsoft.pydroid.ListAdapterLoader;
+import com.pyamsoft.pydroid.PersistLoader;
+import com.pyamsoft.pydroid.util.AsyncDrawable;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import rx.Subscription;
@@ -57,7 +56,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
   @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
-  @NonNull private final AsyncDrawableMap taskMap = new AsyncDrawableMap();
+  @NonNull private final AsyncDrawable.Mapper
+      taskMap = new AsyncDrawable.Mapper();
   @BindView(R.id.lock_info_fauxbar) LinearLayout toolbar;
   @BindView(R.id.lock_info_close) ImageView close;
   @BindView(R.id.lock_info_title) TextView name;

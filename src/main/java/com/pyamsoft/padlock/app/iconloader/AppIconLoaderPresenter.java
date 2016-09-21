@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.app.iconloader;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.base.Presenter;
+import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface AppIconLoaderPresenter<I extends AppIconLoaderView> extends Presenter<I> {
 

@@ -44,10 +44,9 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.ErrorDialog;
-import com.pyamsoft.pydroid.base.ActivityBase;
-import com.pyamsoft.pydroid.base.PersistLoader;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncDrawableMap;
+import com.pyamsoft.pydroid.ActivityBase;
+import com.pyamsoft.pydroid.PersistLoader;
+import com.pyamsoft.pydroid.util.AsyncDrawable;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import java.util.Locale;
@@ -68,7 +67,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @NonNull private static final String KEY_LOCK_PRESENTER = "key_lock_presenter";
 
   @NonNull private final Intent home;
-  @NonNull private final AsyncDrawableMap taskMap;
+  @NonNull private final AsyncDrawable.Mapper taskMap;
   @BindView(R.id.activity_lock_screen) CoordinatorLayout rootView;
   @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.lock_image) ImageView image;
@@ -106,7 +105,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     home = new Intent(Intent.ACTION_MAIN);
     home.addCategory(Intent.CATEGORY_HOME);
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    taskMap = new AsyncDrawableMap();
+    taskMap = new AsyncDrawable.Mapper();
   }
 
   @Override public void setDisplayName(@NonNull String name) {
