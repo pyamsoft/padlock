@@ -25,6 +25,7 @@ import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockModule;
 import com.pyamsoft.pydroid.PYDroidApplication;
+import com.pyamsoft.pydroid.about.Licenses;
 
 public class PadLock extends PYDroidApplication implements IPadLock<PadLockComponent> {
 
@@ -55,5 +56,12 @@ public class PadLock extends PYDroidApplication implements IPadLock<PadLockCompo
 
   @Nullable @Override public String provideGoogleOpenSourceLicenses() {
     return GoogleApiAvailability.getInstance().getOpenSourceSoftwareLicenseInfo(this);
+  }
+
+  @Override public void insertCustomLicensesIntoMap() {
+    Licenses.create("Android Priority Job Queue",
+        "https://github.com/yigit/android-priority-jobqueue", "licenses/androidpriorityjobqueue");
+    Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite");
+    Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight");
   }
 }
