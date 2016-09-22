@@ -135,8 +135,7 @@ dependencies {
   androidTestCompile "com.android.support.test.espresso:espresso-core:$espresso"
 
   // Dagger
-  testCompile "com.google.dagger:dagger:$dagger"
-  testCompile "com.google.dagger:dagger-compiler:$dagger"
+  testAnnotationProcessor "com.google.dagger:dagger-compiler:$dagger"
 
   // Roboelectric for Android on JVM
   testCompile "org.robolectric:robolectric:$robolectric"
@@ -147,7 +146,7 @@ dependencies {
   // Mockito for unit tests
   testCompile "org.mockito:mockito-core:$mockito"
 
-  // PYDroid 4.4.1
+  // PYDroid 4.4.2
   debugCompile project(path: ":PYDroid", configuration: "debug")
   releaseCompile project(path: ":PYDroid", configuration: "release")
 }
