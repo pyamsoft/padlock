@@ -42,7 +42,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.pydroid.PersistLoader;
+import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.util.AsyncDrawable;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import rx.Subscription;
