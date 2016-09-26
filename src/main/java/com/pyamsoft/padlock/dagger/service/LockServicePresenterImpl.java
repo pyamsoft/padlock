@@ -43,9 +43,9 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
 
   @Inject LockServicePresenterImpl(@NonNull final LockServiceStateInteractor stateInteractor,
       @NonNull final LockServiceInteractor interactor,
-      @NonNull @Named("main") Scheduler mainScheduler,
-      @NonNull @Named("io") Scheduler ioScheduler) {
-    super(mainScheduler, ioScheduler);
+      @NonNull @Named("obs") Scheduler obsScheduler,
+      @NonNull @Named("io") Scheduler subScheduler) {
+    super(obsScheduler, subScheduler);
     this.interactor = interactor;
     this.stateInteractor = stateInteractor;
     lockScreenPassed = false;

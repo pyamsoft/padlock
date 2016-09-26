@@ -32,8 +32,8 @@ import rx.Scheduler;
 
   @ActivityScope @Provides LockListPresenter provideLockScreenPresenter(
       @NonNull LockListInteractor interactor, @NonNull LockServiceStateInteractor stateInteractor,
-      @Named("main") Scheduler mainScheduler, @Named("computation") Scheduler ioScheduler) {
-    return new LockListPresenterImpl(interactor, stateInteractor, mainScheduler, ioScheduler);
+      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
+    return new LockListPresenterImpl(interactor, stateInteractor, obsScheduler, subScheduler);
   }
 
   @ActivityScope @Provides LockListInteractor provideLockScreenInteractor(PadLockDB padLockDB,

@@ -20,10 +20,7 @@ import android.app.Application;
 import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.dagger.DaggerTestPadLockComponent;
 import com.pyamsoft.padlock.dagger.TestPadLockComponent;
-import com.pyamsoft.padlock.dagger.TestPadLockModule;
-import com.pyamsoft.padlock.dagger.wrapper.TestPackageManagerWrapperModule;
 
 public class TestPadLock extends Application implements IPadLock<TestPadLockComponent> {
 
@@ -40,10 +37,12 @@ public class TestPadLock extends Application implements IPadLock<TestPadLockComp
 
   @Override public void onCreate() {
     super.onCreate();
-    component = DaggerTestPadLockComponent.builder()
-        .testPackageManagerWrapperModule(new TestPackageManagerWrapperModule())
-        .testPadLockModule(new TestPadLockModule(getApplicationContext()))
-        .build();
+
+    // Can't find symbol?
+    //component = DaggerTestPadLockComponent.builder()
+    //    .testPackageManagerWrapperModule(new TestPackageManagerWrapperModule())
+    //    .testPadLockModule(new TestPadLockModule(getApplicationContext()))
+    //    .build();
   }
 
   @NonNull @Override public TestPadLockComponent provideComponent() {

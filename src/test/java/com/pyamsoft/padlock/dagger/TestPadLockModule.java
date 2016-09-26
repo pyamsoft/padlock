@@ -39,11 +39,11 @@ import rx.schedulers.Schedulers;
     return appContext;
   }
 
-  @Named("computation") @Provides Scheduler provideIOScheduler() {
-    return Schedulers.computation();
+  @Named("sub") @Provides Scheduler provideIOScheduler() {
+    return Schedulers.immediate();
   }
 
-  @Named("main") @Provides Scheduler provideMainThreadScheduler() {
+  @Named("obs") @Provides Scheduler provideMainThreadScheduler() {
     return Schedulers.immediate();
   }
 

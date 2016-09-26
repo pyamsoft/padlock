@@ -31,29 +31,29 @@ import rx.Scheduler;
 
   @ActivityScope @Provides
   AppIconLoaderPresenter<LockScreen> provideLockScreenAppIconLoaderPresenter(
-      final AppIconLoaderInteractor interactor, @Named("main") Scheduler mainScheduler,
-      @Named("computation") Scheduler ioScheduler) {
-    return new AppIconLoaderPresenterImpl<>(interactor, mainScheduler, ioScheduler);
+      final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
+    return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
   }
 
   @ActivityScope @Provides
   AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> provideLockInfoViewAppIconLoaderPresenter(
-      final AppIconLoaderInteractor interactor, @Named("main") Scheduler mainScheduler,
-      @Named("computation") Scheduler ioScheduler) {
-    return new AppIconLoaderPresenterImpl<>(interactor, mainScheduler, ioScheduler);
+      final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
+    return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
   }
 
   @ActivityScope @Provides AppIconLoaderPresenter<PinScreen> providePinScreenAppIconLoaderPresenter(
-      final AppIconLoaderInteractor interactor, @Named("main") Scheduler mainScheduler,
-      @Named("computation") Scheduler ioScheduler) {
-    return new AppIconLoaderPresenterImpl<>(interactor, mainScheduler, ioScheduler);
+      final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
+    return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
   }
 
   @ActivityScope @Provides
   AppIconLoaderPresenter<LockListItem.ViewHolder> provideViewHolderAppIconLoaderPresenter(
-      final AppIconLoaderInteractor interactor, @Named("main") Scheduler mainScheduler,
-      @Named("computation") Scheduler ioScheduler) {
-    return new AppIconLoaderPresenterImpl<>(interactor, mainScheduler, ioScheduler);
+      final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
+    return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
   }
 
   @ActivityScope @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(

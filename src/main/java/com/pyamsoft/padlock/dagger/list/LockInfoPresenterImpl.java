@@ -49,9 +49,9 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
 
   @Inject LockInfoPresenterImpl(@NonNull AppIconLoaderPresenter<LockInfoView> iconLoader,
       final @NonNull LockInfoInteractor lockInfoInteractor,
-      final @NonNull @Named("main") Scheduler mainScheduler,
-      final @NonNull @Named("io") Scheduler ioScheduler) {
-    super(mainScheduler, ioScheduler);
+      final @NonNull @Named("obs") Scheduler obsScheduler,
+      final @NonNull @Named("io") Scheduler subScheduler) {
+    super(obsScheduler, subScheduler);
     this.iconLoader = iconLoader;
     this.lockInfoInteractor = lockInfoInteractor;
   }
