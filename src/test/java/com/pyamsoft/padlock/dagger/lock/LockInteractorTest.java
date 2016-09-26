@@ -42,6 +42,7 @@ public class LockInteractorTest {
 
   /**
    * Test that the same string encoded twice produces the same result
+   *
    * @throws Exception
    */
   @Test public void testEncodeIndentity() throws Exception {
@@ -52,6 +53,7 @@ public class LockInteractorTest {
 
   /**
    * Test that two different strings produces different results
+   *
    * @throws Exception
    */
   @Test public void testEncodeCorrectness() throws Exception {

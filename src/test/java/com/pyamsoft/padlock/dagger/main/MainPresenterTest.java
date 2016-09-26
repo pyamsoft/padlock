@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import com.pyamsoft.padlock.BuildConfig;
-import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.TestPadLock;
 import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.padlock.bus.MainBus;

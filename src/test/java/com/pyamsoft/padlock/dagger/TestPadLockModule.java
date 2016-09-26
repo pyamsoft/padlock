@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.dagger;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import com.birbit.android.jobqueue.JobManager;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
 import dagger.Module;
