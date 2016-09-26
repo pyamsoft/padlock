@@ -30,7 +30,7 @@ import rx.Scheduler;
 
   @ActivityScope @Provides PinEntryPresenter providePinEntryPresenter(PinEntryInteractor interactor,
       @NonNull AppIconLoaderPresenter<PinScreen> iconLoader, @Named("main") Scheduler mainScheduler,
-      @Named("io") Scheduler ioScheduler) {
+      @Named("computation") Scheduler ioScheduler) {
     return new PinEntryPresenterImpl(iconLoader, interactor, mainScheduler, ioScheduler);
   }
 

@@ -34,7 +34,7 @@ import rx.Scheduler;
 
   @ActivityScope @Provides LockScreenPresenter provideLockScreenPresenter(
       @NonNull AppIconLoaderPresenter<LockScreen> iconLoader, final LockScreenInteractor interactor,
-      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+      @Named("main") Scheduler mainScheduler, @Named("computation") Scheduler ioScheduler) {
     return new LockScreenPresenterImpl(iconLoader, interactor, mainScheduler, ioScheduler);
   }
 

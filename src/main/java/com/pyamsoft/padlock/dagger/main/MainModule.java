@@ -26,7 +26,7 @@ import rx.Scheduler;
 @Module public class MainModule {
 
   @ActivityScope @Provides MainPresenter providePinEntryPresenter(final MainInteractor interactor,
-      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+      @Named("main") Scheduler mainScheduler, @Named("computation") Scheduler ioScheduler) {
     return new MainPresenterImpl(interactor, mainScheduler, ioScheduler);
   }
 

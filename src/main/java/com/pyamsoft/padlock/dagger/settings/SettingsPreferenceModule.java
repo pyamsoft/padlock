@@ -30,7 +30,7 @@ import rx.Scheduler;
 
   @ActivityScope @Provides SettingsPreferencePresenter provideSettingsPresenter(
       final @NonNull SettingsPreferenceInteractor interactor,
-      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+      @Named("main") Scheduler mainScheduler, @Named("computation") Scheduler ioScheduler) {
     return new SettingsPreferencePresenterImpl(interactor, mainScheduler, ioScheduler);
   }
 

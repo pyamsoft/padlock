@@ -32,7 +32,7 @@ import rx.Scheduler;
   @ActivityScope @Provides LockInfoPresenter provideLockInfoPresenter(
       @NonNull AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> iconLoader,
       LockInfoInteractor infoInteractor, @Named("main") Scheduler mainScheduler,
-      @Named("io") Scheduler ioScheduler) {
+      @Named("computation") Scheduler ioScheduler) {
     return new LockInfoPresenterImpl(iconLoader, infoInteractor, mainScheduler, ioScheduler);
   }
 
