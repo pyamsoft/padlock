@@ -428,7 +428,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
       } else if (menuIgnoreSixty.isChecked()) {
         index = 8;
       } else {
-        throw new RuntimeException("Invalid index for option selection");
+        index = 0;
       }
     } catch (NullPointerException e) {
       Timber.e(e, "NULL menu item");
