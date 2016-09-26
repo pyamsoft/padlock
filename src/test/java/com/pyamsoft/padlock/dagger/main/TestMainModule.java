@@ -32,13 +32,13 @@ import rx.Scheduler;
 
   @Named("agree") @Provides MainPresenterImpl provideMainPresenterAgree(
       @Named("agree") MainInteractor interactor, @Named("main") Scheduler mainScheduler,
-      @Named("io") Scheduler ioScheduler) {
+      @Named("computation") Scheduler ioScheduler) {
     return new MainPresenterImpl(interactor, mainScheduler, ioScheduler);
   }
 
   @Named("not_agree") @Provides MainPresenterImpl provideMainPresenterNotAgree(
       @Named("not_agree") MainInteractor interactor, @Named("main") Scheduler mainScheduler,
-      @Named("io") Scheduler ioScheduler) {
+      @Named("computation") Scheduler ioScheduler) {
     return new MainPresenterImpl(interactor, mainScheduler, ioScheduler);
   }
 

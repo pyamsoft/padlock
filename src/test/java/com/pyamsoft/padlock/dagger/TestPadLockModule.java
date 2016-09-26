@@ -40,8 +40,8 @@ import rx.schedulers.Schedulers;
     return appContext;
   }
 
-  @Named("io") @Provides Scheduler provideIOScheduler() {
-    return Schedulers.immediate();
+  @Named("computation") @Provides Scheduler provideIOScheduler() {
+    return Schedulers.computation();
   }
 
   @Named("main") @Provides Scheduler provideMainThreadScheduler() {

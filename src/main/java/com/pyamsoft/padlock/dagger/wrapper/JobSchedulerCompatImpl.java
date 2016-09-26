@@ -43,7 +43,8 @@ class JobSchedulerCompatImpl implements JobSchedulerCompat {
     jobManager = createJobManager(context.getApplicationContext());
   }
 
-  @VisibleForTesting @CheckResult @NonNull JobManager createJobManager(@NonNull Context context) {
+  @SuppressWarnings("WeakerAccess") @VisibleForTesting @CheckResult @NonNull
+  JobManager createJobManager(@NonNull Context context) {
     final Configuration.Builder builder =
         new Configuration.Builder(context.getApplicationContext());
 

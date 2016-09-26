@@ -31,7 +31,7 @@ import rx.Scheduler;
 
   @ActivityScope @Provides LockServicePresenter provideLockServicePresenter(
       LockServiceInteractor interactor, LockServiceStateInteractor stateInteractor,
-      @Named("main") Scheduler mainScheduler, @Named("io") Scheduler ioScheduler) {
+      @Named("main") Scheduler mainScheduler, @Named("computation") Scheduler ioScheduler) {
     return new LockServicePresenterImpl(stateInteractor, interactor, mainScheduler, ioScheduler);
   }
 
