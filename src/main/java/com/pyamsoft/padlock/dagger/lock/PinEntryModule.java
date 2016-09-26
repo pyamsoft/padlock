@@ -29,9 +29,9 @@ import rx.Scheduler;
 @Module public class PinEntryModule {
 
   @ActivityScope @Provides PinEntryPresenter providePinEntryPresenter(PinEntryInteractor interactor,
-      @NonNull AppIconLoaderPresenter<PinScreen> iconLoader, @Named("main") Scheduler mainScheduler,
-      @Named("computation") Scheduler ioScheduler) {
-    return new PinEntryPresenterImpl(iconLoader, interactor, mainScheduler, ioScheduler);
+      @NonNull AppIconLoaderPresenter<PinScreen> iconLoader, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
+    return new PinEntryPresenterImpl(iconLoader, interactor, obsScheduler, subScheduler);
   }
 
   @ActivityScope @Provides PinEntryInteractor providePinEntryInteractor(

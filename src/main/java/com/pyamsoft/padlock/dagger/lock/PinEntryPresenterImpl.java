@@ -36,9 +36,9 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
   @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
 
   @Inject PinEntryPresenterImpl(@NonNull AppIconLoaderPresenter<PinScreen> iconLoader,
-      @NonNull final PinEntryInteractor interactor, @NonNull @Named("main") Scheduler mainScheduler,
-      @NonNull @Named("io") Scheduler ioScheduler) {
-    super(mainScheduler, ioScheduler);
+      @NonNull final PinEntryInteractor interactor, @NonNull @Named("obs") Scheduler obsScheduler,
+      @NonNull @Named("io") Scheduler subScheduler) {
+    super(obsScheduler, subScheduler);
     this.iconLoader = iconLoader;
     this.interactor = interactor;
   }

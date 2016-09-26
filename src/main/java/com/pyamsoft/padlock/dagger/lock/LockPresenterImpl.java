@@ -25,8 +25,8 @@ import rx.Scheduler;
 abstract class LockPresenterImpl<I extends LockPresenter.LockView> extends SchedulerPresenter<I>
     implements LockPresenter<I> {
 
-  LockPresenterImpl(@NonNull @Named("main") Scheduler mainScheduler,
-      @NonNull @Named("io") Scheduler ioScheduler) {
-    super(mainScheduler, ioScheduler);
+  LockPresenterImpl(@NonNull @Named("obs") Scheduler obsScheduler,
+      @NonNull @Named("io") Scheduler subScheduler) {
+    super(obsScheduler, subScheduler);
   }
 }

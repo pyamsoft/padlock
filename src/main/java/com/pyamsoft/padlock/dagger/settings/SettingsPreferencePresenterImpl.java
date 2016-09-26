@@ -39,9 +39,9 @@ class SettingsPreferencePresenterImpl
   @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
 
   @Inject SettingsPreferencePresenterImpl(@NonNull SettingsPreferenceInteractor interactor,
-      @NonNull @Named("io") Scheduler ioScheduler,
-      @NonNull @Named("main") Scheduler mainScheduler) {
-    super(mainScheduler, ioScheduler);
+      @NonNull @Named("io") Scheduler subScheduler,
+      @NonNull @Named("obs") Scheduler obsScheduler) {
+    super(obsScheduler, subScheduler);
     this.interactor = interactor;
   }
 

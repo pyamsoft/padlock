@@ -39,9 +39,9 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
   @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
 
   @Inject MainPresenterImpl(@NonNull final MainInteractor interactor,
-      @NonNull @Named("main") Scheduler mainScheduler,
-      @NonNull @Named("io") Scheduler ioScheduler) {
-    super(mainScheduler, ioScheduler);
+      @NonNull @Named("obs") Scheduler obsScheduler,
+      @NonNull @Named("io") Scheduler subScheduler) {
+    super(obsScheduler, subScheduler);
     this.interactor = interactor;
   }
 
