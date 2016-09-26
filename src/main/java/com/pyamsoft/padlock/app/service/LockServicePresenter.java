@@ -22,6 +22,13 @@ import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface LockServicePresenter extends Presenter<LockServicePresenter.LockService> {
 
+  void setLockScreenPassed();
+
+  void getActiveNames(@NonNull String packageName, @NonNull String className);
+
+  void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
+      @NonNull Recheck forcedRecheck, @NonNull MultiLock multiLock);
+
   enum Recheck {
     FORCE, NOT_FORCE
   }
@@ -30,13 +37,6 @@ public interface LockServicePresenter extends Presenter<LockServicePresenter.Loc
     ENABLED,
     DISABLED
   }
-
-  void setLockScreenPassed();
-
-  void getActiveNames(@NonNull String packageName, @NonNull String className);
-
-  void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
-      @NonNull Recheck forcedRecheck, @NonNull MultiLock multiLock);
 
   interface LockService {
 

@@ -56,8 +56,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
   @NonNull private static final String KEY_PIN_DIALOG = "key_pin_dialog";
-  @NonNull private final AsyncDrawable.Mapper
-      taskMap = new AsyncDrawable.Mapper();
+  @NonNull private final AsyncDrawable.Mapper taskMap = new AsyncDrawable.Mapper();
   @BindView(R.id.pin_entry_toolbar) TextView toolbar;
   @BindView(R.id.pin_entry_close) ImageView close;
   @BindView(R.id.pin_image) ImageView image;
