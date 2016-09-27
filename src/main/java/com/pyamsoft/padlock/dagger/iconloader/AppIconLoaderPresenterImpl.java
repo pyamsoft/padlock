@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.dagger.iconloader;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -34,8 +34,7 @@ class AppIconLoaderPresenterImpl<I extends AppIconLoaderView> extends SchedulerP
   @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
 
   @Inject AppIconLoaderPresenterImpl(@NonNull AppIconLoaderInteractor interactor,
-      @NonNull @Named("obs") Scheduler obsScheduler,
-      @NonNull @Named("io") Scheduler subScheduler) {
+      @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
   }

@@ -20,7 +20,6 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.app.lock.PinScreen;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -28,14 +27,13 @@ import rx.Scheduler;
 
 @Module public class PinEntryModule {
 
-  @ActivityScope @Provides PinEntryPresenter providePinEntryPresenter(PinEntryInteractor interactor,
+  @Provides PinEntryPresenter providePinEntryPresenter(PinEntryInteractor interactor,
       @NonNull AppIconLoaderPresenter<PinScreen> iconLoader, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
     return new PinEntryPresenterImpl(iconLoader, interactor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides PinEntryInteractor providePinEntryInteractor(
-      final PinEntryInteractorImpl interactor) {
+  @Provides PinEntryInteractor providePinEntryInteractor(final PinEntryInteractorImpl interactor) {
     return interactor;
   }
 }

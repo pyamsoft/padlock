@@ -20,7 +20,6 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
 import com.pyamsoft.padlock.dagger.PadLockDB;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -28,14 +27,14 @@ import rx.Scheduler;
 
 @Module public class SettingsPreferenceModule {
 
-  @ActivityScope @Provides SettingsPreferencePresenter provideSettingsPresenter(
-      final @NonNull SettingsPreferenceInteractor interactor,
-      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
+  @Provides SettingsPreferencePresenter provideSettingsPresenter(
+      final @NonNull SettingsPreferenceInteractor interactor, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
     return new SettingsPreferencePresenterImpl(interactor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides SettingsPreferenceInteractor provideSettingsInteractor(
-      PadLockDB padLockDB, PadLockPreferences preferences) {
+  @Provides SettingsPreferenceInteractor provideSettingsInteractor(PadLockDB padLockDB,
+      PadLockPreferences preferences) {
     return new SettingsPrefrenceInteractorImpl(padLockDB, preferences);
   }
 }

@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -30,13 +29,13 @@ import rx.Scheduler;
 
 @Module public class LockListModule {
 
-  @ActivityScope @Provides LockListPresenter provideLockScreenPresenter(
-      @NonNull LockListInteractor interactor, @NonNull LockServiceStateInteractor stateInteractor,
-      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
+  @Provides LockListPresenter provideLockScreenPresenter(@NonNull LockListInteractor interactor,
+      @NonNull LockServiceStateInteractor stateInteractor, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
     return new LockListPresenterImpl(interactor, stateInteractor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides LockListInteractor provideLockScreenInteractor(PadLockDB padLockDB,
+  @Provides LockListInteractor provideLockScreenInteractor(PadLockDB padLockDB,
       PackageManagerWrapper packageManagerWrapper, PadLockPreferences preferences) {
     return new LockListInteractorImpl(padLockDB, packageManagerWrapper, preferences);
   }

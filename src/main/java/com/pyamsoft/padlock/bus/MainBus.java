@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.bus;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
-import com.pyamsoft.pydroid.bus.RxBus;
+import com.pyamsoft.pydroidrx.RxBus;
 
 public class MainBus extends RxBus<RefreshEvent> {
 

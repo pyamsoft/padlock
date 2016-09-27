@@ -42,11 +42,12 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.AsyncDrawable;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.widget.DividerItemDecoration;
-import rx.Subscription;
+import com.pyamsoft.pydroidrx.RXLoader;
 import timber.log.Timber;
 
 public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.LockInfoView {
@@ -190,8 +191,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
       }
     });
 
-    final Subscription task =
-        AsyncDrawable.with(getContext()).load(R.drawable.ic_close_24dp).into(close);
+    final AsyncMap.Entry task =
+        AsyncDrawable.with(getContext()).load(R.drawable.ic_close_24dp, new RXLoader()).into(close);
     taskMap.put("close", task);
 
     name.setText(appName);

@@ -24,7 +24,6 @@ import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -32,16 +31,15 @@ import rx.Scheduler;
 
 @Module public class LockScreenModule {
 
-  @ActivityScope @Provides LockScreenPresenter provideLockScreenPresenter(
+  @Provides LockScreenPresenter provideLockScreenPresenter(
       @NonNull AppIconLoaderPresenter<LockScreen> iconLoader, final LockScreenInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
     return new LockScreenPresenterImpl(iconLoader, interactor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides LockScreenInteractor provideLockScreenInteractor(
-      PadLockPreferences preference, JobSchedulerCompat jobSchedulerCompat,
-      MasterPinInteractor masterPinInteractor, PackageManagerWrapper packageManagerWrapper,
-      PadLockDB padLockDB) {
+  @Provides LockScreenInteractor provideLockScreenInteractor(PadLockPreferences preference,
+      JobSchedulerCompat jobSchedulerCompat, MasterPinInteractor masterPinInteractor,
+      PackageManagerWrapper packageManagerWrapper, PadLockDB padLockDB) {
     return new LockScreenInteractorImpl(preference, jobSchedulerCompat, masterPinInteractor,
         packageManagerWrapper, padLockDB);
   }

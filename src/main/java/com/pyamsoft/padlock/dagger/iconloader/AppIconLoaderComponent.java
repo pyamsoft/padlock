@@ -17,11 +17,9 @@
 package com.pyamsoft.padlock.dagger.iconloader;
 
 import com.pyamsoft.padlock.app.list.LockListItem;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Subcomponent;
 
-@ActivityScope @Subcomponent(modules = AppIconLoaderModule.class)
-public interface AppIconLoaderComponent {
+@Subcomponent(modules = AppIconLoaderModule.class) public interface AppIconLoaderComponent {
 
   void inject(LockListItem.ViewHolder holder);
 }

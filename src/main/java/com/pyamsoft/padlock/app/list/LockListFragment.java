@@ -48,11 +48,12 @@ import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
+import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.AsyncDrawable;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.widget.DividerItemDecoration;
-import rx.Subscription;
+import com.pyamsoft.pydroidrx.RXLoader;
 import timber.log.Timber;
 
 public class LockListFragment extends ActionBarFragment
@@ -362,14 +363,16 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void setFABStateEnabled() {
-    final Subscription fabIconTask =
-        AsyncDrawable.with(getContext()).load(R.drawable.ic_lock_outline_24dp).into(fab);
+    final AsyncMap.Entry fabIconTask = AsyncDrawable.with(getContext())
+        .load(R.drawable.ic_lock_outline_24dp, new RXLoader())
+        .into(fab);
     taskMap.put("fab", fabIconTask);
   }
 
   @Override public void setFABStateDisabled() {
-    final Subscription fabIconTask =
-        AsyncDrawable.with(getContext()).load(R.drawable.ic_lock_open_24dp).into(fab);
+    final AsyncMap.Entry fabIconTask = AsyncDrawable.with(getContext())
+        .load(R.drawable.ic_lock_open_24dp, new RXLoader())
+        .into(fab);
     taskMap.put("fab", fabIconTask);
   }
 

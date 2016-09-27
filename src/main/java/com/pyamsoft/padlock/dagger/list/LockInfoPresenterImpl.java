@@ -26,7 +26,7 @@ import com.pyamsoft.padlock.bus.LockInfoSelectBus;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -40,7 +40,7 @@ import timber.log.Timber;
 class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInfoView>
     implements LockInfoPresenter {
 
-  @NonNull final AppIconLoaderPresenter<LockInfoView> iconLoader;
+  @SuppressWarnings("WeakerAccess") @NonNull final AppIconLoaderPresenter<LockInfoView> iconLoader;
   @NonNull private final LockInfoInteractor lockInfoInteractor;
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription allInDBSubscription = Subscriptions.empty();

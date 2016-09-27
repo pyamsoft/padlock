@@ -21,7 +21,7 @@ import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.padlock.bus.AgreeTermsBus;
 import com.pyamsoft.padlock.bus.MainBus;
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -39,8 +39,7 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
   @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
 
   @Inject MainPresenterImpl(@NonNull final MainInteractor interactor,
-      @NonNull @Named("obs") Scheduler obsScheduler,
-      @NonNull @Named("io") Scheduler subScheduler) {
+      @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
   }
@@ -58,7 +57,7 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     unsubscribeAgreeTerms();
   }
 
-  void unregisterFromRefreshBus() {
+  @SuppressWarnings("WeakerAccess") void unregisterFromRefreshBus() {
     if (!refreshBus.isUnsubscribed()) {
       refreshBus.unsubscribe();
     }

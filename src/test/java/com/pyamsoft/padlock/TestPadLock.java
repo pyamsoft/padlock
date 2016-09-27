@@ -21,14 +21,16 @@ import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.TestPadLockComponent;
+import com.pyamsoft.pydroid.IPYDroidApp;
 
-public class TestPadLock extends Application implements IPadLock<TestPadLockComponent> {
+public class TestPadLock extends Application implements IPYDroidApp<TestPadLockComponent> {
 
   private TestPadLockComponent component;
 
-  @NonNull @CheckResult public static IPadLock<TestPadLockComponent> get(@NonNull Context context) {
+  @NonNull @CheckResult
+  public static IPYDroidApp<TestPadLockComponent> get(@NonNull Context context) {
     final Context appContext = context.getApplicationContext();
-    if (appContext instanceof IPadLock) {
+    if (appContext instanceof TestPadLock) {
       return TestPadLock.class.cast(appContext);
     } else {
       throw new ClassCastException("Cannot cast Application Context to IPadLock");
