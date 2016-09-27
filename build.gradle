@@ -126,6 +126,7 @@ dependencies {
   annotationProcessor"com.jakewharton:butterknife-compiler:$butterknife"
 
   // Dagger
+  compile"com.google.dagger:dagger:$dagger"
   annotationProcessor"com.google.dagger:dagger-compiler:$dagger"
 
   // Android Framework Testing
@@ -146,9 +147,9 @@ dependencies {
   // Mockito for unit tests
   testCompile "org.mockito:mockito-core:$mockito"
 
-  // PYDroid 4.4.2
-  debugCompile project(path: ":PYDroid", configuration: "debug")
-  releaseCompile project(path: ":PYDroid", configuration: "release")
+  // PYDroid 4.5.0
+  debugCompile project(path: ":PYDroidRX", configuration: "debug")
+  releaseCompile project(path: ":PYDroidRX", configuration: "release")
 }
 
 // AdView

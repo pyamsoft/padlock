@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -29,15 +28,15 @@ import rx.Scheduler;
 
 @Module public class LockServiceModule {
 
-  @ActivityScope @Provides LockServicePresenter provideLockServicePresenter(
-      LockServiceInteractor interactor, LockServiceStateInteractor stateInteractor,
-      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
+  @Provides LockServicePresenter provideLockServicePresenter(LockServiceInteractor interactor,
+      LockServiceStateInteractor stateInteractor, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
     return new LockServicePresenterImpl(stateInteractor, interactor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides LockServiceInteractor provideLockServiceInteractor(
-      PadLockPreferences preference, JobSchedulerCompat jobManager,
-      PackageManagerWrapper packageManagerWrapper, PadLockDB padLockDB) {
+  @Provides LockServiceInteractor provideLockServiceInteractor(PadLockPreferences preference,
+      JobSchedulerCompat jobManager, PackageManagerWrapper packageManagerWrapper,
+      PadLockDB padLockDB) {
     return new LockServiceInteractorImpl(preference, jobManager, packageManagerWrapper, padLockDB);
   }
 }

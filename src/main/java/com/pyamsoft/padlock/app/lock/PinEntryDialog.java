@@ -43,9 +43,10 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AsyncDrawable;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import rx.Subscription;
+import com.pyamsoft.pydroidrx.RXLoader;
 import timber.log.Timber;
 
 public class PinEntryDialog extends DialogFragment implements PinScreen {
@@ -151,8 +152,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
       dismiss();
     });
 
-    final Subscription task = AsyncDrawable.with(getContext())
-        .load(R.drawable.ic_close_24dp)
+    final AsyncMap.Entry task = AsyncDrawable.with(getContext())
+        .load(R.drawable.ic_close_24dp, new RXLoader())
         .tint(android.R.color.black)
         .into(close);
     taskMap.put("close", task);
@@ -200,8 +201,9 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     // Force keyboard focus
     pinEntryText.requestFocus();
 
-    final Subscription task =
-        AsyncDrawable.with(getContext()).load(R.drawable.ic_arrow_forward_24dp).into(go);
+    final AsyncMap.Entry task = AsyncDrawable.with(getContext())
+        .load(R.drawable.ic_arrow_forward_24dp, new RXLoader())
+        .into(go);
     taskMap.put("arrow", task);
   }
 

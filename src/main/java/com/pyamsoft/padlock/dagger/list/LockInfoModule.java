@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -29,14 +28,14 @@ import rx.Scheduler;
 
 @Module public class LockInfoModule {
 
-  @ActivityScope @Provides LockInfoPresenter provideLockInfoPresenter(
+  @Provides LockInfoPresenter provideLockInfoPresenter(
       @NonNull AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> iconLoader,
       LockInfoInteractor infoInteractor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
     return new LockInfoPresenterImpl(iconLoader, infoInteractor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides LockInfoInteractor provideLockInfoInteractor(PadLockDB padLockDB,
+  @Provides LockInfoInteractor provideLockInfoInteractor(PadLockDB padLockDB,
       PackageManagerWrapper packageManagerWrapper) {
     return new LockInfoInteractorImpl(padLockDB, packageManagerWrapper);
   }

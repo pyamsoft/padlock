@@ -46,11 +46,12 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.ErrorDialog;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.activity.ActivityBase;
+import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.AsyncDrawable;
 import com.pyamsoft.pydroid.util.PersistentCache;
+import com.pyamsoft.pydroidrx.RXLoader;
 import java.util.Locale;
-import rx.Subscription;
 import timber.log.Timber;
 
 public abstract class LockScreenActivity extends ActivityBase implements LockScreen {
@@ -189,8 +190,9 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
       }
     });
 
-    final Subscription arrowGoTask =
-        AsyncDrawable.with(this).load(R.drawable.ic_arrow_forward_24dp).into(imageGo);
+    final AsyncMap.Entry arrowGoTask = AsyncDrawable.with(this)
+        .load(R.drawable.ic_arrow_forward_24dp, new RXLoader())
+        .into(imageGo);
     taskMap.put("arrow", arrowGoTask);
 
     clearDisplay();

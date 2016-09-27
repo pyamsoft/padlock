@@ -24,16 +24,17 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockModule;
+import com.pyamsoft.pydroid.IPYDroidApp;
 import com.pyamsoft.pydroid.PYDroidApplication;
 import com.pyamsoft.pydroid.about.Licenses;
 
-public class PadLock extends PYDroidApplication implements IPadLock<PadLockComponent> {
+public class PadLock extends PYDroidApplication implements IPYDroidApp<PadLockComponent> {
 
   private PadLockComponent component;
 
-  @NonNull @CheckResult public static IPadLock<PadLockComponent> get(@NonNull Context context) {
+  @NonNull @CheckResult public static IPYDroidApp<PadLockComponent> get(@NonNull Context context) {
     final Context appContext = context.getApplicationContext();
-    if (appContext instanceof IPadLock) {
+    if (appContext instanceof PadLock) {
       return PadLock.class.cast(appContext);
     } else {
       throw new ClassCastException("Cannot cast Application Context to IPadLock");

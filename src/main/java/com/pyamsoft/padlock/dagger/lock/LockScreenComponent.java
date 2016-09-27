@@ -18,10 +18,9 @@ package com.pyamsoft.padlock.dagger.lock;
 
 import com.pyamsoft.padlock.app.lock.LockScreenPresenterLoader;
 import com.pyamsoft.padlock.dagger.iconloader.AppIconLoaderModule;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Subcomponent;
 
-@ActivityScope @Subcomponent(modules = {
+@Subcomponent(modules = {
     LockScreenModule.class, MasterPinModule.class, AppIconLoaderModule.class
 }) public interface LockScreenComponent {
 

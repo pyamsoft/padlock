@@ -20,7 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
 import com.pyamsoft.padlock.bus.ConfirmDialogBus;
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -39,8 +39,7 @@ class SettingsPreferencePresenterImpl
   @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
 
   @Inject SettingsPreferencePresenterImpl(@NonNull SettingsPreferenceInteractor interactor,
-      @NonNull @Named("io") Scheduler subScheduler,
-      @NonNull @Named("obs") Scheduler obsScheduler) {
+      @NonNull @Named("io") Scheduler subScheduler, @NonNull @Named("obs") Scheduler obsScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
   }

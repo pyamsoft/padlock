@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import com.pyamsoft.padlock.app.main.MainPresenter;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -25,13 +24,12 @@ import rx.Scheduler;
 
 @Module public class MainModule {
 
-  @ActivityScope @Provides MainPresenter providePinEntryPresenter(final MainInteractor interactor,
+  @Provides MainPresenter providePinEntryPresenter(final MainInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
     return new MainPresenterImpl(interactor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides MainInteractor providePinEntryInteractor(
-      final MainInteractorImpl interactor) {
+  @Provides MainInteractor providePinEntryInteractor(final MainInteractorImpl interactor) {
     return interactor;
   }
 }

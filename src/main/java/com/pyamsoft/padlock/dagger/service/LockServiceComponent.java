@@ -18,10 +18,9 @@ package com.pyamsoft.padlock.dagger.service;
 
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.lock.MasterPinModule;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Subcomponent;
 
-@ActivityScope @Subcomponent(modules = {
+@Subcomponent(modules = {
     LockServiceModule.class, MasterPinModule.class, LockServiceStateModule.class
 }) public interface LockServiceComponent {
 

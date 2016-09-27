@@ -42,8 +42,7 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
 
   @Inject LockScreenPresenterImpl(@NonNull AppIconLoaderPresenter<LockScreen> iconLoader,
       @NonNull final LockScreenInteractor lockScreenInteractor,
-      @NonNull @Named("obs") Scheduler obsScheduler,
-      @NonNull @Named("io") Scheduler subScheduler) {
+      @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.iconLoader = iconLoader;
     this.interactor = lockScreenInteractor;

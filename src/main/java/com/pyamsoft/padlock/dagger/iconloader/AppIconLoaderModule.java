@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.app.list.LockListItem;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.PinScreen;
-import com.pyamsoft.pydroid.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -29,34 +28,32 @@ import rx.Scheduler;
 
 @Module public class AppIconLoaderModule {
 
-  @ActivityScope @Provides
-  AppIconLoaderPresenter<LockScreen> provideLockScreenAppIconLoaderPresenter(
+  @Provides AppIconLoaderPresenter<LockScreen> provideLockScreenAppIconLoaderPresenter(
       final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
     return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides
+  @Provides
   AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> provideLockInfoViewAppIconLoaderPresenter(
       final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
     return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides AppIconLoaderPresenter<PinScreen> providePinScreenAppIconLoaderPresenter(
+  @Provides AppIconLoaderPresenter<PinScreen> providePinScreenAppIconLoaderPresenter(
       final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
     return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides
-  AppIconLoaderPresenter<LockListItem.ViewHolder> provideViewHolderAppIconLoaderPresenter(
+  @Provides AppIconLoaderPresenter<LockListItem.ViewHolder> provideViewHolderAppIconLoaderPresenter(
       final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
     return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(
+  @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(
       final AppIconLoaderInteractorImpl interactor) {
     return interactor;
   }
