@@ -101,6 +101,7 @@ public class LockListFragment extends ActionBarFragment
   private MenuItem displayZeroActivityItem;
   private long loadedPresenterKey;
   private long loadedAdapterKey;
+  private TapTargetSequence sequence;
 
   @CheckResult @NonNull public static LockListFragment newInstance(boolean forceRefresh) {
     final LockListFragment fragment = new LockListFragment();
@@ -299,9 +300,8 @@ public class LockListFragment extends ActionBarFragment
     if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
       final FragmentActivity fragmentActivity = getActivity();
       if (fragmentActivity instanceof MainActivity) {
-        final MainActivity mainActivity = (MainActivity) fragmentActivity;
         final View containerView = getView();
-        final View menuItemView = mainActivity.getSettingsMenuItemView();
+        final View menuItemView = getSettingsMenuItemView();
         if (containerView != null) {
           fragmentManager.beginTransaction()
               .replace(R.id.main_view_container,
@@ -310,6 +310,16 @@ public class LockListFragment extends ActionBarFragment
               .commit();
         }
       }
+    }
+  }
+
+  @CheckResult @NonNull View getSettingsMenuItemView() {
+    final FragmentActivity fragmentActivity = getActivity();
+    if (fragmentActivity instanceof MainActivity) {
+      final MainActivity mainActivity = (MainActivity) fragmentActivity;
+      return mainActivity.getSettingsMenuItemView();
+    } else {
+      throw new ClassCastException("Activity is not MainActivity");
     }
   }
 
@@ -434,35 +444,39 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
+    final TapTarget fabTarget = TapTarget.forView(fab, getString(R.string.getting_started),
+        getString(R.string.getting_started_desc)).cancelable(false).tintTarget(false);
+
     // If we use the first item we get a weird location, try a different item
     final View listTargetView = recyclerView.findViewHolderForAdapterPosition(1).itemView;
-
-    final TapTarget fabTarget = TapTarget.forView(fab, getString(R.string.getting_started),
-        getString(R.string.getting_started_desc))
-        .drawShadow(true)
-        .tintTarget(false)
-        .cancelable(false);
-
     final TapTarget listTarget =
-        TapTarget.forView(listTargetView, getString(R.string.getting_started),
-            getString(R.string.getting_started_desc))
-            .drawShadow(true)
-            .tintTarget(false)
-            .cancelable(false);
+        TapTarget.forView(listTargetView, "Look here", "Wowie").cancelable(false);
 
-    new TapTargetSequence(getActivity()).targets(fabTarget, listTarget)
-        .listener(new TapTargetSequence.Listener() {
-          @Override public void onSequenceFinish() {
-            if (presenter != null) {
-              presenter.setOnBoard();
+    final TapTarget settingsTarget =
+        TapTarget.forView(getSettingsMenuItemView(), "Options", "Do things")
+            .cancelable(false)
+            .dimColor(android.R.color.white)
+            .outerCircleColor(R.color.blue500)
+            .targetCircleColor(android.R.color.white)
+            .textColor(android.R.color.white);
+
+    // Hold a ref to the sequence or Activity will recycle bitmaps and crash
+    if (sequence == null) {
+      sequence = new TapTargetSequence(getActivity()).targets(fabTarget, listTarget, settingsTarget)
+          .listener(new TapTargetSequence.Listener() {
+            @Override public void onSequenceFinish() {
+              if (presenter != null) {
+                presenter.setOnBoard();
+              }
             }
-          }
 
-          @Override public void onSequenceCanceled() {
+            @Override public void onSequenceCanceled() {
 
-          }
-        })
-        .start();
+            }
+          });
+    }
+
+    sequence.start();
   }
 
   @Override public void onListCleared() {
