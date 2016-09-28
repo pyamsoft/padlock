@@ -32,7 +32,7 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
   @NonNull private static final String MASTER_PASSWORD = "master_password";
   @NonNull private static final String HINT = "hint";
   @NonNull private static final String AGREED = "agreed";
-  @NonNull private static final String ONBOARD = "onboard";
+  @NonNull private static final String ONBOARD = "onboard_shown";
   @NonNull private final String ignoreTimeKey;
   @NonNull private final String ignoreTimeDefault;
   @NonNull private final String timeoutTimeKey;

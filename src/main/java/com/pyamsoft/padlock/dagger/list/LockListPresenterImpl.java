@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;
@@ -184,9 +185,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
           return appEntries;
         })
         .flatMap(Observable::from)
-        .toSortedList((appEntry, appEntry2) -> {
-          return appEntry.name().compareToIgnoreCase(appEntry2.name());
-        })
+        .toSortedList((appEntry, appEntry2) -> appEntry.name().compareToIgnoreCase(appEntry2.name()))
         .concatMap(Observable::from)
         .filter(appEntry -> appEntry != null)
         .subscribeOn(getSubscribeScheduler())
@@ -294,6 +293,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @Override public void showOnBoarding() {
     unsubscribeOnboard();
     onboardSubscription = lockListInteractor.hasShownOnBoarding()
+        .delay(1, TimeUnit.SECONDS)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboard -> getView(lockList -> {

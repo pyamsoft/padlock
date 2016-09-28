@@ -38,7 +38,8 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.getkeepsafe.taptargetview.TapTargetView;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
@@ -168,7 +169,6 @@ public class LockListFragment extends ActionBarFragment
     presenter.bindView(this);
 
     presenter.setFABStateFromPreference();
-    presenter.showOnBoarding();
     if (firstRefresh) {
       Timber.d("Do initial refresh");
       firstRefresh = false;
@@ -434,24 +434,35 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
-    new TapTargetView.Builder(getActivity()).title(R.string.getting_started)
-        .description(R.string.getting_started_desc)
+    // If we use the first item we get a weird location, try a different item
+    final View listTargetView = recyclerView.findViewHolderForAdapterPosition(1).itemView;
+
+    final TapTarget fabTarget = TapTarget.forView(fab, getString(R.string.getting_started),
+        getString(R.string.getting_started_desc))
         .drawShadow(true)
         .tintTarget(false)
-        .listener(new TapTargetView.Listener() {
-          @Override public void onTargetClick(TapTargetView view) {
-            view.dismiss(true);
+        .cancelable(false);
+
+    final TapTarget listTarget =
+        TapTarget.forView(listTargetView, getString(R.string.getting_started),
+            getString(R.string.getting_started_desc))
+            .drawShadow(true)
+            .tintTarget(false)
+            .cancelable(false);
+
+    new TapTargetSequence(getActivity()).targets(fabTarget, listTarget)
+        .listener(new TapTargetSequence.Listener() {
+          @Override public void onSequenceFinish() {
             if (presenter != null) {
               presenter.setOnBoard();
             }
           }
 
-          @Override public void onTargetLongClick(TapTargetView view) {
+          @Override public void onSequenceCanceled() {
 
           }
         })
-        .cancelable(false)
-        .showFor(fab);
+        .start();
   }
 
   @Override public void onListCleared() {
@@ -470,6 +481,8 @@ public class LockListFragment extends ActionBarFragment
 
     Timber.d("We have refreshed");
     firstRefresh = false;
+
+    presenter.showOnBoarding();
   }
 
   @Override public void refreshList() {

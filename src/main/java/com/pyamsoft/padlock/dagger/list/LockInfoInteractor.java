@@ -23,7 +23,7 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import rx.Observable;
 
-public interface LockInfoInteractor extends LockCommonInteractor {
+interface LockInfoInteractor extends LockCommonInteractor {
 
   @CheckResult @NonNull Observable<List<PadLockEntry.WithPackageName>> getActivityEntries(
       @NonNull String packageName);
