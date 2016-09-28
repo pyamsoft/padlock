@@ -56,6 +56,10 @@ android {
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
   }
 
+  dataBinding {
+    enabled true
+  }
+
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
@@ -122,9 +126,6 @@ dependencies {
   provided "com.google.auto.value:auto-value:$autoValue"
   annotationProcessor "com.google.auto.value:auto-value:$autoValue"
 
-  // Butterknife
-  annotationProcessor "com.jakewharton:butterknife-compiler:$butterknife"
-
   // Dagger
   compile "com.google.dagger:dagger:$dagger"
   annotationProcessor "com.google.dagger:dagger-compiler:$dagger"
@@ -147,7 +148,7 @@ dependencies {
   // Mockito for unit tests
   testCompile "org.mockito:mockito-core:$mockito"
 
-  // PYDroid 4.5.0
+  // PYDroid 4.6.0
   debugCompile project(path: ":PYDroidRX", configuration: "debug")
   releaseCompile project(path: ":PYDroidRX", configuration: "release")
 }

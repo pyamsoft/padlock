@@ -18,18 +18,16 @@ package com.pyamsoft.padlock.app.lock;
 
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,13 +35,10 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.ErrorDialog;
+import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.tool.AsyncMap;
@@ -69,19 +64,13 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
 
   @NonNull private final Intent home;
   @NonNull private final AsyncDrawable.Mapper taskMap;
-  @BindView(R.id.activity_lock_screen) CoordinatorLayout rootView;
-  @BindView(R.id.toolbar) Toolbar toolbar;
-  @BindView(R.id.lock_image) ImageView image;
-  @BindView(R.id.lock_text) TextInputLayout textLayout;
-  @BindView(R.id.lock_image_go) ImageView imageGo;
-  @BindView(R.id.lock_display_hint) TextView hintDisplay;
-
   @SuppressWarnings("WeakerAccess") LockScreenPresenter presenter;
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") String lockedActivityName;
   @SuppressWarnings("WeakerAccess") String lockedPackageName;
   @SuppressWarnings("WeakerAccess") String lockedCode;
   @SuppressWarnings("WeakerAccess") long lockUntilTime;
+  private ActivityLockBinding binding;
   private long ignorePeriod = -1;
   private boolean excludeEntry;
   private MenuItem menuIgnoreNone;
@@ -95,7 +84,6 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   private MenuItem menuIgnoreSixty;
   private MenuItem menuExclude;
   private EditText editText;
-  private Unbinder unbinder;
   private long[] ignoreTimes;
   private long loadedKey;
   private String lockedRealName;
@@ -111,7 +99,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
 
   @Override public void setDisplayName(@NonNull String name) {
     Timber.d("Set toolbar name %s", name);
-    toolbar.setTitle(name);
+    binding.toolbar.setTitle(name);
     final ActionBar bar = getSupportActionBar();
     if (bar != null) {
       Timber.d("Set actionbar name %s", name);
@@ -122,7 +110,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_lock);
+    binding = DataBindingUtil.setContentView(this, R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     loadedKey = PersistentCache.get()
@@ -137,8 +125,6 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
               }
             });
 
-    unbinder = ButterKnife.bind(this);
-
     final String[] stringIgnoreTimes =
         getApplicationContext().getResources().getStringArray(R.array.ignore_time_entries);
     ignoreTimes = new long[stringIgnoreTimes.length];
@@ -148,7 +134,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
 
     getValuesFromBundle();
 
-    editText = textLayout.getEditText();
+    editText = binding.lockText.getEditText();
     if (editText == null) {
       throw new NullPointerException("Edit text is NULL");
     }
@@ -175,7 +161,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
         (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
-    imageGo.setOnClickListener(view -> {
+    binding.lockImageGo.setOnClickListener(view -> {
       presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
           getCurrentAttempt());
       imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
@@ -192,20 +178,20 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
 
     final AsyncMap.Entry arrowGoTask = AsyncDrawable.with(this)
         .load(R.drawable.ic_arrow_forward_24dp, new RXLoader())
-        .into(imageGo);
+        .into(binding.lockImageGo);
     taskMap.put("arrow", arrowGoTask);
 
     clearDisplay();
 
-    setSupportActionBar(toolbar);
+    setSupportActionBar(binding.toolbar);
 
     // Hide hint to begin with
-    hintDisplay.setVisibility(View.GONE);
+    binding.lockDisplayHint.setVisibility(View.GONE);
   }
 
   @Override public void setDisplayHint(@NonNull String hint) {
     Timber.d("Settings hint");
-    hintDisplay.setText(
+    binding.lockDisplayHint.setText(
         String.format(Locale.getDefault(), "Hint: %s", hint.isEmpty() ? "NO HINT" : hint));
   }
 
@@ -262,7 +248,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     Timber.d("Clear currently locked");
     taskMap.clear();
     imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
-    unbinder.unbind();
+    binding.unbind();
   }
 
   @Override public void finish() {
@@ -272,7 +258,8 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   }
 
   private void showSnackbarWithText(String text) {
-    final Snackbar snackbar = Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT);
+    final Snackbar snackbar =
+        Snackbar.make(binding.activityLockScreen, text, Snackbar.LENGTH_SHORT);
     final int defaultSnackColor = ContextCompat.getColor(this, R.color.snackbar);
     snackbar.getView().setBackgroundColor(defaultSnackColor);
 
@@ -310,7 +297,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     Timber.e("Failed to unlock");
     clearDisplay();
     showSnackbarWithText("Error: Invalid PIN");
-    hintDisplay.setVisibility(View.VISIBLE);
+    binding.lockDisplayHint.setVisibility(View.VISIBLE);
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
     presenter.lockEntry(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
@@ -467,8 +454,9 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
 
   private void showInfoDialog() {
     AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(),
-        LockedStatDialog.newInstance(toolbar.getTitle().toString(), lockedPackageName,
-            lockedActivityName, lockedRealName, lockedSystem, image.getDrawable()), "info_dialog");
+        LockedStatDialog.newInstance(binding.toolbar.getTitle().toString(), lockedPackageName,
+            lockedActivityName, lockedRealName, lockedSystem, binding.lockImage.getDrawable()),
+        "info_dialog");
   }
 
   private void showForgotPasscodeDialog() {
@@ -477,7 +465,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   }
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-    image.setImageDrawable(icon);
+    binding.lockImage.setImageDrawable(icon);
   }
 
   @Override public void onApplicationIconLoadedError() {

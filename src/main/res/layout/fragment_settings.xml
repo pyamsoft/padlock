@@ -15,16 +15,21 @@
   ~ limitations under the License.
   -->
 
-<android.support.design.widget.CoordinatorLayout
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     >
 
-  <FrameLayout
-      android:id="@+id/settings_preferences_container"
+  <android.support.design.widget.CoordinatorLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      />
+      >
 
-</android.support.design.widget.CoordinatorLayout>
+    <FrameLayout
+        android:id="@+id/settings_preferences_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+  </android.support.design.widget.CoordinatorLayout>
+
+</layout>

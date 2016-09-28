@@ -16,16 +16,15 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.ContextThemeWrapper;
@@ -35,13 +34,9 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AsyncDrawable;
@@ -58,16 +53,9 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
   @NonNull private static final String KEY_PIN_DIALOG = "key_pin_dialog";
   @NonNull private final AsyncDrawable.Mapper taskMap = new AsyncDrawable.Mapper();
-  @BindView(R.id.pin_entry_toolbar) TextView toolbar;
-  @BindView(R.id.pin_entry_close) ImageView close;
-  @BindView(R.id.pin_image) ImageView image;
-  @BindView(R.id.pin_image_go) ImageView go;
-  @BindView(R.id.pin_entry_code) TextInputLayout pinEntry;
-  @BindView(R.id.pin_reentry_code) TextInputLayout pinReentry;
-  @BindView(R.id.pin_hint) TextInputLayout pinHint;
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") PinEntryPresenter presenter;
-  private Unbinder unbinder;
+  private DialogPinEntryBinding binding;
   private String packageName;
   private EditText pinEntryText;
   private EditText pinReentryText;
@@ -109,22 +97,22 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     Timber.d("Init dialog");
     final ContextWrapper themedContext =
         new ContextThemeWrapper(getContext(), R.style.Theme_PadLock_Light);
-    @SuppressLint("InflateParams") final View rootView =
-        LayoutInflater.from(themedContext).inflate(R.layout.layout_pin_entry, null, false);
-    unbinder = ButterKnife.bind(this, rootView);
+    binding =
+        DataBindingUtil.inflate(LayoutInflater.from(themedContext), R.layout.dialog_pin_entry, null,
+            false);
 
     // Resolve TextInputLayout edit texts
-    pinEntryText = pinEntry.getEditText();
+    pinEntryText = binding.pinEntryCode.getEditText();
     if (pinEntryText == null) {
       throw new NullPointerException("No pin entry edit text");
     }
 
-    pinReentryText = pinReentry.getEditText();
+    pinReentryText = binding.pinReentryCode.getEditText();
     if (pinReentryText == null) {
       throw new NullPointerException("No pin re-entry edit text");
     }
 
-    pinHintText = pinHint.getEditText();
+    pinHintText = binding.pinHint.getEditText();
     if (pinHintText == null) {
       throw new NullPointerException("No pin hint edit text");
     }
@@ -143,11 +131,11 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
       onRestoreInstanceState(savedInstanceState);
     }
 
-    return new AlertDialog.Builder(getActivity()).setView(rootView).create();
+    return new AlertDialog.Builder(getActivity()).setView(binding.getRoot()).create();
   }
 
   private void setupCloseButton() {
-    close.setOnClickListener(view -> {
+    binding.pinEntryClose.setOnClickListener(view -> {
       Timber.d("onClick Arrow");
       dismiss();
     });
@@ -155,21 +143,21 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     final AsyncMap.Entry task = AsyncDrawable.with(getContext())
         .load(R.drawable.ic_close_24dp, new RXLoader())
         .tint(android.R.color.black)
-        .into(close);
+        .into(binding.pinEntryClose);
     taskMap.put("close", task);
   }
 
   @Override public void showExtraPinEntryViews() {
     Timber.d("No active master, show extra views");
-    pinReentry.setVisibility(View.VISIBLE);
-    pinHint.setVisibility(View.VISIBLE);
+    binding.pinReentryCode.setVisibility(View.VISIBLE);
+    binding.pinHint.setVisibility(View.VISIBLE);
     setupSubmissionView(pinHintText);
   }
 
   @Override public void hideExtraPinEntryViews() {
     Timber.d("Active master, hide extra views");
-    pinReentry.setVisibility(View.GONE);
-    pinHint.setVisibility(View.GONE);
+    binding.pinReentryCode.setVisibility(View.GONE);
+    binding.pinHint.setVisibility(View.GONE);
     setupSubmissionView(pinEntryText);
   }
 
@@ -192,7 +180,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   }
 
   private void setupGoArrow() {
-    go.setOnClickListener(view -> {
+    binding.pinImageGo.setOnClickListener(view -> {
       presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint());
       imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0,
           0);
@@ -203,7 +191,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
     final AsyncMap.Entry task = AsyncDrawable.with(getContext())
         .load(R.drawable.ic_arrow_forward_24dp, new RXLoader())
-        .into(go);
+        .into(binding.pinImageGo);
     taskMap.put("arrow", task);
   }
 
@@ -268,7 +256,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   }
 
   private void setupToolbar() {
-    toolbar.setText("PIN");
+    // Maybe something more descriptive
+    binding.pinEntryToolbar.setText("PIN");
   }
 
   @Override public void onDestroyView() {
@@ -277,7 +266,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     Timber.d("Destroy AlertDialog");
     taskMap.clear();
     imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0, 0);
-    unbinder.unbind();
+    binding.unbind();
   }
 
   @Override public void onDestroy() {
@@ -293,7 +282,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   }
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-    image.setImageDrawable(icon);
+    binding.pinImage.setImageDrawable(icon);
   }
 
   @Override public void onSubmitSuccess() {

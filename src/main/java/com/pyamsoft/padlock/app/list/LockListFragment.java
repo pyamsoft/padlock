@@ -16,17 +16,16 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,15 +34,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
+import com.pyamsoft.padlock.databinding.FragmentApplistBinding;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
@@ -66,14 +63,14 @@ public class LockListFragment extends ActionBarFragment
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull private final AsyncDrawable.Mapper taskMap = new AsyncDrawable.Mapper();
-  @BindView(R.id.applist_fab) FloatingActionButton fab;
-  @BindView(R.id.applist_recyclerview) RecyclerView recyclerView;
-  @BindView(R.id.applist_swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
   @SuppressWarnings("WeakerAccess") LockListAdapter fastItemAdapter;
   @SuppressWarnings("WeakerAccess") LockListLayoutManager lockListLayoutManager;
+  @SuppressWarnings("WeakerAccess") LockListPresenter presenter;
+  @SuppressWarnings("WeakerAccess") boolean firstRefresh;
+  @SuppressWarnings("WeakerAccess") FragmentApplistBinding binding;
   @NonNull private final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
-      swipeRefreshLayout.setRefreshing(true);
+      binding.applistSwipeRefresh.setRefreshing(true);
       lockListLayoutManager.setVerticalScrollEnabled(false);
       final FragmentActivity activity = getActivity();
       if (activity != null) {
@@ -84,7 +81,7 @@ public class LockListFragment extends ActionBarFragment
   };
   @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
     @Override public void run() {
-      swipeRefreshLayout.setRefreshing(false);
+      binding.applistSwipeRefresh.setRefreshing(false);
       lockListLayoutManager.setVerticalScrollEnabled(true);
       final FragmentActivity activity = getActivity();
       if (activity != null) {
@@ -93,10 +90,6 @@ public class LockListFragment extends ActionBarFragment
       }
     }
   };
-
-  @SuppressWarnings("WeakerAccess") LockListPresenter presenter;
-  @SuppressWarnings("WeakerAccess") boolean firstRefresh;
-  private Unbinder unbinder;
   private MenuItem displaySystemItem;
   private MenuItem displayZeroActivityItem;
   private long loadedPresenterKey;
@@ -146,9 +139,8 @@ public class LockListFragment extends ActionBarFragment
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    final View view = inflater.inflate(R.layout.fragment_applist, container, false);
-    unbinder = ButterKnife.bind(this, view);
-    return view;
+    binding = DataBindingUtil.inflate(inflater, R.layout.fragment_applist, container, false);
+    return binding.getRoot();
   }
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -166,7 +158,7 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onStart() {
     super.onStart();
-    recyclerView.setAdapter(fastItemAdapter);
+    binding.applistRecyclerview.setAdapter(fastItemAdapter);
     presenter.bindView(this);
 
     presenter.setFABStateFromPreference();
@@ -185,7 +177,7 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onResume() {
     super.onResume();
     handler.removeCallbacksAndMessages(null);
-    handler.postDelayed(() -> fab.show(), 300L);
+    handler.postDelayed(() -> binding.applistFab.show(), 300L);
     setActionBarUpEnabled(false);
 
     getActivity().supportInvalidateOptionsMenu();
@@ -194,13 +186,13 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onPause() {
     super.onPause();
     handler.removeCallbacksAndMessages(null);
-    handler.postDelayed(() -> fab.hide(), 300L);
+    handler.postDelayed(() -> binding.applistFab.hide(), 300L);
   }
 
   private void setupSwipeRefresh() {
-    swipeRefreshLayout.setColorSchemeResources(R.color.blue500, R.color.amber700, R.color.blue700,
-        R.color.amber500);
-    swipeRefreshLayout.setOnRefreshListener(() -> {
+    binding.applistSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
+        R.color.blue700, R.color.amber500);
+    binding.applistSwipeRefresh.setOnRefreshListener(() -> {
       Timber.d("onRefresh");
       refreshList();
     });
@@ -212,8 +204,8 @@ public class LockListFragment extends ActionBarFragment
     final RecyclerView.ItemDecoration dividerDecoration =
         new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL_LIST);
 
-    recyclerView.setLayoutManager(lockListLayoutManager);
-    recyclerView.addItemDecoration(dividerDecoration);
+    binding.applistRecyclerview.setLayoutManager(lockListLayoutManager);
+    binding.applistRecyclerview.addItemDecoration(dividerDecoration);
   }
 
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -237,7 +229,7 @@ public class LockListFragment extends ActionBarFragment
 
   private void setSystemCheckListener() {
     displaySystemItem.setOnMenuItemClickListener(item -> {
-      if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
+      if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing()) {
         Timber.d("List is not refreshing. Allow change of system preference");
         if (item.isChecked()) {
           presenter.setSystemInvisible();
@@ -253,7 +245,7 @@ public class LockListFragment extends ActionBarFragment
 
   private void setZeroActivityCheckListener() {
     displayZeroActivityItem.setOnMenuItemClickListener(item -> {
-      if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
+      if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing()) {
         Timber.d("List is not refreshing. Allow change of system preference");
         if (item.isChecked()) {
           presenter.setZeroActivityHidden();
@@ -284,7 +276,7 @@ public class LockListFragment extends ActionBarFragment
     switch (item.getItemId()) {
       case R.id.menu_settings:
         handled = true;
-        if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
+        if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing()) {
           Timber.d("List is not refreshing. Do settings click");
           showSettingsScreen();
         }
@@ -348,15 +340,15 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onDestroyView() {
     super.onDestroyView();
 
-    recyclerView.setOnClickListener(null);
-    recyclerView.setLayoutManager(null);
-    recyclerView.setAdapter(null);
+    binding.applistRecyclerview.setOnClickListener(null);
+    binding.applistRecyclerview.setLayoutManager(null);
+    binding.applistRecyclerview.setAdapter(null);
 
-    fab.setOnClickListener(null);
-    swipeRefreshLayout.setOnRefreshListener(null);
+    binding.applistFab.setOnClickListener(null);
+    binding.applistSwipeRefresh.setOnRefreshListener(null);
     taskMap.clear();
     handler.removeCallbacksAndMessages(null);
-    unbinder.unbind();
+    binding.unbind();
   }
 
   @Override public void onDestroy() {
@@ -368,21 +360,21 @@ public class LockListFragment extends ActionBarFragment
   }
 
   private void setupFAB() {
-    fab.setOnClickListener(view -> presenter.clickPinFAB());
-    AppUtil.setupFABBehavior(fab, new HideScrollFABBehavior(24));
+    binding.applistFab.setOnClickListener(view -> presenter.clickPinFAB());
+    AppUtil.setupFABBehavior(binding.applistFab, new HideScrollFABBehavior(24));
   }
 
   @Override public void setFABStateEnabled() {
     final AsyncMap.Entry fabIconTask = AsyncDrawable.with(getContext())
         .load(R.drawable.ic_lock_outline_24dp, new RXLoader())
-        .into(fab);
+        .into(binding.applistFab);
     taskMap.put("fab", fabIconTask);
   }
 
   @Override public void setFABStateDisabled() {
     final AsyncMap.Entry fabIconTask = AsyncDrawable.with(getContext())
         .load(R.drawable.ic_lock_open_24dp, new RXLoader())
-        .into(fab);
+        .into(binding.applistFab);
     taskMap.put("fab", fabIconTask);
   }
 
@@ -429,8 +421,8 @@ public class LockListFragment extends ActionBarFragment
     Timber.d("Add entry: %s", entry);
 
     // In case the configuration changes, we do the animation again
-    if (!swipeRefreshLayout.isRefreshing()) {
-      swipeRefreshLayout.setRefreshing(true);
+    if (!binding.applistSwipeRefresh.isRefreshing()) {
+      binding.applistSwipeRefresh.setRefreshing(true);
     }
 
     fastItemAdapter.add(new LockListItem(entry));
@@ -444,11 +436,13 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
-    final TapTarget fabTarget = TapTarget.forView(fab, getString(R.string.getting_started),
-        getString(R.string.getting_started_desc)).cancelable(false).tintTarget(false);
+    final TapTarget fabTarget =
+        TapTarget.forView(binding.applistFab, getString(R.string.getting_started),
+            getString(R.string.getting_started_desc)).cancelable(false).tintTarget(false);
 
     // If we use the first item we get a weird location, try a different item
-    final View listTargetView = recyclerView.findViewHolderForAdapterPosition(1).itemView;
+    final View listTargetView =
+        binding.applistRecyclerview.findViewHolderForAdapterPosition(1).itemView;
     final TapTarget listTarget =
         TapTarget.forView(listTargetView, "Look here", "Wowie").cancelable(false);
 
@@ -485,13 +479,13 @@ public class LockListFragment extends ActionBarFragment
 
     Timber.d("onListCleared");
     handler.post(startRefreshRunnable);
-    handler.post(() -> fab.hide());
+    handler.post(() -> binding.applistFab.hide());
   }
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
     handler.post(stopRefreshRunnable);
-    handler.post(() -> fab.show());
+    handler.post(() -> binding.applistFab.show());
 
     Timber.d("We have refreshed");
     firstRefresh = false;
