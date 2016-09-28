@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.app.lock;
 
 import android.app.Dialog;
+import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -27,13 +28,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.databinding.DialogLockStatBinding;
 
 public class LockedStatDialog extends DialogFragment {
 
@@ -44,13 +40,6 @@ public class LockedStatDialog extends DialogFragment {
   @NonNull private static final String LABEL = "label";
   @NonNull private static final String IMAGE = "image";
 
-  @BindView(R.id.stat_image) ImageView statImage;
-  @BindView(R.id.state_display_name) TextView statDisplayName;
-  @BindView(R.id.stat_package_name) TextView statPackageName;
-  @BindView(R.id.stat_real_name) TextView statRealName;
-  @BindView(R.id.stat_locked_by) TextView statLockedBy;
-  @BindView(R.id.stat_system) TextView statSystem;
-
   private String displayedLabel;
   private String activityName;
   private String packageName;
@@ -58,7 +47,7 @@ public class LockedStatDialog extends DialogFragment {
   private boolean system;
   @Nullable private Bitmap image;
 
-  private Unbinder unbinder;
+  private DialogLockStatBinding binding;
 
   @CheckResult @NonNull public static LockedStatDialog newInstance(@NonNull String displayedLabel,
       @NonNull String packageName, @NonNull String activityName, @NonNull String realName,
@@ -92,18 +81,18 @@ public class LockedStatDialog extends DialogFragment {
   }
 
   @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-    final View rootView =
-        LayoutInflater.from(getActivity()).inflate(R.layout.dialog_lock_stat, null, false);
-    unbinder = ButterKnife.bind(this, rootView);
+    binding =
+        DataBindingUtil.inflate(LayoutInflater.from(getActivity()), R.layout.dialog_lock_stat, null,
+            false);
 
-    statImage.setImageBitmap(image);
-    statDisplayName.setText(displayedLabel);
-    statPackageName.setText(packageName);
-    statRealName.setText(realName);
-    statLockedBy.setText(activityName);
-    statSystem.setText(system ? "Yes" : "No");
+    binding.statImage.setImageBitmap(image);
+    binding.statDisplayName.setText(displayedLabel);
+    binding.statPackageName.setText(packageName);
+    binding.statRealName.setText(realName);
+    binding.statLockedBy.setText(activityName);
+    binding.statSystem.setText(system ? "Yes" : "No");
 
-    return new AlertDialog.Builder(getActivity()).setView(rootView)
+    return new AlertDialog.Builder(getActivity()).setView(binding.getRoot())
         .setPositiveButton("Okay", (dialogInterface, i) -> {
           dialogInterface.dismiss();
         })
@@ -113,6 +102,6 @@ public class LockedStatDialog extends DialogFragment {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    unbinder.unbind();
+    binding.unbind();
   }
 }

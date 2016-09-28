@@ -16,17 +16,12 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SwitchCompat;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.PadLock;
@@ -35,6 +30,7 @@ import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.bus.DBProgressBus;
 import com.pyamsoft.padlock.bus.LockInfoDisplayBus;
+import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.event.DBProgressEvent;
 import com.pyamsoft.padlock.model.event.LockInfoDisplayEvent;
@@ -64,10 +60,10 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     super.bindView(holder, payloads);
     recycleOldItem(holder);
 
-    holder.name.setText(entry.name());
+    holder.binding.lockListTitle.setText(entry.name());
     holder.loadImage(entry.packageName());
-    holder.toggle.setOnCheckedChangeListener(null);
-    holder.toggle.setChecked(entry.locked());
+    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
+    holder.binding.lockListToggle.setChecked(entry.locked());
     final CompoundButton.OnCheckedChangeListener listener =
         new CompoundButton.OnCheckedChangeListener() {
           @Override
@@ -82,19 +78,19 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
           }
         };
 
-    holder.toggle.setOnCheckedChangeListener(listener);
-    holder.name.setOnClickListener(
+    holder.binding.lockListToggle.setOnCheckedChangeListener(listener);
+    holder.binding.lockListTitle.setOnClickListener(
         view -> authorizeAccess(holder.getAdapterPosition(), false, false));
-    holder.icon.setOnClickListener(
+    holder.binding.lockListIcon.setOnClickListener(
         view -> authorizeAccess(holder.getAdapterPosition(), false, false));
   }
 
   private void recycleOldItem(@NonNull ViewHolder holder) {
-    holder.name.setText(null);
-    holder.name.setOnClickListener(null);
-    holder.icon.setOnClickListener(null);
-    holder.icon.setImageDrawable(null);
-    holder.toggle.setOnCheckedChangeListener(null);
+    holder.binding.lockListTitle.setText(null);
+    holder.binding.lockListTitle.setOnClickListener(null);
+    holder.binding.lockListIcon.setOnClickListener(null);
+    holder.binding.lockListIcon.setImageDrawable(null);
+    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
   }
 
   @SuppressWarnings("WeakerAccess") void authorizeAccess(int position, boolean accessPackage,
@@ -134,15 +130,13 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   public static final class ViewHolder extends RecyclerView.ViewHolder
       implements AppIconLoaderView {
 
-    @NonNull final Unbinder unbinder;
-    @BindView(R.id.lock_list_title) TextView name;
-    @BindView(R.id.lock_list_icon) ImageView icon;
-    @BindView(R.id.lock_list_toggle) SwitchCompat toggle;
+    @NonNull final AdapterItemLocklistEntryBinding binding;
     @Inject AppIconLoaderPresenter<ViewHolder> appIconLoaderPresenter;
 
     public ViewHolder(View itemView) {
       super(itemView);
-      unbinder = ButterKnife.bind(this, itemView);
+      binding = DataBindingUtil.bind(itemView);
+
       PadLock.get(itemView.getContext())
           .provideComponent()
           .plusAppIconLoaderComponent()
@@ -155,7 +149,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     }
 
     @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-      this.icon.setImageDrawable(icon);
+      binding.lockListIcon.setImageDrawable(icon);
     }
 
     @Override public void onApplicationIconLoadedError() {

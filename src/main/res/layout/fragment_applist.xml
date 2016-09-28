@@ -15,37 +15,43 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<android.support.design.widget.CoordinatorLayout
+
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     >
 
-  <android.support.v4.widget.SwipeRefreshLayout
-      android:id="@+id/applist_swipe_refresh"
+  <android.support.design.widget.CoordinatorLayout
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="match_parent"
       >
 
-    <android.support.v7.widget.RecyclerView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/applist_recyclerview"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/applist_swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+      <android.support.v7.widget.RecyclerView
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          android:id="@+id/applist_recyclerview"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/applist_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:elevation="6dp"
+        app:fabSize="normal"
+        app:pressedTranslationZ="12dp"
         />
 
-  </android.support.v4.widget.SwipeRefreshLayout>
+  </android.support.design.widget.CoordinatorLayout>
 
-  <android.support.design.widget.FloatingActionButton
-      android:id="@+id/applist_fab"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="bottom|end"
-      android:layout_margin="@dimen/fab_margin"
-      app:elevation="6dp"
-      app:fabSize="normal"
-      app:pressedTranslationZ="12dp"
-      />
-
-</android.support.design.widget.CoordinatorLayout>
+</layout>

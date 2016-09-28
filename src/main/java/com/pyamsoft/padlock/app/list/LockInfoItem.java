@@ -16,18 +16,15 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.RadioButton;
-import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.bus.LockInfoSelectBus;
+import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.event.LockInfoSelectEvent;
@@ -59,13 +56,13 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
     switch (entry.lockState()) {
       case DEFAULT:
-        holder.defaultLockState.setChecked(true);
+        holder.binding.lockInfoRadioDefault.setChecked(true);
         break;
       case WHITELISTED:
-        holder.whiteLockState.setChecked(true);
+        holder.binding.lockInfoRadioWhite.setChecked(true);
         break;
       case LOCKED:
-        holder.blackLockState.setChecked(true);
+        holder.binding.lockInfoRadioBlack.setChecked(true);
         break;
       default:
         throw new IllegalStateException("Illegal enum state");
@@ -78,9 +75,9 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     } else {
       activityName = entryName;
     }
-    holder.name.setText(activityName);
+    holder.binding.lockInfoActivity.setText(activityName);
 
-    holder.defaultLockState.setOnCheckedChangeListener((compoundButton, b) -> {
+    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
         Timber.d("Post default event to LockInfoSelectBus");
         LockInfoSelectBus.get()
@@ -89,7 +86,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
       }
     });
 
-    holder.whiteLockState.setOnCheckedChangeListener((compoundButton, b) -> {
+    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
         Timber.d("Post whitelist event to LockInfoSelectBus");
         LockInfoSelectBus.get()
@@ -98,7 +95,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
       }
     });
 
-    holder.blackLockState.setOnCheckedChangeListener((compoundButton, b) -> {
+    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
         Timber.d("Post blacklist event to LockInfoSelectBus");
         LockInfoSelectBus.get()
@@ -109,11 +106,11 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
   }
 
   private void recycleOldItem(@NonNull ViewHolder holder) {
-    holder.name.setText(null);
-    holder.name.setOnClickListener(null);
-    holder.blackLockState.setOnCheckedChangeListener(null);
-    holder.whiteLockState.setOnCheckedChangeListener(null);
-    holder.defaultLockState.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoActivity.setText(null);
+    holder.binding.lockInfoActivity.setOnClickListener(null);
+    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
@@ -129,15 +126,11 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   protected static final class ViewHolder extends RecyclerView.ViewHolder {
 
-    @NonNull final Unbinder unbinder;
-    @BindView(R.id.lock_info_activity) TextView name;
-    @BindView(R.id.lock_info_radio_default) RadioButton defaultLockState;
-    @BindView(R.id.lock_info_radio_white) RadioButton whiteLockState;
-    @BindView(R.id.lock_info_radio_black) RadioButton blackLockState;
+    @NonNull final AdapterItemLockinfoBinding binding;
 
     public ViewHolder(View itemView) {
       super(itemView);
-      unbinder = ButterKnife.bind(this, itemView);
+      binding = DataBindingUtil.bind(itemView);
     }
   }
 }

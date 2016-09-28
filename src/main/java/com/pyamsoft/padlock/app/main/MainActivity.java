@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.main;
 
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
@@ -23,17 +24,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.ActionMenuView;
-import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.view.MenuItem;
 import android.view.View;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
+import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.support.DonationActivity;
@@ -48,15 +46,13 @@ public class MainActivity extends DonationActivity
     implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
 
   @NonNull private static final String KEY_PRESENTER = "key_main_presenter";
-  @BindView(R.id.toolbar) Toolbar toolbar;
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
-  private Unbinder unbinder;
+  private ActivityMainBinding binding;
   private long loaderKey;
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
     super.onCreate(savedInstanceState);
-    unbinder = ButterKnife.bind(this);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     loaderKey = PersistentCache.get()
@@ -74,7 +70,7 @@ public class MainActivity extends DonationActivity
   }
 
   @Override protected int bindActivityToView() {
-    setContentView(R.layout.activity_main);
+    binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
     return R.id.ad_view;
   }
 
@@ -103,8 +99,8 @@ public class MainActivity extends DonationActivity
   }
 
   private void setAppBarState() {
-    setSupportActionBar(toolbar);
-    toolbar.setTitle(getString(R.string.app_name));
+    setSupportActionBar(binding.toolbar);
+    binding.toolbar.setTitle(getString(R.string.app_name));
   }
 
   private void showLockList(boolean forceRefresh) {
@@ -121,7 +117,7 @@ public class MainActivity extends DonationActivity
   }
 
   @CheckResult @NonNull public View getSettingsMenuItemView() {
-    final View amv = toolbar.getChildAt(1);
+    final View amv = binding.toolbar.getChildAt(1);
     if (amv != null && amv instanceof ActionMenuView) {
       final ActionMenuView actions = (ActionMenuView) amv;
       // Settings gear is the second item
@@ -136,7 +132,7 @@ public class MainActivity extends DonationActivity
     if (!isChangingConfigurations()) {
       PersistentCache.get().unload(loaderKey);
     }
-    unbinder.unbind();
+    binding.unbind();
   }
 
   @Override protected boolean shouldConfirmBackPress() {
@@ -174,7 +170,7 @@ public class MainActivity extends DonationActivity
 
   @Override protected void onPostResume() {
     super.onPostResume();
-    AnimUtil.animateActionBarToolbar(toolbar);
+    AnimUtil.animateActionBarToolbar(binding.toolbar);
     RatingDialog.showRatingDialog(this, this);
     presenter.showTermsDialog();
   }
