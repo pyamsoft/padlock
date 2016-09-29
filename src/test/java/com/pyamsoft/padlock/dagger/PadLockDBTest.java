@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger;
 
 import com.pyamsoft.padlock.BuildConfig;
-import com.pyamsoft.padlock.TestPadLock;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import org.junit.Before;
@@ -37,8 +36,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(application = TestPadLock.class, sdk = 23, constants = BuildConfig.class)
+@RunWith(RobolectricTestRunner.class) @Config(sdk = 23, constants = BuildConfig.class)
 public class PadLockDBTest {
 
   private PadLockDBImpl db;

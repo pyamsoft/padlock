@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.lock;
 
 import com.pyamsoft.padlock.BuildConfig;
-import com.pyamsoft.padlock.TestPadLock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,11 +28,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(application = TestPadLock.class, sdk = 23, constants = BuildConfig.class)
+@RunWith(RobolectricTestRunner.class) @Config(sdk = 23, constants = BuildConfig.class)
 public class LockInteractorTest {
 
-  LockInteractor interactor;
+  private LockInteractor interactor;
 
   @Before public void setup() {
     interactor = new LockInteractorImpl() {
