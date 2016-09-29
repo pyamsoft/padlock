@@ -97,10 +97,6 @@ android {
   }
 }
 
-retrolambda {
-  jvmArgs "-noverify"
-}
-
 dependencies {
   compile fileTree(dir: "libs", include: ["*.jar"])
 
