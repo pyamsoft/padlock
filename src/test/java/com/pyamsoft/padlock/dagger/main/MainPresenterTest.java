@@ -16,50 +16,44 @@
 
 package com.pyamsoft.padlock.dagger.main;
 
-import com.pyamsoft.padlock.BuildConfig;
-import com.pyamsoft.padlock.TestPadLock;
 import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.padlock.bus.MainBus;
-import com.pyamsoft.padlock.dagger.TestPadLockComponent;
 import com.pyamsoft.padlock.model.event.RefreshEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.inject.Inject;
-import javax.inject.Named;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import static com.pyamsoft.padlock.TestUtils.log;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(application = TestPadLock.class, sdk = 23, constants = BuildConfig.class)
 public class MainPresenterTest {
 
-  @Inject @Named("agree") MainPresenterImpl agreePresenter;
-  @Inject @Named("not_agree") MainPresenterImpl notAgreePresenter;
+  @Mock MainInteractor interactor;
+  private MainPresenterImpl presenter;
 
   @Before public void setup() {
-    final TestPadLockComponent testPadLockComponent =
-        TestPadLock.get(RuntimeEnvironment.application).provideComponent();
-    testPadLockComponent.plusMain().inject(this);
+    interactor = Mockito.mock(MainInteractor.class);
+    presenter = new MainPresenterImpl(interactor, Schedulers.immediate(), Schedulers.immediate());
   }
 
   /**
    * Make sure that the usage terms are shown when they are not agreed to
    */
   @Test public void testShowUsageTerms() throws Exception {
-    assertNotNull(notAgreePresenter);
-    assertFalse(notAgreePresenter.isBound());
+    Mockito.when(interactor.hasAgreed()).then(invocation -> Observable.just(false));
+
+    assertNotNull(presenter);
+    assertFalse(presenter.isBound());
 
     // KLUDGE Kind of ugly
     final AtomicBoolean usageTermsShown = new AtomicBoolean(false);
-    notAgreePresenter.bindView(new MainPresenter.MainView() {
+    presenter.bindView(new MainPresenter.MainView() {
 
       @Override public void showUsageTermsDialog() {
         usageTermsShown.set(true);
@@ -75,7 +69,7 @@ public class MainPresenterTest {
     });
 
     assertFalse(usageTermsShown.get());
-    notAgreePresenter.showTermsDialog();
+    presenter.showTermsDialog();
     assertTrue(usageTermsShown.get());
   }
 
@@ -83,10 +77,11 @@ public class MainPresenterTest {
    * Make sure that any exceptions are swalloed when showing usage terms
    */
   @Test public void testSwallowExceptionUsageTerms() throws Exception {
-    assertNotNull(notAgreePresenter);
-    assertFalse(notAgreePresenter.isBound());
+    Mockito.when(interactor.hasAgreed()).then(invocation -> Observable.just(true));
+    assertNotNull(presenter);
+    assertFalse(presenter.isBound());
 
-    notAgreePresenter.bindView(new MainPresenter.MainView() {
+    presenter.bindView(new MainPresenter.MainView() {
       @Override public void showUsageTermsDialog() {
         log("Throw exception, swallow with RX");
         throw new RuntimeException("Should not be here");
@@ -101,19 +96,19 @@ public class MainPresenterTest {
       }
     });
 
-    notAgreePresenter.showTermsDialog();
+    presenter.showTermsDialog();
   }
 
   /**
    * Make sure refresh is handled
    */
   @Test public void testForceRefresh() throws Exception {
-    assertNotNull(notAgreePresenter);
-    assertFalse(notAgreePresenter.isBound());
+    assertNotNull(presenter);
+    assertFalse(presenter.isBound());
 
     // KLUDGE Kind of ugly
     final AtomicBoolean forcedRefresh = new AtomicBoolean(false);
-    notAgreePresenter.bindView(new MainPresenter.MainView() {
+    presenter.bindView(new MainPresenter.MainView() {
       @Override public void showUsageTermsDialog() {
       }
 
@@ -135,10 +130,10 @@ public class MainPresenterTest {
    * Make sure any exceptions are swallowed
    */
   @Test public void testSwallowExceptionForceRefresh() throws Exception {
-    assertNotNull(notAgreePresenter);
-    assertFalse(notAgreePresenter.isBound());
+    assertNotNull(presenter);
+    assertFalse(presenter.isBound());
 
-    notAgreePresenter.bindView(new MainPresenter.MainView() {
+    presenter.bindView(new MainPresenter.MainView() {
       @Override public void showUsageTermsDialog() {
       }
 
