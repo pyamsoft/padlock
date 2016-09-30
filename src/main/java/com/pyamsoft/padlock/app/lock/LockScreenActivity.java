@@ -43,7 +43,7 @@ import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroidrx.RXLoader;
 import java.util.Locale;
