@@ -141,7 +141,7 @@ dependencies {
   // Mockito for unit tests
   testCompile "org.mockito:mockito-core:$mockito"
 
-  // PYDroid 4.6.0
+  // PYDroid 4.6.1
   debugCompile project(path: ":PYDroidRX", configuration: "debug")
   releaseCompile project(path: ":PYDroidRX", configuration: "release")
 }
