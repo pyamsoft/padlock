@@ -40,6 +40,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:background="?attr/selectableItemBackground"
+        android:ellipsize="end"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceLarge"
         />
