@@ -115,17 +115,23 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
                 className);
           }
           return !isLockScreen;
-        }).map(valid -> {
-          Timber.d("Window has passed checks so far: %s", valid);
+        }).map(fromLockScreen -> {
+          final boolean passed = !fromLockScreen;
+          Timber.d("Window has passed checks so far: %s", passed);
           activePackageName = packageName;
           activeClassName = className;
-          return valid;
+          return passed;
         });
 
     lockedEntrySubscription = Observable.zip(windowEventObservable,
         interactor.hasNameChanged(packageName, lastPackageName),
         interactor.hasNameChanged(className, lastClassName), interactor.isOnlyLockOnPackageChange(),
         (windowEventObserved, packageChanged, classChanged, lockOnPackageChange) -> {
+          if (!windowEventObserved) {
+            Timber.e("Failed to pass window checking");
+            return false;
+          }
+
           if (packageChanged) {
             Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName);
             lastPackageName = packageName;
@@ -147,9 +153,9 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
             windowHasChanged = true;
           }
 
-          return windowHasChanged;
+          return windowHasChanged || !lockScreenPassed;
         })
-        .filter(windowHasChanged -> windowHasChanged || !lockScreenPassed)
+        .filter(lockApp -> lockApp)
         .flatMap(aBoolean -> {
           Timber.d("Get list of locked classes with package: %s, class: %s", packageName,
               className);

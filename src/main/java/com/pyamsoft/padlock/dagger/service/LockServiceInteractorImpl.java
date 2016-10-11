@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.service;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.TagConstraint;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
@@ -79,12 +80,13 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   @NonNull @Override public Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
       @NonNull String className) {
     return Observable.defer(() -> {
-      final boolean lockScreen1 =
-          packageName.equals(LockScreenActivity1.class.getPackage().getName()) && className.equals(
-              LockScreenActivity1.class.getName());
-      final boolean lockScreen2 =
-          packageName.equals(LockScreenActivity2.class.getPackage().getName()) && className.equals(
-              LockScreenActivity2.class.getName());
+      final String lockScreenPackageName = PadLock.class.getPackage().getName();
+      final String lockScreen1ClassName = LockScreenActivity1.class.getName();
+      final String lockScreen2ClassName = LockScreenActivity2.class.getName();
+
+      final boolean isPackage = packageName.equals(lockScreenPackageName);
+      final boolean lockScreen1 = isPackage && className.equals(lockScreen1ClassName);
+      final boolean lockScreen2 = isPackage && className.equals(lockScreen2ClassName);
       return Observable.just(lockScreen1 || lockScreen2);
     });
   }

@@ -103,7 +103,11 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
 
   @Override public void onClearAll() {
     Timber.d("Everything is cleared, kill self");
-    PadLockService.finish();
+    try {
+      PadLockService.finish();
+    } catch (NullPointerException e) {
+      Timber.e(e, "Expected NPE when Service is NULL");
+    }
     final ActivityManager activityManager = (ActivityManager) getContext().getApplicationContext()
         .getSystemService(Context.ACTIVITY_SERVICE);
     activityManager.clearApplicationUserData();
