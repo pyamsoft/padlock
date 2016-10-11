@@ -24,7 +24,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.ActionMenuView;
-import android.text.Spannable;
 import android.view.MenuItem;
 import android.view.View;
 import com.pyamsoft.padlock.BuildConfig;
@@ -34,16 +33,14 @@ import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.app.PersistLoader;
-import com.pyamsoft.pydroid.support.DonationActivity;
+import com.pyamsoft.pydroid.support.RatingActivity;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroid.util.StringUtil;
 import timber.log.Timber;
 
-public class MainActivity extends DonationActivity
-    implements MainPresenter.MainView, RatingDialog.ChangeLogProvider {
+public class MainActivity extends RatingActivity implements MainPresenter.MainView {
 
   @NonNull private static final String KEY_PRESENTER = "key_main_presenter";
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
@@ -180,39 +177,16 @@ public class MainActivity extends DonationActivity
         AgreeTermsDialog.TAG);
   }
 
-  @NonNull @Override public Spannable getChangeLogText() {
-    // The changelog text
-    final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
+  @NonNull @Override protected String[] getChangeLogLines() {
     final String line1 = "CHANGE: Smaller application size";
     final String line2 =
         "BUGFIX: Fix a looping issue which caused the lockscreen to constantly re-launch";
     final String line3 = "BUGFIX: Fix a crash in the LockInfoDialog";
+    return new String[] { line1, line2, line3 };
+  }
 
-    // Turn it into a spannable
-    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1, line2, line3);
-
-    int start = 0;
-    int end = title.length();
-    final int largeSize =
-        StringUtil.getTextSizeFromAppearance(this, android.R.attr.textAppearanceLarge);
-    final int largeColor =
-        StringUtil.getTextColorFromAppearance(this, android.R.attr.textAppearanceLarge);
-    final int smallSize =
-        StringUtil.getTextSizeFromAppearance(this, android.R.attr.textAppearanceSmall);
-    final int smallColor =
-        StringUtil.getTextColorFromAppearance(this, android.R.attr.textAppearanceSmall);
-
-    StringUtil.boldSpan(spannable, start, end);
-    StringUtil.sizeSpan(spannable, start, end, largeSize);
-    StringUtil.colorSpan(spannable, start, end, largeColor);
-
-    start += end + 2;
-    end += 2 + line1.length() + +2 + line2.length() + 2 + line3.length();
-
-    StringUtil.sizeSpan(spannable, start, end, smallSize);
-    StringUtil.colorSpan(spannable, start, end, smallColor);
-
-    return spannable;
+  @NonNull @Override protected String getVersionName() {
+    return BuildConfig.VERSION_NAME;
   }
 
   @Override public int getApplicationIcon() {
