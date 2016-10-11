@@ -158,9 +158,13 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
             })
             .flatMap(Observable::from)
             .toSortedList((activityEntry, activityEntry2) -> {
-              if (activityEntry.name().startsWith(packageName)) {
+              final boolean activity1Package = activityEntry.name().startsWith(packageName);
+              final boolean activity2Package = activityEntry2.name().startsWith(packageName);
+              if (activity1Package && activity2Package) {
+                return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
+              } else if (activity1Package) {
                 return -1;
-              } else if (activityEntry2.name().startsWith(packageName)) {
+              } else if (activity2Package) {
                 return 1;
               } else {
                 return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
