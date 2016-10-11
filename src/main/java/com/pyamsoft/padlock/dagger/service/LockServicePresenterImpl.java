@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.service;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
@@ -89,7 +88,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
 
   @Override
   public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
-      @NonNull Recheck forcedRecheck, @NonNull MultiLock multiLock) {
+      @NonNull Recheck forcedRecheck) {
     unsubLockedEntry();
     final Observable<Boolean> windowEventObservable =
         stateInteractor.isServiceEnabled().filter(enabled -> {
@@ -167,19 +166,13 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
         .subscribe(padLockEntry -> {
               Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
                   padLockEntry.activityName());
-              launchCorrectLockScreen(padLockEntry, className, multiLock);
+              launchCorrectLockScreen(padLockEntry, className);
             }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"),
             this::unsubLockedEntry);
   }
 
   @SuppressWarnings("WeakerAccess") void launchCorrectLockScreen(@NonNull PadLockEntry entry,
-      @NonNull String realName, @NonNull MultiLock multiLock) {
-    getView(lockService -> {
-      if (LockScreenActivity1.isActive() && multiLock.equals(MultiLock.ENABLED)) {
-        lockService.startLockScreen2(entry, realName);
-      } else {
-        lockService.startLockScreen1(entry, realName);
-      }
-    });
+      @NonNull String realName) {
+    getView(lockService -> lockService.startLockScreen1(entry, realName));
   }
 }
