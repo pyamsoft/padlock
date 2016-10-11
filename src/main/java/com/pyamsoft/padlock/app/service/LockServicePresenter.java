@@ -27,22 +27,15 @@ public interface LockServicePresenter extends Presenter<LockServicePresenter.Loc
   void getActiveNames(@NonNull String packageName, @NonNull String className);
 
   void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
-      @NonNull Recheck forcedRecheck, @NonNull MultiLock multiLock);
+      @NonNull Recheck forcedRecheck);
 
   enum Recheck {
     FORCE, NOT_FORCE
   }
 
-  enum MultiLock {
-    ENABLED,
-    DISABLED
-  }
-
   interface LockService {
 
     void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName);
-
-    void startLockScreen2(@NonNull PadLockEntry entry, @NonNull String realName);
 
     void onActiveNamesRetrieved(@NonNull String packageName, @NonNull String activePackage,
         @NonNull String className, @NonNull String activeClass);

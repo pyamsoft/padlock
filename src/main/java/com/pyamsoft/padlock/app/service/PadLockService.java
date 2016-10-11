@@ -26,8 +26,6 @@ import android.support.annotation.VisibleForTesting;
 import android.view.accessibility.AccessibilityEvent;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -38,7 +36,6 @@ public class PadLockService extends AccessibilityService
   private static volatile PadLockService instance = null;
   @Inject LockServicePresenter presenter;
   private Intent lockActivity;
-  private Intent lockActivity2;
 
   @NonNull @CheckResult private static synchronized PadLockService getInstance() {
     if (instance == null) {
@@ -73,16 +70,8 @@ public class PadLockService extends AccessibilityService
     }
   }
 
-  private static void craftIntent(@NonNull Intent removeIntent, @NonNull Intent addIntent,
-      @NonNull PadLockEntry entry, @NonNull String realName) {
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_PACKAGE_NAME);
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME);
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_LOCK_CODE);
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_IS_SYSTEM);
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_REAL_NAME);
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_IGNORE_UNTIL_TIME);
-    removeIntent.removeExtra(LockScreenActivity.ENTRY_LOCK_UNTIL_TIME);
-
+  private static void craftIntent(@NonNull Intent addIntent, @NonNull PadLockEntry entry,
+      @NonNull String realName) {
     addIntent.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName());
     addIntent.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName());
     addIntent.putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode());
@@ -117,23 +106,11 @@ public class PadLockService extends AccessibilityService
       final String pName = eventPackage.toString();
       final String cName = eventClass.toString();
       if (!pName.isEmpty() && !cName.isEmpty()) {
-        final LockServicePresenter.MultiLock multiLock = getMultiLockAvailability();
-        presenter.processAccessibilityEvent(pName, cName, LockServicePresenter.Recheck.NOT_FORCE,
-            multiLock);
+        presenter.processAccessibilityEvent(pName, cName, LockServicePresenter.Recheck.NOT_FORCE);
       }
     } else {
       Timber.e("Missing needed data");
     }
-  }
-
-  @NonNull @CheckResult private LockServicePresenter.MultiLock getMultiLockAvailability() {
-    final LockServicePresenter.MultiLock multiLock;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      multiLock = LockServicePresenter.MultiLock.ENABLED;
-    } else {
-      multiLock = LockServicePresenter.MultiLock.DISABLED;
-    }
-    return multiLock;
   }
 
   @Override public void onInterrupt() {
@@ -157,12 +134,8 @@ public class PadLockService extends AccessibilityService
     super.onServiceConnected();
     Timber.d("onServiceConnected");
     if (lockActivity == null) {
-      lockActivity = new Intent(getApplicationContext(), LockScreenActivity1.class).setFlags(
-          Intent.FLAG_ACTIVITY_NEW_TASK);
-    }
-    if (lockActivity2 == null) {
-      lockActivity2 = new Intent(getApplicationContext(), LockScreenActivity2.class).setFlags(
-          Intent.FLAG_ACTIVITY_NEW_TASK);
+      lockActivity = new Intent(getApplicationContext(), LockScreenActivity.class).setFlags(
+          Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
     }
 
     if (presenter == null) {
@@ -174,17 +147,10 @@ public class PadLockService extends AccessibilityService
   }
 
   @Override public void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName) {
-    craftIntent(lockActivity2, lockActivity, entry, realName);
+    craftIntent(lockActivity, entry, realName);
     Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
         entry.activityName(), realName);
     getApplicationContext().startActivity(lockActivity);
-  }
-
-  @Override public void startLockScreen2(@NonNull PadLockEntry entry, @NonNull String realName) {
-    craftIntent(lockActivity, lockActivity2, entry, realName);
-    Timber.d("Start lock activity 2 for entry: %s %s (real %s)", entry.packageName(),
-        entry.activityName(), realName);
-    getApplicationContext().startActivity(lockActivity2);
   }
 
   @Override
@@ -198,7 +164,7 @@ public class PadLockService extends AccessibilityService
       // which will respond to any class name
       Timber.d("Run recheck for: %s %s", activePackage, activeClass);
       presenter.processAccessibilityEvent(activePackage, activeClass,
-          LockServicePresenter.Recheck.FORCE, getMultiLockAvailability());
+          LockServicePresenter.Recheck.FORCE);
     }
   }
 }

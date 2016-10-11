@@ -18,8 +18,7 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -46,8 +45,7 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
   @NonNull @Override public Observable<String> getPackageActivities(@NonNull String packageName) {
     return packageManagerWrapper.getActivityListForPackage(packageName)
         .filter(
-            activityEntry -> !activityEntry.equalsIgnoreCase(LockScreenActivity1.class.getName())
-                && !activityEntry.equalsIgnoreCase(LockScreenActivity2.class.getName()));
+            activityEntry -> !activityEntry.equalsIgnoreCase(LockScreenActivity.class.getName()));
   }
 
   @NonNull @Override

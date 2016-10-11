@@ -48,20 +48,13 @@
 
     <!-- Lock Screen Activity -->
     <activity
-        android:name=".app.lock.LockScreenActivity1"
+        android:name=".app.lock.LockScreenActivity"
         android:excludeFromRecents="true"
         android:exported="false"
-        android:launchMode="singleInstance"
+        android:launchMode="singleTop"
         android:noHistory="true"
         android:windowSoftInputMode="stateVisible"/>
 
-    <activity
-        android:name=".app.lock.LockScreenActivity2"
-        android:excludeFromRecents="true"
-        android:exported="false"
-        android:launchMode="singleInstance"
-        android:noHistory="true"
-        android:windowSoftInputMode="stateVisible"/>
 
     <!-- Accessibility Service -->
     <service
