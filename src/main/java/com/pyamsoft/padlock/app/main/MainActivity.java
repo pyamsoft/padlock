@@ -183,10 +183,13 @@ public class MainActivity extends DonationActivity
   @NonNull @Override public Spannable getChangeLogText() {
     // The changelog text
     final String title = "What's New in Version " + BuildConfig.VERSION_NAME;
-    final String line1 = "CHANGE: Removed Advertisements and Analytics tracking";
+    final String line1 = "CHANGE: Smaller application size";
+    final String line2 =
+        "BUGFIX: Fix a looping issue which caused the lockscreen to constantly re-launch";
+    final String line3 = "BUGFIX: Fix a crash in the LockInfoDialog";
 
     // Turn it into a spannable
-    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1);
+    final Spannable spannable = StringUtil.createLineBreakBuilder(title, line1, line2, line3);
 
     int start = 0;
     int end = title.length();
@@ -204,7 +207,7 @@ public class MainActivity extends DonationActivity
     StringUtil.colorSpan(spannable, start, end, largeColor);
 
     start += end + 2;
-    end += 2 + line1.length();
+    end += 2 + line1.length() + +2 + line2.length() + 2 + line3.length();
 
     StringUtil.sizeSpan(spannable, start, end, smallSize);
     StringUtil.colorSpan(spannable, start, end, smallColor);
