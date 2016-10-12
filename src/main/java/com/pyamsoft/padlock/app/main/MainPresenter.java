@@ -22,6 +22,8 @@ public interface MainPresenter extends Presenter<MainPresenter.MainView> {
 
   void showTermsDialog();
 
+  void agreeToTerms(boolean agreed);
+
   interface MainView {
 
     void showUsageTermsDialog();
