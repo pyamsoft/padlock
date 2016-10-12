@@ -213,28 +213,18 @@ public class PadLockDBTest {
     insertDummy(1);
     // Deletes will not fail, but they are only meant to be used internally
     TestSubscriber<Integer> testSubscriber = new TestSubscriber<>();
-    db.deleteWithPackageActivityNameUnguarded("TEST", "1")
-        .subscribeOn(subscribeScheduler)
-        .observeOn(observeScheduler)
-        .subscribe(testSubscriber);
-    testSubscriber.assertNoErrors();
-    testSubscriber.assertValueCount(1);
-    testSubscriber.assertValue(1);
-    assertEquals(0, db.getOpenCount());
 
-    insertDummy(1);
-    // Once opened from outside, DB must also be closed from outside
-    testSubscriber = new TestSubscriber<>();
-    db.openDatabase();
-    assertEquals(1, db.getOpenCount());
-    db.deleteWithPackageActivityNameUnguarded("TEST", "1")
-        .subscribeOn(subscribeScheduler)
-        .observeOn(observeScheduler)
-        .subscribe(testSubscriber);
-    testSubscriber.assertNoErrors();
-    testSubscriber.assertValueCount(1);
-    testSubscriber.assertValue(1);
-    assertEquals(1, db.getOpenCount());
+    // db instance is not initialized in unguarded
+
+    assertEquals(0, db.getOpenCount());
+    try {
+      db.deleteWithPackageActivityNameUnguarded("TEST", "1")
+          .subscribeOn(subscribeScheduler)
+          .observeOn(observeScheduler)
+          .subscribe(testSubscriber);
+    } catch (NullPointerException e) {
+      expected("Database is NULL when unguarded", e);
+    }
   }
 
   /**
