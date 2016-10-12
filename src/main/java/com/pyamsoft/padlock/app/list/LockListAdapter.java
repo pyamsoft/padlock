@@ -24,14 +24,16 @@ class LockListAdapter extends FastItemAdapter<LockListItem> implements LockListD
   @Override public void onDatabaseEntryCreated(int position) {
     final LockListItem oldItem = getItem(position);
     final LockListItem newItem =
-        new LockListItem(AppEntry.builder(oldItem.entry).locked(true).build(), oldItem.getListener());
+        new LockListItem(AppEntry.builder(oldItem.entry).locked(true).build(),
+            oldItem.getRequestListener(), oldItem.getModifyListener());
     set(position, newItem);
   }
 
   @Override public void onDatabaseEntryDeleted(int position) {
     final LockListItem oldItem = getItem(position);
     final LockListItem newItem =
-        new LockListItem(AppEntry.builder(oldItem.entry).locked(false).build(), oldItem.getListener());
+        new LockListItem(AppEntry.builder(oldItem.entry).locked(false).build(),
+            oldItem.getRequestListener(), oldItem.getModifyListener());
     set(position, newItem);
   }
 }

@@ -21,7 +21,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
-import com.pyamsoft.padlock.bus.DBProgressBus;
 import com.pyamsoft.padlock.bus.PinEntryBus;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
@@ -49,7 +48,6 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
   @NonNull private Subscription onboardSubscription = Subscriptions.empty();
   @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
-  @NonNull private Subscription dbProgressBus = Subscriptions.empty();
   @NonNull private Subscription databaseSubscription = Subscriptions.empty();
   @NonNull private Subscription zeroActivitySubscription = Subscriptions.empty();
 
@@ -64,39 +62,17 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @Override protected void onBind() {
     super.onBind();
     registerOnPinEntryBus();
-    registerOnDbProgressBus();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
     unregisterFromPinEntryBus();
-    unregisterFromDBProgressBus();
     unsubscribePopulateList();
     unsubscribeSystemVisible();
     unsubscribeZeroActivity();
     unsubscribeOnboard();
     unsubscribeFabSubscription();
     unsubDatabaseSubscription();
-  }
-
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnDbProgressBus() {
-    unregisterFromDBProgressBus();
-    dbProgressBus = DBProgressBus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(dbProgressEvent -> {
-          getView(lockList -> lockList.processDatabaseModifyEvent(dbProgressEvent.isChecked(),
-              dbProgressEvent.position(), dbProgressEvent.entry()));
-        }, throwable -> {
-          Timber.e(throwable, "onError registerOnDbProgressBus");
-        });
-  }
-
-  private void unregisterFromDBProgressBus() {
-    if (!dbProgressBus.isUnsubscribed()) {
-      dbProgressBus.unsubscribe();
-    }
   }
 
   @SuppressWarnings("WeakerAccess") void unsubscribePopulateList() {
