@@ -18,10 +18,8 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
-import com.pyamsoft.padlock.bus.PinEntryBus;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -43,7 +41,6 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
 
-  @NonNull private Subscription pinEntryBusSubscription = Subscriptions.empty();
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
   @NonNull private Subscription onboardSubscription = Subscriptions.empty();
@@ -59,14 +56,8 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     this.stateInteractor = stateInteractor;
   }
 
-  @Override protected void onBind() {
-    super.onBind();
-    registerOnPinEntryBus();
-  }
-
   @Override protected void onUnbind() {
     super.onUnbind();
-    unregisterFromPinEntryBus();
     unsubscribePopulateList();
     unsubscribeSystemVisible();
     unsubscribeZeroActivity();
@@ -258,41 +249,6 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
           Timber.e(throwable, "onError");
           getView(LockList::onListPopulateError);
         }, this::unsubscribeOnboard);
-  }
-
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnPinEntryBus() {
-    unregisterFromPinEntryBus();
-    pinEntryBusSubscription = PinEntryBus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(pinEntryEvent -> {
-          getView(lockList -> {
-            switch (pinEntryEvent.type()) {
-              case 0:
-                if (pinEntryEvent.complete()) {
-                  lockList.onCreateMasterPinSuccess();
-                } else {
-                  lockList.onCreateMasterPinFailure();
-                }
-                break;
-              case 1:
-                if (pinEntryEvent.complete()) {
-                  lockList.onClearMasterPinSuccess();
-                } else {
-                  lockList.onClearMasterPinFailure();
-                }
-            }
-          });
-        }, throwable -> {
-          Timber.e(throwable, "PinEntryBus onError");
-        });
-  }
-
-  private void unregisterFromPinEntryBus() {
-    if (!pinEntryBusSubscription.isUnsubscribed()) {
-      pinEntryBusSubscription.unsubscribe();
-    }
   }
 
   @Override public void setOnBoard() {
