@@ -37,14 +37,15 @@ import timber.log.Timber;
 
 class PadLockDBImpl implements PadLockDB {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final BriteDatabase briteDatabase;
+  @NonNull private final Scheduler dbScheduler;
   @NonNull private final AtomicInteger openCount;
   @NonNull private final PadLockOpenHelper openHelper;
+  @SuppressWarnings("WeakerAccess") BriteDatabase briteDatabase;
 
   @Inject PadLockDBImpl(@NonNull Context context, @NonNull Scheduler scheduler) {
     openHelper = new PadLockOpenHelper(context);
-    briteDatabase = SqlBrite.create().wrapDatabaseHelper(openHelper, scheduler);
     openCount = new AtomicInteger(0);
+    dbScheduler = scheduler;
   }
 
   @SuppressWarnings("WeakerAccess") @VisibleForTesting @CheckResult int getOpenCount() {
@@ -53,15 +54,21 @@ class PadLockDBImpl implements PadLockDB {
 
   @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
     Timber.d("Increment open count to: %d", openCount.incrementAndGet());
+    if (briteDatabase == null) {
+      briteDatabase = SqlBrite.create().wrapDatabaseHelper(openHelper, dbScheduler);
+    }
   }
 
   @SuppressWarnings("WeakerAccess") synchronized void closeDatabase() {
-    Timber.d("Decrement open count to: %d", openCount.decrementAndGet());
+    if (openCount.get() > 0) {
+      Timber.d("Decrement open count to: %d", openCount.decrementAndGet());
+    }
 
     if (openCount.get() == 0) {
       Timber.d("Close and recycle database connection");
       openCount.set(0);
       briteDatabase.close();
+      briteDatabase = null;
     }
   }
 
@@ -223,10 +230,11 @@ class PadLockDBImpl implements PadLockDB {
   }
 
   @Override public void deleteDatabase() {
+    closeDatabase();
     openHelper.deleteDatabase();
   }
 
-  static class PadLockOpenHelper extends SQLiteOpenHelper {
+  @SuppressWarnings("WeakerAccess") static class PadLockOpenHelper extends SQLiteOpenHelper {
 
     @NonNull private static final String DB_NAME = "padlock_db";
     private static final int DATABASE_VERSION = 4;

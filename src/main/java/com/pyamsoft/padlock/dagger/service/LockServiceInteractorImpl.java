@@ -21,8 +21,7 @@ import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity1;
-import com.pyamsoft.padlock.app.lock.LockScreenActivity2;
+import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.job.RecheckJob;
@@ -81,13 +80,11 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
       @NonNull String className) {
     return Observable.defer(() -> {
       final String lockScreenPackageName = PadLock.class.getPackage().getName();
-      final String lockScreen1ClassName = LockScreenActivity1.class.getName();
-      final String lockScreen2ClassName = LockScreenActivity2.class.getName();
+      final String lockScreenClassName = LockScreenActivity.class.getName();
 
       final boolean isPackage = packageName.equals(lockScreenPackageName);
-      final boolean lockScreen1 = isPackage && className.equals(lockScreen1ClassName);
-      final boolean lockScreen2 = isPackage && className.equals(lockScreen2ClassName);
-      return Observable.just(lockScreen1 || lockScreen2);
+      final boolean lockScreen = isPackage && className.equals(lockScreenClassName);
+      return Observable.just(lockScreen);
     });
   }
 

@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -38,18 +39,19 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.ErrorDialog;
+import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.activity.ActivityBase;
+import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroidrx.RXLoader;
 import java.util.Locale;
 import timber.log.Timber;
 
-public abstract class LockScreenActivity extends ActivityBase implements LockScreen {
+public class LockScreenActivity extends ActivityBase implements LockScreen {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
@@ -90,7 +92,7 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
   private boolean lockedSystem;
   private long ignoreUntilTime;
 
-  LockScreenActivity() {
+  public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
     home.addCategory(Intent.CATEGORY_HOME);
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -107,9 +109,10 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     }
   }
 
-  @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
+  @CallSuper @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
     super.onCreate(savedInstanceState);
+
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
@@ -238,8 +241,9 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
     getApplicationContext().startActivity(home);
   }
 
-  @Override protected void onDestroy() {
+  @CallSuper @Override protected void onDestroy() {
     super.onDestroy();
+
     Timber.d("onDestroy");
     if (!isChangingConfigurations()) {
       PersistentCache.get().unload(loadedKey);
@@ -271,6 +275,12 @@ public abstract class LockScreenActivity extends ActivityBase implements LockScr
       textView.setTextSize(14);
     }
     snackbar.show();
+  }
+
+  @Override public void onPostUnlock() {
+    Timber.d("POST Unlock Finished! 1");
+    PadLockService.passLockScreen();
+    finish();
   }
 
   @Override public void onLocked(long lockUntilTime) {
