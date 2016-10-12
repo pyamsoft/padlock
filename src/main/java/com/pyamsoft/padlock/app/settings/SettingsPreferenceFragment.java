@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.preference.Preference;
@@ -58,6 +59,14 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
                 presenter = persist;
               }
             });
+  }
+
+  @CheckResult @NonNull SettingsPreferencePresenter getPresenter() {
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
+
+    return presenter;
   }
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
