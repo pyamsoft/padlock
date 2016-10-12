@@ -20,7 +20,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.padlock.bus.AgreeTermsBus;
-import com.pyamsoft.padlock.bus.MainBus;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,7 +34,6 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
   @SuppressWarnings("WeakerAccess") @NonNull final MainInteractor interactor;
 
   @NonNull private Subscription agreeTermsBusSubscription = Subscriptions.empty();
-  @NonNull private Subscription refreshBus = Subscriptions.empty();
   @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
 
   @Inject MainPresenterImpl(@NonNull final MainInteractor interactor,
@@ -47,30 +45,12 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
   @Override protected void onBind() {
     super.onBind();
     registerOnAgreeTermsBus();
-    registerOnRefreshBus();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
     unregisterFromAgreeTermsBus();
-    unregisterFromRefreshBus();
     unsubscribeAgreeTerms();
-  }
-
-  @SuppressWarnings("WeakerAccess") void unregisterFromRefreshBus() {
-    if (!refreshBus.isUnsubscribed()) {
-      refreshBus.unsubscribe();
-    }
-  }
-
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnRefreshBus() {
-    unregisterFromRefreshBus();
-    refreshBus = MainBus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(refreshEvent -> getView(MainView::forceRefresh),
-            throwable -> Timber.e(throwable, "RefreshBus onError"), this::unregisterFromRefreshBus);
   }
 
   @Override public void showTermsDialog() {

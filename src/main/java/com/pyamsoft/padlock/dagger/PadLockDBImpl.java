@@ -67,8 +67,10 @@ class PadLockDBImpl implements PadLockDB {
     if (openCount.get() == 0) {
       Timber.d("Close and recycle database connection");
       openCount.set(0);
-      briteDatabase.close();
-      briteDatabase = null;
+      if (briteDatabase != null) {
+        briteDatabase.close();
+        briteDatabase = null;
+      }
     }
   }
 
