@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.list;
 
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -28,12 +29,8 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
-import com.pyamsoft.padlock.bus.DBProgressBus;
-import com.pyamsoft.padlock.bus.LockInfoDisplayBus;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.padlock.model.event.DBProgressEvent;
-import com.pyamsoft.padlock.model.event.LockInfoDisplayEvent;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -43,9 +40,22 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
   @NonNull final AppEntry entry;
+  @NonNull private final OnOpenDialogRequestListener requestListener;
+  @NonNull private final OnDatabaseModifyListener modifyListener;
 
-  LockListItem(@NonNull AppEntry entry) {
+  LockListItem(@NonNull AppEntry entry, @NonNull OnOpenDialogRequestListener requestListener,
+      @NonNull OnDatabaseModifyListener modifyListener) {
     this.entry = entry;
+    this.requestListener = requestListener;
+    this.modifyListener = modifyListener;
+  }
+
+  @NonNull @CheckResult OnOpenDialogRequestListener getRequestListener() {
+    return requestListener;
+  }
+
+  @NonNull @CheckResult OnDatabaseModifyListener getModifyListener() {
+    return modifyListener;
   }
 
   @Override public int getType() {
@@ -109,15 +119,25 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   private void accessPackage(int position, boolean isChecked) {
     // TODO app specific codes
-    DBProgressBus.get().post(DBProgressEvent.create(isChecked, position, entry));
+    modifyListener.onDatabaseModify(isChecked, position, entry);
   }
 
   private void openInfo() {
-    LockInfoDisplayBus.get().post(LockInfoDisplayEvent.create(entry));
+    requestListener.onOpenDialogRequest(entry);
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
     return FACTORY;
+  }
+
+  interface OnDatabaseModifyListener {
+
+    void onDatabaseModify(boolean lock, int position, @NonNull AppEntry entry);
+  }
+
+  interface OnOpenDialogRequestListener {
+
+    void onOpenDialogRequest(@NonNull AppEntry entry);
   }
 
   @SuppressWarnings("WeakerAccess") protected static class ItemFactory

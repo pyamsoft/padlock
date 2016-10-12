@@ -20,7 +20,6 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.app.lock.PinScreen;
-import com.pyamsoft.padlock.bus.PinEntryBus;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -30,7 +29,7 @@ import timber.log.Timber;
 
 class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinEntryPresenter {
 
-  @NonNull final AppIconLoaderPresenter<PinScreen> iconLoader;
+  @NonNull private final AppIconLoaderPresenter<PinScreen> iconLoader;
   @NonNull private final PinEntryInteractor interactor;
   @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
   @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
@@ -80,16 +79,14 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
         .filter(pinEntryEvent -> pinEntryEvent != null)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(pinEntryEvent -> {
-          PinEntryBus.get().post(pinEntryEvent);
-          getView(pinScreen -> {
-            if (pinEntryEvent.complete()) {
-              pinScreen.onSubmitSuccess();
-            } else {
-              pinScreen.onSubmitFailure();
-            }
-          });
-        }, throwable -> {
+        .subscribe(pinEntryEvent -> getView(pinScreen -> {
+          pinScreen.handOffPinEvent(pinEntryEvent);
+          if (pinEntryEvent.complete()) {
+            pinScreen.onSubmitSuccess();
+          } else {
+            pinScreen.onSubmitFailure();
+          }
+        }), throwable -> {
           Timber.e(throwable, "attemptPinSubmission onError");
           getView(PinScreen::onSubmitError);
         }, this::unsubPinEntry);

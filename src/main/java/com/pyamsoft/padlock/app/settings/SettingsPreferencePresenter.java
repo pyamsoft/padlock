@@ -25,6 +25,8 @@ public interface SettingsPreferencePresenter
 
   void requestClearDatabase();
 
+  void processClearRequest(int type);
+
   interface SettingsPreferenceView {
 
     void showConfirmDialog(int type);

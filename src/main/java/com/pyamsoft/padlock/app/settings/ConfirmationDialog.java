@@ -21,9 +21,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
-import com.pyamsoft.padlock.bus.ConfirmDialogBus;
-import com.pyamsoft.padlock.model.event.ConfirmationEvent;
 
 public class ConfirmationDialog extends DialogFragment {
   @NonNull private static final String WHICH = "which_type";
@@ -48,12 +48,24 @@ public class ConfirmationDialog extends DialogFragment {
         ? "Really clear entire database?\n\nYou will have to re-configure all locked applications again"
         : "Really clear all application settings?\n\nYou will have to manually restart the Accessibility Service component of PadLock")
         .setPositiveButton("Yes", (dialogInterface, i) -> {
+          sendConfirmationEvent(which);
           dialogInterface.dismiss();
-          ConfirmDialogBus.get().post(ConfirmationEvent.create(which));
         })
         .setNegativeButton("No", (dialogInterface, i) -> {
           dialogInterface.dismiss();
         })
         .create();
+  }
+
+  void sendConfirmationEvent(int which) {
+    final FragmentManager fragmentManager = getFragmentManager();
+    final Fragment settingsPreferenceFragment =
+        fragmentManager.findFragmentByTag(SettingsPreferenceFragment.TAG);
+    if (settingsPreferenceFragment instanceof SettingsPreferenceFragment) {
+      ((SettingsPreferenceFragment) settingsPreferenceFragment).getPresenter()
+          .processClearRequest(which);
+    } else {
+      throw new ClassCastException("Fragment is not SettingsPreferenceFragment");
+    }
   }
 }
