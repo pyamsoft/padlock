@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import javax.inject.Inject;
-import javax.inject.Named;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
@@ -41,8 +40,8 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
   @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
 
   @Inject LockServicePresenterImpl(@NonNull final LockServiceStateInteractor stateInteractor,
-      @NonNull final LockServiceInteractor interactor,
-      @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
+      @NonNull final LockServiceInteractor interactor, @NonNull Scheduler obsScheduler,
+      @NonNull Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
     this.stateInteractor = stateInteractor;
