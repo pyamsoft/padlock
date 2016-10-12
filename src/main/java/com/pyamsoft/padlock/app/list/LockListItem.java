@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.app.list;
 
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -29,11 +30,9 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.bus.DBProgressBus;
-import com.pyamsoft.padlock.bus.LockInfoDisplayBus;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.event.DBProgressEvent;
-import com.pyamsoft.padlock.model.event.LockInfoDisplayEvent;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -43,9 +42,15 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
   @NonNull final AppEntry entry;
+  @NonNull private final OnOpenDialogRequestListener listener;
 
-  LockListItem(@NonNull AppEntry entry) {
+  LockListItem(@NonNull AppEntry entry, @NonNull OnOpenDialogRequestListener listener) {
     this.entry = entry;
+    this.listener = listener;
+  }
+
+  @NonNull @CheckResult OnOpenDialogRequestListener getListener() {
+    return listener;
   }
 
   @Override public int getType() {
@@ -113,11 +118,16 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   }
 
   private void openInfo() {
-    LockInfoDisplayBus.get().post(LockInfoDisplayEvent.create(entry));
+    listener.onOpenDialogRequest(entry);
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
     return FACTORY;
+  }
+
+  interface OnOpenDialogRequestListener {
+
+    void onOpenDialogRequest(@NonNull AppEntry entry);
   }
 
   @SuppressWarnings("WeakerAccess") protected static class ItemFactory

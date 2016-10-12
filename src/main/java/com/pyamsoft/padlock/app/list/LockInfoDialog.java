@@ -36,9 +36,9 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.widget.DividerItemDecoration;
 import com.pyamsoft.pydroidrx.RXLoader;
@@ -213,7 +213,12 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
 
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
     Timber.d("Add entry: %s", entry);
-    fastItemAdapter.add(new LockInfoItem(appPackageName, entry));
+    fastItemAdapter.add(
+        new LockInfoItem(appPackageName, entry, (position, name, currentState, newState) -> {
+          Timber.d("Process lock state selection: [%d] %s from %s to %s", position, name,
+              currentState, newState);
+          processDatabaseModifyEvent(position, name, currentState, newState);
+        }));
   }
 
   @Override public void onListPopulated() {
@@ -291,7 +296,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     safeChangeToggleAllState(false);
   }
 
-  @Override public void processDatabaseModifyEvent(int position, @NonNull String activityName,
+  void processDatabaseModifyEvent(int position, @NonNull String activityName,
       @NonNull LockState previousLockState, @NonNull LockState newLockState) {
     Timber.d("Received a database modify event request for %s %s at %d [%s]", appPackageName,
         activityName, position, newLockState.name());
