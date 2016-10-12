@@ -70,9 +70,5 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
     void onEntryAddedToList(@NonNull AppEntry entry);
 
     void showOnBoarding();
-
-    void displayLockInfoDialog(@NonNull AppEntry entry);
-
-    void processDatabaseModifyEvent(boolean isChecked, int position, @NonNull AppEntry entry);
   }
 }

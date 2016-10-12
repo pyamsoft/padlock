@@ -472,4 +472,6 @@ public class PadLockDBTest {
     testSubscriber.assertValue(0);
     assertEquals(0, db.getOpenCount());
   }
+
+  // TODO Add test for clearing and then accessing again afterwards
 }

@@ -16,7 +16,12 @@
 
 package com.pyamsoft.padlock.app.lock;
 
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.model.event.PinEntryEvent;
+
 public interface PinScreen extends LockPresenter.LockView {
+
+  void handOffPinEvent(@NonNull PinEntryEvent event);
 
   void showExtraPinEntryViews();
 

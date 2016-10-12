@@ -26,6 +26,8 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
@@ -36,10 +38,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.list.LockListFragment;
+import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
+import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.app.PersistLoader;
-import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroidrx.RXLoader;
 import timber.log.Timber;
@@ -298,5 +303,34 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @Override public void onSubmitError() {
     clearDisplay();
     dismiss();
+  }
+
+  @Override public void handOffPinEvent(@NonNull PinEntryEvent event) {
+    final LockListPresenter.LockList lockList = getLockList();
+    switch (event.type()) {
+      case 0:
+        if (event.complete()) {
+          lockList.onCreateMasterPinSuccess();
+        } else {
+          lockList.onCreateMasterPinFailure();
+        }
+        break;
+      case 1:
+        if (event.complete()) {
+          lockList.onClearMasterPinSuccess();
+        } else {
+          lockList.onClearMasterPinFailure();
+        }
+    }
+  }
+
+  @CheckResult @NonNull LockListPresenter.LockList getLockList() {
+    final FragmentManager fragmentManager = getFragmentManager();
+    final Fragment lockListFragment = fragmentManager.findFragmentByTag(LockListFragment.TAG);
+    if (lockListFragment instanceof LockListPresenter.LockList) {
+      return (LockListPresenter.LockList) lockListFragment;
+    } else {
+      throw new ClassCastException("Fragment is not SettingsPreferenceFragment");
+    }
   }
 }

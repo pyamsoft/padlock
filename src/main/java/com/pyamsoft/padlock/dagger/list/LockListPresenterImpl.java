@@ -18,12 +18,8 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
-import com.pyamsoft.padlock.bus.DBProgressBus;
-import com.pyamsoft.padlock.bus.LockInfoDisplayBus;
-import com.pyamsoft.padlock.bus.PinEntryBus;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -45,13 +41,10 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
 
-  @NonNull private Subscription pinEntryBusSubscription = Subscriptions.empty();
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
   @NonNull private Subscription onboardSubscription = Subscriptions.empty();
   @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
-  @NonNull private Subscription dbProgressBus = Subscriptions.empty();
-  @NonNull private Subscription lockInfoDisplayBus = Subscriptions.empty();
   @NonNull private Subscription databaseSubscription = Subscriptions.empty();
   @NonNull private Subscription zeroActivitySubscription = Subscriptions.empty();
 
@@ -63,63 +56,14 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     this.stateInteractor = stateInteractor;
   }
 
-  @Override protected void onBind() {
-    super.onBind();
-    registerOnPinEntryBus();
-    registerOnDbProgressBus();
-    registerOnLockInfoDisplayBus();
-  }
-
   @Override protected void onUnbind() {
     super.onUnbind();
-    unregisterFromPinEntryBus();
-    unregisterFromDBProgressBus();
-    unregisterFromLockInfoDispalyBus();
     unsubscribePopulateList();
     unsubscribeSystemVisible();
     unsubscribeZeroActivity();
     unsubscribeOnboard();
     unsubscribeFabSubscription();
     unsubDatabaseSubscription();
-  }
-
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnLockInfoDisplayBus() {
-    unregisterFromLockInfoDispalyBus();
-    lockInfoDisplayBus = LockInfoDisplayBus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(lockInfoDisplayEvent -> {
-          getView(lockList -> lockList.displayLockInfoDialog(lockInfoDisplayEvent.entry()));
-        }, throwable -> {
-          Timber.e(throwable, "onError registerOnLockInfoDisplayBus");
-        });
-  }
-
-  private void unregisterFromLockInfoDispalyBus() {
-    if (!lockInfoDisplayBus.isUnsubscribed()) {
-      lockInfoDisplayBus.unsubscribe();
-    }
-  }
-
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnDbProgressBus() {
-    unregisterFromDBProgressBus();
-    dbProgressBus = DBProgressBus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(dbProgressEvent -> {
-          getView(lockList -> lockList.processDatabaseModifyEvent(dbProgressEvent.isChecked(),
-              dbProgressEvent.position(), dbProgressEvent.entry()));
-        }, throwable -> {
-          Timber.e(throwable, "onError registerOnDbProgressBus");
-        });
-  }
-
-  private void unregisterFromDBProgressBus() {
-    if (!dbProgressBus.isUnsubscribed()) {
-      dbProgressBus.unsubscribe();
-    }
   }
 
   @SuppressWarnings("WeakerAccess") void unsubscribePopulateList() {
@@ -185,7 +129,8 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
           return appEntries;
         })
         .flatMap(Observable::from)
-        .toSortedList((appEntry, appEntry2) -> appEntry.name().compareToIgnoreCase(appEntry2.name()))
+        .toSortedList(
+            (appEntry, appEntry2) -> appEntry.name().compareToIgnoreCase(appEntry2.name()))
         .concatMap(Observable::from)
         .filter(appEntry -> appEntry != null)
         .subscribeOn(getSubscribeScheduler())
@@ -304,41 +249,6 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
           Timber.e(throwable, "onError");
           getView(LockList::onListPopulateError);
         }, this::unsubscribeOnboard);
-  }
-
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnPinEntryBus() {
-    unregisterFromPinEntryBus();
-    pinEntryBusSubscription = PinEntryBus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(pinEntryEvent -> {
-          getView(lockList -> {
-            switch (pinEntryEvent.type()) {
-              case 0:
-                if (pinEntryEvent.complete()) {
-                  lockList.onCreateMasterPinSuccess();
-                } else {
-                  lockList.onCreateMasterPinFailure();
-                }
-                break;
-              case 1:
-                if (pinEntryEvent.complete()) {
-                  lockList.onClearMasterPinSuccess();
-                } else {
-                  lockList.onClearMasterPinFailure();
-                }
-            }
-          });
-        }, throwable -> {
-          Timber.e(throwable, "PinEntryBus onError");
-        });
-  }
-
-  private void unregisterFromPinEntryBus() {
-    if (!pinEntryBusSubscription.isUnsubscribed()) {
-      pinEntryBusSubscription.unsubscribe();
-    }
   }
 
   @Override public void setOnBoard() {
