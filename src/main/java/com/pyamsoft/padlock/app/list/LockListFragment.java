@@ -425,7 +425,8 @@ public class LockListFragment extends ActionBarFragment
       binding.applistSwipeRefresh.setRefreshing(true);
     }
 
-    fastItemAdapter.add(new LockListItem(entry, this::displayLockInfoDialog));
+    fastItemAdapter.add(
+        new LockListItem(entry, this::displayLockInfoDialog, this::processDatabaseModifyEvent));
   }
 
   @Override public void onListPopulateError() {
@@ -515,11 +516,10 @@ public class LockListFragment extends ActionBarFragment
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  @Override
-  public void processDatabaseModifyEvent(boolean isChecked, int position, @NonNull AppEntry entry) {
+  void processDatabaseModifyEvent(boolean lock, int position, @NonNull AppEntry entry) {
     Timber.d("Received a database modify event request for %s at %d [%s]", entry.packageName(),
-        position, isChecked ? "LOCK" : "NO LOCK");
-    presenter.modifyDatabaseEntry(isChecked, position, entry.packageName(), null, entry.system());
+        position, lock ? "LOCK" : "NO LOCK");
+    presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system());
   }
 
   void displayLockInfoDialog(@NonNull AppEntry entry) {
