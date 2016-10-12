@@ -117,6 +117,8 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     final Activity activity = getActivity();
     if (activity instanceof MainActivity) {
       ((MainActivity) activity).forceRefresh();
+    } else {
+      throw new ClassCastException("Activity is not MainActivity");
     }
   }
 

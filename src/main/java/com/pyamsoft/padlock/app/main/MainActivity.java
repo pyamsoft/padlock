@@ -66,6 +66,14 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
     setAppBarState();
   }
 
+  @CheckResult @NonNull MainPresenter getPresenter() {
+    if (presenter == null) {
+      throw new NullPointerException("MainPresenter is NULL");
+    }
+
+    return presenter;
+  }
+
   @Override protected int bindActivityToView() {
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
     return R.id.ad_view;

@@ -16,14 +16,13 @@
 
 package com.pyamsoft.padlock.app.main;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import com.pyamsoft.padlock.bus.AgreeTermsBus;
-import com.pyamsoft.padlock.model.event.AgreeTermsEvent;
 
 public class AgreeTermsDialog extends DialogFragment {
 
@@ -41,14 +40,23 @@ public class AgreeTermsDialog extends DialogFragment {
                 + " By continuing, you agree that forgetting the passcode used to lock your applications can lead to parts of your device becoming inaccessible,"
                 + " and that pyamsoft can not be held liable.")
         .setPositiveButton("I Understand", (dialogInterface, i) -> {
+          agreeToTerms(true);
           dialogInterface.dismiss();
-          AgreeTermsBus.get().post(AgreeTermsEvent.create(true));
         })
         .setNegativeButton("Cancel", (dialogInterface, i) -> {
+          agreeToTerms(false);
           dialogInterface.dismiss();
-          AgreeTermsBus.get().post(AgreeTermsEvent.create(false));
         })
         .setCancelable(false)
         .create();
+  }
+
+  void agreeToTerms(boolean agree) {
+    final Activity activity = getActivity();
+    if (activity instanceof MainActivity) {
+      ((MainActivity) activity).getPresenter().agreeToTerms(agree);
+    } else {
+      throw new ClassCastException("Activity is not MainActivity");
+    }
   }
 }

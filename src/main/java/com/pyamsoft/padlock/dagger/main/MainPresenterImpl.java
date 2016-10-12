@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.main.MainPresenter;
-import com.pyamsoft.padlock.bus.AgreeTermsBus;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -33,7 +31,6 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
 
   @SuppressWarnings("WeakerAccess") @NonNull final MainInteractor interactor;
 
-  @NonNull private Subscription agreeTermsBusSubscription = Subscriptions.empty();
   @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
 
   @Inject MainPresenterImpl(@NonNull final MainInteractor interactor,
@@ -44,12 +41,10 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
 
   @Override protected void onBind() {
     super.onBind();
-    registerOnAgreeTermsBus();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    unregisterFromAgreeTermsBus();
     unsubscribeAgreeTerms();
   }
 
@@ -68,32 +63,17 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
         }, this::unsubscribeAgreeTerms);
   }
 
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnAgreeTermsBus() {
-    unregisterFromAgreeTermsBus();
-    agreeTermsBusSubscription = AgreeTermsBus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(agreeTermsEvent -> {
-          if (agreeTermsEvent.agreed()) {
-            interactor.setAgreed();
-          } else {
-            getView(MainView::onDidNotAgreeToTerms);
-          }
-        }, throwable -> {
-          Timber.e(throwable, "AgreeTermsBus onError");
-        });
+  @Override public void agreeToTerms(boolean agreed) {
+    if (agreed) {
+      interactor.setAgreed();
+    } else {
+      getView(MainView::onDidNotAgreeToTerms);
+    }
   }
 
   @SuppressWarnings("WeakerAccess") void unsubscribeAgreeTerms() {
     if (!agreeTermsSubscription.isUnsubscribed()) {
       agreeTermsSubscription.unsubscribe();
-    }
-  }
-
-  private void unregisterFromAgreeTermsBus() {
-    if (!agreeTermsBusSubscription.isUnsubscribed()) {
-      agreeTermsBusSubscription.unsubscribe();
     }
   }
 }
