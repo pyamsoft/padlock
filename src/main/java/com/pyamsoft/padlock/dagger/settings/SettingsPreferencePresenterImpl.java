@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
-import com.pyamsoft.padlock.bus.ConfirmDialogBus;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import javax.inject.Inject;
 import rx.Scheduler;
@@ -34,7 +32,6 @@ class SettingsPreferencePresenterImpl
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_DATABASE = 0;
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_ALL = 1;
   @NonNull private final SettingsPreferenceInteractor interactor;
-  @NonNull private Subscription confirmBusSubscription = Subscriptions.empty();
   @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
 
   @Inject SettingsPreferencePresenterImpl(@NonNull SettingsPreferenceInteractor interactor,
@@ -45,12 +42,10 @@ class SettingsPreferencePresenterImpl
 
   @Override protected void onBind() {
     super.onBind();
-    registerOnConfirmEventBus();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    unregisterFromConfirmEventBus();
     unsubscribeConfirm();
   }
 
@@ -68,33 +63,17 @@ class SettingsPreferencePresenterImpl
     }
   }
 
-  private void unregisterFromConfirmEventBus() {
-    if (!confirmBusSubscription.isUnsubscribed()) {
-      confirmBusSubscription.unsubscribe();
+  @Override public void processClearRequest(int type) {
+    switch (type) {
+      case CONFIRM_DATABASE:
+        clearDatabase();
+        break;
+      case CONFIRM_ALL:
+        clearAll();
+        break;
+      default:
+        throw new IllegalStateException("Received invalid confirmation event type: " + type);
     }
-  }
-
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnConfirmEventBus() {
-    unregisterFromConfirmEventBus();
-    confirmBusSubscription = ConfirmDialogBus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(confirmationEvent -> {
-          switch (confirmationEvent.type()) {
-            case CONFIRM_DATABASE:
-              clearDatabase();
-              break;
-            case CONFIRM_ALL:
-              clearAll();
-              break;
-            default:
-              throw new IllegalStateException(
-                  "Received invalid confirmation event type: " + confirmationEvent.type());
-          }
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-        });
   }
 
   @SuppressWarnings("WeakerAccess") void clearAll() {
