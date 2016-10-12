@@ -19,10 +19,8 @@ package com.pyamsoft.padlock.dagger.list;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.list.LockInfoPresenter;
-import com.pyamsoft.padlock.bus.LockInfoSelectBus;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -45,7 +43,6 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
   @NonNull private Subscription databaseSubscription = Subscriptions.empty();
-  @NonNull private Subscription databaseBus = Subscriptions.empty();
 
   @Inject LockInfoPresenterImpl(@NonNull AppIconLoaderPresenter<LockInfoView> iconLoader,
       final @NonNull LockInfoInteractor lockInfoInteractor,
@@ -74,13 +71,11 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
   @Override protected void onBind() {
     super.onBind();
     getView(iconLoader::bindView);
-    registerOnDatabaseBus();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
     iconLoader.unbindView();
-    unregisterFromDBProgressBus();
     unsubDatabaseSubscription();
     unsubPopulateList();
     unsubAllInDB();
@@ -89,27 +84,6 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
   @Override protected void onDestroy() {
     super.onDestroy();
     iconLoader.destroy();
-  }
-
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") void registerOnDatabaseBus() {
-    unregisterFromDBProgressBus();
-    databaseBus = LockInfoSelectBus.get()
-        .register()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(lockInfoSelectEvent -> {
-          getView(lockInfoView -> lockInfoView.processDatabaseModifyEvent(
-              lockInfoSelectEvent.position(), lockInfoSelectEvent.activityName(),
-              lockInfoSelectEvent.previouslockState(), lockInfoSelectEvent.newlockState()));
-        }, throwable -> {
-          Timber.e(throwable, "onError registerOnDbProgressBus");
-        });
-  }
-
-  private void unregisterFromDBProgressBus() {
-    if (!databaseBus.isUnsubscribed()) {
-      databaseBus.unsubscribe();
-    }
   }
 
   @Override public void populateList(@NonNull String packageName) {

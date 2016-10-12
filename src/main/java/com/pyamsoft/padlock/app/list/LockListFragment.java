@@ -46,9 +46,9 @@ import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
+import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.widget.DividerItemDecoration;
 import com.pyamsoft.pydroidrx.RXLoader;
@@ -425,7 +425,7 @@ public class LockListFragment extends ActionBarFragment
       binding.applistSwipeRefresh.setRefreshing(true);
     }
 
-    fastItemAdapter.add(new LockListItem(entry));
+    fastItemAdapter.add(new LockListItem(entry, this::displayLockInfoDialog));
   }
 
   @Override public void onListPopulateError() {
@@ -522,7 +522,7 @@ public class LockListFragment extends ActionBarFragment
     presenter.modifyDatabaseEntry(isChecked, position, entry.packageName(), null, entry.system());
   }
 
-  @Override public void displayLockInfoDialog(@NonNull AppEntry entry) {
+  void displayLockInfoDialog(@NonNull AppEntry entry) {
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), LockInfoDialog.newInstance(entry),
         "lock_info");
   }

@@ -21,7 +21,6 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.ActivityEntry;
-import com.pyamsoft.padlock.model.LockState;
 
 public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {
 
@@ -46,8 +45,5 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
     void enableToggleAll();
 
     void disableToggleAll();
-
-    void processDatabaseModifyEvent(int position, @NonNull String activityName,
-        @NonNull LockState previousLockState, @NonNull LockState newLockState);
   }
 }
