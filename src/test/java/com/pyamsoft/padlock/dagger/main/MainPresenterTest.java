@@ -17,8 +17,6 @@
 package com.pyamsoft.padlock.dagger.main;
 
 import com.pyamsoft.padlock.app.main.MainPresenter;
-import com.pyamsoft.padlock.bus.MainBus;
-import com.pyamsoft.padlock.model.event.RefreshEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Before;
 import org.junit.Test;
@@ -97,56 +95,5 @@ public class MainPresenterTest {
     });
 
     presenter.showTermsDialog();
-  }
-
-  /**
-   * Make sure refresh is handled
-   */
-  @Test public void testForceRefresh() throws Exception {
-    assertNotNull(presenter);
-    assertFalse(presenter.isBound());
-
-    // KLUDGE Kind of ugly
-    final AtomicBoolean forcedRefresh = new AtomicBoolean(false);
-    presenter.bindView(new MainPresenter.MainView() {
-      @Override public void showUsageTermsDialog() {
-      }
-
-      @Override public void onDidNotAgreeToTerms() {
-
-      }
-
-      @Override public void forceRefresh() {
-        forcedRefresh.set(true);
-      }
-    });
-
-    assertFalse(forcedRefresh.get());
-    MainBus.get().post(RefreshEvent.create());
-    assertTrue(forcedRefresh.get());
-  }
-
-  /**
-   * Make sure any exceptions are swallowed
-   */
-  @Test public void testSwallowExceptionForceRefresh() throws Exception {
-    assertNotNull(presenter);
-    assertFalse(presenter.isBound());
-
-    presenter.bindView(new MainPresenter.MainView() {
-      @Override public void showUsageTermsDialog() {
-      }
-
-      @Override public void onDidNotAgreeToTerms() {
-
-      }
-
-      @Override public void forceRefresh() {
-        log("Throw exception, swallow with RX");
-        throw new RuntimeException("Should not be here");
-      }
-    });
-
-    MainBus.get().post(RefreshEvent.create());
   }
 }
