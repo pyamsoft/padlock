@@ -21,6 +21,10 @@ import android.support.annotation.Nullable;
 
 public interface PadLockPreferences {
 
+  @CheckResult boolean isLockInfoDialogOnBoard();
+
+  void setLockInfoDialogOnBoard();
+
   @CheckResult boolean isRecheckEnabled();
 
   @CheckResult long getDefaultIgnoreTime();

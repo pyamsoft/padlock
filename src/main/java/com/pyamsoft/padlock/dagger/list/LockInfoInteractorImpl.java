@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
@@ -29,12 +30,15 @@ import timber.log.Timber;
 
 class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInfoInteractor {
 
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject LockInfoInteractorImpl(PadLockDB padLockDB,
-      @NonNull PackageManagerWrapper packageManagerWrapper) {
+      @NonNull PackageManagerWrapper packageManagerWrapper,
+      @NonNull PadLockPreferences preferences) {
     super(padLockDB);
     this.packageManagerWrapper = packageManagerWrapper;
+    this.preferences = preferences;
   }
 
   @NonNull @Override public Observable<List<PadLockEntry.WithPackageName>> getActivityEntries(
@@ -77,5 +81,13 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
       // We return the original request
       return allCreate;
     });
+  }
+
+  @Override public void setShownOnBoarding() {
+    preferences.setLockInfoDialogOnBoard();
+  }
+
+  @NonNull @Override public Observable<Boolean> hasShownOnBoarding() {
+    return Observable.defer(() -> Observable.just(preferences.isLockInfoDialogOnBoard()));
   }
 }

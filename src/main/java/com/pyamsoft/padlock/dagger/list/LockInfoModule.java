@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
@@ -36,7 +37,7 @@ import rx.Scheduler;
   }
 
   @Provides LockInfoInteractor provideLockInfoInteractor(PadLockDB padLockDB,
-      PackageManagerWrapper packageManagerWrapper) {
-    return new LockInfoInteractorImpl(padLockDB, packageManagerWrapper);
+      PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences) {
+    return new LockInfoInteractorImpl(padLockDB, packageManagerWrapper, preferences);
   }
 }
