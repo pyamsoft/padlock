@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.list.LockInfoFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
@@ -47,9 +48,18 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   private ActivityMainBinding binding;
   private long loaderKey;
 
+  // KLUDGE When the Onboarding TapTargetView is shown, pressing the back button can result in crashing
+  // KLUDGE thus, we disable the back button while target is shown
+  private boolean backButtonEnabled = true;
+
+  public void setBackButtonEnabled(boolean backButtonEnabled) {
+    this.backButtonEnabled = backButtonEnabled;
+  }
+
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
     super.onCreate(savedInstanceState);
+    setBackButtonEnabled(true);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     loaderKey = PersistentCache.get()
@@ -112,6 +122,7 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
     supportInvalidateOptionsMenu();
     final FragmentManager fragmentManager = getSupportFragmentManager();
     if ((fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
         && fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) == null) || forceRefresh) {
       fragmentManager.beginTransaction()
@@ -145,12 +156,16 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   }
 
   @Override public void onBackPressed() {
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    final int backStackCount = fragmentManager.getBackStackEntryCount();
-    if (backStackCount > 0) {
-      fragmentManager.popBackStack();
+    if (backButtonEnabled) {
+      final FragmentManager fragmentManager = getSupportFragmentManager();
+      final int backStackCount = fragmentManager.getBackStackEntryCount();
+      if (backStackCount > 0) {
+        fragmentManager.popBackStack();
+      } else {
+        super.onBackPressed();
+      }
     } else {
-      super.onBackPressed();
+      Timber.w("Back button action is disabled due to onboarding");
     }
   }
 

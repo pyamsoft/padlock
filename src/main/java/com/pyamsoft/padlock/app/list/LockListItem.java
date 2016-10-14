@@ -20,6 +20,7 @@ import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -40,8 +41,8 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
   @NonNull final AppEntry entry;
-  @NonNull private final OnOpenDialogRequestListener requestListener;
-  @NonNull private final OnDatabaseModifyListener modifyListener;
+  @Nullable private OnDatabaseModifyListener modifyListener;
+  @Nullable private OnOpenDialogRequestListener requestListener;
 
   LockListItem(@NonNull AppEntry entry, @NonNull OnOpenDialogRequestListener requestListener,
       @NonNull OnDatabaseModifyListener modifyListener) {
@@ -51,10 +52,25 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   }
 
   @NonNull @CheckResult OnOpenDialogRequestListener getRequestListener() {
+    if (requestListener == null) {
+      throw new NullPointerException("RequestListener is NULL");
+    }
     return requestListener;
   }
 
+  void cleanup() {
+    modifyListener = null;
+    requestListener = null;
+  }
+
+  void setRequestListener(@NonNull OnOpenDialogRequestListener requestListener) {
+    this.requestListener = requestListener;
+  }
+
   @NonNull @CheckResult OnDatabaseModifyListener getModifyListener() {
+    if (modifyListener == null) {
+      throw new NullPointerException("Modify listener is NULL");
+    }
     return modifyListener;
   }
 
@@ -119,11 +135,15 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   private void accessPackage(int position, boolean isChecked) {
     // TODO app specific codes
-    modifyListener.onDatabaseModify(isChecked, position, entry);
+    if (modifyListener != null) {
+      modifyListener.onDatabaseModify(isChecked, position, entry);
+    }
   }
 
   private void openInfo() {
-    requestListener.onOpenDialogRequest(entry);
+    if (requestListener != null) {
+      requestListener.onOpenDialogRequest(entry);
+    }
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {

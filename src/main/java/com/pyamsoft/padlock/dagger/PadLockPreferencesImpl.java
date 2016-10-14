@@ -32,7 +32,8 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
   @NonNull private static final String MASTER_PASSWORD = "master_password";
   @NonNull private static final String HINT = "hint";
   @NonNull private static final String AGREED = "agreed";
-  @NonNull private static final String ONBOARD = "onboard_shown";
+  @NonNull private static final String LOCK_LIST_ONBOARD = "list_onboard";
+  @NonNull private static final String LOCK_DIALOG_ONBOARD = "dialog_onboard";
   @NonNull private final String ignoreTimeKey;
   @NonNull private final String ignoreTimeDefault;
   @NonNull private final String timeoutTimeKey;
@@ -60,6 +61,14 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
 
   @Override public void setHint(@Nullable String hint) {
     put(HINT, hint);
+  }
+
+  @Override public boolean isLockInfoDialogOnBoard() {
+    return get(LOCK_DIALOG_ONBOARD, false);
+  }
+
+  @Override public void setLockInfoDialogOnBoard() {
+    put(LOCK_DIALOG_ONBOARD, true);
   }
 
   @Override public boolean isRecheckEnabled() {
@@ -111,11 +120,11 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
   }
 
   @Override @CheckResult public boolean isOnBoard() {
-    return get(ONBOARD, false);
+    return get(LOCK_LIST_ONBOARD, false);
   }
 
   @Override public void setOnBoard() {
-    put(ONBOARD, true);
+    put(LOCK_LIST_ONBOARD, true);
   }
 
   @Override public void clearAll() {
