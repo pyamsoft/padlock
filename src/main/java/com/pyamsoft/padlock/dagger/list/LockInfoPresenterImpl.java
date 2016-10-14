@@ -27,6 +27,7 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;
@@ -43,6 +44,7 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
   @NonNull private Subscription databaseSubscription = Subscriptions.empty();
+  @NonNull private Subscription onboardSubscription = Subscriptions.empty();
 
   @Inject LockInfoPresenterImpl(@NonNull AppIconLoaderPresenter<LockInfoView> iconLoader,
       final @NonNull LockInfoInteractor lockInfoInteractor,
@@ -79,6 +81,7 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
     unsubDatabaseSubscription();
     unsubPopulateList();
     unsubAllInDB();
+    unsubscribeOnboard();
   }
 
   @Override protected void onDestroy() {
@@ -268,5 +271,31 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
 
   @Override public void loadApplicationIcon(@NonNull String packageName) {
     iconLoader.loadApplicationIcon(packageName);
+  }
+
+  @Override public void showOnBoarding() {
+    unsubscribeOnboard();
+    onboardSubscription = lockInfoInteractor.hasShownOnBoarding()
+        .delay(1, TimeUnit.SECONDS)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(onboard -> getView(lockList -> {
+          if (!onboard) {
+            lockList.showOnBoarding();
+          }
+        }), throwable -> {
+          Timber.e(throwable, "onError");
+          getView(LockInfoView::onListPopulateError);
+        }, this::unsubscribeOnboard);
+  }
+
+  @Override public void setOnBoard() {
+    lockInfoInteractor.setShownOnBoarding();
+  }
+
+  @SuppressWarnings("WeakerAccess") void unsubscribeOnboard() {
+    if (!onboardSubscription.isUnsubscribed()) {
+      onboardSubscription.unsubscribe();
+    }
   }
 }

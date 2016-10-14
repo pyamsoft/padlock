@@ -43,4 +43,17 @@
   <string name="stat_real_name">Name:</string>
   <string name="stat_locked_by">Locked by Entry:</string>
   <string name="stat_system">Is System Application:</string>
+
+  <string name="onboard_title_locklist">Lock Entire Groups</string>
+  <string name="onboard_desc_locklist">Locks applications based on the app that they were installed with</string>
+  <string name="onboard_title_settings">Configure PadLock</string>
+  <string name="onboard_desc_settings">Various settings which control how PadLock behaves</string>
+  <string name="onboard_title_info_toggle">Toggle All Activities</string>
+  <string name="onboard_desc_info_toggle">Toggle all activities to either the locked or default state</string>
+  <string name="onboard_title_info_lock_default">Default Lock State</string>
+  <string name="onboard_desc_info_lock_default">Locking is controlled by package. If the package is locked (from the list) this activity will lock too</string>
+  <string name="onboard_title_info_lock_white">Whitelisted Lock State</string>
+  <string name="onboard_desc_info_lock_white">Locking, even by package is ignored. This activity will never be locked</string>
+  <string name="onboard_title_info_lock_black">Blacklisted Lock State</string>
+  <string name="onboard_desc_info_lock_black">Always lock this activity, even if the package is not locked</string>
 </resources>

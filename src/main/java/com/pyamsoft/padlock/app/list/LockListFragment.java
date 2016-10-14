@@ -66,7 +66,6 @@ public class LockListFragment extends ActionBarFragment
   @SuppressWarnings("WeakerAccess") LockListAdapter fastItemAdapter;
   @SuppressWarnings("WeakerAccess") LockListLayoutManager lockListLayoutManager;
   @SuppressWarnings("WeakerAccess") LockListPresenter presenter;
-  @SuppressWarnings("WeakerAccess") boolean firstRefresh;
   @SuppressWarnings("WeakerAccess") FragmentApplistBinding binding;
   @NonNull private final Runnable startRefreshRunnable = new Runnable() {
     @Override public void run() {
@@ -90,11 +89,12 @@ public class LockListFragment extends ActionBarFragment
       }
     }
   };
+  @SuppressWarnings("WeakerAccess") boolean forceRefresh;
   private MenuItem displaySystemItem;
   private MenuItem displayZeroActivityItem;
   private long loadedPresenterKey;
   private long loadedAdapterKey;
-  private TapTargetSequence sequence;
+  @Nullable private TapTargetSequence sequence;
 
   @CheckResult @NonNull public static LockListFragment newInstance(boolean forceRefresh) {
     final LockListFragment fragment = new LockListFragment();
@@ -111,7 +111,7 @@ public class LockListFragment extends ActionBarFragment
     loadedPresenterKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
           @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
-            firstRefresh = true;
+            forceRefresh = true;
             return new LockListPresenterLoader(getContext());
           }
 
@@ -148,7 +148,7 @@ public class LockListFragment extends ActionBarFragment
     final boolean forceRefresh = getArguments().getBoolean("FORCE_REFRESH", false);
     if (forceRefresh) {
       Timber.d("Force a list refresh");
-      firstRefresh = true;
+      this.forceRefresh = true;
     }
 
     setupRecyclerView();
@@ -162,10 +162,13 @@ public class LockListFragment extends ActionBarFragment
     presenter.bindView(this);
 
     presenter.setFABStateFromPreference();
-    if (firstRefresh) {
+    if (forceRefresh) {
       Timber.d("Do initial refresh");
-      firstRefresh = false;
+      forceRefresh = false;
       refreshList();
+    } else {
+      Timber.d("We are already refreshed, just refresh the request listeners");
+      applyUpdatedRequestListeners();
     }
   }
 
@@ -364,6 +367,12 @@ public class LockListFragment extends ActionBarFragment
     AppUtil.setupFABBehavior(binding.applistFab, new HideScrollFABBehavior(24));
   }
 
+  private void applyUpdatedRequestListeners() {
+    for (final LockListItem item : fastItemAdapter.getAdapterItems()) {
+      item.setRequestListener(this::displayLockInfoDialog);
+    }
+  }
+
   @Override public void setFABStateEnabled() {
     final AsyncMap.Entry fabIconTask = AsyncDrawable.with(getContext())
         .load(R.drawable.ic_lock_outline_24dp, new RXLoader())
@@ -437,38 +446,51 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
-    final TapTarget fabTarget =
-        TapTarget.forView(binding.applistFab, getString(R.string.getting_started),
-            getString(R.string.getting_started_desc)).cancelable(false).tintTarget(false);
-
-    // If we use the first item we get a weird location, try a different item
-    final View listTargetView =
-        binding.applistRecyclerview.findViewHolderForAdapterPosition(1).itemView;
-    final TapTarget listTarget =
-        TapTarget.forView(listTargetView, "Look here", "Wowie").cancelable(false);
-
-    final TapTarget settingsTarget =
-        TapTarget.forView(getSettingsMenuItemView(), "Options", "Do things")
-            .cancelable(false)
-            .dimColor(android.R.color.white)
-            .outerCircleColor(R.color.blue500)
-            .targetCircleColor(android.R.color.white)
-            .textColor(android.R.color.white);
-
-    // Hold a ref to the sequence or Activity will recycle bitmaps and crash
     if (sequence == null) {
-      sequence = new TapTargetSequence(getActivity()).targets(fabTarget, listTarget, settingsTarget)
-          .listener(new TapTargetSequence.Listener() {
-            @Override public void onSequenceFinish() {
-              if (presenter != null) {
-                presenter.setOnBoard();
-              }
-            }
+      final TapTarget fabTarget =
+          TapTarget.forView(binding.applistFab, getString(R.string.getting_started),
+              getString(R.string.getting_started_desc)).cancelable(false).tintTarget(false);
 
-            @Override public void onSequenceCanceled() {
+      // If we use the first item we get a weird location, try a different item
+      TapTarget listTarget = null;
+      final LockListItem.ViewHolder holder =
+          (LockListItem.ViewHolder) binding.applistRecyclerview.findViewHolderForAdapterPosition(1);
+      if (holder != null) {
+        final View switchView = holder.binding.lockListToggle;
+        listTarget = TapTarget.forView(switchView, getString(R.string.onboard_title_locklist),
+            getString(R.string.onboard_desc_locklist)).tintTarget(false).cancelable(false);
+      }
 
-            }
-          });
+      final TapTarget settingsTarget =
+          TapTarget.forView(getSettingsMenuItemView(), getString(R.string.onboard_title_settings),
+              getString(R.string.onboard_desc_settings))
+              .cancelable(false)
+              .dimColor(android.R.color.white)
+              .outerCircleColor(R.color.blue500)
+              .targetCircleColor(android.R.color.white)
+              .textColor(android.R.color.white);
+
+      // Hold a ref to the sequence or Activity will recycle bitmaps and crash
+      sequence = new TapTargetSequence(getActivity());
+      if (fabTarget != null) {
+        sequence.target(fabTarget);
+      }
+      if (listTarget != null) {
+        sequence.target(listTarget);
+      }
+      sequence.target(settingsTarget);
+
+      sequence.listener(new TapTargetSequence.Listener() {
+        @Override public void onSequenceFinish() {
+          if (presenter != null) {
+            presenter.setOnBoard();
+          }
+        }
+
+        @Override public void onSequenceCanceled() {
+
+        }
+      });
     }
 
     sequence.start();
@@ -476,7 +498,7 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onListCleared() {
     Timber.d("Prepare for refresh");
-    firstRefresh = true;
+    forceRefresh = true;
 
     Timber.d("onListCleared");
     handler.post(startRefreshRunnable);
@@ -489,9 +511,10 @@ public class LockListFragment extends ActionBarFragment
     handler.post(() -> binding.applistFab.show());
 
     Timber.d("We have refreshed");
-    firstRefresh = false;
+    forceRefresh = false;
 
     presenter.showOnBoarding();
+    applyUpdatedRequestListeners();
   }
 
   @Override public void refreshList() {
@@ -523,7 +546,12 @@ public class LockListFragment extends ActionBarFragment
   }
 
   void displayLockInfoDialog(@NonNull AppEntry entry) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), LockInfoDialog.newInstance(entry),
-        "lock_info");
+    final FragmentManager fragmentManager = getFragmentManager();
+    if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
+      fragmentManager.beginTransaction()
+          .add(R.id.main_view_container, LockInfoFragment.newInstance(entry), LockInfoFragment.TAG)
+          .addToBackStack(null)
+          .commit();
+    }
   }
 }

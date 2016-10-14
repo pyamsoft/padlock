@@ -37,6 +37,10 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
   void modifyDatabaseGroup(boolean allCreate, @NonNull String packageName, @Nullable String code,
       boolean system);
 
+  void showOnBoarding();
+
+  void setOnBoard();
+
   interface LockInfoView extends LockListCommon, AppIconLoaderView, LockListDatabaseErrorView,
       LockListDatabaseWhitelistView {
 
@@ -45,5 +49,7 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
     void enableToggleAll();
 
     void disableToggleAll();
+
+    void showOnBoarding();
   }
 }
