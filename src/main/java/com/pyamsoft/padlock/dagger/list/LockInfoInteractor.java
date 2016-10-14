@@ -35,4 +35,8 @@ interface LockInfoInteractor extends LockCommonInteractor {
    */
   @CheckResult @NonNull Observable<Boolean> modifyDatabaseGroup(boolean allCreate,
       @NonNull String packageName, @Nullable String code, boolean system);
+
+  void setShownOnBoarding();
+
+  @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding();
 }

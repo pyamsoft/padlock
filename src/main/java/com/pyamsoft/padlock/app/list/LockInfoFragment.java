@@ -16,56 +16,57 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.annotation.SuppressLint;
-import android.app.Dialog;
+import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.app.AlertDialog;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.databinding.DialogLockinfoBinding;
+import com.pyamsoft.padlock.app.main.MainActivity;
+import com.pyamsoft.padlock.databinding.FragmentLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncMap;
+import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.widget.DividerItemDecoration;
-import com.pyamsoft.pydroidrx.RXLoader;
 import timber.log.Timber;
 
-public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.LockInfoView {
+public class LockInfoFragment extends ActionBarFragment implements LockInfoPresenter.LockInfoView {
 
+  @NonNull public static final String TAG = "LockInfoDialog";
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
   @NonNull private static final String ARG_APP_NAME = "app_name";
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
   @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
-  @NonNull private final AsyncDrawable.Mapper taskMap = new AsyncDrawable.Mapper();
 
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") LockInfoAdapter fastItemAdapter;
   @SuppressWarnings("WeakerAccess") boolean firstRefresh;
-  private DialogLockinfoBinding binding;
+  private FragmentLockinfoBinding binding;
   private long loadedPresenterKey;
   private long loadedAdapterKey;
 
   private String appPackageName;
   private String appName;
   private boolean appIsSystem;
+  @Nullable private TapTargetSequence sequence;
 
-  public static LockInfoDialog newInstance(final @NonNull AppEntry appEntry) {
-    final LockInfoDialog fragment = new LockInfoDialog();
+  public static LockInfoFragment newInstance(final @NonNull AppEntry appEntry) {
+    final LockInfoFragment fragment = new LockInfoFragment();
     final Bundle args = new Bundle();
 
     args.putString(ARG_APP_PACKAGE_NAME, appEntry.packageName());
@@ -114,27 +115,62 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
         });
   }
 
-  @SuppressLint("InflateParams") @NonNull @Override
-  public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+  @Nullable @Override
+  public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
     binding =
-        DataBindingUtil.inflate(LayoutInflater.from(getActivity()), R.layout.dialog_lockinfo, null,
-            false);
-    initializeForEntry();
-    return new AlertDialog.Builder(getActivity()).setView(binding.getRoot()).create();
+        DataBindingUtil.inflate(LayoutInflater.from(getActivity()), R.layout.fragment_lockinfo,
+            null, false);
+    return binding.getRoot();
+  }
+
+  @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    final ActionBar actionBar = getActionBar();
+    if (actionBar != null) {
+      actionBar.setTitle(appName);
+    }
+
+    binding.lockInfoPackageName.setText(appPackageName);
+    binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
+
+    // Recycler setup
+    final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+    final RecyclerView.ItemDecoration dividerDecoration =
+        new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST);
+
+    binding.lockInfoRecycler.setLayoutManager(layoutManager);
+    binding.lockInfoRecycler.addItemDecoration(dividerDecoration);
   }
 
   @Override public void onDestroyView() {
     super.onDestroyView();
+    final ActionBar actionBar = getActionBar();
+    if (actionBar != null) {
+      actionBar.setTitle(R.string.app_name);
+    }
+    setActionBarUpEnabled(false);
 
-    // KLUDGE If dialog is killed with back button, it may not have finished adding all of the individual
-    // KLUDGE entries from the Toggle All
-
+    clearListListeners();
     binding.lockInfoRecycler.setOnClickListener(null);
     binding.lockInfoRecycler.setLayoutManager(null);
     binding.lockInfoRecycler.setAdapter(null);
-
-    taskMap.clear();
     binding.unbind();
+  }
+
+  private void clearListListeners() {
+    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
+    if (oldSize <= 0) {
+      Timber.w("List is already empty");
+      return;
+    }
+
+    for (int i = oldSize; i >= 0; --i) {
+      final LockInfoItem item = fastItemAdapter.getAdapterItem(i);
+      if (item != null) {
+        item.cleanup();
+      }
+    }
   }
 
   @Override public void onDestroy() {
@@ -154,6 +190,19 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     presenter.setToggleAllState(appPackageName);
     if (firstRefresh) {
       refreshList();
+    } else {
+      Timber.d("We are already refreshed, just refresh the request listeners");
+      applyUpdatedRequestListeners();
+    }
+  }
+
+  private void applyUpdatedRequestListeners() {
+    for (final LockInfoItem item : fastItemAdapter.getAdapterItems()) {
+      item.setListener((position, name, currentState, newState) -> {
+        Timber.d("Process lock state selection: [%d] %s from %s to %s", position, name,
+            currentState, newState);
+        processDatabaseModifyEvent(position, name, currentState, newState);
+      });
     }
   }
 
@@ -162,45 +211,37 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     presenter.unbindView();
   }
 
+  @Override public void onResume() {
+    super.onResume();
+    setActionBarUpEnabled(true);
+  }
+
   @Override public void onSaveInstanceState(Bundle outState) {
     PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
     PersistentCache.get().saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
     super.onSaveInstanceState(outState);
   }
 
-  private void initializeForEntry() {
-    ViewCompat.setElevation(binding.lockInfoFauxbar, AppUtil.convertToDP(getContext(), 4));
-    binding.lockInfoClose.setOnClickListener(view -> {
-      // Only close if list is displayed
-      if (binding.lockInfoRecycler.isClickable()) {
-        dismiss();
+  void clearList() {
+    setBackButtonEnabled(false);
+
+    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
+    if (oldSize <= 0) {
+      Timber.w("List is already empty");
+      return;
+    }
+
+    for (int i = oldSize; i >= 0; --i) {
+      final LockInfoItem item = fastItemAdapter.getItem(i);
+      if (item != null) {
+        item.cleanup();
       }
-    });
-
-    final AsyncMap.Entry task = AsyncDrawable.with(getContext())
-        .load(R.drawable.ic_close_24dp, new RXLoader())
-        .into(binding.lockInfoClose);
-    taskMap.put("close", task);
-
-    binding.lockInfoTitle.setText(appName);
-    binding.lockInfoPackageName.setText(appPackageName);
-    binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
-
-    // Recycler setup
-    final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-    final RecyclerView.ItemDecoration dividerDecoration =
-        new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST);
-
-    binding.lockInfoRecycler.setLayoutManager(layoutManager);
-    binding.lockInfoRecycler.addItemDecoration(dividerDecoration);
+      fastItemAdapter.remove(i);
+    }
   }
 
   @Override public void refreshList() {
-    final int oldSize = fastItemAdapter.getItemCount() - 1;
-    for (int i = oldSize; i >= 0; --i) {
-      fastItemAdapter.remove(i);
-    }
-
+    clearList();
     onListCleared();
     repopulateList();
   }
@@ -223,13 +264,24 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
 
   @Override public void onListPopulated() {
     Timber.d("Refresh finished");
+    setBackButtonEnabled(true);
     binding.lockInfoRecycler.setClickable(true);
+    presenter.showOnBoarding();
   }
 
   @Override public void onListPopulateError() {
     Timber.e("onListPopulateError");
     onListPopulated();
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
+  }
+
+  void setBackButtonEnabled(boolean enabled) {
+    final Activity activity = getActivity();
+    if (activity instanceof MainActivity) {
+      ((MainActivity) activity).setBackButtonEnabled(enabled);
+    } else {
+      throw new ClassCastException("Activity is not MainActivity");
+    }
   }
 
   @Override public void onListCleared() {
@@ -279,10 +331,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
       binding.lockInfoRecycler.setClickable(false);
 
       // Clear All
-      final int oldSize = fastItemAdapter.getItemCount() - 1;
-      for (int i = oldSize; i >= 0; --i) {
-        fastItemAdapter.remove(i);
-      }
+      clearList();
 
       presenter.modifyDatabaseGroup(isChecked, appPackageName, null, appIsSystem);
     });
@@ -294,6 +343,76 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
 
   @Override public void disableToggleAll() {
     safeChangeToggleAllState(false);
+  }
+
+  @Override public void showOnBoarding() {
+    Timber.d("Show onboarding");
+    if (sequence == null) {
+      final TapTarget toggleTarget = TapTarget.forView(binding.lockInfoToggleall,
+          getString(R.string.onboard_title_info_toggle),
+          getString(R.string.onboard_desc_info_toggle)).cancelable(false).tintTarget(false);
+
+      // If we use the first item we get a weird location, try a different item
+      final LockInfoItem.ViewHolder holder =
+          (LockInfoItem.ViewHolder) binding.lockInfoRecycler.findViewHolderForAdapterPosition(0);
+      TapTarget lockDefaultTarget = null;
+      TapTarget lockWhiteTarget = null;
+      TapTarget lockBlackTarget = null;
+      if (holder != null) {
+        final View radioDefault = holder.binding.lockInfoRadioDefault;
+        lockDefaultTarget =
+            TapTarget.forView(radioDefault, getString(R.string.onboard_title_info_lock_default),
+                getString(R.string.onboard_desc_info_lock_default))
+                .tintTarget(false)
+                .cancelable(false);
+
+        final View radioWhite = holder.binding.lockInfoRadioWhite;
+        lockWhiteTarget =
+            TapTarget.forView(radioWhite, getString(R.string.onboard_title_info_lock_white),
+                getString(R.string.onboard_desc_info_lock_white))
+                .tintTarget(false)
+                .cancelable(false);
+
+        final View radioBlack = holder.binding.lockInfoRadioBlack;
+        lockBlackTarget =
+            TapTarget.forView(radioBlack, getString(R.string.onboard_title_info_lock_black),
+                getString(R.string.onboard_desc_info_lock_black))
+                .tintTarget(false)
+                .cancelable(false);
+      }
+
+      // Hold a ref to the sequence or Activity will recycle bitmaps and crash
+      sequence = new TapTargetSequence(getActivity());
+      if (toggleTarget != null) {
+        sequence.target(toggleTarget);
+      }
+      if (lockDefaultTarget != null) {
+        sequence.target(lockDefaultTarget);
+      }
+      if (lockWhiteTarget != null) {
+        sequence.target(lockWhiteTarget);
+      }
+
+      if (lockBlackTarget != null) {
+        sequence.target(lockBlackTarget);
+      }
+
+      sequence.listener(new TapTargetSequence.Listener() {
+        @Override public void onSequenceFinish() {
+          if (presenter != null) {
+            presenter.setOnBoard();
+          }
+          setBackButtonEnabled(true);
+        }
+
+        @Override public void onSequenceCanceled() {
+          setBackButtonEnabled(true);
+        }
+      });
+    }
+
+    setBackButtonEnabled(false);
+    sequence.start();
   }
 
   void processDatabaseModifyEvent(int position, @NonNull String activityName,

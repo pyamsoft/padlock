@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.app.list;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import com.mikepenz.fastadapter.items.AbstractItem;
@@ -34,7 +35,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
   @NonNull final String packageName;
   @NonNull final ActivityEntry entry;
-  @SuppressWarnings("WeakerAccess") @NonNull final OnLockStateChangeListener listener;
+  @SuppressWarnings("WeakerAccess") @Nullable OnLockStateChangeListener listener;
 
   LockInfoItem(@NonNull String packageName, @NonNull ActivityEntry entry,
       @NonNull OnLockStateChangeListener listener) {
@@ -52,7 +53,18 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
   }
 
   @NonNull @CheckResult OnLockStateChangeListener getListener() {
+    if (listener == null) {
+      throw new NullPointerException("Lister is NULL");
+    }
     return listener;
+  }
+
+  void setListener(@Nullable OnLockStateChangeListener listener) {
+    this.listener = listener;
+  }
+
+  void cleanup() {
+    listener = null;
   }
 
   @Override public void bindView(ViewHolder holder, List payloads) {
@@ -84,22 +96,28 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
     holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        listener.onLockStateChange(holder.getAdapterPosition(), entryName, entry.lockState(),
-            LockState.DEFAULT);
+        if (listener != null) {
+          listener.onLockStateChange(holder.getAdapterPosition(), entryName, entry.lockState(),
+              LockState.DEFAULT);
+        }
       }
     });
 
     holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        listener.onLockStateChange(holder.getAdapterPosition(), entryName, entry.lockState(),
-            LockState.WHITELISTED);
+        if (listener != null) {
+          listener.onLockStateChange(holder.getAdapterPosition(), entryName, entry.lockState(),
+              LockState.WHITELISTED);
+        }
       }
     });
 
     holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener((compoundButton, b) -> {
       if (b) {
-        listener.onLockStateChange(holder.getAdapterPosition(), entryName, entry.lockState(),
-            LockState.LOCKED);
+        if (listener != null) {
+          listener.onLockStateChange(holder.getAdapterPosition(), entryName, entry.lockState(),
+              LockState.LOCKED);
+        }
       }
     });
   }
