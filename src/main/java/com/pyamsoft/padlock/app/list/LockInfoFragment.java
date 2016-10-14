@@ -151,6 +151,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     }
     setActionBarUpEnabled(false);
 
+    clearList();
     binding.lockInfoRecycler.setOnClickListener(null);
     binding.lockInfoRecycler.setLayoutManager(null);
     binding.lockInfoRecycler.setAdapter(null);
@@ -193,12 +194,23 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     super.onSaveInstanceState(outState);
   }
 
-  @Override public void refreshList() {
-    final int oldSize = fastItemAdapter.getItemCount() - 1;
-    for (int i = oldSize; i >= 0; --i) {
-      fastItemAdapter.remove(i);
+  void clearList() {
+    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
+    if (oldSize <= 0) {
+      Timber.w("List is already empty");
+      return;
     }
 
+    for (int i = oldSize; i >= 0; --i) {
+      final LockInfoItem item = fastItemAdapter.getItem(i);
+      if (item != null) {
+        item.cleanup();
+      }
+      fastItemAdapter.remove(i);
+    }
+  }
+
+  @Override public void refreshList() {
     onListCleared();
     repopulateList();
   }
@@ -289,10 +301,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
       binding.lockInfoRecycler.setClickable(false);
 
       // Clear All
-      final int oldSize = fastItemAdapter.getItemCount() - 1;
-      for (int i = oldSize; i >= 0; --i) {
-        fastItemAdapter.remove(i);
-      }
+      clearList();
 
       presenter.modifyDatabaseGroup(isChecked, appPackageName, null, appIsSystem);
     });

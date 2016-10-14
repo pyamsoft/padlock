@@ -343,6 +343,7 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onDestroyView() {
     super.onDestroyView();
 
+    clearList();
     binding.applistRecyclerview.setOnClickListener(null);
     binding.applistRecyclerview.setLayoutManager(null);
     binding.applistRecyclerview.setAdapter(null);
@@ -517,11 +518,24 @@ public class LockListFragment extends ActionBarFragment
     applyUpdatedRequestListeners();
   }
 
-  @Override public void refreshList() {
-    final int oldSize = fastItemAdapter.getItemCount() - 1;
+  void clearList() {
+    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
+    if (oldSize <= 0) {
+      Timber.w("List is already empty");
+      return;
+    }
+
     for (int i = oldSize; i >= 0; --i) {
+      final LockListItem item = fastItemAdapter.getAdapterItem(i);
+      if (item != null) {
+        item.cleanup();
+      }
       fastItemAdapter.remove(i);
     }
+  }
+
+  @Override public void refreshList() {
+    clearList();
 
     onListCleared();
     presenter.populateList();
