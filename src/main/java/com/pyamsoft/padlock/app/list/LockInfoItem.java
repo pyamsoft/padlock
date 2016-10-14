@@ -59,6 +59,10 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     return listener;
   }
 
+  void setListener(@Nullable OnLockStateChangeListener listener) {
+    this.listener = listener;
+  }
+
   void cleanup() {
     listener = null;
   }

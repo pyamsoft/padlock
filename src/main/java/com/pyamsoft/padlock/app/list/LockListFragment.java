@@ -172,6 +172,12 @@ public class LockListFragment extends ActionBarFragment
     }
   }
 
+  private void applyUpdatedRequestListeners() {
+    for (final LockListItem item : fastItemAdapter.getAdapterItems()) {
+      item.setRequestListener(this::displayLockInfoDialog);
+    }
+  }
+
   @Override public void onStop() {
     super.onStop();
     presenter.unbindView();
@@ -343,7 +349,7 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onDestroyView() {
     super.onDestroyView();
 
-    clearList();
+    clearListListeners();
     binding.applistRecyclerview.setOnClickListener(null);
     binding.applistRecyclerview.setLayoutManager(null);
     binding.applistRecyclerview.setAdapter(null);
@@ -353,6 +359,21 @@ public class LockListFragment extends ActionBarFragment
     taskMap.clear();
     handler.removeCallbacksAndMessages(null);
     binding.unbind();
+  }
+
+  private void clearListListeners() {
+    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
+    if (oldSize <= 0) {
+      Timber.w("List is already empty");
+      return;
+    }
+
+    for (int i = oldSize; i >= 0; --i) {
+      final LockListItem item = fastItemAdapter.getAdapterItem(i);
+      if (item != null) {
+        item.cleanup();
+      }
+    }
   }
 
   @Override public void onDestroy() {
@@ -366,12 +387,6 @@ public class LockListFragment extends ActionBarFragment
   private void setupFAB() {
     binding.applistFab.setOnClickListener(view -> presenter.clickPinFAB());
     AppUtil.setupFABBehavior(binding.applistFab, new HideScrollFABBehavior(24));
-  }
-
-  private void applyUpdatedRequestListeners() {
-    for (final LockListItem item : fastItemAdapter.getAdapterItems()) {
-      item.setRequestListener(this::displayLockInfoDialog);
-    }
   }
 
   @Override public void setFABStateEnabled() {
@@ -515,7 +530,6 @@ public class LockListFragment extends ActionBarFragment
     forceRefresh = false;
 
     presenter.showOnBoarding();
-    applyUpdatedRequestListeners();
   }
 
   void clearList() {

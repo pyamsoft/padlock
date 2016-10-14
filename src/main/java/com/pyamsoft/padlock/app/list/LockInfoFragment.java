@@ -151,11 +151,26 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     }
     setActionBarUpEnabled(false);
 
-    clearList();
+    clearListListeners();
     binding.lockInfoRecycler.setOnClickListener(null);
     binding.lockInfoRecycler.setLayoutManager(null);
     binding.lockInfoRecycler.setAdapter(null);
     binding.unbind();
+  }
+
+  private void clearListListeners() {
+    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
+    if (oldSize <= 0) {
+      Timber.w("List is already empty");
+      return;
+    }
+
+    for (int i = oldSize; i >= 0; --i) {
+      final LockInfoItem item = fastItemAdapter.getAdapterItem(i);
+      if (item != null) {
+        item.cleanup();
+      }
+    }
   }
 
   @Override public void onDestroy() {
@@ -175,6 +190,19 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     presenter.setToggleAllState(appPackageName);
     if (firstRefresh) {
       refreshList();
+    } else {
+      Timber.d("We are already refreshed, just refresh the request listeners");
+      applyUpdatedRequestListeners();
+    }
+  }
+
+  private void applyUpdatedRequestListeners() {
+    for (final LockInfoItem item : fastItemAdapter.getAdapterItems()) {
+      item.setListener((position, name, currentState, newState) -> {
+        Timber.d("Process lock state selection: [%d] %s from %s to %s", position, name,
+            currentState, newState);
+        processDatabaseModifyEvent(position, name, currentState, newState);
+      });
     }
   }
 
@@ -195,6 +223,8 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   }
 
   void clearList() {
+    setBackButtonEnabled(false);
+
     final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
     if (oldSize <= 0) {
       Timber.w("List is already empty");
@@ -211,6 +241,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   }
 
   @Override public void refreshList() {
+    clearList();
     onListCleared();
     repopulateList();
   }
@@ -255,7 +286,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onListCleared() {
     Timber.d("onListCleared");
-    setBackButtonEnabled(false);
   }
 
   @Override public void onApplicationIconLoadedError() {
