@@ -40,12 +40,6 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
 
   void setOnBoard();
 
-  void setZeroActivityShown();
-
-  void setZeroActivityHidden();
-
-  void setZeroActivityFromPreference();
-
   void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
       @Nullable String code, boolean system);
 
@@ -58,10 +52,6 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
     void setSystemVisible();
 
     void setSystemInvisible();
-
-    void setZeroActivityShown();
-
-    void setZeroActivityHidden();
 
     void onCreatePinDialog();
 

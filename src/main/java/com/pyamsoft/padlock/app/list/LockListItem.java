@@ -58,13 +58,13 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     return requestListener;
   }
 
+  void setRequestListener(@NonNull OnOpenDialogRequestListener requestListener) {
+    this.requestListener = requestListener;
+  }
+
   void cleanup() {
     modifyListener = null;
     requestListener = null;
-  }
-
-  void setRequestListener(@NonNull OnOpenDialogRequestListener requestListener) {
-    this.requestListener = requestListener;
   }
 
   @NonNull @CheckResult OnDatabaseModifyListener getModifyListener() {
@@ -72,6 +72,10 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
       throw new NullPointerException("Modify listener is NULL");
     }
     return modifyListener;
+  }
+
+  public void setModifyListener(@Nullable OnDatabaseModifyListener modifyListener) {
+    this.modifyListener = modifyListener;
   }
 
   @Override public int getType() {
@@ -137,12 +141,16 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     // TODO app specific codes
     if (modifyListener != null) {
       modifyListener.onDatabaseModify(isChecked, position, entry);
+    } else {
+      Timber.e("No modify listener attached");
     }
   }
 
   private void openInfo() {
     if (requestListener != null) {
       requestListener.onOpenDialogRequest(entry);
+    } else {
+      Timber.e("No request listener attached");
     }
   }
 
