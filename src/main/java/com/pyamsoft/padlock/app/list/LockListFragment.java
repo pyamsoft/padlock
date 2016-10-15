@@ -175,6 +175,7 @@ public class LockListFragment extends ActionBarFragment
   private void applyUpdatedRequestListeners() {
     for (final LockListItem item : fastItemAdapter.getAdapterItems()) {
       item.setRequestListener(this::displayLockInfoDialog);
+      item.setModifyListener(this::processDatabaseModifyEvent);
     }
   }
 
