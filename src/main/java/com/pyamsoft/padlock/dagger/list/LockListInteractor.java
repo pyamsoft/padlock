@@ -36,10 +36,6 @@ interface LockListInteractor extends LockCommonInteractor {
 
   void setSystemVisible(boolean visible);
 
-  @CheckResult @NonNull Observable<Boolean> isZeroActivityVisible();
-
-  void setZeroActivityVisible(boolean visible);
-
   void setShownOnBoarding();
 
   // KLUDGE Observable

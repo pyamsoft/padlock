@@ -37,10 +37,6 @@ public interface PadLockPreferences {
 
   void setSystemVisible(boolean b);
 
-  @CheckResult boolean isZeroActivityVisible();
-
-  void setZeroActivityVisible(boolean b);
-
   @CheckResult String getMasterPassword();
 
   void setMasterPassword(@Nullable String masterPassword);

@@ -46,7 +46,6 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @NonNull private Subscription onboardSubscription = Subscriptions.empty();
   @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
   @NonNull private Subscription databaseSubscription = Subscriptions.empty();
-  @NonNull private Subscription zeroActivitySubscription = Subscriptions.empty();
 
   @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -60,7 +59,6 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     super.onUnbind();
     unsubscribePopulateList();
     unsubscribeSystemVisible();
-    unsubscribeZeroActivity();
     unsubscribeOnboard();
     unsubscribeFabSubscription();
     unsubDatabaseSubscription();
@@ -192,37 +190,6 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
           // TODO different error
           getView(LockList::onListPopulateError);
         }, this::unsubscribeSystemVisible);
-  }
-
-  @Override public void setZeroActivityHidden() {
-    lockListInteractor.setZeroActivityVisible(false);
-  }
-
-  @Override public void setZeroActivityShown() {
-    lockListInteractor.setZeroActivityVisible(true);
-  }
-
-  @Override public void setZeroActivityFromPreference() {
-    unsubscribeZeroActivity();
-    zeroActivitySubscription = lockListInteractor.isZeroActivityVisible()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(visible -> getView(lockList -> {
-          if (visible) {
-            lockList.setZeroActivityShown();
-          } else {
-            lockList.setZeroActivityHidden();
-          }
-        }), throwable -> {
-          // TODO different error
-          getView(LockList::onListPopulateError);
-        }, this::unsubscribeZeroActivity);
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubscribeZeroActivity() {
-    if (!zeroActivitySubscription.isUnsubscribed()) {
-      zeroActivitySubscription.unsubscribe();
-    }
   }
 
   @Override public void clickPinFAB() {
