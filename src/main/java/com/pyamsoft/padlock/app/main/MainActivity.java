@@ -201,15 +201,8 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   }
 
   @NonNull @Override protected String[] getChangeLogLines() {
-    final String line1 = "CHANGE: Smaller application size";
-    final String line2 =
-        "BUGFIX: Fix a looping issue which caused the lockscreen to constantly re-launch";
-    final String line3 = "BUGFIX: Fix a crash in the LockInfoDialog";
-    final String line4 =
-        "BUGFIX: Fix an error where locking an application after clearing the database will crash";
-    final String line5 =
-        "FEATURE: Spawn as many lock screens as needed to prepare for Freeform mode";
-    return new String[] { line1, line2, line3, line4, line5 };
+    final String line1 = "FEATURE: Faster application list loading on Android N";
+    return new String[] { line1 };
   }
 
   @NonNull @Override protected String getVersionName() {
