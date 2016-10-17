@@ -22,7 +22,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -126,10 +125,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    final ActionBar actionBar = getActionBar();
-    if (actionBar != null) {
-      actionBar.setTitle(appName);
-    }
+    setActionBarTitle(appName);
 
     binding.lockInfoPackageName.setText(appPackageName);
     binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
@@ -145,10 +141,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    final ActionBar actionBar = getActionBar();
-    if (actionBar != null) {
-      actionBar.setTitle(R.string.app_name);
-    }
+    setActionBarTitle(R.string.app_name);
     setActionBarUpEnabled(false);
 
     clearListListeners();
