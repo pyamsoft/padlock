@@ -18,13 +18,16 @@ package com.pyamsoft.padlock.dagger.wrapper;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
@@ -83,7 +86,8 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
     });
   }
 
-  @WorkerThread @NonNull @CheckResult Observable<ApplicationInfo> getInstalledApplications() {
+  @VisibleForTesting @SuppressWarnings("WeakerAccess") @WorkerThread @NonNull @CheckResult
+  Observable<ApplicationInfo> getInstalledApplications() {
     return Observable.defer(() -> {
       final Process process;
       boolean caughtPermissionDenial = false;
@@ -95,7 +99,13 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         //
         // but it is not a victim of BinderTransaction failures so it will be able to better handle
         // large sets of applications.
-        final String command = "pm list packages";
+        final String command;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+          // Android N moves package list command to a different, same format, faster command
+          command = "cmd package list packages";
+        } else {
+          command = "pm list packages";
+        }
         process = Runtime.getRuntime().exec(command);
         try (final BufferedReader bufferedReader = new BufferedReader(
             new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
