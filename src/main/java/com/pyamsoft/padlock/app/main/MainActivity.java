@@ -105,6 +105,14 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
     presenter.unbindView();
   }
 
+  @Override protected void onPause() {
+    super.onPause();
+    if (isFinishing() || isChangingConfigurations()) {
+      closeOptionsMenu();
+      closeContextMenu();
+    }
+  }
+
   @NonNull @Override public String provideApplicationName() {
     return "PadLock";
   }

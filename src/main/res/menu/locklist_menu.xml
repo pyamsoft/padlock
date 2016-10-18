@@ -9,26 +9,25 @@
   ~
   ~     http://www.apache.org/licenses/LICENSE-2.0
   ~
-  ~ Unless required by applicable law or agreed to in writing, software
+  ~ Unless required by androidlicable law or agreed to in writing, software
   ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
   <item
       android:id="@+id/menu_settings"
       android:icon="@drawable/ic_settings_24dp"
-      android:title="@string/settings"
-      app:showAsAction="ifRoom"/>
+      android:showAsAction="ifRoom"
+      android:title="@string/settings"/>
 
   <item
       android:id="@+id/menu_is_system"
       android:checkable="true"
-      android:title="@string/show_system_applications"
-      app:showAsAction="never"/>
+      android:showAsAction="never"
+      android:title="@string/show_system_applications"/>
 
 </menu>
