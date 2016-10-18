@@ -321,6 +321,9 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
         } else {
           lockList.onClearMasterPinFailure();
         }
+        break;
+      default:
+        throw new RuntimeException("Invalid event type: " + event.type());
     }
   }
 
