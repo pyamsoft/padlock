@@ -236,6 +236,14 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     presenter.unbindView();
   }
 
+  @Override protected void onPause() {
+    super.onPause();
+    if (isFinishing() || isChangingConfigurations()) {
+      closeOptionsMenu();
+      closeContextMenu();
+    }
+  }
+
   @Override public void onBackPressed() {
     Timber.d("onBackPressed");
     getApplicationContext().startActivity(home);
