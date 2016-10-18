@@ -16,12 +16,15 @@
   ~ limitations under the License.
   -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="AppCompatResource">
 
   <item
       android:icon="@drawable/ic_schedule_24dp"
-      android:showAsAction="ifRoom"
-      android:title="@string/ignore">
+      android:title="@string/ignore"
+      app:showAsAction="ifRoom">
 
     <menu>
 
@@ -31,56 +34,56 @@
         <item
             android:id="@+id/menu_ignore_none"
             android:checked="false"
-            android:showAsAction="never"
-            android:title="@string/do_not_ignore"/>
+            android:title="@string/do_not_ignore"
+            app:showAsAction="never"/>
 
         <item
             android:id="@+id/menu_ignore_one"
             android:checked="false"
-            android:showAsAction="never"
-            android:title="@string/ignore_for_1_minute"/>
+            android:title="@string/ignore_for_1_minute"
+            app:showAsAction="never"/>
 
         <item
             android:id="@+id/menu_ignore_five"
             android:checked="false"
-            android:showAsAction="never"
-            android:title="@string/ignore_for_5_minutes"/>
+            android:title="@string/ignore_for_5_minutes"
+            app:showAsAction="never"/>
 
         <item
             android:id="@+id/menu_ignore_ten"
             android:checked="false"
-            android:showAsAction="never"
-            android:title="@string/ignore_for_10_minutes"/>
+            android:title="@string/ignore_for_10_minutes"
+            app:showAsAction="never"/>
 
         <item
             android:id="@+id/menu_ignore_fifteen"
             android:checked="false"
-            android:showAsAction="never"
-            android:title="@string/ignore_for_15_minutes"/>
+            android:title="@string/ignore_for_15_minutes"
+            app:showAsAction="never"/>
 
         <item
             android:id="@+id/menu_ignore_twenty"
             android:checked="false"
-            android:showAsAction="never"
-            android:title="@string/ignore_for_20_minutes"/>
+            android:title="@string/ignore_for_20_minutes"
+            app:showAsAction="never"/>
 
         <item
             android:id="@+id/menu_ignore_thirty"
             android:checked="false"
-            android:showAsAction="never"
-            android:title="@string/ignore_for_30_minutes"/>
+            android:title="@string/ignore_for_30_minutes"
+            app:showAsAction="never"/>
 
         <item
             android:id="@+id/menu_ignore_fourtyfive"
             android:checked="false"
-            android:showAsAction="never"
-            android:title="@string/ignore_for_45_minutes"/>
+            android:title="@string/ignore_for_45_minutes"
+            app:showAsAction="never"/>
 
         <item
             android:id="@+id/menu_ignore_sixty"
             android:checked="false"
-            android:showAsAction="never"
-            android:title="@string/ignore_for_60_minutes"/>
+            android:title="@string/ignore_for_60_minutes"
+            app:showAsAction="never"/>
 
       </group>
 
@@ -90,8 +93,8 @@
         <item
             android:id="@+id/menu_exclude"
             android:checked="false"
-            android:showAsAction="never"
-            android:title="@string/exclude_entry"/>
+            android:title="@string/exclude_entry"
+            app:showAsAction="never"/>
 
       </group>
 
@@ -102,14 +105,14 @@
   <item
       android:id="@+id/menu_lockscreen_forgot"
       android:icon="@drawable/ic_help_24dp"
-      android:showAsAction="never"
-      android:title="@string/forgot_passcode"/>
+      android:title="@string/forgot_passcode"
+      app:showAsAction="never"/>
 
   <item
       android:id="@+id/menu_lockscreen_info"
       android:icon="@drawable/ic_info_24dp"
-      android:showAsAction="never"
-      android:title="@string/info_for_nerds"/>
+      android:title="@string/info_for_nerds"
+      app:showAsAction="never"/>
 
 
 </menu>
