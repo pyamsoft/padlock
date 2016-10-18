@@ -16,18 +16,21 @@
   ~ limitations under the License.
   -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="AppCompatResource">
 
   <item
       android:id="@+id/menu_settings"
       android:icon="@drawable/ic_settings_24dp"
-      android:showAsAction="ifRoom"
-      android:title="@string/settings"/>
+      android:title="@string/settings"
+      app:showAsAction="ifRoom"/>
 
   <item
       android:id="@+id/menu_is_system"
       android:checkable="true"
-      android:showAsAction="never"
-      android:title="@string/show_system_applications"/>
+      android:title="@string/show_system_applications"
+      app:showAsAction="never"/>
 
 </menu>
