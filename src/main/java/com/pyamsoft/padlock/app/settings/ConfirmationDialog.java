@@ -51,9 +51,7 @@ public class ConfirmationDialog extends DialogFragment {
           sendConfirmationEvent(which);
           dialogInterface.dismiss();
         })
-        .setNegativeButton("No", (dialogInterface, i) -> {
-          dialogInterface.dismiss();
-        })
+        .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
         .create();
   }
 

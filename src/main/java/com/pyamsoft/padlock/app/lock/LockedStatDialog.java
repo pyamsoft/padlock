@@ -93,9 +93,7 @@ public class LockedStatDialog extends DialogFragment {
     binding.statSystem.setText(system ? "Yes" : "No");
 
     return new AlertDialog.Builder(getActivity()).setView(binding.getRoot())
-        .setPositiveButton("Okay", (dialogInterface, i) -> {
-          dialogInterface.dismiss();
-        })
+        .setPositiveButton("Okay", (dialogInterface, i) -> dialogInterface.dismiss())
         .setCancelable(true)
         .create();
   }

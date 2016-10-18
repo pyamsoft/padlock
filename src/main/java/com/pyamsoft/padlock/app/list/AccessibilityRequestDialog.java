@@ -37,9 +37,7 @@ public class AccessibilityRequestDialog extends DialogFragment {
           getActivity().startActivity(accessibilityServiceIntent);
           dismiss();
         })
-        .setNegativeButton("No Thanks", (dialogInterface, i) -> {
-          dismiss();
-        })
+        .setNegativeButton("No Thanks", (dialogInterface, i) -> dismiss())
         .create();
   }
 }

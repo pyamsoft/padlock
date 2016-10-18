@@ -29,10 +29,8 @@
   <string name="accessibility_description">PadLock needs this service to monitor which apps launch
     on your device. It will not capture any personal data. It does not have the ability to connect
     to the Internet. It will only watch the apps you launch and lock the ones you request.</string>
-  <string name="got_it">GOT IT</string>
   <string name="getting_started">PadLock will not be activated until you set a PIN code.</string>
   <string name="getting_started_desc">Click the button to get started.</string>
-  <string name="enable_accessibility_service">Enable Accessibility Service</string>
   <string name="lock_code_hint">Enter Lock Code</string>
   <string name="reenter_lock_code_hint">Re-Enter Lock Code</string>
   <string name="optional_lock_code_hint">Optional Lock Code Hint</string>
