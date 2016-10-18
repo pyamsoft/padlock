@@ -9,20 +9,19 @@
   ~
   ~     http://www.apache.org/licenses/LICENSE-2.0
   ~
-  ~ Unless required by applicable law or agreed to in writing, software
+  ~ Unless required by androidlicable law or agreed to in writing, software
   ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
   <item
       android:icon="@drawable/ic_schedule_24dp"
-      android:title="@string/ignore"
-      app:showAsAction="ifRoom">
+      android:showAsAction="ifRoom"
+      android:title="@string/ignore">
 
     <menu>
 
@@ -32,56 +31,56 @@
         <item
             android:id="@+id/menu_ignore_none"
             android:checked="false"
-            android:title="@string/do_not_ignore"
-            app:showAsAction="never"/>
+            android:showAsAction="never"
+            android:title="@string/do_not_ignore"/>
 
         <item
             android:id="@+id/menu_ignore_one"
             android:checked="false"
-            android:title="@string/ignore_for_1_minute"
-            app:showAsAction="never"/>
+            android:showAsAction="never"
+            android:title="@string/ignore_for_1_minute"/>
 
         <item
             android:id="@+id/menu_ignore_five"
             android:checked="false"
-            android:title="@string/ignore_for_5_minutes"
-            app:showAsAction="never"/>
+            android:showAsAction="never"
+            android:title="@string/ignore_for_5_minutes"/>
 
         <item
             android:id="@+id/menu_ignore_ten"
             android:checked="false"
-            android:title="@string/ignore_for_10_minutes"
-            app:showAsAction="never"/>
+            android:showAsAction="never"
+            android:title="@string/ignore_for_10_minutes"/>
 
         <item
             android:id="@+id/menu_ignore_fifteen"
             android:checked="false"
-            android:title="@string/ignore_for_15_minutes"
-            app:showAsAction="never"/>
+            android:showAsAction="never"
+            android:title="@string/ignore_for_15_minutes"/>
 
         <item
             android:id="@+id/menu_ignore_twenty"
             android:checked="false"
-            android:title="@string/ignore_for_20_minutes"
-            app:showAsAction="never"/>
+            android:showAsAction="never"
+            android:title="@string/ignore_for_20_minutes"/>
 
         <item
             android:id="@+id/menu_ignore_thirty"
             android:checked="false"
-            android:title="@string/ignore_for_30_minutes"
-            app:showAsAction="never"/>
+            android:showAsAction="never"
+            android:title="@string/ignore_for_30_minutes"/>
 
         <item
             android:id="@+id/menu_ignore_fourtyfive"
             android:checked="false"
-            android:title="@string/ignore_for_45_minutes"
-            app:showAsAction="never"/>
+            android:showAsAction="never"
+            android:title="@string/ignore_for_45_minutes"/>
 
         <item
             android:id="@+id/menu_ignore_sixty"
             android:checked="false"
-            android:title="@string/ignore_for_60_minutes"
-            app:showAsAction="never"/>
+            android:showAsAction="never"
+            android:title="@string/ignore_for_60_minutes"/>
 
       </group>
 
@@ -91,8 +90,8 @@
         <item
             android:id="@+id/menu_exclude"
             android:checked="false"
-            android:title="@string/exclude_entry"
-            app:showAsAction="never"/>
+            android:showAsAction="never"
+            android:title="@string/exclude_entry"/>
 
       </group>
 
@@ -103,14 +102,14 @@
   <item
       android:id="@+id/menu_lockscreen_forgot"
       android:icon="@drawable/ic_help_24dp"
-      android:title="@string/forgot_passcode"
-      app:showAsAction="never"/>
+      android:showAsAction="never"
+      android:title="@string/forgot_passcode"/>
 
   <item
       android:id="@+id/menu_lockscreen_info"
       android:icon="@drawable/ic_info_24dp"
-      android:title="@string/info_for_nerds"
-      app:showAsAction="never"/>
+      android:showAsAction="never"
+      android:title="@string/info_for_nerds"/>
 
 
 </menu>
