@@ -32,9 +32,7 @@ public class ForgotPasswordDialog extends DialogFragment {
                 + "One thing you can attempt to do would be to go to the Settings of your phone and attempt to clear all of the application data."
                 + " If you cannot perform this because you have locked Settings as well, you can attempt to uninstall PadLock via the Andrid Debug Bridge (adb):\n\n"
                 + "adb uninstall com.pyamsoft.padlock")
-        .setPositiveButton("Okay", (dialogInterface, i) -> {
-          dialogInterface.dismiss();
-        })
+        .setPositiveButton("Okay", (dialogInterface, i) -> dialogInterface.dismiss())
         .setCancelable(true)
         .create();
   }
