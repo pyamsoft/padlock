@@ -39,8 +39,10 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
   @NonNull private final String timeoutTimeDefault;
   @NonNull private final String lockPackageChangeKey;
   @NonNull private final String recheckKey;
+  @NonNull private final String installListener;
   private final boolean lockPackageChangeDefault;
   private final boolean recheckDefault;
+  private final boolean installListenerDefault;
 
   @Inject PadLockPreferencesImpl(final @NonNull Context context) {
     super(context);
@@ -52,6 +54,12 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
     lockPackageChangeDefault = getResources().getBoolean(R.bool.lock_package_change_default);
     recheckKey = getResources().getString(R.string.recheck_key);
     recheckDefault = getResources().getBoolean(R.bool.recheck_default);
+    installListener = getResources().getString(R.string.install_listener_key);
+    installListenerDefault = getResources().getBoolean(R.bool.install_listener_default);
+  }
+
+  @Override public boolean isInstallListenerEnabled() {
+    return get(installListener, installListenerDefault);
   }
 
   @Override public String getHint() {

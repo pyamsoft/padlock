@@ -32,9 +32,10 @@ class SettingsPreferencePresenterImpl
 
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_DATABASE = 0;
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_ALL = 1;
+  @SuppressWarnings("WeakerAccess") @NonNull final ApplicationInstallReceiver receiver;
   @NonNull private final SettingsPreferenceInteractor interactor;
-  @NonNull private final ApplicationInstallReceiver receiver;
   @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
+  @NonNull private Subscription applicationInstallSubscription = Subscriptions.empty();
 
   @Inject SettingsPreferencePresenterImpl(@NonNull SettingsPreferenceInteractor interactor,
       @NonNull ApplicationInstallReceiver receiver, @NonNull Scheduler obsScheduler,
@@ -51,6 +52,7 @@ class SettingsPreferencePresenterImpl
   @Override protected void onUnbind() {
     super.onUnbind();
     unsubscribeConfirm();
+    unsubApplicationInstallReceiver();
   }
 
   @Override public void requestClearAll() {
@@ -61,12 +63,23 @@ class SettingsPreferencePresenterImpl
     getView(settingsPreferenceView -> settingsPreferenceView.showConfirmDialog(CONFIRM_DATABASE));
   }
 
-  @Override public void setApplicationInstallReceiverState(boolean enabled) {
-    receiver.setEnabled(enabled);
-    if (enabled) {
-      receiver.register();
-    } else {
-      receiver.unregister();
+  @Override public void setApplicationInstallReceiverState() {
+    applicationInstallSubscription = interactor.isInstallListenerEnabled()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(result -> {
+              if (result) {
+                receiver.register();
+              } else {
+                receiver.unregister();
+              }
+            }, throwable -> Timber.e(throwable, "onError setApplicationInstallReceiverState"),
+            this::unsubApplicationInstallReceiver);
+  }
+
+  @SuppressWarnings("WeakerAccess") void unsubApplicationInstallReceiver() {
+    if (!applicationInstallSubscription.isUnsubscribed()) {
+      applicationInstallSubscription.unsubscribe();
     }
   }
 
