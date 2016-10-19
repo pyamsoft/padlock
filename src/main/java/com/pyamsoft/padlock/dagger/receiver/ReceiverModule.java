@@ -19,15 +19,20 @@ package com.pyamsoft.padlock.dagger.receiver;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
-import com.pyamsoft.padlock.dagger.PadLockDB;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Named;
 import javax.inject.Singleton;
+import rx.Scheduler;
 
 @Module public class ReceiverModule {
 
   @Singleton @Provides ApplicationInstallReceiver provideApplicationInstallReceiver(
-      @NonNull Context context, @NonNull PadLockDB padLockDB) {
-    return new ApplicationInstallReceiverImpl(context, padLockDB);
+      @NonNull Context context, @NonNull PackageManagerWrapper packageManagerWrapper,
+      @NonNull @Named("obs") Scheduler obsScheduler,
+      @NonNull @Named("sub") Scheduler subScheduler) {
+    return new ApplicationInstallReceiverImpl(context, packageManagerWrapper, obsScheduler,
+        subScheduler);
   }
 }
