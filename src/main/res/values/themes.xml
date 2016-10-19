@@ -15,6 +15,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <resources>
 
   <style name="Base.Theme.PadLock.Light" parent="@style/Theme.Design.Light.NoActionBar">
