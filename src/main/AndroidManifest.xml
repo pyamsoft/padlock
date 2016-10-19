@@ -90,6 +90,16 @@
         android:exported="false"
         android:syncable="false"/>
 
+    <receiver
+        android:name=".app.receiver.ApplicationInstallReceiver"
+        android:enabled="true"
+        android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.PACKAGE_ADDED"/>
+        <data android:scheme="package"/>
+      </intent-filter>
+    </receiver>
+
   </application>
 
 </manifest>
