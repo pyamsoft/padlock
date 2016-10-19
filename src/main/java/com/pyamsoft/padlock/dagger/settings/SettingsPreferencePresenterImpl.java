@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import javax.inject.Inject;
@@ -31,13 +32,17 @@ class SettingsPreferencePresenterImpl
 
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_DATABASE = 0;
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_ALL = 1;
+  @SuppressWarnings("WeakerAccess") @NonNull final ApplicationInstallReceiver receiver;
   @NonNull private final SettingsPreferenceInteractor interactor;
   @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
+  @NonNull private Subscription applicationInstallSubscription = Subscriptions.empty();
 
   @Inject SettingsPreferencePresenterImpl(@NonNull SettingsPreferenceInteractor interactor,
-      @NonNull Scheduler obsScheduler, @NonNull Scheduler subScheduler) {
+      @NonNull ApplicationInstallReceiver receiver, @NonNull Scheduler obsScheduler,
+      @NonNull Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
+    this.receiver = receiver;
   }
 
   @Override protected void onBind() {
@@ -47,6 +52,7 @@ class SettingsPreferencePresenterImpl
   @Override protected void onUnbind() {
     super.onUnbind();
     unsubscribeConfirm();
+    unsubApplicationInstallReceiver();
   }
 
   @Override public void requestClearAll() {
@@ -55,6 +61,26 @@ class SettingsPreferencePresenterImpl
 
   @Override public void requestClearDatabase() {
     getView(settingsPreferenceView -> settingsPreferenceView.showConfirmDialog(CONFIRM_DATABASE));
+  }
+
+  @Override public void setApplicationInstallReceiverState() {
+    applicationInstallSubscription = interactor.isInstallListenerEnabled()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(result -> {
+              if (result) {
+                receiver.register();
+              } else {
+                receiver.unregister();
+              }
+            }, throwable -> Timber.e(throwable, "onError setApplicationInstallReceiverState"),
+            this::unsubApplicationInstallReceiver);
+  }
+
+  @SuppressWarnings("WeakerAccess") void unsubApplicationInstallReceiver() {
+    if (!applicationInstallSubscription.isUnsubscribed()) {
+      applicationInstallSubscription.unsubscribe();
+    }
   }
 
   @SuppressWarnings("WeakerAccess") void unsubscribeConfirm() {

@@ -21,6 +21,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockModule;
@@ -46,6 +47,14 @@ public class PadLock extends PYDroidApplication implements IPYDroidApp<PadLockCo
     component = DaggerPadLockComponent.builder()
         .padLockModule(new PadLockModule(getApplicationContext()))
         .build();
+
+    final ApplicationInstallReceiver receiver = component.provideApplicationInstallReceiver();
+    final PadLockPreferences preferences = component.providePreferences();
+    if (preferences.isInstallListenerEnabled()) {
+      receiver.register();
+    } else {
+      receiver.unregister();
+    }
   }
 
   @NonNull @Override public PadLockComponent provideComponent() {

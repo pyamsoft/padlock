@@ -91,6 +91,12 @@
   <string name="recheck_key">recheck</string>
   <bool name="recheck_default">false</bool>
 
+  <string name="install_listener_title">Notify on New Install</string>
+  <string name="install_listener_summary_checked">Show suggestions to lock newly installed applications</string>
+  <string name="install_listener_summary_unchecked">Do not show suggestions to lock newly installed applications</string>
+  <string name="install_listener_key">install_listener</string>
+  <bool name="install_listener_default">true</bool>
+
   <string name="clear_db_key">clear_db</string>
   <string name="clear_db_title">Reset Database</string>
   <string name="clear_db_summary">Reset the locked applications database</string>
