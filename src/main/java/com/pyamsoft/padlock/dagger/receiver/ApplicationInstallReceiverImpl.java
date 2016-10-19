@@ -16,31 +16,59 @@
 
 package com.pyamsoft.padlock.dagger.receiver;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.NotificationCompat;
+import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
-import com.pyamsoft.padlock.dagger.PadLockDB;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
+import com.pyamsoft.pydroidrx.SchedulerUtil;
 import javax.inject.Inject;
+import rx.Scheduler;
+import rx.Subscription;
+import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class ApplicationInstallReceiverImpl extends BroadcastReceiver
     implements ApplicationInstallReceiver {
 
+  @NonNull final Context appContext;
+  @NonNull final NotificationManagerCompat notificationManager;
+  @NonNull final PendingIntent pendingIntent;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final IntentFilter filter;
-  @NonNull private final Context appContext;
-  @NonNull private final PadLockDB padlockDb;
+  @NonNull private final Scheduler obsScheduler;
+  @NonNull private final Scheduler subScheduler;
+  int notificationId;
   private boolean registered;
+  @NonNull private Subscription notification = Subscriptions.empty();
 
-  @Inject ApplicationInstallReceiverImpl(@NonNull Context context, @NonNull PadLockDB padLockDB) {
+  @Inject ApplicationInstallReceiverImpl(@NonNull Context context,
+      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull Scheduler obsScheduler,
+      @NonNull Scheduler subScheduler) {
+    this.obsScheduler = obsScheduler;
+    this.subScheduler = subScheduler;
     appContext = context.getApplicationContext();
-    padlockDb = padLockDB;
+    this.packageManagerWrapper = packageManagerWrapper;
     filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
     filter.addDataScheme("package");
     registered = false;
+    notificationId = 0;
+    notificationManager = NotificationManagerCompat.from(appContext);
+    final Intent mainIntent = new Intent(appContext, MainActivity.class);
+    pendingIntent = PendingIntent.getActivity(appContext, 421, mainIntent, 0);
+
+    SchedulerUtil.enforceObserveScheduler(obsScheduler);
+    SchedulerUtil.enforceSubscribeScheduler(subScheduler);
   }
 
   @Override public void onReceive(Context context, Intent intent) {
@@ -49,9 +77,35 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
       return;
     }
 
+    final boolean isNew = !intent.hasExtra(Intent.EXTRA_REPLACING);
     final Uri data = intent.getData();
     final String packageName = data.getSchemeSpecificPart();
-    Timber.d("Package Added: %s", packageName);
+    notification = packageManagerWrapper.loadPackageLabel(packageName)
+        .subscribeOn(subScheduler)
+        .observeOn(obsScheduler)
+        .subscribe(s -> {
+          if (isNew) {
+            Timber.i("Package Added: %s", packageName);
+            final Notification notification1 =
+                new NotificationCompat.Builder(appContext).setContentTitle("Lock New Application")
+                    .setSmallIcon(R.drawable.ic_lock_outline_24dp)
+                    .setColor(ContextCompat.getColor(appContext, R.color.blue500))
+                    .setContentText("Click to lock the newly installed application: " + s)
+                    .setContentIntent(pendingIntent)
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .build();
+            notificationManager.notify(notificationId++, notification1);
+          } else {
+            Timber.d("Package updated: %s", packageName);
+          }
+        }, throwable -> Timber.e(throwable, "onError launching notification for package: %s",
+            packageName), this::unsubNotification);
+  }
+
+  void unsubNotification() {
+    if (!notification.isUnsubscribed()) {
+      notification.unsubscribe();
+    }
   }
 
   @Override public void register() {
