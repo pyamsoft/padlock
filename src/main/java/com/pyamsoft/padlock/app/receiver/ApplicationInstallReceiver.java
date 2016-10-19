@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.settings;
+package com.pyamsoft.padlock.app.receiver;
 
-import com.pyamsoft.pydroid.presenter.Presenter;
+public interface ApplicationInstallReceiver {
 
-public interface SettingsPreferencePresenter
-    extends Presenter<SettingsPreferencePresenter.SettingsPreferenceView> {
+  void register();
 
-  void requestClearAll();
-
-  void requestClearDatabase();
-
-  void processClearRequest(int type);
-
-  void setApplicationInstallReceiverState();
-
-  interface SettingsPreferenceView {
-
-    void showConfirmDialog(int type);
-
-    void onClearAll();
-
-    void onClearDatabase();
-  }
+  void unregister();
 }

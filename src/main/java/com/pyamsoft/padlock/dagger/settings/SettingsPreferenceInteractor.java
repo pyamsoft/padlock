@@ -23,6 +23,8 @@ import rx.Observable;
 
 public interface SettingsPreferenceInteractor {
 
+  @CheckResult @WorkerThread @NonNull Observable<Boolean> isInstallListenerEnabled();
+
   @CheckResult @WorkerThread @NonNull Observable<Boolean> clearDatabase();
 
   @CheckResult @WorkerThread @NonNull Observable<Boolean> clearAll();

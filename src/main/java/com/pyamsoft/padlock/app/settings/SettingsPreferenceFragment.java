@@ -99,6 +99,12 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
 
     final Preference checkVersion = findPreference(getString(R.string.check_version_key));
     checkVersion.setOnPreferenceClickListener(preference -> checkForUpdate());
+
+    final Preference installListener = findPreference(getString(R.string.install_listener_key));
+    installListener.setOnPreferenceClickListener(preference -> {
+      presenter.setApplicationInstallReceiverState();
+      return true;
+    });
   }
 
   @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {
