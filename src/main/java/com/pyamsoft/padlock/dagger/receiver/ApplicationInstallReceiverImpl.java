@@ -17,13 +17,10 @@
 package com.pyamsoft.padlock.dagger.receiver;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.dagger.PadLockDB;
@@ -46,20 +43,6 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
     registered = false;
   }
 
-  @Override @CheckResult public boolean isEnabled() {
-    final ComponentName cmp = new ComponentName(appContext, ApplicationInstallReceiverImpl.class);
-    final int componentState = appContext.getPackageManager().getComponentEnabledSetting(cmp);
-    return componentState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-  }
-
-  @Override public void setEnabled(boolean enabled) {
-    final ComponentName cmp = new ComponentName(appContext, ApplicationInstallReceiverImpl.class);
-    final int componentState = enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-        : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-    appContext.getPackageManager()
-        .setComponentEnabledSetting(cmp, componentState, PackageManager.DONT_KILL_APP);
-  }
-
   @Override public void onReceive(Context context, Intent intent) {
     if (intent == null) {
       Timber.e("NULL Intent");
@@ -73,12 +56,8 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
 
   @Override public void register() {
     if (!registered) {
-      if (isEnabled()) {
-        appContext.registerReceiver(this, filter);
-        registered = true;
-      } else {
-        Timber.e("Cannot register, not enabled in Manifest");
-      }
+      appContext.registerReceiver(this, filter);
+      registered = true;
     }
   }
 

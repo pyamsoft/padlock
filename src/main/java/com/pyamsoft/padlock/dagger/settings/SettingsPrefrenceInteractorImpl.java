@@ -34,6 +34,10 @@ class SettingsPrefrenceInteractorImpl implements SettingsPreferenceInteractor {
     this.preferences = preferences;
   }
 
+  @NonNull @Override public Observable<Boolean> isInstallListenerEnabled() {
+    return Observable.defer(() -> Observable.just(preferences.isInstallListenerEnabled()));
+  }
+
   @NonNull @Override public Observable<Boolean> clearDatabase() {
     return Observable.defer(() -> {
       Timber.d("Clear database of all entries");

@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.dagger.iconloader.AppIconLoaderComponent;
 import com.pyamsoft.padlock.dagger.list.LockInfoComponent;
@@ -64,6 +65,8 @@ import javax.inject.Singleton;
 
   JobComponent plusJobComponent();
 
-  // KLUDE: For use only in the PadLock application class
-  @NonNull ApplicationInstallReceiver provideApplicationInstallReceiver();
+  // KLUDGE: For use only in the PadLock application class
+  ApplicationInstallReceiver provideApplicationInstallReceiver();
+  // KLUDGE: For use only in the PadLock application class
+  PadLockPreferences providePreferences();
 }

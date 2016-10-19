@@ -27,7 +27,7 @@ public interface SettingsPreferencePresenter
 
   void processClearRequest(int type);
 
-  void setApplicationInstallReceiverState(boolean enabled);
+  void setApplicationInstallReceiverState();
 
   interface SettingsPreferenceView {
 

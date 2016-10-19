@@ -16,13 +16,7 @@
 
 package com.pyamsoft.padlock.app.receiver;
 
-import android.support.annotation.CheckResult;
-
 public interface ApplicationInstallReceiver {
-
-  @CheckResult boolean isEnabled();
-
-  void setEnabled(boolean enabled);
 
   void register();
 

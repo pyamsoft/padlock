@@ -49,7 +49,8 @@ public class PadLock extends PYDroidApplication implements IPYDroidApp<PadLockCo
         .build();
 
     final ApplicationInstallReceiver receiver = component.provideApplicationInstallReceiver();
-    if (receiver.isEnabled()) {
+    final PadLockPreferences preferences = component.providePreferences();
+    if (preferences.isInstallListenerEnabled()) {
       receiver.register();
     } else {
       receiver.unregister();
