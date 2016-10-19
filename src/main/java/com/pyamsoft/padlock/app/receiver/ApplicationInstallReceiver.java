@@ -61,7 +61,8 @@ public class ApplicationInstallReceiver extends BroadcastReceiver {
     }
 
     final Uri data = intent.getData();
-    Timber.d("Package Added DATA: %s", data);
+    final String packageName = data.getSchemeSpecificPart();
+    Timber.d("Package Added: %s", packageName);
   }
 
   public void register(@NonNull Context context) {
