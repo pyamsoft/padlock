@@ -108,7 +108,8 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   @Override protected void onPause() {
     super.onPause();
     if (isFinishing() || isChangingConfigurations()) {
-      Timber.d("Even though a leak is reported, this should dismiss the window, and clear the leak");
+      Timber.d(
+          "Even though a leak is reported, this should dismiss the window, and clear the leak");
       binding.toolbar.getMenu().close();
       binding.toolbar.dismissPopupMenus();
     }
@@ -211,7 +212,9 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
 
   @NonNull @Override protected String[] getChangeLogLines() {
     final String line1 = "FEATURE: Faster application list loading on Android N";
-    return new String[] { line1 };
+    final String line2 =
+        "FEATURE: When a new application is installed, suggest to lock it with PadLock";
+    return new String[] { line1, line2 };
   }
 
   @NonNull @Override protected String getVersionName() {
