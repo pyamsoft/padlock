@@ -55,9 +55,6 @@ public interface PadLockDB {
 
   @NonNull @CheckResult Observable<List<PadLockEntry.AllEntries>> queryAll();
 
-  @NonNull @CheckResult @Deprecated Observable<Integer> deleteWithPackageName(
-      @NonNull String packageName);
-
   @NonNull @CheckResult Observable<Integer> deleteWithPackageActivityName(
       @NonNull String packageName, @NonNull String activityName);
 

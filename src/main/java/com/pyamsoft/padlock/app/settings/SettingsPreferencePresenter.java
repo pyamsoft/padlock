@@ -27,6 +27,8 @@ public interface SettingsPreferencePresenter
 
   void processClearRequest(int type);
 
+  void setApplicationInstallReceiverState(boolean enabled);
+
   interface SettingsPreferenceView {
 
     void showConfirmDialog(int type);

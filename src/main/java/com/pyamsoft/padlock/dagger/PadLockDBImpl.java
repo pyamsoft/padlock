@@ -187,19 +187,6 @@ class PadLockDBImpl implements PadLockDB {
         .filter(padLockEntries -> padLockEntries != null);
   }
 
-  @Override @NonNull @CheckResult @Deprecated
-  public Observable<Integer> deleteWithPackageName(final @NonNull String packageName) {
-    Timber.i("DB: DELETE");
-    openDatabase();
-    return Observable.defer(() -> {
-      final int result =
-          briteDatabase.delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME,
-              packageName);
-      closeDatabase();
-      return Observable.just(result);
-    });
-  }
-
   @Override @NonNull @CheckResult
   public Observable<Integer> deleteWithPackageActivityName(final @NonNull String packageName,
       final @NonNull String activityName) {
