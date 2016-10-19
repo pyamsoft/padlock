@@ -108,8 +108,11 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   @Override protected void onPause() {
     super.onPause();
     if (isFinishing() || isChangingConfigurations()) {
-      closeOptionsMenu();
-      closeContextMenu();
+      final View amv = binding.toolbar.getChildAt(1);
+      if (amv instanceof ActionMenuView) {
+        final ActionMenuView actions = (ActionMenuView) amv;
+        actions.dismissPopupMenus();
+      }
     }
   }
 
@@ -142,7 +145,7 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
 
   @CheckResult @NonNull public View getSettingsMenuItemView() {
     final View amv = binding.toolbar.getChildAt(1);
-    if (amv != null && amv instanceof ActionMenuView) {
+    if (amv instanceof ActionMenuView) {
       final ActionMenuView actions = (ActionMenuView) amv;
       // Settings gear is the second item
       return actions.getChildAt(1);
