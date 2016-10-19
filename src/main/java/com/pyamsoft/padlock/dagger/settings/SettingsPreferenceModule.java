@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
+import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import dagger.Module;
@@ -28,9 +29,10 @@ import rx.Scheduler;
 @Module public class SettingsPreferenceModule {
 
   @Provides SettingsPreferencePresenter provideSettingsPresenter(
-      final @NonNull SettingsPreferenceInteractor interactor, @Named("obs") Scheduler obsScheduler,
+      @NonNull SettingsPreferenceInteractor interactor,
+      @NonNull ApplicationInstallReceiver receiver, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
-    return new SettingsPreferencePresenterImpl(interactor, obsScheduler, subScheduler);
+    return new SettingsPreferencePresenterImpl(interactor, receiver, obsScheduler, subScheduler);
   }
 
   @Provides SettingsPreferenceInteractor provideSettingsInteractor(PadLockDB padLockDB,

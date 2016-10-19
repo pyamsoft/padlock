@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.SwitchPreferenceCompat;
 import android.view.View;
@@ -99,6 +100,14 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
 
     final Preference checkVersion = findPreference(getString(R.string.check_version_key));
     checkVersion.setOnPreferenceClickListener(preference -> checkForUpdate());
+
+    final CheckBoxPreference installListener =
+        (CheckBoxPreference) findPreference(getString(R.string.install_listener_key));
+    installListener.setOnPreferenceClickListener(preference -> {
+      final boolean isChecked = installListener.isChecked();
+      presenter.setApplicationInstallReceiverState(isChecked);
+      return true;
+    });
   }
 
   @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {

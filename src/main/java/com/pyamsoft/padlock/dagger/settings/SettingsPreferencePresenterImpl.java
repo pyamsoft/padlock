@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.dagger.settings;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import javax.inject.Inject;
@@ -32,12 +33,15 @@ class SettingsPreferencePresenterImpl
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_DATABASE = 0;
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_ALL = 1;
   @NonNull private final SettingsPreferenceInteractor interactor;
+  @NonNull private final ApplicationInstallReceiver receiver;
   @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
 
   @Inject SettingsPreferencePresenterImpl(@NonNull SettingsPreferenceInteractor interactor,
-      @NonNull Scheduler obsScheduler, @NonNull Scheduler subScheduler) {
+      @NonNull ApplicationInstallReceiver receiver, @NonNull Scheduler obsScheduler,
+      @NonNull Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
+    this.receiver = receiver;
   }
 
   @Override protected void onBind() {
@@ -55,6 +59,15 @@ class SettingsPreferencePresenterImpl
 
   @Override public void requestClearDatabase() {
     getView(settingsPreferenceView -> settingsPreferenceView.showConfirmDialog(CONFIRM_DATABASE));
+  }
+
+  @Override public void setApplicationInstallReceiverState(boolean enabled) {
+    receiver.setEnabled(enabled);
+    if (enabled) {
+      receiver.register();
+    } else {
+      receiver.unregister();
+    }
   }
 
   @SuppressWarnings("WeakerAccess") void unsubscribeConfirm() {

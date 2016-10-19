@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.receiver;
+package com.pyamsoft.padlock.dagger.receiver;
 
-import android.support.annotation.CheckResult;
+import android.content.Context;
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
+import com.pyamsoft.padlock.dagger.PadLockDB;
+import dagger.Module;
+import dagger.Provides;
+import javax.inject.Singleton;
 
-public interface ApplicationInstallReceiver {
+@Module public class ReceiverModule {
 
-  @CheckResult boolean isEnabled();
-
-  void setEnabled(boolean enabled);
-
-  void register();
-
-  void unregister();
+  @Singleton @Provides ApplicationInstallReceiver provideApplicationInstallReceiver(
+      @NonNull Context context, @NonNull PadLockDB padLockDB) {
+    return new ApplicationInstallReceiverImpl(context, padLockDB);
+  }
 }
