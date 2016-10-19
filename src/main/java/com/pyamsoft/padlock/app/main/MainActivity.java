@@ -108,11 +108,9 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   @Override protected void onPause() {
     super.onPause();
     if (isFinishing() || isChangingConfigurations()) {
-      final View amv = binding.toolbar.getChildAt(1);
-      if (amv instanceof ActionMenuView) {
-        final ActionMenuView actions = (ActionMenuView) amv;
-        actions.dismissPopupMenus();
-      }
+      Timber.d("Even though a leak is reported, this should dismiss the window, and clear the leak");
+      binding.toolbar.getMenu().close();
+      binding.toolbar.dismissPopupMenus();
     }
   }
 
