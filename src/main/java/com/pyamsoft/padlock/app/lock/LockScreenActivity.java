@@ -29,6 +29,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.ActionMenuView;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -239,8 +240,9 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   @Override protected void onPause() {
     super.onPause();
     if (isFinishing() || isChangingConfigurations()) {
-      closeOptionsMenu();
-      closeContextMenu();
+      Timber.d("Even though a leak is reported, this should dismiss the window, and clear the leak");
+      binding.toolbar.getMenu().close();
+      binding.toolbar.dismissPopupMenus();
     }
   }
 
