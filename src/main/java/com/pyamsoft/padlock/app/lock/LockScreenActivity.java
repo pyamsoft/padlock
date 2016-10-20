@@ -308,7 +308,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
 
   @Override public void finish() {
     super.finish();
-    Timber.d("Finish");
+    Timber.d("Finish called, either from Us or from Outside");
     overridePendingTransition(0, 0);
   }
 
