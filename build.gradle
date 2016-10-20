@@ -106,7 +106,7 @@ dependencies {
   errorprone "com.google.errorprone:error_prone_core:$errorProne"
 
   // Needs to compile support annotations into actual project
-  compile "com.android.support:support-annotations:$supportLib"
+  annotationProcessor "com.android.support:support-annotations:$supportLib"
 
   // Firebase Crash
   compile "com.google.firebase:firebase-crash:$firebase"
