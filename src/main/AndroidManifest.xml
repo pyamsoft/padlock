@@ -18,6 +18,7 @@
 
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.pyamsoft.padlock">
 
   <!-- Start on Boot -->
@@ -54,8 +55,16 @@
         android:exported="false"
         android:launchMode="singleTop"
         android:noHistory="true"
-        android:windowSoftInputMode="stateVisible"/>
+        android:windowSoftInputMode="stateVisible">
 
+      <!-- Sets a default width/height for the lock screen when in freeform mode -->
+      <!--suppress AndroidElementNotAllowed -->
+      <layout
+          android:defaultHeight="500dp"
+          android:defaultWidth="600dp"
+          tools:ignore="UnusedAttribute"/>
+
+    </activity>
 
     <!-- Accessibility Service -->
     <service
