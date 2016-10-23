@@ -18,7 +18,7 @@
 
 <resources>
 
-  <style name="Base.Theme.PadLock.Light" parent="@style/Theme.Design.Light.NoActionBar">
+  <style name="Base.Theme.PadLock.Light" parent="@style/Theme.AppCompat.Light.NoActionBar">
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/orangeA200</item>

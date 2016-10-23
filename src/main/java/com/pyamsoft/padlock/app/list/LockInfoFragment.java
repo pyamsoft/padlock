@@ -40,7 +40,6 @@ import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroid.widget.DividerItemDecoration;
 import timber.log.Timber;
 
 public class LockInfoFragment extends ActionBarFragment implements LockInfoPresenter.LockInfoView {

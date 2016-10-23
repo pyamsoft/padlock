@@ -76,7 +76,7 @@
             android:hint="@string/lock_code_hint"
             >
 
-          <com.pyamsoft.pydroid.widget.NoLeakTextInputEditText
+          <com.pyamsoft.pydroiddesign.widget.NoLeakTextInputEditText
               android:id="@+id/lock_text_entry"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
