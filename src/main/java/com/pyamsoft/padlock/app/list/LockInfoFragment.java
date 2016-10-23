@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -40,7 +41,6 @@ import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroid.widget.DividerItemDecoration;
 import timber.log.Timber;
 
 public class LockInfoFragment extends ActionBarFragment implements LockInfoPresenter.LockInfoView {
@@ -133,7 +133,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     // Recycler setup
     final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
     final RecyclerView.ItemDecoration dividerDecoration =
-        new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST);
+        new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
 
     binding.lockInfoRecycler.setLayoutManager(layoutManager);
     binding.lockInfoRecycler.addItemDecoration(dividerDecoration);

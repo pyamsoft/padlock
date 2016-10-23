@@ -29,7 +29,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.ActionMenuView;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,6 +41,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.ErrorDialog;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
+import com.pyamsoft.padlock.model.LockScreenEntry;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
@@ -49,7 +49,10 @@ import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroidrx.RXLoader;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import timber.log.Timber;
 
 public class LockScreenActivity extends ActivityBase implements LockScreen {
@@ -64,6 +67,21 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
   @NonNull private static final String KEY_LOCK_PRESENTER = "key_lock_presenter";
+
+  /**
+   * KLUDGE This is a map that holds references to Activities
+   *
+   * That's bad mk.
+   *
+   * More of a proof of concept, only publishable if it works just, really really well and
+   * is LOCKED DOWN TO NOT LEAK
+   */
+  @NonNull private static final Map<LockScreenEntry, WeakReference<LockScreenActivity>>
+      LOCK_SCREEN_MAP;
+
+  static {
+    LOCK_SCREEN_MAP = new HashMap<>();
+  }
 
   @NonNull private final Intent home;
   @NonNull private final AsyncDrawable.Mapper taskMap;
@@ -98,6 +116,25 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     home.addCategory(Intent.CATEGORY_HOME);
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     taskMap = new AsyncDrawable.Mapper();
+  }
+
+  static void addToLockedMap(@NonNull String packageName, @NonNull String className,
+      @NonNull LockScreenActivity instance) {
+    final LockScreenEntry entry = LockScreenEntry.create(packageName, className);
+    if (LOCK_SCREEN_MAP.containsKey(entry)) {
+      Timber.e("Instance for %s %s already exists. I hope you called finish before this",
+          packageName, className);
+    }
+
+    Timber.i("Add instance to map for activity: %s %s", packageName, className);
+    LOCK_SCREEN_MAP.put(entry, new WeakReference<>(instance));
+  }
+
+  @CheckResult @Nullable
+  public static WeakReference<LockScreenActivity> hasLockedMapEntry(@NonNull String packageName,
+      @NonNull String className) {
+    final LockScreenEntry entry = LockScreenEntry.create(packageName, className);
+    return LOCK_SCREEN_MAP.get(entry);
   }
 
   @Override public void setDisplayName(@NonNull String name) {
@@ -230,6 +267,9 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     presenter.loadDisplayNameFromPackage(lockedPackageName);
     presenter.loadApplicationIcon(lockedPackageName);
     supportInvalidateOptionsMenu();
+
+    // Add the lock map
+    addToLockedMap(lockedPackageName, lockedActivityName, this);
   }
 
   @Override protected void onStop() {
@@ -240,7 +280,8 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   @Override protected void onPause() {
     super.onPause();
     if (isFinishing() || isChangingConfigurations()) {
-      Timber.d("Even though a leak is reported, this should dismiss the window, and clear the leak");
+      Timber.d(
+          "Even though a leak is reported, this should dismiss the window, and clear the leak");
       binding.toolbar.getMenu().close();
       binding.toolbar.dismissPopupMenus();
     }
@@ -267,7 +308,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
 
   @Override public void finish() {
     super.finish();
-    Timber.d("Finish");
+    Timber.d("Finish called, either from Us or from Outside");
     overridePendingTransition(0, 0);
   }
 
