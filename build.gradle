@@ -39,13 +39,13 @@ apply plugin: "net.ltgt.errorprone"
 apply plugin: "me.tatarka.retrolambda"
 
 android {
-  compileSdkVersion 24
+  compileSdkVersion 25
   buildToolsVersion "$buildTools"
 
   defaultConfig {
     applicationId "com.pyamsoft.padlock"
     minSdkVersion 19
-    targetSdkVersion 24
+    targetSdkVersion 25
     versionCode 44
     versionName "1.8.2"
 
@@ -106,7 +106,7 @@ dependencies {
   errorprone "com.google.errorprone:error_prone_core:$errorProne"
 
   // Needs to compile support annotations into actual project
-  compile "com.android.support:support-annotations:$supportLib"
+  annotationProcessor "com.android.support:support-annotations:$supportLib"
 
   // Firebase Crash
   compile "com.google.firebase:firebase-crash:$firebase"
@@ -141,9 +141,11 @@ dependencies {
   // Mockito for unit tests
   testCompile "org.mockito:mockito-core:$mockito"
 
-  // PYDroid 4.7.2
+  // PYDroid 4.8.0
   debugCompile project(path: ":PYDroidRX", configuration: "debug")
   releaseCompile project(path: ":PYDroidRX", configuration: "release")
+  debugCompile project(path: ":PYDroidDesign", configuration: "debug")
+  releaseCompile project(path: ":PYDroidDesign", configuration: "release")
 }
 
 // AdView

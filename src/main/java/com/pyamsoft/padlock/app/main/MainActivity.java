@@ -214,7 +214,8 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
     final String line1 = "FEATURE: Faster application list loading on Android N";
     final String line2 =
         "FEATURE: When a new application is installed, suggest to lock it with PadLock";
-    return new String[] { line1, line2 };
+    final String line3 = "BUGFIX: Better locking in Multiwindow and Freeform mode on Android N";
+    return new String[] { line1, line2, line3 };
   }
 
   @NonNull @Override protected String getVersionName() {

@@ -26,6 +26,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,12 +46,12 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
-import com.pyamsoft.pydroid.behavior.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroid.widget.DividerItemDecoration;
+import com.pyamsoft.pydroiddesign.fab.HideScrollFABBehavior;
+import com.pyamsoft.pydroiddesign.util.FABUtil;
 import com.pyamsoft.pydroidrx.RXLoader;
 import timber.log.Timber;
 
@@ -211,7 +212,7 @@ public class LockListFragment extends ActionBarFragment
     lockListLayoutManager = new LockListLayoutManager(getContext());
     lockListLayoutManager.setVerticalScrollEnabled(true);
     final RecyclerView.ItemDecoration dividerDecoration =
-        new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL_LIST);
+        new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
 
     binding.applistRecyclerview.setLayoutManager(lockListLayoutManager);
     binding.applistRecyclerview.addItemDecoration(dividerDecoration);
@@ -354,7 +355,7 @@ public class LockListFragment extends ActionBarFragment
 
   private void setupFAB() {
     binding.applistFab.setOnClickListener(view -> presenter.clickPinFAB());
-    AppUtil.setupFABBehavior(binding.applistFab, new HideScrollFABBehavior(24));
+    FABUtil.setupFABBehavior(binding.applistFab, new HideScrollFABBehavior(24));
   }
 
   @Override public void setFABStateEnabled() {
