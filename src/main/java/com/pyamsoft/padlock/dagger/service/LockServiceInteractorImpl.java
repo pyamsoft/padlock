@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
+import android.app.KeyguardManager;
+import android.content.Context;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.TagConstraint;
@@ -35,16 +37,19 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
+  @SuppressWarnings("WeakerAccess") @NonNull final KeyguardManager keyguardManager;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final PadLockDB padLockDB;
 
-  @Inject LockServiceInteractorImpl(@NonNull PadLockPreferences preferences,
-      @NonNull JobSchedulerCompat jobSchedulerCompat,
+  @Inject LockServiceInteractorImpl(@NonNull Context context,
+      @NonNull PadLockPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB) {
     this.jobSchedulerCompat = jobSchedulerCompat;
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
     this.preferences = preferences;
+    this.keyguardManager = (KeyguardManager) context.getApplicationContext()
+        .getSystemService(Context.KEYGUARD_SERVICE);
   }
 
   /**
@@ -131,5 +136,13 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
           Timber.d("Filter out if whitelisted packages");
           return !entry.whitelist();
         });
+  }
+
+  @NonNull @Override public Observable<Boolean> isRestrictedWhileLocked() {
+    return Observable.defer(() -> {
+      // TODO get preference
+      return Observable.just(
+          keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked());
+    });
   }
 }

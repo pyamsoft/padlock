@@ -92,30 +92,51 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
     final Observable<Boolean> windowEventObservable =
         stateInteractor.isServiceEnabled().filter(enabled -> {
           if (!enabled) {
-            Timber.e("Service is not user-enabled");
+            Timber.e("Service is not user-enabled. Ignore");
             reset();
           }
           return enabled;
         }).flatMap(enabled -> {
-          Timber.d("Check if event is from activity");
-          return interactor.isEventFromActivity(packageName, className);
+          if (enabled) {
+            return interactor.isEventFromActivity(packageName, className);
+          } else {
+            return Observable.just(false);
+          }
         }).filter(fromActivity -> {
           if (!fromActivity) {
-            Timber.e("Event is not caused by an Activity. P: %s, C: %s", packageName, className);
+            Timber.w("Event is not caused by an Activity. P: %s, C: %s. Ignore", packageName,
+                className);
           }
           return fromActivity;
-        }).flatMap(aBoolean -> {
-          Timber.d("Check if window is from lock screen");
-          return interactor.isWindowFromLockScreen(packageName, className);
+        }).flatMap(fromActivity -> {
+          if (fromActivity) {
+            return interactor.isRestrictedWhileLocked();
+          } else {
+            return Observable.just(false);
+          }
+        }).filter(restrictedWhileLocked -> {
+          if (restrictedWhileLocked) {
+            Timber.w("Locking is restricted while device in keyguard: %s %s", packageName,
+                className);
+            return false;
+          } else {
+            return true;
+          }
+        }).flatMap(restrictedWhileLocked -> {
+          if (restrictedWhileLocked) {
+            return Observable.just(false);
+          } else {
+            return interactor.isWindowFromLockScreen(packageName, className);
+          }
         }).filter(isLockScreen -> {
           if (isLockScreen) {
-            Timber.e("Event for package %s class: %s is caused by LockScreen", packageName,
+            Timber.w("Event for package %s class: %s is caused by LockScreen. Ignore", packageName,
                 className);
           }
           return !isLockScreen;
         }).map(fromLockScreen -> {
           final boolean passed = !fromLockScreen;
-          Timber.d("Window has passed checks so far: %s", passed);
+          Timber.i("Window has passed checks so far: %s", passed);
           activePackageName = packageName;
           activeClassName = className;
           return passed;
