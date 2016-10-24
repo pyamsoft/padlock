@@ -140,9 +140,13 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
 
   @NonNull @Override public Observable<Boolean> isRestrictedWhileLocked() {
     return Observable.defer(() -> {
-      // TODO get preference
-      return Observable.just(
-          keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked());
+      final boolean ignoreInKeyguard = preferences.isIgnoreInKeyguard();
+      if (ignoreInKeyguard) {
+        return Observable.just(
+            keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked());
+      } else {
+        return Observable.just(false);
+      }
     });
   }
 }
