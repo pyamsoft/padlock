@@ -74,7 +74,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     return modifyListener;
   }
 
-  public void setModifyListener(@Nullable OnDatabaseModifyListener modifyListener) {
+  void setModifyListener(@NonNull OnDatabaseModifyListener modifyListener) {
     this.modifyListener = modifyListener;
   }
 

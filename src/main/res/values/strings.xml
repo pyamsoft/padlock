@@ -55,4 +55,5 @@
   <string name="onboard_desc_info_lock_white">Locking, even by package is ignored. This activity will never be locked</string>
   <string name="onboard_title_info_lock_black">Blacklisted Lock State</string>
   <string name="onboard_desc_info_lock_black">Always lock this activity, even if the package is not locked</string>
+  <string name="purge_all">Purge All</string>
 </resources>

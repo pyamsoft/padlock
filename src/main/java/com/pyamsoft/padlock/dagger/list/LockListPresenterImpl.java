@@ -135,27 +135,22 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
               // due to the caching aspect
               final List<Pair<String, Boolean>> resultList = new ArrayList<>();
               for (final String applPackageName : packageNames) {
-                int foundLocation = -1;
-                for (int i = 0; i < padLockEntries.size(); ++i) {
-                  final PadLockEntry.AllEntries padLockEntry = padLockEntries.get(i);
+                PadLockEntry.AllEntries found = null;
+                for (final PadLockEntry.AllEntries padLockEntry : padLockEntries) {
                   if (padLockEntry.packageName().equals(applPackageName)
                       && padLockEntry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
-                    foundLocation = i;
+                    found = padLockEntry;
                     break;
                   }
                 }
 
-                // Remove any already found entries
-                final PadLockEntry.AllEntries foundEntry;
-                if (foundLocation != -1) {
-                  foundEntry = padLockEntries.get(foundLocation);
-                  padLockEntries.remove(foundLocation);
-                } else {
-                  foundEntry = null;
+                if (found != null) {
+                  Timber.d("Remove found entry: %s", found.packageName());
+                  padLockEntries.remove(found);
                 }
 
-                Timber.d("New pair: %s %s", applPackageName, foundEntry != null);
-                resultList.add(new Pair<>(applPackageName, foundEntry != null));
+                Timber.d("New pair: %s %s", applPackageName, found != null);
+                resultList.add(new Pair<>(applPackageName, found != null));
               }
 
               return resultList;

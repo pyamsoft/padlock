@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright 2016 Peter Kenji Yamanaka
   ~
@@ -15,8 +16,16 @@
   ~ limitations under the License.
   -->
 
-<resources>
-  <item name="adapter_lock_item" type="id"/>
-  <item name="adapter_lock_info" type="id"/>
-  <item name="adapter_purge" type="id"/>
-</resources>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="AppCompatResource">
+
+  <item
+      android:id="@+id/menu_purge_all"
+      android:icon="@drawable/ic_delete_24dp"
+      android:title="@string/purge_all"
+      app:showAsAction="ifRoom"/>
+
+</menu>

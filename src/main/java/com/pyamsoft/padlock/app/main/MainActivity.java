@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.LockInfoFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
+import com.pyamsoft.padlock.app.purge.PurgeFragment;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
@@ -134,6 +135,7 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
     if ((fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null
         && fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) == null) || forceRefresh) {
       fragmentManager.beginTransaction()
           .replace(R.id.main_view_container, LockListFragment.newInstance(forceRefresh),
