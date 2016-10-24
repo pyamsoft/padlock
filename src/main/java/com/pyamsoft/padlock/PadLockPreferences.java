@@ -21,6 +21,8 @@ import android.support.annotation.Nullable;
 
 public interface PadLockPreferences {
 
+  @CheckResult boolean isIgnoreInKeyguard();
+
   @CheckResult boolean isInstallListenerEnabled();
 
   @CheckResult boolean isLockInfoDialogOnBoard();
