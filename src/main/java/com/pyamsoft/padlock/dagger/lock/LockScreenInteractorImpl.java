@@ -29,6 +29,7 @@ import com.pyamsoft.padlock.dagger.job.RecheckJob;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
 import javax.inject.Inject;
 import rx.Observable;
+import rx.functions.Func1;
 import timber.log.Timber;
 
 class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenInteractor {
@@ -53,42 +54,32 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
 
   @WorkerThread @NonNull @Override @CheckResult
   public Observable<Long> lockEntry(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long oldLockUntilTime, long ignoreUntilTime, boolean isSystem) {
-    return Observable.defer(() -> Observable.just(preferences.getTimeoutPeriod()))
-        .map(period -> period * 60 * 1000)
-        .flatMap(timeOutMinutesInMillis -> {
-          final long newLockUntilTime = System.currentTimeMillis() + timeOutMinutesInMillis;
-          Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
-              timeOutMinutesInMillis);
-          return padLockDB.updateEntry(packageName, activityName, lockCode, newLockUntilTime,
-              ignoreUntilTime, isSystem, false).map(integer -> {
-            Timber.d("Update result: %s", integer);
-            return newLockUntilTime;
-          });
-        });
+      @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem) {
+    return padLockDB.updateEntry(packageName, activityName, lockCode, lockUntilTime,
+        ignoreUntilTime, isSystem, false).map(integer -> {
+      Timber.d("Update result: %s", integer);
+      return lockUntilTime;
+    });
   }
 
-  @WorkerThread @NonNull @Override
-  public Observable<Boolean> unlockEntry(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long lockUntilTime, @NonNull String attempt) {
-    return pinInteractor.getMasterPin().map(masterPin -> {
-      Timber.d("Attempt unlock: %s %s", packageName, activityName);
-      Timber.d("Check entry is not locked: %d", lockUntilTime);
-      if (System.currentTimeMillis() < lockUntilTime) {
-        Timber.e("Entry is still locked. Fail unlock");
-        return null;
-      }
+  @NonNull @Override public Observable<Long> getTimeoutPeriodMinutesInMillis() {
+    return Observable.defer(() -> Observable.just(preferences.getTimeoutPeriod()))
+        .map(period -> period * 60 * 1000);
+  }
 
-      String pin;
-      if (lockCode == null) {
-        Timber.d("No app specific code, use Master PIN");
-        pin = masterPin;
-      } else {
-        Timber.d("App specific code present, compare attempt");
-        pin = lockCode;
-      }
-      return pin;
-    }).filter(pin -> pin != null).flatMap(pin -> checkSubmissionAttempt(attempt, pin));
+  @NonNull @Override public Observable<String> getMasterPin() {
+    return pinInteractor.getMasterPin();
+  }
+
+  @NonNull @Override
+  public Observable<Boolean> unlockEntry(@NonNull String attempt, @NonNull String pin) {
+    return Observable.defer(() -> Observable.just(pin))
+        .filter(pin1 -> pin1 != null)
+        .flatMap(new Func1<String, Observable<Boolean>>() {
+          @Override public Observable<Boolean> call(String pin) {
+            return checkSubmissionAttempt(attempt, pin);
+          }
+        });
   }
 
   @NonNull @Override

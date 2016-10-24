@@ -26,6 +26,7 @@ import javax.inject.Named;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.functions.Func1;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -129,8 +130,14 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
     unsubLock();
     lockSubscription = interactor.incrementAndGetFailCount()
         .filter(count -> count > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT)
-        .flatMap(integer -> interactor.lockEntry(packageName, activityName, lockCode, lockUntilTime,
-            ignoreUntilTime, isSystem))
+        .flatMap(integer -> interactor.getTimeoutPeriodMinutesInMillis())
+        .flatMap(timeOutMinutesInMillis -> {
+          final long newLockUntilTime = System.currentTimeMillis() + timeOutMinutesInMillis;
+          Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
+              timeOutMinutesInMillis);
+          return interactor.lockEntry(packageName, activityName, lockCode, newLockUntilTime,
+              ignoreUntilTime, isSystem);
+        })
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(lockTime -> {
@@ -146,22 +153,44 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
   @Override public void submit(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, @NonNull String currentAttempt) {
     unsubUnlock();
-    unlockSubscription =
-        interactor.unlockEntry(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
-            .subscribe(unlocked -> getView(lockScreen -> {
-              Timber.d("Received unlock entry result");
-              if (unlocked) {
-                lockScreen.onSubmitSuccess();
-              } else {
-                lockScreen.onSubmitFailure();
-              }
-            }), throwable -> {
-              Timber.e(throwable, "unlockEntry onError");
-              getView(LockScreen::onSubmitError);
-              unsubUnlock();
-            }, this::unsubUnlock);
+    unlockSubscription = interactor.getMasterPin()
+        .map(masterPin -> {
+          Timber.d("Attempt unlock: %s %s", packageName, activityName);
+          Timber.d("Check entry is not locked: %d", lockUntilTime);
+          if (System.currentTimeMillis() < lockUntilTime) {
+            Timber.e("Entry is still locked. Fail unlock");
+            return null;
+          }
+
+          final String pin;
+          if (lockCode == null) {
+            Timber.d("No app specific code, use Master PIN");
+            pin = masterPin;
+          } else {
+            Timber.d("App specific code present, compare attempt");
+            pin = lockCode;
+          }
+          return pin;
+        })
+        .flatMap(new Func1<String, Observable<Boolean>>() {
+          @Override public Observable<Boolean> call(String nullablePin) {
+            return interactor.unlockEntry(currentAttempt, nullablePin);
+          }
+        })
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(unlocked -> getView(lockScreen -> {
+          Timber.d("Received unlock entry result");
+          if (unlocked) {
+            lockScreen.onSubmitSuccess();
+          } else {
+            lockScreen.onSubmitFailure();
+          }
+        }), throwable -> {
+          Timber.e(throwable, "unlockEntry onError");
+          getView(LockScreen::onSubmitError);
+          unsubUnlock();
+        }, this::unsubUnlock);
   }
 
   @Override public void loadDisplayNameFromPackage(@NonNull String packageName) {
