@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.app.list;
 
-interface LockListDatabaseView {
+@SuppressWarnings("WeakerAccess") public interface LockListDatabaseView {
 
   void onDatabaseEntryCreated(int position);
 
