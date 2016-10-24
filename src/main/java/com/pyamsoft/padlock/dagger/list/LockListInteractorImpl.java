@@ -19,10 +19,9 @@ package com.pyamsoft.padlock.dagger.list;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
@@ -59,58 +58,32 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
     preferences.setOnBoard();
   }
 
-  @Override @NonNull public Observable<List<String>> getApplicationInfoList() {
-    return packageManagerWrapper.getActiveApplications().filter(applicationInfo -> {
-      // KLUDGE Blocking
-      final boolean systemVisible = isSystemVisible().toBlocking().first();
-      if (systemVisible) {
-        // If system visible, we show all apps
-        return true;
-      } else {
-        if (isSystemApplication(applicationInfo)) {
-          // Application is system but system apps are hidden
-          Timber.w("Hide system application: %s", applicationInfo.packageName);
-          return false;
-        } else {
-          return true;
-        }
-      }
-    }).filter(applicationInfo -> {
-      // KLUDGE blocking
-      final List<String> activityList =
-          packageManagerWrapper.getActivityListForPackage(applicationInfo.packageName)
-              .toList()
-              .toBlocking()
-              .first();
-      if (activityList.size() == 0) {
-        Timber.w("Exclude package %s because it has no activities", applicationInfo.packageName);
-        return false;
-      }
-      return true;
-    }).map(applicationInfo -> applicationInfo.packageName).toList();
+  @NonNull @Override public Observable<ApplicationInfo> getActiveApplications() {
+    return packageManagerWrapper.getActiveApplications();
+  }
+
+  @NonNull @Override
+  public Observable<String> getActivityListForApplication(@NonNull ApplicationInfo info) {
+    return packageManagerWrapper.getActivityListForPackage(info.packageName);
   }
 
   @NonNull @Override public Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
     return getPadLockDB().queryAll().first();
   }
 
-  @CheckResult boolean isSystemApplication(@NonNull ApplicationInfo info) {
+  @Override @CheckResult public boolean isSystemApplication(@NonNull ApplicationInfo info) {
     return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
   }
 
-  @WorkerThread @NonNull @Override
-  public AppEntry createFromPackageInfo(@NonNull String packageName, boolean locked) {
+  @NonNull @Override
+  public Observable<AppEntry> createFromPackageInfo(@NonNull String packageName, boolean locked) {
     Timber.d("Create AppEntry from package info: %s", packageName);
-
-    // KLUDGE blocking
-    final ApplicationInfo info =
-        packageManagerWrapper.getApplicationInfo(packageName).toBlocking().first();
-
-    return AppEntry.builder()
-        .name(packageManagerWrapper.loadPackageLabel(info).toBlocking().first())
-        .packageName(packageName)
-        .system(isSystemApplication(info))
-        .locked(locked)
-        .build();
+    return packageManagerWrapper.getApplicationInfo(packageName)
+        .map(info -> AppEntry.builder()
+            .name(packageManagerWrapper.loadPackageLabel(info).toBlocking().first())
+            .packageName(packageName)
+            .system(isSystemApplication(info))
+            .locked(locked)
+            .build());
   }
 }

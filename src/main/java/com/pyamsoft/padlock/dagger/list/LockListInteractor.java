@@ -16,9 +16,9 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
+import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
@@ -26,7 +26,10 @@ import rx.Observable;
 
 interface LockListInteractor extends LockCommonInteractor {
 
-  @CheckResult @NonNull Observable<List<String>> getApplicationInfoList();
+  @CheckResult @NonNull Observable<ApplicationInfo> getActiveApplications();
+
+  @CheckResult @NonNull Observable<String> getActivityListForApplication(
+      @NonNull ApplicationInfo info);
 
   @CheckResult @NonNull Observable<List<PadLockEntry.AllEntries>> getAppEntryList();
 
@@ -38,7 +41,8 @@ interface LockListInteractor extends LockCommonInteractor {
 
   void setShownOnBoarding();
 
-  // KLUDGE Observable
-  @WorkerThread @NonNull @CheckResult AppEntry createFromPackageInfo(@NonNull String packageName,
+  @NonNull @CheckResult Observable<AppEntry> createFromPackageInfo(@NonNull String packageName,
       boolean locked);
+
+  @CheckResult boolean isSystemApplication(@NonNull ApplicationInfo info);
 }

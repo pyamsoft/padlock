@@ -40,7 +40,7 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
     implements LockInfoPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final AppIconLoaderPresenter<LockInfoView> iconLoader;
-  @NonNull private final LockInfoInteractor lockInfoInteractor;
+  @NonNull final LockInfoInteractor lockInfoInteractor;
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
   @NonNull private Subscription databaseSubscription = Subscriptions.empty();
@@ -239,22 +239,34 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
 
   @Override public void modifyDatabaseGroup(boolean allCreate, @NonNull String packageName,
       @Nullable String code, boolean system) {
-    unsubDatabaseSubscription();
+    final Observable<String> packageActivitiesObservable =
+        lockInfoInteractor.getPackageActivities(packageName);
+    final Observable<Boolean> modifyDatabaseObservable;
+    if (allCreate) {
+      modifyDatabaseObservable = packageActivitiesObservable.flatMap(
+          activityName -> lockInfoInteractor.insertDatabaseGroup(packageName, activityName, code,
+              system));
+    } else {
+      modifyDatabaseObservable = packageActivitiesObservable.flatMap(
+          activityName -> lockInfoInteractor.deleteDatabaseGroup(packageName, activityName));
+    }
 
-    databaseSubscription =
-        lockInfoInteractor.modifyDatabaseGroup(allCreate, packageName, code, system)
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
-            .subscribe(created -> {
-              if (created) {
-                getView(lockInfoView -> lockInfoView.onDatabaseEntryCreated(GROUP_POSITION));
-              } else {
-                getView(lockInfoView -> lockInfoView.onDatabaseEntryDeleted(GROUP_POSITION));
-              }
-            }, throwable -> {
-              Timber.e(throwable, "onError modifyDatabaseGroup");
-              getView(lockInfoView -> lockInfoView.onDatabaseEntryError(GROUP_POSITION));
-            }, this::unsubDatabaseSubscription);
+    unsubDatabaseSubscription();
+    databaseSubscription = modifyDatabaseObservable.toList().map(result -> {
+      Timber.d(
+          "To prevent a bunch of events from occurring for each list entry, we flatten to just a single result");
+      // We return the original request
+      return allCreate;
+    }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
+      if (created) {
+        getView(lockInfoView -> lockInfoView.onDatabaseEntryCreated(GROUP_POSITION));
+      } else {
+        getView(lockInfoView -> lockInfoView.onDatabaseEntryDeleted(GROUP_POSITION));
+      }
+    }, throwable -> {
+      Timber.e(throwable, "onError modifyDatabaseGroup");
+      getView(lockInfoView -> lockInfoView.onDatabaseEntryError(GROUP_POSITION));
+    }, this::unsubDatabaseSubscription);
   }
 
   @SuppressWarnings("WeakerAccess") void unsubDatabaseSubscription() {

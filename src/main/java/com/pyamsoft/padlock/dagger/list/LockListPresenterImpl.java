@@ -16,15 +16,15 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
+import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
-import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -32,13 +32,14 @@ import javax.inject.Named;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.functions.Func1;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockList>
     implements LockListPresenter {
 
-  @NonNull private final LockListInteractor lockListInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
 
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
@@ -87,50 +88,71 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     unsubscribePopulateList();
 
     Timber.d("Get package info list");
-    final Observable<List<String>> packageInfoObservable =
-        lockListInteractor.getApplicationInfoList();
+    final Observable<String> packageInfoObservable = lockListInteractor.getActiveApplications()
+        .zipWith(lockListInteractor.isSystemVisible(), (applicationInfo, systemVisible) -> {
+          if (systemVisible) {
+            // If system visible, we show all apps
+            return applicationInfo;
+          } else {
+            if (lockListInteractor.isSystemApplication(applicationInfo)) {
+              // Application is system but system apps are hidden
+              Timber.w("Hide system application: %s", applicationInfo.packageName);
+              return null;
+            } else {
+              return applicationInfo;
+            }
+          }
+        })
+        .filter(applicationInfo -> applicationInfo != null)
+        .flatMap(new Func1<ApplicationInfo, Observable<String>>() {
+          @Override public Observable<String> call(ApplicationInfo applicationInfo) {
+            return lockListInteractor.getActivityListForApplication(applicationInfo)
+                .toList()
+                .map(activityList -> {
+                  if (activityList.size() == 0) {
+                    Timber.w("Exclude package %s because it has no activities",
+                        applicationInfo.packageName);
+                    return null;
+                  } else {
+                    return applicationInfo.packageName;
+                  }
+                });
+          }
+        })
+        .filter(s -> s != null);
 
     Timber.d("Get padlock entry list");
     final Observable<List<PadLockEntry.AllEntries>> padlockEntryObservable =
         lockListInteractor.getAppEntryList();
 
     populateListSubscription = Observable.zip(packageInfoObservable, padlockEntryObservable,
-        (packageNames, padLockEntries) -> {
-
-          // KLUDGE super ugly.
-          final List<AppEntry> appEntries = new ArrayList<>();
-          for (final String applPackageName : packageNames) {
-            int foundLocation = -1;
-            for (int i = 0; i < padLockEntries.size(); ++i) {
-              final PadLockEntry.AllEntries padLockEntry = padLockEntries.get(i);
-              if (padLockEntry.packageName().equals(applPackageName) && padLockEntry.activityName()
-                  .equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
-                foundLocation = i;
-                break;
-              }
+        (applPackageName, padLockEntries) -> {
+          int foundLocation = -1;
+          for (int i = 0; i < padLockEntries.size(); ++i) {
+            final PadLockEntry.AllEntries padLockEntry = padLockEntries.get(i);
+            if (padLockEntry.packageName().equals(applPackageName) && padLockEntry.activityName()
+                .equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
+              foundLocation = i;
+              break;
             }
-
-            // Remove any already found entries
-            PadLockEntry.AllEntries foundEntry;
-            if (foundLocation != -1) {
-              foundEntry = padLockEntries.get(foundLocation);
-              padLockEntries.remove(foundLocation);
-            } else {
-              foundEntry = null;
-            }
-
-            final AppEntry appEntry =
-                lockListInteractor.createFromPackageInfo(applPackageName, foundEntry != null);
-            Timber.d("Add AppEntry: %s", appEntry);
-            appEntries.add(appEntry);
           }
-          return appEntries;
+
+          // Remove any already found entries
+          PadLockEntry.AllEntries foundEntry;
+          if (foundLocation != -1) {
+            foundEntry = padLockEntries.get(foundLocation);
+            padLockEntries.remove(foundLocation);
+          } else {
+            foundEntry = null;
+          }
+
+          Timber.d("New pair: %s %s", applPackageName, foundEntry != null);
+          return new Pair<>(applPackageName, foundEntry != null);
         })
-        .flatMap(Observable::from)
+        .flatMap(pair -> lockListInteractor.createFromPackageInfo(pair.first, pair.second))
         .toSortedList(
             (appEntry, appEntry2) -> appEntry.name().compareToIgnoreCase(appEntry2.name()))
         .concatMap(Observable::from)
-        .filter(appEntry -> appEntry != null)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(appEntry -> getView(lockList -> lockList.onEntryAddedToList(appEntry)),
