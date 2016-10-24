@@ -82,76 +82,42 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
         });
   }
 
-  @NonNull @Override
-  public Observable<Boolean> postUnlock(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName, @Nullable String lockCode, long lockUntilTime, boolean isSystem,
-      boolean selectedExclude, long selectedIgnoreTime) {
-    return Observable.defer(() -> {
-      Timber.d("Run finishing unlock hooks");
-      final long ignoreMinutesInMillis = selectedIgnoreTime * 60 * 1000;
-      final Observable<Long> whitelistObservable;
-      if (selectedExclude) {
-        whitelistObservable =
-            whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
-      } else {
-        whitelistObservable = Observable.just(0L);
-      }
-
-      final Observable<Integer> ignoreObservable;
-      if (selectedIgnoreTime != 0 && !selectedExclude) {
-        ignoreObservable = ignoreEntryForTime(packageName, activityName, lockCode, lockUntilTime,
-            ignoreMinutesInMillis, isSystem);
-      } else {
-        ignoreObservable = Observable.just(0);
-      }
-
-      final Observable<Integer> recheckObservable;
-      if (selectedIgnoreTime != 0 && preferences.isRecheckEnabled() && !selectedExclude) {
-        recheckObservable = queueRecheckJob(packageName, activityName, ignoreMinutesInMillis);
-      } else {
-        recheckObservable = Observable.just(0);
-      }
-
-      return Observable.zip(ignoreObservable, recheckObservable, whitelistObservable,
-          (ignore, recheck, whitelist) -> {
-            Timber.d("Result of Whitelist: %d", whitelist);
-            Timber.d("Result of Ignore: %d", ignore);
-            Timber.d("Result of Recheck: %d", recheck);
-
-            // KLUDGE Just return something valid for now
-            return true;
-          });
-    });
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> whitelistEntry(
-      @NonNull String packageName, @NonNull String activityName, @NonNull String realName,
-      @Nullable String lockCode, boolean isSystem) {
+  @Override @CheckResult @NonNull
+  public Observable<Long> whitelistEntry(@NonNull String packageName, @NonNull String activityName,
+      @NonNull String realName, @Nullable String lockCode, boolean isSystem) {
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName);
     return padLockDB.insert(packageName, realName, lockCode, 0, 0, isSystem, true);
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Integer> queueRecheckJob(
-      @NonNull String packageName, @NonNull String activityName, long recheckTime) {
-    return Observable.defer(() -> {
-      // Cancel any old recheck job for the class, but not the package
-      final String packageTag = RecheckJob.TAG_CLASS_PREFIX + packageName;
-      final String classTag = RecheckJob.TAG_CLASS_PREFIX + activityName;
-      Timber.d("Cancel jobs with package tag: %s and class tag: %s", packageTag, classTag);
-      jobSchedulerCompat.cancelJobs(TagConstraint.ALL, packageTag, classTag);
+  @Override @CheckResult @NonNull
+  public Observable<Integer> queueRecheckJob(@NonNull String packageName,
+      @NonNull String activityName, long recheckTime) {
+    return Observable.defer(() -> Observable.just(preferences.isRecheckEnabled()))
+        .map(recheckEnabled -> {
+          if (!recheckEnabled) {
+            Timber.e("Recheck is not enabled");
+            return 0;
+          }
 
-      // Queue up a new recheck job
-      final Job recheck = RecheckJob.create(packageName, activityName, recheckTime);
-      jobSchedulerCompat.addJob(recheck);
+          // Cancel any old recheck job for the class, but not the package
+          final String packageTag = RecheckJob.TAG_CLASS_PREFIX + packageName;
+          final String classTag = RecheckJob.TAG_CLASS_PREFIX + activityName;
+          Timber.d("Cancel jobs with package tag: %s and class tag: %s", packageTag, classTag);
+          jobSchedulerCompat.cancelJobs(TagConstraint.ALL, packageTag, classTag);
 
-      // KLUDGE Just return something valid for now
-      return Observable.just(1);
-    });
+          // Queue up a new recheck job
+          final Job recheck = RecheckJob.create(packageName, activityName, recheckTime);
+          jobSchedulerCompat.addJob(recheck);
+
+          // KLUDGE Just return something valid for now
+          return 1;
+        });
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Integer> ignoreEntryForTime(
-      @NonNull String packageName, @NonNull String activityName, @Nullable String lockCode,
-      long lockUntilTime, long ignoreMinutesInMillis, boolean isSystem) {
+  @Override @NonNull @CheckResult
+  public Observable<Integer> ignoreEntryForTime(@NonNull String packageName,
+      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
+      long ignoreMinutesInMillis, boolean isSystem) {
     final long newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis;
     Timber.d("Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
         ignoreMinutesInMillis);

@@ -33,7 +33,7 @@ import timber.log.Timber;
 class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements LockScreenPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockScreenInteractor interactor;
-  @NonNull final AppIconLoaderPresenter<LockScreen> iconLoader;
+  @SuppressWarnings("WeakerAccess") @NonNull final AppIconLoaderPresenter<LockScreen> iconLoader;
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
   @NonNull private Subscription hintSubscription = Subscriptions.empty();
   @NonNull private Subscription ignoreTimeSubscription = Subscriptions.empty();
@@ -206,20 +206,55 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
 
   @Override public void postUnlock(@NonNull String packageName, @NonNull String activityName,
       @NonNull String realName, @Nullable String lockCode, long lockUntilTime, boolean isSystem,
-      boolean shouldExclude, long ignoreTime) {
+      boolean selectedExclude, long selectedIgnoreTime) {
+
+    final long ignoreMinutesInMillis = selectedIgnoreTime * 60 * 1000;
+    final Observable<Long> whitelistObservable;
+    final Observable<Integer> ignoreObservable;
+    final Observable<Integer> recheckObservable;
+
+    if (selectedExclude) {
+      whitelistObservable =
+          interactor.whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
+    } else {
+      whitelistObservable = Observable.just(0L);
+    }
+
+    if (selectedIgnoreTime != 0 && !selectedExclude) {
+      ignoreObservable =
+          interactor.ignoreEntryForTime(packageName, activityName, lockCode, lockUntilTime,
+              ignoreMinutesInMillis, isSystem);
+    } else {
+      ignoreObservable = Observable.just(0);
+    }
+
+    if (selectedIgnoreTime != 0 && !selectedExclude) {
+      recheckObservable =
+          interactor.queueRecheckJob(packageName, activityName, ignoreMinutesInMillis);
+    } else {
+      recheckObservable = Observable.just(0);
+    }
+
     unsubPostUnlock();
-    postUnlockSubscription = Observable.defer(() -> Observable.just(ignoreTime))
-        .flatMap(time -> interactor.postUnlock(packageName, activityName, realName, lockCode,
-            lockUntilTime, isSystem, shouldExclude, time))
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(result -> {
-          Timber.d("onPostUnlock");
-          getView(LockScreen::onPostUnlock);
-        }, throwable -> {
-          Timber.e(throwable, "Error postunlock");
-          getView(LockScreen::onLockedError);
-        }, this::unsubPostUnlock);
+    postUnlockSubscription =
+        Observable.zip(ignoreObservable, recheckObservable, whitelistObservable,
+            (ignore, recheck, whitelist) -> {
+              Timber.d("Result of Whitelist: %d", whitelist);
+              Timber.d("Result of Ignore: %d", ignore);
+              Timber.d("Result of Recheck: %d", recheck);
+
+              // KLUDGE Just return something valid for now
+              return true;
+            })
+            .subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
+            .subscribe(result -> {
+              Timber.d("onPostUnlock");
+              getView(LockScreen::onPostUnlock);
+            }, throwable -> {
+              Timber.e(throwable, "Error postunlock");
+              getView(LockScreen::onLockedError);
+            }, this::unsubPostUnlock);
   }
 
   @SuppressWarnings("WeakerAccess") void unsubDisplayName() {
