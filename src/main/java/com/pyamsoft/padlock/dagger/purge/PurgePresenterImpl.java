@@ -53,20 +53,21 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
               final List<String> stalePackageNames = new ArrayList<>();
               // Remove all active applications from the list of entries
               for (final String packageName : packageNames) {
-                int foundLocation = -1;
+                final List<Integer> foundLocations = new ArrayList<>();
                 for (int i = 0; i < allEntries.size(); ++i) {
                   final PadLockEntry.AllEntries entry = allEntries.get(i);
                   if (entry.packageName().equals(packageName)) {
-                    foundLocation = i;
-                    break;
+                    foundLocations.add(i);
                   }
                 }
 
-                if (foundLocation != -1) {
-                  Timber.d("Found entry for %s at %d, remove", packageName, foundLocation);
-                  allEntries.remove(foundLocation);
-                } else {
+                if (foundLocations.isEmpty()) {
                   Timber.w("Package %s not found in database", packageName);
+                } else {
+                  for (final int foundLocation : foundLocations) {
+                    Timber.d("Found entry for %s at %d, remove", packageName, foundLocation);
+                    allEntries.remove(foundLocation);
+                  }
                 }
               }
 
