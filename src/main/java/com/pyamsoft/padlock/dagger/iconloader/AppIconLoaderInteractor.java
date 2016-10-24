@@ -21,7 +21,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import rx.Observable;
 
-public interface AppIconLoaderInteractor {
+interface AppIconLoaderInteractor {
 
   @CheckResult @NonNull Observable<Drawable> loadPackageIcon(@NonNull String packageName);
 }

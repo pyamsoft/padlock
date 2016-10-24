@@ -21,7 +21,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import rx.Observable;
 
-public interface PinEntryInteractor extends LockInteractor {
+interface PinEntryInteractor extends LockInteractor {
 
   @CheckResult @NonNull Observable<Boolean> hasMasterPin();
 
