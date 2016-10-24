@@ -16,10 +16,31 @@
 
 package com.pyamsoft.padlock.dagger.purge;
 
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.dagger.PadLockDB;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import java.util.List;
 import javax.inject.Inject;
+import rx.Observable;
 
 class PurgeInteractorImpl implements PurgeInteractor {
 
-  @Inject PurgeInteractorImpl() {
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
+  @NonNull private final PadLockDB padLockDB;
+
+  @Inject PurgeInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper,
+      @NonNull PadLockDB padLockDB) {
+    this.packageManagerWrapper = packageManagerWrapper;
+    this.padLockDB = padLockDB;
+  }
+
+  @NonNull @Override public Observable<String> getActiveApplicationPackageNames() {
+    return packageManagerWrapper.getActiveApplications()
+        .map(applicationInfo -> applicationInfo.packageName);
+  }
+
+  @NonNull @Override public Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
+    return padLockDB.queryAll().first();
   }
 }

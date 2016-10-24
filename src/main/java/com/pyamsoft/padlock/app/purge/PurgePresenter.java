@@ -20,6 +20,8 @@ import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface PurgePresenter extends Presenter<PurgePresenter.View> {
 
+  void retrieveOldApplications();
+
   interface View {
 
   }
