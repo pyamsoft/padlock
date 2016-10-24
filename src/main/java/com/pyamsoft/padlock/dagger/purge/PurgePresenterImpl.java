@@ -28,23 +28,33 @@ import javax.inject.Inject;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> implements PurgePresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor interactor;
+  @NonNull private final CompositeSubscription compositeSubscription;
   @NonNull private Subscription retrievalSubscription = Subscriptions.empty();
 
   @Inject PurgePresenterImpl(@NonNull PurgeInteractor interactor,
       @NonNull Scheduler observeScheduler, @NonNull Scheduler subscribeScheduler) {
     super(observeScheduler, subscribeScheduler);
     this.interactor = interactor;
+    compositeSubscription = new CompositeSubscription();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
     unsubRetrieval();
+    unsubStaleDeletes();
+  }
+
+  private void unsubStaleDeletes() {
+    if (compositeSubscription.hasSubscriptions()) {
+      compositeSubscription.clear();
+    }
   }
 
   @Override public void retrieveStaleApplications() {
@@ -58,6 +68,7 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
               for (final String packageName : packageNames) {
                 Timber.i("Look for package: %s", packageName);
                 final List<PadLockEntry.AllEntries> foundLocations = new ArrayList<>();
+                //noinspection Convert2streamapi
                 for (final PadLockEntry.AllEntries entry : allEntries) {
                   if (entry.packageName().equals(packageName)) {
                     foundLocations.add(entry);
@@ -69,7 +80,8 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
 
               // Remove any found locations
               for (final PadLockEntry.AllEntries liveLocation : liveLocations) {
-                Timber.d("Remove live location: %s %s", liveLocation.packageName(), liveLocation.activityName());
+                Timber.d("Remove live location: %s %s", liveLocation.packageName(),
+                    liveLocation.activityName());
                 allEntries.remove(liveLocation);
               }
 
@@ -92,6 +104,21 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
           unsubRetrieval();
           getView(View::onRetrievalComplete);
         });
+  }
+
+  @Override public void deleteStale(@NonNull String packageName) {
+    final Subscription subscription = interactor.deleteEntry(packageName)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(deleteResult -> {
+          Timber.d("Delete result :%d", deleteResult);
+          if (deleteResult > 0) {
+            getView(view -> view.onDeleted(packageName));
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError deleteStale");
+        });
+    compositeSubscription.add(subscription);
   }
 
   @SuppressWarnings("WeakerAccess") void unsubRetrieval() {
