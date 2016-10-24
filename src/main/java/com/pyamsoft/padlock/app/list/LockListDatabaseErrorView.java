@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.app.list;
 
-interface LockListDatabaseErrorView extends LockListDatabaseView {
+@SuppressWarnings("WeakerAccess") public interface LockListDatabaseErrorView extends LockListDatabaseView {
 
   void onDatabaseEntryError(int position);
 }
