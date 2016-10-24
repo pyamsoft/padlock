@@ -28,13 +28,13 @@ import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 
-
 public class PurgeFragment extends ActionBarFragment {
 
   @NonNull public static final String TAG = "PurgeFragment";
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    setHasOptionsMenu(true);
   }
 
   @Override public void onDestroy() {
@@ -61,6 +61,11 @@ public class PurgeFragment extends ActionBarFragment {
 
   @Override public void onStop() {
     super.onStop();
+  }
+
+  @Override public void onResume() {
+    super.onResume();
+    setActionBarUpEnabled(true);
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {

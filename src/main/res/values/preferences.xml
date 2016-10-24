@@ -103,6 +103,10 @@
   <string name="ignore_keyguard_key">ignore_keyguard</string>
   <bool name="ignore_keyguard_default">true</bool>
 
+  <string name="purge_db_key">purge_db</string>
+  <string name="purge_db_title">Cleanup Database</string>
+  <string name="purge_db_summary">Purge the database of uninstalled applications</string>
+
   <string name="clear_db_key">clear_db</string>
   <string name="clear_db_title">Reset Database</string>
   <string name="clear_db_summary">Reset the locked applications database</string>
