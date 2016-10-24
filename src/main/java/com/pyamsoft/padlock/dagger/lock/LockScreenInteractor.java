@@ -21,7 +21,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import rx.Observable;
 
-public interface LockScreenInteractor extends LockInteractor {
+interface LockScreenInteractor extends LockInteractor {
 
   int DEFAULT_MAX_FAIL_COUNT = 2;
 
