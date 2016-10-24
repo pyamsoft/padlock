@@ -20,8 +20,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
-import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
@@ -52,34 +52,25 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
             activityEntry -> !activityEntry.equalsIgnoreCase(LockScreenActivity.class.getName()));
   }
 
-  @NonNull @Override
-  public Observable<Boolean> modifyDatabaseGroup(boolean allCreate, @NonNull String packageName,
-      @Nullable String code, boolean system) {
-    return getPackageActivities(packageName).flatMap(activityName -> {
-      if (allCreate) {
-        Timber.d("Modify the database to create entry for: %s %s", packageName, activityName);
+  @NonNull @Override public Observable<Boolean> insertDatabaseGroup(@NonNull String packageName,
+      @NonNull String activityName, @Nullable String code, boolean system) {
+    Timber.d("Modify the database to create entry for: %s %s", packageName, activityName);
 
-        // No whitelisting for the package grouping, its an all or nothing
-        return getPadLockDB().insert(packageName, activityName, code, 0, 0, system, false)
-            .map(result -> {
-              Timber.d("Create result: %d", result);
-              return true;
-            });
-      } else {
-        Timber.d("Modify the database to delete entry for: %s %s", packageName, activityName);
+    // No whitelisting for the package grouping, its an all or nothing
+    return getPadLockDB().insert(packageName, activityName, code, 0, 0, system, false)
+        .map(result -> {
+          Timber.d("Create result: %d", result);
+          return true;
+        });
+  }
 
-        return getPadLockDB().deleteWithPackageActivityName(packageName, activityName)
-            .map(result -> {
-              Timber.d("Delete result: %d", result);
-              return false;
-            });
-      }
-    }).toList().map(result -> {
-      Timber.d(
-          "To prevent a bunch of events from occurring for each list entry, we flatten to just a single result");
+  @NonNull @Override public Observable<Boolean> deleteDatabaseGroup(@NonNull String packageName,
+      @NonNull String activityName) {
+    Timber.d("Modify the database to delete entry for: %s %s", packageName, activityName);
 
-      // We return the original request
-      return allCreate;
+    return getPadLockDB().deleteWithPackageActivityName(packageName, activityName).map(result -> {
+      Timber.d("Delete result: %d", result);
+      return false;
     });
   }
 
