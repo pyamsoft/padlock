@@ -25,7 +25,7 @@ public interface PurgePresenter extends Presenter<PurgePresenter.View> {
 
   interface View {
 
-    void onStaleApplicationRetreived(@NonNull String name);
+    void onStaleApplicationRetrieved(@NonNull String name);
 
     void onRetrievalComplete();
   }

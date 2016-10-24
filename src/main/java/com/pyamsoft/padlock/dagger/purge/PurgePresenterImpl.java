@@ -82,7 +82,7 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
         .sorted(String::compareToIgnoreCase)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(s -> getView(view -> view.onStaleApplicationRetreived(s)), throwable -> {
+        .subscribe(s -> getView(view -> view.onStaleApplicationRetrieved(s)), throwable -> {
           Timber.e(throwable, "onError retrieveStaleApplications");
           getView(View::onRetrievalComplete);
         }, () -> {
