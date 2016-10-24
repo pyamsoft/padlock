@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.purge;
 
-import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;

@@ -183,7 +183,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         return loadPackageLabel(applicationInfo);
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "EXCEPTION");
-        return Observable.just("");
+        return Observable.just(packageName);
       }
     });
   }
