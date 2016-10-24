@@ -181,6 +181,39 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
           setLockScreenPassed(false);
           return interactor.getEntry(packageName, className);
         })
+        .map(entry -> {
+          if (PadLockEntry.isEmpty(entry)) {
+            Timber.w("Returned entry is EMPTY");
+            return null;
+          }
+
+          Timber.d("Default entry PN %s, AN %s", entry.packageName(), entry.activityName());
+          return entry;
+        })
+        .filter(entry -> entry != null)
+        .filter(entry -> {
+          Timber.d("Check ignore time for: %s %s", entry.packageName(), entry.activityName());
+          final long ignoreUntilTime = entry.ignoreUntilTime();
+          final long currentTime = System.currentTimeMillis();
+          Timber.d("Ignore until time: %d", ignoreUntilTime);
+          Timber.d("Current time: %d", currentTime);
+          if (currentTime < ignoreUntilTime) {
+            Timber.d("Ignore period has not elapsed yet");
+            return false;
+          }
+
+          return true;
+        })
+        .filter(entry -> {
+          if (entry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)
+              && entry.whitelist()) {
+            throw new RuntimeException(
+                "PACKAGE entry for package: " + entry.packageName() + " cannot be whitelisted");
+          }
+
+          Timber.d("Filter out if whitelisted packages");
+          return !entry.whitelist();
+        })
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(padLockEntry -> {
