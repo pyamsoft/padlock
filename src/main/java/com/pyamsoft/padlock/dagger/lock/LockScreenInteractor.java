@@ -21,25 +21,35 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import rx.Observable;
 
-public interface LockScreenInteractor extends LockInteractor {
+interface LockScreenInteractor extends LockInteractor {
 
   int DEFAULT_MAX_FAIL_COUNT = 2;
 
-  @CheckResult @NonNull Observable<Boolean> unlockEntry(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
-      @NonNull String attempt);
-
-  @NonNull @CheckResult Observable<Boolean> postUnlock(@NonNull String packageName,
-      @NonNull String activityName, @NonNull String realName, @Nullable String lockCode,
-      long lockUntilTime, boolean isSystem, boolean selectedExclude, long selectedIgnoreTime);
+  @CheckResult @NonNull Observable<Boolean> unlockEntry(@NonNull String attempt,
+      @NonNull String pin);
 
   @CheckResult @NonNull Observable<Long> lockEntry(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String lockCode, long lastLockUntilTime,
+      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
       long ignoreUntilTime, boolean isSystem);
 
   @CheckResult @NonNull Observable<String> getDisplayName(@NonNull String packageName);
 
   @CheckResult @NonNull Observable<Long> getDefaultIgnoreTime();
+
+  @CheckResult @NonNull Observable<Long> getTimeoutPeriodMinutesInMillis();
+
+  @CheckResult @NonNull Observable<String> getMasterPin();
+
+  @CheckResult @NonNull Observable<Long> whitelistEntry(@NonNull String packageName,
+      @NonNull String activityName, @NonNull String realName, @Nullable String lockCode,
+      boolean isSystem);
+
+  @CheckResult @NonNull Observable<Integer> queueRecheckJob(@NonNull String packageName,
+      @NonNull String activityName, long recheckTime);
+
+  @NonNull @CheckResult Observable<Integer> ignoreEntryForTime(@NonNull String packageName,
+      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
+      long ignoreMinutesInMillis, boolean isSystem);
 
   //@CheckResult @NonNull Observable<Long> getIgnoreTimeForIndex(int index);
 

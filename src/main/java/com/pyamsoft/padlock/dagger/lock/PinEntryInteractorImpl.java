@@ -31,24 +31,16 @@ class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntryInter
     this.masterPinInteractor = masterPinInteractor;
   }
 
-  @Override @CheckResult @NonNull
-  public Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt, @NonNull String reentry,
-      @NonNull String hint) {
-    return masterPinInteractor.getMasterPin().flatMap(masterPin -> {
-      if (masterPin == null) {
-        return attemptCreatePin(attempt, reentry, hint);
-      } else {
-        return attemptClearPin(masterPin, attempt);
-      }
-    });
-  }
-
   @NonNull @Override public Observable<Boolean> hasMasterPin() {
-    return masterPinInteractor.getMasterPin().map(s -> s != null);
+    return getMasterPin().map(s -> s != null);
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<PinEntryEvent> attemptClearPin(
-      @NonNull String masterPin, @NonNull String attempt) {
+  @NonNull @Override public Observable<String> getMasterPin() {
+    return masterPinInteractor.getMasterPin();
+  }
+
+  @Override @CheckResult @NonNull
+  public Observable<PinEntryEvent> clearPin(@NonNull String masterPin, @NonNull String attempt) {
     return checkSubmissionAttempt(attempt, masterPin).map(success -> {
       if (success) {
         Timber.d("Clear master pin");
@@ -62,8 +54,8 @@ class PinEntryInteractorImpl extends LockInteractorImpl implements PinEntryInter
     });
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<PinEntryEvent> attemptCreatePin(@NonNull String attempt, @NonNull String reentry,
+  @Override @CheckResult @NonNull
+  public Observable<PinEntryEvent> createPin(@NonNull String attempt, @NonNull String reentry,
       @NonNull String hint) {
     return Observable.defer(() -> {
       Timber.d("No existing master pin, attempt to create a new one");

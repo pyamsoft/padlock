@@ -21,10 +21,15 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import rx.Observable;
 
-public interface PinEntryInteractor extends LockInteractor {
-
-  @CheckResult @NonNull Observable<PinEntryEvent> submitMasterPin(@NonNull String attempt,
-      @NonNull String reentry, @NonNull String hint);
+interface PinEntryInteractor extends LockInteractor {
 
   @CheckResult @NonNull Observable<Boolean> hasMasterPin();
+
+  @CheckResult @NonNull Observable<String> getMasterPin();
+
+  @CheckResult @NonNull Observable<PinEntryEvent> clearPin(@NonNull String masterPin,
+      @NonNull String attempt);
+
+  @CheckResult @NonNull Observable<PinEntryEvent> createPin(@NonNull String attempt,
+      @NonNull String reentry, @NonNull String hint);
 }
