@@ -68,6 +68,11 @@
         android:summaryOn="@string/ignore_keyguard_summary_checked"
         android:title="@string/ignore_keyguard_title"/>
 
+    <Preference
+        android:key="@string/purge_db_key"
+        android:summary="@string/purge_db_summary"
+        android:title="@string/purge_db_title"/>
+
   </PreferenceCategory>
 
   <PreferenceCategory
