@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright 2016 Peter Kenji Yamanaka
   ~
@@ -15,8 +16,14 @@
   ~ limitations under the License.
   -->
 
-<resources>
-  <item name="adapter_lock_item" type="id"/>
-  <item name="adapter_lock_info" type="id"/>
-  <item name="adapter_purge" type="id"/>
-</resources>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+  <android.support.v7.widget.RecyclerView
+      android:id="@+id/purge_list"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      />
+
+</layout>
