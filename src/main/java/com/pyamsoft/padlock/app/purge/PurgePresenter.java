@@ -16,13 +16,17 @@
 
 package com.pyamsoft.padlock.app.purge;
 
+import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface PurgePresenter extends Presenter<PurgePresenter.View> {
 
-  void retrieveOldApplications();
+  void retrieveStaleApplications();
 
   interface View {
 
+    void onStaleApplicationRetreived(@NonNull String name);
+
+    void onRetrievalComplete();
   }
 }

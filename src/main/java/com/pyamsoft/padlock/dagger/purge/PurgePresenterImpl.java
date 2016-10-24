@@ -25,13 +25,14 @@ import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
 import rx.Scheduler;
-import rx.functions.Action0;
-import rx.functions.Action1;
+import rx.Subscription;
+import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> implements PurgePresenter {
 
-  @NonNull private final PurgeInteractor interactor;
+  @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor interactor;
+  @NonNull private Subscription retrievalSubscription = Subscriptions.empty();
 
   @Inject PurgePresenterImpl(@NonNull PurgeInteractor interactor,
       @NonNull Scheduler observeScheduler, @NonNull Scheduler subscribeScheduler) {
@@ -39,8 +40,14 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
     this.interactor = interactor;
   }
 
-  @Override public void retrieveOldApplications() {
-    interactor.getAppEntryList()
+  @Override protected void onUnbind() {
+    super.onUnbind();
+    unsubRetrieval();
+  }
+
+  @Override public void retrieveStaleApplications() {
+    unsubRetrieval();
+    retrievalSubscription = interactor.getAppEntryList()
         .zipWith(interactor.getActiveApplicationPackageNames().toList(),
             (allEntries, packageNames) -> {
               final List<String> stalePackageNames = new ArrayList<>();
@@ -71,20 +78,22 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
 
               return stalePackageNames;
             })
-        .concatMap(Observable::from)
-        .sorted(String::compareToIgnoreCase).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler())
-    .subscribe(new Action1<String>() {
-      @Override public void call(String s) {
+        .flatMap(Observable::from)
+        .sorted(String::compareToIgnoreCase)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(s -> getView(view -> view.onStaleApplicationRetreived(s)), throwable -> {
+          Timber.e(throwable, "onError retrieveStaleApplications");
+          getView(View::onRetrievalComplete);
+        }, () -> {
+          unsubRetrieval();
+          getView(View::onRetrievalComplete);
+        });
+  }
 
-      }
-    }, new Action1<Throwable>() {
-      @Override public void call(Throwable throwable) {
-
-      }
-    }, new Action0() {
-      @Override public void call() {
-
-      }
-    });
+  @SuppressWarnings("WeakerAccess") void unsubRetrieval() {
+    if (!retrievalSubscription.isUnsubscribed()) {
+      retrievalSubscription.unsubscribe();
+    }
   }
 }
