@@ -54,19 +54,18 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
     this.lockInfoInteractor = lockInfoInteractor;
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult
-  static int findEntryInActivities(@NonNull List<PadLockEntry.WithPackageName> padLockEntries,
-      @NonNull String name) {
-    int foundLocation = -1;
-    for (int i = 0; i < padLockEntries.size(); ++i) {
-      final PadLockEntry.WithPackageName padLockEntry = padLockEntries.get(i);
+  @SuppressWarnings("WeakerAccess") @CheckResult @Nullable
+  PadLockEntry.WithPackageName findEntryInActivities(
+      @NonNull List<PadLockEntry.WithPackageName> padLockEntries, @NonNull String name) {
+    PadLockEntry.WithPackageName found = null;
+    for (final PadLockEntry.WithPackageName padLockEntry : padLockEntries) {
       if (padLockEntry.activityName().equals(name)) {
-        foundLocation = i;
+        found = padLockEntry;
         break;
       }
     }
 
-    return foundLocation;
+    return found;
   }
 
   @Override protected void onBind() {
@@ -103,15 +102,12 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
               // KLUDGE super ugly.
               Timber.d("Search set for locked activities");
               for (final String name : activityInfos) {
-                final int foundLocation = findEntryInActivities(padLockEntries, name);
+                final PadLockEntry.WithPackageName foundEntry =
+                    findEntryInActivities(padLockEntries, name);
 
-                // Remove foundEntry from the list as it is already used
-                PadLockEntry.WithPackageName foundEntry;
-                if (foundLocation != -1) {
-                  foundEntry = padLockEntries.get(foundLocation);
-                  padLockEntries.remove(foundLocation);
-                } else {
-                  foundEntry = null;
+                if (foundEntry != null) {
+                  Timber.d("Remove found entry: %s", foundEntry.activityName());
+                  padLockEntries.remove(foundEntry);
                 }
 
                 LockState state;
@@ -124,6 +120,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
                     state = LockState.LOCKED;
                   }
                 }
+
                 final ActivityEntry activityEntry =
                     ActivityEntry.builder().lockState(state).name(name).build();
                 Timber.d("Add ActivityEntry: %s", activityEntry);
@@ -181,11 +178,11 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
               // KLUDGE super ugly.
               Timber.d("Search set for locked activities");
               for (final String name : activityInfos) {
-                final int foundLocation = findEntryInActivities(padLockEntries, name);
+                final PadLockEntry.WithPackageName found =
+                    findEntryInActivities(padLockEntries, name);
 
-                // Remove foundEntry from the list as it is already used
-                if (foundLocation != -1) {
-                  padLockEntries.remove(foundLocation);
+                // If we found an entry, increment count
+                if (found != null) {
                   ++count;
                 }
               }

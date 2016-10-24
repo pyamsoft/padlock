@@ -27,7 +27,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -95,6 +94,7 @@ public class LockListFragment extends ActionBarFragment
   private long loadedPresenterKey;
   private long loadedAdapterKey;
   @Nullable private TapTargetSequence sequence;
+  private DividerItemDecoration dividerDecoration;
 
   @CheckResult @NonNull public static LockListFragment newInstance(boolean forceRefresh) {
     final LockListFragment fragment = new LockListFragment();
@@ -211,8 +211,7 @@ public class LockListFragment extends ActionBarFragment
   private void setupRecyclerView() {
     lockListLayoutManager = new LockListLayoutManager(getContext());
     lockListLayoutManager.setVerticalScrollEnabled(true);
-    final RecyclerView.ItemDecoration dividerDecoration =
-        new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
+    dividerDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
 
     binding.applistRecyclerview.setLayoutManager(lockListLayoutManager);
     binding.applistRecyclerview.addItemDecoration(dividerDecoration);
@@ -319,6 +318,7 @@ public class LockListFragment extends ActionBarFragment
     super.onDestroyView();
 
     clearListListeners();
+    binding.applistRecyclerview.removeItemDecoration(dividerDecoration);
     binding.applistRecyclerview.setOnClickListener(null);
     binding.applistRecyclerview.setLayoutManager(null);
     binding.applistRecyclerview.setAdapter(null);
