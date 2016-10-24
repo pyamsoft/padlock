@@ -24,7 +24,6 @@ import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,11 +35,11 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInfoView>
+class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.LockInfoView>
     implements LockInfoPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final AppIconLoaderPresenter<LockInfoView> iconLoader;
-  @NonNull final LockInfoInteractor lockInfoInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockInfoInteractor lockInfoInteractor;
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
   @NonNull private Subscription databaseSubscription = Subscriptions.empty();
@@ -50,7 +49,7 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
       final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("obs") Scheduler obsScheduler,
       final @NonNull @Named("io") Scheduler subScheduler) {
-    super(obsScheduler, subScheduler);
+    super(lockInfoInteractor, obsScheduler, subScheduler);
     this.iconLoader = iconLoader;
     this.lockInfoInteractor = lockInfoInteractor;
   }
@@ -215,9 +214,8 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
       boolean forceDelete) {
     unsubDatabaseSubscription();
     databaseSubscription =
-        lockInfoInteractor.modifySingleDatabaseEntry(isDefault, packageName, activityName, code,
-            system, whitelist, forceDelete)
-            .subscribeOn(getSubscribeScheduler())
+        modifySingleDatabaseEntry(isDefault, packageName, activityName, code, system, whitelist,
+            forceDelete).subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
             .subscribe(lockState -> {
               switch (lockState) {
