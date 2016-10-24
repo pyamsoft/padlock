@@ -16,6 +16,16 @@
 
 package com.pyamsoft.padlock.dagger.purge;
 
+import android.content.pm.ApplicationInfo;
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import java.util.List;
+import rx.Observable;
 
 interface PurgeInteractor {
+
+  @CheckResult @NonNull Observable<String> getActiveApplicationPackageNames();
+
+  @CheckResult @NonNull Observable<List<PadLockEntry.AllEntries>> getAppEntryList();
 }
