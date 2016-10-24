@@ -23,10 +23,14 @@ public interface PurgePresenter extends Presenter<PurgePresenter.View> {
 
   void retrieveStaleApplications();
 
+  void deleteStale(@NonNull String packageName);
+
   interface View {
 
     void onStaleApplicationRetrieved(@NonNull String name);
 
     void onRetrievalComplete();
+
+    void onDeleted(@NonNull String packageName);
   }
 }

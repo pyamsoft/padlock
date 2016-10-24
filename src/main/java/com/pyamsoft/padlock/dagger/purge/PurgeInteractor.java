@@ -27,4 +27,6 @@ interface PurgeInteractor {
   @CheckResult @NonNull Observable<String> getActiveApplicationPackageNames();
 
   @CheckResult @NonNull Observable<List<PadLockEntry.AllEntries>> getAppEntryList();
+
+  @CheckResult @NonNull Observable<Integer> deleteEntry(@NonNull String packageName);
 }

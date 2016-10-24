@@ -34,6 +34,7 @@ import com.pyamsoft.padlock.databinding.FragmentPurgeBinding;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
+import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
 
@@ -165,7 +166,18 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    return super.onOptionsItemSelected(item);
+    final boolean handled;
+    switch (item.getItemId()) {
+      case R.id.menu_purge_all:
+        AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new PurgeAllDialog(),
+            "purge_all");
+        handled = true;
+        break;
+      default:
+        handled = false;
+    }
+
+    return handled || super.onOptionsItemSelected(item);
   }
 
   private void setupRecyclerView() {
@@ -182,6 +194,8 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
 
   void handleDeleteRequest(int position, @NonNull String packageName) {
     Timber.d("Handle delete request for %s at %d", packageName, position);
+    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
+        PurgeSingleItemDialog.newInstance(packageName), "purge_single");
   }
 
   @Override public void onStaleApplicationRetrieved(@NonNull String name) {
@@ -190,5 +204,43 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
 
   @Override public void onRetrievalComplete() {
     forceRefresh = false;
+    fastItemAdapter.notifyItemRangeInserted(0, fastItemAdapter.getItemCount() - 1);
+  }
+
+  @Override public void onDeleted(@NonNull String packageName) {
+    final int itemCount = fastItemAdapter.getItemCount();
+    if (itemCount == 0) {
+      Timber.e("Adapter is EMPTY");
+    } else {
+      int found = -1;
+      for (int i = 0; i < itemCount; ++i) {
+        final PurgeItem item = fastItemAdapter.getAdapterItem(i);
+        if (item.getPackageName().equals(packageName)) {
+          found = i;
+          break;
+        }
+      }
+
+      if (found != -1) {
+        Timber.d("Remove deleted item: %s", packageName);
+        fastItemAdapter.remove(found);
+      }
+    }
+  }
+
+  void purge(@NonNull String packageName) {
+    Timber.d("Purge stale: %s", packageName);
+    presenter.deleteStale(packageName);
+  }
+
+  void purgeAll() {
+    final int itemCount = fastItemAdapter.getItemCount();
+    if (itemCount == 0) {
+      Timber.e("Adapter is EMPTY");
+    } else {
+      for (final PurgeItem item : fastItemAdapter.getAdapterItems()) {
+        purge(item.getPackageName());
+      }
+    }
   }
 }

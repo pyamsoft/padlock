@@ -43,4 +43,8 @@ class PurgeInteractorImpl implements PurgeInteractor {
   @NonNull @Override public Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
     return padLockDB.queryAll().first();
   }
+
+  @NonNull @Override public Observable<Integer> deleteEntry(@NonNull String packageName) {
+    return padLockDB.deleteWithPackageName(packageName);
+  }
 }
