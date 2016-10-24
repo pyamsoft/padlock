@@ -29,8 +29,8 @@ import timber.log.Timber;
 
 class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinEntryPresenter {
 
+  @SuppressWarnings("WeakerAccess") @NonNull final PinEntryInteractor interactor;
   @NonNull private final AppIconLoaderPresenter<PinScreen> iconLoader;
-  @NonNull private final PinEntryInteractor interactor;
   @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
   @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
 
@@ -75,7 +75,14 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
       @NonNull String hint) {
     Timber.d("Attempt PIN submission");
     unsubPinEntry();
-    pinEntrySubscription = interactor.submitMasterPin(currentAttempt, reEntryAttempt, hint)
+    pinEntrySubscription = interactor.getMasterPin()
+        .flatMap(masterPin -> {
+          if (masterPin == null) {
+            return interactor.createPin(currentAttempt, reEntryAttempt, hint);
+          } else {
+            return interactor.clearPin(masterPin, currentAttempt);
+          }
+        })
         .filter(pinEntryEvent -> pinEntryEvent != null)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
