@@ -133,7 +133,8 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
               return entries;
             })
             .flatMap(Observable::from)
-            .toSortedList((activityEntry, activityEntry2) -> {
+            .filter(activityEntry -> activityEntry != null)
+            .sorted((activityEntry, activityEntry2) -> {
               final boolean activity1Package = activityEntry.name().startsWith(packageName);
               final boolean activity2Package = activityEntry2.name().startsWith(packageName);
               if (activity1Package && activity2Package) {
@@ -146,8 +147,6 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
                 return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
               }
             })
-            .concatMap(Observable::from)
-            .filter(activityEntry -> activityEntry != null)
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
             .subscribe(activityEntry -> getView(
