@@ -61,6 +61,13 @@
         android:summaryOn="@string/install_listener_summary_checked"
         android:title="@string/install_listener_title"/>
 
+    <CheckBoxPreference
+        android:defaultValue="@bool/ignore_keyguard_default"
+        android:key="@string/ignore_keyguard_key"
+        android:summaryOff="@string/ignore_keyguard_summary_unchecked"
+        android:summaryOn="@string/ignore_keyguard_summary_checked"
+        android:title="@string/ignore_keyguard_title"/>
+
   </PreferenceCategory>
 
   <PreferenceCategory
