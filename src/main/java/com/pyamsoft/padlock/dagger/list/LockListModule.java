@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.dagger.list;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import dagger.Module;

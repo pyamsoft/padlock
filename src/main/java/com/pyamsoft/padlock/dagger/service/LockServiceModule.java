@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.dagger.service;
 import android.content.Context;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
 import dagger.Module;

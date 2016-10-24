@@ -24,7 +24,7 @@ import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.job.RecheckJob;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
