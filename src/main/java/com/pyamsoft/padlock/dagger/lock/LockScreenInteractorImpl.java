@@ -29,6 +29,7 @@ import com.pyamsoft.padlock.dagger.job.RecheckJob;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
 import javax.inject.Inject;
 import rx.Observable;
+import rx.functions.Func1;
 import timber.log.Timber;
 
 class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenInteractor {
@@ -53,114 +54,70 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
 
   @WorkerThread @NonNull @Override @CheckResult
   public Observable<Long> lockEntry(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long oldLockUntilTime, long ignoreUntilTime, boolean isSystem) {
-    return Observable.defer(() -> Observable.just(preferences.getTimeoutPeriod()))
-        .map(period -> period * 60 * 1000)
-        .flatMap(timeOutMinutesInMillis -> {
-          final long newLockUntilTime = System.currentTimeMillis() + timeOutMinutesInMillis;
-          Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
-              timeOutMinutesInMillis);
-          return padLockDB.updateEntry(packageName, activityName, lockCode, newLockUntilTime,
-              ignoreUntilTime, isSystem, false).map(integer -> {
-            Timber.d("Update result: %s", integer);
-            return newLockUntilTime;
-          });
-        });
-  }
-
-  @WorkerThread @NonNull @Override
-  public Observable<Boolean> unlockEntry(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long lockUntilTime, @NonNull String attempt) {
-    return pinInteractor.getMasterPin().map(masterPin -> {
-      Timber.d("Attempt unlock: %s %s", packageName, activityName);
-      Timber.d("Check entry is not locked: %d", lockUntilTime);
-      if (System.currentTimeMillis() < lockUntilTime) {
-        Timber.e("Entry is still locked. Fail unlock");
-        return null;
-      }
-
-      String pin;
-      if (lockCode == null) {
-        Timber.d("No app specific code, use Master PIN");
-        pin = masterPin;
-      } else {
-        Timber.d("App specific code present, compare attempt");
-        pin = lockCode;
-      }
-      return pin;
-    }).filter(pin -> pin != null).flatMap(pin -> checkSubmissionAttempt(attempt, pin));
-  }
-
-  @NonNull @Override
-  public Observable<Boolean> postUnlock(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName, @Nullable String lockCode, long lockUntilTime, boolean isSystem,
-      boolean selectedExclude, long selectedIgnoreTime) {
-    return Observable.defer(() -> {
-      Timber.d("Run finishing unlock hooks");
-      final long ignoreMinutesInMillis = selectedIgnoreTime * 60 * 1000;
-      final Observable<Long> whitelistObservable;
-      if (selectedExclude) {
-        whitelistObservable =
-            whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
-      } else {
-        whitelistObservable = Observable.just(0L);
-      }
-
-      final Observable<Integer> ignoreObservable;
-      if (selectedIgnoreTime != 0 && !selectedExclude) {
-        ignoreObservable = ignoreEntryForTime(packageName, activityName, lockCode, lockUntilTime,
-            ignoreMinutesInMillis, isSystem);
-      } else {
-        ignoreObservable = Observable.just(0);
-      }
-
-      final Observable<Integer> recheckObservable;
-      if (selectedIgnoreTime != 0 && preferences.isRecheckEnabled() && !selectedExclude) {
-        recheckObservable = queueRecheckJob(packageName, activityName, ignoreMinutesInMillis);
-      } else {
-        recheckObservable = Observable.just(0);
-      }
-
-      return Observable.zip(ignoreObservable, recheckObservable, whitelistObservable,
-          (ignore, recheck, whitelist) -> {
-            Timber.d("Result of Whitelist: %d", whitelist);
-            Timber.d("Result of Ignore: %d", ignore);
-            Timber.d("Result of Recheck: %d", recheck);
-
-            // KLUDGE Just return something valid for now
-            return true;
-          });
+      @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem) {
+    return padLockDB.updateEntry(packageName, activityName, lockCode, lockUntilTime,
+        ignoreUntilTime, isSystem, false).map(integer -> {
+      Timber.d("Update result: %s", integer);
+      return lockUntilTime;
     });
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> whitelistEntry(
-      @NonNull String packageName, @NonNull String activityName, @NonNull String realName,
-      @Nullable String lockCode, boolean isSystem) {
+  @NonNull @Override public Observable<Long> getTimeoutPeriodMinutesInMillis() {
+    return Observable.defer(() -> Observable.just(preferences.getTimeoutPeriod()))
+        .map(period -> period * 60 * 1000);
+  }
+
+  @NonNull @Override public Observable<String> getMasterPin() {
+    return pinInteractor.getMasterPin();
+  }
+
+  @NonNull @Override
+  public Observable<Boolean> unlockEntry(@NonNull String attempt, @NonNull String pin) {
+    return Observable.defer(() -> Observable.just(pin))
+        .filter(pin1 -> pin1 != null)
+        .flatMap(new Func1<String, Observable<Boolean>>() {
+          @Override public Observable<Boolean> call(String pin) {
+            return checkSubmissionAttempt(attempt, pin);
+          }
+        });
+  }
+
+  @Override @CheckResult @NonNull
+  public Observable<Long> whitelistEntry(@NonNull String packageName, @NonNull String activityName,
+      @NonNull String realName, @Nullable String lockCode, boolean isSystem) {
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName);
     return padLockDB.insert(packageName, realName, lockCode, 0, 0, isSystem, true);
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Integer> queueRecheckJob(
-      @NonNull String packageName, @NonNull String activityName, long recheckTime) {
-    return Observable.defer(() -> {
-      // Cancel any old recheck job for the class, but not the package
-      final String packageTag = RecheckJob.TAG_CLASS_PREFIX + packageName;
-      final String classTag = RecheckJob.TAG_CLASS_PREFIX + activityName;
-      Timber.d("Cancel jobs with package tag: %s and class tag: %s", packageTag, classTag);
-      jobSchedulerCompat.cancelJobs(TagConstraint.ALL, packageTag, classTag);
+  @Override @CheckResult @NonNull
+  public Observable<Integer> queueRecheckJob(@NonNull String packageName,
+      @NonNull String activityName, long recheckTime) {
+    return Observable.defer(() -> Observable.just(preferences.isRecheckEnabled()))
+        .map(recheckEnabled -> {
+          if (!recheckEnabled) {
+            Timber.e("Recheck is not enabled");
+            return 0;
+          }
 
-      // Queue up a new recheck job
-      final Job recheck = RecheckJob.create(packageName, activityName, recheckTime);
-      jobSchedulerCompat.addJob(recheck);
+          // Cancel any old recheck job for the class, but not the package
+          final String packageTag = RecheckJob.TAG_CLASS_PREFIX + packageName;
+          final String classTag = RecheckJob.TAG_CLASS_PREFIX + activityName;
+          Timber.d("Cancel jobs with package tag: %s and class tag: %s", packageTag, classTag);
+          jobSchedulerCompat.cancelJobs(TagConstraint.ALL, packageTag, classTag);
 
-      // KLUDGE Just return something valid for now
-      return Observable.just(1);
-    });
+          // Queue up a new recheck job
+          final Job recheck = RecheckJob.create(packageName, activityName, recheckTime);
+          jobSchedulerCompat.addJob(recheck);
+
+          // KLUDGE Just return something valid for now
+          return 1;
+        });
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Integer> ignoreEntryForTime(
-      @NonNull String packageName, @NonNull String activityName, @Nullable String lockCode,
-      long lockUntilTime, long ignoreMinutesInMillis, boolean isSystem) {
+  @Override @NonNull @CheckResult
+  public Observable<Integer> ignoreEntryForTime(@NonNull String packageName,
+      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
+      long ignoreMinutesInMillis, boolean isSystem) {
     final long newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis;
     Timber.d("Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
         ignoreMinutesInMillis);

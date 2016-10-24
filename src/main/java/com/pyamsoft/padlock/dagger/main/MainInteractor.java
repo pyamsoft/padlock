@@ -20,7 +20,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import rx.Observable;
 
-public interface MainInteractor {
+interface MainInteractor {
 
   @CheckResult @NonNull Observable<Boolean> hasAgreed();
 
