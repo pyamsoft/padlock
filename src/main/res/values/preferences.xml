@@ -97,6 +97,12 @@
   <string name="install_listener_key">install_listener</string>
   <bool name="install_listener_default">true</bool>
 
+  <string name="ignore_keyguard_title">Ignore Lock Screen When Device Locked</string>
+  <string name="ignore_keyguard_summary_checked">Do not show Lock Screen when device is Locked</string>
+  <string name="ignore_keyguard_summary_unchecked">Show Lock Screen even when device is Locked</string>
+  <string name="ignore_keyguard_key">ignore_keyguard</string>
+  <bool name="ignore_keyguard_default">true</bool>
+
   <string name="clear_db_key">clear_db</string>
   <string name="clear_db_title">Reset Database</string>
   <string name="clear_db_summary">Reset the locked applications database</string>
