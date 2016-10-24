@@ -30,11 +30,11 @@ interface LockInfoInteractor extends LockCommonInteractor {
 
   @CheckResult @NonNull Observable<String> getPackageActivities(@NonNull String packageName);
 
-  /**
-   * Returns a boolean observable where True means created and False means deleted
-   */
-  @CheckResult @NonNull Observable<Boolean> modifyDatabaseGroup(boolean allCreate,
-      @NonNull String packageName, @Nullable String code, boolean system);
+  @CheckResult @NonNull Observable<Boolean> insertDatabaseGroup(@NonNull String packageName,
+      @NonNull String activityName, @Nullable String code, boolean system);
+
+  @CheckResult @NonNull Observable<Boolean> deleteDatabaseGroup(@NonNull String packageName,
+      @NonNull String activityName);
 
   void setShownOnBoarding();
 

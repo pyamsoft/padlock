@@ -16,8 +16,10 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
+import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
@@ -32,13 +34,14 @@ import javax.inject.Named;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.functions.Func1;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockList>
     implements LockListPresenter {
 
-  @NonNull private final LockListInteractor lockListInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
 
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
@@ -84,53 +87,91 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
 
   @Override public void populateList() {
     Timber.d("populateList");
-    unsubscribePopulateList();
 
     Timber.d("Get package info list");
-    final Observable<List<String>> packageInfoObservable =
-        lockListInteractor.getApplicationInfoList();
-
-    Timber.d("Get padlock entry list");
-    final Observable<List<PadLockEntry.AllEntries>> padlockEntryObservable =
-        lockListInteractor.getAppEntryList();
-
-    populateListSubscription = Observable.zip(packageInfoObservable, padlockEntryObservable,
-        (packageNames, padLockEntries) -> {
-
-          // KLUDGE super ugly.
-          final List<AppEntry> appEntries = new ArrayList<>();
-          for (final String applPackageName : packageNames) {
-            int foundLocation = -1;
-            for (int i = 0; i < padLockEntries.size(); ++i) {
-              final PadLockEntry.AllEntries padLockEntry = padLockEntries.get(i);
-              if (padLockEntry.packageName().equals(applPackageName) && padLockEntry.activityName()
-                  .equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
-                foundLocation = i;
-                break;
+    final Observable<List<String>> activeApplicationsObservable =
+        lockListInteractor.getActiveApplications()
+            .withLatestFrom(lockListInteractor.isSystemVisible(),
+                (applicationInfo, systemVisible) -> {
+                  if (systemVisible) {
+                    // If system visible, we show all apps
+                    Timber.d("System visible: show %s", applicationInfo.packageName);
+                    return applicationInfo;
+                  } else {
+                    if (lockListInteractor.isSystemApplication(applicationInfo)) {
+                      // Application is system but system apps are hidden
+                      Timber.w("Hide system application: %s", applicationInfo.packageName);
+                      return null;
+                    } else {
+                      Timber.d("Visible: show %s", applicationInfo.packageName);
+                      return applicationInfo;
+                    }
+                  }
+                })
+            .filter(applicationInfo -> applicationInfo != null)
+            .flatMap(new Func1<ApplicationInfo, Observable<String>>() {
+              @Override public Observable<String> call(ApplicationInfo applicationInfo) {
+                return lockListInteractor.getActivityListForApplication(applicationInfo)
+                    .toList()
+                    .map(activityList -> {
+                      if (activityList.size() == 0) {
+                        Timber.w("Exclude package %s because it has no activities",
+                            applicationInfo.packageName);
+                        return null;
+                      } else {
+                        return applicationInfo.packageName;
+                      }
+                    });
               }
-            }
+            })
+            .filter(s -> s != null)
+            .toList();
 
-            // Remove any already found entries
-            PadLockEntry.AllEntries foundEntry;
-            if (foundLocation != -1) {
-              foundEntry = padLockEntries.get(foundLocation);
-              padLockEntries.remove(foundLocation);
-            } else {
-              foundEntry = null;
-            }
+    final Observable<List<Pair<String, Boolean>>> pairedApplicationsObservable =
+        activeApplicationsObservable.withLatestFrom(lockListInteractor.getAppEntryList(),
+            (packageNames, padLockEntries) -> {
+              // Although ugly, this is slightly faster than converting the packageNames observable
+              // into a flat stream and iterating over it because we would need to re-fetch the padlockentries
+              // list each iteration, or cache the result, and we would be unable to shrink the list
+              // due to the caching aspect
+              final List<Pair<String, Boolean>> resultList = new ArrayList<>();
+              for (final String applPackageName : packageNames) {
+                int foundLocation = -1;
+                for (int i = 0; i < padLockEntries.size(); ++i) {
+                  final PadLockEntry.AllEntries padLockEntry = padLockEntries.get(i);
+                  if (padLockEntry.packageName().equals(applPackageName)
+                      && padLockEntry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
+                    foundLocation = i;
+                    break;
+                  }
+                }
 
-            final AppEntry appEntry =
-                lockListInteractor.createFromPackageInfo(applPackageName, foundEntry != null);
-            Timber.d("Add AppEntry: %s", appEntry);
-            appEntries.add(appEntry);
-          }
-          return appEntries;
-        })
-        .flatMap(Observable::from)
-        .toSortedList(
-            (appEntry, appEntry2) -> appEntry.name().compareToIgnoreCase(appEntry2.name()))
-        .concatMap(Observable::from)
-        .filter(appEntry -> appEntry != null)
+                // Remove any already found entries
+                final PadLockEntry.AllEntries foundEntry;
+                if (foundLocation != -1) {
+                  foundEntry = padLockEntries.get(foundLocation);
+                  padLockEntries.remove(foundLocation);
+                } else {
+                  foundEntry = null;
+                }
+
+                Timber.d("New pair: %s %s", applPackageName, foundEntry != null);
+                resultList.add(new Pair<>(applPackageName, foundEntry != null));
+              }
+
+              return resultList;
+            });
+
+    unsubscribePopulateList();
+    populateListSubscription = pairedApplicationsObservable.flatMap(pairs -> {
+      Observable<AppEntry> appEntryObservable = Observable.empty();
+      for (final Pair<String, Boolean> pair : pairs) {
+        appEntryObservable = appEntryObservable.mergeWith(
+            lockListInteractor.createFromPackageInfo(pair.first, pair.second));
+      }
+      return appEntryObservable;
+    })
+        .sorted((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()))
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(appEntry -> getView(lockList -> lockList.onEntryAddedToList(appEntry)),
