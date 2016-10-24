@@ -28,8 +28,7 @@ class AppIconLoaderInteractorImpl implements AppIconLoaderInteractor {
 
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
-  @Inject
-  protected AppIconLoaderInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper) {
+  @Inject AppIconLoaderInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper) {
     this.packageManagerWrapper = packageManagerWrapper;
   }
 
