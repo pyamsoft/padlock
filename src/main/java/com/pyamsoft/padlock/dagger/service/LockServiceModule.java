@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.dagger.service;
 
+import android.content.Context;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
@@ -34,9 +35,10 @@ import rx.Scheduler;
     return new LockServicePresenterImpl(stateInteractor, interactor, obsScheduler, subScheduler);
   }
 
-  @Provides LockServiceInteractor provideLockServiceInteractor(PadLockPreferences preference,
-      JobSchedulerCompat jobManager, PackageManagerWrapper packageManagerWrapper,
-      PadLockDB padLockDB) {
-    return new LockServiceInteractorImpl(preference, jobManager, packageManagerWrapper, padLockDB);
+  @Provides LockServiceInteractor provideLockServiceInteractor(Context context,
+      PadLockPreferences preference, JobSchedulerCompat jobManager,
+      PackageManagerWrapper packageManagerWrapper, PadLockDB padLockDB) {
+    return new LockServiceInteractorImpl(context, preference, jobManager, packageManagerWrapper,
+        padLockDB);
   }
 }
