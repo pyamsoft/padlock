@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.app.list;
 
-public interface LockListDatabaseView {
+interface LockListDatabaseView {
 
   void onDatabaseEntryCreated(int position);
 

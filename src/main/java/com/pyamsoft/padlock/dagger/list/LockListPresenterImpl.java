@@ -25,7 +25,6 @@ import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +37,7 @@ import rx.functions.Func1;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockList>
+class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.LockList>
     implements LockListPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
@@ -53,7 +52,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
-    super(obsScheduler, subScheduler);
+    super(lockListInteractor, obsScheduler, subScheduler);
     this.lockListInteractor = lockListInteractor;
     this.stateInteractor = stateInteractor;
   }
@@ -269,25 +268,25 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     unsubDatabaseSubscription();
 
     // No whitelisting for modifications from the List
-    databaseSubscription = lockListInteractor.modifySingleDatabaseEntry(isChecked, packageName,
-        PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system, false, false)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(lockState -> {
-          switch (lockState) {
-            case DEFAULT:
-              getView(lockList -> lockList.onDatabaseEntryDeleted(position));
-              break;
-            case LOCKED:
-              getView(lockList -> lockList.onDatabaseEntryCreated(position));
-              break;
-            case WHITELISTED:
-              throw new RuntimeException("Whitelist results are not handled");
-          }
-        }, throwable -> {
-          Timber.e(throwable, "onError modifyDatabaseEntry");
-          getView(lockList -> lockList.onDatabaseEntryError(position));
-        }, this::unsubDatabaseSubscription);
+    databaseSubscription =
+        modifySingleDatabaseEntry(isChecked, packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME, code,
+            system, false, false).subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
+            .subscribe(lockState -> {
+              switch (lockState) {
+                case DEFAULT:
+                  getView(lockList -> lockList.onDatabaseEntryDeleted(position));
+                  break;
+                case LOCKED:
+                  getView(lockList -> lockList.onDatabaseEntryCreated(position));
+                  break;
+                case WHITELISTED:
+                  throw new RuntimeException("Whitelist results are not handled");
+              }
+            }, throwable -> {
+              Timber.e(throwable, "onError modifyDatabaseEntry");
+              getView(lockList -> lockList.onDatabaseEntryError(position));
+            }, this::unsubDatabaseSubscription);
   }
 
   @SuppressWarnings("WeakerAccess") void unsubDatabaseSubscription() {

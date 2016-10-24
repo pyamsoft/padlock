@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.app.list;
 
-public interface LockListCommon {
+interface LockListCommon {
 
   void refreshList();
 
