@@ -21,7 +21,9 @@ import com.pyamsoft.padlock.app.purge.PurgePresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.inject.Inject;
 import rx.Observable;
 import rx.Scheduler;
@@ -50,30 +52,30 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
     retrievalSubscription = interactor.getAppEntryList()
         .zipWith(interactor.getActiveApplicationPackageNames().toList(),
             (allEntries, packageNames) -> {
-              final List<String> stalePackageNames = new ArrayList<>();
+              final Set<PadLockEntry.AllEntries> liveLocations = new HashSet<>();
+              final Set<String> stalePackageNames = new HashSet<>();
               // Remove all active applications from the list of entries
               for (final String packageName : packageNames) {
-                final List<Integer> foundLocations = new ArrayList<>();
-                for (int i = 0; i < allEntries.size(); ++i) {
-                  final PadLockEntry.AllEntries entry = allEntries.get(i);
+                Timber.i("Look for package: %s", packageName);
+                final List<PadLockEntry.AllEntries> foundLocations = new ArrayList<>();
+                for (final PadLockEntry.AllEntries entry : allEntries) {
                   if (entry.packageName().equals(packageName)) {
-                    foundLocations.add(i);
+                    foundLocations.add(entry);
                   }
                 }
 
-                if (foundLocations.isEmpty()) {
-                  Timber.w("Package %s not found in database", packageName);
-                } else {
-                  for (final int foundLocation : foundLocations) {
-                    Timber.d("Found entry for %s at %d, remove", packageName, foundLocation);
-                    allEntries.remove(foundLocation);
-                  }
-                }
+                liveLocations.addAll(foundLocations);
+              }
+
+              // Remove any found locations
+              for (final PadLockEntry.AllEntries liveLocation : liveLocations) {
+                Timber.d("Remove live location: %s %s", liveLocation.packageName(), liveLocation.activityName());
+                allEntries.remove(liveLocation);
               }
 
               // The remaining entries in the database are stale
               for (final PadLockEntry.AllEntries entry : allEntries) {
-                Timber.i("Stale database entry: %s", entry);
+                Timber.i("Stale database entry: %s %s", entry.packageName(), entry.activityName());
                 stalePackageNames.add(entry.packageName());
               }
 
