@@ -16,23 +16,21 @@
 
 package com.pyamsoft.padlock.app.settings;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.PadLockSingleInitProvider;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class SettingsPreferencePresenterLoader extends PersistLoader<SettingsPreferencePresenter> {
 
-  @Inject Provider<SettingsPreferencePresenter> presenterProvider;
+  @SuppressWarnings("WeakerAccess") @Inject Provider<SettingsPreferencePresenter> presenterProvider;
 
-  SettingsPreferencePresenterLoader(@NonNull Context context) {
-    super(context);
+  SettingsPreferencePresenterLoader() {
   }
 
   @NonNull @Override public SettingsPreferencePresenter loadPersistent() {
-    PadLock.get(getContext()).provideComponent().plusSettings().inject(this);
+    PadLockSingleInitProvider.get().provideComponent().plusSettings().inject(this);
     return presenterProvider.get();
   }
 }

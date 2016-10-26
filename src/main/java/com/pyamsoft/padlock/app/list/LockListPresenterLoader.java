@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockSingleInitProvider;
 import com.pyamsoft.pydroid.app.PersistLoader;
