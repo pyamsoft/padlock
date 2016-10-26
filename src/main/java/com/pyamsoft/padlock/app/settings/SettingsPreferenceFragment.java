@@ -53,7 +53,7 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
         .load(KEY_PRESENTER, savedInstanceState,
             new PersistLoader.Callback<SettingsPreferencePresenter>() {
               @NonNull @Override public PersistLoader<SettingsPreferencePresenter> createLoader() {
-                return new SettingsPreferencePresenterLoader(getContext());
+                return new SettingsPreferencePresenterLoader();
               }
 
               @Override
