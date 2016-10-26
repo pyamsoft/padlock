@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.wrapper;
+package com.pyamsoft.padlock.app.wrapper;
 
 import android.app.Service;
 import android.support.annotation.CheckResult;

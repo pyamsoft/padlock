@@ -20,7 +20,7 @@ import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
 import com.pyamsoft.padlock.PadLock;
-import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
+import com.pyamsoft.padlock.app.wrapper.JobSchedulerCompat;
 import javax.inject.Inject;
 
 public class PadLockGCMJobSchedulerService extends GcmJobSchedulerService {
