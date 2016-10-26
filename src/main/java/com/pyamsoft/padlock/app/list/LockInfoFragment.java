@@ -90,7 +90,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
           @NonNull @Override public PersistLoader<LockInfoPresenter> createLoader() {
             firstRefresh = true;
-            return new LockInfoPresenterLoader(getContext());
+            return new LockInfoPresenterLoader();
           }
 
           @Override public void onPersistentLoaded(@NonNull LockInfoPresenter persist) {
@@ -101,7 +101,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     loadedAdapterKey = PersistentCache.get()
         .load(KEY_LOAD_ADAPTER, savedInstanceState, new PersistLoader.Callback<LockInfoAdapter>() {
           @NonNull @Override public PersistLoader<LockInfoAdapter> createLoader() {
-            return new ListAdapterLoader<LockInfoAdapter>(getContext()) {
+            return new ListAdapterLoader<LockInfoAdapter>() {
               @NonNull @Override public LockInfoAdapter loadPersistent() {
                 return new LockInfoAdapter();
               }

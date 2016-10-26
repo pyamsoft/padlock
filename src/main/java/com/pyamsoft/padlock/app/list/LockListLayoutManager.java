@@ -32,7 +32,7 @@ class LockListLayoutManager extends LinearLayoutManager {
     return verticalScrollEnabled && super.canScrollVertically();
   }
 
-  public void setVerticalScrollEnabled(boolean verticalScrollEnabled) {
+  void setVerticalScrollEnabled(boolean verticalScrollEnabled) {
     this.verticalScrollEnabled = verticalScrollEnabled;
   }
 }
