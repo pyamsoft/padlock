@@ -66,7 +66,7 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
     loaderKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<MainPresenter>() {
           @NonNull @Override public PersistLoader<MainPresenter> createLoader() {
-            return new MainPresenterLoader(getApplicationContext());
+            return new MainPresenterLoader();
           }
 
           @Override public void onPersistentLoaded(@NonNull MainPresenter persist) {
