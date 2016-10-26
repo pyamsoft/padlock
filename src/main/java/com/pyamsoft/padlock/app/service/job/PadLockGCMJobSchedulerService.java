@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.app.service.job;
 import android.support.annotation.NonNull;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.scheduling.GcmJobSchedulerService;
-import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.PadLockSingleInitProvider;
 import com.pyamsoft.padlock.app.wrapper.JobSchedulerCompat;
 import javax.inject.Inject;
 
@@ -33,6 +33,6 @@ public class PadLockGCMJobSchedulerService extends GcmJobSchedulerService {
 
   @Override public void onCreate() {
     super.onCreate();
-    PadLock.get(this).provideComponent().plusJobComponent().inject(this);
+    PadLockSingleInitProvider.get().provideComponent().plusJobComponent().inject(this);
   }
 }
