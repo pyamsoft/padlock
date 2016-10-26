@@ -35,7 +35,7 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider
   @Nullable private static volatile PadLockSingleInitProvider instance = null;
   @Nullable private PadLockComponent component;
 
-  @NonNull @CheckResult public static PadLockSingleInitProvider get() {
+  @NonNull @CheckResult public static IPYDroidApp<PadLockComponent> get() {
     if (instance == null) {
       throw new NullPointerException("Instance is NULL");
     }
