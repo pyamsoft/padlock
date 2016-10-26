@@ -93,6 +93,7 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
                     .setContentText("Click to lock the newly installed application: " + s)
                     .setContentIntent(pendingIntent)
                     .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setAutoCancel(true)
                     .build();
             notificationManager.notify(notificationId++, notification1);
           } else {
