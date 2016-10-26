@@ -16,62 +16,7 @@
 
 package com.pyamsoft.padlock;
 
-import android.content.Context;
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
-import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
-import com.pyamsoft.padlock.dagger.PadLockComponent;
-import com.pyamsoft.padlock.dagger.PadLockModule;
-import com.pyamsoft.pydroid.IPYDroidApp;
 import com.pyamsoft.pydroid.PYDroidApplication;
-import com.pyamsoft.pydroid.about.Licenses;
 
-public class PadLock extends PYDroidApplication implements IPYDroidApp<PadLockComponent> {
-
-  private PadLockComponent component;
-
-  @NonNull @CheckResult public static IPYDroidApp<PadLockComponent> get(@NonNull Context context) {
-    final Context appContext = context.getApplicationContext();
-    if (appContext instanceof PadLock) {
-      return PadLock.class.cast(appContext);
-    } else {
-      throw new ClassCastException("Cannot cast Application Context to IPadLock");
-    }
-  }
-
-  @Override protected void createApplicationComponents() {
-    super.createApplicationComponents();
-    component = DaggerPadLockComponent.builder()
-        .padLockModule(new PadLockModule(getApplicationContext()))
-        .build();
-
-    final ApplicationInstallReceiver receiver = component.provideApplicationInstallReceiver();
-    final PadLockPreferences preferences = component.providePreferences();
-    if (preferences.isInstallListenerEnabled()) {
-      receiver.register();
-    } else {
-      receiver.unregister();
-    }
-  }
-
-  @NonNull @Override public PadLockComponent provideComponent() {
-    if (component == null) {
-      throw new NullPointerException("PadLockComponent is NULL");
-    }
-    return component;
-  }
-
-  @Nullable @Override public String provideGoogleOpenSourceLicenses() {
-    return GoogleApiAvailability.getInstance().getOpenSourceSoftwareLicenseInfo(this);
-  }
-
-  @Override public void insertCustomLicensesIntoMap() {
-    Licenses.create("Android Priority Job Queue",
-        "https://github.com/yigit/android-priority-jobqueue", "licenses/androidpriorityjobqueue");
-    Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite");
-    Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight");
-  }
+public class PadLock extends PYDroidApplication {
 }

@@ -59,7 +59,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<PurgePresenter>() {
           @NonNull @Override public PersistLoader<PurgePresenter> createLoader() {
             forceRefresh = true;
-            return new PurgePresenterLoader(getContext());
+            return new PurgePresenterLoader();
           }
 
           @Override public void onPersistentLoaded(@NonNull PurgePresenter persist) {
@@ -71,7 +71,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
         .load(KEY_LOAD_ADAPTER, savedInstanceState,
             new PersistLoader.Callback<FastItemAdapter<PurgeItem>>() {
               @NonNull @Override public PersistLoader<FastItemAdapter<PurgeItem>> createLoader() {
-                return new ListAdapterLoader<FastItemAdapter<PurgeItem>>(getContext()) {
+                return new ListAdapterLoader<FastItemAdapter<PurgeItem>>() {
                   @NonNull @Override public FastItemAdapter<PurgeItem> loadPersistent() {
                     return new FastItemAdapter<>();
                   }
