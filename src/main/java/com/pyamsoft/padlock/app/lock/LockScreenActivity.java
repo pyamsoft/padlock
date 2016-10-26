@@ -158,7 +158,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
         .load(KEY_LOCK_PRESENTER, savedInstanceState,
             new PersistLoader.Callback<LockScreenPresenter>() {
               @NonNull @Override public PersistLoader<LockScreenPresenter> createLoader() {
-                return new LockScreenPresenterLoader(getApplicationContext());
+                return new LockScreenPresenterLoader();
               }
 
               @Override public void onPersistentLoaded(@NonNull LockScreenPresenter persist) {
