@@ -112,7 +112,7 @@ public class LockListFragment extends ActionBarFragment
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
           @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
             forceRefresh = true;
-            return new LockListPresenterLoader(getContext());
+            return new LockListPresenterLoader();
           }
 
           @Override public void onPersistentLoaded(@NonNull LockListPresenter persist) {
@@ -123,7 +123,7 @@ public class LockListFragment extends ActionBarFragment
     loadedAdapterKey = PersistentCache.get()
         .load(KEY_LOAD_ADAPTER, savedInstanceState, new PersistLoader.Callback<LockListAdapter>() {
           @NonNull @Override public PersistLoader<LockListAdapter> createLoader() {
-            return new ListAdapterLoader<LockListAdapter>(getContext()) {
+            return new ListAdapterLoader<LockListAdapter>() {
               @NonNull @Override public LockListAdapter loadPersistent() {
                 return new LockListAdapter();
               }

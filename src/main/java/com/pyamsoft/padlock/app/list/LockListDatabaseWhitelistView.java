@@ -16,7 +16,8 @@
 
 package com.pyamsoft.padlock.app.list;
 
-@SuppressWarnings("WeakerAccess") public interface LockListDatabaseWhitelistView extends LockListDatabaseView {
+@SuppressWarnings("WeakerAccess") public interface LockListDatabaseWhitelistView
+    extends LockListDatabaseView {
 
   void onDatabaseEntryWhitelisted(int position);
 }

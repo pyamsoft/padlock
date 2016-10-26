@@ -32,6 +32,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.pyamsoft.padlock.app.service.job.PadLockFrameworkJobSchedulerService;
 import com.pyamsoft.padlock.app.service.job.PadLockGCMJobSchedulerService;
+import com.pyamsoft.padlock.app.wrapper.JobSchedulerCompat;
 import javax.inject.Inject;
 import timber.log.Timber;
 

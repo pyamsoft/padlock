@@ -30,7 +30,7 @@ import android.support.v7.app.NotificationCompat;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
-import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.pydroidrx.SchedulerUtil;
 import javax.inject.Inject;
 import rx.Scheduler;

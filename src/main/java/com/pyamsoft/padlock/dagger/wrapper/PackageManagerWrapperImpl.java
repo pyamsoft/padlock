@@ -28,6 +28,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.support.annotation.WorkerThread;
+import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.service.LockServiceInteractor;
 import java.io.BufferedReader;
 import java.io.IOException;

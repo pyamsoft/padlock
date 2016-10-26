@@ -24,7 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.view.accessibility.AccessibilityEvent;
-import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.PadLockSingleInitProvider;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.lang.ref.WeakReference;
@@ -140,7 +140,7 @@ public class PadLockService extends AccessibilityService
     }
 
     if (presenter == null) {
-      PadLock.get(this).provideComponent().plusLockService().inject(this);
+      PadLockSingleInitProvider.get().provideComponent().plusLockService().inject(this);
     }
 
     presenter.bindView(this);

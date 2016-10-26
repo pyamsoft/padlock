@@ -16,23 +16,21 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.PadLockSingleInitProvider;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class LockInfoPresenterLoader extends PersistLoader<LockInfoPresenter> {
 
-  @Inject Provider<LockInfoPresenter> presenterProvider;
+  @SuppressWarnings("WeakerAccess") @Inject Provider<LockInfoPresenter> presenterProvider;
 
-  LockInfoPresenterLoader(@NonNull Context context) {
-    super(context);
+  LockInfoPresenterLoader() {
   }
 
   @NonNull @Override public LockInfoPresenter loadPersistent() {
-    PadLock.get(getContext()).provideComponent().plusLockInfo().inject(this);
+    PadLockSingleInitProvider.get().provideComponent().plusLockInfo().inject(this);
     return presenterProvider.get();
   }
 }

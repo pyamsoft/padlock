@@ -89,7 +89,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     loadedKey = PersistentCache.get()
         .load(KEY_PIN_DIALOG, savedInstanceState, new PersistLoader.Callback<PinEntryPresenter>() {
           @NonNull @Override public PersistLoader<PinEntryPresenter> createLoader() {
-            return new PinScreenPresenterLoader(getContext());
+            return new PinScreenPresenterLoader();
           }
 
           @Override public void onPersistentLoaded(@NonNull PinEntryPresenter persist) {
