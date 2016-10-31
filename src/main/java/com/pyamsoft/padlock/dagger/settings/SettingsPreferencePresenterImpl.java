@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.app.settings.SettingsPreferencePresenter;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
+import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import javax.inject.Inject;
 import rx.Scheduler;
 import rx.Subscription;
@@ -34,8 +35,10 @@ class SettingsPreferencePresenterImpl
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_ALL = 1;
   @SuppressWarnings("WeakerAccess") @NonNull final ApplicationInstallReceiver receiver;
   @NonNull private final SettingsPreferenceInteractor interactor;
-  @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
-  @NonNull private Subscription applicationInstallSubscription = Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription confirmedSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription applicationInstallSubscription =
+      Subscriptions.empty();
 
   @Inject SettingsPreferencePresenterImpl(@NonNull SettingsPreferenceInteractor interactor,
       @NonNull ApplicationInstallReceiver receiver, @NonNull Scheduler obsScheduler,
@@ -51,8 +54,7 @@ class SettingsPreferencePresenterImpl
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    unsubscribeConfirm();
-    unsubApplicationInstallReceiver();
+    SubscriptionHelper.unsubscribe(confirmedSubscription, applicationInstallSubscription);
   }
 
   @Override public void requestClearAll() {
@@ -64,6 +66,7 @@ class SettingsPreferencePresenterImpl
   }
 
   @Override public void setApplicationInstallReceiverState() {
+    SubscriptionHelper.unsubscribe(applicationInstallSubscription);
     applicationInstallSubscription = interactor.isInstallListenerEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -74,19 +77,7 @@ class SettingsPreferencePresenterImpl
                 receiver.unregister();
               }
             }, throwable -> Timber.e(throwable, "onError setApplicationInstallReceiverState"),
-            this::unsubApplicationInstallReceiver);
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubApplicationInstallReceiver() {
-    if (!applicationInstallSubscription.isUnsubscribed()) {
-      applicationInstallSubscription.unsubscribe();
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubscribeConfirm() {
-    if (!confirmedSubscription.isUnsubscribed()) {
-      confirmedSubscription.unsubscribe();
-    }
+            () -> SubscriptionHelper.unsubscribe(applicationInstallSubscription));
   }
 
   @Override public void processClearRequest(int type) {
@@ -103,20 +94,22 @@ class SettingsPreferencePresenterImpl
   }
 
   @SuppressWarnings("WeakerAccess") void clearAll() {
-    unsubscribeConfirm();
+    SubscriptionHelper.unsubscribe(confirmedSubscription);
     confirmedSubscription = interactor.clearAll()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(aBoolean -> getView(SettingsPreferenceView::onClearAll),
-            throwable -> Timber.e(throwable, "onError"), this::unsubscribeConfirm);
+            throwable -> Timber.e(throwable, "onError"),
+            () -> SubscriptionHelper.unsubscribe(confirmedSubscription));
   }
 
   @SuppressWarnings("WeakerAccess") void clearDatabase() {
-    unsubscribeConfirm();
+    SubscriptionHelper.unsubscribe(confirmedSubscription);
     confirmedSubscription = interactor.clearDatabase()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(aBoolean -> getView(SettingsPreferenceView::onClearDatabase),
-            throwable -> Timber.e(throwable, "onError"), this::unsubscribeConfirm);
+            throwable -> Timber.e(throwable, "onError"),
+            () -> SubscriptionHelper.unsubscribe(confirmedSubscription));
   }
 }

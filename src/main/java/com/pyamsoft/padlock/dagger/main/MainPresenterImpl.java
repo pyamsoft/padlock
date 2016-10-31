@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.dagger.main;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.main.MainPresenter;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
+import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -30,8 +31,8 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     implements MainPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final MainInteractor interactor;
-
-  @NonNull private Subscription agreeTermsSubscription = Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription agreeTermsSubscription =
+      Subscriptions.empty();
 
   @Inject MainPresenterImpl(@NonNull final MainInteractor interactor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
@@ -45,11 +46,11 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    unsubscribeAgreeTerms();
+    SubscriptionHelper.unsubscribe(agreeTermsSubscription);
   }
 
   @Override public void showTermsDialog() {
-    unsubscribeAgreeTerms();
+    SubscriptionHelper.unsubscribe(agreeTermsSubscription);
     agreeTermsSubscription = interactor.hasAgreed()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -60,7 +61,7 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
         }, throwable -> {
           Timber.e(throwable, "onError");
           // TODO error
-        }, this::unsubscribeAgreeTerms);
+        }, () -> SubscriptionHelper.unsubscribe(agreeTermsSubscription));
   }
 
   @Override public void agreeToTerms(boolean agreed) {
@@ -68,12 +69,6 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
       interactor.setAgreed();
     } else {
       getView(MainView::onDidNotAgreeToTerms);
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubscribeAgreeTerms() {
-    if (!agreeTermsSubscription.isUnsubscribed()) {
-      agreeTermsSubscription.unsubscribe();
     }
   }
 }

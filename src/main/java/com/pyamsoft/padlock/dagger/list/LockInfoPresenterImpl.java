@@ -24,6 +24,7 @@ import com.pyamsoft.padlock.app.list.LockInfoPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -40,10 +41,14 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
 
   @SuppressWarnings("WeakerAccess") @NonNull final AppIconLoaderPresenter<LockInfoView> iconLoader;
   @SuppressWarnings("WeakerAccess") @NonNull final LockInfoInteractor lockInfoInteractor;
-  @NonNull private Subscription populateListSubscription = Subscriptions.empty();
-  @NonNull private Subscription allInDBSubscription = Subscriptions.empty();
-  @NonNull private Subscription databaseSubscription = Subscriptions.empty();
-  @NonNull private Subscription onboardSubscription = Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription allInDBSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription databaseSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription onboardSubscription =
+      Subscriptions.empty();
 
   @Inject LockInfoPresenterImpl(@NonNull AppIconLoaderPresenter<LockInfoView> iconLoader,
       final @NonNull LockInfoInteractor lockInfoInteractor,
@@ -76,10 +81,8 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
   @Override protected void onUnbind() {
     super.onUnbind();
     iconLoader.unbindView();
-    unsubDatabaseSubscription();
-    unsubPopulateList();
-    unsubAllInDB();
-    unsubscribeOnboard();
+    SubscriptionHelper.unsubscribe(databaseSubscription, populateListSubscription,
+        allInDBSubscription, onboardSubscription);
   }
 
   @Override protected void onDestroy() {
@@ -88,7 +91,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
   }
 
   @Override public void populateList(@NonNull String packageName) {
-    unsubPopulateList();
+    SubscriptionHelper.unsubscribe(populateListSubscription);
 
     // Filter out the lockscreen and crashlog entries
     final Observable<List<String>> activityInfoObservable =
@@ -152,19 +155,12 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
               getView(LockInfoView::onListPopulateError);
             }, () -> {
               getView(LockInfoView::onListPopulated);
-              unsubPopulateList();
+              SubscriptionHelper.unsubscribe(populateListSubscription);
             });
   }
 
-  @SuppressWarnings("WeakerAccess") void unsubPopulateList() {
-    if (!populateListSubscription.isUnsubscribed()) {
-      Timber.d("Unsub from populate List event");
-      populateListSubscription.unsubscribe();
-    }
-  }
-
   @Override public void setToggleAllState(@NonNull String packageName) {
-    unsubAllInDB();
+    SubscriptionHelper.unsubscribe(allInDBSubscription);
 
     // Filter out the lockscreen and crashlog entries
     final Observable<List<String>> activityInfoObservable =
@@ -201,14 +197,14 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
               Timber.e(throwable, "onError");
               // TODO maybe different error
               getView(LockInfoView::onListPopulateError);
-            }, this::unsubAllInDB);
+            }, () -> SubscriptionHelper.unsubscribe(allInDBSubscription));
   }
 
   @Override
   public void modifyDatabaseEntry(boolean isDefault, int position, @NonNull String packageName,
       @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
       boolean forceDelete) {
-    unsubDatabaseSubscription();
+    SubscriptionHelper.unsubscribe(databaseSubscription);
     databaseSubscription =
         modifySingleDatabaseEntry(isDefault, packageName, activityName, code, system, whitelist,
             forceDelete).subscribeOn(getSubscribeScheduler())
@@ -228,7 +224,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
             }, throwable -> {
               Timber.e(throwable, "onError modifyDatabaseEntry");
               getView(lockInfoView -> lockInfoView.onDatabaseEntryError(position));
-            }, this::unsubDatabaseSubscription);
+            }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
   }
 
   @Override public void modifyDatabaseGroup(boolean allCreate, @NonNull String packageName,
@@ -245,7 +241,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
           activityName -> lockInfoInteractor.deleteDatabaseGroup(packageName, activityName));
     }
 
-    unsubDatabaseSubscription();
+    SubscriptionHelper.unsubscribe(databaseSubscription);
     databaseSubscription = modifyDatabaseObservable.toList().map(result -> {
       Timber.d(
           "To prevent a bunch of events from occurring for each list entry, we flatten to just a single result");
@@ -260,19 +256,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
     }, throwable -> {
       Timber.e(throwable, "onError modifyDatabaseGroup");
       getView(lockInfoView -> lockInfoView.onDatabaseEntryError(GROUP_POSITION));
-    }, this::unsubDatabaseSubscription);
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubDatabaseSubscription() {
-    if (!databaseSubscription.isUnsubscribed()) {
-      databaseSubscription.isUnsubscribed();
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubAllInDB() {
-    if (!allInDBSubscription.isUnsubscribed()) {
-      allInDBSubscription.unsubscribe();
-    }
+    }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
   }
 
   @Override public void loadApplicationIcon(@NonNull String packageName) {
@@ -280,7 +264,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
   }
 
   @Override public void showOnBoarding() {
-    unsubscribeOnboard();
+    SubscriptionHelper.unsubscribe(onboardSubscription);
     onboardSubscription = lockInfoInteractor.hasShownOnBoarding()
         .delay(1, TimeUnit.SECONDS)
         .subscribeOn(getSubscribeScheduler())
@@ -292,16 +276,10 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
         }), throwable -> {
           Timber.e(throwable, "onError");
           getView(LockInfoView::onListPopulateError);
-        }, this::unsubscribeOnboard);
+        }, () -> SubscriptionHelper.unsubscribe(onboardSubscription));
   }
 
   @Override public void setOnBoard() {
     lockInfoInteractor.setShownOnBoarding();
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubscribeOnboard() {
-    if (!onboardSubscription.isUnsubscribed()) {
-      onboardSubscription.unsubscribe();
-    }
   }
 }

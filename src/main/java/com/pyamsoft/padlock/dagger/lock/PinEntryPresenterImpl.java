@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.PinEntryPresenter;
 import com.pyamsoft.padlock.app.lock.PinScreen;
+import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -31,8 +32,10 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
 
   @SuppressWarnings("WeakerAccess") @NonNull final PinEntryInteractor interactor;
   @NonNull private final AppIconLoaderPresenter<PinScreen> iconLoader;
-  @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
-  @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription pinEntrySubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription pinCheckSubscription =
+      Subscriptions.empty();
 
   @Inject PinEntryPresenterImpl(@NonNull AppIconLoaderPresenter<PinScreen> iconLoader,
       @NonNull final PinEntryInteractor interactor, @NonNull @Named("obs") Scheduler obsScheduler,
@@ -40,18 +43,6 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
     super(obsScheduler, subScheduler);
     this.iconLoader = iconLoader;
     this.interactor = interactor;
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubPinEntry() {
-    if (!pinEntrySubscription.isUnsubscribed()) {
-      pinEntrySubscription.unsubscribe();
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubPinCheck() {
-    if (!pinCheckSubscription.isUnsubscribed()) {
-      pinCheckSubscription.unsubscribe();
-    }
   }
 
   @Override protected void onBind() {
@@ -62,8 +53,7 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
   @Override protected void onUnbind() {
     super.onUnbind();
     iconLoader.unbindView();
-    unsubPinEntry();
-    unsubPinCheck();
+    SubscriptionHelper.unsubscribe(pinEntrySubscription, pinCheckSubscription);
   }
 
   @Override protected void onDestroy() {
@@ -74,7 +64,7 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
   @Override public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
       @NonNull String hint) {
     Timber.d("Attempt PIN submission");
-    unsubPinEntry();
+    SubscriptionHelper.unsubscribe(pinEntrySubscription);
     pinEntrySubscription = interactor.getMasterPin()
         .flatMap(masterPin -> {
           if (masterPin == null) {
@@ -96,12 +86,12 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
         }), throwable -> {
           Timber.e(throwable, "attemptPinSubmission onError");
           getView(PinScreen::onSubmitError);
-        }, this::unsubPinEntry);
+        }, () -> SubscriptionHelper.unsubscribe(pinEntrySubscription));
   }
 
   @Override public void hideUnimportantViews() {
     Timber.d("Check if we have a master");
-    unsubPinCheck();
+    SubscriptionHelper.unsubscribe(pinCheckSubscription);
     pinCheckSubscription = interactor.hasMasterPin()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -114,7 +104,7 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
         }), throwable -> {
           Timber.e(throwable, "onError hideUnimportantViews");
           // TODO
-        }, this::unsubPinCheck);
+        }, () -> SubscriptionHelper.unsubscribe(pinCheckSubscription));
   }
 
   @Override public void loadApplicationIcon(@NonNull String packageName) {

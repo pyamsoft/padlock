@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.service.LockServicePresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
+import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import javax.inject.Inject;
 import rx.Observable;
 import rx.Scheduler;
@@ -37,7 +38,8 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
   @SuppressWarnings("WeakerAccess") @NonNull String activePackageName = "";
   @SuppressWarnings("WeakerAccess") @NonNull String activeClassName = "";
   @SuppressWarnings("WeakerAccess") boolean lockScreenPassed;
-  @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription lockedEntrySubscription =
+      Subscriptions.empty();
 
   @Inject LockServicePresenterImpl(@NonNull final LockServiceStateInteractor stateInteractor,
       @NonNull final LockServiceInteractor interactor, @NonNull Scheduler obsScheduler,
@@ -50,7 +52,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    unsubLockedEntry();
+    SubscriptionHelper.unsubscribe(lockedEntrySubscription);
   }
 
   @Override protected void onDestroy() {
@@ -65,12 +67,6 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
 
   @Override public void setLockScreenPassed() {
     setLockScreenPassed(true);
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubLockedEntry() {
-    if (!lockedEntrySubscription.isUnsubscribed()) {
-      lockedEntrySubscription.unsubscribe();
-    }
   }
 
   @SuppressWarnings("WeakerAccess") void reset() {
@@ -88,7 +84,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
   @Override
   public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
       @NonNull Recheck forcedRecheck) {
-    unsubLockedEntry();
+    SubscriptionHelper.unsubscribe(lockedEntrySubscription);
     final Observable<Boolean> windowEventObservable =
         stateInteractor.isServiceEnabled().filter(enabled -> {
           if (!enabled) {
@@ -221,7 +217,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
                   padLockEntry.activityName());
               launchCorrectLockScreen(padLockEntry, className);
             }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"),
-            this::unsubLockedEntry);
+            () -> SubscriptionHelper.unsubscribe(lockedEntrySubscription));
   }
 
   @SuppressWarnings("WeakerAccess") void launchCorrectLockScreen(@NonNull PadLockEntry entry,
