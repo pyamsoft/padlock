@@ -31,7 +31,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
-import com.pyamsoft.pydroidrx.SchedulerUtil;
+import com.pyamsoft.pydroidrx.SchedulerHelper;
 import javax.inject.Inject;
 import rx.Scheduler;
 import rx.Subscription;
@@ -67,8 +67,8 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
     final Intent mainIntent = new Intent(appContext, MainActivity.class);
     pendingIntent = PendingIntent.getActivity(appContext, 421, mainIntent, 0);
 
-    SchedulerUtil.enforceObserveScheduler(obsScheduler);
-    SchedulerUtil.enforceSubscribeScheduler(subScheduler);
+    SchedulerHelper.enforceObserveScheduler(obsScheduler);
+    SchedulerHelper.enforceSubscribeScheduler(subScheduler);
   }
 
   @Override public void onReceive(Context context, Intent intent) {
