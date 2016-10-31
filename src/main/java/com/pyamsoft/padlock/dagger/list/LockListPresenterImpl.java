@@ -25,6 +25,7 @@ import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -43,11 +44,16 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
   @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
 
-  @NonNull private Subscription populateListSubscription = Subscriptions.empty();
-  @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
-  @NonNull private Subscription onboardSubscription = Subscriptions.empty();
-  @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
-  @NonNull private Subscription databaseSubscription = Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription systemVisibleSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription onboardSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription fabStateSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription databaseSubscription =
+      Subscriptions.empty();
 
   @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -59,29 +65,8 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    unsubscribePopulateList();
-    unsubscribeSystemVisible();
-    unsubscribeOnboard();
-    unsubscribeFabSubscription();
-    unsubDatabaseSubscription();
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubscribePopulateList() {
-    if (!populateListSubscription.isUnsubscribed()) {
-      populateListSubscription.unsubscribe();
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubscribeSystemVisible() {
-    if (!systemVisibleSubscription.isUnsubscribed()) {
-      systemVisibleSubscription.unsubscribe();
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubscribeOnboard() {
-    if (!onboardSubscription.isUnsubscribed()) {
-      onboardSubscription.unsubscribe();
-    }
+    SubscriptionHelper.unsubscribe(populateListSubscription, systemVisibleSubscription,
+        onboardSubscription, fabStateSubscription, databaseSubscription);
   }
 
   @Override public void populateList() {
@@ -156,7 +141,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
               return resultList;
             });
 
-    unsubscribePopulateList();
+    SubscriptionHelper.unsubscribe(populateListSubscription);
     populateListSubscription = pairedApplicationsObservable.flatMap(pairs -> {
       Observable<AppEntry> appEntryObservable = Observable.empty();
       for (final Pair<String, Boolean> pair : pairs) {
@@ -174,12 +159,12 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
               getView(LockList::onListPopulated);
             }, () -> {
               getView(LockList::onListPopulated);
-              unsubscribePopulateList();
+              SubscriptionHelper.unsubscribe(populateListSubscription);
             });
   }
 
   @Override public void setFABStateFromPreference() {
-    unsubscribeFabSubscription();
+    SubscriptionHelper.unsubscribe(fabStateSubscription);
     fabStateSubscription = stateInteractor.isServiceEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -193,13 +178,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
           Timber.e(throwable, "onError");
           // TODO  different error
           getView(LockList::onListPopulateError);
-        }, this::unsubscribeFabSubscription);
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubscribeFabSubscription() {
-    if (!fabStateSubscription.isUnsubscribed()) {
-      fabStateSubscription.unsubscribe();
-    }
+        }, () -> SubscriptionHelper.unsubscribe(fabStateSubscription));
   }
 
   @Override public void setSystemVisible() {
@@ -211,7 +190,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
   }
 
   @Override public void setSystemVisibilityFromPreference() {
-    unsubscribeSystemVisible();
+    SubscriptionHelper.unsubscribe(systemVisibleSubscription);
     systemVisibleSubscription = lockListInteractor.isSystemVisible()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -224,7 +203,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
         }), throwable -> {
           // TODO different error
           getView(LockList::onListPopulateError);
-        }, this::unsubscribeSystemVisible);
+        }, () -> SubscriptionHelper.unsubscribe(systemVisibleSubscription));
   }
 
   @Override public void clickPinFAB() {
@@ -238,7 +217,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
   }
 
   @Override public void showOnBoarding() {
-    unsubscribeOnboard();
+    SubscriptionHelper.unsubscribe(onboardSubscription);
     onboardSubscription = lockListInteractor.hasShownOnBoarding()
         .delay(1, TimeUnit.SECONDS)
         .subscribeOn(getSubscribeScheduler())
@@ -250,7 +229,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
         }), throwable -> {
           Timber.e(throwable, "onError");
           getView(LockList::onListPopulateError);
-        }, this::unsubscribeOnboard);
+        }, () -> SubscriptionHelper.unsubscribe(onboardSubscription));
   }
 
   @Override public void setOnBoard() {
@@ -260,7 +239,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
   @Override
   public void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
       @Nullable String code, boolean system) {
-    unsubDatabaseSubscription();
+    SubscriptionHelper.unsubscribe(databaseSubscription);
 
     // No whitelisting for modifications from the List
     databaseSubscription =
@@ -281,12 +260,6 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
             }, throwable -> {
               Timber.e(throwable, "onError modifyDatabaseEntry");
               getView(lockList -> lockList.onDatabaseEntryError(position));
-            }, this::unsubDatabaseSubscription);
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubDatabaseSubscription() {
-    if (!databaseSubscription.isUnsubscribed()) {
-      databaseSubscription.isUnsubscribed();
-    }
+            }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
   }
 }

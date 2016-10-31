@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.app.purge.PurgePresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
+import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +37,8 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
 
   @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor interactor;
   @NonNull private final CompositeSubscription compositeSubscription;
-  @NonNull private Subscription retrievalSubscription = Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription retrievalSubscription =
+      Subscriptions.empty();
 
   @Inject PurgePresenterImpl(@NonNull PurgeInteractor interactor,
       @NonNull Scheduler observeScheduler, @NonNull Scheduler subscribeScheduler) {
@@ -47,7 +49,7 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    unsubRetrieval();
+    SubscriptionHelper.unsubscribe(retrievalSubscription);
     unsubStaleDeletes();
   }
 
@@ -58,7 +60,7 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
   }
 
   @Override public void retrieveStaleApplications() {
-    unsubRetrieval();
+    SubscriptionHelper.unsubscribe(retrievalSubscription);
     retrievalSubscription = interactor.getAppEntryList()
         .zipWith(interactor.getActiveApplicationPackageNames().toList(),
             (allEntries, packageNames) -> {
@@ -101,7 +103,7 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
           Timber.e(throwable, "onError retrieveStaleApplications");
           getView(View::onRetrievalComplete);
         }, () -> {
-          unsubRetrieval();
+          SubscriptionHelper.unsubscribe(retrievalSubscription);
           getView(View::onRetrievalComplete);
         });
   }
@@ -119,11 +121,5 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
           Timber.e(throwable, "onError deleteStale");
         });
     compositeSubscription.add(subscription);
-  }
-
-  @SuppressWarnings("WeakerAccess") void unsubRetrieval() {
-    if (!retrievalSubscription.isUnsubscribed()) {
-      retrievalSubscription.unsubscribe();
-    }
   }
 }
