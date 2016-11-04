@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.app.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.PadLockSingleInitProvider;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -30,7 +30,7 @@ public class LockScreenPresenterLoader extends PersistLoader<LockScreenPresenter
   }
 
   @NonNull @Override public LockScreenPresenter loadPersistent() {
-    PadLockSingleInitProvider.get().provideComponent().plusLockScreen().inject(this);
+    Injector.get().provideComponent().plusLockScreen().inject(this);
     return presenterProvider.get();
   }
 }

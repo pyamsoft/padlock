@@ -26,7 +26,7 @@ import android.view.View;
 import android.widget.CompoundButton;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
-import com.pyamsoft.padlock.PadLockSingleInitProvider;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
@@ -185,7 +185,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
       super(itemView);
       binding = DataBindingUtil.bind(itemView);
 
-      PadLockSingleInitProvider.get().provideComponent().plusAppIconLoaderComponent().inject(this);
+      Injector.get().provideComponent().plusAppIconLoaderComponent().inject(this);
       appIconLoaderPresenter.bindView(this);
     }
 
