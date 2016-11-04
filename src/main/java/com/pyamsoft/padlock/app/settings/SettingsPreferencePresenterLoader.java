@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.app.settings;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.PadLockSingleInitProvider;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -30,7 +30,7 @@ public class SettingsPreferencePresenterLoader extends PersistLoader<SettingsPre
   }
 
   @NonNull @Override public SettingsPreferencePresenter loadPersistent() {
-    PadLockSingleInitProvider.get().provideComponent().plusSettings().inject(this);
+    Injector.get().provideComponent().plusSettings().inject(this);
     return presenterProvider.get();
   }
 }

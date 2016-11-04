@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.app.purge;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.PadLockSingleInitProvider;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -30,7 +30,7 @@ public class PurgePresenterLoader extends PersistLoader<PurgePresenter> {
   }
 
   @NonNull @Override public PurgePresenter loadPersistent() {
-    PadLockSingleInitProvider.get().provideComponent().plusPurgeComponent().inject(this);
+    Injector.get().provideComponent().plusPurgeComponent().inject(this);
     return presenterProvider.get();
   }
 }
