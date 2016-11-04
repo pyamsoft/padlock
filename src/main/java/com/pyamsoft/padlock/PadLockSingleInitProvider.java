@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock;
 
 import android.content.Context;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -32,21 +31,7 @@ import com.pyamsoft.pydroid.about.Licenses;
 public class PadLockSingleInitProvider extends SingleInitContentProvider
     implements IPYDroidApp<PadLockComponent> {
 
-  @Nullable private static volatile PadLockSingleInitProvider instance = null;
   @Nullable private PadLockComponent component;
-
-  @NonNull @CheckResult public static IPYDroidApp<PadLockComponent> get() {
-    if (instance == null) {
-      throw new NullPointerException("Instance is NULL");
-    }
-
-    //noinspection ConstantConditions
-    return instance;
-  }
-
-  private static void setInstance(@NonNull PadLockSingleInitProvider instance) {
-    PadLockSingleInitProvider.instance = instance;
-  }
 
   @Override protected void onFirstCreate(@NonNull Context context) {
     super.onFirstCreate(context);
@@ -54,7 +39,7 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider
   }
 
   @Override protected void onInstanceCreated(@NonNull Context context) {
-    setInstance(this);
+    Injector.set(component);
     final PadLockComponent comp = provideComponent();
     final ApplicationInstallReceiver receiver = comp.provideApplicationInstallReceiver();
     final PadLockPreferences preferences = comp.providePreferences();
