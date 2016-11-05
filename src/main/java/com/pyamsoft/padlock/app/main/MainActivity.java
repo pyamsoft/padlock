@@ -23,7 +23,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.ActionMenuView;
 import android.view.MenuItem;
 import android.view.View;
 import com.pyamsoft.padlock.BuildConfig;
@@ -136,14 +135,7 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   }
 
   @CheckResult @NonNull public View getSettingsMenuItemView() {
-    final View amv = binding.toolbar.getChildAt(1);
-    if (amv instanceof ActionMenuView) {
-      final ActionMenuView actions = (ActionMenuView) amv;
-      // Settings gear is the second item
-      return actions.getChildAt(1);
-    } else {
-      throw new RuntimeException("Could not locate view for Settings menu item");
-    }
+    return binding.toolbar.findViewById(R.id.menu_settings);
   }
 
   @Override protected void onDestroy() {
