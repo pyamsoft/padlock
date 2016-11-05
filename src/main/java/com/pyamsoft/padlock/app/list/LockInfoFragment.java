@@ -214,6 +214,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     } else {
       Timber.d("We are already refreshed, just refresh the request listeners");
       applyUpdatedRequestListeners();
+      presenter.showOnBoarding();
     }
   }
 

@@ -169,6 +169,7 @@ public class LockListFragment extends ActionBarFragment
     } else {
       Timber.d("We are already refreshed, just refresh the request listeners");
       applyUpdatedRequestListeners();
+      presenter.showOnBoarding();
     }
   }
 
