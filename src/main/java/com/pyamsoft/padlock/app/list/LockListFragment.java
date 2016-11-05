@@ -472,7 +472,7 @@ public class LockListFragment extends ActionBarFragment
           }
         }
 
-        @Override public void onSequenceCanceled() {
+        @Override public void onSequenceCanceled(TapTarget lastTarget) {
 
         }
       });
