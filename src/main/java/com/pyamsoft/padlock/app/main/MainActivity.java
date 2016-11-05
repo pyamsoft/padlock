@@ -49,18 +49,9 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   private ActivityMainBinding binding;
   private long loaderKey;
 
-  // KLUDGE When the Onboarding TapTargetView is shown, pressing the back button can result in crashing
-  // KLUDGE thus, we disable the back button while target is shown
-  private boolean backButtonEnabled = true;
-
-  public void setBackButtonEnabled(boolean backButtonEnabled) {
-    this.backButtonEnabled = backButtonEnabled;
-  }
-
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
     super.onCreate(savedInstanceState);
-    setBackButtonEnabled(true);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     loaderKey = PersistentCache.get()
@@ -168,16 +159,12 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   }
 
   @Override public void onBackPressed() {
-    if (backButtonEnabled) {
-      final FragmentManager fragmentManager = getSupportFragmentManager();
-      final int backStackCount = fragmentManager.getBackStackEntryCount();
-      if (backStackCount > 0) {
-        fragmentManager.popBackStack();
-      } else {
-        super.onBackPressed();
-      }
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    final int backStackCount = fragmentManager.getBackStackEntryCount();
+    if (backStackCount > 0) {
+      fragmentManager.popBackStack();
     } else {
-      Timber.w("Back button action is disabled due to onboarding");
+      super.onBackPressed();
     }
   }
 
