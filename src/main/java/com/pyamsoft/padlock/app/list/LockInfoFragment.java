@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -29,9 +28,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
@@ -62,7 +60,11 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   private String appPackageName;
   private String appName;
   private boolean appIsSystem;
-  @Nullable private TapTargetSequence sequence;
+
+  @Nullable private TapTargetView toggleAllTapTarget;
+  @Nullable private TapTargetView defaultLockTapTarget;
+  @Nullable private TapTargetView whiteLockTapTarget;
+  @Nullable private TapTargetView blackLockTapTarget;
 
   public static LockInfoFragment newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoFragment fragment = new LockInfoFragment();
@@ -141,6 +143,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onDestroyView() {
     super.onDestroyView();
+    dismissOnboarding();
     setActionBarTitle(R.string.app_name);
     setActionBarUpEnabled(false);
 
@@ -149,6 +152,31 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     binding.lockInfoRecycler.setLayoutManager(null);
     binding.lockInfoRecycler.setAdapter(null);
     binding.unbind();
+  }
+
+  private void dismissOnboarding() {
+    dismissOnboarding(toggleAllTapTarget);
+    toggleAllTapTarget = null;
+
+    dismissOnboarding(defaultLockTapTarget);
+    defaultLockTapTarget = null;
+
+    dismissOnboarding(whiteLockTapTarget);
+    whiteLockTapTarget = null;
+
+    dismissOnboarding(blackLockTapTarget);
+    blackLockTapTarget = null;
+  }
+
+  private void dismissOnboarding(@Nullable TapTargetView tapTarget) {
+    if (tapTarget == null) {
+      Timber.d("NULL Target");
+      return;
+    }
+
+    if (tapTarget.isVisible()) {
+      tapTarget.dismiss(false);
+    }
   }
 
   private void clearListListeners() {
@@ -186,6 +214,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     } else {
       Timber.d("We are already refreshed, just refresh the request listeners");
       applyUpdatedRequestListeners();
+      presenter.showOnBoarding();
     }
   }
 
@@ -216,8 +245,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   }
 
   void clearList() {
-    setBackButtonEnabled(false);
-
     final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
     if (oldSize <= 0) {
       Timber.w("List is already empty");
@@ -257,7 +284,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onListPopulated() {
     Timber.d("Refresh finished");
-    setBackButtonEnabled(true);
     binding.lockInfoRecycler.setClickable(true);
     presenter.showOnBoarding();
   }
@@ -266,15 +292,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     Timber.e("onListPopulateError");
     onListPopulated();
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
-  }
-
-  void setBackButtonEnabled(boolean enabled) {
-    final Activity activity = getActivity();
-    if (activity instanceof MainActivity) {
-      ((MainActivity) activity).setBackButtonEnabled(enabled);
-    } else {
-      throw new ClassCastException("Activity is not MainActivity");
-    }
   }
 
   @Override public void onListCleared() {
@@ -340,72 +357,86 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
-    if (sequence == null) {
-      final TapTarget toggleTarget = TapTarget.forView(binding.lockInfoToggleall,
-          getString(R.string.onboard_title_info_toggle),
-          getString(R.string.onboard_desc_info_toggle)).cancelable(false).tintTarget(false);
-
-      // If we use the first item we get a weird location, try a different item
-      final LockInfoItem.ViewHolder holder =
-          (LockInfoItem.ViewHolder) binding.lockInfoRecycler.findViewHolderForAdapterPosition(0);
-      TapTarget lockDefaultTarget = null;
-      TapTarget lockWhiteTarget = null;
-      TapTarget lockBlackTarget = null;
-      if (holder != null) {
-        final View radioDefault = holder.binding.lockInfoRadioDefault;
-        lockDefaultTarget =
-            TapTarget.forView(radioDefault, getString(R.string.onboard_title_info_lock_default),
-                getString(R.string.onboard_desc_info_lock_default))
-                .tintTarget(false)
-                .cancelable(false);
-
-        final View radioWhite = holder.binding.lockInfoRadioWhite;
-        lockWhiteTarget =
-            TapTarget.forView(radioWhite, getString(R.string.onboard_title_info_lock_white),
-                getString(R.string.onboard_desc_info_lock_white))
-                .tintTarget(false)
-                .cancelable(false);
-
-        final View radioBlack = holder.binding.lockInfoRadioBlack;
-        lockBlackTarget =
-            TapTarget.forView(radioBlack, getString(R.string.onboard_title_info_lock_black),
-                getString(R.string.onboard_desc_info_lock_black))
-                .tintTarget(false)
-                .cancelable(false);
-      }
-
-      // Hold a ref to the sequence or Activity will recycle bitmaps and crash
-      sequence = new TapTargetSequence(getActivity());
-      if (toggleTarget != null) {
-        sequence.target(toggleTarget);
-      }
-      if (lockDefaultTarget != null) {
-        sequence.target(lockDefaultTarget);
-      }
-      if (lockWhiteTarget != null) {
-        sequence.target(lockWhiteTarget);
-      }
-
-      if (lockBlackTarget != null) {
-        sequence.target(lockBlackTarget);
-      }
-
-      sequence.listener(new TapTargetSequence.Listener() {
-        @Override public void onSequenceFinish() {
-          if (presenter != null) {
-            presenter.setOnBoard();
-          }
-          setBackButtonEnabled(true);
-        }
-
-        @Override public void onSequenceCanceled() {
-          setBackButtonEnabled(true);
-        }
-      });
+    if (toggleAllTapTarget == null) {
+      createToggleTarget();
     }
+  }
 
-    setBackButtonEnabled(false);
-    sequence.start();
+  private void createToggleTarget() {
+    final LockInfoItem.ViewHolder holder =
+        (LockInfoItem.ViewHolder) binding.lockInfoRecycler.findViewHolderForAdapterPosition(0);
+    final TapTarget toggleTarget =
+        TapTarget.forView(binding.lockInfoToggleall, getString(R.string.onboard_title_info_toggle),
+            getString(R.string.onboard_desc_info_toggle)).cancelable(false).tintTarget(false);
+    toggleAllTapTarget =
+        TapTargetView.showFor(getActivity(), toggleTarget, new TapTargetView.Listener() {
+
+          @Override public void onTargetClick(TapTargetView view) {
+            super.onTargetClick(view);
+            Timber.d("Toggle all target clicked");
+            if (holder != null) {
+              final View radioDefault = holder.binding.lockInfoRadioDefault;
+              createDefaultLockTarget(holder, radioDefault);
+            } else {
+              Timber.w("Cannot find Default lock target");
+              endOnboarding();
+            }
+          }
+        });
+  }
+
+  void createDefaultLockTarget(@NonNull LockInfoItem.ViewHolder holder,
+      @NonNull View radioDefault) {
+    final TapTarget lockDefaultTarget =
+        TapTarget.forView(radioDefault, getString(R.string.onboard_title_info_lock_default),
+            getString(R.string.onboard_desc_info_lock_default)).tintTarget(false).cancelable(false);
+    defaultLockTapTarget =
+        TapTargetView.showFor(getActivity(), lockDefaultTarget, new TapTargetView.Listener() {
+          @Override public void onTargetClick(TapTargetView view) {
+            super.onTargetClick(view);
+
+            Timber.d("Default lock target clicked");
+            final View radioWhite = holder.binding.lockInfoRadioWhite;
+            createWhiteLockTarget(holder, radioWhite);
+          }
+        });
+  }
+
+  void createWhiteLockTarget(@NonNull LockInfoItem.ViewHolder holder, @NonNull View radioWhite) {
+    final TapTarget lockWhiteTarget =
+        TapTarget.forView(radioWhite, getString(R.string.onboard_title_info_lock_white),
+            getString(R.string.onboard_desc_info_lock_white)).tintTarget(false).cancelable(false);
+    whiteLockTapTarget =
+        TapTargetView.showFor(getActivity(), lockWhiteTarget, new TapTargetView.Listener() {
+
+          @Override public void onTargetClick(TapTargetView view) {
+            super.onTargetClick(view);
+            Timber.d("White lock target clicked");
+            final View radioBlack = holder.binding.lockInfoRadioBlack;
+            createBlackLockTarget(holder, radioBlack);
+          }
+        });
+  }
+
+  void createBlackLockTarget(@NonNull LockInfoItem.ViewHolder holder, @NonNull View radioBlack) {
+    final TapTarget lockBlackTarget =
+        TapTarget.forView(radioBlack, getString(R.string.onboard_title_info_lock_black),
+            getString(R.string.onboard_desc_info_lock_black)).tintTarget(false).cancelable(false);
+    blackLockTapTarget =
+        TapTargetView.showFor(getActivity(), lockBlackTarget, new TapTargetView.Listener() {
+          @Override public void onTargetClick(TapTargetView view) {
+            super.onTargetClick(view);
+            Timber.d("Black lock target clicked");
+            endOnboarding();
+          }
+        });
+  }
+
+  void endOnboarding() {
+    if (presenter != null) {
+      Timber.d("End onboarding");
+      presenter.setOnBoard();
+    }
   }
 
   void processDatabaseModifyEvent(int position, @NonNull String activityName,
