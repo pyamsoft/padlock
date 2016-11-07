@@ -67,9 +67,17 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     listener = null;
   }
 
+  @Override public void unbindView(ViewHolder holder) {
+    super.unbindView(holder);
+    holder.binding.lockInfoActivity.setText(null);
+    holder.binding.lockInfoActivity.setOnClickListener(null);
+    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
+  }
+
   @Override public void bindView(ViewHolder holder, List payloads) {
     super.bindView(holder, payloads);
-    recycleOldItem(holder);
 
     switch (entry.lockState()) {
       case DEFAULT:
@@ -120,14 +128,6 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
         }
       }
     });
-  }
-
-  private void recycleOldItem(@NonNull ViewHolder holder) {
-    holder.binding.lockInfoActivity.setText(null);
-    holder.binding.lockInfoActivity.setOnClickListener(null);
-    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
-    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
-    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
