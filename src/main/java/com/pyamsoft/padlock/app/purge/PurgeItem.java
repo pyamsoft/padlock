@@ -46,6 +46,11 @@ class PurgeItem extends AbstractItem<PurgeItem, PurgeItem.ViewHolder> {
     return R.layout.adapter_item_purge;
   }
 
+  @Override public void unbindView(ViewHolder holder) {
+    super.unbindView(holder);
+    holder.binding.itemPurgeName.setText(null);
+  }
+
   @Override public void bindView(ViewHolder holder, List payloads) {
     super.bindView(holder, payloads);
     holder.binding.itemPurgeName.setText(packageName);
