@@ -55,7 +55,7 @@ class PadLockDBImpl implements PadLockDB {
   @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
     Timber.d("Increment open count to: %d", openCount.incrementAndGet());
     if (briteDatabase == null) {
-      briteDatabase = SqlBrite.create().wrapDatabaseHelper(openHelper, dbScheduler);
+      briteDatabase = new SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, dbScheduler);
     }
   }
 
