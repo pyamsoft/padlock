@@ -86,9 +86,17 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     return R.layout.adapter_item_locklist_entry;
   }
 
+  @Override public void unbindView(ViewHolder holder) {
+    super.unbindView(holder);
+    holder.binding.lockListTitle.setText(null);
+    holder.binding.lockListTitle.setOnClickListener(null);
+    holder.binding.lockListIcon.setOnClickListener(null);
+    holder.binding.lockListIcon.setImageDrawable(null);
+    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
+  }
+
   @Override public void bindView(ViewHolder holder, List payloads) {
     super.bindView(holder, payloads);
-    recycleOldItem(holder);
 
     holder.binding.lockListTitle.setText(entry.name());
     holder.loadImage(entry.packageName());
@@ -113,14 +121,6 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
         view -> authorizeAccess(holder.getAdapterPosition(), false, false));
     holder.binding.lockListIcon.setOnClickListener(
         view -> authorizeAccess(holder.getAdapterPosition(), false, false));
-  }
-
-  private void recycleOldItem(@NonNull ViewHolder holder) {
-    holder.binding.lockListTitle.setText(null);
-    holder.binding.lockListTitle.setOnClickListener(null);
-    holder.binding.lockListIcon.setOnClickListener(null);
-    holder.binding.lockListIcon.setImageDrawable(null);
-    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
   }
 
   @SuppressWarnings("WeakerAccess") void authorizeAccess(int position, boolean accessPackage,
