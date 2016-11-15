@@ -22,6 +22,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.preference.PreferenceManager;
 import android.view.MenuItem;
 import android.view.View;
@@ -117,6 +118,7 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   private void setAppBarState() {
     setSupportActionBar(binding.toolbar);
     binding.toolbar.setTitle(getString(R.string.app_name));
+    ViewCompat.setElevation(binding.toolbar, AppUtil.convertToDP(this, 4));
   }
 
   private void showLockList(boolean forceRefresh) {
