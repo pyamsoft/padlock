@@ -194,10 +194,10 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   }
 
   @NonNull @Override protected String[] getChangeLogLines() {
-    final String line1 = "FEATURE: Faster application list loading on Android N";
+    final String line1 = "FEATURE: Option to not launch PadLock when device is locked";
     final String line2 =
-        "FEATURE: When a new application is installed, suggest to lock it with PadLock";
-    final String line3 = "BUGFIX: Better locking in Multiwindow and Freeform mode on Android N";
+        "FEATURE: Purge old, uninstalled applications from the Settings menu";
+    final String line3 = "BUGFIX: Additional bugfixes and optimizations";
     return new String[] { line1, line2, line3 };
   }
 
