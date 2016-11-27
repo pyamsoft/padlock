@@ -90,10 +90,9 @@ class PadLockDBImpl implements PadLockDB {
       return deleteWithPackageActivityNameUnguarded(packageName, activityName);
     }).map(deleted -> {
       Timber.d("Delete result: %d", deleted);
-
-      final long result = briteDatabase.insert(PadLockEntry.TABLE_NAME,
+      return briteDatabase.insert(PadLockEntry.TABLE_NAME,
           PadLockEntry.FACTORY.marshal(entry).asContentValues());
-
+    }).map(result -> {
       closeDatabase();
       return result;
     });
@@ -113,11 +112,9 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: UPDATE");
       openDatabase();
-
       final int result = briteDatabase.update(PadLockEntry.TABLE_NAME,
           PadLockEntry.FACTORY.marshal(entry).asContentValues(),
           PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
-
       closeDatabase();
       return Observable.just(result);
     });
@@ -129,13 +126,11 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: QUERY PACKAGE ACTIVITY");
       openDatabase();
-
-      final Observable<PadLockEntry.WithPackageActivityName> result =
-          briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
-              PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)
-              .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_MAPPER::map,
-                  PadLockEntry.WithPackageActivityName.empty());
-
+      return briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
+          PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)
+          .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_MAPPER::map,
+              PadLockEntry.WithPackageActivityName.empty());
+    }).map(result -> {
       closeDatabase();
       return result;
     });
@@ -157,14 +152,13 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT");
       openDatabase();
-
-      final Observable<PadLockEntry> result = briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
+      return briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
           PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT, packageName,
           PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName, PadLockEntry.PACKAGE_ACTIVITY_NAME,
           activityName)
           .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_name_defaultMapper()::map,
               PadLockEntry.empty());
-
+    }).map(result -> {
       closeDatabase();
       return result;
     });
@@ -176,11 +170,9 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: QUERY PACKAGE");
       openDatabase();
-
-      final Observable<List<PadLockEntry.WithPackageName>> result =
-          briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME,
-              packageName).mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map);
-
+      return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME,
+          packageName).mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map);
+    }).map(result -> {
       closeDatabase();
       return result;
     });
@@ -190,11 +182,9 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: QUERY ALL");
       openDatabase();
-
-      final Observable<List<PadLockEntry.AllEntries>> result =
-          briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
-              .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map);
-
+      return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
+          .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map);
+    }).map(result -> {
       closeDatabase();
       return result;
     });
@@ -205,11 +195,9 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: DELETE PACKAGE");
       openDatabase();
-
       final int result =
           briteDatabase.delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME,
               packageName);
-
       closeDatabase();
       return Observable.just(result);
     });
@@ -221,10 +209,8 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: DELETE PACKAGE ACTIVITY");
       openDatabase();
-
-      final Observable<Integer> result =
-          deleteWithPackageActivityNameUnguarded(packageName, activityName);
-
+      return deleteWithPackageActivityNameUnguarded(packageName, activityName);
+    }).map(result -> {
       closeDatabase();
       return result;
     });
@@ -241,9 +227,7 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: DELETE ALL");
       openDatabase();
-
       final int result = briteDatabase.delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
-
       closeDatabase();
       return Observable.just(result);
     });
