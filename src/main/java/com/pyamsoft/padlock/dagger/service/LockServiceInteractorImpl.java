@@ -80,12 +80,16 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
    */
   @NonNull @CheckResult @Override public Observable<Boolean> hasNameChanged(@NonNull String name,
       @NonNull String oldName) {
-    return Observable.defer(() -> Observable.just(!name.equals(oldName)));
+    return Observable.defer(() -> {
+      Timber.d("Check if name has change");
+      return Observable.just(!name.equals(oldName));
+    });
   }
 
   @NonNull @Override public Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
       @NonNull String className) {
     return Observable.defer(() -> {
+      Timber.d("Check if window is from lock screen");
       final String lockScreenPackageName = PadLock.class.getPackage().getName();
       final String lockScreenClassName = LockScreenActivity.class.getName();
 
@@ -96,7 +100,10 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   }
 
   @NonNull @Override public Observable<Boolean> isOnlyLockOnPackageChange() {
-    return Observable.defer(() -> Observable.just(preferences.getLockOnPackageChange()));
+    return Observable.defer(() -> {
+      Timber.d("Check if locking only happens on package change");
+      return Observable.just(preferences.getLockOnPackageChange());
+    });
   }
 
   @NonNull @CheckResult @Override
@@ -107,11 +114,17 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   }
 
   @NonNull @Override public Observable<Boolean> isRestrictedWhileLocked() {
-    return Observable.defer(() -> Observable.just(preferences.isIgnoreInKeyguard()));
+    return Observable.defer(() -> {
+      Timber.d("Check if window is restricted while device is locked");
+      return Observable.just(preferences.isIgnoreInKeyguard());
+    });
   }
 
   @NonNull @Override public Observable<Boolean> isDeviceLocked() {
-    return Observable.defer(() -> Observable.just(
-        keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked()));
+    return Observable.defer(() -> {
+      Timber.d("Check if device is locked");
+      return Observable.just(
+          keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked());
+    });
   }
 }
