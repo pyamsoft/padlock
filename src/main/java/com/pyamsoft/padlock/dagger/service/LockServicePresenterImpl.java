@@ -106,7 +106,15 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
           return fromActivity;
         }).flatMap(fromActivity -> {
           if (fromActivity) {
-            return interactor.isRestrictedWhileLocked();
+            return interactor.isDeviceLocked().flatMap(deviceLocked -> {
+              if (deviceLocked) {
+                reset();
+                return interactor.isRestrictedWhileLocked();
+              } else {
+                Timber.d("Device is not locked, continue");
+                return Observable.just(false);
+              }
+            });
           } else {
             return Observable.just(false);
           }

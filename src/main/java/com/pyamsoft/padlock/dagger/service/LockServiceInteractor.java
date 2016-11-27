@@ -43,5 +43,7 @@ public interface LockServiceInteractor {
   @NonNull @CheckResult Observable<PadLockEntry> getEntry(@NonNull String packageName,
       @NonNull String activityName);
 
+  @NonNull @CheckResult Observable<Boolean> isDeviceLocked();
+
   @NonNull @CheckResult Observable<Boolean> isRestrictedWhileLocked();
 }
