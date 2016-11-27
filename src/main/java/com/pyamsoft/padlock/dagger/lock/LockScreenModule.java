@@ -16,14 +16,15 @@
 
 package com.pyamsoft.padlock.dagger.lock;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.lock.LockScreen;
 import com.pyamsoft.padlock.app.lock.LockScreenPresenter;
-import com.pyamsoft.padlock.app.wrapper.JobSchedulerCompat;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
+import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -37,10 +38,11 @@ import rx.Scheduler;
     return new LockScreenPresenterImpl(iconLoader, interactor, obsScheduler, subScheduler);
   }
 
-  @Provides LockScreenInteractor provideLockScreenInteractor(PadLockPreferences preference,
-      JobSchedulerCompat jobSchedulerCompat, MasterPinInteractor masterPinInteractor,
-      PackageManagerWrapper packageManagerWrapper, PadLockDB padLockDB) {
-    return new LockScreenInteractorImpl(preference, jobSchedulerCompat, masterPinInteractor,
-        packageManagerWrapper, padLockDB);
+  @Provides LockScreenInteractor provideLockScreenInteractor(Context context,
+      PadLockPreferences preference, JobSchedulerCompat jobSchedulerCompat,
+      MasterPinInteractor masterPinInteractor, PackageManagerWrapper packageManagerWrapper,
+      PadLockDB padLockDB) {
+    return new LockScreenInteractorImpl(context, preference, jobSchedulerCompat,
+        masterPinInteractor, packageManagerWrapper, padLockDB);
   }
 }
