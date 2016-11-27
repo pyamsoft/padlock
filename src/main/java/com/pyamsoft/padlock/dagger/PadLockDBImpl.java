@@ -128,10 +128,7 @@ class PadLockDBImpl implements PadLockDB {
         PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)
         .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_MAPPER::map,
             PadLockEntry.WithPackageActivityName.empty())
-        .map(entry -> {
-          closeDatabase();
-          return entry;
-        })
+        .doOnSubscribe(this::closeDatabase)
         .filter(padLockEntry -> padLockEntry != null);
   }
 
@@ -156,10 +153,7 @@ class PadLockDBImpl implements PadLockDB {
         activityName)
         .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_name_defaultMapper()::map,
             PadLockEntry.empty())
-        .map(entry -> {
-          closeDatabase();
-          return entry;
-        })
+        .doOnSubscribe(this::closeDatabase)
         .filter(padLockEntry -> padLockEntry != null);
   }
 
@@ -169,10 +163,10 @@ class PadLockDBImpl implements PadLockDB {
     Timber.i("DB: QUERY");
     openDatabase();
     return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME,
-        packageName).mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map).map(padLockEntries -> {
-      closeDatabase();
-      return padLockEntries;
-    }).filter(padLockEntries -> padLockEntries != null);
+        packageName)
+        .mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map)
+        .doOnSubscribe(this::closeDatabase)
+        .filter(padLockEntries -> padLockEntries != null);
   }
 
   @Override @NonNull @CheckResult public Observable<List<PadLockEntry.AllEntries>> queryAll() {
@@ -180,10 +174,7 @@ class PadLockDBImpl implements PadLockDB {
     openDatabase();
     return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
         .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map)
-        .map(padLockEntries -> {
-          closeDatabase();
-          return padLockEntries;
-        })
+        .doOnSubscribe(this::closeDatabase)
         .filter(padLockEntries -> padLockEntries != null);
   }
 
