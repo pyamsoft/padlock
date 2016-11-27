@@ -18,16 +18,15 @@ package com.pyamsoft.padlock.dagger.service;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
-import com.pyamsoft.padlock.app.wrapper.JobSchedulerCompat;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
-import com.pyamsoft.padlock.dagger.job.RecheckJob;
+import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
@@ -35,6 +34,7 @@ import timber.log.Timber;
 
 class LockServiceInteractorImpl implements LockServiceInteractor {
 
+  @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
   @SuppressWarnings("WeakerAccess") @NonNull final KeyguardManager keyguardManager;
@@ -44,6 +44,7 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   @Inject LockServiceInteractorImpl(@NonNull Context context,
       @NonNull PadLockPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB) {
+    this.appContext = context.getApplicationContext();
     this.jobSchedulerCompat = jobSchedulerCompat;
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
@@ -57,8 +58,9 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
    */
   @Override public void cleanup() {
     Timber.d("Cleanup LockService");
-    Timber.d("Cancel ALL jobs in background");
-    jobSchedulerCompat.cancelJobsInBackground(TagConstraint.ANY, RecheckJob.TAG_ALL);
+    Timber.d("Cancel ALL jobs");
+    final Intent intent = new Intent(appContext, RecheckService.class);
+    jobSchedulerCompat.cancel(intent);
   }
 
   /**
