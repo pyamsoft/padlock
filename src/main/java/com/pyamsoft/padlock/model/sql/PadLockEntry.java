@@ -44,8 +44,8 @@ import com.squareup.sqldelight.RowMapper;
   @NonNull public static final RowMapper<WithPackageActivityName>
       WITH_PACKAGE_ACTIVITY_NAME_MAPPER =
       FACTORY.with_package_activity_nameMapper(AutoValue_PadLockEntry_WithPackageActivityName::new);
-  @NonNull static final String PACKAGE_EMPTY = "EMPTY";
-  @NonNull static final String ACTIVITY_EMPTY = "EMPTY";
+  @NonNull private static final String PACKAGE_EMPTY = "EMPTY";
+  @NonNull private static final String ACTIVITY_EMPTY = "EMPTY";
 
   @NonNull @CheckResult public static PadLockEntry empty() {
     return new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false);

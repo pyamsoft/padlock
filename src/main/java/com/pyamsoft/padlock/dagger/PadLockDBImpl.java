@@ -66,7 +66,6 @@ class PadLockDBImpl implements PadLockDB {
 
     if (openCount.get() == 0) {
       Timber.d("Close and recycle database connection");
-      openCount.set(0);
       if (briteDatabase != null) {
         briteDatabase.close();
         briteDatabase = null;
@@ -85,16 +84,17 @@ class PadLockDBImpl implements PadLockDB {
       throw new RuntimeException("Cannot insert EMPTY entry");
     }
 
-    Timber.i("DB: INSERT");
-
-    openDatabase();
-    return deleteWithPackageActivityNameUnguarded(packageName, activityName).map(deleted -> {
+    return Observable.defer(() -> {
+      Timber.i("DB: INSERT");
+      openDatabase();
+      return deleteWithPackageActivityNameUnguarded(packageName, activityName);
+    }).map(deleted -> {
       Timber.d("Delete result: %d", deleted);
-      final long result = briteDatabase.insert(PadLockEntry.TABLE_NAME,
+      return briteDatabase.insert(PadLockEntry.TABLE_NAME,
           PadLockEntry.FACTORY.marshal(entry).asContentValues());
-      closeDatabase();
-      return result;
-    });
+    })
+
+        .doOnNext(result -> closeDatabase());
   }
 
   @Override @CheckResult @NonNull
@@ -108,27 +108,27 @@ class PadLockDBImpl implements PadLockDB {
       throw new RuntimeException("Cannot update EMPTY entry");
     }
 
-    Timber.i("DB: UPDATE");
-    openDatabase();
     return Observable.defer(() -> {
-      final int result = briteDatabase.update(PadLockEntry.TABLE_NAME,
+      Timber.i("DB: UPDATE");
+      openDatabase();
+      return Observable.just(briteDatabase.update(PadLockEntry.TABLE_NAME,
           PadLockEntry.FACTORY.marshal(entry).asContentValues(),
-          PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
-      closeDatabase();
-      return Observable.just(result);
-    });
+          PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName));
+    }).doOnNext(result -> closeDatabase());
   }
 
   @Override @NonNull @CheckResult
   public Observable<PadLockEntry.WithPackageActivityName> queryWithPackageActivityName(
       final @NonNull String packageName, final @NonNull String activityName) {
-    Timber.i("DB: QUERY");
-    openDatabase();
-    return briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
-        PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)
-        .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_MAPPER::map,
-            PadLockEntry.WithPackageActivityName.empty())
-        .doOnSubscribe(this::closeDatabase)
+    return Observable.defer(() -> {
+      Timber.i("DB: QUERY PACKAGE ACTIVITY");
+      openDatabase();
+      return briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
+          PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)
+          .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_MAPPER::map,
+              PadLockEntry.WithPackageActivityName.empty());
+    })
+        .doOnNext(withPackageActivityName -> closeDatabase())
         .filter(padLockEntry -> padLockEntry != null);
   }
 
@@ -145,85 +145,80 @@ class PadLockDBImpl implements PadLockDB {
   @Override @NonNull @CheckResult
   public Observable<PadLockEntry> queryWithPackageActivityNameDefault(
       final @NonNull String packageName, final @NonNull String activityName) {
-    Timber.i("DB: QUERY");
-    openDatabase();
-    return briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
-        PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT, packageName,
-        PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName, PadLockEntry.PACKAGE_ACTIVITY_NAME,
-        activityName)
-        .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_name_defaultMapper()::map,
-            PadLockEntry.empty())
-        .doOnSubscribe(this::closeDatabase)
-        .filter(padLockEntry -> padLockEntry != null);
+    return Observable.defer(() -> {
+      Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT");
+      openDatabase();
+      return briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
+          PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT, packageName,
+          PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName, PadLockEntry.PACKAGE_ACTIVITY_NAME,
+          activityName)
+          .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_name_defaultMapper()::map,
+              PadLockEntry.empty());
+    }).doOnNext(padLockEntry -> closeDatabase()).filter(padLockEntry -> padLockEntry != null);
   }
 
   @Override @NonNull @CheckResult
   public Observable<List<PadLockEntry.WithPackageName>> queryWithPackageName(
       final @NonNull String packageName) {
-    Timber.i("DB: QUERY");
-    openDatabase();
-    return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME,
-        packageName)
-        .mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map)
-        .doOnSubscribe(this::closeDatabase)
+    return Observable.defer(() -> {
+      Timber.i("DB: QUERY PACKAGE");
+      openDatabase();
+      return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME,
+          packageName).mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map);
+    })
+        .doOnNext(withPackageNames -> closeDatabase())
         .filter(padLockEntries -> padLockEntries != null);
   }
 
   @Override @NonNull @CheckResult public Observable<List<PadLockEntry.AllEntries>> queryAll() {
-    Timber.i("DB: QUERY");
-    openDatabase();
-    return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
-        .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map)
-        .doOnSubscribe(this::closeDatabase)
-        .filter(padLockEntries -> padLockEntries != null);
+    return Observable.defer(() -> {
+      Timber.i("DB: QUERY ALL");
+      openDatabase();
+      return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
+          .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map);
+    }).doOnNext(allEntries -> closeDatabase()).filter(padLockEntries -> padLockEntries != null);
   }
 
   @Override @NonNull @CheckResult
   public Observable<Integer> deleteWithPackageName(final @NonNull String packageName) {
-    Timber.i("DB: DELETE");
-    openDatabase();
     return Observable.defer(() -> {
+      Timber.i("DB: DELETE PACKAGE");
+      openDatabase();
+
       final int result =
           briteDatabase.delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME,
               packageName);
-      closeDatabase();
       return Observable.just(result);
-    });
+    }).doOnNext(result -> closeDatabase());
   }
 
   @Override @NonNull @CheckResult
   public Observable<Integer> deleteWithPackageActivityName(final @NonNull String packageName,
       final @NonNull String activityName) {
-    Timber.i("DB: DELETE");
-    openDatabase();
-    return deleteWithPackageActivityNameUnguarded(packageName, activityName).map(integer -> {
-      closeDatabase();
-      return integer;
-    });
+    return Observable.defer(() -> {
+      Timber.i("DB: DELETE PACKAGE ACTIVITY");
+      openDatabase();
+      return deleteWithPackageActivityNameUnguarded(packageName, activityName);
+    }).doOnNext(result -> closeDatabase());
   }
 
   @VisibleForTesting @NonNull @CheckResult
   Observable<Integer> deleteWithPackageActivityNameUnguarded(@NonNull String packageName,
       @NonNull String activityName) {
-    return Observable.defer(() -> {
-      final int result = briteDatabase.delete(PadLockEntry.TABLE_NAME,
-          PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
-      return Observable.just(result);
-    });
+    return Observable.just(briteDatabase.delete(PadLockEntry.TABLE_NAME,
+        PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName));
   }
 
   @Override @NonNull @CheckResult public Observable<Integer> deleteAll() {
-    Timber.i("DB: DELETE");
-    openDatabase();
     return Observable.defer(() -> {
-      final int result = briteDatabase.delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
-      closeDatabase();
-      return Observable.just(result);
-    });
+      Timber.i("DB: DELETE ALL");
+      openDatabase();
+      return Observable.just(
+          briteDatabase.delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL));
+    }).doOnNext(result -> closeDatabase());
   }
 
   @Override public void deleteDatabase() {
-    closeDatabase();
     openHelper.deleteDatabase();
   }
 

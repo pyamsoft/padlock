@@ -180,14 +180,12 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
           setLockScreenPassed(false);
           return interactor.getEntry(packageName, className);
         })
-        .map(entry -> {
+        .doOnNext(entry -> {
           if (PadLockEntry.isEmpty(entry)) {
             Timber.w("Returned entry is EMPTY");
           } else {
             Timber.d("Default entry PN %s, AN %s", entry.packageName(), entry.activityName());
           }
-
-          return entry;
         })
         .filter(padLockEntry -> !PadLockEntry.isEmpty(padLockEntry))
         .filter(entry -> {
