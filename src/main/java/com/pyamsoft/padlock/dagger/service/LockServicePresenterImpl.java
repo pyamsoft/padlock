@@ -86,65 +86,60 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
       @NonNull Recheck forcedRecheck) {
     SubscriptionHelper.unsubscribe(lockedEntrySubscription);
     final Observable<Boolean> windowEventObservable =
-        stateInteractor.isServiceEnabled().filter(enabled -> {
-          if (!enabled) {
-            Timber.e("Service is not user-enabled. Ignore");
-            reset();
-          }
-          return enabled;
-        }).flatMap(enabled -> {
-          if (enabled) {
-            return interactor.isEventFromActivity(packageName, className);
-          } else {
-            return Observable.just(false);
-          }
-        }).filter(fromActivity -> {
-          if (!fromActivity) {
-            Timber.w("Event is not caused by an Activity. P: %s, C: %s. Ignore", packageName,
-                className);
-          }
-          return fromActivity;
-        }).flatMap(fromActivity -> {
-          if (fromActivity) {
-            return interactor.isDeviceLocked().flatMap(deviceLocked -> {
-              if (deviceLocked) {
+        stateInteractor.isServiceEnabled()
+            .filter(enabled -> {
+              if (!enabled) {
+                Timber.e("Service is not user-enabled. Ignore");
                 reset();
+              }
+              return enabled;
+            })
+            .flatMap(enabled -> interactor.isDeviceLocked().map(deviceLocked -> {
+              if (deviceLocked) {
+                Timber.w("Device is locked, reset lastPackage/lastClass");
+                reset();
+              }
+              return enabled;
+            }))
+            .flatMap(enabled -> interactor.isEventFromActivity(packageName, className))
+            .filter(fromActivity -> {
+              if (!fromActivity) {
+                Timber.w("Event is not caused by an Activity. P: %s, C: %s. Ignore", packageName,
+                    className);
+              }
+              return fromActivity;
+            })
+            .flatMap(fromActivity -> interactor.isDeviceLocked().flatMap(deviceLocked -> {
+              if (deviceLocked) {
                 return interactor.isRestrictedWhileLocked();
               } else {
-                Timber.d("Device is not locked, continue");
                 return Observable.just(false);
               }
+            }))
+            .filter(restrictedWhileLocked -> {
+              if (restrictedWhileLocked) {
+                Timber.w("Locking is restricted while device in keyguard: %s %s", packageName,
+                    className);
+                return false;
+              } else {
+                return true;
+              }
+            })
+            .flatMap(notLocked -> interactor.isWindowFromLockScreen(packageName, className))
+            .filter(isLockScreen -> {
+              if (isLockScreen) {
+                Timber.w("Event for package %s class: %s is caused by LockScreen. Ignore",
+                    packageName, className);
+              }
+              return !isLockScreen;
+            })
+            .map(fromLockScreen -> {
+              final boolean passed = !fromLockScreen;
+              Timber.i("Window has passed checks so far: %s", passed);
+              activePackageName = packageName;
+              activeClassName = className;
+              return passed;
             });
-          } else {
-            return Observable.just(false);
-          }
-        }).filter(restrictedWhileLocked -> {
-          if (restrictedWhileLocked) {
-            Timber.w("Locking is restricted while device in keyguard: %s %s", packageName,
-                className);
-            return false;
-          } else {
-            return true;
-          }
-        }).flatMap(restrictedWhileLocked -> {
-          if (restrictedWhileLocked) {
-            return Observable.just(false);
-          } else {
-            return interactor.isWindowFromLockScreen(packageName, className);
-          }
-        }).filter(isLockScreen -> {
-          if (isLockScreen) {
-            Timber.w("Event for package %s class: %s is caused by LockScreen. Ignore", packageName,
-                className);
-          }
-          return !isLockScreen;
-        }).map(fromLockScreen -> {
-          final boolean passed = !fromLockScreen;
-          Timber.i("Window has passed checks so far: %s", passed);
-          activePackageName = packageName;
-          activeClassName = className;
-          return passed;
-        });
 
     lockedEntrySubscription = Observable.zip(windowEventObservable,
         interactor.hasNameChanged(packageName, lastPackageName),
