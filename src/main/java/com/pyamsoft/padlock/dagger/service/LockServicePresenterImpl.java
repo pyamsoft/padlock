@@ -183,13 +183,13 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
         .map(entry -> {
           if (PadLockEntry.isEmpty(entry)) {
             Timber.w("Returned entry is EMPTY");
-            return null;
+          } else {
+            Timber.d("Default entry PN %s, AN %s", entry.packageName(), entry.activityName());
           }
 
-          Timber.d("Default entry PN %s, AN %s", entry.packageName(), entry.activityName());
           return entry;
         })
-        .filter(entry -> entry != null)
+        .filter(padLockEntry -> !PadLockEntry.isEmpty(padLockEntry))
         .filter(entry -> {
           Timber.d("Check ignore time for: %s %s", entry.packageName(), entry.activityName());
           final long ignoreUntilTime = entry.ignoreUntilTime();
