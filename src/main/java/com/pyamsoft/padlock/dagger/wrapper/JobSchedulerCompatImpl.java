@@ -35,7 +35,9 @@ class JobSchedulerCompatImpl implements JobSchedulerCompat {
   }
 
   @Override public void cancel(@NonNull Intent intent) {
-    alarmManager.cancel(PendingIntent.getService(appContext, 0, intent, 0));
+    final PendingIntent pendingIntent = PendingIntent.getService(appContext, 0, intent, 0);
+    alarmManager.cancel(pendingIntent);
+    pendingIntent.cancel();
   }
 
   @Override public void set(@NonNull Intent intent, long triggerTime) {
