@@ -19,7 +19,6 @@ package com.pyamsoft.padlock;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
 import com.pyamsoft.padlock.dagger.PadLockComponent;
@@ -51,7 +50,7 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider
   }
 
   @Nullable @Override public String provideGoogleOpenSourceLicenses(@NonNull Context context) {
-    return GoogleApiAvailability.getInstance().getOpenSourceSoftwareLicenseInfo(context);
+    return null;
   }
 
   @Override public void insertCustomLicensesIntoMap() {

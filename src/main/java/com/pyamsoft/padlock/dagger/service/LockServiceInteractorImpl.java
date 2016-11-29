@@ -18,16 +18,15 @@ package com.pyamsoft.padlock.dagger.service;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
-import com.pyamsoft.padlock.app.wrapper.JobSchedulerCompat;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
-import com.pyamsoft.padlock.dagger.job.RecheckJob;
+import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
@@ -35,6 +34,7 @@ import timber.log.Timber;
 
 class LockServiceInteractorImpl implements LockServiceInteractor {
 
+  @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
   @SuppressWarnings("WeakerAccess") @NonNull final KeyguardManager keyguardManager;
@@ -44,6 +44,7 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   @Inject LockServiceInteractorImpl(@NonNull Context context,
       @NonNull PadLockPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB) {
+    this.appContext = context.getApplicationContext();
     this.jobSchedulerCompat = jobSchedulerCompat;
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
@@ -57,8 +58,9 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
    */
   @Override public void cleanup() {
     Timber.d("Cleanup LockService");
-    Timber.d("Cancel ALL jobs in background");
-    jobSchedulerCompat.cancelJobsInBackground(TagConstraint.ANY, RecheckJob.TAG_ALL);
+    Timber.d("Cancel ALL jobs");
+    final Intent intent = new Intent(appContext, RecheckService.class);
+    jobSchedulerCompat.cancel(intent);
   }
 
   /**
@@ -78,12 +80,16 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
    */
   @NonNull @CheckResult @Override public Observable<Boolean> hasNameChanged(@NonNull String name,
       @NonNull String oldName) {
-    return Observable.defer(() -> Observable.just(!name.equals(oldName)));
+    return Observable.defer(() -> {
+      Timber.d("Check if name has change");
+      return Observable.just(!name.equals(oldName));
+    });
   }
 
   @NonNull @Override public Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
       @NonNull String className) {
     return Observable.defer(() -> {
+      Timber.d("Check if window is from lock screen");
       final String lockScreenPackageName = PadLock.class.getPackage().getName();
       final String lockScreenClassName = LockScreenActivity.class.getName();
 
@@ -94,7 +100,10 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   }
 
   @NonNull @Override public Observable<Boolean> isOnlyLockOnPackageChange() {
-    return Observable.defer(() -> Observable.just(preferences.getLockOnPackageChange()));
+    return Observable.defer(() -> {
+      Timber.d("Check if locking only happens on package change");
+      return Observable.just(preferences.getLockOnPackageChange());
+    });
   }
 
   @NonNull @CheckResult @Override
@@ -106,13 +115,16 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
 
   @NonNull @Override public Observable<Boolean> isRestrictedWhileLocked() {
     return Observable.defer(() -> {
-      final boolean ignoreInKeyguard = preferences.isIgnoreInKeyguard();
-      if (ignoreInKeyguard) {
-        return Observable.just(
-            keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked());
-      } else {
-        return Observable.just(false);
-      }
+      Timber.d("Check if window is restricted while device is locked");
+      return Observable.just(preferences.isIgnoreInKeyguard());
+    });
+  }
+
+  @NonNull @Override public Observable<Boolean> isDeviceLocked() {
+    return Observable.defer(() -> {
+      Timber.d("Check if device is locked");
+      return Observable.just(
+          keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked());
     });
   }
 }

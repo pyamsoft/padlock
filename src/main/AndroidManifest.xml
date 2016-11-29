@@ -78,20 +78,9 @@
           android:resource="@xml/padlock"/>
     </service>
 
-    <!-- Framework Job Scheduler -->
     <service
-        android:name=".app.service.job.PadLockFrameworkJobSchedulerService"
-        android:permission="android.permission.BIND_JOB_SERVICE"/>
-
-    <!-- GCM Job Scheduler -->
-    <service
-        android:name=".app.service.job.PadLockGCMJobSchedulerService"
-        android:exported="true"
-        android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
-      <intent-filter>
-        <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY"/>
-      </intent-filter>
-    </service>
+        android:name=".dagger.service.RecheckService"
+        android:exported="false"/>
 
     <provider
         android:name=".PadLockSingleInitProvider"

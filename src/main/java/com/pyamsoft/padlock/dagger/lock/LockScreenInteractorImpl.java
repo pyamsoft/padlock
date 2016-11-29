@@ -16,17 +16,17 @@
 
 package com.pyamsoft.padlock.dagger.lock;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
-import com.birbit.android.jobqueue.Job;
-import com.birbit.android.jobqueue.TagConstraint;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.app.wrapper.JobSchedulerCompat;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
-import com.pyamsoft.padlock.dagger.job.RecheckJob;
+import com.pyamsoft.padlock.dagger.service.RecheckService;
 import javax.inject.Inject;
 import rx.Observable;
 import rx.functions.Func1;
@@ -34,6 +34,7 @@ import timber.log.Timber;
 
 class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenInteractor {
 
+  @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
@@ -41,10 +42,11 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @SuppressWarnings("WeakerAccess") int failCount;
 
-  @Inject LockScreenInteractorImpl(@NonNull final PadLockPreferences preferences,
+  @Inject LockScreenInteractorImpl(@NonNull Context context, @NonNull final PadLockPreferences preferences,
       @NonNull JobSchedulerCompat jobSchedulerCompat,
       @NonNull final MasterPinInteractor masterPinInteractor,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB) {
+    this.appContext = context.getApplicationContext();
     this.jobSchedulerCompat = jobSchedulerCompat;
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
@@ -100,14 +102,11 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
           }
 
           // Cancel any old recheck job for the class, but not the package
-          final String packageTag = RecheckJob.TAG_CLASS_PREFIX + packageName;
-          final String classTag = RecheckJob.TAG_CLASS_PREFIX + activityName;
-          Timber.d("Cancel jobs with package tag: %s and class tag: %s", packageTag, classTag);
-          jobSchedulerCompat.cancelJobs(TagConstraint.ALL, packageTag, classTag);
+          final Intent intent = new Intent(appContext, RecheckService.class);
+          jobSchedulerCompat.cancel(intent);
 
           // Queue up a new recheck job
-          final Job recheck = RecheckJob.create(packageName, activityName, recheckTime);
-          jobSchedulerCompat.addJob(recheck);
+          jobSchedulerCompat.set(intent, System.currentTimeMillis() + recheckTime);
 
           // KLUDGE Just return something valid for now
           return 1;

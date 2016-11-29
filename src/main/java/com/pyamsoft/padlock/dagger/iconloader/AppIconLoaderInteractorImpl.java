@@ -20,7 +20,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
-import com.pyamsoft.padlock.app.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import javax.inject.Inject;
 import rx.Observable;
 
