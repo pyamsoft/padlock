@@ -111,10 +111,6 @@ dependencies {
   // Firebase Crash
   compile "com.google.firebase:firebase-crash:$firebase"
 
-  // Job Scheduling
-  compile "com.birbit:android-priority-jobqueue:$androidPriorityJobQueue"
-  compile "com.google.android.gms:play-services-gcm:$firebase"
-
   // SQLBrite
   compile "com.squareup.sqlbrite:sqlbrite:$sqlbrite"
 

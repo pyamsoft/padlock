@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.app.wrapper;
+package com.pyamsoft.padlock.dagger.wrapper;
 
-import android.app.Service;
-import android.support.annotation.CheckResult;
+import android.content.Intent;
 import android.support.annotation.NonNull;
-import com.birbit.android.jobqueue.Job;
-import com.birbit.android.jobqueue.JobManager;
-import com.birbit.android.jobqueue.TagConstraint;
 
 public interface JobSchedulerCompat {
 
-  @CheckResult @NonNull JobManager provideManagerToService(@NonNull Service service);
+  void cancel(@NonNull Intent intent);
 
-  void cancelJobsInBackground(@NonNull TagConstraint constraint, @NonNull String... tags);
-
-  void cancelJobs(@NonNull TagConstraint constraint, @NonNull String... tags);
-
-  void addJob(@NonNull Job job);
+  void set(@NonNull Intent intent, long triggerTime);
 }

@@ -27,7 +27,6 @@ import com.pyamsoft.padlock.dagger.main.MainComponent;
 import com.pyamsoft.padlock.dagger.purge.PurgeComponent;
 import com.pyamsoft.padlock.dagger.receiver.ReceiverModule;
 import com.pyamsoft.padlock.dagger.service.LockServiceComponent;
-import com.pyamsoft.padlock.dagger.service.job.JobComponent;
 import com.pyamsoft.padlock.dagger.settings.SettingsPreferenceComponent;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompatModule;
 import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapperModule;
@@ -62,8 +61,6 @@ import javax.inject.Singleton;
 
   // Subcomponent AppIconLoader
   AppIconLoaderComponent plusAppIconLoaderComponent();
-
-  JobComponent plusJobComponent();
 
   PurgeComponent plusPurgeComponent();
 

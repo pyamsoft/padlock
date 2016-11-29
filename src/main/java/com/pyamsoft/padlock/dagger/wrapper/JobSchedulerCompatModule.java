@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.dagger.wrapper;
 
 import android.content.Context;
-import com.pyamsoft.padlock.app.wrapper.JobSchedulerCompat;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
