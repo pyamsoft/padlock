@@ -422,6 +422,7 @@ public class LockListFragment extends ActionBarFragment
 
     fastItemAdapter.add(
         new LockListItem(entry, this::displayLockInfoDialog, this::processDatabaseModifyEvent));
+    fastItemAdapter.notifyAdapterItemInserted(fastItemAdapter.getItemCount() - 1);
   }
 
   @Override public void onListPopulateError() {
@@ -493,6 +494,7 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
+    fastItemAdapter.notifyAdapterDataSetChanged();
     handler.post(stopRefreshRunnable);
     handler.post(() -> binding.applistFab.show());
 

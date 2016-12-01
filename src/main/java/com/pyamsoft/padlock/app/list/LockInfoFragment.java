@@ -280,10 +280,12 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
               currentState, newState);
           processDatabaseModifyEvent(position, name, currentState, newState);
         }));
+    fastItemAdapter.notifyAdapterItemInserted(fastItemAdapter.getItemCount() - 1);
   }
 
   @Override public void onListPopulated() {
     Timber.d("Refresh finished");
+    fastItemAdapter.notifyAdapterDataSetChanged();
     binding.lockInfoRecycler.setClickable(true);
     presenter.showOnBoarding();
   }
