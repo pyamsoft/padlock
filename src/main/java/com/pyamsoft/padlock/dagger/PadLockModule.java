@@ -52,7 +52,7 @@ import rx.schedulers.Schedulers;
   }
 
   @Singleton @Provides @Named("sub") Scheduler provideIOScheduler() {
-    return Schedulers.io();
+    return Schedulers.computation();
   }
 
   @Singleton @Provides @Named("obs") Scheduler provideMainThreadScheduler() {

@@ -102,18 +102,15 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
         Observable.zip(lockInfoInteractor.getActivityEntries(packageName), activityInfoObservable,
             (padLockEntries, activityInfos) -> {
               final List<ActivityEntry> entries = new ArrayList<>();
-              // KLUDGE super ugly.
-              Timber.d("Search set for locked activities");
               for (final String name : activityInfos) {
                 final PadLockEntry.WithPackageName foundEntry =
                     findEntryInActivities(padLockEntries, name);
 
                 if (foundEntry != null) {
-                  Timber.d("Remove found entry: %s", foundEntry.activityName());
                   padLockEntries.remove(foundEntry);
                 }
 
-                LockState state;
+                final LockState state;
                 if (foundEntry == null) {
                   state = LockState.DEFAULT;
                 } else {
@@ -124,10 +121,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
                   }
                 }
 
-                final ActivityEntry activityEntry =
-                    ActivityEntry.builder().lockState(state).name(name).build();
-                Timber.d("Add ActivityEntry: %s", activityEntry);
-                entries.add(activityEntry);
+                entries.add(ActivityEntry.builder().lockState(state).name(name).build());
               }
 
               return entries;
