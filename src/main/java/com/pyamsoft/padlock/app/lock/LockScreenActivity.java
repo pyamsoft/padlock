@@ -361,8 +361,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     binding.lockDisplayHint.setVisibility(View.VISIBLE);
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
-    presenter.lockEntry(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
-        ignoreUntilTime, lockedSystem);
+    presenter.lockEntry(lockedPackageName, lockedActivityName, lockUntilTime);
   }
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {

@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.model.sql;
 
-import android.content.ContentValues;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
@@ -29,9 +28,8 @@ import com.squareup.sqldelight.RowMapper;
    * The activity name of the PACKAGE entry in the database
    */
   @NonNull public static final String PACKAGE_ACTIVITY_NAME = "PACKAGE";
-  // SQLDelight does not yet support update strings
-  @NonNull public static final String UPDATE_WITH_PACKAGE_ACTIVITY_NAME =
-      "packageName = ? AND activityName = ?;";
+  @NonNull public static final String PACKAGE_EMPTY = "EMPTY";
+  @NonNull public static final String ACTIVITY_EMPTY = "EMPTY";
 
   @SuppressWarnings("StaticInitializerReferencesSubClass") @NonNull
   private static final Factory<PadLockEntry> FACTORY = new Factory<>(AutoValue_PadLockEntry::new);
@@ -46,8 +44,6 @@ import com.squareup.sqldelight.RowMapper;
   @NonNull public static final RowMapper<WithPackageActivityName>
       WITH_PACKAGE_ACTIVITY_NAME_MAPPER =
       FACTORY.with_package_activity_nameMapper(AutoValue_PadLockEntry_WithPackageActivityName::new);
-  @NonNull private static final String PACKAGE_EMPTY = "EMPTY";
-  @NonNull private static final String ACTIVITY_EMPTY = "EMPTY";
 
   @NonNull @CheckResult public static PadLockEntry empty() {
     return new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false);
@@ -55,13 +51,6 @@ import com.squareup.sqldelight.RowMapper;
 
   @CheckResult public static boolean isEmpty(@NonNull PadLockEntry entry) {
     return entry.packageName().equals(PACKAGE_EMPTY) && entry.activityName().equals(ACTIVITY_EMPTY);
-  }
-
-  /**
-   * Marshal method is deprecated, but Marshal class is not. Keep using it for now I suppose.
-   */
-  @NonNull @CheckResult public static ContentValues asContentValues(@NonNull PadLockEntry entry) {
-    return new Marshal(entry).asContentValues();
   }
 
   @CheckResult @NonNull
@@ -77,6 +66,21 @@ import com.squareup.sqldelight.RowMapper;
   @CheckResult @NonNull public static DeletePackageActivityManager deletePackageActivity(
       @NonNull SQLiteOpenHelper openHelper) {
     return new DeletePackageActivityManager(openHelper);
+  }
+
+  @CheckResult @NonNull
+  public static UpdateLockTimeManager updateLockTime(@NonNull SQLiteOpenHelper openHelper) {
+    return new UpdateLockTimeManager(openHelper);
+  }
+
+  @CheckResult @NonNull
+  public static UpdateIgnoreTimeManager updateIgnoreTime(@NonNull SQLiteOpenHelper openHelper) {
+    return new UpdateIgnoreTimeManager(openHelper);
+  }
+
+  @CheckResult @NonNull
+  public static UpdateWhitelistManager updateWhitelist(@NonNull SQLiteOpenHelper openHelper) {
+    return new UpdateWhitelistManager(openHelper);
   }
 
   @AutoValue public static abstract class AllEntries implements All_entriesModel {
@@ -141,6 +145,48 @@ import com.squareup.sqldelight.RowMapper;
     public int executeProgram(@NonNull String packageName, @NonNull String activityName) {
       deletePackageActivity.bind(packageName, activityName);
       return deletePackageActivity.program.executeUpdateDelete();
+    }
+  }
+
+  @SuppressWarnings("WeakerAccess") public static class UpdateLockTimeManager {
+    @NonNull private final Update_lock_until_time updateLockUntilTime;
+
+    UpdateLockTimeManager(@NonNull SQLiteOpenHelper openHelper) {
+      this.updateLockUntilTime = new Update_lock_until_time(openHelper.getWritableDatabase());
+    }
+
+    @CheckResult public int executeProgram(long time, @NonNull String packageName,
+        @NonNull String activityName) {
+      updateLockUntilTime.bind(time, packageName, activityName);
+      return updateLockUntilTime.program.executeUpdateDelete();
+    }
+  }
+
+  @SuppressWarnings("WeakerAccess") public static class UpdateIgnoreTimeManager {
+    @NonNull private final Update_ignore_until_time updateIgnoreUntilTime;
+
+    UpdateIgnoreTimeManager(@NonNull SQLiteOpenHelper openHelper) {
+      this.updateIgnoreUntilTime = new Update_ignore_until_time(openHelper.getWritableDatabase());
+    }
+
+    @CheckResult public int executeProgram(long time, @NonNull String packageName,
+        @NonNull String activityName) {
+      updateIgnoreUntilTime.bind(time, packageName, activityName);
+      return updateIgnoreUntilTime.program.executeUpdateDelete();
+    }
+  }
+
+  @SuppressWarnings("WeakerAccess") public static class UpdateWhitelistManager {
+    @NonNull private final Update_whitelist updateWhitelist;
+
+    UpdateWhitelistManager(@NonNull SQLiteOpenHelper openHelper) {
+      this.updateWhitelist = new Update_whitelist(openHelper.getWritableDatabase());
+    }
+
+    @CheckResult public int executeProgram(boolean whitelist, @NonNull String packageName,
+        @NonNull String activityName) {
+      updateWhitelist.bind(whitelist, packageName, activityName);
+      return updateWhitelist.program.executeUpdateDelete();
     }
   }
 }

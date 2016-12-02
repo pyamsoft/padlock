@@ -98,7 +98,7 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
   }
 
   @Override public void lockEntry(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem) {
+      long lockUntilTime) {
     SubscriptionHelper.unsubscribe(lockSubscription);
     lockSubscription = interactor.incrementAndGetFailCount()
         .filter(count -> count > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT)
@@ -107,8 +107,7 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
           final long newLockUntilTime = System.currentTimeMillis() + timeOutMinutesInMillis;
           Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
               timeOutMinutesInMillis);
-          return interactor.lockEntry(packageName, activityName, lockCode, newLockUntilTime,
-              ignoreUntilTime, isSystem);
+          return interactor.lockEntry(newLockUntilTime, packageName, activityName);
         })
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -192,8 +191,7 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
 
     if (selectedIgnoreTime != 0 && !selectedExclude) {
       ignoreObservable =
-          interactor.ignoreEntryForTime(packageName, activityName, lockCode, lockUntilTime,
-              ignoreMinutesInMillis, isSystem);
+          interactor.ignoreEntryForTime(ignoreMinutesInMillis, packageName, activityName);
     } else {
       ignoreObservable = Observable.just(0);
     }

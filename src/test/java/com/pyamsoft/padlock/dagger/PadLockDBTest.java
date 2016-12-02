@@ -420,48 +420,5 @@ public class PadLockDBTest {
     assertEquals(0, db.getOpenCount());
   }
 
-  /**
-   * Test that updates will success only on entries that already exist in the database
-   *
-   * @throws Exception
-   */
-  @Test public void testUpdate() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
-    insertDummy(PadLockEntry.PACKAGE_ACTIVITY_NAME);
-    insertDummy(1);
-    insertDummy(2);
-
-    TestSubscriber<Integer> testSubscriber = new TestSubscriber<>();
-    db.updateEntry("TEST", "1", "TESTING", 0, 0, false, false)
-        .subscribeOn(subscribeScheduler)
-        .observeOn(observeScheduler)
-        .subscribe(testSubscriber);
-    testSubscriber.assertNoErrors();
-    testSubscriber.assertValueCount(1);
-    testSubscriber.assertValue(1);
-    assertEquals(0, db.getOpenCount());
-
-    TestSubscriber<PadLockEntry.WithPackageActivityName> entryTestSubscriber =
-        new TestSubscriber<>();
-    db.queryWithPackageActivityName("TEST", "1").first().
-        subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(entryTestSubscriber);
-    entryTestSubscriber.assertNoErrors();
-    assertFalse(
-        PadLockEntry.WithPackageActivityName.isEmpty(entryTestSubscriber.getOnNextEvents().get(0)));
-    assertEquals("TESTING", entryTestSubscriber.getOnNextEvents().get(0).lockCode());
-    assertEquals(0, db.getOpenCount());
-
-    testSubscriber = new TestSubscriber<>();
-    db.updateEntry("TEST", "5", "TESTING", 0, 0, false, false)
-        .subscribeOn(subscribeScheduler)
-        .observeOn(observeScheduler)
-        .subscribe(testSubscriber);
-    testSubscriber.assertNoErrors();
-    testSubscriber.assertValueCount(1);
-    testSubscriber.assertValue(0);
-    assertEquals(0, db.getOpenCount());
-  }
-
-  // TODO Add test for clearing and then accessing again afterwards
+  // TODO Add test for updates, clearing and then accessing again afterwards
 }
