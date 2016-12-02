@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.model.sql;
 
+import android.content.ContentValues;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
@@ -27,8 +28,6 @@ import com.squareup.sqldelight.RowMapper;
    * The activity name of the PACKAGE entry in the database
    */
   @NonNull public static final String PACKAGE_ACTIVITY_NAME = "PACKAGE";
-  @NonNull public static final Factory<PadLockEntry> FACTORY =
-      new Factory<>(AutoValue_PadLockEntry::new);
   // SQLDelight does not yet support delete strings
   @NonNull public static final String DELETE_WITH_PACKAGE_NAME = "packageName = ?";
   @NonNull public static final String DELETE_WITH_PACKAGE_ACTIVITY_NAME =
@@ -37,10 +36,17 @@ import com.squareup.sqldelight.RowMapper;
   // SQLDelight does not yet support update strings
   @NonNull public static final String UPDATE_WITH_PACKAGE_ACTIVITY_NAME =
       "packageName = ? AND activityName = ?;";
+
+  @SuppressWarnings("StaticInitializerReferencesSubClass") @NonNull
+  private static final Factory<PadLockEntry> FACTORY = new Factory<>(AutoValue_PadLockEntry::new);
+
+  @NonNull public static final Creator<PadLockEntry> CREATOR = FACTORY.creator;
   @NonNull public static final RowMapper<AllEntries> ALL_ENTRIES_MAPPER =
       FACTORY.all_entriesMapper(AutoValue_PadLockEntry_AllEntries::new);
   @NonNull public static final RowMapper<WithPackageName> WITH_PACKAGE_NAME_MAPPER =
       FACTORY.with_package_nameMapper(AutoValue_PadLockEntry_WithPackageName::new);
+  @NonNull public static final Mapper<PadLockEntry> WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER =
+      FACTORY.with_package_activity_name_defaultMapper();
   @NonNull public static final RowMapper<WithPackageActivityName>
       WITH_PACKAGE_ACTIVITY_NAME_MAPPER =
       FACTORY.with_package_activity_nameMapper(AutoValue_PadLockEntry_WithPackageActivityName::new);
@@ -53,6 +59,13 @@ import com.squareup.sqldelight.RowMapper;
 
   @CheckResult public static boolean isEmpty(@NonNull PadLockEntry entry) {
     return entry.packageName().equals(PACKAGE_EMPTY) && entry.activityName().equals(ACTIVITY_EMPTY);
+  }
+
+  /**
+   * Marshal method is deprecated, but Marshal class is not. Keep using it for now I suppose.
+   */
+  @NonNull @CheckResult public static ContentValues asContentValues(@NonNull PadLockEntry entry) {
+    return new Marshal(entry).asContentValues();
   }
 
   @AutoValue public static abstract class AllEntries implements All_entriesModel {
