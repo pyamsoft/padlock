@@ -79,7 +79,6 @@ public class PadLockService extends AccessibilityService
     addIntent.putExtra(LockScreenActivity.ENTRY_IS_SYSTEM, entry.systemApplication());
     addIntent.putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName);
     addIntent.putExtra(LockScreenActivity.ENTRY_LOCK_UNTIL_TIME, entry.lockUntilTime());
-    addIntent.putExtra(LockScreenActivity.ENTRY_IGNORE_UNTIL_TIME, entry.ignoreUntilTime());
 
     if (entry.whitelist()) {
       throw new RuntimeException("Cannot launch LockScreen for whitelisted applications");

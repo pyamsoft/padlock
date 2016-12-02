@@ -63,7 +63,6 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   @NonNull public static final String ENTRY_LOCK_CODE = "lock_code";
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
   @NonNull public static final String ENTRY_LOCK_UNTIL_TIME = "lock_until_time";
-  @NonNull public static final String ENTRY_IGNORE_UNTIL_TIME = "ignore_until_time";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
   @NonNull private static final String KEY_LOCK_PRESENTER = "key_lock_presenter";
@@ -109,7 +108,6 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   private long loadedKey;
   private String lockedRealName;
   private boolean lockedSystem;
-  private long ignoreUntilTime;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -247,7 +245,6 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     lockedRealName = bundle.getString(ENTRY_REAL_NAME);
     lockedCode = bundle.getString(ENTRY_LOCK_CODE);
     lockUntilTime = bundle.getLong(ENTRY_LOCK_UNTIL_TIME, 0);
-    ignoreUntilTime = bundle.getLong(ENTRY_IGNORE_UNTIL_TIME, 0);
     lockedSystem = bundle.getBoolean(ENTRY_IS_SYSTEM, false);
 
     if (lockedPackageName == null || lockedActivityName == null || lockedRealName == null) {
