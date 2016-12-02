@@ -37,15 +37,14 @@ import timber.log.Timber;
 
 class PadLockDBImpl implements PadLockDB {
 
-  @NonNull private final Scheduler dbScheduler;
+  @SuppressWarnings("WeakerAccess") @NonNull final BriteDatabase briteDatabase;
   @NonNull private final AtomicInteger openCount;
   @NonNull private final PadLockOpenHelper openHelper;
-  @SuppressWarnings("WeakerAccess") volatile BriteDatabase briteDatabase;
 
   @Inject PadLockDBImpl(@NonNull Context context, @NonNull Scheduler scheduler) {
     openHelper = new PadLockOpenHelper(context);
+    briteDatabase = new SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler);
     openCount = new AtomicInteger(0);
-    dbScheduler = scheduler;
   }
 
   @SuppressWarnings("WeakerAccess") @VisibleForTesting @CheckResult int getOpenCount() {
@@ -54,9 +53,6 @@ class PadLockDBImpl implements PadLockDB {
 
   @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
     Timber.d("Increment open count to: %d", openCount.incrementAndGet());
-    if (briteDatabase == null) {
-      briteDatabase = new SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, dbScheduler);
-    }
   }
 
   @SuppressWarnings("WeakerAccess") synchronized void closeDatabase() {
@@ -66,10 +62,7 @@ class PadLockDBImpl implements PadLockDB {
 
     if (openCount.get() == 0) {
       Timber.d("Close and recycle database connection");
-      if (briteDatabase != null) {
-        briteDatabase.close();
-        briteDatabase = null;
-      }
+      briteDatabase.close();
     }
   }
 
@@ -78,7 +71,7 @@ class PadLockDBImpl implements PadLockDB {
       @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem,
       boolean whitelist) {
     final PadLockEntry entry =
-        PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
+        PadLockEntry.CREATOR.create(packageName, activityName, lockCode, lockUntilTime,
             ignoreUntilTime, isSystem, whitelist);
     if (PadLockEntry.isEmpty(entry)) {
       throw new RuntimeException("Cannot insert EMPTY entry");
@@ -90,8 +83,7 @@ class PadLockDBImpl implements PadLockDB {
       return deleteWithPackageActivityNameUnguarded(packageName, activityName);
     }).map(deleted -> {
       Timber.d("Delete result: %d", deleted);
-      return briteDatabase.insert(PadLockEntry.TABLE_NAME,
-          PadLockEntry.FACTORY.marshal(entry).asContentValues());
+      return briteDatabase.insert(PadLockEntry.TABLE_NAME, PadLockEntry.asContentValues(entry));
     }).map(result -> {
       closeDatabase();
       return result;
@@ -103,7 +95,7 @@ class PadLockDBImpl implements PadLockDB {
       @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem,
       boolean whitelist) {
     final PadLockEntry entry =
-        PadLockEntry.FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
+        PadLockEntry.CREATOR.create(packageName, activityName, lockCode, lockUntilTime,
             ignoreUntilTime, isSystem, whitelist);
     if (PadLockEntry.isEmpty(entry)) {
       throw new RuntimeException("Cannot update EMPTY entry");
@@ -112,9 +104,9 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: UPDATE");
       openDatabase();
-      final int result = briteDatabase.update(PadLockEntry.TABLE_NAME,
-          PadLockEntry.FACTORY.marshal(entry).asContentValues(),
-          PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
+      final int result =
+          briteDatabase.update(PadLockEntry.TABLE_NAME, PadLockEntry.asContentValues(entry),
+              PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
       closeDatabase();
       return Observable.just(result);
     });
@@ -156,7 +148,7 @@ class PadLockDBImpl implements PadLockDB {
           PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT, packageName,
           PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName, PadLockEntry.PACKAGE_ACTIVITY_NAME,
           activityName)
-          .mapToOneOrDefault(PadLockEntry.FACTORY.with_package_activity_name_defaultMapper()::map,
+          .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER::map,
               PadLockEntry.empty());
     }).map(result -> {
       closeDatabase();
