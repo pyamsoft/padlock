@@ -29,11 +29,6 @@ import com.squareup.sqldelight.RowMapper;
    * The activity name of the PACKAGE entry in the database
    */
   @NonNull public static final String PACKAGE_ACTIVITY_NAME = "PACKAGE";
-  // SQLDelight does not yet support delete strings
-  @NonNull public static final String DELETE_WITH_PACKAGE_NAME = "packageName = ?";
-  @NonNull public static final String DELETE_WITH_PACKAGE_ACTIVITY_NAME =
-      "packageName = ? AND activityName = ?;";
-  @NonNull public static final String DELETE_ALL = "1=1";
   // SQLDelight does not yet support update strings
   @NonNull public static final String UPDATE_WITH_PACKAGE_ACTIVITY_NAME =
       "packageName = ? AND activityName = ?;";
@@ -74,6 +69,16 @@ import com.squareup.sqldelight.RowMapper;
     return new InsertManager(openHelper);
   }
 
+  @CheckResult @NonNull
+  public static DeletePackageManager deletePackage(@NonNull SQLiteOpenHelper openHelper) {
+    return new DeletePackageManager(openHelper);
+  }
+
+  @CheckResult @NonNull public static DeletePackageActivityManager deletePackageActivity(
+      @NonNull SQLiteOpenHelper openHelper) {
+    return new DeletePackageActivityManager(openHelper);
+  }
+
   @AutoValue public static abstract class AllEntries implements All_entriesModel {
 
   }
@@ -108,6 +113,34 @@ import com.squareup.sqldelight.RowMapper;
           padLockEntry.lockCode(), padLockEntry.lockUntilTime(), padLockEntry.ignoreUntilTime(),
           padLockEntry.systemApplication(), padLockEntry.whitelist());
       return insertEntry.program.executeInsert();
+    }
+  }
+
+  @SuppressWarnings("WeakerAccess") public static class DeletePackageManager {
+    @NonNull private final Delete_with_package_name deletePackage;
+
+    DeletePackageManager(@NonNull SQLiteOpenHelper openHelper) {
+      this.deletePackage = new Delete_with_package_name(openHelper.getWritableDatabase());
+    }
+
+    @CheckResult public int executeProgram(@NonNull String packageName) {
+      deletePackage.bind(packageName);
+      return deletePackage.program.executeUpdateDelete();
+    }
+  }
+
+  @SuppressWarnings("WeakerAccess") public static class DeletePackageActivityManager {
+    @NonNull private final Delete_with_package_activity_name deletePackageActivity;
+
+    DeletePackageActivityManager(@NonNull SQLiteOpenHelper openHelper) {
+      this.deletePackageActivity =
+          new Delete_with_package_activity_name(openHelper.getWritableDatabase());
+    }
+
+    @CheckResult
+    public int executeProgram(@NonNull String packageName, @NonNull String activityName) {
+      deletePackageActivity.bind(packageName, activityName);
+      return deletePackageActivity.program.executeUpdateDelete();
     }
   }
 }
