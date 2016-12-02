@@ -249,9 +249,9 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: DELETE ALL");
       openDatabase();
-      final int result = briteDatabase.delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_ALL);
+      briteDatabase.execute(PadLockEntry.DELETE_ALL);
       closeDatabase();
-      return Observable.just(result);
+      return Observable.just(1);
     });
   }
 
