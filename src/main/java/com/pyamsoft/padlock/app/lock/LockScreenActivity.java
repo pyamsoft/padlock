@@ -26,7 +26,6 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
 import android.view.KeyEvent;
@@ -36,7 +35,6 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.ErrorDialog;
 import com.pyamsoft.padlock.app.service.PadLockService;
@@ -309,20 +307,8 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     overridePendingTransition(0, 0);
   }
 
-  private void showSnackbarWithText(String text) {
-    final Snackbar snackbar =
-        Snackbar.make(binding.activityLockScreen, text, Snackbar.LENGTH_SHORT);
-    final int defaultSnackColor = ContextCompat.getColor(this, R.color.snackbar);
-    snackbar.getView().setBackgroundColor(defaultSnackColor);
-
-    // KLUDGE Directly asks for the snackbar textview
-    final TextView textView =
-        (TextView) snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-    if (textView != null) {
-      textView.setBackgroundColor(defaultSnackColor);
-      textView.setTextSize(14);
-    }
-    snackbar.show();
+  private void showSnackbarWithText(@NonNull String text) {
+    Snackbar.make(binding.activityLockScreen, text, Snackbar.LENGTH_SHORT).show();
   }
 
   @Override public void onPostUnlock() {
