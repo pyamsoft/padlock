@@ -57,8 +57,7 @@ abstract class LockCommonInteractorImpl implements LockCommonInteractor {
             throw new RuntimeException("PadLock entry is empty but update was called");
           }
 
-          return padLockDB.updateEntry(entry.packageName(), entry.activityName(), entry.lockCode(),
-              entry.lockUntilTime(), entry.ignoreUntilTime(), entry.systemApplication(), whitelist)
+          return padLockDB.updateWhitelist(whitelist, entry.packageName(), entry.activityName())
               .map(result -> {
                 Timber.d("Update result: %d", result);
                 Timber.d("Whitelist: %s", whitelist);

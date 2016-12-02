@@ -29,9 +29,14 @@ public interface PadLockDB {
       @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
       long ignoreUntilTime, boolean isSystem, boolean whitelist);
 
-  @CheckResult @NonNull Observable<Integer> updateEntry(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
-      long ignoreUntilTime, boolean isSystem, boolean whitelist);
+  @CheckResult @NonNull Observable<Integer> updateLockTime(long lockUntilTime,
+      @NonNull String packageName, @NonNull String activityName);
+
+  @CheckResult @NonNull Observable<Integer> updateIgnoreTime(long ignoreUntilTime,
+      @NonNull String packageName, @NonNull String activityName);
+
+  @CheckResult @NonNull Observable<Integer> updateWhitelist(boolean whitelist,
+      @NonNull String packageName, @NonNull String activityName);
 
   @NonNull @CheckResult
   Observable<PadLockEntry.WithPackageActivityName> queryWithPackageActivityName(

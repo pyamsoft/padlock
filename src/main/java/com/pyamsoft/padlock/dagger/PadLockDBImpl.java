@@ -90,23 +90,55 @@ class PadLockDBImpl implements PadLockDB {
     });
   }
 
-  @Override @CheckResult @NonNull
-  public Observable<Integer> updateEntry(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem,
-      boolean whitelist) {
-    final PadLockEntry entry =
-        PadLockEntry.CREATOR.create(packageName, activityName, lockCode, lockUntilTime,
-            ignoreUntilTime, isSystem, whitelist);
-    if (PadLockEntry.isEmpty(entry)) {
+  @NonNull @Override
+  public Observable<Integer> updateIgnoreTime(long ignoreUntilTime, @NonNull String packageName,
+      @NonNull String activityName) {
+    if (packageName.equals(PadLockEntry.PACKAGE_EMPTY) || activityName.equals(
+        PadLockEntry.ACTIVITY_EMPTY)) {
       throw new RuntimeException("Cannot update EMPTY entry");
     }
 
     return Observable.defer(() -> {
-      Timber.i("DB: UPDATE");
+      Timber.i("DB: UPDATE IGNORE");
       openDatabase();
-      final int result =
-          briteDatabase.update(PadLockEntry.TABLE_NAME, PadLockEntry.asContentValues(entry),
-              PadLockEntry.UPDATE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName);
+      final int result = PadLockEntry.updateIgnoreTime(openHelper)
+          .executeProgram(ignoreUntilTime, packageName, activityName);
+      closeDatabase();
+      return Observable.just(result);
+    });
+  }
+
+  @NonNull @Override
+  public Observable<Integer> updateLockTime(long lockUntilTime, @NonNull String packageName,
+      @NonNull String activityName) {
+    if (packageName.equals(PadLockEntry.PACKAGE_EMPTY) || activityName.equals(
+        PadLockEntry.ACTIVITY_EMPTY)) {
+      throw new RuntimeException("Cannot update EMPTY entry");
+    }
+
+    return Observable.defer(() -> {
+      Timber.i("DB: UPDATE LOCK");
+      openDatabase();
+      final int result = PadLockEntry.updateLockTime(openHelper)
+          .executeProgram(lockUntilTime, packageName, activityName);
+      closeDatabase();
+      return Observable.just(result);
+    });
+  }
+
+  @NonNull @Override
+  public Observable<Integer> updateWhitelist(boolean whitelist, @NonNull String packageName,
+      @NonNull String activityName) {
+    if (packageName.equals(PadLockEntry.PACKAGE_EMPTY) || activityName.equals(
+        PadLockEntry.ACTIVITY_EMPTY)) {
+      throw new RuntimeException("Cannot update EMPTY entry");
+    }
+
+    return Observable.defer(() -> {
+      Timber.i("DB: UPDATE WHITELIST");
+      openDatabase();
+      final int result = PadLockEntry.updateWhitelist(openHelper)
+          .executeProgram(whitelist, packageName, activityName);
       closeDatabase();
       return Observable.just(result);
     });

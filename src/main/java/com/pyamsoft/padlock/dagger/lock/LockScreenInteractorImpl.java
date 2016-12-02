@@ -23,10 +23,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
-import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
-import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.service.RecheckService;
+import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
+import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import javax.inject.Inject;
 import rx.Observable;
 import rx.functions.Func1;
@@ -42,8 +42,8 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @SuppressWarnings("WeakerAccess") int failCount;
 
-  @Inject LockScreenInteractorImpl(@NonNull Context context, @NonNull final PadLockPreferences preferences,
-      @NonNull JobSchedulerCompat jobSchedulerCompat,
+  @Inject LockScreenInteractorImpl(@NonNull Context context,
+      @NonNull final PadLockPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
       @NonNull final MasterPinInteractor masterPinInteractor,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB) {
     this.appContext = context.getApplicationContext();
@@ -54,11 +54,10 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
     this.pinInteractor = masterPinInteractor;
   }
 
-  @WorkerThread @NonNull @Override @CheckResult
-  public Observable<Long> lockEntry(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem) {
-    return padLockDB.updateEntry(packageName, activityName, lockCode, lockUntilTime,
-        ignoreUntilTime, isSystem, false).map(integer -> {
+  @NonNull @Override
+  public Observable<Long> lockEntry(long lockUntilTime, @NonNull String packageName,
+      @NonNull String activityName) {
+    return padLockDB.updateLockTime(lockUntilTime, packageName, activityName).map(integer -> {
       Timber.d("Update result: %s", integer);
       return lockUntilTime;
     });
@@ -113,15 +112,12 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
         });
   }
 
-  @Override @NonNull @CheckResult
-  public Observable<Integer> ignoreEntryForTime(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
-      long ignoreMinutesInMillis, boolean isSystem) {
+  @NonNull @Override public Observable<Integer> ignoreEntryForTime(long ignoreMinutesInMillis,
+      @NonNull String packageName, @NonNull String activityName) {
     final long newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis;
     Timber.d("Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
         ignoreMinutesInMillis);
-    return padLockDB.updateEntry(packageName, activityName, lockCode, lockUntilTime, newIgnoreTime,
-        isSystem, false);
+    return padLockDB.updateIgnoreTime(newIgnoreTime, packageName, activityName);
   }
 
   @NonNull @CheckResult @Override public Observable<Long> getDefaultIgnoreTime() {

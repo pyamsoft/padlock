@@ -28,9 +28,8 @@ interface LockScreenInteractor extends LockInteractor {
   @CheckResult @NonNull Observable<Boolean> unlockEntry(@NonNull String attempt,
       @NonNull String pin);
 
-  @CheckResult @NonNull Observable<Long> lockEntry(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
-      long ignoreUntilTime, boolean isSystem);
+  @CheckResult @NonNull Observable<Long> lockEntry(long lockUntilTime, @NonNull String packageName,
+      @NonNull String activityName);
 
   @CheckResult @NonNull Observable<String> getDisplayName(@NonNull String packageName);
 
@@ -47,9 +46,8 @@ interface LockScreenInteractor extends LockInteractor {
   @CheckResult @NonNull Observable<Integer> queueRecheckJob(@NonNull String packageName,
       @NonNull String activityName, long recheckTime);
 
-  @NonNull @CheckResult Observable<Integer> ignoreEntryForTime(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
-      long ignoreMinutesInMillis, boolean isSystem);
+  @NonNull @CheckResult Observable<Integer> ignoreEntryForTime(long ignoreMinutesInMillis,
+      @NonNull String packageName, @NonNull String activityName);
 
   //@CheckResult @NonNull Observable<Long> getIgnoreTimeForIndex(int index);
 
