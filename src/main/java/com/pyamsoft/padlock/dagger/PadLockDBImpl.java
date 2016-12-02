@@ -83,7 +83,7 @@ class PadLockDBImpl implements PadLockDB {
       return deleteWithPackageActivityNameUnguarded(packageName, activityName);
     }).map(deleted -> {
       Timber.d("Delete result: %d", deleted);
-      return briteDatabase.insert(PadLockEntry.TABLE_NAME, PadLockEntry.asContentValues(entry));
+      return PadLockEntry.insertEntry(openHelper).executeProgram(entry);
     }).map(result -> {
       closeDatabase();
       return result;

@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.model.sql;
 
 import android.content.ContentValues;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
@@ -68,6 +69,11 @@ import com.squareup.sqldelight.RowMapper;
     return new Marshal(entry).asContentValues();
   }
 
+  @CheckResult @NonNull
+  public static InsertManager insertEntry(@NonNull SQLiteOpenHelper openHelper) {
+    return new InsertManager(openHelper);
+  }
+
   @AutoValue public static abstract class AllEntries implements All_entriesModel {
 
   }
@@ -87,6 +93,21 @@ import com.squareup.sqldelight.RowMapper;
     @CheckResult public static boolean isEmpty(@NonNull WithPackageActivityName entry) {
       return entry.packageName().equals(PACKAGE_EMPTY) && entry.activityName()
           .equals(ACTIVITY_EMPTY);
+    }
+  }
+
+  @SuppressWarnings("WeakerAccess") public static class InsertManager {
+    @NonNull private final Insert_entry insertEntry;
+
+    InsertManager(@NonNull SQLiteOpenHelper openHelper) {
+      this.insertEntry = new Insert_entry(openHelper.getWritableDatabase());
+    }
+
+    @CheckResult public long executeProgram(@NonNull PadLockEntry padLockEntry) {
+      insertEntry.bind(padLockEntry.packageName(), padLockEntry.activityName(),
+          padLockEntry.lockCode(), padLockEntry.lockUntilTime(), padLockEntry.ignoreUntilTime(),
+          padLockEntry.systemApplication(), padLockEntry.whitelist());
+      return insertEntry.program.executeInsert();
     }
   }
 }
