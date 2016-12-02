@@ -187,9 +187,7 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: DELETE PACKAGE");
       openDatabase();
-      final int result =
-          briteDatabase.delete(PadLockEntry.TABLE_NAME, PadLockEntry.DELETE_WITH_PACKAGE_NAME,
-              packageName);
+      final int result = PadLockEntry.deletePackage(openHelper).executeProgram(packageName);
       closeDatabase();
       return Observable.just(result);
     });
@@ -211,8 +209,8 @@ class PadLockDBImpl implements PadLockDB {
   @VisibleForTesting @NonNull @CheckResult
   Observable<Integer> deleteWithPackageActivityNameUnguarded(@NonNull String packageName,
       @NonNull String activityName) {
-    return Observable.just(briteDatabase.delete(PadLockEntry.TABLE_NAME,
-        PadLockEntry.DELETE_WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName));
+    return Observable.just(
+        PadLockEntry.deletePackageActivity(openHelper).executeProgram(packageName, activityName));
   }
 
   @Override @NonNull @CheckResult public Observable<Integer> deleteAll() {
