@@ -21,9 +21,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.pyamsoft.padlock">
 
-  <!-- Start on Boot -->
-  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-
   <!-- For accessibility service -->
   <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"/>
 
