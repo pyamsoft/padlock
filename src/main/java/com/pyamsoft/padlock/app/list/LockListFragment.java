@@ -95,18 +95,8 @@ public class LockListFragment extends ActionBarFragment
   @Nullable private TapTargetSequence sequence;
   private DividerItemDecoration dividerDecoration;
 
-  @CheckResult @NonNull public static LockListFragment newInstance(boolean forceRefresh) {
-    final LockListFragment fragment = new LockListFragment();
-    final Bundle args = new Bundle();
-    args.putBoolean("FORCE_REFRESH", forceRefresh);
-    fragment.setArguments(args);
-    return fragment;
-  }
-
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setHasOptionsMenu(true);
-
     loadedPresenterKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
           @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
@@ -124,6 +114,7 @@ public class LockListFragment extends ActionBarFragment
           @NonNull @Override public PersistLoader<LockListAdapter> createLoader() {
             return new ListAdapterLoader<LockListAdapter>() {
               @NonNull @Override public LockListAdapter loadPersistent() {
+                forceRefresh = true;
                 return new LockListAdapter();
               }
             };
@@ -144,12 +135,6 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    final boolean forceRefresh = getArguments().getBoolean("FORCE_REFRESH", false);
-    if (forceRefresh) {
-      Timber.d("Force a list refresh");
-      this.forceRefresh = true;
-    }
-
     setupRecyclerView();
     setupSwipeRefresh();
     setupFAB();
