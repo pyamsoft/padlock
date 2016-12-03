@@ -225,7 +225,9 @@ public class MainActivity extends RatingActivity
     final int backStackCount = fragmentManager.getBackStackEntryCount();
     if (backStackCount > 0) {
       fragmentManager.popBackStackImmediate();
-      drawerNormalNavigation();
+      if (backStackCount == 1) {
+        drawerNormalNavigation();
+      }
     } else {
       super.onBackPressed();
     }

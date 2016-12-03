@@ -39,8 +39,8 @@ public class SettingsFragment extends ActionBarFragment {
 
   @Override public void onResume() {
     super.onResume();
-    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
     setActionBarUpEnabled(true);
+    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
     displayPreferenceFragment();
   }
 
