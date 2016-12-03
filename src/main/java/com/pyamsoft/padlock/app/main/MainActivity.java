@@ -16,16 +16,20 @@
 
 package com.pyamsoft.padlock.app.main;
 
+import android.app.Activity;
+import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.preference.PreferenceManager;
 import android.view.MenuItem;
-import android.view.View;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.list.LockInfoFragment;
@@ -42,12 +46,23 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
 
-public class MainActivity extends RatingActivity implements MainPresenter.MainView {
+public class MainActivity extends RatingActivity
+    implements MainPresenter.MainView, NavigationDrawerController {
 
   @NonNull private static final String KEY_PRESENTER = "key_main_presenter";
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
   private ActivityMainBinding binding;
   private long loaderKey;
+  private ActionBarDrawerToggle drawerToggle;
+
+  @CheckResult @NonNull public static NavigationDrawerController getNavigationDrawerController(
+      @NonNull Activity activity) {
+    if (activity instanceof NavigationDrawerController) {
+      return (NavigationDrawerController) activity;
+    } else {
+      throw new IllegalStateException("Activity is not Drawer Controller");
+    }
+  }
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
@@ -65,7 +80,78 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
           }
         });
 
+    setupDrawerLayout();
     setAppBarState();
+    loadFirstFragment();
+  }
+
+  private void setupDrawerLayout() {
+    drawerToggle =
+        new ActionBarDrawerToggle(this, binding.drawerLayout, binding.toolbar, R.string.blank,
+            R.string.blank);
+
+    binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
+      boolean handled = false;
+      final boolean toggleChecked;
+      switch (item.getItemId()) {
+        case R.id.menu_locklist:
+          toggleChecked =
+              replaceFragment(LockListFragment.newInstance(false), LockListFragment.TAG);
+          break;
+        case R.id.menu_settings:
+          toggleChecked = replaceFragment(new SettingsFragment(), SettingsFragment.TAG);
+          break;
+        default:
+          toggleChecked = false;
+      }
+
+      if (toggleChecked) {
+        handled = true;
+        item.setChecked(!item.isChecked());
+        binding.drawerLayout.closeDrawers();
+      }
+
+      return handled;
+    });
+    binding.drawerLayout.addDrawerListener(drawerToggle);
+  }
+
+  @CheckResult boolean replaceFragment(@NonNull Fragment fragment, @NonNull String tag) {
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    if (fragmentManager.findFragmentByTag(tag) == null) {
+      fragmentManager.beginTransaction().replace(R.id.main_view_container, fragment, tag).commit();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private void loadFirstFragment() {
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null
+        || fragmentManager.findFragmentByTag(LockInfoFragment.TAG) != null) {
+      drawerShowUpNavigation();
+    } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) == null) {
+      binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
+    }
+  }
+
+  @Override public void drawerNormalNavigation() {
+    binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
+        binding.navigationDrawer);
+    binding.navigationDrawer.setCheckedItem(R.id.menu_settings);
+    drawerToggle.setDrawerIndicatorEnabled(true);
+    drawerToggle.syncState();
+  }
+
+  @Override public void drawerShowUpNavigation() {
+    binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED,
+        binding.navigationDrawer);
+    drawerToggle.setDrawerIndicatorEnabled(false);
+    drawerToggle.syncState();
   }
 
   @CheckResult @NonNull MainPresenter getPresenter() {
@@ -89,7 +175,6 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
   @Override protected void onStart() {
     super.onStart();
     presenter.bindView(this);
-    showLockList(false);
   }
 
   @Override protected void onStop() {
@@ -121,30 +206,13 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
     ViewCompat.setElevation(binding.toolbar, AppUtil.convertToDP(this, 4));
   }
 
-  private void showLockList(boolean forceRefresh) {
-    supportInvalidateOptionsMenu();
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    if ((fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) == null) || forceRefresh) {
-      fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, LockListFragment.newInstance(forceRefresh),
-              LockListFragment.TAG)
-          .commitNow();
-    }
-  }
-
-  @CheckResult @NonNull public View getSettingsMenuItemView() {
-    return binding.toolbar.findViewById(R.id.menu_settings);
-  }
-
   @Override protected void onDestroy() {
     super.onDestroy();
     if (!isChangingConfigurations()) {
       PersistentCache.get().unload(loaderKey);
     }
+
+    binding.drawerLayout.removeDrawerListener(drawerToggle);
     binding.unbind();
   }
 
@@ -156,13 +224,29 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
     final FragmentManager fragmentManager = getSupportFragmentManager();
     final int backStackCount = fragmentManager.getBackStackEntryCount();
     if (backStackCount > 0) {
-      fragmentManager.popBackStack();
+      fragmentManager.popBackStackImmediate();
+      drawerNormalNavigation();
     } else {
       super.onBackPressed();
     }
   }
 
+  @Override public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    drawerToggle.onConfigurationChanged(newConfig);
+  }
+
+  @Override protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+    super.onPostCreate(savedInstanceState);
+    drawerToggle.syncState();
+  }
+
   @Override public boolean onOptionsItemSelected(final @NonNull MenuItem item) {
+    if (drawerToggle.onOptionsItemSelected(item)) {
+      Timber.d("Handled by drawer toggle");
+      return true;
+    }
+
     final int itemId = item.getItemId();
     boolean handled;
     switch (itemId) {
@@ -195,8 +279,7 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
 
   @NonNull @Override protected String[] getChangeLogLines() {
     final String line1 = "FEATURE: Option to not launch PadLock when device is locked";
-    final String line2 =
-        "FEATURE: Purge old, uninstalled applications from the Settings menu";
+    final String line2 = "FEATURE: Purge old, uninstalled applications from the Settings menu";
     final String line3 = "BUGFIX: Additional bugfixes and optimizations";
     return new String[] { line1, line2, line3 };
   }
@@ -213,7 +296,7 @@ public class MainActivity extends RatingActivity implements MainPresenter.MainVi
     Timber.d("Force lock list refresh");
     final FragmentManager fragmentManager = getSupportFragmentManager();
     fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-    showLockList(true);
+    binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
   }
 }
 
