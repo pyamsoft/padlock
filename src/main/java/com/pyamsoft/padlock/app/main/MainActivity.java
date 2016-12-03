@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -50,8 +52,10 @@ public class MainActivity extends RatingActivity
     implements MainPresenter.MainView, NavigationDrawerController {
 
   @NonNull private static final String KEY_PRESENTER = "key_main_presenter";
+  @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
-  private ActivityMainBinding binding;
+  ActivityMainBinding binding;
+  boolean firstLaunch;
   private long loaderKey;
   private ActionBarDrawerToggle drawerToggle;
 
@@ -69,9 +73,11 @@ public class MainActivity extends RatingActivity
     super.onCreate(savedInstanceState);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
+    firstLaunch = false;
     loaderKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<MainPresenter>() {
           @NonNull @Override public PersistLoader<MainPresenter> createLoader() {
+            firstLaunch = true;
             return new MainPresenterLoader();
           }
 
@@ -83,6 +89,10 @@ public class MainActivity extends RatingActivity
     setupDrawerLayout();
     setAppBarState();
     loadFirstFragment();
+
+    if (firstLaunch) {
+      peekNavigationDrawer();
+    }
   }
 
   private void setupDrawerLayout() {
@@ -108,12 +118,22 @@ public class MainActivity extends RatingActivity
       if (toggleChecked) {
         handled = true;
         item.setChecked(!item.isChecked());
-        binding.drawerLayout.closeDrawers();
+        binding.drawerLayout.closeDrawer(binding.navigationDrawer);
       }
 
       return handled;
     });
     binding.drawerLayout.addDrawerListener(drawerToggle);
+  }
+
+  private void peekNavigationDrawer() {
+    binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN,
+        binding.navigationDrawer);
+
+    handler.postDelayed(() -> {
+      binding.drawerLayout.closeDrawer(binding.navigationDrawer);
+      drawerNormalNavigation();
+    }, 1200L);
   }
 
   @CheckResult boolean replaceFragment(@NonNull Fragment fragment, @NonNull String tag) {
@@ -211,6 +231,7 @@ public class MainActivity extends RatingActivity
       PersistentCache.get().unload(loaderKey);
     }
 
+    handler.removeCallbacksAndMessages(null);
     binding.drawerLayout.removeDrawerListener(drawerToggle);
     binding.unbind();
   }
