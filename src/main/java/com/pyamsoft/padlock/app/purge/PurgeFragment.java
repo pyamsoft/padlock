@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.mikepenz.fastadapter.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
@@ -151,6 +152,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
 
   @Override public void onResume() {
     super.onResume();
+    MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
     setActionBarUpEnabled(true);
   }
 
