@@ -189,8 +189,8 @@ public class LockListFragment extends ActionBarFragment
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> binding.applistFab.show(), 300L);
 
-    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
     setActionBarUpEnabled(true);
+    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
     getActivity().supportInvalidateOptionsMenu();
   }
 
