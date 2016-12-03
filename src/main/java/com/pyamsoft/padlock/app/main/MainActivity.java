@@ -111,6 +111,9 @@ public class MainActivity extends RatingActivity
         case R.id.menu_settings:
           toggleChecked = replaceFragment(new SettingsFragment(), SettingsFragment.TAG);
           break;
+        case R.id.menu_purge:
+          toggleChecked = replaceFragment(new PurgeFragment(), PurgeFragment.TAG);
+          break;
         default:
           toggleChecked = false;
       }
@@ -148,13 +151,14 @@ public class MainActivity extends RatingActivity
 
   private void loadFirstFragment() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
+    // These fragments are a level up
     if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null
-        || fragmentManager.findFragmentByTag(LockInfoFragment.TAG) != null
-        || fragmentManager.findFragmentByTag(PurgeFragment.TAG) != null) {
+        || fragmentManager.findFragmentByTag(LockInfoFragment.TAG) != null) {
       drawerShowUpNavigation();
+      // These are base fragments
     } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) == null) {
+        && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null) {
       binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
     }
   }

@@ -152,8 +152,8 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
 
   @Override public void onResume() {
     super.onResume();
-    MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
     setActionBarUpEnabled(true);
+    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {

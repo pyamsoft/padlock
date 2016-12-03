@@ -31,6 +31,11 @@
         android:icon="@drawable/ic_settings_24dp"
         android:title="@string/settings"/>
 
+    <item
+        android:id="@+id/menu_purge"
+        android:icon="@drawable/ic_delete_24dp"
+        android:title="@string/clean_up_old"/>
+
   </group>
 
 </menu>
