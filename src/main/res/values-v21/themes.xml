@@ -17,7 +17,10 @@
 
 <resources>
 
-  <!-- Normal App Theme -->
+  <!-- Normal App Theme
+
+  On devices API 21 and up, includes a transparent status bar
+  -->
   <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light">
     <item name="android:statusBarColor">@android:color/transparent</item>
   </style>
