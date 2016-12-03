@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
@@ -235,6 +236,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onResume() {
     super.onResume();
+    MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
     setActionBarUpEnabled(true);
   }
 

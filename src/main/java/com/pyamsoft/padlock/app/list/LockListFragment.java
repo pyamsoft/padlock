@@ -39,7 +39,6 @@ import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
-import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.databinding.FragmentApplistBinding;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
@@ -175,7 +174,7 @@ public class LockListFragment extends ActionBarFragment
 
   private void applyUpdatedRequestListeners() {
     for (final LockListItem item : fastItemAdapter.getAdapterItems()) {
-      item.setRequestListener(this::displayLockInfoDialog);
+      item.setRequestListener(this::displayLockInfoFragment);
       item.setModifyListener(this::processDatabaseModifyEvent);
     }
   }
@@ -189,8 +188,9 @@ public class LockListFragment extends ActionBarFragment
     super.onResume();
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> binding.applistFab.show(), 300L);
-    setActionBarUpEnabled(false);
 
+    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
+    setActionBarUpEnabled(true);
     getActivity().supportInvalidateOptionsMenu();
   }
 
@@ -255,50 +255,6 @@ public class LockListFragment extends ActionBarFragment
     displaySystemItem.setOnMenuItemClickListener(null);
     displaySystemItem.setChecked(visible);
     setSystemCheckListener();
-  }
-
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    boolean handled;
-    switch (item.getItemId()) {
-      case R.id.menu_settings:
-        handled = true;
-        if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing()) {
-          Timber.d("List is not refreshing. Do settings click");
-          showSettingsScreen();
-        }
-        break;
-      default:
-        handled = false;
-    }
-    return handled || super.onOptionsItemSelected(item);
-  }
-
-  private void showSettingsScreen() {
-    final FragmentManager fragmentManager = getFragmentManager();
-    if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
-      final FragmentActivity fragmentActivity = getActivity();
-      if (fragmentActivity instanceof MainActivity) {
-        final View containerView = getView();
-        final View menuItemView = getSettingsMenuItemView();
-        if (containerView != null) {
-          fragmentManager.beginTransaction()
-              .replace(R.id.main_view_container,
-                  SettingsFragment.newInstance(menuItemView, containerView), SettingsFragment.TAG)
-              .addToBackStack(null)
-              .commit();
-        }
-      }
-    }
-  }
-
-  @CheckResult @NonNull View getSettingsMenuItemView() {
-    final FragmentActivity fragmentActivity = getActivity();
-    if (fragmentActivity instanceof MainActivity) {
-      final MainActivity mainActivity = (MainActivity) fragmentActivity;
-      return mainActivity.getSettingsMenuItemView();
-    } else {
-      throw new ClassCastException("Activity is not MainActivity");
-    }
   }
 
   @Override public void setSystemVisible() {
@@ -421,7 +377,7 @@ public class LockListFragment extends ActionBarFragment
     }
 
     fastItemAdapter.add(
-        new LockListItem(entry, this::displayLockInfoDialog, this::processDatabaseModifyEvent));
+        new LockListItem(entry, this::displayLockInfoFragment, this::processDatabaseModifyEvent));
     fastItemAdapter.notifyAdapterItemInserted(fastItemAdapter.getItemCount() - 1);
   }
 
@@ -448,15 +404,6 @@ public class LockListFragment extends ActionBarFragment
             getString(R.string.onboard_desc_locklist)).tintTarget(false).cancelable(false);
       }
 
-      final TapTarget settingsTarget =
-          TapTarget.forView(getSettingsMenuItemView(), getString(R.string.onboard_title_settings),
-              getString(R.string.onboard_desc_settings))
-              .cancelable(false)
-              .dimColor(android.R.color.white)
-              .outerCircleColor(R.color.blue500)
-              .targetCircleColor(android.R.color.white)
-              .textColor(android.R.color.white);
-
       // Hold a ref to the sequence or Activity will recycle bitmaps and crash
       sequence = new TapTargetSequence(getActivity());
       if (fabTarget != null) {
@@ -465,7 +412,6 @@ public class LockListFragment extends ActionBarFragment
       if (listTarget != null) {
         sequence.target(listTarget);
       }
-      sequence.target(settingsTarget);
 
       sequence.listener(new TapTargetSequence.Listener() {
         @Override public void onSequenceFinish() {
@@ -545,7 +491,7 @@ public class LockListFragment extends ActionBarFragment
     presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system());
   }
 
-  void displayLockInfoDialog(@NonNull AppEntry entry) {
+  void displayLockInfoFragment(@NonNull AppEntry entry) {
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
       fragmentManager.beginTransaction()

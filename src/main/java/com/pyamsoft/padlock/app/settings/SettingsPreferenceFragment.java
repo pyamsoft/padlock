@@ -46,6 +46,10 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
   @SuppressWarnings("WeakerAccess") SettingsPreferencePresenter presenter;
   private long loadedKey;
 
+  @NonNull @Override protected AboutLibrariesFragment.BackStackState isLastOnBackStack() {
+    return AboutLibrariesFragment.BackStackState.LAST;
+  }
+
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
@@ -95,9 +99,12 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     showAds.setOnPreferenceChangeListener((preference, newValue) -> toggleAdVisibility(newValue));
 
     final Preference showAboutLicenses = findPreference(getString(R.string.about_license_key));
-    showAboutLicenses.setOnPreferenceClickListener(
-        preference -> showAboutLicensesFragment(R.id.main_view_container,
-            AboutLibrariesFragment.Styling.LIGHT));
+    showAboutLicenses.setOnPreferenceClickListener(preference -> {
+      MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
+      setActionBarUpEnabled(true);
+      return showAboutLicensesFragment(R.id.main_view_container,
+          AboutLibrariesFragment.Styling.LIGHT);
+    });
 
     final Preference checkVersion = findPreference(getString(R.string.check_version_key));
     checkVersion.setOnPreferenceClickListener(preference -> checkForUpdate());
