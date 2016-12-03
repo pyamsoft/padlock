@@ -129,11 +129,11 @@ public class MainActivity extends RatingActivity
   private void loadFirstFragment() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null
-        || fragmentManager.findFragmentByTag(LockInfoFragment.TAG) != null) {
+        || fragmentManager.findFragmentByTag(LockInfoFragment.TAG) != null
+        || fragmentManager.findFragmentByTag(PurgeFragment.TAG) != null) {
       drawerShowUpNavigation();
     } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null
         && fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) == null) {
       binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
     }
@@ -142,7 +142,6 @@ public class MainActivity extends RatingActivity
   @Override public void drawerNormalNavigation() {
     binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
         binding.navigationDrawer);
-    binding.navigationDrawer.setCheckedItem(R.id.menu_settings);
     drawerToggle.setDrawerIndicatorEnabled(true);
     drawerToggle.syncState();
   }
