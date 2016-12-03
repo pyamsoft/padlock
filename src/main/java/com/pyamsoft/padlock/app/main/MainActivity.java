@@ -105,8 +105,7 @@ public class MainActivity extends RatingActivity
       final boolean toggleChecked;
       switch (item.getItemId()) {
         case R.id.menu_locklist:
-          toggleChecked =
-              replaceFragment(LockListFragment.newInstance(false), LockListFragment.TAG);
+          toggleChecked = replaceFragment(new LockListFragment(), LockListFragment.TAG);
           break;
         case R.id.menu_settings:
           toggleChecked = replaceFragment(new SettingsFragment(), SettingsFragment.TAG);
