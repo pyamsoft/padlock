@@ -23,7 +23,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,6 +65,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @Nullable private TapTargetView defaultLockTapTarget;
   @Nullable private TapTargetView whiteLockTapTarget;
   @Nullable private TapTargetView blackLockTapTarget;
+  @Nullable private DividerItemDecoration dividerDecoration;
 
   public static LockInfoFragment newInstance(final @NonNull AppEntry appEntry) {
     final LockInfoFragment fragment = new LockInfoFragment();
@@ -133,10 +133,15 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     binding.lockInfoPackageName.setText(appPackageName);
     binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
 
-    // Recycler setup
+    setupRecyclerView();
+  }
+
+  private void setupRecyclerView() {
     final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-    final RecyclerView.ItemDecoration dividerDecoration =
-        new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
+    dividerDecoration = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
+
+    fastItemAdapter.withFilterPredicate(
+        (item, charSequence) -> item.getEntry().name().startsWith(String.valueOf(charSequence)));
 
     binding.lockInfoRecycler.setLayoutManager(layoutManager);
     binding.lockInfoRecycler.addItemDecoration(dividerDecoration);
