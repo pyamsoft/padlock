@@ -16,10 +16,10 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.support.annotation.NonNull;
+import com.mikepenz.fastadapter.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.model.AppEntry;
 
-class LockListAdapter extends LockFilterAdapter<LockListItem> implements LockListDatabaseView {
+class LockListAdapter extends FastItemAdapter<LockListItem> implements LockListDatabaseView {
 
   @Override public void onDatabaseEntryCreated(int position) {
     final LockListItem oldItem = getItem(position);
@@ -35,9 +35,5 @@ class LockListAdapter extends LockFilterAdapter<LockListItem> implements LockLis
         new LockListItem(AppEntry.builder(oldItem.getEntry()).locked(false).build(),
             oldItem.getRequestListener(), oldItem.getModifyListener());
     set(position, newItem);
-  }
-
-  @NonNull @Override String getFilterName(@NonNull LockListItem item) {
-    return item.getEntry().name();
   }
 }

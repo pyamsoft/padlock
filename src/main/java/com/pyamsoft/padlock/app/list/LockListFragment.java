@@ -37,7 +37,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
-import com.mikepenz.fastadapter.items.AbstractItem;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
@@ -97,6 +96,7 @@ public class LockListFragment extends ActionBarFragment
   private long loadedAdapterKey;
   @Nullable private TapTargetSequence sequence;
   private DividerItemDecoration dividerDecoration;
+  @Nullable private MenuItem searchItem;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -181,25 +181,18 @@ public class LockListFragment extends ActionBarFragment
 
     setActionBarUpEnabled(true);
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
-    setSearchViewOnQueryTextListener(fastItemAdapter, false);
   }
 
-  @CheckResult @NonNull private SearchView.OnQueryTextListener getOnQueryTextListener(
-      @NonNull LockFilterAdapter<? extends AbstractItem> adapter) {
+  @CheckResult @NonNull private SearchView.OnQueryTextListener getOnQueryTextListener() {
     return new SearchView.OnQueryTextListener() {
 
-      void filter(@Nullable String query) {
-        Timber.d("Set query filter to %s", query);
-        adapter.getFilter().filter(query);
-      }
-
       @Override public boolean onQueryTextChange(String newText) {
-        filter(newText);
+        fastItemAdapter.filter(newText);
         return true;
       }
 
       @Override public boolean onQueryTextSubmit(String query) {
-        filter(query);
+        fastItemAdapter.filter(query);
         if (searchView != null) {
           searchView.clearFocus();
         }
@@ -228,6 +221,12 @@ public class LockListFragment extends ActionBarFragment
     lockListLayoutManager.setVerticalScrollEnabled(true);
     dividerDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
 
+    fastItemAdapter.withFilterPredicate((item, query) -> {
+      final String queryString = String.valueOf(query).toLowerCase().trim();
+      final String name = item.getEntry().name().toLowerCase().trim();
+      Timber.d("Filter predicate: '%s' against %s", queryString, name);
+      return !name.startsWith(queryString);
+    });
     binding.applistRecyclerview.setLayoutManager(lockListLayoutManager);
     binding.applistRecyclerview.addItemDecoration(dividerDecoration);
   }
@@ -246,27 +245,21 @@ public class LockListFragment extends ActionBarFragment
   }
 
   private void setupSearchItem(@NonNull Menu menu) {
-    final MenuItem searchItem = menu.findItem(R.id.menu_search);
+    searchItem = menu.findItem(R.id.menu_search);
     if (searchItem != null) {
       searchView = (SearchView) searchItem.getActionView();
-      setSearchViewOnQueryTextListener(fastItemAdapter, false);
+      setSearchViewOnQueryTextListener();
     }
   }
 
-  void setSearchViewOnQueryTextListener(@NonNull LockFilterAdapter<? extends AbstractItem> adapter,
-      boolean reset) {
+  private void setSearchViewOnQueryTextListener() {
     if (searchView != null) {
       Timber.d("Set Search View listeners");
-      searchView.setOnQueryTextListener(getOnQueryTextListener(adapter));
+      searchView.setOnQueryTextListener(getOnQueryTextListener());
       searchView.setOnCloseListener(() -> {
-        adapter.getFilter().filter(null);
+        fastItemAdapter.filter(null);
         return true;
       });
-
-      if (reset) {
-        Timber.d("Reset query");
-        searchView.setQuery(null, true);
-      }
     }
   }
 
@@ -312,6 +305,17 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onDestroyView() {
+    if (searchItem != null) {
+      searchItem.collapseActionView();
+    }
+    searchItem = null;
+
+    if (searchView != null) {
+      searchView.setOnQueryTextListener(null);
+      searchView.setOnCloseListener(null);
+    }
+    searchView = null;
+
     clearListListeners();
     binding.applistRecyclerview.removeItemDecoration(dividerDecoration);
     binding.applistRecyclerview.setOnClickListener(null);
@@ -323,12 +327,6 @@ public class LockListFragment extends ActionBarFragment
 
     displaySystemItem.setOnMenuItemClickListener(null);
     displaySystemItem = null;
-
-    if (searchView != null) {
-      searchView.setOnQueryTextListener(null);
-      searchView.setSearchableInfo(null);
-    }
-    searchView = null;
 
     taskMap.clear();
     handler.removeCallbacksAndMessages(null);
@@ -541,6 +539,10 @@ public class LockListFragment extends ActionBarFragment
   }
 
   void displayLockInfoFragment(@NonNull AppEntry entry) {
+    if (searchItem != null) {
+      searchItem.collapseActionView();
+    }
+
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
       fragmentManager.beginTransaction()
