@@ -40,7 +40,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
-  @NonNull final AppEntry entry;
+  @NonNull private final AppEntry entry;
   @Nullable private OnDatabaseModifyListener modifyListener;
   @Nullable private OnOpenDialogRequestListener requestListener;
 
@@ -49,6 +49,10 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     this.entry = entry;
     this.requestListener = requestListener;
     this.modifyListener = modifyListener;
+  }
+
+  @NonNull @CheckResult AppEntry getEntry() {
+    return entry;
   }
 
   @NonNull @CheckResult OnOpenDialogRequestListener getRequestListener() {

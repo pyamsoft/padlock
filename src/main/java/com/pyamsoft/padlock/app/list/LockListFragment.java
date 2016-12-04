@@ -20,7 +20,6 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -201,8 +200,12 @@ public class LockListFragment extends ActionBarFragment
     lockListLayoutManager.setVerticalScrollEnabled(true);
     dividerDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
 
+    fastItemAdapter.withFilterPredicate(
+        (item, charSequence) -> item.getEntry().name().startsWith(String.valueOf(charSequence)));
+
     binding.applistRecyclerview.setLayoutManager(lockListLayoutManager);
     binding.applistRecyclerview.addItemDecoration(dividerDecoration);
+
   }
 
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
