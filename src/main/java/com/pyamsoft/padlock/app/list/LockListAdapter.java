@@ -37,7 +37,7 @@ class LockListAdapter extends LockFilterAdapter<LockListItem> implements LockLis
     set(position, newItem);
   }
 
-  @Override boolean filterQuery(@NonNull LockListItem item, @NonNull CharSequence query) {
-    return item.getEntry().name().startsWith(String.valueOf(query));
+  @NonNull @Override String getFilterName(@NonNull LockListItem item) {
+    return item.getEntry().name();
   }
 }

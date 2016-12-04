@@ -424,7 +424,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     final FragmentManager fragmentManager = getFragmentManager();
     final Fragment lockListFragment = fragmentManager.findFragmentByTag(LockListFragment.TAG);
     if (lockListFragment instanceof LockListFragment) {
-      ((LockListFragment) lockListFragment).setSearchViewOnQueryTextListener(fastItemAdapter);
+      ((LockListFragment) lockListFragment).setSearchViewOnQueryTextListener(fastItemAdapter, true);
     } else {
       Timber.e("No LockListFragment exists to provide a new search query");
     }

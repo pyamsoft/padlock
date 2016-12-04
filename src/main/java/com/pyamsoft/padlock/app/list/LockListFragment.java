@@ -16,8 +16,6 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
@@ -183,10 +181,10 @@ public class LockListFragment extends ActionBarFragment
 
     setActionBarUpEnabled(true);
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
-    setSearchViewOnQueryTextListener(fastItemAdapter);
+    setSearchViewOnQueryTextListener(fastItemAdapter, false);
   }
 
-  @CheckResult @NonNull SearchView.OnQueryTextListener getOnQueryTextListener(
+  @CheckResult @NonNull private SearchView.OnQueryTextListener getOnQueryTextListener(
       @NonNull LockFilterAdapter<? extends AbstractItem> adapter) {
     return new SearchView.OnQueryTextListener() {
 
@@ -197,14 +195,14 @@ public class LockListFragment extends ActionBarFragment
 
       @Override public boolean onQueryTextChange(String newText) {
         filter(newText);
-        if (searchView != null) {
-          searchView.clearFocus();
-        }
         return true;
       }
 
       @Override public boolean onQueryTextSubmit(String query) {
         filter(query);
+        if (searchView != null) {
+          searchView.clearFocus();
+        }
         return true;
       }
     };
@@ -249,23 +247,26 @@ public class LockListFragment extends ActionBarFragment
 
   private void setupSearchItem(@NonNull Menu menu) {
     final MenuItem searchItem = menu.findItem(R.id.menu_search);
-    final SearchManager searchManager =
-        (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-
     if (searchItem != null) {
       searchView = (SearchView) searchItem.getActionView();
-    }
-
-    if (searchView != null) {
-      searchView.setSearchableInfo(
-          searchManager.getSearchableInfo(getActivity().getComponentName()));
+      setSearchViewOnQueryTextListener(fastItemAdapter, false);
     }
   }
 
-  void setSearchViewOnQueryTextListener(
-      @NonNull LockFilterAdapter<? extends AbstractItem> adapter) {
+  void setSearchViewOnQueryTextListener(@NonNull LockFilterAdapter<? extends AbstractItem> adapter,
+      boolean reset) {
     if (searchView != null) {
+      Timber.d("Set Search View listeners");
       searchView.setOnQueryTextListener(getOnQueryTextListener(adapter));
+      searchView.setOnCloseListener(() -> {
+        adapter.getFilter().filter(null);
+        return true;
+      });
+
+      if (reset) {
+        Timber.d("Reset query");
+        searchView.setQuery(null, true);
+      }
     }
   }
 

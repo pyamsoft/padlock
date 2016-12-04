@@ -47,7 +47,7 @@ class LockInfoAdapter extends LockFilterAdapter<LockInfoItem>
     set(position, newItem);
   }
 
-  @Override boolean filterQuery(@NonNull LockInfoItem item, @NonNull CharSequence query) {
-    return item.getEntry().name().startsWith(String.valueOf(query));
+  @NonNull @Override String getFilterName(@NonNull LockInfoItem item) {
+    return item.getEntry().name();
   }
 }

@@ -23,6 +23,7 @@ import com.mikepenz.fastadapter.adapters.FastItemAdapter;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import java.util.ArrayList;
 import java.util.List;
+import timber.log.Timber;
 
 abstract class LockFilterAdapter<T extends AbstractItem> extends FastItemAdapter<T> {
 
@@ -30,6 +31,16 @@ abstract class LockFilterAdapter<T extends AbstractItem> extends FastItemAdapter
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult List<T> getAllItemList() {
     return allItemList;
+  }
+
+  @Override public FastItemAdapter<T> add(T item) {
+    allItemList.add(item);
+    return super.add(item);
+  }
+
+  @Override public FastItemAdapter<T> remove(int position) {
+    allItemList.remove(position);
+    return super.remove(position);
   }
 
   @CheckResult @NonNull Filter getFilter() {
@@ -41,14 +52,11 @@ abstract class LockFilterAdapter<T extends AbstractItem> extends FastItemAdapter
         } else {
           query = query.toString().toLowerCase().trim();
           for (T item : getAllItemList()) {
-            if (filterQuery(item, query)) {
+            if (filterQuery(getFilterName(item), query)) {
+              Timber.d("Add %s to filter", item);
               listResult.add(item);
             }
           }
-
-          // Store the item list
-          getAllItemList().clear();
-          getAllItemList().addAll(getAdapterItems());
         }
 
         // Return the filter result
@@ -68,10 +76,18 @@ abstract class LockFilterAdapter<T extends AbstractItem> extends FastItemAdapter
           //noinspection unchecked
           listFiltered.addAll((List<T>) filterResults.values);
         }
-        notifyDataSetChanged();
+
+        Timber.d("Nofiy changes");
+        notifyAdapterDataSetChanged();
       }
     };
   }
 
-  @CheckResult abstract boolean filterQuery(@NonNull T item, @NonNull CharSequence query);
+  @CheckResult boolean filterQuery(@NonNull String name, @NonNull CharSequence query) {
+    name = name.toLowerCase();
+    Timber.d("Compare lock list: '%s' %s", query, name);
+    return name.startsWith(String.valueOf(query));
+  }
+
+  @CheckResult @NonNull abstract String getFilterName(@NonNull T item);
 }
