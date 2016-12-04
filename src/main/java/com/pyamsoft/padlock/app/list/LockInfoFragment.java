@@ -209,7 +209,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
     binding.lockInfoRecycler.setAdapter(fastItemAdapter);
     presenter.loadApplicationIcon(appPackageName);
-    presenter.setToggleAllState(appPackageName);
     if (firstRefresh) {
       refreshList();
     } else {
@@ -338,55 +337,14 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  private void safeChangeToggleAllState(boolean enabled) {
-    binding.lockInfoToggleall.setOnCheckedChangeListener(null);
-    binding.lockInfoToggleall.setChecked(enabled);
-    binding.lockInfoToggleall.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-      binding.lockInfoRecycler.setClickable(false);
-
-      // Clear All
-      clearList();
-
-      presenter.modifyDatabaseGroup(isChecked, appPackageName, null, appIsSystem);
-    });
-  }
-
-  @Override public void enableToggleAll() {
-    safeChangeToggleAllState(true);
-  }
-
-  @Override public void disableToggleAll() {
-    safeChangeToggleAllState(false);
-  }
-
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
     if (toggleAllTapTarget == null) {
-      createToggleTarget();
+      final LockInfoItem.ViewHolder holder =
+          (LockInfoItem.ViewHolder) binding.lockInfoRecycler.findViewHolderForAdapterPosition(0);
+      final View radioDefault = holder.binding.lockInfoRadioDefault;
+      createDefaultLockTarget(holder, radioDefault);
     }
-  }
-
-  private void createToggleTarget() {
-    final LockInfoItem.ViewHolder holder =
-        (LockInfoItem.ViewHolder) binding.lockInfoRecycler.findViewHolderForAdapterPosition(0);
-    final TapTarget toggleTarget =
-        TapTarget.forView(binding.lockInfoToggleall, getString(R.string.onboard_title_info_toggle),
-            getString(R.string.onboard_desc_info_toggle)).cancelable(false).tintTarget(false);
-    toggleAllTapTarget =
-        TapTargetView.showFor(getActivity(), toggleTarget, new TapTargetView.Listener() {
-
-          @Override public void onTargetClick(TapTargetView view) {
-            super.onTargetClick(view);
-            Timber.d("Toggle all target clicked");
-            if (holder != null) {
-              final View radioDefault = holder.binding.lockInfoRadioDefault;
-              createDefaultLockTarget(holder, radioDefault);
-            } else {
-              Timber.w("Cannot find Default lock target");
-              endOnboarding();
-            }
-          }
-        });
   }
 
   void createDefaultLockTarget(@NonNull LockInfoItem.ViewHolder holder,
@@ -417,12 +375,12 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
             super.onTargetClick(view);
             Timber.d("White lock target clicked");
             final View radioBlack = holder.binding.lockInfoRadioBlack;
-            createBlackLockTarget(holder, radioBlack);
+            createBlackLockTarget(radioBlack);
           }
         });
   }
 
-  void createBlackLockTarget(@NonNull LockInfoItem.ViewHolder holder, @NonNull View radioBlack) {
+  void createBlackLockTarget(@NonNull View radioBlack) {
     final TapTarget lockBlackTarget =
         TapTarget.forView(radioBlack, getString(R.string.onboard_title_info_lock_black),
             getString(R.string.onboard_desc_info_lock_black)).tintTarget(false).cancelable(false);
