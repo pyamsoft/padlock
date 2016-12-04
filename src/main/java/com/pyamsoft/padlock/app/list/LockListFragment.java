@@ -16,16 +16,20 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,6 +39,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.mikepenz.fastadapter.items.AbstractItem;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
@@ -88,6 +93,7 @@ public class LockListFragment extends ActionBarFragment
     }
   };
   @SuppressWarnings("WeakerAccess") boolean forceRefresh;
+  @Nullable SearchView searchView;
   private MenuItem displaySystemItem;
   private long loadedPresenterKey;
   private long loadedAdapterKey;
@@ -177,7 +183,31 @@ public class LockListFragment extends ActionBarFragment
 
     setActionBarUpEnabled(true);
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
-    getActivity().supportInvalidateOptionsMenu();
+    setSearchViewOnQueryTextListener(fastItemAdapter);
+  }
+
+  @CheckResult @NonNull SearchView.OnQueryTextListener getOnQueryTextListener(
+      @NonNull LockFilterAdapter<? extends AbstractItem> adapter) {
+    return new SearchView.OnQueryTextListener() {
+
+      void filter(@Nullable String query) {
+        Timber.d("Set query filter to %s", query);
+        adapter.getFilter().filter(query);
+      }
+
+      @Override public boolean onQueryTextChange(String newText) {
+        filter(newText);
+        if (searchView != null) {
+          searchView.clearFocus();
+        }
+        return true;
+      }
+
+      @Override public boolean onQueryTextSubmit(String query) {
+        filter(query);
+        return true;
+      }
+    };
   }
 
   @Override public void onPause() {
@@ -200,12 +230,8 @@ public class LockListFragment extends ActionBarFragment
     lockListLayoutManager.setVerticalScrollEnabled(true);
     dividerDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
 
-    fastItemAdapter.withFilterPredicate(
-        (item, charSequence) -> item.getEntry().name().startsWith(String.valueOf(charSequence)));
-
     binding.applistRecyclerview.setLayoutManager(lockListLayoutManager);
     binding.applistRecyclerview.addItemDecoration(dividerDecoration);
-
   }
 
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -217,6 +243,29 @@ public class LockListFragment extends ActionBarFragment
     super.onPrepareOptionsMenu(menu);
     if (isResumed()) {
       setupLockListMenuItems(menu);
+      setupSearchItem(menu);
+    }
+  }
+
+  private void setupSearchItem(@NonNull Menu menu) {
+    final MenuItem searchItem = menu.findItem(R.id.menu_search);
+    final SearchManager searchManager =
+        (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+
+    if (searchItem != null) {
+      searchView = (SearchView) searchItem.getActionView();
+    }
+
+    if (searchView != null) {
+      searchView.setSearchableInfo(
+          searchManager.getSearchableInfo(getActivity().getComponentName()));
+    }
+  }
+
+  void setSearchViewOnQueryTextListener(
+      @NonNull LockFilterAdapter<? extends AbstractItem> adapter) {
+    if (searchView != null) {
+      searchView.setOnQueryTextListener(getOnQueryTextListener(adapter));
     }
   }
 
@@ -262,8 +311,6 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onDestroyView() {
-    super.onDestroyView();
-
     clearListListeners();
     binding.applistRecyclerview.removeItemDecoration(dividerDecoration);
     binding.applistRecyclerview.setOnClickListener(null);
@@ -272,9 +319,20 @@ public class LockListFragment extends ActionBarFragment
 
     binding.applistFab.setOnClickListener(null);
     binding.applistSwipeRefresh.setOnRefreshListener(null);
+
+    displaySystemItem.setOnMenuItemClickListener(null);
+    displaySystemItem = null;
+
+    if (searchView != null) {
+      searchView.setOnQueryTextListener(null);
+      searchView.setSearchableInfo(null);
+    }
+    searchView = null;
+
     taskMap.clear();
     handler.removeCallbacksAndMessages(null);
     binding.unbind();
+    super.onDestroyView();
   }
 
   private void clearListListeners() {

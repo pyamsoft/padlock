@@ -152,7 +152,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   private void openInfo() {
     if (requestListener != null) {
-      requestListener.onOpenDialogRequest(entry);
+      requestListener.onOpenLockInfoRequest(entry);
     } else {
       Timber.e("No request listener attached");
     }
@@ -169,7 +169,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   interface OnOpenDialogRequestListener {
 
-    void onOpenDialogRequest(@NonNull AppEntry entry);
+    void onOpenLockInfoRequest(@NonNull AppEntry entry);
   }
 
   @SuppressWarnings("WeakerAccess") protected static class ItemFactory
