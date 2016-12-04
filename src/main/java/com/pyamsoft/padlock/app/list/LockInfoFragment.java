@@ -22,6 +22,8 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
@@ -82,6 +84,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
     appPackageName = getArguments().getString(ARG_APP_PACKAGE_NAME, null);
     appName = getArguments().getString(ARG_APP_NAME, null);
     appIsSystem = getArguments().getBoolean(ARG_APP_SYSTEM, false);
@@ -140,9 +143,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   private void setupRecyclerView() {
     final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
     dividerDecoration = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
-
-    fastItemAdapter.withFilterPredicate(
-        (item, charSequence) -> item.getEntry().name().startsWith(String.valueOf(charSequence)));
 
     binding.lockInfoRecycler.setLayoutManager(layoutManager);
     binding.lockInfoRecycler.addItemDecoration(dividerDecoration);
@@ -244,6 +244,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     super.onResume();
     MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
     setActionBarUpEnabled(true);
+    updateSearchFilter();
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
@@ -417,5 +418,15 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     final boolean wasDefault = previousLockState.equals(LockState.DEFAULT);
     presenter.modifyDatabaseEntry(wasDefault, position, appPackageName, activityName, null,
         appIsSystem, whitelist, forceLock);
+  }
+
+  private void updateSearchFilter() {
+    final FragmentManager fragmentManager = getFragmentManager();
+    final Fragment lockListFragment = fragmentManager.findFragmentByTag(LockListFragment.TAG);
+    if (lockListFragment instanceof LockListFragment) {
+      ((LockListFragment) lockListFragment).setSearchViewOnQueryTextListener(fastItemAdapter);
+    } else {
+      Timber.e("No LockListFragment exists to provide a new search query");
+    }
   }
 }

@@ -16,11 +16,11 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import com.mikepenz.fastadapter.adapters.FastItemAdapter;
+import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 
-class LockInfoAdapter extends FastItemAdapter<LockInfoItem>
+class LockInfoAdapter extends LockFilterAdapter<LockInfoItem>
     implements LockListDatabaseWhitelistView {
 
   @Override public void onDatabaseEntryCreated(int position) {
@@ -45,5 +45,9 @@ class LockInfoAdapter extends FastItemAdapter<LockInfoItem>
         ActivityEntry.builder(oldItem.getEntry()).lockState(LockState.WHITELISTED).build(),
         oldItem.getListener());
     set(position, newItem);
+  }
+
+  @Override boolean filterQuery(@NonNull LockInfoItem item, @NonNull CharSequence query) {
+    return item.getEntry().name().startsWith(String.valueOf(query));
   }
 }
