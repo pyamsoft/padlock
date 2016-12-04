@@ -27,9 +27,6 @@ interface LockCommonInteractor {
   @CheckResult @NonNull Observable<LockState> createNewEntry(@NonNull String packageName,
       @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist);
 
-  @CheckResult @NonNull Observable<LockState> updateExistingEntry(@NonNull String packageName,
-      @NonNull String activityName, boolean whitelist);
-
   @CheckResult @NonNull Observable<LockState> deleteEntry(@NonNull String packageName,
       @NonNull String activityName);
 }

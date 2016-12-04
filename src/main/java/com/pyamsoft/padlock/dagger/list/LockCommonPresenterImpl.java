@@ -27,7 +27,7 @@ import timber.log.Timber;
 
 abstract class LockCommonPresenterImpl<I> extends SchedulerPresenter<I> {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final LockCommonInteractor interactor;
+  @NonNull private final LockCommonInteractor interactor;
 
   LockCommonPresenterImpl(@NonNull LockCommonInteractor interactor,
       @NonNull Scheduler observeScheduler, @NonNull Scheduler subscribeScheduler) {
@@ -35,35 +35,49 @@ abstract class LockCommonPresenterImpl<I> extends SchedulerPresenter<I> {
     this.interactor = interactor;
   }
 
+  @CheckResult @NonNull LockCommonInteractor getInteractor() {
+    return interactor;
+  }
+
   @NonNull @CheckResult Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
       @NonNull String packageName, @NonNull String activityName, @Nullable String code,
       boolean system, boolean whitelist, boolean forceLock) {
     if (whitelist) {
-      Timber.d("Whitelist call");
       return Observable.defer(() -> {
+        final Observable<LockState> lockState;
         if (notInDatabase) {
-          return interactor.createNewEntry(packageName, activityName, code, system, true);
+          Timber.d("Add new as whitelisted");
+          lockState = getInteractor().createNewEntry(packageName, activityName, code, system, true);
         } else {
-          return interactor.updateExistingEntry(packageName, activityName, true);
+          // Update existing entry
+          lockState = Observable.just(LockState.NONE);
         }
+        return lockState;
       });
     } else if (forceLock) {
-      Timber.d("Force lock call");
       return Observable.defer(() -> {
+        final Observable<LockState> lockState;
         if (notInDatabase) {
-          return interactor.createNewEntry(packageName, activityName, code, system, false);
+          Timber.d("Add new as force locked");
+          lockState =
+              getInteractor().createNewEntry(packageName, activityName, code, system, false);
         } else {
-          return interactor.updateExistingEntry(packageName, activityName, false);
+          // Update existing entry
+          lockState = Observable.just(LockState.NONE);
         }
+        return lockState;
       });
     } else {
-      Timber.d("Normal call");
       return Observable.defer(() -> {
+        final Observable<LockState> lockState;
         if (notInDatabase) {
-          return interactor.createNewEntry(packageName, activityName, code, system, false);
+          Timber.d("Add new entry");
+          lockState = interactor.createNewEntry(packageName, activityName, code, system, false);
         } else {
-          return interactor.deleteEntry(packageName, activityName);
+          Timber.d("Delete existing entry");
+          lockState = interactor.deleteEntry(packageName, activityName);
         }
+        return lockState;
       });
     }
   }

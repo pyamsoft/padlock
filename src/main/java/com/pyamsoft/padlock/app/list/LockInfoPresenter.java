@@ -28,14 +28,9 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
 
   void populateList(@NonNull String packageName);
 
-  void setToggleAllState(@NonNull String packageName);
-
   void modifyDatabaseEntry(boolean isNotDefault, int position, @NonNull String packageName,
       @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
       boolean forceDelete);
-
-  void modifyDatabaseGroup(boolean allCreate, @NonNull String packageName, @Nullable String code,
-      boolean system);
 
   void showOnBoarding();
 
@@ -45,10 +40,6 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
       LockListDatabaseWhitelistView {
 
     void onEntryAddedToList(@NonNull ActivityEntry entry);
-
-    void enableToggleAll();
-
-    void disableToggleAll();
 
     void showOnBoarding();
   }
