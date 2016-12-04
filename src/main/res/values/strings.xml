@@ -58,4 +58,5 @@
   <string name="purge_all">Purge All</string>
   <string name="locklist">Lock List</string>
   <string name="clean_up_old">Clean Up Old</string>
+  <string name="search">Search</string>
 </resources>
