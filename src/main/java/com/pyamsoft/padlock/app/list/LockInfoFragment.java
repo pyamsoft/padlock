@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.app.list;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
@@ -65,9 +66,9 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @Nullable private TapTargetView defaultLockTapTarget;
   @Nullable private TapTargetView whiteLockTapTarget;
   @Nullable private TapTargetView blackLockTapTarget;
-  @Nullable private DividerItemDecoration dividerDecoration;
+  private DividerItemDecoration dividerDecoration;
 
-  public static LockInfoFragment newInstance(final @NonNull AppEntry appEntry) {
+  @CheckResult @NonNull public static LockInfoFragment newInstance(@NonNull AppEntry appEntry) {
     final LockInfoFragment fragment = new LockInfoFragment();
     final Bundle args = new Bundle();
 
@@ -154,6 +155,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     setActionBarUpEnabled(false);
 
     clearListListeners();
+    binding.lockInfoRecycler.removeItemDecoration(dividerDecoration);
     binding.lockInfoRecycler.setOnClickListener(null);
     binding.lockInfoRecycler.setLayoutManager(null);
     binding.lockInfoRecycler.setAdapter(null);
