@@ -168,7 +168,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
         Timber.d("onBindViewHolder: %d", i);
         final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(i).bindView(holder, list);
+        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).bindView(holder, list);
         holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener((compoundButton, b) -> {
           if (b) {
             final ActivityEntry item =
@@ -205,7 +205,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
         Timber.d("unBindViewHolder: %d", i);
         final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(i).unbindView(holder);
+        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).unbindView(holder);
       }
     });
 
