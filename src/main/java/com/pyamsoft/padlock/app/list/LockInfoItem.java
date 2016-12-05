@@ -78,9 +78,6 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
     holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
     holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
-    holder.binding.lockInfoRadioBlack.setChecked(false);
-    holder.binding.lockInfoRadioWhite.setChecked(false);
-    holder.binding.lockInfoRadioDefault.setChecked(false);
     lockedButton.setChecked(true);
 
     final String entryName = entry.name();
