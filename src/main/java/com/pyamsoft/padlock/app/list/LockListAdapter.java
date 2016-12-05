@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import com.mikepenz.fastadapter.adapters.FastItemAdapter;
+import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.model.AppEntry;
 
 class LockListAdapter extends FastItemAdapter<LockListItem> implements LockListDatabaseView {
