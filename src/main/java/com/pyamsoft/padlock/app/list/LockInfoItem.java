@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.app.list;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import com.mikepenz.fastadapter.items.AbstractItem;
@@ -27,7 +26,6 @@ import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
-import com.pyamsoft.padlock.model.LockState;
 import java.util.List;
 
 class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
@@ -35,13 +33,10 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
   @NonNull private final String packageName;
   @NonNull private final ActivityEntry entry;
-  @SuppressWarnings("WeakerAccess") @Nullable OnLockStateChangeListener listener;
 
-  LockInfoItem(@NonNull String packageName, @NonNull ActivityEntry entry,
-      @NonNull OnLockStateChangeListener listener) {
+  LockInfoItem(@NonNull String packageName, @NonNull ActivityEntry entry) {
     this.packageName = packageName;
     this.entry = entry;
-    this.listener = listener;
   }
 
   @NonNull @CheckResult ActivityEntry getEntry() {
@@ -60,28 +55,10 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     return R.layout.adapter_item_lockinfo;
   }
 
-  @NonNull @CheckResult OnLockStateChangeListener getListener() {
-    if (listener == null) {
-      throw new NullPointerException("Lister is NULL");
-    }
-    return listener;
-  }
-
-  void setListener(@Nullable OnLockStateChangeListener listener) {
-    this.listener = listener;
-  }
-
-  void cleanup() {
-    listener = null;
-  }
-
   @Override public void unbindView(ViewHolder holder) {
     super.unbindView(holder);
     holder.binding.lockInfoActivity.setText(null);
     holder.binding.lockInfoActivity.setOnClickListener(null);
-    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
-    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
-    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
   }
 
   @Override public void bindView(ViewHolder holder, List payloads) {
@@ -109,43 +86,10 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
       activityName = entryName;
     }
     holder.binding.lockInfoActivity.setText(activityName);
-
-    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener((compoundButton, b) -> {
-      if (b) {
-        if (listener != null) {
-          listener.onLockStateChange(holder.getAdapterPosition(), entryName, getEntry().lockState(),
-              LockState.DEFAULT);
-        }
-      }
-    });
-
-    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener((compoundButton, b) -> {
-      if (b) {
-        if (listener != null) {
-          listener.onLockStateChange(holder.getAdapterPosition(), entryName, getEntry().lockState(),
-              LockState.WHITELISTED);
-        }
-      }
-    });
-
-    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener((compoundButton, b) -> {
-      if (b) {
-        if (listener != null) {
-          listener.onLockStateChange(holder.getAdapterPosition(), entryName, getEntry().lockState(),
-              LockState.LOCKED);
-        }
-      }
-    });
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
     return FACTORY;
-  }
-
-  interface OnLockStateChangeListener {
-
-    void onLockStateChange(int position, @NonNull String name, @NonNull LockState currentState,
-        @NonNull LockState newState);
   }
 
   @SuppressWarnings("WeakerAccess") protected static class ItemFactory

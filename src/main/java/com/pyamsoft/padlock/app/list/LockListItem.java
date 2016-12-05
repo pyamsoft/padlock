@@ -20,10 +20,8 @@ import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.CompoundButton;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.Injector;
@@ -41,45 +39,13 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
   @NonNull private final AppEntry entry;
-  @Nullable private OnDatabaseModifyListener modifyListener;
-  @Nullable private OnOpenDialogRequestListener requestListener;
 
-  LockListItem(@NonNull AppEntry entry, @NonNull OnOpenDialogRequestListener requestListener,
-      @NonNull OnDatabaseModifyListener modifyListener) {
+  LockListItem(@NonNull AppEntry entry) {
     this.entry = entry;
-    this.requestListener = requestListener;
-    this.modifyListener = modifyListener;
   }
 
   @NonNull @CheckResult AppEntry getEntry() {
     return entry;
-  }
-
-  @NonNull @CheckResult OnOpenDialogRequestListener getRequestListener() {
-    if (requestListener == null) {
-      throw new NullPointerException("RequestListener is NULL");
-    }
-    return requestListener;
-  }
-
-  void setRequestListener(@NonNull OnOpenDialogRequestListener requestListener) {
-    this.requestListener = requestListener;
-  }
-
-  void cleanup() {
-    modifyListener = null;
-    requestListener = null;
-  }
-
-  @NonNull @CheckResult OnDatabaseModifyListener getModifyListener() {
-    if (modifyListener == null) {
-      throw new NullPointerException("Modify listener is NULL");
-    }
-    return modifyListener;
-  }
-
-  void setModifyListener(@NonNull OnDatabaseModifyListener modifyListener) {
-    this.modifyListener = modifyListener;
   }
 
   @Override public int getType() {
@@ -96,80 +62,17 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     holder.binding.lockListTitle.setOnClickListener(null);
     holder.binding.lockListIcon.setOnClickListener(null);
     holder.binding.lockListIcon.setImageDrawable(null);
-    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
   }
 
   @Override public void bindView(ViewHolder holder, List payloads) {
     super.bindView(holder, payloads);
-
     holder.binding.lockListTitle.setText(entry.name());
     holder.loadImage(entry.packageName());
-    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
     holder.binding.lockListToggle.setChecked(entry.locked());
-    final CompoundButton.OnCheckedChangeListener listener =
-        new CompoundButton.OnCheckedChangeListener() {
-          @Override
-          public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
-            // Don't check it yet, get auth first
-            compoundButton.setOnCheckedChangeListener(null);
-            compoundButton.setChecked(!b);
-            compoundButton.setOnCheckedChangeListener(this);
-
-            // Authorize for package access
-            authorizeAccess(holder.getAdapterPosition(), true, b);
-          }
-        };
-
-    holder.binding.lockListToggle.setOnCheckedChangeListener(listener);
-    holder.binding.lockListTitle.setOnClickListener(
-        view -> authorizeAccess(holder.getAdapterPosition(), false, false));
-    holder.binding.lockListIcon.setOnClickListener(
-        view -> authorizeAccess(holder.getAdapterPosition(), false, false));
-  }
-
-  @SuppressWarnings("WeakerAccess") void authorizeAccess(int position, boolean accessPackage,
-      boolean isChecked) {
-    // TODO some kind of observable which can confirm correct passcode entry
-
-    Timber.d("Access authorized");
-    if (accessPackage) {
-      Timber.d("Access package");
-      accessPackage(position, isChecked);
-    } else {
-      Timber.d("Access activities");
-      openInfo();
-    }
-  }
-
-  private void accessPackage(int position, boolean isChecked) {
-    // TODO app specific codes
-    if (modifyListener != null) {
-      modifyListener.onDatabaseModify(isChecked, position, entry);
-    } else {
-      Timber.e("No modify listener attached");
-    }
-  }
-
-  private void openInfo() {
-    if (requestListener != null) {
-      requestListener.onOpenLockInfoRequest(entry);
-    } else {
-      Timber.e("No request listener attached");
-    }
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
     return FACTORY;
-  }
-
-  interface OnDatabaseModifyListener {
-
-    void onDatabaseModify(boolean lock, int position, @NonNull AppEntry entry);
-  }
-
-  interface OnOpenDialogRequestListener {
-
-    void onOpenLockInfoRequest(@NonNull AppEntry entry);
   }
 
   @SuppressWarnings("WeakerAccess") protected static class ItemFactory

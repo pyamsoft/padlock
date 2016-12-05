@@ -26,24 +26,21 @@ class LockInfoAdapter extends FastItemAdapter<LockInfoItem>
   @Override public void onDatabaseEntryCreated(int position) {
     final LockInfoItem oldItem = getItem(position);
     final LockInfoItem newItem = new LockInfoItem(oldItem.getPackageName(),
-        ActivityEntry.builder(oldItem.getEntry()).lockState(LockState.LOCKED).build(),
-        oldItem.getListener());
+        ActivityEntry.builder(oldItem.getEntry()).lockState(LockState.LOCKED).build());
     set(position, newItem);
   }
 
   @Override public void onDatabaseEntryDeleted(int position) {
     final LockInfoItem oldItem = getItem(position);
     final LockInfoItem newItem = new LockInfoItem(oldItem.getPackageName(),
-        ActivityEntry.builder(oldItem.getEntry()).lockState(LockState.DEFAULT).build(),
-        oldItem.getListener());
+        ActivityEntry.builder(oldItem.getEntry()).lockState(LockState.DEFAULT).build());
     set(position, newItem);
   }
 
   @Override public void onDatabaseEntryWhitelisted(int position) {
     final LockInfoItem oldItem = getItem(position);
     final LockInfoItem newItem = new LockInfoItem(oldItem.getPackageName(),
-        ActivityEntry.builder(oldItem.getEntry()).lockState(LockState.WHITELISTED).build(),
-        oldItem.getListener());
+        ActivityEntry.builder(oldItem.getEntry()).lockState(LockState.WHITELISTED).build());
     set(position, newItem);
   }
 }
