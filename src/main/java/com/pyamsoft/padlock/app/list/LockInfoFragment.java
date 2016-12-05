@@ -28,6 +28,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RadioButton;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.mikepenz.fastadapter.FastAdapter;
@@ -44,6 +45,10 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import java.util.List;
 import timber.log.Timber;
+
+import static com.pyamsoft.padlock.model.LockState.DEFAULT;
+import static com.pyamsoft.padlock.model.LockState.LOCKED;
+import static com.pyamsoft.padlock.model.LockState.WHITELISTED;
 
 public class LockInfoFragment extends ActionBarFragment implements LockInfoPresenter.LockInfoView {
 
@@ -162,15 +167,51 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
           return;
         }
 
+        Timber.d("onBindViewHolder: %d", i);
         final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(i).bindView(holder, list);
+        final LockInfoItem infoItem = fastItemAdapter.getItem(holder.getAdapterPosition());
+        final ActivityEntry entry = infoItem.getEntry();
+
+        // Remove any old binds
+        final RadioButton lockedButton;
+        switch (entry.lockState()) {
+          case DEFAULT:
+            lockedButton = holder.binding.lockInfoRadioDefault;
+            break;
+          case WHITELISTED:
+            lockedButton = holder.binding.lockInfoRadioWhite;
+            break;
+          case LOCKED:
+            lockedButton = holder.binding.lockInfoRadioBlack;
+            break;
+          default:
+            throw new IllegalStateException("Illegal enum state");
+        }
+
+        holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
+        holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
+        holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
+        holder.binding.lockInfoRadioBlack.setChecked(false);
+        holder.binding.lockInfoRadioWhite.setChecked(false);
+        holder.binding.lockInfoRadioDefault.setChecked(false);
+        lockedButton.setChecked(true);
+
+        final String entryName = entry.name();
+        final String activityName;
+        final String packageName = infoItem.getPackageName();
+        if (entryName.startsWith(packageName)) {
+          activityName = entryName.replace(packageName, "");
+        } else {
+          activityName = entryName;
+        }
+        holder.binding.lockInfoActivity.setText(activityName);
 
         holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener((compoundButton, b) -> {
           if (b) {
             final ActivityEntry item =
                 fastItemAdapter.getItem(holder.getAdapterPosition()).getEntry();
             processDatabaseModifyEvent(holder.getAdapterPosition(), item.name(), item.lockState(),
-                LockState.DEFAULT);
+                DEFAULT);
           }
         });
 
@@ -179,7 +220,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
             final ActivityEntry item =
                 fastItemAdapter.getItem(holder.getAdapterPosition()).getEntry();
             processDatabaseModifyEvent(holder.getAdapterPosition(), item.name(), item.lockState(),
-                LockState.WHITELISTED);
+                WHITELISTED);
           }
         });
 
@@ -188,7 +229,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
             final ActivityEntry item =
                 fastItemAdapter.getItem(holder.getAdapterPosition()).getEntry();
             processDatabaseModifyEvent(holder.getAdapterPosition(), item.name(), item.lockState(),
-                LockState.LOCKED);
+                LOCKED);
           }
         });
       }
@@ -199,8 +240,10 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
           return;
         }
 
+        Timber.d("unBindViewHolder: %d", i);
         final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(i).unbindView(holder);
+        holder.binding.lockInfoActivity.setText(null);
+        holder.binding.lockInfoActivity.setOnClickListener(null);
         holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
         holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
         holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
@@ -442,9 +485,9 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
       @NonNull LockState previousLockState, @NonNull LockState newLockState) {
     Timber.d("Received a database modify event request for %s %s at %d [%s]", appPackageName,
         activityName, position, newLockState.name());
-    final boolean whitelist = newLockState.equals(LockState.WHITELISTED);
-    final boolean forceLock = newLockState.equals(LockState.LOCKED);
-    final boolean wasDefault = previousLockState.equals(LockState.DEFAULT);
+    final boolean whitelist = newLockState.equals(WHITELISTED);
+    final boolean forceLock = newLockState.equals(LOCKED);
+    final boolean wasDefault = previousLockState.equals(DEFAULT);
     presenter.modifyDatabaseEntry(wasDefault, position, appPackageName, activityName, null,
         appIsSystem, whitelist, forceLock);
   }
