@@ -28,7 +28,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RadioButton;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.mikepenz.fastadapter.FastAdapter;
@@ -169,43 +168,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
         Timber.d("onBindViewHolder: %d", i);
         final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
-        final LockInfoItem infoItem = fastItemAdapter.getItem(holder.getAdapterPosition());
-        final ActivityEntry entry = infoItem.getEntry();
-
-        // Remove any old binds
-        final RadioButton lockedButton;
-        switch (entry.lockState()) {
-          case DEFAULT:
-            lockedButton = holder.binding.lockInfoRadioDefault;
-            break;
-          case WHITELISTED:
-            lockedButton = holder.binding.lockInfoRadioWhite;
-            break;
-          case LOCKED:
-            lockedButton = holder.binding.lockInfoRadioBlack;
-            break;
-          default:
-            throw new IllegalStateException("Illegal enum state");
-        }
-
-        holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
-        holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
-        holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
-        holder.binding.lockInfoRadioBlack.setChecked(false);
-        holder.binding.lockInfoRadioWhite.setChecked(false);
-        holder.binding.lockInfoRadioDefault.setChecked(false);
-        lockedButton.setChecked(true);
-
-        final String entryName = entry.name();
-        final String activityName;
-        final String packageName = infoItem.getPackageName();
-        if (entryName.startsWith(packageName)) {
-          activityName = entryName.replace(packageName, "");
-        } else {
-          activityName = entryName;
-        }
-        holder.binding.lockInfoActivity.setText(activityName);
-
+        fastItemAdapter.getAdapterItem(i).bindView(holder, list);
         holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener((compoundButton, b) -> {
           if (b) {
             final ActivityEntry item =
@@ -242,11 +205,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
         Timber.d("unBindViewHolder: %d", i);
         final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
-        holder.binding.lockInfoActivity.setText(null);
-        holder.binding.lockInfoActivity.setOnClickListener(null);
-        holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
-        holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
-        holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
+        fastItemAdapter.getAdapterItem(i).unbindView(holder);
       }
     });
 

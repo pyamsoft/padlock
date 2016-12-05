@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.model.AppEntry;
+import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -57,6 +58,23 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
     return FACTORY;
+  }
+
+  @Override public void bindView(ViewHolder holder, List payloads) {
+    super.bindView(holder, payloads);
+    holder.binding.lockListTitle.setText(entry.name());
+    holder.loadImage(entry.packageName());
+    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
+    holder.binding.lockListToggle.setChecked(entry.locked());
+  }
+
+  @Override public void unbindView(ViewHolder holder) {
+    super.unbindView(holder);
+    holder.binding.lockListTitle.setText(null);
+    holder.binding.lockListTitle.setOnClickListener(null);
+    holder.binding.lockListIcon.setOnClickListener(null);
+    holder.binding.lockListIcon.setImageDrawable(null);
+    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
   }
 
   @SuppressWarnings("WeakerAccess") protected static class ItemFactory
