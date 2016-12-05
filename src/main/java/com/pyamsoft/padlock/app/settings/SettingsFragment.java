@@ -25,16 +25,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainActivity;
+import com.pyamsoft.padlock.databinding.FragmentSettingsBinding;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 
 public class SettingsFragment extends ActionBarFragment {
 
   @NonNull public static final String TAG = "SettingsFragment";
+  private FragmentSettingsBinding binding;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_settings, container, false);
+    binding = FragmentSettingsBinding.inflate(inflater, container, false);
+    return binding.getRoot();
+  }
+
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+    binding.unbind();
   }
 
   @Override public void onResume() {
