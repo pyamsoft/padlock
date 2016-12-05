@@ -42,7 +42,7 @@ class PadLockDBImpl implements PadLockDB {
   @SuppressWarnings("WeakerAccess") @NonNull final BriteDatabase briteDatabase;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockOpenHelper openHelper;
   @NonNull private final Scheduler dbScheduler;
-  @SuppressWarnings("WeakerAccess") @Nullable Subscription dbOpenSubscription;
+  @SuppressWarnings("WeakerAccess") @Nullable volatile Subscription dbOpenSubscription;
 
   @Inject PadLockDBImpl(@NonNull Context context, @NonNull Scheduler scheduler) {
     dbScheduler = scheduler;
