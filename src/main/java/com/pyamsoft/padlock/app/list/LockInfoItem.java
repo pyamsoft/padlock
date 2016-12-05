@@ -21,11 +21,13 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.RadioButton;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
+import java.util.List;
 
 class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
@@ -52,6 +54,52 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   @Override public int getLayoutRes() {
     return R.layout.adapter_item_lockinfo;
+  }
+
+  @Override public void bindView(ViewHolder holder, List payloads) {
+    super.bindView(holder, payloads);
+
+    // Remove any old binds
+    final RadioButton lockedButton;
+    switch (entry.lockState()) {
+      case DEFAULT:
+        lockedButton = holder.binding.lockInfoRadioDefault;
+        break;
+      case WHITELISTED:
+        lockedButton = holder.binding.lockInfoRadioWhite;
+        break;
+      case LOCKED:
+        lockedButton = holder.binding.lockInfoRadioBlack;
+        break;
+      default:
+        throw new IllegalStateException("Illegal enum state");
+    }
+
+    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioBlack.setChecked(false);
+    holder.binding.lockInfoRadioWhite.setChecked(false);
+    holder.binding.lockInfoRadioDefault.setChecked(false);
+    lockedButton.setChecked(true);
+
+    final String entryName = entry.name();
+    final String activityName;
+    if (entryName.startsWith(packageName)) {
+      activityName = entryName.replace(packageName, "");
+    } else {
+      activityName = entryName;
+    }
+    holder.binding.lockInfoActivity.setText(activityName);
+  }
+
+  @Override public void unbindView(ViewHolder holder) {
+    super.unbindView(holder);
+    holder.binding.lockInfoActivity.setText(null);
+    holder.binding.lockInfoActivity.setOnClickListener(null);
+    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
