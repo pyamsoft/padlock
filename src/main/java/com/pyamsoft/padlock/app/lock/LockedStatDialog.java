@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.app.lock;
 
 import android.app.Dialog;
-import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -28,7 +27,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
-import com.pyamsoft.padlock.R;
+import android.view.View;
+import android.view.ViewGroup;
 import com.pyamsoft.padlock.databinding.DialogLockStatBinding;
 
 public class LockedStatDialog extends DialogFragment {
@@ -81,21 +81,28 @@ public class LockedStatDialog extends DialogFragment {
   }
 
   @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-    binding =
-        DataBindingUtil.inflate(LayoutInflater.from(getActivity()), R.layout.dialog_lock_stat, null,
-            false);
+    binding = DialogLockStatBinding.inflate(LayoutInflater.from(getActivity()), null, false);
 
+    return new AlertDialog.Builder(getActivity()).setView(binding.getRoot())
+        .setPositiveButton("Okay", (dialogInterface, i) -> dialogInterface.dismiss())
+        .setCancelable(true)
+        .create();
+  }
+
+  @Nullable @Override
+  public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return binding.getRoot();
+  }
+
+  @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
     binding.statImage.setImageBitmap(image);
     binding.statDisplayName.setText(displayedLabel);
     binding.statPackageName.setText(packageName);
     binding.statRealName.setText(realName);
     binding.statLockedBy.setText(activityName);
     binding.statSystem.setText(system ? "Yes" : "No");
-
-    return new AlertDialog.Builder(getActivity()).setView(binding.getRoot())
-        .setPositiveButton("Okay", (dialogInterface, i) -> dialogInterface.dismiss())
-        .setCancelable(true)
-        .create();
   }
 
   @Override public void onDestroyView() {

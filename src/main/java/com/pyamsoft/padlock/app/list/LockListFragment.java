@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -138,7 +137,7 @@ public class LockListFragment extends ActionBarFragment
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = DataBindingUtil.inflate(inflater, R.layout.fragment_applist, container, false);
+    binding = FragmentApplistBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 

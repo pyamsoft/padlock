@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
@@ -129,9 +128,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding =
-        DataBindingUtil.inflate(LayoutInflater.from(getActivity()), R.layout.fragment_lockinfo,
-            null, false);
+    binding = FragmentLockinfoBinding.inflate(inflater, null, false);
     return binding.getRoot();
   }
 
