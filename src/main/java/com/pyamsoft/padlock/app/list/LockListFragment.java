@@ -244,7 +244,7 @@ public class LockListFragment extends ActionBarFragment
 
         Timber.d("onBindViewHolder: %d", i);
         final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(i).bindView(holder, list);
+        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).bindView(holder, list);
 
         final CompoundButton.OnCheckedChangeListener listener =
             new CompoundButton.OnCheckedChangeListener() {
@@ -271,7 +271,7 @@ public class LockListFragment extends ActionBarFragment
 
         Timber.d("unBindViewHolder: %d", i);
         final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(i).unbindView(holder);
+        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).unbindView(holder);
       }
     });
 
