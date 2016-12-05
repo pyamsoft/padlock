@@ -224,7 +224,6 @@ public class LockListFragment extends ActionBarFragment
       return !name.startsWith(queryString);
     });
 
-    fastItemAdapter.withSelectable(true);
     fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
 
       @CheckResult @NonNull
@@ -275,7 +274,9 @@ public class LockListFragment extends ActionBarFragment
       }
     });
 
+    fastItemAdapter.withSelectable(true);
     fastItemAdapter.withOnClickListener((view, iAdapter, item, i) -> {
+      Timber.d("Click position: %d", i);
       displayLockInfoFragment(item.getEntry());
       return true;
     });
