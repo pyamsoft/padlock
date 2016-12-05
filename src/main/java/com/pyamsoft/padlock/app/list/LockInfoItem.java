@@ -26,7 +26,6 @@ import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
-import java.util.List;
 
 class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
@@ -53,39 +52,6 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   @Override public int getLayoutRes() {
     return R.layout.adapter_item_lockinfo;
-  }
-
-  @Override public void unbindView(ViewHolder holder) {
-    super.unbindView(holder);
-    holder.binding.lockInfoActivity.setText(null);
-    holder.binding.lockInfoActivity.setOnClickListener(null);
-  }
-
-  @Override public void bindView(ViewHolder holder, List payloads) {
-    super.bindView(holder, payloads);
-
-    switch (entry.lockState()) {
-      case DEFAULT:
-        holder.binding.lockInfoRadioDefault.setChecked(true);
-        break;
-      case WHITELISTED:
-        holder.binding.lockInfoRadioWhite.setChecked(true);
-        break;
-      case LOCKED:
-        holder.binding.lockInfoRadioBlack.setChecked(true);
-        break;
-      default:
-        throw new IllegalStateException("Illegal enum state");
-    }
-
-    final String entryName = entry.name();
-    final String activityName;
-    if (entryName.startsWith(packageName)) {
-      activityName = entryName.replace(packageName, "");
-    } else {
-      activityName = entryName;
-    }
-    holder.binding.lockInfoActivity.setText(activityName);
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {

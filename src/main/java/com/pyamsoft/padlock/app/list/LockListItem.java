@@ -30,7 +30,6 @@ import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.model.AppEntry;
-import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -54,21 +53,6 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
   @Override public int getLayoutRes() {
     return R.layout.adapter_item_locklist_entry;
-  }
-
-  @Override public void unbindView(ViewHolder holder) {
-    super.unbindView(holder);
-    holder.binding.lockListTitle.setText(null);
-    holder.binding.lockListTitle.setOnClickListener(null);
-    holder.binding.lockListIcon.setOnClickListener(null);
-    holder.binding.lockListIcon.setImageDrawable(null);
-  }
-
-  @Override public void bindView(ViewHolder holder, List payloads) {
-    super.bindView(holder, payloads);
-    holder.binding.lockListTitle.setText(entry.name());
-    holder.loadImage(entry.packageName());
-    holder.binding.lockListToggle.setChecked(entry.locked());
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {

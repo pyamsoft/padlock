@@ -242,9 +242,8 @@ public class LockListFragment extends ActionBarFragment
           return;
         }
 
+        Timber.d("onBindViewHolder: %d", i);
         final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(i).bindView(holder, list);
-
         final CompoundButton.OnCheckedChangeListener listener =
             new CompoundButton.OnCheckedChangeListener() {
               @Override
@@ -260,6 +259,12 @@ public class LockListFragment extends ActionBarFragment
               }
             };
 
+        final AppEntry entry =
+            fastItemAdapter.getAdapterItem(viewHolder.getAdapterPosition()).getEntry();
+        holder.binding.lockListTitle.setText(entry.name());
+        holder.loadImage(entry.packageName());
+        holder.binding.lockListToggle.setOnCheckedChangeListener(null);
+        holder.binding.lockListToggle.setChecked(entry.locked());
         holder.binding.lockListToggle.setOnCheckedChangeListener(listener);
       }
 
@@ -269,8 +274,12 @@ public class LockListFragment extends ActionBarFragment
           return;
         }
 
+        Timber.d("unBindViewHolder: %d", i);
         final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(i).unbindView(holder);
+        holder.binding.lockListTitle.setText(null);
+        holder.binding.lockListTitle.setOnClickListener(null);
+        holder.binding.lockListIcon.setOnClickListener(null);
+        holder.binding.lockListIcon.setImageDrawable(null);
         holder.binding.lockListToggle.setOnCheckedChangeListener(null);
       }
     });
