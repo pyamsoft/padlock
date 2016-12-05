@@ -276,10 +276,10 @@ public class LockListFragment extends ActionBarFragment
 
     fastItemAdapter.withSelectable(true);
     fastItemAdapter.withOnClickListener((view, iAdapter, item, i) -> {
-      Timber.d("Click position: %d", i);
       displayLockInfoFragment(item.getEntry());
       return true;
     });
+
     binding.applistRecyclerview.setLayoutManager(lockListLayoutManager);
     binding.applistRecyclerview.addItemDecoration(dividerDecoration);
   }

@@ -19,10 +19,14 @@ package com.pyamsoft.padlock.app.list;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.RadioButton;
+import com.mikepenz.fastadapter.FastAdapter;
+import com.mikepenz.fastadapter.helpers.ClickListenerHelper;
 import com.mikepenz.fastadapter.items.AbstractItem;
+import com.mikepenz.fastadapter.listeners.ClickEventHook;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
@@ -93,7 +97,6 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
   @Override public void unbindView(ViewHolder holder) {
     super.unbindView(holder);
     holder.binding.lockInfoActivity.setText(null);
-    holder.binding.lockInfoActivity.setOnClickListener(null);
     holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
     holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
     holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
