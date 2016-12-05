@@ -71,8 +71,6 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   @Override public void unbindView(ViewHolder holder) {
     super.unbindView(holder);
     holder.binding.lockListTitle.setText(null);
-    holder.binding.lockListTitle.setOnClickListener(null);
-    holder.binding.lockListIcon.setOnClickListener(null);
     holder.binding.lockListIcon.setImageDrawable(null);
     holder.binding.lockListToggle.setOnCheckedChangeListener(null);
   }
