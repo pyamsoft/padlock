@@ -17,21 +17,18 @@
 package com.pyamsoft.padlock.app.list;
 
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
-import com.pyamsoft.padlock.model.AppEntry;
 
 class LockListAdapter extends FastItemAdapter<LockListItem> implements LockListDatabaseView {
 
   @Override public void onDatabaseEntryCreated(int position) {
     final LockListItem oldItem = getItem(position);
-    final LockListItem newItem =
-        new LockListItem(AppEntry.builder(oldItem.getEntry()).locked(true).build());
+    final LockListItem newItem = oldItem.copyWithNewLockState(true);
     set(position, newItem);
   }
 
   @Override public void onDatabaseEntryDeleted(int position) {
     final LockListItem oldItem = getItem(position);
-    final LockListItem newItem =
-        new LockListItem(AppEntry.builder(oldItem.getEntry()).locked(false).build());
+    final LockListItem newItem = oldItem.copyWithNewLockState(false);
     set(position, newItem);
   }
 }
