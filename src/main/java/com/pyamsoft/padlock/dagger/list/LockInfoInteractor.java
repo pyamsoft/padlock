@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import rx.Observable;
@@ -30,11 +30,8 @@ interface LockInfoInteractor extends LockCommonInteractor {
 
   @CheckResult @NonNull Observable<String> getPackageActivities(@NonNull String packageName);
 
-  @CheckResult @NonNull Observable<Boolean> insertDatabaseGroup(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String code, boolean system);
-
-  @CheckResult @NonNull Observable<Boolean> deleteDatabaseGroup(@NonNull String packageName,
-      @NonNull String activityName);
+  @CheckResult @NonNull Observable<LockState> updateExistingEntry(@NonNull String packageName,
+      @NonNull String activityName, boolean whitelist);
 
   void setShownOnBoarding();
 

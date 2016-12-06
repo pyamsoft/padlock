@@ -56,4 +56,7 @@
   <string name="onboard_title_info_lock_black">Blacklisted Lock State</string>
   <string name="onboard_desc_info_lock_black">Always lock this activity, even if the package is not locked</string>
   <string name="purge_all">Purge All</string>
+  <string name="locklist">Lock List</string>
+  <string name="clean_up_old">Clean Up Old</string>
+  <string name="search">Search</string>
 </resources>

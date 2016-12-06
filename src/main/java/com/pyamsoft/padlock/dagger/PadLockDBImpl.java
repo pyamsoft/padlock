@@ -25,45 +25,45 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import rx.Observable;
 import rx.Scheduler;
+import rx.Subscription;
 import timber.log.Timber;
 
 class PadLockDBImpl implements PadLockDB {
 
   @SuppressWarnings("WeakerAccess") @NonNull final BriteDatabase briteDatabase;
-  @NonNull private final AtomicInteger openCount;
-  @NonNull private final PadLockOpenHelper openHelper;
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockOpenHelper openHelper;
+  @NonNull private final Scheduler dbScheduler;
+  @SuppressWarnings("WeakerAccess") @Nullable volatile Subscription dbOpenSubscription;
 
   @Inject PadLockDBImpl(@NonNull Context context, @NonNull Scheduler scheduler) {
+    dbScheduler = scheduler;
     openHelper = new PadLockOpenHelper(context);
     briteDatabase = new SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler);
-    openCount = new AtomicInteger(0);
   }
 
-  @SuppressWarnings("WeakerAccess") @VisibleForTesting @CheckResult int getOpenCount() {
-    return openCount.get();
-  }
+  @SuppressWarnings("WeakerAccess") void openDatabase() {
+    SubscriptionHelper.unsubscribe(dbOpenSubscription);
 
-  @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
-    Timber.d("Increment open count to: %d", openCount.incrementAndGet());
-  }
-
-  @SuppressWarnings("WeakerAccess") synchronized void closeDatabase() {
-    if (openCount.get() > 0) {
-      Timber.d("Decrement open count to: %d", openCount.decrementAndGet());
-    }
-
-    if (openCount.get() == 0) {
-      Timber.d("Close and recycle database connection");
-      briteDatabase.close();
-    }
+    // After a 1 minute timeout, close the DB
+    dbOpenSubscription = Observable.timer(1, TimeUnit.MINUTES)
+        .map(aLong -> {
+          briteDatabase.close();
+          return true;
+        })
+        .subscribeOn(dbScheduler)
+        .observeOn(dbScheduler)
+        .subscribe(ignoreMe -> Timber.d("PadLockDB is closed"),
+            throwable -> Timber.e(throwable, "onError closing database"),
+            () -> SubscriptionHelper.unsubscribe(dbOpenSubscription));
   }
 
   @Override @CheckResult @NonNull
@@ -84,9 +84,6 @@ class PadLockDBImpl implements PadLockDB {
     }).map(deleted -> {
       Timber.d("Delete result: %d", deleted);
       return PadLockEntry.insertEntry(openHelper).executeProgram(entry);
-    }).map(result -> {
-      closeDatabase();
-      return result;
     });
   }
 
@@ -101,10 +98,8 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: UPDATE IGNORE");
       openDatabase();
-      final int result = PadLockEntry.updateIgnoreTime(openHelper)
-          .executeProgram(ignoreUntilTime, packageName, activityName);
-      closeDatabase();
-      return Observable.just(result);
+      return Observable.fromCallable(() -> PadLockEntry.updateIgnoreTime(openHelper)
+          .executeProgram(ignoreUntilTime, packageName, activityName));
     });
   }
 
@@ -119,10 +114,8 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: UPDATE LOCK");
       openDatabase();
-      final int result = PadLockEntry.updateLockTime(openHelper)
-          .executeProgram(lockUntilTime, packageName, activityName);
-      closeDatabase();
-      return Observable.just(result);
+      return Observable.fromCallable(() -> PadLockEntry.updateLockTime(openHelper)
+          .executeProgram(lockUntilTime, packageName, activityName));
     });
   }
 
@@ -137,10 +130,8 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: UPDATE WHITELIST");
       openDatabase();
-      final int result = PadLockEntry.updateWhitelist(openHelper)
-          .executeProgram(whitelist, packageName, activityName);
-      closeDatabase();
-      return Observable.just(result);
+      return Observable.fromCallable(() -> PadLockEntry.updateWhitelist(openHelper)
+          .executeProgram(whitelist, packageName, activityName));
     });
   }
 
@@ -154,9 +145,6 @@ class PadLockDBImpl implements PadLockDB {
           PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)
           .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_MAPPER::map,
               PadLockEntry.WithPackageActivityName.empty());
-    }).map(result -> {
-      closeDatabase();
-      return result;
     });
   }
 
@@ -182,9 +170,6 @@ class PadLockDBImpl implements PadLockDB {
           activityName)
           .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER::map,
               PadLockEntry.empty());
-    }).map(result -> {
-      closeDatabase();
-      return result;
     });
   }
 
@@ -196,9 +181,6 @@ class PadLockDBImpl implements PadLockDB {
       openDatabase();
       return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME,
           packageName).mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map);
-    }).map(result -> {
-      closeDatabase();
-      return result;
     });
   }
 
@@ -208,9 +190,6 @@ class PadLockDBImpl implements PadLockDB {
       openDatabase();
       return briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
           .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map);
-    }).map(result -> {
-      closeDatabase();
-      return result;
     });
   }
 
@@ -219,9 +198,8 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: DELETE PACKAGE");
       openDatabase();
-      final int result = PadLockEntry.deletePackage(openHelper).executeProgram(packageName);
-      closeDatabase();
-      return Observable.just(result);
+      return Observable.fromCallable(
+          () -> PadLockEntry.deletePackage(openHelper).executeProgram(packageName));
     });
   }
 
@@ -232,9 +210,6 @@ class PadLockDBImpl implements PadLockDB {
       Timber.i("DB: DELETE PACKAGE ACTIVITY");
       openDatabase();
       return deleteWithPackageActivityNameUnguarded(packageName, activityName);
-    }).map(result -> {
-      closeDatabase();
-      return result;
     });
   }
 
@@ -248,9 +223,10 @@ class PadLockDBImpl implements PadLockDB {
   @Override @NonNull @CheckResult public Observable<Integer> deleteAll() {
     return Observable.defer(() -> {
       Timber.i("DB: DELETE ALL");
-      openDatabase();
       briteDatabase.execute(PadLockEntry.DELETE_ALL);
-      closeDatabase();
+      SubscriptionHelper.unsubscribe(dbOpenSubscription);
+      briteDatabase.close();
+      deleteDatabase();
       return Observable.just(1);
     });
   }

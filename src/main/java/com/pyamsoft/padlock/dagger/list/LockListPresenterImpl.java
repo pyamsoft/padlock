@@ -254,7 +254,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
                 case LOCKED:
                   getView(lockList -> lockList.onDatabaseEntryCreated(position));
                   break;
-                case WHITELISTED:
+                default:
                   throw new RuntimeException("Whitelist results are not handled");
               }
             }, throwable -> {

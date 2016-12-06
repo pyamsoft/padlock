@@ -32,7 +32,10 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_margin="8dp"
+        android:clickable="false"
         android:contentDescription="@string/blank"
+        android:focusable="false"
+        android:longClickable="false"
         />
 
     <com.pyamsoft.pydroid.widget.NoLeakTextView
@@ -41,8 +44,11 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:background="?attr/selectableItemBackground"
+        android:clickable="false"
         android:ellipsize="end"
+        android:focusable="false"
         android:gravity="center_vertical"
+        android:longClickable="false"
         android:maxLines="1"
         android:textAppearance="?android:attr/textAppearanceLarge"
         />
@@ -51,7 +57,7 @@
         android:id="@+id/lock_list_toggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:padding="8dp"
         />
 
   </LinearLayout>

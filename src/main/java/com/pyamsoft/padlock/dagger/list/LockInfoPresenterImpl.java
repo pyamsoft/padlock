@@ -153,47 +153,6 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
             });
   }
 
-  @Override public void setToggleAllState(@NonNull String packageName) {
-    SubscriptionHelper.unsubscribe(allInDBSubscription);
-
-    // Filter out the lockscreen and crashlog entries
-    final Observable<List<String>> activityInfoObservable =
-        lockInfoInteractor.getPackageActivities(packageName).toList();
-
-    // Zip together the lists into a list of ActivityEntry objects
-    allInDBSubscription =
-        Observable.zip(lockInfoInteractor.getActivityEntries(packageName), activityInfoObservable,
-            (padLockEntries, activityInfos) -> {
-              int count = 0;
-              // KLUDGE super ugly.
-              Timber.d("Search set for locked activities");
-              for (final String name : activityInfos) {
-                final PadLockEntry.WithPackageName found =
-                    findEntryInActivities(padLockEntries, name);
-
-                // If we found an entry, increment count
-                if (found != null) {
-                  ++count;
-                }
-              }
-
-              return count == activityInfos.size();
-            })
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
-            .subscribe(allIn -> getView(lockInfoView -> {
-              if (allIn) {
-                lockInfoView.enableToggleAll();
-              } else {
-                lockInfoView.disableToggleAll();
-              }
-            }), throwable -> {
-              Timber.e(throwable, "onError");
-              // TODO maybe different error
-              getView(LockInfoView::onListPopulateError);
-            }, () -> SubscriptionHelper.unsubscribe(allInDBSubscription));
-  }
-
   @Override
   public void modifyDatabaseEntry(boolean isDefault, int position, @NonNull String packageName,
       @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
@@ -201,7 +160,18 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
     SubscriptionHelper.unsubscribe(databaseSubscription);
     databaseSubscription =
         modifySingleDatabaseEntry(isDefault, packageName, activityName, code, system, whitelist,
-            forceDelete).subscribeOn(getSubscribeScheduler())
+            forceDelete).flatMap(lockState -> {
+          final Observable<LockState> resultState;
+          if (lockState == LockState.NONE) {
+            Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated");
+            resultState =
+                lockInfoInteractor.updateExistingEntry(packageName, activityName, whitelist);
+          } else {
+            resultState = Observable.just(lockState);
+          }
+          return resultState;
+        })
+            .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
             .subscribe(lockState -> {
               switch (lockState) {
@@ -219,38 +189,6 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
               Timber.e(throwable, "onError modifyDatabaseEntry");
               getView(lockInfoView -> lockInfoView.onDatabaseEntryError(position));
             }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
-  }
-
-  @Override public void modifyDatabaseGroup(boolean allCreate, @NonNull String packageName,
-      @Nullable String code, boolean system) {
-    final Observable<String> packageActivitiesObservable =
-        lockInfoInteractor.getPackageActivities(packageName);
-    final Observable<Boolean> modifyDatabaseObservable;
-    if (allCreate) {
-      modifyDatabaseObservable = packageActivitiesObservable.flatMap(
-          activityName -> lockInfoInteractor.insertDatabaseGroup(packageName, activityName, code,
-              system));
-    } else {
-      modifyDatabaseObservable = packageActivitiesObservable.flatMap(
-          activityName -> lockInfoInteractor.deleteDatabaseGroup(packageName, activityName));
-    }
-
-    SubscriptionHelper.unsubscribe(databaseSubscription);
-    databaseSubscription = modifyDatabaseObservable.toList().map(result -> {
-      Timber.d(
-          "To prevent a bunch of events from occurring for each list entry, we flatten to just a single result");
-      // We return the original request
-      return allCreate;
-    }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(created -> {
-      if (created) {
-        getView(lockInfoView -> lockInfoView.onDatabaseEntryCreated(GROUP_POSITION));
-      } else {
-        getView(lockInfoView -> lockInfoView.onDatabaseEntryDeleted(GROUP_POSITION));
-      }
-    }, throwable -> {
-      Timber.e(throwable, "onError modifyDatabaseGroup");
-      getView(lockInfoView -> lockInfoView.onDatabaseEntryError(GROUP_POSITION));
-    }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
   }
 
   @Override public void loadApplicationIcon(@NonNull String packageName) {

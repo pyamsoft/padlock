@@ -16,10 +16,7 @@
 
 package com.pyamsoft.padlock.app.lock;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.content.ContextWrapper;
-import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
@@ -28,11 +25,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
-import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -98,14 +94,15 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
         });
   }
 
-  @NonNull @Override public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-    Timber.d("Init dialog");
-    final ContextWrapper themedContext =
-        new ContextThemeWrapper(getContext(), R.style.Theme_PadLock_Light);
-    binding =
-        DataBindingUtil.inflate(LayoutInflater.from(themedContext), R.layout.dialog_pin_entry, null,
-            false);
+  @Nullable @Override
+  public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    binding = DialogPinEntryBinding.inflate(inflater, null, false);
+    return binding.getRoot();
+  }
 
+  @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
     // Resolve TextInputLayout edit texts
     pinEntryText = binding.pinEntryCode.getEditText();
     if (pinEntryText == null) {
@@ -135,8 +132,6 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     if (savedInstanceState != null) {
       onRestoreInstanceState(savedInstanceState);
     }
-
-    return new AlertDialog.Builder(getActivity()).setView(binding.getRoot()).create();
   }
 
   private void setupCloseButton() {
