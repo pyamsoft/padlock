@@ -94,11 +94,11 @@ public class LockListFragment extends ActionBarFragment
   };
   @SuppressWarnings("WeakerAccess") boolean forceRefresh;
   @Nullable SearchView searchView;
-  private MenuItem displaySystemItem;
+  @Nullable private MenuItem displaySystemItem;
   private long loadedPresenterKey;
   private long loadedAdapterKey;
   @Nullable private TapTargetSequence sequence;
-  private DividerItemDecoration dividerDecoration;
+  @Nullable private DividerItemDecoration dividerDecoration;
   @Nullable private MenuItem searchItem;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -321,6 +321,10 @@ public class LockListFragment extends ActionBarFragment
   }
 
   private void setSystemCheckListener() {
+    if (displaySystemItem == null) {
+      throw new IllegalStateException("DisplaySystem menu item is NULL.");
+    }
+
     displaySystemItem.setOnMenuItemClickListener(item -> {
       if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing()) {
         Timber.d("List is not refreshing. Allow change of system preference");
@@ -337,6 +341,10 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @SuppressWarnings("WeakerAccess") void setSystemVisible(boolean visible) {
+    if (displaySystemItem == null) {
+      throw new IllegalStateException("DisplaySystem menu item is NULL.");
+    }
+
     displaySystemItem.setOnMenuItemClickListener(null);
     displaySystemItem.setChecked(visible);
     setSystemCheckListener();
@@ -376,7 +384,9 @@ public class LockListFragment extends ActionBarFragment
     binding.applistFab.setOnClickListener(null);
     binding.applistSwipeRefresh.setOnRefreshListener(null);
 
-    displaySystemItem.setOnMenuItemClickListener(null);
+    if (displaySystemItem != null) {
+      displaySystemItem.setOnMenuItemClickListener(null);
+    }
     displaySystemItem = null;
 
     taskMap.clear();
