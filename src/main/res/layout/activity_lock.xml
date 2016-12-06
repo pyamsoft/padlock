@@ -38,7 +38,7 @@
           android:id="@+id/toolbar"
           android:layout_width="match_parent"
           android:layout_height="?attr/actionBarSize"
-          app:popupTheme="@style/Theme.PadLock.Light.Menu"
+          app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
           />
 
     </android.support.design.widget.AppBarLayout>

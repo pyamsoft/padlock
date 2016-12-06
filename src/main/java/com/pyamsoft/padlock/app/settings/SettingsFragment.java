@@ -17,43 +17,38 @@
 package com.pyamsoft.padlock.app.settings;
 
 import android.os.Bundle;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.main.MainActivity;
+import com.pyamsoft.padlock.databinding.FragmentSettingsBinding;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
-import com.pyamsoft.pydroid.util.CircularRevealFragmentUtil;
 
 public class SettingsFragment extends ActionBarFragment {
 
   @NonNull public static final String TAG = "SettingsFragment";
-
-  @CheckResult @NonNull
-  public static Fragment newInstance(@NonNull View fromView, @NonNull View containerView) {
-    final Fragment fragment = new SettingsFragment();
-    fragment.setArguments(CircularRevealFragmentUtil.bundleArguments(fromView, containerView, 0));
-    return fragment;
-  }
+  private FragmentSettingsBinding binding;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_settings, container, false);
+    binding = FragmentSettingsBinding.inflate(inflater, container, false);
+    return binding.getRoot();
   }
 
-  @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-    super.onViewCreated(view, savedInstanceState);
-    CircularRevealFragmentUtil.runCircularRevealOnViewCreated(view, getArguments());
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+    binding.unbind();
   }
 
   @Override public void onResume() {
     super.onResume();
     setActionBarUpEnabled(true);
+    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
     displayPreferenceFragment();
   }
 

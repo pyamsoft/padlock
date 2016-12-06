@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.list;
+package com.pyamsoft.padlock.app.main;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.model.LockState;
-import rx.Observable;
+public interface NavigationDrawerController {
 
-interface LockCommonInteractor {
+  void drawerNormalNavigation();
 
-  @CheckResult @NonNull Observable<LockState> createNewEntry(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist);
-
-  @CheckResult @NonNull Observable<LockState> deleteEntry(@NonNull String packageName,
-      @NonNull String activityName);
+  void drawerShowUpNavigation();
 }

@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,19 +26,22 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.mikepenz.fastadapter.FastAdapter;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
-import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.databinding.FragmentApplistBinding;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
@@ -52,6 +54,7 @@ import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroiddesign.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroiddesign.util.FABUtil;
 import com.pyamsoft.pydroidrx.RXLoader;
+import java.util.List;
 import timber.log.Timber;
 
 public class LockListFragment extends ActionBarFragment
@@ -90,19 +93,13 @@ public class LockListFragment extends ActionBarFragment
     }
   };
   @SuppressWarnings("WeakerAccess") boolean forceRefresh;
+  @Nullable SearchView searchView;
   private MenuItem displaySystemItem;
   private long loadedPresenterKey;
   private long loadedAdapterKey;
   @Nullable private TapTargetSequence sequence;
   private DividerItemDecoration dividerDecoration;
-
-  @CheckResult @NonNull public static LockListFragment newInstance(boolean forceRefresh) {
-    final LockListFragment fragment = new LockListFragment();
-    final Bundle args = new Bundle();
-    args.putBoolean("FORCE_REFRESH", forceRefresh);
-    fragment.setArguments(args);
-    return fragment;
-  }
+  @Nullable private MenuItem searchItem;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -125,6 +122,7 @@ public class LockListFragment extends ActionBarFragment
           @NonNull @Override public PersistLoader<LockListAdapter> createLoader() {
             return new ListAdapterLoader<LockListAdapter>() {
               @NonNull @Override public LockListAdapter loadPersistent() {
+                forceRefresh = true;
                 return new LockListAdapter();
               }
             };
@@ -139,18 +137,12 @@ public class LockListFragment extends ActionBarFragment
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = DataBindingUtil.inflate(inflater, R.layout.fragment_applist, container, false);
+    binding = FragmentApplistBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    final boolean forceRefresh = getArguments().getBoolean("FORCE_REFRESH", false);
-    if (forceRefresh) {
-      Timber.d("Force a list refresh");
-      this.forceRefresh = true;
-    }
-
     setupRecyclerView();
     setupSwipeRefresh();
     setupFAB();
@@ -168,15 +160,7 @@ public class LockListFragment extends ActionBarFragment
       refreshList();
     } else {
       Timber.d("We are already refreshed, just refresh the request listeners");
-      applyUpdatedRequestListeners();
       presenter.showOnBoarding();
-    }
-  }
-
-  private void applyUpdatedRequestListeners() {
-    for (final LockListItem item : fastItemAdapter.getAdapterItems()) {
-      item.setRequestListener(this::displayLockInfoDialog);
-      item.setModifyListener(this::processDatabaseModifyEvent);
     }
   }
 
@@ -189,9 +173,27 @@ public class LockListFragment extends ActionBarFragment
     super.onResume();
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> binding.applistFab.show(), 300L);
-    setActionBarUpEnabled(false);
 
-    getActivity().supportInvalidateOptionsMenu();
+    setActionBarUpEnabled(true);
+    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
+  }
+
+  @CheckResult @NonNull private SearchView.OnQueryTextListener getOnQueryTextListener() {
+    return new SearchView.OnQueryTextListener() {
+
+      @Override public boolean onQueryTextChange(String newText) {
+        fastItemAdapter.filter(newText);
+        return true;
+      }
+
+      @Override public boolean onQueryTextSubmit(String query) {
+        fastItemAdapter.filter(query);
+        if (searchView != null) {
+          searchView.clearFocus();
+        }
+        return true;
+      }
+    };
   }
 
   @Override public void onPause() {
@@ -214,6 +216,69 @@ public class LockListFragment extends ActionBarFragment
     lockListLayoutManager.setVerticalScrollEnabled(true);
     dividerDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
 
+    fastItemAdapter.withFilterPredicate((item, query) -> {
+      final String queryString = String.valueOf(query).toLowerCase().trim();
+      final String name = item.getEntry().name().toLowerCase().trim();
+      Timber.d("Filter predicate: '%s' against %s", queryString, name);
+      return !name.startsWith(queryString);
+    });
+
+    fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
+
+      @CheckResult @NonNull
+      private LockListItem.ViewHolder toLockListViewHolder(RecyclerView.ViewHolder viewHolder) {
+        if (viewHolder instanceof LockListItem.ViewHolder) {
+          return (LockListItem.ViewHolder) viewHolder;
+        } else {
+          throw new IllegalStateException("ViewHolder is not LockListItem.ViewHolder");
+        }
+      }
+
+      @Override public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List list) {
+        if (i < 0) {
+          Timber.e("onBindViewHolder passed with invalid index: %d", i);
+          return;
+        }
+
+        Timber.d("onBindViewHolder: %d", i);
+        final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
+        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).bindView(holder, list);
+
+        final CompoundButton.OnCheckedChangeListener listener =
+            new CompoundButton.OnCheckedChangeListener() {
+              @Override
+              public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
+                // Don't check it yet, get auth first
+                compoundButton.setOnCheckedChangeListener(null);
+                compoundButton.setChecked(!b);
+                compoundButton.setOnCheckedChangeListener(this);
+
+                // TODO Authorize for package access
+                processDatabaseModifyEvent(b, viewHolder.getAdapterPosition(),
+                    fastItemAdapter.getAdapterItem(viewHolder.getAdapterPosition()).getEntry());
+              }
+            };
+        holder.binding.lockListToggle.setOnCheckedChangeListener(listener);
+      }
+
+      @Override public void unBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
+        if (i < 0) {
+          Timber.e("unBindViewHolder passed with invalid index: %d", i);
+          return;
+        }
+
+        Timber.d("unBindViewHolder: %d", i);
+        final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
+        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).unbindView(holder);
+      }
+    });
+
+    fastItemAdapter.withSelectable(true);
+    fastItemAdapter.withOnClickListener((view, iAdapter, item, i) -> {
+      displayLockInfoFragment(item.getEntry());
+      return true;
+    });
+
     binding.applistRecyclerview.setLayoutManager(lockListLayoutManager);
     binding.applistRecyclerview.addItemDecoration(dividerDecoration);
   }
@@ -227,6 +292,26 @@ public class LockListFragment extends ActionBarFragment
     super.onPrepareOptionsMenu(menu);
     if (isResumed()) {
       setupLockListMenuItems(menu);
+      setupSearchItem(menu);
+    }
+  }
+
+  private void setupSearchItem(@NonNull Menu menu) {
+    searchItem = menu.findItem(R.id.menu_search);
+    if (searchItem != null) {
+      searchView = (SearchView) searchItem.getActionView();
+      setSearchViewOnQueryTextListener();
+    }
+  }
+
+  private void setSearchViewOnQueryTextListener() {
+    if (searchView != null) {
+      Timber.d("Set Search View listeners");
+      searchView.setOnQueryTextListener(getOnQueryTextListener());
+      searchView.setOnCloseListener(() -> {
+        fastItemAdapter.filter(null);
+        return true;
+      });
     }
   }
 
@@ -257,50 +342,6 @@ public class LockListFragment extends ActionBarFragment
     setSystemCheckListener();
   }
 
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    boolean handled;
-    switch (item.getItemId()) {
-      case R.id.menu_settings:
-        handled = true;
-        if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing()) {
-          Timber.d("List is not refreshing. Do settings click");
-          showSettingsScreen();
-        }
-        break;
-      default:
-        handled = false;
-    }
-    return handled || super.onOptionsItemSelected(item);
-  }
-
-  private void showSettingsScreen() {
-    final FragmentManager fragmentManager = getFragmentManager();
-    if (fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null) {
-      final FragmentActivity fragmentActivity = getActivity();
-      if (fragmentActivity instanceof MainActivity) {
-        final View containerView = getView();
-        final View menuItemView = getSettingsMenuItemView();
-        if (containerView != null) {
-          fragmentManager.beginTransaction()
-              .replace(R.id.main_view_container,
-                  SettingsFragment.newInstance(menuItemView, containerView), SettingsFragment.TAG)
-              .addToBackStack(null)
-              .commit();
-        }
-      }
-    }
-  }
-
-  @CheckResult @NonNull View getSettingsMenuItemView() {
-    final FragmentActivity fragmentActivity = getActivity();
-    if (fragmentActivity instanceof MainActivity) {
-      final MainActivity mainActivity = (MainActivity) fragmentActivity;
-      return mainActivity.getSettingsMenuItemView();
-    } else {
-      throw new ClassCastException("Activity is not MainActivity");
-    }
-  }
-
   @Override public void setSystemVisible() {
     setSystemVisible(true);
   }
@@ -316,9 +357,17 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onDestroyView() {
-    super.onDestroyView();
+    if (searchItem != null) {
+      searchItem.collapseActionView();
+    }
+    searchItem = null;
 
-    clearListListeners();
+    if (searchView != null) {
+      searchView.setOnQueryTextListener(null);
+      searchView.setOnCloseListener(null);
+    }
+    searchView = null;
+
     binding.applistRecyclerview.removeItemDecoration(dividerDecoration);
     binding.applistRecyclerview.setOnClickListener(null);
     binding.applistRecyclerview.setLayoutManager(null);
@@ -326,24 +375,14 @@ public class LockListFragment extends ActionBarFragment
 
     binding.applistFab.setOnClickListener(null);
     binding.applistSwipeRefresh.setOnRefreshListener(null);
+
+    displaySystemItem.setOnMenuItemClickListener(null);
+    displaySystemItem = null;
+
     taskMap.clear();
     handler.removeCallbacksAndMessages(null);
     binding.unbind();
-  }
-
-  private void clearListListeners() {
-    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
-    if (oldSize <= 0) {
-      Timber.w("List is already empty");
-      return;
-    }
-
-    for (int i = oldSize; i >= 0; --i) {
-      final LockListItem item = fastItemAdapter.getAdapterItem(i);
-      if (item != null) {
-        item.cleanup();
-      }
-    }
+    super.onDestroyView();
   }
 
   @Override public void onDestroy() {
@@ -420,9 +459,7 @@ public class LockListFragment extends ActionBarFragment
       binding.applistSwipeRefresh.setRefreshing(true);
     }
 
-    fastItemAdapter.add(
-        new LockListItem(entry, this::displayLockInfoDialog, this::processDatabaseModifyEvent));
-    fastItemAdapter.notifyAdapterItemInserted(fastItemAdapter.getItemCount() - 1);
+    fastItemAdapter.add(new LockListItem(entry));
   }
 
   @Override public void onListPopulateError() {
@@ -448,15 +485,6 @@ public class LockListFragment extends ActionBarFragment
             getString(R.string.onboard_desc_locklist)).tintTarget(false).cancelable(false);
       }
 
-      final TapTarget settingsTarget =
-          TapTarget.forView(getSettingsMenuItemView(), getString(R.string.onboard_title_settings),
-              getString(R.string.onboard_desc_settings))
-              .cancelable(false)
-              .dimColor(android.R.color.white)
-              .outerCircleColor(R.color.blue500)
-              .targetCircleColor(android.R.color.white)
-              .textColor(android.R.color.white);
-
       // Hold a ref to the sequence or Activity will recycle bitmaps and crash
       sequence = new TapTargetSequence(getActivity());
       if (fabTarget != null) {
@@ -465,7 +493,6 @@ public class LockListFragment extends ActionBarFragment
       if (listTarget != null) {
         sequence.target(listTarget);
       }
-      sequence.target(settingsTarget);
 
       sequence.listener(new TapTargetSequence.Listener() {
         @Override public void onSequenceFinish() {
@@ -494,7 +521,6 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
-    fastItemAdapter.notifyAdapterDataSetChanged();
     handler.post(stopRefreshRunnable);
     handler.post(() -> binding.applistFab.show());
 
@@ -512,10 +538,6 @@ public class LockListFragment extends ActionBarFragment
     }
 
     for (int i = oldSize; i >= 0; --i) {
-      final LockListItem item = fastItemAdapter.getAdapterItem(i);
-      if (item != null) {
-        item.cleanup();
-      }
       fastItemAdapter.remove(i);
     }
   }
@@ -545,7 +567,11 @@ public class LockListFragment extends ActionBarFragment
     presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system());
   }
 
-  void displayLockInfoDialog(@NonNull AppEntry entry) {
+  void displayLockInfoFragment(@NonNull AppEntry entry) {
+    if (searchItem != null) {
+      searchItem.collapseActionView();
+    }
+
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
       fragmentManager.beginTransaction()

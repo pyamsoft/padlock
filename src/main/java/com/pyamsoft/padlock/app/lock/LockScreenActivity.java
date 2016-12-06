@@ -144,7 +144,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   }
 
   @CallSuper @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
-    setTheme(R.style.Theme_PadLock_Light);
+    setTheme(R.style.Theme_PadLock_Light_Lock);
     super.onCreate(savedInstanceState);
 
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock);

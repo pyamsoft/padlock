@@ -23,13 +23,11 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.SwitchPreferenceCompat;
 import android.view.View;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainActivity;
-import com.pyamsoft.padlock.app.purge.PurgeFragment;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.app.PersistLoader;
@@ -45,6 +43,10 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
   @NonNull private static final String KEY_PRESENTER = "key_settings_presenter";
   @SuppressWarnings("WeakerAccess") SettingsPreferencePresenter presenter;
   private long loadedKey;
+
+  @NonNull @Override protected AboutLibrariesFragment.BackStackState isLastOnBackStack() {
+    return AboutLibrariesFragment.BackStackState.LAST;
+  }
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -95,9 +97,12 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     showAds.setOnPreferenceChangeListener((preference, newValue) -> toggleAdVisibility(newValue));
 
     final Preference showAboutLicenses = findPreference(getString(R.string.about_license_key));
-    showAboutLicenses.setOnPreferenceClickListener(
-        preference -> showAboutLicensesFragment(R.id.main_view_container,
-            AboutLibrariesFragment.Styling.LIGHT));
+    showAboutLicenses.setOnPreferenceClickListener(preference -> {
+      MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
+      setActionBarUpEnabled(true);
+      return showAboutLicensesFragment(R.id.main_view_container,
+          AboutLibrariesFragment.Styling.LIGHT);
+    });
 
     final Preference checkVersion = findPreference(getString(R.string.check_version_key));
     checkVersion.setOnPreferenceClickListener(preference -> checkForUpdate());
@@ -105,19 +110,6 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     final Preference installListener = findPreference(getString(R.string.install_listener_key));
     installListener.setOnPreferenceClickListener(preference -> {
       presenter.setApplicationInstallReceiverState();
-      return true;
-    });
-
-    final Preference purgeDatabase = findPreference(getString(R.string.purge_db_key));
-    purgeDatabase.setOnPreferenceClickListener(preference -> {
-      final FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-      if (fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null) {
-        fragmentManager.beginTransaction()
-            .replace(R.id.main_view_container, new PurgeFragment(), PurgeFragment.TAG)
-            .addToBackStack(null)
-            .commit();
-      }
-
       return true;
     });
   }

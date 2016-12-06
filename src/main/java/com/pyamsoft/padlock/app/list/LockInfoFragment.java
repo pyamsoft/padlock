@@ -16,9 +16,9 @@
 
 package com.pyamsoft.padlock.app.list;
 
-import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
@@ -29,7 +29,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
+import com.mikepenz.fastadapter.FastAdapter;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
@@ -39,7 +41,12 @@ import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
+import java.util.List;
 import timber.log.Timber;
+
+import static com.pyamsoft.padlock.model.LockState.DEFAULT;
+import static com.pyamsoft.padlock.model.LockState.LOCKED;
+import static com.pyamsoft.padlock.model.LockState.WHITELISTED;
 
 public class LockInfoFragment extends ActionBarFragment implements LockInfoPresenter.LockInfoView {
 
@@ -65,8 +72,9 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @Nullable private TapTargetView defaultLockTapTarget;
   @Nullable private TapTargetView whiteLockTapTarget;
   @Nullable private TapTargetView blackLockTapTarget;
+  private DividerItemDecoration dividerDecoration;
 
-  public static LockInfoFragment newInstance(final @NonNull AppEntry appEntry) {
+  @CheckResult @NonNull public static LockInfoFragment newInstance(@NonNull AppEntry appEntry) {
     final LockInfoFragment fragment = new LockInfoFragment();
     final Bundle args = new Bundle();
 
@@ -80,6 +88,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
     appPackageName = getArguments().getString(ARG_APP_PACKAGE_NAME, null);
     appName = getArguments().getString(ARG_APP_NAME, null);
     appIsSystem = getArguments().getBoolean(ARG_APP_SYSTEM, false);
@@ -119,9 +128,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding =
-        DataBindingUtil.inflate(LayoutInflater.from(getActivity()), R.layout.fragment_lockinfo,
-            null, false);
+    binding = FragmentLockinfoBinding.inflate(inflater, null, false);
     return binding.getRoot();
   }
 
@@ -132,10 +139,72 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     binding.lockInfoPackageName.setText(appPackageName);
     binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
 
-    // Recycler setup
+    setupRecyclerView();
+  }
+
+  private void setupRecyclerView() {
     final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-    final RecyclerView.ItemDecoration dividerDecoration =
-        new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
+    dividerDecoration = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
+
+    fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
+
+      @CheckResult @NonNull
+      private LockInfoItem.ViewHolder toLockInfoViewHolder(RecyclerView.ViewHolder viewHolder) {
+        if (viewHolder instanceof LockInfoItem.ViewHolder) {
+          return (LockInfoItem.ViewHolder) viewHolder;
+        } else {
+          throw new IllegalStateException("ViewHolder is not LockInfoItem.ViewHolder");
+        }
+      }
+
+      @Override public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List list) {
+        if (i < 0) {
+          Timber.e("onBindViewHolder passed with invalid index: %d", i);
+          return;
+        }
+
+        Timber.d("onBindViewHolder: %d", i);
+        final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
+        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).bindView(holder, list);
+        holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener((compoundButton, b) -> {
+          if (b) {
+            final ActivityEntry item =
+                fastItemAdapter.getItem(holder.getAdapterPosition()).getEntry();
+            processDatabaseModifyEvent(holder.getAdapterPosition(), item.name(), item.lockState(),
+                DEFAULT);
+          }
+        });
+
+        holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener((compoundButton, b) -> {
+          if (b) {
+            final ActivityEntry item =
+                fastItemAdapter.getItem(holder.getAdapterPosition()).getEntry();
+            processDatabaseModifyEvent(holder.getAdapterPosition(), item.name(), item.lockState(),
+                WHITELISTED);
+          }
+        });
+
+        holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener((compoundButton, b) -> {
+          if (b) {
+            final ActivityEntry item =
+                fastItemAdapter.getItem(holder.getAdapterPosition()).getEntry();
+            processDatabaseModifyEvent(holder.getAdapterPosition(), item.name(), item.lockState(),
+                LOCKED);
+          }
+        });
+      }
+
+      @Override public void unBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
+        if (i < 0) {
+          Timber.e("unBindViewHolder passed with invalid index: %d", i);
+          return;
+        }
+
+        Timber.d("unBindViewHolder: %d", i);
+        final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
+        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).unbindView(holder);
+      }
+    });
 
     binding.lockInfoRecycler.setLayoutManager(layoutManager);
     binding.lockInfoRecycler.addItemDecoration(dividerDecoration);
@@ -147,7 +216,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     setActionBarTitle(R.string.app_name);
     setActionBarUpEnabled(false);
 
-    clearListListeners();
+    binding.lockInfoRecycler.removeItemDecoration(dividerDecoration);
     binding.lockInfoRecycler.setOnClickListener(null);
     binding.lockInfoRecycler.setLayoutManager(null);
     binding.lockInfoRecycler.setAdapter(null);
@@ -179,21 +248,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     }
   }
 
-  private void clearListListeners() {
-    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
-    if (oldSize <= 0) {
-      Timber.w("List is already empty");
-      return;
-    }
-
-    for (int i = oldSize; i >= 0; --i) {
-      final LockInfoItem item = fastItemAdapter.getAdapterItem(i);
-      if (item != null) {
-        item.cleanup();
-      }
-    }
-  }
-
   @Override public void onDestroy() {
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
@@ -208,23 +262,11 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
     binding.lockInfoRecycler.setAdapter(fastItemAdapter);
     presenter.loadApplicationIcon(appPackageName);
-    presenter.setToggleAllState(appPackageName);
     if (firstRefresh) {
       refreshList();
     } else {
       Timber.d("We are already refreshed, just refresh the request listeners");
-      applyUpdatedRequestListeners();
       presenter.showOnBoarding();
-    }
-  }
-
-  private void applyUpdatedRequestListeners() {
-    for (final LockInfoItem item : fastItemAdapter.getAdapterItems()) {
-      item.setListener((position, name, currentState, newState) -> {
-        Timber.d("Process lock state selection: [%d] %s from %s to %s", position, name,
-            currentState, newState);
-        processDatabaseModifyEvent(position, name, currentState, newState);
-      });
     }
   }
 
@@ -235,6 +277,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onResume() {
     super.onResume();
+    MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
     setActionBarUpEnabled(true);
   }
 
@@ -252,10 +295,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     }
 
     for (int i = oldSize; i >= 0; --i) {
-      final LockInfoItem item = fastItemAdapter.getItem(i);
-      if (item != null) {
-        item.cleanup();
-      }
       fastItemAdapter.remove(i);
     }
   }
@@ -274,18 +313,16 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
     Timber.d("Add entry: %s", entry);
-    fastItemAdapter.add(
-        new LockInfoItem(appPackageName, entry, (position, name, currentState, newState) -> {
-          Timber.d("Process lock state selection: [%d] %s from %s to %s", position, name,
-              currentState, newState);
-          processDatabaseModifyEvent(position, name, currentState, newState);
-        }));
-    fastItemAdapter.notifyAdapterItemInserted(fastItemAdapter.getItemCount() - 1);
+    fastItemAdapter.add(new LockInfoItem(appPackageName, entry));
+    //, (position, name, currentState, newState) -> {
+    //      Timber.d("Process lock state selection: [%d] %s from %s to %s", position, name,
+    //          currentState, newState);
+    //      processDatabaseModifyEvent(position, name, currentState, newState);
+    //    }));
   }
 
   @Override public void onListPopulated() {
     Timber.d("Refresh finished");
-    fastItemAdapter.notifyAdapterDataSetChanged();
     binding.lockInfoRecycler.setClickable(true);
     presenter.showOnBoarding();
   }
@@ -336,55 +373,14 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  private void safeChangeToggleAllState(boolean enabled) {
-    binding.lockInfoToggleall.setOnCheckedChangeListener(null);
-    binding.lockInfoToggleall.setChecked(enabled);
-    binding.lockInfoToggleall.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-      binding.lockInfoRecycler.setClickable(false);
-
-      // Clear All
-      clearList();
-
-      presenter.modifyDatabaseGroup(isChecked, appPackageName, null, appIsSystem);
-    });
-  }
-
-  @Override public void enableToggleAll() {
-    safeChangeToggleAllState(true);
-  }
-
-  @Override public void disableToggleAll() {
-    safeChangeToggleAllState(false);
-  }
-
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
     if (toggleAllTapTarget == null) {
-      createToggleTarget();
+      final LockInfoItem.ViewHolder holder =
+          (LockInfoItem.ViewHolder) binding.lockInfoRecycler.findViewHolderForAdapterPosition(0);
+      final View radioDefault = holder.binding.lockInfoRadioDefault;
+      createDefaultLockTarget(holder, radioDefault);
     }
-  }
-
-  private void createToggleTarget() {
-    final LockInfoItem.ViewHolder holder =
-        (LockInfoItem.ViewHolder) binding.lockInfoRecycler.findViewHolderForAdapterPosition(0);
-    final TapTarget toggleTarget =
-        TapTarget.forView(binding.lockInfoToggleall, getString(R.string.onboard_title_info_toggle),
-            getString(R.string.onboard_desc_info_toggle)).cancelable(false).tintTarget(false);
-    toggleAllTapTarget =
-        TapTargetView.showFor(getActivity(), toggleTarget, new TapTargetView.Listener() {
-
-          @Override public void onTargetClick(TapTargetView view) {
-            super.onTargetClick(view);
-            Timber.d("Toggle all target clicked");
-            if (holder != null) {
-              final View radioDefault = holder.binding.lockInfoRadioDefault;
-              createDefaultLockTarget(holder, radioDefault);
-            } else {
-              Timber.w("Cannot find Default lock target");
-              endOnboarding();
-            }
-          }
-        });
   }
 
   void createDefaultLockTarget(@NonNull LockInfoItem.ViewHolder holder,
@@ -415,12 +411,12 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
             super.onTargetClick(view);
             Timber.d("White lock target clicked");
             final View radioBlack = holder.binding.lockInfoRadioBlack;
-            createBlackLockTarget(holder, radioBlack);
+            createBlackLockTarget(radioBlack);
           }
         });
   }
 
-  void createBlackLockTarget(@NonNull LockInfoItem.ViewHolder holder, @NonNull View radioBlack) {
+  void createBlackLockTarget(@NonNull View radioBlack) {
     final TapTarget lockBlackTarget =
         TapTarget.forView(radioBlack, getString(R.string.onboard_title_info_lock_black),
             getString(R.string.onboard_desc_info_lock_black)).tintTarget(false).cancelable(false);
@@ -445,9 +441,9 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
       @NonNull LockState previousLockState, @NonNull LockState newLockState) {
     Timber.d("Received a database modify event request for %s %s at %d [%s]", appPackageName,
         activityName, position, newLockState.name());
-    final boolean whitelist = newLockState.equals(LockState.WHITELISTED);
-    final boolean forceLock = newLockState.equals(LockState.LOCKED);
-    final boolean wasDefault = previousLockState.equals(LockState.DEFAULT);
+    final boolean whitelist = newLockState.equals(WHITELISTED);
+    final boolean forceLock = newLockState.equals(LOCKED);
+    final boolean wasDefault = previousLockState.equals(DEFAULT);
     presenter.modifyDatabaseEntry(wasDefault, position, appPackageName, activityName, null,
         appIsSystem, whitelist, forceLock);
   }

@@ -20,13 +20,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.model.LockState;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import rx.Observable;
 import timber.log.Timber;
 
 abstract class LockCommonInteractorImpl implements LockCommonInteractor {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
+  @NonNull private final PadLockDB padLockDB;
 
   LockCommonInteractorImpl(@NonNull PadLockDB padLockDB) {
     this.padLockDB = padLockDB;
@@ -39,7 +38,7 @@ abstract class LockCommonInteractorImpl implements LockCommonInteractor {
   @Override @NonNull public Observable<LockState> createNewEntry(@NonNull String packageName,
       @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist) {
     Timber.d("Empty entry, create a new entry for: %s %s", packageName, activityName);
-    return padLockDB.insert(packageName, activityName, code, 0, 0, system, whitelist)
+    return getPadLockDB().insert(packageName, activityName, code, 0, 0, system, whitelist)
         .map(result -> {
           Timber.d("Insert result: %d", result);
           Timber.d("Whitelist: %s", whitelist);
@@ -47,29 +46,10 @@ abstract class LockCommonInteractorImpl implements LockCommonInteractor {
         });
   }
 
-  @Override @NonNull public Observable<LockState> updateExistingEntry(@NonNull String packageName,
-      @NonNull String activityName, boolean whitelist) {
-    Timber.d("Entry already exists for: %s %s, update it", packageName, activityName);
-    return padLockDB.queryWithPackageActivityName(packageName, activityName)
-        .first()
-        .flatMap(entry -> {
-          if (PadLockEntry.WithPackageActivityName.isEmpty(entry)) {
-            throw new RuntimeException("PadLock entry is empty but update was called");
-          }
-
-          return padLockDB.updateWhitelist(whitelist, entry.packageName(), entry.activityName())
-              .map(result -> {
-                Timber.d("Update result: %d", result);
-                Timber.d("Whitelist: %s", whitelist);
-                return whitelist ? LockState.WHITELISTED : LockState.LOCKED;
-              });
-        });
-  }
-
   @Override @NonNull public Observable<LockState> deleteEntry(@NonNull String packageName,
       @NonNull String activityName) {
     Timber.d("Entry already exists for: %s %s, delete it", packageName, activityName);
-    return padLockDB.deleteWithPackageActivityName(packageName, activityName).map(result -> {
+    return getPadLockDB().deleteWithPackageActivityName(packageName, activityName).map(result -> {
       Timber.d("Delete result: %d", result);
       return LockState.DEFAULT;
     });

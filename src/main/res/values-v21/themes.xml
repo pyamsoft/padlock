@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
   ~ Copyright 2016 Peter Kenji Yamanaka
   ~
@@ -18,25 +17,11 @@
 
 <resources>
 
-  <style name="Base.Theme.PadLock.Light" parent="@style/Theme.AppCompat.Light.NoActionBar">
-    <item name="colorPrimary">@color/blue500</item>
-    <item name="colorPrimaryDark">@color/blue700</item>
-    <item name="colorAccent">@color/orangeA200</item>
-    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
-  </style>
-
   <!-- Normal App Theme
 
   On devices API 21 and up, includes a transparent status bar
   -->
-  <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light"/>
-
-  <!-- Lock Screen Theme -->
-  <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light"/>
-
-  <!-- Splash screen-->
-  <style name="Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock.Light">
-    <item name="android:windowBackground">@drawable/splash_screen</item>
+  <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light">
+    <item name="android:statusBarColor">@android:color/transparent</item>
   </style>
-
 </resources>
