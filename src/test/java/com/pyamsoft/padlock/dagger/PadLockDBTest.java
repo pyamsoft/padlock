@@ -79,8 +79,6 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testInsert() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     // Normal inserts
     TestSubscriber<Long> testSubscriber = new TestSubscriber<>();
     db.insert("TEST", "TEST", null, 0, 0, false, false)
@@ -90,8 +88,6 @@ public class PadLockDBTest {
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
     testSubscriber.assertValue(1L);
-
-    assertEquals(0, db.getOpenCount());
   }
 
   /**
@@ -100,8 +96,6 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testInsertNull() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     try {
       //noinspection ConstantConditions
       db.insert(null, null, null, 0, 0, false, false)
@@ -112,8 +106,6 @@ public class PadLockDBTest {
     } catch (NullPointerException e) {
       expected("NullPointerException in testInsert with NULL information");
     }
-
-    assertEquals(0, db.getOpenCount());
   }
 
   /**
@@ -122,8 +114,6 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testInsertEmpty() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     try {
       final PadLockEntry empty = PadLockEntry.empty();
       db.insert(empty.packageName(), empty.activityName(), empty.lockCode(), empty.lockUntilTime(),
@@ -135,8 +125,6 @@ public class PadLockDBTest {
     } catch (RuntimeException e) {
       expected("RuntimeException in testInsert with NULL information");
     }
-
-    assertEquals(0, db.getOpenCount());
   }
 
   /**
@@ -145,8 +133,6 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testInsertDuplicates() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     TestSubscriber<Long> testSubscriber;
     for (int i = 0; i < 50; ++i) {
       testSubscriber = new TestSubscriber<>();
@@ -157,7 +143,6 @@ public class PadLockDBTest {
       testSubscriber.assertNoErrors();
       testSubscriber.assertValueCount(1);
       testSubscriber.assertValue(1L);
-      assertEquals(0, db.getOpenCount());
     }
   }
 
@@ -167,8 +152,6 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testDeleteNothing() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     // Normal deletes do not fail when nothing is deleted
     TestSubscriber<Integer> testSubscriber = new TestSubscriber<>();
     db.deleteWithPackageActivityName("TEST", "1")
@@ -178,7 +161,6 @@ public class PadLockDBTest {
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
     testSubscriber.assertValue(0);
-    assertEquals(0, db.getOpenCount());
   }
 
   /**
@@ -187,8 +169,6 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testDelete() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     insertDummy(1);
     // Test actual delete
     TestSubscriber<Integer> testSubscriber = new TestSubscriber<>();
@@ -199,7 +179,6 @@ public class PadLockDBTest {
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
     testSubscriber.assertValue(1);
-    assertEquals(0, db.getOpenCount());
   }
 
   /**
@@ -208,15 +187,12 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testDeleteUnguarded() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     insertDummy(1);
     // Deletes will not fail, but they are only meant to be used internally
     TestSubscriber<Integer> testSubscriber = new TestSubscriber<>();
 
     // db instance is not initialized in unguarded
 
-    assertEquals(0, db.getOpenCount());
     try {
       db.deleteWithPackageActivityNameUnguarded("TEST", "1")
           .subscribeOn(subscribeScheduler)
@@ -233,8 +209,6 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testDeleteAll() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     for (int i = 0; i < 50; ++i) {
       insertDummy(i);
     }
@@ -247,8 +221,6 @@ public class PadLockDBTest {
         .subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
-    testSubscriber.assertValue(50);
-    assertEquals(0, db.getOpenCount());
   }
 
   /**
@@ -257,8 +229,6 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testQueryAll() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     for (int i = 0; i < 50; ++i) {
       insertDummy(i);
     }
@@ -268,14 +238,12 @@ public class PadLockDBTest {
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
-    assertEquals(0, db.getOpenCount());
 
     TestSubscriber<PadLockEntry.AllEntries> flatTestSubscriber = new TestSubscriber<>();
     db.queryAll().first().flatMap(Observable::from).
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(flatTestSubscriber);
     flatTestSubscriber.assertNoErrors();
     flatTestSubscriber.assertValueCount(50);
-    assertEquals(0, db.getOpenCount());
   }
 
   /**
@@ -284,8 +252,6 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testQueryWithPackageName() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     for (int i = 0; i < 50; ++i) {
       insertDummy(i);
     }
@@ -295,14 +261,12 @@ public class PadLockDBTest {
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
-    assertEquals(0, db.getOpenCount());
 
     TestSubscriber<PadLockEntry.WithPackageName> flatTestSubscriber = new TestSubscriber<>();
     db.queryWithPackageName("TEST").first().flatMap(Observable::from).
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(flatTestSubscriber);
     flatTestSubscriber.assertNoErrors();
     flatTestSubscriber.assertValueCount(50);
-    assertEquals(0, db.getOpenCount());
 
     testSubscriber = new TestSubscriber<>();
     db.queryWithPackageName("NOT HERE").first().
@@ -310,14 +274,12 @@ public class PadLockDBTest {
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
     assertTrue(testSubscriber.getOnNextEvents().get(0).isEmpty());
-    assertEquals(0, db.getOpenCount());
 
     flatTestSubscriber = new TestSubscriber<>();
     db.queryWithPackageName("NOT HERE").first().flatMap(Observable::from).
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(flatTestSubscriber);
     flatTestSubscriber.assertNoErrors();
     flatTestSubscriber.assertValueCount(0);
-    assertEquals(0, db.getOpenCount());
   }
 
   /**
@@ -327,8 +289,6 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testQueryWithPackageActivityName() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     for (int i = 0; i < 50; ++i) {
       insertDummy(i);
     }
@@ -340,7 +300,6 @@ public class PadLockDBTest {
     testSubscriber.assertValueCount(1);
     assertFalse(
         PadLockEntry.WithPackageActivityName.isEmpty(testSubscriber.getOnNextEvents().get(0)));
-    assertEquals(0, db.getOpenCount());
 
     testSubscriber = new TestSubscriber<>();
     db.queryWithPackageActivityName("TEST", "10").first().
@@ -349,7 +308,6 @@ public class PadLockDBTest {
     testSubscriber.assertValueCount(1);
     assertFalse(
         PadLockEntry.WithPackageActivityName.isEmpty(testSubscriber.getOnNextEvents().get(0)));
-    assertEquals(0, db.getOpenCount());
 
     testSubscriber = new TestSubscriber<>();
     db.queryWithPackageActivityName("TEST", "25").first().
@@ -358,7 +316,6 @@ public class PadLockDBTest {
     testSubscriber.assertValueCount(1);
     assertFalse(
         PadLockEntry.WithPackageActivityName.isEmpty(testSubscriber.getOnNextEvents().get(0)));
-    assertEquals(0, db.getOpenCount());
 
     testSubscriber = new TestSubscriber<>();
     db.queryWithPackageActivityName("NOT HERE", "0").first().
@@ -367,7 +324,6 @@ public class PadLockDBTest {
     testSubscriber.assertValueCount(1);
     assertTrue(
         PadLockEntry.WithPackageActivityName.isEmpty(testSubscriber.getOnNextEvents().get(0)));
-    assertEquals(0, db.getOpenCount());
   }
 
   /**
@@ -377,15 +333,12 @@ public class PadLockDBTest {
    * @throws Exception
    */
   @Test public void testQueryWithPackageActivityNameDefault() throws Exception {
-    assertEquals(0, db.getOpenCount());
-
     TestSubscriber<PadLockEntry> testSubscriber = new TestSubscriber<>();
     db.queryWithPackageActivityNameDefault("TEST", "1").first().
         subscribeOn(subscribeScheduler).observeOn(observeScheduler).subscribe(testSubscriber);
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
     assertTrue(PadLockEntry.isEmpty(testSubscriber.getOnNextEvents().get(0)));
-    assertEquals(0, db.getOpenCount());
 
     insertDummy(PadLockEntry.PACKAGE_ACTIVITY_NAME);
     insertDummy(1);
@@ -398,7 +351,6 @@ public class PadLockDBTest {
     testSubscriber.assertValueCount(1);
     assertFalse(PadLockEntry.isEmpty(testSubscriber.getOnNextEvents().get(0)));
     assertEquals("1", testSubscriber.getOnNextEvents().get(0).activityName());
-    assertEquals(0, db.getOpenCount());
 
     testSubscriber = new TestSubscriber<>();
     db.queryWithPackageActivityNameDefault("TEST", "2").first().
@@ -407,7 +359,6 @@ public class PadLockDBTest {
     testSubscriber.assertValueCount(1);
     assertFalse(PadLockEntry.isEmpty(testSubscriber.getOnNextEvents().get(0)));
     assertEquals("2", testSubscriber.getOnNextEvents().get(0).activityName());
-    assertEquals(0, db.getOpenCount());
 
     testSubscriber = new TestSubscriber<>();
     db.queryWithPackageActivityNameDefault("TEST", "3").first().
@@ -417,7 +368,6 @@ public class PadLockDBTest {
     assertFalse(PadLockEntry.isEmpty(testSubscriber.getOnNextEvents().get(0)));
     assertEquals(PadLockEntry.PACKAGE_ACTIVITY_NAME,
         testSubscriber.getOnNextEvents().get(0).activityName());
-    assertEquals(0, db.getOpenCount());
   }
 
   // TODO Add test for updates, clearing and then accessing again afterwards
