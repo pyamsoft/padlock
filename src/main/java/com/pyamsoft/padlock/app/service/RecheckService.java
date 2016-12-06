@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.dagger.service;
+package com.pyamsoft.padlock.app.service;
 
 import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.app.service.PadLockService;
 import timber.log.Timber;
 
 public class RecheckService extends IntentService {

@@ -24,7 +24,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.dagger.PadLockDB;
-import com.pyamsoft.padlock.dagger.service.RecheckService;
+import com.pyamsoft.padlock.app.service.RecheckService;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import javax.inject.Inject;

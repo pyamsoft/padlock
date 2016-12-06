@@ -76,7 +76,7 @@
     </service>
 
     <service
-        android:name=".dagger.service.RecheckService"
+        android:name=".app.service.RecheckService"
         android:exported="false"/>
 
     <provider
