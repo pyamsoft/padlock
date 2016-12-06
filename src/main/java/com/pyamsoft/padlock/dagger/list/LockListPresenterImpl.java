@@ -49,23 +49,37 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
   @SuppressWarnings("WeakerAccess") @NonNull Subscription databaseSubscription =
       Subscriptions.empty();
 
+  @SuppressWarnings("WeakerAccess") boolean refreshing;
+
   @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
     super(lockListInteractor, obsScheduler, subScheduler);
     this.lockListInteractor = lockListInteractor;
     this.stateInteractor = stateInteractor;
+    refreshing = false;
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    SubscriptionHelper.unsubscribe(populateListSubscription);
+    refreshing = false;
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    SubscriptionHelper.unsubscribe(populateListSubscription, systemVisibleSubscription,
-        onboardSubscription, fabStateSubscription, databaseSubscription);
+    SubscriptionHelper.unsubscribe(systemVisibleSubscription, onboardSubscription,
+        fabStateSubscription, databaseSubscription);
   }
 
   @Override public void populateList() {
-    Timber.d("populateList");
+    if (refreshing) {
+      Timber.w("Already refreshing, do nothing");
+      return;
+    }
 
+    refreshing = true;
+    Timber.d("populateList");
     SubscriptionHelper.unsubscribe(populateListSubscription);
     populateListSubscription = lockListInteractor.getActiveApplications()
         .withLatestFrom(lockListInteractor.isSystemVisible(), (applicationInfo, systemVisible) -> {
@@ -120,6 +134,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
               Timber.e(throwable, "populateList onError");
               getView(LockList::onListPopulated);
             }, () -> {
+              refreshing = false;
               getView(LockList::onListPopulated);
               SubscriptionHelper.unsubscribe(populateListSubscription);
             });

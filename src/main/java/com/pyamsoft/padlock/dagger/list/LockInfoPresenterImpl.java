@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.dagger.list;
 
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
@@ -25,7 +24,6 @@ import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -49,6 +47,8 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
   @SuppressWarnings("WeakerAccess") @NonNull Subscription onboardSubscription =
       Subscriptions.empty();
 
+  @SuppressWarnings("WeakerAccess") boolean refreshing;
+
   @Inject LockInfoPresenterImpl(@NonNull AppIconLoaderPresenter<LockInfoView> iconLoader,
       final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("obs") Scheduler obsScheduler,
@@ -56,20 +56,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
     super(lockInfoInteractor, obsScheduler, subScheduler);
     this.iconLoader = iconLoader;
     this.lockInfoInteractor = lockInfoInteractor;
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult @Nullable
-  PadLockEntry.WithPackageName findEntryInActivities(
-      @NonNull List<PadLockEntry.WithPackageName> padLockEntries, @NonNull String name) {
-    PadLockEntry.WithPackageName found = null;
-    for (final PadLockEntry.WithPackageName padLockEntry : padLockEntries) {
-      if (padLockEntry.activityName().equals(name)) {
-        found = padLockEntry;
-        break;
-      }
-    }
-
-    return found;
+    refreshing = false;
   }
 
   @Override protected void onBind() {
@@ -80,18 +67,25 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
   @Override protected void onUnbind() {
     super.onUnbind();
     iconLoader.unbindView();
-    SubscriptionHelper.unsubscribe(databaseSubscription, populateListSubscription,
-        allInDBSubscription, onboardSubscription);
+    SubscriptionHelper.unsubscribe(databaseSubscription, allInDBSubscription, onboardSubscription);
   }
 
   @Override protected void onDestroy() {
     super.onDestroy();
     iconLoader.destroy();
+    SubscriptionHelper.unsubscribe(populateListSubscription);
+    refreshing = false;
   }
 
   @Override public void populateList(@NonNull String packageName) {
-    SubscriptionHelper.unsubscribe(populateListSubscription);
+    if (refreshing) {
+      Timber.w("Already refreshing, do nothing");
+      return;
+    }
 
+    refreshing = true;
+    Timber.d("Populate list");
+    SubscriptionHelper.unsubscribe(populateListSubscription);
     // Search the list of activities in the package name for any which are locked
     populateListSubscription = lockInfoInteractor.getPackageActivities(packageName)
         .withLatestFrom(lockInfoInteractor.getActivityEntries(packageName),
@@ -157,6 +151,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
           Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
           getView(LockInfoView::onListPopulateError);
         }, () -> {
+          refreshing = false;
           getView(LockInfoView::onListPopulated);
           SubscriptionHelper.unsubscribe(populateListSubscription);
         });
