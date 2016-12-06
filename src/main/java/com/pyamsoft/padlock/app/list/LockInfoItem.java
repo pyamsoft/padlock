@@ -27,6 +27,8 @@ import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
+import com.pyamsoft.padlock.model.LockState;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
@@ -40,12 +42,9 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     this.entry = entry;
   }
 
-  @NonNull @CheckResult ActivityEntry getEntry() {
-    return entry;
-  }
-
-  @NonNull @CheckResult String getPackageName() {
-    return packageName;
+  @CheckResult @NonNull LockInfoItem copyWithNewLockState(@NonNull LockState newState) {
+    return new LockInfoItem(packageName,
+        ActivityEntry.builder().name(entry.name()).lockState(newState).build());
   }
 
   @Override public int getType() {
@@ -58,49 +57,22 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
-
-    // Remove any old binds
-    final RadioButton lockedButton;
-    switch (entry.lockState()) {
-      case DEFAULT:
-        lockedButton = holder.binding.lockInfoRadioDefault;
-        break;
-      case WHITELISTED:
-        lockedButton = holder.binding.lockInfoRadioWhite;
-        break;
-      case LOCKED:
-        lockedButton = holder.binding.lockInfoRadioBlack;
-        break;
-      default:
-        throw new IllegalStateException("Illegal enum state");
-    }
-
-    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
-    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
-    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
-    lockedButton.setChecked(true);
-
-    final String entryName = entry.name();
-    String activityName = entryName;
-    if (entryName.startsWith(packageName)) {
-      final String strippedPackageName = entryName.replace(packageName, "");
-      if (strippedPackageName.charAt(0) == '.') {
-        activityName = strippedPackageName;
-      }
-    }
-    holder.binding.lockInfoActivity.setText(activityName);
+    holder.bind(packageName, entry);
   }
 
   @Override public void unbindView(ViewHolder holder) {
     super.unbindView(holder);
-    holder.binding.lockInfoActivity.setText(null);
-    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
-    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
-    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
+    holder.unbind();
   }
 
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
     return FACTORY;
+  }
+
+  interface OnLockRadioCheckedChanged {
+
+    void call(int position, @NonNull String name, @NonNull LockState oldState,
+        @NonNull LockState newState);
   }
 
   @SuppressWarnings("WeakerAccess") protected static class ItemFactory
@@ -112,11 +84,93 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   protected static final class ViewHolder extends RecyclerView.ViewHolder {
 
-    @NonNull final AdapterItemLockinfoBinding binding;
+    @NonNull private final AdapterItemLockinfoBinding binding;
+    @NonNull private WeakReference<ActivityEntry> weakEntry;
 
-    public ViewHolder(View itemView) {
+    ViewHolder(View itemView) {
       super(itemView);
       binding = DataBindingUtil.bind(itemView);
+      weakEntry = new WeakReference<>(null);
+    }
+
+    @CheckResult @NonNull AdapterItemLockinfoBinding getBinding() {
+      return binding;
+    }
+
+    void bind(@NonNull String packageName, @NonNull ActivityEntry entry) {
+      // Remove any old binds
+      final RadioButton lockedButton;
+      switch (entry.lockState()) {
+        case DEFAULT:
+          lockedButton = binding.lockInfoRadioDefault;
+          break;
+        case WHITELISTED:
+          lockedButton = binding.lockInfoRadioWhite;
+          break;
+        case LOCKED:
+          lockedButton = binding.lockInfoRadioBlack;
+          break;
+        default:
+          throw new IllegalStateException("Illegal enum state");
+      }
+
+      binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
+      binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
+      binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
+      lockedButton.setChecked(true);
+
+      final String entryName = entry.name();
+      String activityName = entryName;
+      if (entryName.startsWith(packageName)) {
+        final String strippedPackageName = entryName.replace(packageName, "");
+        if (strippedPackageName.charAt(0) == '.') {
+          activityName = strippedPackageName;
+        }
+      }
+      binding.lockInfoActivity.setText(activityName);
+
+      weakEntry.clear();
+      weakEntry = new WeakReference<>(entry);
+    }
+
+    void bind(@NonNull OnLockRadioCheckedChanged onCheckedChanged) {
+      binding.lockInfoRadioDefault.setOnCheckedChangeListener((compoundButton, b) -> {
+        if (b) {
+          final ActivityEntry entry = weakEntry.get();
+          if (entry != null) {
+            onCheckedChanged.call(getAdapterPosition(), entry.name(), entry.lockState(),
+                LockState.DEFAULT);
+          }
+        }
+      });
+
+      binding.lockInfoRadioWhite.setOnCheckedChangeListener((compoundButton, b) -> {
+        if (b) {
+          final ActivityEntry entry = weakEntry.get();
+          if (entry != null) {
+            onCheckedChanged.call(getAdapterPosition(), entry.name(), entry.lockState(),
+                LockState.WHITELISTED);
+          }
+        }
+      });
+
+      binding.lockInfoRadioBlack.setOnCheckedChangeListener((compoundButton, b) -> {
+        if (b) {
+          final ActivityEntry entry = weakEntry.get();
+          if (entry != null) {
+            onCheckedChanged.call(getAdapterPosition(), entry.name(), entry.lockState(),
+                LockState.LOCKED);
+          }
+        }
+      });
+    }
+
+    void unbind() {
+      binding.lockInfoActivity.setText(null);
+      binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
+      binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
+      binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
+      weakEntry.clear();
     }
   }
 }

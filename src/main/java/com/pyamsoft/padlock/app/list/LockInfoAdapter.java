@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.app.list;
 
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
-import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 
 class LockInfoAdapter extends FastItemAdapter<LockInfoItem>
@@ -25,22 +24,19 @@ class LockInfoAdapter extends FastItemAdapter<LockInfoItem>
 
   @Override public void onDatabaseEntryCreated(int position) {
     final LockInfoItem oldItem = getItem(position);
-    final LockInfoItem newItem = new LockInfoItem(oldItem.getPackageName(),
-        ActivityEntry.builder(oldItem.getEntry()).lockState(LockState.LOCKED).build());
+    final LockInfoItem newItem = oldItem.copyWithNewLockState(LockState.LOCKED);
     set(position, newItem);
   }
 
   @Override public void onDatabaseEntryDeleted(int position) {
     final LockInfoItem oldItem = getItem(position);
-    final LockInfoItem newItem = new LockInfoItem(oldItem.getPackageName(),
-        ActivityEntry.builder(oldItem.getEntry()).lockState(LockState.DEFAULT).build());
+    final LockInfoItem newItem = oldItem.copyWithNewLockState(LockState.DEFAULT);
     set(position, newItem);
   }
 
   @Override public void onDatabaseEntryWhitelisted(int position) {
     final LockInfoItem oldItem = getItem(position);
-    final LockInfoItem newItem = new LockInfoItem(oldItem.getPackageName(),
-        ActivityEntry.builder(oldItem.getEntry()).lockState(LockState.WHITELISTED).build());
+    final LockInfoItem newItem = oldItem.copyWithNewLockState(LockState.WHITELISTED);
     set(position, newItem);
   }
 }

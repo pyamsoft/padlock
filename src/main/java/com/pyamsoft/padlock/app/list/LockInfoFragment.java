@@ -173,32 +173,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
         Timber.d("onBindViewHolder: %d", i);
         final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
         fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).bindView(holder, list);
-        holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener((compoundButton, b) -> {
-          if (b) {
-            final ActivityEntry item =
-                fastItemAdapter.getItem(holder.getAdapterPosition()).getEntry();
-            processDatabaseModifyEvent(holder.getAdapterPosition(), item.name(), item.lockState(),
-                DEFAULT);
-          }
-        });
-
-        holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener((compoundButton, b) -> {
-          if (b) {
-            final ActivityEntry item =
-                fastItemAdapter.getItem(holder.getAdapterPosition()).getEntry();
-            processDatabaseModifyEvent(holder.getAdapterPosition(), item.name(), item.lockState(),
-                WHITELISTED);
-          }
-        });
-
-        holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener((compoundButton, b) -> {
-          if (b) {
-            final ActivityEntry item =
-                fastItemAdapter.getItem(holder.getAdapterPosition()).getEntry();
-            processDatabaseModifyEvent(holder.getAdapterPosition(), item.name(), item.lockState(),
-                LOCKED);
-          }
-        });
+        holder.bind(LockInfoFragment.this::processDatabaseModifyEvent);
       }
 
       @Override public void unBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
@@ -382,7 +357,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     if (toggleAllTapTarget == null) {
       final LockInfoItem.ViewHolder holder =
           (LockInfoItem.ViewHolder) binding.lockInfoRecycler.findViewHolderForAdapterPosition(0);
-      final View radioDefault = holder.binding.lockInfoRadioDefault;
+      final View radioDefault = holder.getBinding().lockInfoRadioDefault;
       createDefaultLockTarget(holder, radioDefault);
     }
   }
@@ -398,7 +373,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
             super.onTargetClick(view);
 
             Timber.d("Default lock target clicked");
-            final View radioWhite = holder.binding.lockInfoRadioWhite;
+            final View radioWhite = holder.getBinding().lockInfoRadioWhite;
             createWhiteLockTarget(holder, radioWhite);
           }
         });
@@ -414,7 +389,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
           @Override public void onTargetClick(TapTargetView view) {
             super.onTargetClick(view);
             Timber.d("White lock target clicked");
-            final View radioBlack = holder.binding.lockInfoRadioBlack;
+            final View radioBlack = holder.getBinding().lockInfoRadioBlack;
             createBlackLockTarget(radioBlack);
           }
         });
