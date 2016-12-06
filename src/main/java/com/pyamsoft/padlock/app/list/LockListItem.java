@@ -22,6 +22,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.CompoundButton;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.Injector;
@@ -30,6 +31,8 @@ import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.pydroid.ActionSingle;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -44,8 +47,8 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     this.entry = entry;
   }
 
-  @NonNull @CheckResult AppEntry getEntry() {
-    return entry;
+  @CheckResult @NonNull LockListItem copyWithNewLockState(boolean locked) {
+    return new LockListItem(AppEntry.builder(entry).locked(locked).build());
   }
 
   @Override public int getType() {
@@ -60,19 +63,29 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     return FACTORY;
   }
 
+  @CheckResult boolean filterAgaint(@NonNull String query) {
+    final String name = entry.name().toLowerCase().trim();
+    Timber.d("Filter predicate: '%s' against %s", query, name);
+    return !name.startsWith(query);
+  }
+
   @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
-    holder.binding.lockListTitle.setText(entry.name());
-    holder.loadImage(entry.packageName());
-    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
-    holder.binding.lockListToggle.setChecked(entry.locked());
+    holder.bind(entry);
   }
 
   @Override public void unbindView(ViewHolder holder) {
     super.unbindView(holder);
-    holder.binding.lockListTitle.setText(null);
-    holder.binding.lockListIcon.setImageDrawable(null);
-    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
+    holder.unbind();
+  }
+
+  void onClick(@NonNull ActionSingle<AppEntry> click) {
+    click.call(entry);
+  }
+
+  interface OnLockSwitchCheckedChanged {
+
+    void call(boolean isChecked, int position, @NonNull AppEntry entry);
   }
 
   @SuppressWarnings("WeakerAccess") protected static class ItemFactory
@@ -85,8 +98,9 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   public static final class ViewHolder extends RecyclerView.ViewHolder
       implements AppIconLoaderView {
 
-    @NonNull final AdapterItemLocklistEntryBinding binding;
+    @NonNull private final AdapterItemLocklistEntryBinding binding;
     @Inject AppIconLoaderPresenter<ViewHolder> appIconLoaderPresenter;
+    @NonNull WeakReference<AppEntry> weakEntry;
 
     public ViewHolder(View itemView) {
       super(itemView);
@@ -94,6 +108,11 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
       Injector.get().provideComponent().plusAppIconLoaderComponent().inject(this);
       appIconLoaderPresenter.bindView(this);
+      weakEntry = new WeakReference<>(null);
+    }
+
+    @NonNull @CheckResult AdapterItemLocklistEntryBinding getBinding() {
+      return binding;
     }
 
     void loadImage(@NonNull String packageName) {
@@ -106,6 +125,43 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
     @Override public void onApplicationIconLoadedError() {
       Timber.e("Failed to load icon into ViewHolder");
+    }
+
+    void bind(@NonNull AppEntry entry) {
+      binding.lockListTitle.setText(entry.name());
+      binding.lockListToggle.setChecked(entry.locked());
+      binding.lockListToggle.setOnCheckedChangeListener(null);
+      loadImage(entry.packageName());
+
+      weakEntry.clear();
+      weakEntry = new WeakReference<>(entry);
+    }
+
+    void unbind() {
+      binding.lockListTitle.setText(null);
+      binding.lockListIcon.setImageDrawable(null);
+      binding.lockListToggle.setOnCheckedChangeListener(null);
+      weakEntry.clear();
+    }
+
+    void bind(@NonNull OnLockSwitchCheckedChanged onCheckChanged) {
+      final CompoundButton.OnCheckedChangeListener listener =
+          new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
+              // Don't check it yet, get auth first
+              compoundButton.setOnCheckedChangeListener(null);
+              compoundButton.setChecked(!b);
+              compoundButton.setOnCheckedChangeListener(this);
+
+              // TODO Authorize for package access
+              final AppEntry entry = weakEntry.get();
+              if (entry != null) {
+                onCheckChanged.call(b, getAdapterPosition(), entry);
+              }
+            }
+          };
+      binding.lockListToggle.setOnCheckedChangeListener(listener);
     }
   }
 }

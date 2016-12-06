@@ -34,7 +34,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -224,9 +223,7 @@ public class LockListFragment extends ActionBarFragment
 
     fastItemAdapter.withFilterPredicate((item, query) -> {
       final String queryString = String.valueOf(query).toLowerCase().trim();
-      final String name = item.getEntry().name().toLowerCase().trim();
-      Timber.d("Filter predicate: '%s' against %s", queryString, name);
-      return !name.startsWith(queryString);
+      return item.filterAgaint(queryString);
     });
 
     fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
@@ -250,22 +247,7 @@ public class LockListFragment extends ActionBarFragment
         Timber.d("onBindViewHolder: %d", i);
         final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
         fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).bindView(holder, list);
-
-        final CompoundButton.OnCheckedChangeListener listener =
-            new CompoundButton.OnCheckedChangeListener() {
-              @Override
-              public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
-                // Don't check it yet, get auth first
-                compoundButton.setOnCheckedChangeListener(null);
-                compoundButton.setChecked(!b);
-                compoundButton.setOnCheckedChangeListener(this);
-
-                // TODO Authorize for package access
-                processDatabaseModifyEvent(b, viewHolder.getAdapterPosition(),
-                    fastItemAdapter.getAdapterItem(viewHolder.getAdapterPosition()).getEntry());
-              }
-            };
-        holder.binding.lockListToggle.setOnCheckedChangeListener(listener);
+        holder.bind(LockListFragment.this::processDatabaseModifyEvent);
       }
 
       @Override public void unBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
@@ -282,7 +264,7 @@ public class LockListFragment extends ActionBarFragment
 
     fastItemAdapter.withSelectable(true);
     fastItemAdapter.withOnClickListener((view, iAdapter, item, i) -> {
-      displayLockInfoFragment(item.getEntry());
+      item.onClick(this::displayLockInfoFragment);
       return true;
     });
 
@@ -498,7 +480,7 @@ public class LockListFragment extends ActionBarFragment
       final LockListItem.ViewHolder holder =
           (LockListItem.ViewHolder) binding.applistRecyclerview.findViewHolderForAdapterPosition(1);
       if (holder != null) {
-        final View switchView = holder.binding.lockListToggle;
+        final View switchView = holder.getBinding().lockListToggle;
         listTarget = TapTarget.forView(switchView, getString(R.string.onboard_title_locklist),
             getString(R.string.onboard_desc_locklist)).tintTarget(false).cancelable(false);
       }
