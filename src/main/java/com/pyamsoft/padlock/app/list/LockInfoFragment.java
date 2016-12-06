@@ -327,46 +327,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @Override public void onListPopulated() {
     Timber.d("Refresh finished");
 
-    // Sort items here
-    fastItemAdapter.getItemAdapter().withComparator((entry1, entry2) -> {
-      // Starts with can lead to issues where a name is not the exact package name but still
-      // starts with it, and is wrongly stripped off.
-
-      //final boolean activity1Package = entry1.getEntry().name().startsWith(entry1.getPackageName());
-      //final boolean activity2Package = entry2.getEntry().name().startsWith(entry2.getPackageName());
-
-      // Package names are all the same
-      final String packageName = entry1.getPackageName();
-      final String entry1Name = entry1.getEntry().name();
-      final String entry2Name = entry2.getEntry().name();
-
-      // Calculate if the starting X characters in the activity name is the exact package name
-      boolean activity1Package = false;
-      if (entry1Name.startsWith(packageName)) {
-        final String strippedPackageName = entry1Name.replace(packageName, "");
-        if (strippedPackageName.charAt(0) == '.') {
-          activity1Package = true;
-        }
-      }
-
-      boolean activity2Package = false;
-      if (entry2Name.startsWith(packageName)) {
-        final String strippedPackageName = entry2Name.replace(packageName, "");
-        if (strippedPackageName.charAt(0) == '.') {
-          activity2Package = true;
-        }
-      }
-      if (activity1Package && activity2Package) {
-        return entry1Name.compareToIgnoreCase(entry2Name);
-      } else if (activity1Package) {
-        return -1;
-      } else if (activity2Package) {
-        return 1;
-      } else {
-        return entry1Name.compareToIgnoreCase(entry2Name);
-      }
-    }, true);
-
     binding.lockInfoRecycler.setClickable(true);
     presenter.showOnBoarding();
   }

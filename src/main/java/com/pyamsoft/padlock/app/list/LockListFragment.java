@@ -540,12 +540,6 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
 
-    // Sort list here
-    fastItemAdapter.getItemAdapter()
-        .withComparator((entry1, entry2) -> entry1.getEntry()
-            .name()
-            .compareToIgnoreCase(entry2.getEntry().name()), true);
-
     handler.post(stopRefreshRunnable);
     handler.post(() -> binding.applistFab.show());
 
