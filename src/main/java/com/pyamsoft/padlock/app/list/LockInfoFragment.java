@@ -157,7 +157,8 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
         }
       }
 
-      @Override public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List<Object> list) {
+      @Override
+      public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List<Object> list) {
         if (i < 0) {
           Timber.e("onBindViewHolder passed with invalid index: %d", i);
           return;
@@ -333,11 +334,21 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
       final String entry2Name = entry2.getEntry().name();
 
       // Calculate if the starting X characters in the activity name is the exact package name
-      final boolean activity1Package =
-          entry1Name.indexOf('.') == packageName.length() && entry1Name.startsWith(packageName);
-      final boolean activity2Package =
-          entry2Name.indexOf('.') == packageName.length() && entry2Name.startsWith(packageName);
+      boolean activity1Package = false;
+      if (entry1Name.startsWith(packageName)) {
+        final String strippedPackageName = entry1Name.replace(packageName, "");
+        if (strippedPackageName.charAt(0) == '.') {
+          activity1Package = true;
+        }
+      }
 
+      boolean activity2Package = false;
+      if (entry2Name.startsWith(packageName)) {
+        final String strippedPackageName = entry2Name.replace(packageName, "");
+        if (strippedPackageName.charAt(0) == '.') {
+          activity2Package = true;
+        }
+      }
       if (activity1Package && activity2Package) {
         return entry1Name.compareToIgnoreCase(entry2Name);
       } else if (activity1Package) {

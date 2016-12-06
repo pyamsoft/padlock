@@ -81,11 +81,12 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     lockedButton.setChecked(true);
 
     final String entryName = entry.name();
-    final String activityName;
-    if (entryName.indexOf('.') == packageName.length() && entryName.startsWith(packageName)) {
-      activityName = entryName.replace(packageName, "");
-    } else {
-      activityName = entryName;
+    String activityName = entryName;
+    if (entryName.startsWith(packageName)) {
+      final String strippedPackageName = entryName.replace(packageName, "");
+      if (strippedPackageName.charAt(0) == '.') {
+        activityName = strippedPackageName;
+      }
     }
     holder.binding.lockInfoActivity.setText(activityName);
   }
