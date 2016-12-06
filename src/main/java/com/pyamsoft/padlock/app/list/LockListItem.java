@@ -60,7 +60,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     return FACTORY;
   }
 
-  @Override public void bindView(ViewHolder holder, List payloads) {
+  @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
     holder.binding.lockListTitle.setText(entry.name());
     holder.loadImage(entry.packageName());

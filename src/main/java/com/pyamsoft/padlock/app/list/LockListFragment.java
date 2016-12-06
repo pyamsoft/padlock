@@ -234,7 +234,8 @@ public class LockListFragment extends ActionBarFragment
         }
       }
 
-      @Override public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List list) {
+      @Override
+      public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List<Object> list) {
         if (i < 0) {
           Timber.e("onBindViewHolder passed with invalid index: %d", i);
           return;
@@ -531,6 +532,13 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
+
+    // Sort list here
+    fastItemAdapter.getItemAdapter()
+        .withComparator((entry1, entry2) -> entry1.getEntry()
+            .name()
+            .compareToIgnoreCase(entry2.getEntry().name()), true);
+
     handler.post(stopRefreshRunnable);
     handler.post(() -> binding.applistFab.show());
 

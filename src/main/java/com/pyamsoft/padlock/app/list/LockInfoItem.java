@@ -56,7 +56,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     return R.layout.adapter_item_lockinfo;
   }
 
-  @Override public void bindView(ViewHolder holder, List payloads) {
+  @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
 
     // Remove any old binds
@@ -82,7 +82,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
     final String entryName = entry.name();
     final String activityName;
-    if (entryName.startsWith(packageName)) {
+    if (entryName.indexOf('.') == packageName.length() && entryName.startsWith(packageName)) {
       activityName = entryName.replace(packageName, "");
     } else {
       activityName = entryName;
