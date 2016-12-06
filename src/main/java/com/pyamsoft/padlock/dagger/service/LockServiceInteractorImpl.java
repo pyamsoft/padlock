@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
+import com.pyamsoft.padlock.app.service.RecheckService;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
