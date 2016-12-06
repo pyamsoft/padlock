@@ -157,7 +157,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
         }
       }
 
-      @Override public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List list) {
+      @Override public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List<Object> list) {
         if (i < 0) {
           Timber.e("onBindViewHolder passed with invalid index: %d", i);
           return;
@@ -314,15 +314,41 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
     Timber.d("Add entry: %s", entry);
     fastItemAdapter.add(new LockInfoItem(appPackageName, entry));
-    //, (position, name, currentState, newState) -> {
-    //      Timber.d("Process lock state selection: [%d] %s from %s to %s", position, name,
-    //          currentState, newState);
-    //      processDatabaseModifyEvent(position, name, currentState, newState);
-    //    }));
   }
 
   @Override public void onListPopulated() {
     Timber.d("Refresh finished");
+
+    // Sort items here
+    fastItemAdapter.getItemAdapter().withComparator((entry1, entry2) -> {
+      // Starts with can lead to issues where a name is not the exact package name but still
+      // starts with it, and is wrongly stripped off.
+
+      //final boolean activity1Package = entry1.getEntry().name().startsWith(entry1.getPackageName());
+      //final boolean activity2Package = entry2.getEntry().name().startsWith(entry2.getPackageName());
+
+      // Package names are all the same
+      final String packageName = entry1.getPackageName();
+      final String entry1Name = entry1.getEntry().name();
+      final String entry2Name = entry2.getEntry().name();
+
+      // Calculate if the starting X characters in the activity name is the exact package name
+      final boolean activity1Package =
+          entry1Name.indexOf('.') == packageName.length() && entry1Name.startsWith(packageName);
+      final boolean activity2Package =
+          entry2Name.indexOf('.') == packageName.length() && entry2Name.startsWith(packageName);
+
+      if (activity1Package && activity2Package) {
+        return entry1Name.compareToIgnoreCase(entry2Name);
+      } else if (activity1Package) {
+        return -1;
+      } else if (activity2Package) {
+        return 1;
+      } else {
+        return entry1Name.compareToIgnoreCase(entry2Name);
+      }
+    }, true);
+
     binding.lockInfoRecycler.setClickable(true);
     presenter.showOnBoarding();
   }

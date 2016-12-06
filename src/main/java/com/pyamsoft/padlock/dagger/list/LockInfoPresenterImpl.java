@@ -119,19 +119,19 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
 
               return ActivityEntry.builder().name(activityName).lockState(state).build();
             })
-        .sorted((activityEntry, activityEntry2) -> {
-          final boolean activity1Package = activityEntry.name().startsWith(packageName);
-          final boolean activity2Package = activityEntry2.name().startsWith(packageName);
-          if (activity1Package && activity2Package) {
-            return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
-          } else if (activity1Package) {
-            return -1;
-          } else if (activity2Package) {
-            return 1;
-          } else {
-            return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
-          }
-        })
+        //.sorted((activityEntry, activityEntry2) -> {
+        //  final boolean activity1Package = activityEntry.name().startsWith(packageName);
+        //  final boolean activity2Package = activityEntry2.name().startsWith(packageName);
+        //  if (activity1Package && activity2Package) {
+        //    return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
+        //  } else if (activity1Package) {
+        //    return -1;
+        //  } else if (activity2Package) {
+        //    return 1;
+        //  } else {
+        //    return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
+        //  }
+        //})
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(activityEntry -> getView(

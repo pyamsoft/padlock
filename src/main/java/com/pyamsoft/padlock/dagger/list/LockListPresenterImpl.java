@@ -112,7 +112,6 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
           return new Pair<>(packageName, found != null);
         })
         .flatMap(pair -> lockListInteractor.createFromPackageInfo(pair.first, pair.second))
-        .sorted((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()))
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(appEntry -> getView(lockList -> lockList.onEntryAddedToList(appEntry)),
