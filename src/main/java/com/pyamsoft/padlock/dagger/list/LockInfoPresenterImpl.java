@@ -25,7 +25,6 @@ import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -93,64 +92,56 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
   @Override public void populateList(@NonNull String packageName) {
     SubscriptionHelper.unsubscribe(populateListSubscription);
 
-    // Filter out the lockscreen and crashlog entries
-    final Observable<List<String>> activityInfoObservable =
-        lockInfoInteractor.getPackageActivities(packageName).toList();
-
-    // Zip together the lists into a list of ActivityEntry objects
-    populateListSubscription =
-        Observable.zip(lockInfoInteractor.getActivityEntries(packageName), activityInfoObservable,
-            (padLockEntries, activityInfos) -> {
-              final List<ActivityEntry> entries = new ArrayList<>();
-              for (final String name : activityInfos) {
-                final PadLockEntry.WithPackageName foundEntry =
-                    findEntryInActivities(padLockEntries, name);
-
-                if (foundEntry != null) {
-                  padLockEntries.remove(foundEntry);
+    // Search the list of activities in the package name for any which are locked
+    populateListSubscription = lockInfoInteractor.getPackageActivities(packageName)
+        .withLatestFrom(lockInfoInteractor.getActivityEntries(packageName),
+            (activityName, padLockEntries) -> {
+              PadLockEntry.WithPackageName foundEntry = null;
+              for (final PadLockEntry.WithPackageName entry : padLockEntries) {
+                if (entry.activityName().equals(activityName)) {
+                  foundEntry = entry;
+                  break;
                 }
-
-                final LockState state;
-                if (foundEntry == null) {
-                  state = LockState.DEFAULT;
-                } else {
-                  if (foundEntry.whitelist()) {
-                    state = LockState.WHITELISTED;
-                  } else {
-                    state = LockState.LOCKED;
-                  }
-                }
-
-                entries.add(ActivityEntry.builder().lockState(state).name(name).build());
               }
 
-              return entries;
-            })
-            .flatMap(Observable::from)
-            .filter(activityEntry -> activityEntry != null)
-            .sorted((activityEntry, activityEntry2) -> {
-              final boolean activity1Package = activityEntry.name().startsWith(packageName);
-              final boolean activity2Package = activityEntry2.name().startsWith(packageName);
-              if (activity1Package && activity2Package) {
-                return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
-              } else if (activity1Package) {
-                return -1;
-              } else if (activity2Package) {
-                return 1;
+              final LockState state;
+              if (foundEntry == null) {
+                Timber.d("Could not find a lock entry for %s", activityName);
+                state = LockState.DEFAULT;
               } else {
-                return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
+                Timber.i("Found a lock entry for %s", activityName);
+                if (foundEntry.whitelist()) {
+                  state = LockState.WHITELISTED;
+                } else {
+                  state = LockState.LOCKED;
+                }
               }
+
+              return ActivityEntry.builder().name(activityName).lockState(state).build();
             })
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
-            .subscribe(activityEntry -> getView(
-                lockInfoView -> lockInfoView.onEntryAddedToList(activityEntry)), throwable -> {
-              Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
-              getView(LockInfoView::onListPopulateError);
-            }, () -> {
-              getView(LockInfoView::onListPopulated);
-              SubscriptionHelper.unsubscribe(populateListSubscription);
-            });
+        .sorted((activityEntry, activityEntry2) -> {
+          final boolean activity1Package = activityEntry.name().startsWith(packageName);
+          final boolean activity2Package = activityEntry2.name().startsWith(packageName);
+          if (activity1Package && activity2Package) {
+            return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
+          } else if (activity1Package) {
+            return -1;
+          } else if (activity2Package) {
+            return 1;
+          } else {
+            return activityEntry.name().compareToIgnoreCase(activityEntry2.name());
+          }
+        })
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(activityEntry -> getView(
+            lockInfoView -> lockInfoView.onEntryAddedToList(activityEntry)), throwable -> {
+          Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
+          getView(LockInfoView::onListPopulateError);
+        }, () -> {
+          getView(LockInfoView::onListPopulated);
+          SubscriptionHelper.unsubscribe(populateListSubscription);
+        });
   }
 
   @Override
