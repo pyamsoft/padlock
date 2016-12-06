@@ -64,6 +64,7 @@ public class LockListFragment extends ActionBarFragment
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
   @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
+  @NonNull private static final String FORCE_REFRESH = "key_force_refresh";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @NonNull private final AsyncDrawable.Mapper taskMap = new AsyncDrawable.Mapper();
   @SuppressWarnings("WeakerAccess") LockListAdapter fastItemAdapter;
@@ -104,6 +105,11 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
+
+    if (savedInstanceState != null) {
+      Timber.i("Restore forceRefresh state from savedInstanceState");
+      forceRefresh = savedInstanceState.getBoolean(FORCE_REFRESH, true);
+    }
 
     loadedPresenterKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
@@ -362,6 +368,7 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onSaveInstanceState(Bundle outState) {
     PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
     PersistentCache.get().saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
+    outState.putBoolean(FORCE_REFRESH, forceRefresh);
     super.onSaveInstanceState(outState);
   }
 

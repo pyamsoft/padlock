@@ -55,11 +55,12 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @NonNull private static final String ARG_APP_NAME = "app_name";
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
   @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
+  @NonNull private static final String FORCE_REFRESH = "key_force_refresh";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
 
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") LockInfoAdapter fastItemAdapter;
-  @SuppressWarnings("WeakerAccess") boolean firstRefresh;
+  @SuppressWarnings("WeakerAccess") boolean forceRefresh;
   private FragmentLockinfoBinding binding;
   private long loadedPresenterKey;
   private long loadedAdapterKey;
@@ -97,10 +98,15 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
       throw new NullPointerException("App information is NULL");
     }
 
+    if (savedInstanceState != null) {
+      Timber.i("Restore forceRefresh state from savedInstanceState");
+      forceRefresh = savedInstanceState.getBoolean(FORCE_REFRESH, true);
+    }
+
     loadedPresenterKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
           @NonNull @Override public PersistLoader<LockInfoPresenter> createLoader() {
-            firstRefresh = true;
+            forceRefresh = true;
             return new LockInfoPresenterLoader();
           }
 
@@ -263,7 +269,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
     binding.lockInfoRecycler.setAdapter(fastItemAdapter);
     presenter.loadApplicationIcon(appPackageName);
-    if (firstRefresh) {
+    if (forceRefresh) {
       refreshList();
     } else {
       Timber.d("We are already refreshed, just refresh the request listeners");
@@ -285,6 +291,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @Override public void onSaveInstanceState(Bundle outState) {
     PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
     PersistentCache.get().saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
+    outState.putBoolean(FORCE_REFRESH, forceRefresh);
     super.onSaveInstanceState(outState);
   }
 
