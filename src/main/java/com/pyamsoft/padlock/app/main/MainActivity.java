@@ -303,10 +303,13 @@ public class MainActivity extends RatingActivity
   }
 
   @NonNull @Override protected String[] getChangeLogLines() {
-    final String line1 = "FEATURE: Option to not launch PadLock when device is locked";
-    final String line2 = "FEATURE: Purge old, uninstalled applications from the Settings menu";
-    final String line3 = "BUGFIX: Additional bugfixes and optimizations";
-    return new String[] { line1, line2, line3 };
+    final String line1 = "CHANGE: Add a navigation drawer to interact with the application";
+    final String line2 = "CHANGE: Optimization for list entry processing";
+    final String line3 =
+        "CHANGE: Smaller APK size, should run on more devices now, including those without Google Play Services";
+    final String line4 = "BUGFIX: Fixes a crash in the donation page";
+    final String line5 = "BUGFIX: Fixes a crash with image loading on KitKat";
+    return new String[] { line1, line2, line3, line4, line5 };
   }
 
   @NonNull @Override protected String getVersionName() {
