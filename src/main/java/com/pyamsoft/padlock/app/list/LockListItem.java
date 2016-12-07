@@ -129,8 +129,8 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
     void bind(@NonNull AppEntry entry) {
       binding.lockListTitle.setText(entry.name());
-      binding.lockListToggle.setChecked(entry.locked());
       binding.lockListToggle.setOnCheckedChangeListener(null);
+      binding.lockListToggle.setChecked(entry.locked());
       loadImage(entry.packageName());
 
       weakEntry.clear();
