@@ -16,3 +16,8 @@
 #   public *;
 #}
 
+
+# Keep the SearchView class so that it works in Release builds.
+# https://code.google.com/p/android/issues/detail?id=58508
+-keep class android.support.v7.widget.SearchView { *; }
+
