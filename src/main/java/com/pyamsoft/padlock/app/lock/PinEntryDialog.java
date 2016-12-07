@@ -140,8 +140,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
       dismiss();
     });
 
-    final AsyncMap.Entry task = AsyncDrawable.with(getContext())
-        .load(R.drawable.ic_close_24dp, new RXLoader())
+    final AsyncMap.Entry task = AsyncDrawable.load(R.drawable.ic_close_24dp, new RXLoader())
         .tint(android.R.color.black)
         .into(binding.pinEntryClose);
     taskMap.put("close", task);
@@ -189,8 +188,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     // Force keyboard focus
     pinEntryText.requestFocus();
 
-    final AsyncMap.Entry task = AsyncDrawable.with(getContext())
-        .load(R.drawable.ic_arrow_forward_24dp, new RXLoader())
+    final AsyncMap.Entry task = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp, new RXLoader())
         .into(binding.pinImageGo);
     taskMap.put("arrow", task);
   }
