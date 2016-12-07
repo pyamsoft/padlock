@@ -44,6 +44,7 @@ import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
+import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroidrx.RXLoader;
@@ -81,7 +82,6 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   }
 
   @NonNull private final Intent home;
-  @NonNull private final AsyncDrawable.Mapper taskMap;
   @SuppressWarnings("WeakerAccess") LockScreenPresenter presenter;
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") String lockedActivityName;
@@ -106,12 +106,12 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   private long loadedKey;
   private String lockedRealName;
   private boolean lockedSystem;
+  @Nullable private AsyncMap.Entry arrowGoTask;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
     home.addCategory(Intent.CATEGORY_HOME);
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    taskMap = new AsyncDrawable.Mapper();
   }
 
   static void addToLockedMap(@NonNull String packageName, @NonNull String className,
@@ -213,10 +213,9 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
       }
     });
 
-    final AsyncMap.Entry arrowGoTask = AsyncDrawable.with(this)
-        .load(R.drawable.ic_arrow_forward_24dp, new RXLoader())
+    AsyncMapHelper.unsubscribe(arrowGoTask);
+    arrowGoTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp, new RXLoader())
         .into(binding.lockImageGo);
-    taskMap.put("arrow", arrowGoTask);
 
     clearDisplay();
 
@@ -296,8 +295,8 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     }
 
     Timber.d("Clear currently locked");
-    taskMap.clear();
     imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
+    AsyncMapHelper.unsubscribe(arrowGoTask);
     binding.unbind();
   }
 

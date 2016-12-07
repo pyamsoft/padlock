@@ -187,6 +187,8 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
                 case LOCKED:
                   getView(lockInfoView -> lockInfoView.onDatabaseEntryCreated(position));
                   break;
+                default:
+                  throw new IllegalStateException("Unsupported lock state: " + lockState);
               }
             }, throwable -> {
               Timber.e(throwable, "onError modifyDatabaseEntry");

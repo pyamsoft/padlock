@@ -48,6 +48,7 @@ import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
+import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroiddesign.fab.HideScrollFABBehavior;
@@ -65,7 +66,6 @@ public class LockListFragment extends ActionBarFragment
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
   @NonNull private static final String FORCE_REFRESH = "key_force_refresh";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
-  @NonNull private final AsyncDrawable.Mapper taskMap = new AsyncDrawable.Mapper();
   @SuppressWarnings("WeakerAccess") LockListAdapter fastItemAdapter;
   @SuppressWarnings("WeakerAccess") LockListLayoutManager lockListLayoutManager;
   @SuppressWarnings("WeakerAccess") LockListPresenter presenter;
@@ -109,6 +109,7 @@ public class LockListFragment extends ActionBarFragment
   @Nullable private TapTargetSequence sequence;
   @Nullable private DividerItemDecoration dividerDecoration;
   @Nullable private MenuItem searchItem;
+  @Nullable private AsyncMap.Entry fabIconTask;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -379,7 +380,7 @@ public class LockListFragment extends ActionBarFragment
     }
     displaySystemItem = null;
 
-    taskMap.clear();
+    AsyncMapHelper.unsubscribe(fabIconTask);
     handler.removeCallbacksAndMessages(null);
     binding.unbind();
     super.onDestroyView();
@@ -399,17 +400,15 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void setFABStateEnabled() {
-    final AsyncMap.Entry fabIconTask = AsyncDrawable.with(getContext())
-        .load(R.drawable.ic_lock_outline_24dp, new RXLoader())
+    AsyncMapHelper.unsubscribe(fabIconTask);
+    fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_outline_24dp, new RXLoader())
         .into(binding.applistFab);
-    taskMap.put("fab", fabIconTask);
   }
 
   @Override public void setFABStateDisabled() {
-    final AsyncMap.Entry fabIconTask = AsyncDrawable.with(getContext())
-        .load(R.drawable.ic_lock_open_24dp, new RXLoader())
-        .into(binding.applistFab);
-    taskMap.put("fab", fabIconTask);
+    AsyncMapHelper.unsubscribe(fabIconTask);
+    fabIconTask =
+        AsyncDrawable.load(R.drawable.ic_lock_open_24dp, new RXLoader()).into(binding.applistFab);
   }
 
   @Override public void onCreateAccessibilityDialog() {
