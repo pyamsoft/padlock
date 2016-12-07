@@ -31,6 +31,7 @@ import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import timber.log.Timber;
 
 class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
@@ -113,7 +114,6 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
         default:
           throw new IllegalStateException("Illegal enum state");
       }
-
       binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
       binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
       binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
@@ -134,6 +134,12 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     }
 
     void bind(@NonNull OnLockRadioCheckedChanged onCheckedChanged) {
+      binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener((radioGroup, i) -> {
+        if (radioGroup.getCheckedRadioButtonId() == 0) {
+          Timber.e("No radiobutton is checked, set to default");
+          getBinding().lockInfoRadioDefault.setChecked(true);
+        }
+      });
       binding.lockInfoRadioDefault.setOnCheckedChangeListener(
           new OnRadioCheckChangedListener(getAdapterPosition(), weakEntry, onCheckedChanged,
               LockState.DEFAULT));
@@ -150,6 +156,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
       binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
       binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
       binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
+      binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener(null);
       weakEntry.clear();
     }
 
