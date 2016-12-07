@@ -88,7 +88,7 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
             Timber.i("Package Added: %s", packageName);
             final Notification notification1 =
                 new NotificationCompat.Builder(appContext).setContentTitle("Lock New Application")
-                    .setSmallIcon(R.drawable.ic_lock_outline_24dp)
+                    .setSmallIcon(R.drawable.ic_notification_lock)
                     .setColor(ContextCompat.getColor(appContext, R.color.blue500))
                     .setContentText("Click to lock the newly installed application: " + s)
                     .setContentIntent(pendingIntent)
