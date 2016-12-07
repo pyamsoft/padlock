@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -194,6 +195,12 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     dismissOnboarding();
     setActionBarTitle(R.string.app_name);
     setActionBarUpEnabled(false);
+
+    // Show the menu items again
+    final Fragment lockListFragment = getFragmentManager().findFragmentByTag(LockListFragment.TAG);
+    if (lockListFragment instanceof LockListFragment) {
+      ((LockListFragment) lockListFragment).showMenuItems();
+    }
 
     binding.lockInfoRecycler.removeItemDecoration(dividerDecoration);
     binding.lockInfoRecycler.setOnClickListener(null);

@@ -191,6 +191,7 @@ public class LockListFragment extends ActionBarFragment
 
     setActionBarUpEnabled(true);
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
+    showMenuItems();
   }
 
   @CheckResult @NonNull private SearchView.OnQueryTextListener getOnQueryTextListener() {
@@ -280,10 +281,8 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onPrepareOptionsMenu(@NonNull Menu menu) {
     super.onPrepareOptionsMenu(menu);
-    if (isResumed()) {
-      setupLockListMenuItems(menu);
-      setupSearchItem(menu);
-    }
+    setupLockListMenuItems(menu);
+    setupSearchItem(menu);
   }
 
   private void setupSearchItem(@NonNull Menu menu) {
@@ -567,13 +566,33 @@ public class LockListFragment extends ActionBarFragment
     presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system());
   }
 
-  void displayLockInfoFragment(@NonNull AppEntry entry) {
+  void hideMenuItems() {
     if (searchItem != null) {
       searchItem.collapseActionView();
+      searchItem.setVisible(false);
     }
+
+    if (displaySystemItem != null) {
+      displaySystemItem.setVisible(false);
+    }
+  }
+
+  void showMenuItems() {
+    if (searchItem != null) {
+      searchItem.collapseActionView();
+      searchItem.setVisible(true);
+    }
+
+    if (displaySystemItem != null) {
+      displaySystemItem.setVisible(true);
+    }
+  }
+
+  void displayLockInfoFragment(@NonNull AppEntry entry) {
 
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
+      hideMenuItems();
       fragmentManager.beginTransaction()
           .add(R.id.main_view_container, LockInfoFragment.newInstance(entry), LockInfoFragment.TAG)
           .addToBackStack(null)
