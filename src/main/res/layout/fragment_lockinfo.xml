@@ -93,11 +93,28 @@
 
     </RelativeLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/lock_info_recycler"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />
+        >
+
+      <android.support.v7.widget.RecyclerView
+          android:id="@+id/lock_info_recycler"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          />
+
+      <ProgressBar
+          android:id="@+id/lock_info_progress"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:clickable="false"
+          android:focusable="false"
+          android:longClickable="false"
+          style="?attr/progressBarStyle"
+          />
+
+    </FrameLayout>
 
   </LinearLayout>
 

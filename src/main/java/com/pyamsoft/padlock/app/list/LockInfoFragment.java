@@ -146,6 +146,12 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
 
     setupRecyclerView();
+    setupProgressSpinner();
+  }
+
+  private void setupProgressSpinner() {
+    binding.lockInfoProgress.setIndeterminate(true);
+    binding.lockInfoProgress.setVisibility(View.GONE);
   }
 
   private void setupRecyclerView() {
@@ -248,6 +254,8 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
       refreshList();
     } else {
       Timber.d("We are already refreshed, just refresh the request listeners");
+      binding.lockInfoProgress.setVisibility(View.GONE);
+      binding.lockInfoRecycler.setVisibility(View.VISIBLE);
       presenter.showOnBoarding();
     }
   }
@@ -302,6 +310,8 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @Override public void onListPopulated() {
     Timber.d("Refresh finished");
 
+    binding.lockInfoProgress.setVisibility(View.GONE);
+    binding.lockInfoRecycler.setVisibility(View.VISIBLE);
     binding.lockInfoRecycler.setClickable(true);
     presenter.showOnBoarding();
   }
@@ -314,6 +324,9 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onListCleared() {
     Timber.d("onListCleared");
+
+    binding.lockInfoProgress.setVisibility(View.VISIBLE);
+    binding.lockInfoRecycler.setVisibility(View.GONE);
   }
 
   @Override public void onApplicationIconLoadedError() {
