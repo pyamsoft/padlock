@@ -239,19 +239,17 @@ public class LockListFragment extends ActionBarFragment
 
       @Override
       public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List<Object> list) {
-        if (i < 0) {
-          Timber.e("onBindViewHolder passed with invalid index: %d", i);
-          return;
-        }
-
-        Timber.d("onBindViewHolder: %d", i);
         final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
         fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).bindView(holder, list);
         holder.bind(LockListFragment.this::processDatabaseModifyEvent);
       }
 
       @Override public void unBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-        toLockListViewHolder(viewHolder).unbind();
+        final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
+        final LockListItem item = (LockListItem) holder.itemView.getTag();
+        if (item != null) {
+          item.unbindView(holder);
+        }
       }
     });
 
