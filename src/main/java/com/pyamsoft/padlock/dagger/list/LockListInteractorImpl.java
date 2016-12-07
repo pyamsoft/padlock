@@ -27,7 +27,6 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
-import timber.log.Timber;
 
 class LockListInteractorImpl extends LockCommonInteractorImpl implements LockListInteractor {
 
@@ -77,7 +76,6 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
 
   @NonNull @Override
   public Observable<AppEntry> createFromPackageInfo(@NonNull String packageName, boolean locked) {
-    Timber.d("Create AppEntry from package info: %s", packageName);
     return packageManagerWrapper.getApplicationInfo(packageName)
         .map(info -> AppEntry.builder()
             .name(packageManagerWrapper.loadPackageLabel(info).toBlocking().first())
