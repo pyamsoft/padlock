@@ -20,6 +20,7 @@ import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -32,7 +33,6 @@ import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.ActionSingle;
-import java.lang.ref.WeakReference;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -100,7 +100,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
     @NonNull private final AdapterItemLocklistEntryBinding binding;
     @Inject AppIconLoaderPresenter<ViewHolder> appIconLoaderPresenter;
-    @NonNull WeakReference<AppEntry> weakEntry;
+    @Nullable AppEntry entry;
 
     public ViewHolder(View itemView) {
       super(itemView);
@@ -108,7 +108,6 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
 
       Injector.get().provideComponent().plusAppIconLoaderComponent().inject(this);
       appIconLoaderPresenter.bindView(this);
-      weakEntry = new WeakReference<>(null);
     }
 
     @NonNull @CheckResult AdapterItemLocklistEntryBinding getBinding() {
@@ -133,15 +132,14 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
       binding.lockListToggle.setChecked(entry.locked());
       loadImage(entry.packageName());
 
-      weakEntry.clear();
-      weakEntry = new WeakReference<>(entry);
+      this.entry = entry;
     }
 
     void unbind() {
       binding.lockListTitle.setText(null);
       binding.lockListIcon.setImageDrawable(null);
       binding.lockListToggle.setOnCheckedChangeListener(null);
-      weakEntry.clear();
+      entry = null;
     }
 
     void bind(@NonNull OnLockSwitchCheckedChanged onCheckChanged) {
@@ -155,9 +153,10 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
               compoundButton.setOnCheckedChangeListener(this);
 
               // TODO Authorize for package access
-              final AppEntry entry = weakEntry.get();
               if (entry != null) {
                 onCheckChanged.call(b, getAdapterPosition(), entry);
+              } else {
+                Timber.e("AppEntry is NULL");
               }
             }
           };

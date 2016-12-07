@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.app.list;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -29,7 +30,6 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
-import java.lang.ref.WeakReference;
 import java.util.List;
 import timber.log.Timber;
 
@@ -86,12 +86,11 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
   protected static final class ViewHolder extends RecyclerView.ViewHolder {
 
     @NonNull private final AdapterItemLockinfoBinding binding;
-    @NonNull WeakReference<ActivityEntry> weakEntry;
+    @Nullable ActivityEntry entry;
 
     ViewHolder(View itemView) {
       super(itemView);
       binding = DataBindingUtil.bind(itemView);
-      weakEntry = new WeakReference<>(null);
     }
 
     @CheckResult @NonNull AdapterItemLockinfoBinding getBinding() {
@@ -129,25 +128,18 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
       }
       binding.lockInfoActivity.setText(activityName);
 
-      weakEntry.clear();
-      weakEntry = new WeakReference<>(entry);
+      this.entry = entry;
     }
 
     void bind(@NonNull OnLockRadioCheckedChanged onCheckedChanged) {
-      binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener((radioGroup, i) -> {
-        if (radioGroup.getCheckedRadioButtonId() == 0) {
-          Timber.e("No radiobutton is checked, set to default");
-          getBinding().lockInfoRadioDefault.setChecked(true);
-        }
-      });
       binding.lockInfoRadioDefault.setOnCheckedChangeListener(
-          new OnRadioCheckChangedListener(getAdapterPosition(), weakEntry, onCheckedChanged,
+          new OnRadioCheckChangedListener(getAdapterPosition(), entry, onCheckedChanged,
               LockState.DEFAULT));
       binding.lockInfoRadioWhite.setOnCheckedChangeListener(
-          new OnRadioCheckChangedListener(getAdapterPosition(), weakEntry, onCheckedChanged,
+          new OnRadioCheckChangedListener(getAdapterPosition(), entry, onCheckedChanged,
               LockState.WHITELISTED));
       binding.lockInfoRadioBlack.setOnCheckedChangeListener(
-          new OnRadioCheckChangedListener(getAdapterPosition(), weakEntry, onCheckedChanged,
+          new OnRadioCheckChangedListener(getAdapterPosition(), entry, onCheckedChanged,
               LockState.LOCKED));
     }
 
@@ -156,21 +148,20 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
       binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
       binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
       binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
-      binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener(null);
-      weakEntry.clear();
+      entry = null;
     }
 
     static class OnRadioCheckChangedListener implements CompoundButton.OnCheckedChangeListener {
 
       private final int position;
-      @NonNull private final WeakReference<ActivityEntry> weakEntry;
+      @Nullable private final ActivityEntry entry;
       @NonNull private final OnLockRadioCheckedChanged onCheckedChanged;
       @NonNull private final LockState changeToState;
 
-      OnRadioCheckChangedListener(int position, @NonNull WeakReference<ActivityEntry> weakEntry,
+      OnRadioCheckChangedListener(int position, @Nullable ActivityEntry entry,
           @NonNull OnLockRadioCheckedChanged onCheckedChanged, @NonNull LockState changeToState) {
         this.position = position;
-        this.weakEntry = weakEntry;
+        this.entry = entry;
         this.onCheckedChanged = onCheckedChanged;
         this.changeToState = changeToState;
       }
@@ -182,9 +173,10 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
           compoundButton.setChecked(false);
           compoundButton.setOnCheckedChangeListener(this);
 
-          final ActivityEntry entry = weakEntry.get();
           if (entry != null) {
             onCheckedChanged.call(position, entry.name(), entry.lockState(), changeToState);
+          } else {
+            Timber.e("Entry is NULL");
           }
         }
       }

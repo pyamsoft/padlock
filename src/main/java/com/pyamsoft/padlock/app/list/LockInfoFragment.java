@@ -183,14 +183,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
       }
 
       @Override public void unBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-        if (i < 0) {
-          Timber.e("unBindViewHolder passed with invalid index: %d", i);
-          return;
-        }
-
-        Timber.d("unBindViewHolder: %d", i);
-        final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).unbindView(holder);
+        toLockInfoViewHolder(viewHolder).unbind();
       }
     });
 

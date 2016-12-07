@@ -251,14 +251,7 @@ public class LockListFragment extends ActionBarFragment
       }
 
       @Override public void unBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-        if (i < 0) {
-          Timber.e("unBindViewHolder passed with invalid index: %d", i);
-          return;
-        }
-
-        Timber.d("unBindViewHolder: %d", i);
-        final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).unbindView(holder);
+        toLockListViewHolder(viewHolder).unbind();
       }
     });
 
