@@ -309,34 +309,12 @@ public class LockListFragment extends ActionBarFragment
     presenter.setSystemVisibilityFromPreference();
   }
 
-  private void setSystemCheckListener() {
-    if (displaySystemItem == null) {
-      throw new IllegalStateException("DisplaySystem menu item is NULL.");
-    }
-
-    displaySystemItem.setOnMenuItemClickListener(item -> {
-      if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing()) {
-        Timber.d("List is not refreshing. Allow change of system preference");
-        if (item.isChecked()) {
-          presenter.setSystemInvisible();
-        } else {
-          presenter.setSystemVisible();
-        }
-
-        refreshList();
-      }
-      return true;
-    });
-  }
-
   @SuppressWarnings("WeakerAccess") void setSystemVisible(boolean visible) {
     if (displaySystemItem == null) {
       throw new IllegalStateException("DisplaySystem menu item is NULL.");
     }
 
-    displaySystemItem.setOnMenuItemClickListener(null);
     displaySystemItem.setChecked(visible);
-    setSystemCheckListener();
   }
 
   @Override public void setSystemVisible() {
@@ -365,6 +343,7 @@ public class LockListFragment extends ActionBarFragment
       searchView.setOnCloseListener(null);
     }
     searchView = null;
+    displaySystemItem = null;
 
     binding.applistRecyclerview.removeItemDecoration(dividerDecoration);
     binding.applistRecyclerview.setOnClickListener(null);
@@ -374,15 +353,28 @@ public class LockListFragment extends ActionBarFragment
     binding.applistFab.setOnClickListener(null);
     binding.applistSwipeRefresh.setOnRefreshListener(null);
 
-    if (displaySystemItem != null) {
-      displaySystemItem.setOnMenuItemClickListener(null);
-    }
-    displaySystemItem = null;
-
     AsyncMapHelper.unsubscribe(fabIconTask);
     handler.removeCallbacksAndMessages(null);
     binding.unbind();
     super.onDestroyView();
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.menu_is_system:
+        if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing()) {
+          Timber.d("List is not refreshing. Allow change of system preference");
+          if (item.isChecked()) {
+            presenter.setSystemInvisible();
+          } else {
+            presenter.setSystemVisible();
+          }
+
+          refreshList();
+        }
+        break;
+    }
+    return super.onOptionsItemSelected(item);
   }
 
   @Override public void onDestroy() {
