@@ -24,8 +24,6 @@ import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -90,39 +88,30 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
     SubscriptionHelper.unsubscribe(populateListSubscription);
     // Search the list of activities in the package name for any which are locked
     populateListSubscription = lockInfoInteractor.getPackageActivities(packageName)
-        .toList()
         .withLatestFrom(lockInfoInteractor.getActivityEntries(packageName),
-            (activityNames, padLockEntries) -> {
-              final List<ActivityEntry> activityEntryList = new ArrayList<>();
-              for (final String activityName : activityNames) {
-                PadLockEntry.WithPackageName foundEntry = null;
-                for (int i = 0; i < padLockEntries.size(); ++i) {
-                  final PadLockEntry.WithPackageName entry = padLockEntries.get(i);
-                  if (entry.activityName().equals(activityName)) {
-                    foundEntry = entry;
-                    break;
-                  }
+            (activityName, padLockEntries) -> {
+              PadLockEntry.WithPackageName foundEntry = null;
+              for (int i = 0; i < padLockEntries.size(); ++i) {
+                final PadLockEntry.WithPackageName entry = padLockEntries.get(i);
+                if (entry.activityName().equals(activityName)) {
+                  foundEntry = entry;
+                  break;
                 }
-
-                final LockState state;
-                if (foundEntry == null) {
-                  state = LockState.DEFAULT;
-                } else {
-                  padLockEntries.remove(foundEntry);
-                  if (foundEntry.whitelist()) {
-                    state = LockState.WHITELISTED;
-                  } else {
-                    state = LockState.LOCKED;
-                  }
-                }
-
-                activityEntryList.add(
-                    ActivityEntry.builder().name(activityName).lockState(state).build());
               }
 
-              return activityEntryList;
+              final LockState state;
+              if (foundEntry == null) {
+                state = LockState.DEFAULT;
+              } else {
+                if (foundEntry.whitelist()) {
+                  state = LockState.WHITELISTED;
+                } else {
+                  state = LockState.LOCKED;
+                }
+              }
+
+              return ActivityEntry.builder().name(activityName).lockState(state).build();
             })
-        .flatMap(Observable::from)
         .sorted((activityEntry, activityEntry2) -> {
           // Package names are all the same
           final String entry1Name = activityEntry.name();

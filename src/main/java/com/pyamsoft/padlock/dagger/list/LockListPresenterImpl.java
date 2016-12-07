@@ -24,12 +24,9 @@ import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
@@ -115,35 +112,20 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
                   }
                 }))
         .filter(s -> s != null)
-        .toList()
-        .withLatestFrom(lockListInteractor.getAppEntryList(), (packageNames, padLockEntries) -> {
-          final List<Pair<String, Boolean>> pairList = new ArrayList<>();
-          for (final String packageName : packageNames) {
-            PadLockEntry.AllEntries found = null;
-            for (int i = 0; i < padLockEntries.size(); ++i) {
-              final PadLockEntry.AllEntries padLockEntry = padLockEntries.get(i);
-              if (padLockEntry.packageName().equals(packageName) && padLockEntry.activityName()
-                  .equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
-                found = padLockEntry;
-                break;
-              }
+        .withLatestFrom(lockListInteractor.getAppEntryList(), (packageName, padLockEntries) -> {
+          PadLockEntry.AllEntries found = null;
+          for (final PadLockEntry.AllEntries padLockEntry : padLockEntries) {
+            if (padLockEntry.packageName().equals(packageName) && padLockEntry.activityName()
+                .equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
+              found = padLockEntry;
+              break;
             }
-
-            final boolean locked;
-            if (found != null) {
-              locked = true;
-              padLockEntries.remove(found);
-            } else {
-              locked = false;
-            }
-
-            Timber.d("New pair: %s %s", packageName, locked);
-            pairList.add(new Pair<>(packageName, locked));
           }
 
-          return pairList;
+          final boolean locked = found != null;
+          Timber.d("New pair: %s %s", packageName, locked);
+          return new Pair<>(packageName, locked);
         })
-        .flatMap(Observable::from)
         .flatMap(pair -> lockListInteractor.createFromPackageInfo(pair.first, pair.second))
         .sorted((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()))
         .subscribeOn(getSubscribeScheduler())
