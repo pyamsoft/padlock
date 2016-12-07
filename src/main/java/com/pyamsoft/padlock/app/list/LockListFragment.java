@@ -70,26 +70,35 @@ public class LockListFragment extends ActionBarFragment
   @SuppressWarnings("WeakerAccess") LockListLayoutManager lockListLayoutManager;
   @SuppressWarnings("WeakerAccess") LockListPresenter presenter;
   @SuppressWarnings("WeakerAccess") FragmentApplistBinding binding;
-  @NonNull private final Runnable startRefreshRunnable = new Runnable() {
-    @Override public void run() {
-      binding.applistSwipeRefresh.setRefreshing(true);
-      lockListLayoutManager.setVerticalScrollEnabled(false);
-      final FragmentActivity activity = getActivity();
-      if (activity != null) {
-        Timber.d("Reload options");
-        activity.supportInvalidateOptionsMenu();
+  @NonNull private final Runnable startRefreshRunnable = () -> {
+    binding.applistSwipeRefresh.post(() -> {
+      if (binding != null) {
+        if (binding.applistSwipeRefresh != null) {
+          binding.applistSwipeRefresh.setRefreshing(true);
+        }
       }
+    });
+
+    lockListLayoutManager.setVerticalScrollEnabled(false);
+    final FragmentActivity activity = getActivity();
+    if (activity != null) {
+      Timber.d("Reload options");
+      activity.supportInvalidateOptionsMenu();
     }
   };
-  @NonNull private final Runnable stopRefreshRunnable = new Runnable() {
-    @Override public void run() {
-      binding.applistSwipeRefresh.setRefreshing(false);
-      lockListLayoutManager.setVerticalScrollEnabled(true);
-      final FragmentActivity activity = getActivity();
-      if (activity != null) {
-        Timber.d("Reload options");
-        activity.supportInvalidateOptionsMenu();
+  @NonNull private final Runnable stopRefreshRunnable = () -> {
+    binding.applistSwipeRefresh.post(() -> {
+      if (binding != null) {
+        if (binding.applistSwipeRefresh != null) {
+          binding.applistSwipeRefresh.setRefreshing(false);
+        }
       }
+    });
+    lockListLayoutManager.setVerticalScrollEnabled(true);
+    final FragmentActivity activity = getActivity();
+    if (activity != null) {
+      Timber.d("Reload options");
+      activity.supportInvalidateOptionsMenu();
     }
   };
   @SuppressWarnings("WeakerAccess") boolean forceRefresh;
