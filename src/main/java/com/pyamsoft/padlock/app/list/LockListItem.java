@@ -48,6 +48,14 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     this.entry = entry;
   }
 
+  @NonNull @CheckResult String getName() {
+    return entry.name();
+  }
+
+  @NonNull @CheckResult String getPackageName() {
+    return entry.packageName();
+  }
+
   @CheckResult @NonNull LockListItem copyWithNewLockState(boolean locked) {
     return new LockListItem(AppEntry.builder(entry).locked(locked).build());
   }

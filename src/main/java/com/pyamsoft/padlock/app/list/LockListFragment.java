@@ -43,7 +43,6 @@ import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentApplistBinding;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
@@ -61,11 +60,10 @@ public class LockListFragment extends FilterListFragment
 
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
-  @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
   @NonNull private static final String FORCE_REFRESH = "key_force_refresh";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
-  @SuppressWarnings("WeakerAccess") LockListAdapter fastItemAdapter;
+  @SuppressWarnings("WeakerAccess") FastItemAdapter<LockListItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") LockListLayoutManager lockListLayoutManager;
   @SuppressWarnings("WeakerAccess") LockListPresenter presenter;
   @SuppressWarnings("WeakerAccess") FragmentApplistBinding binding;
@@ -103,7 +101,6 @@ public class LockListFragment extends FilterListFragment
   @SuppressWarnings("WeakerAccess") boolean forceRefresh;
   @Nullable private MenuItem displaySystemItem;
   private long loadedPresenterKey;
-  private long loadedAdapterKey;
   @Nullable private TapTargetSequence sequence;
   @Nullable private DividerItemDecoration dividerDecoration;
   @Nullable private AsyncMap.Entry fabIconTask;
@@ -129,21 +126,7 @@ public class LockListFragment extends FilterListFragment
           }
         });
 
-    loadedAdapterKey = PersistentCache.get()
-        .load(KEY_LOAD_ADAPTER, savedInstanceState, new PersistLoader.Callback<LockListAdapter>() {
-          @NonNull @Override public PersistLoader<LockListAdapter> createLoader() {
-            return new ListAdapterLoader<LockListAdapter>() {
-              @NonNull @Override public LockListAdapter loadPersistent() {
-                forceRefresh = true;
-                return new LockListAdapter();
-              }
-            };
-          }
-
-          @Override public void onPersistentLoaded(@NonNull LockListAdapter persist) {
-            fastItemAdapter = persist;
-          }
-        });
+    fastItemAdapter = new FastItemAdapter<>();
   }
 
   @Nullable @Override
@@ -171,8 +154,8 @@ public class LockListFragment extends FilterListFragment
       forceRefresh = false;
       refreshList();
     } else {
-      Timber.d("We are already refreshed, just refresh the request listeners");
-      presenter.showOnBoarding();
+      Timber.d("We are already refreshed, fetch the cached data");
+      presenter.populateList();
     }
   }
 
@@ -284,7 +267,6 @@ public class LockListFragment extends FilterListFragment
 
   @Override public void onSaveInstanceState(Bundle outState) {
     PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
-    PersistentCache.get().saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
     outState.putBoolean(FORCE_REFRESH, forceRefresh);
     super.onSaveInstanceState(outState);
   }
@@ -328,7 +310,6 @@ public class LockListFragment extends FilterListFragment
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
       PersistentCache.get().unload(loadedPresenterKey);
-      PersistentCache.get().unload(loadedAdapterKey);
     }
   }
 
@@ -474,16 +455,24 @@ public class LockListFragment extends FilterListFragment
 
   @Override public void refreshList() {
     fastItemAdapter.clear();
+    presenter.clearList();
     onListCleared();
     presenter.populateList();
   }
 
   @Override public void onDatabaseEntryCreated(int position) {
-    fastItemAdapter.onDatabaseEntryCreated(position);
+    onDatabaseUpdated(position, true);
   }
 
   @Override public void onDatabaseEntryDeleted(int position) {
-    fastItemAdapter.onDatabaseEntryDeleted(position);
+    onDatabaseUpdated(position, false);
+  }
+
+  private void onDatabaseUpdated(int position, boolean locked) {
+    final LockListItem oldItem = fastItemAdapter.getItem(position);
+    final LockListItem newItem = oldItem.copyWithNewLockState(locked);
+    fastItemAdapter.set(position, newItem);
+    presenter.updateCachedEntryLockState(newItem.getName(), newItem.getPackageName(), locked);
   }
 
   @Override public void onDatabaseEntryError(int position) {
