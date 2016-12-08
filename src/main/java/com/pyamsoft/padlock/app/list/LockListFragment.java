@@ -191,7 +191,11 @@ public class LockListFragment extends ActionBarFragment
 
     setActionBarUpEnabled(true);
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
-    showMenuItems();
+
+    if (getFragmentManager().findFragmentByTag(LockInfoFragment.TAG) != null) {
+      Timber.w("Has LockInfo fragment, hide menu items");
+      hideMenuItems();
+    }
   }
 
   @CheckResult @NonNull private SearchView.OnQueryTextListener getOnQueryTextListener() {
@@ -281,8 +285,13 @@ public class LockListFragment extends ActionBarFragment
 
   @Override public void onPrepareOptionsMenu(@NonNull Menu menu) {
     super.onPrepareOptionsMenu(menu);
-    setupLockListMenuItems(menu);
+    setupDisplaySystemVisibleItem(menu);
     setupSearchItem(menu);
+
+    if (getFragmentManager().findFragmentByTag(LockInfoFragment.TAG) != null) {
+      Timber.w("Has LockInfo fragment, hide menu items");
+      hideMenuItems();
+    }
   }
 
   private void setupSearchItem(@NonNull Menu menu) {
@@ -304,7 +313,7 @@ public class LockListFragment extends ActionBarFragment
     }
   }
 
-  private void setupLockListMenuItems(final @NonNull Menu menu) {
+  private void setupDisplaySystemVisibleItem(final @NonNull Menu menu) {
     displaySystemItem = menu.findItem(R.id.menu_is_system);
     presenter.setSystemVisibilityFromPreference();
   }
@@ -515,10 +524,9 @@ public class LockListFragment extends ActionBarFragment
     handler.post(stopRefreshRunnable);
     handler.post(() -> binding.applistFab.show());
 
-    Timber.d("We have refreshed");
-    forceRefresh = false;
-
     if (fastItemAdapter.getAdapterItemCount() > 1) {
+      Timber.d("We have refreshed");
+      forceRefresh = false;
       presenter.showOnBoarding();
     } else {
       Toast.makeText(getContext(), "Error while loading list. Please try again.",
@@ -526,21 +534,8 @@ public class LockListFragment extends ActionBarFragment
     }
   }
 
-  void clearList() {
-    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
-    if (oldSize <= 0) {
-      Timber.w("List is already empty");
-      return;
-    }
-
-    for (int i = oldSize; i >= 0; --i) {
-      fastItemAdapter.remove(i);
-    }
-  }
-
   @Override public void refreshList() {
-    clearList();
-
+    fastItemAdapter.clear();
     onListCleared();
     presenter.populateList();
   }
