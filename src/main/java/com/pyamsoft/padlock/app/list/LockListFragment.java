@@ -518,7 +518,12 @@ public class LockListFragment extends ActionBarFragment
     Timber.d("We have refreshed");
     forceRefresh = false;
 
-    presenter.showOnBoarding();
+    if (fastItemAdapter.getAdapterItemCount() > 1) {
+      presenter.showOnBoarding();
+    } else {
+      Toast.makeText(getContext(), "Error while loading list. Please try again.",
+          Toast.LENGTH_SHORT).show();
+    }
   }
 
   void clearList() {
@@ -581,7 +586,6 @@ public class LockListFragment extends ActionBarFragment
   }
 
   void displayLockInfoFragment(@NonNull AppEntry entry) {
-
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
       hideMenuItems();

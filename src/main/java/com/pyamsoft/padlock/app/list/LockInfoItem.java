@@ -179,9 +179,6 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
       @Override public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
         if (b) {
-          // Don't check it yet, get auth first
-          compoundButton.setChecked(false);
-
           final ActivityEntry entry = weakEntry.get();
           if (entry != null) {
             onCheckedChanged.call(position, entry.name(), entry.lockState(), changeToState);
