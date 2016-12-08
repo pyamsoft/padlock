@@ -66,6 +66,12 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     holder.unbind();
   }
 
+  @CheckResult boolean filterAgainst(@NonNull String query) {
+    final String name = entry.name().toLowerCase().trim();
+    Timber.d("Filter predicate: '%s' against %s", query, name);
+    return !name.contains(query);
+  }
+
   @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
     return FACTORY;
   }

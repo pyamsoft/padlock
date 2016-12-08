@@ -63,7 +63,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     return FACTORY;
   }
 
-  @CheckResult boolean filterAgaint(@NonNull String query) {
+  @CheckResult boolean filterAgainst(@NonNull String query) {
     final String name = entry.name().toLowerCase().trim();
     Timber.d("Filter predicate: '%s' against %s", query, name);
     return !name.startsWith(query);

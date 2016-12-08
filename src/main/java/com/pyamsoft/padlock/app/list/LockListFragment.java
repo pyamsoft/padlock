@@ -23,6 +23,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.DividerItemDecoration;
@@ -38,6 +39,7 @@ import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.mikepenz.fastadapter.FastAdapter;
+import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
@@ -192,28 +194,11 @@ public class LockListFragment extends ActionBarFragment
     setActionBarUpEnabled(true);
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
 
-    if (getFragmentManager().findFragmentByTag(LockInfoFragment.TAG) != null) {
+    final Fragment fragment = getFragmentManager().findFragmentByTag(LockInfoFragment.TAG);
+    if (fragment instanceof LockInfoFragment) {
       Timber.w("Has LockInfo fragment, hide menu items");
-      hideMenuItems();
+      ((LockInfoFragment) fragment).takeOverMenuItems(this);
     }
-  }
-
-  @CheckResult @NonNull private SearchView.OnQueryTextListener getOnQueryTextListener() {
-    return new SearchView.OnQueryTextListener() {
-
-      @Override public boolean onQueryTextChange(String newText) {
-        fastItemAdapter.filter(newText);
-        return true;
-      }
-
-      @Override public boolean onQueryTextSubmit(String query) {
-        fastItemAdapter.filter(query);
-        if (searchView != null) {
-          searchView.clearFocus();
-        }
-        return true;
-      }
-    };
   }
 
   @Override public void onPause() {
@@ -238,7 +223,7 @@ public class LockListFragment extends ActionBarFragment
 
     fastItemAdapter.withFilterPredicate((item, query) -> {
       final String queryString = String.valueOf(query).toLowerCase().trim();
-      return item.filterAgaint(queryString);
+      return item.filterAgainst(queryString);
     });
 
     fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
@@ -287,10 +272,12 @@ public class LockListFragment extends ActionBarFragment
     super.onPrepareOptionsMenu(menu);
     setupDisplaySystemVisibleItem(menu);
     setupSearchItem(menu);
-
-    if (getFragmentManager().findFragmentByTag(LockInfoFragment.TAG) != null) {
+    final Fragment fragment = getFragmentManager().findFragmentByTag(LockInfoFragment.TAG);
+    if (fragment instanceof LockInfoFragment) {
       Timber.w("Has LockInfo fragment, hide menu items");
-      hideMenuItems();
+      ((LockInfoFragment) fragment).takeOverMenuItems(this);
+    } else {
+      setSearchViewOnQueryTextListener(fastItemAdapter);
     }
   }
 
@@ -298,19 +285,41 @@ public class LockListFragment extends ActionBarFragment
     searchItem = menu.findItem(R.id.menu_search);
     if (searchItem != null) {
       searchView = (SearchView) searchItem.getActionView();
-      setSearchViewOnQueryTextListener();
     }
   }
 
-  private void setSearchViewOnQueryTextListener() {
+  void resetSearchViewOnQueryTextListener() {
+    setSearchViewOnQueryTextListener(fastItemAdapter);
+  }
+
+  void setSearchViewOnQueryTextListener(@NonNull FastItemAdapter adapter) {
     if (searchView != null) {
       Timber.d("Set Search View listeners");
-      searchView.setOnQueryTextListener(getOnQueryTextListener());
+      searchView.setOnQueryTextListener(getOnQueryTextListener(adapter));
       searchView.setOnCloseListener(() -> {
         fastItemAdapter.filter(null);
         return true;
       });
     }
+  }
+
+  @CheckResult @NonNull
+  private SearchView.OnQueryTextListener getOnQueryTextListener(@NonNull FastItemAdapter adapter) {
+    return new SearchView.OnQueryTextListener() {
+
+      @Override public boolean onQueryTextChange(String newText) {
+        adapter.filter(newText);
+        return true;
+      }
+
+      @Override public boolean onQueryTextSubmit(String query) {
+        adapter.filter(query);
+        if (searchView != null) {
+          searchView.clearFocus();
+        }
+        return true;
+      }
+    };
   }
 
   private void setupDisplaySystemVisibleItem(final @NonNull Menu menu) {
@@ -558,32 +567,20 @@ public class LockListFragment extends ActionBarFragment
     presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system());
   }
 
-  void hideMenuItems() {
+  void setMenuItemVisibility(boolean visibile) {
     if (searchItem != null) {
       searchItem.collapseActionView();
-      searchItem.setVisible(false);
     }
 
     if (displaySystemItem != null) {
-      displaySystemItem.setVisible(false);
-    }
-  }
-
-  void showMenuItems() {
-    if (searchItem != null) {
-      searchItem.collapseActionView();
-      searchItem.setVisible(true);
-    }
-
-    if (displaySystemItem != null) {
-      displaySystemItem.setVisible(true);
+      displaySystemItem.setVisible(visibile);
     }
   }
 
   void displayLockInfoFragment(@NonNull AppEntry entry) {
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
-      hideMenuItems();
+      setMenuItemVisibility(false);
       fragmentManager.beginTransaction()
           .add(R.id.main_view_container, LockInfoFragment.newInstance(entry), LockInfoFragment.TAG)
           .addToBackStack(null)

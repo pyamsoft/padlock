@@ -48,6 +48,10 @@ public class RecheckService extends IntentService {
 
     final String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
     final String className = intent.getStringExtra(EXTRA_CLASS_NAME);
-    PadLockService.recheck(packageName, className);
+    try {
+      PadLockService.recheck(packageName, className);
+    } catch (NullPointerException e) {
+      Timber.e(e, "ERROR");
+    }
   }
 }
