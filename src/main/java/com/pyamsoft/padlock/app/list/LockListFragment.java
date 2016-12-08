@@ -23,12 +23,10 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,7 +45,6 @@ import com.pyamsoft.padlock.databinding.FragmentApplistBinding;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
-import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.tool.AsyncMapHelper;
@@ -59,7 +56,7 @@ import com.pyamsoft.pydroidrx.RXLoader;
 import java.util.List;
 import timber.log.Timber;
 
-public class LockListFragment extends ActionBarFragment
+public class LockListFragment extends FilterListFragment
     implements LockListPresenter.LockList, PinEntryDialogRequest {
 
   @NonNull public static final String TAG = "LockListFragment";
@@ -104,13 +101,11 @@ public class LockListFragment extends ActionBarFragment
     }
   };
   @SuppressWarnings("WeakerAccess") boolean forceRefresh;
-  @Nullable SearchView searchView;
   @Nullable private MenuItem displaySystemItem;
   private long loadedPresenterKey;
   private long loadedAdapterKey;
   @Nullable private TapTargetSequence sequence;
   @Nullable private DividerItemDecoration dividerDecoration;
-  @Nullable private MenuItem searchItem;
   @Nullable private AsyncMap.Entry fabIconTask;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -193,12 +188,6 @@ public class LockListFragment extends ActionBarFragment
 
     setActionBarUpEnabled(true);
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
-
-    final Fragment fragment = getFragmentManager().findFragmentByTag(LockInfoFragment.TAG);
-    if (fragment instanceof LockInfoFragment) {
-      Timber.w("Has LockInfo fragment, hide menu items");
-      ((LockInfoFragment) fragment).takeOverMenuItems(this);
-    }
   }
 
   @Override public void onPause() {
@@ -220,11 +209,6 @@ public class LockListFragment extends ActionBarFragment
     lockListLayoutManager = new LockListLayoutManager(getContext());
     lockListLayoutManager.setVerticalScrollEnabled(true);
     dividerDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
-
-    fastItemAdapter.withFilterPredicate((item, query) -> {
-      final String queryString = String.valueOf(query).toLowerCase().trim();
-      return item.filterAgainst(queryString);
-    });
 
     fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
 
@@ -271,55 +255,10 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onPrepareOptionsMenu(@NonNull Menu menu) {
     super.onPrepareOptionsMenu(menu);
     setupDisplaySystemVisibleItem(menu);
-    setupSearchItem(menu);
-    final Fragment fragment = getFragmentManager().findFragmentByTag(LockInfoFragment.TAG);
-    if (fragment instanceof LockInfoFragment) {
-      Timber.w("Has LockInfo fragment, hide menu items");
-      ((LockInfoFragment) fragment).takeOverMenuItems(this);
-    } else {
-      setSearchViewOnQueryTextListener(fastItemAdapter);
-    }
   }
 
-  private void setupSearchItem(@NonNull Menu menu) {
-    searchItem = menu.findItem(R.id.menu_search);
-    if (searchItem != null) {
-      searchView = (SearchView) searchItem.getActionView();
-    }
-  }
-
-  void resetSearchViewOnQueryTextListener() {
-    setSearchViewOnQueryTextListener(fastItemAdapter);
-  }
-
-  void setSearchViewOnQueryTextListener(@NonNull FastItemAdapter adapter) {
-    if (searchView != null) {
-      Timber.d("Set Search View listeners");
-      searchView.setOnQueryTextListener(getOnQueryTextListener(adapter));
-      searchView.setOnCloseListener(() -> {
-        fastItemAdapter.filter(null);
-        return true;
-      });
-    }
-  }
-
-  @CheckResult @NonNull
-  private SearchView.OnQueryTextListener getOnQueryTextListener(@NonNull FastItemAdapter adapter) {
-    return new SearchView.OnQueryTextListener() {
-
-      @Override public boolean onQueryTextChange(String newText) {
-        adapter.filter(newText);
-        return true;
-      }
-
-      @Override public boolean onQueryTextSubmit(String query) {
-        adapter.filter(query);
-        if (searchView != null) {
-          searchView.clearFocus();
-        }
-        return true;
-      }
-    };
+  @NonNull @Override FastItemAdapter<? extends FilterableItem> getListAdapter() {
+    return fastItemAdapter;
   }
 
   private void setupDisplaySystemVisibleItem(final @NonNull Menu menu) {
@@ -351,16 +290,6 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @Override public void onDestroyView() {
-    if (searchItem != null) {
-      searchItem.collapseActionView();
-    }
-    searchItem = null;
-
-    if (searchView != null) {
-      searchView.setOnQueryTextListener(null);
-      searchView.setOnCloseListener(null);
-    }
-    searchView = null;
     displaySystemItem = null;
 
     binding.applistRecyclerview.removeItemDecoration(dividerDecoration);
@@ -567,22 +496,12 @@ public class LockListFragment extends ActionBarFragment
     presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system());
   }
 
-  void setMenuItemVisibility(boolean visibile) {
-    if (searchItem != null) {
-      searchItem.collapseActionView();
-    }
-
-    if (displaySystemItem != null) {
-      displaySystemItem.setVisible(visibile);
-    }
-  }
-
   void displayLockInfoFragment(@NonNull AppEntry entry) {
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
-      setMenuItemVisibility(false);
       fragmentManager.beginTransaction()
-          .add(R.id.main_view_container, LockInfoFragment.newInstance(entry), LockInfoFragment.TAG)
+          .replace(R.id.main_view_container, LockInfoFragment.newInstance(entry),
+              LockInfoFragment.TAG)
           .addToBackStack(null)
           .commit();
     }

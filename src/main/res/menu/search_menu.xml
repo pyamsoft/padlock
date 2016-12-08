@@ -23,9 +23,10 @@
     tools:ignore="AppCompatResource">
 
   <item
-      android:id="@+id/menu_is_system"
-      android:checkable="true"
-      android:title="@string/show_system_applications"
-      app:showAsAction="never"/>
+      android:id="@+id/menu_search"
+      android:icon="@drawable/ic_search_24dp"
+      android:title="@string/search"
+      app:actionViewClass="android.support.v7.widget.SearchView"
+      app:showAsAction="ifRoom|collapseActionView"/>
 
 </menu>
