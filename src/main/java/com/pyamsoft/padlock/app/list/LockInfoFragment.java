@@ -58,7 +58,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
 
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
-  @SuppressWarnings("WeakerAccess") LockInfoAdapter fastItemAdapter;
+  @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") boolean forceRefresh;
   private FragmentLockinfoBinding binding;
   private long loadedPresenterKey;
@@ -113,7 +113,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
           }
         });
 
-    fastItemAdapter = new LockInfoAdapter();
+    fastItemAdapter = new FastItemAdapter<>();
   }
 
   @Nullable @Override
@@ -240,7 +240,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
       Timber.d("We are already refreshed, just refresh the request listeners");
       binding.lockInfoProgress.setVisibility(View.GONE);
       binding.lockInfoRecycler.setVisibility(View.VISIBLE);
-      presenter.showOnBoarding();
+      presenter.populateList(appPackageName);
     }
   }
 
@@ -263,12 +263,9 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
   @Override public void refreshList() {
     fastItemAdapter.clear();
+    presenter.clearList();
     onListCleared();
-    repopulateList();
-  }
 
-  private void repopulateList() {
-    Timber.d("Repopulate list");
     binding.lockInfoRecycler.setClickable(false);
     presenter.populateList(appPackageName);
   }
@@ -316,27 +313,22 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   }
 
   @Override public void onDatabaseEntryCreated(int position) {
-    if (position == LockInfoPresenter.GROUP_POSITION) {
-      refreshList();
-    } else {
-      fastItemAdapter.onDatabaseEntryCreated(position);
-    }
+    onDatabaseUpdated(position, LockState.LOCKED);
   }
 
   @Override public void onDatabaseEntryDeleted(int position) {
-    if (position == LockInfoPresenter.GROUP_POSITION) {
-      refreshList();
-    } else {
-      fastItemAdapter.onDatabaseEntryDeleted(position);
-    }
+    onDatabaseUpdated(position, LockState.DEFAULT);
   }
 
   @Override public void onDatabaseEntryWhitelisted(int position) {
-    if (position == LockInfoPresenter.GROUP_POSITION) {
-      refreshList();
-    } else {
-      fastItemAdapter.onDatabaseEntryWhitelisted(position);
-    }
+    onDatabaseUpdated(position, LockState.WHITELISTED);
+  }
+
+  private void onDatabaseUpdated(int position, @NonNull LockState newLockState) {
+    final LockInfoItem oldItem = fastItemAdapter.getItem(position);
+    final LockInfoItem newItem = oldItem.copyWithNewLockState(newLockState);
+    fastItemAdapter.set(position, newItem);
+    presenter.updateCachedEntryLockState(newItem.getName(), newLockState);
   }
 
   @Override public void onDatabaseEntryError(int position) {

@@ -24,6 +24,8 @@ import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -38,6 +40,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
 
   @SuppressWarnings("WeakerAccess") @NonNull final AppIconLoaderPresenter<LockInfoView> iconLoader;
   @SuppressWarnings("WeakerAccess") @NonNull final LockInfoInteractor lockInfoInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull final List<ActivityEntry> activityEntryCache;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
       Subscriptions.empty();
   @SuppressWarnings("WeakerAccess") @NonNull Subscription allInDBSubscription =
@@ -46,7 +49,6 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
       Subscriptions.empty();
   @SuppressWarnings("WeakerAccess") @NonNull Subscription onboardSubscription =
       Subscriptions.empty();
-
   @SuppressWarnings("WeakerAccess") boolean refreshing;
 
   @Inject LockInfoPresenterImpl(@NonNull AppIconLoaderPresenter<LockInfoView> iconLoader,
@@ -56,6 +58,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
     super(lockInfoInteractor, obsScheduler, subScheduler);
     this.iconLoader = iconLoader;
     this.lockInfoInteractor = lockInfoInteractor;
+    activityEntryCache = new ArrayList<>();
     refreshing = false;
   }
 
@@ -74,7 +77,26 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
     super.onDestroy();
     iconLoader.destroy();
     SubscriptionHelper.unsubscribe(populateListSubscription);
+    clearList();
     refreshing = false;
+  }
+
+  @Override
+  public void updateCachedEntryLockState(@NonNull String name, @NonNull LockState lockState) {
+    final int size = activityEntryCache.size();
+    for (int i = 0; i < size; ++i) {
+      final ActivityEntry activityEntry = activityEntryCache.get(i);
+      if (activityEntry.name().equals(name)) {
+        Timber.d("Update cached entry: %s", name);
+        activityEntryCache.set(i,
+            ActivityEntry.builder(activityEntry).lockState(lockState).build());
+      }
+    }
+  }
+
+  @Override public void clearList() {
+    Timber.w("Clear activity entry cache");
+    activityEntryCache.clear();
   }
 
   @Override public void populateList(@NonNull String packageName) {
@@ -85,9 +107,8 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
 
     refreshing = true;
     Timber.d("Populate list");
-    SubscriptionHelper.unsubscribe(populateListSubscription);
-    // Search the list of activities in the package name for any which are locked
-    populateListSubscription = lockInfoInteractor.getPackageActivities(packageName)
+
+    final Observable<ActivityEntry> freshData = lockInfoInteractor.getPackageActivities(packageName)
         .withLatestFrom(lockInfoInteractor.getActivityEntries(packageName),
             (activityName, padLockEntries) -> {
               PadLockEntry.WithPackageName foundEntry = null;
@@ -143,7 +164,21 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
             return entry1Name.compareToIgnoreCase(entry2Name);
           }
         })
-        .subscribeOn(getSubscribeScheduler())
+        .map(activityEntry -> {
+          activityEntryCache.add(activityEntry);
+          return activityEntry;
+        });
+
+    final Observable<ActivityEntry> dataSource;
+    if (activityEntryCache.isEmpty()) {
+      dataSource = freshData;
+    } else {
+      dataSource = Observable.defer(() -> Observable.from(activityEntryCache));
+    }
+
+    SubscriptionHelper.unsubscribe(populateListSubscription);
+    // Search the list of activities in the package name for any which are locked
+    populateListSubscription = dataSource.subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(activityEntry -> getView(
             lockInfoView -> lockInfoView.onEntryAddedToList(activityEntry)), throwable -> {

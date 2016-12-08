@@ -21,10 +21,13 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.app.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.ActivityEntry;
+import com.pyamsoft.padlock.model.LockState;
 
 public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {
 
-  int GROUP_POSITION = -1;
+  void updateCachedEntryLockState(@NonNull String name, @NonNull LockState lockState);
+
+  void clearList();
 
   void populateList(@NonNull String packageName);
 
