@@ -32,7 +32,6 @@ import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.mikepenz.fastadapter.FastAdapter;
-import com.mikepenz.fastadapter.IItemAdapter;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentLockinfoBinding;
@@ -206,7 +205,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     // Show the menu items again
     final Fragment lockListFragment = getFragmentManager().findFragmentByTag(LockListFragment.TAG);
     if (lockListFragment instanceof LockListFragment) {
-      ((LockListFragment) lockListFragment).showMenuItems();
+      ((LockListFragment) lockListFragment).setMenuItemVisibility(true);
     }
 
     binding.lockInfoRecycler.removeItemDecoration(dividerDecoration);
@@ -278,7 +277,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     // Hide the menu items
     final Fragment lockListFragment = getFragmentManager().findFragmentByTag(LockListFragment.TAG);
     if (lockListFragment instanceof LockListFragment) {
-      ((LockListFragment) lockListFragment).hideMenuItems();
+      ((LockListFragment) lockListFragment).setMenuItemVisibility(false);
     }
   }
 

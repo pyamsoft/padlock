@@ -194,7 +194,7 @@ public class LockListFragment extends ActionBarFragment
 
     if (getFragmentManager().findFragmentByTag(LockInfoFragment.TAG) != null) {
       Timber.w("Has LockInfo fragment, hide menu items");
-      hideMenuItems();
+      setMenuItemVisibility(false);
     }
   }
 
@@ -290,7 +290,7 @@ public class LockListFragment extends ActionBarFragment
 
     if (getFragmentManager().findFragmentByTag(LockInfoFragment.TAG) != null) {
       Timber.w("Has LockInfo fragment, hide menu items");
-      hideMenuItems();
+      setMenuItemVisibility(false);
     }
   }
 
@@ -558,30 +558,20 @@ public class LockListFragment extends ActionBarFragment
     presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system());
   }
 
-  void hideMenuItems() {
+  void setMenuItemVisibility(boolean visibile) {
     if (searchItem != null) {
       searchItem.collapseActionView();
     }
 
     if (displaySystemItem != null) {
-      displaySystemItem.setVisible(false);
-    }
-  }
-
-  void showMenuItems() {
-    if (searchItem != null) {
-      searchItem.collapseActionView();
-    }
-
-    if (displaySystemItem != null) {
-      displaySystemItem.setVisible(true);
+      displaySystemItem.setVisible(visibile);
     }
   }
 
   void displayLockInfoFragment(@NonNull AppEntry entry) {
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
-      hideMenuItems();
+      setMenuItemVisibility(false);
       fragmentManager.beginTransaction()
           .add(R.id.main_view_container, LockInfoFragment.newInstance(entry), LockInfoFragment.TAG)
           .addToBackStack(null)
