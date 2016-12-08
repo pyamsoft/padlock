@@ -268,6 +268,12 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     super.onResume();
     MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
     setActionBarUpEnabled(true);
+
+    // Hide the menu items
+    final Fragment lockListFragment = getFragmentManager().findFragmentByTag(LockListFragment.TAG);
+    if (lockListFragment instanceof LockListFragment) {
+      ((LockListFragment) lockListFragment).hideMenuItems();
+    }
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
@@ -277,20 +283,8 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     super.onSaveInstanceState(outState);
   }
 
-  void clearList() {
-    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
-    if (oldSize <= 0) {
-      Timber.w("List is already empty");
-      return;
-    }
-
-    for (int i = oldSize; i >= 0; --i) {
-      fastItemAdapter.remove(i);
-    }
-  }
-
   @Override public void refreshList() {
-    clearList();
+    fastItemAdapter.clear();
     onListCleared();
     repopulateList();
   }
@@ -307,16 +301,17 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   }
 
   @Override public void onListPopulated() {
-    Timber.d("Refresh finished");
-
     binding.lockInfoProgress.setVisibility(View.GONE);
     binding.lockInfoRecycler.setVisibility(View.VISIBLE);
     binding.lockInfoRecycler.setClickable(true);
 
     if (fastItemAdapter.getAdapterItemCount() > 0) {
+      Timber.d("Refresh finished");
+      forceRefresh = false;
       presenter.showOnBoarding();
     } else {
-      Toast.makeText(getContext(), "Error while loading list. Please try again.", Toast.LENGTH_SHORT).show();
+      Toast.makeText(getContext(), "Error while loading list. Please try again.",
+          Toast.LENGTH_SHORT).show();
     }
   }
 
@@ -327,7 +322,8 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   }
 
   @Override public void onListCleared() {
-    Timber.d("onListCleared");
+    Timber.d("Prepare for refresh");
+    forceRefresh = true;
 
     binding.lockInfoProgress.setVisibility(View.VISIBLE);
     binding.lockInfoRecycler.setVisibility(View.GONE);
