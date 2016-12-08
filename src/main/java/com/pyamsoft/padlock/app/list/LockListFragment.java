@@ -561,7 +561,6 @@ public class LockListFragment extends ActionBarFragment
   void hideMenuItems() {
     if (searchItem != null) {
       searchItem.collapseActionView();
-      searchItem.setVisible(false);
     }
 
     if (displaySystemItem != null) {
@@ -572,7 +571,6 @@ public class LockListFragment extends ActionBarFragment
   void showMenuItems() {
     if (searchItem != null) {
       searchItem.collapseActionView();
-      searchItem.setVisible(true);
     }
 
     if (displaySystemItem != null) {
