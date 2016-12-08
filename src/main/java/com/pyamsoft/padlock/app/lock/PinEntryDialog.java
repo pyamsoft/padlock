@@ -25,10 +25,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -94,10 +98,24 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
         });
   }
 
+  @Override public void onResume() {
+    super.onResume();
+    // The dialog is super small for some reason. We have to set the size manually, in onResume
+    final Window window = getDialog().getWindow();
+    if (window != null) {
+      WindowManager.LayoutParams params = window.getAttributes();
+      final Display display = getActivity().getWindowManager().getDefaultDisplay();
+      final DisplayMetrics displayMetrics = new DisplayMetrics();
+      display.getMetrics(displayMetrics);
+      params.width = displayMetrics.widthPixels;
+      window.setLayout(params.width, params.height);
+    }
+  }
+
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = DialogPinEntryBinding.inflate(inflater, null, false);
+    binding = DialogPinEntryBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 

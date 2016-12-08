@@ -84,7 +84,7 @@
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/pin_entry_code"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
@@ -108,7 +108,7 @@
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/pin_reentry_code"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@id/pin_entry_code"
@@ -132,7 +132,7 @@
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/pin_hint"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@id/pin_reentry_code"
