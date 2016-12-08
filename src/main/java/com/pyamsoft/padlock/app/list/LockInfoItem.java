@@ -33,7 +33,8 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import timber.log.Timber;
 
-class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
+class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder>
+    implements FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
   @NonNull private final String packageName;
@@ -66,7 +67,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder> {
     holder.unbind();
   }
 
-  @CheckResult boolean filterAgainst(@NonNull String query) {
+  @Override public boolean filterAgainst(@NonNull String query) {
     final String name = entry.name().toLowerCase().trim();
     Timber.d("Filter predicate: '%s' against %s", query, name);
     return !name.contains(query);

@@ -37,7 +37,8 @@ import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHolder> {
+public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHolder>
+    implements FilterableItem<LockListItem, LockListItem.ViewHolder> {
 
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
@@ -63,7 +64,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
     return FACTORY;
   }
 
-  @CheckResult boolean filterAgainst(@NonNull String query) {
+  @Override public boolean filterAgainst(@NonNull String query) {
     final String name = entry.name().toLowerCase().trim();
     Timber.d("Filter predicate: '%s' against %s", query, name);
     return !name.startsWith(query);

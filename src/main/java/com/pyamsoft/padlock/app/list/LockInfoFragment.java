@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +31,7 @@ import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.mikepenz.fastadapter.FastAdapter;
+import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentLockinfoBinding;
@@ -40,7 +40,6 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
-import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import java.util.List;
@@ -50,7 +49,7 @@ import static com.pyamsoft.padlock.model.LockState.DEFAULT;
 import static com.pyamsoft.padlock.model.LockState.LOCKED;
 import static com.pyamsoft.padlock.model.LockState.WHITELISTED;
 
-public class LockInfoFragment extends ActionBarFragment implements LockInfoPresenter.LockInfoView {
+public class LockInfoFragment extends FilterListFragment implements LockInfoPresenter.LockInfoView {
 
   @NonNull public static final String TAG = "LockInfoDialog";
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
@@ -151,6 +150,10 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     setupProgressSpinner();
   }
 
+  @NonNull @Override FastItemAdapter<? extends FilterableItem> getListAdapter() {
+    return fastItemAdapter;
+  }
+
   private void setupProgressSpinner() {
     binding.lockInfoProgress.setIndeterminate(true);
     binding.lockInfoProgress.setVisibility(View.GONE);
@@ -201,14 +204,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     dismissOnboarding();
     setActionBarTitle(R.string.app_name);
     setActionBarUpEnabled(false);
-
-    // Show the menu items again
-    final Fragment fragment = getFragmentManager().findFragmentByTag(LockListFragment.TAG);
-    if (fragment instanceof LockListFragment) {
-      final LockListFragment lockListFragment = (LockListFragment) fragment;
-      lockListFragment.setMenuItemVisibility(true);
-      lockListFragment.resetSearchViewOnQueryTextListener();
-    }
 
     binding.lockInfoRecycler.removeItemDecoration(dividerDecoration);
     binding.lockInfoRecycler.setOnClickListener(null);
@@ -275,11 +270,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     super.onResume();
     MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
     setActionBarUpEnabled(true);
-  }
-
-  void takeOverMenuItems(@NonNull LockListFragment lockListFragment) {
-    lockListFragment.setMenuItemVisibility(false);
-    lockListFragment.setSearchViewOnQueryTextListener(fastItemAdapter);
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
