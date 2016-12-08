@@ -24,6 +24,11 @@ import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface LockListPresenter extends Presenter<LockListPresenter.LockList> {
 
+  void updateCachedEntryLockState(@NonNull String name, @NonNull String packageName,
+      boolean newLockState);
+
+  void clearList();
+
   void populateList();
 
   void setFABStateFromPreference();

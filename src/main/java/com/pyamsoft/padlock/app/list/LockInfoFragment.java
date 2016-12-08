@@ -38,7 +38,6 @@ import com.pyamsoft.padlock.databinding.FragmentLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
-import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
@@ -55,7 +54,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
   @NonNull private static final String ARG_APP_NAME = "app_name";
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
-  @NonNull private static final String KEY_LOAD_ADAPTER = "key_load_adapter";
   @NonNull private static final String FORCE_REFRESH = "key_force_refresh";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
 
@@ -64,7 +62,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @SuppressWarnings("WeakerAccess") boolean forceRefresh;
   private FragmentLockinfoBinding binding;
   private long loadedPresenterKey;
-  private long loadedAdapterKey;
 
   private String appPackageName;
   private String appName;
@@ -116,20 +113,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
           }
         });
 
-    loadedAdapterKey = PersistentCache.get()
-        .load(KEY_LOAD_ADAPTER, savedInstanceState, new PersistLoader.Callback<LockInfoAdapter>() {
-          @NonNull @Override public PersistLoader<LockInfoAdapter> createLoader() {
-            return new ListAdapterLoader<LockInfoAdapter>() {
-              @NonNull @Override public LockInfoAdapter loadPersistent() {
-                return new LockInfoAdapter();
-              }
-            };
-          }
-
-          @Override public void onPersistentLoaded(@NonNull LockInfoAdapter persist) {
-            fastItemAdapter = persist;
-          }
-        });
+    fastItemAdapter = new LockInfoAdapter();
   }
 
   @Nullable @Override
@@ -241,7 +225,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
       PersistentCache.get().unload(loadedPresenterKey);
-      PersistentCache.get().unload(loadedAdapterKey);
     }
   }
 
@@ -274,7 +257,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
   @Override public void onSaveInstanceState(Bundle outState) {
     PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
-    PersistentCache.get().saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
     outState.putBoolean(FORCE_REFRESH, forceRefresh);
     super.onSaveInstanceState(outState);
   }

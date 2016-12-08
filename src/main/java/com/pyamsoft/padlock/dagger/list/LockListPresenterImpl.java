@@ -22,11 +22,15 @@ import android.support.v4.util.Pair;
 import com.pyamsoft.padlock.app.list.LockListPresenter;
 import com.pyamsoft.padlock.app.service.PadLockService;
 import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
+import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
+import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
@@ -36,8 +40,8 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
     implements LockListPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
+  @NonNull final List<AppEntry> appEntryCache;
   @NonNull private final LockServiceStateInteractor stateInteractor;
-
   @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
       Subscriptions.empty();
   @SuppressWarnings("WeakerAccess") @NonNull Subscription systemVisibleSubscription =
@@ -48,7 +52,6 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
       Subscriptions.empty();
   @SuppressWarnings("WeakerAccess") @NonNull Subscription databaseSubscription =
       Subscriptions.empty();
-
   @SuppressWarnings("WeakerAccess") boolean refreshing;
 
   @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
@@ -57,6 +60,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
     super(lockListInteractor, obsScheduler, subScheduler);
     this.lockListInteractor = lockListInteractor;
     this.stateInteractor = stateInteractor;
+    appEntryCache = new ArrayList<>();
     refreshing = false;
   }
 
@@ -64,12 +68,31 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
     super.onDestroy();
     SubscriptionHelper.unsubscribe(populateListSubscription);
     refreshing = false;
+    clearList();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
     SubscriptionHelper.unsubscribe(systemVisibleSubscription, onboardSubscription,
         fabStateSubscription, databaseSubscription);
+  }
+
+  @Override public void clearList() {
+    Timber.w("Clear app entry cache");
+    appEntryCache.clear();
+  }
+
+  @Override
+  public void updateCachedEntryLockState(@NonNull String name, @NonNull String packageName,
+      boolean newLockState) {
+    final int size = appEntryCache.size();
+    for (int i = 0; i < size; ++i) {
+      final AppEntry appEntry = appEntryCache.get(i);
+      if (appEntry.name().equals(name) && appEntry.packageName().equals(packageName)) {
+        Timber.d("Update cached entry: %s %s", name, packageName);
+        appEntryCache.set(i, AppEntry.builder(appEntry).locked(newLockState).build());
+      }
+    }
   }
 
   @Override public void populateList() {
@@ -80,8 +103,8 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
 
     refreshing = true;
     Timber.d("populateList");
-    SubscriptionHelper.unsubscribe(populateListSubscription);
-    populateListSubscription = lockListInteractor.getActiveApplications()
+
+    final Observable<AppEntry> freshAppEntries = lockListInteractor.getActiveApplications()
         .withLatestFrom(lockListInteractor.isSystemVisible(), (applicationInfo, systemVisible) -> {
           if (systemVisible) {
             // If system visible, we show all apps
@@ -128,7 +151,20 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
         })
         .flatMap(pair -> lockListInteractor.createFromPackageInfo(pair.first, pair.second))
         .sorted((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()))
-        .subscribeOn(getSubscribeScheduler())
+        .map(appEntry -> {
+          appEntryCache.add(appEntry);
+          return appEntry;
+        });
+
+    final Observable<AppEntry> dataSource;
+    if (appEntryCache.isEmpty()) {
+      dataSource = freshAppEntries;
+    } else {
+      dataSource = Observable.defer(() -> Observable.from(appEntryCache));
+    }
+
+    SubscriptionHelper.unsubscribe(populateListSubscription);
+    populateListSubscription = dataSource.subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(appEntry -> getView(lockList -> lockList.onEntryAddedToList(appEntry)),
             throwable -> {
