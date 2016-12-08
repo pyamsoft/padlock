@@ -21,6 +21,8 @@ import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface PurgePresenter extends Presenter<PurgePresenter.View> {
 
+  void clearList();
+
   void retrieveStaleApplications();
 
   void deleteStale(@NonNull String packageName);

@@ -48,21 +48,29 @@ class PurgeItem extends AbstractItem<PurgeItem, PurgeItem.ViewHolder> {
 
   @Override public void unbindView(ViewHolder holder) {
     super.unbindView(holder);
-    holder.binding.itemPurgeName.setText(null);
+    holder.unbind();
   }
 
-  @Override public void bindView(ViewHolder holder, List payloads) {
+  @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
-    holder.binding.itemPurgeName.setText(packageName);
+    holder.bind(packageName);
   }
 
   protected static class ViewHolder extends RecyclerView.ViewHolder {
 
-    @NonNull final AdapterItemPurgeBinding binding;
+    @NonNull private final AdapterItemPurgeBinding binding;
 
     ViewHolder(View itemView) {
       super(itemView);
       binding = DataBindingUtil.bind(itemView);
+    }
+
+    void bind(@NonNull String packageName) {
+      binding.itemPurgeName.setText(packageName);
+    }
+
+    void unbind() {
+      binding.itemPurgeName.setText(null);
     }
   }
 }

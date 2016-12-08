@@ -31,7 +31,6 @@ import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding;
-import com.pyamsoft.pydroid.app.ListAdapterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -41,19 +40,23 @@ import timber.log.Timber;
 public class PurgeFragment extends ActionBarFragment implements PurgePresenter.View {
 
   @NonNull public static final String TAG = "PurgeFragment";
+  @NonNull private static final String FORCE_REFRESH = "key_force_refresh";
   @NonNull private static final String KEY_PRESENTER = "key_purge_presenter";
-  @NonNull private static final String KEY_LOAD_ADAPTER = "key_purge_adapter";
   PurgePresenter presenter;
   FastItemAdapter<PurgeItem> fastItemAdapter;
   boolean forceRefresh;
   private FragmentPurgeBinding binding;
   private long loadedKey;
-  private long loadedAdapterKey;
   private DividerItemDecoration decoration;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
+
+    if (savedInstanceState != null) {
+      Timber.i("Restore forceRefresh state from savedInstanceState");
+      forceRefresh = savedInstanceState.getBoolean(FORCE_REFRESH, true);
+    }
 
     loadedKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<PurgePresenter>() {
@@ -67,29 +70,13 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
           }
         });
 
-    loadedAdapterKey = PersistentCache.get()
-        .load(KEY_LOAD_ADAPTER, savedInstanceState,
-            new PersistLoader.Callback<FastItemAdapter<PurgeItem>>() {
-              @NonNull @Override public PersistLoader<FastItemAdapter<PurgeItem>> createLoader() {
-                return new ListAdapterLoader<FastItemAdapter<PurgeItem>>() {
-                  @NonNull @Override public FastItemAdapter<PurgeItem> loadPersistent() {
-                    return new FastItemAdapter<>();
-                  }
-                };
-              }
-
-              @Override
-              public void onPersistentLoaded(@NonNull FastItemAdapter<PurgeItem> persist) {
-                fastItemAdapter = persist;
-              }
-            });
+    fastItemAdapter = new FastItemAdapter<>();
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
       PersistentCache.get().unload(loadedKey);
-      PersistentCache.get().unload(loadedAdapterKey);
     }
   }
 
@@ -123,24 +110,15 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
       refreshList();
     } else {
       Timber.d("We are already refreshed");
-    }
-  }
-
-  private void clearList() {
-    final int oldSize = fastItemAdapter.getAdapterItems().size() - 1;
-    if (oldSize <= 0) {
-      Timber.w("List is already empty");
-      return;
-    }
-
-    for (int i = oldSize; i >= 0; --i) {
-      fastItemAdapter.remove(i);
+      presenter.retrieveStaleApplications();
     }
   }
 
   private void refreshList() {
-    forceRefresh = false;
-    clearList();
+    fastItemAdapter.clear();
+    presenter.clearList();
+    forceRefresh = true;
+
     presenter.retrieveStaleApplications();
   }
 
@@ -156,9 +134,9 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
     PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedKey);
-    PersistentCache.get().saveKey(outState, KEY_LOAD_ADAPTER, loadedAdapterKey);
+    outState.putBoolean(FORCE_REFRESH, forceRefresh);
+    super.onSaveInstanceState(outState);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -205,7 +183,6 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
 
   @Override public void onRetrievalComplete() {
     forceRefresh = false;
-    fastItemAdapter.notifyItemRangeInserted(0, fastItemAdapter.getItemCount() - 1);
   }
 
   @Override public void onDeleted(@NonNull String packageName) {
