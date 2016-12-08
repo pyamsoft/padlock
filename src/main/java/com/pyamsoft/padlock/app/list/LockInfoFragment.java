@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.mikepenz.fastadapter.FastAdapter;
+import com.mikepenz.fastadapter.IItemAdapter;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentLockinfoBinding;
@@ -159,6 +160,11 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   private void setupRecyclerView() {
     final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
     dividerDecoration = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
+
+    fastItemAdapter.withFilterPredicate((item, query) -> {
+      final String queryString = String.valueOf(query).toLowerCase().trim();
+      return item.filterAgainst(queryString);
+    });
 
     fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
 

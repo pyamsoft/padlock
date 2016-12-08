@@ -238,7 +238,7 @@ public class LockListFragment extends ActionBarFragment
 
     fastItemAdapter.withFilterPredicate((item, query) -> {
       final String queryString = String.valueOf(query).toLowerCase().trim();
-      return item.filterAgaint(queryString);
+      return item.filterAgainst(queryString);
     });
 
     fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
