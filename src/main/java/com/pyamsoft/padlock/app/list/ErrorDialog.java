@@ -33,6 +33,7 @@ public class ErrorDialog extends DialogFragment {
           dialogInterface.dismiss();
           getActivity().finish();
         })
+        .setCancelable(false)
         .create();
   }
 }

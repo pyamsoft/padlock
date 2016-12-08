@@ -40,7 +40,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
     implements LockListPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
-  @NonNull final List<AppEntry> appEntryCache;
+  @SuppressWarnings("WeakerAccess") @NonNull final List<AppEntry> appEntryCache;
   @NonNull private final LockServiceStateInteractor stateInteractor;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
       Subscriptions.empty();

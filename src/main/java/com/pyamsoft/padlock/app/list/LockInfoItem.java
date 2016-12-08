@@ -45,6 +45,10 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder>
     this.entry = entry;
   }
 
+  @NonNull @CheckResult String getName() {
+    return entry.name();
+  }
+
   @CheckResult @NonNull LockInfoItem copyWithNewLockState(@NonNull LockState newState) {
     return new LockInfoItem(packageName, ActivityEntry.builder(entry).lockState(newState).build());
   }
