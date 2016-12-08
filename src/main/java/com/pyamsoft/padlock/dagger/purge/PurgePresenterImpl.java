@@ -36,21 +36,25 @@ import timber.log.Timber;
 class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> implements PurgePresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor interactor;
+  @SuppressWarnings("WeakerAccess") @NonNull final List<String> stalePackageNameCache;
   @NonNull private final CompositeSubscription compositeSubscription;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription retrievalSubscription =
       Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") boolean refreshing;
 
   @Inject PurgePresenterImpl(@NonNull PurgeInteractor interactor,
       @NonNull Scheduler observeScheduler, @NonNull Scheduler subscribeScheduler) {
     super(observeScheduler, subscribeScheduler);
     this.interactor = interactor;
     compositeSubscription = new CompositeSubscription();
+    stalePackageNameCache = new ArrayList<>();
+    refreshing = false;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
-    SubscriptionHelper.unsubscribe(retrievalSubscription);
+  @Override protected void onDestroy() {
+    super.onDestroy();
     unsubStaleDeletes();
+    SubscriptionHelper.unsubscribe(retrievalSubscription);
   }
 
   private void unsubStaleDeletes() {
@@ -59,9 +63,19 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
     }
   }
 
+  @Override public void clearList() {
+    Timber.d("Clear cached stale packages");
+    stalePackageNameCache.clear();
+  }
+
   @Override public void retrieveStaleApplications() {
-    SubscriptionHelper.unsubscribe(retrievalSubscription);
-    retrievalSubscription = interactor.getAppEntryList()
+    if (refreshing) {
+      Timber.w("Already refreshing, do nothing");
+      return;
+    }
+
+    refreshing = true;
+    final Observable<String> freshData = interactor.getAppEntryList()
         .zipWith(interactor.getActiveApplicationPackageNames().toList(),
             (allEntries, packageNames) -> {
               final Set<PadLockEntry.AllEntries> liveLocations = new HashSet<>();
@@ -97,12 +111,26 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
             })
         .flatMap(Observable::from)
         .sorted(String::compareToIgnoreCase)
-        .subscribeOn(getSubscribeScheduler())
+        .map(packageName -> {
+          stalePackageNameCache.add(packageName);
+          return packageName;
+        });
+
+    final Observable<String> dataSource;
+    if (stalePackageNameCache.isEmpty()) {
+      dataSource = freshData;
+    } else {
+      dataSource = Observable.defer(() -> Observable.from(stalePackageNameCache));
+    }
+
+    SubscriptionHelper.unsubscribe(retrievalSubscription);
+    retrievalSubscription = dataSource.subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(s -> getView(view -> view.onStaleApplicationRetrieved(s)), throwable -> {
           Timber.e(throwable, "onError retrieveStaleApplications");
           getView(View::onRetrievalComplete);
         }, () -> {
+          refreshing = false;
           SubscriptionHelper.unsubscribe(retrievalSubscription);
           getView(View::onRetrievalComplete);
         });
@@ -115,11 +143,16 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
         .subscribe(deleteResult -> {
           Timber.d("Delete result :%d", deleteResult);
           if (deleteResult > 0) {
-            getView(view -> view.onDeleted(packageName));
+            onDeleteSuccess(packageName);
           }
         }, throwable -> {
           Timber.e(throwable, "onError deleteStale");
         });
     compositeSubscription.add(subscription);
+  }
+
+  @SuppressWarnings("WeakerAccess") void onDeleteSuccess(@NonNull String packageName) {
+    getView(view -> view.onDeleted(packageName));
+    stalePackageNameCache.remove(packageName);
   }
 }
