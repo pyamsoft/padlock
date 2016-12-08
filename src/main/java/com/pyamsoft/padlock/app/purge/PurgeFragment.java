@@ -183,6 +183,8 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
 
   @Override public void onRetrievalComplete() {
     forceRefresh = false;
+
+    // TODO show empty view if empty list
   }
 
   @Override public void onDeleted(@NonNull String packageName) {
