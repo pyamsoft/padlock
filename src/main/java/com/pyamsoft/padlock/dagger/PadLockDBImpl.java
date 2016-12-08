@@ -50,7 +50,7 @@ class PadLockDBImpl implements PadLockDB {
     briteDatabase = new SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler);
   }
 
-  @SuppressWarnings("WeakerAccess") void openDatabase() {
+  @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
     SubscriptionHelper.unsubscribe(dbOpenSubscription);
 
     // After a 1 minute timeout, close the DB

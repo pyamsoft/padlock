@@ -28,6 +28,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.mikepenz.fastadapter.FastAdapter;
@@ -311,7 +312,12 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     binding.lockInfoProgress.setVisibility(View.GONE);
     binding.lockInfoRecycler.setVisibility(View.VISIBLE);
     binding.lockInfoRecycler.setClickable(true);
-    presenter.showOnBoarding();
+
+    if (fastItemAdapter.getAdapterItemCount() > 0) {
+      presenter.showOnBoarding();
+    } else {
+      Toast.makeText(getContext(), "Error while loading list. Please try again.", Toast.LENGTH_SHORT).show();
+    }
   }
 
   @Override public void onListPopulateError() {
