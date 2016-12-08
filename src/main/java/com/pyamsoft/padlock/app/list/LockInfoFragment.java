@@ -203,9 +203,11 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     setActionBarUpEnabled(false);
 
     // Show the menu items again
-    final Fragment lockListFragment = getFragmentManager().findFragmentByTag(LockListFragment.TAG);
-    if (lockListFragment instanceof LockListFragment) {
-      ((LockListFragment) lockListFragment).setMenuItemVisibility(true);
+    final Fragment fragment = getFragmentManager().findFragmentByTag(LockListFragment.TAG);
+    if (fragment instanceof LockListFragment) {
+      final LockListFragment lockListFragment = (LockListFragment) fragment;
+      lockListFragment.setMenuItemVisibility(true);
+      lockListFragment.resetSearchViewOnQueryTextListener();
     }
 
     binding.lockInfoRecycler.removeItemDecoration(dividerDecoration);
@@ -273,12 +275,11 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     super.onResume();
     MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
     setActionBarUpEnabled(true);
+  }
 
-    // Hide the menu items
-    final Fragment lockListFragment = getFragmentManager().findFragmentByTag(LockListFragment.TAG);
-    if (lockListFragment instanceof LockListFragment) {
-      ((LockListFragment) lockListFragment).setMenuItemVisibility(false);
-    }
+  void takeOverMenuItems(@NonNull LockListFragment lockListFragment) {
+    lockListFragment.setMenuItemVisibility(false);
+    lockListFragment.setSearchViewOnQueryTextListener(fastItemAdapter);
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
