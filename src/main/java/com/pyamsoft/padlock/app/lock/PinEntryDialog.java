@@ -101,9 +101,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     // The dialog is super small for some reason. We have to set the size manually, in onResume
     final Window window = getDialog().getWindow();
     if (window != null) {
-      WindowManager.LayoutParams params = window.getAttributes();
-      params.width = WindowManager.LayoutParams.MATCH_PARENT;
-      window.setLayout(params.width, params.height);
+      window.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+          WindowManager.LayoutParams.WRAP_CONTENT);
     }
   }
 
