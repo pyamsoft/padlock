@@ -17,25 +17,18 @@
 package com.pyamsoft.padlock.app.purge;
 
 import android.databinding.DataBindingUtil;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import com.mikepenz.fastadapter.items.AbstractItem;
+import com.mikepenz.fastadapter.items.GenericAbstractItem;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemPurgeBinding;
 import java.util.List;
 
-class PurgeItem extends AbstractItem<PurgeItem, PurgeItem.ViewHolder> {
-
-  @NonNull private final String packageName;
+class PurgeItem extends GenericAbstractItem<String, PurgeItem, PurgeItem.ViewHolder> {
 
   PurgeItem(@NonNull String packageName) {
-    this.packageName = packageName;
-  }
-
-  @NonNull @CheckResult String getPackageName() {
-    return packageName;
+    super(packageName);
   }
 
   @Override public int getType() {
@@ -53,7 +46,7 @@ class PurgeItem extends AbstractItem<PurgeItem, PurgeItem.ViewHolder> {
 
   @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
-    holder.bind(packageName);
+    holder.bind(getModel());
   }
 
   protected static class ViewHolder extends RecyclerView.ViewHolder {

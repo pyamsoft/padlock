@@ -23,7 +23,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CompoundButton;
-import com.mikepenz.fastadapter.items.AbstractItem;
+import com.mikepenz.fastadapter.items.GenericAbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
@@ -37,27 +37,26 @@ import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHolder>
+public class LockListItem
+    extends GenericAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>
     implements FilterableItem<LockListItem, LockListItem.ViewHolder> {
 
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
-  @NonNull private final AppEntry entry;
-
   LockListItem(@NonNull AppEntry entry) {
-    this.entry = entry;
+    super(entry);
   }
 
   @NonNull @CheckResult String getName() {
-    return entry.name();
+    return getModel().name();
   }
 
   @NonNull @CheckResult String getPackageName() {
-    return entry.packageName();
+    return getModel().packageName();
   }
 
   @CheckResult @NonNull LockListItem copyWithNewLockState(boolean locked) {
-    return new LockListItem(AppEntry.builder(entry).locked(locked).build());
+    return new LockListItem(AppEntry.builder(getModel()).locked(locked).build());
   }
 
   @Override public int getType() {
@@ -73,14 +72,14 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   }
 
   @Override public boolean filterAgainst(@NonNull String query) {
-    final String name = entry.name().toLowerCase().trim();
+    final String name = getModel().name().toLowerCase().trim();
     Timber.d("Filter predicate: '%s' against %s", query, name);
     return !name.startsWith(query);
   }
 
   @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
-    holder.bind(entry);
+    holder.bind(getModel());
   }
 
   @Override public void unbindView(ViewHolder holder) {
@@ -89,7 +88,7 @@ public class LockListItem extends AbstractItem<LockListItem, LockListItem.ViewHo
   }
 
   void onClick(@NonNull ActionSingle<AppEntry> click) {
-    click.call(entry);
+    click.call(getModel());
   }
 
   interface OnLockSwitchCheckedChanged {
