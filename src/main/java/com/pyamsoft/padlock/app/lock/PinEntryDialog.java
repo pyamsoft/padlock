@@ -25,8 +25,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -104,10 +102,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     final Window window = getDialog().getWindow();
     if (window != null) {
       WindowManager.LayoutParams params = window.getAttributes();
-      final Display display = getActivity().getWindowManager().getDefaultDisplay();
-      final DisplayMetrics displayMetrics = new DisplayMetrics();
-      display.getMetrics(displayMetrics);
-      params.width = displayMetrics.widthPixels;
+      params.width = WindowManager.LayoutParams.MATCH_PARENT;
       window.setLayout(params.width, params.height);
     }
   }
