@@ -23,7 +23,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
-import com.mikepenz.fastadapter.items.AbstractItem;
+import com.mikepenz.fastadapter.items.GenericAbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
@@ -33,24 +33,24 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import timber.log.Timber;
 
-class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder>
+class LockInfoItem extends GenericAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>
     implements FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
   @NonNull private final String packageName;
-  @NonNull private final ActivityEntry entry;
 
   LockInfoItem(@NonNull String packageName, @NonNull ActivityEntry entry) {
+    super(entry);
     this.packageName = packageName;
-    this.entry = entry;
   }
 
   @NonNull @CheckResult String getName() {
-    return entry.name();
+    return getModel().name();
   }
 
   @CheckResult @NonNull LockInfoItem copyWithNewLockState(@NonNull LockState newState) {
-    return new LockInfoItem(packageName, ActivityEntry.builder(entry).lockState(newState).build());
+    return new LockInfoItem(packageName,
+        ActivityEntry.builder(getModel()).lockState(newState).build());
   }
 
   @Override public int getType() {
@@ -63,7 +63,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder>
 
   @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
-    holder.bind(packageName, entry);
+    holder.bind(packageName, getModel());
   }
 
   @Override public void unbindView(ViewHolder holder) {
@@ -72,7 +72,7 @@ class LockInfoItem extends AbstractItem<LockInfoItem, LockInfoItem.ViewHolder>
   }
 
   @Override public boolean filterAgainst(@NonNull String query) {
-    final String name = entry.name().toLowerCase().trim();
+    final String name = getModel().name().toLowerCase().trim();
     Timber.d("Filter predicate: '%s' against %s", query, name);
     return !name.contains(query);
   }

@@ -162,7 +162,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   private void setupRecyclerView() {
     fastItemAdapter.withSelectable(true);
     fastItemAdapter.withOnClickListener((v, adapter, item, position) -> {
-      handleDeleteRequest(position, item.getPackageName());
+      handleDeleteRequest(position, item.getModel());
       return true;
     });
     decoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
@@ -195,7 +195,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
       int found = -1;
       for (int i = 0; i < itemCount; ++i) {
         final PurgeItem item = fastItemAdapter.getAdapterItem(i);
-        if (item.getPackageName().equals(packageName)) {
+        if (item.getModel().equals(packageName)) {
           found = i;
           break;
         }
@@ -219,7 +219,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
       Timber.e("Adapter is EMPTY");
     } else {
       for (final PurgeItem item : fastItemAdapter.getAdapterItems()) {
-        purge(item.getPackageName());
+        purge(item.getModel());
       }
     }
   }
