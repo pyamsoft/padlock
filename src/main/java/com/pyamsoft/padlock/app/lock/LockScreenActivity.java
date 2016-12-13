@@ -47,7 +47,6 @@ import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroidrx.RXLoader;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Locale;
@@ -214,8 +213,8 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     });
 
     AsyncMapHelper.unsubscribe(arrowGoTask);
-    arrowGoTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp, new RXLoader())
-        .into(binding.lockImageGo);
+    arrowGoTask =
+        AsyncDrawable.with(this).load(R.drawable.ic_arrow_forward_24dp).into(binding.lockImageGo);
 
     clearDisplay();
 

@@ -51,7 +51,6 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroiddesign.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroiddesign.util.FABUtil;
-import com.pyamsoft.pydroidrx.RXLoader;
 import java.util.List;
 import timber.log.Timber;
 
@@ -320,14 +319,16 @@ public class LockListFragment extends FilterListFragment
 
   @Override public void setFABStateEnabled() {
     AsyncMapHelper.unsubscribe(fabIconTask);
-    fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_outline_24dp, new RXLoader())
+    fabIconTask = AsyncDrawable.with(getActivity())
+        .load(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab);
   }
 
   @Override public void setFABStateDisabled() {
     AsyncMapHelper.unsubscribe(fabIconTask);
-    fabIconTask =
-        AsyncDrawable.load(R.drawable.ic_lock_open_24dp, new RXLoader()).into(binding.applistFab);
+    fabIconTask = AsyncDrawable.with(getActivity())
+        .load(R.drawable.ic_lock_open_24dp)
+        .into(binding.applistFab);
   }
 
   @Override public void onCreateAccessibilityDialog() {
