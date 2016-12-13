@@ -214,7 +214,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
 
     AsyncMapHelper.unsubscribe(arrowGoTask);
     arrowGoTask =
-        AsyncDrawable.with(this).load(R.drawable.ic_arrow_forward_24dp).into(binding.lockImageGo);
+        AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.lockImageGo);
 
     clearDisplay();
 
