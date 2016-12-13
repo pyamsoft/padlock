@@ -319,16 +319,12 @@ public class LockListFragment extends FilterListFragment
 
   @Override public void setFABStateEnabled() {
     AsyncMapHelper.unsubscribe(fabIconTask);
-    fabIconTask = AsyncDrawable.with(getActivity())
-        .load(R.drawable.ic_lock_outline_24dp)
-        .into(binding.applistFab);
+    fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
   }
 
   @Override public void setFABStateDisabled() {
     AsyncMapHelper.unsubscribe(fabIconTask);
-    fabIconTask = AsyncDrawable.with(getActivity())
-        .load(R.drawable.ic_lock_open_24dp)
-        .into(binding.applistFab);
+    fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
   }
 
   @Override public void onCreateAccessibilityDialog() {

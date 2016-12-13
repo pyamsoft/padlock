@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.lock;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -72,6 +73,12 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     args.putString(ENTRY_ACTIVITY_NAME, activityName);
     fragment.setArguments(args);
     return fragment;
+  }
+
+  @NonNull @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+    final Dialog dialog = super.onCreateDialog(savedInstanceState);
+    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+    return dialog;
   }
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -151,8 +158,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
       dismiss();
     });
 
-    final AsyncMap.Entry task = AsyncDrawable.with(getActivity())
-        .load(R.drawable.ic_close_24dp)
+    final AsyncMap.Entry task = AsyncDrawable.load(R.drawable.ic_close_24dp)
         .tint(android.R.color.black)
         .into(binding.pinEntryClose);
     taskMap.put("close", task);
@@ -200,9 +206,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     // Force keyboard focus
     pinEntryText.requestFocus();
 
-    final AsyncMap.Entry task = AsyncDrawable.with(getActivity())
-        .load(R.drawable.ic_arrow_forward_24dp)
-        .into(binding.pinImageGo);
+    final AsyncMap.Entry task =
+        AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.pinImageGo);
     taskMap.put("arrow", task);
   }
 
