@@ -42,7 +42,6 @@ import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.sec.TamperActivity;
-import com.pyamsoft.pydroid.support.RatingActivity;
 import com.pyamsoft.pydroid.support.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -308,13 +307,10 @@ public class MainActivity extends TamperActivity
   }
 
   @NonNull @Override protected String[] getChangeLogLines() {
-    final String line1 = "CHANGE: Add a navigation drawer to interact with the application";
-    final String line2 = "CHANGE: Optimization for list entry processing";
-    final String line3 =
-        "CHANGE: Smaller APK size, should run on more devices now, including those without Google Play Services";
-    final String line4 = "BUGFIX: Fixes a crash in the donation page";
-    final String line5 = "BUGFIX: Fixes a crash with image loading on KitKat";
-    return new String[] { line1, line2, line3, line4, line5 };
+    final String line1 = "BUGFIX: Some additional stability fixes";
+    final String line2 = "FEATURE: Search and filter in specific application Info screens too.";
+    final String line3 = "BUGFIX: Better support for smaller screens with PIN dialog";
+    return new String[] { line1, line2, line3 };
   }
 
   @NonNull @Override protected String getVersionName() {
