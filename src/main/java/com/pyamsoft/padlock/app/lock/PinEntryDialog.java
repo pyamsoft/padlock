@@ -44,7 +44,6 @@ import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroidrx.RXLoader;
 import timber.log.Timber;
 
 public class PinEntryDialog extends DialogFragment implements PinScreen {
@@ -152,7 +151,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
       dismiss();
     });
 
-    final AsyncMap.Entry task = AsyncDrawable.load(R.drawable.ic_close_24dp, new RXLoader())
+    final AsyncMap.Entry task = AsyncDrawable.with(getActivity())
+        .load(R.drawable.ic_close_24dp)
         .tint(android.R.color.black)
         .into(binding.pinEntryClose);
     taskMap.put("close", task);
@@ -200,7 +200,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     // Force keyboard focus
     pinEntryText.requestFocus();
 
-    final AsyncMap.Entry task = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp, new RXLoader())
+    final AsyncMap.Entry task = AsyncDrawable.with(getActivity())
+        .load(R.drawable.ic_arrow_forward_24dp)
         .into(binding.pinImageGo);
     taskMap.put("arrow", task);
   }
