@@ -234,6 +234,8 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     if (forceRefresh) {
       refreshList();
     } else {
+      // Clear here because we repopulate the list
+      fastItemAdapter.clear();
       Timber.d("We are already refreshed, just refresh the request listeners");
       binding.lockInfoProgress.setVisibility(View.GONE);
       binding.lockInfoRecycler.setVisibility(View.VISIBLE);

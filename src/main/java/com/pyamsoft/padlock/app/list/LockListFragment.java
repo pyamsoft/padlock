@@ -153,6 +153,8 @@ public class LockListFragment extends FilterListFragment
       refreshList();
     } else {
       Timber.d("We are already refreshed, fetch the cached data");
+      // Clear here because we repopulate the list
+      fastItemAdapter.clear();
       presenter.populateList();
     }
   }
