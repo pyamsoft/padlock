@@ -69,8 +69,6 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
             presenter = persist;
           }
         });
-
-    fastItemAdapter = new FastItemAdapter<>();
   }
 
   @Override public void onDestroy() {
@@ -83,6 +81,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
+    fastItemAdapter = new FastItemAdapter<>();
     binding = FragmentPurgeBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }

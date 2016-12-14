@@ -112,13 +112,12 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
             presenter = persist;
           }
         });
-
-    fastItemAdapter = new FastItemAdapter<>();
   }
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
+    fastItemAdapter = new FastItemAdapter<>();
     binding = FragmentLockinfoBinding.inflate(inflater, null, false);
     return binding.getRoot();
   }
@@ -126,10 +125,8 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     setActionBarTitle(appName);
-
     binding.lockInfoPackageName.setText(appPackageName);
     binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
-
     setupRecyclerView();
     setupProgressSpinner();
   }
@@ -362,7 +359,8 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
         });
   }
 
-  @SuppressWarnings("WeakerAccess") void createWhiteLockTarget(@NonNull LockInfoItem.ViewHolder holder, @NonNull View radioWhite) {
+  @SuppressWarnings("WeakerAccess") void createWhiteLockTarget(
+      @NonNull LockInfoItem.ViewHolder holder, @NonNull View radioWhite) {
     final TapTarget lockWhiteTarget =
         TapTarget.forView(radioWhite, getString(R.string.onboard_title_info_lock_white),
             getString(R.string.onboard_desc_info_lock_white)).tintTarget(false).cancelable(false);
@@ -399,8 +397,9 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     }
   }
 
-  @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(int position, @NonNull String activityName,
-      @NonNull LockState previousLockState, @NonNull LockState newLockState) {
+  @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(int position,
+      @NonNull String activityName, @NonNull LockState previousLockState,
+      @NonNull LockState newLockState) {
     Timber.d("Received a database modify event request for %s %s at %d [%s]", appPackageName,
         activityName, position, newLockState.name());
     final boolean whitelist = newLockState.equals(WHITELISTED);
