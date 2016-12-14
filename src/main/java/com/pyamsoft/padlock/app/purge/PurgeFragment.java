@@ -17,6 +17,8 @@
 package com.pyamsoft.padlock.app.purge;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
@@ -40,11 +42,29 @@ import timber.log.Timber;
 public class PurgeFragment extends ActionBarFragment implements PurgePresenter.View {
 
   @NonNull public static final String TAG = "PurgeFragment";
-  @NonNull private static final String FORCE_REFRESH = "key_force_refresh";
   @NonNull private static final String KEY_PRESENTER = "key_purge_presenter";
+  @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") PurgePresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<PurgeItem> fastItemAdapter;
   private FragmentPurgeBinding binding;
+  @NonNull private final Runnable startRefreshRunnable = () -> {
+    binding.purgeSwipeRefresh.post(() -> {
+      if (binding != null) {
+        if (binding.purgeSwipeRefresh != null) {
+          binding.purgeSwipeRefresh.setRefreshing(true);
+        }
+      }
+    });
+  };
+  @NonNull private final Runnable stopRefreshRunnable = () -> {
+    binding.purgeSwipeRefresh.post(() -> {
+      if (binding != null) {
+        if (binding.purgeSwipeRefresh != null) {
+          binding.purgeSwipeRefresh.setRefreshing(false);
+        }
+      }
+    });
+  };
   private long loadedKey;
   private DividerItemDecoration decoration;
   private boolean listIsRefreshed;
@@ -83,6 +103,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
 
   @Override public void onDestroyView() {
     super.onDestroyView();
+    handler.removeCallbacksAndMessages(null);
     fastItemAdapter.withOnClickListener(null);
     binding.purgeList.removeItemDecoration(decoration);
     binding.purgeList.setOnClickListener(null);
@@ -94,6 +115,16 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     setupRecyclerView();
+    setupSwipeRefresh();
+  }
+
+  private void setupSwipeRefresh() {
+    binding.purgeSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
+        R.color.blue700, R.color.amber500);
+    binding.purgeSwipeRefresh.setOnRefreshListener(() -> {
+      Timber.d("onRefresh");
+      refreshList();
+    });
   }
 
   @Override public void onStart() {
@@ -110,6 +141,10 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   private void refreshList() {
     fastItemAdapter.clear();
     presenter.clearList();
+
+    handler.removeCallbacksAndMessages(null);
+    handler.post(startRefreshRunnable);
+
     presenter.retrieveStaleApplications();
   }
 
@@ -169,6 +204,13 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   }
 
   @Override public void onStaleApplicationRetrieved(@NonNull String name) {
+    Timber.d("Add entry: %s", name);
+
+    // In case the configuration changes, we do the animation again
+    if (!binding.purgeSwipeRefresh.isRefreshing()) {
+      binding.purgeSwipeRefresh.setRefreshing(true);
+    }
+
     fastItemAdapter.add(new PurgeItem(name));
   }
 
@@ -176,6 +218,8 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
     listIsRefreshed = true;
 
     // TODO show empty view if empty list
+    handler.removeCallbacksAndMessages(null);
+    handler.post(stopRefreshRunnable);
   }
 
   @Override public void onDeleted(@NonNull String packageName) {
