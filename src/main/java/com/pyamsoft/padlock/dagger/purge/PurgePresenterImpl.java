@@ -36,7 +36,6 @@ import timber.log.Timber;
 class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> implements PurgePresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor interactor;
-  @SuppressWarnings("WeakerAccess") @NonNull final List<String> stalePackageNameCache;
   @NonNull private final CompositeSubscription compositeSubscription;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription retrievalSubscription =
       Subscriptions.empty();
@@ -47,7 +46,6 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
     super(observeScheduler, subscribeScheduler);
     this.interactor = interactor;
     compositeSubscription = new CompositeSubscription();
-    stalePackageNameCache = new ArrayList<>();
     refreshing = false;
   }
 
@@ -64,8 +62,7 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
   }
 
   @Override public void clearList() {
-    Timber.d("Clear cached stale packages");
-    stalePackageNameCache.clear();
+    interactor.clearCache();
   }
 
   @Override public void retrieveStaleApplications() {
@@ -112,15 +109,15 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
         .flatMap(Observable::from)
         .sorted(String::compareToIgnoreCase)
         .map(packageName -> {
-          stalePackageNameCache.add(packageName);
+          interactor.cacheEntry(packageName);
           return packageName;
         });
 
     final Observable<String> dataSource;
-    if (stalePackageNameCache.isEmpty()) {
+    if (interactor.isCacheEmpty()) {
       dataSource = freshData;
     } else {
-      dataSource = Observable.defer(() -> Observable.from(stalePackageNameCache));
+      dataSource = interactor.getCachedEntries();
     }
 
     SubscriptionHelper.unsubscribe(retrievalSubscription);
@@ -153,6 +150,6 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
 
   @SuppressWarnings("WeakerAccess") void onDeleteSuccess(@NonNull String packageName) {
     getView(view -> view.onDeleted(packageName));
-    stalePackageNameCache.remove(packageName);
+    interactor.removeFromCache(packageName);
   }
 }

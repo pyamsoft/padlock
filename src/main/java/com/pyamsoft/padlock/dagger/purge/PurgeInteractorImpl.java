@@ -20,12 +20,14 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
 
 class PurgeInteractorImpl implements PurgeInteractor {
 
+  @SuppressWarnings("WeakerAccess") @NonNull final List<String> stalePackageNameCache;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final PadLockDB padLockDB;
 
@@ -33,6 +35,7 @@ class PurgeInteractorImpl implements PurgeInteractor {
       @NonNull PadLockDB padLockDB) {
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
+    stalePackageNameCache = new ArrayList<>();
   }
 
   @NonNull @Override public Observable<String> getActiveApplicationPackageNames() {
@@ -46,5 +49,25 @@ class PurgeInteractorImpl implements PurgeInteractor {
 
   @NonNull @Override public Observable<Integer> deleteEntry(@NonNull String packageName) {
     return padLockDB.deleteWithPackageName(packageName);
+  }
+
+  @Override public boolean isCacheEmpty() {
+    return stalePackageNameCache.isEmpty();
+  }
+
+  @NonNull @Override public Observable<String> getCachedEntries() {
+    return Observable.defer(() -> Observable.from(stalePackageNameCache));
+  }
+
+  @Override public void clearCache() {
+    stalePackageNameCache.clear();
+  }
+
+  @Override public void cacheEntry(@NonNull String entry) {
+    stalePackageNameCache.add(entry);
+  }
+
+  @Override public void removeFromCache(@NonNull String entry) {
+    stalePackageNameCache.remove(entry);
   }
 }
