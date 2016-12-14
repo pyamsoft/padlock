@@ -213,6 +213,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     setActionBarTitle(R.string.app_name);
     setActionBarUpEnabled(false);
 
+    handler.removeCallbacksAndMessages(null);
     binding.lockInfoRecycler.removeItemDecoration(dividerDecoration);
     binding.lockInfoRecycler.setOnClickListener(null);
     binding.lockInfoRecycler.setLayoutManager(null);
@@ -297,6 +298,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     binding.lockInfoProgress.setVisibility(View.GONE);
     binding.lockInfoRecycler.setVisibility(View.VISIBLE);
     binding.lockInfoRecycler.setClickable(true);
+    handler.removeCallbacksAndMessages(null);
     handler.post(stopRefreshRunnable);
 
     if (fastItemAdapter.getAdapterItemCount() > 0) {
@@ -321,6 +323,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
     binding.lockInfoProgress.setVisibility(View.VISIBLE);
     binding.lockInfoRecycler.setVisibility(View.GONE);
+    handler.removeCallbacksAndMessages(null);
     handler.post(startRefreshRunnable);
   }
 

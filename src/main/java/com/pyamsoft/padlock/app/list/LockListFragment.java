@@ -418,6 +418,7 @@ public class LockListFragment extends FilterListFragment
     listIsRefreshed = false;
 
     Timber.d("onListCleared");
+    handler.removeCallbacksAndMessages(null);
     handler.post(startRefreshRunnable);
     handler.post(() -> binding.applistFab.hide());
   }
@@ -425,6 +426,7 @@ public class LockListFragment extends FilterListFragment
   @Override public void onListPopulated() {
     Timber.d("onListPopulated");
 
+    handler.removeCallbacksAndMessages(null);
     handler.post(stopRefreshRunnable);
     handler.post(() -> binding.applistFab.show());
 
