@@ -141,7 +141,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
     setupSwipeRefresh();
     setupRecyclerView();
-    setupProgressSpinner();
   }
 
   private void setupSwipeRefresh() {
@@ -155,11 +154,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
   @NonNull @Override FastItemAdapter<? extends FilterableItem> getListAdapter() {
     return fastItemAdapter;
-  }
-
-  private void setupProgressSpinner() {
-    binding.lockInfoProgress.setIndeterminate(true);
-    binding.lockInfoProgress.setVisibility(View.GONE);
   }
 
   private void setupRecyclerView() {
@@ -253,8 +247,15 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     presenter.bindView(this);
     presenter.loadApplicationIcon(appPackageName);
     if (!listIsRefreshed) {
-      binding.lockInfoProgress.setVisibility(View.GONE);
-      binding.lockInfoRecycler.setVisibility(View.VISIBLE);
+      if (!binding.lockInfoSwipeRefresh.isRefreshing()) {
+        binding.lockInfoSwipeRefresh.post(() -> {
+          if (binding != null) {
+            if (binding.lockInfoSwipeRefresh != null) {
+              binding.lockInfoSwipeRefresh.setRefreshing(true);
+            }
+          }
+        });
+      }
       presenter.populateList(appPackageName);
     }
   }
@@ -300,8 +301,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   }
 
   @Override public void onListPopulated() {
-    binding.lockInfoProgress.setVisibility(View.GONE);
-    binding.lockInfoRecycler.setVisibility(View.VISIBLE);
     binding.lockInfoRecycler.setClickable(true);
     handler.removeCallbacksAndMessages(null);
     handler.post(stopRefreshRunnable);
@@ -326,8 +325,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     Timber.d("Prepare for refresh");
     listIsRefreshed = false;
 
-    binding.lockInfoProgress.setVisibility(View.VISIBLE);
-    binding.lockInfoRecycler.setVisibility(View.GONE);
     handler.removeCallbacksAndMessages(null);
     handler.post(startRefreshRunnable);
   }
