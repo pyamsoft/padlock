@@ -18,11 +18,12 @@ package com.pyamsoft.padlock.app.list;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,17 +56,37 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @NonNull private static final String ARG_APP_NAME = "app_name";
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
-
+  @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
+  @SuppressWarnings("WeakerAccess") VertScrollLinearLayoutManager vertScrollLayoutManager;
   private FragmentLockinfoBinding binding;
-  private long loadedPresenterKey;
+  @NonNull private final Runnable startRefreshRunnable = () -> {
+    binding.lockInfoSwipeRefresh.post(() -> {
+      if (binding != null) {
+        if (binding.lockInfoSwipeRefresh != null) {
+          binding.lockInfoSwipeRefresh.setRefreshing(true);
+        }
+      }
+    });
 
+    vertScrollLayoutManager.setVerticalScrollEnabled(false);
+  };
+  @NonNull private final Runnable stopRefreshRunnable = () -> {
+    binding.lockInfoSwipeRefresh.post(() -> {
+      if (binding != null) {
+        if (binding.lockInfoSwipeRefresh != null) {
+          binding.lockInfoSwipeRefresh.setRefreshing(false);
+        }
+      }
+    });
+    vertScrollLayoutManager.setVerticalScrollEnabled(true);
+  };
+  private long loadedPresenterKey;
   private String appPackageName;
   private String appName;
   private boolean appIsSystem;
   private boolean listIsRefreshed;
-
   @Nullable private TapTargetView toggleAllTapTarget;
   @Nullable private TapTargetView defaultLockTapTarget;
   @Nullable private TapTargetView whiteLockTapTarget;
@@ -121,8 +142,18 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     setActionBarTitle(appName);
     binding.lockInfoPackageName.setText(appPackageName);
     binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
+    setupSwipeRefresh();
     setupRecyclerView();
     setupProgressSpinner();
+  }
+
+  private void setupSwipeRefresh() {
+    binding.lockInfoSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
+        R.color.blue700, R.color.amber500);
+    binding.lockInfoSwipeRefresh.setOnRefreshListener(() -> {
+      Timber.d("onRefresh");
+      refreshList();
+    });
   }
 
   @NonNull @Override FastItemAdapter<? extends FilterableItem> getListAdapter() {
@@ -135,7 +166,8 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   }
 
   private void setupRecyclerView() {
-    final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+    vertScrollLayoutManager = new VertScrollLinearLayoutManager(getContext());
+    vertScrollLayoutManager.setVerticalScrollEnabled(true);
     dividerDecoration = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
 
     fastItemAdapter.withFilterPredicate((item, query) -> {
@@ -170,7 +202,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
       }
     });
 
-    binding.lockInfoRecycler.setLayoutManager(layoutManager);
+    binding.lockInfoRecycler.setLayoutManager(vertScrollLayoutManager);
     binding.lockInfoRecycler.addItemDecoration(dividerDecoration);
     binding.lockInfoRecycler.setAdapter(fastItemAdapter);
   }
@@ -265,6 +297,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     binding.lockInfoProgress.setVisibility(View.GONE);
     binding.lockInfoRecycler.setVisibility(View.VISIBLE);
     binding.lockInfoRecycler.setClickable(true);
+    handler.post(stopRefreshRunnable);
 
     if (fastItemAdapter.getAdapterItemCount() > 0) {
       Timber.d("Refresh finished");
@@ -288,6 +321,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
     binding.lockInfoProgress.setVisibility(View.VISIBLE);
     binding.lockInfoRecycler.setVisibility(View.GONE);
+    handler.post(startRefreshRunnable);
   }
 
   @Override public void onApplicationIconLoadedError() {
