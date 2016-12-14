@@ -46,7 +46,7 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
   void setOnBoard();
 
   void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
-      @Nullable String code, boolean system);
+      @SuppressWarnings("SameParameterValue") @Nullable String code, boolean system);
 
   interface LockList extends LockListCommon, LockListDatabaseErrorView, MasterPinSubmitCallback {
 

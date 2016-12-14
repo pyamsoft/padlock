@@ -301,6 +301,8 @@ public class LockListFragment extends FilterListFragment
           refreshList();
         }
         break;
+      default:
+        Timber.w("Item selected: %d, do nothing", item.getItemId());
     }
     return super.onOptionsItemSelected(item);
   }
@@ -476,13 +478,13 @@ public class LockListFragment extends FilterListFragment
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  void processDatabaseModifyEvent(boolean lock, int position, @NonNull AppEntry entry) {
+  @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(boolean lock, int position, @NonNull AppEntry entry) {
     Timber.d("Received a database modify event request for %s at %d [%s]", entry.packageName(),
         position, lock ? "LOCK" : "NO LOCK");
     presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system());
   }
 
-  void displayLockInfoFragment(@NonNull AppEntry entry) {
+  @SuppressWarnings("WeakerAccess") void displayLockInfoFragment(@NonNull AppEntry entry) {
     final FragmentManager fragmentManager = getFragmentManager();
     if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
       fragmentManager.beginTransaction()

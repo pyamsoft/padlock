@@ -48,10 +48,6 @@ class SettingsPreferencePresenterImpl
     this.receiver = receiver;
   }
 
-  @Override protected void onBind() {
-    super.onBind();
-  }
-
   @Override protected void onUnbind() {
     super.onUnbind();
     SubscriptionHelper.unsubscribe(confirmedSubscription, applicationInstallSubscription);

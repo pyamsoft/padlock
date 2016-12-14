@@ -41,14 +41,14 @@ import timber.log.Timber;
 class ApplicationInstallReceiverImpl extends BroadcastReceiver
     implements ApplicationInstallReceiver {
 
-  @NonNull final Context appContext;
-  @NonNull final NotificationManagerCompat notificationManager;
-  @NonNull final PendingIntent pendingIntent;
+  @NonNull private final Context appContext;
+  @NonNull private final NotificationManagerCompat notificationManager;
+  @NonNull private final PendingIntent pendingIntent;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final IntentFilter filter;
   @NonNull private final Scheduler obsScheduler;
   @NonNull private final Scheduler subScheduler;
-  int notificationId;
+  private int notificationId;
   private boolean registered;
   @NonNull private Subscription notification = Subscriptions.empty();
 
@@ -85,17 +85,7 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
         .observeOn(obsScheduler)
         .subscribe(s -> {
           if (isNew) {
-            Timber.i("Package Added: %s", packageName);
-            final Notification notification1 =
-                new NotificationCompat.Builder(appContext).setContentTitle("Lock New Application")
-                    .setSmallIcon(R.drawable.ic_notification_lock)
-                    .setColor(ContextCompat.getColor(appContext, R.color.blue500))
-                    .setContentText("Click to lock the newly installed application: " + s)
-                    .setContentIntent(pendingIntent)
-                    .setPriority(NotificationCompat.PRIORITY_LOW)
-                    .setAutoCancel(true)
-                    .build();
-            notificationManager.notify(notificationId++, notification1);
+            onNewPackageInstalled(packageName, s);
           } else {
             Timber.d("Package updated: %s", packageName);
           }
@@ -103,7 +93,21 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
             packageName), this::unsubNotification);
   }
 
-  void unsubNotification() {
+  void onNewPackageInstalled(@NonNull String packageName, @NonNull String name) {
+    Timber.i("Package Added: %s", packageName);
+    final Notification notification1 =
+        new NotificationCompat.Builder(appContext).setContentTitle("Lock New Application")
+            .setSmallIcon(R.drawable.ic_notification_lock)
+            .setColor(ContextCompat.getColor(appContext, R.color.blue500))
+            .setContentText("Click to lock the newly installed application: " + name)
+            .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setAutoCancel(true)
+            .build();
+    notificationManager.notify(notificationId++, notification1);
+  }
+
+  @SuppressWarnings("WeakerAccess") void unsubNotification() {
     if (!notification.isUnsubscribed()) {
       notification.unsubscribe();
     }

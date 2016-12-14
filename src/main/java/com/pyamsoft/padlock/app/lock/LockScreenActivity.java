@@ -113,7 +113,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
   }
 
-  static void addToLockedMap(@NonNull String packageName, @NonNull String className,
+  private static void addToLockedMap(@NonNull String packageName, @NonNull String className,
       @NonNull LockScreenActivity instance) {
     final LockScreenEntry entry = LockScreenEntry.create(packageName, className);
     if (LOCK_SCREEN_MAP.containsKey(entry)) {

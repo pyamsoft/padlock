@@ -32,8 +32,8 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
   void populateList(@NonNull String packageName);
 
   void modifyDatabaseEntry(boolean isNotDefault, int position, @NonNull String packageName,
-      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
-      boolean forceDelete);
+      @NonNull String activityName, @SuppressWarnings("SameParameterValue") @Nullable String code,
+      boolean system, boolean whitelist, boolean forceDelete);
 
   void showOnBoarding();
 

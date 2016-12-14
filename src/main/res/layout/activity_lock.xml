@@ -92,7 +92,6 @@
             android:id="@+id/lock_image_go"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:contentDescription="@string/blank"
             />

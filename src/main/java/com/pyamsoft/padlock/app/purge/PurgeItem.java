@@ -21,11 +21,14 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import com.mikepenz.fastadapter.items.GenericAbstractItem;
+import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemPurgeBinding;
 import java.util.List;
 
 class PurgeItem extends GenericAbstractItem<String, PurgeItem, PurgeItem.ViewHolder> {
+
+  @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
   PurgeItem(@NonNull String packageName) {
     super(packageName);
@@ -39,6 +42,10 @@ class PurgeItem extends GenericAbstractItem<String, PurgeItem, PurgeItem.ViewHol
     return R.layout.adapter_item_purge;
   }
 
+  @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
+    return FACTORY;
+  }
+
   @Override public void unbindView(ViewHolder holder) {
     super.unbindView(holder);
     holder.unbind();
@@ -49,7 +56,14 @@ class PurgeItem extends GenericAbstractItem<String, PurgeItem, PurgeItem.ViewHol
     holder.bind(getModel());
   }
 
-  protected static class ViewHolder extends RecyclerView.ViewHolder {
+  @SuppressWarnings("WeakerAccess") protected static class ItemFactory
+      implements ViewHolderFactory<ViewHolder> {
+    @Override public ViewHolder create(View v) {
+      return new ViewHolder(v);
+    }
+  }
+
+  static class ViewHolder extends RecyclerView.ViewHolder {
 
     @NonNull private final AdapterItemPurgeBinding binding;
 

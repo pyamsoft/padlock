@@ -85,7 +85,7 @@ public class PadLockService extends AccessibilityService
     }
   }
 
-  @CheckResult @NonNull LockServicePresenter getPresenter() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull LockServicePresenter getPresenter() {
     if (presenter == null) {
       throw new NullPointerException("Presenter is NULL");
     }

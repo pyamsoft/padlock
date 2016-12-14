@@ -42,9 +42,9 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   @NonNull public static final String TAG = "PurgeFragment";
   @NonNull private static final String FORCE_REFRESH = "key_force_refresh";
   @NonNull private static final String KEY_PRESENTER = "key_purge_presenter";
-  PurgePresenter presenter;
-  FastItemAdapter<PurgeItem> fastItemAdapter;
-  boolean forceRefresh;
+  @SuppressWarnings("WeakerAccess") PurgePresenter presenter;
+  @SuppressWarnings("WeakerAccess") FastItemAdapter<PurgeItem> fastItemAdapter;
+  @SuppressWarnings("WeakerAccess") boolean forceRefresh;
   private FragmentPurgeBinding binding;
   private long loadedKey;
   private DividerItemDecoration decoration;
@@ -171,7 +171,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
     binding.purgeList.setAdapter(fastItemAdapter);
   }
 
-  void handleDeleteRequest(int position, @NonNull String packageName) {
+  @SuppressWarnings("WeakerAccess") void handleDeleteRequest(int position, @NonNull String packageName) {
     Timber.d("Handle delete request for %s at %d", packageName, position);
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
         PurgeSingleItemDialog.newInstance(packageName), "purge_single");

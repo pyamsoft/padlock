@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.lock;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -271,7 +272,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     presenter.unbindView();
   }
 
-  private void setupToolbar() {
+  @SuppressLint("SetTextI18n") private void setupToolbar() {
     // Maybe something more descriptive
     binding.pinEntryToolbar.setText("PIN");
   }
@@ -338,7 +339,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     }
   }
 
-  @CheckResult @NonNull LockListPresenter.LockList getLockList() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull LockListPresenter.LockList getLockList() {
     final FragmentManager fragmentManager = getFragmentManager();
     final Fragment lockListFragment = fragmentManager.findFragmentByTag(LockListFragment.TAG);
     if (lockListFragment instanceof LockListPresenter.LockList) {

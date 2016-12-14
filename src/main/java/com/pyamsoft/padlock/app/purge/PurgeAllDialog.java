@@ -36,7 +36,7 @@ public class PurgeAllDialog extends DialogFragment {
         .create();
   }
 
-  void sendDeleteAllEvent() {
+  @SuppressWarnings("WeakerAccess") void sendDeleteAllEvent() {
     final FragmentManager fragmentManager = getFragmentManager();
     final Fragment purgeFragment = fragmentManager.findFragmentByTag(PurgeFragment.TAG);
     if (purgeFragment instanceof PurgeFragment) {

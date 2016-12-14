@@ -43,8 +43,6 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
   @SuppressWarnings("WeakerAccess") @NonNull final List<ActivityEntry> activityEntryCache;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
       Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription allInDBSubscription =
-      Subscriptions.empty();
   @SuppressWarnings("WeakerAccess") @NonNull Subscription databaseSubscription =
       Subscriptions.empty();
   @SuppressWarnings("WeakerAccess") @NonNull Subscription onboardSubscription =
@@ -70,7 +68,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
   @Override protected void onUnbind() {
     super.onUnbind();
     iconLoader.unbindView();
-    SubscriptionHelper.unsubscribe(databaseSubscription, allInDBSubscription, onboardSubscription);
+    SubscriptionHelper.unsubscribe(databaseSubscription, onboardSubscription);
   }
 
   @Override protected void onDestroy() {

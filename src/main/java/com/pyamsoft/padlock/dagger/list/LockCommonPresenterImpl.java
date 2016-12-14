@@ -35,7 +35,7 @@ abstract class LockCommonPresenterImpl<I> extends SchedulerPresenter<I> {
     this.interactor = interactor;
   }
 
-  @CheckResult @NonNull LockCommonInteractor getInteractor() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull LockCommonInteractor getInteractor() {
     return interactor;
   }
 
