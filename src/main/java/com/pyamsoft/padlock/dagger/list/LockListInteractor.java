@@ -45,4 +45,14 @@ interface LockListInteractor extends LockCommonInteractor {
       boolean locked);
 
   @CheckResult boolean isSystemApplication(@NonNull ApplicationInfo info);
+
+  @CheckResult boolean isCacheEmpty();
+
+  @CheckResult @NonNull Observable<AppEntry> getCachedEntries();
+
+  void clearCache();
+
+  void updateCacheEntry(@NonNull String name, @NonNull String packageName, boolean newLockState);
+
+  void cacheEntry(@NonNull AppEntry entry);
 }

@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.dagger.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
@@ -36,4 +37,14 @@ interface LockInfoInteractor extends LockCommonInteractor {
   void setShownOnBoarding();
 
   @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding();
+
+  @CheckResult boolean isCacheEmpty();
+
+  @CheckResult @NonNull Observable<ActivityEntry> getCachedEntries();
+
+  void clearCache();
+
+  void updateCacheEntry(@NonNull String name, @NonNull LockState lockState);
+
+  void cacheEntry(@NonNull ActivityEntry entry);
 }
