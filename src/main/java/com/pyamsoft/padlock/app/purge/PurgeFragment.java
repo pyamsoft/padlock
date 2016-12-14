@@ -108,6 +108,8 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
       Timber.d("Do initial refresh");
       refreshList();
     } else {
+      // Clear here because we repopulate the list
+      fastItemAdapter.clear();
       Timber.d("We are already refreshed");
       presenter.retrieveStaleApplications();
     }
