@@ -131,9 +131,6 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
     super.onStart();
     presenter.bindView(this);
     if (!listIsRefreshed) {
-      // Clear here because we repopulate the list
-      fastItemAdapter.clear();
-      Timber.d("We are already refreshed");
       presenter.retrieveStaleApplications();
     }
   }
