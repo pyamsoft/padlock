@@ -45,6 +45,7 @@ import com.pyamsoft.padlock.app.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentApplistBinding;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.tool.AsyncMapHelper;
@@ -55,7 +56,7 @@ import com.pyamsoft.pydroiddesign.util.FABUtil;
 import java.util.List;
 import timber.log.Timber;
 
-public class LockListFragment extends FilterListFragment
+public class LockListFragment extends ActionBarFragment
     implements LockListPresenter.LockList, PinEntryDialogRequest {
 
   @NonNull public static final String TAG = "LockListFragment";
@@ -100,6 +101,7 @@ public class LockListFragment extends FilterListFragment
   @Nullable private DividerItemDecoration dividerDecoration;
   @Nullable private AsyncMap.Entry fabIconTask;
   private boolean listIsRefreshed;
+  private FilterListDelegate filterListDelegate;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -120,6 +122,7 @@ public class LockListFragment extends FilterListFragment
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
     listIsRefreshed = false;
+    filterListDelegate = new FilterListDelegate();
     fastItemAdapter = new FastItemAdapter<>();
     binding = FragmentApplistBinding.inflate(inflater, container, false);
     return binding.getRoot();
@@ -127,6 +130,7 @@ public class LockListFragment extends FilterListFragment
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    filterListDelegate.onViewCreated(fastItemAdapter);
     setupRecyclerView();
     setupSwipeRefresh();
     setupFAB();
@@ -224,15 +228,13 @@ public class LockListFragment extends FilterListFragment
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
     super.onCreateOptionsMenu(menu, inflater);
     inflater.inflate(R.menu.locklist_menu, menu);
+    inflater.inflate(filterListDelegate.provideMenuResource(), menu);
   }
 
   @Override public void onPrepareOptionsMenu(@NonNull Menu menu) {
     super.onPrepareOptionsMenu(menu);
     setupDisplaySystemVisibleItem(menu);
-  }
-
-  @NonNull @Override FastItemAdapter<? extends FilterableItem> getListAdapter() {
-    return fastItemAdapter;
+    filterListDelegate.onPrepareOptionsMenu(menu, fastItemAdapter);
   }
 
   private void setupDisplaySystemVisibleItem(final @NonNull Menu menu) {
@@ -262,6 +264,7 @@ public class LockListFragment extends FilterListFragment
   }
 
   @Override public void onDestroyView() {
+    filterListDelegate.onDestroyView();
     displaySystemItem = null;
 
     binding.applistRecyclerview.removeItemDecoration(dividerDecoration);
