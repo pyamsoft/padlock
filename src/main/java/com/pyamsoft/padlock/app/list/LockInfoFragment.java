@@ -60,7 +60,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
-  private FragmentLockinfoBinding binding;
+  FragmentLockinfoBinding binding;
   @NonNull private final Runnable startRefreshRunnable = () -> {
     binding.lockInfoSwipeRefresh.post(() -> {
       if (binding != null) {
@@ -285,11 +285,15 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   }
 
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
-    Timber.d("Add entry: %s", entry);
-
     // In case the configuration changes, we do the animation again
     if (!binding.lockInfoSwipeRefresh.isRefreshing()) {
-      binding.lockInfoSwipeRefresh.setRefreshing(true);
+      binding.lockInfoSwipeRefresh.post(() -> {
+        if (binding != null) {
+          if (binding.lockInfoSwipeRefresh != null) {
+            binding.lockInfoSwipeRefresh.setRefreshing(true);
+          }
+        }
+      });
     }
 
     fastItemAdapter.add(new LockInfoItem(appPackageName, entry));

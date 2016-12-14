@@ -81,7 +81,7 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
     for (int i = 0; i < size; ++i) {
       final ActivityEntry activityEntry = activityEntryCache.get(i);
       if (activityEntry.name().equals(name)) {
-        Timber.d("Update cached entry: %s", name);
+        Timber.d("Update cached entry: %s %s", name, lockState);
         activityEntryCache.set(i,
             ActivityEntry.builder(activityEntry).lockState(lockState).build());
       }
