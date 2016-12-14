@@ -79,7 +79,6 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
               final Set<String> stalePackageNames = new HashSet<>();
               // Remove all active applications from the list of entries
               for (final String packageName : packageNames) {
-                Timber.i("Look for package: %s", packageName);
                 final List<PadLockEntry.AllEntries> foundLocations = new ArrayList<>();
                 //noinspection Convert2streamapi
                 for (final PadLockEntry.AllEntries entry : allEntries) {
@@ -93,14 +92,11 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
 
               // Remove any found locations
               for (final PadLockEntry.AllEntries liveLocation : liveLocations) {
-                Timber.d("Remove live location: %s %s", liveLocation.packageName(),
-                    liveLocation.activityName());
                 allEntries.remove(liveLocation);
               }
 
               // The remaining entries in the database are stale
               for (final PadLockEntry.AllEntries entry : allEntries) {
-                Timber.i("Stale database entry: %s %s", entry.packageName(), entry.activityName());
                 stalePackageNames.add(entry.packageName());
               }
 

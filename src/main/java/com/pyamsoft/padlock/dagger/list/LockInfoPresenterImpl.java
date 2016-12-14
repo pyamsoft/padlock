@@ -197,7 +197,6 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
   PadLockEntry.WithPackageName findMatchingEntry(
       @NonNull List<PadLockEntry.WithPackageName> padLockEntries, @NonNull String activityName) {
     if (padLockEntries.isEmpty()) {
-      Timber.d("Did not find entry for %s", activityName);
       return null;
     }
 
