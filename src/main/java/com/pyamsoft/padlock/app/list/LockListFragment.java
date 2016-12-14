@@ -124,13 +124,12 @@ public class LockListFragment extends FilterListFragment
             presenter = persist;
           }
         });
-
-    fastItemAdapter = new FastItemAdapter<>();
   }
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
+    fastItemAdapter = new FastItemAdapter<>();
     binding = FragmentApplistBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
@@ -478,7 +477,8 @@ public class LockListFragment extends FilterListFragment
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(boolean lock, int position, @NonNull AppEntry entry) {
+  @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(boolean lock, int position,
+      @NonNull AppEntry entry) {
     Timber.d("Received a database modify event request for %s at %d [%s]", entry.packageName(),
         position, lock ? "LOCK" : "NO LOCK");
     presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system());
