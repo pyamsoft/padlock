@@ -138,6 +138,15 @@ public class LockListFragment extends FilterListFragment
 
     presenter.setFABStateFromPreference();
     if (!listIsRefreshed) {
+      if (!binding.applistSwipeRefresh.isRefreshing()) {
+        binding.applistSwipeRefresh.post(() -> {
+          if (binding != null) {
+            if (binding.applistSwipeRefresh != null) {
+              binding.applistSwipeRefresh.setRefreshing(true);
+            }
+          }
+        });
+      }
       presenter.populateList();
     }
   }
@@ -351,11 +360,15 @@ public class LockListFragment extends FilterListFragment
   }
 
   @Override public void onEntryAddedToList(@NonNull AppEntry entry) {
-    Timber.d("Add entry: %s", entry);
-
     // In case the configuration changes, we do the animation again
     if (!binding.applistSwipeRefresh.isRefreshing()) {
-      binding.applistSwipeRefresh.setRefreshing(true);
+      binding.applistSwipeRefresh.post(() -> {
+        if (binding != null) {
+          if (binding.applistSwipeRefresh != null) {
+            binding.applistSwipeRefresh.setRefreshing(true);
+          }
+        }
+      });
     }
 
     fastItemAdapter.add(new LockListItem(entry));
