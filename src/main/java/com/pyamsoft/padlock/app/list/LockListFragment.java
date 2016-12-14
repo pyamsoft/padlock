@@ -60,7 +60,6 @@ public class LockListFragment extends FilterListFragment
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
-  @NonNull private static final String FORCE_REFRESH = "key_force_refresh";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockListItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") LockListLayoutManager lockListLayoutManager;
@@ -97,7 +96,6 @@ public class LockListFragment extends FilterListFragment
       activity.supportInvalidateOptionsMenu();
     }
   };
-  @SuppressWarnings("WeakerAccess") boolean forceRefresh;
   @Nullable private MenuItem displaySystemItem;
   private long loadedPresenterKey;
   @Nullable private TapTargetSequence sequence;
@@ -108,16 +106,9 @@ public class LockListFragment extends FilterListFragment
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-
-    if (savedInstanceState != null) {
-      Timber.i("Restore forceRefresh state from savedInstanceState");
-      forceRefresh = savedInstanceState.getBoolean(FORCE_REFRESH, true);
-    }
-
     loadedPresenterKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
           @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
-            forceRefresh = true;
             return new LockListPresenterLoader();
           }
 
@@ -148,17 +139,8 @@ public class LockListFragment extends FilterListFragment
     presenter.bindView(this);
 
     presenter.setFABStateFromPreference();
-    if (forceRefresh) {
-      Timber.d("Do initial refresh");
-      forceRefresh = false;
-      refreshList();
-    } else {
-      if (!listIsRefreshed) {
-        Timber.d("We are already refreshed, fetch the cached data");
-        // Clear here because we repopulate the list
-        fastItemAdapter.clear();
-        presenter.populateList();
-      }
+    if (!listIsRefreshed) {
+      presenter.populateList();
     }
   }
 
@@ -271,7 +253,6 @@ public class LockListFragment extends FilterListFragment
 
   @Override public void onSaveInstanceState(Bundle outState) {
     PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
-    outState.putBoolean(FORCE_REFRESH, forceRefresh);
     super.onSaveInstanceState(outState);
   }
 
@@ -434,7 +415,6 @@ public class LockListFragment extends FilterListFragment
 
   @Override public void onListCleared() {
     Timber.d("Prepare for refresh");
-    forceRefresh = true;
     listIsRefreshed = false;
 
     Timber.d("onListCleared");
@@ -450,7 +430,6 @@ public class LockListFragment extends FilterListFragment
 
     if (fastItemAdapter.getAdapterItemCount() > 1) {
       Timber.d("We have refreshed");
-      forceRefresh = false;
       listIsRefreshed = true;
       presenter.showOnBoarding();
     } else {
