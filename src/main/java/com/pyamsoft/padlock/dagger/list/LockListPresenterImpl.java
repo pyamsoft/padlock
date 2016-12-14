@@ -195,7 +195,6 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
   PadLockEntry.AllEntries findMatchingEntry(@NonNull List<PadLockEntry.AllEntries> padLockEntries,
       @NonNull String packageName) {
     if (padLockEntries.isEmpty()) {
-      Timber.d("Did not find entry for %s", packageName);
       return null;
     }
 
