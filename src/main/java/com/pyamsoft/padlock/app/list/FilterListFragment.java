@@ -33,7 +33,7 @@ import timber.log.Timber;
 
 abstract class FilterListFragment extends ActionBarFragment {
 
-  @Nullable SearchView searchView;
+  @SuppressWarnings("WeakerAccess") @Nullable SearchView searchView;
   @Nullable private MenuItem searchItem;
 
   @CallSuper @Override public void onCreate(@Nullable Bundle savedInstanceState) {

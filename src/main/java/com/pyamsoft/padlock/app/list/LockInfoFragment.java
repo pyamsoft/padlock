@@ -345,7 +345,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     }
   }
 
-  void createDefaultLockTarget(@NonNull LockInfoItem.ViewHolder holder,
+  private void createDefaultLockTarget(@NonNull LockInfoItem.ViewHolder holder,
       @NonNull View radioDefault) {
     final TapTarget lockDefaultTarget =
         TapTarget.forView(radioDefault, getString(R.string.onboard_title_info_lock_default),
@@ -362,7 +362,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
         });
   }
 
-  void createWhiteLockTarget(@NonNull LockInfoItem.ViewHolder holder, @NonNull View radioWhite) {
+  @SuppressWarnings("WeakerAccess") void createWhiteLockTarget(@NonNull LockInfoItem.ViewHolder holder, @NonNull View radioWhite) {
     final TapTarget lockWhiteTarget =
         TapTarget.forView(radioWhite, getString(R.string.onboard_title_info_lock_white),
             getString(R.string.onboard_desc_info_lock_white)).tintTarget(false).cancelable(false);
@@ -378,7 +378,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
         });
   }
 
-  void createBlackLockTarget(@NonNull View radioBlack) {
+  @SuppressWarnings("WeakerAccess") void createBlackLockTarget(@NonNull View radioBlack) {
     final TapTarget lockBlackTarget =
         TapTarget.forView(radioBlack, getString(R.string.onboard_title_info_lock_black),
             getString(R.string.onboard_desc_info_lock_black)).tintTarget(false).cancelable(false);
@@ -392,14 +392,14 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
         });
   }
 
-  void endOnboarding() {
+  @SuppressWarnings("WeakerAccess") void endOnboarding() {
     if (presenter != null) {
       Timber.d("End onboarding");
       presenter.setOnBoard();
     }
   }
 
-  void processDatabaseModifyEvent(int position, @NonNull String activityName,
+  @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(int position, @NonNull String activityName,
       @NonNull LockState previousLockState, @NonNull LockState newLockState) {
     Timber.d("Received a database modify event request for %s %s at %d [%s]", appPackageName,
         activityName, position, newLockState.name());

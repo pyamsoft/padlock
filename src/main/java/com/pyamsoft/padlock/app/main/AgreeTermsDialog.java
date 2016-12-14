@@ -51,7 +51,7 @@ public class AgreeTermsDialog extends DialogFragment {
         .create();
   }
 
-  void agreeToTerms(boolean agree) {
+  @SuppressWarnings("WeakerAccess") void agreeToTerms(boolean agree) {
     final Activity activity = getActivity();
     if (activity instanceof MainActivity) {
       ((MainActivity) activity).getPresenter().agreeToTerms(agree);

@@ -59,7 +59,7 @@ public class PurgeSingleItemDialog extends DialogFragment {
         .create();
   }
 
-  void sendDeleteEvent(@NonNull String packageName) {
+  @SuppressWarnings("WeakerAccess") void sendDeleteEvent(@NonNull String packageName) {
     final FragmentManager fragmentManager = getFragmentManager();
     final Fragment purgeFragment = fragmentManager.findFragmentByTag(PurgeFragment.TAG);
     if (purgeFragment instanceof PurgeFragment) {

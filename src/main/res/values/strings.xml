@@ -37,7 +37,6 @@
   <string name="optional_lock_code_hint">Optional Lock Code Hint</string>
   <string name="show_system_applications">Show System Applications</string>
   <string name="settings">Settings</string>
-  <string name="toggle_all">Toggle All</string>
   <string name="stat_package_name">Package Name:</string>
   <string name="stat_real_name">Name:</string>
   <string name="stat_locked_by">Locked by Entry:</string>
@@ -45,10 +44,6 @@
 
   <string name="onboard_title_locklist">Lock Entire Groups</string>
   <string name="onboard_desc_locklist">Locks applications based on the app that they were installed with</string>
-  <string name="onboard_title_settings">Configure PadLock</string>
-  <string name="onboard_desc_settings">Various settings which control how PadLock behaves</string>
-  <string name="onboard_title_info_toggle">Toggle All Activities</string>
-  <string name="onboard_desc_info_toggle">Toggle all activities to either the locked or default state</string>
   <string name="onboard_title_info_lock_default">Default Lock State</string>
   <string name="onboard_desc_info_lock_default">Locking is controlled by package. If the package is locked (from the list) this activity will lock too</string>
   <string name="onboard_title_info_lock_white">Whitelisted Lock State</string>

@@ -54,8 +54,8 @@ public class MainActivity extends TamperActivity
   @NonNull private static final String KEY_PRESENTER = "key_main_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
-  ActivityMainBinding binding;
-  boolean firstLaunch;
+  @SuppressWarnings("WeakerAccess") ActivityMainBinding binding;
+  @SuppressWarnings("WeakerAccess") boolean firstLaunch;
   private long loaderKey;
   private ActionBarDrawerToggle drawerToggle;
 
@@ -138,7 +138,7 @@ public class MainActivity extends TamperActivity
     }, 1200L);
   }
 
-  @CheckResult boolean replaceFragment(@NonNull Fragment fragment, @NonNull String tag) {
+  @SuppressWarnings("WeakerAccess") @CheckResult boolean replaceFragment(@NonNull Fragment fragment, @NonNull String tag) {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     if (fragmentManager.findFragmentByTag(tag) == null) {
       fragmentManager.beginTransaction().replace(R.id.main_view_container, fragment, tag).commit();
