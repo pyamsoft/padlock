@@ -25,8 +25,6 @@ import com.pyamsoft.padlock.dagger.service.LockServiceStateInteractor;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -40,7 +38,6 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
     implements LockListPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
-  @SuppressWarnings("WeakerAccess") @NonNull final List<AppEntry> appEntryCache;
   @NonNull private final LockServiceStateInteractor stateInteractor;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
       Subscriptions.empty();
@@ -60,7 +57,6 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
     super(lockListInteractor, obsScheduler, subScheduler);
     this.lockListInteractor = lockListInteractor;
     this.stateInteractor = stateInteractor;
-    appEntryCache = new ArrayList<>();
     refreshing = false;
   }
 
@@ -78,21 +74,13 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
   }
 
   @Override public void clearList() {
-    Timber.w("Clear app entry cache");
-    appEntryCache.clear();
+    lockListInteractor.clearCache();
   }
 
   @Override
   public void updateCachedEntryLockState(@NonNull String name, @NonNull String packageName,
       boolean newLockState) {
-    final int size = appEntryCache.size();
-    for (int i = 0; i < size; ++i) {
-      final AppEntry appEntry = appEntryCache.get(i);
-      if (appEntry.name().equals(name) && appEntry.packageName().equals(packageName)) {
-        Timber.d("Update cached entry: %s %s", name, packageName);
-        appEntryCache.set(i, AppEntry.builder(appEntry).locked(newLockState).build());
-      }
-    }
+    lockListInteractor.updateCacheEntry(name, packageName, newLockState);
   }
 
   @Override public void populateList() {
@@ -152,15 +140,15 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
         .flatMap(pair -> lockListInteractor.createFromPackageInfo(pair.first, pair.second))
         .sorted((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()))
         .map(appEntry -> {
-          appEntryCache.add(appEntry);
+          lockListInteractor.cacheEntry(appEntry);
           return appEntry;
         });
 
     final Observable<AppEntry> dataSource;
-    if (appEntryCache.isEmpty()) {
+    if (lockListInteractor.isCacheEmpty()) {
       dataSource = freshAppEntries;
     } else {
-      dataSource = Observable.defer(() -> Observable.from(appEntryCache));
+      dataSource = lockListInteractor.getCachedEntries();
     }
 
     SubscriptionHelper.unsubscribe(populateListSubscription);

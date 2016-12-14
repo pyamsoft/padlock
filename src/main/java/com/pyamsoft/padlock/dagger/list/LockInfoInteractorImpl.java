@@ -21,8 +21,10 @@ import com.pyamsoft.padlock.PadLockPreferences;
 import com.pyamsoft.padlock.app.lock.LockScreenActivity;
 import com.pyamsoft.padlock.dagger.PadLockDB;
 import com.pyamsoft.padlock.dagger.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
@@ -31,6 +33,7 @@ import timber.log.Timber;
 class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInfoInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final List<ActivityEntry> activityEntryCache;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject LockInfoInteractorImpl(PadLockDB padLockDB,
@@ -39,6 +42,7 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
     super(padLockDB);
     this.packageManagerWrapper = packageManagerWrapper;
     this.preferences = preferences;
+    activityEntryCache = new ArrayList<>();
   }
 
   @NonNull @Override public Observable<List<PadLockEntry.WithPackageName>> getActivityEntries(
@@ -58,6 +62,34 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
 
   @NonNull @Override public Observable<Boolean> hasShownOnBoarding() {
     return Observable.defer(() -> Observable.just(preferences.isLockInfoDialogOnBoard()));
+  }
+
+  @Override public boolean isCacheEmpty() {
+    return activityEntryCache.isEmpty();
+  }
+
+  @NonNull @Override public Observable<ActivityEntry> getCachedEntries() {
+    return Observable.defer(() -> Observable.from(activityEntryCache));
+  }
+
+  @Override public void clearCache() {
+    activityEntryCache.clear();
+  }
+
+  @Override public void updateCacheEntry(@NonNull String name, @NonNull LockState lockState) {
+    final int size = activityEntryCache.size();
+    for (int i = 0; i < size; ++i) {
+      final ActivityEntry activityEntry = activityEntryCache.get(i);
+      if (activityEntry.name().equals(name)) {
+        Timber.d("Update cached entry: %s", name);
+        activityEntryCache.set(i,
+            ActivityEntry.builder(activityEntry).lockState(lockState).build());
+      }
+    }
+  }
+
+  @Override public void cacheEntry(@NonNull ActivityEntry entry) {
+    activityEntryCache.add(entry);
   }
 
   @Override @NonNull public Observable<LockState> updateExistingEntry(@NonNull String packageName,
