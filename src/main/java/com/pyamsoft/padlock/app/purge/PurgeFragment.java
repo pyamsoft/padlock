@@ -131,6 +131,15 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
     super.onStart();
     presenter.bindView(this);
     if (!listIsRefreshed) {
+      if (!binding.purgeSwipeRefresh.isRefreshing()) {
+        binding.purgeSwipeRefresh.post(() -> {
+          if (binding != null) {
+            if (binding.purgeSwipeRefresh != null) {
+              binding.purgeSwipeRefresh.setRefreshing(true);
+            }
+          }
+        });
+      }
       presenter.retrieveStaleApplications();
     }
   }
@@ -201,11 +210,15 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   }
 
   @Override public void onStaleApplicationRetrieved(@NonNull String name) {
-    Timber.d("Add entry: %s", name);
-
     // In case the configuration changes, we do the animation again
     if (!binding.purgeSwipeRefresh.isRefreshing()) {
-      binding.purgeSwipeRefresh.setRefreshing(true);
+      binding.purgeSwipeRefresh.post(() -> {
+        if (binding != null) {
+          if (binding.purgeSwipeRefresh != null) {
+            binding.purgeSwipeRefresh.setRefreshing(true);
+          }
+        }
+      });
     }
 
     fastItemAdapter.add(new PurgeItem(name));
