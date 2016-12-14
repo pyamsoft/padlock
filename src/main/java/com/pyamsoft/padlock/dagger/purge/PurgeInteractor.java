@@ -29,4 +29,14 @@ interface PurgeInteractor {
   @CheckResult @NonNull Observable<List<PadLockEntry.AllEntries>> getAppEntryList();
 
   @CheckResult @NonNull Observable<Integer> deleteEntry(@NonNull String packageName);
+
+  @CheckResult boolean isCacheEmpty();
+
+  @CheckResult @NonNull Observable<String> getCachedEntries();
+
+  void clearCache();
+
+  void cacheEntry(@NonNull String entry);
+
+  void removeFromCache(@NonNull String entry);
 }
