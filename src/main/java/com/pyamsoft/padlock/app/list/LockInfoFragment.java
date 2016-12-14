@@ -27,6 +27,8 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -41,6 +43,7 @@ import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import java.util.List;
@@ -50,7 +53,7 @@ import static com.pyamsoft.padlock.model.LockState.DEFAULT;
 import static com.pyamsoft.padlock.model.LockState.LOCKED;
 import static com.pyamsoft.padlock.model.LockState.WHITELISTED;
 
-public class LockInfoFragment extends FilterListFragment implements LockInfoPresenter.LockInfoView {
+public class LockInfoFragment extends ActionBarFragment implements LockInfoPresenter.LockInfoView {
 
   @NonNull public static final String TAG = "LockInfoDialog";
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
@@ -89,6 +92,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @Nullable private TapTargetView whiteLockTapTarget;
   @Nullable private TapTargetView blackLockTapTarget;
   private DividerItemDecoration dividerDecoration;
+  private FilterListDelegate filterListDelegate;
 
   @CheckResult @NonNull public static LockInfoFragment newInstance(@NonNull AppEntry appEntry) {
     final LockInfoFragment fragment = new LockInfoFragment();
@@ -104,6 +108,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    setHasOptionsMenu(true);
 
     appPackageName = getArguments().getString(ARG_APP_PACKAGE_NAME, null);
     appName = getArguments().getString(ARG_APP_NAME, null);
@@ -129,6 +134,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
     listIsRefreshed = false;
+    filterListDelegate = new FilterListDelegate();
     fastItemAdapter = new FastItemAdapter<>();
     binding = FragmentLockinfoBinding.inflate(inflater, null, false);
     return binding.getRoot();
@@ -139,8 +145,19 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     setActionBarTitle(appName);
     binding.lockInfoPackageName.setText(appPackageName);
     binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
+    filterListDelegate.onViewCreated(fastItemAdapter);
     setupSwipeRefresh();
     setupRecyclerView();
+  }
+
+  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    inflater.inflate(filterListDelegate.provideMenuResource(), menu);
+    super.onCreateOptionsMenu(menu, inflater);
+  }
+
+  @Override public void onPrepareOptionsMenu(Menu menu) {
+    super.onPrepareOptionsMenu(menu);
+    filterListDelegate.onPrepareOptionsMenu(menu, fastItemAdapter);
   }
 
   private void setupSwipeRefresh() {
@@ -150,10 +167,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
       Timber.d("onRefresh");
       refreshList();
     });
-  }
-
-  @NonNull @Override FastItemAdapter<? extends FilterableItem> getListAdapter() {
-    return fastItemAdapter;
   }
 
   private void setupRecyclerView() {
@@ -199,8 +212,8 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @Override public void onDestroyView() {
     super.onDestroyView();
     dismissOnboarding();
+    filterListDelegate.onDestroyView();
     setActionBarTitle(R.string.app_name);
-    setActionBarUpEnabled(false);
 
     handler.removeCallbacksAndMessages(null);
     binding.lockInfoRecycler.removeItemDecoration(dividerDecoration);
