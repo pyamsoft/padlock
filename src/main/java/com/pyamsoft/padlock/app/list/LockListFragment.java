@@ -103,6 +103,7 @@ public class LockListFragment extends FilterListFragment
   @Nullable private TapTargetSequence sequence;
   @Nullable private DividerItemDecoration dividerDecoration;
   @Nullable private AsyncMap.Entry fabIconTask;
+  private boolean listIsRefreshed;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -129,6 +130,7 @@ public class LockListFragment extends FilterListFragment
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
+    listIsRefreshed = false;
     fastItemAdapter = new FastItemAdapter<>();
     binding = FragmentApplistBinding.inflate(inflater, container, false);
     return binding.getRoot();
@@ -143,7 +145,6 @@ public class LockListFragment extends FilterListFragment
 
   @Override public void onStart() {
     super.onStart();
-    binding.applistRecyclerview.setAdapter(fastItemAdapter);
     presenter.bindView(this);
 
     presenter.setFABStateFromPreference();
@@ -152,10 +153,12 @@ public class LockListFragment extends FilterListFragment
       forceRefresh = false;
       refreshList();
     } else {
-      Timber.d("We are already refreshed, fetch the cached data");
-      // Clear here because we repopulate the list
-      fastItemAdapter.clear();
-      presenter.populateList();
+      if (!listIsRefreshed) {
+        Timber.d("We are already refreshed, fetch the cached data");
+        // Clear here because we repopulate the list
+        fastItemAdapter.clear();
+        presenter.populateList();
+      }
     }
   }
 
@@ -228,6 +231,7 @@ public class LockListFragment extends FilterListFragment
 
     binding.applistRecyclerview.setLayoutManager(lockListLayoutManager);
     binding.applistRecyclerview.addItemDecoration(dividerDecoration);
+    binding.applistRecyclerview.setAdapter(fastItemAdapter);
   }
 
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -431,6 +435,7 @@ public class LockListFragment extends FilterListFragment
   @Override public void onListCleared() {
     Timber.d("Prepare for refresh");
     forceRefresh = true;
+    listIsRefreshed = false;
 
     Timber.d("onListCleared");
     handler.post(startRefreshRunnable);
@@ -446,6 +451,7 @@ public class LockListFragment extends FilterListFragment
     if (fastItemAdapter.getAdapterItemCount() > 1) {
       Timber.d("We have refreshed");
       forceRefresh = false;
+      listIsRefreshed = true;
       presenter.showOnBoarding();
     } else {
       Toast.makeText(getContext(), "Error while loading list. Please try again.",
