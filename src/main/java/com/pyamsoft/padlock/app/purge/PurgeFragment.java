@@ -44,7 +44,6 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   @NonNull private static final String KEY_PRESENTER = "key_purge_presenter";
   @SuppressWarnings("WeakerAccess") PurgePresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<PurgeItem> fastItemAdapter;
-  @SuppressWarnings("WeakerAccess") boolean forceRefresh;
   private FragmentPurgeBinding binding;
   private long loadedKey;
   private DividerItemDecoration decoration;
@@ -54,15 +53,9 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
 
-    if (savedInstanceState != null) {
-      Timber.i("Restore forceRefresh state from savedInstanceState");
-      forceRefresh = savedInstanceState.getBoolean(FORCE_REFRESH, true);
-    }
-
     loadedKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<PurgePresenter>() {
           @NonNull @Override public PersistLoader<PurgePresenter> createLoader() {
-            forceRefresh = true;
             return new PurgePresenterLoader();
           }
 
@@ -106,24 +99,17 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   @Override public void onStart() {
     super.onStart();
     presenter.bindView(this);
-    if (forceRefresh) {
-      Timber.d("Do initial refresh");
-      refreshList();
-    } else {
-      if (!listIsRefreshed) {
-        // Clear here because we repopulate the list
-        fastItemAdapter.clear();
-        Timber.d("We are already refreshed");
-        presenter.retrieveStaleApplications();
-      }
+    if (!listIsRefreshed) {
+      // Clear here because we repopulate the list
+      fastItemAdapter.clear();
+      Timber.d("We are already refreshed");
+      presenter.retrieveStaleApplications();
     }
   }
 
   private void refreshList() {
     fastItemAdapter.clear();
     presenter.clearList();
-    forceRefresh = true;
-
     presenter.retrieveStaleApplications();
   }
 
@@ -140,7 +126,6 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
 
   @Override public void onSaveInstanceState(Bundle outState) {
     PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedKey);
-    outState.putBoolean(FORCE_REFRESH, forceRefresh);
     super.onSaveInstanceState(outState);
   }
 
@@ -188,7 +173,6 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   }
 
   @Override public void onRetrievalComplete() {
-    forceRefresh = false;
     listIsRefreshed = true;
 
     // TODO show empty view if empty list

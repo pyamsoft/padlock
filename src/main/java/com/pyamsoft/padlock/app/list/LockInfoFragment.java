@@ -54,12 +54,10 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
   @NonNull private static final String ARG_APP_NAME = "app_name";
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
-  @NonNull private static final String FORCE_REFRESH = "key_force_refresh";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
 
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
-  @SuppressWarnings("WeakerAccess") boolean forceRefresh;
   private FragmentLockinfoBinding binding;
   private long loadedPresenterKey;
 
@@ -97,15 +95,9 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
       throw new NullPointerException("App information is NULL");
     }
 
-    if (savedInstanceState != null) {
-      Timber.i("Restore forceRefresh state from savedInstanceState");
-      forceRefresh = savedInstanceState.getBoolean(FORCE_REFRESH, true);
-    }
-
     loadedPresenterKey = PersistentCache.get()
         .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
           @NonNull @Override public PersistLoader<LockInfoPresenter> createLoader() {
-            forceRefresh = true;
             return new LockInfoPresenterLoader();
           }
 
@@ -232,17 +224,10 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     super.onStart();
     presenter.bindView(this);
     presenter.loadApplicationIcon(appPackageName);
-    if (forceRefresh) {
-      refreshList();
-    } else {
-      if (!listIsRefreshed) {
-        // Clear here because we repopulate the list
-        fastItemAdapter.clear();
-        Timber.d("We are already refreshed, just refresh the request listeners");
-        binding.lockInfoProgress.setVisibility(View.GONE);
-        binding.lockInfoRecycler.setVisibility(View.VISIBLE);
-        presenter.populateList(appPackageName);
-      }
+    if (!listIsRefreshed) {
+      binding.lockInfoProgress.setVisibility(View.GONE);
+      binding.lockInfoRecycler.setVisibility(View.VISIBLE);
+      presenter.populateList(appPackageName);
     }
   }
 
@@ -259,7 +244,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
   @Override public void onSaveInstanceState(Bundle outState) {
     PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
-    outState.putBoolean(FORCE_REFRESH, forceRefresh);
     super.onSaveInstanceState(outState);
   }
 
@@ -284,7 +268,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
     if (fastItemAdapter.getAdapterItemCount() > 0) {
       Timber.d("Refresh finished");
-      forceRefresh = false;
       listIsRefreshed = true;
       presenter.showOnBoarding();
     } else {
@@ -301,7 +284,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
   @Override public void onListCleared() {
     Timber.d("Prepare for refresh");
-    forceRefresh = true;
     listIsRefreshed = false;
 
     binding.lockInfoProgress.setVisibility(View.VISIBLE);
