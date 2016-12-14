@@ -24,6 +24,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,7 +60,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
-  @SuppressWarnings("WeakerAccess") VertScrollLinearLayoutManager vertScrollLayoutManager;
   private FragmentLockinfoBinding binding;
   @NonNull private final Runnable startRefreshRunnable = () -> {
     binding.lockInfoSwipeRefresh.post(() -> {
@@ -69,8 +69,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
         }
       }
     });
-
-    vertScrollLayoutManager.setVerticalScrollEnabled(false);
   };
   @NonNull private final Runnable stopRefreshRunnable = () -> {
     binding.lockInfoSwipeRefresh.post(() -> {
@@ -80,7 +78,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
         }
       }
     });
-    vertScrollLayoutManager.setVerticalScrollEnabled(true);
   };
   private long loadedPresenterKey;
   private String appPackageName;
@@ -166,8 +163,6 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   }
 
   private void setupRecyclerView() {
-    vertScrollLayoutManager = new VertScrollLinearLayoutManager(getContext());
-    vertScrollLayoutManager.setVerticalScrollEnabled(true);
     dividerDecoration = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
 
     fastItemAdapter.withFilterPredicate((item, query) -> {
@@ -202,7 +197,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
       }
     });
 
-    binding.lockInfoRecycler.setLayoutManager(vertScrollLayoutManager);
+    binding.lockInfoRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
     binding.lockInfoRecycler.addItemDecoration(dividerDecoration);
     binding.lockInfoRecycler.setAdapter(fastItemAdapter);
   }
@@ -291,6 +286,12 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
     Timber.d("Add entry: %s", entry);
+
+    // In case the configuration changes, we do the animation again
+    if (!binding.lockInfoSwipeRefresh.isRefreshing()) {
+      binding.lockInfoSwipeRefresh.setRefreshing(true);
+    }
+
     fastItemAdapter.add(new LockInfoItem(appPackageName, entry));
   }
 
