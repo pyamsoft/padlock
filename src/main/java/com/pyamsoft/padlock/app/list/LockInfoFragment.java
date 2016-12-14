@@ -66,6 +66,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   private String appPackageName;
   private String appName;
   private boolean appIsSystem;
+  private boolean listIsRefreshed;
 
   @Nullable private TapTargetView toggleAllTapTarget;
   @Nullable private TapTargetView defaultLockTapTarget;
@@ -117,6 +118,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
+    listIsRefreshed = false;
     fastItemAdapter = new FastItemAdapter<>();
     binding = FragmentLockinfoBinding.inflate(inflater, null, false);
     return binding.getRoot();
@@ -178,6 +180,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
 
     binding.lockInfoRecycler.setLayoutManager(layoutManager);
     binding.lockInfoRecycler.addItemDecoration(dividerDecoration);
+    binding.lockInfoRecycler.setAdapter(fastItemAdapter);
   }
 
   @Override public void onDestroyView() {
@@ -228,18 +231,18 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @Override public void onStart() {
     super.onStart();
     presenter.bindView(this);
-
-    binding.lockInfoRecycler.setAdapter(fastItemAdapter);
     presenter.loadApplicationIcon(appPackageName);
     if (forceRefresh) {
       refreshList();
     } else {
-      // Clear here because we repopulate the list
-      fastItemAdapter.clear();
-      Timber.d("We are already refreshed, just refresh the request listeners");
-      binding.lockInfoProgress.setVisibility(View.GONE);
-      binding.lockInfoRecycler.setVisibility(View.VISIBLE);
-      presenter.populateList(appPackageName);
+      if (!listIsRefreshed) {
+        // Clear here because we repopulate the list
+        fastItemAdapter.clear();
+        Timber.d("We are already refreshed, just refresh the request listeners");
+        binding.lockInfoProgress.setVisibility(View.GONE);
+        binding.lockInfoRecycler.setVisibility(View.VISIBLE);
+        presenter.populateList(appPackageName);
+      }
     }
   }
 
@@ -282,6 +285,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
     if (fastItemAdapter.getAdapterItemCount() > 0) {
       Timber.d("Refresh finished");
       forceRefresh = false;
+      listIsRefreshed = true;
       presenter.showOnBoarding();
     } else {
       Toast.makeText(getContext(), "Error while loading list. Please try again.",
@@ -298,6 +302,7 @@ public class LockInfoFragment extends FilterListFragment implements LockInfoPres
   @Override public void onListCleared() {
     Timber.d("Prepare for refresh");
     forceRefresh = true;
+    listIsRefreshed = false;
 
     binding.lockInfoProgress.setVisibility(View.VISIBLE);
     binding.lockInfoRecycler.setVisibility(View.GONE);

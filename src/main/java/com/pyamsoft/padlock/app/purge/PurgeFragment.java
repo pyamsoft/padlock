@@ -48,6 +48,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   private FragmentPurgeBinding binding;
   private long loadedKey;
   private DividerItemDecoration decoration;
+  private boolean listIsRefreshed;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -81,6 +82,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
+    listIsRefreshed = false;
     fastItemAdapter = new FastItemAdapter<>();
     binding = FragmentPurgeBinding.inflate(inflater, container, false);
     return binding.getRoot();
@@ -108,10 +110,12 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
       Timber.d("Do initial refresh");
       refreshList();
     } else {
-      // Clear here because we repopulate the list
-      fastItemAdapter.clear();
-      Timber.d("We are already refreshed");
-      presenter.retrieveStaleApplications();
+      if (!listIsRefreshed) {
+        // Clear here because we repopulate the list
+        fastItemAdapter.clear();
+        Timber.d("We are already refreshed");
+        presenter.retrieveStaleApplications();
+      }
     }
   }
 
@@ -172,7 +176,8 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
     binding.purgeList.setAdapter(fastItemAdapter);
   }
 
-  @SuppressWarnings("WeakerAccess") void handleDeleteRequest(int position, @NonNull String packageName) {
+  @SuppressWarnings("WeakerAccess") void handleDeleteRequest(int position,
+      @NonNull String packageName) {
     Timber.d("Handle delete request for %s at %d", packageName, position);
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
         PurgeSingleItemDialog.newInstance(packageName), "purge_single");
@@ -184,6 +189,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
 
   @Override public void onRetrievalComplete() {
     forceRefresh = false;
+    listIsRefreshed = true;
 
     // TODO show empty view if empty list
   }
