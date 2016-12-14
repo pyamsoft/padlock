@@ -62,7 +62,7 @@ public class LockListFragment extends FilterListFragment
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockListItem> fastItemAdapter;
-  @SuppressWarnings("WeakerAccess") LockListLayoutManager lockListLayoutManager;
+  @SuppressWarnings("WeakerAccess") VertScrollLinearLayoutManager vertScrollLayoutManager;
   @SuppressWarnings("WeakerAccess") LockListPresenter presenter;
   @SuppressWarnings("WeakerAccess") FragmentApplistBinding binding;
   @NonNull private final Runnable startRefreshRunnable = () -> {
@@ -74,7 +74,7 @@ public class LockListFragment extends FilterListFragment
       }
     });
 
-    lockListLayoutManager.setVerticalScrollEnabled(false);
+    vertScrollLayoutManager.setVerticalScrollEnabled(false);
     final FragmentActivity activity = getActivity();
     if (activity != null) {
       Timber.d("Reload options");
@@ -89,7 +89,7 @@ public class LockListFragment extends FilterListFragment
         }
       }
     });
-    lockListLayoutManager.setVerticalScrollEnabled(true);
+    vertScrollLayoutManager.setVerticalScrollEnabled(true);
     final FragmentActivity activity = getActivity();
     if (activity != null) {
       Timber.d("Reload options");
@@ -174,8 +174,8 @@ public class LockListFragment extends FilterListFragment
   }
 
   private void setupRecyclerView() {
-    lockListLayoutManager = new LockListLayoutManager(getContext());
-    lockListLayoutManager.setVerticalScrollEnabled(true);
+    vertScrollLayoutManager = new VertScrollLinearLayoutManager(getContext());
+    vertScrollLayoutManager.setVerticalScrollEnabled(true);
     dividerDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
 
     fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
@@ -211,7 +211,7 @@ public class LockListFragment extends FilterListFragment
       return true;
     });
 
-    binding.applistRecyclerview.setLayoutManager(lockListLayoutManager);
+    binding.applistRecyclerview.setLayoutManager(vertScrollLayoutManager);
     binding.applistRecyclerview.addItemDecoration(dividerDecoration);
     binding.applistRecyclerview.setAdapter(fastItemAdapter);
   }

@@ -20,11 +20,11 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 
-class LockListLayoutManager extends LinearLayoutManager {
+class VertScrollLinearLayoutManager extends LinearLayoutManager {
 
   private boolean verticalScrollEnabled = true;
 
-  LockListLayoutManager(@NonNull Context context) {
+  VertScrollLinearLayoutManager(@NonNull Context context) {
     super(context);
   }
 
