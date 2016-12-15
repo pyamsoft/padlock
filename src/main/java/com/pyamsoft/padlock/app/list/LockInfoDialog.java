@@ -60,24 +60,22 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
   DialogLockInfoBinding binding;
-  @NonNull private final Runnable startRefreshRunnable = () -> {
-    binding.lockInfoSwipeRefresh.post(() -> {
-      if (binding != null) {
-        if (binding.lockInfoSwipeRefresh != null) {
-          binding.lockInfoSwipeRefresh.setRefreshing(true);
+  @NonNull private final Runnable startRefreshRunnable =
+      () -> binding.lockInfoSwipeRefresh.post(() -> {
+        if (binding != null) {
+          if (binding.lockInfoSwipeRefresh != null) {
+            binding.lockInfoSwipeRefresh.setRefreshing(true);
+          }
         }
-      }
-    });
-  };
-  @NonNull private final Runnable stopRefreshRunnable = () -> {
-    binding.lockInfoSwipeRefresh.post(() -> {
-      if (binding != null) {
-        if (binding.lockInfoSwipeRefresh != null) {
-          binding.lockInfoSwipeRefresh.setRefreshing(false);
+      });
+  @NonNull private final Runnable stopRefreshRunnable =
+      () -> binding.lockInfoSwipeRefresh.post(() -> {
+        if (binding != null) {
+          if (binding.lockInfoSwipeRefresh != null) {
+            binding.lockInfoSwipeRefresh.setRefreshing(false);
+          }
         }
-      }
-    });
-  };
+      });
   private long loadedPresenterKey;
   private String appPackageName;
   private String appName;
