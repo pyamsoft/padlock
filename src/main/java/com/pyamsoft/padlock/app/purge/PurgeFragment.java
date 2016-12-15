@@ -47,24 +47,21 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   @SuppressWarnings("WeakerAccess") PurgePresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<PurgeItem> fastItemAdapter;
   private FragmentPurgeBinding binding;
-  @NonNull private final Runnable startRefreshRunnable = () -> {
-    binding.purgeSwipeRefresh.post(() -> {
-      if (binding != null) {
-        if (binding.purgeSwipeRefresh != null) {
-          binding.purgeSwipeRefresh.setRefreshing(true);
+  @NonNull private final Runnable startRefreshRunnable =
+      () -> binding.purgeSwipeRefresh.post(() -> {
+        if (binding != null) {
+          if (binding.purgeSwipeRefresh != null) {
+            binding.purgeSwipeRefresh.setRefreshing(true);
+          }
         }
+      });
+  @NonNull private final Runnable stopRefreshRunnable = () -> binding.purgeSwipeRefresh.post(() -> {
+    if (binding != null) {
+      if (binding.purgeSwipeRefresh != null) {
+        binding.purgeSwipeRefresh.setRefreshing(false);
       }
-    });
-  };
-  @NonNull private final Runnable stopRefreshRunnable = () -> {
-    binding.purgeSwipeRefresh.post(() -> {
-      if (binding != null) {
-        if (binding.purgeSwipeRefresh != null) {
-          binding.purgeSwipeRefresh.setRefreshing(false);
-        }
-      }
-    });
-  };
+    }
+  });
   private long loadedKey;
   private DividerItemDecoration decoration;
   private boolean listIsRefreshed;
