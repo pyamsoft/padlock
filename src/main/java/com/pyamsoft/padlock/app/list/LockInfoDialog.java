@@ -390,7 +390,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
         TapTarget.forView(radioDefault, getString(R.string.onboard_title_info_lock_default),
             getString(R.string.onboard_desc_info_lock_default)).tintTarget(false).cancelable(false);
     defaultLockTapTarget =
-        TapTargetView.showFor(getActivity(), lockDefaultTarget, new TapTargetView.Listener() {
+        TapTargetView.showFor(getDialog(), lockDefaultTarget, new TapTargetView.Listener() {
           @Override public void onTargetClick(TapTargetView view) {
             super.onTargetClick(view);
 
@@ -407,7 +407,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
         TapTarget.forView(radioWhite, getString(R.string.onboard_title_info_lock_white),
             getString(R.string.onboard_desc_info_lock_white)).tintTarget(false).cancelable(false);
     whiteLockTapTarget =
-        TapTargetView.showFor(getActivity(), lockWhiteTarget, new TapTargetView.Listener() {
+        TapTargetView.showFor(getDialog(), lockWhiteTarget, new TapTargetView.Listener() {
 
           @Override public void onTargetClick(TapTargetView view) {
             super.onTargetClick(view);
@@ -423,7 +423,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
         TapTarget.forView(radioBlack, getString(R.string.onboard_title_info_lock_black),
             getString(R.string.onboard_desc_info_lock_black)).tintTarget(false).cancelable(false);
     blackLockTapTarget =
-        TapTargetView.showFor(getActivity(), lockBlackTarget, new TapTargetView.Listener() {
+        TapTargetView.showFor(getDialog(), lockBlackTarget, new TapTargetView.Listener() {
           @Override public void onTargetClick(TapTargetView view) {
             super.onTargetClick(view);
             Timber.d("Black lock target clicked");
