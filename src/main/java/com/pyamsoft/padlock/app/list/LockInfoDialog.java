@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.app.list;
 
+import android.app.Dialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,37 +24,32 @@ import android.os.Looper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.mikepenz.fastadapter.FastAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.main.MainActivity;
-import com.pyamsoft.padlock.databinding.FragmentLockinfoBinding;
+import com.pyamsoft.padlock.databinding.DialogLockInfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.app.PersistLoader;
-import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import java.util.List;
 import timber.log.Timber;
 
-import static com.pyamsoft.padlock.model.LockState.DEFAULT;
-import static com.pyamsoft.padlock.model.LockState.LOCKED;
-import static com.pyamsoft.padlock.model.LockState.WHITELISTED;
-
-public class LockInfoFragment extends ActionBarFragment implements LockInfoPresenter.LockInfoView {
+public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.LockInfoView {
 
   @NonNull public static final String TAG = "LockInfoDialog";
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
@@ -63,7 +59,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
-  FragmentLockinfoBinding binding;
+  DialogLockInfoBinding binding;
   @NonNull private final Runnable startRefreshRunnable = () -> {
     binding.lockInfoSwipeRefresh.post(() -> {
       if (binding != null) {
@@ -94,8 +90,8 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
   private DividerItemDecoration dividerDecoration;
   private FilterListDelegate filterListDelegate;
 
-  @CheckResult @NonNull public static LockInfoFragment newInstance(@NonNull AppEntry appEntry) {
-    final LockInfoFragment fragment = new LockInfoFragment();
+  @CheckResult @NonNull public static LockInfoDialog newInstance(@NonNull AppEntry appEntry) {
+    final LockInfoDialog fragment = new LockInfoDialog();
     final Bundle args = new Bundle();
 
     args.putString(ARG_APP_PACKAGE_NAME, appEntry.packageName());
@@ -106,9 +102,14 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     return fragment;
   }
 
+  @NonNull @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+    final Dialog dialog = super.onCreateDialog(savedInstanceState);
+    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+    return dialog;
+  }
+
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setHasOptionsMenu(true);
 
     appPackageName = getArguments().getString(ARG_APP_PACKAGE_NAME, null);
     appName = getArguments().getString(ARG_APP_NAME, null);
@@ -136,13 +137,13 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     listIsRefreshed = false;
     filterListDelegate = new FilterListDelegate();
     fastItemAdapter = new FastItemAdapter<>();
-    binding = FragmentLockinfoBinding.inflate(inflater, null, false);
+    binding = DialogLockInfoBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    setActionBarTitle(appName);
+    setupToolbar();
     binding.lockInfoPackageName.setText(appPackageName);
     binding.lockInfoSystem.setText((appIsSystem ? "YES" : "NO"));
     filterListDelegate.onViewCreated(fastItemAdapter);
@@ -150,14 +151,11 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     setupRecyclerView();
   }
 
-  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-    inflater.inflate(filterListDelegate.provideMenuResource(), menu);
-    super.onCreateOptionsMenu(menu, inflater);
-  }
-
-  @Override public void onPrepareOptionsMenu(Menu menu) {
-    super.onPrepareOptionsMenu(menu);
-    filterListDelegate.onPrepareOptionsMenu(menu, fastItemAdapter);
+  private void setupToolbar() {
+    binding.lockInfoToolbar.setTitle(appName);
+    binding.lockInfoToolbar.setNavigationOnClickListener(v -> dismiss());
+    binding.lockInfoToolbar.inflateMenu(filterListDelegate.provideMenuResource());
+    filterListDelegate.onPrepareOptionsMenu(binding.lockInfoToolbar.getMenu(), fastItemAdapter);
   }
 
   private void setupSwipeRefresh() {
@@ -192,7 +190,7 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
       public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List<Object> list) {
         final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
         fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).bindView(holder, list);
-        holder.bind(LockInfoFragment.this::processDatabaseModifyEvent);
+        holder.bind(LockInfoDialog.this::processDatabaseModifyEvent);
       }
 
       @Override public void unBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
@@ -213,7 +211,6 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
     super.onDestroyView();
     dismissOnboarding();
     filterListDelegate.onDestroyView();
-    setActionBarTitle(R.string.app_name);
 
     handler.removeCallbacksAndMessages(null);
     binding.lockInfoRecycler.removeItemDecoration(dividerDecoration);
@@ -280,8 +277,12 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
 
   @Override public void onResume() {
     super.onResume();
-    MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
-    setActionBarUpEnabled(true);
+    // The dialog is super small for some reason. We have to set the size manually, in onResume
+    final Window window = getDialog().getWindow();
+    if (window != null) {
+      window.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+          WindowManager.LayoutParams.WRAP_CONTENT);
+    }
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
@@ -443,9 +444,9 @@ public class LockInfoFragment extends ActionBarFragment implements LockInfoPrese
       @NonNull LockState newLockState) {
     Timber.d("Received a database modify event request for %s %s at %d [%s]", appPackageName,
         activityName, position, newLockState.name());
-    final boolean whitelist = newLockState.equals(WHITELISTED);
-    final boolean forceLock = newLockState.equals(LOCKED);
-    final boolean wasDefault = previousLockState.equals(DEFAULT);
+    final boolean whitelist = newLockState.equals(LockState.WHITELISTED);
+    final boolean forceLock = newLockState.equals(LockState.LOCKED);
+    final boolean wasDefault = previousLockState.equals(LockState.DEFAULT);
     presenter.modifyDatabaseEntry(wasDefault, position, appPackageName, activityName, null,
         appIsSystem, whitelist, forceLock);
   }

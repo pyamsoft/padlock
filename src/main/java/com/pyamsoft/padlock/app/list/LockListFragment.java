@@ -24,7 +24,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,7 +41,7 @@ import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.lock.PinEntryDialog;
 import com.pyamsoft.padlock.app.main.MainActivity;
-import com.pyamsoft.padlock.databinding.FragmentApplistBinding;
+import com.pyamsoft.padlock.databinding.FragmentLockListBinding;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.app.fragment.ActionBarFragment;
@@ -65,7 +64,7 @@ public class LockListFragment extends ActionBarFragment
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockListItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") LockListPresenter presenter;
-  @SuppressWarnings("WeakerAccess") FragmentApplistBinding binding;
+  @SuppressWarnings("WeakerAccess") FragmentLockListBinding binding;
   @NonNull private final Runnable startRefreshRunnable = () -> {
     binding.applistSwipeRefresh.post(() -> {
       if (binding != null) {
@@ -124,7 +123,7 @@ public class LockListFragment extends ActionBarFragment
     listIsRefreshed = false;
     filterListDelegate = new FilterListDelegate();
     fastItemAdapter = new FastItemAdapter<>();
-    binding = FragmentApplistBinding.inflate(inflater, container, false);
+    binding = FragmentLockListBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 
@@ -486,13 +485,7 @@ public class LockListFragment extends ActionBarFragment
   }
 
   @SuppressWarnings("WeakerAccess") void displayLockInfoFragment(@NonNull AppEntry entry) {
-    final FragmentManager fragmentManager = getFragmentManager();
-    if (fragmentManager.findFragmentByTag(LockInfoFragment.TAG) == null) {
-      fragmentManager.beginTransaction()
-          .replace(R.id.main_view_container, LockInfoFragment.newInstance(entry),
-              LockInfoFragment.TAG)
-          .addToBackStack(null)
-          .commit();
-    }
+    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), LockInfoDialog.newInstance(entry),
+        LockInfoDialog.TAG);
   }
 }

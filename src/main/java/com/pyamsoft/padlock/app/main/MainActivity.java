@@ -34,7 +34,6 @@ import android.support.v7.preference.PreferenceManager;
 import android.view.MenuItem;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.app.list.LockInfoFragment;
 import com.pyamsoft.padlock.app.list.LockListFragment;
 import com.pyamsoft.padlock.app.purge.PurgeFragment;
 import com.pyamsoft.padlock.app.settings.SettingsFragment;
@@ -138,7 +137,8 @@ public class MainActivity extends TamperActivity
     }, 1200L);
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult boolean replaceFragment(@NonNull Fragment fragment, @NonNull String tag) {
+  @SuppressWarnings("WeakerAccess") @CheckResult boolean replaceFragment(@NonNull Fragment fragment,
+      @NonNull String tag) {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     if (fragmentManager.findFragmentByTag(tag) == null) {
       fragmentManager.beginTransaction().replace(R.id.main_view_container, fragment, tag).commit();
@@ -151,8 +151,7 @@ public class MainActivity extends TamperActivity
   private void loadFirstFragment() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     // These fragments are a level up
-    if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null
-        || fragmentManager.findFragmentByTag(LockInfoFragment.TAG) != null) {
+    if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null) {
       drawerShowUpNavigation();
       // These are base fragments
     } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
