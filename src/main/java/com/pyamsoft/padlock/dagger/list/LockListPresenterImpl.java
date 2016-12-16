@@ -99,7 +99,6 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
         .withLatestFrom(lockListInteractor.isSystemVisible(), (applicationInfo, systemVisible) -> {
           if (systemVisible) {
             // If system visible, we show all apps
-            Timber.d("System visible: show %s", applicationInfo.packageName);
             return applicationInfo;
           } else {
             if (lockListInteractor.isSystemApplication(applicationInfo)) {
@@ -107,7 +106,6 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
               Timber.w("Hide system application: %s", applicationInfo.packageName);
               return null;
             } else {
-              Timber.d("Visible: show %s", applicationInfo.packageName);
               return applicationInfo;
             }
           }
