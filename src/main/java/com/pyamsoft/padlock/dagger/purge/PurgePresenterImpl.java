@@ -21,9 +21,7 @@ import com.pyamsoft.padlock.app.purge.PurgePresenter;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
 import rx.Observable;
@@ -75,27 +73,27 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
     final Observable<String> freshData = interactor.getAppEntryList()
         .zipWith(interactor.getActiveApplicationPackageNames().toList(),
             (allEntries, packageNames) -> {
-              final Set<PadLockEntry.AllEntries> liveLocations = new HashSet<>();
               final Set<String> stalePackageNames = new HashSet<>();
-              // Remove all active applications from the list of entries
-              for (final String packageName : packageNames) {
-                final List<PadLockEntry.AllEntries> foundLocations = new ArrayList<>();
-                //noinspection Convert2streamapi
-                for (final PadLockEntry.AllEntries entry : allEntries) {
-                  if (entry.packageName().equals(packageName)) {
-                    foundLocations.add(entry);
-                  }
-                }
-
-                liveLocations.addAll(foundLocations);
+              if (allEntries.isEmpty()) {
+                Timber.e("Database does not have any AppEntry items");
+                return stalePackageNames;
               }
 
-              // Remove any found locations
-              for (final PadLockEntry.AllEntries liveLocation : liveLocations) {
-                allEntries.remove(liveLocation);
+              // Loop through all the package names that we are aware of on the device
+              for (final String packageName : packageNames) {
+                int size = allEntries.size();
+                for (int i = 0; i < size; ++i) {
+                  final PadLockEntry.AllEntries entry = allEntries.get(i);
+                  // If an entry is found in the database remove it
+                  if (entry.packageName().equals(packageName)) {
+                    allEntries.remove(entry);
+                    --size;
+                  }
+                }
               }
 
               // The remaining entries in the database are stale
+              //noinspection Convert2streamapi
               for (final PadLockEntry.AllEntries entry : allEntries) {
                 stalePackageNames.add(entry.packageName());
               }
