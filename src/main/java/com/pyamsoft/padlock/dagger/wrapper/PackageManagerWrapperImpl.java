@@ -107,7 +107,6 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         process = Runtime.getRuntime().exec(command);
         try (final BufferedReader bufferedReader = new BufferedReader(
             new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-          Timber.d("Read results of exec: '%s'", command);
           String line = bufferedReader.readLine();
           while (line != null && !line.isEmpty()) {
             if (line.startsWith("Permission Denial")) {
@@ -115,7 +114,6 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
               caughtPermissionDenial = true;
               break;
             }
-            Timber.d("%s", line);
             packageNames.add(line);
             line = bufferedReader.readLine();
           }
