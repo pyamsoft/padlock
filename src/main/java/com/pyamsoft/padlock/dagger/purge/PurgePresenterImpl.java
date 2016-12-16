@@ -80,16 +80,19 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
               }
 
               // Loop through all the package names that we are aware of on the device
+              final Set<PadLockEntry.AllEntries> foundLocations = new HashSet<>();
               for (final String packageName : packageNames) {
-                int size = allEntries.size();
-                for (int i = 0; i < size; ++i) {
-                  final PadLockEntry.AllEntries entry = allEntries.get(i);
+                foundLocations.clear();
+
+                //noinspection Convert2streamapi
+                for (final PadLockEntry.AllEntries entry : allEntries) {
                   // If an entry is found in the database remove it
                   if (entry.packageName().equals(packageName)) {
-                    allEntries.remove(entry);
-                    --size;
+                    foundLocations.add(entry);
                   }
                 }
+
+                allEntries.removeAll(foundLocations);
               }
 
               // The remaining entries in the database are stale
