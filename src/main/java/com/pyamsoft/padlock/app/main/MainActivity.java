@@ -41,7 +41,7 @@ import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.sec.TamperActivity;
-import com.pyamsoft.pydroid.support.RatingDialog;
+import com.pyamsoft.pydroid.rating.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
