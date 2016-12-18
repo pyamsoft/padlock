@@ -40,8 +40,8 @@ import com.pyamsoft.padlock.app.settings.SettingsFragment;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.pydroid.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.app.PersistLoader;
-import com.pyamsoft.pydroid.sec.TamperActivity;
 import com.pyamsoft.pydroid.rating.RatingDialog;
+import com.pyamsoft.pydroid.sec.TamperActivity;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
@@ -306,10 +306,12 @@ public class MainActivity extends TamperActivity
   }
 
   @NonNull @Override protected String[] getChangeLogLines() {
-    final String line1 = "BUGFIX: Some additional stability fixes";
-    final String line2 = "FEATURE: Search and filter in specific application Info screens too.";
-    final String line3 = "BUGFIX: Better support for smaller screens with PIN dialog";
-    return new String[] { line1, line2, line3 };
+    final String line1 = "CHANGE: Convert application information back to a Dialog";
+    final String line2 =
+        "BUGFIX: Fix the flickering that sometimes occurs when opening the application";
+    final String line3 = "BUGFIX: Slightly faster application processing for lists";
+    final String line4 = "CHANGE: Some new settings to play with";
+    return new String[] { line1, line2, line3, line4 };
   }
 
   @NonNull @Override protected String getVersionName() {
