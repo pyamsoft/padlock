@@ -24,7 +24,6 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.preference.Preference;
-import android.support.v7.preference.SwitchPreferenceCompat;
 import android.view.View;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.app.main.MainActivity;
@@ -82,31 +81,6 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
       return true;
     });
 
-    final Preference resetAll = findPreference(getString(R.string.clear_all_key));
-    resetAll.setOnPreferenceClickListener(preference -> {
-      Timber.d("Reset settings onClick");
-      presenter.requestClearAll();
-      return true;
-    });
-
-    final Preference upgradeInfo = findPreference(getString(R.string.upgrade_info_key));
-    upgradeInfo.setOnPreferenceClickListener(preference -> showChangelog());
-
-    final SwitchPreferenceCompat showAds =
-        (SwitchPreferenceCompat) findPreference(getString(R.string.adview_key));
-    showAds.setOnPreferenceChangeListener((preference, newValue) -> toggleAdVisibility(newValue));
-
-    final Preference showAboutLicenses = findPreference(getString(R.string.about_license_key));
-    showAboutLicenses.setOnPreferenceClickListener(preference -> {
-      MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
-      setActionBarUpEnabled(true);
-      return showAboutLicensesFragment(R.id.main_view_container,
-          AboutLibrariesFragment.Styling.LIGHT);
-    });
-
-    final Preference checkVersion = findPreference(getString(R.string.check_version_key));
-    checkVersion.setOnPreferenceClickListener(preference -> checkForUpdate());
-
     final Preference installListener = findPreference(getString(R.string.install_listener_key));
     installListener.setOnPreferenceClickListener(preference -> {
       presenter.setApplicationInstallReceiverState();
@@ -114,8 +88,21 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     });
   }
 
-  @Override public void onCreatePreferences(@Nullable Bundle bundle, @Nullable String s) {
-    addPreferencesFromResource(R.xml.preferences);
+  @Override protected int getPreferenceXmlResId() {
+    return R.xml.preferences;
+  }
+
+  @Override protected int getRootViewContainer() {
+    return R.id.main_view_container;
+  }
+
+  @NonNull @Override protected String getApplicationName() {
+    return getString(R.string.app_name);
+  }
+
+  @Override protected boolean onClearAllPreferenceClicked() {
+    presenter.requestClearAll();
+    return true;
   }
 
   @Override public void showConfirmDialog(int type) {
