@@ -28,7 +28,6 @@
         android:key="@string/ignore_time_key"
         android:summary="@string/ignore_time_summary"
         android:title="@string/ignore_time_title"/>
-    />
 
     <ListPreference
         android:defaultValue="@string/timeout_time_default"
@@ -38,7 +37,6 @@
         android:key="@string/timeout_time_key"
         android:summary="@string/timeout_time_summary"
         android:title="@string/timeout_time_title"/>
-    />
 
     <CheckBoxPreference
         android:defaultValue="@bool/lock_package_change_default"
