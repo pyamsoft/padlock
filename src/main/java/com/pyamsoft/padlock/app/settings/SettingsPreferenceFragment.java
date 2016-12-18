@@ -105,6 +105,12 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
     return true;
   }
 
+  @Override protected boolean onLicenseItemClicked() {
+    MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
+    setActionBarUpEnabled(true);
+    return super.onLicenseItemClicked();
+  }
+
   @Override public void showConfirmDialog(int type) {
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
         ConfirmationDialog.newInstance(type), "confirm_dialog");
