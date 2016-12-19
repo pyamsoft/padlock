@@ -23,7 +23,9 @@
   <RelativeLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:padding="8dp"
+      android:layout_marginBottom="8dp"
+      android:layout_marginEnd="16dp"
+      android:layout_marginTop="8dp"
       >
 
     <RadioGroup
@@ -61,6 +63,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:layout_toStartOf="@id/lock_info_tristate_radiogroup"
         android:clickable="false"
         android:focusable="false"
