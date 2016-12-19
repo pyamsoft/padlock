@@ -189,7 +189,7 @@ public class MainActivity extends TamperActivity
   }
 
   @Override protected void onSaveInstanceState(Bundle outState) {
-    PersistentCache.get().saveKey(outState, KEY_PRESENTER, loaderKey);
+    PersistentCache.get().saveKey(outState, KEY_PRESENTER, loaderKey, MainPresenter.class);
     super.onSaveInstanceState(outState);
   }
 
