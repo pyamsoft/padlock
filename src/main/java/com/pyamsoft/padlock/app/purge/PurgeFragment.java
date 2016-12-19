@@ -163,7 +163,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedKey);
+    PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedKey, PurgePresenter.class);
     super.onSaveInstanceState(outState);
   }
 

@@ -213,8 +213,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     });
 
     AsyncMapHelper.unsubscribe(arrowGoTask);
-    arrowGoTask =
-        AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.lockImageGo);
+    arrowGoTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.lockImageGo);
 
     clearDisplay();
 
@@ -374,7 +373,8 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     }
     outState.putBoolean("EXCLUDE", exclude);
 
-    PersistentCache.get().saveKey(outState, KEY_LOCK_PRESENTER, loadedKey);
+    PersistentCache.get()
+        .saveKey(outState, KEY_LOCK_PRESENTER, loadedKey, LockScreenPresenter.class);
     super.onSaveInstanceState(outState);
   }
 

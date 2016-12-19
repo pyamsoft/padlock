@@ -232,7 +232,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
-    PersistentCache.get().saveKey(outState, KEY_PIN_DIALOG, loadedKey);
+    PersistentCache.get().saveKey(outState, KEY_PIN_DIALOG, loadedKey, PinEntryPresenter.class);
     outState.putString(CODE_DISPLAY, getCurrentAttempt());
     outState.putString(CODE_REENTRY_DISPLAY, getCurrentReentry());
     outState.putString(HINT_DISPLAY, getCurrentHint());

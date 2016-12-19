@@ -284,7 +284,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedPresenterKey);
+    PersistentCache.get()
+        .saveKey(outState, KEY_PRESENTER, loadedPresenterKey, LockInfoPresenter.class);
     super.onSaveInstanceState(outState);
   }
 
