@@ -19,10 +19,13 @@ package com.pyamsoft.padlock;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.app.receiver.ApplicationInstallReceiver;
-import com.pyamsoft.padlock.dagger.DaggerPadLockComponent;
-import com.pyamsoft.padlock.dagger.PadLockComponent;
-import com.pyamsoft.padlock.dagger.PadLockModule;
+import com.pyamsoft.padlock.main.MainActivity;
+import com.pyamsoft.padlockpresenter.DaggerPadLockComponent;
+import com.pyamsoft.padlockpresenter.Injector;
+import com.pyamsoft.padlockpresenter.PadLockComponent;
+import com.pyamsoft.padlockpresenter.PadLockModule;
+import com.pyamsoft.padlockpresenter.PadLockPreferences;
+import com.pyamsoft.padlockpresenter.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.pydroid.BuildConfigChecker;
 import com.pyamsoft.pydroid.IPYDroidApp;
 import com.pyamsoft.pydroid.SingleInitContentProvider;
@@ -52,7 +55,7 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider
     final ApplicationInstallReceiver receiver = comp.provideApplicationInstallReceiver();
     final PadLockPreferences preferences = comp.providePreferences();
     if (preferences.isInstallListenerEnabled()) {
-      receiver.register();
+      receiver.register(MainActivity.class);
     } else {
       receiver.unregister();
     }

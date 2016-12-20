@@ -32,7 +32,7 @@
 
     <!-- Main Activity -->
     <activity
-        android:name=".app.main.MainActivity"
+        android:name=".main.MainActivity"
         android:excludeFromRecents="false"
         android:exported="true"
         android:label="@string/app_name"
@@ -47,7 +47,7 @@
 
     <!-- Lock Screen Activity -->
     <activity
-        android:name=".app.lock.LockScreenActivity"
+        android:name=".lock.LockScreenActivity"
         android:excludeFromRecents="true"
         android:exported="false"
         android:launchMode="singleTop"
@@ -65,7 +65,7 @@
 
     <!-- Accessibility Service -->
     <service
-        android:name=".app.service.PadLockService"
+        android:name=".service.PadLockService"
         android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
       <intent-filter>
         <action android:name="android.accessibilityservice.AccessibilityService"/>
@@ -76,7 +76,7 @@
     </service>
 
     <service
-        android:name=".app.service.RecheckService"
+        android:name=".service.RecheckService"
         android:exported="false"/>
 
     <provider

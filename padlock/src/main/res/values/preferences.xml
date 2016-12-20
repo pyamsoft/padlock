@@ -53,8 +53,6 @@
 
   <string name="ignore_time_title">Ignore Times</string>
   <string name="ignore_time_summary">Set the default Ignore duration</string>
-  <string name="ignore_time_key">ignore_time</string>
-  <string name="ignore_time_default">0</string>
 
   <string-array name="timeout_time">
     <item name="time_none">Do Not Timeout</item>
@@ -82,33 +80,23 @@
 
   <string name="timeout_time_title">Timeout Times</string>
   <string name="timeout_time_summary">Set the default Timeout duration</string>
-  <string name="timeout_time_key">timeout_time</string>
-  <string name="timeout_time_default">0</string>
 
   <string name="recheck_title">Check locking periodically</string>
   <string name="recheck_summary_checked">Check if the current application should be locked after the Ignore period</string>
   <string name="recheck_summary_unchecked">Do not check if the current application should be locked after the Ignore period</string>
-  <string name="recheck_key">recheck</string>
-  <bool name="recheck_default">false</bool>
 
   <string name="install_listener_title">Notify on New Install</string>
   <string name="install_listener_summary_checked">Show suggestions to lock newly installed applications</string>
   <string name="install_listener_summary_unchecked">Do not show suggestions to lock newly installed applications</string>
-  <string name="install_listener_key">install_listener</string>
-  <bool name="install_listener_default">true</bool>
 
   <string name="ignore_keyguard_title">Ignore Lock Screen When Device Locked</string>
   <string name="ignore_keyguard_summary_checked">Do not show Lock Screen when device is Locked</string>
   <string name="ignore_keyguard_summary_unchecked">Show Lock Screen even when device is Locked</string>
-  <string name="ignore_keyguard_key">ignore_keyguard</string>
-  <bool name="ignore_keyguard_default">true</bool>
 
   <string name="clear_db_key">clear_db</string>
   <string name="clear_db_title">Reset Database</string>
   <string name="clear_db_summary">Reset the locked applications database</string>
 
-  <bool name="lock_package_change_default">true</bool>
-  <string name="lock_package_change_key">lock_package_change</string>
   <string name="lock_package_change_title">Lock on Package Change</string>
   <string name="lock_package_change_summary_checked">Check for locked applications only when package has changed</string>
   <string name="lock_package_change_summary_unchecked">Check for locked applications when the window changes</string>
