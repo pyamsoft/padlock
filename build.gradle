@@ -64,6 +64,9 @@ buildscript {
 
     // Error prone compiler
     classpath "net.ltgt.gradle:gradle-errorprone-plugin:0.0.8"
+
+    // SQLDelight
+    classpath "com.squareup.sqldelight:gradle-plugin:$sqldelight"
   }
 }
 
