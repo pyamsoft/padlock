@@ -65,5 +65,14 @@ dependencies {
   }
 
   compile project(":padlock-model")
+
+  // Roboelectric for Android on JVM
+  testCompile "org.robolectric:robolectric:$robolectric"
+
+  // JUnit for unit tests
+  testCompile "junit:junit:$junit"
+
+  // Mockito for unit tests
+  testCompile "org.mockito:mockito-core:$mockito"
 }
 
