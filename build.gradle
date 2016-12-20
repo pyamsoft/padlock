@@ -14,15 +14,75 @@
  * limitations under the License.
  */
 
-buildscript {
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+buildscript {
   repositories {
     jcenter()
+
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+
+  ext {
+    // Fails to resolve
+    //    retrolambda = "2.3.0"
+
+    // https://medium.com/@skaliakoudas/decreasing-build-times-by-decreasing-gradle-memory-requirements-7fcafc6d98ea#.wblqdn1xf
+    // Gradle memory is set in gradle.properties to 2GB
+    heapSize = "1g"
+    buildTools = "25.0.2"
+    supportLib = "25.1.0"
+    firebase = "10.0.1"
+    leakCanary = "1.4-beta2"
+    pydroid = "5.1.0"
+    autoValue = "1.3"
+    sqlbrite = "1.1.0"
+    sqldelight = "0.5.1"
+    tapTargetView = "1.6.0"
+    dagger = "2.8"
+    robolectric = "3.1.4"
+    junit = "4.12"
+    mockito = "2.3.10"
   }
 
   dependencies {
-    classpath "com.squareup.sqldelight:gradle-plugin:$sqldelight"
+    classpath 'com.android.tools.build:gradle:2.2.3'
+
+    // Retro lambda
+    classpath 'me.tatarka:gradle-retrolambda:3.3.1'
+
+    // Dex count
+    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.0'
+
+    // Gradle version checker
+    classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0'
+
+    // Google services
+    classpath 'com.google.gms:google-services:3.0.0'
+
+    // Error prone compiler
+    classpath "net.ltgt.gradle:gradle-errorprone-plugin:0.0.8"
   }
+}
+
+allprojects {
+  repositories {
+    jcenter()
+
+    maven { url 'https://jitpack.io' }
+  }
+
+  gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+      options.compilerArgs << '-XepDisableWarningsInGeneratedCode' << '-Xep:MissingOverride:OFF'
+    }
+  }
+}
+
+task clean(type: Delete) {
+  delete rootProject.buildDir
 }
 
 tasks.whenTaskAdded { task ->
@@ -30,119 +90,3 @@ tasks.whenTaskAdded { task ->
     task.enabled = false
   }
 }
-
-apply plugin: "com.android.application"
-apply plugin: "com.github.ben-manes.versions"
-apply plugin: "com.getkeepsafe.dexcount"
-apply plugin: "com.squareup.sqldelight"
-apply plugin: "net.ltgt.errorprone"
-apply plugin: "me.tatarka.retrolambda"
-
-android {
-  compileSdkVersion 25
-  buildToolsVersion "$buildTools"
-
-  defaultConfig {
-    applicationId "com.pyamsoft.padlock"
-    minSdkVersion 19
-    targetSdkVersion 25
-    versionCode 67
-    versionName "2.1.5pre1"
-
-    // For vector drawables
-    vectorDrawables.useSupportLibrary = true
-
-    // For instrumentation test
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-  }
-
-  dataBinding {
-    enabled true
-  }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  signingConfigs {
-    release {
-      //noinspection GroovyAssignabilityCheck
-      storeFile new File(RELEASE_STORE_FILE)
-
-      //noinspection GroovyAssignabilityCheck
-      keyAlias RELEASE_KEY_ALIAS
-
-      //noinspection GroovyAssignabilityCheck
-      keyPassword RELEASE_KEY_PASSWD
-
-      //noinspection GroovyAssignabilityCheck
-      storePassword RELEASE_STORE_PASSWD
-    }
-  }
-
-  buildTypes {
-    release {
-      //noinspection GroovyAssignabilityCheck
-      signingConfig signingConfigs.release
-      minifyEnabled true
-      shrinkResources true
-      proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),
-          "proguard-rules.pro"
-    }
-  }
-
-  dexOptions {
-    javaMaxHeapSize "$heapSize"
-  }
-}
-
-dependencies {
-  compile fileTree(dir: "libs", include: ["*.jar"])
-
-  retrolambdaConfig "net.orfjackal.retrolambda:retrolambda:2.3.0"
-
-  // Error-Prone compiler
-  errorprone "com.google.errorprone:error_prone_core:$errorProne"
-
-  // Needs to compile support annotations into actual project
-  annotationProcessor "com.android.support:support-annotations:$supportLib"
-
-  // Firebase Crash
-  compile "com.google.firebase:firebase-crash:$firebase"
-
-  // SQLBrite
-  compile "com.squareup.sqlbrite:sqlbrite:$sqlbrite"
-
-  // Auto value
-  provided "com.google.auto.value:auto-value:$autoValue"
-  annotationProcessor "com.google.auto.value:auto-value:$autoValue"
-
-  // Dagger
-  compile "com.google.dagger:dagger:$dagger"
-  annotationProcessor "com.google.dagger:dagger-compiler:$dagger"
-
-  // Android Framework Testing
-  androidTestCompile "com.android.support:support-annotations:$supportLib"
-  androidTestCompile "com.android.support.test:runner:$androidTestRunner"
-  androidTestCompile "com.android.support.test:rules:$androidTestRules"
-  androidTestCompile "com.android.support.test.espresso:espresso-core:$espresso"
-
-  // Roboelectric for Android on JVM
-  testCompile "org.robolectric:robolectric:$robolectric"
-
-  // JUnit for unit tests
-  testCompile "junit:junit:$junit"
-
-  // Mockito for unit tests
-  testCompile "org.mockito:mockito-core:$mockito"
-
-  // PYDroid 4.14.0
-  debugCompile project(path: ":PYDroidRX", configuration: "debug")
-  releaseCompile project(path: ":PYDroidRX", configuration: "release")
-  debugCompile project(path: ":PYDroidDesign", configuration: "debug")
-  releaseCompile project(path: ":PYDroidDesign", configuration: "release")
-}
-
-// AdView
-apply plugin: "com.google.gms.google-services"
