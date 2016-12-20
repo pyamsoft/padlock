@@ -39,10 +39,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.list.LockListFragment;
-import com.pyamsoft.padlockpresenter.list.LockListPresenter;
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
+import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlockmodel.event.PinEntryEvent;
+import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
+import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenterLoader;
+import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderView;
+import com.pyamsoft.padlockpresenter.list.LockListPresenter;
 import com.pyamsoft.padlockpresenter.lock.PinEntryPresenter;
 import com.pyamsoft.padlockpresenter.lock.PinScreen;
 import com.pyamsoft.padlockpresenter.lock.PinScreenPresenterLoader;
@@ -52,7 +55,7 @@ import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
 
-public class PinEntryDialog extends DialogFragment implements PinScreen {
+public class PinEntryDialog extends DialogFragment implements PinScreen, AppIconLoaderView {
 
   @NonNull private static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull private static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
@@ -60,15 +63,18 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
   @NonNull private static final String KEY_PIN_DIALOG = "key_pin_dialog";
+  @NonNull private static final String KEY_APP_ICON_LOADER = "key_app_icon_loader";
   @NonNull private final AsyncDrawable.Mapper taskMap = new AsyncDrawable.Mapper();
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") PinEntryPresenter presenter;
+  @SuppressWarnings("WeakerAccess") AppIconLoaderPresenter appIconLoaderPresenter;
   private DialogPinEntryBinding binding;
   private String packageName;
   private EditText pinEntryText;
   private EditText pinReentryText;
   private EditText pinHintText;
   private long loadedKey;
+  private long loadedAppIconKey;
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -105,6 +111,18 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
             presenter = persist;
           }
         });
+
+    loadedAppIconKey = PersistentCache.get()
+        .load(KEY_APP_ICON_LOADER, savedInstanceState,
+            new PersistLoader.Callback<AppIconLoaderPresenter>() {
+              @NonNull @Override public PersistLoader<AppIconLoaderPresenter> createLoader() {
+                return new AppIconLoaderPresenterLoader();
+              }
+
+              @Override public void onPersistentLoaded(@NonNull AppIconLoaderPresenter persist) {
+                appIconLoaderPresenter = persist;
+              }
+            });
   }
 
   @Override public void onResume() {
@@ -237,6 +255,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
     PersistentCache.get().saveKey(outState, KEY_PIN_DIALOG, loadedKey, PinEntryPresenter.class);
+    PersistentCache.get()
+        .saveKey(outState, KEY_APP_ICON_LOADER, loadedAppIconKey, AppIconLoaderPresenter.class);
     outState.putString(CODE_DISPLAY, getCurrentAttempt());
     outState.putString(CODE_REENTRY_DISPLAY, getCurrentReentry());
     outState.putString(HINT_DISPLAY, getCurrentHint());
@@ -266,14 +286,16 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
 
   @Override public void onStart() {
     super.onStart();
+    appIconLoaderPresenter.bindView(this);
     presenter.bindView(this);
-    presenter.loadApplicationIcon(packageName);
+    appIconLoaderPresenter.loadApplicationIcon(packageName);
     presenter.hideUnimportantViews();
   }
 
   @Override public void onStop() {
     super.onStop();
     presenter.unbindView();
+    appIconLoaderPresenter.unbindView();
   }
 
   @SuppressLint("SetTextI18n") private void setupToolbar() {
@@ -294,6 +316,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen {
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
       PersistentCache.get().unload(loadedKey);
+      PersistentCache.get().unload(loadedAppIconKey);
     }
     PadLock.getRefWatcher(this).watch(this);
   }

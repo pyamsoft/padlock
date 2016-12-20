@@ -25,8 +25,8 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class AppIconLoaderPresenterImpl<I extends AppIconLoaderView> extends SchedulerPresenter<I>
-    implements AppIconLoaderPresenter<I> {
+class AppIconLoaderPresenterImpl extends SchedulerPresenter<AppIconLoaderView>
+    implements AppIconLoaderPresenter {
 
   @NonNull private final AppIconLoaderInteractor interactor;
   @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
@@ -50,7 +50,7 @@ class AppIconLoaderPresenterImpl<I extends AppIconLoaderView> extends SchedulerP
         .subscribe(drawable -> getView(i -> i.onApplicationIconLoadedSuccess(drawable)),
             throwable -> {
               Timber.e(throwable, "onError");
-              getView(I::onApplicationIconLoadedError);
+              getView(AppIconLoaderView::onApplicationIconLoadedError);
             }, this::unsubLoadIcon);
   }
 

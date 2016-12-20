@@ -16,15 +16,10 @@
 
 package com.pyamsoft.padlockpresenter.lock;
 
-import android.app.IntentService;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
 
-public interface LockScreenPresenter
-    extends LockPresenter<LockScreen>, AppIconLoaderPresenter<LockScreen> {
-
-  void setRecheckServiceClass(@NonNull Class<? extends IntentService> recheckServiceClass);
+public interface LockScreenPresenter extends LockPresenter<LockScreen> {
 
   void displayLockedHint();
 

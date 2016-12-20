@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlockpresenter.service;
 
+import android.app.Activity;
+import android.app.IntentService;
 import android.content.Context;
 import com.pyamsoft.padlockpresenter.PadLockDB;
 import com.pyamsoft.padlockpresenter.PadLockPreferences;
@@ -36,8 +38,10 @@ import rx.Scheduler;
 
   @Provides LockServiceInteractor provideLockServiceInteractor(Context context,
       PadLockPreferences preference, JobSchedulerCompat jobManager,
-      PackageManagerWrapper packageManagerWrapper, PadLockDB padLockDB) {
+      PackageManagerWrapper packageManagerWrapper, PadLockDB padLockDB,
+      @Named("lockscreen") Class<? extends Activity> lockScreenActivityClass,
+      @Named("recheck") Class<? extends IntentService> recheckServiceClass) {
     return new LockServiceInteractorImpl(context, preference, jobManager, packageManagerWrapper,
-        padLockDB);
+        padLockDB, lockScreenActivityClass, recheckServiceClass);
   }
 }

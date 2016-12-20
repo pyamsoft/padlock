@@ -26,8 +26,6 @@ import rx.Observable;
 
 interface LockInfoInteractor extends LockCommonInteractor {
 
-  void setLockScreenClassToIgnore(@NonNull Class<?> lockScreenClass);
-
   @CheckResult @NonNull Observable<List<PadLockEntry.WithPackageName>> getActivityEntries(
       @NonNull String packageName);
 

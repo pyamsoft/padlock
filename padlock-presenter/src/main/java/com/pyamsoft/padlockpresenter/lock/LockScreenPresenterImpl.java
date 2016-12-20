@@ -16,10 +16,8 @@
 
 package com.pyamsoft.padlockpresenter.lock;
 
-import android.app.IntentService;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -33,7 +31,6 @@ import timber.log.Timber;
 class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements LockScreenPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockScreenInteractor interactor;
-  @SuppressWarnings("WeakerAccess") @NonNull final AppIconLoaderPresenter<LockScreen> iconLoader;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription postUnlockSubscription =
       Subscriptions.empty();
   @SuppressWarnings("WeakerAccess") @NonNull Subscription displayNameSubscription =
@@ -45,36 +42,22 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
   @SuppressWarnings("WeakerAccess") @NonNull Subscription lockSubscription = Subscriptions.empty();
   @SuppressWarnings("WeakerAccess") @NonNull Subscription hintSubscription = Subscriptions.empty();
 
-  @Inject LockScreenPresenterImpl(@NonNull AppIconLoaderPresenter<LockScreen> iconLoader,
-      @NonNull final LockScreenInteractor lockScreenInteractor,
+  @Inject LockScreenPresenterImpl(@NonNull final LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
-    this.iconLoader = iconLoader;
     this.interactor = lockScreenInteractor;
     interactor.resetFailCount();
   }
 
-  @Override protected void onBind() {
-    super.onBind();
-    getView(iconLoader::bindView);
-  }
-
   @Override protected void onUnbind() {
     super.onUnbind();
-    iconLoader.unbindView();
     SubscriptionHelper.unsubscribe(ignoreTimeSubscription, unlockSubscription, lockSubscription,
         displayNameSubscription, postUnlockSubscription);
   }
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    iconLoader.destroy();
     interactor.resetFailCount();
-  }
-
-  @Override
-  public void setRecheckServiceClass(@NonNull Class<? extends IntentService> recheckServiceClass) {
-    interactor.setRecheckServiceClass(recheckServiceClass);
   }
 
   @Override public void displayLockedHint() {
@@ -229,7 +212,7 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
             }, () -> SubscriptionHelper.unsubscribe(postUnlockSubscription));
   }
 
-  @Override public void loadApplicationIcon(@NonNull String packageName) {
-    iconLoader.loadApplicationIcon(packageName);
-  }
+  //@Override public void loadApplicationIcon(@NonNull String packageName) {
+  //  iconLoader.loadApplicationIcon(packageName);
+  //}
 }

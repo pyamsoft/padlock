@@ -16,8 +16,6 @@
 
 package com.pyamsoft.padlockpresenter.settings;
 
-import android.app.Activity;
-import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface SettingsPreferencePresenter
@@ -29,7 +27,7 @@ public interface SettingsPreferencePresenter
 
   void processClearRequest(int type);
 
-  void setApplicationInstallReceiverState(@NonNull Class<? extends Activity> activityClass);
+  void setApplicationInstallReceiverState();
 
   interface SettingsPreferenceView {
 

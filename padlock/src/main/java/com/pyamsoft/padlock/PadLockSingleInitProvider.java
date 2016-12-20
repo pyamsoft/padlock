@@ -19,7 +19,9 @@ package com.pyamsoft.padlock;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.lock.LockScreenActivity;
 import com.pyamsoft.padlock.main.MainActivity;
+import com.pyamsoft.padlock.service.RecheckService;
 import com.pyamsoft.padlockpresenter.DaggerPadLockComponent;
 import com.pyamsoft.padlockpresenter.Injector;
 import com.pyamsoft.padlockpresenter.PadLockComponent;
@@ -38,7 +40,10 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider
 
   @Override protected void onFirstCreate(@NonNull Context context) {
     super.onFirstCreate(context);
-    component = DaggerPadLockComponent.builder().padLockModule(new PadLockModule(context)).build();
+    final PadLockModule module =
+        new PadLockModule(context, MainActivity.class, LockScreenActivity.class,
+            RecheckService.class);
+    component = DaggerPadLockComponent.builder().padLockModule(module).build();
   }
 
   @NonNull @Override protected BuildConfigChecker initializeBuildConfigChecker() {
@@ -55,7 +60,7 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider
     final ApplicationInstallReceiver receiver = comp.provideApplicationInstallReceiver();
     final PadLockPreferences preferences = comp.providePreferences();
     if (preferences.isInstallListenerEnabled()) {
-      receiver.register(MainActivity.class);
+      receiver.register();
     } else {
       receiver.unregister();
     }

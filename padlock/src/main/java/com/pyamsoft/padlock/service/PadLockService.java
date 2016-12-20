@@ -144,8 +144,6 @@ public class PadLockService extends AccessibilityService
     }
 
     presenter.bindView(this);
-    presenter.setLockScreenActivity(LockScreenActivity.class);
-    presenter.setRecheckService(RecheckService.class);
     setInstance(this);
   }
 

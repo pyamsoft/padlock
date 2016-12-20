@@ -16,17 +16,11 @@
 
 package com.pyamsoft.padlockpresenter.service;
 
-import android.app.Activity;
-import android.app.IntentService;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlockmodel.sql.PadLockEntry;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface LockServicePresenter extends Presenter<LockServicePresenter.LockService> {
-
-  void setRecheckService(@NonNull Class<? extends IntentService> recheckService);
-
-  void setLockScreenActivity(@NonNull Class<? extends Activity> lockScreenActivity);
 
   void setLockScreenPassed();
 

@@ -31,11 +31,11 @@ import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.padlockpresenter.settings.SettingsPreferencePresenter;
 import com.pyamsoft.padlockpresenter.settings.SettingsPreferencePresenterLoader;
-import com.pyamsoft.pydroidui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.app.PersistLoader;
-import com.pyamsoft.pydroidui.app.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
+import com.pyamsoft.pydroidui.about.AboutLibrariesFragment;
+import com.pyamsoft.pydroidui.app.fragment.ActionBarSettingsPreferenceFragment;
 import timber.log.Timber;
 
 public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragment
@@ -86,7 +86,7 @@ public class SettingsPreferenceFragment extends ActionBarSettingsPreferenceFragm
 
     final Preference installListener = findPreference(getString(R.string.install_listener_key));
     installListener.setOnPreferenceClickListener(preference -> {
-      presenter.setApplicationInstallReceiverState(MainActivity.class);
+      presenter.setApplicationInstallReceiverState();
       return true;
     });
   }

@@ -28,13 +28,12 @@ import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlockmodel.AppEntry;
-import com.pyamsoft.padlockpresenter.Injector;
 import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
+import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenterLoader;
 import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderView;
 import com.pyamsoft.pydroid.ActionSingle;
 import java.lang.ref.WeakReference;
 import java.util.List;
-import javax.inject.Inject;
 import timber.log.Timber;
 
 class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>
@@ -105,15 +104,14 @@ class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListI
   static final class ViewHolder extends RecyclerView.ViewHolder implements AppIconLoaderView {
 
     @NonNull private final AdapterItemLocklistEntryBinding binding;
-    @Inject AppIconLoaderPresenter<ViewHolder> appIconLoaderPresenter;
+    @NonNull private final AppIconLoaderPresenter appIconLoaderPresenter;
     @NonNull WeakReference<AppEntry> weakEntry;
 
     ViewHolder(View itemView) {
       super(itemView);
       binding = DataBindingUtil.bind(itemView);
 
-      Injector.get().provideComponent().plusAppIconLoaderComponent().inject(this);
-      appIconLoaderPresenter.bindView(this);
+      appIconLoaderPresenter = new AppIconLoaderPresenterLoader().loadPersistent();
       weakEntry = new WeakReference<>(null);
     }
 
@@ -134,6 +132,7 @@ class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListI
     }
 
     void bind(@NonNull AppEntry entry) {
+      appIconLoaderPresenter.bindView(this);
       binding.lockListTitle.setText(entry.name());
       binding.lockListToggle.setOnCheckedChangeListener(null);
       binding.lockListToggle.setChecked(entry.locked());
@@ -144,6 +143,7 @@ class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListI
     }
 
     void unbind() {
+      appIconLoaderPresenter.unbindView();
       binding.lockListTitle.setText(null);
       binding.lockListIcon.setImageDrawable(null);
       binding.lockListToggle.setOnCheckedChangeListener(null);

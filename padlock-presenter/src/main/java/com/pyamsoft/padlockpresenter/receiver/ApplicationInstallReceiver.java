@@ -16,12 +16,9 @@
 
 package com.pyamsoft.padlockpresenter.receiver;
 
-import android.app.Activity;
-import android.support.annotation.NonNull;
-
 public interface ApplicationInstallReceiver {
 
-  void register(@NonNull Class<? extends Activity> activityClass);
+  void register();
 
   void unregister();
 }

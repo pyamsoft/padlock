@@ -22,7 +22,6 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlockmodel.ActivityEntry;
 import com.pyamsoft.padlockmodel.LockState;
 import com.pyamsoft.padlockmodel.sql.PadLockEntry;
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +37,6 @@ import timber.log.Timber;
 class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.LockInfoView>
     implements LockInfoPresenter {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final AppIconLoaderPresenter<LockInfoView> iconLoader;
   @SuppressWarnings("WeakerAccess") @NonNull final LockInfoInteractor lockInfoInteractor;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
       Subscriptions.empty();
@@ -48,30 +46,21 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
       Subscriptions.empty();
   @SuppressWarnings("WeakerAccess") boolean refreshing;
 
-  @Inject LockInfoPresenterImpl(@NonNull AppIconLoaderPresenter<LockInfoView> iconLoader,
-      final @NonNull LockInfoInteractor lockInfoInteractor,
+  @Inject LockInfoPresenterImpl(final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("obs") Scheduler obsScheduler,
       final @NonNull @Named("io") Scheduler subScheduler) {
     super(lockInfoInteractor, obsScheduler, subScheduler);
-    this.iconLoader = iconLoader;
     this.lockInfoInteractor = lockInfoInteractor;
     refreshing = false;
   }
 
-  @Override protected void onBind() {
-    super.onBind();
-    getView(iconLoader::bindView);
-  }
-
   @Override protected void onUnbind() {
     super.onUnbind();
-    iconLoader.unbindView();
     SubscriptionHelper.unsubscribe(databaseSubscription, onboardSubscription);
   }
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    iconLoader.destroy();
     SubscriptionHelper.unsubscribe(populateListSubscription);
     clearList();
     refreshing = false;
@@ -295,10 +284,6 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
               Timber.e(throwable, "onError modifyDatabaseEntry");
               getView(lockInfoView -> lockInfoView.onDatabaseEntryError(position));
             }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
-  }
-
-  @Override public void loadApplicationIcon(@NonNull String packageName) {
-    iconLoader.loadApplicationIcon(packageName);
   }
 
   @Override public void showOnBoarding() {

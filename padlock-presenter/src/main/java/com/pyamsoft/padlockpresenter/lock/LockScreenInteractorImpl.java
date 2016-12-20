@@ -38,21 +38,24 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
+  @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends IntentService>
+      recheckServiceClass;
   @NonNull private final MasterPinInteractor pinInteractor;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @SuppressWarnings("WeakerAccess") int failCount;
-  @SuppressWarnings("WeakerAccess") @Nullable Class<? extends IntentService> recheckServiceClass;
 
   @Inject LockScreenInteractorImpl(@NonNull Context context,
       @NonNull final PadLockPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
       @NonNull final MasterPinInteractor masterPinInteractor,
-      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB) {
+      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB,
+      @NonNull Class<? extends IntentService> recheckServiceClass) {
     this.appContext = context.getApplicationContext();
     this.jobSchedulerCompat = jobSchedulerCompat;
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
     this.preferences = preferences;
     this.pinInteractor = masterPinInteractor;
+    this.recheckServiceClass = recheckServiceClass;
   }
 
   @NonNull @Override
@@ -71,11 +74,6 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
 
   @NonNull @Override public Observable<String> getMasterPin() {
     return pinInteractor.getMasterPin();
-  }
-
-  @Override
-  public void setRecheckServiceClass(@NonNull Class<? extends IntentService> recheckServiceClass) {
-    this.recheckServiceClass = recheckServiceClass;
   }
 
   @NonNull @Override
@@ -107,10 +105,6 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
           }
 
           // Cancel any old recheck job for the class, but not the package
-          if (recheckServiceClass == null) {
-            throw new IllegalStateException("Recheck service class is NULL");
-          }
-
           final Intent intent = new Intent(appContext, recheckServiceClass);
           intent.putExtra(Recheck.EXTRA_PACKAGE_NAME, packageName);
           intent.putExtra(Recheck.EXTRA_CLASS_NAME, activityName);

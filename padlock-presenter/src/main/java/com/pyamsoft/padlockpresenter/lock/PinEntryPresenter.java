@@ -17,10 +17,8 @@
 package com.pyamsoft.padlockpresenter.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
 
-public interface PinEntryPresenter
-    extends LockPresenter<PinScreen>, AppIconLoaderPresenter<PinScreen> {
+public interface PinEntryPresenter extends LockPresenter<PinScreen> {
 
   void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt, @NonNull String hint);
 

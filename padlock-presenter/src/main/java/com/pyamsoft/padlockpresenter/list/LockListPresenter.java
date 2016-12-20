@@ -40,6 +40,7 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
   void setSystemVisibilityFromPreference();
 
   void clickPinFABServiceRunning();
+
   void clickPinFABServiceIdle();
 
   void showOnBoarding();

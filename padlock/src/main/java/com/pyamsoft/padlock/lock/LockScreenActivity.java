@@ -39,8 +39,10 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.padlock.service.RecheckService;
 import com.pyamsoft.padlockmodel.LockScreenEntry;
+import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
+import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenterLoader;
+import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlockpresenter.lock.LockScreen;
 import com.pyamsoft.padlockpresenter.lock.LockScreenPresenter;
 import com.pyamsoft.padlockpresenter.lock.LockScreenPresenterLoader;
@@ -57,7 +59,7 @@ import java.util.Locale;
 import java.util.Map;
 import timber.log.Timber;
 
-public class LockScreenActivity extends ActivityBase implements LockScreen {
+public class LockScreenActivity extends ActivityBase implements LockScreen, AppIconLoaderView {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
@@ -68,6 +70,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
   @NonNull private static final String KEY_LOCK_PRESENTER = "key_lock_presenter";
+  @NonNull private static final String KEY_APP_ICON_PRESENTER = "key_app_icon_presenter";
 
   /**
    * KLUDGE This is a map that holds references to Activities
@@ -86,6 +89,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
 
   @NonNull private final Intent home;
   @SuppressWarnings("WeakerAccess") LockScreenPresenter presenter;
+  @SuppressWarnings("WeakerAccess") AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") String lockedActivityName;
   @SuppressWarnings("WeakerAccess") String lockedPackageName;
@@ -110,6 +114,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   private String lockedRealName;
   private boolean lockedSystem;
   @Nullable private AsyncMap.Entry arrowGoTask;
+  private long loadedAppIconKey;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -162,6 +167,18 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
 
               @Override public void onPersistentLoaded(@NonNull LockScreenPresenter persist) {
                 presenter = persist;
+              }
+            });
+
+    loadedAppIconKey = PersistentCache.get()
+        .load(KEY_APP_ICON_PRESENTER, savedInstanceState,
+            new PersistLoader.Callback<AppIconLoaderPresenter>() {
+              @NonNull @Override public PersistLoader<AppIconLoaderPresenter> createLoader() {
+                return new AppIconLoaderPresenterLoader();
+              }
+
+              @Override public void onPersistentLoaded(@NonNull AppIconLoaderPresenter persist) {
+                appIconLoaderPresenter = persist;
               }
             });
 
@@ -257,12 +274,12 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   @Override protected void onStart() {
     super.onStart();
     Timber.d("onStart");
+    appIconLoaderPresenter.bindView(this);
     presenter.bindView(this);
-    presenter.setRecheckServiceClass(RecheckService.class);
     presenter.displayLockedHint();
 
     presenter.loadDisplayNameFromPackage(lockedPackageName);
-    presenter.loadApplicationIcon(lockedPackageName);
+    appIconLoaderPresenter.loadApplicationIcon(lockedPackageName);
     supportInvalidateOptionsMenu();
 
     // Add the lock map
@@ -272,6 +289,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
   @Override protected void onStop() {
     super.onStop();
     presenter.unbindView();
+    appIconLoaderPresenter.unbindView();
   }
 
   @Override protected void onPause() {
@@ -295,6 +313,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
     Timber.d("onDestroy");
     if (!isChangingConfigurations()) {
       PersistentCache.get().unload(loadedKey);
+      PersistentCache.get().unload(loadedAppIconKey);
     }
 
     Timber.d("Clear currently locked");
@@ -380,6 +399,8 @@ public class LockScreenActivity extends ActivityBase implements LockScreen {
 
     PersistentCache.get()
         .saveKey(outState, KEY_LOCK_PRESENTER, loadedKey, LockScreenPresenter.class);
+    PersistentCache.get()
+        .saveKey(outState, KEY_APP_ICON_PRESENTER, loadedAppIconKey, AppIconLoaderPresenter.class);
     super.onSaveInstanceState(outState);
   }
 
