@@ -25,8 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.databinding.FragmentSettingsBinding;
+import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.pydroidui.app.fragment.ActionBarFragment;
 
 public class SettingsFragment extends ActionBarFragment {
