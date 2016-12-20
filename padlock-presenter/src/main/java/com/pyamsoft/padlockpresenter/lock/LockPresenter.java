@@ -16,12 +16,11 @@
 
 package com.pyamsoft.padlockpresenter.lock;
 
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderView;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
-public interface LockPresenter<I extends LockPresenter.LockView> extends Presenter<I> {
+interface LockPresenter<I extends LockPresenter.LockView> extends Presenter<I> {
 
-  interface LockView extends AppIconLoaderView {
+  interface LockView {
 
     void onSubmitSuccess();
 

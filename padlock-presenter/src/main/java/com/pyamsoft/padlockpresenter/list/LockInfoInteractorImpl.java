@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlockpresenter.list;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.padlockmodel.ActivityEntry;
 import com.pyamsoft.padlockmodel.LockState;
 import com.pyamsoft.padlockmodel.sql.PadLockEntry;
@@ -34,20 +34,17 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final List<ActivityEntry> activityEntryCache;
+  @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenClass;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
-  @Nullable private Class<?> lockScreenClass;
 
   @Inject LockInfoInteractorImpl(PadLockDB padLockDB,
-      @NonNull PackageManagerWrapper packageManagerWrapper,
-      @NonNull PadLockPreferences preferences) {
+      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
+      @NonNull Class<? extends Activity> lockScreenClass) {
     super(padLockDB);
     this.packageManagerWrapper = packageManagerWrapper;
     this.preferences = preferences;
-    activityEntryCache = new ArrayList<>();
-  }
-
-  @Override public void setLockScreenClassToIgnore(@NonNull Class<?> lockScreenClass) {
     this.lockScreenClass = lockScreenClass;
+    activityEntryCache = new ArrayList<>();
   }
 
   @NonNull @Override public Observable<List<PadLockEntry.WithPackageName>> getActivityEntries(
@@ -57,8 +54,7 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
 
   @NonNull @Override public Observable<String> getPackageActivities(@NonNull String packageName) {
     return packageManagerWrapper.getActivityListForPackage(packageName)
-        .filter(activityEntry -> lockScreenClass == null || !activityEntry.equalsIgnoreCase(
-            lockScreenClass.getName()));
+        .filter(activityEntry -> !activityEntry.equalsIgnoreCase(lockScreenClass.getName()));
   }
 
   @Override public void setShownOnBoarding() {

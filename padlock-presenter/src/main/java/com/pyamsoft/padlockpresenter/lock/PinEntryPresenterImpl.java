@@ -17,7 +17,6 @@
 package com.pyamsoft.padlockpresenter.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,34 +28,20 @@ import timber.log.Timber;
 class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinEntryPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PinEntryInteractor interactor;
-  @NonNull private final AppIconLoaderPresenter<PinScreen> iconLoader;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription pinEntrySubscription =
       Subscriptions.empty();
   @SuppressWarnings("WeakerAccess") @NonNull Subscription pinCheckSubscription =
       Subscriptions.empty();
 
-  @Inject PinEntryPresenterImpl(@NonNull AppIconLoaderPresenter<PinScreen> iconLoader,
-      @NonNull final PinEntryInteractor interactor, @NonNull @Named("obs") Scheduler obsScheduler,
-      @NonNull @Named("io") Scheduler subScheduler) {
+  @Inject PinEntryPresenterImpl(@NonNull final PinEntryInteractor interactor,
+      @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
-    this.iconLoader = iconLoader;
     this.interactor = interactor;
-  }
-
-  @Override protected void onBind() {
-    super.onBind();
-    getView(iconLoader::bindView);
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    iconLoader.unbindView();
     SubscriptionHelper.unsubscribe(pinEntrySubscription, pinCheckSubscription);
-  }
-
-  @Override protected void onDestroy() {
-    super.onDestroy();
-    iconLoader.destroy();
   }
 
   @Override public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
@@ -103,9 +88,5 @@ class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinE
           Timber.e(throwable, "onError hideUnimportantViews");
           // TODO
         }, () -> SubscriptionHelper.unsubscribe(pinCheckSubscription));
-  }
-
-  @Override public void loadApplicationIcon(@NonNull String packageName) {
-    iconLoader.loadApplicationIcon(packageName);
   }
 }

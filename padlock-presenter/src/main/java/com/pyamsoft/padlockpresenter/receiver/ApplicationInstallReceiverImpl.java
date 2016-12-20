@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
@@ -47,14 +46,14 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
   @NonNull private final IntentFilter filter;
   @NonNull private final Scheduler obsScheduler;
   @NonNull private final Scheduler subScheduler;
-  @Nullable private PendingIntent pendingIntent;
+  @NonNull private final PendingIntent pendingIntent;
   private int notificationId;
   private boolean registered;
   @NonNull private Subscription notification = Subscriptions.empty();
 
   @Inject ApplicationInstallReceiverImpl(@NonNull Context context,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull Scheduler obsScheduler,
-      @NonNull Scheduler subScheduler) {
+      @NonNull Scheduler subScheduler, @NonNull Class<? extends Activity> mainActivityClass) {
     this.obsScheduler = obsScheduler;
     this.subScheduler = subScheduler;
     appContext = context.getApplicationContext();
@@ -63,14 +62,11 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
     filter.addDataScheme("package");
     registered = false;
     notificationId = 0;
+    pendingIntent =
+        PendingIntent.getActivity(appContext, 421, new Intent(appContext, mainActivityClass), 0);
     notificationManager = NotificationManagerCompat.from(appContext);
     SchedulerHelper.enforceObserveScheduler(obsScheduler);
     SchedulerHelper.enforceSubscribeScheduler(subScheduler);
-  }
-
-  public void setActivityClass(@NonNull Class<?> activityClass) {
-    final Intent mainIntent = new Intent(appContext, activityClass);
-    pendingIntent = PendingIntent.getActivity(appContext, 421, mainIntent, 0);
   }
 
   @Override public void onReceive(Context context, Intent intent) {
@@ -96,10 +92,6 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
   }
 
   void onNewPackageInstalled(@NonNull String packageName, @NonNull String name) {
-    if (pendingIntent == null) {
-      throw new IllegalStateException("PendingIntent is NULL. Must pass activity class");
-    }
-
     Timber.i("Package Added: %s", packageName);
     final Notification notification1 =
         new NotificationCompat.Builder(appContext).setContentTitle("Lock New Application")
@@ -119,9 +111,8 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
     }
   }
 
-  @Override public void register(@NonNull Class<? extends Activity> activityClass) {
+  @Override public void register() {
     if (!registered) {
-      setActivityClass(activityClass);
       appContext.registerReceiver(this, filter);
       registered = true;
     }
@@ -130,7 +121,6 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
   @Override public void unregister() {
     if (registered) {
       appContext.unregisterReceiver(this);
-      pendingIntent = null;
       registered = false;
     }
   }

@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlockpresenter;
 
+import android.app.Activity;
+import android.app.IntentService;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import dagger.Module;
@@ -31,30 +33,54 @@ import rx.schedulers.Schedulers;
   @NonNull private final Context appContext;
   @NonNull private final PadLockDB padLockDB;
   @NonNull private final PadLockPreferences preferences;
+  @NonNull private final Class<? extends IntentService> recheckServiceClass;
+  @NonNull private final Class<? extends Activity> mainActivityClass;
+  @NonNull private final Class<? extends Activity> lockScreenActivityClass;
 
-  public PadLockModule(final @NonNull Context context) {
+  public PadLockModule(@NonNull Context context,
+      @NonNull Class<? extends Activity> mainActivityClass,
+      @NonNull Class<? extends Activity> lockScreenActivityClass,
+      @NonNull Class<? extends IntentService> recheckServiceClass) {
     appContext = context.getApplicationContext();
     preferences = new PadLockPreferencesImpl(appContext);
     padLockDB = new PadLockDBImpl(appContext, Schedulers.io());
+    this.mainActivityClass = mainActivityClass;
+    this.lockScreenActivityClass = lockScreenActivityClass;
+    this.recheckServiceClass = recheckServiceClass;
   }
 
-  @Singleton @Provides Context provideContext() {
+  @Singleton @Provides @NonNull Context provideContext() {
     return appContext;
   }
 
-  @Singleton @Provides PadLockPreferences providePreferences() {
+  @Singleton @Provides @NonNull PadLockPreferences providePreferences() {
     return preferences;
   }
 
-  @Singleton @Provides PadLockDB providePadLockDB() {
+  @Singleton @Provides @NonNull PadLockDB providePadLockDB() {
     return padLockDB;
   }
 
-  @Singleton @Provides @Named("sub") Scheduler provideIOScheduler() {
-    return Schedulers.computation();
+  @Singleton @Provides @NonNull @Named("main")
+  Class<? extends Activity> provideMainActivityClass() {
+    return mainActivityClass;
   }
 
-  @Singleton @Provides @Named("obs") Scheduler provideMainThreadScheduler() {
+  @Singleton @Provides @NonNull @Named("lockscreen")
+  Class<? extends Activity> provideLockScreenActivityClas() {
+    return lockScreenActivityClass;
+  }
+
+  @Singleton @Provides @NonNull @Named("recheck")
+  Class<? extends IntentService> provideRecheckServiceClass() {
+    return recheckServiceClass;
+  }
+
+  @Singleton @Provides @NonNull @Named("sub") Scheduler provideIOScheduler() {
+    return Schedulers.io();
+  }
+
+  @Singleton @Provides @NonNull @Named("obs") Scheduler provideMainThreadScheduler() {
     return AndroidSchedulers.mainThread();
   }
 }

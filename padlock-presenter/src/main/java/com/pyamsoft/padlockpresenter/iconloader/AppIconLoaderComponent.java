@@ -20,5 +20,5 @@ import dagger.Subcomponent;
 
 @Subcomponent(modules = AppIconLoaderModule.class) public interface AppIconLoaderComponent {
 
-  void inject(AppIconLoaderView view);
+  void inject(AppIconLoaderPresenterLoader view);
 }

@@ -16,8 +16,6 @@
 
 package com.pyamsoft.padlockpresenter.service;
 
-import android.app.Activity;
-import android.app.IntentService;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlockmodel.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
@@ -64,15 +62,6 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
   @SuppressWarnings("WeakerAccess") void setLockScreenPassed(boolean b) {
     Timber.d("Set lockScreenPassed: %s", b);
     lockScreenPassed = b;
-  }
-
-  @Override public void setRecheckService(@NonNull Class<? extends IntentService> recheckService) {
-    interactor.setRecheckService(recheckService);
-  }
-
-  @Override
-  public void setLockScreenActivity(@NonNull Class<? extends Activity> lockScreenActivity) {
-    interactor.setLockScreenActivity(lockScreenActivity);
   }
 
   @Override public void setLockScreenPassed() {

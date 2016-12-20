@@ -18,12 +18,11 @@ package com.pyamsoft.padlockpresenter.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlockmodel.ActivityEntry;
 import com.pyamsoft.padlockmodel.LockState;
+import com.pyamsoft.pydroid.presenter.Presenter;
 
-public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> {
+public interface LockInfoPresenter extends Presenter<LockInfoPresenter.LockInfoView> {
 
   void updateCachedEntryLockState(@NonNull String name, @NonNull LockState lockState);
 
@@ -39,8 +38,8 @@ public interface LockInfoPresenter extends AppIconLoaderPresenter<LockInfoPresen
 
   void setOnBoard();
 
-  interface LockInfoView extends LockListCommon, AppIconLoaderView, LockListDatabaseErrorView,
-      LockListDatabaseWhitelistView {
+  interface LockInfoView
+      extends LockListCommon, LockListDatabaseErrorView, LockListDatabaseWhitelistView {
 
     void onEntryAddedToList(@NonNull ActivityEntry entry);
 

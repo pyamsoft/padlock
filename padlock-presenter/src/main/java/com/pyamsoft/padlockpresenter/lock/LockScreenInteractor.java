@@ -26,8 +26,6 @@ interface LockScreenInteractor extends LockInteractor {
 
   int DEFAULT_MAX_FAIL_COUNT = 2;
 
-  void setRecheckServiceClass(@NonNull Class<? extends IntentService> recheckServiceClass);
-
   @CheckResult @NonNull Observable<Boolean> unlockEntry(@NonNull String attempt,
       @NonNull String pin);
 

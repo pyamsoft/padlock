@@ -16,10 +16,10 @@
 
 package com.pyamsoft.padlockpresenter.list;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlockpresenter.PadLockDB;
 import com.pyamsoft.padlockpresenter.PadLockPreferences;
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlockpresenter.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
@@ -28,15 +28,15 @@ import rx.Scheduler;
 
 @Module public class LockInfoModule {
 
-  @Provides LockInfoPresenter provideLockInfoPresenter(
-      @NonNull AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> iconLoader,
-      LockInfoInteractor infoInteractor, @Named("obs") Scheduler obsScheduler,
-      @Named("sub") Scheduler subScheduler) {
-    return new LockInfoPresenterImpl(iconLoader, infoInteractor, obsScheduler, subScheduler);
+  @Provides LockInfoPresenter provideLockInfoPresenter(LockInfoInteractor infoInteractor,
+      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
+    return new LockInfoPresenterImpl(infoInteractor, obsScheduler, subScheduler);
   }
 
   @Provides LockInfoInteractor provideLockInfoInteractor(PadLockDB padLockDB,
-      PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences) {
-    return new LockInfoInteractorImpl(padLockDB, packageManagerWrapper, preferences);
+      PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
+      @Named("lockscreen") Class<? extends Activity> lockScreenClass) {
+    return new LockInfoInteractorImpl(padLockDB, packageManagerWrapper, preferences,
+        lockScreenClass);
   }
 }

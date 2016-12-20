@@ -17,9 +17,6 @@
 package com.pyamsoft.padlockpresenter.iconloader;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlockpresenter.list.LockInfoPresenter;
-import com.pyamsoft.padlockpresenter.lock.LockScreen;
-import com.pyamsoft.padlockpresenter.lock.PinScreen;
 import com.pyamsoft.padlockpresenter.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
@@ -28,29 +25,10 @@ import rx.Scheduler;
 
 @Module public class AppIconLoaderModule {
 
-  @Provides AppIconLoaderPresenter<? extends AppIconLoaderView> provideAppIconLoaderPresenter(
+  @Provides AppIconLoaderPresenter provideAppIconLoaderPresenter(
       final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
-    return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
-  }
-
-  @Provides AppIconLoaderPresenter<LockScreen> provideLockScreenAppIconLoaderPresenter(
-      final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
-      @Named("sub") Scheduler subScheduler) {
-    return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
-  }
-
-  @Provides AppIconLoaderPresenter<PinScreen> providePinScreenAppIconLoaderPresenter(
-      final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
-      @Named("sub") Scheduler subScheduler) {
-    return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
-  }
-
-  @Provides
-  AppIconLoaderPresenter<LockInfoPresenter.LockInfoView> provideLockInfoViewAppIconLoaderPresenter(
-      final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
-      @Named("sub") Scheduler subScheduler) {
-    return new AppIconLoaderPresenterImpl<>(interactor, obsScheduler, subScheduler);
+    return new AppIconLoaderPresenterImpl(interactor, obsScheduler, subScheduler);
   }
 
   @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(

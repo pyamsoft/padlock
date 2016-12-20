@@ -62,14 +62,14 @@ class SettingsPreferencePresenterImpl
   }
 
   @Override
-  public void setApplicationInstallReceiverState(@NonNull Class<? extends Activity> activityClass) {
+  public void setApplicationInstallReceiverState() {
     SubscriptionHelper.unsubscribe(applicationInstallSubscription);
     applicationInstallSubscription = interactor.isInstallListenerEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(result -> {
               if (result) {
-                receiver.register(activityClass);
+                receiver.register();
               } else {
                 receiver.unregister();
               }

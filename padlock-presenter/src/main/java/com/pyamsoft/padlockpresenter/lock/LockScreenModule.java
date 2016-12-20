@@ -16,11 +16,10 @@
 
 package com.pyamsoft.padlockpresenter.lock;
 
+import android.app.IntentService;
 import android.content.Context;
-import android.support.annotation.NonNull;
 import com.pyamsoft.padlockpresenter.PadLockDB;
 import com.pyamsoft.padlockpresenter.PadLockPreferences;
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlockpresenter.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlockpresenter.wrapper.PackageManagerWrapper;
 import dagger.Module;
@@ -30,17 +29,16 @@ import rx.Scheduler;
 
 @Module public class LockScreenModule {
 
-  @Provides LockScreenPresenter provideLockScreenPresenter(
-      @NonNull AppIconLoaderPresenter<LockScreen> iconLoader, final LockScreenInteractor interactor,
+  @Provides LockScreenPresenter provideLockScreenPresenter(LockScreenInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
-    return new LockScreenPresenterImpl(iconLoader, interactor, obsScheduler, subScheduler);
+    return new LockScreenPresenterImpl(interactor, obsScheduler, subScheduler);
   }
 
   @Provides LockScreenInteractor provideLockScreenInteractor(Context context,
       PadLockPreferences preference, JobSchedulerCompat jobSchedulerCompat,
       MasterPinInteractor masterPinInteractor, PackageManagerWrapper packageManagerWrapper,
-      PadLockDB padLockDB) {
+      PadLockDB padLockDB, @Named("recheck") Class<? extends IntentService> recheckServiceClass) {
     return new LockScreenInteractorImpl(context, preference, jobSchedulerCompat,
-        masterPinInteractor, packageManagerWrapper, padLockDB);
+        masterPinInteractor, packageManagerWrapper, padLockDB, recheckServiceClass);
   }
 }

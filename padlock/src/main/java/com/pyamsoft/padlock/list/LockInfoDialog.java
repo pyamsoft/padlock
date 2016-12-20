@@ -44,6 +44,9 @@ import com.pyamsoft.padlock.databinding.DialogLockInfoBinding;
 import com.pyamsoft.padlockmodel.ActivityEntry;
 import com.pyamsoft.padlockmodel.AppEntry;
 import com.pyamsoft.padlockmodel.LockState;
+import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
+import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenterLoader;
+import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlockpresenter.list.LockInfoPresenter;
 import com.pyamsoft.padlockpresenter.list.LockInfoPresenterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
@@ -52,15 +55,18 @@ import com.pyamsoft.pydroid.util.PersistentCache;
 import java.util.List;
 import timber.log.Timber;
 
-public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.LockInfoView {
+public class LockInfoDialog extends DialogFragment
+    implements LockInfoPresenter.LockInfoView, AppIconLoaderView {
 
   @NonNull public static final String TAG = "LockInfoDialog";
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
   @NonNull private static final String ARG_APP_NAME = "app_name";
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
   @NonNull private static final String KEY_PRESENTER = "key_presenter";
+  @NonNull private static final String KEY_APP_ICON_LOADER = "key_app_icon_loader";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
+  @SuppressWarnings("WeakerAccess") AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
   DialogLockInfoBinding binding;
   @NonNull private final Runnable startRefreshRunnable =
@@ -90,6 +96,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @Nullable private TapTargetView blackLockTapTarget;
   private DividerItemDecoration dividerDecoration;
   private FilterListDelegate filterListDelegate;
+  private long loadedAppIconLoaderKey;
 
   @CheckResult @NonNull public static LockInfoDialog newInstance(@NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -130,6 +137,18 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
             presenter = persist;
           }
         });
+
+    loadedAppIconLoaderKey = PersistentCache.get()
+        .load(KEY_APP_ICON_LOADER, savedInstanceState,
+            new PersistLoader.Callback<AppIconLoaderPresenter>() {
+              @NonNull @Override public PersistLoader<AppIconLoaderPresenter> createLoader() {
+                return new AppIconLoaderPresenterLoader();
+              }
+
+              @Override public void onPersistentLoaded(@NonNull AppIconLoaderPresenter persist) {
+                appIconLoaderPresenter = persist;
+              }
+            });
   }
 
   @Nullable @Override
@@ -250,6 +269,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
       PersistentCache.get().unload(loadedPresenterKey);
+      PersistentCache.get().unload(loadedAppIconLoaderKey);
     }
     PadLock.getRefWatcher(this).watch(this);
   }
@@ -257,7 +277,8 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @Override public void onStart() {
     super.onStart();
     presenter.bindView(this);
-    presenter.loadApplicationIcon(appPackageName);
+    appIconLoaderPresenter.bindView(this);
+    appIconLoaderPresenter.loadApplicationIcon(appPackageName);
     if (!listIsRefreshed) {
       if (!binding.lockInfoSwipeRefresh.isRefreshing()) {
         binding.lockInfoSwipeRefresh.post(() -> {
@@ -275,6 +296,7 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @Override public void onStop() {
     super.onStop();
     presenter.unbindView();
+    appIconLoaderPresenter.unbindView();
   }
 
   @Override public void onResume() {
@@ -290,6 +312,9 @@ public class LockInfoDialog extends DialogFragment implements LockInfoPresenter.
   @Override public void onSaveInstanceState(Bundle outState) {
     PersistentCache.get()
         .saveKey(outState, KEY_PRESENTER, loadedPresenterKey, LockInfoPresenter.class);
+    PersistentCache.get()
+        .saveKey(outState, KEY_APP_ICON_LOADER, loadedAppIconLoaderKey,
+            AppIconLoaderPresenter.class);
     super.onSaveInstanceState(outState);
   }
 

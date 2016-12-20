@@ -17,9 +17,20 @@
 package com.pyamsoft.padlockpresenter.iconloader;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.presenter.Presenter;
+import com.pyamsoft.padlockpresenter.Injector;
+import com.pyamsoft.pydroid.app.PersistLoader;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
-public interface AppIconLoaderPresenter extends Presenter<AppIconLoaderView> {
+public class AppIconLoaderPresenterLoader extends PersistLoader<AppIconLoaderPresenter> {
 
-  void loadApplicationIcon(@NonNull String packageName);
+  @SuppressWarnings("WeakerAccess") @Inject Provider<AppIconLoaderPresenter> presenterProvider;
+
+  public AppIconLoaderPresenterLoader() {
+  }
+
+  @NonNull @Override public AppIconLoaderPresenter loadPersistent() {
+    Injector.get().provideComponent().plusAppIconLoaderComponent().inject(this);
+    return presenterProvider.get();
+  }
 }

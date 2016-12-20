@@ -16,8 +16,6 @@
 
 package com.pyamsoft.padlockpresenter.lock;
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlockpresenter.iconloader.AppIconLoaderPresenter;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -26,9 +24,8 @@ import rx.Scheduler;
 @Module public class PinEntryModule {
 
   @Provides PinEntryPresenter providePinEntryPresenter(PinEntryInteractor interactor,
-      @NonNull AppIconLoaderPresenter<PinScreen> iconLoader, @Named("obs") Scheduler obsScheduler,
-      @Named("sub") Scheduler subScheduler) {
-    return new PinEntryPresenterImpl(iconLoader, interactor, obsScheduler, subScheduler);
+      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
+    return new PinEntryPresenterImpl(interactor, obsScheduler, subScheduler);
   }
 
   @Provides PinEntryInteractor providePinEntryInteractor(final PinEntryInteractorImpl interactor) {

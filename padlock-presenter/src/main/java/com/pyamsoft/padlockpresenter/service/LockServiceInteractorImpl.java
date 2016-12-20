@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.padlockmodel.sql.PadLockEntry;
 import com.pyamsoft.padlockpresenter.PadLockDB;
 import com.pyamsoft.padlockpresenter.PadLockPreferences;
@@ -39,14 +38,16 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
   @SuppressWarnings("WeakerAccess") @NonNull final KeyguardManager keyguardManager;
+  @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenActivity;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final PadLockDB padLockDB;
-  @SuppressWarnings("WeakerAccess") @Nullable Class<? extends Activity> lockScreenActivity;
-  @Nullable private Class<? extends IntentService> recheckService;
+  @NonNull private final Class<? extends IntentService> recheckService;
 
   @Inject LockServiceInteractorImpl(@NonNull Context context,
       @NonNull PadLockPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
-      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB) {
+      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB,
+      @NonNull Class<? extends Activity> lockScreenActivity,
+      @NonNull Class<? extends IntentService> recheckService) {
     this.appContext = context.getApplicationContext();
     this.jobSchedulerCompat = jobSchedulerCompat;
     this.packageManagerWrapper = packageManagerWrapper;
@@ -54,32 +55,18 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
     this.preferences = preferences;
     this.keyguardManager = (KeyguardManager) context.getApplicationContext()
         .getSystemService(Context.KEYGUARD_SERVICE);
-  }
-
-  @Override public void setRecheckService(@NonNull Class<? extends IntentService> recheckService) {
-    this.recheckService = recheckService;
-  }
-
-  @Override
-  public void setLockScreenActivity(@NonNull Class<? extends Activity> lockScreenActivity) {
     this.lockScreenActivity = lockScreenActivity;
+    this.recheckService = recheckService;
   }
 
   /**
    * Clean up the lock service, cancel background jobs
    */
   @Override public void cleanup() {
-    if (recheckService == null) {
-      throw new IllegalStateException("RecheckService class is NULL");
-    }
-
     Timber.d("Cleanup LockService");
     Timber.d("Cancel ALL jobs");
     final Intent intent = new Intent(appContext, recheckService);
     jobSchedulerCompat.cancel(intent);
-
-    recheckService = null;
-    lockScreenActivity = null;
   }
 
   /**
@@ -108,9 +95,6 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   @NonNull @Override public Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
       @NonNull String className) {
     return Observable.defer(() -> {
-      if (lockScreenActivity == null) {
-        throw new IllegalStateException("LockScreenActivity is NULL");
-      }
       Timber.d("Check if window is from lock screen");
       final String lockScreenPackageName = lockScreenActivity.getPackage().getName();
       final String lockScreenClassName = lockScreenActivity.getName();

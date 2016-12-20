@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlockpresenter.receiver;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlockpresenter.wrapper.PackageManagerWrapper;
@@ -29,9 +30,9 @@ import rx.Scheduler;
 
   @Singleton @Provides ApplicationInstallReceiver provideApplicationInstallReceiver(
       @NonNull Context context, @NonNull PackageManagerWrapper packageManagerWrapper,
-      @NonNull @Named("obs") Scheduler obsScheduler,
-      @NonNull @Named("sub") Scheduler subScheduler) {
+      @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("sub") Scheduler subScheduler,
+      @NonNull @Named("main") Class<? extends Activity> mainActivityClass) {
     return new ApplicationInstallReceiverImpl(context, packageManagerWrapper, obsScheduler,
-        subScheduler);
+        subScheduler, mainActivityClass);
   }
 }
