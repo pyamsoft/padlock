@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlockpresenter.settings;
 
-import android.app.Activity;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlockpresenter.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
@@ -61,8 +60,7 @@ class SettingsPreferencePresenterImpl
     getView(settingsPreferenceView -> settingsPreferenceView.showConfirmDialog(CONFIRM_DATABASE));
   }
 
-  @Override
-  public void setApplicationInstallReceiverState() {
+  @Override public void setApplicationInstallReceiverState() {
     SubscriptionHelper.unsubscribe(applicationInstallSubscription);
     applicationInstallSubscription = interactor.isInstallListenerEnabled()
         .subscribeOn(getSubscribeScheduler())

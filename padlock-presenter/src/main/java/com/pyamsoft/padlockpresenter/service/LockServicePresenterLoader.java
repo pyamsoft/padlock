@@ -18,7 +18,6 @@ package com.pyamsoft.padlockpresenter.service;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlockpresenter.Injector;
-import com.pyamsoft.padlockpresenter.purge.PurgePresenter;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import javax.inject.Inject;
 import javax.inject.Provider;

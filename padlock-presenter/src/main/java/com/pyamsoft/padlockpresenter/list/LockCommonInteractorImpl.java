@@ -18,8 +18,8 @@ package com.pyamsoft.padlockpresenter.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlockpresenter.PadLockDB;
 import com.pyamsoft.padlockmodel.LockState;
+import com.pyamsoft.padlockpresenter.PadLockDB;
 import rx.Observable;
 import timber.log.Timber;
 

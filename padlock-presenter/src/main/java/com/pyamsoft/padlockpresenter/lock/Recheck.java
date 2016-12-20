@@ -22,5 +22,4 @@ public interface Recheck {
 
   @NonNull String EXTRA_PACKAGE_NAME = "extra_package_name";
   @NonNull String EXTRA_CLASS_NAME = "extra_class_name";
-
 }
