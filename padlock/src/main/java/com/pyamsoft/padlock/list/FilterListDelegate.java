@@ -32,10 +32,6 @@ class FilterListDelegate {
   @SuppressWarnings("WeakerAccess") @Nullable SearchView searchView;
   @Nullable private MenuItem searchItem;
 
-  @CheckResult @MenuRes int provideMenuResource() {
-    return R.menu.search_menu;
-  }
-
   /**
    * Prepare the menu item for search
    *

@@ -30,6 +30,7 @@ android {
   compileSdkVersion 25
   buildToolsVersion "$buildTools"
 
+  //noinspection GroovyMissingReturnStatement
   defaultConfig {
     minSdkVersion 19
     targetSdkVersion 25
