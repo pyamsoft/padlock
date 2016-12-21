@@ -472,9 +472,9 @@ public class LockInfoDialog extends DialogFragment
       @NonNull LockState newLockState) {
     Timber.d("Received a database modify event request for %s %s at %d [%s]", appPackageName,
         activityName, position, newLockState.name());
-    final boolean whitelist = newLockState.equals(LockState.WHITELISTED);
-    final boolean forceLock = newLockState.equals(LockState.LOCKED);
-    final boolean wasDefault = previousLockState.equals(LockState.DEFAULT);
+    final boolean whitelist = newLockState == LockState.WHITELISTED;
+    final boolean forceLock = newLockState == LockState.LOCKED;
+    final boolean wasDefault = previousLockState == LockState.DEFAULT;
     presenter.modifyDatabaseEntry(wasDefault, position, appPackageName, activityName, null,
         appIsSystem, whitelist, forceLock);
   }

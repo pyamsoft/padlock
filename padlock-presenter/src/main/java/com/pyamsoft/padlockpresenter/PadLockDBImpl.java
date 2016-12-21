@@ -57,7 +57,7 @@ class PadLockDBImpl implements PadLockDB {
     dbOpenSubscription = Observable.timer(1, TimeUnit.MINUTES)
         .map(aLong -> {
           briteDatabase.close();
-          return true;
+          return Boolean.TRUE;
         })
         .subscribeOn(dbScheduler)
         .observeOn(dbScheduler)
@@ -241,6 +241,12 @@ class PadLockDBImpl implements PadLockDB {
     private static final int DATABASE_VERSION = 4;
     @NonNull private final Context appContext;
 
+    @NonNull private static final String[] UPGRADE_1_TO_2_TABLE_COLUMNS = {
+        PadLockEntry.PACKAGENAME, PadLockEntry.ACTIVITYNAME, PadLockEntry.LOCKCODE,
+        PadLockEntry.LOCKUNTILTIME, PadLockEntry.IGNOREUNTILTIME, PadLockEntry.SYSTEMAPPLICATION
+    };
+
+
     PadLockOpenHelper(final @NonNull Context context) {
       super(context.getApplicationContext(), DB_NAME, null, DATABASE_VERSION);
       appContext = context.getApplicationContext();
@@ -303,12 +309,7 @@ class PadLockDBImpl implements PadLockDB {
 
       // Remove the columns we don't want anymore from the table's list of columns
       Timber.d("Gather a list of the remaining columns");
-      final String[] updatedTableColumns = {
-          PadLockEntry.PACKAGENAME, PadLockEntry.ACTIVITYNAME, PadLockEntry.LOCKCODE,
-          PadLockEntry.LOCKUNTILTIME, PadLockEntry.IGNOREUNTILTIME, PadLockEntry.SYSTEMAPPLICATION
-      };
-
-      final String columnsSeperated = TextUtils.join(",", updatedTableColumns);
+      final String columnsSeperated = TextUtils.join(",", UPGRADE_1_TO_2_TABLE_COLUMNS);
       Timber.d("Column seperated: %s", columnsSeperated);
 
       final String tableName = PadLockEntry.TABLE_NAME;

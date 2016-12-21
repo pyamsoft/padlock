@@ -32,7 +32,7 @@ abstract class LockInteractorImpl implements LockInteractor {
     try {
       messageDigest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException("Could not create SHA-256 Digest");
+      throw new RuntimeException("Could not create SHA-256 Digest", e);
     }
   }
 
