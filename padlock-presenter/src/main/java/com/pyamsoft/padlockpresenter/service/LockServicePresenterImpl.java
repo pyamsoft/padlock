@@ -112,16 +112,16 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
               if (deviceLocked) {
                 return interactor.isRestrictedWhileLocked();
               } else {
-                return Observable.just(false);
+                return Observable.just(Boolean.FALSE);
               }
             }))
             .filter(restrictedWhileLocked -> {
               if (restrictedWhileLocked) {
                 Timber.w("Locking is restricted while device in keyguard: %s %s", packageName,
                     className);
-                return false;
+                return Boolean.FALSE;
               } else {
-                return true;
+                return Boolean.TRUE;
               }
             })
             .flatMap(notLocked -> interactor.isWindowFromLockScreen(packageName, className))
@@ -146,7 +146,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
         (windowEventObserved, packageChanged, classChanged, lockOnPackageChange) -> {
           if (!windowEventObserved) {
             Timber.e("Failed to pass window checking");
-            return false;
+            return Boolean.FALSE;
           }
 
           if (packageChanged) {
@@ -165,7 +165,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
             windowHasChanged &= packageChanged;
           }
 
-          if (forcedRecheck.equals(Recheck.FORCE)) {
+          if (forcedRecheck == Recheck.FORCE) {
             Timber.d("Pass filter via forced recheck");
             windowHasChanged = true;
           }
@@ -195,10 +195,10 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
           Timber.d("Current time: %d", currentTime);
           if (currentTime < ignoreUntilTime) {
             Timber.d("Ignore period has not elapsed yet");
-            return false;
+            return Boolean.FALSE;
           }
 
-          return true;
+          return Boolean.TRUE;
         })
         .filter(entry -> {
           if (PadLockEntry.PACKAGE_ACTIVITY_NAME.equals(entry.activityName())

@@ -47,7 +47,7 @@ class SettingsPrefrenceInteractorImpl implements SettingsPreferenceInteractor {
       padLockDB.deleteDatabase();
 
       // TODO just return something valid
-      return true;
+      return Boolean.TRUE;
     });
   }
 
@@ -55,7 +55,7 @@ class SettingsPrefrenceInteractorImpl implements SettingsPreferenceInteractor {
     return clearDatabase().map(aBoolean -> {
       Timber.d("Clear all preferences");
       preferences.clearAll();
-      return true;
+      return Boolean.TRUE;
     });
   }
 }

@@ -199,7 +199,7 @@ class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements L
               Timber.d("Result of Recheck: %d", recheck);
 
               // KLUDGE Just return something valid for now
-              return true;
+              return Boolean.TRUE;
             })
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
