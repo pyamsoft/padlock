@@ -29,20 +29,21 @@ import com.pyamsoft.padlockmodel.sql.PadLockEntry;
 import com.pyamsoft.padlockpresenter.service.LockServicePresenter;
 import com.pyamsoft.padlockpresenter.service.LockServicePresenterLoader;
 import java.lang.ref.WeakReference;
-import javax.inject.Inject;
 import timber.log.Timber;
 
 public class PadLockService extends AccessibilityService
     implements LockServicePresenter.LockService {
 
-  private static volatile PadLockService instance = null;
-  @Inject LockServicePresenter presenter;
+  @Nullable private static volatile PadLockService instance = null;
+  private LockServicePresenter presenter;
   private Intent lockActivity;
 
   @NonNull @CheckResult private static synchronized PadLockService getInstance() {
     if (instance == null) {
       throw new NullPointerException("Current service instance is NULL");
     }
+
+    //noinspection ConstantConditions
     return instance;
   }
 
