@@ -230,7 +230,7 @@ public class LockListFragment extends ActionBarFragment
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
     super.onCreateOptionsMenu(menu, inflater);
     inflater.inflate(R.menu.locklist_menu, menu);
-    inflater.inflate(filterListDelegate.provideMenuResource(), menu);
+    inflater.inflate(R.menu.search_menu, menu);
   }
 
   @Override public void onPrepareOptionsMenu(@NonNull Menu menu) {

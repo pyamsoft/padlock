@@ -91,7 +91,7 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
             packageName), this::unsubNotification);
   }
 
-  void onNewPackageInstalled(@NonNull String packageName, @NonNull String name) {
+  @SuppressWarnings("WeakerAccess") void onNewPackageInstalled(@NonNull String packageName, @NonNull String name) {
     Timber.i("Package Added: %s", packageName);
     final Notification notification1 =
         new NotificationCompat.Builder(appContext).setContentTitle("Lock New Application")

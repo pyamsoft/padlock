@@ -68,7 +68,7 @@ public class LockInfoDialog extends DialogFragment
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
-  DialogLockInfoBinding binding;
+  @SuppressWarnings("WeakerAccess") DialogLockInfoBinding binding;
   @NonNull private final Runnable startRefreshRunnable =
       () -> binding.lockInfoSwipeRefresh.post(() -> {
         if (binding != null) {
@@ -174,7 +174,7 @@ public class LockInfoDialog extends DialogFragment
   private void setupToolbar() {
     binding.lockInfoToolbar.setTitle(appName);
     binding.lockInfoToolbar.setNavigationOnClickListener(v -> dismiss());
-    binding.lockInfoToolbar.inflateMenu(filterListDelegate.provideMenuResource());
+    binding.lockInfoToolbar.inflateMenu(R.menu.search_menu);
     filterListDelegate.onPrepareOptionsMenu(binding.lockInfoToolbar.getMenu(), fastItemAdapter);
   }
 
