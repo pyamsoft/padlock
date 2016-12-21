@@ -35,8 +35,8 @@ public class PadLockService extends AccessibilityService
     implements LockServicePresenter.LockService {
 
   @Nullable private static volatile PadLockService instance = null;
-  private LockServicePresenter presenter;
-  private Intent lockActivity;
+  @Nullable private LockServicePresenter presenter;
+  @Nullable private Intent lockActivity;
 
   @NonNull @CheckResult private static synchronized PadLockService getInstance() {
     if (instance == null) {
@@ -100,6 +100,10 @@ public class PadLockService extends AccessibilityService
       Timber.e("AccessibilityEvent is NULL");
       return;
     }
+    if (presenter == null) {
+      Timber.e("Cannot process event, Presenter is NULL");
+      return;
+    }
 
     final CharSequence eventPackage = event.getPackageName();
     final CharSequence eventClass = event.getClassName();
@@ -120,16 +124,18 @@ public class PadLockService extends AccessibilityService
   }
 
   @Override public boolean onUnbind(Intent intent) {
-    Timber.d("onUnbind");
+    if (presenter != null) {
+      presenter.unbindView();
+    }
     setInstance(null);
-    presenter.unbindView();
     return super.onUnbind(intent);
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
-    Timber.d("onDestroy");
-    presenter.destroy();
+    if (presenter != null) {
+      presenter.destroy();
+    }
   }
 
   @Override protected void onServiceConnected() {
@@ -149,6 +155,10 @@ public class PadLockService extends AccessibilityService
   }
 
   @Override public void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName) {
+    if (lockActivity == null) {
+      throw new IllegalStateException("Cannot start lock screen because activity is NULL");
+    }
+
     craftIntent(lockActivity, entry, realName);
     Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
         entry.activityName(), realName);
@@ -174,6 +184,10 @@ public class PadLockService extends AccessibilityService
   @Override
   public void onActiveNamesRetrieved(@NonNull String packageName, @NonNull String activePackage,
       @NonNull String className, @NonNull String activeClass) {
+    if (presenter == null) {
+      throw new IllegalStateException("Cannot process accessibility event, Presenter is NULL");
+    }
+
     Timber.d("Check against current window values: %s, %s", activePackage, activeClass);
     if (activePackage.equals(packageName) && (activeClass.equals(className) || className.equals(
         PadLockEntry.PACKAGE_ACTIVITY_NAME))) {
