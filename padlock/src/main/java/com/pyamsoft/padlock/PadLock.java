@@ -32,7 +32,7 @@ public class PadLock extends PYDroidApplication {
   @CheckResult @NonNull public static RefWatcher getRefWatcher(@NonNull Fragment fragment) {
     final Application application = fragment.getActivity().getApplication();
     if (application instanceof PadLock) {
-      return ((PadLock) application).getRefWatcher();
+      return ((PadLock) application).getWatcher();
     } else {
       throw new IllegalStateException("Application is not PadLock");
     }
@@ -48,7 +48,7 @@ public class PadLock extends PYDroidApplication {
     refWatcher = RefWatcher.DISABLED;
   }
 
-  @NonNull @CheckResult RefWatcher getRefWatcher() {
+  @NonNull @CheckResult RefWatcher getWatcher() {
     if (refWatcher == null) {
       throw new IllegalStateException("RefWatcher is NULL");
     }

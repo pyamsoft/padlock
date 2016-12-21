@@ -90,8 +90,8 @@ class PadLockDBImpl implements PadLockDB {
   @NonNull @Override
   public Observable<Integer> updateIgnoreTime(long ignoreUntilTime, @NonNull String packageName,
       @NonNull String activityName) {
-    if (packageName.equals(PadLockEntry.PACKAGE_EMPTY) || activityName.equals(
-        PadLockEntry.ACTIVITY_EMPTY)) {
+    if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
+        activityName)) {
       throw new RuntimeException("Cannot update EMPTY entry");
     }
 
@@ -106,8 +106,8 @@ class PadLockDBImpl implements PadLockDB {
   @NonNull @Override
   public Observable<Integer> updateLockTime(long lockUntilTime, @NonNull String packageName,
       @NonNull String activityName) {
-    if (packageName.equals(PadLockEntry.PACKAGE_EMPTY) || activityName.equals(
-        PadLockEntry.ACTIVITY_EMPTY)) {
+    if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
+        activityName)) {
       throw new RuntimeException("Cannot update EMPTY entry");
     }
 
@@ -122,8 +122,8 @@ class PadLockDBImpl implements PadLockDB {
   @NonNull @Override
   public Observable<Integer> updateWhitelist(boolean whitelist, @NonNull String packageName,
       @NonNull String activityName) {
-    if (packageName.equals(PadLockEntry.PACKAGE_EMPTY) || activityName.equals(
-        PadLockEntry.ACTIVITY_EMPTY)) {
+    if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
+        activityName)) {
       throw new RuntimeException("Cannot update EMPTY entry");
     }
 

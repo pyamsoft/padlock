@@ -113,7 +113,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
             applicationInfo -> lockListInteractor.getActivityListForApplication(applicationInfo)
                 .toList()
                 .map(activityList -> {
-                  if (activityList.size() == 0) {
+                  if (activityList.isEmpty()) {
                     Timber.w("Exclude package %s because it has no activities",
                         applicationInfo.packageName);
                     return null;

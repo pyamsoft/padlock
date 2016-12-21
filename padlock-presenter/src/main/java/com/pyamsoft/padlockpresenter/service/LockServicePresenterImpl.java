@@ -201,7 +201,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
           return true;
         })
         .filter(entry -> {
-          if (entry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)
+          if (PadLockEntry.PACKAGE_ACTIVITY_NAME.equals(entry.activityName())
               && entry.whitelist()) {
             throw new RuntimeException(
                 "PACKAGE entry for package: " + entry.packageName() + " cannot be whitelisted");
