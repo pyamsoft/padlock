@@ -50,7 +50,7 @@ import com.squareup.sqldelight.RowMapper;
   }
 
   @CheckResult public static boolean isEmpty(@NonNull PadLockEntry entry) {
-    return entry.packageName().equals(PACKAGE_EMPTY) && entry.activityName().equals(ACTIVITY_EMPTY);
+    return PACKAGE_EMPTY.equals(entry.packageName()) && ACTIVITY_EMPTY.equals(entry.activityName());
   }
 
   @CheckResult @NonNull
@@ -100,8 +100,8 @@ import com.squareup.sqldelight.RowMapper;
     }
 
     @CheckResult public static boolean isEmpty(@NonNull WithPackageActivityName entry) {
-      return entry.packageName().equals(PACKAGE_EMPTY) && entry.activityName()
-          .equals(ACTIVITY_EMPTY);
+      return PACKAGE_EMPTY.equals(entry.packageName()) && ACTIVITY_EMPTY.equals(
+          entry.activityName());
     }
   }
 

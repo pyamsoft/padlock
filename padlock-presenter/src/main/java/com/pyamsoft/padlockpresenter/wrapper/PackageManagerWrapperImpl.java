@@ -143,12 +143,12 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         return Observable.empty();
       }
 
-      if (info.packageName.equals(LockServiceInteractor.ANDROID_PACKAGE)) {
+      if (LockServiceInteractor.ANDROID_PACKAGE.equals(info.packageName)) {
         Timber.i("Application %s is Android", info.packageName);
         return Observable.empty();
       }
 
-      if (info.packageName.equals(LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE)) {
+      if (LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE.equals(info.packageName)) {
         Timber.i("Application %s is System UI", info.packageName);
         return Observable.empty();
       }
