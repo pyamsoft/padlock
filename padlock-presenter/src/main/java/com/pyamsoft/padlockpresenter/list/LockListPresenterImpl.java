@@ -23,6 +23,7 @@ import android.support.v4.util.Pair;
 import com.pyamsoft.padlockmodel.AppEntry;
 import com.pyamsoft.padlockmodel.sql.PadLockEntry;
 import com.pyamsoft.padlockpresenter.service.LockServiceStateInteractor;
+import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.LockList>
+class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockList>
     implements LockListPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
@@ -55,7 +56,7 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
   @Inject LockListPresenterImpl(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
-    super(lockListInteractor, obsScheduler, subScheduler);
+    super(obsScheduler, subScheduler);
     this.lockListInteractor = lockListInteractor;
     this.stateInteractor = stateInteractor;
     refreshing = false;
@@ -313,24 +314,24 @@ class LockListPresenterImpl extends LockCommonPresenterImpl<LockListPresenter.Lo
     SubscriptionHelper.unsubscribe(databaseSubscription);
 
     // No whitelisting for modifications from the List
-    databaseSubscription =
-        modifySingleDatabaseEntry(isChecked, packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME, code,
-            system, false, false).subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
-            .subscribe(lockState -> {
-              switch (lockState) {
-                case DEFAULT:
-                  getView(lockList -> lockList.onDatabaseEntryDeleted(position));
-                  break;
-                case LOCKED:
-                  getView(lockList -> lockList.onDatabaseEntryCreated(position));
-                  break;
-                default:
-                  throw new RuntimeException("Whitelist results are not handled");
-              }
-            }, throwable -> {
-              Timber.e(throwable, "onError modifyDatabaseEntry");
-              getView(lockList -> lockList.onDatabaseEntryError(position));
-            }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
+    databaseSubscription = lockListInteractor.modifySingleDatabaseEntry(isChecked, packageName,
+        PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system, false, false)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(lockState -> {
+          switch (lockState) {
+            case DEFAULT:
+              getView(lockList -> lockList.onDatabaseEntryDeleted(position));
+              break;
+            case LOCKED:
+              getView(lockList -> lockList.onDatabaseEntryCreated(position));
+              break;
+            default:
+              throw new RuntimeException("Whitelist results are not handled");
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError modifyDatabaseEntry");
+          getView(lockList -> lockList.onDatabaseEntryError(position));
+        }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
   }
 }

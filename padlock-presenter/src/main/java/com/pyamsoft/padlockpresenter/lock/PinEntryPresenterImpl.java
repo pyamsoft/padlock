@@ -17,6 +17,7 @@
 package com.pyamsoft.padlockpresenter.lock;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -25,7 +26,8 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class PinEntryPresenterImpl extends LockPresenterImpl<PinScreen> implements PinEntryPresenter {
+class PinEntryPresenterImpl extends SchedulerPresenter<PinScreen>
+    implements PinEntryPresenter, LockPresenter<PinScreen> {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PinEntryInteractor interactor;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription pinEntrySubscription =

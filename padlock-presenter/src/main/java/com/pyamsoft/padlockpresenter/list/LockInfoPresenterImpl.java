@@ -22,6 +22,7 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlockmodel.ActivityEntry;
 import com.pyamsoft.padlockmodel.LockState;
 import com.pyamsoft.padlockmodel.sql.PadLockEntry;
+import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.LockInfoView>
+class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInfoView>
     implements LockInfoPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockInfoInteractor lockInfoInteractor;
@@ -49,7 +50,7 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
   @Inject LockInfoPresenterImpl(final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("obs") Scheduler obsScheduler,
       final @NonNull @Named("io") Scheduler subScheduler) {
-    super(lockInfoInteractor, obsScheduler, subScheduler);
+    super(obsScheduler, subScheduler);
     this.lockInfoInteractor = lockInfoInteractor;
     refreshing = false;
   }
@@ -252,18 +253,19 @@ class LockInfoPresenterImpl extends LockCommonPresenterImpl<LockInfoPresenter.Lo
       boolean forceDelete) {
     SubscriptionHelper.unsubscribe(databaseSubscription);
     databaseSubscription =
-        modifySingleDatabaseEntry(isDefault, packageName, activityName, code, system, whitelist,
-            forceDelete).flatMap(lockState -> {
-          final Observable<LockState> resultState;
-          if (lockState == LockState.NONE) {
-            Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated");
-            resultState =
-                lockInfoInteractor.updateExistingEntry(packageName, activityName, whitelist);
-          } else {
-            resultState = Observable.just(lockState);
-          }
-          return resultState;
-        })
+        lockInfoInteractor.modifySingleDatabaseEntry(isDefault, packageName, activityName, code,
+            system, whitelist, forceDelete)
+            .flatMap(lockState -> {
+              final Observable<LockState> resultState;
+              if (lockState == LockState.NONE) {
+                Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated");
+                resultState =
+                    lockInfoInteractor.updateExistingEntry(packageName, activityName, whitelist);
+              } else {
+                resultState = Observable.just(lockState);
+              }
+              return resultState;
+            })
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
             .subscribe(lockState -> {
