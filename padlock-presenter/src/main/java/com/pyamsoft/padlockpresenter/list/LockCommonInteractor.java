@@ -23,10 +23,14 @@ import com.pyamsoft.padlockmodel.LockState;
 import rx.Observable;
 
 interface LockCommonInteractor {
+  //
+  //@CheckResult @NonNull Observable<LockState> createNewEntry(@NonNull String packageName,
+  //    @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist);
+  //
+  //@CheckResult @NonNull Observable<LockState> deleteEntry(@NonNull String packageName,
+  //    @NonNull String activityName);
 
-  @CheckResult @NonNull Observable<LockState> createNewEntry(@NonNull String packageName,
-      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist);
-
-  @CheckResult @NonNull Observable<LockState> deleteEntry(@NonNull String packageName,
-      @NonNull String activityName);
+  @NonNull @CheckResult Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
+      @NonNull String packageName, @NonNull String activityName, @Nullable String code,
+      boolean system, boolean whitelist, boolean forceLock);
 }

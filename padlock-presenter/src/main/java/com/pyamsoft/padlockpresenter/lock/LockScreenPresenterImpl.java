@@ -18,6 +18,7 @@ package com.pyamsoft.padlockpresenter.lock;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -28,7 +29,8 @@ import rx.functions.Func1;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class LockScreenPresenterImpl extends LockPresenterImpl<LockScreen> implements LockScreenPresenter {
+class LockScreenPresenterImpl extends SchedulerPresenter<LockScreen>
+    implements LockScreenPresenter, LockPresenter<LockScreen> {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockScreenInteractor interactor;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription postUnlockSubscription =
