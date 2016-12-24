@@ -25,6 +25,7 @@ import com.pyamsoft.padlockmodel.sql.PadLockEntry;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -87,11 +88,14 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
 
     final Observable<ActivityEntry> freshData = lockInfoInteractor.getPackageActivities(packageName)
         .toList()
-        .withLatestFrom(lockInfoInteractor.getActivityEntries(packageName)
-                .flatMap(Observable::from)
-                .toSortedList((withPackageName, withPackageName2) -> withPackageName.activityName()
-                    .compareToIgnoreCase(withPackageName2.activityName())),
+        .withLatestFrom(lockInfoInteractor.getActivityEntries(packageName),
             (activityNames, padLockEntries) -> {
+              // Sort here to avoid stream break
+              // If the list is empty, the old flatMap call can hang, causing a list loading error
+              // Sort here where we are guaranteed a list of some kind
+              Collections.sort(padLockEntries,
+                  (o1, o2) -> o1.activityName().compareToIgnoreCase(o2.activityName()));
+
               final List<ActivityEntry> activityEntries = new ArrayList<>();
 
               int start = 0;

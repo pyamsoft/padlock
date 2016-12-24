@@ -26,6 +26,7 @@ import com.pyamsoft.padlockpresenter.service.LockServiceStateInteractor;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -124,33 +125,33 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
                 }))
         .filter(s -> s != null)
         .toList()
-        .withLatestFrom(lockListInteractor.getAppEntryList()
-                .flatMap(Observable::from)
-                .toSortedList((allEntries, allEntries2) -> allEntries.packageName()
-                    .compareToIgnoreCase(allEntries2.packageName())),
-            (packageNames, padLockEntries) -> {
-              final List<Pair<String, Boolean>> lockPairs = new ArrayList<>();
-              int start = 0;
-              int end = packageNames.size() - 1;
+        .withLatestFrom(lockListInteractor.getAppEntryList(), (packageNames, padLockEntries) -> {
+          // Sort here to avoid stream break
+          // If the list is empty, the old flatMap call can hang, causing a list loading error
+          // Sort here where we are guaranteed a list of some kind
+          Collections.sort(padLockEntries,
+              (o1, o2) -> o1.packageName().compareToIgnoreCase(o2.packageName()));
 
-              while (start <= end) {
-                // Find entry to compare against
-                final Pair<String, Boolean> entry1 =
-                    findAppEntry(packageNames, padLockEntries, start);
-                lockPairs.add(entry1);
+          final List<Pair<String, Boolean>> lockPairs = new ArrayList<>();
+          int start = 0;
+          int end = packageNames.size() - 1;
 
-                if (start != end) {
-                  final Pair<String, Boolean> entry2 =
-                      findAppEntry(packageNames, padLockEntries, end);
-                  lockPairs.add(entry2);
-                }
+          while (start <= end) {
+            // Find entry to compare against
+            final Pair<String, Boolean> entry1 = findAppEntry(packageNames, padLockEntries, start);
+            lockPairs.add(entry1);
 
-                ++start;
-                --end;
-              }
+            if (start != end) {
+              final Pair<String, Boolean> entry2 = findAppEntry(packageNames, padLockEntries, end);
+              lockPairs.add(entry2);
+            }
 
-              return lockPairs;
-            })
+            ++start;
+            --end;
+          }
+
+          return lockPairs;
+        })
         .flatMap(Observable::from)
         .flatMap(pair -> lockListInteractor.createFromPackageInfo(pair.first, pair.second))
         .sorted((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()))

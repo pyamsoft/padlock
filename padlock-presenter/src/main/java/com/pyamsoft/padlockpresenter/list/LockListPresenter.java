@@ -67,5 +67,6 @@ public interface LockListPresenter extends Presenter<LockListPresenter.LockList>
     void onEntryAddedToList(@NonNull AppEntry entry);
 
     void showOnBoarding();
+
   }
 }
