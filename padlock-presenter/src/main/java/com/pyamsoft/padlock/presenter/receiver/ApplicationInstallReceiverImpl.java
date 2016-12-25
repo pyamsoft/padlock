@@ -30,7 +30,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
 import com.pyamsoft.padlock.presenter.R;
 import com.pyamsoft.padlock.presenter.wrapper.PackageManagerWrapper;
-import com.pyamsoft.pydroidrx.SchedulerHelper;
+import com.pyamsoft.pydroid.rx.SchedulerHelper;
 import javax.inject.Inject;
 import rx.Scheduler;
 import rx.Subscription;

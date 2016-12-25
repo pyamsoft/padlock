@@ -52,9 +52,9 @@ import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroiddesign.fab.HideScrollFABBehavior;
-import com.pyamsoft.pydroiddesign.util.FABUtil;
-import com.pyamsoft.pydroidui.app.fragment.ActionBarFragment;
+import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
+import com.pyamsoft.pydroid.design.util.FABUtil;
+import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
 import java.util.List;
 import timber.log.Timber;
 

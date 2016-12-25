@@ -39,7 +39,7 @@ import com.pyamsoft.padlock.presenter.purge.PurgePresenterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroidui.app.fragment.ActionBarFragment;
+import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
 import timber.log.Timber;
 
 public class PurgeFragment extends ActionBarFragment implements PurgePresenter.View {

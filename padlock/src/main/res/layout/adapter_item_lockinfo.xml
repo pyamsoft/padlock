@@ -57,7 +57,7 @@
 
     </RadioGroup>
 
-    <com.pyamsoft.pydroidui.widget.NoLeakTextView
+    <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
         android:id="@+id/lock_info_activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

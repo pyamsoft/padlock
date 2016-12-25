@@ -44,9 +44,9 @@ import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroidui.about.AboutLibrariesFragment;
-import com.pyamsoft.pydroidui.rating.RatingDialog;
-import com.pyamsoft.pydroidui.sec.TamperActivity;
+import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
+import com.pyamsoft.pydroid.ui.rating.RatingDialog;
+import com.pyamsoft.pydroid.ui.sec.TamperActivity;
 import timber.log.Timber;
 
 public class MainActivity extends TamperActivity
