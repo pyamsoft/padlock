@@ -30,7 +30,7 @@ import rx.Scheduler;
 
   @Provides LockListPresenter provideLockScreenPresenter(@NonNull LockListInteractor interactor,
       @NonNull LockServiceStateInteractor stateInteractor, @Named("obs") Scheduler obsScheduler,
-      @Named("sub") Scheduler subScheduler) {
+      @Named("io") Scheduler subScheduler) {
     return new LockListPresenterImpl(interactor, stateInteractor, obsScheduler, subScheduler);
   }
 

@@ -29,7 +29,7 @@ import rx.Scheduler;
 @Module public class LockInfoModule {
 
   @Provides LockInfoPresenter provideLockInfoPresenter(LockInfoInteractor infoInteractor,
-      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
+      @Named("obs") Scheduler obsScheduler, @Named("io") Scheduler subScheduler) {
     return new LockInfoPresenterImpl(infoInteractor, obsScheduler, subScheduler);
   }
 

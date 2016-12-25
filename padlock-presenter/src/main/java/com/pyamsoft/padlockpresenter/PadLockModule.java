@@ -43,7 +43,7 @@ import rx.schedulers.Schedulers;
       @NonNull Class<? extends IntentService> recheckServiceClass) {
     appContext = context.getApplicationContext();
     preferences = new PadLockPreferencesImpl(appContext);
-    padLockDB = new PadLockDBImpl(appContext, Schedulers.io());
+    padLockDB = new PadLockDBImpl(appContext, provideIOScheduler());
     this.mainActivityClass = mainActivityClass;
     this.lockScreenActivityClass = lockScreenActivityClass;
     this.recheckServiceClass = recheckServiceClass;
@@ -76,11 +76,15 @@ import rx.schedulers.Schedulers;
     return recheckServiceClass;
   }
 
-  @Singleton @Provides @NonNull @Named("sub") Scheduler provideIOScheduler() {
+  @Singleton @Provides @NonNull @Named("sub") Scheduler provideSubScheduler() {
+    return Schedulers.computation();
+  }
+
+  @Singleton @Provides @NonNull @Named("io") Scheduler provideIOScheduler() {
     return Schedulers.io();
   }
 
-  @Singleton @Provides @NonNull @Named("obs") Scheduler provideMainThreadScheduler() {
+  @Singleton @Provides @NonNull @Named("obs") Scheduler provideObsScheduler() {
     return AndroidSchedulers.mainThread();
   }
 }
