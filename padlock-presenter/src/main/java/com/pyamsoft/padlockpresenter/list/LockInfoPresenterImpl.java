@@ -87,7 +87,7 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
     Timber.d("Populate list");
 
     final Observable<ActivityEntry> freshData = lockInfoInteractor.getPackageActivities(packageName)
-        .withLatestFrom(lockInfoInteractor.getActivityEntries(packageName),
+        .withLatestFrom(lockInfoInteractor.getLockedActivityEntries(packageName),
             (activityNames, padLockEntries) -> {
               // Sort here to avoid stream break
               // If the list is empty, the old flatMap call can hang, causing a list loading error

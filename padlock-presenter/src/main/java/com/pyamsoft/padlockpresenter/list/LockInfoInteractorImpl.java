@@ -47,7 +47,7 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
     activityEntryCache = new ArrayList<>();
   }
 
-  @NonNull @Override public Observable<List<PadLockEntry.WithPackageName>> getActivityEntries(
+  @NonNull @Override public Observable<List<PadLockEntry.WithPackageName>> getLockedActivityEntries(
       @NonNull String packageName) {
     return getPadLockDB().queryWithPackageName(packageName).first();
   }
