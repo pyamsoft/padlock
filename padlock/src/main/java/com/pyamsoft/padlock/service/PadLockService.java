@@ -25,9 +25,9 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.view.accessibility.AccessibilityEvent;
 import com.pyamsoft.padlock.lock.LockScreenActivity;
-import com.pyamsoft.padlockmodel.sql.PadLockEntry;
-import com.pyamsoft.padlockpresenter.service.LockServicePresenter;
-import com.pyamsoft.padlockpresenter.service.LockServicePresenterLoader;
+import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.presenter.service.LockServicePresenter;
+import com.pyamsoft.presenter.service.LockServicePresenterLoader;
 import java.lang.ref.WeakReference;
 import timber.log.Timber;
 

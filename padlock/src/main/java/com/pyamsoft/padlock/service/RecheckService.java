@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.service;
 
 import android.app.IntentService;
 import android.content.Intent;
-import com.pyamsoft.padlockpresenter.lock.Recheck;
+import com.pyamsoft.presenter.lock.Recheck;
 import timber.log.Timber;
 
 public class RecheckService extends IntentService implements Recheck {
