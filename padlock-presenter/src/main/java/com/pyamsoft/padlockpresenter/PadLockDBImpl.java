@@ -55,7 +55,7 @@ class PadLockDBImpl implements PadLockDB {
 
     // After a 1 minute timeout, close the DB
     dbOpenSubscription = Observable.timer(1, TimeUnit.MINUTES)
-        .map(aLong -> {
+        .map(time -> {
           briteDatabase.close();
           return Boolean.TRUE;
         })
@@ -216,19 +216,19 @@ class PadLockDBImpl implements PadLockDB {
   @VisibleForTesting @NonNull @CheckResult
   Observable<Integer> deleteWithPackageActivityNameUnguarded(@NonNull String packageName,
       @NonNull String activityName) {
-    return Observable.just(
-        PadLockEntry.deletePackageActivity(openHelper).executeProgram(packageName, activityName));
+    return Observable.fromCallable(() -> PadLockEntry.deletePackageActivity(openHelper)
+        .executeProgram(packageName, activityName));
   }
 
   @Override @NonNull @CheckResult public Observable<Integer> deleteAll() {
-    return Observable.defer(() -> {
+    return Observable.defer(() -> Observable.fromCallable(() -> {
       Timber.i("DB: DELETE ALL");
       briteDatabase.execute(PadLockEntry.DELETE_ALL);
       SubscriptionHelper.unsubscribe(dbOpenSubscription);
       briteDatabase.close();
       deleteDatabase();
-      return Observable.just(1);
-    });
+      return 1;
+    }));
   }
 
   @Override public void deleteDatabase() {
@@ -239,13 +239,11 @@ class PadLockDBImpl implements PadLockDB {
 
     @NonNull private static final String DB_NAME = "padlock_db";
     private static final int DATABASE_VERSION = 4;
-    @NonNull private final Context appContext;
-
     @NonNull private static final String[] UPGRADE_1_TO_2_TABLE_COLUMNS = {
         PadLockEntry.PACKAGENAME, PadLockEntry.ACTIVITYNAME, PadLockEntry.LOCKCODE,
         PadLockEntry.LOCKUNTILTIME, PadLockEntry.IGNOREUNTILTIME, PadLockEntry.SYSTEMAPPLICATION
     };
-
+    @NonNull private final Context appContext;
 
     PadLockOpenHelper(final @NonNull Context context) {
       super(context.getApplicationContext(), DB_NAME, null, DATABASE_VERSION);
