@@ -36,7 +36,7 @@ buildscript {
     supportLib = "25.1.0"
     firebase = "10.0.1"
     leakCanary = "1.4-beta2"
-    pydroid = "5.2.2"
+    pydroid = "5.2.3"
     autoValue = "1.3"
     sqlbrite = "1.1.0"
     sqldelight = "0.5.1"
