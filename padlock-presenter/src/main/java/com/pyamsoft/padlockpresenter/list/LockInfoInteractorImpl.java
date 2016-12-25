@@ -52,9 +52,11 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
     return getPadLockDB().queryWithPackageName(packageName).first();
   }
 
-  @NonNull @Override public Observable<String> getPackageActivities(@NonNull String packageName) {
+  @NonNull @Override
+  public Observable<List<String>> getPackageActivities(@NonNull String packageName) {
     return packageManagerWrapper.getActivityListForPackage(packageName)
-        .filter(activityEntry -> !activityEntry.equalsIgnoreCase(lockScreenClass.getName()));
+        .filter(activityEntry -> !activityEntry.equalsIgnoreCase(lockScreenClass.getName()))
+        .toList();
   }
 
   @Override public void setShownOnBoarding() {

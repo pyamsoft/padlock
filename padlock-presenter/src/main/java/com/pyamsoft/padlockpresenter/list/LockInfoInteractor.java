@@ -29,7 +29,7 @@ interface LockInfoInteractor extends LockCommonInteractor {
   @CheckResult @NonNull Observable<List<PadLockEntry.WithPackageName>> getActivityEntries(
       @NonNull String packageName);
 
-  @CheckResult @NonNull Observable<String> getPackageActivities(@NonNull String packageName);
+  @CheckResult @NonNull Observable<List<String>> getPackageActivities(@NonNull String packageName);
 
   @CheckResult @NonNull Observable<LockState> updateExistingEntry(@NonNull String packageName,
       @NonNull String activityName, boolean whitelist);

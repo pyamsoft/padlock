@@ -63,7 +63,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
   @NonNull @Override
   public Observable<String> getActivityListForPackage(@NonNull String packageName) {
-    return Observable.defer(() -> {
+    return Observable.defer(() -> Observable.fromCallable(() -> {
       final List<String> activityEntries = new ArrayList<>();
       try {
         final PackageInfo packageInfo =
@@ -80,13 +80,13 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
       } catch (RuntimeException e) {
         Timber.e(e, "PackageManager error, return what we have for %s", packageName);
       }
-      return Observable.from(activityEntries);
-    });
+      return activityEntries;
+    })).flatMap(Observable::from);
   }
 
   @VisibleForTesting @SuppressWarnings("WeakerAccess") @WorkerThread @NonNull @CheckResult
   Observable<ApplicationInfo> getInstalledApplications() {
-    return Observable.defer(() -> {
+    return Observable.defer(() -> Observable.fromCallable(() -> {
       final Process process;
       boolean caughtPermissionDenial = false;
       final List<String> packageNames = new ArrayList<>();
@@ -129,77 +129,76 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         packageNames.clear();
       }
 
-      return Observable.just(packageNames);
-    })
+      return packageNames;
+    }))
         .flatMap(Observable::from)
         .map(packageNameWithPrefix -> packageNameWithPrefix.replaceFirst("^package:", ""))
         .flatMap(this::getApplicationInfo);
   }
 
   @NonNull @Override public Observable<ApplicationInfo> getActiveApplications() {
-    return getInstalledApplications().flatMap(info -> {
+    return getInstalledApplications().map(info -> {
       if (!info.enabled) {
         Timber.i("Application %s is disabled", info.packageName);
-        return Observable.empty();
+        return null;
       }
 
       if (LockServiceInteractor.ANDROID_PACKAGE.equals(info.packageName)) {
         Timber.i("Application %s is Android", info.packageName);
-        return Observable.empty();
+        return null;
       }
 
       if (LockServiceInteractor.ANDROID_SYSTEM_UI_PACKAGE.equals(info.packageName)) {
         Timber.i("Application %s is System UI", info.packageName);
-        return Observable.empty();
+        return null;
       }
 
       Timber.d("Successfully processed application: %s", info.packageName);
-      return Observable.just(info);
-    });
+      return info;
+    }).filter(applicationInfo -> applicationInfo != null);
   }
 
   @NonNull @Override
   public Observable<ApplicationInfo> getApplicationInfo(@NonNull String packageName) {
-    return Observable.defer(() -> {
+    return Observable.defer(() -> Observable.fromCallable(() -> {
       try {
-        return Observable.just(packageManager.getApplicationInfo(packageName, 0));
+        return packageManager.getApplicationInfo(packageName, 0);
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "onError getApplicationInfo");
-        return Observable.empty();
+        return null;
       }
-    });
+    })).filter(applicationInfo -> applicationInfo != null);
   }
 
   @NonNull @Override public Observable<String> loadPackageLabel(@NonNull ApplicationInfo info) {
-    return Observable.defer(() -> Observable.just(info.loadLabel(packageManager).toString()));
+    return Observable.defer(
+        () -> Observable.fromCallable(() -> info.loadLabel(packageManager).toString()));
   }
 
   @NonNull @Override public Observable<String> loadPackageLabel(@NonNull String packageName) {
-    return Observable.defer(() -> {
+    return Observable.defer(() -> Observable.fromCallable(() -> {
       try {
-        final ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
-        return loadPackageLabel(applicationInfo);
+        return packageManager.getApplicationInfo(packageName, 0);
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "EXCEPTION");
-        return Observable.just(packageName);
+        return null;
       }
-    });
+    })).filter(applicationInfo -> applicationInfo != null).flatMap(this::loadPackageLabel);
   }
 
   @NonNull @Override public Observable<ActivityInfo> getActivityInfo(@NonNull String packageName,
       @NonNull String activityName) {
-    return Observable.defer(() -> {
+    return Observable.defer(() -> Observable.fromCallable(() -> {
       if (packageName.isEmpty() || activityName.isEmpty()) {
-        return Observable.empty();
+        return null;
       }
 
       final ComponentName componentName = new ComponentName(packageName, activityName);
       try {
-        final ActivityInfo activityInfo = packageManager.getActivityInfo(componentName, 0);
-        return Observable.just(activityInfo);
+        return packageManager.getActivityInfo(componentName, 0);
       } catch (PackageManager.NameNotFoundException e) {
-        return Observable.empty();
+        return null;
       }
-    });
+    })).filter(activityInfo -> activityInfo != null);
   }
 }

@@ -87,7 +87,6 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
     Timber.d("Populate list");
 
     final Observable<ActivityEntry> freshData = lockInfoInteractor.getPackageActivities(packageName)
-        .toList()
         .withLatestFrom(lockInfoInteractor.getActivityEntries(packageName),
             (activityNames, padLockEntries) -> {
               // Sort here to avoid stream break
