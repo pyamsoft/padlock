@@ -125,7 +125,7 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
                 }))
         .filter(s -> s != null)
         .toList()
-        .withLatestFrom(lockListInteractor.getAppEntryList(), (packageNames, padLockEntries) -> {
+        .zipWith(lockListInteractor.getAppEntryList(), (packageNames, padLockEntries) -> {
           // Sort here to avoid stream break
           // If the list is empty, the old flatMap call can hang, causing a list loading error
           // Sort here where we are guaranteed a list of some kind
