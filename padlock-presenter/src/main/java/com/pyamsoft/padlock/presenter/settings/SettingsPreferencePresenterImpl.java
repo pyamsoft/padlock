@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.settings;
+package com.pyamsoft.padlock.presenter.settings;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.presenter.receiver.ApplicationInstallReceiver;
+import com.pyamsoft.padlock.presenter.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.pydroidrx.SchedulerPresenter;
 import com.pyamsoft.pydroidrx.SubscriptionHelper;
 import javax.inject.Inject;

@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter;
+package com.pyamsoft.padlock.presenter;
 
-import com.pyamsoft.presenter.iconloader.AppIconLoaderComponent;
-import com.pyamsoft.presenter.list.LockInfoComponent;
-import com.pyamsoft.presenter.list.LockListComponent;
-import com.pyamsoft.presenter.lock.LockScreenComponent;
-import com.pyamsoft.presenter.lock.PinEntryComponent;
-import com.pyamsoft.presenter.main.MainComponent;
-import com.pyamsoft.presenter.purge.PurgeComponent;
-import com.pyamsoft.presenter.receiver.ApplicationInstallReceiver;
-import com.pyamsoft.presenter.receiver.ReceiverModule;
-import com.pyamsoft.presenter.service.LockServiceComponent;
-import com.pyamsoft.presenter.settings.SettingsPreferenceComponent;
-import com.pyamsoft.presenter.wrapper.JobSchedulerCompatModule;
-import com.pyamsoft.presenter.wrapper.PackageManagerWrapperModule;
+import com.pyamsoft.padlock.presenter.iconloader.AppIconLoaderComponent;
+import com.pyamsoft.padlock.presenter.list.LockInfoComponent;
+import com.pyamsoft.padlock.presenter.list.LockListComponent;
+import com.pyamsoft.padlock.presenter.lock.LockScreenComponent;
+import com.pyamsoft.padlock.presenter.lock.PinEntryComponent;
+import com.pyamsoft.padlock.presenter.main.MainComponent;
+import com.pyamsoft.padlock.presenter.purge.PurgeComponent;
+import com.pyamsoft.padlock.presenter.receiver.ApplicationInstallReceiver;
+import com.pyamsoft.padlock.presenter.receiver.ReceiverModule;
+import com.pyamsoft.padlock.presenter.service.LockServiceComponent;
+import com.pyamsoft.padlock.presenter.settings.SettingsPreferenceComponent;
+import com.pyamsoft.padlock.presenter.wrapper.JobSchedulerCompatModule;
+import com.pyamsoft.padlock.presenter.wrapper.PackageManagerWrapperModule;
 import dagger.Component;
 import javax.inject.Singleton;
 

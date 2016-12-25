@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.receiver;
+package com.pyamsoft.padlock.presenter.receiver;
 
 public interface ApplicationInstallReceiver {
 

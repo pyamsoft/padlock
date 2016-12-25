@@ -26,8 +26,8 @@ import android.support.annotation.VisibleForTesting;
 import android.view.accessibility.AccessibilityEvent;
 import com.pyamsoft.padlock.lock.LockScreenActivity;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.presenter.service.LockServicePresenter;
-import com.pyamsoft.presenter.service.LockServicePresenterLoader;
+import com.pyamsoft.padlock.presenter.service.LockServicePresenter;
+import com.pyamsoft.padlock.presenter.service.LockServicePresenterLoader;
 import java.lang.ref.WeakReference;
 import timber.log.Timber;
 
@@ -112,7 +112,7 @@ public class PadLockService extends AccessibilityService
       final String pName = eventPackage.toString();
       final String cName = eventClass.toString();
       if (!pName.isEmpty() && !cName.isEmpty()) {
-        presenter.processAccessibilityEvent(pName, cName, LockServicePresenter.Recheck.NOT_FORCE);
+        presenter.processAccessibilityEvent(pName, cName, LockServicePresenter.RecheckStatus.NOT_FORCE);
       }
     } else {
       Timber.e("Missing needed data");
@@ -196,7 +196,7 @@ public class PadLockService extends AccessibilityService
       // which will respond to any class name
       Timber.d("Run recheck for: %s %s", activePackage, activeClass);
       presenter.processAccessibilityEvent(activePackage, activeClass,
-          LockServicePresenter.Recheck.FORCE);
+          LockServicePresenter.RecheckStatus.FORCE);
     }
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.purge;
+package com.pyamsoft.padlock.presenter.purge;
 
 import dagger.Subcomponent;
 

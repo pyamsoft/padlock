@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.service;
+package com.pyamsoft.padlock.presenter.service;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -27,9 +27,9 @@ public interface LockServicePresenter extends Presenter<LockServicePresenter.Loc
   void getActiveNames(@NonNull String packageName, @NonNull String className);
 
   void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
-      @NonNull Recheck forcedRecheck);
+      @NonNull RecheckStatus forcedRecheck);
 
-  enum Recheck {
+  enum RecheckStatus {
     FORCE, NOT_FORCE
   }
 

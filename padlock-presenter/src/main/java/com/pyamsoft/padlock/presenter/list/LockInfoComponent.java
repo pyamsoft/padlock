@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.list;
+package com.pyamsoft.padlock.presenter.list;
 
-import com.pyamsoft.presenter.iconloader.AppIconLoaderModule;
+import com.pyamsoft.padlock.presenter.iconloader.AppIconLoaderModule;
 import dagger.Subcomponent;
 
 @Subcomponent(modules = {

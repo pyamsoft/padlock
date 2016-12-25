@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.iconloader;
+package com.pyamsoft.padlock.presenter.iconloader;
 
 import dagger.Subcomponent;
 

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.iconloader;
+package com.pyamsoft.padlock.presenter.iconloader;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.presenter.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.presenter.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

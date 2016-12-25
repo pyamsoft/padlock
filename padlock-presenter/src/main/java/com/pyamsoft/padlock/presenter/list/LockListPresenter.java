@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.list;
+package com.pyamsoft.padlock.presenter.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.presenter.lock.MasterPinSubmitCallback;
+import com.pyamsoft.padlock.presenter.lock.MasterPinSubmitCallback;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
 public interface LockListPresenter extends Presenter<LockListPresenter.LockList> {

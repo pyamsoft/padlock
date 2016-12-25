@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.receiver;
+package com.pyamsoft.padlock.presenter.receiver;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -28,8 +28,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
-import com.pyamsoft.presenter.R;
-import com.pyamsoft.presenter.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.presenter.R;
+import com.pyamsoft.padlock.presenter.wrapper.PackageManagerWrapper;
 import com.pyamsoft.pydroidrx.SchedulerHelper;
 import javax.inject.Inject;
 import rx.Scheduler;

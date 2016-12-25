@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.service;
+package com.pyamsoft.padlock.presenter.service;
 
 import android.app.Activity;
 import android.app.IntentService;
@@ -24,10 +24,10 @@ import android.content.Intent;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.presenter.PadLockDB;
-import com.pyamsoft.presenter.PadLockPreferences;
-import com.pyamsoft.presenter.wrapper.JobSchedulerCompat;
-import com.pyamsoft.presenter.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.presenter.PadLockDB;
+import com.pyamsoft.padlock.presenter.PadLockPreferences;
+import com.pyamsoft.padlock.presenter.wrapper.JobSchedulerCompat;
+import com.pyamsoft.padlock.presenter.wrapper.PackageManagerWrapper;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
