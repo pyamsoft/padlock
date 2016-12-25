@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PadLock.iml" filepath="$PROJECT_DIR$/PadLock.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PadLock.iml" filepath="$PROJECT_DIR$/PadLock.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock/padlock.iml" filepath="$PROJECT_DIR$/padlock/padlock.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-model/padlock-model.iml" filepath="$PROJECT_DIR$/padlock-model/padlock-model.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-presenter/padlock-presenter.iml" filepath="$PROJECT_DIR$/padlock-presenter/padlock-presenter.iml" />

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.main;
+package com.pyamsoft.padlock.presenter.main;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Before;

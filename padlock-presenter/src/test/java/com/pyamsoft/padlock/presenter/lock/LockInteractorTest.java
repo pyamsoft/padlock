@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.lock;
+package com.pyamsoft.padlock.presenter.lock;
 
-import com.pyamsoft.presenter.BuildConfig;
+import com.pyamsoft.padlock.presenter.BuildConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

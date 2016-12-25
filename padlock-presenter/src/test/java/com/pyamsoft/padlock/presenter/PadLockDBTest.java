@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter;
+package com.pyamsoft.padlock.presenter;
 
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.List;
@@ -178,28 +178,6 @@ public class PadLockDBTest {
     testSubscriber.assertNoErrors();
     testSubscriber.assertValueCount(1);
     testSubscriber.assertValue(1);
-  }
-
-  /**
-   * Unguarded deletes must have someone else call open and close for them
-   *
-   * @throws Exception
-   */
-  @Test public void testDeleteUnguarded() throws Exception {
-    insertDummy(1);
-    // Deletes will not fail, but they are only meant to be used internally
-    TestSubscriber<Integer> testSubscriber = new TestSubscriber<>();
-
-    // db instance is not initialized in unguarded
-
-    try {
-      db.deleteWithPackageActivityNameUnguarded("TEST", "1")
-          .subscribeOn(subscribeScheduler)
-          .observeOn(observeScheduler)
-          .subscribe(testSubscriber);
-    } catch (NullPointerException e) {
-      expected("Database is NULL when unguarded", e);
-    }
   }
 
   /**
