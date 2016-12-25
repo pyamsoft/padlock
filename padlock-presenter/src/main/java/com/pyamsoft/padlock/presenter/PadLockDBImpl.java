@@ -41,11 +41,9 @@ class PadLockDBImpl implements PadLockDB {
 
   @SuppressWarnings("WeakerAccess") @NonNull final BriteDatabase briteDatabase;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockOpenHelper openHelper;
-  @NonNull private final Scheduler dbScheduler;
   @SuppressWarnings("WeakerAccess") @Nullable volatile Subscription dbOpenSubscription;
 
   @Inject PadLockDBImpl(@NonNull Context context, @NonNull Scheduler scheduler) {
-    dbScheduler = scheduler;
     openHelper = new PadLockOpenHelper(context);
     briteDatabase = new SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler);
   }
@@ -54,10 +52,8 @@ class PadLockDBImpl implements PadLockDB {
     SubscriptionHelper.unsubscribe(dbOpenSubscription);
 
     // After a 1 minute timeout, close the DB
-    dbOpenSubscription = Observable.defer(() -> Observable.timer(1, TimeUnit.MINUTES, dbScheduler))
-        .subscribeOn(dbScheduler)
-        .observeOn(dbScheduler)
-        .subscribe(delay -> {
+    dbOpenSubscription =
+        Observable.defer(() -> Observable.timer(1, TimeUnit.MINUTES)).subscribe(delay -> {
               Timber.w("Closing PadLock DB");
               briteDatabase.close();
             }, throwable -> Timber.e(throwable, "onError closing database"),
@@ -211,7 +207,7 @@ class PadLockDBImpl implements PadLockDB {
     });
   }
 
-  @VisibleForTesting @NonNull @CheckResult
+  @SuppressWarnings("WeakerAccess") @VisibleForTesting @NonNull @CheckResult
   Observable<Integer> deleteWithPackageActivityNameUnguarded(@NonNull String packageName,
       @NonNull String activityName) {
     return Observable.fromCallable(() -> PadLockEntry.deletePackageActivity(openHelper)
