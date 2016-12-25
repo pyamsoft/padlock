@@ -74,10 +74,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
             activityEntries.add(activityInfo.name);
           }
         }
-      } catch (PackageManager.NameNotFoundException e) {
-        Timber.e(e, "PackageManager error %s", packageName);
-        activityEntries.clear();
-      } catch (RuntimeException e) {
+      } catch (Exception e) {
         Timber.e(e, "PackageManager error, return what we have for %s", packageName);
       }
       return activityEntries;
