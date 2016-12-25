@@ -54,15 +54,13 @@ class PadLockDBImpl implements PadLockDB {
     SubscriptionHelper.unsubscribe(dbOpenSubscription);
 
     // After a 1 minute timeout, close the DB
-    dbOpenSubscription = Observable.timer(1, TimeUnit.MINUTES)
-        .map(time -> {
-          briteDatabase.close();
-          return Boolean.TRUE;
-        })
+    dbOpenSubscription = Observable.defer(() -> Observable.timer(1, TimeUnit.MINUTES, dbScheduler))
         .subscribeOn(dbScheduler)
         .observeOn(dbScheduler)
-        .subscribe(ignoreMe -> Timber.d("PadLockDB is closed"),
-            throwable -> Timber.e(throwable, "onError closing database"),
+        .subscribe(delay -> {
+              Timber.w("Closing PadLock DB");
+              briteDatabase.close();
+            }, throwable -> Timber.e(throwable, "onError closing database"),
             () -> SubscriptionHelper.unsubscribe(dbOpenSubscription));
   }
 
