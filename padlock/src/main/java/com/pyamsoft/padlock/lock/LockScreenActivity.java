@@ -52,7 +52,7 @@ import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroidui.app.activity.ActivityBase;
+import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Locale;

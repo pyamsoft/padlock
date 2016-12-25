@@ -50,7 +50,7 @@
           android:layout_weight="1"
           />
 
-      <com.pyamsoft.pydroidui.ads.AdvertisementView
+      <com.pyamsoft.pydroid.ui.ads.AdvertisementView
           android:id="@+id/ad_view"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"

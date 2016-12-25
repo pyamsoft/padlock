@@ -18,8 +18,8 @@ package com.pyamsoft.padlock.presenter.purge;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroidrx.SchedulerPresenter;
-import com.pyamsoft.pydroidrx.SubscriptionHelper;
+import com.pyamsoft.pydroid.rx.SchedulerPresenter;
+import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import java.util.HashSet;
 import java.util.Set;
 import javax.inject.Inject;

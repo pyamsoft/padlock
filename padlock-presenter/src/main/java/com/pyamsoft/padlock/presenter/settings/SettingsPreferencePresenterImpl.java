@@ -18,8 +18,8 @@ package com.pyamsoft.padlock.presenter.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.presenter.receiver.ApplicationInstallReceiver;
-import com.pyamsoft.pydroidrx.SchedulerPresenter;
-import com.pyamsoft.pydroidrx.SubscriptionHelper;
+import com.pyamsoft.pydroid.rx.SchedulerPresenter;
+import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import javax.inject.Inject;
 import rx.Scheduler;
 import rx.Subscription;

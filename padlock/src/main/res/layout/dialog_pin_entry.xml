@@ -41,7 +41,7 @@
           android:contentDescription="@string/blank"
           />
 
-      <com.pyamsoft.pydroidui.widget.NoLeakTextView
+      <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
           android:id="@+id/pin_entry_toolbar"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
@@ -103,7 +103,7 @@
                 android:hint="@string/lock_code_hint"
                 >
 
-              <com.pyamsoft.pydroiddesign.widget.NoLeakTextInputEditText
+              <com.pyamsoft.pydroid.design.widget.NoLeakTextInputEditText
                   android:id="@+id/pin_entry_code_text"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"
@@ -124,7 +124,7 @@
                 android:hint="@string/reenter_lock_code_hint"
                 >
 
-              <com.pyamsoft.pydroiddesign.widget.NoLeakTextInputEditText
+              <com.pyamsoft.pydroid.design.widget.NoLeakTextInputEditText
                   android:id="@+id/pin_reentry_code_text"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"
@@ -145,7 +145,7 @@
                 android:hint="@string/optional_lock_code_hint"
                 >
 
-              <com.pyamsoft.pydroiddesign.widget.NoLeakTextInputEditText
+              <com.pyamsoft.pydroid.design.widget.NoLeakTextInputEditText
                   android:id="@+id/pin_hint_text"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"
