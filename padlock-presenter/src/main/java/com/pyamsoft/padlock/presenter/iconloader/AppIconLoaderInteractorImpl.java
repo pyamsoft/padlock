@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.iconloader;
+package com.pyamsoft.padlock.presenter.iconloader;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
-import com.pyamsoft.presenter.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.presenter.wrapper.PackageManagerWrapper;
 import javax.inject.Inject;
 import rx.Observable;
 

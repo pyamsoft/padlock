@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.service;
+package com.pyamsoft.padlock.presenter.service;
 
-import com.pyamsoft.presenter.lock.MasterPinModule;
+import com.pyamsoft.padlock.presenter.lock.MasterPinModule;
 import dagger.Subcomponent;
 
 @Subcomponent(modules = {

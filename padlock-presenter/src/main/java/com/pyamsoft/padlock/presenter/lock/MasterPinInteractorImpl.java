@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.lock;
+package com.pyamsoft.padlock.presenter.lock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.presenter.PadLockPreferences;
+import com.pyamsoft.padlock.presenter.PadLockPreferences;
 import javax.inject.Inject;
 import rx.Observable;
 

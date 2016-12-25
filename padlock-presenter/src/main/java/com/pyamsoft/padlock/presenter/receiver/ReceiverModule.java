@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.receiver;
+package com.pyamsoft.padlock.presenter.receiver;
 
 import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import com.pyamsoft.presenter.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.presenter.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

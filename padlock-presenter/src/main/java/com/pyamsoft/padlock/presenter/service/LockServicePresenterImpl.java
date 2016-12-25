@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.service;
+package com.pyamsoft.padlock.presenter.service;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
@@ -82,7 +82,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
 
   @Override
   public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
-      @NonNull Recheck forcedRecheck) {
+      @NonNull RecheckStatus forcedRecheck) {
     SubscriptionHelper.unsubscribe(lockedEntrySubscription);
     final Observable<Boolean> windowEventObservable =
         stateInteractor.isServiceEnabled()
@@ -165,7 +165,7 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
             windowHasChanged &= packageChanged;
           }
 
-          if (forcedRecheck == Recheck.FORCE) {
+          if (forcedRecheck == RecheckStatus.FORCE) {
             Timber.d("Pass filter via forced recheck");
             windowHasChanged = true;
           }

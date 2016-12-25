@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.presenter.lock;
+package com.pyamsoft.padlock.presenter.lock;
 
 public interface MasterPinSubmitCallback {
 
