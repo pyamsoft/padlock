@@ -64,68 +64,67 @@ class PadLockDBImpl implements PadLockDB {
   public Observable<Long> insert(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem,
       boolean whitelist) {
-    final PadLockEntry entry =
-        PadLockEntry.CREATOR.create(packageName, activityName, lockCode, lockUntilTime,
-            ignoreUntilTime, isSystem, whitelist);
-    if (PadLockEntry.isEmpty(entry)) {
-      throw new RuntimeException("Cannot insert EMPTY entry");
-    }
+    return Observable.fromCallable(() -> {
+      final PadLockEntry entry =
+          PadLockEntry.CREATOR.create(packageName, activityName, lockCode, lockUntilTime,
+              ignoreUntilTime, isSystem, whitelist);
+      if (PadLockEntry.isEmpty(entry)) {
+        throw new RuntimeException("Cannot insert EMPTY entry");
+      }
 
-    return Observable.defer(() -> {
       Timber.i("DB: INSERT");
       openDatabase();
-      return deleteWithPackageActivityNameUnguarded(packageName, activityName);
-    }).map(deleted -> {
-      Timber.d("Delete result: %d", deleted);
-      return PadLockEntry.insertEntry(openHelper).executeProgram(entry);
-    });
+      final int deleteResult = deleteWithPackageActivityNameUnguarded(packageName, activityName);
+      Timber.d("Delete result: %d", deleteResult);
+      return entry;
+    }).map(entry -> PadLockEntry.insertEntry(openHelper).executeProgram(entry));
   }
 
   @NonNull @Override
   public Observable<Integer> updateIgnoreTime(long ignoreUntilTime, @NonNull String packageName,
       @NonNull String activityName) {
-    if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
-        activityName)) {
-      throw new RuntimeException("Cannot update EMPTY entry");
-    }
+    return Observable.fromCallable(() -> {
+      if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
+          activityName)) {
+        throw new RuntimeException("Cannot update EMPTY entry");
+      }
 
-    return Observable.defer(() -> {
       Timber.i("DB: UPDATE IGNORE");
       openDatabase();
-      return Observable.fromCallable(() -> PadLockEntry.updateIgnoreTime(openHelper)
-          .executeProgram(ignoreUntilTime, packageName, activityName));
+      return PadLockEntry.updateIgnoreTime(openHelper)
+          .executeProgram(ignoreUntilTime, packageName, activityName);
     });
   }
 
   @NonNull @Override
   public Observable<Integer> updateLockTime(long lockUntilTime, @NonNull String packageName,
       @NonNull String activityName) {
-    if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
-        activityName)) {
-      throw new RuntimeException("Cannot update EMPTY entry");
-    }
+    return Observable.fromCallable(() -> {
+      if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
+          activityName)) {
+        throw new RuntimeException("Cannot update EMPTY entry");
+      }
 
-    return Observable.defer(() -> {
       Timber.i("DB: UPDATE LOCK");
       openDatabase();
-      return Observable.fromCallable(() -> PadLockEntry.updateLockTime(openHelper)
-          .executeProgram(lockUntilTime, packageName, activityName));
+      return PadLockEntry.updateLockTime(openHelper)
+          .executeProgram(lockUntilTime, packageName, activityName);
     });
   }
 
   @NonNull @Override
   public Observable<Integer> updateWhitelist(boolean whitelist, @NonNull String packageName,
       @NonNull String activityName) {
-    if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
-        activityName)) {
-      throw new RuntimeException("Cannot update EMPTY entry");
-    }
+    return Observable.fromCallable(() -> {
+      if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
+          activityName)) {
+        throw new RuntimeException("Cannot update EMPTY entry");
+      }
 
-    return Observable.defer(() -> {
       Timber.i("DB: UPDATE WHITELIST");
       openDatabase();
-      return Observable.fromCallable(() -> PadLockEntry.updateWhitelist(openHelper)
-          .executeProgram(whitelist, packageName, activityName));
+      return PadLockEntry.updateWhitelist(openHelper)
+          .executeProgram(whitelist, packageName, activityName);
     });
   }
 
@@ -189,40 +188,38 @@ class PadLockDBImpl implements PadLockDB {
 
   @Override @NonNull @CheckResult
   public Observable<Integer> deleteWithPackageName(final @NonNull String packageName) {
-    return Observable.defer(() -> {
+    return Observable.fromCallable(() -> {
       Timber.i("DB: DELETE PACKAGE");
       openDatabase();
-      return Observable.fromCallable(
-          () -> PadLockEntry.deletePackage(openHelper).executeProgram(packageName));
+      return PadLockEntry.deletePackage(openHelper).executeProgram(packageName);
     });
   }
 
   @Override @NonNull @CheckResult
   public Observable<Integer> deleteWithPackageActivityName(final @NonNull String packageName,
       final @NonNull String activityName) {
-    return Observable.defer(() -> {
+    return Observable.fromCallable(() -> {
       Timber.i("DB: DELETE PACKAGE ACTIVITY");
       openDatabase();
       return deleteWithPackageActivityNameUnguarded(packageName, activityName);
     });
   }
 
-  @SuppressWarnings("WeakerAccess") @VisibleForTesting @NonNull @CheckResult
-  Observable<Integer> deleteWithPackageActivityNameUnguarded(@NonNull String packageName,
+  @SuppressWarnings("WeakerAccess") @VisibleForTesting @CheckResult
+  int deleteWithPackageActivityNameUnguarded(@NonNull String packageName,
       @NonNull String activityName) {
-    return Observable.fromCallable(() -> PadLockEntry.deletePackageActivity(openHelper)
-        .executeProgram(packageName, activityName));
+    return PadLockEntry.deletePackageActivity(openHelper).executeProgram(packageName, activityName);
   }
 
   @Override @NonNull @CheckResult public Observable<Integer> deleteAll() {
-    return Observable.defer(() -> Observable.fromCallable(() -> {
+    return Observable.fromCallable(() -> {
       Timber.i("DB: DELETE ALL");
       briteDatabase.execute(PadLockEntry.DELETE_ALL);
       SubscriptionHelper.unsubscribe(dbOpenSubscription);
       briteDatabase.close();
       deleteDatabase();
       return 1;
-    }));
+    });
   }
 
   @Override public void deleteDatabase() {
