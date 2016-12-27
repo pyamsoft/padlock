@@ -17,13 +17,13 @@
 package com.pyamsoft.padlock.presenter;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.pydroid.app.ApplicationPreferences;
 import javax.inject.Inject;
 
-class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPreferences {
+class PadLockPreferencesImpl implements PadLockPreferences {
 
   @NonNull private static final String IS_SYSTEM = "is_system";
   @NonNull private static final String MASTER_PASSWORD = "master_password";
@@ -31,6 +31,7 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
   @NonNull private static final String AGREED = "agreed";
   @NonNull private static final String LOCK_LIST_ONBOARD = "list_onboard";
   @NonNull private static final String LOCK_DIALOG_ONBOARD = "dialog_onboard";
+  @NonNull private final ApplicationPreferences preferences;
   @NonNull private final String ignoreTimeKey;
   @NonNull private final String ignoreTimeDefault;
   @NonNull private final String timeoutTimeKey;
@@ -45,94 +46,103 @@ class PadLockPreferencesImpl extends ApplicationPreferences implements PadLockPr
   private final boolean ignoreKeyguardDefault;
 
   @Inject PadLockPreferencesImpl(final @NonNull Context context) {
-    super(context);
-    ignoreTimeKey = getResources().getString(R.string.ignore_time_key);
-    ignoreTimeDefault = getResources().getString(R.string.ignore_time_default);
-    timeoutTimeKey = getResources().getString(R.string.timeout_time_key);
-    timeoutTimeDefault = getResources().getString(R.string.timeout_time_default);
-    lockPackageChangeKey = getResources().getString(R.string.lock_package_change_key);
-    lockPackageChangeDefault = getResources().getBoolean(R.bool.lock_package_change_default);
-    recheckKey = getResources().getString(R.string.recheck_key);
-    recheckDefault = getResources().getBoolean(R.bool.recheck_default);
-    installListener = getResources().getString(R.string.install_listener_key);
-    installListenerDefault = getResources().getBoolean(R.bool.install_listener_default);
-    ignoreKeyguard = getResources().getString(R.string.ignore_keyguard_key);
-    ignoreKeyguardDefault = getResources().getBoolean(R.bool.ignore_keyguard_default);
+    final Resources res = context.getApplicationContext().getResources();
+    preferences = ApplicationPreferences.getInstance(context);
+    ignoreTimeKey = res.getString(R.string.ignore_time_key);
+    ignoreTimeDefault = res.getString(R.string.ignore_time_default);
+    timeoutTimeKey = res.getString(R.string.timeout_time_key);
+    timeoutTimeDefault = res.getString(R.string.timeout_time_default);
+    lockPackageChangeKey = res.getString(R.string.lock_package_change_key);
+    lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default);
+    recheckKey = res.getString(R.string.recheck_key);
+    recheckDefault = res.getBoolean(R.bool.recheck_default);
+    installListener = res.getString(R.string.install_listener_key);
+    installListenerDefault = res.getBoolean(R.bool.install_listener_default);
+    ignoreKeyguard = res.getString(R.string.ignore_keyguard_key);
+    ignoreKeyguardDefault = res.getBoolean(R.bool.ignore_keyguard_default);
   }
 
   @Override public boolean isIgnoreInKeyguard() {
-    return get(ignoreKeyguard, ignoreKeyguardDefault);
+    return preferences.get(ignoreKeyguard, ignoreKeyguardDefault);
   }
 
   @Override public boolean isInstallListenerEnabled() {
-    return get(installListener, installListenerDefault);
+    return preferences.get(installListener, installListenerDefault);
   }
 
   @Override public String getHint() {
-    return get(HINT, null);
+    return preferences.get(HINT, null);
   }
 
-  @Override public void setHint(@Nullable String hint) {
-    put(HINT, hint);
+  @Override public void setHint(@NonNull String hint) {
+    preferences.put(HINT, hint);
+  }
+
+  @Override public void clearHint() {
+    preferences.remove(HINT);
   }
 
   @Override public boolean isLockInfoDialogOnBoard() {
-    return get(LOCK_DIALOG_ONBOARD, false);
+    return preferences.get(LOCK_DIALOG_ONBOARD, false);
   }
 
   @Override public void setLockInfoDialogOnBoard() {
-    put(LOCK_DIALOG_ONBOARD, true);
+    preferences.put(LOCK_DIALOG_ONBOARD, true);
   }
 
   @Override public boolean isRecheckEnabled() {
-    return get(recheckKey, recheckDefault);
+    return preferences.get(recheckKey, recheckDefault);
   }
 
   @Override @CheckResult public final long getDefaultIgnoreTime() {
-    return Long.parseLong(get(ignoreTimeKey, ignoreTimeDefault));
+    return Long.parseLong(preferences.get(ignoreTimeKey, ignoreTimeDefault));
   }
 
   @Override @CheckResult public final long getTimeoutPeriod() {
-    return Long.parseLong(get(timeoutTimeKey, timeoutTimeDefault));
+    return Long.parseLong(preferences.get(timeoutTimeKey, timeoutTimeDefault));
   }
 
   @Override @CheckResult public final boolean getLockOnPackageChange() {
-    return get(lockPackageChangeKey, lockPackageChangeDefault);
+    return preferences.get(lockPackageChangeKey, lockPackageChangeDefault);
   }
 
   @Override @CheckResult public final boolean isSystemVisible() {
-    return get(IS_SYSTEM, false);
+    return preferences.get(IS_SYSTEM, false);
   }
 
   @Override public final void setSystemVisible(final boolean b) {
-    put(IS_SYSTEM, b);
+    preferences.put(IS_SYSTEM, b);
   }
 
   @Override @CheckResult public final String getMasterPassword() {
-    return get(MASTER_PASSWORD, null);
+    return preferences.get(MASTER_PASSWORD, null);
   }
 
-  @Override public final void setMasterPassword(final @Nullable String masterPassword) {
-    put(MASTER_PASSWORD, masterPassword);
+  @Override public final void setMasterPassword(@NonNull String masterPassword) {
+    preferences.put(MASTER_PASSWORD, masterPassword);
+  }
+
+  @Override public void clearMasterPassword() {
+    preferences.remove(MASTER_PASSWORD);
   }
 
   @Override @CheckResult public boolean hasAgreed() {
-    return get(AGREED, false);
+    return preferences.get(AGREED, false);
   }
 
   @Override public void setAgreed() {
-    put(AGREED, true);
+    preferences.put(AGREED, true);
   }
 
   @Override @CheckResult public boolean isOnBoard() {
-    return get(LOCK_LIST_ONBOARD, false);
+    return preferences.get(LOCK_LIST_ONBOARD, false);
   }
 
   @Override public void setOnBoard() {
-    put(LOCK_LIST_ONBOARD, true);
+    preferences.put(LOCK_LIST_ONBOARD, true);
   }
 
   @Override public void clearAll() {
-    clear(true);
+    preferences.clear(true);
   }
 }

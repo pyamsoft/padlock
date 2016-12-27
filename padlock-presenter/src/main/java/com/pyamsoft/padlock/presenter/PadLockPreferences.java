@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.presenter;
 
 import android.support.annotation.CheckResult;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 
 public interface PadLockPreferences {
 
@@ -43,11 +43,15 @@ public interface PadLockPreferences {
 
   @CheckResult String getMasterPassword();
 
-  void setMasterPassword(@Nullable String masterPassword);
+  void setMasterPassword(@NonNull String masterPassword);
+
+  void clearMasterPassword();
 
   @CheckResult String getHint();
 
-  void setHint(@Nullable String hint);
+  void setHint(@NonNull String hint);
+
+  void clearHint();
 
   @CheckResult boolean hasAgreed();
 
