@@ -43,8 +43,8 @@ public class PadLock extends PYDroidApplication {
     refWatcher = LeakCanary.install(this);
   }
 
-  @Override protected void onCreateInNormalMode() {
-    super.onCreateInNormalMode();
+  @Override protected void onCreateInReleaseMode() {
+    super.onCreateInReleaseMode();
     refWatcher = RefWatcher.DISABLED;
   }
 

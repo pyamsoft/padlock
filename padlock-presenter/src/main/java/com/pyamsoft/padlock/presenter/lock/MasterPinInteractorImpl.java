@@ -36,7 +36,11 @@ class MasterPinInteractorImpl implements MasterPinInteractor {
   }
 
   @Override public void setMasterPin(@Nullable String pin) {
-    preferences.setMasterPassword(pin);
+    if (pin == null) {
+      preferences.clearMasterPassword();
+    } else {
+      preferences.setMasterPassword(pin);
+    }
   }
 
   @CheckResult @NonNull @Override public Observable<String> getHint() {
@@ -44,6 +48,10 @@ class MasterPinInteractorImpl implements MasterPinInteractor {
   }
 
   @Override public void setHint(@Nullable String hint) {
-    preferences.setHint(hint);
+    if (hint == null) {
+      preferences.clearHint();
+    } else {
+      preferences.setHint(hint);
+    }
   }
 }
