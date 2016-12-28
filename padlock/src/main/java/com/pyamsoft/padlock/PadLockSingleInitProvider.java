@@ -32,6 +32,8 @@ import com.pyamsoft.pydroid.BuildConfigChecker;
 import com.pyamsoft.pydroid.IPYDroidApp;
 import com.pyamsoft.pydroid.SingleInitContentProvider;
 import com.pyamsoft.pydroid.about.Licenses;
+import com.pyamsoft.pydroid.rx.RxLicenses;
+import com.pyamsoft.pydroid.ui.UiLicenses;
 
 public class PadLockSingleInitProvider extends SingleInitContentProvider
     implements IPYDroidApp<PadLockComponent> {
@@ -73,6 +75,8 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider
   @Override public void insertCustomLicensesIntoMap() {
     Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite");
     Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight");
+    RxLicenses.addLicenses();
+    UiLicenses.addLicenses();
   }
 
   @NonNull @Override public PadLockComponent provideComponent() {
