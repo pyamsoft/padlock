@@ -36,17 +36,17 @@ import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
-import com.pyamsoft.padlock.purge.PurgeFragment;
-import com.pyamsoft.padlock.settings.SettingsFragment;
 import com.pyamsoft.padlock.presenter.main.MainPresenter;
 import com.pyamsoft.padlock.presenter.main.MainPresenterLoader;
+import com.pyamsoft.padlock.purge.PurgeFragment;
+import com.pyamsoft.padlock.settings.SettingsFragment;
 import com.pyamsoft.pydroid.app.PersistLoader;
-import com.pyamsoft.pydroid.util.AnimUtil;
-import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.ui.sec.TamperActivity;
+import com.pyamsoft.pydroid.util.AnimUtil;
+import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
 
 public class MainActivity extends TamperActivity
@@ -308,12 +308,10 @@ public class MainActivity extends TamperActivity
   }
 
   @NonNull @Override protected String[] getChangeLogLines() {
-    final String line1 = "CHANGE: Convert application information back to a Dialog";
-    final String line2 =
-        "BUGFIX: Fix the flickering that sometimes occurs when opening the application";
-    final String line3 = "BUGFIX: Slightly faster application processing for lists";
-    final String line4 = "CHANGE: Some new settings to play with";
-    return new String[] { line1, line2, line3, line4 };
+    final String line1 = "BUGFIX: Fix list loading that would sometimes be empty";
+    final String line2 = "BUGFIX: Lower memory footprint";
+    final String line3 = "BUGFIX: Fixed some In App Billing related code";
+    return new String[] { line1, line2, line3 };
   }
 
   @NonNull @Override protected String getVersionName() {
