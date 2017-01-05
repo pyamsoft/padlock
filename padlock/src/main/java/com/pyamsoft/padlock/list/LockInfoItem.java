@@ -94,7 +94,7 @@ class LockInfoItem extends GenericAbstractItem<ActivityEntry, LockInfoItem, Lock
     }
   }
 
-  protected static final class ViewHolder extends RecyclerView.ViewHolder {
+  static final class ViewHolder extends RecyclerView.ViewHolder {
 
     @NonNull private final AdapterItemLockinfoBinding binding;
     @NonNull private WeakReference<ActivityEntry> weakEntry;
