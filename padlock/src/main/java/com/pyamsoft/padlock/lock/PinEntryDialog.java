@@ -40,15 +40,12 @@ import android.widget.Toast;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
+import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenterLoader;
+import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
-import com.pyamsoft.padlock.presenter.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.presenter.iconloader.AppIconLoaderPresenterLoader;
-import com.pyamsoft.padlock.presenter.iconloader.AppIconLoaderView;
-import com.pyamsoft.padlock.presenter.list.LockListPresenter;
-import com.pyamsoft.padlock.presenter.lock.PinEntryPresenter;
-import com.pyamsoft.padlock.presenter.lock.PinScreen;
-import com.pyamsoft.padlock.presenter.lock.PinScreenPresenterLoader;
+import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
@@ -346,7 +343,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
   }
 
   @Override public void handOffPinEvent(@NonNull PinEntryEvent event) {
-    final LockListPresenter.LockList lockList = getLockList();
+    final MasterPinSubmitCallback lockList = getLockList();
     switch (event.type()) {
       case 0:
         if (event.complete()) {
@@ -367,13 +364,13 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
     }
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull LockListPresenter.LockList getLockList() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull MasterPinSubmitCallback getLockList() {
     final FragmentManager fragmentManager = getFragmentManager();
     final Fragment lockListFragment = fragmentManager.findFragmentByTag(LockListFragment.TAG);
-    if (lockListFragment instanceof LockListPresenter.LockList) {
-      return (LockListPresenter.LockList) lockListFragment;
+    if (lockListFragment instanceof MasterPinSubmitCallback) {
+      return (MasterPinSubmitCallback) lockListFragment;
     } else {
-      throw new ClassCastException("Fragment is not SettingsPreferenceFragment");
+      throw new ClassCastException("Fragment is not MasterPinSubmitCallback");
     }
   }
 }

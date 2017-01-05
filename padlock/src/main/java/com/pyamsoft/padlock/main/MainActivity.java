@@ -36,8 +36,6 @@ import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
-import com.pyamsoft.padlock.presenter.main.MainPresenter;
-import com.pyamsoft.padlock.presenter.main.MainPresenterLoader;
 import com.pyamsoft.padlock.purge.PurgeFragment;
 import com.pyamsoft.padlock.settings.SettingsFragment;
 import com.pyamsoft.pydroid.app.PersistLoader;

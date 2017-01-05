@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# These directories are reported missing for some reason, most likely build tools error
+
+mkdir -p ./padlock/build/intermediates/data-binding-info/androidTest/debug
+mkdir -p ./padlock/build/intermediates/data-binding-layout-out/androidTest/debug

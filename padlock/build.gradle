@@ -34,8 +34,8 @@ android {
     applicationId "com.pyamsoft.padlock"
     minSdkVersion 19
     targetSdkVersion 25
-    versionCode 72
-    versionName "2.1.7"
+    versionCode 73
+    versionName "2.2.0pre1"
 
     // For vector drawables
     vectorDrawables.useSupportLibrary = true
@@ -106,7 +106,13 @@ dependencies {
     transitive = true
   }
 
-  compile project(":padlock-presenter")
+  compile project(":padlock-iconloader")
+  compile project(":padlock-main")
+  compile project(":padlock-lock")
+  compile project(":padlock-list")
+  compile project(":padlock-purge")
+  compile project(":padlock-service")
+  compile project(":padlock-settings")
 }
 
 // AdView

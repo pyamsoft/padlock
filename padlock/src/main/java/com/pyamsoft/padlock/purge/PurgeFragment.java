@@ -34,12 +34,10 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding;
 import com.pyamsoft.padlock.main.MainActivity;
-import com.pyamsoft.padlock.presenter.purge.PurgePresenter;
-import com.pyamsoft.padlock.presenter.purge.PurgePresenterLoader;
 import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
-import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
 import timber.log.Timber;
 
 public class PurgeFragment extends ActionBarFragment implements PurgePresenter.View {
