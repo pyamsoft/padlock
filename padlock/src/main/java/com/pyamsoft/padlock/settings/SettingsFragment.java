@@ -16,56 +16,155 @@
 
 package com.pyamsoft.padlock.settings;
 
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
-import android.view.LayoutInflater;
+import android.support.v7.preference.Preference;
 import android.view.View;
-import android.view.ViewGroup;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.databinding.FragmentSettingsBinding;
 import com.pyamsoft.padlock.main.MainActivity;
-import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
+import com.pyamsoft.padlock.service.PadLockService;
+import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
+import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment;
+import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.PersistentCache;
+import timber.log.Timber;
 
-public class SettingsFragment extends ActionBarFragment {
+public class SettingsFragment extends ActionBarSettingsPreferenceFragment
+    implements SettingsPreferencePresenter.SettingsPreferenceView {
 
-  @NonNull public static final String TAG = "SettingsFragment";
-  private FragmentSettingsBinding binding;
+  @NonNull public static final String TAG = "SettingsPreferenceFragment";
+  @NonNull private static final String KEY_PRESENTER = "key_settings_presenter";
+  @SuppressWarnings("WeakerAccess") SettingsPreferencePresenter presenter;
+  private long loadedKey;
 
-  @Nullable @Override
-  public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    binding = FragmentSettingsBinding.inflate(inflater, container, false);
-    return binding.getRoot();
+  @NonNull @Override protected AboutLibrariesFragment.BackStackState isLastOnBackStack() {
+    return AboutLibrariesFragment.BackStackState.LAST;
   }
 
-  @Override public void onDestroyView() {
-    super.onDestroyView();
-    binding.unbind();
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    loadedKey = PersistentCache.get()
+        .load(KEY_PRESENTER, savedInstanceState,
+            new PersistLoader.Callback<SettingsPreferencePresenter>() {
+              @NonNull @Override public PersistLoader<SettingsPreferencePresenter> createLoader() {
+                return new SettingsPreferencePresenterLoader();
+              }
+
+              @Override
+              public void onPersistentLoaded(@NonNull SettingsPreferencePresenter persist) {
+                presenter = persist;
+              }
+            });
+  }
+
+  @CheckResult @NonNull SettingsPreferencePresenter getPresenter() {
+    if (presenter == null) {
+      throw new NullPointerException("Presenter is NULL");
+    }
+
+    return presenter;
+  }
+
+  @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    final Preference clearDb = findPreference(getString(R.string.clear_db_key));
+    clearDb.setOnPreferenceClickListener(preference -> {
+      Timber.d("Clear DB onClick");
+      presenter.requestClearDatabase();
+      return true;
+    });
+
+    final Preference installListener = findPreference(getString(R.string.install_listener_key));
+    installListener.setOnPreferenceClickListener(preference -> {
+      presenter.setApplicationInstallReceiverState();
+      return true;
+    });
+  }
+
+  @Override protected int getPreferenceXmlResId() {
+    return R.xml.preferences;
+  }
+
+  @Override protected int getRootViewContainer() {
+    return R.id.main_view_container;
+  }
+
+  @NonNull @Override protected String getApplicationName() {
+    return getString(R.string.app_name);
+  }
+
+  @Override protected boolean onClearAllPreferenceClicked() {
+    presenter.requestClearAll();
+    return true;
+  }
+
+  @Override protected boolean onLicenseItemClicked() {
+    MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
+    setActionBarUpEnabled(true);
+    return super.onLicenseItemClicked();
+  }
+
+  @Override public void showConfirmDialog(int type) {
+    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
+        ConfirmationDialog.newInstance(type), "confirm_dialog");
+  }
+
+  @Override public void onClearAll() {
+    Timber.d("Everything is cleared, kill self");
+    try {
+      PadLockService.finish();
+    } catch (NullPointerException e) {
+      Timber.e(e, "Expected NPE when Service is NULL");
+    }
+    final ActivityManager activityManager = (ActivityManager) getContext().getApplicationContext()
+        .getSystemService(Context.ACTIVITY_SERVICE);
+    activityManager.clearApplicationUserData();
+  }
+
+  @Override public void onClearDatabase() {
+    final Activity activity = getActivity();
+    if (activity instanceof MainActivity) {
+      ((MainActivity) activity).forceRefresh();
+    } else {
+      throw new ClassCastException("Activity is not MainActivity");
+    }
+  }
+
+  @Override public void onStart() {
+    super.onStart();
+    presenter.bindView(this);
+  }
+
+  @Override public void onStop() {
+    super.onStop();
+    presenter.unbindView();
   }
 
   @Override public void onResume() {
     super.onResume();
     setActionBarUpEnabled(true);
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
-    displayPreferenceFragment();
-  }
-
-  private void displayPreferenceFragment() {
-    // KLUDGE child fragment, not the nicest
-    final FragmentManager fragmentManager = getChildFragmentManager();
-    if (fragmentManager.findFragmentByTag(SettingsPreferenceFragment.TAG) == null) {
-      fragmentManager.beginTransaction()
-          .replace(R.id.settings_preferences_container, new SettingsPreferenceFragment(),
-              SettingsPreferenceFragment.TAG)
-          .commit();
-    }
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
+    if (!getActivity().isChangingConfigurations()) {
+      PersistentCache.get().unload(loadedKey);
+    }
     PadLock.getRefWatcher(this).watch(this);
+  }
+
+  @Override public void onSaveInstanceState(Bundle outState) {
+    PersistentCache.get()
+        .saveKey(outState, KEY_PRESENTER, loadedKey, SettingsPreferencePresenter.class);
+    super.onSaveInstanceState(outState);
   }
 }

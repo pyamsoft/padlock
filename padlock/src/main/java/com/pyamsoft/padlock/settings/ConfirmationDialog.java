@@ -59,9 +59,9 @@ public class ConfirmationDialog extends DialogFragment {
   @SuppressWarnings("WeakerAccess") void sendConfirmationEvent(int which) {
     final FragmentManager fragmentManager = getFragmentManager();
     final Fragment settingsPreferenceFragment =
-        fragmentManager.findFragmentByTag(SettingsPreferenceFragment.TAG);
-    if (settingsPreferenceFragment instanceof SettingsPreferenceFragment) {
-      ((SettingsPreferenceFragment) settingsPreferenceFragment).getPresenter()
+        fragmentManager.findFragmentByTag(SettingsFragment.TAG);
+    if (settingsPreferenceFragment instanceof SettingsFragment) {
+      ((SettingsFragment) settingsPreferenceFragment).getPresenter()
           .processClearRequest(which);
     } else {
       throw new ClassCastException("Fragment is not SettingsPreferenceFragment");
