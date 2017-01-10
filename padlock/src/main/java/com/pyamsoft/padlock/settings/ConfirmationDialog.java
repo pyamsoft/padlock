@@ -61,8 +61,7 @@ public class ConfirmationDialog extends DialogFragment {
     final Fragment settingsPreferenceFragment =
         fragmentManager.findFragmentByTag(SettingsFragment.TAG);
     if (settingsPreferenceFragment instanceof SettingsFragment) {
-      ((SettingsFragment) settingsPreferenceFragment).getPresenter()
-          .processClearRequest(which);
+      ((SettingsFragment) settingsPreferenceFragment).getPresenter().processClearRequest(which);
     } else {
       throw new ClassCastException("Fragment is not SettingsPreferenceFragment");
     }
