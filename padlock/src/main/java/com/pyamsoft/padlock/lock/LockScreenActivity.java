@@ -161,19 +161,11 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
     setupTextInput();
     setupInputManager();
     setupGoArrow();
-    setupLockOverlay();
     clearDisplay();
     setupActionBar();
 
     // Hide hint to begin with
     binding.lockDisplayHint.setVisibility(View.GONE);
-  }
-
-  private void setupLockOverlay() {
-    final AsyncMap.Entry overlay = AsyncDrawable.load(R.drawable.ic_lock_outline_24dp)
-        .tint(android.R.color.black)
-        .into(binding.lockOverlay);
-    mapper.put("lock", overlay);
   }
 
   private void setupActionBar() {

@@ -44,30 +44,15 @@
         android:padding="16dp"
         >
 
-      <FrameLayout
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
+      <com.pyamsoft.pydroid.ui.widget.SquareImageView
+          android:id="@+id/lock_image"
+          android:layout_width="64dp"
+          android:layout_height="64dp"
+          android:layout_gravity="center"
           android:layout_marginBottom="72dp"
           android:layout_marginTop="-64dp"
-          >
-
-        <com.pyamsoft.pydroid.ui.widget.SquareImageView
-            android:id="@+id/lock_image"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_gravity="center"
-            android:contentDescription="@string/blank"
-            />
-
-        <com.pyamsoft.pydroid.ui.widget.SquareImageView
-            android:id="@+id/lock_overlay"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="center"
-            android:contentDescription="@string/blank"
-            />
-
-      </FrameLayout>
+          android:contentDescription="@string/blank"
+          />
 
       <LinearLayout
           android:layout_width="match_parent"
