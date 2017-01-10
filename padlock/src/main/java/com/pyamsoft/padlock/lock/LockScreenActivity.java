@@ -63,10 +63,11 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
   @NonNull public static final String ENTRY_LOCK_CODE = "lock_code";
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
   @NonNull public static final String ENTRY_LOCK_UNTIL_TIME = "lock_until_time";
+  @NonNull private static final String TAG = "LockScreenActivity";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
-  @NonNull private static final String KEY_LOCK_PRESENTER = "key_lock_presenter";
-  @NonNull private static final String KEY_APP_ICON_PRESENTER = "key_app_icon_presenter";
+  @NonNull private static final String KEY_LOCK_PRESENTER = TAG + "key_lock_presenter";
+  @NonNull private static final String KEY_APP_ICON_PRESENTER = TAG + "key_app_icon_presenter";
 
   /**
    * KLUDGE This is a map that holds references to Activities

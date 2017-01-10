@@ -39,7 +39,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
     implements SettingsPreferencePresenter.SettingsPreferenceView {
 
   @NonNull public static final String TAG = "SettingsPreferenceFragment";
-  @NonNull private static final String KEY_PRESENTER = "key_settings_presenter";
+  @NonNull private static final String KEY_PRESENTER = TAG + "key_settings_presenter";
   @SuppressWarnings("WeakerAccess") SettingsPreferencePresenter presenter;
 
   @NonNull @Override protected AboutLibrariesFragment.BackStackState isLastOnBackStack() {
