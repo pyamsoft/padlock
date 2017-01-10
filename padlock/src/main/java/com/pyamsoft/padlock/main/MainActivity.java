@@ -100,7 +100,6 @@ public class MainActivity extends TamperActivity
             R.string.blank);
 
     binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
-      boolean handled = false;
       final boolean toggleChecked;
       switch (item.getItemId()) {
         case R.id.menu_locklist:
@@ -117,12 +116,11 @@ public class MainActivity extends TamperActivity
       }
 
       if (toggleChecked) {
-        handled = true;
         item.setChecked(!item.isChecked());
         binding.drawerLayout.closeDrawer(binding.navigationDrawer);
       }
 
-      return handled;
+      return toggleChecked;
     });
     binding.drawerLayout.addDrawerListener(drawerToggle);
   }
@@ -272,7 +270,7 @@ public class MainActivity extends TamperActivity
     }
 
     final int itemId = item.getItemId();
-    boolean handled;
+    final boolean handled;
     switch (itemId) {
       case android.R.id.home:
         onBackPressed();
