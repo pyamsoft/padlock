@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
@@ -35,12 +36,11 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.pydroid.app.PersistLoader;
-import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
 
-public class PurgeFragment extends ActionBarFragment implements PurgePresenter.View {
+public class PurgeFragment extends Fragment implements PurgePresenter.View {
 
   @NonNull public static final String TAG = "PurgeFragment";
   @NonNull private static final String KEY_PRESENTER = "key_purge_presenter";
@@ -160,7 +160,6 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.V
 
   @Override public void onResume() {
     super.onResume();
-    setActionBarUpEnabled(true);
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
   }
 

@@ -21,27 +21,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
-  <android.support.design.widget.CoordinatorLayout
+  <LinearLayout
       android:id="@+id/activity_lock_screen"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
+      android:orientation="vertical"
       >
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        >
-
-      <android.support.v7.widget.Toolbar
-          android:id="@+id/toolbar"
-          android:layout_width="match_parent"
-          android:layout_height="?attr/actionBarSize"
-          app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-          />
-
-    </android.support.design.widget.AppBarLayout>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -49,16 +42,32 @@
         android:gravity="center"
         android:orientation="vertical"
         android:padding="16dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         >
 
-      <ImageView
-          android:id="@+id/lock_image"
-          android:layout_width="56dp"
-          android:layout_height="56dp"
-          android:layout_marginBottom="16dp"
-          android:contentDescription="@string/blank"
-          />
+      <FrameLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="72dp"
+          android:layout_marginTop="-64dp"
+          >
+
+        <com.pyamsoft.pydroid.ui.widget.SquareImageView
+            android:id="@+id/lock_image"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/blank"
+            />
+
+        <com.pyamsoft.pydroid.ui.widget.SquareImageView
+            android:id="@+id/lock_overlay"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/blank"
+            />
+
+      </FrameLayout>
 
       <LinearLayout
           android:layout_width="match_parent"
@@ -84,11 +93,12 @@
               android:imeOptions="actionGo"
               android:inputType="textPassword"
               android:textAppearance="?android:attr/textAppearanceMedium"
+              android:textColor="@android:color/white"
               />
 
         </android.support.design.widget.TextInputLayout>
 
-        <ImageView
+        <com.pyamsoft.pydroid.ui.widget.SquareImageView
             android:id="@+id/lock_image_go"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -104,10 +114,11 @@
           android:layout_height="wrap_content"
           android:gravity="center_horizontal"
           android:textAppearance="?android:attr/textAppearanceSmall"
+          android:textColor="@color/material_light_background"
           />
 
     </LinearLayout>
 
-  </android.support.design.widget.CoordinatorLayout>
+  </LinearLayout>
 
 </layout>

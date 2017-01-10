@@ -26,6 +26,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
 import android.view.KeyEvent;
@@ -46,7 +47,6 @@ import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.app.PersistLoader;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
-import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.PersistentCache;
@@ -85,6 +85,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
   }
 
   @NonNull private final Intent home;
+  @NonNull private final AsyncDrawable.Mapper mapper = new AsyncDrawable.Mapper();
   @SuppressWarnings("WeakerAccess") LockScreenPresenter presenter;
   @SuppressWarnings("WeakerAccess") AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
@@ -110,7 +111,6 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
   private long loadedKey;
   private String lockedRealName;
   private boolean lockedSystem;
-  @Nullable private AsyncMap.Entry arrowGoTask;
   private long loadedAppIconKey;
 
   public LockScreenActivity() {
@@ -179,15 +179,69 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
               }
             });
 
+    populateIgnoreTimes();
+    getValuesFromBundle();
+    setupTextInput();
+    setupInputManager();
+    setupGoArrow();
+    setupLockOverlay();
+    clearDisplay();
+    setupActionBar();
+
+    // Hide hint to begin with
+    binding.lockDisplayHint.setVisibility(View.GONE);
+  }
+
+  private void setupLockOverlay() {
+    final AsyncMap.Entry overlay = AsyncDrawable.load(R.drawable.ic_lock_outline_24dp)
+        .tint(android.R.color.black)
+        .into(binding.lockOverlay);
+    mapper.put("lock", overlay);
+  }
+
+  private void setupActionBar() {
+    setSupportActionBar(binding.toolbar);
+    ViewCompat.setElevation(binding.toolbar, 0);
+  }
+
+  private void setupGoArrow() {
+    binding.lockImageGo.setOnClickListener(view -> {
+      presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
+          getCurrentAttempt());
+      imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
+    });
+
+    // Force keyboard focus
+    editText.requestFocus();
+
+    editText.setOnFocusChangeListener((view, hasFocus) -> {
+      if (hasFocus) {
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+      }
+    });
+
+    final AsyncMap.Entry arrowGoTask =
+        AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.lockImageGo);
+    mapper.put("arrow", arrowGoTask);
+  }
+
+  private void setupInputManager() {
+    // Force the keyboard
+    imm =
+        (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+  }
+
+  private void populateIgnoreTimes() {
     final String[] stringIgnoreTimes =
         getApplicationContext().getResources().getStringArray(R.array.ignore_time_entries);
     ignoreTimes = new long[stringIgnoreTimes.length];
     for (int i = 0; i < stringIgnoreTimes.length; ++i) {
       ignoreTimes[i] = Long.parseLong(stringIgnoreTimes[i]);
     }
+  }
 
-    getValuesFromBundle();
-
+  private void setupTextInput() {
     editText = binding.lockText.getEditText();
     if (editText == null) {
       throw new NullPointerException("Edit text is NULL");
@@ -209,36 +263,6 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
       Timber.d("Do not handle key event");
       return false;
     });
-
-    // Force the keyboard
-    imm =
-        (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-
-    binding.lockImageGo.setOnClickListener(view -> {
-      presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
-          getCurrentAttempt());
-      imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
-    });
-
-    // Force keyboard focus
-    editText.requestFocus();
-
-    editText.setOnFocusChangeListener((view, hasFocus) -> {
-      if (hasFocus) {
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-      }
-    });
-
-    AsyncMapHelper.unsubscribe(arrowGoTask);
-    arrowGoTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.lockImageGo);
-
-    clearDisplay();
-
-    setSupportActionBar(binding.toolbar);
-
-    // Hide hint to begin with
-    binding.lockDisplayHint.setVisibility(View.GONE);
   }
 
   @Override public void setDisplayHint(@NonNull String hint) {
@@ -315,7 +339,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
 
     Timber.d("Clear currently locked");
     imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
-    AsyncMapHelper.unsubscribe(arrowGoTask);
+    mapper.clear();
     binding.unbind();
   }
 

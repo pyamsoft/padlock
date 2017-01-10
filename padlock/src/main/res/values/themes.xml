@@ -32,7 +32,9 @@
   <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light"/>
 
   <!-- Lock Screen Theme -->
-  <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light"/>
+  <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
+    <item name="android:windowBackground">@color/blue500</item>
+  </style>
 
   <!-- Splash screen-->
   <style name="Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock.Light">
