@@ -286,10 +286,6 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
 
   @Override public void onDestroy() {
     super.onDestroy();
-    if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.unload(getActivity(), KEY_PIN_DIALOG);
-      PersistentCache.unload(getActivity(), KEY_APP_ICON_LOADER);
-    }
     PadLock.getRefWatcher(this).watch(this);
   }
 

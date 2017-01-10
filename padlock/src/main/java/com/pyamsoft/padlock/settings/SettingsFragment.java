@@ -143,9 +143,6 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
 
   @Override public void onDestroy() {
     super.onDestroy();
-    if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.unload(getActivity(), KEY_PRESENTER);
-    }
     PadLock.getRefWatcher(this).watch(this);
   }
 }

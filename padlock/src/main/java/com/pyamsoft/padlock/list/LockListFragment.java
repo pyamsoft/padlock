@@ -39,6 +39,7 @@ import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.mikepenz.fastadapter.FastAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding;
 import com.pyamsoft.padlock.lock.PinEntryDialog;
@@ -264,6 +265,11 @@ public class LockListFragment extends Fragment
     super.onDestroyView();
   }
 
+  @Override public void onDestroy() {
+    super.onDestroy();
+    PadLock.getRefWatcher(this).watch(this);
+  }
+
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.menu_is_system:
@@ -282,13 +288,6 @@ public class LockListFragment extends Fragment
         Timber.w("Item selected: %d, do nothing", item.getItemId());
     }
     return super.onOptionsItemSelected(item);
-  }
-
-  @Override public void onDestroy() {
-    super.onDestroy();
-    if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.unload(getActivity(), KEY_PRESENTER);
-    }
   }
 
   private void setupFAB() {
