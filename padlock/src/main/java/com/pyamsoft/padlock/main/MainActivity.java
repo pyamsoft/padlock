@@ -49,7 +49,8 @@ import timber.log.Timber;
 public class MainActivity extends TamperActivity
     implements MainPresenter.MainView, NavigationDrawerController {
 
-  @NonNull private static final String KEY_PRESENTER = "key_main_presenter";
+  @NonNull private static final String TAG = "MainActivity";
+  @NonNull private static final String KEY_PRESENTER = TAG + "key_main_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
   @SuppressWarnings("WeakerAccess") ActivityMainBinding binding;

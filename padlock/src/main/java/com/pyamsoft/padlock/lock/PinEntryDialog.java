@@ -53,13 +53,14 @@ import timber.log.Timber;
 
 public class PinEntryDialog extends DialogFragment implements PinScreen, AppIconLoaderView {
 
+  @NonNull private static final String TAG = "PinEntryDialog";
   @NonNull private static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull private static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
-  @NonNull private static final String KEY_PIN_DIALOG = "key_pin_dialog";
-  @NonNull private static final String KEY_APP_ICON_LOADER = "key_app_icon_loader";
+  @NonNull private static final String KEY_PIN_DIALOG = TAG + "key_pin_dialog";
+  @NonNull private static final String KEY_APP_ICON_LOADER = TAG + "key_app_icon_loader";
   @NonNull private final AsyncDrawable.Mapper taskMap = new AsyncDrawable.Mapper();
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") PinEntryPresenter presenter;

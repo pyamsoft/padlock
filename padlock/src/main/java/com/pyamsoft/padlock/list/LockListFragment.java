@@ -61,7 +61,7 @@ public class LockListFragment extends Fragment
 
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
-  @NonNull private static final String KEY_PRESENTER = "key_presenter";
+  @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockListItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") LockListPresenter presenter;

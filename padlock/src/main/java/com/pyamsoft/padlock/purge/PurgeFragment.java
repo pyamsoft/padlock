@@ -42,7 +42,7 @@ import timber.log.Timber;
 public class PurgeFragment extends Fragment implements PurgePresenter.View {
 
   @NonNull public static final String TAG = "PurgeFragment";
-  @NonNull private static final String KEY_PRESENTER = "key_purge_presenter";
+  @NonNull private static final String KEY_PRESENTER = TAG + "key_purge_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") PurgePresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<PurgeItem> fastItemAdapter;
