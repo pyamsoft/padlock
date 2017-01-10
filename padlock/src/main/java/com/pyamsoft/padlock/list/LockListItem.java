@@ -111,7 +111,7 @@ class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListI
       super(itemView);
       binding = DataBindingUtil.bind(itemView);
 
-      appIconLoaderPresenter = new AppIconLoaderPresenterLoader().loadPersistent();
+      appIconLoaderPresenter = new AppIconLoaderPresenterLoader().call();
       weakEntry = new WeakReference<>(null);
     }
 

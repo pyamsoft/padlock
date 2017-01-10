@@ -18,15 +18,15 @@ package com.pyamsoft.padlock.purge;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.Injector;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.FuncNone;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-class PurgePresenterLoader extends PersistLoader<PurgePresenter> {
+class PurgePresenterLoader implements FuncNone<PurgePresenter> {
 
   @SuppressWarnings("WeakerAccess") @Inject Provider<PurgePresenter> presenterProvider;
 
-  @NonNull @Override public PurgePresenter loadPersistent() {
+  @NonNull @Override public PurgePresenter call() {
     DaggerPurgeComponent.builder()
         .padLockComponent(Injector.get().provideComponent())
         .build()

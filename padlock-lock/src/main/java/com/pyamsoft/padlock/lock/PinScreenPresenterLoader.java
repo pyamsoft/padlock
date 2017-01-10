@@ -18,15 +18,15 @@ package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.Injector;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.FuncNone;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-class PinScreenPresenterLoader extends PersistLoader<PinEntryPresenter> {
+class PinScreenPresenterLoader implements FuncNone<PinEntryPresenter> {
 
   @SuppressWarnings("WeakerAccess") @Inject Provider<PinEntryPresenter> presenterProvider;
 
-  @NonNull @Override public PinEntryPresenter loadPersistent() {
+  @NonNull @Override public PinEntryPresenter call() {
     DaggerPinEntryComponent.builder()
         .padLockComponent(Injector.get().provideComponent())
         .build()

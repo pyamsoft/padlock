@@ -47,9 +47,8 @@ import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import java.util.List;
 import timber.log.Timber;
 
@@ -83,7 +82,6 @@ public class LockInfoDialog extends DialogFragment
           }
         }
       });
-  private long loadedPresenterKey;
   private String appPackageName;
   private String appName;
   private boolean appIsSystem;
@@ -94,7 +92,6 @@ public class LockInfoDialog extends DialogFragment
   @Nullable private TapTargetView blackLockTapTarget;
   private DividerItemDecoration dividerDecoration;
   private FilterListDelegate filterListDelegate;
-  private long loadedAppIconLoaderKey;
 
   @CheckResult @NonNull public static LockInfoDialog newInstance(@NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -125,28 +122,9 @@ public class LockInfoDialog extends DialogFragment
       throw new NullPointerException("App information is NULL");
     }
 
-    loadedPresenterKey = PersistentCache.get()
-        .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockInfoPresenter>() {
-          @NonNull @Override public PersistLoader<LockInfoPresenter> createLoader() {
-            return new LockInfoPresenterLoader();
-          }
-
-          @Override public void onPersistentLoaded(@NonNull LockInfoPresenter persist) {
-            presenter = persist;
-          }
-        });
-
-    loadedAppIconLoaderKey = PersistentCache.get()
-        .load(KEY_APP_ICON_LOADER, savedInstanceState,
-            new PersistLoader.Callback<AppIconLoaderPresenter>() {
-              @NonNull @Override public PersistLoader<AppIconLoaderPresenter> createLoader() {
-                return new AppIconLoaderPresenterLoader();
-              }
-
-              @Override public void onPersistentLoaded(@NonNull AppIconLoaderPresenter persist) {
-                appIconLoaderPresenter = persist;
-              }
-            });
+    presenter = PersistentCache.load(getActivity(), KEY_PRESENTER, new LockInfoPresenterLoader());
+    appIconLoaderPresenter = PersistentCache.load(getActivity(), KEY_APP_ICON_LOADER,
+        new AppIconLoaderPresenterLoader());
   }
 
   @Nullable @Override
@@ -266,8 +244,8 @@ public class LockInfoDialog extends DialogFragment
   @Override public void onDestroy() {
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.get().unload(loadedPresenterKey);
-      PersistentCache.get().unload(loadedAppIconLoaderKey);
+      PersistentCache.unload(getActivity(), KEY_PRESENTER);
+      PersistentCache.unload(getActivity(), KEY_APP_ICON_LOADER);
     }
     PadLock.getRefWatcher(this).watch(this);
   }
@@ -305,15 +283,6 @@ public class LockInfoDialog extends DialogFragment
       window.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
           WindowManager.LayoutParams.WRAP_CONTENT);
     }
-  }
-
-  @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.get()
-        .saveKey(outState, KEY_PRESENTER, loadedPresenterKey, LockInfoPresenter.class);
-    PersistentCache.get()
-        .saveKey(outState, KEY_APP_ICON_LOADER, loadedAppIconLoaderKey,
-            AppIconLoaderPresenter.class);
-    super.onSaveInstanceState(outState);
   }
 
   @Override public void refreshList() {

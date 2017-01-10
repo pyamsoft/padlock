@@ -45,14 +45,13 @@ import com.pyamsoft.padlock.lock.PinEntryDialog;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.design.util.FABUtil;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import java.util.List;
 import timber.log.Timber;
 
@@ -96,7 +95,6 @@ public class LockListFragment extends Fragment
     }
   };
   @Nullable private MenuItem displaySystemItem;
-  private long loadedPresenterKey;
   @Nullable private TapTargetSequence sequence;
   @Nullable private DividerItemDecoration dividerDecoration;
   @Nullable private AsyncMap.Entry fabIconTask;
@@ -106,16 +104,7 @@ public class LockListFragment extends Fragment
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-    loadedPresenterKey = PersistentCache.get()
-        .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<LockListPresenter>() {
-          @NonNull @Override public PersistLoader<LockListPresenter> createLoader() {
-            return new LockListPresenterLoader();
-          }
-
-          @Override public void onPersistentLoaded(@NonNull LockListPresenter persist) {
-            presenter = persist;
-          }
-        });
+    presenter = PersistentCache.load(getActivity(), KEY_PRESENTER, new LockListPresenterLoader());
   }
 
   @Nullable @Override
@@ -257,12 +246,6 @@ public class LockListFragment extends Fragment
     setSystemVisible(false);
   }
 
-  @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.get()
-        .saveKey(outState, KEY_PRESENTER, loadedPresenterKey, LockListPresenter.class);
-    super.onSaveInstanceState(outState);
-  }
-
   @Override public void onDestroyView() {
     filterListDelegate.onDestroyView();
     displaySystemItem = null;
@@ -304,7 +287,7 @@ public class LockListFragment extends Fragment
   @Override public void onDestroy() {
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.get().unload(loadedPresenterKey);
+      PersistentCache.unload(getActivity(), KEY_PRESENTER);
     }
   }
 

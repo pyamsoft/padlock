@@ -38,13 +38,12 @@ import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.purge.PurgeFragment;
 import com.pyamsoft.padlock.settings.SettingsFragment;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.ui.sec.TamperActivity;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
 
 public class MainActivity extends TamperActivity
@@ -55,7 +54,6 @@ public class MainActivity extends TamperActivity
   @SuppressWarnings("WeakerAccess") MainPresenter presenter;
   @SuppressWarnings("WeakerAccess") ActivityMainBinding binding;
   @SuppressWarnings("WeakerAccess") boolean firstLaunch;
-  private long loaderKey;
   private ActionBarDrawerToggle drawerToggle;
 
   @CheckResult @NonNull public static NavigationDrawerController getNavigationDrawerController(
@@ -73,17 +71,13 @@ public class MainActivity extends TamperActivity
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     firstLaunch = false;
-    loaderKey = PersistentCache.get()
-        .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<MainPresenter>() {
-          @NonNull @Override public PersistLoader<MainPresenter> createLoader() {
-            firstLaunch = true;
-            return new MainPresenterLoader();
-          }
+    presenter = PersistentCache.load(this, KEY_PRESENTER, new MainPresenterLoader() {
 
-          @Override public void onPersistentLoaded(@NonNull MainPresenter persist) {
-            presenter = persist;
-          }
-        });
+      @NonNull @Override public MainPresenter call() {
+        firstLaunch = true;
+        return super.call();
+      }
+    });
 
     setAppBarState();
     setupDrawerLayout();
@@ -188,11 +182,6 @@ public class MainActivity extends TamperActivity
     return R.id.ad_view;
   }
 
-  @Override protected void onSaveInstanceState(Bundle outState) {
-    PersistentCache.get().saveKey(outState, KEY_PRESENTER, loaderKey, MainPresenter.class);
-    super.onSaveInstanceState(outState);
-  }
-
   @Override protected void onStart() {
     super.onStart();
     presenter.bindView(this);
@@ -230,7 +219,7 @@ public class MainActivity extends TamperActivity
   @Override protected void onDestroy() {
     super.onDestroy();
     if (!isChangingConfigurations()) {
-      PersistentCache.get().unload(loaderKey);
+      PersistentCache.unload(this, KEY_PRESENTER);
     }
 
     handler.removeCallbacksAndMessages(null);

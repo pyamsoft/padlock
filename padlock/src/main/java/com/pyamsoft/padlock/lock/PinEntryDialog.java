@@ -46,10 +46,9 @@ import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
 
 public class PinEntryDialog extends DialogFragment implements PinScreen, AppIconLoaderView {
@@ -70,8 +69,6 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
   private EditText pinEntryText;
   private EditText pinReentryText;
   private EditText pinHintText;
-  private long loadedKey;
-  private long loadedAppIconKey;
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -98,28 +95,9 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
 
     setCancelable(true);
 
-    loadedKey = PersistentCache.get()
-        .load(KEY_PIN_DIALOG, savedInstanceState, new PersistLoader.Callback<PinEntryPresenter>() {
-          @NonNull @Override public PersistLoader<PinEntryPresenter> createLoader() {
-            return new PinScreenPresenterLoader();
-          }
-
-          @Override public void onPersistentLoaded(@NonNull PinEntryPresenter persist) {
-            presenter = persist;
-          }
-        });
-
-    loadedAppIconKey = PersistentCache.get()
-        .load(KEY_APP_ICON_LOADER, savedInstanceState,
-            new PersistLoader.Callback<AppIconLoaderPresenter>() {
-              @NonNull @Override public PersistLoader<AppIconLoaderPresenter> createLoader() {
-                return new AppIconLoaderPresenterLoader();
-              }
-
-              @Override public void onPersistentLoaded(@NonNull AppIconLoaderPresenter persist) {
-                appIconLoaderPresenter = persist;
-              }
-            });
+    presenter = PersistentCache.load(getActivity(), KEY_PIN_DIALOG, new PinScreenPresenterLoader());
+    appIconLoaderPresenter = PersistentCache.load(getActivity(), KEY_APP_ICON_LOADER,
+        new AppIconLoaderPresenterLoader());
   }
 
   @Override public void onResume() {
@@ -251,9 +229,6 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     Timber.d("onSaveInstanceState");
-    PersistentCache.get().saveKey(outState, KEY_PIN_DIALOG, loadedKey, PinEntryPresenter.class);
-    PersistentCache.get()
-        .saveKey(outState, KEY_APP_ICON_LOADER, loadedAppIconKey, AppIconLoaderPresenter.class);
     outState.putString(CODE_DISPLAY, getCurrentAttempt());
     outState.putString(CODE_REENTRY_DISPLAY, getCurrentReentry());
     outState.putString(HINT_DISPLAY, getCurrentHint());
@@ -312,8 +287,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
   @Override public void onDestroy() {
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.get().unload(loadedKey);
-      PersistentCache.get().unload(loadedAppIconKey);
+      PersistentCache.unload(getActivity(), KEY_PIN_DIALOG);
+      PersistentCache.unload(getActivity(), KEY_APP_ICON_LOADER);
     }
     PadLock.getRefWatcher(this).watch(this);
   }

@@ -146,7 +146,7 @@ public class PadLockService extends AccessibilityService
     }
 
     if (presenter == null) {
-      presenter = new LockServicePresenterLoader().loadPersistent();
+      presenter = new LockServicePresenterLoader().call();
     }
 
     presenter.bindView(this);
