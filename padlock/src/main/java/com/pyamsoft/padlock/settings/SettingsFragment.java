@@ -108,7 +108,6 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
 
   @Override protected boolean onLicenseItemClicked() {
     MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
-    setActionBarUpEnabled(true);
     return super.onLicenseItemClicked();
   }
 

@@ -85,8 +85,8 @@ public class MainActivity extends TamperActivity
           }
         });
 
-    setupDrawerLayout();
     setAppBarState();
+    setupDrawerLayout();
     loadFirstFragment();
 
     if (firstLaunch) {
@@ -98,6 +98,8 @@ public class MainActivity extends TamperActivity
     drawerToggle =
         new ActionBarDrawerToggle(this, binding.drawerLayout, binding.toolbar, R.string.blank,
             R.string.blank);
+
+    drawerToggle.setToolbarNavigationClickListener(v -> onBackPressed());
 
     binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
       final boolean toggleChecked;
@@ -269,17 +271,7 @@ public class MainActivity extends TamperActivity
       return true;
     }
 
-    final int itemId = item.getItemId();
-    final boolean handled;
-    switch (itemId) {
-      case android.R.id.home:
-        onBackPressed();
-        handled = true;
-        break;
-      default:
-        handled = false;
-    }
-    return handled || super.onOptionsItemSelected(item);
+    return super.onOptionsItemSelected(item);
   }
 
   @Override public void onDidNotAgreeToTerms() {
