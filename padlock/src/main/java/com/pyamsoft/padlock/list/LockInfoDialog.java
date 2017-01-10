@@ -243,10 +243,6 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void onDestroy() {
     super.onDestroy();
-    if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.unload(getActivity(), KEY_PRESENTER);
-      PersistentCache.unload(getActivity(), KEY_APP_ICON_LOADER);
-    }
     PadLock.getRefWatcher(this).watch(this);
   }
 

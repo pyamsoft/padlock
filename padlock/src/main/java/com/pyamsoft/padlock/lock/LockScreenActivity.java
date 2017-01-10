@@ -300,12 +300,6 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
   @CallSuper @Override protected void onDestroy() {
     super.onDestroy();
 
-    Timber.d("onDestroy");
-    if (!isChangingConfigurations()) {
-      PersistentCache.unload(this, KEY_LOCK_PRESENTER);
-      PersistentCache.unload(this, KEY_APP_ICON_PRESENTER);
-    }
-
     Timber.d("Clear currently locked");
     imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
     mapper.clear();

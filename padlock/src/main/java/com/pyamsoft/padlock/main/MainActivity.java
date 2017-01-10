@@ -218,10 +218,6 @@ public class MainActivity extends TamperActivity
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    if (!isChangingConfigurations()) {
-      PersistentCache.unload(this, KEY_PRESENTER);
-    }
-
     handler.removeCallbacksAndMessages(null);
     binding.drawerLayout.removeDrawerListener(drawerToggle);
     binding.unbind();
