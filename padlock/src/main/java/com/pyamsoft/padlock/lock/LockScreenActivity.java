@@ -44,12 +44,11 @@ import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.model.LockScreenEntry;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Locale;
@@ -108,10 +107,8 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
   private MenuItem menuExclude;
   private EditText editText;
   private long[] ignoreTimes;
-  private long loadedKey;
   private String lockedRealName;
   private boolean lockedSystem;
-  private long loadedAppIconKey;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -155,29 +152,9 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    loadedKey = PersistentCache.get()
-        .load(KEY_LOCK_PRESENTER, savedInstanceState,
-            new PersistLoader.Callback<LockScreenPresenter>() {
-              @NonNull @Override public PersistLoader<LockScreenPresenter> createLoader() {
-                return new LockScreenPresenterLoader();
-              }
-
-              @Override public void onPersistentLoaded(@NonNull LockScreenPresenter persist) {
-                presenter = persist;
-              }
-            });
-
-    loadedAppIconKey = PersistentCache.get()
-        .load(KEY_APP_ICON_PRESENTER, savedInstanceState,
-            new PersistLoader.Callback<AppIconLoaderPresenter>() {
-              @NonNull @Override public PersistLoader<AppIconLoaderPresenter> createLoader() {
-                return new AppIconLoaderPresenterLoader();
-              }
-
-              @Override public void onPersistentLoaded(@NonNull AppIconLoaderPresenter persist) {
-                appIconLoaderPresenter = persist;
-              }
-            });
+    presenter = PersistentCache.load(this, KEY_LOCK_PRESENTER, new LockScreenPresenterLoader());
+    appIconLoaderPresenter =
+        PersistentCache.load(this, KEY_APP_ICON_PRESENTER, new AppIconLoaderPresenterLoader());
 
     populateIgnoreTimes();
     getValuesFromBundle();
@@ -333,8 +310,8 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
 
     Timber.d("onDestroy");
     if (!isChangingConfigurations()) {
-      PersistentCache.get().unload(loadedKey);
-      PersistentCache.get().unload(loadedAppIconKey);
+      PersistentCache.unload(this, KEY_LOCK_PRESENTER);
+      PersistentCache.unload(this, KEY_APP_ICON_PRESENTER);
     }
 
     Timber.d("Clear currently locked");
@@ -417,11 +394,6 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
       exclude = false;
     }
     outState.putBoolean("EXCLUDE", exclude);
-
-    PersistentCache.get()
-        .saveKey(outState, KEY_LOCK_PRESENTER, loadedKey, LockScreenPresenter.class);
-    PersistentCache.get()
-        .saveKey(outState, KEY_APP_ICON_PRESENTER, loadedAppIconKey, AppIconLoaderPresenter.class);
     super.onSaveInstanceState(outState);
   }
 

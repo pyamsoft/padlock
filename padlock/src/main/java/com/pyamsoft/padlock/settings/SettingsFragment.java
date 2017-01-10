@@ -29,11 +29,10 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
 
 public class SettingsFragment extends ActionBarSettingsPreferenceFragment
@@ -42,7 +41,6 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   @NonNull public static final String TAG = "SettingsPreferenceFragment";
   @NonNull private static final String KEY_PRESENTER = "key_settings_presenter";
   @SuppressWarnings("WeakerAccess") SettingsPreferencePresenter presenter;
-  private long loadedKey;
 
   @NonNull @Override protected AboutLibrariesFragment.BackStackState isLastOnBackStack() {
     return AboutLibrariesFragment.BackStackState.LAST;
@@ -51,18 +49,8 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    loadedKey = PersistentCache.get()
-        .load(KEY_PRESENTER, savedInstanceState,
-            new PersistLoader.Callback<SettingsPreferencePresenter>() {
-              @NonNull @Override public PersistLoader<SettingsPreferencePresenter> createLoader() {
-                return new SettingsPreferencePresenterLoader();
-              }
-
-              @Override
-              public void onPersistentLoaded(@NonNull SettingsPreferencePresenter persist) {
-                presenter = persist;
-              }
-            });
+    presenter =
+        PersistentCache.load(getActivity(), KEY_PRESENTER, new SettingsPreferencePresenterLoader());
   }
 
   @CheckResult @NonNull SettingsPreferencePresenter getPresenter() {
@@ -156,14 +144,8 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   @Override public void onDestroy() {
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.get().unload(loadedKey);
+      PersistentCache.unload(getActivity(), KEY_PRESENTER);
     }
     PadLock.getRefWatcher(this).watch(this);
-  }
-
-  @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.get()
-        .saveKey(outState, KEY_PRESENTER, loadedKey, SettingsPreferencePresenter.class);
-    super.onSaveInstanceState(outState);
   }
 }

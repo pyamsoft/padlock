@@ -18,15 +18,15 @@ package com.pyamsoft.padlock.service;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.Injector;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.FuncNone;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-class LockServicePresenterLoader extends PersistLoader<LockServicePresenter> {
+class LockServicePresenterLoader implements FuncNone<LockServicePresenter> {
 
   @SuppressWarnings("WeakerAccess") @Inject Provider<LockServicePresenter> presenterProvider;
 
-  @NonNull @Override public LockServicePresenter loadPersistent() {
+  @NonNull @Override public LockServicePresenter call() {
     DaggerLockServiceComponent.builder()
         .padLockComponent(Injector.get().provideComponent())
         .build()

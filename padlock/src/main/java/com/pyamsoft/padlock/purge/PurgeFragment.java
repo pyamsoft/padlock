@@ -35,9 +35,8 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding;
 import com.pyamsoft.padlock.main.MainActivity;
-import com.pyamsoft.pydroid.app.PersistLoader;
+import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.PersistentCache;
 import timber.log.Timber;
 
 public class PurgeFragment extends Fragment implements PurgePresenter.View {
@@ -63,7 +62,6 @@ public class PurgeFragment extends Fragment implements PurgePresenter.View {
       }
     }
   });
-  private long loadedKey;
   private DividerItemDecoration decoration;
   private boolean listIsRefreshed;
 
@@ -71,22 +69,13 @@ public class PurgeFragment extends Fragment implements PurgePresenter.View {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
 
-    loadedKey = PersistentCache.get()
-        .load(KEY_PRESENTER, savedInstanceState, new PersistLoader.Callback<PurgePresenter>() {
-          @NonNull @Override public PersistLoader<PurgePresenter> createLoader() {
-            return new PurgePresenterLoader();
-          }
-
-          @Override public void onPersistentLoaded(@NonNull PurgePresenter persist) {
-            presenter = persist;
-          }
-        });
+    presenter = PersistentCache.load(getActivity(), KEY_PRESENTER, new PurgePresenterLoader());
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
     if (!getActivity().isChangingConfigurations()) {
-      PersistentCache.get().unload(loadedKey);
+      PersistentCache.unload(getActivity(), KEY_PRESENTER);
     }
     PadLock.getRefWatcher(this).watch(this);
   }
@@ -161,11 +150,6 @@ public class PurgeFragment extends Fragment implements PurgePresenter.View {
   @Override public void onResume() {
     super.onResume();
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
-  }
-
-  @Override public void onSaveInstanceState(Bundle outState) {
-    PersistentCache.get().saveKey(outState, KEY_PRESENTER, loadedKey, PurgePresenter.class);
-    super.onSaveInstanceState(outState);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
