@@ -26,14 +26,15 @@ apply plugin: "com.getkeepsafe.dexcount"
 apply plugin: "net.ltgt.errorprone"
 apply plugin: "me.tatarka.retrolambda"
 
+//noinspection GroovyMissingReturnStatement
 android {
-  compileSdkVersion 25
+  compileSdkVersion rootProject.ext.maxSdk
   buildToolsVersion "$buildTools"
 
   defaultConfig {
     applicationId "com.pyamsoft.padlock"
-    minSdkVersion 19
-    targetSdkVersion 25
+    minSdkVersion rootProject.ext.minSdk
+    targetSdkVersion rootProject.ext.maxSdk
     versionCode 73
     versionName "2.2.0pre1"
 
@@ -85,7 +86,7 @@ android {
 dependencies {
   compile fileTree(dir: "libs", include: ["*.jar"])
 
-  retrolambdaConfig "net.orfjackal.retrolambda:retrolambda:2.3.0"
+  retrolambdaConfig "net.orfjackal.retrolambda:retrolambda:${rootProject.ext.retrolambda}"
 
   // Leak Canary
   debugCompile "com.squareup.leakcanary:leakcanary-android:$leakCanary"
