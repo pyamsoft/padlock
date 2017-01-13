@@ -59,7 +59,7 @@ public class MainPresenterTest {
 
       }
 
-      @Override public void forceRefresh() {
+      @Override public void onForceRefresh() {
 
       }
     });
@@ -86,7 +86,7 @@ public class MainPresenterTest {
 
       }
 
-      @Override public void forceRefresh() {
+      @Override public void onForceRefresh() {
 
       }
     });

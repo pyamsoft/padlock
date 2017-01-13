@@ -20,16 +20,14 @@ import com.pyamsoft.pydroid.presenter.Presenter;
 
 interface MainPresenter extends Presenter<MainPresenter.MainView> {
 
-  void showTermsDialog();
-
-  void agreeToTerms(boolean agreed);
+  void showOnboardingOrDefault();
 
   interface MainView {
 
-    void showUsageTermsDialog();
+    void onShowOnboarding();
 
-    void onDidNotAgreeToTerms();
+    void onShowDefaultPage();
 
-    void forceRefresh();
+    void onForceRefresh();
   }
 }

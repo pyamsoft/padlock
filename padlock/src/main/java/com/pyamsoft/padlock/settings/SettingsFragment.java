@@ -119,7 +119,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   @Override public void onClearDatabase() {
     final Activity activity = getActivity();
     if (activity instanceof MainActivity) {
-      ((MainActivity) activity).forceRefresh();
+      ((MainActivity) activity).onForceRefresh();
     } else {
       throw new ClassCastException("Activity is not MainActivity");
     }

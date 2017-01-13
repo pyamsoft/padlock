@@ -296,7 +296,7 @@ public class MainActivity extends TamperActivity
     return R.mipmap.ic_launcher;
   }
 
-  @Override public void forceRefresh() {
+  @Override public void onForceRefresh() {
     Timber.d("Force lock list refresh");
     final FragmentManager fragmentManager = getSupportFragmentManager();
     fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
