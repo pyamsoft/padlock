@@ -38,6 +38,11 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     this.interactor = interactor;
   }
 
+  @Override protected void onBind() {
+    super.onBind();
+    showOnboardingOrDefault();
+  }
+
   @Override protected void onUnbind() {
     super.onUnbind();
     SubscriptionHelper.unsubscribe(onboardingSubscription);

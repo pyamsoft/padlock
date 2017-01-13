@@ -82,11 +82,6 @@ public class MainActivity extends TamperActivity
 
     setAppBarState();
     setupDrawerLayout();
-    loadFirstFragment();
-
-    if (firstLaunch) {
-      peekNavigationDrawer();
-    }
   }
 
   private void setupDrawerLayout() {
@@ -143,7 +138,7 @@ public class MainActivity extends TamperActivity
     }
   }
 
-  private void loadFirstFragment() {
+  private void loadFragment() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     // These fragments are a level up
     if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null) {
@@ -260,25 +255,14 @@ public class MainActivity extends TamperActivity
     return super.onOptionsItemSelected(item);
   }
 
-  @Override public void onDidNotAgreeToTerms() {
-    Timber.e("Did not agree to terms");
-    finish();
-  }
-
   @Override protected void onPostResume() {
     super.onPostResume();
     AnimUtil.animateActionBarToolbar(binding.toolbar);
     RatingDialog.showRatingDialog(this, this);
-    presenter.showTermsDialog();
   }
 
   @NonNull @Override protected String getSafePackageName() {
     return "com.pyamsoft.padlock";
-  }
-
-  @Override public void showUsageTermsDialog() {
-    AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new AgreeTermsDialog(),
-        AgreeTermsDialog.TAG);
   }
 
   @NonNull @Override protected String[] getChangeLogLines() {
@@ -294,6 +278,17 @@ public class MainActivity extends TamperActivity
 
   @Override public int getApplicationIcon() {
     return R.mipmap.ic_launcher;
+  }
+
+  @Override public void onShowOnboarding() {
+    // TODO load onboarding fragment
+  }
+
+  @Override public void onShowDefaultPage() {
+    loadFragment();
+    if (firstLaunch) {
+      peekNavigationDrawer();
+    }
   }
 
   @Override public void onForceRefresh() {
