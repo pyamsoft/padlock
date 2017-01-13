@@ -56,7 +56,7 @@ class PurgeInteractorImpl implements PurgeInteractor {
   }
 
   @NonNull @Override public Observable<String> getCachedEntries() {
-    return Observable.defer(() -> Observable.from(stalePackageNameCache));
+    return Observable.fromCallable(() -> stalePackageNameCache).flatMap(Observable::from);
   }
 
   @Override public void clearCache() {
