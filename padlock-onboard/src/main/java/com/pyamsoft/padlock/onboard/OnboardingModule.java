@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-include ':padlock', ':padlock-model', ':padlock-base', ':padlock-pin', ':padlock-onboard',
-    ':padlock-settings',
-    ':padlock-purge',
-    ':padlock-main',
-    ':padlock-service',
-    ':padlock-lock',
-    ':padlock-list',
-    ':padlock-iconloader'
+package com.pyamsoft.padlock.onboard;
 
+import dagger.Module;
+import dagger.Provides;
+import javax.inject.Named;
+import rx.Scheduler;
+
+@Module public class OnboardingModule {
+
+  @Provides OnboardingEnableServicePresenter provideOnboardingEnableServicePresenter(
+      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
+    return new OnbordingEnableServicePresenterImpl(obsScheduler, subScheduler);
+  }
+}

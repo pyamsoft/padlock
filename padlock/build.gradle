@@ -109,6 +109,7 @@ dependencies {
 
   compile project(":padlock-iconloader")
   compile project(":padlock-main")
+  compile project(":padlock-onboard")
   compile project(":padlock-lock")
   compile project(":padlock-list")
   compile project(":padlock-purge")
