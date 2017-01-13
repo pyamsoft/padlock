@@ -53,12 +53,12 @@ public class AgreeTermsDialog extends DialogFragment {
   }
 
   @SuppressWarnings("WeakerAccess") void agreeToTerms(boolean agree) {
-    final Activity activity = getActivity();
-    if (activity instanceof MainActivity) {
-      ((MainActivity) activity).getPresenter().agreeToTerms(agree);
-    } else {
-      throw new ClassCastException("Activity is not MainActivity");
-    }
+    //final Activity activity = getActivity();
+    //if (activity instanceof MainActivity) {
+    //  ((MainActivity) activity).getPresenter().agreeToTerms(agree);
+    //} else {
+    //  throw new ClassCastException("Activity is not MainActivity");
+    //}
   }
 
   @Override public void onDestroy() {
