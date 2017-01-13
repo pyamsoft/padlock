@@ -37,6 +37,7 @@ import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
+import com.pyamsoft.padlock.onboard.OnboardingFragment;
 import com.pyamsoft.padlock.purge.PurgeFragment;
 import com.pyamsoft.padlock.settings.SettingsFragment;
 import com.pyamsoft.pydroid.cache.PersistentCache;
@@ -153,10 +154,14 @@ public class MainActivity extends TamperActivity
       // These are base fragments
     } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(OnboardingFragment.TAG) == null
         && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null) {
       binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
       changed = FragmentHasChanged.CHANGED_NO_UP;
     } else {
+      if (fragmentManager.findFragmentByTag(OnboardingFragment.TAG) != null) {
+        prepareActivityForOnboarding();
+      }
       changed = FragmentHasChanged.NOT_CHANGED;
     }
 
@@ -175,14 +180,6 @@ public class MainActivity extends TamperActivity
         binding.navigationDrawer);
     drawerToggle.setDrawerIndicatorEnabled(false);
     drawerToggle.syncState();
-  }
-
-  @CheckResult @NonNull MainPresenter getPresenter() {
-    if (presenter == null) {
-      throw new NullPointerException("MainPresenter is NULL");
-    }
-
-    return presenter;
   }
 
   @Override protected int bindActivityToView() {
@@ -293,7 +290,28 @@ public class MainActivity extends TamperActivity
   }
 
   @Override public void onShowOnboarding() {
-    // TODO load onboarding fragment
+    if (replaceFragment(new OnboardingFragment(), OnboardingFragment.TAG)) {
+      Timber.d("New onboarding fragment placed");
+    }
+
+    prepareActivityForOnboarding();
+  }
+
+  /**
+   * Hide action bar, lock drawer
+   */
+  private void prepareActivityForOnboarding() {
+    // Hide the action bar
+    final ActionBar actionBar = getSupportActionBar();
+    if (actionBar != null) {
+      if (actionBar.isShowing()) {
+        actionBar.hide();
+      }
+    }
+
+    // Lock the navigation drawer if we are showing onboarding
+    // Action bar is hidden so the drawer toggle state wont matter
+    drawerShowUpNavigation();
   }
 
   @Override public void onShowDefaultPage() {
