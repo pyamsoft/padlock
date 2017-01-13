@@ -29,6 +29,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.preference.PreferenceManager;
 import android.view.MenuItem;
@@ -138,17 +139,28 @@ public class MainActivity extends TamperActivity
     }
   }
 
-  private void loadFragment() {
+  /**
+   * Returns if the fragment has changed
+   */
+  @CheckResult @NonNull private FragmentHasChanged loadFragment() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
+    final FragmentHasChanged changed;
+
     // These fragments are a level up
     if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null) {
       drawerShowUpNavigation();
+      changed = FragmentHasChanged.CHANGD_WITH_UP;
       // These are base fragments
     } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
         && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null) {
       binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
+      changed = FragmentHasChanged.CHANGED_NO_UP;
+    } else {
+      changed = FragmentHasChanged.NOT_CHANGED;
     }
+
+    return changed;
   }
 
   @Override public void drawerNormalNavigation() {
@@ -285,9 +297,27 @@ public class MainActivity extends TamperActivity
   }
 
   @Override public void onShowDefaultPage() {
-    loadFragment();
-    if (firstLaunch) {
-      peekNavigationDrawer();
+    // Set normal navigation
+    final FragmentHasChanged changed = loadFragment();
+    if (changed == FragmentHasChanged.NOT_CHANGED) {
+      Timber.d("Fragment has not changed");
+    } else {
+      // Un hide the action bar in case it was hidden
+      final ActionBar actionBar = getSupportActionBar();
+      if (actionBar != null) {
+        if (!actionBar.isShowing()) {
+          actionBar.show();
+        }
+      }
+      if (changed == FragmentHasChanged.CHANGD_WITH_UP) {
+        drawerShowUpNavigation();
+      } else {
+        drawerNormalNavigation();
+      }
+
+      if (firstLaunch) {
+        peekNavigationDrawer();
+      }
     }
   }
 
@@ -296,6 +326,12 @@ public class MainActivity extends TamperActivity
     final FragmentManager fragmentManager = getSupportFragmentManager();
     fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
+  }
+
+  private enum FragmentHasChanged {
+    NOT_CHANGED,
+    CHANGD_WITH_UP,
+    CHANGED_NO_UP,
   }
 }
 
