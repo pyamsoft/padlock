@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-include ':padlock', ':padlock-model', ':padlock-base', ':padlock-pin', ':padlock-onboard',
-    ':padlock-settings',
-    ':padlock-purge',
-    ':padlock-main',
-    ':padlock-service',
-    ':padlock-lock',
-    ':padlock-list',
-    ':padlock-iconloader'
+package com.pyamsoft.padlock.onboard;
 
+import com.pyamsoft.padlock.base.PadLockComponent;
+import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
+import dagger.Component;
+
+@FragmentScope @Component(dependencies = PadLockComponent.class, modules = OnboardingModule.class)
+interface OnboardingComponent {
+
+  void inject(OnboardingEnableServicePresenterLoader loader);
+}

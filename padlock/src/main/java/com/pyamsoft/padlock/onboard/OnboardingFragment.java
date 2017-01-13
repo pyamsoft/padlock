@@ -35,7 +35,7 @@ public class OnboardingFragment extends Fragment {
   @NonNull public static final String TAG = "OnboardingFragment";
   static final int MAX_USABLE_PAGE_COUNT = 2;
   @NonNull private static final String PAGER_SAVED_POSITION = "pager_saved_position";
-  FragmentOnboardingBinding binding;
+  private FragmentOnboardingBinding binding;
   private ViewPager.OnPageChangeListener pageChangeListener;
 
   @Nullable @Override
@@ -98,9 +98,13 @@ public class OnboardingFragment extends Fragment {
     if (position == MAX_USABLE_PAGE_COUNT) {
       prepareAcceptTermsPage();
     } else {
-      binding.onboardingNext.setOnClickListener(
-          v -> binding.onboardingPager.arrowScroll(View.FOCUS_RIGHT));
+      binding.onboardingNext.setOnClickListener(v -> scrollToNextPage());
     }
+  }
+
+  void scrollToNextPage() {
+    Timber.d("Scroll to next page");
+    binding.onboardingPager.arrowScroll(View.FOCUS_RIGHT);
   }
 
   private void setupCancelButton(final int startPosition) {

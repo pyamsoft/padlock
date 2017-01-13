@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/padlock-lock" />
             <option value="$PROJECT_DIR$/padlock-main" />
             <option value="$PROJECT_DIR$/padlock-model" />
+            <option value="$PROJECT_DIR$/padlock-onboard" />
             <option value="$PROJECT_DIR$/padlock-pin" />
             <option value="$PROJECT_DIR$/padlock-purge" />
             <option value="$PROJECT_DIR$/padlock-service" />

@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-include ':padlock', ':padlock-model', ':padlock-base', ':padlock-pin', ':padlock-onboard',
-    ':padlock-settings',
-    ':padlock-purge',
-    ':padlock-main',
-    ':padlock-service',
-    ':padlock-lock',
-    ':padlock-list',
-    ':padlock-iconloader'
+package com.pyamsoft.padlock.onboard;
 
+import com.pyamsoft.pydroid.FuncNone;
+import javax.inject.Inject;
+import javax.inject.Provider;
+
+class OnboardingEnableServicePresenterLoader implements FuncNone<OnboardingEnableServicePresenter> {
+
+  @SuppressWarnings("WeakerAccess") @Inject Provider<OnboardingEnableServicePresenter>
+      presenterProvider;
+
+  @Override public OnboardingEnableServicePresenter call() {
+    return presenterProvider.get();
+  }
+}

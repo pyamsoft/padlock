@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-include ':padlock', ':padlock-model', ':padlock-base', ':padlock-pin', ':padlock-onboard',
-    ':padlock-settings',
-    ':padlock-purge',
-    ':padlock-main',
-    ':padlock-service',
-    ':padlock-lock',
-    ':padlock-list',
-    ':padlock-iconloader'
+package com.pyamsoft.padlock.onboard;
 
+import com.pyamsoft.pydroid.presenter.Presenter;
+
+interface OnboardingEnableServicePresenter
+    extends Presenter<OnboardingEnableServicePresenter.View> {
+
+  void checkIfServiceIsRunning(boolean isRunning);
+
+  interface View {
+
+    void onServiceEnabled();
+  }
+}
