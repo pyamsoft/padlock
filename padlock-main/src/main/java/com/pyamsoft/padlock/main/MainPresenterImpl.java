@@ -17,21 +17,20 @@
 package com.pyamsoft.padlock.main;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.pyamsoft.pydroid.rx.SchedulerPresenter;
 import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     implements MainPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final MainInteractor interactor;
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription agreeTermsSubscription =
-      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @Nullable Subscription onboardingSubscription;
 
   @Inject MainPresenterImpl(@NonNull final MainInteractor interactor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
@@ -41,29 +40,44 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    SubscriptionHelper.unsubscribe(agreeTermsSubscription);
+    SubscriptionHelper.unsubscribe(onboardingSubscription);
   }
 
-  @Override public void showTermsDialog() {
-    SubscriptionHelper.unsubscribe(agreeTermsSubscription);
-    agreeTermsSubscription = interactor.hasAgreed()
+  @Override public void showOnboardingOrDefault() {
+    SubscriptionHelper.unsubscribe(onboardingSubscription);
+    onboardingSubscription = interactor.isOnboardingComplete()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(agreed -> {
-          if (!agreed) {
-            getView(MainView::showUsageTermsDialog);
-          }
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-          // TODO error
-        }, () -> SubscriptionHelper.unsubscribe(agreeTermsSubscription));
+        .subscribe(onboardingComplete -> getView(mainView -> {
+              if (onboardingComplete) {
+                mainView.onShowDefaultPage();
+              } else {
+                mainView.onShowOnboarding();
+              }
+            }), throwable -> Timber.e(throwable, "onError"),
+            () -> SubscriptionHelper.unsubscribe(onboardingSubscription));
   }
 
-  @Override public void agreeToTerms(boolean agreed) {
-    if (agreed) {
-      interactor.setAgreed();
-    } else {
-      getView(MainView::onDidNotAgreeToTerms);
-    }
-  }
+  //@Override public void showTermsDialog() {
+  //  SubscriptionHelper.unsubscribe(onboardingSubscription);
+  //  onboardingSubscription = interactor.hasAgreed()
+  //      .subscribeOn(getSubscribeScheduler())
+  //      .observeOn(getObserveScheduler())
+  //      .subscribe(agreed -> {
+  //        if (!agreed) {
+  //          getView(MainView::showUsageTermsDialog);
+  //        }
+  //      }, throwable -> {
+  //        Timber.e(throwable, "onError");
+  //        // TODO error
+  //      }, () -> SubscriptionHelper.unsubscribe(onboardingSubscription));
+  //}
+
+  //@Override public void agreeToTerms(boolean agreed) {
+  //  if (agreed) {
+  //    interactor.setAgreed();
+  //  } else {
+  //    getView(MainView::onDidNotAgreeToTerms);
+  //  }
+  //}
 }
