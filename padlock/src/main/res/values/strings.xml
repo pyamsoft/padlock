@@ -64,4 +64,13 @@
     \n\nhttps://github.com/pyamsoft/padlock
     \n\nAre you ready to go?</string>
   <string name="lets_get_started">Let\'s Get Started!</string>
+  <string name="service_enabled">PadLock service is enabled, awesome!</string>
+  <string name="please_enable_service">Please enable the PadLock service to continue</string>
+  <string name="cancel">Cancel</string>
+  <string name="accept_terms">Accept Terms</string>
+  <string name="terms_of_usage">One last thing is the terms of usage agreement. You must read this!
+    \n\nBecause PadLock can lock your applications, you may experience difficulty using your device if you forget the password that you use to unlock secured applications.
+    \n\nThis password is stored locally on your device and is never transmitted or used in any other way. You are the sole individual who would know what your password is.
+    \n\nBy using PadLock, you assume the responsibility of remembering your password for the applications you choose to protect. By continuing, you agree that forgetting the password used to lock your applications may result in certain functions of your device becoming inaccessible, and that pyamsoft will not be held liable for any reason.
+  </string>
 </resources>

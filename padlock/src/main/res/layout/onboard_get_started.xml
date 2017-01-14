@@ -19,35 +19,44 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     >
 
-  <LinearLayout
+  <ScrollView
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:background="@color/blue500"
-      android:orientation="vertical"
       android:paddingTop="?attr/actionBarSize"
       >
 
-    <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="@string/onboard_get_started"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/material_light_background"
-        />
+        android:orientation="vertical"
+        >
 
-    <Button
-        android:id="@+id/onboarding_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginEnd="32dp"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:text="@string/lets_get_started"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        />
+      <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:padding="16dp"
+          android:text="@string/onboard_get_started"
+          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textColor="@color/material_light_background"
+          />
 
-  </LinearLayout>
+      <Button
+          android:id="@+id/onboarding_next"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="end"
+          android:layout_marginBottom="16dp"
+          android:layout_marginEnd="32dp"
+          android:layout_marginTop="8dp"
+          android:gravity="center"
+          android:text="@string/lets_get_started"
+          android:textAppearance="?android:attr/textAppearanceLarge"
+          />
+
+    </LinearLayout>
+
+  </ScrollView>
+
 
 </layout>

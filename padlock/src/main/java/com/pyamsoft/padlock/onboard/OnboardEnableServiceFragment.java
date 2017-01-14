@@ -73,11 +73,13 @@ public class OnboardEnableServiceFragment extends OnboardChildFragment
   @Override public void onServiceEnabled() {
     binding.onboardingNext.setText(R.string.continue_onboard);
     binding.onboardingNext.setOnClickListener(v -> scrollToNextPage());
+    binding.serviceEnabledText.setText(R.string.service_enabled);
   }
 
   @Override public void onServiceDisabled() {
     binding.onboardingNext.setText(R.string.enable_service);
     binding.onboardingNext.setOnClickListener(
         v -> delegate.launchAccessibilityIntent(getActivity()));
+    binding.serviceEnabledText.setText(R.string.please_enable_service);
   }
 }
