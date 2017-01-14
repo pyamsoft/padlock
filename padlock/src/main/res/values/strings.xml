@@ -18,7 +18,7 @@
 
 <resources>
   <string name="app_name">PadLock</string>
-  <string name="ignore">Ignore</string>
+  <string name="ignore">Re-Lock</string>
   <string name="forgot_passcode">Forgot Passcode</string>
   <string name="package_name">Package:</string>
   <string name="system">System:</string>
@@ -26,10 +26,13 @@
   <string name="info_for_nerds">Info for Nerds</string>
   <string name="explain_accessibility_service">
     PadLock requires a special Accessibility Service to secure your device.
+    \n\nThis service is used to monitor for the applications that you want to be locked. When PadLock notices that you have launched an application that you want to lock, it will secure the application with a custom lock screen.
+    \n\nPlease select the \'PadLock\' Accessibility Service from the Settings menu and enable the service.
   </string>
   <string name="accessibility_description">PadLock needs this service to monitor which apps launch
     on your device.
-    \n\nIt will not capture any personal data.\nIt does not have the ability to connect to the Internet.\nIt will only watch the apps you launch and lock the ones you request.</string>
+    \n\nIt will not capture any personal data.\nIt does not have the ability to connect to the Internet.
+    \nIt will only watch the apps you launch and lock the ones you request.</string>
   <string name="getting_started">PadLock will not be activated until you set a PIN code.</string>
   <string name="getting_started_desc">Click the button to get started.</string>
   <string name="lock_code_hint">Enter Lock Code</string>
@@ -54,8 +57,9 @@
   <string name="locklist">Lock List</string>
   <string name="clean_up_old">Clean Up Old</string>
   <string name="search">Search</string>
-  <string name="onboard_get_started">Welcome to PadLock!
-    \n\nThis is a lightweight application which will improve your device\'s security by protecting applications from prying eyes. Lock applications with a special password to keep your information safe and secure.
+  <string name="continue_onboard">Continue</string>
+  <string name="enable_service">Enable Service</string>
+  <string name="onboard_get_started">This is a lightweight application which will improve your device\'s security by protecting applications from prying eyes. Lock applications with a special password to keep your information safe and secure.
     \n\nPadLock is free to use, and entirely open source! You can view the source online at:
     \n\nhttps://github.com/pyamsoft/padlock
     \n\nAre you ready to go?</string>

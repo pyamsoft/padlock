@@ -17,29 +17,31 @@
 package com.pyamsoft.padlock.list;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.uicommon.AccessibilityRequestDelegate;
 
 public class AccessibilityRequestDialog extends DialogFragment {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final Intent accessibilityServiceIntent =
-      new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+  @NonNull private final AccessibilityRequestDelegate delegate = new AccessibilityRequestDelegate();
 
   @NonNull @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
     return new AlertDialog.Builder(getActivity()).setTitle("Enable PadLock AccessibilityService")
         .setMessage(R.string.explain_accessibility_service)
         .setPositiveButton("Let's Go", (dialogInterface, i) -> {
-          getActivity().startActivity(accessibilityServiceIntent);
+          onPositionButtonClicked();
           dismiss();
         })
         .setNegativeButton("No Thanks", (dialogInterface, i) -> dismiss())
         .create();
+  }
+
+  void onPositionButtonClicked() {
+    delegate.launchAccessibilityIntent(getActivity());
   }
 
   @Override public void onDestroy() {
