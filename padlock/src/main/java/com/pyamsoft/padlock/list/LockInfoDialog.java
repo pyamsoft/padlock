@@ -59,8 +59,8 @@ public class LockInfoDialog extends DialogFragment
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
   @NonNull private static final String ARG_APP_NAME = "app_name";
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
-  @NonNull private static final String KEY_PRESENTER = TAG + "key_info_presenter";
   @NonNull private static final String KEY_APP_ICON_LOADER = TAG + "key_app_icon_loader";
+  @NonNull private static final String KEY_PRESENTER = TAG + "key_info_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") AppIconLoaderPresenter appIconLoaderPresenter;
@@ -122,7 +122,9 @@ public class LockInfoDialog extends DialogFragment
       throw new NullPointerException("App information is NULL");
     }
 
-    presenter = PersistentCache.load(getActivity(), KEY_PRESENTER, new LockInfoPresenterLoader());
+    final String presenterKeyFull = KEY_PRESENTER + appPackageName + appName;
+    presenter =
+        PersistentCache.load(getActivity(), presenterKeyFull, new LockInfoPresenterLoader());
     appIconLoaderPresenter = PersistentCache.load(getActivity(), KEY_APP_ICON_LOADER,
         new AppIconLoaderPresenterLoader());
   }
