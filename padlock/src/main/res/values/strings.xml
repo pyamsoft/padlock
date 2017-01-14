@@ -44,7 +44,6 @@
   <string name="stat_real_name">Name:</string>
   <string name="stat_locked_by">Locked by Entry:</string>
   <string name="stat_system">Is System Application:</string>
-
   <string name="onboard_title_locklist">Lock Entire Groups</string>
   <string name="onboard_desc_locklist">Locks applications based on the app that they were installed with</string>
   <string name="onboard_title_info_lock_default">Default Lock State</string>
