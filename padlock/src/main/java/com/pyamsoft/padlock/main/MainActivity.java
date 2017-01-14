@@ -228,10 +228,6 @@ public class MainActivity extends TamperActivity
     binding.unbind();
   }
 
-  @Override protected boolean shouldConfirmBackPress() {
-    return true;
-  }
-
   @Override public void onBackPressed() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     final int backStackCount = fragmentManager.getBackStackEntryCount();
@@ -344,6 +340,16 @@ public class MainActivity extends TamperActivity
     final FragmentManager fragmentManager = getSupportFragmentManager();
     fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
+  }
+
+  public void onOnboardingCompleted() {
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    final Fragment onboarding = fragmentManager.findFragmentByTag(OnboardFragment.TAG);
+    if (onboarding != null) {
+      fragmentManager.beginTransaction().remove(onboarding).commitNow();
+    }
+
+    presenter.showOnboardingOrDefault();
   }
 
   private enum FragmentHasChanged {

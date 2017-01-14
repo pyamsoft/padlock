@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.main;
+package com.pyamsoft.padlock.onboard;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import javax.inject.Inject;
 import rx.Observable;
 
-class MainInteractorImpl implements MainInteractor {
+class OnboardAcceptTermsInteractorImpl implements OnboardAcceptTermsInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
 
-  @Inject MainInteractorImpl(final @NonNull PadLockPreferences preferences) {
+  @Inject OnboardAcceptTermsInteractorImpl(@NonNull PadLockPreferences preferences) {
     this.preferences = preferences;
   }
 
-  @NonNull @Override public Observable<Boolean> isOnboardingComplete() {
+  @Override public void agreeToTerms() {
+    preferences.setAgreed();
+  }
+
+  @NonNull @Override public Observable<Boolean> hasAgreedToTerms() {
     return Observable.fromCallable(preferences::hasAgreed);
   }
 }

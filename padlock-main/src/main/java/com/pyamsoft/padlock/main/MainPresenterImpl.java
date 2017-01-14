@@ -62,27 +62,4 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
             }), throwable -> Timber.e(throwable, "onError"),
             () -> SubscriptionHelper.unsubscribe(onboardingSubscription));
   }
-
-  //@Override public void showTermsDialog() {
-  //  SubscriptionHelper.unsubscribe(onboardingSubscription);
-  //  onboardingSubscription = interactor.hasAgreed()
-  //      .subscribeOn(getSubscribeScheduler())
-  //      .observeOn(getObserveScheduler())
-  //      .subscribe(agreed -> {
-  //        if (!agreed) {
-  //          getView(MainView::showUsageTermsDialog);
-  //        }
-  //      }, throwable -> {
-  //        Timber.e(throwable, "onError");
-  //        // TODO error
-  //      }, () -> SubscriptionHelper.unsubscribe(onboardingSubscription));
-  //}
-
-  //@Override public void agreeToTerms(boolean agreed) {
-  //  if (agreed) {
-  //    interactor.setAgreed();
-  //  } else {
-  //    getView(MainView::onDidNotAgreeToTerms);
-  //  }
-  //}
 }

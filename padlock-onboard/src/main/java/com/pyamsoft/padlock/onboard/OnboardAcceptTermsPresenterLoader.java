@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.main;
+package com.pyamsoft.padlock.onboard;
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.Injector;
+import com.pyamsoft.pydroid.FuncNone;
 import javax.inject.Inject;
-import rx.Observable;
+import javax.inject.Provider;
 
-class MainInteractorImpl implements MainInteractor {
+class OnboardAcceptTermsPresenterLoader implements FuncNone<OnboardAcceptTermsPresenter> {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @Inject Provider<OnboardAcceptTermsPresenter> presenterProvider;
 
-  @Inject MainInteractorImpl(final @NonNull PadLockPreferences preferences) {
-    this.preferences = preferences;
-  }
-
-  @NonNull @Override public Observable<Boolean> isOnboardingComplete() {
-    return Observable.fromCallable(preferences::hasAgreed);
+  @Override public OnboardAcceptTermsPresenter call() {
+    DaggerOnboardComponent.builder()
+        .padLockComponent(Injector.get().provideComponent())
+        .build()
+        .inject(this);
+    return presenterProvider.get();
   }
 }
