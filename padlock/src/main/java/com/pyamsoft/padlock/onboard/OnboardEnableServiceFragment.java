@@ -19,12 +19,13 @@ package com.pyamsoft.padlock.onboard;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.OnboardEnableServiceBinding;
 import com.pyamsoft.padlock.service.PadLockService;
+import com.pyamsoft.padlock.uicommon.AccessibilityRequestDelegate;
 import com.pyamsoft.pydroid.cache.PersistentCache;
 
 public class OnboardEnableServiceFragment extends OnboardChildFragment
@@ -32,6 +33,7 @@ public class OnboardEnableServiceFragment extends OnboardChildFragment
 
   @NonNull private static final String TAG = "OnboardingEnableServiceFragment";
   @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
+  @NonNull final AccessibilityRequestDelegate delegate = new AccessibilityRequestDelegate();
   OnboardEnableServicePresenter presenter;
   private OnboardEnableServiceBinding binding;
 
@@ -69,16 +71,13 @@ public class OnboardEnableServiceFragment extends OnboardChildFragment
   }
 
   @Override public void onServiceEnabled() {
-    setNextButtonState(true);
+    binding.onboardingNext.setText(R.string.continue_onboard);
+    binding.onboardingNext.setOnClickListener(v -> scrollToNextPage());
   }
 
   @Override public void onServiceDisabled() {
-    setNextButtonState(false);
-  }
-
-  private void setNextButtonState(boolean enabled) {
-    final int buttonColor = enabled ? android.R.color.white : R.color.grey500;
-    binding.onboardingNext.setTextColor(ContextCompat.getColor(getContext(), buttonColor));
-    binding.onboardingNext.setOnClickListener(enabled ? v -> scrollToNextPage() : null);
+    binding.onboardingNext.setText(R.string.enable_service);
+    binding.onboardingNext.setOnClickListener(
+        v -> delegate.launchAccessibilityIntent(getActivity()));
   }
 }

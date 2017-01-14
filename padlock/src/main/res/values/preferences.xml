@@ -41,18 +41,18 @@
     <item name="time_sixty">60</item>
   </string-array>
 
-  <string name="do_not_ignore">Do Not Ignore</string>
-  <string name="ignore_for_1_minute">Ignore for 1 Minute</string>
-  <string name="ignore_for_5_minutes">Ignore for 5 Minutes</string>
-  <string name="ignore_for_10_minutes">Ignore for 10 Minutes</string>
-  <string name="ignore_for_15_minutes">Ignore for 15 Minutes</string>
-  <string name="ignore_for_20_minutes">Ignore for 20 Minutes</string>
-  <string name="ignore_for_30_minutes">Ignore for 30 Minutes</string>
-  <string name="ignore_for_45_minutes">Ignore for 45 Minutes</string>
-  <string name="ignore_for_60_minutes">Ignore for 1 Hour</string>
+  <string name="do_not_ignore">Always Re-Lock</string>
+  <string name="ignore_for_1_minute">Re-Lock after 1 Minute</string>
+  <string name="ignore_for_5_minutes">Re-Lock after 5 Minutes</string>
+  <string name="ignore_for_10_minutes">Re-Lock after 10 Minutes</string>
+  <string name="ignore_for_15_minutes">Re-Lock after 15 Minutes</string>
+  <string name="ignore_for_20_minutes">Re-Lock after 20 Minutes</string>
+  <string name="ignore_for_30_minutes">Re-Lock after 30 Minutes</string>
+  <string name="ignore_for_45_minutes">Re-Lock after 45 Minutes</string>
+  <string name="ignore_for_60_minutes">Re-Lock after 1 Hour</string>
 
-  <string name="ignore_time_title">Ignore Times</string>
-  <string name="ignore_time_summary">Set the default Ignore duration</string>
+  <string name="ignore_time_title">Re-Lock Applications</string>
+  <string name="ignore_time_summary">Should PadLock re-lock applications after unlocking once?</string>
 
   <string-array name="timeout_time">
     <item name="time_none">Do Not Timeout</item>
@@ -79,7 +79,7 @@
   </string-array>
 
   <string name="timeout_time_title">Timeout Times</string>
-  <string name="timeout_time_summary">Set the default Timeout duration</string>
+  <string name="timeout_time_summary">Set the default Timeout after too many failed unlock attempts</string>
 
   <string name="recheck_title">Check locking periodically</string>
   <string name="recheck_summary_checked">Check if the current application should be locked after the Ignore period</string>
@@ -89,9 +89,9 @@
   <string name="install_listener_summary_checked">Show suggestions to lock newly installed applications</string>
   <string name="install_listener_summary_unchecked">Do not show suggestions to lock newly installed applications</string>
 
-  <string name="ignore_keyguard_title">Ignore Lock Screen When Device Locked</string>
-  <string name="ignore_keyguard_summary_checked">Do not show Lock Screen when device is Locked</string>
-  <string name="ignore_keyguard_summary_unchecked">Show Lock Screen even when device is Locked</string>
+  <string name="ignore_keyguard_title">Ignore while Device Locked</string>
+  <string name="ignore_keyguard_summary_checked">Do not lock applications when device is locked</string>
+  <string name="ignore_keyguard_summary_unchecked">Lock applications even when device is locked</string>
 
   <string name="clear_db_key">clear_db</string>
   <string name="clear_db_title">Reset Database</string>
