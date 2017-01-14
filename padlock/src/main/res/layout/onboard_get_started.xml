@@ -22,11 +22,31 @@
   <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:background="@color/blue600"
+      android:background="@color/blue500"
       android:orientation="vertical"
-      android:paddingBottom="?attr/actionBarSize"
       android:paddingTop="?attr/actionBarSize"
       >
+
+    <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/onboard_get_started"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/material_light_background"
+        />
+
+    <Button
+        android:id="@+id/onboarding_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="@string/lets_get_started"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        />
 
   </LinearLayout>
 

@@ -37,7 +37,7 @@ import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
-import com.pyamsoft.padlock.onboard.OnboardingFragment;
+import com.pyamsoft.padlock.onboard.OnboardFragment;
 import com.pyamsoft.padlock.purge.PurgeFragment;
 import com.pyamsoft.padlock.settings.SettingsFragment;
 import com.pyamsoft.pydroid.cache.PersistentCache;
@@ -154,12 +154,12 @@ public class MainActivity extends TamperActivity
       // These are base fragments
     } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(OnboardingFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(OnboardFragment.TAG) == null
         && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null) {
       binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
       changed = FragmentHasChanged.CHANGED_NO_UP;
     } else {
-      if (fragmentManager.findFragmentByTag(OnboardingFragment.TAG) != null) {
+      if (fragmentManager.findFragmentByTag(OnboardFragment.TAG) != null) {
         prepareActivityForOnboarding();
       }
       changed = FragmentHasChanged.NOT_CHANGED;
@@ -290,7 +290,7 @@ public class MainActivity extends TamperActivity
   }
 
   @Override public void onShowOnboarding() {
-    if (replaceFragment(new OnboardingFragment(), OnboardingFragment.TAG)) {
+    if (replaceFragment(new OnboardFragment(), OnboardFragment.TAG)) {
       Timber.d("New onboarding fragment placed");
     }
 

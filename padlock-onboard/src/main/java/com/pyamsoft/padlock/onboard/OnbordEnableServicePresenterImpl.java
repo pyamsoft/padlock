@@ -16,16 +16,27 @@
 
 package com.pyamsoft.padlock.onboard;
 
-import com.pyamsoft.pydroid.FuncNone;
+import android.support.annotation.NonNull;
+import com.pyamsoft.pydroid.rx.SchedulerPresenter;
 import javax.inject.Inject;
-import javax.inject.Provider;
+import rx.Scheduler;
 
-class OnboardingEnableServicePresenterLoader implements FuncNone<OnboardingEnableServicePresenter> {
+class OnbordEnableServicePresenterImpl
+    extends SchedulerPresenter<OnboardEnableServicePresenter.View>
+    implements OnboardEnableServicePresenter {
 
-  @SuppressWarnings("WeakerAccess") @Inject Provider<OnboardingEnableServicePresenter>
-      presenterProvider;
+  @Inject OnbordEnableServicePresenterImpl(@NonNull Scheduler observeScheduler,
+      @NonNull Scheduler subscribeScheduler) {
+    super(observeScheduler, subscribeScheduler);
+  }
 
-  @Override public OnboardingEnableServicePresenter call() {
-    return presenterProvider.get();
+  @Override public void checkIfServiceIsRunning(boolean isRunning) {
+    getView(view -> {
+      if (isRunning) {
+        view.onServiceEnabled();
+      } else {
+        view.onServiceDisabled();
+      }
+    });
   }
 }

@@ -16,28 +16,22 @@
 
 package com.pyamsoft.padlock.onboard;
 
-import android.content.Context;
-import android.support.v4.view.ViewPager;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 
-public class OnboardingNoSwipeViewPager extends ViewPager {
+abstract class OnboardChildFragment extends Fragment implements Onboard {
 
-  public OnboardingNoSwipeViewPager(Context context) {
-    super(context);
+  @Override public void scrollToNextPage() {
+    getOnboard().scrollToNextPage();
   }
 
-  public OnboardingNoSwipeViewPager(Context context, AttributeSet attrs) {
-    super(context, attrs);
-  }
-
-  @Override public boolean onInterceptTouchEvent(MotionEvent event) {
-    // Never allow swiping to switch between pages
-    return false;
-  }
-
-  @Override public boolean onTouchEvent(MotionEvent event) {
-    // Never allow swiping to switch between pages
-    return false;
+  @CheckResult @NonNull private Onboard getOnboard() {
+    final Fragment parent = getParentFragment();
+    if (parent instanceof Onboard) {
+      return (Onboard) parent;
+    } else {
+      throw new IllegalStateException("Parent Fragment is not instance of Onboard");
+    }
   }
 }

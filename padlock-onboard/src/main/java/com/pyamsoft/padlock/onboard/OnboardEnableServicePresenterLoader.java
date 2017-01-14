@@ -16,12 +16,21 @@
 
 package com.pyamsoft.padlock.onboard;
 
-import com.pyamsoft.padlock.base.PadLockComponent;
-import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
-import dagger.Component;
+import com.pyamsoft.padlock.base.Injector;
+import com.pyamsoft.pydroid.FuncNone;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
-@FragmentScope @Component(dependencies = PadLockComponent.class, modules = OnboardingModule.class)
-interface OnboardingComponent {
+class OnboardEnableServicePresenterLoader implements FuncNone<OnboardEnableServicePresenter> {
 
-  void inject(OnboardingEnableServicePresenterLoader loader);
+  @SuppressWarnings("WeakerAccess") @Inject Provider<OnboardEnableServicePresenter>
+      presenterProvider;
+
+  @Override public OnboardEnableServicePresenter call() {
+    DaggerOnboardComponent.builder()
+        .padLockComponent(Injector.get().provideComponent())
+        .build()
+        .inject(this);
+    return presenterProvider.get();
+  }
 }

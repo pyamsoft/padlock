@@ -16,15 +16,7 @@
 
 package com.pyamsoft.padlock.onboard;
 
-import dagger.Module;
-import dagger.Provides;
-import javax.inject.Named;
-import rx.Scheduler;
+interface Onboard {
 
-@Module public class OnboardingModule {
-
-  @Provides OnboardingEnableServicePresenter provideOnboardingEnableServicePresenter(
-      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
-    return new OnbordingEnableServicePresenterImpl(obsScheduler, subScheduler);
-  }
+  void scrollToNextPage();
 }

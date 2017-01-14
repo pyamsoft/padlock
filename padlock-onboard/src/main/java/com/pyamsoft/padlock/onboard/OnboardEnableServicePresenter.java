@@ -16,23 +16,16 @@
 
 package com.pyamsoft.padlock.onboard;
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.rx.SchedulerPresenter;
-import javax.inject.Inject;
-import rx.Scheduler;
+import com.pyamsoft.pydroid.presenter.Presenter;
 
-class OnbordingEnableServicePresenterImpl
-    extends SchedulerPresenter<OnboardingEnableServicePresenter.View>
-    implements OnboardingEnableServicePresenter {
+interface OnboardEnableServicePresenter extends Presenter<OnboardEnableServicePresenter.View> {
 
-  @Inject OnbordingEnableServicePresenterImpl(@NonNull Scheduler observeScheduler,
-      @NonNull Scheduler subscribeScheduler) {
-    super(observeScheduler, subscribeScheduler);
-  }
+  void checkIfServiceIsRunning(boolean isRunning);
 
-  @Override public void checkIfServiceIsRunning(boolean isRunning) {
-    if (isRunning) {
-      getView(View::onServiceEnabled);
-    }
+  interface View {
+
+    void onServiceEnabled();
+
+    void onServiceDisabled();
   }
 }
