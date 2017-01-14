@@ -24,4 +24,6 @@ import dagger.Component;
 interface OnboardComponent {
 
   void inject(OnboardEnableServicePresenterLoader loader);
+
+  void inject(OnboardAcceptTermsPresenterLoader loader);
 }

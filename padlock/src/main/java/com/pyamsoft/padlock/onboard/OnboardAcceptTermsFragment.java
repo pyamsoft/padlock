@@ -16,17 +16,31 @@
 
 package com.pyamsoft.padlock.onboard;
 
+import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.databinding.OnboardAcceptTermsBinding;
+import com.pyamsoft.padlock.main.MainActivity;
+import com.pyamsoft.pydroid.cache.PersistentCache;
 import timber.log.Timber;
 
-public class OnboardAcceptTermsFragment extends OnboardChildFragment {
+public class OnboardAcceptTermsFragment extends OnboardChildFragment
+    implements OnboardAcceptTermsPresenter.View {
 
+  @NonNull private static final String TAG = "OnboardAcceptTermsFragment";
+  @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
+  OnboardAcceptTermsPresenter presenter;
   private OnboardAcceptTermsBinding binding;
+
+  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    presenter =
+        PersistentCache.load(getActivity(), KEY_PRESENTER, new OnboardAcceptTermsPresenterLoader());
+  }
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -46,6 +60,16 @@ public class OnboardAcceptTermsFragment extends OnboardChildFragment {
     setupCancelButton();
   }
 
+  @Override public void onStart() {
+    super.onStart();
+    presenter.bindView(this);
+  }
+
+  @Override public void onStop() {
+    super.onStop();
+    presenter.unbindView();
+  }
+
   private void setupCancelButton() {
     binding.onboardingCancel.setOnClickListener(v -> {
       Timber.w("Did not agree to terms");
@@ -56,7 +80,16 @@ public class OnboardAcceptTermsFragment extends OnboardChildFragment {
   private void setupNextButton() {
     binding.onboardingAcceptTerms.setOnClickListener(v -> {
       Timber.i("Accepted Terms of use");
-      // TODO
+      presenter.acceptUsageTerms();
     });
+  }
+
+  @Override public void onUsageTermsAccepted() {
+    final Activity activity = getActivity();
+    if (activity instanceof MainActivity) {
+      ((MainActivity) activity).onOnboardingCompleted();
+    } else {
+      throw new IllegalStateException("Activity cannot handle onboarding result");
+    }
   }
 }
