@@ -18,25 +18,33 @@ package com.pyamsoft.padlock.onboard;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.pyamsoft.padlock.databinding.OnboardingAcceptTermsBinding;
+import com.pyamsoft.padlock.databinding.OnboardGetStartedBinding;
 
-public class OnboardingAcceptTermsFragment extends Fragment {
+public class OnboardGetStartedFragment extends OnboardChildFragment {
 
-  private OnboardingAcceptTermsBinding binding;
+  private OnboardGetStartedBinding binding;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = OnboardingAcceptTermsBinding.inflate(inflater, container, false);
+    binding = OnboardGetStartedBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 
   @Override public void onDestroyView() {
     super.onDestroyView();
     binding.unbind();
+  }
+
+  @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    setupNextButton();
+  }
+
+  private void setupNextButton() {
+    binding.onboardingNext.setOnClickListener(v -> scrollToNextPage());
   }
 }

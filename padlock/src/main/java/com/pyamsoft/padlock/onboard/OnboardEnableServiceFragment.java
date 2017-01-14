@@ -19,26 +19,26 @@ package com.pyamsoft.padlock.onboard;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.pyamsoft.padlock.databinding.OnboardingEnableServiceBinding;
+import com.pyamsoft.padlock.databinding.OnboardEnableServiceBinding;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.cache.PersistentCache;
 
-public class OnboardingEnableServiceFragment extends Fragment
-    implements OnboardingEnableServicePresenter.View {
+public class OnboardEnableServiceFragment extends OnboardChildFragment
+    implements OnboardEnableServicePresenter.View {
 
   @NonNull private static final String TAG = "OnboardingEnableServiceFragment";
   @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
-  OnboardingEnableServicePresenter presenter;
-  private OnboardingEnableServiceBinding binding;
+  OnboardEnableServicePresenter presenter;
+  private OnboardEnableServiceBinding binding;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = OnboardingEnableServiceBinding.inflate(inflater, container, false);
+    binding = OnboardEnableServiceBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 
@@ -50,7 +50,7 @@ public class OnboardingEnableServiceFragment extends Fragment
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     presenter = PersistentCache.load(getActivity(), KEY_PRESENTER,
-        new OnboardingEnableServicePresenterLoader());
+        new OnboardEnableServicePresenterLoader());
   }
 
   @Override public void onStart() {
@@ -69,9 +69,16 @@ public class OnboardingEnableServiceFragment extends Fragment
   }
 
   @Override public void onServiceEnabled() {
-    final Fragment parent = getParentFragment();
-    if (parent instanceof OnboardingFragment) {
-      ((OnboardingFragment) parent).scrollToNextPage();
-    }
+    setNextButtonState(true);
+  }
+
+  @Override public void onServiceDisabled() {
+    setNextButtonState(false);
+  }
+
+  private void setNextButtonState(boolean enabled) {
+    final int buttonColor = enabled ? android.R.color.white : R.color.grey500;
+    binding.onboardingNext.setTextColor(ContextCompat.getColor(getContext(), buttonColor));
+    binding.onboardingNext.setOnClickListener(enabled ? v -> scrollToNextPage() : null);
   }
 }

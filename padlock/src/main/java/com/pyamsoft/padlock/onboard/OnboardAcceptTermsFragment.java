@@ -18,25 +18,45 @@ package com.pyamsoft.padlock.onboard;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.pyamsoft.padlock.databinding.OnboardingGetStartedBinding;
+import com.pyamsoft.padlock.databinding.OnboardAcceptTermsBinding;
+import timber.log.Timber;
 
-public class OnboardingGetStartedFragment extends Fragment {
+public class OnboardAcceptTermsFragment extends OnboardChildFragment {
 
-  private OnboardingGetStartedBinding binding;
+  private OnboardAcceptTermsBinding binding;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = OnboardingGetStartedBinding.inflate(inflater, container, false);
+    binding = OnboardAcceptTermsBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 
   @Override public void onDestroyView() {
     super.onDestroyView();
     binding.unbind();
+  }
+
+  @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    setupNextButton();
+    setupCancelButton();
+  }
+
+  private void setupCancelButton() {
+    binding.onboardingCancel.setOnClickListener(v -> {
+      Timber.w("Did not agree to terms");
+      getActivity().finish();
+    });
+  }
+
+  private void setupNextButton() {
+    binding.onboardingAcceptTerms.setOnClickListener(v -> {
+      Timber.i("Accepted Terms of use");
+      // TODO
+    });
   }
 }

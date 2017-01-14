@@ -16,15 +16,12 @@
 
 package com.pyamsoft.padlock.onboard;
 
-import com.pyamsoft.pydroid.presenter.Presenter;
+import com.pyamsoft.padlock.base.PadLockComponent;
+import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
+import dagger.Component;
 
-interface OnboardingEnableServicePresenter
-    extends Presenter<OnboardingEnableServicePresenter.View> {
+@FragmentScope @Component(dependencies = PadLockComponent.class, modules = OnboardModule.class)
+interface OnboardComponent {
 
-  void checkIfServiceIsRunning(boolean isRunning);
-
-  interface View {
-
-    void onServiceEnabled();
-  }
+  void inject(OnboardEnableServicePresenterLoader loader);
 }

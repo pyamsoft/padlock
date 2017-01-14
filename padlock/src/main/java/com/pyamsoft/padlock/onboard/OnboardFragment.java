@@ -19,24 +19,28 @@ package com.pyamsoft.padlock.onboard;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.Size;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewCompat;
-import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.databinding.FragmentOnboardingBinding;
 import timber.log.Timber;
 
-public class OnboardingFragment extends Fragment {
+public class OnboardFragment extends Fragment implements Onboard {
 
   @NonNull public static final String TAG = "OnboardingFragment";
-  static final int MAX_USABLE_PAGE_COUNT = 2;
+
+  /**
+   * Zero indexed
+   */
+  @Size private static final int MAX_USABLE_PAGE_COUNT = 2;
   @NonNull private static final String PAGER_SAVED_POSITION = "pager_saved_position";
+
   private FragmentOnboardingBinding binding;
-  private ViewPager.OnPageChangeListener pageChangeListener;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -47,26 +51,13 @@ public class OnboardingFragment extends Fragment {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    binding.onboardingPager.removeOnPageChangeListener(pageChangeListener);
-    pageChangeListener = null;
     binding.unbind();
   }
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     setupToolbar();
-
-    final int startPosition;
-    if (savedInstanceState != null) {
-      startPosition = savedInstanceState.getInt(PAGER_SAVED_POSITION, 0);
-    } else {
-      startPosition = 0;
-    }
-
-    Timber.d("Current pager position is %d, max is %d", startPosition, MAX_USABLE_PAGE_COUNT);
-    setupViewPager(startPosition);
-    setupNextButton(startPosition);
-    setupCancelButton(startPosition);
+    setupViewPager(savedInstanceState);
   }
 
   /**
@@ -77,61 +68,17 @@ public class OnboardingFragment extends Fragment {
     binding.onboardingToolbar.setTitle("Welcome to PadLock");
   }
 
-  private void setupViewPager(final int startPosition) {
+  private void setupViewPager(@Nullable Bundle savedInstanceState) {
+    final int startPosition;
+    if (savedInstanceState != null) {
+      startPosition = savedInstanceState.getInt(PAGER_SAVED_POSITION, 0);
+    } else {
+      startPosition = 0;
+    }
+
     ViewCompat.setElevation(binding.onboardingPager, 0);
     binding.onboardingPager.setAdapter(new OnboardingPagerAdapter(getChildFragmentManager()));
     binding.onboardingPager.setCurrentItem(startPosition);
-    pageChangeListener = new ViewPager.SimpleOnPageChangeListener() {
-
-      @Override public void onPageSelected(int position) {
-        super.onPageSelected(position);
-        if (position == MAX_USABLE_PAGE_COUNT) {
-          prepareAcceptTermsPage();
-        }
-      }
-    };
-
-    binding.onboardingPager.addOnPageChangeListener(pageChangeListener);
-  }
-
-  private void setupNextButton(final int position) {
-    if (position == MAX_USABLE_PAGE_COUNT) {
-      prepareAcceptTermsPage();
-    } else {
-      binding.onboardingNext.setOnClickListener(v -> scrollToNextPage());
-    }
-  }
-
-  void scrollToNextPage() {
-    Timber.d("Scroll to next page");
-    binding.onboardingPager.arrowScroll(View.FOCUS_RIGHT);
-  }
-
-  private void setupCancelButton(final int startPosition) {
-    binding.onboardingCancel.setOnClickListener(v -> {
-      Timber.w("Terms rejected, Close");
-      getActivity().finish();
-    });
-
-    final int visible;
-    if (startPosition == MAX_USABLE_PAGE_COUNT) {
-      visible = View.VISIBLE;
-    } else {
-      visible = View.GONE;
-    }
-
-    binding.onboardingCancel.setVisibility(visible);
-  }
-
-  void prepareAcceptTermsPage() {
-    Timber.d("End reached, this button serves as accept");
-    binding.onboardingNext.setText("Accept Terms");
-    binding.onboardingNext.setOnClickListener(v -> {
-      Timber.i("Terms accepted, show normal");
-      // TODO
-    });
-
-    binding.onboardingCancel.setVisibility(View.VISIBLE);
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
@@ -141,9 +88,13 @@ public class OnboardingFragment extends Fragment {
     super.onSaveInstanceState(outState);
   }
 
+  @Override public void scrollToNextPage() {
+    binding.onboardingPager.arrowScroll(View.FOCUS_RIGHT);
+  }
+
   static class OnboardingPagerAdapter extends FragmentStatePagerAdapter {
 
-    OnboardingPagerAdapter(FragmentManager fm) {
+    OnboardingPagerAdapter(@NonNull FragmentManager fm) {
       super(fm);
     }
 
@@ -155,13 +106,13 @@ public class OnboardingFragment extends Fragment {
       final Fragment fragment;
       switch (position) {
         case 0:
-          fragment = new OnboardingGetStartedFragment();
+          fragment = new OnboardGetStartedFragment();
           break;
         case 1:
-          fragment = new OnboardingEnableServiceFragment();
+          fragment = new OnboardEnableServiceFragment();
           break;
         case 2:
-          fragment = new OnboardingAcceptTermsFragment();
+          fragment = new OnboardAcceptTermsFragment();
           break;
         default:
           throw new IllegalArgumentException("Invalid position: " + position);

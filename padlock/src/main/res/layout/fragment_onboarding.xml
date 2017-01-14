@@ -26,7 +26,7 @@
       android:orientation="vertical"
       >
 
-    <com.pyamsoft.padlock.onboard.OnboardingNoSwipeViewPager
+    <com.pyamsoft.padlock.onboard.OnboardNoSwipeViewPager
         android:id="@+id/onboarding_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -39,46 +39,6 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         />
-
-    <LinearLayout
-        android:id="@+id/onboarding_bottom_bar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_gravity="bottom"
-        android:background="#4000"
-        android:orientation="horizontal"
-        >
-
-      <Button
-          android:id="@+id/onboarding_cancel"
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:gravity="center"
-          android:text="Cancel"
-          android:textAppearance="?android:attr/textAppearanceLarge"
-          android:textColor="@android:color/white"
-          style="?attr/buttonBarPositiveButtonStyle"
-          />
-
-      <View
-          android:layout_width="0dp"
-          android:layout_height="match_parent"
-          android:layout_weight="1"
-          />
-
-      <Button
-          android:id="@+id/onboarding_next"
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:gravity="center"
-          android:text="Next >"
-          android:textAppearance="?android:attr/textAppearanceLarge"
-          android:textColor="@android:color/white"
-          style="?attr/buttonBarPositiveButtonStyle"
-          />
-
-    </LinearLayout>
-
 
   </FrameLayout>
 
