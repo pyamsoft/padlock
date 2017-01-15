@@ -99,25 +99,19 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   @Override @CheckResult @NonNull
   public Observable<Integer> queueRecheckJob(@NonNull String packageName,
       @NonNull String activityName, long recheckTime) {
-    return Observable.defer(() -> Observable.just(preferences.isRecheckEnabled()))
-        .map(recheckEnabled -> {
-          if (!recheckEnabled) {
-            Timber.e("Recheck is not enabled");
-            return 0;
-          }
+    return Observable.fromCallable(() -> {
+      // Cancel any old recheck job for the class, but not the package
+      final Intent intent = new Intent(appContext, recheckServiceClass);
+      intent.putExtra(Recheck.EXTRA_PACKAGE_NAME, packageName);
+      intent.putExtra(Recheck.EXTRA_CLASS_NAME, activityName);
+      jobSchedulerCompat.cancel(intent);
 
-          // Cancel any old recheck job for the class, but not the package
-          final Intent intent = new Intent(appContext, recheckServiceClass);
-          intent.putExtra(Recheck.EXTRA_PACKAGE_NAME, packageName);
-          intent.putExtra(Recheck.EXTRA_CLASS_NAME, activityName);
-          jobSchedulerCompat.cancel(intent);
+      // Queue up a new recheck job
+      jobSchedulerCompat.set(intent, System.currentTimeMillis() + recheckTime);
 
-          // Queue up a new recheck job
-          jobSchedulerCompat.set(intent, System.currentTimeMillis() + recheckTime);
-
-          // KLUDGE Just return something valid for now
-          return 1;
-        });
+      // KLUDGE Just return something valid for now
+      return 1;
+    });
   }
 
   @NonNull @Override public Observable<Integer> ignoreEntryForTime(long ignoreMinutesInMillis,

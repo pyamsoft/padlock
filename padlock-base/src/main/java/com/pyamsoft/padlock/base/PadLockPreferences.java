@@ -29,8 +29,6 @@ public interface PadLockPreferences {
 
   void setLockInfoDialogOnBoard();
 
-  @CheckResult boolean isRecheckEnabled();
-
   @CheckResult long getDefaultIgnoreTime();
 
   @CheckResult long getTimeoutPeriod();

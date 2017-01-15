@@ -23,9 +23,6 @@
   <string name="timeout_time_key">timeout_time</string>
   <string name="timeout_time_default">0</string>
 
-  <string name="recheck_key">recheck</string>
-  <bool name="recheck_default">false</bool>
-
   <string name="install_listener_key">install_listener</string>
   <bool name="install_listener_default">true</bool>
 
