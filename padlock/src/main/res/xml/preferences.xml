@@ -46,13 +46,6 @@
         android:title="@string/lock_package_change_title"/>
 
     <CheckBoxPreference
-        android:defaultValue="@bool/recheck_default"
-        android:key="@string/recheck_key"
-        android:summaryOff="@string/recheck_summary_unchecked"
-        android:summaryOn="@string/recheck_summary_checked"
-        android:title="@string/recheck_title"/>
-
-    <CheckBoxPreference
         android:defaultValue="@bool/install_listener_default"
         android:key="@string/install_listener_key"
         android:summaryOff="@string/install_listener_summary_unchecked"

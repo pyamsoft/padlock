@@ -52,7 +52,7 @@
   <string name="ignore_for_60_minutes">Re-Lock after 1 Hour</string>
 
   <string name="ignore_time_title">Re-Lock Applications</string>
-  <string name="ignore_time_summary">Should PadLock re-lock applications after unlocking once?</string>
+  <string name="ignore_time_summary">Re-lock applications after initial unlocking</string>
 
   <string-array name="timeout_time">
     <item name="time_none">Do Not Timeout</item>
@@ -79,11 +79,7 @@
   </string-array>
 
   <string name="timeout_time_title">Timeout Times</string>
-  <string name="timeout_time_summary">Set the default Timeout after too many failed unlock attempts</string>
-
-  <string name="recheck_title">Check locking periodically</string>
-  <string name="recheck_summary_checked">Check if the current application should be locked after the Ignore period</string>
-  <string name="recheck_summary_unchecked">Do not check if the current application should be locked after the Ignore period</string>
+  <string name="timeout_time_summary">Set the timeout length after too many failed unlock attempts</string>
 
   <string name="install_listener_title">Notify on New Install</string>
   <string name="install_listener_summary_checked">Show suggestions to lock newly installed applications</string>
