@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
 import rx.Observable;
+import rx.functions.Func0;
 import timber.log.Timber;
 
 class LockServiceInteractorImpl implements LockServiceInteractor {
@@ -86,29 +87,28 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
    */
   @NonNull @CheckResult @Override public Observable<Boolean> hasNameChanged(@NonNull String name,
       @NonNull String oldName) {
-    return Observable.defer(() -> {
+    return Observable.fromCallable((Func0<Boolean>) () -> {
       Timber.d("Check if name has change");
-      return Observable.just(!name.equals(oldName));
+      return !name.equals(oldName);
     });
   }
 
   @NonNull @Override public Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
       @NonNull String className) {
-    return Observable.defer(() -> {
+    return Observable.fromCallable(() -> {
       Timber.d("Check if window is from lock screen");
       final String lockScreenPackageName = lockScreenActivity.getPackage().getName();
       final String lockScreenClassName = lockScreenActivity.getName();
 
       final boolean isPackage = packageName.equals(lockScreenPackageName);
-      final boolean lockScreen = isPackage && className.equals(lockScreenClassName);
-      return Observable.just(lockScreen);
+      return isPackage && className.equals(lockScreenClassName);
     });
   }
 
   @NonNull @Override public Observable<Boolean> isOnlyLockOnPackageChange() {
-    return Observable.defer(() -> {
+    return Observable.fromCallable(() -> {
       Timber.d("Check if locking only happens on package change");
-      return Observable.just(preferences.getLockOnPackageChange());
+      return preferences.getLockOnPackageChange();
     });
   }
 
@@ -120,17 +120,16 @@ class LockServiceInteractorImpl implements LockServiceInteractor {
   }
 
   @NonNull @Override public Observable<Boolean> isRestrictedWhileLocked() {
-    return Observable.defer(() -> {
+    return Observable.fromCallable(() -> {
       Timber.d("Check if window is restricted while device is locked");
-      return Observable.just(preferences.isIgnoreInKeyguard());
+      return preferences.isIgnoreInKeyguard();
     });
   }
 
   @NonNull @Override public Observable<Boolean> isDeviceLocked() {
-    return Observable.defer(() -> {
+    return Observable.fromCallable(() -> {
       Timber.d("Check if device is locked");
-      return Observable.just(
-          keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked());
+      return keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked();
     });
   }
 }
