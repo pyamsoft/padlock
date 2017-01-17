@@ -50,6 +50,7 @@ import com.pyamsoft.pydroid.design.util.FABUtil;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.tool.AsyncMapHelper;
+import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.List;
 import timber.log.Timber;
@@ -153,6 +154,11 @@ public class LockListFragment extends Fragment
     handler.postDelayed(() -> binding.applistFab.show(), 300L);
 
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
+
+    final FragmentActivity activity = getActivity();
+    if (activity instanceof RatingDialog.ChangeLogProvider) {
+      RatingDialog.showRatingDialog(activity, (RatingDialog.ChangeLogProvider) activity);
+    }
   }
 
   @Override public void onPause() {

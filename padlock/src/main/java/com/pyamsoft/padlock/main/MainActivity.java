@@ -42,7 +42,6 @@ import com.pyamsoft.padlock.purge.PurgeFragment;
 import com.pyamsoft.padlock.settings.SettingsFragment;
 import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
-import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.ui.sec.TamperActivity;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -263,7 +262,6 @@ public class MainActivity extends TamperActivity
   @Override protected void onPostResume() {
     super.onPostResume();
     AnimUtil.animateActionBarToolbar(binding.toolbar);
-    RatingDialog.showRatingDialog(this, this);
   }
 
   @NonNull @Override protected String getSafePackageName() {
