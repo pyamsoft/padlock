@@ -40,8 +40,9 @@ import timber.log.Timber;
 
 class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
-  @NonNull static final String ANDROID_SYSTEM_UI_PACKAGE = "com.android.systemui";
-  @NonNull static final String ANDROID_PACKAGE = "android";
+  @SuppressWarnings("WeakerAccess") @NonNull static final String ANDROID_SYSTEM_UI_PACKAGE =
+      "com.android.systemui";
+  @SuppressWarnings("WeakerAccess") @NonNull static final String ANDROID_PACKAGE = "android";
   @SuppressWarnings("WeakerAccess") @NonNull final PackageManager packageManager;
 
   @Inject PackageManagerWrapperImpl(@NonNull Context context) {
@@ -50,7 +51,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
   @NonNull @Override
   public Observable<Drawable> loadDrawableForPackageOrDefault(@NonNull String packageName) {
-    return Observable.defer(() -> {
+    return Observable.fromCallable(() -> {
       Drawable image;
       try {
         image = packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager);
@@ -58,13 +59,14 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         Timber.e(e, "PackageManager error");
         image = packageManager.getDefaultActivityIcon();
       }
-      return Observable.just(image);
+
+      return image;
     });
   }
 
   @NonNull @Override
   public Observable<String> getActivityListForPackage(@NonNull String packageName) {
-    return Observable.defer(() -> Observable.fromCallable(() -> {
+    return Observable.fromCallable(() -> {
       final List<String> activityEntries = new ArrayList<>();
       try {
         final PackageInfo packageInfo =
@@ -79,12 +81,12 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         Timber.e(e, "PackageManager error, return what we have for %s", packageName);
       }
       return activityEntries;
-    })).flatMap(Observable::from);
+    }).flatMap(Observable::from);
   }
 
   @VisibleForTesting @SuppressWarnings("WeakerAccess") @WorkerThread @NonNull @CheckResult
   Observable<ApplicationInfo> getInstalledApplications() {
-    return Observable.defer(() -> Observable.fromCallable(() -> {
+    return Observable.fromCallable(() -> {
       final Process process;
       boolean caughtPermissionDenial = false;
       final List<String> packageNames = new ArrayList<>();
@@ -128,7 +130,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
       }
 
       return packageNames;
-    }))
+    })
         .flatMap(Observable::from)
         .map(packageNameWithPrefix -> packageNameWithPrefix.replaceFirst("^package:", ""))
         .flatMap(this::getApplicationInfo);
@@ -158,45 +160,53 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
   @NonNull @Override
   public Observable<ApplicationInfo> getApplicationInfo(@NonNull String packageName) {
-    return Observable.defer(() -> Observable.fromCallable(() -> {
+    return Observable.fromCallable(() -> {
+      ApplicationInfo info;
       try {
-        return packageManager.getApplicationInfo(packageName, 0);
+        info = packageManager.getApplicationInfo(packageName, 0);
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "onError getApplicationInfo");
-        return null;
+        info = null;
       }
-    })).filter(applicationInfo -> applicationInfo != null);
+
+      return info;
+    }).filter(applicationInfo -> applicationInfo != null);
   }
 
   @NonNull @Override public Observable<String> loadPackageLabel(@NonNull ApplicationInfo info) {
-    return Observable.defer(
-        () -> Observable.fromCallable(() -> info.loadLabel(packageManager).toString()));
+    return Observable.fromCallable(() -> info.loadLabel(packageManager).toString());
   }
 
   @NonNull @Override public Observable<String> loadPackageLabel(@NonNull String packageName) {
-    return Observable.defer(() -> Observable.fromCallable(() -> {
+    return Observable.fromCallable(() -> {
+      ApplicationInfo info;
       try {
-        return packageManager.getApplicationInfo(packageName, 0);
+        info = packageManager.getApplicationInfo(packageName, 0);
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "EXCEPTION");
-        return null;
+        info = null;
       }
-    })).filter(applicationInfo -> applicationInfo != null).flatMap(this::loadPackageLabel);
+
+      return info;
+    }).filter(applicationInfo -> applicationInfo != null).flatMap(this::loadPackageLabel);
   }
 
   @NonNull @Override public Observable<ActivityInfo> getActivityInfo(@NonNull String packageName,
       @NonNull String activityName) {
-    return Observable.defer(() -> Observable.fromCallable(() -> {
+    return Observable.fromCallable(() -> {
       if (packageName.isEmpty() || activityName.isEmpty()) {
         return null;
       }
 
       final ComponentName componentName = new ComponentName(packageName, activityName);
+      ActivityInfo info;
       try {
-        return packageManager.getActivityInfo(componentName, 0);
+        info = packageManager.getActivityInfo(componentName, 0);
       } catch (PackageManager.NameNotFoundException e) {
-        return null;
+        info = null;
       }
-    })).filter(activityInfo -> activityInfo != null);
+
+      return info;
+    }).filter(activityInfo -> activityInfo != null);
   }
 }
