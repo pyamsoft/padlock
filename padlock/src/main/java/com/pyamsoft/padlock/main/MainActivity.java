@@ -37,7 +37,7 @@ import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
-import com.pyamsoft.padlock.onboard.OnboardFragment;
+import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFragment;
 import com.pyamsoft.padlock.purge.PurgeFragment;
 import com.pyamsoft.padlock.settings.SettingsFragment;
 import com.pyamsoft.pydroid.cache.PersistentCache;

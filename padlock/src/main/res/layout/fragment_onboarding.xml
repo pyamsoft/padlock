@@ -26,7 +26,7 @@
       android:orientation="vertical"
       >
 
-    <com.pyamsoft.padlock.onboard.OnboardNoSwipeViewPager
+    <com.pyamsoft.padlock.onboard.firstlaunch.OnboardNoSwipeViewPager
         android:id="@+id/onboarding_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
