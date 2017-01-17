@@ -64,7 +64,7 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
   }
 
   @NonNull @Override public Observable<Boolean> hasShownOnBoarding() {
-    return Observable.defer(() -> Observable.just(preferences.isLockInfoDialogOnBoard()));
+    return Observable.fromCallable(preferences::isLockInfoDialogOnBoard);
   }
 
   @Override public boolean isCacheEmpty() {
@@ -72,7 +72,7 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
   }
 
   @NonNull @Override public Observable<ActivityEntry> getCachedEntries() {
-    return Observable.defer(() -> Observable.from(activityEntryCache));
+    return Observable.fromCallable(() -> activityEntryCache).flatMap(Observable::from);
   }
 
   @Override public void clearCache() {
