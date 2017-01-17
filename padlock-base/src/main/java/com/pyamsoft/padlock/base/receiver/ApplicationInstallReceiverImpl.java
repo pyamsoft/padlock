@@ -31,6 +31,7 @@ import android.support.v7.app.NotificationCompat;
 import com.pyamsoft.padlock.base.R;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.pydroid.rx.SchedulerHelper;
+import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import javax.inject.Inject;
 import rx.Scheduler;
 import rx.Subscription;
@@ -47,9 +48,9 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
   @NonNull private final Scheduler obsScheduler;
   @NonNull private final Scheduler subScheduler;
   @NonNull private final PendingIntent pendingIntent;
+  @NonNull Subscription notification = Subscriptions.empty();
   private int notificationId;
   private boolean registered;
-  @NonNull private Subscription notification = Subscriptions.empty();
 
   @Inject ApplicationInstallReceiverImpl(@NonNull Context context,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull Scheduler obsScheduler,
@@ -65,6 +66,7 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
     pendingIntent =
         PendingIntent.getActivity(appContext, 421, new Intent(appContext, mainActivityClass), 0);
     notificationManager = NotificationManagerCompat.from(appContext);
+
     SchedulerHelper.enforceObserveScheduler(obsScheduler);
     SchedulerHelper.enforceSubscribeScheduler(subScheduler);
   }
@@ -78,6 +80,8 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
     final boolean isNew = !intent.hasExtra(Intent.EXTRA_REPLACING);
     final Uri data = intent.getData();
     final String packageName = data.getSchemeSpecificPart();
+
+    SubscriptionHelper.unsubscribe(notification);
     notification = packageManagerWrapper.loadPackageLabel(packageName)
         .subscribeOn(subScheduler)
         .observeOn(obsScheduler)
@@ -88,7 +92,7 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
             Timber.d("Package updated: %s", packageName);
           }
         }, throwable -> Timber.e(throwable, "onError launching notification for package: %s",
-            packageName), this::unsubNotification);
+            packageName), () -> SubscriptionHelper.unsubscribe(notification));
   }
 
   @SuppressWarnings("WeakerAccess") void onNewPackageInstalled(@NonNull String packageName,
@@ -106,12 +110,6 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
     notificationManager.notify(notificationId++, notification1);
   }
 
-  @SuppressWarnings("WeakerAccess") void unsubNotification() {
-    if (!notification.isUnsubscribed()) {
-      notification.unsubscribe();
-    }
-  }
-
   @Override public void register() {
     if (!registered) {
       appContext.registerReceiver(this, filter);
@@ -122,6 +120,7 @@ class ApplicationInstallReceiverImpl extends BroadcastReceiver
   @Override public void unregister() {
     if (registered) {
       appContext.unregisterReceiver(this);
+      SubscriptionHelper.unsubscribe(notification);
       registered = false;
     }
   }
