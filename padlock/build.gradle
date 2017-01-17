@@ -96,9 +96,6 @@ dependencies {
   // Firebase Crash
   compile "com.google.firebase:firebase-crash:$firebase"
 
-  // Tap Target View
-  compile "com.getkeepsafe.taptargetview:taptargetview:$tapTargetView"
-
   // PYDroid
   compile("com.github.pyamsoft.pydroid:pydroid-ui:$pydroid@aar") {
     transitive = true

@@ -36,6 +36,6 @@ import rx.Scheduler;
 
   @Provides SettingsPreferenceInteractor provideSettingsInteractor(PadLockDB padLockDB,
       PadLockPreferences preferences) {
-    return new SettingsPrefrenceInteractorImpl(padLockDB, preferences);
+    return new SettingsPreferenceInteractorImpl(padLockDB, preferences);
   }
 }

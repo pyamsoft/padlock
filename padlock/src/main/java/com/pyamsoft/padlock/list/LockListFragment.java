@@ -35,8 +35,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.mikepenz.fastadapter.FastAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.PadLock;
@@ -96,7 +94,6 @@ public class LockListFragment extends Fragment
     }
   };
   @Nullable private MenuItem displaySystemItem;
-  @Nullable private TapTargetSequence sequence;
   @Nullable private DividerItemDecoration dividerDecoration;
   @Nullable private AsyncMap.Entry fabIconTask;
   private boolean listIsRefreshed;
@@ -373,44 +370,7 @@ public class LockListFragment extends Fragment
 
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
-    if (sequence == null) {
-      final TapTarget fabTarget =
-          TapTarget.forView(binding.applistFab, getString(R.string.getting_started),
-              getString(R.string.getting_started_desc)).cancelable(false).tintTarget(false);
-
-      // If we use the first item we get a weird location, try a different item
-      TapTarget listTarget = null;
-      final LockListItem.ViewHolder holder =
-          (LockListItem.ViewHolder) binding.applistRecyclerview.findViewHolderForAdapterPosition(1);
-      if (holder != null) {
-        final View switchView = holder.getBinding().lockListToggle;
-        listTarget = TapTarget.forView(switchView, getString(R.string.onboard_title_locklist),
-            getString(R.string.onboard_desc_locklist)).tintTarget(false).cancelable(false);
-      }
-
-      // Hold a ref to the sequence or Activity will recycle bitmaps and crash
-      sequence = new TapTargetSequence(getActivity());
-      if (fabTarget != null) {
-        sequence.target(fabTarget);
-      }
-      if (listTarget != null) {
-        sequence.target(listTarget);
-      }
-
-      sequence.listener(new TapTargetSequence.Listener() {
-        @Override public void onSequenceFinish() {
-          if (presenter != null) {
-            presenter.setOnBoard();
-          }
-        }
-
-        @Override public void onSequenceCanceled(TapTarget lastTarget) {
-
-        }
-      });
-    }
-
-    sequence.start();
+    // TODO
   }
 
   @Override public void onListCleared() {

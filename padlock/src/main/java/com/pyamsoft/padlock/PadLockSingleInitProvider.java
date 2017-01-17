@@ -62,8 +62,6 @@ public class PadLockSingleInitProvider extends BaseInitProvider {
   @Override public void insertCustomLicensesIntoMap() {
     Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite");
     Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight");
-    Licenses.create("TapTargetView", "https://github.com/KeepSafe/TapTargetView",
-        "licenses/taptargetview");
     Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2");
     RxLicenses.addLicenses();
     UiLicenses.addLicenses();
