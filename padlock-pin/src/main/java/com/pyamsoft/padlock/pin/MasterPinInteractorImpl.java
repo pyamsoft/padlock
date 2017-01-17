@@ -32,7 +32,7 @@ class MasterPinInteractorImpl implements MasterPinInteractor {
   }
 
   @CheckResult @NonNull @Override public Observable<String> getMasterPin() {
-    return Observable.defer(() -> Observable.just(preferences.getMasterPassword()));
+    return Observable.fromCallable(preferences::getMasterPassword);
   }
 
   @Override public void setMasterPin(@Nullable String pin) {
@@ -44,7 +44,7 @@ class MasterPinInteractorImpl implements MasterPinInteractor {
   }
 
   @CheckResult @NonNull @Override public Observable<String> getHint() {
-    return Observable.defer(() -> Observable.just(preferences.getHint()));
+    return Observable.fromCallable(preferences::getHint);
   }
 
   @Override public void setHint(@Nullable String hint) {

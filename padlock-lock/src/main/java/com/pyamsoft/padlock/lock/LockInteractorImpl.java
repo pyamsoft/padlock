@@ -37,10 +37,10 @@ abstract class LockInteractorImpl implements LockInteractor {
   }
 
   @Override @CheckResult @NonNull public Observable<String> encodeSHA256(@NonNull String attempt) {
-    return Observable.defer(() -> {
+    return Observable.fromCallable(() -> {
       messageDigest.reset();
       final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
-      return Observable.just(Base64.encodeToString(output, Base64.DEFAULT).trim());
+      return Base64.encodeToString(output, Base64.DEFAULT).trim();
     });
   }
 
