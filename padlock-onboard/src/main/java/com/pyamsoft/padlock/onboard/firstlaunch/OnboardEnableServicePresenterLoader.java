@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard;
+package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import com.pyamsoft.padlock.base.Injector;
 import com.pyamsoft.pydroid.FuncNone;

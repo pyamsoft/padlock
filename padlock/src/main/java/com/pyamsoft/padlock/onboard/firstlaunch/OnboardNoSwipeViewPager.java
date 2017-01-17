@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard;
+package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.content.Context;
 import android.support.v4.view.ViewPager;

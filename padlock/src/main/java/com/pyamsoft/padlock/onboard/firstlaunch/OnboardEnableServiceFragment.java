@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard;
+package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;

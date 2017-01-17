@@ -14,22 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard;
+package com.pyamsoft.padlock.onboard.firstlaunch;
 
-import com.pyamsoft.padlock.base.Injector;
-import com.pyamsoft.pydroid.FuncNone;
-import javax.inject.Inject;
-import javax.inject.Provider;
+interface Onboard {
 
-class OnboardAcceptTermsPresenterLoader implements FuncNone<OnboardAcceptTermsPresenter> {
-
-  @SuppressWarnings("WeakerAccess") @Inject Provider<OnboardAcceptTermsPresenter> presenterProvider;
-
-  @Override public OnboardAcceptTermsPresenter call() {
-    DaggerOnboardComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
-    return presenterProvider.get();
-  }
+  void scrollToNextPage();
 }

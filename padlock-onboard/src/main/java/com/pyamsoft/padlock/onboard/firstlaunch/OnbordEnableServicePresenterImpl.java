@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard;
+package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.rx.SchedulerPresenter;
