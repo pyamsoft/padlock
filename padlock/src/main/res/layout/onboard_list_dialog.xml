@@ -34,14 +34,46 @@
         android:layout_weight="1"
         />
 
-    <android.support.v7.widget.Toolbar
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/onboard_list_toolbar"
+    <LinearLayout
+        android:id="@+id/onboard_list_buttonbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        />
+        android:layout_height="wrap_content"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        >
+
+      <com.pyamsoft.pydroid.ui.widget.SquareImageView
+          android:id="@+id/onboard_list_back"
+          android:layout_width="24dp"
+          android:layout_height="24dp"
+          android:layout_margin="16dp"
+          />
+
+      <View
+          android:layout_width="0dp"
+          android:layout_height="match_parent"
+          android:layout_weight="1"
+          />
+
+      <android.support.design.widget.FloatingActionButton
+          xmlns:app="http://schemas.android.com/apk/res-auto"
+          android:id="@+id/onboard_list_confirm"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_margin="16dp"
+          app:elevation="6dp"
+          app:fabSize="normal"
+          app:pressedTranslationZ="12dp"
+          />
+
+      <com.pyamsoft.pydroid.ui.widget.SquareImageView
+          android:id="@+id/onboard_list_next"
+          android:layout_width="24dp"
+          android:layout_height="24dp"
+          android:layout_margin="16dp"
+          />
+
+    </LinearLayout>
 
   </LinearLayout>
 
