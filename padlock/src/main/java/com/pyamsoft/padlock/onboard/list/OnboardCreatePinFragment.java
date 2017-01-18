@@ -14,37 +14,52 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard.firstlaunch;
+package com.pyamsoft.padlock.onboard.list;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.pyamsoft.padlock.databinding.OnboardFirstlaunchGetStartedBinding;
+import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.databinding.OnboardListCreatePinBinding;
+import com.pyamsoft.pydroid.tool.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncMap;
+import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 
-public class OnboardGetStartedFragment extends OnboardChildFragment {
+public class OnboardCreatePinFragment extends OnboardChildFragment {
 
-  private OnboardFirstlaunchGetStartedBinding binding;
+  private OnboardListCreatePinBinding binding;
+  private AsyncMap.Entry imageTask;
+
+  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    PadLock.getRefWatcher(this).watch(this);
+  }
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = OnboardFirstlaunchGetStartedBinding.inflate(inflater, container, false);
+    binding = OnboardListCreatePinBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 
   @Override public void onDestroyView() {
     super.onDestroyView();
+    AsyncMapHelper.unsubscribe(imageTask);
     binding.unbind();
   }
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    setupNextButton();
-  }
 
-  private void setupNextButton() {
-    binding.onboardingNext.setOnClickListener(v -> scrollToNextPage());
+    AsyncMapHelper.unsubscribe(imageTask);
+    imageTask =
+        AsyncDrawable.load(R.drawable.list_onboard_1).into(binding.onboardListCreatePinImage);
   }
 }

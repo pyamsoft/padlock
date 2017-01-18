@@ -72,4 +72,7 @@
     \n\nThis password is stored locally on your device and is never transmitted or used in any other way. You are the sole individual who would know what your password is.
     \n\nBy using PadLock, you assume the responsibility of remembering your password for the applications you choose to protect. By continuing, you agree that forgetting the password used to lock your applications may result in certain functions of your device becoming inaccessible, and that pyamsoft will not be held liable for any reason.
   </string>
+  <string name="next_page">Next Page</string>
+  <string name="onboard_create_pin_msg">Get started by first creating a special PIN to secure applications. All applications that are selected to be locked will be secured with this PIN, and will require it to unlock applications in the future.
+    \n\nMake a strong PIN that is easy to remember, but please know that there are no requirements for your PIN.</string>
 </resources>

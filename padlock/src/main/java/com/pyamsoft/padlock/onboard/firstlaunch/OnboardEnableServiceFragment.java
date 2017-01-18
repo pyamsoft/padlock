@@ -23,7 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.databinding.OnboardEnableServiceBinding;
+import com.pyamsoft.padlock.databinding.OnboardFirstlaunchEnableServiceBinding;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.padlock.uicommon.AccessibilityRequestDelegate;
 import com.pyamsoft.pydroid.cache.PersistentCache;
@@ -35,12 +35,12 @@ public class OnboardEnableServiceFragment extends OnboardChildFragment
   @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
   @NonNull final AccessibilityRequestDelegate delegate = new AccessibilityRequestDelegate();
   OnboardEnableServicePresenter presenter;
-  private OnboardEnableServiceBinding binding;
+  private OnboardFirstlaunchEnableServiceBinding binding;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = OnboardEnableServiceBinding.inflate(inflater, container, false);
+    binding = OnboardFirstlaunchEnableServiceBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 

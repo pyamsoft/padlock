@@ -27,7 +27,7 @@ import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.pyamsoft.padlock.databinding.FragmentOnboardingBinding;
+import com.pyamsoft.padlock.databinding.FragmentOnboardingFirstlaunchBinding;
 import timber.log.Timber;
 
 public class OnboardFragment extends Fragment implements Onboard {
@@ -40,12 +40,12 @@ public class OnboardFragment extends Fragment implements Onboard {
   @Size private static final int MAX_USABLE_PAGE_COUNT = 2;
   @NonNull private static final String PAGER_SAVED_POSITION = "pager_saved_position";
 
-  private FragmentOnboardingBinding binding;
+  private FragmentOnboardingFirstlaunchBinding binding;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = FragmentOnboardingBinding.inflate(inflater, container, false);
+    binding = FragmentOnboardingFirstlaunchBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 

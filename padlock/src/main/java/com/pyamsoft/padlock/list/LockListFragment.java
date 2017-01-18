@@ -43,6 +43,7 @@ import com.pyamsoft.padlock.databinding.FragmentLockListBinding;
 import com.pyamsoft.padlock.lock.PinEntryDialog;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.padlock.onboard.list.OnboardingDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
@@ -376,7 +377,10 @@ public class LockListFragment extends Fragment
 
   @Override public void showOnBoarding() {
     Timber.d("Show onboarding");
-    // TODO
+    if (getFragmentManager().findFragmentByTag(OnboardingDialog.TAG) == null) {
+      AppUtil.guaranteeSingleDialogFragment(getActivity(), new OnboardingDialog(),
+          OnboardingDialog.TAG);
+    }
   }
 
   @Override public void onListCleared() {
