@@ -34,12 +34,15 @@ import android.view.WindowManager;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.OnboardListDialogBinding;
+import com.pyamsoft.pydroid.tool.AsyncDrawable;
+import com.pyamsoft.pydroid.tool.AsyncMap;
 
 public class OnboardingDialog extends DialogFragment implements Onboard {
 
   @NonNull public static final String TAG = "OnboardingDialog";
   @NonNull private static final String KEY_LAST_POSITION = "key_onboardin_list_dialog_position";
   private static final int PAGER_PAGE_COUNT = 3;
+  @NonNull private final AsyncDrawable.Mapper mapper = new AsyncDrawable.Mapper();
   private OnboardListDialogBinding binding;
   private ViewPager.OnPageChangeListener pageChangeListener;
 
@@ -68,6 +71,7 @@ public class OnboardingDialog extends DialogFragment implements Onboard {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
+    mapper.clear();
     binding.onboardListPager.removeOnPageChangeListener(pageChangeListener);
     binding.unbind();
   }
@@ -81,7 +85,7 @@ public class OnboardingDialog extends DialogFragment implements Onboard {
     } else {
       position = savedInstanceState.getInt(KEY_LAST_POSITION, 0);
     }
-    setupToolbar(position);
+    setupButtons(position);
     setupViewPager(position);
   }
 
@@ -100,19 +104,23 @@ public class OnboardingDialog extends DialogFragment implements Onboard {
     }
   }
 
-  private void setupToolbar(int position) {
-    ViewCompat.setElevation(binding.onboardListToolbar, 0);
-    binding.onboardListToolbar.setTitle("");
-    binding.onboardListToolbar.inflateMenu(R.menu.onboarding_next_page_menu);
-    binding.onboardListToolbar.setNavigationOnClickListener(v -> scrollToPreviousPage());
-    binding.onboardListToolbar.setOnMenuItemClickListener(item -> {
-      if (item.getItemId() == R.id.onboarding_next_page) {
-        scrollToNextPage();
-        return true;
-      }
+  private void setupButtons(int position) {
+    ViewCompat.setElevation(binding.onboardListButtonbar, 0);
+    binding.onboardListBack.setOnClickListener(v -> scrollToPreviousPage());
+    binding.onboardListNext.setOnClickListener(v -> scrollToNextPage());
+    binding.onboardListConfirm.setOnClickListener(v -> completeOnboarding());
 
-      return false;
-    });
+    final AsyncMap.Entry backTask =
+        AsyncDrawable.load(R.drawable.ic_arrow_back_24dp).into(binding.onboardListBack);
+    mapper.put("back", backTask);
+
+    final AsyncMap.Entry nextTask =
+        AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.onboardListNext);
+    mapper.put("next", nextTask);
+
+    final AsyncMap.Entry confirmTask =
+        AsyncDrawable.load(R.drawable.ic_check_24dp).into(binding.onboardListConfirm);
+    mapper.put("confirm", confirmTask);
 
     onPageChangeToolbarResponse(position);
   }
@@ -133,17 +141,23 @@ public class OnboardingDialog extends DialogFragment implements Onboard {
 
   void onPageChangeToolbarResponse(int position) {
     if (position == 0) {
-      binding.onboardListToolbar.setNavigationIcon(null);
+      binding.onboardListBack.setVisibility(View.GONE);
+      binding.onboardListConfirm.setVisibility(View.GONE);
     } else {
-      binding.onboardListToolbar.setNavigationIcon(R.drawable.ic_arrow_back_24dp);
+      binding.onboardListBack.setVisibility(View.VISIBLE);
+      if (position + 1 < PAGER_PAGE_COUNT) {
+        binding.onboardListConfirm.setVisibility(View.GONE);
+        binding.onboardListConfirm.hide();
+        binding.onboardListNext.setVisibility(View.VISIBLE);
+      } else {
+        binding.onboardListNext.setVisibility(View.GONE);
+        binding.onboardListConfirm.setVisibility(View.VISIBLE);
+        binding.onboardListConfirm.show();
+      }
     }
-
-    binding.onboardListToolbar.getMenu()
-        .findItem(R.id.onboarding_next_page)
-        .setVisible(position + 1 < PAGER_PAGE_COUNT);
   }
 
-  @Override public void onboardingComplete() {
+  @Override public void completeOnboarding() {
     // TODO Save onboarding
     dismiss();
   }

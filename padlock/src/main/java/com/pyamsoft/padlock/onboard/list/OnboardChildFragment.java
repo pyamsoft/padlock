@@ -30,8 +30,8 @@ abstract class OnboardChildFragment extends Fragment implements Onboard {
     getOnboard().scrollToPreviousPage();
   }
 
-  @Override public void onboardingComplete() {
-    getOnboard().onboardingComplete();
+  @Override public void completeOnboarding() {
+    getOnboard().completeOnboarding();
   }
 
   @CheckResult @NonNull private Onboard getOnboard() {

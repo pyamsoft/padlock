@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.onboard.list;
 
 interface Onboard {
 
-  void onboardingComplete();
+  void completeOnboarding();
 
   void scrollToPreviousPage();
 
