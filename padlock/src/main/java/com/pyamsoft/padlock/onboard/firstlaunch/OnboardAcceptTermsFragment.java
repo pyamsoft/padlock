@@ -23,7 +23,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.pyamsoft.padlock.databinding.OnboardAcceptTermsBinding;
+import com.pyamsoft.padlock.databinding.OnboardFirstlaunchAcceptTermsBinding;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.pydroid.cache.PersistentCache;
 import timber.log.Timber;
@@ -34,7 +34,7 @@ public class OnboardAcceptTermsFragment extends OnboardChildFragment
   @NonNull private static final String TAG = "OnboardAcceptTermsFragment";
   @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
   OnboardAcceptTermsPresenter presenter;
-  private OnboardAcceptTermsBinding binding;
+  private OnboardFirstlaunchAcceptTermsBinding binding;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -45,7 +45,7 @@ public class OnboardAcceptTermsFragment extends OnboardChildFragment
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = OnboardAcceptTermsBinding.inflate(inflater, container, false);
+    binding = OnboardFirstlaunchAcceptTermsBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright 2016 Peter Kenji Yamanaka
   ~
@@ -14,12 +15,13 @@
   ~ limitations under the License.
   -->
 
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="24dp"
-    android:viewportHeight="24.0"
-    android:viewportWidth="24.0"
-    android:width="24dp">
-  <path
-      android:fillColor="#FFF"
-      android:pathData="M12,4l-1.41,1.41L16.17,11H4v2h12.17l-5.58,5.59L12,20l8,-8z"/>
-</vector>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      android:id="@+id/onboarding_next_page"
+      android:icon="@drawable/ic_arrow_forward_24dp"
+      android:title="@string/next_page"
+      app:showAsAction="always"/>
+
+</menu>

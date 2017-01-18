@@ -190,8 +190,9 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
       }
     });
 
-    final AsyncMap.Entry arrowGoTask =
-        AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.lockImageGo);
+    final AsyncMap.Entry arrowGoTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp)
+        .tint(R.color.orangeA200)
+        .into(binding.lockImageGo);
     mapper.put("arrow", arrowGoTask);
   }
 
