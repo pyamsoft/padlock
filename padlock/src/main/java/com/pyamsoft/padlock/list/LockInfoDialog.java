@@ -335,8 +335,12 @@ public class LockInfoDialog extends DialogFragment
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  @Override public void showOnBoarding() {
+  @Override public void onShowOnboarding() {
     Timber.d("Show onboarding");
+    // TODO
+  }
+
+  @Override public void onOnboardingComplete() {
     // TODO
   }
 

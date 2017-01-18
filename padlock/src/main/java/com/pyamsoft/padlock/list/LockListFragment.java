@@ -155,17 +155,19 @@ public class LockListFragment extends Fragment
     handler.postDelayed(() -> binding.applistFab.show(), 300L);
 
     MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
-
-    final FragmentActivity activity = getActivity();
-    if (activity instanceof RatingDialog.ChangeLogProvider) {
-      RatingDialog.showRatingDialog(activity, (RatingDialog.ChangeLogProvider) activity);
-    }
   }
 
   @Override public void onPause() {
     super.onPause();
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> binding.applistFab.hide(), 300L);
+  }
+
+  @Override public void onOnboardingComplete() {
+    final FragmentActivity activity = getActivity();
+    if (activity instanceof RatingDialog.ChangeLogProvider) {
+      RatingDialog.showRatingDialog(activity, (RatingDialog.ChangeLogProvider) activity);
+    }
   }
 
   private void setupSwipeRefresh() {
@@ -243,11 +245,11 @@ public class LockListFragment extends Fragment
     displaySystemItem.setChecked(visible);
   }
 
-  @Override public void setSystemVisible() {
+  @Override public void onSetSystemVisible() {
     setSystemVisible(true);
   }
 
-  @Override public void setSystemInvisible() {
+  @Override public void onSetSystemInvisible() {
     setSystemVisible(false);
   }
 
@@ -305,12 +307,12 @@ public class LockListFragment extends Fragment
     FABUtil.setupFABBehavior(binding.applistFab, new HideScrollFABBehavior(24));
   }
 
-  @Override public void setFABStateEnabled() {
+  @Override public void onSetFABStateEnabled() {
     AsyncMapHelper.unsubscribe(fabIconTask);
     fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
   }
 
-  @Override public void setFABStateDisabled() {
+  @Override public void onSetFABStateDisabled() {
     AsyncMapHelper.unsubscribe(fabIconTask);
     fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
   }
@@ -331,7 +333,7 @@ public class LockListFragment extends Fragment
   }
 
   @Override public void onCreateMasterPinSuccess() {
-    setFABStateEnabled();
+    onSetFABStateEnabled();
     final View v = getView();
     if (v != null) {
       Snackbar.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT).show();
@@ -343,7 +345,7 @@ public class LockListFragment extends Fragment
   }
 
   @Override public void onClearMasterPinSuccess() {
-    setFABStateDisabled();
+    onSetFABStateDisabled();
     final View v = getView();
     if (v != null) {
       Snackbar.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT).show();
@@ -375,7 +377,7 @@ public class LockListFragment extends Fragment
     AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
   }
 
-  @Override public void showOnBoarding() {
+  @Override public void onShowOnboarding() {
     Timber.d("Show onboarding");
     if (getFragmentManager().findFragmentByTag(OnboardingDialog.TAG) == null) {
       AppUtil.guaranteeSingleDialogFragment(getActivity(), new OnboardingDialog(),

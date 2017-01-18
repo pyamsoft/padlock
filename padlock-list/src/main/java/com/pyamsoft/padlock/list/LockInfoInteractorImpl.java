@@ -59,10 +59,6 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
         .toList();
   }
 
-  @Override public void setShownOnBoarding() {
-    preferences.setLockInfoDialogOnBoard();
-  }
-
   @NonNull @Override public Observable<Boolean> hasShownOnBoarding() {
     return Observable.fromCallable(preferences::isLockInfoDialogOnBoard);
   }

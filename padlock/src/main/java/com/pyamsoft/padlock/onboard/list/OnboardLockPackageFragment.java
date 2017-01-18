@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.onboard.list;
 
 import com.pyamsoft.padlock.R;
 
-public class OnboardCreatePinFragment extends OnboardContentFragment {
+public class OnboardLockPackageFragment extends OnboardContentFragment {
 
   @Override protected int getOnboardText() {
     return R.string.onboard_create_pin_msg;
