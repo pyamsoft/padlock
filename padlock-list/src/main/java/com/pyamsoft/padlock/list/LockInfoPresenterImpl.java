@@ -298,16 +298,14 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboard -> getView(lockList -> {
-          if (!onboard) {
-            lockList.showOnBoarding();
+          if (onboard) {
+            lockList.onOnboardingComplete();
+          } else {
+            lockList.onShowOnboarding();
           }
         }), throwable -> {
           Timber.e(throwable, "onError");
           getView(LockInfoView::onListPopulateError);
         }, () -> SubscriptionHelper.unsubscribe(onboardSubscription));
-  }
-
-  @Override public void setOnBoard() {
-    lockInfoInteractor.setShownOnBoarding();
   }
 }

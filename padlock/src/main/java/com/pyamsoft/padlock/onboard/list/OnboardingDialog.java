@@ -177,7 +177,21 @@ public class OnboardingDialog extends DialogFragment implements Onboard {
     }
 
     @Override public Fragment getItem(int position) {
-      return new OnboardCreatePinFragment();
+      final Fragment fragment;
+      switch (position) {
+        case 0:
+          fragment = new OnboardCreatePinFragment();
+          break;
+        case 1:
+          fragment = new OnboardLockPackageFragment();
+          break;
+        case 2:
+          fragment = new OnboardShowInfoFragment();
+          break;
+        default:
+          throw new IllegalArgumentException("Invalid position: " + position);
+      }
+      return fragment;
     }
 
     @Override public int getCount() {

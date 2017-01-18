@@ -20,7 +20,6 @@
     >
 
   <ScrollView
-      android:id="@+id/onboard_list_create_pin_scroll"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       >
@@ -32,7 +31,7 @@
         >
 
       <ImageView
-          android:id="@+id/onboard_list_create_pin_image"
+          android:id="@+id/onboard_list_content_image"
           android:layout_width="match_parent"
           android:layout_height="180dp"
           android:contentDescription="@string/blank"
@@ -40,11 +39,10 @@
           />
 
       <TextView
-          android:id="@+id/onboard_list_create_pin_text"
+          android:id="@+id/onboard_list_content_text"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:padding="16dp"
-          android:text="@string/onboard_create_pin_msg"
           android:textAppearance="?android:attr/textAppearanceMedium"
           android:textColor="@color/material_light_background"
           />

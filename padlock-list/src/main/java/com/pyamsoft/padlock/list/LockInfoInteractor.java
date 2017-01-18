@@ -34,8 +34,6 @@ interface LockInfoInteractor extends LockCommonInteractor {
   @CheckResult @NonNull Observable<LockState> updateExistingEntry(@NonNull String packageName,
       @NonNull String activityName, boolean whitelist);
 
-  void setShownOnBoarding();
-
   @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding();
 
   @CheckResult boolean isCacheEmpty();

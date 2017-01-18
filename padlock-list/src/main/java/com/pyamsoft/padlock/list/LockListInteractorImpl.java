@@ -57,10 +57,6 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
     preferences.setSystemVisible(visible);
   }
 
-  @Override public void setShownOnBoarding() {
-    preferences.setOnBoard();
-  }
-
   @NonNull @Override public Observable<ApplicationInfo> getActiveApplications() {
     return packageManagerWrapper.getActiveApplications();
   }
