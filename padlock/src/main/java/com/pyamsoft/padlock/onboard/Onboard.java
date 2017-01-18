@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard.firstlaunch;
+package com.pyamsoft.padlock.onboard;
 
-interface Onboard {
+public interface Onboard {
+
+  void completeOnboarding();
+
+  void scrollToPreviousPage();
 
   void scrollToNextPage();
 }
