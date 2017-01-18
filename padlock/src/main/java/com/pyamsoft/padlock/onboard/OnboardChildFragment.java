@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard.list;
+package com.pyamsoft.padlock.onboard;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 
-abstract class OnboardChildFragment extends Fragment implements Onboard {
+public abstract class OnboardChildFragment extends Fragment implements Onboard {
+
+  protected OnboardChildFragment() {
+
+  }
 
   @Override public void scrollToNextPage() {
     getOnboard().scrollToNextPage();

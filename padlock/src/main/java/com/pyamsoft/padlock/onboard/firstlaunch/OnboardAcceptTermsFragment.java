@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.onboard.firstlaunch;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,7 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.databinding.OnboardFirstlaunchAcceptTermsBinding;
-import com.pyamsoft.padlock.main.MainActivity;
+import com.pyamsoft.padlock.onboard.OnboardChildFragment;
 import com.pyamsoft.pydroid.cache.PersistentCache;
 import timber.log.Timber;
 
@@ -85,11 +84,6 @@ public class OnboardAcceptTermsFragment extends OnboardChildFragment
   }
 
   @Override public void onUsageTermsAccepted() {
-    final Activity activity = getActivity();
-    if (activity instanceof MainActivity) {
-      ((MainActivity) activity).onOnboardingCompleted();
-    } else {
-      throw new IllegalStateException("Activity cannot handle onboarding result");
-    }
+    completeOnboarding();
   }
 }

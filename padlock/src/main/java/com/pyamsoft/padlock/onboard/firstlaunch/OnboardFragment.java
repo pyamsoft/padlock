@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.onboard.firstlaunch;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,6 +29,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.databinding.FragmentOnboardingFirstlaunchBinding;
+import com.pyamsoft.padlock.main.MainActivity;
+import com.pyamsoft.padlock.onboard.Onboard;
 import timber.log.Timber;
 
 public class OnboardFragment extends Fragment implements Onboard {
@@ -86,6 +89,19 @@ public class OnboardFragment extends Fragment implements Onboard {
     Timber.d("Save current pager position: %d", position);
     outState.putInt(PAGER_SAVED_POSITION, position);
     super.onSaveInstanceState(outState);
+  }
+
+  @Override public void completeOnboarding() {
+    final Activity activity = getActivity();
+    if (activity instanceof MainActivity) {
+      ((MainActivity) activity).onOnboardingCompleted();
+    } else {
+      throw new IllegalStateException("Activity cannot handle onOnboardingCompleted");
+    }
+  }
+
+  @Override public void scrollToPreviousPage() {
+
   }
 
   @Override public void scrollToNextPage() {
