@@ -100,8 +100,8 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   }
 
   @Override public void showConfirmDialog(int type) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
-        ConfirmationDialog.newInstance(type), "confirm_dialog");
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), ConfirmationDialog.newInstance(type),
+        "confirm_dialog");
   }
 
   @Override public void onClearAll() {

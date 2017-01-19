@@ -158,8 +158,7 @@ public class PurgeFragment extends Fragment implements PurgePresenter.View {
     final boolean handled;
     switch (item.getItemId()) {
       case R.id.menu_purge_all:
-        AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new PurgeAllDialog(),
-            "purge_all");
+        AppUtil.onlyLoadOnceDialogFragment(getActivity(), new PurgeAllDialog(), "purge_all");
         handled = true;
         break;
       default:
@@ -184,7 +183,7 @@ public class PurgeFragment extends Fragment implements PurgePresenter.View {
   @SuppressWarnings("WeakerAccess") void handleDeleteRequest(int position,
       @NonNull String packageName) {
     Timber.d("Handle delete request for %s at %d", packageName, position);
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(),
         PurgeSingleItemDialog.newInstance(packageName), "purge_single");
   }
 
