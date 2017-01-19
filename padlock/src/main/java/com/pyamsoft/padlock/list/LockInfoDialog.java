@@ -293,7 +293,7 @@ public class LockInfoDialog extends DialogFragment
   @Override public void onListPopulateError() {
     Timber.e("onListPopulateError");
     onListPopulated();
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
   }
 
   @Override public void onListCleared() {
@@ -332,7 +332,7 @@ public class LockInfoDialog extends DialogFragment
   }
 
   @Override public void onDatabaseEntryError(int position) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
   }
 
   @Override public void onShowOnboarding() {

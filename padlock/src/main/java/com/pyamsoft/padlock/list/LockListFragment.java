@@ -166,7 +166,7 @@ public class LockListFragment extends Fragment
   @Override public void onOnboardingComplete() {
     final FragmentActivity activity = getActivity();
     if (activity instanceof RatingDialog.ChangeLogProvider) {
-      RatingDialog.showRatingDialog(activity, (RatingDialog.ChangeLogProvider) activity);
+      RatingDialog.showRatingDialog(activity, (RatingDialog.ChangeLogProvider) activity, false);
     }
   }
 
@@ -318,7 +318,7 @@ public class LockListFragment extends Fragment
   }
 
   @Override public void onCreateAccessibilityDialog() {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new AccessibilityRequestDialog(),
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new AccessibilityRequestDialog(),
         "accessibility");
   }
 
@@ -328,7 +328,7 @@ public class LockListFragment extends Fragment
 
   @Override
   public void onPinEntryDialogRequested(@NonNull String packageName, @NonNull String activityName) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(),
         PinEntryDialog.newInstance(packageName, activityName), PIN_DIALOG_TAG);
   }
 
@@ -374,15 +374,12 @@ public class LockListFragment extends Fragment
   @Override public void onListPopulateError() {
     Timber.e("onListPopulateError");
     onListPopulated();
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
   }
 
   @Override public void onShowOnboarding() {
     Timber.d("Show onboarding");
-    if (getFragmentManager().findFragmentByTag(OnboardingDialog.TAG) == null) {
-      AppUtil.guaranteeSingleDialogFragment(getActivity(), new OnboardingDialog(),
-          OnboardingDialog.TAG);
-    }
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardingDialog(), OnboardingDialog.TAG);
   }
 
   @Override public void onListCleared() {
@@ -435,7 +432,7 @@ public class LockListFragment extends Fragment
   }
 
   @Override public void onDatabaseEntryError(int position) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
   }
 
   @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(boolean lock, int position,
@@ -446,7 +443,7 @@ public class LockListFragment extends Fragment
   }
 
   @SuppressWarnings("WeakerAccess") void displayLockInfoFragment(@NonNull AppEntry entry) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), LockInfoDialog.newInstance(entry),
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), LockInfoDialog.newInstance(entry),
         LockInfoDialog.TAG);
   }
 }
