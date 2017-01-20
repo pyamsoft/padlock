@@ -75,4 +75,6 @@
   <string name="next_page">Next Page</string>
   <string name="onboard_create_pin_msg">Get started by first creating a special PIN to secure applications. All applications that are selected to be locked will be secured with this PIN, and will require it to unlock applications in the future.
     \n\nMake a strong PIN that is easy to remember, but please know that there are no requirements for your PIN.</string>
+  <string name="onboard_show_lockinfo_msg">TESTING HERE</string>
+  <string name="onboard_lock_package_msg">TEST</string>
 </resources>

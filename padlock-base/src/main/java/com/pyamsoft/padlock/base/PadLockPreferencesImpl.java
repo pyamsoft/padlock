@@ -80,12 +80,8 @@ class PadLockPreferencesImpl implements PadLockPreferences {
     preferences.edit().remove(HINT).apply();
   }
 
-  @Override public boolean isLockInfoDialogOnBoard() {
+  @Override public boolean isDialogOnBoard() {
     return preferences.getBoolean(LOCK_DIALOG_ONBOARD, false);
-  }
-
-  @Override public void setLockInfoDialogOnBoard() {
-    preferences.edit().putBoolean(LOCK_DIALOG_ONBOARD, true).apply();
   }
 
   @Override @CheckResult public long getDefaultIgnoreTime() {
@@ -128,12 +124,16 @@ class PadLockPreferencesImpl implements PadLockPreferences {
     preferences.edit().putBoolean(AGREED, true).apply();
   }
 
-  @Override @CheckResult public boolean isOnBoard() {
+  @Override @CheckResult public boolean isListOnBoard() {
     return preferences.getBoolean(LOCK_LIST_ONBOARD, false);
   }
 
-  @Override public void setOnBoard() {
+  @Override public void setListOnBoard() {
     preferences.edit().putBoolean(LOCK_LIST_ONBOARD, true).apply();
+  }
+
+  @Override public void setInfoDialogOnBoard() {
+    preferences.edit().putBoolean(LOCK_DIALOG_ONBOARD, true).apply();
   }
 
   @Override public void clearAll() {

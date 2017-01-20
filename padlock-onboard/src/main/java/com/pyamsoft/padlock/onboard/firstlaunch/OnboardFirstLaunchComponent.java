@@ -20,8 +20,8 @@ import com.pyamsoft.padlock.base.PadLockComponent;
 import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
 import dagger.Component;
 
-@FragmentScope @Component(dependencies = PadLockComponent.class, modules = OnboardModule.class)
-interface OnboardComponent {
+@FragmentScope @Component(dependencies = PadLockComponent.class, modules = OnboardFirstLaunchModule.class)
+interface OnboardFirstLaunchComponent {
 
   void inject(OnboardEnableServicePresenterLoader loader);
 

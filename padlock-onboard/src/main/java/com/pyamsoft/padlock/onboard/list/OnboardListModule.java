@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard.firstlaunch;
+package com.pyamsoft.padlock.onboard.list;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
@@ -23,21 +23,16 @@ import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module class OnboardModule {
+@Module class OnboardListModule {
 
-  @Provides OnboardEnableServicePresenter provideOnboardingEnableServicePresenter(
-      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
-    return new OnbordEnableServicePresenterImpl(obsScheduler, subScheduler);
-  }
-
-  @Provides OnboardAcceptTermsPresenter provideOnboardAcceptTermsPresenter(
-      @NonNull OnboardAcceptTermsInteractor interactor, @Named("obs") Scheduler obsScheduler,
+  @Provides OnboardListPresenter provideOnboardListPresenter(
+      @NonNull OnboardListInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
-    return new OnboardAcceptTermsPresenterImpl(interactor, obsScheduler, subScheduler);
+    return new OnboardListPresenterImpl(interactor, obsScheduler, subScheduler);
   }
 
-  @Provides OnboardAcceptTermsInteractor provideOnboardAcceptTermsInteractor(
-      @NonNull PadLockPreferences padLockPreferences) {
-    return new OnboardAcceptTermsInteractorImpl(padLockPreferences);
+  @Provides OnboardListInteractor provideOnboardListInteractor(
+      @NonNull PadLockPreferences preferences) {
+    return new OnboardListInteractorImpl(preferences);
   }
 }

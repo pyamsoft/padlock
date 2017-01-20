@@ -60,7 +60,7 @@ class LockInfoInteractorImpl extends LockCommonInteractorImpl implements LockInf
   }
 
   @NonNull @Override public Observable<Boolean> hasShownOnBoarding() {
-    return Observable.fromCallable(preferences::isLockInfoDialogOnBoard);
+    return Observable.fromCallable(preferences::isDialogOnBoard);
   }
 
   @Override public boolean isCacheEmpty() {

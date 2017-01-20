@@ -16,15 +16,20 @@
 
 package com.pyamsoft.padlock.onboard.list;
 
-import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.base.Injector;
+import com.pyamsoft.pydroid.FuncNone;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
-public class OnboardShowInfoFragment extends OnboardContentFragment {
+class OnboardListPresenterLoader implements FuncNone<OnboardListPresenter> {
 
-  @Override protected int getOnboardText() {
-    return R.string.onboard_show_lockinfo_msg;
-  }
+  @SuppressWarnings("WeakerAccess") @Inject Provider<OnboardListPresenter> presenterProvider;
 
-  @Override protected int getOnboardImage() {
-    return R.drawable.list_onboard_1;
+  @Override public OnboardListPresenter call() {
+    DaggerOnboardListComponent.builder()
+        .padLockComponent(Injector.get().provideComponent())
+        .build()
+        .inject(this);
+    return presenterProvider.get();
   }
 }

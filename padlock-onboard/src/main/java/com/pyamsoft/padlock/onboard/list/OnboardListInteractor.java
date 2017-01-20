@@ -16,15 +16,7 @@
 
 package com.pyamsoft.padlock.onboard.list;
 
-import com.pyamsoft.padlock.R;
+interface OnboardListInteractor {
 
-public class OnboardShowInfoFragment extends OnboardContentFragment {
-
-  @Override protected int getOnboardText() {
-    return R.string.onboard_show_lockinfo_msg;
-  }
-
-  @Override protected int getOnboardImage() {
-    return R.drawable.list_onboard_1;
-  }
+  void completeOnboarding();
 }

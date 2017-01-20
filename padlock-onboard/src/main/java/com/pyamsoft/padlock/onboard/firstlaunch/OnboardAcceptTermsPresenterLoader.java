@@ -26,7 +26,7 @@ class OnboardAcceptTermsPresenterLoader implements FuncNone<OnboardAcceptTermsPr
   @SuppressWarnings("WeakerAccess") @Inject Provider<OnboardAcceptTermsPresenter> presenterProvider;
 
   @Override public OnboardAcceptTermsPresenter call() {
-    DaggerOnboardComponent.builder()
+    DaggerOnboardFirstLaunchComponent.builder()
         .padLockComponent(Injector.get().provideComponent())
         .build()
         .inject(this);

@@ -27,7 +27,7 @@ class OnboardEnableServicePresenterLoader implements FuncNone<OnboardEnableServi
       presenterProvider;
 
   @Override public OnboardEnableServicePresenter call() {
-    DaggerOnboardComponent.builder()
+    DaggerOnboardFirstLaunchComponent.builder()
         .padLockComponent(Injector.get().provideComponent())
         .build()
         .inject(this);

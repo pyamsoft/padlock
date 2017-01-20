@@ -34,22 +34,30 @@ import android.view.WindowManager;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.OnboardListDialogBinding;
+import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.onboard.Onboard;
+import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 
-public class OnboardingDialog extends DialogFragment implements Onboard {
+public class OnboardListDialog extends DialogFragment
+    implements Onboard, OnboardListPresenter.View {
 
-  @NonNull public static final String TAG = "OnboardingDialog";
-  @NonNull private static final String KEY_LAST_POSITION = "key_onboardin_list_dialog_position";
+  @NonNull public static final String TAG = "OnboardListDialog";
+  @NonNull private static final String KEY_LAST_POSITION = "key_onboard_list_dialog_position";
   private static final int PAGER_PAGE_COUNT = 3;
+  @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
   @NonNull private final AsyncDrawable.Mapper mapper = new AsyncDrawable.Mapper();
   private OnboardListDialogBinding binding;
   private ViewPager.OnPageChangeListener pageChangeListener;
+  private OnboardListPresenter presenter;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setCancelable(false);
+
+    presenter =
+        PersistentCache.load(getActivity(), KEY_PRESENTER, new OnboardListPresenterLoader());
   }
 
   @Override public void onDestroy() {
@@ -103,6 +111,16 @@ public class OnboardingDialog extends DialogFragment implements Onboard {
       window.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
           WindowManager.LayoutParams.WRAP_CONTENT);
     }
+  }
+
+  @Override public void onStart() {
+    super.onStart();
+    presenter.bindView(this);
+  }
+
+  @Override public void onStop() {
+    super.onStop();
+    presenter.unbindView();
   }
 
   private void setupButtons(int position) {
@@ -159,8 +177,15 @@ public class OnboardingDialog extends DialogFragment implements Onboard {
   }
 
   @Override public void completeOnboarding() {
-    // TODO Save onboarding
+    presenter.finishOnboarding();
     dismiss();
+
+    // Talk to list fragment
+    final FragmentManager fragmentManager = getFragmentManager();
+    final Fragment fragment = fragmentManager.findFragmentByTag(LockListFragment.TAG);
+    if (fragment instanceof LockListFragment) {
+      ((LockListFragment) fragment).onOnboardingComplete();
+    }
   }
 
   @Override public void scrollToPreviousPage() {

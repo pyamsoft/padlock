@@ -16,15 +16,23 @@
 
 package com.pyamsoft.padlock.onboard.list;
 
-import com.pyamsoft.padlock.R;
+import android.support.annotation.NonNull;
+import com.pyamsoft.pydroid.rx.SchedulerPresenter;
+import javax.inject.Inject;
+import rx.Scheduler;
 
-public class OnboardShowInfoFragment extends OnboardContentFragment {
+class OnboardListPresenterImpl extends SchedulerPresenter<OnboardListPresenter.View>
+    implements OnboardListPresenter {
 
-  @Override protected int getOnboardText() {
-    return R.string.onboard_show_lockinfo_msg;
+  @NonNull private final OnboardListInteractor interactor;
+
+  @Inject OnboardListPresenterImpl(@NonNull OnboardListInteractor interactor,
+      @NonNull Scheduler observeScheduler, @NonNull Scheduler subscribeScheduler) {
+    super(observeScheduler, subscribeScheduler);
+    this.interactor = interactor;
   }
 
-  @Override protected int getOnboardImage() {
-    return R.drawable.list_onboard_1;
+  @Override public void finishOnboarding() {
+    interactor.completeOnboarding();
   }
 }

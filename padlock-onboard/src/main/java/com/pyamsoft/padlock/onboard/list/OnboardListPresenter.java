@@ -16,15 +16,12 @@
 
 package com.pyamsoft.padlock.onboard.list;
 
-import com.pyamsoft.padlock.R;
+import com.pyamsoft.pydroid.presenter.Presenter;
 
-public class OnboardShowInfoFragment extends OnboardContentFragment {
+interface OnboardListPresenter extends Presenter<OnboardListPresenter.View> {
 
-  @Override protected int getOnboardText() {
-    return R.string.onboard_show_lockinfo_msg;
-  }
+  void finishOnboarding();
 
-  @Override protected int getOnboardImage() {
-    return R.drawable.list_onboard_1;
+  interface View {
   }
 }
