@@ -16,15 +16,19 @@
 
 package com.pyamsoft.padlock.onboard.list;
 
-import com.pyamsoft.padlock.R;
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
+import javax.inject.Inject;
 
-public class OnboardShowInfoFragment extends OnboardContentFragment {
+class OnboardListInteractorImpl implements OnboardListInteractor {
 
-  @Override protected int getOnboardText() {
-    return R.string.onboard_show_lockinfo_msg;
+  @NonNull private final PadLockPreferences preferences;
+
+  @Inject OnboardListInteractorImpl(@NonNull PadLockPreferences preferences) {
+    this.preferences = preferences;
   }
 
-  @Override protected int getOnboardImage() {
-    return R.drawable.list_onboard_1;
+  @Override public void completeOnboarding() {
+    preferences.setListOnBoard();
   }
 }

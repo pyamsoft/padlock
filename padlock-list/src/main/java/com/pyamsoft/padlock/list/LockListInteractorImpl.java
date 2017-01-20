@@ -46,7 +46,7 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
   }
 
   @NonNull @Override public Observable<Boolean> hasShownOnBoarding() {
-    return Observable.fromCallable(preferences::isOnBoard);
+    return Observable.fromCallable(preferences::isListOnBoard);
   }
 
   @NonNull @Override public Observable<Boolean> isSystemVisible() {

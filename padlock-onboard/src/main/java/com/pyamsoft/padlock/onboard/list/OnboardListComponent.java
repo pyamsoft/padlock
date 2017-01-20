@@ -16,15 +16,12 @@
 
 package com.pyamsoft.padlock.onboard.list;
 
-import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.base.PadLockComponent;
+import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
+import dagger.Component;
 
-public class OnboardShowInfoFragment extends OnboardContentFragment {
+@FragmentScope @Component(dependencies = PadLockComponent.class, modules = OnboardListModule.class)
+interface OnboardListComponent {
 
-  @Override protected int getOnboardText() {
-    return R.string.onboard_show_lockinfo_msg;
-  }
-
-  @Override protected int getOnboardImage() {
-    return R.drawable.list_onboard_1;
-  }
+  void inject(OnboardListPresenterLoader loader);
 }
