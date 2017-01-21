@@ -25,6 +25,6 @@ public class OnboardShowInfoFragment extends OnboardContentFragment {
   }
 
   @Override protected int getOnboardImage() {
-    return R.drawable.list_onboard_1;
+    return R.drawable.list_onboard_3;
   }
 }
