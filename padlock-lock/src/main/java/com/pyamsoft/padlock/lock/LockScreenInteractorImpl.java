@@ -31,7 +31,6 @@ import com.pyamsoft.padlock.model.Recheck;
 import com.pyamsoft.padlock.pin.MasterPinInteractor;
 import javax.inject.Inject;
 import rx.Observable;
-import rx.functions.Func1;
 import timber.log.Timber;
 
 class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenInteractor {
@@ -70,8 +69,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   @NonNull @Override public Observable<Long> getTimeoutPeriodMinutesInMillis() {
-    return Observable.defer(() -> Observable.just(preferences.getTimeoutPeriod()))
-        .map(period -> period * 60 * 1000);
+    return Observable.fromCallable(preferences::getTimeoutPeriod).map(period -> period * 60 * 1000);
   }
 
   @NonNull @Override public Observable<String> getMasterPin() {
@@ -80,13 +78,9 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
 
   @NonNull @Override
   public Observable<Boolean> unlockEntry(@NonNull String attempt, @NonNull String pin) {
-    return Observable.defer(() -> Observable.just(pin))
+    return Observable.fromCallable(() -> pin)
         .filter(pin1 -> pin1 != null)
-        .flatMap(new Func1<String, Observable<Boolean>>() {
-          @Override public Observable<Boolean> call(String pin) {
-            return checkSubmissionAttempt(attempt, pin);
-          }
-        });
+        .flatMap(pin1 -> checkSubmissionAttempt(attempt, pin1));
   }
 
   @Override @CheckResult @NonNull
@@ -99,25 +93,19 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   @Override @CheckResult @NonNull
   public Observable<Integer> queueRecheckJob(@NonNull String packageName,
       @NonNull String activityName, long recheckTime) {
-    return Observable.defer(() -> Observable.just(preferences.isRecheckEnabled()))
-        .map(recheckEnabled -> {
-          if (!recheckEnabled) {
-            Timber.e("Recheck is not enabled");
-            return 0;
-          }
+    return Observable.fromCallable(() -> {
+      // Cancel any old recheck job for the class, but not the package
+      final Intent intent = new Intent(appContext, recheckServiceClass);
+      intent.putExtra(Recheck.EXTRA_PACKAGE_NAME, packageName);
+      intent.putExtra(Recheck.EXTRA_CLASS_NAME, activityName);
+      jobSchedulerCompat.cancel(intent);
 
-          // Cancel any old recheck job for the class, but not the package
-          final Intent intent = new Intent(appContext, recheckServiceClass);
-          intent.putExtra(Recheck.EXTRA_PACKAGE_NAME, packageName);
-          intent.putExtra(Recheck.EXTRA_CLASS_NAME, activityName);
-          jobSchedulerCompat.cancel(intent);
+      // Queue up a new recheck job
+      jobSchedulerCompat.set(intent, System.currentTimeMillis() + recheckTime);
 
-          // Queue up a new recheck job
-          jobSchedulerCompat.set(intent, System.currentTimeMillis() + recheckTime);
-
-          // KLUDGE Just return something valid for now
-          return 1;
-        });
+      // KLUDGE Just return something valid for now
+      return 1;
+    });
   }
 
   @NonNull @Override public Observable<Integer> ignoreEntryForTime(long ignoreMinutesInMillis,
@@ -129,7 +117,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   @NonNull @CheckResult @Override public Observable<Long> getDefaultIgnoreTime() {
-    return Observable.defer(() -> Observable.just(preferences.getDefaultIgnoreTime()));
+    return Observable.fromCallable(preferences::getDefaultIgnoreTime);
   }
 
   @WorkerThread @NonNull @Override @CheckResult
@@ -138,7 +126,7 @@ class LockScreenInteractorImpl extends LockInteractorImpl implements LockScreenI
   }
 
   @NonNull @Override public Observable<Integer> incrementAndGetFailCount() {
-    return Observable.defer(() -> Observable.just(++failCount));
+    return Observable.fromCallable(() -> ++failCount);
   }
 
   @Override public void resetFailCount() {

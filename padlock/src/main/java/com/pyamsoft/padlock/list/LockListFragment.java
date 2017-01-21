@@ -35,8 +35,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.mikepenz.fastadapter.FastAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.PadLock;
@@ -45,6 +43,7 @@ import com.pyamsoft.padlock.databinding.FragmentLockListBinding;
 import com.pyamsoft.padlock.lock.PinEntryDialog;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.padlock.onboard.list.OnboardListDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
@@ -52,6 +51,7 @@ import com.pyamsoft.pydroid.design.util.FABUtil;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.tool.AsyncMapHelper;
+import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.List;
 import timber.log.Timber;
@@ -96,7 +96,6 @@ public class LockListFragment extends Fragment
     }
   };
   @Nullable private MenuItem displaySystemItem;
-  @Nullable private TapTargetSequence sequence;
   @Nullable private DividerItemDecoration dividerDecoration;
   @Nullable private AsyncMap.Entry fabIconTask;
   private boolean listIsRefreshed;
@@ -162,6 +161,13 @@ public class LockListFragment extends Fragment
     super.onPause();
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> binding.applistFab.hide(), 300L);
+  }
+
+  @Override public void onOnboardingComplete() {
+    final FragmentActivity activity = getActivity();
+    if (activity instanceof RatingDialog.ChangeLogProvider) {
+      RatingDialog.showRatingDialog(activity, (RatingDialog.ChangeLogProvider) activity, false);
+    }
   }
 
   private void setupSwipeRefresh() {
@@ -239,11 +245,11 @@ public class LockListFragment extends Fragment
     displaySystemItem.setChecked(visible);
   }
 
-  @Override public void setSystemVisible() {
+  @Override public void onSetSystemVisible() {
     setSystemVisible(true);
   }
 
-  @Override public void setSystemInvisible() {
+  @Override public void onSetSystemInvisible() {
     setSystemVisible(false);
   }
 
@@ -301,18 +307,18 @@ public class LockListFragment extends Fragment
     FABUtil.setupFABBehavior(binding.applistFab, new HideScrollFABBehavior(24));
   }
 
-  @Override public void setFABStateEnabled() {
+  @Override public void onSetFABStateEnabled() {
     AsyncMapHelper.unsubscribe(fabIconTask);
     fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
   }
 
-  @Override public void setFABStateDisabled() {
+  @Override public void onSetFABStateDisabled() {
     AsyncMapHelper.unsubscribe(fabIconTask);
     fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
   }
 
   @Override public void onCreateAccessibilityDialog() {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new AccessibilityRequestDialog(),
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new AccessibilityRequestDialog(),
         "accessibility");
   }
 
@@ -322,12 +328,12 @@ public class LockListFragment extends Fragment
 
   @Override
   public void onPinEntryDialogRequested(@NonNull String packageName, @NonNull String activityName) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(),
         PinEntryDialog.newInstance(packageName, activityName), PIN_DIALOG_TAG);
   }
 
   @Override public void onCreateMasterPinSuccess() {
-    setFABStateEnabled();
+    onSetFABStateEnabled();
     final View v = getView();
     if (v != null) {
       Snackbar.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT).show();
@@ -339,7 +345,7 @@ public class LockListFragment extends Fragment
   }
 
   @Override public void onClearMasterPinSuccess() {
-    setFABStateDisabled();
+    onSetFABStateDisabled();
     final View v = getView();
     if (v != null) {
       Snackbar.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT).show();
@@ -368,49 +374,12 @@ public class LockListFragment extends Fragment
   @Override public void onListPopulateError() {
     Timber.e("onListPopulateError");
     onListPopulated();
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
   }
 
-  @Override public void showOnBoarding() {
+  @Override public void onShowOnboarding() {
     Timber.d("Show onboarding");
-    if (sequence == null) {
-      final TapTarget fabTarget =
-          TapTarget.forView(binding.applistFab, getString(R.string.getting_started),
-              getString(R.string.getting_started_desc)).cancelable(false).tintTarget(false);
-
-      // If we use the first item we get a weird location, try a different item
-      TapTarget listTarget = null;
-      final LockListItem.ViewHolder holder =
-          (LockListItem.ViewHolder) binding.applistRecyclerview.findViewHolderForAdapterPosition(1);
-      if (holder != null) {
-        final View switchView = holder.getBinding().lockListToggle;
-        listTarget = TapTarget.forView(switchView, getString(R.string.onboard_title_locklist),
-            getString(R.string.onboard_desc_locklist)).tintTarget(false).cancelable(false);
-      }
-
-      // Hold a ref to the sequence or Activity will recycle bitmaps and crash
-      sequence = new TapTargetSequence(getActivity());
-      if (fabTarget != null) {
-        sequence.target(fabTarget);
-      }
-      if (listTarget != null) {
-        sequence.target(listTarget);
-      }
-
-      sequence.listener(new TapTargetSequence.Listener() {
-        @Override public void onSequenceFinish() {
-          if (presenter != null) {
-            presenter.setOnBoard();
-          }
-        }
-
-        @Override public void onSequenceCanceled(TapTarget lastTarget) {
-
-        }
-      });
-    }
-
-    sequence.start();
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(), OnboardListDialog.TAG);
   }
 
   @Override public void onListCleared() {
@@ -463,7 +432,7 @@ public class LockListFragment extends Fragment
   }
 
   @Override public void onDatabaseEntryError(int position) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
   }
 
   @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(boolean lock, int position,
@@ -474,7 +443,7 @@ public class LockListFragment extends Fragment
   }
 
   @SuppressWarnings("WeakerAccess") void displayLockInfoFragment(@NonNull AppEntry entry) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), LockInfoDialog.newInstance(entry),
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), LockInfoDialog.newInstance(entry),
         LockInfoDialog.TAG);
   }
 }

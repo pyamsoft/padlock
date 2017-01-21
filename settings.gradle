@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-include ':padlock', ':padlock-model', ':padlock-base', ':padlock-pin',
+include ':padlock', ':padlock-model', ':padlock-base', ':padlock-pin', ':padlock-onboard',
     ':padlock-settings',
     ':padlock-purge',
     ':padlock-main',

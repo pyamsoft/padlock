@@ -23,26 +23,23 @@ import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-class SettingsPrefrenceInteractorImpl implements SettingsPreferenceInteractor {
+class SettingsPreferenceInteractorImpl implements SettingsPreferenceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
 
-  @Inject SettingsPrefrenceInteractorImpl(@NonNull PadLockDB padLockDB,
+  @Inject SettingsPreferenceInteractorImpl(@NonNull PadLockDB padLockDB,
       @NonNull PadLockPreferences preferences) {
     this.padLockDB = padLockDB;
     this.preferences = preferences;
   }
 
   @NonNull @Override public Observable<Boolean> isInstallListenerEnabled() {
-    return Observable.defer(() -> Observable.just(preferences.isInstallListenerEnabled()));
+    return Observable.fromCallable(preferences::isInstallListenerEnabled);
   }
 
   @NonNull @Override public Observable<Boolean> clearDatabase() {
-    return Observable.defer(() -> {
-      Timber.d("Clear database of all entries");
-      return padLockDB.deleteAll();
-    }).map(deleteResult -> {
+    return padLockDB.deleteAll().map(deleteResult -> {
       Timber.d("Database is cleared: %s", deleteResult);
       padLockDB.deleteDatabase();
 

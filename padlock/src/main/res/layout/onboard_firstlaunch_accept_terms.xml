@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2016 Peter Kenji Yamanaka
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:background="@color/blue700"
+      android:orientation="vertical"
+      android:paddingTop="?attr/actionBarSize"
+      >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        >
+
+      <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
+          android:padding="16dp"
+          android:text="@string/terms_of_usage"
+          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textColor="@color/material_light_background"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          />
+
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/onboarding_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="bottom"
+        android:background="#4000"
+        android:orientation="horizontal"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        >
+
+      <Button
+          android:id="@+id/onboarding_cancel"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:gravity="center"
+          android:text="@string/cancel"
+          android:textAppearance="?android:attr/textAppearanceLarge"
+          android:textColor="@android:color/white"
+          style="?attr/buttonBarNegativeButtonStyle"
+          />
+
+      <View
+          android:layout_width="0dp"
+          android:layout_height="match_parent"
+          android:layout_weight="1"
+          />
+
+      <Button
+          android:id="@+id/onboarding_accept_terms"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:gravity="center"
+          android:text="@string/accept_terms"
+          android:textAppearance="?android:attr/textAppearanceLarge"
+          android:textColor="@android:color/white"
+          style="?attr/buttonBarPositiveButtonStyle"
+          />
+
+    </LinearLayout>
+
+  </LinearLayout>
+
+</layout>

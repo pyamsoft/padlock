@@ -35,6 +35,8 @@ android {
   defaultConfig {
     minSdkVersion rootProject.ext.minSdk
     targetSdkVersion rootProject.ext.maxSdk
+
+    publishNonDefault true
   }
 
   compileOptions {
@@ -65,6 +67,7 @@ dependencies {
   // Mockito for unit tests
   testCompile "org.mockito:mockito-core:$mockito"
 
-  compile project(":padlock-service")
+  debugCompile project(path: ":padlock-service", configuration: "debug")
+  releaseCompile project(path: ":padlock-service", configuration: "release")
 }
 

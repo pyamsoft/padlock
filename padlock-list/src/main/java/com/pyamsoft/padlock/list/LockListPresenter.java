@@ -45,20 +45,18 @@ interface LockListPresenter extends Presenter<LockListPresenter.LockList> {
 
   void showOnBoarding();
 
-  void setOnBoard();
-
   void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
       @SuppressWarnings("SameParameterValue") @Nullable String code, boolean system);
 
   interface LockList extends LockListCommon, LockListDatabaseErrorView, MasterPinSubmitCallback {
 
-    void setFABStateEnabled();
+    void onSetFABStateEnabled();
 
-    void setFABStateDisabled();
+    void onSetFABStateDisabled();
 
-    void setSystemVisible();
+    void onSetSystemVisible();
 
-    void setSystemInvisible();
+    void onSetSystemInvisible();
 
     void onCreatePinDialog();
 
@@ -66,6 +64,8 @@ interface LockListPresenter extends Presenter<LockListPresenter.LockList> {
 
     void onEntryAddedToList(@NonNull AppEntry entry);
 
-    void showOnBoarding();
+    void onShowOnboarding();
+
+    void onOnboardingComplete();
   }
 }

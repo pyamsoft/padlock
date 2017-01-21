@@ -36,6 +36,8 @@ android {
   defaultConfig {
     minSdkVersion rootProject.ext.minSdk
     targetSdkVersion rootProject.ext.maxSdk
+
+    publishNonDefault true
   }
 
   compileOptions {

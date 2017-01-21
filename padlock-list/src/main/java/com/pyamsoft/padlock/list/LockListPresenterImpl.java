@@ -28,7 +28,6 @@ import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Observable;
@@ -245,9 +244,9 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         .observeOn(getObserveScheduler())
         .subscribe(enabled -> getView(lockList -> {
           if (enabled) {
-            lockList.setFABStateEnabled();
+            lockList.onSetFABStateEnabled();
           } else {
-            lockList.setFABStateDisabled();
+            lockList.onSetFABStateDisabled();
           }
         }), throwable -> {
           Timber.e(throwable, "onError");
@@ -271,9 +270,9 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
         .observeOn(getObserveScheduler())
         .subscribe(visible -> getView(lockList -> {
           if (visible) {
-            lockList.setSystemVisible();
+            lockList.onSetSystemVisible();
           } else {
-            lockList.setSystemInvisible();
+            lockList.onSetSystemInvisible();
           }
         }), throwable -> {
           // TODO different error
@@ -292,21 +291,18 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
   @Override public void showOnBoarding() {
     SubscriptionHelper.unsubscribe(onboardSubscription);
     onboardSubscription = lockListInteractor.hasShownOnBoarding()
-        .delay(1, TimeUnit.SECONDS)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboard -> getView(lockList -> {
-          if (!onboard) {
-            lockList.showOnBoarding();
+          if (onboard) {
+            lockList.onOnboardingComplete();
+          } else {
+            lockList.onShowOnboarding();
           }
         }), throwable -> {
           Timber.e(throwable, "onError");
           getView(LockList::onListPopulateError);
         }, () -> SubscriptionHelper.unsubscribe(onboardSubscription));
-  }
-
-  @Override public void setOnBoard() {
-    lockListInteractor.setShownOnBoarding();
   }
 
   @Override

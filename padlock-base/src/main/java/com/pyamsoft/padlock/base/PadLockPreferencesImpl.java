@@ -38,11 +38,9 @@ class PadLockPreferencesImpl implements PadLockPreferences {
   @NonNull private final String timeoutTimeKey;
   @NonNull private final String timeoutTimeDefault;
   @NonNull private final String lockPackageChangeKey;
-  @NonNull private final String recheckKey;
   @NonNull private final String installListener;
   @NonNull private final String ignoreKeyguard;
   private final boolean lockPackageChangeDefault;
-  private final boolean recheckDefault;
   private final boolean installListenerDefault;
   private final boolean ignoreKeyguardDefault;
 
@@ -56,8 +54,6 @@ class PadLockPreferencesImpl implements PadLockPreferences {
     timeoutTimeDefault = res.getString(R.string.timeout_time_default);
     lockPackageChangeKey = res.getString(R.string.lock_package_change_key);
     lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default);
-    recheckKey = res.getString(R.string.recheck_key);
-    recheckDefault = res.getBoolean(R.bool.recheck_default);
     installListener = res.getString(R.string.install_listener_key);
     installListenerDefault = res.getBoolean(R.bool.install_listener_default);
     ignoreKeyguard = res.getString(R.string.ignore_keyguard_key);
@@ -84,16 +80,8 @@ class PadLockPreferencesImpl implements PadLockPreferences {
     preferences.edit().remove(HINT).apply();
   }
 
-  @Override public boolean isLockInfoDialogOnBoard() {
+  @Override public boolean isDialogOnBoard() {
     return preferences.getBoolean(LOCK_DIALOG_ONBOARD, false);
-  }
-
-  @Override public void setLockInfoDialogOnBoard() {
-    preferences.edit().putBoolean(LOCK_DIALOG_ONBOARD, true).apply();
-  }
-
-  @Override public boolean isRecheckEnabled() {
-    return preferences.getBoolean(recheckKey, recheckDefault);
   }
 
   @Override @CheckResult public long getDefaultIgnoreTime() {
@@ -136,12 +124,16 @@ class PadLockPreferencesImpl implements PadLockPreferences {
     preferences.edit().putBoolean(AGREED, true).apply();
   }
 
-  @Override @CheckResult public boolean isOnBoard() {
+  @Override @CheckResult public boolean isListOnBoard() {
     return preferences.getBoolean(LOCK_LIST_ONBOARD, false);
   }
 
-  @Override public void setOnBoard() {
+  @Override public void setListOnBoard() {
     preferences.edit().putBoolean(LOCK_LIST_ONBOARD, true).apply();
+  }
+
+  @Override public void setInfoDialogOnBoard() {
+    preferences.edit().putBoolean(LOCK_DIALOG_ONBOARD, true).apply();
   }
 
   @Override public void clearAll() {
