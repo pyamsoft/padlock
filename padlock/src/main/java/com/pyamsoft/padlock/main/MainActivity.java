@@ -29,6 +29,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.preference.PreferenceManager;
 import android.view.MenuItem;
@@ -36,11 +37,11 @@ import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
+import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFragment;
 import com.pyamsoft.padlock.purge.PurgeFragment;
 import com.pyamsoft.padlock.settings.SettingsFragment;
 import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
-import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.ui.sec.TamperActivity;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -82,11 +83,6 @@ public class MainActivity extends TamperActivity
 
     setAppBarState();
     setupDrawerLayout();
-    loadFirstFragment();
-
-    if (firstLaunch) {
-      peekNavigationDrawer();
-    }
   }
 
   private void setupDrawerLayout() {
@@ -143,17 +139,32 @@ public class MainActivity extends TamperActivity
     }
   }
 
-  private void loadFirstFragment() {
+  /**
+   * Returns if the fragment has changed
+   */
+  @CheckResult @NonNull private FragmentHasChanged loadFragment() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
+    final FragmentHasChanged changed;
+
     // These fragments are a level up
     if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null) {
       drawerShowUpNavigation();
+      changed = FragmentHasChanged.CHANGD_WITH_UP;
       // These are base fragments
     } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
+        && fragmentManager.findFragmentByTag(OnboardFragment.TAG) == null
         && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null) {
       binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
+      changed = FragmentHasChanged.CHANGED_NO_UP;
+    } else {
+      if (fragmentManager.findFragmentByTag(OnboardFragment.TAG) != null) {
+        prepareActivityForOnboarding();
+      }
+      changed = FragmentHasChanged.NOT_CHANGED;
     }
+
+    return changed;
   }
 
   @Override public void drawerNormalNavigation() {
@@ -168,14 +179,6 @@ public class MainActivity extends TamperActivity
         binding.navigationDrawer);
     drawerToggle.setDrawerIndicatorEnabled(false);
     drawerToggle.syncState();
-  }
-
-  @CheckResult @NonNull MainPresenter getPresenter() {
-    if (presenter == null) {
-      throw new NullPointerException("MainPresenter is NULL");
-    }
-
-    return presenter;
   }
 
   @Override protected int bindActivityToView() {
@@ -224,10 +227,6 @@ public class MainActivity extends TamperActivity
     binding.unbind();
   }
 
-  @Override protected boolean shouldConfirmBackPress() {
-    return true;
-  }
-
   @Override public void onBackPressed() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     final int backStackCount = fragmentManager.getBackStackEntryCount();
@@ -260,25 +259,13 @@ public class MainActivity extends TamperActivity
     return super.onOptionsItemSelected(item);
   }
 
-  @Override public void onDidNotAgreeToTerms() {
-    Timber.e("Did not agree to terms");
-    finish();
-  }
-
   @Override protected void onPostResume() {
     super.onPostResume();
     AnimUtil.animateActionBarToolbar(binding.toolbar);
-    RatingDialog.showRatingDialog(this, this);
-    presenter.showTermsDialog();
   }
 
   @NonNull @Override protected String getSafePackageName() {
     return "com.pyamsoft.padlock";
-  }
-
-  @Override public void showUsageTermsDialog() {
-    AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new AgreeTermsDialog(),
-        AgreeTermsDialog.TAG);
   }
 
   @NonNull @Override protected String[] getChangeLogLines() {
@@ -296,11 +283,77 @@ public class MainActivity extends TamperActivity
     return R.mipmap.ic_launcher;
   }
 
-  @Override public void forceRefresh() {
+  @Override public void onShowOnboarding() {
+    if (replaceFragment(new OnboardFragment(), OnboardFragment.TAG)) {
+      Timber.d("New onboarding fragment placed");
+    }
+
+    prepareActivityForOnboarding();
+  }
+
+  /**
+   * Hide action bar, lock drawer
+   */
+  private void prepareActivityForOnboarding() {
+    // Hide the action bar
+    final ActionBar actionBar = getSupportActionBar();
+    if (actionBar != null) {
+      if (actionBar.isShowing()) {
+        actionBar.hide();
+      }
+    }
+
+    // Lock the navigation drawer if we are showing onboarding
+    // Action bar is hidden so the drawer toggle state wont matter
+    drawerShowUpNavigation();
+  }
+
+  @Override public void onShowDefaultPage() {
+    // Set normal navigation
+    final FragmentHasChanged changed = loadFragment();
+    if (changed == FragmentHasChanged.NOT_CHANGED) {
+      Timber.d("Fragment has not changed");
+    } else {
+      // Un hide the action bar in case it was hidden
+      final ActionBar actionBar = getSupportActionBar();
+      if (actionBar != null) {
+        if (!actionBar.isShowing()) {
+          actionBar.show();
+        }
+      }
+      if (changed == FragmentHasChanged.CHANGD_WITH_UP) {
+        drawerShowUpNavigation();
+      } else {
+        drawerNormalNavigation();
+      }
+
+      if (firstLaunch) {
+        peekNavigationDrawer();
+      }
+    }
+  }
+
+  @Override public void onForceRefresh() {
     Timber.d("Force lock list refresh");
     final FragmentManager fragmentManager = getSupportFragmentManager();
     fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
+  }
+
+  public void onOnboardingCompleted() {
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    final Fragment onboarding = fragmentManager.findFragmentByTag(OnboardFragment.TAG);
+    if (onboarding != null) {
+      fragmentManager.beginTransaction().remove(onboarding).commitNow();
+    }
+
+    presenter.showOnboardingOrDefault();
+  }
+
+  private enum FragmentHasChanged {
+    NOT_CHANGED,
+    CHANGD_WITH_UP,
+    CHANGED_NO_UP,
   }
 }
 

@@ -36,13 +36,13 @@ interface LockInfoPresenter extends Presenter<LockInfoPresenter.LockInfoView> {
 
   void showOnBoarding();
 
-  void setOnBoard();
-
   interface LockInfoView
       extends LockListCommon, LockListDatabaseErrorView, LockListDatabaseWhitelistView {
 
     void onEntryAddedToList(@NonNull ActivityEntry entry);
 
-    void showOnBoarding();
+    void onShowOnboarding();
+
+    void onOnboardingComplete();
   }
 }

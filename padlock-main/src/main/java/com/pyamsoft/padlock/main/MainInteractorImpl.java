@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.main;
 
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import javax.inject.Inject;
@@ -30,11 +29,7 @@ class MainInteractorImpl implements MainInteractor {
     this.preferences = preferences;
   }
 
-  @NonNull @CheckResult @Override public Observable<Boolean> hasAgreed() {
-    return Observable.defer(() -> Observable.just(preferences.hasAgreed()));
-  }
-
-  @Override public void setAgreed() {
-    preferences.setAgreed();
+  @NonNull @Override public Observable<Boolean> isOnboardingComplete() {
+    return Observable.fromCallable(preferences::hasAgreed);
   }
 }

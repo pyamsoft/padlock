@@ -25,11 +25,7 @@ public interface PadLockPreferences {
 
   @CheckResult boolean isInstallListenerEnabled();
 
-  @CheckResult boolean isLockInfoDialogOnBoard();
-
-  void setLockInfoDialogOnBoard();
-
-  @CheckResult boolean isRecheckEnabled();
+  @CheckResult boolean isDialogOnBoard();
 
   @CheckResult long getDefaultIgnoreTime();
 
@@ -57,9 +53,11 @@ public interface PadLockPreferences {
 
   void setAgreed();
 
-  @CheckResult boolean isOnBoard();
+  @CheckResult boolean isListOnBoard();
 
-  void setOnBoard();
+  void setListOnBoard();
+
+  void setInfoDialogOnBoard();
 
   void clearAll();
 }

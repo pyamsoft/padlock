@@ -34,8 +34,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
-import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetView;
 import com.mikepenz.fastadapter.FastAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.PadLock;
@@ -59,8 +57,8 @@ public class LockInfoDialog extends DialogFragment
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
   @NonNull private static final String ARG_APP_NAME = "app_name";
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
-  @NonNull private static final String KEY_PRESENTER = TAG + "key_info_presenter";
   @NonNull private static final String KEY_APP_ICON_LOADER = TAG + "key_app_icon_loader";
+  @NonNull private static final String KEY_PRESENTER = TAG + "key_info_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") AppIconLoaderPresenter appIconLoaderPresenter;
@@ -86,10 +84,6 @@ public class LockInfoDialog extends DialogFragment
   private String appName;
   private boolean appIsSystem;
   private boolean listIsRefreshed;
-  @Nullable private TapTargetView toggleAllTapTarget;
-  @Nullable private TapTargetView defaultLockTapTarget;
-  @Nullable private TapTargetView whiteLockTapTarget;
-  @Nullable private TapTargetView blackLockTapTarget;
   private DividerItemDecoration dividerDecoration;
   private FilterListDelegate filterListDelegate;
 
@@ -122,7 +116,9 @@ public class LockInfoDialog extends DialogFragment
       throw new NullPointerException("App information is NULL");
     }
 
-    presenter = PersistentCache.load(getActivity(), KEY_PRESENTER, new LockInfoPresenterLoader());
+    final String presenterKeyFull = KEY_PRESENTER + appPackageName + appName;
+    presenter =
+        PersistentCache.load(getActivity(), presenterKeyFull, new LockInfoPresenterLoader());
     appIconLoaderPresenter = PersistentCache.load(getActivity(), KEY_APP_ICON_LOADER,
         new AppIconLoaderPresenterLoader());
   }
@@ -205,7 +201,6 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    dismissOnboarding();
     filterListDelegate.onDestroyView();
 
     handler.removeCallbacksAndMessages(null);
@@ -214,31 +209,6 @@ public class LockInfoDialog extends DialogFragment
     binding.lockInfoRecycler.setLayoutManager(null);
     binding.lockInfoRecycler.setAdapter(null);
     binding.unbind();
-  }
-
-  private void dismissOnboarding() {
-    dismissOnboarding(toggleAllTapTarget);
-    toggleAllTapTarget = null;
-
-    dismissOnboarding(defaultLockTapTarget);
-    defaultLockTapTarget = null;
-
-    dismissOnboarding(whiteLockTapTarget);
-    whiteLockTapTarget = null;
-
-    dismissOnboarding(blackLockTapTarget);
-    blackLockTapTarget = null;
-  }
-
-  private void dismissOnboarding(@Nullable TapTargetView tapTarget) {
-    if (tapTarget == null) {
-      Timber.d("NULL Target");
-      return;
-    }
-
-    if (tapTarget.isVisible()) {
-      tapTarget.dismiss(false);
-    }
   }
 
   @Override public void onDestroy() {
@@ -323,7 +293,7 @@ public class LockInfoDialog extends DialogFragment
   @Override public void onListPopulateError() {
     Timber.e("onListPopulateError");
     onListPopulated();
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
   }
 
   @Override public void onListCleared() {
@@ -362,72 +332,16 @@ public class LockInfoDialog extends DialogFragment
   }
 
   @Override public void onDatabaseEntryError(int position) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(), new ErrorDialog(), "error");
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
   }
 
-  @Override public void showOnBoarding() {
+  @Override public void onShowOnboarding() {
     Timber.d("Show onboarding");
-    if (toggleAllTapTarget == null) {
-      final LockInfoItem.ViewHolder holder =
-          (LockInfoItem.ViewHolder) binding.lockInfoRecycler.findViewHolderForAdapterPosition(0);
-      final View radioDefault = holder.getBinding().lockInfoRadioDefault;
-      createDefaultLockTarget(holder, radioDefault);
-    }
+    // TODO
   }
 
-  private void createDefaultLockTarget(@NonNull LockInfoItem.ViewHolder holder,
-      @NonNull View radioDefault) {
-    final TapTarget lockDefaultTarget =
-        TapTarget.forView(radioDefault, getString(R.string.onboard_title_info_lock_default),
-            getString(R.string.onboard_desc_info_lock_default)).tintTarget(false).cancelable(false);
-    defaultLockTapTarget =
-        TapTargetView.showFor(getDialog(), lockDefaultTarget, new TapTargetView.Listener() {
-          @Override public void onTargetClick(TapTargetView view) {
-            super.onTargetClick(view);
-
-            Timber.d("Default lock target clicked");
-            final View radioWhite = holder.getBinding().lockInfoRadioWhite;
-            createWhiteLockTarget(holder, radioWhite);
-          }
-        });
-  }
-
-  @SuppressWarnings("WeakerAccess") void createWhiteLockTarget(
-      @NonNull LockInfoItem.ViewHolder holder, @NonNull View radioWhite) {
-    final TapTarget lockWhiteTarget =
-        TapTarget.forView(radioWhite, getString(R.string.onboard_title_info_lock_white),
-            getString(R.string.onboard_desc_info_lock_white)).tintTarget(false).cancelable(false);
-    whiteLockTapTarget =
-        TapTargetView.showFor(getDialog(), lockWhiteTarget, new TapTargetView.Listener() {
-
-          @Override public void onTargetClick(TapTargetView view) {
-            super.onTargetClick(view);
-            Timber.d("White lock target clicked");
-            final View radioBlack = holder.getBinding().lockInfoRadioBlack;
-            createBlackLockTarget(radioBlack);
-          }
-        });
-  }
-
-  @SuppressWarnings("WeakerAccess") void createBlackLockTarget(@NonNull View radioBlack) {
-    final TapTarget lockBlackTarget =
-        TapTarget.forView(radioBlack, getString(R.string.onboard_title_info_lock_black),
-            getString(R.string.onboard_desc_info_lock_black)).tintTarget(false).cancelable(false);
-    blackLockTapTarget =
-        TapTargetView.showFor(getDialog(), lockBlackTarget, new TapTargetView.Listener() {
-          @Override public void onTargetClick(TapTargetView view) {
-            super.onTargetClick(view);
-            Timber.d("Black lock target clicked");
-            endOnboarding();
-          }
-        });
-  }
-
-  @SuppressWarnings("WeakerAccess") void endOnboarding() {
-    if (presenter != null) {
-      Timber.d("End onboarding");
-      presenter.setOnBoard();
-    }
+  @Override public void onOnboardingComplete() {
+    // TODO
   }
 
   @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(int position,

@@ -22,7 +22,5 @@ import rx.Observable;
 
 interface MainInteractor {
 
-  @CheckResult @NonNull Observable<Boolean> hasAgreed();
-
-  void setAgreed();
+  @CheckResult @NonNull Observable<Boolean> isOnboardingComplete();
 }

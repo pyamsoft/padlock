@@ -190,8 +190,9 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
       }
     });
 
-    final AsyncMap.Entry arrowGoTask =
-        AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.lockImageGo);
+    final AsyncMap.Entry arrowGoTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp)
+        .tint(R.color.orangeA200)
+        .into(binding.lockImageGo);
     mapper.put("arrow", arrowGoTask);
   }
 
@@ -500,15 +501,14 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
   }
 
   private void showInfoDialog() {
-    AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(),
+    AppUtil.onlyLoadOnceDialogFragment(this,
         LockedStatDialog.newInstance(binding.toolbar.getTitle().toString(), lockedPackageName,
             lockedActivityName, lockedRealName, lockedSystem, binding.lockImage.getDrawable()),
         "info_dialog");
   }
 
   private void showForgotPasscodeDialog() {
-    AppUtil.guaranteeSingleDialogFragment(getSupportFragmentManager(), new ForgotPasswordDialog(),
-        FORGOT_PASSWORD_TAG);
+    AppUtil.onlyLoadOnceDialogFragment(this, new ForgotPasswordDialog(), FORGOT_PASSWORD_TAG);
   }
 
   @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {

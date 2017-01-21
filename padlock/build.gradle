@@ -96,9 +96,6 @@ dependencies {
   // Firebase Crash
   compile "com.google.firebase:firebase-crash:$firebase"
 
-  // Tap Target View
-  compile "com.getkeepsafe.taptargetview:taptargetview:$tapTargetView"
-
   // PYDroid
   compile("com.github.pyamsoft.pydroid:pydroid-ui:$pydroid@aar") {
     transitive = true
@@ -107,13 +104,20 @@ dependencies {
     transitive = true
   }
 
-  compile project(":padlock-iconloader")
-  compile project(":padlock-main")
-  compile project(":padlock-lock")
-  compile project(":padlock-list")
-  compile project(":padlock-purge")
-  compile project(":padlock-service")
-  compile project(":padlock-settings")
+  debugCompile project(path: ":padlock-iconloader", configuration: "debug")
+  releaseCompile project(path: ":padlock-iconloader", configuration: "release")
+  debugCompile project(path: ":padlock-main", configuration: "debug")
+  releaseCompile project(path: ":padlock-main", configuration: "release")
+  debugCompile project(path: ":padlock-onboard", configuration: "debug")
+  releaseCompile project(path: ":padlock-onboard", configuration: "release")
+  debugCompile project(path: ":padlock-lock", configuration: "debug")
+  releaseCompile project(path: ":padlock-lock", configuration: "release")
+  debugCompile project(path: ":padlock-list", configuration: "debug")
+  releaseCompile project(path: ":padlock-list", configuration: "release")
+  debugCompile project(path: ":padlock-purge", configuration: "debug")
+  releaseCompile project(path: ":padlock-purge", configuration: "release")
+  debugCompile project(path: ":padlock-settings", configuration: "debug")
+  releaseCompile project(path: ":padlock-settings", configuration: "release")
 }
 
 // AdView

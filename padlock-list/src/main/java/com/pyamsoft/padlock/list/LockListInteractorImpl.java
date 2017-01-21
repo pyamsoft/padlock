@@ -46,19 +46,15 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
   }
 
   @NonNull @Override public Observable<Boolean> hasShownOnBoarding() {
-    return Observable.defer(() -> Observable.just(preferences.isOnBoard()));
+    return Observable.fromCallable(preferences::isListOnBoard);
   }
 
   @NonNull @Override public Observable<Boolean> isSystemVisible() {
-    return Observable.defer(() -> Observable.just(preferences.isSystemVisible()));
+    return Observable.fromCallable(preferences::isSystemVisible);
   }
 
   @Override public void setSystemVisible(boolean visible) {
     preferences.setSystemVisible(visible);
-  }
-
-  @Override public void setShownOnBoarding() {
-    preferences.setOnBoard();
   }
 
   @NonNull @Override public Observable<ApplicationInfo> getActiveApplications() {
@@ -83,7 +79,7 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
   }
 
   @NonNull @Override public Observable<AppEntry> getCachedEntries() {
-    return Observable.defer(() -> Observable.from(appEntryCache));
+    return Observable.fromCallable(() -> appEntryCache).flatMap(Observable::from);
   }
 
   @Override public void clearCache() {

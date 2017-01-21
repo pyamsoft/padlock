@@ -10,6 +10,7 @@
       <module fileurl="file://$PROJECT_DIR$/padlock-lock/padlock-lock.iml" filepath="$PROJECT_DIR$/padlock-lock/padlock-lock.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-main/padlock-main.iml" filepath="$PROJECT_DIR$/padlock-main/padlock-main.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-model/padlock-model.iml" filepath="$PROJECT_DIR$/padlock-model/padlock-model.iml" />
+      <module fileurl="file://$PROJECT_DIR$/padlock-onboard/padlock-onboard.iml" filepath="$PROJECT_DIR$/padlock-onboard/padlock-onboard.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-pin/padlock-pin.iml" filepath="$PROJECT_DIR$/padlock-pin/padlock-pin.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-purge/padlock-purge.iml" filepath="$PROJECT_DIR$/padlock-purge/padlock-purge.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-service/padlock-service.iml" filepath="$PROJECT_DIR$/padlock-service/padlock-service.iml" />

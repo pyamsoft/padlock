@@ -100,8 +100,8 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   }
 
   @Override public void showConfirmDialog(int type) {
-    AppUtil.guaranteeSingleDialogFragment(getFragmentManager(),
-        ConfirmationDialog.newInstance(type), "confirm_dialog");
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), ConfirmationDialog.newInstance(type),
+        "confirm_dialog");
   }
 
   @Override public void onClearAll() {
@@ -119,7 +119,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   @Override public void onClearDatabase() {
     final Activity activity = getActivity();
     if (activity instanceof MainActivity) {
-      ((MainActivity) activity).forceRefresh();
+      ((MainActivity) activity).onForceRefresh();
     } else {
       throw new ClassCastException("Activity is not MainActivity");
     }

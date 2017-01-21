@@ -39,8 +39,6 @@ interface LockListInteractor extends LockCommonInteractor {
 
   void setSystemVisible(boolean visible);
 
-  void setShownOnBoarding();
-
   @NonNull @CheckResult Observable<AppEntry> createFromPackageInfo(@NonNull String packageName,
       boolean locked);
 
