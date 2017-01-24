@@ -50,11 +50,18 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
     appEntryCache = new ArrayList<>();
   }
 
+  @SuppressWarnings("WeakerAccess") void stopRefreshing() {
+    synchronized (LOCK) {
+      refreshing = false;
+    }
+  }
+
   @NonNull @Override public Observable<AppEntry> populateList() {
     return Observable.defer(() -> {
       synchronized (LOCK) {
         while (refreshing) {
           // Empty
+          // TODO use wait once we figure out why stuff doesn't work when we use wait
         }
 
         refreshing = true;
@@ -68,11 +75,10 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
         dataSource = getCachedEntries();
       }
       return dataSource;
-    }).doOnUnsubscribe(() -> {
-      synchronized (LOCK) {
-        refreshing = false;
-      }
-    });
+    })
+        .doOnUnsubscribe(this::stopRefreshing)
+        .doOnCompleted(this::stopRefreshing)
+        .doOnTerminate(this::stopRefreshing);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<AppEntry> fetchFreshData() {
