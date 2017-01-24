@@ -36,15 +36,14 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenterLoader;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.model.LockScreenEntry;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
@@ -53,6 +52,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import javax.inject.Inject;
 import timber.log.Timber;
 
 public class LockScreenActivity extends ActivityBase implements LockScreen, AppIconLoaderView {
@@ -66,8 +66,6 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
   @NonNull private static final String TAG = "LockScreenActivity";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
-  @NonNull private static final String KEY_LOCK_PRESENTER = TAG + "key_lock_presenter";
-  @NonNull private static final String KEY_APP_ICON_PRESENTER = TAG + "key_app_icon_presenter";
 
   /**
    * KLUDGE This is a map that holds references to Activities
@@ -86,8 +84,8 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
 
   @NonNull private final Intent home;
   @NonNull private final AsyncDrawable.Mapper mapper = new AsyncDrawable.Mapper();
-  @SuppressWarnings("WeakerAccess") LockScreenPresenter presenter;
-  @SuppressWarnings("WeakerAccess") AppIconLoaderPresenter appIconLoaderPresenter;
+  @SuppressWarnings("WeakerAccess") @Inject LockScreenPresenter presenter;
+  @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") String lockedActivityName;
   @SuppressWarnings("WeakerAccess") String lockedPackageName;
@@ -153,9 +151,10 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    presenter = PersistentCache.load(this, KEY_LOCK_PRESENTER, new LockScreenPresenterLoader());
-    appIconLoaderPresenter =
-        PersistentCache.load(this, KEY_APP_ICON_PRESENTER, new AppIconLoaderPresenterLoader());
+    DaggerLockScreenComponent.builder()
+        .padLockComponent(Injector.get().provideComponent())
+        .build()
+        .inject(this);
 
     populateIgnoreTimes();
     getValuesFromBundle();

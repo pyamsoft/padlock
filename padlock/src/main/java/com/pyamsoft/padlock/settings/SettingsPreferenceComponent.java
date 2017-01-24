@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list;
+package com.pyamsoft.padlock.settings;
 
-import com.pyamsoft.padlock.base.PadLockComponent;
+import com.pyamsoft.padlock.PadLockComponent;
 import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
 import dagger.Component;
 
-@FragmentScope @Component(dependencies = PadLockComponent.class, modules = {
-    LockInfoModule.class
-}) interface LockInfoComponent {
-
-  void inject(LockInfoPresenterLoader loader);
+@FragmentScope
+@Component(dependencies = PadLockComponent.class, modules = SettingsPreferenceModule.class)
+interface SettingsPreferenceComponent {
+  void inject(SettingsFragment fragment);
 }
-

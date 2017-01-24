@@ -37,18 +37,18 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenterLoader;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
-import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
+import javax.inject.Inject;
 import timber.log.Timber;
 
 public class PinEntryDialog extends DialogFragment implements PinScreen, AppIconLoaderView {
@@ -59,12 +59,10 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
-  @NonNull private static final String KEY_PIN_DIALOG = TAG + "key_pin_dialog";
-  @NonNull private static final String KEY_APP_ICON_LOADER = TAG + "key_app_icon_loader";
   @NonNull private final AsyncDrawable.Mapper taskMap = new AsyncDrawable.Mapper();
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
-  @SuppressWarnings("WeakerAccess") PinEntryPresenter presenter;
-  @SuppressWarnings("WeakerAccess") AppIconLoaderPresenter appIconLoaderPresenter;
+  @SuppressWarnings("WeakerAccess") @Inject PinEntryPresenter presenter;
+  @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   private DialogPinEntryBinding binding;
   private String packageName;
   private EditText pinEntryText;
@@ -96,9 +94,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
 
     setCancelable(true);
 
-    presenter = PersistentCache.load(getActivity(), KEY_PIN_DIALOG, new PinScreenPresenterLoader());
-    appIconLoaderPresenter = PersistentCache.load(getActivity(), KEY_APP_ICON_LOADER,
-        new AppIconLoaderPresenterLoader());
+    DaggerPinEntryComponent.builder().padLockComponent(Injector.get().provideComponent())
+        .build().inject(this);
   }
 
   @Override public void onResume() {

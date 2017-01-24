@@ -31,20 +31,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding;
 import com.pyamsoft.padlock.main.MainActivity;
-import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.util.AppUtil;
+import javax.inject.Inject;
 import timber.log.Timber;
 
 public class PurgeFragment extends Fragment implements PurgePresenter.View {
 
   @NonNull public static final String TAG = "PurgeFragment";
-  @NonNull private static final String KEY_PRESENTER = TAG + "key_purge_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
-  @SuppressWarnings("WeakerAccess") PurgePresenter presenter;
+  @SuppressWarnings("WeakerAccess") @Inject PurgePresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<PurgeItem> fastItemAdapter;
   private FragmentPurgeBinding binding;
   @NonNull private final Runnable startRefreshRunnable =
@@ -69,7 +69,10 @@ public class PurgeFragment extends Fragment implements PurgePresenter.View {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
 
-    presenter = PersistentCache.load(getActivity(), KEY_PRESENTER, new PurgePresenterLoader());
+    DaggerPurgeComponent.builder()
+        .padLockComponent(Injector.get().provideComponent())
+        .build()
+        .inject(this);
   }
 
   @Override public void onDestroy() {

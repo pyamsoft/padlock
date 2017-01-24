@@ -25,15 +25,16 @@ import android.view.View;
 import android.widget.CompoundButton;
 import com.mikepenz.fastadapter.items.GenericAbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenterLoader;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.ActionSingle;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import javax.inject.Inject;
 import timber.log.Timber;
 
 class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>
@@ -104,15 +105,18 @@ class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListI
   static final class ViewHolder extends RecyclerView.ViewHolder implements AppIconLoaderView {
 
     @NonNull private final AdapterItemLocklistEntryBinding binding;
-    @NonNull private final AppIconLoaderPresenter appIconLoaderPresenter;
+    @Inject AppIconLoaderPresenter appIconLoaderPresenter;
     @NonNull WeakReference<AppEntry> weakEntry;
 
     ViewHolder(View itemView) {
       super(itemView);
       binding = DataBindingUtil.bind(itemView);
-
-      appIconLoaderPresenter = new AppIconLoaderPresenterLoader().call();
       weakEntry = new WeakReference<>(null);
+
+      DaggerLockListComponent.builder()
+          .padLockComponent(Injector.get().provideComponent())
+          .build()
+          .inject(this);
     }
 
     @NonNull @CheckResult AdapterItemLocklistEntryBinding getBinding() {

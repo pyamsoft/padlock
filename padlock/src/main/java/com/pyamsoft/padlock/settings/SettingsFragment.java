@@ -25,22 +25,22 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.preference.Preference;
 import android.view.View;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
+import javax.inject.Inject;
 import timber.log.Timber;
 
 public class SettingsFragment extends ActionBarSettingsPreferenceFragment
     implements SettingsPreferencePresenter.SettingsPreferenceView {
 
   @NonNull public static final String TAG = "SettingsPreferenceFragment";
-  @NonNull private static final String KEY_PRESENTER = TAG + "key_settings_presenter";
-  @SuppressWarnings("WeakerAccess") SettingsPreferencePresenter presenter;
+  @SuppressWarnings("WeakerAccess") @Inject SettingsPreferencePresenter presenter;
 
   @NonNull @Override protected AboutLibrariesFragment.BackStackState isLastOnBackStack() {
     return AboutLibrariesFragment.BackStackState.LAST;
@@ -49,8 +49,8 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    presenter =
-        PersistentCache.load(getActivity(), KEY_PRESENTER, new SettingsPreferencePresenterLoader());
+    DaggerSettingsPreferenceComponent.builder().padLockComponent(Injector.get().provideComponent())
+        .build().inject(this);
   }
 
   @CheckResult @NonNull SettingsPreferencePresenter getPresenter() {

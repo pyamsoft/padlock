@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.main;
+package com.pyamsoft.padlock.purge;
 
-import com.pyamsoft.padlock.base.PadLockComponent;
-import com.pyamsoft.pydroid.rx.scopes.ActivityScope;
+import com.pyamsoft.padlock.PadLockComponent;
+import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
 import dagger.Component;
 
-@ActivityScope @Component(dependencies = PadLockComponent.class, modules = MainModule.class)
-interface MainComponent {
-
-  void inject(MainPresenterLoader loader);
+@FragmentScope @Component(dependencies = PadLockComponent.class, modules = PurgeModule.class)
+interface PurgeComponent {
+  void inject(PurgeFragment fragment);
 }

@@ -18,21 +18,20 @@ package com.pyamsoft.padlock.iconloader;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
-import com.pyamsoft.pydroid.rx.scopes.ActivityScope;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module class AppIconLoaderModule {
+@Module public class AppIconLoaderModule {
 
-  @ActivityScope @Provides AppIconLoaderPresenter provideAppIconLoaderPresenter(
+  @Provides AppIconLoaderPresenter provideAppIconLoaderPresenter(
       final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
     return new AppIconLoaderPresenterImpl(interactor, obsScheduler, subScheduler);
   }
 
-  @ActivityScope @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(
+  @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(
       @NonNull PackageManagerWrapper packageManagerWrapper) {
     return new AppIconLoaderInteractorImpl(packageManagerWrapper);
   }

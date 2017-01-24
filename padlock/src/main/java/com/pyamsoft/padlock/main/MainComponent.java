@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service;
+package com.pyamsoft.padlock.main;
 
-import com.pyamsoft.padlock.base.PadLockComponent;
-import com.pyamsoft.padlock.pin.MasterPinModule;
-import com.pyamsoft.pydroid.rx.scopes.ServiceScope;
+import com.pyamsoft.padlock.PadLockComponent;
+import com.pyamsoft.pydroid.rx.scopes.ActivityScope;
 import dagger.Component;
 
-@ServiceScope @Component(dependencies = PadLockComponent.class, modules = {
-    LockServiceModule.class, MasterPinModule.class, LockServiceStateModule.class
-}) interface LockServiceComponent {
+@ActivityScope @Component(dependencies = PadLockComponent.class, modules = MainModule.class)
+interface MainComponent {
 
-  void inject(LockServicePresenterLoader loader);
+  void inject(MainActivity activity);
 }

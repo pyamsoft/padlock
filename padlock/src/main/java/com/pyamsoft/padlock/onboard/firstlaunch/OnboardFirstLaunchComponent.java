@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.main;
+package com.pyamsoft.padlock.onboard.firstlaunch;
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.Injector;
-import com.pyamsoft.pydroid.FuncNone;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import com.pyamsoft.padlock.PadLockComponent;
+import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
+import dagger.Component;
 
-class MainPresenterLoader implements FuncNone<MainPresenter> {
+@FragmentScope
+@Component(dependencies = PadLockComponent.class, modules = OnboardFirstLaunchModule.class)
+interface OnboardFirstLaunchComponent {
 
-  @SuppressWarnings("WeakerAccess") @Inject Provider<MainPresenter> presenterProvider;
+  void inject(OnboardEnableServiceFragment fragment);
 
-  @NonNull @Override public MainPresenter call() {
-    DaggerMainComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
-    return presenterProvider.get();
-  }
+  void inject(OnboardAcceptTermsFragment fragment);
 }
