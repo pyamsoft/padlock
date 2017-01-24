@@ -24,17 +24,19 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.view.accessibility.AccessibilityEvent;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.lock.LockScreenActivity;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.lang.ref.WeakReference;
+import javax.inject.Inject;
 import timber.log.Timber;
 
 public class PadLockService extends AccessibilityService
     implements LockServicePresenter.LockService {
 
-  @Nullable private static volatile PadLockService instance = null;
-  @Nullable private LockServicePresenter presenter;
-  @Nullable private Intent lockActivity;
+  private static volatile PadLockService instance = null;
+  @Inject LockServicePresenter presenter;
+  private Intent lockActivity;
 
   @NonNull @CheckResult private static synchronized PadLockService getInstance() {
     if (instance == null) {
@@ -98,10 +100,6 @@ public class PadLockService extends AccessibilityService
       Timber.e("AccessibilityEvent is NULL");
       return;
     }
-    if (presenter == null) {
-      Timber.e("Cannot process event, Presenter is NULL");
-      return;
-    }
 
     final CharSequence eventPackage = event.getPackageName();
     final CharSequence eventClass = event.getClassName();
@@ -123,41 +121,31 @@ public class PadLockService extends AccessibilityService
   }
 
   @Override public boolean onUnbind(Intent intent) {
-    if (presenter != null) {
-      presenter.unbindView();
-    }
+    presenter.unbindView();
     setInstance(null);
     return super.onUnbind(intent);
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
-    if (presenter != null) {
-      presenter.destroy();
-    }
+    presenter.destroy();
   }
 
   @Override protected void onServiceConnected() {
     super.onServiceConnected();
     Timber.d("onServiceConnected");
-    if (lockActivity == null) {
-      lockActivity = new Intent(getApplicationContext(), LockScreenActivity.class).setFlags(
-          Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-    }
+    lockActivity = new Intent(getApplicationContext(), LockScreenActivity.class).setFlags(
+        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
 
-    if (presenter == null) {
-      presenter = new LockServicePresenterLoader().call();
-    }
-
+    DaggerLockServiceComponent.builder()
+        .padLockComponent(Injector.get().provideComponent())
+        .build()
+        .inject(this);
     presenter.bindView(this);
     setInstance(this);
   }
 
   @Override public void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName) {
-    if (lockActivity == null) {
-      throw new IllegalStateException("Cannot start lock screen because activity is NULL");
-    }
-
     craftIntent(lockActivity, entry, realName);
     Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
         entry.activityName(), realName);
@@ -183,10 +171,6 @@ public class PadLockService extends AccessibilityService
   @Override
   public void onActiveNamesRetrieved(@NonNull String packageName, @NonNull String activePackage,
       @NonNull String className, @NonNull String activeClass) {
-    if (presenter == null) {
-      throw new IllegalStateException("Cannot process accessibility event, Presenter is NULL");
-    }
-
     Timber.d("Check against current window values: %s, %s", activePackage, activeClass);
     if (activePackage.equals(packageName) && (activeClass.equals(className) || className.equals(
         PadLockEntry.PACKAGE_ACTIVITY_NAME))) {

@@ -16,21 +16,20 @@
 
 package com.pyamsoft.padlock.list;
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.Injector;
-import com.pyamsoft.pydroid.FuncNone;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import com.pyamsoft.padlock.PadLockComponent;
+import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
+import com.pyamsoft.padlock.pin.MasterPinModule;
+import com.pyamsoft.padlock.service.LockServiceStateModule;
+import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
+import dagger.Component;
 
-class LockListPresenterLoader implements FuncNone<LockListPresenter> {
+@FragmentScope @Component(dependencies = PadLockComponent.class, modules = {
+    LockListModule.class, LockServiceStateModule.class, MasterPinModule.class,
+    AppIconLoaderModule.class
+}) interface LockListComponent {
 
-  @SuppressWarnings("WeakerAccess") @Inject Provider<LockListPresenter> presenterProvider;
+  void inject(LockListFragment fragment);
 
-  @NonNull @Override public LockListPresenter call() {
-    DaggerLockListComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
-    return presenterProvider.get();
-  }
+  void inject(LockListItem.ViewHolder viewHolder);
 }
+

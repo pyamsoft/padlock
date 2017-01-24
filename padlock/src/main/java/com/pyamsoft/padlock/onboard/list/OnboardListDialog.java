@@ -31,14 +31,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.OnboardListDialogBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.onboard.Onboard;
-import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
+import javax.inject.Inject;
 
 public class OnboardListDialog extends DialogFragment
     implements Onboard, OnboardListPresenter.View {
@@ -46,18 +47,19 @@ public class OnboardListDialog extends DialogFragment
   @NonNull public static final String TAG = "OnboardListDialog";
   @NonNull private static final String KEY_LAST_POSITION = "key_onboard_list_dialog_position";
   private static final int PAGER_PAGE_COUNT = 3;
-  @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
   @NonNull private final AsyncDrawable.Mapper mapper = new AsyncDrawable.Mapper();
+  @Inject OnboardListPresenter presenter;
   private OnboardListDialogBinding binding;
   private ViewPager.OnPageChangeListener pageChangeListener;
-  private OnboardListPresenter presenter;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setCancelable(false);
 
-    presenter =
-        PersistentCache.load(getActivity(), KEY_PRESENTER, new OnboardListPresenterLoader());
+    DaggerOnboardListComponent.builder()
+        .padLockComponent(Injector.get().provideComponent())
+        .build()
+        .inject(this);
   }
 
   @Override public void onDestroy() {

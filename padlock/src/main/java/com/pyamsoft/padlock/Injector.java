@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base;
+package com.pyamsoft.padlock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;

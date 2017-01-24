@@ -93,6 +93,9 @@ dependencies {
   releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanary"
   testCompile "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanary"
 
+  // Dagger
+  annotationProcessor "com.google.dagger:dagger-compiler:$dagger"
+
   // Firebase Crash
   compile "com.google.firebase:firebase-crash:$firebase"
 

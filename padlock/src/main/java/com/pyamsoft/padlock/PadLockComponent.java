@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base;
+package com.pyamsoft.padlock;
 
 import android.app.Activity;
 import android.app.IntentService;
 import android.content.Context;
+import com.pyamsoft.padlock.base.PadLockModule;
+import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.db.PadLockDBModule;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
@@ -40,8 +42,6 @@ import rx.Scheduler;
   PadLockPreferences providePreferences();
 
   Context provideContext();
-
-  @Named("main") Class<? extends Activity> provideMainActivityClass();
 
   @Named("lockscreen") Class<? extends Activity> provideLockScreenActivityClas();
 

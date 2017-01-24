@@ -22,23 +22,24 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.databinding.OnboardFirstlaunchAcceptTermsBinding;
 import com.pyamsoft.padlock.onboard.OnboardChildFragment;
-import com.pyamsoft.pydroid.cache.PersistentCache;
+import javax.inject.Inject;
 import timber.log.Timber;
 
 public class OnboardAcceptTermsFragment extends OnboardChildFragment
     implements OnboardAcceptTermsPresenter.View {
 
-  @NonNull private static final String TAG = "OnboardAcceptTermsFragment";
-  @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
-  OnboardAcceptTermsPresenter presenter;
+@Inject OnboardAcceptTermsPresenter presenter;
   private OnboardFirstlaunchAcceptTermsBinding binding;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    presenter =
-        PersistentCache.load(getActivity(), KEY_PRESENTER, new OnboardAcceptTermsPresenterLoader());
+    DaggerOnboardFirstLaunchComponent.builder()
+        .padLockComponent(Injector.get().provideComponent())
+        .build()
+        .inject(this);
   }
 
   @Nullable @Override

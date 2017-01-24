@@ -34,26 +34,26 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.preference.PreferenceManager;
 import android.view.MenuItem;
 import com.pyamsoft.padlock.BuildConfig;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFragment;
 import com.pyamsoft.padlock.purge.PurgeFragment;
 import com.pyamsoft.padlock.settings.SettingsFragment;
-import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.sec.TamperActivity;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
+import javax.inject.Inject;
 import timber.log.Timber;
 
 public class MainActivity extends TamperActivity
     implements MainPresenter.MainView, NavigationDrawerController {
 
   @NonNull private static final String TAG = "MainActivity";
-  @NonNull private static final String KEY_PRESENTER = TAG + "key_main_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
-  @SuppressWarnings("WeakerAccess") MainPresenter presenter;
+  @SuppressWarnings("WeakerAccess") @Inject MainPresenter presenter;
   @SuppressWarnings("WeakerAccess") ActivityMainBinding binding;
   @SuppressWarnings("WeakerAccess") boolean firstLaunch;
   private ActionBarDrawerToggle drawerToggle;
@@ -73,13 +73,11 @@ public class MainActivity extends TamperActivity
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     firstLaunch = false;
-    presenter = PersistentCache.load(this, KEY_PRESENTER, new MainPresenterLoader() {
 
-      @NonNull @Override public MainPresenter call() {
-        firstLaunch = true;
-        return super.call();
-      }
-    });
+    DaggerMainComponent.builder()
+        .padLockComponent(Injector.get().provideComponent())
+        .build()
+        .inject(this);
 
     setAppBarState();
     setupDrawerLayout();

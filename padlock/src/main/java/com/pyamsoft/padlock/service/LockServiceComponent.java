@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard.firstlaunch;
+package com.pyamsoft.padlock.service;
 
-import com.pyamsoft.padlock.base.PadLockComponent;
-import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
+import com.pyamsoft.padlock.PadLockComponent;
+import com.pyamsoft.padlock.pin.MasterPinModule;
+import com.pyamsoft.pydroid.rx.scopes.ServiceScope;
 import dagger.Component;
 
-@FragmentScope @Component(dependencies = PadLockComponent.class, modules = OnboardFirstLaunchModule.class)
-interface OnboardFirstLaunchComponent {
-
-  void inject(OnboardEnableServicePresenterLoader loader);
-
-  void inject(OnboardAcceptTermsPresenterLoader loader);
+@ServiceScope @Component(dependencies = PadLockComponent.class, modules = {
+    LockServiceModule.class, MasterPinModule.class, LockServiceStateModule.class
+}) interface LockServiceComponent {
+  void inject(PadLockService service);
 }

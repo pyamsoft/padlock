@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.iconloader;
+package com.pyamsoft.padlock.onboard.list;
 
-import com.pyamsoft.padlock.base.PadLockComponent;
-import com.pyamsoft.pydroid.rx.scopes.ActivityScope;
+import com.pyamsoft.padlock.PadLockComponent;
+import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
 import dagger.Component;
 
-@ActivityScope
-@Component(dependencies = PadLockComponent.class, modules = AppIconLoaderModule.class)
-interface AppIconLoaderComponent {
-
-  void inject(AppIconLoaderPresenterLoader view);
+@FragmentScope @Component(dependencies = PadLockComponent.class, modules = OnboardListModule.class)
+interface OnboardListComponent {
+  void inject(OnboardListDialog dialog);
 }

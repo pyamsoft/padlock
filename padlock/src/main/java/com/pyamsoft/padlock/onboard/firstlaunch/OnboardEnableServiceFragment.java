@@ -22,20 +22,19 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.OnboardFirstlaunchEnableServiceBinding;
 import com.pyamsoft.padlock.onboard.OnboardChildFragment;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.padlock.uicommon.AccessibilityRequestDelegate;
-import com.pyamsoft.pydroid.cache.PersistentCache;
+import javax.inject.Inject;
 
 public class OnboardEnableServiceFragment extends OnboardChildFragment
     implements OnboardEnableServicePresenter.View {
 
-  @NonNull private static final String TAG = "OnboardingEnableServiceFragment";
-  @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
   @NonNull final AccessibilityRequestDelegate delegate = new AccessibilityRequestDelegate();
-  OnboardEnableServicePresenter presenter;
+  @Inject OnboardEnableServicePresenter presenter;
   private OnboardFirstlaunchEnableServiceBinding binding;
 
   @Nullable @Override
@@ -52,8 +51,10 @@ public class OnboardEnableServiceFragment extends OnboardChildFragment
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    presenter = PersistentCache.load(getActivity(), KEY_PRESENTER,
-        new OnboardEnableServicePresenterLoader());
+    DaggerOnboardFirstLaunchComponent.builder()
+        .padLockComponent(Injector.get().provideComponent())
+        .build()
+        .inject(this);
   }
 
   @Override public void onStart() {

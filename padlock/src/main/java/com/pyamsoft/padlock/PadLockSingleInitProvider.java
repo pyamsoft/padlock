@@ -19,9 +19,6 @@ package com.pyamsoft.padlock;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.base.BaseInitProvider;
-import com.pyamsoft.padlock.base.DaggerPadLockComponent;
-import com.pyamsoft.padlock.base.PadLockComponent;
 import com.pyamsoft.padlock.base.PadLockModule;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
@@ -29,11 +26,12 @@ import com.pyamsoft.padlock.lock.LockScreenActivity;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.service.RecheckService;
 import com.pyamsoft.pydroid.BuildConfigChecker;
+import com.pyamsoft.pydroid.SingleInitContentProvider;
 import com.pyamsoft.pydroid.about.Licenses;
 import com.pyamsoft.pydroid.rx.RxLicenses;
 import com.pyamsoft.pydroid.ui.UiLicenses;
 
-public class PadLockSingleInitProvider extends BaseInitProvider {
+public class PadLockSingleInitProvider extends SingleInitContentProvider {
 
   @NonNull @Override protected BuildConfigChecker initializeBuildConfigChecker() {
     return new BuildConfigChecker() {
@@ -44,10 +42,15 @@ public class PadLockSingleInitProvider extends BaseInitProvider {
   }
 
   @Override protected void onInstanceCreated(@NonNull Context context) {
-    super.onInstanceCreated(context);
-    final PadLockComponent comp = provideComponent();
-    final ApplicationInstallReceiver receiver = comp.provideApplicationInstallReceiver();
-    final PadLockPreferences preferences = comp.providePreferences();
+    final PadLockModule padLockModule =
+        new PadLockModule(context.getApplicationContext(), MainActivity.class,
+            LockScreenActivity.class, RecheckService.class);
+    final PadLockComponent component =
+        DaggerPadLockComponent.builder().padLockModule(padLockModule).build();
+    Injector.set(component);
+
+    final ApplicationInstallReceiver receiver = component.provideApplicationInstallReceiver();
+    final PadLockPreferences preferences = component.providePreferences();
     if (preferences.isInstallListenerEnabled()) {
       receiver.register();
     } else {
@@ -65,12 +68,5 @@ public class PadLockSingleInitProvider extends BaseInitProvider {
     Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2");
     RxLicenses.addLicenses();
     UiLicenses.addLicenses();
-  }
-
-  @NonNull @Override protected PadLockComponent createComponent(Context context) {
-    final PadLockModule module =
-        new PadLockModule(context, MainActivity.class, LockScreenActivity.class,
-            RecheckService.class);
-    return DaggerPadLockComponent.builder().padLockModule(module).build();
   }
 }

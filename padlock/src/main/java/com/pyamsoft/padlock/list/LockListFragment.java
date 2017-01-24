@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import com.mikepenz.fastadapter.FastAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding;
@@ -45,7 +46,6 @@ import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.onboard.list.OnboardListDialog;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.cache.PersistentCache;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.design.util.FABUtil;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
@@ -54,6 +54,7 @@ import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.List;
+import javax.inject.Inject;
 import timber.log.Timber;
 
 public class LockListFragment extends Fragment
@@ -61,10 +62,9 @@ public class LockListFragment extends Fragment
 
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
-  @NonNull private static final String KEY_PRESENTER = TAG + "key_presenter";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockListItem> fastItemAdapter;
-  @SuppressWarnings("WeakerAccess") LockListPresenter presenter;
+  @SuppressWarnings("WeakerAccess") @Inject LockListPresenter presenter;
   @SuppressWarnings("WeakerAccess") FragmentLockListBinding binding;
   @NonNull private final Runnable startRefreshRunnable = () -> {
     binding.applistSwipeRefresh.post(() -> {
@@ -104,7 +104,9 @@ public class LockListFragment extends Fragment
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-    presenter = PersistentCache.load(getActivity(), KEY_PRESENTER, new LockListPresenterLoader());
+
+    DaggerLockListComponent.builder().padLockComponent(Injector.get().provideComponent())
+        .build().inject(this);
   }
 
   @Nullable @Override
@@ -379,7 +381,8 @@ public class LockListFragment extends Fragment
 
   @Override public void onShowOnboarding() {
     Timber.d("Show onboarding");
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(), OnboardListDialog.TAG);
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(),
+        OnboardListDialog.TAG);
   }
 
   @Override public void onListCleared() {

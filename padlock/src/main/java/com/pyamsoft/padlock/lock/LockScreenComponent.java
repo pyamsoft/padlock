@@ -16,21 +16,15 @@
 
 package com.pyamsoft.padlock.lock;
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.Injector;
-import com.pyamsoft.pydroid.FuncNone;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import com.pyamsoft.padlock.PadLockComponent;
+import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
+import com.pyamsoft.padlock.pin.MasterPinModule;
+import com.pyamsoft.pydroid.rx.scopes.ActivityScope;
+import dagger.Component;
 
-class PinScreenPresenterLoader implements FuncNone<PinEntryPresenter> {
+@ActivityScope @Component(dependencies = PadLockComponent.class, modules = {
+    LockScreenModule.class, MasterPinModule.class, AppIconLoaderModule.class
+}) interface LockScreenComponent {
 
-  @SuppressWarnings("WeakerAccess") @Inject Provider<PinEntryPresenter> presenterProvider;
-
-  @NonNull @Override public PinEntryPresenter call() {
-    DaggerPinEntryComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
-    return presenterProvider.get();
-  }
+  void inject(LockScreenActivity activity);
 }
