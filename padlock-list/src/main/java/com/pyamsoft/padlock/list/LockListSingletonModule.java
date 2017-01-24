@@ -16,18 +16,17 @@
 
 package com.pyamsoft.padlock.list;
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.service.LockServiceStateInteractor;
+import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.db.PadLockDB;
+import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
-import javax.inject.Named;
-import rx.Scheduler;
+import javax.inject.Singleton;
 
-@Module class LockListModule {
+@Module public class LockListSingletonModule {
 
-  @Provides LockListPresenter provideLockScreenPresenter(@NonNull LockListInteractor interactor,
-      @NonNull LockServiceStateInteractor stateInteractor, @Named("obs") Scheduler obsScheduler,
-      @Named("io") Scheduler subScheduler) {
-    return new LockListPresenterImpl(interactor, stateInteractor, obsScheduler, subScheduler);
+  @Singleton @Provides LockListInteractor provideLockScreenInteractor(PadLockDB padLockDB,
+      PackageManagerWrapper packageManagerWrapper, PadLockPreferences preferences) {
+    return new LockListInteractorImpl(padLockDB, packageManagerWrapper, preferences);
   }
 }

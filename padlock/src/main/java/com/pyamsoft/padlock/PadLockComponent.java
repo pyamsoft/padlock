@@ -29,6 +29,8 @@ import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatModule;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperModule;
+import com.pyamsoft.padlock.list.LockListInteractor;
+import com.pyamsoft.padlock.list.LockListSingletonModule;
 import dagger.Component;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -36,7 +38,7 @@ import rx.Scheduler;
 
 @Singleton @Component(modules = {
     PadLockModule.class, PackageManagerWrapperModule.class, JobSchedulerCompatModule.class,
-    PadLockDBModule.class, ReceiverModule.class
+    PadLockDBModule.class, ReceiverModule.class, LockListSingletonModule.class,
 }) public interface PadLockComponent {
 
   PadLockPreferences providePreferences();
@@ -60,4 +62,6 @@ import rx.Scheduler;
   PadLockDB providePadLockDb();
 
   ApplicationInstallReceiver provideApplicationInstallReceiver();
+
+  LockListInteractor provideLockListInteractor();
 }

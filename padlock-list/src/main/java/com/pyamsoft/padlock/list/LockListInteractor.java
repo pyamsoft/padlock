@@ -20,18 +20,10 @@ import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import java.util.List;
 import rx.Observable;
 
-interface LockListInteractor extends LockCommonInteractor {
-
-  @CheckResult @NonNull Observable<ApplicationInfo> getActiveApplications();
-
-  @CheckResult @NonNull Observable<String> getActivityListForApplication(
-      @NonNull ApplicationInfo info);
-
-  @CheckResult @NonNull Observable<List<PadLockEntry.AllEntries>> getAppEntryList();
+public interface LockListInteractor extends LockCommonInteractor {
+  @CheckResult @NonNull Observable<AppEntry> populateList();
 
   @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding();
 
@@ -39,18 +31,9 @@ interface LockListInteractor extends LockCommonInteractor {
 
   void setSystemVisible(boolean visible);
 
-  @NonNull @CheckResult Observable<AppEntry> createFromPackageInfo(@NonNull String packageName,
-      boolean locked);
-
   @CheckResult boolean isSystemApplication(@NonNull ApplicationInfo info);
-
-  @CheckResult boolean isCacheEmpty();
-
-  @CheckResult @NonNull Observable<AppEntry> getCachedEntries();
 
   void clearCache();
 
   void updateCacheEntry(@NonNull String name, @NonNull String packageName, boolean newLockState);
-
-  void cacheEntry(@NonNull AppEntry entry);
 }
