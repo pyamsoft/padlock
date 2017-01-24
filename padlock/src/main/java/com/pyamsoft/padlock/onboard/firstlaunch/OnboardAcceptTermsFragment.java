@@ -36,10 +36,7 @@ public class OnboardAcceptTermsFragment extends OnboardChildFragment
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    DaggerOnboardFirstLaunchComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
+    Injector.get().provideComponent().plusOnboardFirstLaunchComponent().inject(this);
   }
 
   @Nullable @Override

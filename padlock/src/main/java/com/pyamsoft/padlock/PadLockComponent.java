@@ -16,52 +16,55 @@
 
 package com.pyamsoft.padlock;
 
-import android.app.Activity;
-import android.app.IntentService;
-import android.content.Context;
 import com.pyamsoft.padlock.base.PadLockModule;
 import com.pyamsoft.padlock.base.PadLockPreferences;
-import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.db.PadLockDBModule;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.base.receiver.ReceiverModule;
-import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatModule;
-import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperModule;
-import com.pyamsoft.padlock.list.LockListInteractor;
+import com.pyamsoft.padlock.list.LockInfoComponent;
+import com.pyamsoft.padlock.list.LockListComponent;
 import com.pyamsoft.padlock.list.LockListSingletonModule;
+import com.pyamsoft.padlock.lock.LockScreenComponent;
+import com.pyamsoft.padlock.lock.PinEntryComponent;
+import com.pyamsoft.padlock.main.MainComponent;
+import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFirstLaunchComponent;
+import com.pyamsoft.padlock.onboard.list.OnboardListComponent;
+import com.pyamsoft.padlock.purge.PurgeComponent;
+import com.pyamsoft.padlock.service.LockServiceComponent;
+import com.pyamsoft.padlock.settings.SettingsPreferenceComponent;
 import dagger.Component;
-import javax.inject.Named;
 import javax.inject.Singleton;
-import rx.Scheduler;
 
 @Singleton @Component(modules = {
     PadLockModule.class, PackageManagerWrapperModule.class, JobSchedulerCompatModule.class,
     PadLockDBModule.class, ReceiverModule.class, LockListSingletonModule.class,
 }) public interface PadLockComponent {
 
+  LockInfoComponent plusLockInfoComponent();
+
+  LockListComponent plusLockListComponent();
+
+  LockScreenComponent plusLockScreenComponent();
+
+  PinEntryComponent plusPinEntryComponent();
+
+  MainComponent plusMainComponent();
+
+  OnboardFirstLaunchComponent plusOnboardFirstLaunchComponent();
+
+  OnboardListComponent plusOnboardListComponent();
+
+  PurgeComponent plusPurgeComponent();
+
+  LockServiceComponent plusLockServiceComponent();
+
+  SettingsPreferenceComponent plusSettingsPreferenceComponent();
+
+  // To be used directly by PadLockSingleInitProvider
   PadLockPreferences providePreferences();
 
-  Context provideContext();
-
-  @Named("lockscreen") Class<? extends Activity> provideLockScreenActivityClas();
-
-  @Named("recheck") Class<? extends IntentService> provideRecheckServiceClass();
-
-  @Named("sub") Scheduler provideSubScheduler();
-
-  @Named("io") Scheduler provideIOScheduler();
-
-  @Named("obs") Scheduler provideObsScheduler();
-
-  JobSchedulerCompat provideJobSchedulerCompat();
-
-  PackageManagerWrapper providePackageManagerWrapper();
-
-  PadLockDB providePadLockDb();
-
+  // To be used directly by PadLockSingleInitProvider
   ApplicationInstallReceiver provideApplicationInstallReceiver();
-
-  LockListInteractor provideLockListInteractor();
 }

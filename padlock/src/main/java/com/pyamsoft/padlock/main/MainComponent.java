@@ -16,12 +16,10 @@
 
 package com.pyamsoft.padlock.main;
 
-import com.pyamsoft.padlock.PadLockComponent;
 import com.pyamsoft.pydroid.rx.scopes.ActivityScope;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@ActivityScope @Component(dependencies = PadLockComponent.class, modules = MainModule.class)
-interface MainComponent {
+@ActivityScope @Subcomponent(modules = MainModule.class) public interface MainComponent {
 
   void inject(MainActivity activity);
 }

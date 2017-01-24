@@ -23,7 +23,7 @@ import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module class OnboardListModule {
+@Module public class OnboardListModule {
 
   @Provides OnboardListPresenter provideOnboardListPresenter(
       @NonNull OnboardListInteractor interactor, @Named("obs") Scheduler obsScheduler,

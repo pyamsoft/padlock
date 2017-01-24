@@ -55,11 +55,7 @@ public class OnboardListDialog extends DialogFragment
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setCancelable(false);
-
-    DaggerOnboardListComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
+    Injector.get().provideComponent().plusOnboardListComponent().inject(this);
   }
 
   @Override public void onDestroy() {

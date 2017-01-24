@@ -49,8 +49,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    DaggerSettingsPreferenceComponent.builder().padLockComponent(Injector.get().provideComponent())
-        .build().inject(this);
+    Injector.get().provideComponent().plusSettingsPreferenceComponent().inject(this);
   }
 
   @CheckResult @NonNull SettingsPreferencePresenter getPresenter() {

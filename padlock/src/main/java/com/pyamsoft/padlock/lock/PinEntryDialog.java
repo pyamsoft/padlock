@@ -94,8 +94,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
 
     setCancelable(true);
 
-    DaggerPinEntryComponent.builder().padLockComponent(Injector.get().provideComponent())
-        .build().inject(this);
+    Injector.get().provideComponent().plusPinEntryComponent().inject(this);
   }
 
   @Override public void onResume() {

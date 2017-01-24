@@ -137,10 +137,7 @@ public class PadLockService extends AccessibilityService
     lockActivity = new Intent(getApplicationContext(), LockScreenActivity.class).setFlags(
         Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
 
-    DaggerLockServiceComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
+    Injector.get().provideComponent().plusLockServiceComponent().inject(this);
     presenter.bindView(this);
     setInstance(this);
   }

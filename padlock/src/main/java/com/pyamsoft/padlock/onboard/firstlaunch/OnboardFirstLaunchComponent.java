@@ -16,13 +16,11 @@
 
 package com.pyamsoft.padlock.onboard.firstlaunch;
 
-import com.pyamsoft.padlock.PadLockComponent;
 import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@FragmentScope
-@Component(dependencies = PadLockComponent.class, modules = OnboardFirstLaunchModule.class)
-interface OnboardFirstLaunchComponent {
+@FragmentScope @Subcomponent(modules = OnboardFirstLaunchModule.class)
+public interface OnboardFirstLaunchComponent {
 
   void inject(OnboardEnableServiceFragment fragment);
 

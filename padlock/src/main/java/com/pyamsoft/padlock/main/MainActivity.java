@@ -51,7 +51,7 @@ import timber.log.Timber;
 public class MainActivity extends TamperActivity
     implements MainPresenter.MainView, NavigationDrawerController {
 
-  @NonNull private static final String TAG = "MainActivity";
+  @NonNull private static final String FIRST_LAUNCH = "main_first_launch";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") @Inject MainPresenter presenter;
   @SuppressWarnings("WeakerAccess") ActivityMainBinding binding;
@@ -72,12 +72,9 @@ public class MainActivity extends TamperActivity
     super.onCreate(savedInstanceState);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    firstLaunch = false;
+    firstLaunch = savedInstanceState != null && savedInstanceState.getBoolean(FIRST_LAUNCH, false);
 
-    DaggerMainComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
+    Injector.get().provideComponent().plusMainComponent().inject(this);
 
     setAppBarState();
     setupDrawerLayout();
@@ -236,6 +233,11 @@ public class MainActivity extends TamperActivity
     } else {
       super.onBackPressed();
     }
+  }
+
+  @Override protected void onSaveInstanceState(Bundle outState) {
+    outState.putBoolean(FIRST_LAUNCH, firstLaunch);
+    super.onSaveInstanceState(outState);
   }
 
   @Override public void onConfigurationChanged(Configuration newConfig) {

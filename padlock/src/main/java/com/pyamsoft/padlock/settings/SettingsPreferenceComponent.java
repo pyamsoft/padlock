@@ -16,12 +16,10 @@
 
 package com.pyamsoft.padlock.settings;
 
-import com.pyamsoft.padlock.PadLockComponent;
 import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@FragmentScope
-@Component(dependencies = PadLockComponent.class, modules = SettingsPreferenceModule.class)
-interface SettingsPreferenceComponent {
+@FragmentScope @Subcomponent(modules = SettingsPreferenceModule.class)
+public interface SettingsPreferenceComponent {
   void inject(SettingsFragment fragment);
 }

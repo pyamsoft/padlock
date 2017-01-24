@@ -25,7 +25,7 @@ import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module class SettingsPreferenceModule {
+@Module public class SettingsPreferenceModule {
 
   @Provides SettingsPreferencePresenter provideSettingsPresenter(
       @NonNull SettingsPreferenceInteractor interactor,

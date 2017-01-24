@@ -68,11 +68,7 @@ public class PurgeFragment extends Fragment implements PurgePresenter.View {
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-
-    DaggerPurgeComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
+    Injector.get().provideComponent().plusPurgeComponent().inject(this);
   }
 
   @Override public void onDestroy() {

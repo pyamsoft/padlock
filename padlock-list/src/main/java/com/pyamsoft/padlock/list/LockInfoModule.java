@@ -26,7 +26,7 @@ import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module class LockInfoModule {
+@Module public class LockInfoModule {
 
   @Provides LockInfoPresenter provideLockInfoPresenter(LockInfoInteractor infoInteractor,
       @Named("obs") Scheduler obsScheduler, @Named("io") Scheduler subScheduler) {

@@ -16,13 +16,12 @@
 
 package com.pyamsoft.padlock.service;
 
-import com.pyamsoft.padlock.PadLockComponent;
 import com.pyamsoft.padlock.pin.MasterPinModule;
 import com.pyamsoft.pydroid.rx.scopes.ServiceScope;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@ServiceScope @Component(dependencies = PadLockComponent.class, modules = {
+@ServiceScope @Subcomponent(modules = {
     LockServiceModule.class, MasterPinModule.class, LockServiceStateModule.class
-}) interface LockServiceComponent {
+}) public interface LockServiceComponent {
   void inject(PadLockService service);
 }

@@ -105,8 +105,7 @@ public class LockListFragment extends Fragment
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
 
-    DaggerLockListComponent.builder().padLockComponent(Injector.get().provideComponent())
-        .build().inject(this);
+    Injector.get().provideComponent().plusLockListComponent().inject(this);
   }
 
   @Nullable @Override

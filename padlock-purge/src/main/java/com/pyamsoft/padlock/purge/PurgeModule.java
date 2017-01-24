@@ -21,7 +21,7 @@ import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module class PurgeModule {
+@Module public class PurgeModule {
 
   @Provides PurgePresenter providePinEntryPresenter(final PurgeInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
