@@ -23,7 +23,7 @@ import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module class PinEntryModule {
+@Module public class PinEntryModule {
 
   @Provides PinEntryPresenter providePinEntryPresenter(PinEntryInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {

@@ -37,7 +37,7 @@ import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>
+public class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>
     implements FilterableItem<LockListItem, LockListItem.ViewHolder> {
 
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
@@ -102,7 +102,7 @@ class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListI
     }
   }
 
-  static final class ViewHolder extends RecyclerView.ViewHolder implements AppIconLoaderView {
+  public static final class ViewHolder extends RecyclerView.ViewHolder implements AppIconLoaderView {
 
     @NonNull private final AdapterItemLocklistEntryBinding binding;
     @Inject AppIconLoaderPresenter appIconLoaderPresenter;
@@ -113,10 +113,7 @@ class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListI
       binding = DataBindingUtil.bind(itemView);
       weakEntry = new WeakReference<>(null);
 
-      DaggerLockListComponent.builder()
-          .padLockComponent(Injector.get().provideComponent())
-          .build()
-          .inject(this);
+      Injector.get().provideComponent().plusLockListComponent().inject(this);
     }
 
     @NonNull @CheckResult AdapterItemLocklistEntryBinding getBinding() {

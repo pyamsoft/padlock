@@ -16,15 +16,14 @@
 
 package com.pyamsoft.padlock.lock;
 
-import com.pyamsoft.padlock.PadLockComponent;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
 import com.pyamsoft.padlock.pin.MasterPinModule;
 import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@FragmentScope @Component(dependencies = PadLockComponent.class, modules = {
+@FragmentScope @Subcomponent(modules = {
     PinEntryModule.class, MasterPinModule.class, AppIconLoaderModule.class
-}) interface PinEntryComponent {
+}) public interface PinEntryComponent {
 
   void inject(PinEntryDialog dialog);
 }

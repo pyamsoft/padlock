@@ -22,7 +22,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.AppEntry;
 import rx.Observable;
 
-public interface LockListInteractor extends LockCommonInteractor {
+interface LockListInteractor extends LockCommonInteractor {
   @CheckResult @NonNull Observable<AppEntry> populateList();
 
   @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding();

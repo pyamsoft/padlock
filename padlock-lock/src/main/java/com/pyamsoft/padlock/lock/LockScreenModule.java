@@ -28,7 +28,7 @@ import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module class LockScreenModule {
+@Module public class LockScreenModule {
 
   @Provides LockScreenPresenter provideLockScreenPresenter(LockScreenInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {

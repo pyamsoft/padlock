@@ -114,10 +114,7 @@ public class LockInfoDialog extends DialogFragment
       throw new NullPointerException("App information is NULL");
     }
 
-    DaggerLockInfoComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
+    Injector.get().provideComponent().plusLockInfoComponent().inject(this);
   }
 
   @Nullable @Override

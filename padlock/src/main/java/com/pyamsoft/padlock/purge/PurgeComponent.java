@@ -16,11 +16,9 @@
 
 package com.pyamsoft.padlock.purge;
 
-import com.pyamsoft.padlock.PadLockComponent;
 import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@FragmentScope @Component(dependencies = PadLockComponent.class, modules = PurgeModule.class)
-interface PurgeComponent {
+@FragmentScope @Subcomponent(modules = PurgeModule.class) public interface PurgeComponent {
   void inject(PurgeFragment fragment);
 }

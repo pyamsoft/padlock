@@ -23,7 +23,7 @@ import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module class OnboardFirstLaunchModule {
+@Module public class OnboardFirstLaunchModule {
 
   @Provides OnboardEnableServicePresenter provideOnboardingEnableServicePresenter(
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {

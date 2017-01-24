@@ -151,10 +151,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    DaggerLockScreenComponent.builder()
-        .padLockComponent(Injector.get().provideComponent())
-        .build()
-        .inject(this);
+    Injector.get().provideComponent().plusLockScreenComponent().inject(this);
 
     populateIgnoreTimes();
     getValuesFromBundle();

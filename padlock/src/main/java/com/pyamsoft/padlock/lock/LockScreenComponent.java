@@ -16,15 +16,14 @@
 
 package com.pyamsoft.padlock.lock;
 
-import com.pyamsoft.padlock.PadLockComponent;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
 import com.pyamsoft.padlock.pin.MasterPinModule;
 import com.pyamsoft.pydroid.rx.scopes.ActivityScope;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@ActivityScope @Component(dependencies = PadLockComponent.class, modules = {
+@ActivityScope @Subcomponent(modules = {
     LockScreenModule.class, MasterPinModule.class, AppIconLoaderModule.class
-}) interface LockScreenComponent {
+}) public interface LockScreenComponent {
 
   void inject(LockScreenActivity activity);
 }

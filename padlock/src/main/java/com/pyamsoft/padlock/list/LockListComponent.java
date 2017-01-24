@@ -16,17 +16,16 @@
 
 package com.pyamsoft.padlock.list;
 
-import com.pyamsoft.padlock.PadLockComponent;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
 import com.pyamsoft.padlock.pin.MasterPinModule;
 import com.pyamsoft.padlock.service.LockServiceStateModule;
 import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
-import dagger.Component;
+import dagger.Subcomponent;
 
-@FragmentScope @Component(dependencies = PadLockComponent.class, modules = {
+@FragmentScope @Subcomponent(modules = {
     LockListModule.class, LockServiceStateModule.class, MasterPinModule.class,
     AppIconLoaderModule.class
-}) interface LockListComponent {
+}) public interface LockListComponent {
 
   void inject(LockListFragment fragment);
 
