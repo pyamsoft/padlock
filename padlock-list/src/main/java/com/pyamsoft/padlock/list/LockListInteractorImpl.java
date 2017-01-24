@@ -35,6 +35,7 @@ import timber.log.Timber;
 
 class LockListInteractorImpl extends LockCommonInteractorImpl implements LockListInteractor {
 
+  @SuppressWarnings("WeakerAccess") @NonNull static final Object LOCK = new Object();
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManagerWrapper;
   @SuppressWarnings("WeakerAccess") @NonNull final List<AppEntry> appEntryCache;
@@ -51,33 +52,26 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
 
   @NonNull @Override public Observable<AppEntry> populateList() {
     return Observable.defer(() -> {
-      synchronized (LockListInteractorImpl.this) {
+      synchronized (LOCK) {
         while (refreshing) {
-          try {
-            wait();
-          } catch (InterruptedException e) {
-            Timber.e(e, "Waiting interruped!");
-            return Observable.empty();
-          }
+          // Empty
         }
+
+        refreshing = true;
       }
 
-      refreshing = true;
       Timber.d("populateList");
-      Observable<AppEntry> dataSource;
+      final Observable<AppEntry> dataSource;
       if (isCacheEmpty()) {
         dataSource = fetchFreshData();
       } else {
         dataSource = getCachedEntries();
       }
-      dataSource = dataSource.doOnCompleted(() -> {
-        synchronized (LockListInteractorImpl.this) {
-          refreshing = false;
-          notify();
-        }
-      });
-
       return dataSource;
+    }).doOnUnsubscribe(() -> {
+      synchronized (LOCK) {
+        refreshing = false;
+      }
     });
   }
 
