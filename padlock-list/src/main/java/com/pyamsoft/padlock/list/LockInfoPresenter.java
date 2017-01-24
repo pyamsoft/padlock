@@ -24,7 +24,8 @@ import com.pyamsoft.pydroid.presenter.Presenter;
 
 interface LockInfoPresenter extends Presenter<LockInfoPresenter.LockInfoView> {
 
-  void updateCachedEntryLockState(@NonNull String name, @NonNull LockState lockState);
+  void updateCachedEntryLockState(@NonNull String packageName, @NonNull String name,
+      @NonNull LockState lockState);
 
   void clearList();
 

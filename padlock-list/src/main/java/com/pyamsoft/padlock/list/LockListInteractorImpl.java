@@ -140,10 +140,7 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
         .flatMap(Observable::from)
         .flatMap(pair -> createFromPackageInfo(pair.first, pair.second))
         .sorted((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()))
-        .map(appEntry -> {
-          cacheEntry(appEntry);
-          return appEntry;
-        });
+        .doOnNext(this::cacheEntry);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Pair<String, Boolean> findAppEntry(

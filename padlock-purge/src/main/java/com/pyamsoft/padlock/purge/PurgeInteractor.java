@@ -18,25 +18,17 @@ package com.pyamsoft.padlock.purge;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import java.util.List;
 import rx.Observable;
 
 interface PurgeInteractor {
 
-  @CheckResult @NonNull Observable<String> getActiveApplicationPackageNames();
-
-  @CheckResult @NonNull Observable<List<PadLockEntry.AllEntries>> getAppEntryList();
+  @CheckResult @NonNull Observable<String> populateList();
 
   @CheckResult @NonNull Observable<Integer> deleteEntry(@NonNull String packageName);
 
   @CheckResult boolean isCacheEmpty();
 
-  @CheckResult @NonNull Observable<String> getCachedEntries();
-
   void clearCache();
-
-  void cacheEntry(@NonNull String entry);
 
   void removeFromCache(@NonNull String entry);
 }
