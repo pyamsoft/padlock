@@ -19,12 +19,15 @@ package com.pyamsoft.padlock.list;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Observable;
@@ -35,6 +38,7 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManagerWrapper;
   @SuppressWarnings("WeakerAccess") @NonNull final List<AppEntry> appEntryCache;
+  @SuppressWarnings("WeakerAccess") boolean refreshing;
 
   @Inject LockListInteractorImpl(PadLockDB padLockDB,
       @NonNull PackageManagerWrapper packageManagerWrapper,
@@ -43,6 +47,159 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
     this.packageManagerWrapper = packageManagerWrapper;
     this.preferences = preferences;
     appEntryCache = new ArrayList<>();
+  }
+
+  @NonNull @Override public Observable<AppEntry> populateList() {
+    return Observable.defer(() -> {
+      synchronized (LockListInteractorImpl.this) {
+        while (refreshing) {
+          try {
+            wait();
+          } catch (InterruptedException e) {
+            Timber.e(e, "Waiting interruped!");
+            return Observable.empty();
+          }
+        }
+      }
+
+      refreshing = true;
+      Timber.d("populateList");
+      Observable<AppEntry> dataSource;
+      if (isCacheEmpty()) {
+        dataSource = fetchFreshData();
+      } else {
+        dataSource = getCachedEntries();
+      }
+      dataSource = dataSource.doOnCompleted(() -> {
+        synchronized (LockListInteractorImpl.this) {
+          refreshing = false;
+          notify();
+        }
+      });
+
+      return dataSource;
+    });
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<AppEntry> fetchFreshData() {
+    return getActiveApplications().withLatestFrom(isSystemVisible(),
+        (applicationInfo, systemVisible) -> {
+          if (systemVisible) {
+            // If system visible, we show all apps
+            return applicationInfo;
+          } else {
+            if (isSystemApplication(applicationInfo)) {
+              // Application is system but system apps are hidden
+              Timber.w("Hide system application: %s", applicationInfo.packageName);
+              return null;
+            } else {
+              return applicationInfo;
+            }
+          }
+        })
+        .filter(applicationInfo -> applicationInfo != null)
+        .flatMap(applicationInfo -> getActivityListForApplication(applicationInfo).toList()
+            .map(activityList -> {
+              if (activityList.isEmpty()) {
+                Timber.w("Exclude package %s because it has no activities",
+                    applicationInfo.packageName);
+                return null;
+              } else {
+                return applicationInfo.packageName;
+              }
+            }))
+        .filter(s -> s != null)
+        .toList()
+        .zipWith(getAppEntryList(), (packageNames, padLockEntries) -> {
+          // Sort here to avoid stream break
+          // If the list is empty, the old flatMap call can hang, causing a list loading error
+          // Sort here where we are guaranteed a list of some kind
+          Collections.sort(padLockEntries,
+              (o1, o2) -> o1.packageName().compareToIgnoreCase(o2.packageName()));
+
+          final List<Pair<String, Boolean>> lockPairs = new ArrayList<>();
+          int start = 0;
+          int end = packageNames.size() - 1;
+
+          while (start <= end) {
+            // Find entry to compare against
+            final Pair<String, Boolean> entry1 = findAppEntry(packageNames, padLockEntries, start);
+            lockPairs.add(entry1);
+
+            if (start != end) {
+              final Pair<String, Boolean> entry2 = findAppEntry(packageNames, padLockEntries, end);
+              lockPairs.add(entry2);
+            }
+
+            ++start;
+            --end;
+          }
+
+          return lockPairs;
+        })
+        .flatMap(Observable::from)
+        .flatMap(pair -> createFromPackageInfo(pair.first, pair.second))
+        .sorted((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()))
+        .map(appEntry -> {
+          cacheEntry(appEntry);
+          return appEntry;
+        });
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Pair<String, Boolean> findAppEntry(
+      @NonNull List<String> packageNames, @NonNull List<PadLockEntry.AllEntries> padLockEntries,
+      int index) {
+    final String packageName = packageNames.get(index);
+    final PadLockEntry.AllEntries foundEntry = findMatchingEntry(padLockEntries, packageName);
+    return new Pair<>(packageName, foundEntry != null);
+  }
+
+  @CheckResult @Nullable private PadLockEntry.AllEntries findMatchingEntry(
+      @NonNull List<PadLockEntry.AllEntries> padLockEntries, @NonNull String packageName) {
+    if (padLockEntries.isEmpty()) {
+      return null;
+    }
+
+    // Select a pivot point
+    final int middle = padLockEntries.size() / 2;
+    final PadLockEntry.AllEntries pivotPoint = padLockEntries.get(middle);
+
+    // Compare to pivot
+    int start;
+    int end;
+    PadLockEntry.AllEntries foundEntry = null;
+    if (pivotPoint.packageName().equals(packageName)) {
+      // We are the pivot
+      foundEntry = pivotPoint;
+      start = 0;
+      end = -1;
+    } else if (packageName.compareToIgnoreCase(pivotPoint.packageName()) < 0) {
+      //  We are before the pivot point
+      start = 0;
+      end = middle - 1;
+    } else {
+      // We are after the pivot point
+      start = middle + 1;
+      end = padLockEntries.size() - 1;
+    }
+
+    while (start <= end) {
+      final PadLockEntry.AllEntries checkEntry1 = padLockEntries.get(start++);
+      final PadLockEntry.AllEntries checkEntry2 = padLockEntries.get(end--);
+      if (packageName.equals(checkEntry1.packageName())) {
+        foundEntry = checkEntry1;
+        break;
+      } else if (packageName.equals(checkEntry2.packageName())) {
+        foundEntry = checkEntry2;
+        break;
+      }
+    }
+
+    if (foundEntry != null) {
+      padLockEntries.remove(foundEntry);
+    }
+
+    return foundEntry;
   }
 
   @NonNull @Override public Observable<Boolean> hasShownOnBoarding() {
@@ -57,16 +214,17 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
     preferences.setSystemVisible(visible);
   }
 
-  @NonNull @Override public Observable<ApplicationInfo> getActiveApplications() {
+  @SuppressWarnings("WeakerAccess") @NonNull Observable<ApplicationInfo> getActiveApplications() {
     return packageManagerWrapper.getActiveApplications();
   }
 
-  @NonNull @Override
-  public Observable<String> getActivityListForApplication(@NonNull ApplicationInfo info) {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
+  Observable<String> getActivityListForApplication(@NonNull ApplicationInfo info) {
     return packageManagerWrapper.getActivityListForPackage(info.packageName);
   }
 
-  @NonNull @Override public Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
+  Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
     return getPadLockDB().queryAll().first();
   }
 
@@ -74,12 +232,12 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
     return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
   }
 
-  @Override public boolean isCacheEmpty() {
+  @SuppressWarnings("WeakerAccess") @CheckResult boolean isCacheEmpty() {
     return appEntryCache.isEmpty();
   }
 
-  @NonNull @Override public Observable<AppEntry> getCachedEntries() {
-    return Observable.fromCallable(() -> appEntryCache).flatMap(Observable::from);
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<AppEntry> getCachedEntries() {
+    return Observable.fromCallable(() -> appEntryCache).concatMap(Observable::from);
   }
 
   @Override public void clearCache() {
@@ -98,12 +256,12 @@ class LockListInteractorImpl extends LockCommonInteractorImpl implements LockLis
     }
   }
 
-  @Override public void cacheEntry(@NonNull AppEntry entry) {
+  @SuppressWarnings("WeakerAccess") void cacheEntry(@NonNull AppEntry entry) {
     appEntryCache.add(entry);
   }
 
-  @NonNull @Override
-  public Observable<AppEntry> createFromPackageInfo(@NonNull String packageName, boolean locked) {
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Observable<AppEntry> createFromPackageInfo(@NonNull String packageName, boolean locked) {
     return packageManagerWrapper.getApplicationInfo(packageName)
         .map(info -> AppEntry.builder()
             .name(packageManagerWrapper.loadPackageLabel(info).toBlocking().first())
