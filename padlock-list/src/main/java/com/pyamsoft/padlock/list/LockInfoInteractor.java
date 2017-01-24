@@ -20,29 +20,19 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import java.util.List;
 import rx.Observable;
 
 interface LockInfoInteractor extends LockCommonInteractor {
 
-  @CheckResult @NonNull Observable<List<PadLockEntry.WithPackageName>> getLockedActivityEntries(
-      @NonNull String packageName);
-
-  @CheckResult @NonNull Observable<List<String>> getPackageActivities(@NonNull String packageName);
+  @CheckResult @NonNull Observable<ActivityEntry> populateList(@NonNull String packageName);
 
   @CheckResult @NonNull Observable<LockState> updateExistingEntry(@NonNull String packageName,
       @NonNull String activityName, boolean whitelist);
 
   @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding();
 
-  @CheckResult boolean isCacheEmpty();
-
-  @CheckResult @NonNull Observable<ActivityEntry> getCachedEntries();
-
   void clearCache();
 
-  void updateCacheEntry(@NonNull String name, @NonNull LockState lockState);
-
-  void cacheEntry(@NonNull ActivityEntry entry);
+  void updateCacheEntry(@NonNull String packageName, @NonNull String name,
+      @NonNull LockState lockState);
 }

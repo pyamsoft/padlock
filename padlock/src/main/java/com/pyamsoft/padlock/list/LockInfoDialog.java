@@ -322,7 +322,7 @@ public class LockInfoDialog extends DialogFragment
     final LockInfoItem oldItem = fastItemAdapter.getItem(position);
     final LockInfoItem newItem = oldItem.copyWithNewLockState(newLockState);
     fastItemAdapter.set(position, newItem);
-    presenter.updateCachedEntryLockState(newItem.getName(), newLockState);
+    presenter.updateCachedEntryLockState(appPackageName, newItem.getName(), newLockState);
   }
 
   @Override public void onDatabaseEntryError(int position) {

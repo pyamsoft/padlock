@@ -16,20 +16,26 @@
 
 package com.pyamsoft.padlock.purge;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.inject.Inject;
 import rx.Observable;
+import timber.log.Timber;
 
 class PurgeInteractorImpl implements PurgeInteractor {
 
+  @SuppressWarnings("WeakerAccess") @NonNull static final Object LOCK = new Object();
   @SuppressWarnings("WeakerAccess") @NonNull final List<String> stalePackageNameCache;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final PadLockDB padLockDB;
+  @SuppressWarnings("WeakerAccess") boolean refreshing;
 
   @Inject PurgeInteractorImpl(@NonNull PackageManagerWrapper packageManagerWrapper,
       @NonNull PadLockDB padLockDB) {
@@ -38,13 +44,84 @@ class PurgeInteractorImpl implements PurgeInteractor {
     stalePackageNameCache = new ArrayList<>();
   }
 
-  @NonNull @Override public Observable<String> getActiveApplicationPackageNames() {
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Observable<String> getActiveApplicationPackageNames() {
     return packageManagerWrapper.getActiveApplications()
         .map(applicationInfo -> applicationInfo.packageName);
   }
 
-  @NonNull @Override public Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
     return padLockDB.queryAll().first();
+  }
+
+  @SuppressWarnings("WeakerAccess") void stopRefreshing() {
+    synchronized (LOCK) {
+      refreshing = false;
+    }
+  }
+
+  @NonNull @Override public Observable<String> populateList() {
+    return Observable.defer(() -> {
+      synchronized (LOCK) {
+        while (refreshing) {
+          // Empty
+          // TODO use wait once we figure out why stuff doesn't work when we use wait
+        }
+
+        refreshing = true;
+      }
+
+      Timber.d("populateList");
+      final Observable<String> dataSource;
+      if (isCacheEmpty()) {
+        dataSource = fetchFreshData();
+      } else {
+        dataSource = getCachedEntries();
+      }
+      return dataSource;
+    })
+        .doOnUnsubscribe(this::stopRefreshing)
+        .doOnCompleted(this::stopRefreshing)
+        .doOnTerminate(this::stopRefreshing);
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<String> fetchFreshData() {
+    return getAppEntryList().zipWith(getActiveApplicationPackageNames().toList(),
+        (allEntries, packageNames) -> {
+          final Set<String> stalePackageNames = new HashSet<>();
+          if (allEntries.isEmpty()) {
+            Timber.e("Database does not have any AppEntry items");
+            return stalePackageNames;
+          }
+
+          // Loop through all the package names that we are aware of on the device
+          final Set<PadLockEntry.AllEntries> foundLocations = new HashSet<>();
+          for (final String packageName : packageNames) {
+            foundLocations.clear();
+
+            //noinspection Convert2streamapi
+            for (final PadLockEntry.AllEntries entry : allEntries) {
+              // If an entry is found in the database remove it
+              if (entry.packageName().equals(packageName)) {
+                foundLocations.add(entry);
+              }
+            }
+
+            allEntries.removeAll(foundLocations);
+          }
+
+          // The remaining entries in the database are stale
+          //noinspection Convert2streamapi
+          for (final PadLockEntry.AllEntries entry : allEntries) {
+            stalePackageNames.add(entry.packageName());
+          }
+
+          return stalePackageNames;
+        }).flatMap(Observable::from).sorted(String::compareToIgnoreCase).map(packageName -> {
+      cacheEntry(packageName);
+      return packageName;
+    });
   }
 
   @NonNull @Override public Observable<Integer> deleteEntry(@NonNull String packageName) {
@@ -55,7 +132,7 @@ class PurgeInteractorImpl implements PurgeInteractor {
     return stalePackageNameCache.isEmpty();
   }
 
-  @NonNull @Override public Observable<String> getCachedEntries() {
+  @NonNull @CheckResult Observable<String> getCachedEntries() {
     return Observable.fromCallable(() -> stalePackageNameCache).flatMap(Observable::from);
   }
 
@@ -63,7 +140,7 @@ class PurgeInteractorImpl implements PurgeInteractor {
     stalePackageNameCache.clear();
   }
 
-  @Override public void cacheEntry(@NonNull String entry) {
+  void cacheEntry(@NonNull String entry) {
     stalePackageNameCache.add(entry);
   }
 
