@@ -338,6 +338,8 @@ public class MainActivity extends TamperActivity
     final FragmentManager fragmentManager = getSupportFragmentManager();
     fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
+
+    // TODO reload the list to remove cached items
   }
 
   public void onOnboardingCompleted() {
