@@ -74,16 +74,14 @@ class LockListPresenterImpl extends SchedulerPresenter<LockListPresenter.LockLis
     populateListSubscription = lockListInteractor.populateList()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(appEntry -> {
-          Timber.d("onNext!");
-          getView(lockList -> lockList.onEntryAddedToList(appEntry));
-        }, throwable -> {
-          Timber.e(throwable, "populateList onError");
-          getView(LockList::onListPopulated);
-        }, () -> {
-          getView(LockList::onListPopulated);
-          SubscriptionHelper.unsubscribe(populateListSubscription);
-        });
+        .subscribe(appEntry -> getView(lockList -> lockList.onEntryAddedToList(appEntry)),
+            throwable -> {
+              Timber.e(throwable, "populateList onError");
+              getView(LockList::onListPopulated);
+            }, () -> {
+              getView(LockList::onListPopulated);
+              SubscriptionHelper.unsubscribe(populateListSubscription);
+            });
   }
 
   @Override public void setFABStateFromPreference() {
