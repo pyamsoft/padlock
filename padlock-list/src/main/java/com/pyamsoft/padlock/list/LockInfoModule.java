@@ -16,11 +16,6 @@
 
 package com.pyamsoft.padlock.list;
 
-import android.app.Activity;
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.PadLockPreferences;
-import com.pyamsoft.padlock.base.db.PadLockDB;
-import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -31,12 +26,5 @@ import rx.Scheduler;
   @Provides LockInfoPresenter provideLockInfoPresenter(LockInfoInteractor infoInteractor,
       @Named("obs") Scheduler obsScheduler, @Named("io") Scheduler subScheduler) {
     return new LockInfoPresenterImpl(infoInteractor, obsScheduler, subScheduler);
-  }
-
-  @Provides LockInfoInteractor provideLockInfoInteractor(PadLockDB padLockDB,
-      PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
-      @Named("lockscreen") Class<? extends Activity> lockScreenClass) {
-    return new LockInfoInteractorImpl(padLockDB, packageManagerWrapper, preferences,
-        lockScreenClass);
   }
 }

@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.purge;
+package com.pyamsoft.padlock.list;
 
+import android.app.Activity;
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.db.PadLockDB;
+import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
-import rx.Scheduler;
 
-@Module public class PurgeModule {
+@Module public class LockInfoSingletonModule {
 
-  @Provides PurgePresenter providePinEntryPresenter(final PurgeInteractor interactor,
-      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
-    return new PurgePresenterImpl(interactor, obsScheduler, subScheduler);
+  @Provides LockInfoInteractor provideLockInfoInteractor(PadLockDB padLockDB,
+      PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
+      @Named("lockscreen") Class<? extends Activity> lockScreenClass) {
+    return new LockInfoInteractorImpl(padLockDB, packageManagerWrapper, preferences,
+        lockScreenClass);
   }
 }

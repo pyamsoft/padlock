@@ -16,15 +16,17 @@
 
 package com.pyamsoft.padlock.purge;
 
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.db.PadLockDB;
+import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
-import javax.inject.Named;
-import rx.Scheduler;
+import javax.inject.Singleton;
 
-@Module public class PurgeModule {
+@Module public class PurgeSingletonModule {
 
-  @Provides PurgePresenter providePinEntryPresenter(final PurgeInteractor interactor,
-      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
-    return new PurgePresenterImpl(interactor, obsScheduler, subScheduler);
+  @Singleton @Provides PurgeInteractor providePinEntryInteractor(
+      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB) {
+    return new PurgeInteractorImpl(packageManagerWrapper, padLockDB);
   }
 }
