@@ -22,28 +22,35 @@ import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
-interface LockInfoPresenter extends Presenter<LockInfoPresenter.LockInfoView> {
+interface LockInfoPresenter extends Presenter<Presenter.Empty> {
 
   void updateCachedEntryLockState(@NonNull String packageName, @NonNull String name,
       @NonNull LockState lockState);
 
   void clearList();
 
-  void populateList(@NonNull String packageName);
+  void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback);
 
   void modifyDatabaseEntry(boolean isNotDefault, int position, @NonNull String packageName,
       @NonNull String activityName, @SuppressWarnings("SameParameterValue") @Nullable String code,
-      boolean system, boolean whitelist, boolean forceDelete);
+      boolean system, boolean whitelist, boolean forceDelete,
+      @NonNull ModifyDatabaseCallback callback);
 
-  void showOnBoarding();
+  void showOnBoarding(@NonNull OnBoardingCallback callback);
 
-  interface LockInfoView
-      extends LockListCommon, LockListDatabaseErrorView, LockListDatabaseWhitelistView {
+  interface ModifyDatabaseCallback extends LockDatabaseErrorView, LockDatabaseWhitelistView {
 
-    void onEntryAddedToList(@NonNull ActivityEntry entry);
+  }
+
+  interface OnBoardingCallback {
 
     void onShowOnboarding();
 
     void onOnboardingComplete();
+  }
+
+  interface PopulateListCallback extends LockCommon {
+
+    void onEntryAddedToList(@NonNull ActivityEntry entry);
   }
 }

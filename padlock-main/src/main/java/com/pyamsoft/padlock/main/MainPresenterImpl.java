@@ -38,28 +38,23 @@ class MainPresenterImpl extends SchedulerPresenter<MainPresenter.MainView>
     this.interactor = interactor;
   }
 
-  @Override protected void onBind() {
-    super.onBind();
-    showOnboardingOrDefault();
+  @Override public void showOnboardingOrDefault(@NonNull OnboardingCallback callback) {
+    SubscriptionHelper.unsubscribe(onboardingSubscription);
+    onboardingSubscription = interactor.isOnboardingComplete()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(onboardingComplete -> {
+              if (onboardingComplete) {
+                callback.onShowDefaultPage();
+              } else {
+                callback.onShowOnboarding();
+              }
+            }, throwable -> Timber.e(throwable, "onError"),
+            () -> SubscriptionHelper.unsubscribe(onboardingSubscription));
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
     SubscriptionHelper.unsubscribe(onboardingSubscription);
-  }
-
-  @Override public void showOnboardingOrDefault() {
-    SubscriptionHelper.unsubscribe(onboardingSubscription);
-    onboardingSubscription = interactor.isOnboardingComplete()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(onboardingComplete -> getView(mainView -> {
-              if (onboardingComplete) {
-                mainView.onShowDefaultPage();
-              } else {
-                mainView.onShowOnboarding();
-              }
-            }), throwable -> Timber.e(throwable, "onError"),
-            () -> SubscriptionHelper.unsubscribe(onboardingSubscription));
   }
 }

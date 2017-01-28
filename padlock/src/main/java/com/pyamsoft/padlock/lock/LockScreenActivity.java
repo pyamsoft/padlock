@@ -40,7 +40,6 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.model.LockScreenEntry;
 import com.pyamsoft.padlock.service.PadLockService;
@@ -55,7 +54,9 @@ import java.util.Map;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockScreenActivity extends ActivityBase implements LockScreen, AppIconLoaderView {
+public class LockScreenActivity extends ActivityBase
+    implements LockSubmitCallback, LockScreenPresenter.IgnoreTimeCallback,
+    LockScreenPresenter.LockCallback, LockScreenPresenter.PostUnlockCallback {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
@@ -91,7 +92,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
   @SuppressWarnings("WeakerAccess") String lockedPackageName;
   @SuppressWarnings("WeakerAccess") String lockedCode;
   @SuppressWarnings("WeakerAccess") long lockUntilTime;
-  private ActivityLockBinding binding;
+  ActivityLockBinding binding;
   private long ignorePeriod = -1;
   private boolean excludeEntry;
   private MenuItem menuIgnoreNone;
@@ -134,16 +135,6 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
     return LOCK_SCREEN_MAP.get(entry);
   }
 
-  @Override public void setDisplayName(@NonNull String name) {
-    Timber.d("Set toolbar name %s", name);
-    binding.toolbar.setTitle(name);
-    final ActionBar bar = getSupportActionBar();
-    if (bar != null) {
-      Timber.d("Set actionbar name %s", name);
-      bar.setTitle(name);
-    }
-  }
-
   @CallSuper @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light_Lock);
     super.onCreate(savedInstanceState);
@@ -173,7 +164,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
   private void setupGoArrow() {
     binding.lockImageGo.setOnClickListener(view -> {
       presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
-          getCurrentAttempt());
+          getCurrentAttempt(), this);
       imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
     });
 
@@ -223,19 +214,13 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
       if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
         Timber.d("KeyEvent is Enter pressed");
         presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
-            getCurrentAttempt());
+            getCurrentAttempt(), this);
         return true;
       }
 
       Timber.d("Do not handle key event");
       return false;
     });
-  }
-
-  @Override public void setDisplayHint(@NonNull String hint) {
-    Timber.d("Settings hint");
-    binding.lockDisplayHint.setText(
-        String.format(Locale.getDefault(), "Hint: %s", hint.isEmpty() ? "NO HINT" : hint));
   }
 
   private void clearDisplay() {
@@ -262,12 +247,34 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
   @Override protected void onStart() {
     super.onStart();
     Timber.d("onStart");
-    appIconLoaderPresenter.bindView(this);
-    presenter.bindView(this);
-    presenter.displayLockedHint();
+    appIconLoaderPresenter.bindView(null);
+    presenter.bindView(null);
+    presenter.displayLockedHint(hint -> {
+      Timber.d("Settings hint");
+      binding.lockDisplayHint.setText(
+          String.format(Locale.getDefault(), "Hint: %s", hint.isEmpty() ? "NO HINT" : hint));
+    });
 
-    presenter.loadDisplayNameFromPackage(lockedPackageName);
-    appIconLoaderPresenter.loadApplicationIcon(lockedPackageName);
+    presenter.loadDisplayNameFromPackage(lockedPackageName, name -> {
+      Timber.d("Set toolbar name %s", name);
+      binding.toolbar.setTitle(name);
+      final ActionBar bar = getSupportActionBar();
+      if (bar != null) {
+        Timber.d("Set actionbar name %s", name);
+        bar.setTitle(name);
+      }
+    });
+    appIconLoaderPresenter.loadApplicationIcon(lockedPackageName,
+        new AppIconLoaderPresenter.LoadCallback() {
+          @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
+            binding.lockImage.setImageDrawable(icon);
+          }
+
+          @Override public void onApplicationIconLoadedError() {
+            AppUtil.guaranteeSingleDialogFragment(LockScreenActivity.this, new ErrorDialog(),
+                "error");
+          }
+        });
     supportInvalidateOptionsMenu();
 
     // Add the lock map
@@ -337,7 +344,8 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
     clearDisplay();
 
     presenter.postUnlock(lockedPackageName, lockedActivityName, lockedRealName, lockedCode,
-        lockUntilTime, lockedSystem, menuExclude.isChecked(), getIgnoreTimeFromSelectedIndex());
+        lockUntilTime, lockedSystem, menuExclude.isChecked(), getIgnoreTimeFromSelectedIndex(),
+        this);
   }
 
   @Override public void onSubmitFailure() {
@@ -347,7 +355,7 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
     binding.lockDisplayHint.setVisibility(View.VISIBLE);
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
-    presenter.lockEntry(lockedPackageName, lockedActivityName, lockUntilTime);
+    presenter.lockEntry(lockedPackageName, lockedActivityName, lockUntilTime, this);
   }
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
@@ -403,9 +411,9 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
 
   @Override public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
     if (presenter != null) {
-      if (ignorePeriod == -1 && presenter.isBound()) {
+      if (ignorePeriod == -1) {
         Timber.d("No previous selection, load ignore time from preference");
-        presenter.createWithDefaultIgnoreTime();
+        presenter.createWithDefaultIgnoreTime(this);
       } else {
         initializeWithIgnoreTime(ignorePeriod);
       }
@@ -505,13 +513,5 @@ public class LockScreenActivity extends ActivityBase implements LockScreen, AppI
 
   private void showForgotPasscodeDialog() {
     AppUtil.onlyLoadOnceDialogFragment(this, new ForgotPasswordDialog(), FORGOT_PASSWORD_TAG);
-  }
-
-  @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-    binding.lockImage.setImageDrawable(icon);
-  }
-
-  @Override public void onApplicationIconLoadedError() {
-    AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "error");
   }
 }

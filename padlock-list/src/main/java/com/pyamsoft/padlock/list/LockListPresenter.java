@@ -19,53 +19,71 @@ package com.pyamsoft.padlock.list;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
-interface LockListPresenter extends Presenter<LockListPresenter.LockList> {
+interface LockListPresenter extends Presenter<Presenter.Empty> {
 
   void updateCachedEntryLockState(@NonNull String name, @NonNull String packageName,
       boolean newLockState);
 
   void clearList();
 
-  void populateList();
+  void populateList(@NonNull PopulateListCallback callback);
 
-  void setFABStateFromPreference();
+  void setFABStateFromPreference(@NonNull FABStateCallback callback);
 
   void setSystemVisible();
 
   void setSystemInvisible();
 
-  void setSystemVisibilityFromPreference();
+  void setSystemVisibilityFromPreference(@NonNull SystemVisibilityCallback callback);
 
-  void clickPinFABServiceRunning();
+  void clickPinFABServiceRunning(@NonNull ShowPinCallback callback);
 
-  void clickPinFABServiceIdle();
+  void clickPinFABServiceIdle(@NonNull ShowAccessibilityCallback callback);
 
-  void showOnBoarding();
+  void showOnBoarding(@NonNull OnboardingCallback callback);
 
   void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
-      @SuppressWarnings("SameParameterValue") @Nullable String code, boolean system);
+      @SuppressWarnings("SameParameterValue") @Nullable String code, boolean system,
+      @NonNull DatabaseCallback callback);
 
-  interface LockList extends LockListCommon, LockListDatabaseErrorView, MasterPinSubmitCallback {
-
-    void onSetFABStateEnabled();
-
-    void onSetFABStateDisabled();
-
-    void onSetSystemVisible();
-
-    void onSetSystemInvisible();
-
-    void onCreatePinDialog();
-
-    void onCreateAccessibilityDialog();
-
-    void onEntryAddedToList(@NonNull AppEntry entry);
+  interface OnboardingCallback {
 
     void onShowOnboarding();
 
     void onOnboardingComplete();
+  }
+
+  interface FABStateCallback {
+
+    void onSetFABStateEnabled();
+
+    void onSetFABStateDisabled();
+  }
+
+  interface SystemVisibilityCallback {
+
+    void onSetSystemVisible();
+
+    void onSetSystemInvisible();
+  }
+
+  interface PopulateListCallback extends LockCommon {
+
+    void onEntryAddedToList(@NonNull AppEntry entry);
+  }
+
+  interface DatabaseCallback extends LockDatabaseErrorView {
+  }
+
+  interface ShowPinCallback {
+
+    void onCreatePinDialog();
+  }
+
+  interface ShowAccessibilityCallback {
+
+    void onCreateAccessibilityDialog();
   }
 }

@@ -25,11 +25,6 @@ import rx.Scheduler;
 
 @Module public class OnboardFirstLaunchModule {
 
-  @Provides OnboardEnableServicePresenter provideOnboardingEnableServicePresenter(
-      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
-    return new OnbordEnableServicePresenterImpl(obsScheduler, subScheduler);
-  }
-
   @Provides OnboardAcceptTermsPresenter provideOnboardAcceptTermsPresenter(
       @NonNull OnboardAcceptTermsInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {

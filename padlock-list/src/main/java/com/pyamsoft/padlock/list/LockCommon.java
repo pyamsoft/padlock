@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.list;
 
-import com.pyamsoft.pydroid.presenter.Presenter;
+interface LockCommon {
 
-interface LockPresenter<I extends LockPresenter.LockView> extends Presenter<I> {
+  void onListPopulated();
 
-  interface LockView {
+  void onListPopulateError();
 
-    void onSubmitSuccess();
-
-    void onSubmitFailure();
-
-    void onSubmitError();
-  }
+  void onListCleared();
 }

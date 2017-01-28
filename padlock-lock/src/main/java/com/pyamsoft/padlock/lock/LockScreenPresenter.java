@@ -18,21 +18,55 @@ package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.pydroid.presenter.Presenter;
 
-interface LockScreenPresenter extends LockPresenter<LockScreen> {
+interface LockScreenPresenter extends Presenter<Presenter.Empty> {
 
-  void displayLockedHint();
+  void displayLockedHint(@NonNull LockHintCallback callback);
 
-  void createWithDefaultIgnoreTime();
+  void createWithDefaultIgnoreTime(@NonNull IgnoreTimeCallback callback);
 
-  void lockEntry(@NonNull String packageName, @NonNull String activityName, long lockUntilTime);
+  void lockEntry(@NonNull String packageName, @NonNull String activityName, long lockUntilTime,
+      @NonNull LockCallback callback);
 
   void submit(@NonNull String packageName, @NonNull String activityName, @Nullable String lockCode,
-      long lockUntilTime, @NonNull String currentAttempt);
+      long lockUntilTime, @NonNull String currentAttempt, @NonNull LockSubmitCallback callback);
 
-  void loadDisplayNameFromPackage(@NonNull String packageName);
+  void loadDisplayNameFromPackage(@NonNull String packageName,
+      @NonNull DisplayNameLoadCallback callback);
 
   void postUnlock(@NonNull String packageName, @NonNull String activityName,
       @NonNull String realName, @Nullable String lockCode, long lockUntilTime, boolean isSystem,
-      boolean shouldExclude, long ignoreTime);
+      boolean shouldExclude, long ignoreTime, @NonNull PostUnlockCallback callback);
+
+  void resetFailCount();
+
+  interface LockErrorCallback {
+
+    void onLockedError();
+  }
+
+  interface PostUnlockCallback extends LockErrorCallback {
+
+    void onPostUnlock();
+  }
+
+  interface DisplayNameLoadCallback {
+
+    void setDisplayName(@NonNull String name);
+  }
+
+  interface LockCallback extends LockErrorCallback {
+
+    void onLocked(long lockUntilTime);
+  }
+
+  interface IgnoreTimeCallback {
+    void initializeWithIgnoreTime(long time);
+  }
+
+  interface LockHintCallback {
+
+    void setDisplayHint(@NonNull String hint);
+  }
 }

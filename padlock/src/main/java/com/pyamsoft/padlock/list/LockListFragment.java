@@ -45,6 +45,7 @@ import com.pyamsoft.padlock.lock.PinEntryDialog;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.onboard.list.OnboardListDialog;
+import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.design.util.FABUtil;
@@ -58,7 +59,8 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public class LockListFragment extends Fragment
-    implements LockListPresenter.LockList, PinEntryDialogRequest {
+    implements PinEntryDialogRequest, LockListPresenter.PopulateListCallback,
+    LockListPresenter.FABStateCallback, MasterPinSubmitCallback {
 
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
@@ -128,9 +130,9 @@ public class LockListFragment extends Fragment
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(this);
+    presenter.bindView(null);
 
-    presenter.setFABStateFromPreference();
+    presenter.setFABStateFromPreference(this);
     if (!listIsRefreshed) {
       if (!binding.applistSwipeRefresh.isRefreshing()) {
         binding.applistSwipeRefresh.post(() -> {
@@ -141,7 +143,7 @@ public class LockListFragment extends Fragment
           }
         });
       }
-      presenter.populateList();
+      presenter.populateList(this);
     }
   }
 
@@ -162,13 +164,6 @@ public class LockListFragment extends Fragment
     super.onPause();
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> binding.applistFab.hide(), 300L);
-  }
-
-  @Override public void onOnboardingComplete() {
-    final FragmentActivity activity = getActivity();
-    if (activity instanceof RatingDialog.ChangeLogProvider) {
-      RatingDialog.showRatingDialog(activity, (RatingDialog.ChangeLogProvider) activity, false);
-    }
   }
 
   private void setupSwipeRefresh() {
@@ -235,7 +230,15 @@ public class LockListFragment extends Fragment
 
   private void setupDisplaySystemVisibleItem(final @NonNull Menu menu) {
     displaySystemItem = menu.findItem(R.id.menu_is_system);
-    presenter.setSystemVisibilityFromPreference();
+    presenter.setSystemVisibilityFromPreference(new LockListPresenter.SystemVisibilityCallback() {
+      @Override public void onSetSystemVisible() {
+        setSystemVisible(true);
+      }
+
+      @Override public void onSetSystemInvisible() {
+        setSystemVisible(false);
+      }
+    });
   }
 
   @SuppressWarnings("WeakerAccess") void setSystemVisible(boolean visible) {
@@ -244,14 +247,6 @@ public class LockListFragment extends Fragment
     }
 
     displaySystemItem.setChecked(visible);
-  }
-
-  @Override public void onSetSystemVisible() {
-    setSystemVisible(true);
-  }
-
-  @Override public void onSetSystemInvisible() {
-    setSystemVisible(false);
   }
 
   @Override public void onDestroyView() {
@@ -300,31 +295,15 @@ public class LockListFragment extends Fragment
   private void setupFAB() {
     binding.applistFab.setOnClickListener(v -> {
       if (PadLockService.isRunning()) {
-        presenter.clickPinFABServiceRunning();
+        presenter.clickPinFABServiceRunning(
+            () -> onPinEntryDialogRequested(getContext().getPackageName(),
+                getActivity().getClass().getName()));
       } else {
-        presenter.clickPinFABServiceIdle();
+        presenter.clickPinFABServiceIdle(() -> AppUtil.onlyLoadOnceDialogFragment(getActivity(),
+            new AccessibilityRequestDialog(), "accessibility"));
       }
     });
     FABUtil.setupFABBehavior(binding.applistFab, new HideScrollFABBehavior(24));
-  }
-
-  @Override public void onSetFABStateEnabled() {
-    AsyncMapHelper.unsubscribe(fabIconTask);
-    fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
-  }
-
-  @Override public void onSetFABStateDisabled() {
-    AsyncMapHelper.unsubscribe(fabIconTask);
-    fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
-  }
-
-  @Override public void onCreateAccessibilityDialog() {
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new AccessibilityRequestDialog(),
-        "accessibility");
-  }
-
-  @Override public void onCreatePinDialog() {
-    onPinEntryDialogRequested(getContext().getPackageName(), getActivity().getClass().getName());
   }
 
   @Override
@@ -378,12 +357,6 @@ public class LockListFragment extends Fragment
     AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
   }
 
-  @Override public void onShowOnboarding() {
-    Timber.d("Show onboarding");
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(),
-        OnboardListDialog.TAG);
-  }
-
   @Override public void onListCleared() {
     Timber.d("Prepare for refresh");
     listIsRefreshed = false;
@@ -404,48 +377,76 @@ public class LockListFragment extends Fragment
     if (fastItemAdapter.getAdapterItemCount() > 1) {
       Timber.d("We have refreshed");
       listIsRefreshed = true;
-      presenter.showOnBoarding();
+      presenter.showOnBoarding(new LockListPresenter.OnboardingCallback() {
+        @Override public void onShowOnboarding() {
+          Timber.d("Show onboarding");
+          AppUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(),
+              OnboardListDialog.TAG);
+        }
+
+        @Override public void onOnboardingComplete() {
+          onCompletedOnboarding();
+        }
+      });
     } else {
       Toast.makeText(getContext(), "Error while loading list. Please try again.",
           Toast.LENGTH_SHORT).show();
     }
   }
 
-  @Override public void refreshList() {
+  public void onCompletedOnboarding() {
+    final FragmentActivity activity = getActivity();
+    if (activity instanceof RatingDialog.ChangeLogProvider) {
+      RatingDialog.showRatingDialog(activity, (RatingDialog.ChangeLogProvider) activity, false);
+    }
+  }
+
+  public void refreshList() {
     fastItemAdapter.clear();
     presenter.clearList();
     onListCleared();
-    presenter.populateList();
+    presenter.populateList(this);
   }
 
-  @Override public void onDatabaseEntryCreated(int position) {
-    onDatabaseUpdated(position, true);
-  }
-
-  @Override public void onDatabaseEntryDeleted(int position) {
-    onDatabaseUpdated(position, false);
-  }
-
-  private void onDatabaseUpdated(int position, boolean locked) {
+  void onDatabaseUpdated(int position, boolean locked) {
     final LockListItem oldItem = fastItemAdapter.getItem(position);
     final LockListItem newItem = oldItem.copyWithNewLockState(locked);
     fastItemAdapter.set(position, newItem);
     presenter.updateCachedEntryLockState(newItem.getName(), newItem.getPackageName(), locked);
   }
 
-  @Override public void onDatabaseEntryError(int position) {
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
-  }
-
   @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(boolean lock, int position,
       @NonNull AppEntry entry) {
     Timber.d("Received a database modify event request for %s at %d [%s]", entry.packageName(),
         position, lock ? "LOCK" : "NO LOCK");
-    presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system());
+    presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system(),
+        new LockListPresenter.DatabaseCallback() {
+          @Override public void onDatabaseEntryError(int position) {
+            AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
+          }
+
+          @Override public void onDatabaseEntryCreated(int position) {
+            onDatabaseUpdated(position, true);
+          }
+
+          @Override public void onDatabaseEntryDeleted(int position) {
+            onDatabaseUpdated(position, false);
+          }
+        });
   }
 
   @SuppressWarnings("WeakerAccess") void displayLockInfoFragment(@NonNull AppEntry entry) {
     AppUtil.onlyLoadOnceDialogFragment(getActivity(), LockInfoDialog.newInstance(entry),
         LockInfoDialog.TAG);
+  }
+
+  @Override public void onSetFABStateEnabled() {
+    AsyncMapHelper.unsubscribe(fabIconTask);
+    fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
+  }
+
+  @Override public void onSetFABStateDisabled() {
+    AsyncMapHelper.unsubscribe(fabIconTask);
+    fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
   }
 }

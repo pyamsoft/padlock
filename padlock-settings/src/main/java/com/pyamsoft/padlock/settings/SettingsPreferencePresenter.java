@@ -16,25 +16,27 @@
 
 package com.pyamsoft.padlock.settings;
 
+import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
-interface SettingsPreferencePresenter
-    extends Presenter<SettingsPreferencePresenter.SettingsPreferenceView> {
+interface SettingsPreferencePresenter extends Presenter<Presenter.Empty> {
 
-  void requestClearAll();
+  void requestClearAll(@NonNull RequestCallback callback);
 
-  void requestClearDatabase();
+  void requestClearDatabase(@NonNull RequestCallback callback);
 
-  void processClearRequest(int type);
+  void processClearRequest(int type, @NonNull ClearCallback callback);
 
   void setApplicationInstallReceiverState();
 
-  interface SettingsPreferenceView {
-
-    void showConfirmDialog(int type);
-
+  interface ClearCallback {
     void onClearAll();
 
     void onClearDatabase();
+  }
+
+  interface RequestCallback {
+
+    void showConfirmDialog(int type);
   }
 }

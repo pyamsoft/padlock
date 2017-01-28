@@ -22,7 +22,7 @@ import rx.Observable;
 
 interface OnboardAcceptTermsInteractor {
 
-  void agreeToTerms();
+  @NonNull @CheckResult Observable<Boolean> agreeToTerms();
 
   @NonNull @CheckResult Observable<Boolean> hasAgreedToTerms();
 }

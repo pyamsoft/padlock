@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.list;
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.event.PinEntryEvent;
+interface LockDatabaseView {
 
-interface PinScreen extends LockPresenter.LockView {
+  void onDatabaseEntryCreated(int position);
 
-  void handOffPinEvent(@NonNull PinEntryEvent event);
-
-  void showExtraPinEntryViews();
-
-  void hideExtraPinEntryViews();
+  void onDatabaseEntryDeleted(int position);
 }

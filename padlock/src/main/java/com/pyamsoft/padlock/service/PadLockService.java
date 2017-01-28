@@ -32,13 +32,13 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public class PadLockService extends AccessibilityService
-    implements LockServicePresenter.LockService {
+    implements LockServicePresenter.ProcessCallback {
 
   private static volatile PadLockService instance = null;
   @Inject LockServicePresenter presenter;
   private Intent lockActivity;
 
-  @NonNull @CheckResult private static synchronized PadLockService getInstance() {
+  @NonNull @CheckResult static synchronized PadLockService getInstance() {
     if (instance == null) {
       throw new NullPointerException("Current service instance is NULL");
     }
@@ -69,7 +69,8 @@ public class PadLockService extends AccessibilityService
   public static void recheck(@NonNull String packageName, @NonNull String className) {
     if (!packageName.isEmpty() && !className.isEmpty()) {
       Timber.d("Recheck was requested for: %s, %s", packageName, className);
-      getInstance().getPresenter().getActiveNames(packageName, className);
+      PadLockService service = getInstance();
+      service.getPresenter().processActiveApplicationIfMatching(packageName, className, service);
     }
   }
 
@@ -109,7 +110,7 @@ public class PadLockService extends AccessibilityService
       final String cName = eventClass.toString();
       if (!pName.isEmpty() && !cName.isEmpty()) {
         presenter.processAccessibilityEvent(pName, cName,
-            LockServicePresenter.RecheckStatus.NOT_FORCE);
+            LockServicePresenter.RecheckStatus.NOT_FORCE, this);
       }
     } else {
       Timber.e("Missing needed data");
@@ -126,11 +127,6 @@ public class PadLockService extends AccessibilityService
     return super.onUnbind(intent);
   }
 
-  @Override public void onDestroy() {
-    super.onDestroy();
-    presenter.destroy();
-  }
-
   @Override protected void onServiceConnected() {
     super.onServiceConnected();
     Timber.d("onServiceConnected");
@@ -138,11 +134,11 @@ public class PadLockService extends AccessibilityService
         Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
 
     Injector.get().provideComponent().plusLockServiceComponent().inject(this);
-    presenter.bindView(this);
+    presenter.bindView(null);
     setInstance(this);
   }
 
-  @Override public void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName) {
+  @Override public void startLockScreen(@NonNull PadLockEntry entry, @NonNull String realName) {
     craftIntent(lockActivity, entry, realName);
     Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
         entry.activityName(), realName);
@@ -163,20 +159,5 @@ public class PadLockService extends AccessibilityService
     }
 
     getApplicationContext().startActivity(lockActivity);
-  }
-
-  @Override
-  public void onActiveNamesRetrieved(@NonNull String packageName, @NonNull String activePackage,
-      @NonNull String className, @NonNull String activeClass) {
-    Timber.d("Check against current window values: %s, %s", activePackage, activeClass);
-    if (activePackage.equals(packageName) && (activeClass.equals(className) || className.equals(
-        PadLockEntry.PACKAGE_ACTIVITY_NAME))) {
-      // We can replace the actual passed classname with the stored classname because:
-      // either it is equal to the passed name or the passed name is PACKAGE
-      // which will respond to any class name
-      Timber.d("Run recheck for: %s %s", activePackage, activeClass);
-      presenter.processAccessibilityEvent(activePackage, activeClass,
-          LockServicePresenter.RecheckStatus.FORCE);
-    }
   }
 }

@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.rx.SchedulerPresenter;
 import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import javax.inject.Inject;
@@ -26,8 +27,8 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class PinEntryPresenterImpl extends SchedulerPresenter<PinScreen>
-    implements PinEntryPresenter, LockPresenter<PinScreen> {
+class PinEntryPresenterImpl extends SchedulerPresenter<Presenter.Empty>
+    implements PinEntryPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PinEntryInteractor interactor;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription pinEntrySubscription =
@@ -47,7 +48,7 @@ class PinEntryPresenterImpl extends SchedulerPresenter<PinScreen>
   }
 
   @Override public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
-      @NonNull String hint) {
+      @NonNull String hint, @NonNull SubmitCallback callback) {
     Timber.d("Attempt PIN submission");
     SubscriptionHelper.unsubscribe(pinEntrySubscription);
     pinEntrySubscription = interactor.getMasterPin()
@@ -61,32 +62,32 @@ class PinEntryPresenterImpl extends SchedulerPresenter<PinScreen>
         .filter(pinEntryEvent -> pinEntryEvent != null)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(pinEntryEvent -> getView(pinScreen -> {
-          pinScreen.handOffPinEvent(pinEntryEvent);
+        .subscribe(pinEntryEvent -> {
+          callback.handOffPinEvent(pinEntryEvent);
           if (pinEntryEvent.complete()) {
-            pinScreen.onSubmitSuccess();
+            callback.onSubmitSuccess();
           } else {
-            pinScreen.onSubmitFailure();
+            callback.onSubmitFailure();
           }
-        }), throwable -> {
+        }, throwable -> {
           Timber.e(throwable, "attemptPinSubmission onError");
-          getView(PinScreen::onSubmitError);
+          callback.onSubmitError();
         }, () -> SubscriptionHelper.unsubscribe(pinEntrySubscription));
   }
 
-  @Override public void hideUnimportantViews() {
+  @Override public void hideUnimportantViews(@NonNull HideViewsCallback callback) {
     Timber.d("Check if we have a master");
     SubscriptionHelper.unsubscribe(pinCheckSubscription);
     pinCheckSubscription = interactor.hasMasterPin()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(hasMaster -> getView(pinScreen -> {
+        .subscribe(hasMaster -> {
           if (hasMaster) {
-            pinScreen.hideExtraPinEntryViews();
+            callback.hideExtraPinEntryViews();
           } else {
-            pinScreen.showExtraPinEntryViews();
+            callback.showExtraPinEntryViews();
           }
-        }), throwable -> {
+        }, throwable -> {
           Timber.e(throwable, "onError hideUnimportantViews");
           // TODO
         }, () -> SubscriptionHelper.unsubscribe(pinCheckSubscription));

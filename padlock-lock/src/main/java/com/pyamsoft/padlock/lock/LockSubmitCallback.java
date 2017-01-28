@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list;
+package com.pyamsoft.padlock.lock;
 
-interface LockListDatabaseWhitelistView extends LockListDatabaseView {
+interface LockSubmitCallback {
 
-  void onDatabaseEntryWhitelisted(int position);
+  void onSubmitSuccess();
+
+  void onSubmitFailure();
+
+  void onSubmitError();
 }

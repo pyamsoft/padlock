@@ -17,10 +17,25 @@
 package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.model.event.PinEntryEvent;
+import com.pyamsoft.pydroid.presenter.Presenter;
 
-interface PinEntryPresenter extends LockPresenter<PinScreen> {
+interface PinEntryPresenter extends Presenter<Presenter.Empty> {
 
-  void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt, @NonNull String hint);
+  void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt, @NonNull String hint,
+      @NonNull SubmitCallback callback);
 
-  void hideUnimportantViews();
+  void hideUnimportantViews(@NonNull HideViewsCallback callback);
+
+  interface HideViewsCallback {
+
+    void showExtraPinEntryViews();
+
+    void hideExtraPinEntryViews();
+  }
+
+  interface SubmitCallback extends LockSubmitCallback {
+
+    void handOffPinEvent(@NonNull PinEntryEvent event);
+  }
 }

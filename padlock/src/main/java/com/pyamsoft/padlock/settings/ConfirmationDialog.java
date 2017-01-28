@@ -16,7 +16,10 @@
 
 package com.pyamsoft.padlock.settings;
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -25,6 +28,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.main.MainActivity;
+import com.pyamsoft.padlock.service.PadLockService;
+import timber.log.Timber;
 
 public class ConfirmationDialog extends DialogFragment {
   @NonNull private static final String WHICH = "which_type";
@@ -61,7 +67,30 @@ public class ConfirmationDialog extends DialogFragment {
     final Fragment settingsPreferenceFragment =
         fragmentManager.findFragmentByTag(SettingsFragment.TAG);
     if (settingsPreferenceFragment instanceof SettingsFragment) {
-      ((SettingsFragment) settingsPreferenceFragment).getPresenter().processClearRequest(which);
+      ((SettingsFragment) settingsPreferenceFragment).getPresenter()
+          .processClearRequest(which, new SettingsPreferencePresenter.ClearCallback() {
+            @Override public void onClearAll() {
+              Timber.d("Everything is cleared, kill self");
+              try {
+                PadLockService.finish();
+              } catch (NullPointerException e) {
+                Timber.e(e, "Expected NPE when Service is NULL");
+              }
+              final ActivityManager activityManager =
+                  (ActivityManager) getContext().getApplicationContext()
+                      .getSystemService(Context.ACTIVITY_SERVICE);
+              activityManager.clearApplicationUserData();
+            }
+
+            @Override public void onClearDatabase() {
+              final Activity activity = getActivity();
+              if (activity instanceof MainActivity) {
+                ((MainActivity) activity).onForceRefresh();
+              } else {
+                throw new ClassCastException("Activity is not MainActivity");
+              }
+            }
+          });
     } else {
       throw new ClassCastException("Fragment is not SettingsPreferenceFragment");
     }

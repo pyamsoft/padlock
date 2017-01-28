@@ -41,8 +41,7 @@ import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import javax.inject.Inject;
 
-public class OnboardListDialog extends DialogFragment
-    implements Onboard, OnboardListPresenter.View {
+public class OnboardListDialog extends DialogFragment implements Onboard {
 
   @NonNull public static final String TAG = "OnboardListDialog";
   @NonNull private static final String KEY_LAST_POSITION = "key_onboard_list_dialog_position";
@@ -113,7 +112,7 @@ public class OnboardListDialog extends DialogFragment
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(this);
+    presenter.bindView(null);
   }
 
   @Override public void onStop() {
@@ -182,7 +181,7 @@ public class OnboardListDialog extends DialogFragment
     final FragmentManager fragmentManager = getFragmentManager();
     final Fragment fragment = fragmentManager.findFragmentByTag(LockListFragment.TAG);
     if (fragment instanceof LockListFragment) {
-      ((LockListFragment) fragment).onOnboardingComplete();
+      ((LockListFragment) fragment).onCompletedOnboarding();
     }
   }
 

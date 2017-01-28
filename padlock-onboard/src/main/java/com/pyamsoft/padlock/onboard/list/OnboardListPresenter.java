@@ -18,10 +18,7 @@ package com.pyamsoft.padlock.onboard.list;
 
 import com.pyamsoft.pydroid.presenter.Presenter;
 
-interface OnboardListPresenter extends Presenter<OnboardListPresenter.View> {
+interface OnboardListPresenter extends Presenter<Presenter.Empty> {
 
   void finishOnboarding();
-
-  interface View {
-  }
 }

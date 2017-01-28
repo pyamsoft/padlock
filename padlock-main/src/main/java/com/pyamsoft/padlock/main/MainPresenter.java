@@ -16,17 +16,21 @@
 
 package com.pyamsoft.padlock.main;
 
+import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
 interface MainPresenter extends Presenter<MainPresenter.MainView> {
 
-  void showOnboardingOrDefault();
+  void showOnboardingOrDefault(@NonNull OnboardingCallback callback);
 
-  interface MainView {
+  interface OnboardingCallback {
 
     void onShowOnboarding();
 
     void onShowDefaultPage();
+  }
+
+  interface MainView {
 
     void onForceRefresh();
   }

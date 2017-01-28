@@ -42,7 +42,6 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
@@ -51,9 +50,9 @@ import com.pyamsoft.pydroid.tool.AsyncMap;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class PinEntryDialog extends DialogFragment implements PinScreen, AppIconLoaderView {
+public class PinEntryDialog extends DialogFragment
+    implements LockSubmitCallback, PinEntryPresenter.SubmitCallback {
 
-  @NonNull private static final String TAG = "PinEntryDialog";
   @NonNull private static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull private static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
@@ -63,11 +62,11 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") @Inject PinEntryPresenter presenter;
   @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
-  private DialogPinEntryBinding binding;
+  DialogPinEntryBinding binding;
+  EditText pinEntryText;
+  EditText pinHintText;
   private String packageName;
-  private EditText pinEntryText;
   private EditText pinReentryText;
-  private EditText pinHintText;
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -159,21 +158,7 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
     taskMap.put("close", task);
   }
 
-  @Override public void showExtraPinEntryViews() {
-    Timber.d("No active master, show extra views");
-    binding.pinReentryCode.setVisibility(View.VISIBLE);
-    binding.pinHint.setVisibility(View.VISIBLE);
-    setupSubmissionView(pinHintText);
-  }
-
-  @Override public void hideExtraPinEntryViews() {
-    Timber.d("Active master, hide extra views");
-    binding.pinReentryCode.setVisibility(View.GONE);
-    binding.pinHint.setVisibility(View.GONE);
-    setupSubmissionView(pinEntryText);
-  }
-
-  private void setupSubmissionView(@NonNull EditText view) {
+  void setupSubmissionView(@NonNull EditText view) {
     view.setOnEditorActionListener((textView, actionId, keyEvent) -> {
       if (keyEvent == null) {
         Timber.e("KeyEvent was not caused by keypress");
@@ -182,7 +167,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
 
       if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
         Timber.d("KeyEvent is Enter pressed");
-        presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint());
+        presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint(),
+            PinEntryDialog.this);
         return true;
       }
 
@@ -193,7 +179,8 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
 
   private void setupGoArrow() {
     binding.pinImageGo.setOnClickListener(view -> {
-      presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint());
+      presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint(),
+          PinEntryDialog.this);
       imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0,
           0);
     });
@@ -255,10 +242,34 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
 
   @Override public void onStart() {
     super.onStart();
-    appIconLoaderPresenter.bindView(this);
-    presenter.bindView(this);
-    appIconLoaderPresenter.loadApplicationIcon(packageName);
-    presenter.hideUnimportantViews();
+    appIconLoaderPresenter.bindView(null);
+    presenter.bindView(null);
+    appIconLoaderPresenter.loadApplicationIcon(packageName,
+        new AppIconLoaderPresenter.LoadCallback() {
+          @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
+            binding.pinImage.setImageDrawable(icon);
+          }
+
+          @Override public void onApplicationIconLoadedError() {
+            Toast.makeText(getActivity(), "Failed to load image", Toast.LENGTH_SHORT).show();
+            dismiss();
+          }
+        });
+    presenter.hideUnimportantViews(new PinEntryPresenter.HideViewsCallback() {
+      @Override public void showExtraPinEntryViews() {
+        Timber.d("No active master, show extra views");
+        binding.pinReentryCode.setVisibility(View.VISIBLE);
+        binding.pinHint.setVisibility(View.VISIBLE);
+        setupSubmissionView(pinHintText);
+      }
+
+      @Override public void hideExtraPinEntryViews() {
+        Timber.d("Active master, hide extra views");
+        binding.pinReentryCode.setVisibility(View.GONE);
+        binding.pinHint.setVisibility(View.GONE);
+        setupSubmissionView(pinEntryText);
+      }
+    });
   }
 
   @Override public void onStop() {
@@ -284,15 +295,6 @@ public class PinEntryDialog extends DialogFragment implements PinScreen, AppIcon
   @Override public void onDestroy() {
     super.onDestroy();
     PadLock.getRefWatcher(this).watch(this);
-  }
-
-  @Override public void onApplicationIconLoadedError() {
-    Toast.makeText(getActivity(), "Failed to load image", Toast.LENGTH_SHORT).show();
-    dismiss();
-  }
-
-  @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-    binding.pinImage.setImageDrawable(icon);
   }
 
   @Override public void onSubmitSuccess() {
