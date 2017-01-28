@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.iconloader;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.rx.SchedulerPresenter;
 import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import javax.inject.Inject;
@@ -26,7 +27,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class AppIconLoaderPresenterImpl extends SchedulerPresenter<AppIconLoaderView>
+class AppIconLoaderPresenterImpl extends SchedulerPresenter<Presenter.Empty>
     implements AppIconLoaderPresenter {
 
   @NonNull private final AppIconLoaderInteractor interactor;
@@ -44,15 +45,15 @@ class AppIconLoaderPresenterImpl extends SchedulerPresenter<AppIconLoaderView>
     SubscriptionHelper.unsubscribe(loadIconSubscription);
   }
 
-  @Override public void loadApplicationIcon(@NonNull String packageName) {
+  @Override
+  public void loadApplicationIcon(@NonNull String packageName, @NonNull LoadCallback callback) {
     SubscriptionHelper.unsubscribe(loadIconSubscription);
     loadIconSubscription = interactor.loadPackageIcon(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(drawable -> getView(i -> i.onApplicationIconLoadedSuccess(drawable)),
-            throwable -> {
-              Timber.e(throwable, "onError");
-              getView(AppIconLoaderView::onApplicationIconLoadedError);
-            }, () -> SubscriptionHelper.unsubscribe(loadIconSubscription));
+        .subscribe(callback::onApplicationIconLoadedSuccess, throwable -> {
+          Timber.e(throwable, "onError");
+          callback.onApplicationIconLoadedError();
+        }, () -> SubscriptionHelper.unsubscribe(loadIconSubscription));
   }
 }

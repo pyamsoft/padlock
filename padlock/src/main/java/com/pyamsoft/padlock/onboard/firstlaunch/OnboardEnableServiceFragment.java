@@ -28,13 +28,10 @@ import com.pyamsoft.padlock.databinding.OnboardFirstlaunchEnableServiceBinding;
 import com.pyamsoft.padlock.onboard.OnboardChildFragment;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.padlock.uicommon.AccessibilityRequestDelegate;
-import javax.inject.Inject;
 
-public class OnboardEnableServiceFragment extends OnboardChildFragment
-    implements OnboardEnableServicePresenter.View {
+public class OnboardEnableServiceFragment extends OnboardChildFragment {
 
   @NonNull final AccessibilityRequestDelegate delegate = new AccessibilityRequestDelegate();
-  @Inject OnboardEnableServicePresenter presenter;
   private OnboardFirstlaunchEnableServiceBinding binding;
 
   @Nullable @Override
@@ -54,28 +51,22 @@ public class OnboardEnableServiceFragment extends OnboardChildFragment
     Injector.get().provideComponent().plusOnboardFirstLaunchComponent().inject(this);
   }
 
-  @Override public void onStart() {
-    super.onStart();
-    presenter.bindView(this);
-  }
-
-  @Override public void onStop() {
-    super.onStop();
-    presenter.unbindView();
-  }
-
   @Override public void onResume() {
     super.onResume();
-    presenter.checkIfServiceIsRunning(PadLockService.isRunning());
+    if (PadLockService.isRunning()) {
+      onServiceEnabled();
+    } else {
+      onServiceDisabled();
+    }
   }
 
-  @Override public void onServiceEnabled() {
+  private void onServiceEnabled() {
     binding.onboardingNext.setText(R.string.continue_onboard);
     binding.onboardingNext.setOnClickListener(v -> scrollToNextPage());
     binding.serviceEnabledText.setText(R.string.service_enabled);
   }
 
-  @Override public void onServiceDisabled() {
+  private void onServiceDisabled() {
     binding.onboardingNext.setText(R.string.enable_service);
     binding.onboardingNext.setOnClickListener(
         v -> delegate.launchAccessibilityIntent(getActivity()));

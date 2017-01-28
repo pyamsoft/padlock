@@ -19,19 +19,22 @@ package com.pyamsoft.padlock.purge;
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
-interface PurgePresenter extends Presenter<PurgePresenter.View> {
+interface PurgePresenter extends Presenter<Presenter.Empty> {
 
   void clearList();
 
-  void retrieveStaleApplications();
+  void retrieveStaleApplications(@NonNull RetrievalCallback callback);
 
-  void deleteStale(@NonNull String packageName);
+  void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback);
 
-  interface View {
+  interface RetrievalCallback {
 
     void onStaleApplicationRetrieved(@NonNull String name);
 
     void onRetrievalComplete();
+  }
+
+  interface DeleteCallback {
 
     void onDeleted(@NonNull String packageName);
   }

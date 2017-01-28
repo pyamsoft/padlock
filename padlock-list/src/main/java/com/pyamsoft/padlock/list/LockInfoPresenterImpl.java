@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.list;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.LockState;
+import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.rx.SchedulerPresenter;
 import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +31,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInfoView>
+class LockInfoPresenterImpl extends SchedulerPresenter<Presenter.Empty>
     implements LockInfoPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockInfoInteractor lockInfoInteractor;
@@ -64,28 +65,29 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
     lockInfoInteractor.clearCache();
   }
 
-  @Override public void populateList(@NonNull String packageName) {
+  @Override
+  public void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback) {
     SubscriptionHelper.unsubscribe(populateListSubscription);
     populateListSubscription = lockInfoInteractor.populateList(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(activityEntry -> getView(
-            lockInfoView -> lockInfoView.onEntryAddedToList(activityEntry)), throwable -> {
+        .subscribe(callback::onEntryAddedToList, throwable -> {
           Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
-          getView(LockInfoView::onListPopulateError);
+          callback.onListPopulateError();
         }, () -> {
-          getView(LockInfoView::onListPopulated);
+          callback.onListPopulated();
           SubscriptionHelper.unsubscribe(populateListSubscription);
         });
   }
 
   @Override
-  public void modifyDatabaseEntry(boolean isDefault, int position, @NonNull String packageName,
-      @NonNull String activityName, @Nullable String code, boolean system, boolean whitelist,
-      boolean forceDelete) {
+  public void modifyDatabaseEntry(boolean isNotDefault, int position, @NonNull String packageName,
+      @NonNull String activityName, @SuppressWarnings("SameParameterValue") @Nullable String code,
+      boolean system, boolean whitelist, boolean forceDelete,
+      @NonNull ModifyDatabaseCallback callback) {
     SubscriptionHelper.unsubscribe(databaseSubscription);
     databaseSubscription =
-        lockInfoInteractor.modifySingleDatabaseEntry(isDefault, packageName, activityName, code,
+        lockInfoInteractor.modifySingleDatabaseEntry(isNotDefault, packageName, activityName, code,
             system, whitelist, forceDelete)
             .flatMap(lockState -> {
               final Observable<LockState> resultState;
@@ -103,38 +105,37 @@ class LockInfoPresenterImpl extends SchedulerPresenter<LockInfoPresenter.LockInf
             .subscribe(lockState -> {
               switch (lockState) {
                 case DEFAULT:
-                  getView(lockInfoView -> lockInfoView.onDatabaseEntryDeleted(position));
+                  callback.onDatabaseEntryDeleted(position);
                   break;
                 case WHITELISTED:
-                  getView(lockInfoView -> lockInfoView.onDatabaseEntryWhitelisted(position));
+                  callback.onDatabaseEntryWhitelisted(position);
                   break;
                 case LOCKED:
-                  getView(lockInfoView -> lockInfoView.onDatabaseEntryCreated(position));
+                  callback.onDatabaseEntryCreated(position);
                   break;
                 default:
                   throw new IllegalStateException("Unsupported lock state: " + lockState);
               }
             }, throwable -> {
               Timber.e(throwable, "onError modifyDatabaseEntry");
-              getView(lockInfoView -> lockInfoView.onDatabaseEntryError(position));
+              callback.onDatabaseEntryError(position);
             }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
   }
 
-  @Override public void showOnBoarding() {
+  @Override public void showOnBoarding(@NonNull OnBoardingCallback callback) {
     SubscriptionHelper.unsubscribe(onboardSubscription);
     onboardSubscription = lockInfoInteractor.hasShownOnBoarding()
-        .delay(1, TimeUnit.SECONDS)
+        .delay(300, TimeUnit.MILLISECONDS)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(onboard -> getView(lockList -> {
+        .subscribe(onboard -> {
           if (onboard) {
-            lockList.onOnboardingComplete();
+            callback.onOnboardingComplete();
           } else {
-            lockList.onShowOnboarding();
+            callback.onShowOnboarding();
           }
-        }), throwable -> {
+        }, throwable -> {
           Timber.e(throwable, "onError");
-          getView(LockInfoView::onListPopulateError);
         }, () -> SubscriptionHelper.unsubscribe(onboardSubscription));
   }
 }

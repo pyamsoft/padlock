@@ -41,7 +41,6 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
@@ -51,7 +50,7 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public class LockInfoDialog extends DialogFragment
-    implements LockInfoPresenter.LockInfoView, AppIconLoaderView {
+    implements LockInfoPresenter.PopulateListCallback {
 
   @NonNull public static final String TAG = "LockInfoDialog";
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
@@ -212,9 +211,19 @@ public class LockInfoDialog extends DialogFragment
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(this);
-    appIconLoaderPresenter.bindView(this);
-    appIconLoaderPresenter.loadApplicationIcon(appPackageName);
+    presenter.bindView(null);
+    appIconLoaderPresenter.bindView(null);
+    appIconLoaderPresenter.loadApplicationIcon(appPackageName,
+        new AppIconLoaderPresenter.LoadCallback() {
+
+          @Override public void onApplicationIconLoadedError() {
+            // TODO handle
+          }
+
+          @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable drawable) {
+            binding.lockInfoIcon.setImageDrawable(drawable);
+          }
+        });
     if (!listIsRefreshed) {
       if (!binding.lockInfoSwipeRefresh.isRefreshing()) {
         binding.lockInfoSwipeRefresh.post(() -> {
@@ -225,7 +234,7 @@ public class LockInfoDialog extends DialogFragment
           }
         });
       }
-      presenter.populateList(appPackageName);
+      presenter.populateList(appPackageName, this);
     }
   }
 
@@ -245,13 +254,13 @@ public class LockInfoDialog extends DialogFragment
     }
   }
 
-  @Override public void refreshList() {
+  void refreshList() {
     fastItemAdapter.clear();
     presenter.clearList();
     onListCleared();
 
     binding.lockInfoRecycler.setClickable(false);
-    presenter.populateList(appPackageName);
+    presenter.populateList(appPackageName, this);
   }
 
   @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
@@ -277,7 +286,16 @@ public class LockInfoDialog extends DialogFragment
     if (fastItemAdapter.getAdapterItemCount() > 0) {
       Timber.d("Refresh finished");
       listIsRefreshed = true;
-      presenter.showOnBoarding();
+      presenter.showOnBoarding(new LockInfoPresenter.OnBoardingCallback() {
+        @Override public void onShowOnboarding() {
+          Timber.d("Show onboarding");
+          // TODO
+        }
+
+        @Override public void onOnboardingComplete() {
+          // TODO
+        }
+      });
     } else {
       Toast.makeText(getContext(), "Error while loading list. Please try again.",
           Toast.LENGTH_SHORT).show();
@@ -298,44 +316,11 @@ public class LockInfoDialog extends DialogFragment
     handler.post(startRefreshRunnable);
   }
 
-  @Override public void onApplicationIconLoadedError() {
-    // TODO handle
-  }
-
-  @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable drawable) {
-    binding.lockInfoIcon.setImageDrawable(drawable);
-  }
-
-  @Override public void onDatabaseEntryCreated(int position) {
-    onDatabaseUpdated(position, LockState.LOCKED);
-  }
-
-  @Override public void onDatabaseEntryDeleted(int position) {
-    onDatabaseUpdated(position, LockState.DEFAULT);
-  }
-
-  @Override public void onDatabaseEntryWhitelisted(int position) {
-    onDatabaseUpdated(position, LockState.WHITELISTED);
-  }
-
-  private void onDatabaseUpdated(int position, @NonNull LockState newLockState) {
+  void onDatabaseUpdated(int position, @NonNull LockState newLockState) {
     final LockInfoItem oldItem = fastItemAdapter.getItem(position);
     final LockInfoItem newItem = oldItem.copyWithNewLockState(newLockState);
     fastItemAdapter.set(position, newItem);
     presenter.updateCachedEntryLockState(appPackageName, newItem.getName(), newLockState);
-  }
-
-  @Override public void onDatabaseEntryError(int position) {
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
-  }
-
-  @Override public void onShowOnboarding() {
-    Timber.d("Show onboarding");
-    // TODO
-  }
-
-  @Override public void onOnboardingComplete() {
-    // TODO
   }
 
   @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(int position,
@@ -347,6 +332,22 @@ public class LockInfoDialog extends DialogFragment
     final boolean forceLock = newLockState == LockState.LOCKED;
     final boolean wasDefault = previousLockState == LockState.DEFAULT;
     presenter.modifyDatabaseEntry(wasDefault, position, appPackageName, activityName, null,
-        appIsSystem, whitelist, forceLock);
+        appIsSystem, whitelist, forceLock, new LockInfoPresenter.ModifyDatabaseCallback() {
+          @Override public void onDatabaseEntryError(int position) {
+            AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
+          }
+
+          @Override public void onDatabaseEntryWhitelisted(int position) {
+            onDatabaseUpdated(position, LockState.WHITELISTED);
+          }
+
+          @Override public void onDatabaseEntryCreated(int position) {
+            onDatabaseUpdated(position, LockState.LOCKED);
+          }
+
+          @Override public void onDatabaseEntryDeleted(int position) {
+            onDatabaseUpdated(position, LockState.DEFAULT);
+          }
+        });
   }
 }

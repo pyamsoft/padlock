@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.rx.SchedulerPresenter;
 import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import javax.inject.Inject;
@@ -25,7 +26,7 @@ import rx.Scheduler;
 import rx.Subscription;
 import timber.log.Timber;
 
-class OnboardAcceptTermsPresenterImpl extends SchedulerPresenter<OnboardAcceptTermsPresenter.View>
+class OnboardAcceptTermsPresenterImpl extends SchedulerPresenter<Presenter.Empty>
     implements OnboardAcceptTermsPresenter {
 
   @NonNull private final OnboardAcceptTermsInteractor interactor;
@@ -42,16 +43,14 @@ class OnboardAcceptTermsPresenterImpl extends SchedulerPresenter<OnboardAcceptTe
     SubscriptionHelper.unsubscribe(termsSubscription);
   }
 
-  @Override public void acceptUsageTerms() {
-    interactor.agreeToTerms();
-
+  @Override public void acceptUsageTerms(@NonNull UsageTermsCallback callback) {
     SubscriptionHelper.unsubscribe(termsSubscription);
-    termsSubscription = interactor.hasAgreedToTerms()
+    termsSubscription = interactor.agreeToTerms()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(agreed -> {
               if (agreed) {
-                getView(View::onUsageTermsAccepted);
+                callback.onUsageTermsAccepted();
               }
             }, throwable -> Timber.e(throwable, "onError"),
             () -> SubscriptionHelper.unsubscribe(termsSubscription));

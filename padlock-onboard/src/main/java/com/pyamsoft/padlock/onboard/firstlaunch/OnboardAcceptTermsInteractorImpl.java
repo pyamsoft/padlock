@@ -29,8 +29,11 @@ class OnboardAcceptTermsInteractorImpl implements OnboardAcceptTermsInteractor {
     this.preferences = preferences;
   }
 
-  @Override public void agreeToTerms() {
-    preferences.setAgreed();
+  @NonNull @Override public Observable<Boolean> agreeToTerms() {
+    return Observable.fromCallable(() -> {
+      preferences.setAgreed();
+      return true;
+    });
   }
 
   @NonNull @Override public Observable<Boolean> hasAgreedToTerms() {

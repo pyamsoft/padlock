@@ -16,10 +16,18 @@
 
 package com.pyamsoft.padlock.iconloader;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
-public interface AppIconLoaderPresenter extends Presenter<AppIconLoaderView> {
+public interface AppIconLoaderPresenter extends Presenter<Presenter.Empty> {
 
-  void loadApplicationIcon(@NonNull String packageName);
+  void loadApplicationIcon(@NonNull String packageName, @NonNull LoadCallback callback);
+
+  interface LoadCallback {
+
+    void onApplicationIconLoadedSuccess(@NonNull Drawable icon);
+
+    void onApplicationIconLoadedError();
+  }
 }

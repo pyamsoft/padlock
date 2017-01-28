@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.iconloader;
+package com.pyamsoft.padlock.list;
 
-import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
+interface LockDatabaseWhitelistView extends LockDatabaseView {
 
-public interface AppIconLoaderView {
-
-  void onApplicationIconLoadedSuccess(@NonNull Drawable icon);
-
-  void onApplicationIconLoadedError();
+  void onDatabaseEntryWhitelisted(int position);
 }

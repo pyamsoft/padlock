@@ -20,24 +20,22 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
-interface LockServicePresenter extends Presenter<LockServicePresenter.LockService> {
+interface LockServicePresenter extends Presenter<Presenter.Empty> {
 
   void setLockScreenPassed();
 
-  void getActiveNames(@NonNull String packageName, @NonNull String className);
+  void processActiveApplicationIfMatching(@NonNull String packageName, @NonNull String className,
+      @NonNull ProcessCallback callback);
 
   void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
-      @NonNull RecheckStatus forcedRecheck);
+      @NonNull RecheckStatus forcedRecheck, @NonNull ProcessCallback callback);
 
   enum RecheckStatus {
     FORCE, NOT_FORCE
   }
 
-  interface LockService {
+  interface ProcessCallback {
 
-    void startLockScreen1(@NonNull PadLockEntry entry, @NonNull String realName);
-
-    void onActiveNamesRetrieved(@NonNull String packageName, @NonNull String activePackage,
-        @NonNull String className, @NonNull String activeClass);
+    void startLockScreen(@NonNull PadLockEntry entry, @NonNull String realName);
   }
 }

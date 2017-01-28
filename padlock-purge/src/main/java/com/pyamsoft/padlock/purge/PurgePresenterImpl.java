@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.purge;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.rx.SchedulerPresenter;
 import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import javax.inject.Inject;
@@ -26,7 +27,7 @@ import rx.subscriptions.CompositeSubscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> implements PurgePresenter {
+class PurgePresenterImpl extends SchedulerPresenter<Presenter.Empty> implements PurgePresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor interactor;
   @NonNull private final CompositeSubscription compositeSubscription;
@@ -52,29 +53,28 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
     interactor.clearCache();
   }
 
-  @Override public void retrieveStaleApplications() {
+  @Override public void retrieveStaleApplications(@NonNull RetrievalCallback callback) {
     SubscriptionHelper.unsubscribe(retrievalSubscription);
     retrievalSubscription = interactor.populateList()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(s -> getView(view -> view.onStaleApplicationRetrieved(s)), throwable -> {
+        .subscribe(callback::onStaleApplicationRetrieved, throwable -> {
           Timber.e(throwable, "onError retrieveStaleApplications");
-          getView(View::onRetrievalComplete);
         }, () -> {
           refreshing = false;
           SubscriptionHelper.unsubscribe(retrievalSubscription);
-          getView(View::onRetrievalComplete);
+          callback.onRetrievalComplete();
         });
   }
 
-  @Override public void deleteStale(@NonNull String packageName) {
+  @Override public void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback) {
     final Subscription subscription = interactor.deleteEntry(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(deleteResult -> {
           Timber.d("Delete result :%d", deleteResult);
           if (deleteResult > 0) {
-            onDeleteSuccess(packageName);
+            onDeleteSuccess(packageName, callback);
           }
         }, throwable -> {
           Timber.e(throwable, "onError deleteStale");
@@ -82,8 +82,9 @@ class PurgePresenterImpl extends SchedulerPresenter<PurgePresenter.View> impleme
     compositeSubscription.add(subscription);
   }
 
-  @SuppressWarnings("WeakerAccess") void onDeleteSuccess(@NonNull String packageName) {
+  @SuppressWarnings("WeakerAccess") void onDeleteSuccess(@NonNull String packageName,
+      @NonNull DeleteCallback callback) {
     interactor.removeFromCache(packageName);
-    getView(view -> view.onDeleted(packageName));
+    callback.onDeleted(packageName);
   }
 }

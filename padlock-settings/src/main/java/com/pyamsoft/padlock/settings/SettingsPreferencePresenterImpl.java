@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
+import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.rx.SchedulerPresenter;
 import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import javax.inject.Inject;
@@ -26,8 +27,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class SettingsPreferencePresenterImpl
-    extends SchedulerPresenter<SettingsPreferencePresenter.SettingsPreferenceView>
+class SettingsPreferencePresenterImpl extends SchedulerPresenter<Presenter.Empty>
     implements SettingsPreferencePresenter {
 
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_DATABASE = 0;
@@ -52,12 +52,12 @@ class SettingsPreferencePresenterImpl
     SubscriptionHelper.unsubscribe(confirmedSubscription, applicationInstallSubscription);
   }
 
-  @Override public void requestClearAll() {
-    getView(settingsPreferenceView -> settingsPreferenceView.showConfirmDialog(CONFIRM_ALL));
+  @Override public void requestClearAll(@NonNull RequestCallback callback) {
+    callback.showConfirmDialog(CONFIRM_ALL);
   }
 
-  @Override public void requestClearDatabase() {
-    getView(settingsPreferenceView -> settingsPreferenceView.showConfirmDialog(CONFIRM_DATABASE));
+  @Override public void requestClearDatabase(@NonNull RequestCallback callback) {
+    callback.showConfirmDialog(CONFIRM_DATABASE);
   }
 
   @Override public void setApplicationInstallReceiverState() {
@@ -75,35 +75,34 @@ class SettingsPreferencePresenterImpl
             () -> SubscriptionHelper.unsubscribe(applicationInstallSubscription));
   }
 
-  @Override public void processClearRequest(int type) {
+  @Override public void processClearRequest(int type, @NonNull ClearCallback callback) {
     switch (type) {
       case CONFIRM_DATABASE:
-        clearDatabase();
+        clearDatabase(callback);
         break;
       case CONFIRM_ALL:
-        clearAll();
+        clearAll(callback);
         break;
       default:
         throw new IllegalStateException("Received invalid confirmation event type: " + type);
     }
   }
 
-  @SuppressWarnings("WeakerAccess") void clearAll() {
+  @SuppressWarnings("WeakerAccess") void clearAll(@NonNull ClearCallback callback) {
     SubscriptionHelper.unsubscribe(confirmedSubscription);
     confirmedSubscription = interactor.clearAll()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(aBoolean -> getView(SettingsPreferenceView::onClearAll),
-            throwable -> Timber.e(throwable, "onError"),
+        .subscribe(aBoolean -> callback.onClearAll(), throwable -> Timber.e(throwable, "onError"),
             () -> SubscriptionHelper.unsubscribe(confirmedSubscription));
   }
 
-  @SuppressWarnings("WeakerAccess") void clearDatabase() {
+  @SuppressWarnings("WeakerAccess") void clearDatabase(@NonNull ClearCallback callback) {
     SubscriptionHelper.unsubscribe(confirmedSubscription);
     confirmedSubscription = interactor.clearDatabase()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(aBoolean -> getView(SettingsPreferenceView::onClearDatabase),
+        .subscribe(aBoolean -> callback.onClearDatabase(),
             throwable -> Timber.e(throwable, "onError"),
             () -> SubscriptionHelper.unsubscribe(confirmedSubscription));
   }

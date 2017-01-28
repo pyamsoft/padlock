@@ -29,7 +29,6 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderView;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.ActionSingle;
 import java.lang.ref.WeakReference;
@@ -37,7 +36,8 @@ import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>
+public class LockListItem
+    extends GenericAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>
     implements FilterableItem<LockListItem, LockListItem.ViewHolder> {
 
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
@@ -102,9 +102,9 @@ public class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, Lo
     }
   }
 
-  public static final class ViewHolder extends RecyclerView.ViewHolder implements AppIconLoaderView {
+  public static final class ViewHolder extends RecyclerView.ViewHolder {
 
-    @NonNull private final AdapterItemLocklistEntryBinding binding;
+    @NonNull final AdapterItemLocklistEntryBinding binding;
     @Inject AppIconLoaderPresenter appIconLoaderPresenter;
     @NonNull WeakReference<AppEntry> weakEntry;
 
@@ -121,19 +121,20 @@ public class LockListItem extends GenericAbstractItem<AppEntry, LockListItem, Lo
     }
 
     void loadImage(@NonNull String packageName) {
-      appIconLoaderPresenter.loadApplicationIcon(packageName);
-    }
+      appIconLoaderPresenter.loadApplicationIcon(packageName,
+          new AppIconLoaderPresenter.LoadCallback() {
+            @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
+              binding.lockListIcon.setImageDrawable(icon);
+            }
 
-    @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-      binding.lockListIcon.setImageDrawable(icon);
-    }
-
-    @Override public void onApplicationIconLoadedError() {
-      Timber.e("Failed to load icon into ViewHolder");
+            @Override public void onApplicationIconLoadedError() {
+              Timber.e("Failed to load icon into ViewHolder");
+            }
+          });
     }
 
     void bind(@NonNull AppEntry entry) {
-      appIconLoaderPresenter.bindView(this);
+      appIconLoaderPresenter.bindView(null);
       binding.lockListTitle.setText(entry.name());
       binding.lockListToggle.setOnCheckedChangeListener(null);
       binding.lockListToggle.setChecked(entry.locked());

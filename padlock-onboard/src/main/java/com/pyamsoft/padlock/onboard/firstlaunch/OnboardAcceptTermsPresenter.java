@@ -16,13 +16,14 @@
 
 package com.pyamsoft.padlock.onboard.firstlaunch;
 
+import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.presenter.Presenter;
 
-interface OnboardAcceptTermsPresenter extends Presenter<OnboardAcceptTermsPresenter.View> {
+interface OnboardAcceptTermsPresenter extends Presenter<Presenter.Empty> {
 
-  void acceptUsageTerms();
+  void acceptUsageTerms(@NonNull UsageTermsCallback callback);
 
-  interface View {
+  interface UsageTermsCallback {
 
     void onUsageTermsAccepted();
   }

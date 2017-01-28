@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.service;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.rx.SchedulerPresenter;
 import com.pyamsoft.pydroid.rx.SubscriptionHelper;
 import javax.inject.Inject;
@@ -27,7 +28,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.LockService>
+class LockServicePresenterImpl extends SchedulerPresenter<Presenter.Empty>
     implements LockServicePresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockServiceInteractor interactor;
@@ -52,10 +53,6 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
   @Override protected void onUnbind() {
     super.onUnbind();
     SubscriptionHelper.unsubscribe(lockedEntrySubscription);
-  }
-
-  @Override protected void onDestroy() {
-    super.onDestroy();
     interactor.cleanup();
   }
 
@@ -74,15 +71,23 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
     lastClassName = "";
   }
 
-  @Override public void getActiveNames(@NonNull String packageName, @NonNull String className) {
-    getView(
-        lockService -> lockService.onActiveNamesRetrieved(packageName, activePackageName, className,
-            activeClassName));
+  @Override public void processActiveApplicationIfMatching(@NonNull String packageName,
+      @NonNull String className, @NonNull ProcessCallback callback) {
+    Timber.d("Check against current window values: %s, %s", activePackageName, activeClassName);
+    if (activePackageName.equals(packageName) && (activeClassName.equals(className)
+        || className.equals(PadLockEntry.PACKAGE_ACTIVITY_NAME))) {
+      // We can replace the actual passed classname with the stored classname because:
+      // either it is equal to the passed name or the passed name is PACKAGE
+      // which will respond to any class name
+      Timber.d("Run recheck for: %s %s", activePackageName, activeClassName);
+      processAccessibilityEvent(activePackageName, activeClassName,
+          LockServicePresenter.RecheckStatus.FORCE, callback);
+    }
   }
 
   @Override
   public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
-      @NonNull RecheckStatus forcedRecheck) {
+      @NonNull RecheckStatus forcedRecheck, @NonNull ProcessCallback callback) {
     SubscriptionHelper.unsubscribe(lockedEntrySubscription);
     final Observable<Boolean> windowEventObservable =
         stateInteractor.isServiceEnabled()
@@ -215,13 +220,8 @@ class LockServicePresenterImpl extends SchedulerPresenter<LockServicePresenter.L
         .subscribe(padLockEntry -> {
               Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
                   padLockEntry.activityName());
-              launchCorrectLockScreen(padLockEntry, className);
+              callback.startLockScreen(padLockEntry, className);
             }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"),
             () -> SubscriptionHelper.unsubscribe(lockedEntrySubscription));
-  }
-
-  @SuppressWarnings("WeakerAccess") void launchCorrectLockScreen(@NonNull PadLockEntry entry,
-      @NonNull String realName) {
-    getView(lockService -> lockService.startLockScreen1(entry, realName));
   }
 }

@@ -113,7 +113,7 @@ public class MainActivity extends TamperActivity
     binding.drawerLayout.addDrawerListener(drawerToggle);
   }
 
-  private void peekNavigationDrawer() {
+  void peekNavigationDrawer() {
     binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN,
         binding.navigationDrawer);
 
@@ -137,7 +137,7 @@ public class MainActivity extends TamperActivity
   /**
    * Returns if the fragment has changed
    */
-  @CheckResult @NonNull private FragmentHasChanged loadFragment() {
+  @CheckResult @NonNull FragmentHasChanged loadFragment() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     final FragmentHasChanged changed;
 
@@ -283,18 +283,10 @@ public class MainActivity extends TamperActivity
     return R.mipmap.ic_launcher;
   }
 
-  @Override public void onShowOnboarding() {
-    if (replaceFragment(new OnboardFragment(), OnboardFragment.TAG)) {
-      Timber.d("New onboarding fragment placed");
-    }
-
-    prepareActivityForOnboarding();
-  }
-
   /**
    * Hide action bar, lock drawer
    */
-  private void prepareActivityForOnboarding() {
+  void prepareActivityForOnboarding() {
     // Hide the action bar
     final ActionBar actionBar = getSupportActionBar();
     if (actionBar != null) {
@@ -306,31 +298,6 @@ public class MainActivity extends TamperActivity
     // Lock the navigation drawer if we are showing onboarding
     // Action bar is hidden so the drawer toggle state wont matter
     drawerShowUpNavigation();
-  }
-
-  @Override public void onShowDefaultPage() {
-    // Set normal navigation
-    final FragmentHasChanged changed = loadFragment();
-    if (changed == FragmentHasChanged.NOT_CHANGED) {
-      Timber.d("Fragment has not changed");
-    } else {
-      // Un hide the action bar in case it was hidden
-      final ActionBar actionBar = getSupportActionBar();
-      if (actionBar != null) {
-        if (!actionBar.isShowing()) {
-          actionBar.show();
-        }
-      }
-      if (changed == FragmentHasChanged.CHANGD_WITH_UP) {
-        drawerShowUpNavigation();
-      } else {
-        drawerNormalNavigation();
-      }
-
-      if (firstLaunch) {
-        peekNavigationDrawer();
-      }
-    }
   }
 
   @Override public void onForceRefresh() {
@@ -349,7 +316,40 @@ public class MainActivity extends TamperActivity
       fragmentManager.beginTransaction().remove(onboarding).commitNow();
     }
 
-    presenter.showOnboardingOrDefault();
+    presenter.showOnboardingOrDefault(new MainPresenter.OnboardingCallback() {
+      @Override public void onShowOnboarding() {
+        if (replaceFragment(new OnboardFragment(), OnboardFragment.TAG)) {
+          Timber.d("New onboarding fragment placed");
+        }
+
+        prepareActivityForOnboarding();
+      }
+
+      @Override public void onShowDefaultPage() {
+        // Set normal navigation
+        final FragmentHasChanged changed = loadFragment();
+        if (changed == FragmentHasChanged.NOT_CHANGED) {
+          Timber.d("Fragment has not changed");
+        } else {
+          // Un hide the action bar in case it was hidden
+          final ActionBar actionBar = getSupportActionBar();
+          if (actionBar != null) {
+            if (!actionBar.isShowing()) {
+              actionBar.show();
+            }
+          }
+          if (changed == FragmentHasChanged.CHANGD_WITH_UP) {
+            drawerShowUpNavigation();
+          } else {
+            drawerNormalNavigation();
+          }
+
+          if (firstLaunch) {
+            peekNavigationDrawer();
+          }
+        }
+      }
+    });
   }
 
   private enum FragmentHasChanged {

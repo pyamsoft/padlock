@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,10 +27,9 @@ import com.pyamsoft.padlock.onboard.OnboardChildFragment;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class OnboardAcceptTermsFragment extends OnboardChildFragment
-    implements OnboardAcceptTermsPresenter.View {
+public class OnboardAcceptTermsFragment extends OnboardChildFragment {
 
-@Inject OnboardAcceptTermsPresenter presenter;
+  @Inject OnboardAcceptTermsPresenter presenter;
   private OnboardFirstlaunchAcceptTermsBinding binding;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,7 +57,7 @@ public class OnboardAcceptTermsFragment extends OnboardChildFragment
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(this);
+    presenter.bindView(null);
   }
 
   @Override public void onStop() {
@@ -77,11 +75,7 @@ public class OnboardAcceptTermsFragment extends OnboardChildFragment
   private void setupNextButton() {
     binding.onboardingAcceptTerms.setOnClickListener(v -> {
       Timber.i("Accepted Terms of use");
-      presenter.acceptUsageTerms();
+      presenter.acceptUsageTerms(this::completeOnboarding);
     });
-  }
-
-  @Override public void onUsageTermsAccepted() {
-    completeOnboarding();
   }
 }

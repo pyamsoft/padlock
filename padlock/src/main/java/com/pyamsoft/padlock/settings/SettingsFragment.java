@@ -16,9 +16,6 @@
 
 package com.pyamsoft.padlock.settings;
 
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
@@ -29,7 +26,6 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.main.MainActivity;
-import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -37,7 +33,7 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public class SettingsFragment extends ActionBarSettingsPreferenceFragment
-    implements SettingsPreferencePresenter.SettingsPreferenceView {
+    implements SettingsPreferencePresenter.RequestCallback {
 
   @NonNull public static final String TAG = "SettingsPreferenceFragment";
   @SuppressWarnings("WeakerAccess") @Inject SettingsPreferencePresenter presenter;
@@ -65,7 +61,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));
     clearDb.setOnPreferenceClickListener(preference -> {
       Timber.d("Clear DB onClick");
-      presenter.requestClearDatabase();
+      presenter.requestClearDatabase(this);
       return true;
     });
 
@@ -89,7 +85,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   }
 
   @Override protected boolean onClearAllPreferenceClicked() {
-    presenter.requestClearAll();
+    presenter.requestClearAll(this);
     return true;
   }
 
@@ -103,30 +99,9 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
         "confirm_dialog");
   }
 
-  @Override public void onClearAll() {
-    Timber.d("Everything is cleared, kill self");
-    try {
-      PadLockService.finish();
-    } catch (NullPointerException e) {
-      Timber.e(e, "Expected NPE when Service is NULL");
-    }
-    final ActivityManager activityManager = (ActivityManager) getContext().getApplicationContext()
-        .getSystemService(Context.ACTIVITY_SERVICE);
-    activityManager.clearApplicationUserData();
-  }
-
-  @Override public void onClearDatabase() {
-    final Activity activity = getActivity();
-    if (activity instanceof MainActivity) {
-      ((MainActivity) activity).onForceRefresh();
-    } else {
-      throw new ClassCastException("Activity is not MainActivity");
-    }
-  }
-
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(this);
+    presenter.bindView(null);
   }
 
   @Override public void onStop() {
