@@ -55,8 +55,8 @@ public class ConfirmationDialog extends DialogFragment {
         ? "Really clear entire database?\n\nYou will have to re-configure all locked applications again"
         : "Really clear all application settings?\n\nYou will have to manually restart the Accessibility Service component of PadLock")
         .setPositiveButton("Yes", (dialogInterface, i) -> {
+          dismiss();
           sendConfirmationEvent(which);
-          dialogInterface.dismiss();
         })
         .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
         .create();
@@ -77,7 +77,7 @@ public class ConfirmationDialog extends DialogFragment {
                 Timber.e(e, "Expected NPE when Service is NULL");
               }
               final ActivityManager activityManager =
-                  (ActivityManager) getContext().getApplicationContext()
+                  (ActivityManager) getActivity().getApplicationContext()
                       .getSystemService(Context.ACTIVITY_SERVICE);
               activityManager.clearApplicationUserData();
             }

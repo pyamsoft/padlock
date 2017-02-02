@@ -49,7 +49,8 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public class MainActivity extends TamperActivity
-    implements MainPresenter.MainView, NavigationDrawerController {
+    implements MainPresenter.MainView, NavigationDrawerController,
+    MainPresenter.OnboardingCallback {
 
   @NonNull private static final String FIRST_LAUNCH = "main_first_launch";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
@@ -184,6 +185,7 @@ public class MainActivity extends TamperActivity
   @Override protected void onStart() {
     super.onStart();
     presenter.bindView(this);
+    presenter.showOnboardingOrDefault(this);
   }
 
   @Override protected void onStop() {
@@ -316,40 +318,40 @@ public class MainActivity extends TamperActivity
       fragmentManager.beginTransaction().remove(onboarding).commitNow();
     }
 
-    presenter.showOnboardingOrDefault(new MainPresenter.OnboardingCallback() {
-      @Override public void onShowOnboarding() {
-        if (replaceFragment(new OnboardFragment(), OnboardFragment.TAG)) {
-          Timber.d("New onboarding fragment placed");
-        }
+    presenter.showOnboardingOrDefault(this);
+  }
 
-        prepareActivityForOnboarding();
-      }
+  @Override public void onShowOnboarding() {
+    if (replaceFragment(new OnboardFragment(), OnboardFragment.TAG)) {
+      Timber.d("New onboarding fragment placed");
+    }
 
-      @Override public void onShowDefaultPage() {
-        // Set normal navigation
-        final FragmentHasChanged changed = loadFragment();
-        if (changed == FragmentHasChanged.NOT_CHANGED) {
-          Timber.d("Fragment has not changed");
-        } else {
-          // Un hide the action bar in case it was hidden
-          final ActionBar actionBar = getSupportActionBar();
-          if (actionBar != null) {
-            if (!actionBar.isShowing()) {
-              actionBar.show();
-            }
-          }
-          if (changed == FragmentHasChanged.CHANGD_WITH_UP) {
-            drawerShowUpNavigation();
-          } else {
-            drawerNormalNavigation();
-          }
+    prepareActivityForOnboarding();
+  }
 
-          if (firstLaunch) {
-            peekNavigationDrawer();
-          }
+  @Override public void onShowDefaultPage() {
+    // Set normal navigation
+    final FragmentHasChanged changed = loadFragment();
+    if (changed == FragmentHasChanged.NOT_CHANGED) {
+      Timber.d("Fragment has not changed");
+    } else {
+      // Un hide the action bar in case it was hidden
+      final ActionBar actionBar = getSupportActionBar();
+      if (actionBar != null) {
+        if (!actionBar.isShowing()) {
+          actionBar.show();
         }
       }
-    });
+      if (changed == FragmentHasChanged.CHANGD_WITH_UP) {
+        drawerShowUpNavigation();
+      } else {
+        drawerNormalNavigation();
+      }
+
+      if (firstLaunch) {
+        peekNavigationDrawer();
+      }
+    }
   }
 
   private enum FragmentHasChanged {
