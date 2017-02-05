@@ -115,7 +115,7 @@ public class PadLockDBTest {
    */
   @Test public void testInsertEmpty() throws Exception {
     try {
-      final PadLockEntry empty = PadLockEntry.empty();
+      final PadLockEntry empty = PadLockEntry.EMPTY;
       db.insert(empty.packageName(), empty.activityName(), empty.lockCode(), empty.lockUntilTime(),
           empty.ignoreUntilTime(), empty.systemApplication(), empty.whitelist())
           .subscribeOn(subscribeScheduler)
