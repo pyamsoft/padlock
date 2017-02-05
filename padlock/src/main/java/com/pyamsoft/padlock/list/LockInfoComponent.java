@@ -17,10 +17,9 @@
 package com.pyamsoft.padlock.list;
 
 import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
-import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
 import dagger.Subcomponent;
 
-@FragmentScope @Subcomponent(modules = {
+@Subcomponent(modules = {
     LockInfoModule.class, AppIconLoaderModule.class
 }) public interface LockInfoComponent {
 
