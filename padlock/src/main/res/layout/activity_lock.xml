@@ -36,27 +36,18 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:orientation="vertical"
         android:padding="16dp"
         >
 
-      <com.pyamsoft.pydroid.ui.widget.SquareImageView
-          android:id="@+id/lock_image"
-          android:layout_width="64dp"
-          android:layout_height="64dp"
-          android:layout_gravity="center"
-          android:layout_marginBottom="72dp"
-          android:layout_marginTop="-64dp"
-          android:contentDescription="@string/blank"
-          />
-
       <LinearLayout
+          android:id="@+id/pin_entry_layout"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
+          android:layout_marginTop="32dp"
           android:gravity="center"
           android:orientation="horizontal"
           >
@@ -97,12 +88,23 @@
           android:id="@+id/lock_display_hint"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
+          android:layout_below="@id/pin_entry_layout"
           android:gravity="center_horizontal"
           android:textAppearance="?android:attr/textAppearanceSmall"
           android:textColor="@color/material_light_background"
           />
 
-    </LinearLayout>
+      <com.pyamsoft.pydroid.ui.widget.SquareImageView
+          android:id="@+id/lock_image"
+          android:layout_width="64dp"
+          android:layout_height="64dp"
+          android:layout_above="@id/pin_entry_layout"
+          android:layout_centerHorizontal="true"
+          android:layout_gravity="center"
+          android:contentDescription="@string/blank"
+          />
+
+    </RelativeLayout>
 
   </LinearLayout>
 
