@@ -79,7 +79,7 @@ android {
   }
 
   dexOptions {
-    javaMaxHeapSize "$heapSize"
+    javaMaxHeapSize "${rootProject.ext.heapSize}"
   }
 }
 
