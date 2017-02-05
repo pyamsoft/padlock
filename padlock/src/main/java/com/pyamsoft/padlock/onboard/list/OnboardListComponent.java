@@ -16,9 +16,8 @@
 
 package com.pyamsoft.padlock.onboard.list;
 
-import com.pyamsoft.pydroid.rx.scopes.FragmentScope;
 import dagger.Subcomponent;
 
-@FragmentScope @Subcomponent(modules = OnboardListModule.class) public interface OnboardListComponent {
+@Subcomponent(modules = OnboardListModule.class) public interface OnboardListComponent {
   void inject(OnboardListDialog dialog);
 }
