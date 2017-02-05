@@ -162,7 +162,7 @@ class PadLockDBImpl implements PadLockDB {
           PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName, PadLockEntry.PACKAGE_ACTIVITY_NAME,
           activityName)
           .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER::map,
-              PadLockEntry.empty());
+              PadLockEntry.EMPTY);
     });
   }
 

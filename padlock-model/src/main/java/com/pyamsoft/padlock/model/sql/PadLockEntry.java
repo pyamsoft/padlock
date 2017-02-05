@@ -30,10 +30,10 @@ import com.squareup.sqldelight.RowMapper;
   @NonNull public static final String PACKAGE_ACTIVITY_NAME = "PACKAGE";
   @NonNull public static final String PACKAGE_EMPTY = "EMPTY";
   @NonNull public static final String ACTIVITY_EMPTY = "EMPTY";
-
+  @SuppressWarnings("StaticInitializerReferencesSubClass") @NonNull public static final PadLockEntry
+      EMPTY = new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false);
   @SuppressWarnings("StaticInitializerReferencesSubClass") @NonNull
   private static final Factory<PadLockEntry> FACTORY = new Factory<>(AutoValue_PadLockEntry::new);
-
   @NonNull public static final Creator<PadLockEntry> CREATOR = FACTORY.creator;
   @NonNull public static final RowMapper<AllEntries> ALL_ENTRIES_MAPPER =
       FACTORY.all_entriesMapper(AutoValue_PadLockEntry_AllEntries::new);
@@ -44,10 +44,6 @@ import com.squareup.sqldelight.RowMapper;
   @NonNull public static final RowMapper<WithPackageActivityName>
       WITH_PACKAGE_ACTIVITY_NAME_MAPPER =
       FACTORY.with_package_activity_nameMapper(AutoValue_PadLockEntry_WithPackageActivityName::new);
-
-  @NonNull @CheckResult public static PadLockEntry empty() {
-    return new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false);
-  }
 
   @CheckResult public static boolean isEmpty(@NonNull PadLockEntry entry) {
     return PACKAGE_EMPTY.equals(entry.packageName()) && ACTIVITY_EMPTY.equals(entry.activityName());
