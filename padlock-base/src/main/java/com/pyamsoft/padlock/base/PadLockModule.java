@@ -41,7 +41,7 @@ import rx.schedulers.Schedulers;
       @NonNull Class<? extends Activity> lockScreenActivityClass,
       @NonNull Class<? extends IntentService> recheckServiceClass) {
     appContext = context.getApplicationContext();
-    preferences = new PadLockPreferencesImpl(appContext);
+    preferences = new PadLockPreferences(appContext);
     this.mainActivityClass = mainActivityClass;
     this.lockScreenActivityClass = lockScreenActivityClass;
     this.recheckServiceClass = recheckServiceClass;

@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.rx.SchedulerPresenter;
 import com.pyamsoft.pydroid.rx.SubscriptionHelper;

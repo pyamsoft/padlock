@@ -32,7 +32,7 @@ import rx.Scheduler;
       @NonNull Context context, @NonNull PackageManagerWrapper packageManagerWrapper,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("sub") Scheduler subScheduler,
       @NonNull @Named("main") Class<? extends Activity> mainActivityClass) {
-    return new ApplicationInstallReceiverImpl(context, packageManagerWrapper, obsScheduler,
+    return new ApplicationInstallReceiver(context, packageManagerWrapper, obsScheduler,
         subScheduler, mainActivityClass);
   }
 }

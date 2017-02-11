@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.lock;
 
 import android.app.IntentService;
 import android.content.Context;
-import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
