@@ -64,7 +64,7 @@ dependencies {
   annotationProcessor "com.google.dagger:dagger-compiler:$dagger"
 
   // PYDroid
-  compile("com.github.pyamsoft.pydroid:pydroid-rx:$pydroid@aar") {
+  compile("com.github.pyamsoft.pydroid:pydroid:$pydroid@aar") {
     transitive = true
   }
 
