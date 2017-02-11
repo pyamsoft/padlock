@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.iconloader;
+package com.pyamsoft.padlock.base.iconloader;
 
-import com.pyamsoft.padlock.base.iconloader.AppIconLoaderInteractor;
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
 import rx.Scheduler;
 
-@Module public class AppIconLoaderModule {
+@Module public class AppIconLoaderInteractorModule {
 
-  @Provides AppIconLoaderPresenter provideAppIconLoaderPresenter(
-      final AppIconLoaderInteractor interactor, @Named("obs") Scheduler obsScheduler,
-      @Named("sub") Scheduler subScheduler) {
-    return new AppIconLoaderPresenter(interactor, obsScheduler, subScheduler);
+  @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(
+      @NonNull PackageManagerWrapper packageManagerWrapper) {
+    return new AppIconLoaderInteractor(packageManagerWrapper);
   }
 }

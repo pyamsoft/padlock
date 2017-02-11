@@ -14,14 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.iconloader;
+package com.pyamsoft.padlock.base.iconloader;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
+import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
+import javax.inject.Inject;
 import rx.Observable;
 
-interface AppIconLoaderInteractor {
+public class AppIconLoaderInteractor {
 
-  @CheckResult @NonNull Observable<Drawable> loadPackageIcon(@NonNull String packageName);
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
+
+  @Inject AppIconLoaderInteractor(@NonNull PackageManagerWrapper packageManagerWrapper) {
+    this.packageManagerWrapper = packageManagerWrapper;
+  }
+
+  @NonNull @WorkerThread @CheckResult
+  public Observable<Drawable> loadPackageIcon(final @NonNull String packageName) {
+    return packageManagerWrapper.loadDrawableForPackageOrDefault(packageName);
+  }
 }

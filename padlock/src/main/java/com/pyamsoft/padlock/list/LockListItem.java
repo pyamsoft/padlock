@@ -28,7 +28,6 @@ import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.ActionSingle;
 import java.lang.ref.WeakReference;

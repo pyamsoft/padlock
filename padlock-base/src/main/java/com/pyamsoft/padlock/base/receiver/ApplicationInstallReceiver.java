@@ -38,7 +38,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class ApplicationInstallReceiver extends BroadcastReceiver {
+public class ApplicationInstallReceiver extends BroadcastReceiver {
 
   @NonNull private final Context appContext;
   @NonNull private final NotificationManagerCompat notificationManager;

@@ -19,7 +19,7 @@ package com.pyamsoft.padlock;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.pydroid.IPYDroidApp;
+import com.pyamsoft.pydroid.ui.IPYDroidApp;
 
 public class Injector implements IPYDroidApp<PadLockComponent> {
 

@@ -39,7 +39,6 @@ import android.widget.EditText;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.model.LockScreenEntry;
 import com.pyamsoft.padlock.service.PadLockService;
