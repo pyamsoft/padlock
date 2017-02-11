@@ -24,7 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.preference.PreferenceManager;
 import javax.inject.Inject;
 
-class PadLockPreferences {
+public class PadLockPreferences {
 
   @NonNull private static final String IS_SYSTEM = "is_system";
   @NonNull private static final String MASTER_PASSWORD = "master_password";

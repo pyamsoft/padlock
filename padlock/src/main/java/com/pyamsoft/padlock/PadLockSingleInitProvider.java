@@ -20,14 +20,14 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.PadLockModule;
+import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.lock.LockScreenActivity;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.service.RecheckService;
 import com.pyamsoft.pydroid.BuildConfigChecker;
-import com.pyamsoft.pydroid.SingleInitContentProvider;
 import com.pyamsoft.pydroid.about.Licenses;
-import com.pyamsoft.pydroid.rx.RxLicenses;
-import com.pyamsoft.pydroid.ui.UiLicenses;
+import com.pyamsoft.pydroid.ui.SingleInitContentProvider;
 
 public class PadLockSingleInitProvider extends SingleInitContentProvider {
 
@@ -61,10 +61,9 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider {
   }
 
   @Override public void insertCustomLicensesIntoMap() {
+    super.insertCustomLicensesIntoMap();
     Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite");
     Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight");
     Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2");
-    RxLicenses.addLicenses();
-    UiLicenses.addLicenses();
   }
 }
