@@ -16,9 +16,7 @@
 
 package com.pyamsoft.padlock.list;
 
-import android.support.annotation.NonNull;
+interface ClearCallback {
 
-interface PinEntryDialogRequest {
-
-  void onPinEntryDialogRequested(@NonNull String packageName, @NonNull String activityName);
+  void onListCleared();
 }

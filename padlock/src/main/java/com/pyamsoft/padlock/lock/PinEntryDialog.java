@@ -45,6 +45,7 @@ import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
+import com.pyamsoft.pydroid.ActionSingle;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
 import javax.inject.Inject;
@@ -86,25 +87,26 @@ public class PinEntryDialog extends DialogFragment {
         }
 
         @Override public void handOffPinEvent(@NonNull PinEntryEvent event) {
-          final MasterPinSubmitCallback lockList = getLockList();
-          switch (event.type()) {
-            case 0:
-              if (event.complete()) {
-                lockList.onCreateMasterPinSuccess();
-              } else {
-                lockList.onCreateMasterPinFailure();
-              }
-              break;
-            case 1:
-              if (event.complete()) {
-                lockList.onClearMasterPinSuccess();
-              } else {
-                lockList.onClearMasterPinFailure();
-              }
-              break;
-            default:
-              throw new RuntimeException("Invalid event type: " + event.type());
-          }
+          actOnLockList(callback -> {
+            switch (event.type()) {
+              case 0:
+                if (event.complete()) {
+                  callback.onCreateMasterPinSuccess();
+                } else {
+                  callback.onCreateMasterPinFailure();
+                }
+                break;
+              case 1:
+                if (event.complete()) {
+                  callback.onClearMasterPinSuccess();
+                } else {
+                  callback.onClearMasterPinFailure();
+                }
+                break;
+              default:
+                throw new RuntimeException("Invalid event type: " + event.type());
+            }
+          });
         }
       };
 
@@ -337,11 +339,11 @@ public class PinEntryDialog extends DialogFragment {
     PadLock.getRefWatcher(this).watch(this);
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull MasterPinSubmitCallback getLockList() {
+  void actOnLockList(@NonNull ActionSingle<MasterPinSubmitCallback> action) {
     final FragmentManager fragmentManager = getFragmentManager();
     final Fragment lockListFragment = fragmentManager.findFragmentByTag(LockListFragment.TAG);
-    if (lockListFragment instanceof MasterPinSubmitCallback) {
-      return (MasterPinSubmitCallback) lockListFragment;
+    if (lockListFragment instanceof LockListFragment) {
+      ((LockListFragment) lockListFragment).provideMasterSubmitCallback(action);
     } else {
       throw new ClassCastException("Fragment is not MasterPinSubmitCallback");
     }

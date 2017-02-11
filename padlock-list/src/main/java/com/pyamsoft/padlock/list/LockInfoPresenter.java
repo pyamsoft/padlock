@@ -60,8 +60,9 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
     lockInfoInteractor.updateCacheEntry(packageName, name, lockState);
   }
 
-  public void clearList() {
+  public void clearList(@NonNull ClearCallback callback) {
     lockInfoInteractor.clearCache();
+    callback.onListCleared();
   }
 
   public void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback) {
