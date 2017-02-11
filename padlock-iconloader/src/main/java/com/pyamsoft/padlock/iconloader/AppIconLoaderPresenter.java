@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.iconloader;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.iconloader.AppIconLoaderInteractor;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
