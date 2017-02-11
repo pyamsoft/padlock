@@ -47,28 +47,27 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.onboard.list.OnboardListDialog;
 import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.service.PadLockService;
+import com.pyamsoft.pydroid.ActionSingle;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.design.util.FABUtil;
+import com.pyamsoft.pydroid.helper.AsyncMapHelper;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
-import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockListFragment extends Fragment
-    implements PinEntryDialogRequest, LockListPresenter.PopulateListCallback,
-    LockListPresenter.FABStateCallback, MasterPinSubmitCallback {
+public class LockListFragment extends Fragment {
 
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
-  @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
+  @NonNull final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockListItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") @Inject LockListPresenter presenter;
   @SuppressWarnings("WeakerAccess") FragmentLockListBinding binding;
-  @NonNull private final Runnable startRefreshRunnable = () -> {
+  @NonNull final Runnable startRefreshRunnable = () -> {
     binding.applistSwipeRefresh.post(() -> {
       if (binding != null) {
         if (binding.applistSwipeRefresh != null) {
@@ -83,7 +82,7 @@ public class LockListFragment extends Fragment
       activity.supportInvalidateOptionsMenu();
     }
   };
-  @NonNull private final Runnable stopRefreshRunnable = () -> {
+  @NonNull final Runnable stopRefreshRunnable = () -> {
     binding.applistSwipeRefresh.post(() -> {
       if (binding != null) {
         if (binding.applistSwipeRefresh != null) {
@@ -97,10 +96,112 @@ public class LockListFragment extends Fragment
       activity.supportInvalidateOptionsMenu();
     }
   };
+  @Nullable AsyncMap.Entry fabIconTask;
+  @NonNull final LockListPresenter.FABStateCallback fabStateCallback =
+      new LockListPresenter.FABStateCallback() {
+
+        @Override public void onSetFABStateEnabled() {
+          AsyncMapHelper.unsubscribe(fabIconTask);
+          fabIconTask =
+              AsyncDrawable.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
+        }
+
+        @Override public void onSetFABStateDisabled() {
+          AsyncMapHelper.unsubscribe(fabIconTask);
+          fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
+        }
+      };
+  @NonNull private final MasterPinSubmitCallback masterPinSubmitCallback =
+      new MasterPinSubmitCallback() {
+
+        @Override public void onCreateMasterPinSuccess() {
+          fabStateCallback.onSetFABStateEnabled();
+          final View v = getView();
+          if (v != null) {
+            Snackbar.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT).show();
+          }
+        }
+
+        @Override public void onCreateMasterPinFailure() {
+          Toast.makeText(getContext(), "Error: Mismatched PIN", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override public void onClearMasterPinSuccess() {
+          fabStateCallback.onSetFABStateDisabled();
+          final View v = getView();
+          if (v != null) {
+            Snackbar.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT).show();
+          }
+        }
+
+        @Override public void onClearMasterPinFailure() {
+          Toast.makeText(getContext(), "Error: Invalid PIN", Toast.LENGTH_SHORT).show();
+        }
+      };
+  boolean listIsRefreshed;
+  @NonNull private final LockListPresenter.PopulateListCallback populateListCallback =
+      new LockListPresenter.PopulateListCallback() {
+
+        @Override public void onEntryAddedToList(@NonNull AppEntry entry) {
+          // In case the configuration changes, we do the animation again
+          if (!binding.applistSwipeRefresh.isRefreshing()) {
+            binding.applistSwipeRefresh.post(() -> {
+              if (binding != null) {
+                if (binding.applistSwipeRefresh != null) {
+                  binding.applistSwipeRefresh.setRefreshing(true);
+                }
+              }
+            });
+          }
+
+          fastItemAdapter.add(new LockListItem(entry));
+        }
+
+        @Override public void onListPopulated() {
+          Timber.d("onListPopulated");
+
+          handler.removeCallbacksAndMessages(null);
+          handler.post(stopRefreshRunnable);
+          handler.post(() -> binding.applistFab.show());
+
+          if (fastItemAdapter.getAdapterItemCount() > 1) {
+            Timber.d("We have refreshed");
+            listIsRefreshed = true;
+            presenter.showOnBoarding(new LockListPresenter.OnboardingCallback() {
+              @Override public void onShowOnboarding() {
+                Timber.d("Show onboarding");
+                AppUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(),
+                    OnboardListDialog.TAG);
+              }
+
+              @Override public void onOnboardingComplete() {
+                onCompletedOnboarding();
+              }
+            });
+          } else {
+            Toast.makeText(getContext(), "Error while loading list. Please try again.",
+                Toast.LENGTH_SHORT).show();
+          }
+        }
+
+        @Override public void onListPopulateError() {
+          Timber.e("onListPopulateError");
+          onListPopulated();
+          AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
+        }
+
+        @Override public void onListCleared() {
+          Timber.d("Prepare for refresh");
+          listIsRefreshed = false;
+
+          Timber.d("onListCleared");
+          handler.removeCallbacksAndMessages(null);
+          handler.post(startRefreshRunnable);
+          handler.post(() -> binding.applistFab.hide());
+        }
+      };
   @Nullable private MenuItem displaySystemItem;
   @Nullable private DividerItemDecoration dividerDecoration;
-  @Nullable private AsyncMap.Entry fabIconTask;
-  private boolean listIsRefreshed;
   private FilterListDelegate filterListDelegate;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -132,7 +233,7 @@ public class LockListFragment extends Fragment
     super.onStart();
     presenter.bindView(null);
 
-    presenter.setFABStateFromPreference(this);
+    presenter.setFABStateFromPreference(fabStateCallback);
     if (!listIsRefreshed) {
       if (!binding.applistSwipeRefresh.isRefreshing()) {
         binding.applistSwipeRefresh.post(() -> {
@@ -143,7 +244,7 @@ public class LockListFragment extends Fragment
           }
         });
       }
-      presenter.populateList(this);
+      presenter.populateList(populateListCallback);
     }
   }
 
@@ -295,103 +396,15 @@ public class LockListFragment extends Fragment
   private void setupFAB() {
     binding.applistFab.setOnClickListener(v -> {
       if (PadLockService.isRunning()) {
-        presenter.clickPinFABServiceRunning(
-            () -> onPinEntryDialogRequested(getContext().getPackageName(),
-                getActivity().getClass().getName()));
+        presenter.clickPinFABServiceRunning(() -> AppUtil.onlyLoadOnceDialogFragment(getActivity(),
+            PinEntryDialog.newInstance(getContext().getPackageName(),
+                getActivity().getClass().getName()), PIN_DIALOG_TAG));
       } else {
         presenter.clickPinFABServiceIdle(() -> AppUtil.onlyLoadOnceDialogFragment(getActivity(),
             new AccessibilityRequestDialog(), "accessibility"));
       }
     });
     FABUtil.setupFABBehavior(binding.applistFab, new HideScrollFABBehavior(24));
-  }
-
-  @Override
-  public void onPinEntryDialogRequested(@NonNull String packageName, @NonNull String activityName) {
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(),
-        PinEntryDialog.newInstance(packageName, activityName), PIN_DIALOG_TAG);
-  }
-
-  @Override public void onCreateMasterPinSuccess() {
-    onSetFABStateEnabled();
-    final View v = getView();
-    if (v != null) {
-      Snackbar.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT).show();
-    }
-  }
-
-  @Override public void onCreateMasterPinFailure() {
-    Toast.makeText(getContext(), "Error: Mismatched PIN", Toast.LENGTH_SHORT).show();
-  }
-
-  @Override public void onClearMasterPinSuccess() {
-    onSetFABStateDisabled();
-    final View v = getView();
-    if (v != null) {
-      Snackbar.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT).show();
-    }
-  }
-
-  @Override public void onClearMasterPinFailure() {
-    Toast.makeText(getContext(), "Error: Invalid PIN", Toast.LENGTH_SHORT).show();
-  }
-
-  @Override public void onEntryAddedToList(@NonNull AppEntry entry) {
-    // In case the configuration changes, we do the animation again
-    if (!binding.applistSwipeRefresh.isRefreshing()) {
-      binding.applistSwipeRefresh.post(() -> {
-        if (binding != null) {
-          if (binding.applistSwipeRefresh != null) {
-            binding.applistSwipeRefresh.setRefreshing(true);
-          }
-        }
-      });
-    }
-
-    fastItemAdapter.add(new LockListItem(entry));
-  }
-
-  @Override public void onListPopulateError() {
-    Timber.e("onListPopulateError");
-    onListPopulated();
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
-  }
-
-  @Override public void onListCleared() {
-    Timber.d("Prepare for refresh");
-    listIsRefreshed = false;
-
-    Timber.d("onListCleared");
-    handler.removeCallbacksAndMessages(null);
-    handler.post(startRefreshRunnable);
-    handler.post(() -> binding.applistFab.hide());
-  }
-
-  @Override public void onListPopulated() {
-    Timber.d("onListPopulated");
-
-    handler.removeCallbacksAndMessages(null);
-    handler.post(stopRefreshRunnable);
-    handler.post(() -> binding.applistFab.show());
-
-    if (fastItemAdapter.getAdapterItemCount() > 1) {
-      Timber.d("We have refreshed");
-      listIsRefreshed = true;
-      presenter.showOnBoarding(new LockListPresenter.OnboardingCallback() {
-        @Override public void onShowOnboarding() {
-          Timber.d("Show onboarding");
-          AppUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(),
-              OnboardListDialog.TAG);
-        }
-
-        @Override public void onOnboardingComplete() {
-          onCompletedOnboarding();
-        }
-      });
-    } else {
-      Toast.makeText(getContext(), "Error while loading list. Please try again.",
-          Toast.LENGTH_SHORT).show();
-    }
   }
 
   public void onCompletedOnboarding() {
@@ -403,9 +416,8 @@ public class LockListFragment extends Fragment
 
   public void refreshList() {
     fastItemAdapter.clear();
-    presenter.clearList();
-    onListCleared();
-    presenter.populateList(this);
+    presenter.clearList(populateListCallback);
+    presenter.populateList(populateListCallback);
   }
 
   void onDatabaseUpdated(int position, boolean locked) {
@@ -440,13 +452,10 @@ public class LockListFragment extends Fragment
         LockInfoDialog.TAG);
   }
 
-  @Override public void onSetFABStateEnabled() {
-    AsyncMapHelper.unsubscribe(fabIconTask);
-    fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
-  }
-
-  @Override public void onSetFABStateDisabled() {
-    AsyncMapHelper.unsubscribe(fabIconTask);
-    fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
+  /**
+   * Called from {@link PinEntryDialog}
+   */
+  public void provideMasterSubmitCallback(@NonNull ActionSingle<MasterPinSubmitCallback> action) {
+    action.call(masterPinSubmitCallback);
   }
 }

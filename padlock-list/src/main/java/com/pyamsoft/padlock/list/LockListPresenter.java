@@ -60,8 +60,9 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
         fabStateSubscription, databaseSubscription, populateListSubscription);
   }
 
-  public void clearList() {
+  public void clearList(@NonNull ClearCallback callback) {
     lockListInteractor.clearCache();
+    callback.onListCleared();
   }
 
   public void updateCachedEntryLockState(@NonNull String name, @NonNull String packageName,

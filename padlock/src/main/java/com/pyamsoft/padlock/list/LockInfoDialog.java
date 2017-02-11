@@ -40,6 +40,7 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding;
+import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
@@ -48,38 +49,91 @@ import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockInfoDialog extends DialogFragment
-    implements LockInfoPresenter.PopulateListCallback {
+public class LockInfoDialog extends DialogFragment {
 
   @NonNull public static final String TAG = "LockInfoDialog";
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
   @NonNull private static final String ARG_APP_NAME = "app_name";
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
-  @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
+  @NonNull final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") @Inject LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") DialogLockInfoBinding binding;
-  @NonNull private final Runnable startRefreshRunnable =
-      () -> binding.lockInfoSwipeRefresh.post(() -> {
-        if (binding != null) {
-          if (binding.lockInfoSwipeRefresh != null) {
-            binding.lockInfoSwipeRefresh.setRefreshing(true);
+  @NonNull final Runnable startRefreshRunnable = () -> binding.lockInfoSwipeRefresh.post(() -> {
+    if (binding != null) {
+      if (binding.lockInfoSwipeRefresh != null) {
+        binding.lockInfoSwipeRefresh.setRefreshing(true);
+      }
+    }
+  });
+  @NonNull final Runnable stopRefreshRunnable = () -> binding.lockInfoSwipeRefresh.post(() -> {
+    if (binding != null) {
+      if (binding.lockInfoSwipeRefresh != null) {
+        binding.lockInfoSwipeRefresh.setRefreshing(false);
+      }
+    }
+  });
+  String appPackageName;
+  boolean listIsRefreshed;
+  @NonNull private final LockInfoPresenter.PopulateListCallback populateListCallback =
+      new LockInfoPresenter.PopulateListCallback() {
+
+        @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
+          // In case the configuration changes, we do the animation again
+          if (!binding.lockInfoSwipeRefresh.isRefreshing()) {
+            binding.lockInfoSwipeRefresh.post(() -> {
+              if (binding != null) {
+                if (binding.lockInfoSwipeRefresh != null) {
+                  binding.lockInfoSwipeRefresh.setRefreshing(true);
+                }
+              }
+            });
+          }
+
+          fastItemAdapter.add(new LockInfoItem(appPackageName, entry));
+        }
+
+        @Override public void onListPopulated() {
+          binding.lockInfoRecycler.setClickable(true);
+          handler.removeCallbacksAndMessages(null);
+          handler.post(stopRefreshRunnable);
+
+          if (fastItemAdapter.getAdapterItemCount() > 0) {
+            Timber.d("Refresh finished");
+            listIsRefreshed = true;
+            presenter.showOnBoarding(new LockInfoPresenter.OnBoardingCallback() {
+              @Override public void onShowOnboarding() {
+                Timber.d("Show onboarding");
+                // TODO
+              }
+
+              @Override public void onOnboardingComplete() {
+                // TODO
+              }
+            });
+          } else {
+            Toast.makeText(getContext(), "Error while loading list. Please try again.",
+                Toast.LENGTH_SHORT).show();
           }
         }
-      });
-  @NonNull private final Runnable stopRefreshRunnable =
-      () -> binding.lockInfoSwipeRefresh.post(() -> {
-        if (binding != null) {
-          if (binding.lockInfoSwipeRefresh != null) {
-            binding.lockInfoSwipeRefresh.setRefreshing(false);
-          }
+
+        @Override public void onListPopulateError() {
+          Timber.e("onListPopulateError");
+          onListPopulated();
+          AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
         }
-      });
-  private String appPackageName;
+
+        @Override public void onListCleared() {
+          Timber.d("Prepare for refresh");
+          listIsRefreshed = false;
+
+          handler.removeCallbacksAndMessages(null);
+          handler.post(startRefreshRunnable);
+        }
+      };
   private String appName;
   private boolean appIsSystem;
-  private boolean listIsRefreshed;
   private DividerItemDecoration dividerDecoration;
   private FilterListDelegate filterListDelegate;
 
@@ -233,7 +287,7 @@ public class LockInfoDialog extends DialogFragment
           }
         });
       }
-      presenter.populateList(appPackageName, this);
+      presenter.populateList(appPackageName, populateListCallback);
     }
   }
 
@@ -255,64 +309,9 @@ public class LockInfoDialog extends DialogFragment
 
   void refreshList() {
     fastItemAdapter.clear();
-    presenter.clearList();
-    onListCleared();
-
+    presenter.clearList(populateListCallback);
     binding.lockInfoRecycler.setClickable(false);
-    presenter.populateList(appPackageName, this);
-  }
-
-  @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
-    // In case the configuration changes, we do the animation again
-    if (!binding.lockInfoSwipeRefresh.isRefreshing()) {
-      binding.lockInfoSwipeRefresh.post(() -> {
-        if (binding != null) {
-          if (binding.lockInfoSwipeRefresh != null) {
-            binding.lockInfoSwipeRefresh.setRefreshing(true);
-          }
-        }
-      });
-    }
-
-    fastItemAdapter.add(new LockInfoItem(appPackageName, entry));
-  }
-
-  @Override public void onListPopulated() {
-    binding.lockInfoRecycler.setClickable(true);
-    handler.removeCallbacksAndMessages(null);
-    handler.post(stopRefreshRunnable);
-
-    if (fastItemAdapter.getAdapterItemCount() > 0) {
-      Timber.d("Refresh finished");
-      listIsRefreshed = true;
-      presenter.showOnBoarding(new LockInfoPresenter.OnBoardingCallback() {
-        @Override public void onShowOnboarding() {
-          Timber.d("Show onboarding");
-          // TODO
-        }
-
-        @Override public void onOnboardingComplete() {
-          // TODO
-        }
-      });
-    } else {
-      Toast.makeText(getContext(), "Error while loading list. Please try again.",
-          Toast.LENGTH_SHORT).show();
-    }
-  }
-
-  @Override public void onListPopulateError() {
-    Timber.e("onListPopulateError");
-    onListPopulated();
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
-  }
-
-  @Override public void onListCleared() {
-    Timber.d("Prepare for refresh");
-    listIsRefreshed = false;
-
-    handler.removeCallbacksAndMessages(null);
-    handler.post(startRefreshRunnable);
+    presenter.populateList(appPackageName, populateListCallback);
   }
 
   void onDatabaseUpdated(int position, @NonNull LockState newLockState) {
