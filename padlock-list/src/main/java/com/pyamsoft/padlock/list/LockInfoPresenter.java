@@ -20,36 +20,134 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
+import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
+import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
+import javax.inject.Named;
+import rx.Observable;
+import rx.Scheduler;
+import rx.Subscription;
+import rx.subscriptions.Subscriptions;
+import timber.log.Timber;
 
-interface LockInfoPresenter extends Presenter<Presenter.Empty> {
+class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  void updateCachedEntryLockState(@NonNull String packageName, @NonNull String name,
-      @NonNull LockState lockState);
+  @SuppressWarnings("WeakerAccess") @NonNull final LockInfoInteractor lockInfoInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription databaseSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription onboardSubscription =
+      Subscriptions.empty();
 
-  void clearList();
+  @Inject LockInfoPresenter(final @NonNull LockInfoInteractor lockInfoInteractor,
+      final @NonNull @Named("obs") Scheduler obsScheduler,
+      final @NonNull @Named("io") Scheduler subScheduler) {
+    super(obsScheduler, subScheduler);
+    this.lockInfoInteractor = lockInfoInteractor;
+  }
 
-  void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback);
+  @Override protected void onUnbind() {
+    super.onUnbind();
+    SubscriptionHelper.unsubscribe(databaseSubscription, onboardSubscription,
+        populateListSubscription);
+  }
 
-  void modifyDatabaseEntry(boolean isNotDefault, int position, @NonNull String packageName,
+  public void updateCachedEntryLockState(@NonNull String packageName, @NonNull String name,
+      @NonNull LockState lockState) {
+    lockInfoInteractor.updateCacheEntry(packageName, name, lockState);
+  }
+
+  public void clearList() {
+    lockInfoInteractor.clearCache();
+  }
+
+  public void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback) {
+    SubscriptionHelper.unsubscribe(populateListSubscription);
+    populateListSubscription = lockInfoInteractor.populateList(packageName)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(callback::onEntryAddedToList, throwable -> {
+          Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
+          callback.onListPopulateError();
+        }, () -> {
+          callback.onListPopulated();
+          SubscriptionHelper.unsubscribe(populateListSubscription);
+        });
+  }
+
+  public void modifyDatabaseEntry(boolean isNotDefault, int position, @NonNull String packageName,
       @NonNull String activityName, @SuppressWarnings("SameParameterValue") @Nullable String code,
       boolean system, boolean whitelist, boolean forceDelete,
-      @NonNull ModifyDatabaseCallback callback);
+      @NonNull ModifyDatabaseCallback callback) {
+    SubscriptionHelper.unsubscribe(databaseSubscription);
+    databaseSubscription =
+        lockInfoInteractor.modifySingleDatabaseEntry(isNotDefault, packageName, activityName, code,
+            system, whitelist, forceDelete)
+            .flatMap(lockState -> {
+              final Observable<LockState> resultState;
+              if (lockState == LockState.NONE) {
+                Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated");
+                resultState =
+                    lockInfoInteractor.updateExistingEntry(packageName, activityName, whitelist);
+              } else {
+                resultState = Observable.just(lockState);
+              }
+              return resultState;
+            })
+            .subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
+            .subscribe(lockState -> {
+              switch (lockState) {
+                case DEFAULT:
+                  callback.onDatabaseEntryDeleted(position);
+                  break;
+                case WHITELISTED:
+                  callback.onDatabaseEntryWhitelisted(position);
+                  break;
+                case LOCKED:
+                  callback.onDatabaseEntryCreated(position);
+                  break;
+                default:
+                  throw new IllegalStateException("Unsupported lock state: " + lockState);
+              }
+            }, throwable -> {
+              Timber.e(throwable, "onError modifyDatabaseEntry");
+              callback.onDatabaseEntryError(position);
+            }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
+  }
 
-  void showOnBoarding(@NonNull OnBoardingCallback callback);
+  public void showOnBoarding(@NonNull OnBoardingCallback callback) {
+    SubscriptionHelper.unsubscribe(onboardSubscription);
+    onboardSubscription = lockInfoInteractor.hasShownOnBoarding()
+        .delay(300, TimeUnit.MILLISECONDS)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(onboard -> {
+          if (onboard) {
+            callback.onOnboardingComplete();
+          } else {
+            callback.onShowOnboarding();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError");
+        }, () -> SubscriptionHelper.unsubscribe(onboardSubscription));
+  }
 
-  interface ModifyDatabaseCallback extends LockDatabaseErrorView, LockDatabaseWhitelistView {
+  public interface ModifyDatabaseCallback extends LockDatabaseErrorView, LockDatabaseWhitelistView {
 
   }
 
-  interface OnBoardingCallback {
+  public interface OnBoardingCallback {
 
     void onShowOnboarding();
 
     void onOnboardingComplete();
   }
 
-  interface PopulateListCallback extends LockCommon {
+  public interface PopulateListCallback extends LockCommon {
 
     void onEntryAddedToList(@NonNull ActivityEntry entry);
   }

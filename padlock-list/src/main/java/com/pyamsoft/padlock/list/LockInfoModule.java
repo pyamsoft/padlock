@@ -25,6 +25,6 @@ import rx.Scheduler;
 
   @Provides LockInfoPresenter provideLockInfoPresenter(LockInfoInteractor infoInteractor,
       @Named("obs") Scheduler obsScheduler, @Named("io") Scheduler subScheduler) {
-    return new LockInfoPresenterImpl(infoInteractor, obsScheduler, subScheduler);
+    return new LockInfoPresenter(infoInteractor, obsScheduler, subScheduler);
   }
 }

@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list;
 
+import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import dagger.Module;
@@ -26,6 +27,6 @@ import javax.inject.Singleton;
 
   @Singleton @Provides LockListInteractor provideLockScreenInteractor(PadLockDB padLockDB,
       PackageManagerWrapper packageManagerWrapper, PadLockPreferences preferences) {
-    return new LockListInteractorImpl(padLockDB, packageManagerWrapper, preferences);
+    return new LockListInteractor(padLockDB, packageManagerWrapper, preferences);
   }
 }
