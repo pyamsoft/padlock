@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
-import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

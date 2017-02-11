@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.main;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.PadLockPreferences;
 import javax.inject.Inject;
 import rx.Observable;
 

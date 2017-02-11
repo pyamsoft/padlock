@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock;
 
 import com.pyamsoft.padlock.base.PadLockModule;
-import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDBModule;
-import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.base.receiver.ReceiverModule;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatModule;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperModule;
