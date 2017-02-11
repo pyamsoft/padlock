@@ -33,7 +33,7 @@ public class LockInteractorTest {
   private LockInteractor interactor;
 
   @Before public void setup() {
-    interactor = new LockInteractorImpl() {
+    interactor = new LockInteractor() {
     };
   }
 

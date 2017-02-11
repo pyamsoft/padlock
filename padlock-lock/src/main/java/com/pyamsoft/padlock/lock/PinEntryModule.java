@@ -27,11 +27,11 @@ import rx.Scheduler;
 
   @Provides PinEntryPresenter providePinEntryPresenter(PinEntryInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
-    return new PinEntryPresenterImpl(interactor, obsScheduler, subScheduler);
+    return new PinEntryPresenter(interactor, obsScheduler, subScheduler);
   }
 
   @Provides PinEntryInteractor providePinEntryInteractor(
       @NonNull MasterPinInteractor masterPinInteractor) {
-    return new PinEntryInteractorImpl(masterPinInteractor);
+    return new PinEntryInteractor(masterPinInteractor);
   }
 }
