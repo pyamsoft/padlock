@@ -54,9 +54,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockScreenActivity extends ActivityBase
-    implements LockSubmitCallback, LockScreenPresenter.IgnoreTimeCallback,
-    LockScreenPresenter.LockCallback, LockScreenPresenter.PostUnlockCallback {
+public class LockScreenActivity extends ActivityBase {
 
   @NonNull public static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull public static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
@@ -82,6 +80,10 @@ public class LockScreenActivity extends ActivityBase
     LOCK_SCREEN_MAP = new HashMap<>();
   }
 
+  @NonNull final LockScreenPresenter.LockErrorCallback lockErrorCallback = () -> {
+    Timber.e("LOCK ERROR");
+    AppUtil.guaranteeSingleDialogFragment(LockScreenActivity.this, new ErrorDialog(), "lock_error");
+  };
   @NonNull private final Intent home;
   @NonNull private final AsyncDrawable.Mapper mapper = new AsyncDrawable.Mapper();
   @SuppressWarnings("WeakerAccess") @Inject LockScreenPresenter presenter;
@@ -92,22 +94,46 @@ public class LockScreenActivity extends ActivityBase
   @SuppressWarnings("WeakerAccess") String lockedCode;
   @SuppressWarnings("WeakerAccess") long lockUntilTime;
   ActivityLockBinding binding;
+  MenuItem menuIgnoreNone;
+  MenuItem menuIgnoreOne;
+  MenuItem menuIgnoreFive;
+  MenuItem menuIgnoreTen;
+  MenuItem menuIgnoreFifteen;
+  MenuItem menuIgnoreTwenty;
+  MenuItem menuIgnoreThirty;
+  MenuItem menuIgnoreFourtyFive;
+  MenuItem menuIgnoreSixty;
+  long[] ignoreTimes;
+  @NonNull private final LockScreenPresenter.IgnoreTimeCallback ignoreCallback = time -> {
+    if (time == ignoreTimes[0]) {
+      menuIgnoreNone.setChecked(true);
+    } else if (time == ignoreTimes[1]) {
+      menuIgnoreOne.setChecked(true);
+    } else if (time == ignoreTimes[2]) {
+      menuIgnoreFive.setChecked(true);
+    } else if (time == ignoreTimes[3]) {
+      menuIgnoreTen.setChecked(true);
+    } else if (time == ignoreTimes[4]) {
+      menuIgnoreFifteen.setChecked(true);
+    } else if (time == ignoreTimes[5]) {
+      menuIgnoreTwenty.setChecked(true);
+    } else if (time == ignoreTimes[6]) {
+      menuIgnoreThirty.setChecked(true);
+    } else if (time == ignoreTimes[7]) {
+      menuIgnoreFourtyFive.setChecked(true);
+    } else if (time == ignoreTimes[8]) {
+      menuIgnoreSixty.setChecked(true);
+    } else {
+      Timber.e("No valid ignore time, initialize to None");
+      menuIgnoreNone.setChecked(true);
+    }
+  };
+  MenuItem menuExclude;
+  String lockedRealName;
+  boolean lockedSystem;
   private long ignorePeriod = -1;
   private boolean excludeEntry;
-  private MenuItem menuIgnoreNone;
-  private MenuItem menuIgnoreOne;
-  private MenuItem menuIgnoreFive;
-  private MenuItem menuIgnoreTen;
-  private MenuItem menuIgnoreFifteen;
-  private MenuItem menuIgnoreTwenty;
-  private MenuItem menuIgnoreThirty;
-  private MenuItem menuIgnoreFourtyFive;
-  private MenuItem menuIgnoreSixty;
-  private MenuItem menuExclude;
   private EditText editText;
-  private long[] ignoreTimes;
-  private String lockedRealName;
-  private boolean lockedSystem;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -145,11 +171,61 @@ public class LockScreenActivity extends ActivityBase
 
     populateIgnoreTimes();
     getValuesFromBundle();
-    setupTextInput();
     setupInputManager();
-    setupGoArrow();
     clearDisplay();
     setupActionBar();
+
+    LockSubmitCallback submitCallback = new LockSubmitCallback() {
+
+      @Override public void onSubmitSuccess() {
+        Timber.d("Unlocked!");
+        clearDisplay();
+
+        presenter.postUnlock(lockedPackageName, lockedActivityName, lockedRealName, lockedCode,
+            lockUntilTime, lockedSystem, menuExclude.isChecked(), getIgnoreTimeFromSelectedIndex(),
+            new LockScreenPresenter.PostUnlockCallback() {
+              @Override public void onPostUnlock() {
+                Timber.d("POST Unlock Finished! 1");
+                PadLockService.passLockScreen();
+                finish();
+              }
+
+              @Override public void onLockedError() {
+                lockErrorCallback.onLockedError();
+              }
+            });
+      }
+
+      @Override public void onSubmitFailure() {
+        Timber.e("Failed to unlock");
+        clearDisplay();
+        showSnackbarWithText("Error: Invalid PIN");
+        binding.lockDisplayHint.setVisibility(View.VISIBLE);
+
+        // Once fail count is tripped once, continue to update it every time following until time elapses
+        presenter.lockEntry(lockedPackageName, lockedActivityName,
+            new LockScreenPresenter.LockCallback() {
+              @Override public void onLocked(long lockUntilTime) {
+                LockScreenActivity.this.lockUntilTime = lockUntilTime;
+                getIntent().removeExtra(ENTRY_LOCK_UNTIL_TIME);
+                getIntent().putExtra(ENTRY_LOCK_UNTIL_TIME, lockUntilTime);
+                showSnackbarWithText("This entry is temporarily locked");
+              }
+
+              @Override public void onLockedError() {
+                lockErrorCallback.onLockedError();
+              }
+            });
+      }
+
+      @Override public void onSubmitError() {
+        clearDisplay();
+        AppUtil.guaranteeSingleDialogFragment(LockScreenActivity.this, new ErrorDialog(),
+            "unlock_error");
+      }
+    };
+    setupTextInput(submitCallback);
+    setupGoArrow(submitCallback);
 
     // Hide hint to begin with
     binding.lockDisplayHint.setVisibility(View.GONE);
@@ -160,10 +236,10 @@ public class LockScreenActivity extends ActivityBase
     ViewCompat.setElevation(binding.toolbar, 0);
   }
 
-  private void setupGoArrow() {
+  private void setupGoArrow(@NonNull LockSubmitCallback submitCallback) {
     binding.lockImageGo.setOnClickListener(view -> {
       presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
-          getCurrentAttempt(), this);
+          getCurrentAttempt(), submitCallback);
       imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
     });
 
@@ -198,7 +274,7 @@ public class LockScreenActivity extends ActivityBase
     }
   }
 
-  private void setupTextInput() {
+  private void setupTextInput(@NonNull LockSubmitCallback submitCallback) {
     editText = binding.lockText.getEditText();
     if (editText == null) {
       throw new NullPointerException("Edit text is NULL");
@@ -213,7 +289,7 @@ public class LockScreenActivity extends ActivityBase
       if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
         Timber.d("KeyEvent is Enter pressed");
         presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
-            getCurrentAttempt(), this);
+            getCurrentAttempt(), submitCallback);
         return true;
       }
 
@@ -222,7 +298,7 @@ public class LockScreenActivity extends ActivityBase
     });
   }
 
-  private void clearDisplay() {
+  void clearDisplay() {
     editText.setText("");
   }
 
@@ -316,45 +392,8 @@ public class LockScreenActivity extends ActivityBase
     overridePendingTransition(0, 0);
   }
 
-  private void showSnackbarWithText(@NonNull String text) {
+  void showSnackbarWithText(@NonNull String text) {
     Snackbar.make(binding.activityLockScreen, text, Snackbar.LENGTH_SHORT).show();
-  }
-
-  @Override public void onPostUnlock() {
-    Timber.d("POST Unlock Finished! 1");
-    PadLockService.passLockScreen();
-    finish();
-  }
-
-  @Override public void onLocked(long lockUntilTime) {
-    this.lockUntilTime = lockUntilTime;
-    getIntent().removeExtra(ENTRY_LOCK_UNTIL_TIME);
-    getIntent().putExtra(ENTRY_LOCK_UNTIL_TIME, lockUntilTime);
-    showSnackbarWithText("This entry is temporarily locked");
-  }
-
-  @Override public void onLockedError() {
-    Timber.e("LOCK ERROR");
-    AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "lock_error");
-  }
-
-  @Override public void onSubmitSuccess() {
-    Timber.d("Unlocked!");
-    clearDisplay();
-
-    presenter.postUnlock(lockedPackageName, lockedActivityName, lockedRealName, lockedCode,
-        lockUntilTime, lockedSystem, menuExclude.isChecked(), getIgnoreTimeFromSelectedIndex(),
-        this);
-  }
-
-  @Override public void onSubmitFailure() {
-    Timber.e("Failed to unlock");
-    clearDisplay();
-    showSnackbarWithText("Error: Invalid PIN");
-    binding.lockDisplayHint.setVisibility(View.VISIBLE);
-
-    // Once fail count is tripped once, continue to update it every time following until time elapses
-    presenter.lockEntry(lockedPackageName, lockedActivityName, this);
   }
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
@@ -412,19 +451,14 @@ public class LockScreenActivity extends ActivityBase
     if (presenter != null) {
       if (ignorePeriod == -1) {
         Timber.d("No previous selection, load ignore time from preference");
-        presenter.createWithDefaultIgnoreTime(this);
+        presenter.createWithDefaultIgnoreTime(ignoreCallback);
       } else {
-        initializeWithIgnoreTime(ignorePeriod);
+        ignoreCallback.onInitializeWithIgnoreTime(ignorePeriod);
       }
     }
 
     menuExclude.setChecked(excludeEntry);
     return super.onPrepareOptionsMenu(menu);
-  }
-
-  @Override public void onSubmitError() {
-    clearDisplay();
-    AppUtil.guaranteeSingleDialogFragment(this, new ErrorDialog(), "unlock_error");
   }
 
   @Override public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -446,7 +480,7 @@ public class LockScreenActivity extends ActivityBase
     return true;
   }
 
-  @CheckResult private long getIgnoreTimeFromSelectedIndex() {
+  @CheckResult long getIgnoreTimeFromSelectedIndex() {
     int index;
     try {
       if (menuIgnoreNone.isChecked()) {
@@ -476,31 +510,6 @@ public class LockScreenActivity extends ActivityBase
     }
 
     return ignoreTimes[index];
-  }
-
-  @Override public void initializeWithIgnoreTime(long time) {
-    if (time == ignoreTimes[0]) {
-      menuIgnoreNone.setChecked(true);
-    } else if (time == ignoreTimes[1]) {
-      menuIgnoreOne.setChecked(true);
-    } else if (time == ignoreTimes[2]) {
-      menuIgnoreFive.setChecked(true);
-    } else if (time == ignoreTimes[3]) {
-      menuIgnoreTen.setChecked(true);
-    } else if (time == ignoreTimes[4]) {
-      menuIgnoreFifteen.setChecked(true);
-    } else if (time == ignoreTimes[5]) {
-      menuIgnoreTwenty.setChecked(true);
-    } else if (time == ignoreTimes[6]) {
-      menuIgnoreThirty.setChecked(true);
-    } else if (time == ignoreTimes[7]) {
-      menuIgnoreFourtyFive.setChecked(true);
-    } else if (time == ignoreTimes[8]) {
-      menuIgnoreSixty.setChecked(true);
-    } else {
-      Timber.e("No valid ignore time, initialize to None");
-      menuIgnoreNone.setChecked(true);
-    }
   }
 
   private void showInfoDialog() {

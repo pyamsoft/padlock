@@ -77,7 +77,7 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
     ignoreTimeSubscription = interactor.getDefaultIgnoreTime()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(callback::initializeWithIgnoreTime, throwable -> {
+        .subscribe(callback::onInitializeWithIgnoreTime, throwable -> {
           Timber.e(throwable, "onError createWithDefaultIgnoreTime");
           // TODO
         }, () -> SubscriptionHelper.unsubscribe(ignoreTimeSubscription));
@@ -225,7 +225,7 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   interface IgnoreTimeCallback {
-    void initializeWithIgnoreTime(long time);
+    void onInitializeWithIgnoreTime(long time);
   }
 
   interface LockHintCallback {
