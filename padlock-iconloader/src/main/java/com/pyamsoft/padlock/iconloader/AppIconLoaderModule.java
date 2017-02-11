@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.iconloader;
 
-import com.pyamsoft.padlock.base.iconloader.AppIconLoaderInteractor;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
