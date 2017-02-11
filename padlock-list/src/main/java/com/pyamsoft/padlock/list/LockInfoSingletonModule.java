@@ -30,7 +30,7 @@ import javax.inject.Named;
   @Provides LockInfoInteractor provideLockInfoInteractor(PadLockDB padLockDB,
       PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
       @Named("lockscreen") Class<? extends Activity> lockScreenClass) {
-    return new LockInfoInteractorImpl(padLockDB, packageManagerWrapper, preferences,
+    return new LockInfoInteractor(padLockDB, packageManagerWrapper, preferences,
         lockScreenClass);
   }
 }
