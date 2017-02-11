@@ -50,8 +50,7 @@ import com.pyamsoft.pydroid.tool.AsyncMap;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class PinEntryDialog extends DialogFragment
-    implements LockSubmitCallback, PinEntryPresenter.SubmitCallback {
+public class PinEntryDialog extends DialogFragment {
 
   @NonNull private static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull private static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
@@ -67,6 +66,47 @@ public class PinEntryDialog extends DialogFragment
   EditText pinHintText;
   private String packageName;
   private EditText pinReentryText;
+
+  @NonNull final PinEntryPresenter.SubmitCallback submitCallback =
+      new PinEntryPresenter.SubmitCallback() {
+
+        @Override public void onSubmitSuccess() {
+          clearDisplay();
+          dismiss();
+        }
+
+        @Override public void onSubmitFailure() {
+          clearDisplay();
+          dismiss();
+        }
+
+        @Override public void onSubmitError() {
+          clearDisplay();
+          dismiss();
+        }
+
+        @Override public void handOffPinEvent(@NonNull PinEntryEvent event) {
+          final MasterPinSubmitCallback lockList = getLockList();
+          switch (event.type()) {
+            case 0:
+              if (event.complete()) {
+                lockList.onCreateMasterPinSuccess();
+              } else {
+                lockList.onCreateMasterPinFailure();
+              }
+              break;
+            case 1:
+              if (event.complete()) {
+                lockList.onClearMasterPinSuccess();
+              } else {
+                lockList.onClearMasterPinFailure();
+              }
+              break;
+            default:
+              throw new RuntimeException("Invalid event type: " + event.type());
+          }
+        }
+      };
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -137,9 +177,9 @@ public class PinEntryDialog extends DialogFragment
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
     setupCloseButton();
-    setupGoArrow();
     clearDisplay();
     setupToolbar();
+    setupGoArrow(submitCallback);
 
     if (savedInstanceState != null) {
       onRestoreInstanceState(savedInstanceState);
@@ -158,7 +198,8 @@ public class PinEntryDialog extends DialogFragment
     taskMap.put("close", task);
   }
 
-  void setupSubmissionView(@NonNull EditText view) {
+  void setupSubmissionView(@NonNull EditText view,
+      @NonNull PinEntryPresenter.SubmitCallback submitCallback) {
     view.setOnEditorActionListener((textView, actionId, keyEvent) -> {
       if (keyEvent == null) {
         Timber.e("KeyEvent was not caused by keypress");
@@ -168,7 +209,7 @@ public class PinEntryDialog extends DialogFragment
       if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
         Timber.d("KeyEvent is Enter pressed");
         presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint(),
-            PinEntryDialog.this);
+            submitCallback);
         return true;
       }
 
@@ -177,10 +218,9 @@ public class PinEntryDialog extends DialogFragment
     });
   }
 
-  private void setupGoArrow() {
+  private void setupGoArrow(@NonNull PinEntryPresenter.SubmitCallback submitCallback) {
     binding.pinImageGo.setOnClickListener(view -> {
-      presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint(),
-          PinEntryDialog.this);
+      presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint(), submitCallback);
       imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0,
           0);
     });
@@ -222,7 +262,7 @@ public class PinEntryDialog extends DialogFragment
   /**
    * Clear the display of all text entry fields
    */
-  private void clearDisplay() {
+  void clearDisplay() {
     pinEntryText.setText("");
     pinReentryText.setText("");
     pinHintText.setText("");
@@ -260,14 +300,14 @@ public class PinEntryDialog extends DialogFragment
         Timber.d("No active master, show extra views");
         binding.pinReentryCode.setVisibility(View.VISIBLE);
         binding.pinHint.setVisibility(View.VISIBLE);
-        setupSubmissionView(pinHintText);
+        setupSubmissionView(pinHintText, submitCallback);
       }
 
       @Override public void hideExtraPinEntryViews() {
         Timber.d("Active master, hide extra views");
         binding.pinReentryCode.setVisibility(View.GONE);
         binding.pinHint.setVisibility(View.GONE);
-        setupSubmissionView(pinEntryText);
+        setupSubmissionView(pinEntryText, submitCallback);
       }
     });
   }
@@ -295,43 +335,6 @@ public class PinEntryDialog extends DialogFragment
   @Override public void onDestroy() {
     super.onDestroy();
     PadLock.getRefWatcher(this).watch(this);
-  }
-
-  @Override public void onSubmitSuccess() {
-    clearDisplay();
-    dismiss();
-  }
-
-  @Override public void onSubmitFailure() {
-    clearDisplay();
-    dismiss();
-  }
-
-  @Override public void onSubmitError() {
-    clearDisplay();
-    dismiss();
-  }
-
-  @Override public void handOffPinEvent(@NonNull PinEntryEvent event) {
-    final MasterPinSubmitCallback lockList = getLockList();
-    switch (event.type()) {
-      case 0:
-        if (event.complete()) {
-          lockList.onCreateMasterPinSuccess();
-        } else {
-          lockList.onCreateMasterPinFailure();
-        }
-        break;
-      case 1:
-        if (event.complete()) {
-          lockList.onClearMasterPinSuccess();
-        } else {
-          lockList.onClearMasterPinFailure();
-        }
-        break;
-      default:
-        throw new RuntimeException("Invalid event type: " + event.type());
-    }
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull MasterPinSubmitCallback getLockList() {
