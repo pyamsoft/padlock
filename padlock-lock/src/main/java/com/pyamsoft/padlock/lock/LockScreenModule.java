@@ -31,14 +31,14 @@ import rx.Scheduler;
 
   @Provides LockScreenPresenter provideLockScreenPresenter(LockScreenInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
-    return new LockScreenPresenterImpl(interactor, obsScheduler, subScheduler);
+    return new LockScreenPresenter(interactor, obsScheduler, subScheduler);
   }
 
   @Provides LockScreenInteractor provideLockScreenInteractor(Context context,
       PadLockPreferences preference, JobSchedulerCompat jobSchedulerCompat,
       MasterPinInteractor masterPinInteractor, PackageManagerWrapper packageManagerWrapper,
       PadLockDB padLockDB, @Named("recheck") Class<? extends IntentService> recheckServiceClass) {
-    return new LockScreenInteractorImpl(context, preference, jobSchedulerCompat,
+    return new LockScreenInteractor(context, preference, jobSchedulerCompat,
         masterPinInteractor, packageManagerWrapper, padLockDB, recheckServiceClass);
   }
 }

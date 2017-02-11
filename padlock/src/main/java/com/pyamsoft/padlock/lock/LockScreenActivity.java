@@ -39,6 +39,7 @@ import android.widget.EditText;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
+import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.model.LockScreenEntry;
 import com.pyamsoft.padlock.service.PadLockService;
@@ -63,7 +64,6 @@ public class LockScreenActivity extends ActivityBase
   @NonNull public static final String ENTRY_LOCK_CODE = "lock_code";
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
   @NonNull public static final String ENTRY_LOCK_UNTIL_TIME = "lock_until_time";
-  @NonNull private static final String TAG = "LockScreenActivity";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
@@ -354,7 +354,7 @@ public class LockScreenActivity extends ActivityBase
     binding.lockDisplayHint.setVisibility(View.VISIBLE);
 
     // Once fail count is tripped once, continue to update it every time following until time elapses
-    presenter.lockEntry(lockedPackageName, lockedActivityName, lockUntilTime, this);
+    presenter.lockEntry(lockedPackageName, lockedActivityName, this);
   }
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {

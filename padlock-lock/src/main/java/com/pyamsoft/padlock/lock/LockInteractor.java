@@ -18,12 +18,34 @@ package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.util.Base64;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import rx.Observable;
 
-interface LockInteractor {
+abstract class LockInteractor {
 
-  @CheckResult @NonNull Observable<String> encodeSHA256(@NonNull String attempt);
+  @SuppressWarnings("WeakerAccess") @NonNull final MessageDigest messageDigest;
 
-  @CheckResult @NonNull Observable<Boolean> checkSubmissionAttempt(@NonNull String attempt,
-      @NonNull String encodedPin);
+  LockInteractor() {
+    try {
+      messageDigest = MessageDigest.getInstance("SHA-256");
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException("Could not create SHA-256 Digest", e);
+    }
+  }
+
+  @CheckResult @NonNull public Observable<String> encodeSHA256(@NonNull String attempt) {
+    return Observable.fromCallable(() -> {
+      messageDigest.reset();
+      final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
+      return Base64.encodeToString(output, Base64.DEFAULT).trim();
+    });
+  }
+
+  @NonNull @CheckResult public Observable<Boolean> checkSubmissionAttempt(@NonNull String attempt,
+      @NonNull String encodedPin) {
+    return encodeSHA256(attempt).map(encodedPin::equals);
+  }
 }

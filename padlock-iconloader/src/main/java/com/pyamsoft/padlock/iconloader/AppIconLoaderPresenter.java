@@ -28,7 +28,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class AppIconLoaderPresenter extends SchedulerPresenter<Presenter.Empty> {
+public class AppIconLoaderPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final AppIconLoaderInteractor interactor;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription loadIconSubscription =
