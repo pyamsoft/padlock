@@ -36,12 +36,23 @@ class PinEntryInteractor extends LockInteractor {
     return getMasterPin().map(s -> s != null);
   }
 
-  @NonNull @CheckResult public Observable<String> getMasterPin() {
+  @NonNull @CheckResult public Observable<PinEntryEvent> submitPin(@NonNull String currentAttempt,
+      @NonNull String reEntryAttempt, @NonNull String hint) {
+    return getMasterPin().flatMap(masterPin -> {
+      if (masterPin == null) {
+        return createPin(currentAttempt, reEntryAttempt, hint);
+      } else {
+        return clearPin(masterPin, currentAttempt);
+      }
+    }).filter(pinEntryEvent -> pinEntryEvent != null);
+  }
+
+  @CheckResult @NonNull private Observable<String> getMasterPin() {
     return masterPinInteractor.getMasterPin();
   }
 
-  @CheckResult @NonNull
-  public Observable<PinEntryEvent> clearPin(@NonNull String masterPin, @NonNull String attempt) {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<PinEntryEvent> clearPin(
+      @NonNull String masterPin, @NonNull String attempt) {
     return checkSubmissionAttempt(attempt, masterPin).map(success -> {
 
       if (success) {
@@ -56,9 +67,8 @@ class PinEntryInteractor extends LockInteractor {
     });
   }
 
-  @CheckResult @NonNull
-  public Observable<PinEntryEvent> createPin(@NonNull String attempt, @NonNull String reentry,
-      @NonNull String hint) {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<PinEntryEvent> createPin(
+      @NonNull String attempt, @NonNull String reentry, @NonNull String hint) {
     return Observable.fromCallable(() -> {
       Timber.d("No existing master pin, attempt to create a new one");
 
