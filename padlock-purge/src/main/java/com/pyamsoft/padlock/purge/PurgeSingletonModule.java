@@ -27,6 +27,6 @@ import javax.inject.Singleton;
 
   @Singleton @Provides PurgeInteractor providePinEntryInteractor(
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB) {
-    return new PurgeInteractorImpl(packageManagerWrapper, padLockDB);
+    return new PurgeInteractor(packageManagerWrapper, padLockDB);
   }
 }

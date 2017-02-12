@@ -20,10 +20,11 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Singleton;
 
 @Module public class AppIconLoaderInteractorModule {
 
-  @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(
+  @Singleton @Provides AppIconLoaderInteractor provideAppIconLoaderInteractor(
       @NonNull PackageManagerWrapper packageManagerWrapper) {
     return new AppIconLoaderInteractor(packageManagerWrapper);
   }

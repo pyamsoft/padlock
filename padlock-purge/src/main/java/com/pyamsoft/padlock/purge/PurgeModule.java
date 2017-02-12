@@ -25,6 +25,6 @@ import rx.Scheduler;
 
   @Provides PurgePresenter providePinEntryPresenter(final PurgeInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
-    return new PurgePresenterImpl(interactor, obsScheduler, subScheduler);
+    return new PurgePresenter(interactor, obsScheduler, subScheduler);
   }
 }
