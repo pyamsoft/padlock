@@ -16,9 +16,23 @@
 
 package com.pyamsoft.padlock.onboard.list;
 
+import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.presenter.Presenter;
+import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import javax.inject.Inject;
+import rx.Scheduler;
 
-interface OnboardListPresenter extends Presenter<Presenter.Empty> {
+class OnboardListPresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  void finishOnboarding();
+  @NonNull private final OnboardListInteractor interactor;
+
+  @Inject OnboardListPresenter(@NonNull OnboardListInteractor interactor,
+      @NonNull Scheduler observeScheduler, @NonNull Scheduler subscribeScheduler) {
+    super(observeScheduler, subscribeScheduler);
+    this.interactor = interactor;
+  }
+
+  public void finishOnboarding() {
+    interactor.completeOnboarding();
+  }
 }

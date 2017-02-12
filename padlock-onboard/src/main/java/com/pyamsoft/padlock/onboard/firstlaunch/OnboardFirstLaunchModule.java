@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -27,11 +28,11 @@ import rx.Scheduler;
   @Provides OnboardAcceptTermsPresenter provideOnboardAcceptTermsPresenter(
       @NonNull OnboardAcceptTermsInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
-    return new OnboardAcceptTermsPresenterImpl(interactor, obsScheduler, subScheduler);
+    return new OnboardAcceptTermsPresenter(interactor, obsScheduler, subScheduler);
   }
 
   @Provides OnboardAcceptTermsInteractor provideOnboardAcceptTermsInteractor(
       @NonNull PadLockPreferences padLockPreferences) {
-    return new OnboardAcceptTermsInteractorImpl(padLockPreferences);
+    return new OnboardAcceptTermsInteractor(padLockPreferences);
   }
 }
