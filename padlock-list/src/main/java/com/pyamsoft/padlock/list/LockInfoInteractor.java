@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -55,36 +56,34 @@ class LockInfoInteractor extends LockCommonInteractor {
     activityEntryCache = new HashMap<>();
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Observable<List<PadLockEntry.WithPackageName>> getLockedActivityEntries(
-      @NonNull String packageName) {
-    return getPadLockDB().queryWithPackageName(packageName).first();
+  @NonNull @Override public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
+      @NonNull String packageName, @NonNull String activityName, @Nullable String code,
+      boolean system, boolean whitelist, boolean forceLock) {
+    return super.modifySingleDatabaseEntry(notInDatabase, packageName, activityName, code, system,
+        whitelist, forceLock).flatMap(lockState -> {
+      final Observable<LockState> resultState;
+      if (lockState == LockState.NONE) {
+        Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated");
+        resultState = updateExistingEntry(packageName, activityName, whitelist);
+      } else {
+        resultState = Observable.just(lockState);
+      }
+      return resultState;
+    });
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Observable<List<String>> getPackageActivities(@NonNull String packageName) {
-    return packageManagerWrapper.getActivityListForPackage(packageName)
-        .filter(activityEntry -> !activityEntry.equalsIgnoreCase(lockScreenClass.getName()))
-        .toList();
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<LockState> updateExistingEntry(
+      @NonNull String packageName, @NonNull String activityName, boolean whitelist) {
+    Timber.d("Entry already exists for: %s %s, update it", packageName, activityName);
+    return getPadLockDB().updateWhitelist(whitelist, packageName, activityName).map(result -> {
+      Timber.d("Update result: %d", result);
+      Timber.d("Whitelist: %s", whitelist);
+      return whitelist ? LockState.WHITELISTED : LockState.LOCKED;
+    });
   }
 
   @CheckResult @NonNull public Observable<Boolean> hasShownOnBoarding() {
-    return Observable.fromCallable(preferences::isDialogOnBoard);
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult boolean isCacheEmpty() {
-    return activityEntryCache.isEmpty();
-  }
-
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Observable<ActivityEntry> getCachedEntries(@NonNull String packageName) {
-    return Observable.fromCallable(() -> {
-      List<ActivityEntry> activityEntries = activityEntryCache.get(packageName);
-      if (activityEntries == null) {
-        activityEntries = Collections.emptyList();
-      }
-      return activityEntries;
-    }).flatMap(Observable::from);
+    return Observable.fromCallable(preferences::isDialogOnBoard).delay(300, TimeUnit.MILLISECONDS);
   }
 
   public void clearCache() {
@@ -107,17 +106,6 @@ class LockInfoInteractor extends LockCommonInteractor {
         activityEntries.set(i, ActivityEntry.builder(activityEntry).lockState(lockState).build());
       }
     }
-  }
-
-  @SuppressWarnings("WeakerAccess") void cacheEntry(@NonNull String packageName,
-      @NonNull ActivityEntry entry) {
-    List<ActivityEntry> list = activityEntryCache.get(packageName);
-    if (list == null) {
-      list = new ArrayList<>();
-      activityEntryCache.put(packageName, list);
-    }
-
-    list.add(entry);
   }
 
   @SuppressWarnings("WeakerAccess") void stopRefreshing() {
@@ -149,6 +137,21 @@ class LockInfoInteractor extends LockCommonInteractor {
         .doOnUnsubscribe(this::stopRefreshing)
         .doOnCompleted(this::stopRefreshing)
         .doOnTerminate(this::stopRefreshing);
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult boolean isCacheEmpty() {
+    return activityEntryCache.isEmpty();
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Observable<ActivityEntry> getCachedEntries(@NonNull String packageName) {
+    return Observable.fromCallable(() -> {
+      List<ActivityEntry> activityEntries = activityEntryCache.get(packageName);
+      if (activityEntries == null) {
+        activityEntries = Collections.emptyList();
+      }
+      return activityEntries;
+    }).flatMap(Observable::from);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<ActivityEntry> fetchFreshData(
@@ -212,6 +215,30 @@ class LockInfoInteractor extends LockCommonInteractor {
         return entry1Name.compareToIgnoreCase(entry2Name);
       }
     }).doOnNext(entry -> cacheEntry(packageName, entry));
+  }
+
+  @SuppressWarnings("WeakerAccess") void cacheEntry(@NonNull String packageName,
+      @NonNull ActivityEntry entry) {
+    List<ActivityEntry> list = activityEntryCache.get(packageName);
+    if (list == null) {
+      list = new ArrayList<>();
+      activityEntryCache.put(packageName, list);
+    }
+
+    list.add(entry);
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Observable<List<PadLockEntry.WithPackageName>> getLockedActivityEntries(
+      @NonNull String packageName) {
+    return getPadLockDB().queryWithPackageName(packageName).first();
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Observable<List<String>> getPackageActivities(@NonNull String packageName) {
+    return packageManagerWrapper.getActivityListForPackage(packageName)
+        .filter(activityEntry -> !activityEntry.equalsIgnoreCase(lockScreenClass.getName()))
+        .toList();
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull ActivityEntry findActivityEntry(
@@ -284,16 +311,5 @@ class LockInfoInteractor extends LockCommonInteractor {
     }
 
     return ActivityEntry.builder().name(name).lockState(state).build();
-  }
-
-  @CheckResult @NonNull
-  public Observable<LockState> updateExistingEntry(@NonNull String packageName,
-      @NonNull String activityName, boolean whitelist) {
-    Timber.d("Entry already exists for: %s %s, update it", packageName, activityName);
-    return getPadLockDB().updateWhitelist(whitelist, packageName, activityName).map(result -> {
-      Timber.d("Update result: %d", result);
-      Timber.d("Whitelist: %s", whitelist);
-      return whitelist ? LockState.WHITELISTED : LockState.LOCKED;
-    });
   }
 }

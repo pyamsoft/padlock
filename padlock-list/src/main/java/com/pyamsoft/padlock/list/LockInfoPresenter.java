@@ -87,17 +87,6 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
     databaseSubscription =
         lockInfoInteractor.modifySingleDatabaseEntry(isNotDefault, packageName, activityName, code,
             system, whitelist, forceDelete)
-            .flatMap(lockState -> {
-              final Observable<LockState> resultState;
-              if (lockState == LockState.NONE) {
-                Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated");
-                resultState =
-                    lockInfoInteractor.updateExistingEntry(packageName, activityName, whitelist);
-              } else {
-                resultState = Observable.just(lockState);
-              }
-              return resultState;
-            })
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
             .subscribe(lockState -> {
@@ -123,7 +112,6 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
   public void showOnBoarding(@NonNull OnBoardingCallback callback) {
     SubscriptionHelper.unsubscribe(onboardSubscription);
     onboardSubscription = lockInfoInteractor.hasShownOnBoarding()
-        .delay(300, TimeUnit.MILLISECONDS)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboard -> {
