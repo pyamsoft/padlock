@@ -18,11 +18,22 @@ package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
+import javax.inject.Inject;
 import rx.Observable;
 
-interface OnboardAcceptTermsInteractor {
+class OnboardAcceptTermsInteractor {
 
-  @NonNull @CheckResult Observable<Boolean> agreeToTerms();
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
 
-  @NonNull @CheckResult Observable<Boolean> hasAgreedToTerms();
+  @Inject OnboardAcceptTermsInteractor(@NonNull PadLockPreferences preferences) {
+    this.preferences = preferences;
+  }
+
+  @NonNull @CheckResult public Observable<Boolean> agreeToTerms() {
+    return Observable.fromCallable(() -> {
+      preferences.setAgreed();
+      return true;
+    });
+  }
 }

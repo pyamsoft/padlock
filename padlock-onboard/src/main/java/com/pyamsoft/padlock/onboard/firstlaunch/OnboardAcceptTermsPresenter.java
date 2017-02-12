@@ -17,11 +17,43 @@
 package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
+import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import javax.inject.Inject;
+import rx.Scheduler;
+import rx.Subscription;
+import timber.log.Timber;
 
-interface OnboardAcceptTermsPresenter extends Presenter<Presenter.Empty> {
+class OnboardAcceptTermsPresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  void acceptUsageTerms(@NonNull UsageTermsCallback callback);
+  @NonNull private final OnboardAcceptTermsInteractor interactor;
+  @SuppressWarnings("WeakerAccess") @Nullable Subscription termsSubscription;
+
+  @Inject OnboardAcceptTermsPresenter(@NonNull OnboardAcceptTermsInteractor interactor,
+      @NonNull Scheduler observeScheduler, @NonNull Scheduler subscribeScheduler) {
+    super(observeScheduler, subscribeScheduler);
+    this.interactor = interactor;
+  }
+
+  @Override protected void onUnbind() {
+    super.onUnbind();
+    SubscriptionHelper.unsubscribe(termsSubscription);
+  }
+
+  public void acceptUsageTerms(@NonNull UsageTermsCallback callback) {
+    SubscriptionHelper.unsubscribe(termsSubscription);
+    termsSubscription = interactor.agreeToTerms()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(agreed -> {
+              if (agreed) {
+                callback.onUsageTermsAccepted();
+              }
+            }, throwable -> Timber.e(throwable, "onError"),
+            () -> SubscriptionHelper.unsubscribe(termsSubscription));
+  }
 
   interface UsageTermsCallback {
 

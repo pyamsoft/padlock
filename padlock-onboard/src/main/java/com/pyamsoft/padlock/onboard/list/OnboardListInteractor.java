@@ -16,7 +16,19 @@
 
 package com.pyamsoft.padlock.onboard.list;
 
-interface OnboardListInteractor {
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
+import javax.inject.Inject;
 
-  void completeOnboarding();
+class OnboardListInteractor {
+
+  @NonNull private final PadLockPreferences preferences;
+
+  @Inject OnboardListInteractor(@NonNull PadLockPreferences preferences) {
+    this.preferences = preferences;
+  }
+
+  public void completeOnboarding() {
+    preferences.setListOnBoard();
+  }
 }

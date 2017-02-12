@@ -27,11 +27,11 @@ import rx.Scheduler;
   @Provides OnboardListPresenter provideOnboardListPresenter(
       @NonNull OnboardListInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
-    return new OnboardListPresenterImpl(interactor, obsScheduler, subScheduler);
+    return new OnboardListPresenter(interactor, obsScheduler, subScheduler);
   }
 
   @Provides OnboardListInteractor provideOnboardListInteractor(
       @NonNull PadLockPreferences preferences) {
-    return new OnboardListInteractorImpl(preferences);
+    return new OnboardListInteractor(preferences);
   }
 }
