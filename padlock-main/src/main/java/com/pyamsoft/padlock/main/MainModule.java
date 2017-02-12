@@ -26,10 +26,10 @@ import rx.Scheduler;
 
   @Provides MainPresenter providePinEntryPresenter(final MainInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
-    return new MainPresenterImpl(interactor, obsScheduler, subScheduler);
+    return new MainPresenter(interactor, obsScheduler, subScheduler);
   }
 
   @Provides MainInteractor providePinEntryInteractor(@NonNull PadLockPreferences preferences) {
-    return new MainInteractorImpl(preferences);
+    return new MainInteractor(preferences);
   }
 }
