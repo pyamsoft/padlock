@@ -22,7 +22,7 @@ import dagger.Provides;
 @Module public class MasterPinModule {
 
   @Provides MasterPinInteractor provideMasterPinInteractor(
-      final MasterPinInteractorImpl interactor) {
+      final MasterPinInteractor interactor) {
     return interactor;
   }
 }

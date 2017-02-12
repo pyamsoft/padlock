@@ -19,15 +19,39 @@ package com.pyamsoft.padlock.pin;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.base.PadLockPreferences;
+import javax.inject.Inject;
 import rx.Observable;
 
-public interface MasterPinInteractor {
+public class MasterPinInteractor {
 
-  @NonNull @CheckResult Observable<String> getMasterPin();
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
 
-  void setMasterPin(@Nullable String pin);
+  @Inject MasterPinInteractor(@NonNull final PadLockPreferences preferences) {
+    this.preferences = preferences;
+  }
 
-  @NonNull @CheckResult Observable<String> getHint();
+  @CheckResult @NonNull public Observable<String> getMasterPin() {
+    return Observable.fromCallable(preferences::getMasterPassword);
+  }
 
-  void setHint(@Nullable String hint);
+  public void setMasterPin(@Nullable String pin) {
+    if (pin == null) {
+      preferences.clearMasterPassword();
+    } else {
+      preferences.setMasterPassword(pin);
+    }
+  }
+
+  @CheckResult @NonNull public Observable<String> getHint() {
+    return Observable.fromCallable(preferences::getHint);
+  }
+
+  public void setHint(@Nullable String hint) {
+    if (hint == null) {
+      preferences.clearHint();
+    } else {
+      preferences.setHint(hint);
+    }
+  }
 }
