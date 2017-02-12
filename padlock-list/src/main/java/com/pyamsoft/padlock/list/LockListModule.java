@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.service.LockServiceStateInteractor;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

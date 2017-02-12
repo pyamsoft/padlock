@@ -137,7 +137,7 @@ class PurgeInteractor {
     stalePackageNameCache.clear();
   }
 
-  @NonNull public Observable<Integer> deleteEntry(@NonNull String packageName) {
+  @CheckResult @NonNull public Observable<Integer> deleteEntry(@NonNull String packageName) {
     return padLockDB.deleteWithPackageName(packageName);
   }
 

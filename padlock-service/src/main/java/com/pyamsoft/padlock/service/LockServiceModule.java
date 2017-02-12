@@ -19,6 +19,8 @@ package com.pyamsoft.padlock.service;
 import android.app.Activity;
 import android.app.IntentService;
 import android.content.Context;
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
@@ -29,18 +31,20 @@ import rx.Scheduler;
 
 @Module public class LockServiceModule {
 
-  @Provides LockServicePresenter provideLockServicePresenter(LockServiceInteractor interactor,
-      LockServiceStateInteractor stateInteractor, @Named("obs") Scheduler obsScheduler,
+  @Provides LockServicePresenter provideLockServicePresenter(
+      @NonNull LockServiceInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
-    return new LockServicePresenterImpl(stateInteractor, interactor, obsScheduler, subScheduler);
+    return new LockServicePresenter(interactor, obsScheduler, subScheduler);
   }
 
-  @Provides LockServiceInteractor provideLockServiceInteractor(Context context,
-      PadLockPreferences preference, JobSchedulerCompat jobManager,
-      PackageManagerWrapper packageManagerWrapper, PadLockDB padLockDB,
+  @Provides LockServiceInteractor provideLockServiceInteractor(@NonNull Context context,
+      @NonNull PadLockPreferences preference, @NonNull JobSchedulerCompat jobManager,
+      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB,
       @Named("lockscreen") Class<? extends Activity> lockScreenActivityClass,
-      @Named("recheck") Class<? extends IntentService> recheckServiceClass) {
-    return new LockServiceInteractorImpl(context, preference, jobManager, packageManagerWrapper,
-        padLockDB, lockScreenActivityClass, recheckServiceClass);
+      @Named("recheck") Class<? extends IntentService> recheckServiceClass,
+      @NonNull LockServiceStateInteractor stateInteractor) {
+    return new LockServiceInteractor(context.getApplicationContext(), preference, jobManager,
+        packageManagerWrapper, padLockDB, lockScreenActivityClass, recheckServiceClass,
+        stateInteractor);
   }
 }

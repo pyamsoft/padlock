@@ -16,30 +16,283 @@
 
 package com.pyamsoft.padlock.service;
 
+import android.app.Activity;
+import android.app.IntentService;
+import android.app.KeyguardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.db.PadLockDB;
+import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
+import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import javax.inject.Inject;
 import rx.Observable;
+import rx.functions.Func0;
+import timber.log.Timber;
 
-interface LockServiceInteractor {
+class LockServiceInteractor {
 
-  void cleanup();
+  @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
+  @SuppressWarnings("WeakerAccess") @NonNull final KeyguardManager keyguardManager;
+  @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenActivity;
+  @NonNull private final PackageManagerWrapper packageManagerWrapper;
+  @NonNull private final PadLockDB padLockDB;
+  @NonNull private final Class<? extends IntentService> recheckService;
+  @NonNull private final LockServiceStateInteractor stateInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull String lastPackageName = "";
+  @SuppressWarnings("WeakerAccess") @NonNull String lastClassName = "";
+  @SuppressWarnings("WeakerAccess") @NonNull String activePackageName = "";
+  @SuppressWarnings("WeakerAccess") @NonNull String activeClassName = "";
+  @SuppressWarnings("WeakerAccess") boolean lockScreenPassed;
 
-  @NonNull @CheckResult Observable<Boolean> isEventFromActivity(@NonNull String packageName,
-      @NonNull String className);
+  @Inject LockServiceInteractor(@NonNull Context context, @NonNull PadLockPreferences preferences,
+      @NonNull JobSchedulerCompat jobSchedulerCompat,
+      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB,
+      @NonNull Class<? extends Activity> lockScreenActivity,
+      @NonNull Class<? extends IntentService> recheckService,
+      @NonNull LockServiceStateInteractor stateInteractor) {
+    this.appContext = context.getApplicationContext();
+    this.jobSchedulerCompat = jobSchedulerCompat;
+    this.packageManagerWrapper = packageManagerWrapper;
+    this.padLockDB = padLockDB;
+    this.preferences = preferences;
+    this.keyguardManager = (KeyguardManager) context.getApplicationContext()
+        .getSystemService(Context.KEYGUARD_SERVICE);
+    this.lockScreenActivity = lockScreenActivity;
+    this.recheckService = recheckService;
+    this.stateInteractor = stateInteractor;
+  }
 
-  @NonNull @CheckResult Observable<Boolean> hasNameChanged(@NonNull String name,
-      @NonNull String oldName);
+  @SuppressWarnings("WeakerAccess") void reset() {
+    Timber.i("Reset name state");
+    lastPackageName = "";
+    lastClassName = "";
+    activeClassName = "";
+    activePackageName = "";
+    setLockScreenPassed(false);
+  }
 
-  @NonNull @CheckResult Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
-      @NonNull String className);
+  @CheckResult @NonNull
+  public Observable<Boolean> processActiveIfMatching(@NonNull String packageName,
+      @NonNull String className) {
+    return Observable.fromCallable((Func0<Boolean>) () -> {
+      Timber.d("Check against current window values: %s, %s", activePackageName, activeClassName);
+      if (activePackageName.equals(packageName) && (activeClassName.equals(className)
+          || className.equals(PadLockEntry.PACKAGE_ACTIVITY_NAME))) {
+        // We can replace the actual passed classname with the stored classname because:
+        // either it is equal to the passed name or the passed name is PACKAGE
+        // which will respond to any class name
+        Timber.d("Run recheck for: %s %s", activePackageName, activeClassName);
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
 
-  @NonNull @CheckResult Observable<Boolean> isOnlyLockOnPackageChange();
+  @CheckResult @NonNull public Observable<PadLockEntry> processEvent(@NonNull String packageName,
+      @NonNull String className, @NonNull RecheckStatus forcedRecheck) {
+    final Observable<Boolean> windowEventObservable =
+        stateInteractor.isServiceEnabled()
+            .filter(enabled -> {
+              if (!enabled) {
+                Timber.e("Service is not user-enabled. Ignore");
+                reset();
+              }
+              return enabled;
+            })
+            .flatMap(enabled -> isDeviceLocked().map(deviceLocked -> {
+              if (deviceLocked) {
+                Timber.w("Device is locked, reset lastPackage/lastClass");
+                reset();
+              }
+              return enabled;
+            }))
+            .flatMap(enabled -> isEventFromActivity(packageName, className))
+            .filter(fromActivity -> {
+              if (!fromActivity) {
+                Timber.w("Event is not caused by an Activity. P: %s, C: %s. Ignore", packageName,
+                    className);
+              }
+              return fromActivity;
+            })
+            .flatMap(fromActivity -> isDeviceLocked().flatMap(deviceLocked -> {
+              if (deviceLocked) {
+                return isRestrictedWhileLocked();
+              } else {
+                return Observable.just(Boolean.FALSE);
+              }
+            }))
+            .filter(restrictedWhileLocked -> {
+              if (restrictedWhileLocked) {
+                Timber.w("Locking is restricted while device in keyguard: %s %s", packageName,
+                    className);
+                return Boolean.FALSE;
+              } else {
+                return Boolean.TRUE;
+              }
+            })
+            .flatMap(notLocked -> isWindowFromLockScreen(packageName, className))
+            .filter(isLockScreen -> {
+              if (isLockScreen) {
+                Timber.w("Event for package %s class: %s is caused by LockScreen. Ignore",
+                    packageName, className);
+              }
+              return !isLockScreen;
+            })
+            .map(fromLockScreen -> {
+              final boolean passed = !fromLockScreen;
+              Timber.i("Window has passed checks so far: %s", passed);
+              activePackageName = packageName;
+              activeClassName = className;
+              return passed;
+            });
 
-  @NonNull @CheckResult Observable<PadLockEntry> getEntry(@NonNull String packageName,
-      @NonNull String activityName);
+    return Observable.zip(windowEventObservable, hasNameChanged(packageName, lastPackageName),
+        hasNameChanged(className, lastClassName), isOnlyLockOnPackageChange(),
+        (windowEventObserved, packageChanged, classChanged, lockOnPackageChange) -> {
+          if (!windowEventObserved) {
+            Timber.e("Failed to pass window checking");
+            return Boolean.FALSE;
+          }
 
-  @NonNull @CheckResult Observable<Boolean> isDeviceLocked();
+          if (packageChanged) {
+            Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName);
+            lastPackageName = packageName;
+          }
+          if (classChanged) {
+            Timber.d("Last Class: %s - New Class: %s", lastClassName, className);
+            lastClassName = className;
+          }
 
-  @NonNull @CheckResult Observable<Boolean> isRestrictedWhileLocked();
+          Timber.d("Window change if class changed");
+          boolean windowHasChanged = classChanged;
+          if (lockOnPackageChange) {
+            Timber.d("Window change if package changed");
+            windowHasChanged &= packageChanged;
+          }
+
+          if (forcedRecheck == RecheckStatus.FORCE) {
+            Timber.d("Pass filter via forced recheck");
+            windowHasChanged = true;
+          }
+
+          return windowHasChanged || !lockScreenPassed;
+        }).filter(lockApp -> lockApp).flatMap(aBoolean -> {
+      Timber.d("Get list of locked classes with package: %s, class: %s", packageName, className);
+      setLockScreenPassed(false);
+      return getEntry(packageName, className);
+    }).doOnNext(entry -> {
+      if (PadLockEntry.isEmpty(entry)) {
+        Timber.w("Returned entry is EMPTY");
+      } else {
+        Timber.d("Default entry PN %s, AN %s", entry.packageName(), entry.activityName());
+      }
+    }).filter(padLockEntry -> !PadLockEntry.isEmpty(padLockEntry)).filter(entry -> {
+      Timber.d("Check ignore time for: %s %s", entry.packageName(), entry.activityName());
+      final long ignoreUntilTime = entry.ignoreUntilTime();
+      final long currentTime = System.currentTimeMillis();
+      Timber.d("Ignore until time: %d", ignoreUntilTime);
+      Timber.d("Current time: %d", currentTime);
+      if (currentTime < ignoreUntilTime) {
+        Timber.d("Ignore period has not elapsed yet");
+        return Boolean.FALSE;
+      }
+
+      return Boolean.TRUE;
+    }).filter(entry -> {
+      if (PadLockEntry.PACKAGE_ACTIVITY_NAME.equals(entry.activityName()) && entry.whitelist()) {
+        throw new RuntimeException(
+            "PACKAGE entry for package: " + entry.packageName() + " cannot be whitelisted");
+      }
+
+      Timber.d("Filter out if whitelisted packages");
+      return !entry.whitelist();
+    });
+  }
+
+  public void setLockScreenPassed(boolean b) {
+    Timber.d("Set lockScreenPassed: %s", b);
+    lockScreenPassed = b;
+  }
+
+  /**
+   * Clean up the lock service, cancel background jobs
+   */
+  public void cleanup() {
+    Timber.d("Cleanup LockService");
+    Timber.d("Cancel ALL jobs");
+    final Intent intent = new Intent(appContext, recheckService);
+    jobSchedulerCompat.cancel(intent);
+  }
+
+  /**
+   * Return true if the window event is caused by an Activity
+   */
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Boolean> isEventFromActivity(
+      @NonNull String packageName, @NonNull String className) {
+    Timber.d("Check event from activity: %s %s", packageName, className);
+    return packageManagerWrapper.getActivityInfo(packageName, className)
+        .map(activityInfo -> activityInfo != null);
+  }
+
+  /**
+   * If the screen has changed, update the last package.
+   * This will prevent the lock screen from opening twice when the same
+   * app opens multiple activities for example.
+   */
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Boolean> hasNameChanged(
+      @NonNull String name, @NonNull String oldName) {
+    return Observable.fromCallable((Func0<Boolean>) () -> {
+      Timber.d("Check if name has change");
+      return !name.equals(oldName);
+    });
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
+      @NonNull String className) {
+    return Observable.fromCallable(() -> {
+      Timber.d("Check if window is from lock screen");
+      final String lockScreenPackageName = lockScreenActivity.getPackage().getName();
+      final String lockScreenClassName = lockScreenActivity.getName();
+
+      final boolean isPackage = packageName.equals(lockScreenPackageName);
+      return isPackage && className.equals(lockScreenClassName);
+    });
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Observable<Boolean> isOnlyLockOnPackageChange() {
+    return Observable.fromCallable(() -> {
+      Timber.d("Check if locking only happens on package change");
+      return preferences.getLockOnPackageChange();
+    });
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<PadLockEntry> getEntry(
+      @NonNull String packageName, @NonNull String activityName) {
+    Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);
+    return padLockDB.queryWithPackageActivityNameDefault(packageName, activityName).first();
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Observable<Boolean> isRestrictedWhileLocked() {
+    return Observable.fromCallable(() -> {
+      Timber.d("Check if window is restricted while device is locked");
+      return preferences.isIgnoreInKeyguard();
+    });
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Boolean> isDeviceLocked() {
+    return Observable.fromCallable(() -> {
+      Timber.d("Check if device is locked");
+      return keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked();
+    });
+  }
 }
