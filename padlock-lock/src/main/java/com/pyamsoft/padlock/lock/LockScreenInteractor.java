@@ -61,7 +61,7 @@ class LockScreenInteractor extends LockInteractor {
   }
 
   @CheckResult @NonNull
-  public Observable<BooleansubmitPin(@NonNull String packageName, @NonNull String activityName,
+  public Observable<Boolean> submitPin(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, String currentAttempt) {
     return pinInteractor.getMasterPin().map(masterPin -> {
       Timber.d("Attempt unlock: %s %s", packageName, activityName);
