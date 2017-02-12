@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.pin.MasterPinInteractor;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
