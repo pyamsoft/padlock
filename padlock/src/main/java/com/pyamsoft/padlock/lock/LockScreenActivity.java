@@ -172,7 +172,6 @@ public class LockScreenActivity extends ActivityBase {
     populateIgnoreTimes();
     getValuesFromBundle();
     setupInputManager();
-    clearDisplay();
     setupActionBar();
 
     LockSubmitCallback submitCallback = new LockSubmitCallback() {
@@ -226,6 +225,7 @@ public class LockScreenActivity extends ActivityBase {
     };
     setupTextInput(submitCallback);
     setupGoArrow(submitCallback);
+    clearDisplay();
 
     // Hide hint to begin with
     binding.lockDisplayHint.setVisibility(View.GONE);
@@ -299,7 +299,9 @@ public class LockScreenActivity extends ActivityBase {
   }
 
   void clearDisplay() {
-    editText.setText("");
+    if (editText != null) {
+      editText.setText("");
+    }
   }
 
   private void getValuesFromBundle() {
