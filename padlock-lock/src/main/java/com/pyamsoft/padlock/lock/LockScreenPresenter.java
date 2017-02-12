@@ -23,7 +23,6 @@ import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
@@ -56,14 +55,9 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
         displayNameSubscription, postUnlockSubscription);
   }
 
-  public void resetFailCount() {
-    interactor.resetFailCount();
-  }
-
   public void displayLockedHint(@NonNull LockHintCallback callback) {
     SubscriptionHelper.unsubscribe(hintSubscription);
     hintSubscription = interactor.getHint()
-        .map(s -> s == null ? "" : s)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(callback::setDisplayHint, throwable -> {
@@ -86,15 +80,7 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
   public void lockEntry(@NonNull String packageName, @NonNull String activityName,
       @NonNull LockCallback callback) {
     SubscriptionHelper.unsubscribe(lockSubscription);
-    lockSubscription = interactor.incrementAndGetFailCount()
-        .filter(count -> count > LockScreenInteractor.DEFAULT_MAX_FAIL_COUNT)
-        .flatMap(integer -> interactor.getTimeoutPeriodMinutesInMillis())
-        .flatMap(timeOutMinutesInMillis -> {
-          final long newLockUntilTime = System.currentTimeMillis() + timeOutMinutesInMillis;
-          Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
-              timeOutMinutesInMillis);
-          return interactor.lockEntry(newLockUntilTime, packageName, activityName);
-        })
+    lockSubscription = interactor.incrementAndGetFailCount(packageName, activityName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(lockTime -> {
@@ -110,39 +96,21 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
       @Nullable String lockCode, long lockUntilTime, @NonNull String currentAttempt,
       @NonNull LockSubmitCallback callback) {
     SubscriptionHelper.unsubscribe(unlockSubscription);
-    unlockSubscription = interactor.getMasterPin()
-        .map(masterPin -> {
-          Timber.d("Attempt unlock: %s %s", packageName, activityName);
-          Timber.d("Check entry is not locked: %d", lockUntilTime);
-          if (System.currentTimeMillis() < lockUntilTime) {
-            Timber.e("Entry is still locked. Fail unlock");
-            return null;
-          }
-
-          final String pin;
-          if (lockCode == null) {
-            Timber.d("No app specific code, use Master PIN");
-            pin = masterPin;
-          } else {
-            Timber.d("App specific code present, compare attempt");
-            pin = lockCode;
-          }
-          return pin;
-        })
-        .flatMap(nullablePin -> interactor.unlockEntry(currentAttempt, nullablePin))
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(unlocked -> {
-          Timber.d("Received unlock entry result");
-          if (unlocked) {
-            callback.onSubmitSuccess();
-          } else {
-            callback.onSubmitFailure();
-          }
-        }, throwable -> {
-          Timber.e(throwable, "unlockEntry onError");
-          callback.onSubmitError();
-        }, () -> SubscriptionHelper.unsubscribe(unlockSubscription));
+    unlockSubscription =
+        interactor.submitPin(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
+            .subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
+            .subscribe(unlocked -> {
+              Timber.d("Received unlock entry result");
+              if (unlocked) {
+                callback.onSubmitSuccess();
+              } else {
+                callback.onSubmitFailure();
+              }
+            }, throwable -> {
+              Timber.e(throwable, "unlockEntry onError");
+              callback.onSubmitError();
+            }, () -> SubscriptionHelper.unsubscribe(unlockSubscription));
   }
 
   public void loadDisplayNameFromPackage(@NonNull String packageName,
@@ -158,41 +126,12 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void postUnlock(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName, @Nullable String lockCode, long lockUntilTime, boolean isSystem,
-      boolean shouldExclude, long ignoreTime, @NonNull PostUnlockCallback callback) {
-    final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
-    final Observable<Long> whitelistObservable;
-    final Observable<Integer> ignoreObservable;
-    final Observable<Integer> recheckObservable;
-
-    if (shouldExclude) {
-      whitelistObservable =
-          interactor.whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
-    } else {
-      whitelistObservable = Observable.just(0L);
-    }
-
-    if (ignoreTime != 0 && !shouldExclude) {
-      ignoreObservable =
-          interactor.ignoreEntryForTime(ignoreMinutesInMillis, packageName, activityName);
-      recheckObservable =
-          interactor.queueRecheckJob(packageName, activityName, ignoreMinutesInMillis);
-    } else {
-      ignoreObservable = Observable.just(0);
-      recheckObservable = Observable.just(0);
-    }
-
+      @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
+      long ignoreTime, @NonNull PostUnlockCallback callback) {
     SubscriptionHelper.unsubscribe(postUnlockSubscription);
     postUnlockSubscription =
-        Observable.zip(ignoreObservable, recheckObservable, whitelistObservable,
-            (ignore, recheck, whitelist) -> {
-              Timber.d("Result of Whitelist: %d", whitelist);
-              Timber.d("Result of Ignore: %d", ignore);
-              Timber.d("Result of Recheck: %d", recheck);
-
-              // KLUDGE Just return something valid for now
-              return Boolean.TRUE;
-            })
+        interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
+            shouldExclude, ignoreTime)
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
             .subscribe(result -> {
