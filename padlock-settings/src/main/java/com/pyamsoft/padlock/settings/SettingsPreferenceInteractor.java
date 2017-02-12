@@ -18,14 +18,42 @@ package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
+import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.db.PadLockDB;
+import javax.inject.Inject;
 import rx.Observable;
+import timber.log.Timber;
 
-interface SettingsPreferenceInteractor {
+class SettingsPreferenceInteractor {
 
-  @CheckResult @WorkerThread @NonNull Observable<Boolean> isInstallListenerEnabled();
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
 
-  @CheckResult @WorkerThread @NonNull Observable<Boolean> clearDatabase();
+  @Inject SettingsPreferenceInteractor(@NonNull PadLockDB padLockDB,
+      @NonNull PadLockPreferences preferences) {
+    this.padLockDB = padLockDB;
+    this.preferences = preferences;
+  }
 
-  @CheckResult @WorkerThread @NonNull Observable<Boolean> clearAll();
+  @NonNull @CheckResult public Observable<Boolean> isInstallListenerEnabled() {
+    return Observable.fromCallable(preferences::isInstallListenerEnabled);
+  }
+
+  @NonNull @CheckResult public Observable<Boolean> clearDatabase() {
+    return padLockDB.deleteAll().map(deleteResult -> {
+      Timber.d("Database is cleared: %s", deleteResult);
+      padLockDB.deleteDatabase();
+
+      // TODO just return something valid
+      return Boolean.TRUE;
+    });
+  }
+
+  @NonNull @CheckResult public Observable<Boolean> clearAll() {
+    return clearDatabase().map(aBoolean -> {
+      Timber.d("Clear all preferences");
+      preferences.clearAll();
+      return Boolean.TRUE;
+    });
+  }
 }

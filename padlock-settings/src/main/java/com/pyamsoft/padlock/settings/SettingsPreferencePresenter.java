@@ -17,17 +17,94 @@
 package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
+import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
+import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import javax.inject.Inject;
+import rx.Scheduler;
+import rx.Subscription;
+import rx.subscriptions.Subscriptions;
+import timber.log.Timber;
 
-interface SettingsPreferencePresenter extends Presenter<Presenter.Empty> {
+class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  void requestClearAll(@NonNull RequestCallback callback);
+  @SuppressWarnings("WeakerAccess") static final int CONFIRM_DATABASE = 0;
+  @SuppressWarnings("WeakerAccess") static final int CONFIRM_ALL = 1;
+  @SuppressWarnings("WeakerAccess") @NonNull final ApplicationInstallReceiver receiver;
+  @NonNull private final SettingsPreferenceInteractor interactor;
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription confirmedSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription applicationInstallSubscription =
+      Subscriptions.empty();
 
-  void requestClearDatabase(@NonNull RequestCallback callback);
+  @Inject SettingsPreferencePresenter(@NonNull SettingsPreferenceInteractor interactor,
+      @NonNull ApplicationInstallReceiver receiver, @NonNull Scheduler obsScheduler,
+      @NonNull Scheduler subScheduler) {
+    super(obsScheduler, subScheduler);
+    this.interactor = interactor;
+    this.receiver = receiver;
+  }
 
-  void processClearRequest(int type, @NonNull ClearCallback callback);
+  @Override protected void onUnbind() {
+    super.onUnbind();
+    SubscriptionHelper.unsubscribe(confirmedSubscription, applicationInstallSubscription);
+  }
 
-  void setApplicationInstallReceiverState();
+  public void requestClearAll(@NonNull RequestCallback callback) {
+    callback.showConfirmDialog(CONFIRM_ALL);
+  }
+
+  public void requestClearDatabase(@NonNull RequestCallback callback) {
+    callback.showConfirmDialog(CONFIRM_DATABASE);
+  }
+
+  public void setApplicationInstallReceiverState() {
+    SubscriptionHelper.unsubscribe(applicationInstallSubscription);
+    applicationInstallSubscription = interactor.isInstallListenerEnabled()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(result -> {
+              if (result) {
+                receiver.register();
+              } else {
+                receiver.unregister();
+              }
+            }, throwable -> Timber.e(throwable, "onError setApplicationInstallReceiverState"),
+            () -> SubscriptionHelper.unsubscribe(applicationInstallSubscription));
+  }
+
+  public void processClearRequest(int type, @NonNull ClearCallback callback) {
+    switch (type) {
+      case CONFIRM_DATABASE:
+        clearDatabase(callback);
+        break;
+      case CONFIRM_ALL:
+        clearAll(callback);
+        break;
+      default:
+        throw new IllegalStateException("Received invalid confirmation event type: " + type);
+    }
+  }
+
+  @SuppressWarnings("WeakerAccess") void clearAll(@NonNull ClearCallback callback) {
+    SubscriptionHelper.unsubscribe(confirmedSubscription);
+    confirmedSubscription = interactor.clearAll()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(aBoolean -> callback.onClearAll(), throwable -> Timber.e(throwable, "onError"),
+            () -> SubscriptionHelper.unsubscribe(confirmedSubscription));
+  }
+
+  @SuppressWarnings("WeakerAccess") void clearDatabase(@NonNull ClearCallback callback) {
+    SubscriptionHelper.unsubscribe(confirmedSubscription);
+    confirmedSubscription = interactor.clearDatabase()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(aBoolean -> callback.onClearDatabase(),
+            throwable -> Timber.e(throwable, "onError"),
+            () -> SubscriptionHelper.unsubscribe(confirmedSubscription));
+  }
 
   interface ClearCallback {
     void onClearAll();
