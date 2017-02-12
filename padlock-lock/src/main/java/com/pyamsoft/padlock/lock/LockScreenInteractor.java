@@ -35,6 +35,7 @@ import timber.log.Timber;
 
 class LockScreenInteractor extends LockInteractor {
 
+  @SuppressWarnings("WeakerAccess") static final int DEFAULT_MAX_FAIL_COUNT = 2;
   @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
@@ -43,7 +44,6 @@ class LockScreenInteractor extends LockInteractor {
       recheckServiceClass;
   @NonNull private final MasterPinInteractor pinInteractor;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
-  static int DEFAULT_MAX_FAIL_COUNT = 2;
   @SuppressWarnings("WeakerAccess") int failCount;
 
   @Inject LockScreenInteractor(@NonNull Context context,
@@ -61,38 +61,80 @@ class LockScreenInteractor extends LockInteractor {
   }
 
   @CheckResult @NonNull
-  public Observable<Long> lockEntry(long lockUntilTime, @NonNull String packageName,
-      @NonNull String activityName) {
-    return padLockDB.updateLockTime(lockUntilTime, packageName, activityName).map(integer -> {
-      Timber.d("Update result: %s", integer);
-      return lockUntilTime;
-    });
+  public Observable<Boolean> submitPin(@NonNull String packageName, @NonNull String activityName,
+      @Nullable String lockCode, long lockUntilTime, String currentAttempt) {
+    return pinInteractor.getMasterPin().map(masterPin -> {
+      Timber.d("Attempt unlock: %s %s", packageName, activityName);
+      Timber.d("Check entry is not locked: %d", lockUntilTime);
+      if (System.currentTimeMillis() < lockUntilTime) {
+        Timber.e("Entry is still locked. Fail unlock");
+        return null;
+      }
+
+      final String pin;
+      if (lockCode == null) {
+        Timber.d("No app specific code, use Master PIN");
+        pin = masterPin;
+      } else {
+        Timber.d("App specific code present, compare attempt");
+        pin = lockCode;
+      }
+      return pin;
+    }).flatMap(nullablePin -> unlockEntry(currentAttempt, nullablePin));
   }
 
-  @CheckResult @NonNull public Observable<Long> getTimeoutPeriodMinutesInMillis() {
-    return Observable.fromCallable(preferences::getTimeoutPeriod).map(period -> period * 60 * 1000);
-  }
-
-  @CheckResult @NonNull public Observable<String> getMasterPin() {
-    return pinInteractor.getMasterPin();
-  }
-
-  @CheckResult @NonNull
-  public Observable<Boolean> unlockEntry(@NonNull String attempt, @NonNull String pin) {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Boolean> unlockEntry(
+      @NonNull String attempt, @NonNull String pin) {
     return Observable.fromCallable(() -> pin)
         .filter(pin1 -> pin1 != null)
         .flatMap(pin1 -> checkSubmissionAttempt(attempt, pin1));
   }
 
-  @CheckResult @NonNull
-  public Observable<Long> whitelistEntry(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName, @Nullable String lockCode, boolean isSystem) {
+  @CheckResult @NonNull Observable<Boolean> postUnlock(@NonNull String packageName,
+      @NonNull String activityName, @NonNull String realName, @NonNull String lockCode,
+      boolean isSystem, boolean shouldExclude, long ignoreTime) {
+    return Observable.defer(() -> {
+      final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
+      final Observable<Long> whitelistObservable;
+      final Observable<Integer> ignoreObservable;
+      final Observable<Integer> recheckObservable;
+
+      if (shouldExclude) {
+        whitelistObservable =
+            whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
+      } else {
+        whitelistObservable = Observable.just(0L);
+      }
+
+      if (ignoreTime != 0 && !shouldExclude) {
+        ignoreObservable = ignoreEntryForTime(ignoreMinutesInMillis, packageName, activityName);
+        recheckObservable = queueRecheckJob(packageName, activityName, ignoreMinutesInMillis);
+      } else {
+        ignoreObservable = Observable.just(0);
+        recheckObservable = Observable.just(0);
+      }
+
+      return Observable.zip(ignoreObservable, recheckObservable, whitelistObservable,
+          (ignore, recheck, whitelist) -> {
+            Timber.d("Result of Whitelist: %d", whitelist);
+            Timber.d("Result of Ignore: %d", ignore);
+            Timber.d("Result of Recheck: %d", recheck);
+
+            // KLUDGE Just return something valid for now
+            return Boolean.TRUE;
+          });
+    });
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> whitelistEntry(
+      @NonNull String packageName, @NonNull String activityName, @NonNull String realName,
+      @Nullable String lockCode, boolean isSystem) {
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName);
     return padLockDB.insert(packageName, realName, lockCode, 0, 0, isSystem, true);
   }
 
-  @CheckResult @NonNull public Observable<Integer> queueRecheckJob(@NonNull String packageName,
-      @NonNull String activityName, long recheckTime) {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Integer> queueRecheckJob(
+      @NonNull String packageName, @NonNull String activityName, long recheckTime) {
     return Observable.fromCallable(() -> {
       // Cancel any old recheck job for the class, but not the package
       final Intent intent = new Intent(appContext, recheckServiceClass);
@@ -108,8 +150,8 @@ class LockScreenInteractor extends LockInteractor {
     });
   }
 
-  @CheckResult @NonNull public Observable<Integer> ignoreEntryForTime(long ignoreMinutesInMillis,
-      @NonNull String packageName, @NonNull String activityName) {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Integer> ignoreEntryForTime(
+      long ignoreMinutesInMillis, @NonNull String packageName, @NonNull String activityName) {
     final long newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis;
     Timber.d("Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
         ignoreMinutesInMillis);
@@ -125,8 +167,30 @@ class LockScreenInteractor extends LockInteractor {
     return packageManagerWrapper.loadPackageLabel(packageName);
   }
 
-  @CheckResult @NonNull public Observable<Integer> incrementAndGetFailCount() {
-    return Observable.fromCallable(() -> ++failCount);
+  @CheckResult @NonNull
+  public Observable<Long> incrementAndGetFailCount(String packageName, String activityName) {
+    return Observable.fromCallable(() -> ++failCount)
+        .filter(count -> count > DEFAULT_MAX_FAIL_COUNT)
+        .flatMap(integer -> getTimeoutPeriodMinutesInMillis())
+        .flatMap(timeOutMinutesInMillis -> {
+          final long newLockUntilTime = System.currentTimeMillis() + timeOutMinutesInMillis;
+          Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
+              timeOutMinutesInMillis);
+          return lockEntry(newLockUntilTime, packageName, activityName);
+        });
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
+  Observable<Long> getTimeoutPeriodMinutesInMillis() {
+    return Observable.fromCallable(preferences::getTimeoutPeriod).map(period -> period * 60 * 1000);
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> lockEntry(
+      long lockUntilTime, @NonNull String packageName, @NonNull String activityName) {
+    return padLockDB.updateLockTime(lockUntilTime, packageName, activityName).map(integer -> {
+      Timber.d("Update result: %s", integer);
+      return lockUntilTime;
+    });
   }
 
   public void resetFailCount() {
@@ -134,7 +198,7 @@ class LockScreenInteractor extends LockInteractor {
     failCount = 0;
   }
 
-  @NonNull public Observable<String> getHint() {
-    return pinInteractor.getHint();
+  @NonNull @CheckResult public Observable<String> getHint() {
+    return pinInteractor.getHint().map(s -> s == null ? "" : s);
   }
 }
