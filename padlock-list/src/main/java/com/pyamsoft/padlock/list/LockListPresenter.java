@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.padlock.service.LockServiceStateInteractor;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;

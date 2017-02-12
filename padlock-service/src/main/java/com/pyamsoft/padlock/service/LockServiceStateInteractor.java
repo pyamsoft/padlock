@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.pin.MasterPinInteractor;
 import javax.inject.Inject;
 import rx.Observable;
 
-class LockServiceStateInteractor {
+public class LockServiceStateInteractor {
 
   @NonNull private final MasterPinInteractor pinInteractor;
 

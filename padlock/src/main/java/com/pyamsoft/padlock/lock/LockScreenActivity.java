@@ -182,7 +182,7 @@ public class LockScreenActivity extends ActivityBase {
         clearDisplay();
 
         presenter.postUnlock(lockedPackageName, lockedActivityName, lockedRealName, lockedCode,
-            lockUntilTime, lockedSystem, menuExclude.isChecked(), getIgnoreTimeFromSelectedIndex(),
+            lockedSystem, menuExclude.isChecked(), getIgnoreTimeFromSelectedIndex(),
             new LockScreenPresenter.PostUnlockCallback() {
               @Override public void onPostUnlock() {
                 Timber.d("POST Unlock Finished! 1");
