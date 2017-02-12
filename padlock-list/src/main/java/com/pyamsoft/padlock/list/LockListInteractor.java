@@ -85,6 +85,30 @@ class LockListInteractor extends LockCommonInteractor {
         .doOnTerminate(this::stopRefreshing);
   }
 
+  @SuppressWarnings("WeakerAccess") @CheckResult boolean isCacheEmpty() {
+    return appEntryCache.isEmpty();
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<AppEntry> getCachedEntries() {
+    return Observable.fromCallable(() -> appEntryCache).concatMap(Observable::from);
+  }
+
+  public void clearCache() {
+    appEntryCache.clear();
+  }
+
+  public void updateCacheEntry(@NonNull String name, @NonNull String packageName,
+      boolean newLockState) {
+    final int size = appEntryCache.size();
+    for (int i = 0; i < size; ++i) {
+      final AppEntry appEntry = appEntryCache.get(i);
+      if (appEntry.name().equals(name) && appEntry.packageName().equals(packageName)) {
+        Timber.d("Update cached entry: %s %s", name, packageName);
+        appEntryCache.set(i, AppEntry.builder(appEntry).locked(newLockState).build());
+      }
+    }
+  }
+
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<AppEntry> fetchFreshData() {
     return getActiveApplications().withLatestFrom(isSystemVisible(),
         (applicationInfo, systemVisible) -> {
@@ -145,6 +169,40 @@ class LockListInteractor extends LockCommonInteractor {
         .flatMap(pair -> createFromPackageInfo(pair.first, pair.second))
         .sorted((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()))
         .doOnNext(this::cacheEntry);
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Observable<AppEntry> createFromPackageInfo(@NonNull String packageName, boolean locked) {
+    return packageManagerWrapper.getApplicationInfo(packageName)
+        .map(info -> AppEntry.builder()
+            .name(packageManagerWrapper.loadPackageLabel(info).toBlocking().first())
+            .packageName(packageName)
+            .system(isSystemApplication(info))
+            .locked(locked)
+            .build());
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult boolean isSystemApplication(
+      @NonNull ApplicationInfo info) {
+    return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+  }
+
+  @SuppressWarnings("WeakerAccess") @NonNull Observable<ApplicationInfo> getActiveApplications() {
+    return packageManagerWrapper.getActiveApplications();
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
+  Observable<String> getActivityListForApplication(@NonNull ApplicationInfo info) {
+    return packageManagerWrapper.getActivityListForPackage(info.packageName);
+  }
+
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
+  Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
+    return getPadLockDB().queryAll().first();
+  }
+
+  @SuppressWarnings("WeakerAccess") void cacheEntry(@NonNull AppEntry entry) {
+    appEntryCache.add(entry);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Pair<String, Boolean> findAppEntry(
@@ -213,62 +271,5 @@ class LockListInteractor extends LockCommonInteractor {
 
   public void setSystemVisible(boolean visible) {
     preferences.setSystemVisible(visible);
-  }
-
-  @SuppressWarnings("WeakerAccess") @NonNull Observable<ApplicationInfo> getActiveApplications() {
-    return packageManagerWrapper.getActiveApplications();
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<String> getActivityListForApplication(@NonNull ApplicationInfo info) {
-    return packageManagerWrapper.getActivityListForPackage(info.packageName);
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
-    return getPadLockDB().queryAll().first();
-  }
-
-  @CheckResult public boolean isSystemApplication(@NonNull ApplicationInfo info) {
-    return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult boolean isCacheEmpty() {
-    return appEntryCache.isEmpty();
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<AppEntry> getCachedEntries() {
-    return Observable.fromCallable(() -> appEntryCache).concatMap(Observable::from);
-  }
-
-  public void clearCache() {
-    appEntryCache.clear();
-  }
-
-  public void updateCacheEntry(@NonNull String name, @NonNull String packageName,
-      boolean newLockState) {
-    final int size = appEntryCache.size();
-    for (int i = 0; i < size; ++i) {
-      final AppEntry appEntry = appEntryCache.get(i);
-      if (appEntry.name().equals(name) && appEntry.packageName().equals(packageName)) {
-        Timber.d("Update cached entry: %s %s", name, packageName);
-        appEntryCache.set(i, AppEntry.builder(appEntry).locked(newLockState).build());
-      }
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess") void cacheEntry(@NonNull AppEntry entry) {
-    appEntryCache.add(entry);
-  }
-
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Observable<AppEntry> createFromPackageInfo(@NonNull String packageName, boolean locked) {
-    return packageManagerWrapper.getApplicationInfo(packageName)
-        .map(info -> AppEntry.builder()
-            .name(packageManagerWrapper.loadPackageLabel(info).toBlocking().first())
-            .packageName(packageName)
-            .system(isSystemApplication(info))
-            .locked(locked)
-            .build());
   }
 }
