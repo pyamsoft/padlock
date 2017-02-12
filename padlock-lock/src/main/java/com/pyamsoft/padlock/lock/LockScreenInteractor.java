@@ -91,7 +91,7 @@ class LockScreenInteractor extends LockInteractor {
   }
 
   @CheckResult @NonNull Observable<Boolean> postUnlock(@NonNull String packageName,
-      @NonNull String activityName, @NonNull String realName, @NonNull String lockCode,
+      @NonNull String activityName, @NonNull String realName, @Nullable String lockCode,
       boolean isSystem, boolean shouldExclude, long ignoreTime) {
     return Observable.defer(() -> {
       final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;

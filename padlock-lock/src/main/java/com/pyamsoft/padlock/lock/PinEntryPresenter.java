@@ -50,15 +50,7 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
       @NonNull String hint, @NonNull SubmitCallback callback) {
     Timber.d("Attempt PIN submission");
     SubscriptionHelper.unsubscribe(pinEntrySubscription);
-    pinEntrySubscription = interactor.getMasterPin()
-        .flatMap(masterPin -> {
-          if (masterPin == null) {
-            return interactor.createPin(currentAttempt, reEntryAttempt, hint);
-          } else {
-            return interactor.clearPin(masterPin, currentAttempt);
-          }
-        })
-        .filter(pinEntryEvent -> pinEntryEvent != null)
+    pinEntrySubscription = interactor.submitPin(currentAttempt, reEntryAttempt, hint)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(pinEntryEvent -> {
