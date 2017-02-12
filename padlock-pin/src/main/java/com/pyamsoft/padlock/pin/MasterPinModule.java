@@ -16,13 +16,15 @@
 
 package com.pyamsoft.padlock.pin;
 
+import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
 import dagger.Module;
 import dagger.Provides;
 
 @Module public class MasterPinModule {
 
   @Provides MasterPinInteractor provideMasterPinInteractor(
-      final MasterPinInteractor interactor) {
-    return interactor;
+      @NonNull PadLockPreferences preferences) {
+    return new MasterPinInteractor(preferences);
   }
 }

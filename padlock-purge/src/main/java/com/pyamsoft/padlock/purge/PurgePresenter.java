@@ -17,15 +17,76 @@
 package com.pyamsoft.padlock.purge;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
+import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import javax.inject.Inject;
+import rx.Scheduler;
+import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
+import rx.subscriptions.Subscriptions;
+import timber.log.Timber;
 
-interface PurgePresenter extends Presenter<Presenter.Empty> {
+class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  void clearList();
+  @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor interactor;
+  @NonNull private final CompositeSubscription compositeSubscription;
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription retrievalSubscription =
+      Subscriptions.empty();
+  @SuppressWarnings("WeakerAccess") boolean refreshing;
 
-  void retrieveStaleApplications(@NonNull RetrievalCallback callback);
+  @Inject PurgePresenter(@NonNull PurgeInteractor interactor, @NonNull Scheduler observeScheduler,
+      @NonNull Scheduler subscribeScheduler) {
+    super(observeScheduler, subscribeScheduler);
+    this.interactor = interactor;
+    compositeSubscription = new CompositeSubscription();
+    refreshing = false;
+  }
 
-  void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback);
+  @Override protected void onUnbind() {
+    super.onUnbind();
+    compositeSubscription.clear();
+    SubscriptionHelper.unsubscribe(retrievalSubscription);
+  }
+
+  public void clearList() {
+    interactor.clearCache();
+  }
+
+  public void retrieveStaleApplications(@NonNull RetrievalCallback callback) {
+    SubscriptionHelper.unsubscribe(retrievalSubscription);
+    retrievalSubscription = interactor.populateList()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(callback::onStaleApplicationRetrieved, throwable -> {
+          Timber.e(throwable, "onError retrieveStaleApplications");
+        }, () -> {
+          refreshing = false;
+          SubscriptionHelper.unsubscribe(retrievalSubscription);
+          callback.onRetrievalComplete();
+        });
+  }
+
+  public void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback) {
+    final Subscription subscription = interactor.deleteEntry(packageName)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(deleteResult -> {
+          Timber.d("Delete result :%d", deleteResult);
+          if (deleteResult > 0) {
+            onDeleteSuccess(packageName, callback);
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError deleteStale");
+        });
+    compositeSubscription.add(subscription);
+  }
+
+  @SuppressWarnings("WeakerAccess") void onDeleteSuccess(@NonNull String packageName,
+      @NonNull DeleteCallback callback) {
+    interactor.removeFromCache(packageName);
+    callback.onDeleted(packageName);
+  }
 
   interface RetrievalCallback {
 

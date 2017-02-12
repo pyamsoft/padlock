@@ -18,9 +18,11 @@ package com.pyamsoft.padlock.lock;
 
 import android.app.IntentService;
 import android.content.Context;
+import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.pin.MasterPinInteractor;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -37,7 +39,7 @@ import rx.Scheduler;
       PadLockPreferences preference, JobSchedulerCompat jobSchedulerCompat,
       MasterPinInteractor masterPinInteractor, PackageManagerWrapper packageManagerWrapper,
       PadLockDB padLockDB, @Named("recheck") Class<? extends IntentService> recheckServiceClass) {
-    return new LockScreenInteractor(context, preference, jobSchedulerCompat,
-        masterPinInteractor, packageManagerWrapper, padLockDB, recheckServiceClass);
+    return new LockScreenInteractor(context, preference, jobSchedulerCompat, masterPinInteractor,
+        packageManagerWrapper, padLockDB, recheckServiceClass);
   }
 }
