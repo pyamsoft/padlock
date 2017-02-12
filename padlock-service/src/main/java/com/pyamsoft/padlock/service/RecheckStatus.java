@@ -16,20 +16,6 @@
 
 package com.pyamsoft.padlock.service;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import javax.inject.Inject;
-import rx.Observable;
-
-class LockServiceStateInteractorImpl implements LockServiceStateInteractor {
-
-  @NonNull private final MasterPinInteractor pinInteractor;
-
-  @Inject LockServiceStateInteractorImpl(final @NonNull MasterPinInteractor pinInteractor) {
-    this.pinInteractor = pinInteractor;
-  }
-
-  @NonNull @CheckResult @Override public Observable<Boolean> isServiceEnabled() {
-    return pinInteractor.getMasterPin().map(pin -> pin != null);
-  }
+public enum RecheckStatus {
+  FORCE, NOT_FORCE
 }

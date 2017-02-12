@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.service;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.pin.MasterPinInteractor;
 import dagger.Module;
 import dagger.Provides;
 
@@ -24,6 +25,6 @@ import dagger.Provides;
 
   @Provides LockServiceStateInteractor provideLockServiceStateInteractor(
       @NonNull MasterPinInteractor pinInteractor) {
-    return new LockServiceStateInteractorImpl(pinInteractor);
+    return new LockServiceStateInteractor(pinInteractor);
   }
 }

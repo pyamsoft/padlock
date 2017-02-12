@@ -109,8 +109,7 @@ public class PadLockService extends AccessibilityService
       final String pName = eventPackage.toString();
       final String cName = eventClass.toString();
       if (!pName.isEmpty() && !cName.isEmpty()) {
-        presenter.processAccessibilityEvent(pName, cName,
-            LockServicePresenter.RecheckStatus.NOT_FORCE, this);
+        presenter.processAccessibilityEvent(pName, cName, RecheckStatus.NOT_FORCE, this);
       }
     } else {
       Timber.e("Missing needed data");
