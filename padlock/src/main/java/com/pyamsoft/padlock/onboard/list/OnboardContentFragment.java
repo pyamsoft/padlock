@@ -28,9 +28,9 @@ import android.view.ViewGroup;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.databinding.OnboardListPageContentBinding;
 import com.pyamsoft.padlock.onboard.OnboardChildFragment;
+import com.pyamsoft.pydroid.helper.AsyncMapHelper;
 import com.pyamsoft.pydroid.tool.AsyncDrawable;
 import com.pyamsoft.pydroid.tool.AsyncMap;
-import com.pyamsoft.pydroid.tool.AsyncMapHelper;
 
 abstract class OnboardContentFragment extends OnboardChildFragment {
 
