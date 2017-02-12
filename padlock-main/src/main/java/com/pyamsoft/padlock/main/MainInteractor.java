@@ -18,9 +18,19 @@ package com.pyamsoft.padlock.main;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
+import javax.inject.Inject;
 import rx.Observable;
 
-interface MainInteractor {
+class MainInteractor {
 
-  @CheckResult @NonNull Observable<Boolean> isOnboardingComplete();
+  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+
+  @Inject MainInteractor(final @NonNull PadLockPreferences preferences) {
+    this.preferences = preferences;
+  }
+
+  @NonNull @CheckResult public Observable<Boolean> isOnboardingComplete() {
+    return Observable.fromCallable(preferences::hasAgreed);
+  }
 }

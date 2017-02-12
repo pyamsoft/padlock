@@ -17,11 +17,44 @@
 package com.pyamsoft.padlock.main;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.presenter.Presenter;
+import android.support.annotation.Nullable;
+import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import javax.inject.Inject;
+import rx.Scheduler;
+import rx.Subscription;
+import timber.log.Timber;
 
-interface MainPresenter extends Presenter<MainPresenter.MainView> {
+class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
 
-  void showOnboardingOrDefault(@NonNull OnboardingCallback callback);
+  @SuppressWarnings("WeakerAccess") @NonNull final MainInteractor interactor;
+  @SuppressWarnings("WeakerAccess") @Nullable Subscription onboardingSubscription;
+
+  @Inject MainPresenter(@NonNull MainInteractor interactor, @NonNull Scheduler observeScheduler,
+      @NonNull Scheduler subscribeScheduler) {
+    super(observeScheduler, subscribeScheduler);
+    this.interactor = interactor;
+  }
+
+  public void showOnboardingOrDefault(@NonNull OnboardingCallback callback) {
+    SubscriptionHelper.unsubscribe(onboardingSubscription);
+    onboardingSubscription = interactor.isOnboardingComplete()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(onboardingComplete -> {
+              if (onboardingComplete) {
+                callback.onShowDefaultPage();
+              } else {
+                callback.onShowOnboarding();
+              }
+            }, throwable -> Timber.e(throwable, "onError"),
+            () -> SubscriptionHelper.unsubscribe(onboardingSubscription));
+  }
+
+  @Override protected void onUnbind() {
+    super.onUnbind();
+    SubscriptionHelper.unsubscribe(onboardingSubscription);
+  }
 
   interface OnboardingCallback {
 
