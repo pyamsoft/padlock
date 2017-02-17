@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.helper.Locker;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,13 +39,12 @@ import timber.log.Timber;
 
 class LockInfoInteractor extends LockCommonInteractor {
 
-  @SuppressWarnings("WeakerAccess") @NonNull static final Object LOCK = new Object();
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final Map<String, List<ActivityEntry>>
       activityEntryCache;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenClass;
+  @NonNull final Locker locker = Locker.newLock();
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
-  @SuppressWarnings("WeakerAccess") boolean refreshing;
 
   @Inject LockInfoInteractor(PadLockDB padLockDB,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
@@ -108,35 +108,19 @@ class LockInfoInteractor extends LockCommonInteractor {
     }
   }
 
-  @SuppressWarnings("WeakerAccess") void stopRefreshing() {
-    synchronized (LOCK) {
-      refreshing = false;
-    }
-  }
-
   @NonNull @CheckResult public Observable<ActivityEntry> populateList(@NonNull String packageName) {
     return Observable.defer(() -> {
-      synchronized (LOCK) {
-        while (refreshing) {
-          // Empty
-          // TODO use wait once we figure out why stuff doesn't work when we use wait
-        }
-
-        refreshing = true;
-      }
-
+      locker.waitForUnlock();
       Timber.d("populateList");
       final Observable<ActivityEntry> dataSource;
       if (isCacheEmpty()) {
-        dataSource = fetchFreshData(packageName);
+        locker.prepareLock();
+        dataSource = fetchFreshData(packageName).doOnNext(entry -> locker.unlock());
       } else {
         dataSource = getCachedEntries(packageName);
       }
       return dataSource;
-    })
-        .doOnUnsubscribe(this::stopRefreshing)
-        .doOnCompleted(this::stopRefreshing)
-        .doOnTerminate(this::stopRefreshing);
+    });
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult boolean isCacheEmpty() {
