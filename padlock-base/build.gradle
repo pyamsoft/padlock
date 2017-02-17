@@ -37,6 +37,8 @@ android {
     targetSdkVersion rootProject.ext.maxSdk
 
     publishNonDefault true
+
+    resConfigs "en"
   }
 
   compileOptions {
