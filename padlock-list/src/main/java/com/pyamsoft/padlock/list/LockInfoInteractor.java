@@ -43,7 +43,7 @@ class LockInfoInteractor extends LockCommonInteractor {
   @SuppressWarnings("WeakerAccess") @NonNull final Map<String, List<ActivityEntry>>
       activityEntryCache;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenClass;
-  @NonNull final Locker locker = Locker.newLock();
+  @SuppressWarnings("WeakerAccess") @NonNull final Locker locker = Locker.newLock();
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
   @Inject LockInfoInteractor(PadLockDB padLockDB,

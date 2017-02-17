@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.helper.Locker;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,11 +36,10 @@ import timber.log.Timber;
 
 class LockListInteractor extends LockCommonInteractor {
 
-  @SuppressWarnings("WeakerAccess") @NonNull static final Object LOCK = new Object();
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManagerWrapper;
   @SuppressWarnings("WeakerAccess") @NonNull final List<AppEntry> appEntryCache;
-  @SuppressWarnings("WeakerAccess") boolean refreshing;
+  @SuppressWarnings("WeakerAccess") @NonNull final Locker locker = Locker.newLock();
 
   @Inject LockListInteractor(PadLockDB padLockDB,
       @NonNull PackageManagerWrapper packageManagerWrapper,
@@ -50,39 +50,19 @@ class LockListInteractor extends LockCommonInteractor {
     appEntryCache = new ArrayList<>();
   }
 
-  @SuppressWarnings("WeakerAccess") void stopRefreshing() {
-    while (refreshing) {
-      synchronized (LOCK) {
-        while (refreshing) {
-          refreshing = false;
-        }
-      }
-    }
-  }
-
   @CheckResult @NonNull public Observable<AppEntry> populateList() {
     return Observable.defer(() -> {
-      synchronized (LOCK) {
-        while (refreshing) {
-          // Empty
-          // TODO use wait once we figure out why stuff doesn't work when we use wait
-        }
-
-        refreshing = true;
-      }
-
+      locker.waitForUnlock();
       Timber.d("populateList");
       final Observable<AppEntry> dataSource;
       if (isCacheEmpty()) {
-        dataSource = fetchFreshData();
+        locker.prepareLock();
+        dataSource = fetchFreshData().doOnNext(entry -> locker.unlock());
       } else {
         dataSource = getCachedEntries();
       }
       return dataSource;
-    })
-        .doOnUnsubscribe(this::stopRefreshing)
-        .doOnCompleted(this::stopRefreshing)
-        .doOnTerminate(this::stopRefreshing);
+    });
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult boolean isCacheEmpty() {
