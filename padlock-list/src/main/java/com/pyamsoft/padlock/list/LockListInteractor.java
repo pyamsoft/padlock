@@ -57,7 +57,7 @@ class LockListInteractor extends LockCommonInteractor {
       final Observable<AppEntry> dataSource;
       if (isCacheEmpty()) {
         locker.prepareLock();
-        dataSource = fetchFreshData().doOnNext(entry -> locker.unlock());
+        dataSource = fetchFreshData().doOnTerminate(locker::unlock).doOnUnsubscribe(locker::unlock);
       } else {
         dataSource = getCachedEntries();
       }
