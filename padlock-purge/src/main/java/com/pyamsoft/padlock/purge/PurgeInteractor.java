@@ -51,7 +51,7 @@ class PurgeInteractor {
       final Observable<String> dataSource;
       if (isCacheEmpty()) {
         locker.prepareLock();
-        dataSource = fetchFreshData().doOnNext(s -> locker.unlock());
+        dataSource = fetchFreshData().doOnTerminate(locker::unlock).doOnUnsubscribe(locker::unlock);
       } else {
         dataSource = getCachedEntries();
       }
