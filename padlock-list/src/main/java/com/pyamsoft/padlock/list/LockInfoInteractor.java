@@ -115,7 +115,8 @@ class LockInfoInteractor extends LockCommonInteractor {
       final Observable<ActivityEntry> dataSource;
       if (isCacheEmpty()) {
         locker.prepareLock();
-        dataSource = fetchFreshData(packageName).doOnNext(entry -> locker.unlock());
+        dataSource = fetchFreshData(packageName).doOnTerminate(locker::unlock)
+            .doOnUnsubscribe(locker::unlock);
       } else {
         dataSource = getCachedEntries(packageName);
       }
