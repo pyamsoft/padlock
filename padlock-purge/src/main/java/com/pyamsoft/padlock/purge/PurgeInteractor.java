@@ -21,6 +21,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.helper.Locker;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -31,11 +32,10 @@ import timber.log.Timber;
 
 class PurgeInteractor {
 
-  @SuppressWarnings("WeakerAccess") @NonNull static final Object LOCK = new Object();
+  @SuppressWarnings("WeakerAccess") @NonNull final Locker locker = Locker.newLock();
   @SuppressWarnings("WeakerAccess") @NonNull final List<String> stalePackageNameCache;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final PadLockDB padLockDB;
-  @SuppressWarnings("WeakerAccess") boolean refreshing;
 
   @Inject PurgeInteractor(@NonNull PackageManagerWrapper packageManagerWrapper,
       @NonNull PadLockDB padLockDB) {
@@ -44,35 +44,19 @@ class PurgeInteractor {
     stalePackageNameCache = new ArrayList<>();
   }
 
-  @SuppressWarnings("WeakerAccess") void stopRefreshing() {
-    synchronized (LOCK) {
-      refreshing = false;
-    }
-  }
-
   @NonNull public Observable<String> populateList() {
     return Observable.defer(() -> {
-      synchronized (LOCK) {
-        while (refreshing) {
-          // Empty
-          // TODO use wait once we figure out why stuff doesn't work when we use wait
-        }
-
-        refreshing = true;
-      }
-
+      locker.waitForUnlock();
       Timber.d("populateList");
       final Observable<String> dataSource;
       if (isCacheEmpty()) {
-        dataSource = fetchFreshData();
+        locker.prepareLock();
+        dataSource = fetchFreshData().doOnNext(s -> locker.unlock());
       } else {
         dataSource = getCachedEntries();
       }
       return dataSource;
-    })
-        .doOnUnsubscribe(this::stopRefreshing)
-        .doOnCompleted(this::stopRefreshing)
-        .doOnTerminate(this::stopRefreshing);
+    });
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<String> getCachedEntries() {

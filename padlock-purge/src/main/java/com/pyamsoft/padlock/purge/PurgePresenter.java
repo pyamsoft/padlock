@@ -33,14 +33,12 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
   @NonNull private final CompositeSubscription compositeSubscription;
   @SuppressWarnings("WeakerAccess") @NonNull Subscription retrievalSubscription =
       Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") boolean refreshing;
 
   @Inject PurgePresenter(@NonNull PurgeInteractor interactor, @NonNull Scheduler observeScheduler,
       @NonNull Scheduler subscribeScheduler) {
     super(observeScheduler, subscribeScheduler);
     this.interactor = interactor;
     compositeSubscription = new CompositeSubscription();
-    refreshing = false;
   }
 
   @Override protected void onUnbind() {
@@ -60,8 +58,8 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
         .observeOn(getObserveScheduler())
         .subscribe(callback::onStaleApplicationRetrieved, throwable -> {
           Timber.e(throwable, "onError retrieveStaleApplications");
+          callback.onRetrievalComplete();
         }, () -> {
-          refreshing = false;
           SubscriptionHelper.unsubscribe(retrievalSubscription);
           callback.onRetrievalComplete();
         });
