@@ -78,6 +78,7 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
         .subscribe(callback::onEntryAddedToList, throwable -> {
           Timber.e(throwable, "populateList onError");
           callback.onListPopulateError();
+          callback.onListPopulated();
         }, () -> {
           callback.onListPopulated();
           SubscriptionHelper.unsubscribe(populateListSubscription);
