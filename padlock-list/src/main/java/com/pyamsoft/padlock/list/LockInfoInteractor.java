@@ -26,12 +26,9 @@ import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.helper.Locker;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import rx.Observable;
@@ -40,11 +37,10 @@ import timber.log.Timber;
 class LockInfoInteractor extends LockCommonInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
-  @SuppressWarnings("WeakerAccess") @NonNull final Map<String, List<ActivityEntry>>
-      activityEntryCache;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenClass;
-  @SuppressWarnings("WeakerAccess") @NonNull final Locker locker = Locker.newLock();
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
+  @SuppressWarnings("WeakerAccess") @Nullable Observable<List<ActivityEntry>> cachedInfoObservable;
+  @NonNull private String currentPackageName;
 
   @Inject LockInfoInteractor(PadLockDB padLockDB,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
@@ -53,7 +49,7 @@ class LockInfoInteractor extends LockCommonInteractor {
     this.packageManagerWrapper = packageManagerWrapper;
     this.preferences = preferences;
     this.lockScreenClass = lockScreenClass;
-    activityEntryCache = new HashMap<>();
+    currentPackageName = "";
   }
 
   @NonNull @Override public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
@@ -86,90 +82,36 @@ class LockInfoInteractor extends LockCommonInteractor {
     return Observable.fromCallable(preferences::isDialogOnBoard).delay(300, TimeUnit.MILLISECONDS);
   }
 
-  public void clearCache() {
-    activityEntryCache.clear();
-  }
-
-  public void updateCacheEntry(@NonNull String packageName, @NonNull String name,
-      @NonNull LockState lockState) {
-    final List<ActivityEntry> activityEntries = activityEntryCache.get(packageName);
-    if (activityEntries == null) {
-      Timber.e("No list of activities exists for %s, do not update", packageName);
-      return;
-    }
-
-    final int size = activityEntries.size();
-    for (int i = 0; i < size; ++i) {
-      final ActivityEntry activityEntry = activityEntries.get(i);
-      if (activityEntry.name().equals(name)) {
-        Timber.d("Update cached entry: %s %s", name, lockState);
-        activityEntries.set(i, ActivityEntry.builder(activityEntry).lockState(lockState).build());
-      }
+  public void updateCacheEntry(@NonNull String name, @NonNull LockState lockState) {
+    if (cachedInfoObservable != null) {
+      cachedInfoObservable = cachedInfoObservable.map(activityEntries -> {
+        final int size = activityEntries.size();
+        for (int i = 0; i < size; ++i) {
+          final ActivityEntry activityEntry = activityEntries.get(i);
+          if (activityEntry.name().equals(name)) {
+            Timber.d("Update cached entry: %s %s", name, lockState);
+            activityEntries.set(i,
+                ActivityEntry.builder(activityEntry).lockState(lockState).build());
+          }
+        }
+        return activityEntries;
+      });
     }
   }
 
-  @NonNull @CheckResult public Observable<ActivityEntry> populateList(@NonNull String packageName) {
+  @NonNull @CheckResult
+  public Observable<ActivityEntry> populateList(@NonNull String packageName, boolean forceRefresh) {
     return Observable.defer(() -> {
-      locker.waitForUnlock();
-      Timber.d("populateList");
-      final Observable<ActivityEntry> dataSource;
-      if (isCacheEmpty()) {
-        locker.prepareLock();
-        dataSource = fetchFreshData(packageName).doOnTerminate(locker::unlock)
-            .doOnUnsubscribe(locker::unlock);
+      final Observable<List<ActivityEntry>> dataSource;
+      if (cachedInfoObservable == null || forceRefresh || !currentPackageName.equals(packageName)) {
+        Timber.d("Refresh info list data");
+        dataSource = fetchFreshData(packageName);
       } else {
-        dataSource = getCachedEntries(packageName);
+        Timber.d("Fetch info from cache");
+        dataSource = cachedInfoObservable;
       }
       return dataSource;
-    });
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult boolean isCacheEmpty() {
-    return activityEntryCache.isEmpty();
-  }
-
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Observable<ActivityEntry> getCachedEntries(@NonNull String packageName) {
-    return Observable.fromCallable(() -> {
-      List<ActivityEntry> activityEntries = activityEntryCache.get(packageName);
-      if (activityEntries == null) {
-        activityEntries = Collections.emptyList();
-      }
-      return activityEntries;
-    }).flatMap(Observable::from);
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<ActivityEntry> fetchFreshData(
-      @NonNull String packageName) {
-    return getPackageActivities(packageName).zipWith(getLockedActivityEntries(packageName),
-        (activityNames, padLockEntries) -> {
-          // Sort here to avoid stream break
-          // If the list is empty, the old flatMap call can hang, causing a list loading error
-          // Sort here where we are guaranteed a list of some kind
-          Collections.sort(padLockEntries,
-              (o1, o2) -> o1.activityName().compareToIgnoreCase(o2.activityName()));
-
-          final List<ActivityEntry> activityEntries = new ArrayList<>();
-
-          int start = 0;
-          int end = activityNames.size() - 1;
-
-          while (start <= end) {
-            // Find entry to compare against
-            final ActivityEntry entry1 = findActivityEntry(activityNames, padLockEntries, start);
-            activityEntries.add(entry1);
-
-            if (start != end) {
-              final ActivityEntry entry2 = findActivityEntry(activityNames, padLockEntries, end);
-              activityEntries.add(entry2);
-            }
-
-            ++start;
-            --end;
-          }
-
-          return activityEntries;
-        }).flatMap(Observable::from).sorted((activityEntry, activityEntry2) -> {
+    }).flatMap(Observable::from).sorted((activityEntry, activityEntry2) -> {
       // Package names are all the same
       final String entry1Name = activityEntry.name();
       final String entry2Name = activityEntry2.name();
@@ -199,18 +141,40 @@ class LockInfoInteractor extends LockCommonInteractor {
       } else {
         return entry1Name.compareToIgnoreCase(entry2Name);
       }
-    }).doOnNext(entry -> cacheEntry(packageName, entry));
+    });
   }
 
-  @SuppressWarnings("WeakerAccess") void cacheEntry(@NonNull String packageName,
-      @NonNull ActivityEntry entry) {
-    List<ActivityEntry> list = activityEntryCache.get(packageName);
-    if (list == null) {
-      list = new ArrayList<>();
-      activityEntryCache.put(packageName, list);
-    }
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
+  Observable<List<ActivityEntry>> fetchFreshData(@NonNull String packageName) {
+    return getPackageActivities(packageName).zipWith(getLockedActivityEntries(packageName),
+        (activityNames, padLockEntries) -> {
+          // Sort here to avoid stream break
+          // If the list is empty, the old flatMap call can hang, causing a list loading error
+          // Sort here where we are guaranteed a list of some kind
+          Collections.sort(padLockEntries,
+              (o1, o2) -> o1.activityName().compareToIgnoreCase(o2.activityName()));
 
-    list.add(entry);
+          final List<ActivityEntry> activityEntries = new ArrayList<>();
+
+          int start = 0;
+          int end = activityNames.size() - 1;
+
+          while (start <= end) {
+            // Find entry to compare against
+            final ActivityEntry entry1 = findActivityEntry(activityNames, padLockEntries, start);
+            activityEntries.add(entry1);
+
+            if (start != end) {
+              final ActivityEntry entry2 = findActivityEntry(activityNames, padLockEntries, end);
+              activityEntries.add(entry2);
+            }
+
+            ++start;
+            --end;
+          }
+
+          return activityEntries;
+        });
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
