@@ -29,10 +29,9 @@ import timber.log.Timber;
 
 class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor interactor;
+  @NonNull private final PurgeInteractor interactor;
   @NonNull private final CompositeSubscription compositeSubscription;
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription retrievalSubscription =
-      Subscriptions.empty();
+  @NonNull private Subscription retrievalSubscription = Subscriptions.empty();
 
   @Inject PurgePresenter(@NonNull PurgeInteractor interactor, @NonNull Scheduler observeScheduler,
       @NonNull Scheduler subscribeScheduler) {
@@ -44,18 +43,17 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
   @Override protected void onUnbind() {
     super.onUnbind();
     compositeSubscription.clear();
-    SubscriptionHelper.unsubscribe(retrievalSubscription);
+    retrievalSubscription = SubscriptionHelper.unsubscribe(retrievalSubscription);
   }
 
   public void retrieveStaleApplications(@NonNull RetrievalCallback callback, boolean forceRefresh) {
-    SubscriptionHelper.unsubscribe(retrievalSubscription);
+    retrievalSubscription = SubscriptionHelper.unsubscribe(retrievalSubscription);
     retrievalSubscription = interactor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onRetrievalComplete)
         .subscribe(callback::onStaleApplicationRetrieved,
-            throwable -> Timber.e(throwable, "onError retrieveStaleApplications"),
-            () -> SubscriptionHelper.unsubscribe(retrievalSubscription));
+            throwable -> Timber.e(throwable, "onError retrieveStaleApplications"));
   }
 
   public void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback) {
@@ -65,17 +63,12 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
         .subscribe(deleteResult -> {
           Timber.d("Delete result :%d", deleteResult);
           if (deleteResult > 0) {
-            onDeleteSuccess(packageName, callback);
+            callback.onDeleted(packageName);
           }
         }, throwable -> {
           Timber.e(throwable, "onError deleteStale");
         });
     compositeSubscription.add(subscription);
-  }
-
-  @SuppressWarnings("WeakerAccess") void onDeleteSuccess(@NonNull String packageName,
-      @NonNull DeleteCallback callback) {
-    callback.onDeleted(packageName);
   }
 
   interface RetrievalCallback {

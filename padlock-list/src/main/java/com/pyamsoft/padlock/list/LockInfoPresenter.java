@@ -31,13 +31,10 @@ import timber.log.Timber;
 
 class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final LockInfoInteractor lockInfoInteractor;
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription databaseSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription onboardSubscription =
-      Subscriptions.empty();
+  @NonNull private final LockInfoInteractor lockInfoInteractor;
+  @NonNull private Subscription populateListSubscription = Subscriptions.empty();
+  @NonNull private Subscription databaseSubscription = Subscriptions.empty();
+  @NonNull private Subscription onboardSubscription = Subscriptions.empty();
 
   @Inject LockInfoPresenter(final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("obs") Scheduler obsScheduler,
@@ -48,13 +45,14 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    SubscriptionHelper.unsubscribe(databaseSubscription, onboardSubscription,
-        populateListSubscription);
+    databaseSubscription = SubscriptionHelper.unsubscribe(databaseSubscription);
+    onboardSubscription = SubscriptionHelper.unsubscribe(onboardSubscription);
+    populateListSubscription = SubscriptionHelper.unsubscribe(populateListSubscription);
   }
 
   public void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback,
       boolean forceRefresh) {
-    SubscriptionHelper.unsubscribe(populateListSubscription);
+    populateListSubscription = SubscriptionHelper.unsubscribe(populateListSubscription);
     populateListSubscription = lockInfoInteractor.populateList(packageName, forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -62,14 +60,14 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
         .subscribe(callback::onEntryAddedToList, throwable -> {
           Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
           callback.onListPopulateError();
-        }, () -> SubscriptionHelper.unsubscribe(populateListSubscription));
+        });
   }
 
   public void modifyDatabaseEntry(boolean isNotDefault, int position, @NonNull String packageName,
       @NonNull String activityName, @SuppressWarnings("SameParameterValue") @Nullable String code,
       boolean system, boolean whitelist, boolean forceDelete,
       @NonNull ModifyDatabaseCallback callback) {
-    SubscriptionHelper.unsubscribe(databaseSubscription);
+    databaseSubscription = SubscriptionHelper.unsubscribe(databaseSubscription);
     databaseSubscription =
         lockInfoInteractor.modifySingleDatabaseEntry(isNotDefault, packageName, activityName, code,
             system, whitelist, forceDelete)
@@ -92,11 +90,11 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
             }, throwable -> {
               Timber.e(throwable, "onError modifyDatabaseEntry");
               callback.onDatabaseEntryError(position);
-            }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
+            });
   }
 
   public void showOnBoarding(@NonNull OnBoardingCallback callback) {
-    SubscriptionHelper.unsubscribe(onboardSubscription);
+    onboardSubscription = SubscriptionHelper.unsubscribe(onboardSubscription);
     onboardSubscription = lockInfoInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -108,7 +106,7 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
           }
         }, throwable -> {
           Timber.e(throwable, "onError");
-        }, () -> SubscriptionHelper.unsubscribe(onboardSubscription));
+        });
   }
 
   public interface ModifyDatabaseCallback extends LockDatabaseErrorView, LockDatabaseWhitelistView {

@@ -46,8 +46,9 @@ import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
 import com.pyamsoft.pydroid.ActionSingle;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncMap;
+import com.pyamsoft.pydroid.drawable.AsyncDrawable;
+import com.pyamsoft.pydroid.drawable.AsyncMap;
+import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -58,7 +59,7 @@ public class PinEntryDialog extends DialogFragment {
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
-  @NonNull private final AsyncDrawable.Mapper taskMap = new AsyncDrawable.Mapper();
+  @NonNull private final AsyncMap taskMap = new AsyncMap();
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") @Inject PinEntryPresenter presenter;
   @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
@@ -194,7 +195,7 @@ public class PinEntryDialog extends DialogFragment {
       dismiss();
     });
 
-    final AsyncMap.Entry task = AsyncDrawable.load(R.drawable.ic_close_24dp)
+    final AsyncMapEntry task = AsyncDrawable.load(R.drawable.ic_close_24dp)
         .tint(android.R.color.black)
         .into(binding.pinEntryClose);
     taskMap.put("close", task);
@@ -230,7 +231,7 @@ public class PinEntryDialog extends DialogFragment {
     // Force keyboard focus
     pinEntryText.requestFocus();
 
-    final AsyncMap.Entry task =
+    final AsyncMapEntry task =
         AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.pinImageGo);
     taskMap.put("arrow", task);
   }

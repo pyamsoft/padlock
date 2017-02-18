@@ -33,18 +33,13 @@ import timber.log.Timber;
 
 class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
+  @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription populateListSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription systemVisibleSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription onboardSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription fabStateSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription databaseSubscription =
-      Subscriptions.empty();
+  @NonNull private Subscription populateListSubscription = Subscriptions.empty();
+  @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
+  @NonNull private Subscription onboardSubscription = Subscriptions.empty();
+  @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
+  @NonNull private Subscription databaseSubscription = Subscriptions.empty();
 
   @Inject LockListPresenter(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -56,12 +51,15 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    SubscriptionHelper.unsubscribe(systemVisibleSubscription, onboardSubscription,
-        fabStateSubscription, databaseSubscription, populateListSubscription);
+    systemVisibleSubscription = SubscriptionHelper.unsubscribe(systemVisibleSubscription);
+    onboardSubscription = SubscriptionHelper.unsubscribe(onboardSubscription);
+    fabStateSubscription = SubscriptionHelper.unsubscribe(fabStateSubscription);
+    databaseSubscription = SubscriptionHelper.unsubscribe(databaseSubscription);
+    populateListSubscription = SubscriptionHelper.unsubscribe(populateListSubscription);
   }
 
   public void populateList(@NonNull PopulateListCallback callback, boolean forceRefresh) {
-    SubscriptionHelper.unsubscribe(populateListSubscription);
+    populateListSubscription = SubscriptionHelper.unsubscribe(populateListSubscription);
     populateListSubscription = lockListInteractor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -69,22 +67,21 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
         .subscribe(callback::onEntryAddedToList, throwable -> {
           Timber.e(throwable, "populateList onError");
           callback.onListPopulateError();
-        }, () -> SubscriptionHelper.unsubscribe(populateListSubscription));
+        });
   }
 
   public void setFABStateFromPreference(@NonNull FABStateCallback callback) {
-    SubscriptionHelper.unsubscribe(fabStateSubscription);
+    fabStateSubscription = SubscriptionHelper.unsubscribe(fabStateSubscription);
     fabStateSubscription = stateInteractor.isServiceEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(enabled -> {
-              if (enabled) {
-                callback.onSetFABStateEnabled();
-              } else {
-                callback.onSetFABStateDisabled();
-              }
-            }, throwable -> Timber.e(throwable, "onError"),
-            () -> SubscriptionHelper.unsubscribe(fabStateSubscription));
+          if (enabled) {
+            callback.onSetFABStateEnabled();
+          } else {
+            callback.onSetFABStateDisabled();
+          }
+        }, throwable -> Timber.e(throwable, "onError"));
   }
 
   public void setSystemVisible() {
@@ -96,48 +93,38 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void setSystemVisibilityFromPreference(@NonNull SystemVisibilityCallback callback) {
-    SubscriptionHelper.unsubscribe(systemVisibleSubscription);
+    systemVisibleSubscription = SubscriptionHelper.unsubscribe(systemVisibleSubscription);
     systemVisibleSubscription = lockListInteractor.isSystemVisible()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(visible -> {
-              if (visible) {
-                callback.onSetSystemVisible();
-              } else {
-                callback.onSetSystemInvisible();
-              }
-            }, throwable -> Timber.e(throwable, "onError"),
-            () -> SubscriptionHelper.unsubscribe(systemVisibleSubscription));
-  }
-
-  public void clickPinFABServiceIdle(@NonNull ShowAccessibilityCallback callback) {
-    callback.onCreateAccessibilityDialog();
-  }
-
-  public void clickPinFABServiceRunning(@NonNull ShowPinCallback callback) {
-    callback.onCreatePinDialog();
+          if (visible) {
+            callback.onSetSystemVisible();
+          } else {
+            callback.onSetSystemInvisible();
+          }
+        }, throwable -> Timber.e(throwable, "onError"));
   }
 
   public void showOnBoarding(@NonNull OnboardingCallback callback) {
-    SubscriptionHelper.unsubscribe(onboardSubscription);
+    onboardSubscription = SubscriptionHelper.unsubscribe(onboardSubscription);
     onboardSubscription = lockListInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboard -> {
-              if (onboard) {
-                callback.onOnboardingComplete();
-              } else {
-                callback.onShowOnboarding();
-              }
-            }, throwable -> Timber.e(throwable, "onError"),
-            () -> SubscriptionHelper.unsubscribe(onboardSubscription));
+          if (onboard) {
+            callback.onOnboardingComplete();
+          } else {
+            callback.onShowOnboarding();
+          }
+        }, throwable -> Timber.e(throwable, "onError"));
   }
 
   public void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
       @SuppressWarnings("SameParameterValue") @Nullable String code, boolean system,
       @NonNull DatabaseCallback callback) {
     // No whitelisting for modifications from the List
-    SubscriptionHelper.unsubscribe(databaseSubscription);
+    databaseSubscription = SubscriptionHelper.unsubscribe(databaseSubscription);
     databaseSubscription = lockListInteractor.modifySingleDatabaseEntry(isChecked, packageName,
         PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system, false, false)
         .subscribeOn(getSubscribeScheduler())
@@ -156,7 +143,7 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
         }, throwable -> {
           Timber.e(throwable, "onError modifyDatabaseEntry");
           callback.onDatabaseEntryError(position);
-        }, () -> SubscriptionHelper.unsubscribe(databaseSubscription));
+        });
   }
 
   interface OnboardingCallback {

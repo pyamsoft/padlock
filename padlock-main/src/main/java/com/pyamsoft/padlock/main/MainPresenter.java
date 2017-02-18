@@ -17,18 +17,18 @@
 package com.pyamsoft.padlock.main;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final MainInteractor interactor;
-  @SuppressWarnings("WeakerAccess") @Nullable Subscription onboardingSubscription;
+  @NonNull private final MainInteractor interactor;
+  @NonNull private Subscription onboardingSubscription = Subscriptions.empty();
 
   @Inject MainPresenter(@NonNull MainInteractor interactor, @NonNull Scheduler observeScheduler,
       @NonNull Scheduler subscribeScheduler) {
@@ -37,23 +37,22 @@ class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
   }
 
   public void showOnboardingOrDefault(@NonNull OnboardingCallback callback) {
-    SubscriptionHelper.unsubscribe(onboardingSubscription);
+    onboardingSubscription = SubscriptionHelper.unsubscribe(onboardingSubscription);
     onboardingSubscription = interactor.isOnboardingComplete()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboardingComplete -> {
-              if (onboardingComplete) {
-                callback.onShowDefaultPage();
-              } else {
-                callback.onShowOnboarding();
-              }
-            }, throwable -> Timber.e(throwable, "onError"),
-            () -> SubscriptionHelper.unsubscribe(onboardingSubscription));
+          if (onboardingComplete) {
+            callback.onShowDefaultPage();
+          } else {
+            callback.onShowOnboarding();
+          }
+        }, throwable -> Timber.e(throwable, "onError"));
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    SubscriptionHelper.unsubscribe(onboardingSubscription);
+    onboardingSubscription = SubscriptionHelper.unsubscribe(onboardingSubscription);
   }
 
   interface OnboardingCallback {

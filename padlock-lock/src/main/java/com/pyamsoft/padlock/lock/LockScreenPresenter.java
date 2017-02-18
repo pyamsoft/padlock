@@ -30,17 +30,13 @@ import timber.log.Timber;
 
 class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final LockScreenInteractor interactor;
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription postUnlockSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription displayNameSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription ignoreTimeSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription unlockSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription lockSubscription = Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription hintSubscription = Subscriptions.empty();
+  @NonNull private final LockScreenInteractor interactor;
+  @NonNull private Subscription postUnlockSubscription = Subscriptions.empty();
+  @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
+  @NonNull private Subscription ignoreTimeSubscription = Subscriptions.empty();
+  @NonNull private Subscription unlockSubscription = Subscriptions.empty();
+  @NonNull private Subscription lockSubscription = Subscriptions.empty();
+  @NonNull private Subscription hintSubscription = Subscriptions.empty();
 
   @Inject LockScreenPresenter(@NonNull final LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
@@ -51,35 +47,35 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    SubscriptionHelper.unsubscribe(ignoreTimeSubscription, unlockSubscription, lockSubscription,
-        displayNameSubscription, postUnlockSubscription);
+    postUnlockSubscription = SubscriptionHelper.unsubscribe(postUnlockSubscription);
+    displayNameSubscription = SubscriptionHelper.unsubscribe(displayNameSubscription);
+    ignoreTimeSubscription = SubscriptionHelper.unsubscribe(ignoreTimeSubscription);
+    unlockSubscription = SubscriptionHelper.unsubscribe(unlockSubscription);
+    lockSubscription = SubscriptionHelper.unsubscribe(lockSubscription);
+    hintSubscription = SubscriptionHelper.unsubscribe(hintSubscription);
   }
 
   public void displayLockedHint(@NonNull LockHintCallback callback) {
-    SubscriptionHelper.unsubscribe(hintSubscription);
+    hintSubscription = SubscriptionHelper.unsubscribe(hintSubscription);
     hintSubscription = interactor.getHint()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(callback::setDisplayHint, throwable -> {
-          Timber.e(throwable, "onError displayLockedHint");
-          // TODO
-        }, () -> SubscriptionHelper.unsubscribe(hintSubscription));
+        .subscribe(callback::setDisplayHint,
+            throwable -> Timber.e(throwable, "onError displayLockedHint"));
   }
 
   public void createWithDefaultIgnoreTime(@NonNull IgnoreTimeCallback callback) {
-    SubscriptionHelper.unsubscribe(ignoreTimeSubscription);
+    ignoreTimeSubscription = SubscriptionHelper.unsubscribe(ignoreTimeSubscription);
     ignoreTimeSubscription = interactor.getDefaultIgnoreTime()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(callback::onInitializeWithIgnoreTime, throwable -> {
-          Timber.e(throwable, "onError createWithDefaultIgnoreTime");
-          // TODO
-        }, () -> SubscriptionHelper.unsubscribe(ignoreTimeSubscription));
+        .subscribe(callback::onInitializeWithIgnoreTime,
+            throwable -> Timber.e(throwable, "onError createWithDefaultIgnoreTime"));
   }
 
   public void lockEntry(@NonNull String packageName, @NonNull String activityName,
       @NonNull LockCallback callback) {
-    SubscriptionHelper.unsubscribe(lockSubscription);
+    lockSubscription = SubscriptionHelper.unsubscribe(lockSubscription);
     lockSubscription = interactor.incrementAndGetFailCount(packageName, activityName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -89,13 +85,13 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
         }, throwable -> {
           Timber.e(throwable, "lockEntry onError");
           callback.onLockedError();
-        }, () -> SubscriptionHelper.unsubscribe(lockSubscription));
+        });
   }
 
   public void submit(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, @NonNull String currentAttempt,
       @NonNull LockSubmitCallback callback) {
-    SubscriptionHelper.unsubscribe(unlockSubscription);
+    unlockSubscription = SubscriptionHelper.unsubscribe(unlockSubscription);
     unlockSubscription =
         interactor.submitPin(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
             .subscribeOn(getSubscribeScheduler())
@@ -110,25 +106,25 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
             }, throwable -> {
               Timber.e(throwable, "unlockEntry onError");
               callback.onSubmitError();
-            }, () -> SubscriptionHelper.unsubscribe(unlockSubscription));
+            });
   }
 
   public void loadDisplayNameFromPackage(@NonNull String packageName,
       @NonNull DisplayNameLoadCallback callback) {
-    SubscriptionHelper.unsubscribe(displayNameSubscription);
+    displayNameSubscription = SubscriptionHelper.unsubscribe(displayNameSubscription);
     displayNameSubscription = interactor.getDisplayName(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(callback::setDisplayName, throwable -> {
           Timber.e(throwable, "Error loading display name from package");
           callback.setDisplayName("");
-        }, () -> SubscriptionHelper.unsubscribe(displayNameSubscription));
+        });
   }
 
   public void postUnlock(@NonNull String packageName, @NonNull String activityName,
       @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
       long ignoreTime, @NonNull PostUnlockCallback callback) {
-    SubscriptionHelper.unsubscribe(postUnlockSubscription);
+    postUnlockSubscription = SubscriptionHelper.unsubscribe(postUnlockSubscription);
     postUnlockSubscription =
         interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
             shouldExclude, ignoreTime)
@@ -140,7 +136,7 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
             }, throwable -> {
               Timber.e(throwable, "Error postunlock");
               callback.onLockedError();
-            }, () -> SubscriptionHelper.unsubscribe(postUnlockSubscription));
+            });
   }
 
   interface LockErrorCallback {

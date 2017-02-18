@@ -33,10 +33,8 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_ALL = 1;
   @SuppressWarnings("WeakerAccess") @NonNull final ApplicationInstallReceiver receiver;
   @NonNull private final SettingsPreferenceInteractor interactor;
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription confirmedSubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription applicationInstallSubscription =
-      Subscriptions.empty();
+  @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
+  @NonNull private Subscription applicationInstallSubscription = Subscriptions.empty();
 
   @Inject SettingsPreferencePresenter(@NonNull SettingsPreferenceInteractor interactor,
       @NonNull ApplicationInstallReceiver receiver, @NonNull Scheduler obsScheduler,
@@ -48,7 +46,8 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    SubscriptionHelper.unsubscribe(confirmedSubscription, applicationInstallSubscription);
+    confirmedSubscription = SubscriptionHelper.unsubscribe(confirmedSubscription);
+    applicationInstallSubscription = SubscriptionHelper.unsubscribe(applicationInstallSubscription);
   }
 
   public void requestClearAll(@NonNull RequestCallback callback) {
@@ -60,18 +59,17 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void setApplicationInstallReceiverState() {
-    SubscriptionHelper.unsubscribe(applicationInstallSubscription);
+    applicationInstallSubscription = SubscriptionHelper.unsubscribe(applicationInstallSubscription);
     applicationInstallSubscription = interactor.isInstallListenerEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(result -> {
-              if (result) {
-                receiver.register();
-              } else {
-                receiver.unregister();
-              }
-            }, throwable -> Timber.e(throwable, "onError setApplicationInstallReceiverState"),
-            () -> SubscriptionHelper.unsubscribe(applicationInstallSubscription));
+          if (result) {
+            receiver.register();
+          } else {
+            receiver.unregister();
+          }
+        }, throwable -> Timber.e(throwable, "onError setApplicationInstallReceiverState"));
   }
 
   public void processClearRequest(int type, @NonNull ClearCallback callback) {
@@ -87,23 +85,21 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
     }
   }
 
-  @SuppressWarnings("WeakerAccess") void clearAll(@NonNull ClearCallback callback) {
-    SubscriptionHelper.unsubscribe(confirmedSubscription);
+  private void clearAll(@NonNull ClearCallback callback) {
+    confirmedSubscription = SubscriptionHelper.unsubscribe(confirmedSubscription);
     confirmedSubscription = interactor.clearAll()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(aBoolean -> callback.onClearAll(), throwable -> Timber.e(throwable, "onError"),
-            () -> SubscriptionHelper.unsubscribe(confirmedSubscription));
+        .subscribe(aBoolean -> callback.onClearAll(), throwable -> Timber.e(throwable, "onError"));
   }
 
-  @SuppressWarnings("WeakerAccess") void clearDatabase(@NonNull ClearCallback callback) {
-    SubscriptionHelper.unsubscribe(confirmedSubscription);
+  private void clearDatabase(@NonNull ClearCallback callback) {
+    confirmedSubscription = SubscriptionHelper.unsubscribe(confirmedSubscription);
     confirmedSubscription = interactor.clearDatabase()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(aBoolean -> callback.onClearDatabase(),
-            throwable -> Timber.e(throwable, "onError"),
-            () -> SubscriptionHelper.unsubscribe(confirmedSubscription));
+            throwable -> Timber.e(throwable, "onError"));
   }
 
   interface ClearCallback {
