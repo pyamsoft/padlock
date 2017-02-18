@@ -244,7 +244,7 @@ public class LockListFragment extends Fragment {
           }
         });
       }
-      presenter.populateList(populateListCallback);
+      presenter.populateList(populateListCallback, false);
     }
   }
 
@@ -416,15 +416,14 @@ public class LockListFragment extends Fragment {
 
   public void refreshList() {
     fastItemAdapter.clear();
-    presenter.clearList(populateListCallback);
-    presenter.populateList(populateListCallback);
+    populateListCallback.onListCleared();
+    presenter.populateList(populateListCallback, true);
   }
 
   void onDatabaseUpdated(int position, boolean locked) {
     final LockListItem oldItem = fastItemAdapter.getItem(position);
     final LockListItem newItem = oldItem.copyWithNewLockState(locked);
     fastItemAdapter.set(position, newItem);
-    presenter.updateCachedEntryLockState(newItem.getName(), newItem.getPackageName(), locked);
   }
 
   @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(boolean lock, int position,
