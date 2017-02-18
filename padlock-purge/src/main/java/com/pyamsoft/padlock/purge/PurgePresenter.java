@@ -47,22 +47,16 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
     SubscriptionHelper.unsubscribe(retrievalSubscription);
   }
 
-  public void clearList() {
-    interactor.clearCache();
-  }
-
-  public void retrieveStaleApplications(@NonNull RetrievalCallback callback) {
+  public void retrieveStaleApplications(@NonNull RetrievalCallback callback, boolean forceRefresh) {
     SubscriptionHelper.unsubscribe(retrievalSubscription);
-    retrievalSubscription = interactor.populateList()
+    retrievalSubscription = interactor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(callback::onStaleApplicationRetrieved, throwable -> {
-          Timber.e(throwable, "onError retrieveStaleApplications");
-          callback.onRetrievalComplete();
-        }, () -> {
-          SubscriptionHelper.unsubscribe(retrievalSubscription);
-          callback.onRetrievalComplete();
-        });
+        .doOnTerminate(callback::onRetrievalComplete)
+        .subscribeOn(getObserveScheduler())
+        .subscribe(callback::onStaleApplicationRetrieved,
+            throwable -> Timber.e(throwable, "onError retrieveStaleApplications"),
+            () -> SubscriptionHelper.unsubscribe(retrievalSubscription));
   }
 
   public void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback) {
@@ -82,7 +76,6 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @SuppressWarnings("WeakerAccess") void onDeleteSuccess(@NonNull String packageName,
       @NonNull DeleteCallback callback) {
-    interactor.removeFromCache(packageName);
     callback.onDeleted(packageName);
   }
 

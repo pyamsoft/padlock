@@ -18,10 +18,10 @@ package com.pyamsoft.padlock.purge;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.helper.Locker;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,45 +32,38 @@ import timber.log.Timber;
 
 class PurgeInteractor {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final Locker locker = Locker.newLock();
-  @SuppressWarnings("WeakerAccess") @NonNull final List<String> stalePackageNameCache;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final PadLockDB padLockDB;
+  @SuppressWarnings("WeakerAccess") @Nullable Observable<List<String>> cachedStalePackages;
 
   @Inject PurgeInteractor(@NonNull PackageManagerWrapper packageManagerWrapper,
       @NonNull PadLockDB padLockDB) {
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
-    stalePackageNameCache = new ArrayList<>();
   }
 
-  @NonNull public Observable<String> populateList() {
+  @NonNull public Observable<String> populateList(boolean forceRefresh) {
     return Observable.defer(() -> {
-      locker.waitForUnlock();
-      Timber.d("populateList");
-      final Observable<String> dataSource;
-      if (isCacheEmpty()) {
-        locker.prepareLock();
-        dataSource = fetchFreshData().doOnTerminate(locker::unlock).doOnUnsubscribe(locker::unlock);
-      } else {
-        dataSource = getCachedEntries();
+      final Observable<List<String>> dataSource;
+      synchronized (this) {
+        if (cachedStalePackages == null || forceRefresh) {
+          Timber.d("Refresh stale package");
+          dataSource = fetchFreshData().cache();
+          cachedStalePackages = dataSource;
+        } else {
+          Timber.d("Fetch stale from cache");
+          dataSource = cachedStalePackages;
+        }
       }
       return dataSource;
-    });
+    }).flatMap(Observable::from).sorted(String::compareToIgnoreCase);
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<String> getCachedEntries() {
-    return Observable.fromCallable(() -> stalePackageNameCache).flatMap(Observable::from);
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult boolean isCacheEmpty() {
-    return stalePackageNameCache.isEmpty();
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<String> fetchFreshData() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
+  Observable<List<String>> fetchFreshData() {
     return getAppEntryList().zipWith(getActiveApplicationPackageNames().toList(),
         (allEntries, packageNames) -> {
-          final Set<String> stalePackageNames = new HashSet<>();
+          final List<String> stalePackageNames = new ArrayList<>();
           if (allEntries.isEmpty()) {
             Timber.e("Database does not have any AppEntry items");
             return stalePackageNames;
@@ -99,7 +92,7 @@ class PurgeInteractor {
           }
 
           return stalePackageNames;
-        }).flatMap(Observable::from).sorted(String::compareToIgnoreCase).doOnNext(this::cacheEntry);
+        });
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
@@ -113,19 +106,12 @@ class PurgeInteractor {
     return padLockDB.queryAll().first();
   }
 
-  @SuppressWarnings("WeakerAccess") void cacheEntry(@NonNull String entry) {
-    stalePackageNameCache.add(entry);
-  }
-
-  public void clearCache() {
-    stalePackageNameCache.clear();
-  }
-
   @CheckResult @NonNull public Observable<Integer> deleteEntry(@NonNull String packageName) {
-    return padLockDB.deleteWithPackageName(packageName);
-  }
-
-  public void removeFromCache(@NonNull String entry) {
-    stalePackageNameCache.remove(entry);
+    return padLockDB.deleteWithPackageName(packageName).map(integer -> {
+      synchronized (this) {
+        cachedStalePackages = null;
+      }
+      return integer;
+    });
   }
 }
