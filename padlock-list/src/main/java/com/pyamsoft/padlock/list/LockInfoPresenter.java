@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.list;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.ActivityEntry;
-import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
@@ -53,13 +52,10 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
         populateListSubscription);
   }
 
-  public void updateCachedEntryLockState(@NonNull String name, @NonNull LockState lockState) {
-    lockInfoInteractor.updateCacheEntry(name, lockState);
-  }
-
-  public void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback) {
+  public void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback,
+      boolean forceRefresh) {
     SubscriptionHelper.unsubscribe(populateListSubscription);
-    populateListSubscription = lockInfoInteractor.populateList(packageName, false)
+    populateListSubscription = lockInfoInteractor.populateList(packageName, forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onListPopulated)

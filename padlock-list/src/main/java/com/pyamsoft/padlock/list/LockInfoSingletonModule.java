@@ -24,13 +24,13 @@ import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 @Module public class LockInfoSingletonModule {
 
-  @Provides LockInfoInteractor provideLockInfoInteractor(PadLockDB padLockDB,
+  @Singleton @Provides LockInfoInteractor provideLockInfoInteractor(PadLockDB padLockDB,
       PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
       @Named("lockscreen") Class<? extends Activity> lockScreenClass) {
-    return new LockInfoInteractor(padLockDB, packageManagerWrapper, preferences,
-        lockScreenClass);
+    return new LockInfoInteractor(padLockDB, packageManagerWrapper, preferences, lockScreenClass);
   }
 }
