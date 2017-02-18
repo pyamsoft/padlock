@@ -30,7 +30,7 @@ import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-class PurgeInteractor {
+public class PurgeInteractor {
 
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final PadLockDB padLockDB;
@@ -40,6 +40,10 @@ class PurgeInteractor {
       @NonNull PadLockDB padLockDB) {
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
+  }
+
+  public void clearCached() {
+    cachedStalePackages = null;
   }
 
   @NonNull public Observable<String> populateList(boolean forceRefresh) {

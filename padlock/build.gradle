@@ -117,10 +117,6 @@ dependencies {
   releaseCompile project(path: ":padlock-onboard", configuration: "release")
   debugCompile project(path: ":padlock-lock", configuration: "debug")
   releaseCompile project(path: ":padlock-lock", configuration: "release")
-  debugCompile project(path: ":padlock-list", configuration: "debug")
-  releaseCompile project(path: ":padlock-list", configuration: "release")
-  debugCompile project(path: ":padlock-purge", configuration: "debug")
-  releaseCompile project(path: ":padlock-purge", configuration: "release")
   debugCompile project(path: ":padlock-settings", configuration: "debug")
   releaseCompile project(path: ":padlock-settings", configuration: "release")
 }

@@ -73,7 +73,9 @@ dependencies {
   // Mockito for unit tests
   testCompile "org.mockito:mockito-core:$mockito"
 
-  debugCompile project(path: ":padlock-base", configuration: "debug")
-  releaseCompile project(path: ":padlock-base", configuration: "release")
+  debugCompile project(path: ":padlock-list", configuration: "debug")
+  releaseCompile project(path: ":padlock-list", configuration: "release")
+  debugCompile project(path: ":padlock-purge", configuration: "debug")
+  releaseCompile project(path: ":padlock-purge", configuration: "release")
 }
 

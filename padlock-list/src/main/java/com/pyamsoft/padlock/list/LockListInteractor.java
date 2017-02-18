@@ -34,7 +34,7 @@ import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-class LockListInteractor extends LockCommonInteractor {
+public class LockListInteractor extends LockCommonInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManagerWrapper;
@@ -46,6 +46,10 @@ class LockListInteractor extends LockCommonInteractor {
     super(padLockDB);
     this.packageManagerWrapper = packageManagerWrapper;
     this.preferences = preferences;
+  }
+
+  @Override public void clearCached() {
+    cachedEntriesObservable = null;
   }
 
   @CheckResult @NonNull public Observable<AppEntry> populateList(boolean forceRefresh) {
