@@ -36,7 +36,7 @@ import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-class LockInfoInteractor extends LockCommonInteractor {
+public class LockInfoInteractor extends LockCommonInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenClass;
@@ -52,6 +52,10 @@ class LockInfoInteractor extends LockCommonInteractor {
     this.preferences = preferences;
     this.lockScreenClass = lockScreenClass;
     cachedInfoObservableMap = new HashMap<>();
+  }
+
+  @Override public void clearCached() {
+    cachedInfoObservableMap.clear();
   }
 
   @NonNull @Override public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,

@@ -20,6 +20,9 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
+import com.pyamsoft.padlock.list.LockInfoInteractor;
+import com.pyamsoft.padlock.list.LockListInteractor;
+import com.pyamsoft.padlock.purge.PurgeInteractor;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -35,7 +38,9 @@ import rx.Scheduler;
   }
 
   @Provides SettingsPreferenceInteractor provideSettingsInteractor(PadLockDB padLockDB,
-      PadLockPreferences preferences) {
-    return new SettingsPreferenceInteractor(padLockDB, preferences);
+      PadLockPreferences preferences, @NonNull LockListInteractor lockListInteractor,
+      @NonNull LockInfoInteractor lockInfoInteractor, @NonNull PurgeInteractor purgeInteractor) {
+    return new SettingsPreferenceInteractor(padLockDB, preferences, lockListInteractor,
+        lockInfoInteractor, purgeInteractor);
   }
 }

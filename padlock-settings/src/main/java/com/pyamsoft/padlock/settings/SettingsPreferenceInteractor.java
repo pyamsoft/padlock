@@ -20,6 +20,9 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
+import com.pyamsoft.padlock.list.LockInfoInteractor;
+import com.pyamsoft.padlock.list.LockListInteractor;
+import com.pyamsoft.padlock.purge.PurgeInteractor;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -28,11 +31,18 @@ class SettingsPreferenceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
+  @NonNull final LockListInteractor lockListInteractor;
+  @NonNull final LockInfoInteractor lockInfoInteractor;
+  @NonNull final PurgeInteractor purgeInteractor;
 
   @Inject SettingsPreferenceInteractor(@NonNull PadLockDB padLockDB,
-      @NonNull PadLockPreferences preferences) {
+      @NonNull PadLockPreferences preferences, @NonNull LockListInteractor lockListInteractor,
+      @NonNull LockInfoInteractor lockInfoInteractor, @NonNull PurgeInteractor purgeInteractor) {
     this.padLockDB = padLockDB;
     this.preferences = preferences;
+    this.lockListInteractor = lockListInteractor;
+    this.lockInfoInteractor = lockInfoInteractor;
+    this.purgeInteractor = purgeInteractor;
   }
 
   @NonNull @CheckResult public Observable<Boolean> isInstallListenerEnabled() {
@@ -45,6 +55,9 @@ class SettingsPreferenceInteractor {
       padLockDB.deleteDatabase();
 
       // TODO just return something valid
+      lockListInteractor.clearCached();
+      lockInfoInteractor.clearCached();
+      purgeInteractor.clearCached();
       return Boolean.TRUE;
     });
   }

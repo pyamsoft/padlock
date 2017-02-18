@@ -58,6 +58,8 @@ abstract class LockCommonInteractor {
     });
   }
 
+  public abstract void clearCached();
+
   @NonNull @CheckResult
   public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
       @NonNull String packageName, @NonNull String activityName, @Nullable String code,
