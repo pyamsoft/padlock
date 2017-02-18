@@ -45,15 +45,13 @@ class PurgeInteractor {
   @NonNull public Observable<String> populateList(boolean forceRefresh) {
     return Observable.defer(() -> {
       final Observable<List<String>> dataSource;
-      synchronized (this) {
-        if (cachedStalePackages == null || forceRefresh) {
-          Timber.d("Refresh stale package");
-          dataSource = fetchFreshData().cache();
-          cachedStalePackages = dataSource;
-        } else {
-          Timber.d("Fetch stale from cache");
-          dataSource = cachedStalePackages;
-        }
+      if (cachedStalePackages == null || forceRefresh) {
+        Timber.d("Refresh stale package");
+        dataSource = fetchFreshData().cache();
+        cachedStalePackages = dataSource;
+      } else {
+        Timber.d("Fetch stale from cache");
+        dataSource = cachedStalePackages;
       }
       return dataSource;
     }).flatMap(Observable::from).sorted(String::compareToIgnoreCase);
@@ -108,9 +106,7 @@ class PurgeInteractor {
 
   @CheckResult @NonNull public Observable<Integer> deleteEntry(@NonNull String packageName) {
     return padLockDB.deleteWithPackageName(packageName).map(integer -> {
-      synchronized (this) {
-        cachedStalePackages = null;
-      }
+      cachedStalePackages = null;
       return integer;
     });
   }

@@ -23,10 +23,8 @@ import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
@@ -55,29 +53,21 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
         populateListSubscription);
   }
 
-  public void updateCachedEntryLockState(@NonNull String packageName, @NonNull String name,
-      @NonNull LockState lockState) {
-    lockInfoInteractor.updateCacheEntry(packageName, name, lockState);
-  }
-
-  public void clearList(@NonNull ClearCallback callback) {
-    lockInfoInteractor.clearCache();
-    callback.onListCleared();
+  public void updateCachedEntryLockState(@NonNull String name, @NonNull LockState lockState) {
+    lockInfoInteractor.updateCacheEntry(name, lockState);
   }
 
   public void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback) {
     SubscriptionHelper.unsubscribe(populateListSubscription);
-    populateListSubscription = lockInfoInteractor.populateList(packageName)
+    populateListSubscription = lockInfoInteractor.populateList(packageName, false)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
+        .doAfterTerminate(callback::onListPopulated)
+        .subscribeOn(getObserveScheduler())
         .subscribe(callback::onEntryAddedToList, throwable -> {
           Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
           callback.onListPopulateError();
-          callback.onListPopulated();
-        }, () -> {
-          callback.onListPopulated();
-          SubscriptionHelper.unsubscribe(populateListSubscription);
-        });
+        }, () -> SubscriptionHelper.unsubscribe(populateListSubscription));
   }
 
   public void modifyDatabaseEntry(boolean isNotDefault, int position, @NonNull String packageName,

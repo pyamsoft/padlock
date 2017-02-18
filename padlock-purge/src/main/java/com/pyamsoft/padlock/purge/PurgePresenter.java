@@ -52,7 +52,7 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
     retrievalSubscription = interactor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .doOnTerminate(callback::onRetrievalComplete)
+        .doAfterTerminate(callback::onRetrievalComplete)
         .subscribeOn(getObserveScheduler())
         .subscribe(callback::onStaleApplicationRetrieved,
             throwable -> Timber.e(throwable, "onError retrieveStaleApplications"),
