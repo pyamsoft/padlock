@@ -287,7 +287,7 @@ public class LockInfoDialog extends DialogFragment {
           }
         });
       }
-      presenter.populateList(appPackageName, populateListCallback);
+      presenter.populateList(appPackageName, populateListCallback, false);
     }
   }
 
@@ -309,16 +309,15 @@ public class LockInfoDialog extends DialogFragment {
 
   void refreshList() {
     fastItemAdapter.clear();
-    presenter.clearList(populateListCallback);
+    populateListCallback.onListCleared();
     binding.lockInfoRecycler.setClickable(false);
-    presenter.populateList(appPackageName, populateListCallback);
+    presenter.populateList(appPackageName, populateListCallback, true);
   }
 
   void onDatabaseUpdated(int position, @NonNull LockState newLockState) {
     final LockInfoItem oldItem = fastItemAdapter.getItem(position);
     final LockInfoItem newItem = oldItem.copyWithNewLockState(newLockState);
     fastItemAdapter.set(position, newItem);
-    presenter.updateCachedEntryLockState(appPackageName, newItem.getName(), newLockState);
   }
 
   @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(int position,

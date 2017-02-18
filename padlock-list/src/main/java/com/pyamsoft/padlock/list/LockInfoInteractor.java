@@ -28,7 +28,9 @@ import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import rx.Observable;
@@ -38,9 +40,9 @@ class LockInfoInteractor extends LockCommonInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenClass;
+  @SuppressWarnings("WeakerAccess") @NonNull final Map<String, Observable<List<ActivityEntry>>>
+      cachedInfoObservableMap;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
-  @SuppressWarnings("WeakerAccess") @Nullable Observable<List<ActivityEntry>> cachedInfoObservable;
-  @NonNull private String currentPackageName;
 
   @Inject LockInfoInteractor(PadLockDB padLockDB,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
@@ -49,7 +51,7 @@ class LockInfoInteractor extends LockCommonInteractor {
     this.packageManagerWrapper = packageManagerWrapper;
     this.preferences = preferences;
     this.lockScreenClass = lockScreenClass;
-    currentPackageName = "";
+    cachedInfoObservableMap = new HashMap<>();
   }
 
   @NonNull @Override public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
@@ -62,7 +64,10 @@ class LockInfoInteractor extends LockCommonInteractor {
         Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated");
         resultState = updateExistingEntry(packageName, activityName, whitelist);
       } else {
-        resultState = Observable.just(lockState);
+        resultState = Observable.just(lockState).map(lockState1 -> {
+          updateCacheEntry(packageName, activityName, lockState1);
+          return lockState1;
+        });
       }
       return resultState;
     });
@@ -75,6 +80,9 @@ class LockInfoInteractor extends LockCommonInteractor {
       Timber.d("Update result: %d", result);
       Timber.d("Whitelist: %s", whitelist);
       return whitelist ? LockState.WHITELISTED : LockState.LOCKED;
+    }).map(lockState -> {
+      updateCacheEntry(packageName, activityName, lockState);
+      return lockState;
     });
   }
 
@@ -82,20 +90,23 @@ class LockInfoInteractor extends LockCommonInteractor {
     return Observable.fromCallable(preferences::isDialogOnBoard).delay(300, TimeUnit.MILLISECONDS);
   }
 
-  public void updateCacheEntry(@NonNull String name, @NonNull LockState lockState) {
-    if (cachedInfoObservable != null) {
-      cachedInfoObservable = cachedInfoObservable.map(activityEntries -> {
-        final int size = activityEntries.size();
-        for (int i = 0; i < size; ++i) {
-          final ActivityEntry activityEntry = activityEntries.get(i);
-          if (activityEntry.name().equals(name)) {
-            Timber.d("Update cached entry: %s %s", name, lockState);
-            activityEntries.set(i,
-                ActivityEntry.builder(activityEntry).lockState(lockState).build());
-          }
-        }
-        return activityEntries;
-      });
+  @SuppressWarnings("WeakerAccess") void updateCacheEntry(@NonNull String packageName,
+      @NonNull String name, @NonNull LockState lockState) {
+    if (cachedInfoObservableMap.get(packageName) != null) {
+      Timber.d("Attempt update cached entry for: %s", packageName);
+      cachedInfoObservableMap.put(packageName,
+          cachedInfoObservableMap.get(packageName).map(activityEntries -> {
+            final int size = activityEntries.size();
+            for (int i = 0; i < size; ++i) {
+              final ActivityEntry activityEntry = activityEntries.get(i);
+              if (activityEntry.name().equals(name)) {
+                Timber.d("Update cached entry: %s %s", name, lockState);
+                activityEntries.set(i,
+                    ActivityEntry.builder(activityEntry).lockState(lockState).build());
+              }
+            }
+            return activityEntries;
+          }));
     }
   }
 
@@ -103,12 +114,13 @@ class LockInfoInteractor extends LockCommonInteractor {
   public Observable<ActivityEntry> populateList(@NonNull String packageName, boolean forceRefresh) {
     return Observable.defer(() -> {
       final Observable<List<ActivityEntry>> dataSource;
-      if (cachedInfoObservable == null || forceRefresh || !currentPackageName.equals(packageName)) {
+      if (cachedInfoObservableMap.get(packageName) == null || forceRefresh) {
         Timber.d("Refresh info list data");
-        dataSource = fetchFreshData(packageName);
+        dataSource = fetchFreshData(packageName).cache();
+        cachedInfoObservableMap.put(packageName, dataSource);
       } else {
         Timber.d("Fetch info from cache");
-        dataSource = cachedInfoObservable;
+        dataSource = cachedInfoObservableMap.get(packageName);
       }
       return dataSource;
     }).flatMap(Observable::from).sorted((activityEntry, activityEntry2) -> {

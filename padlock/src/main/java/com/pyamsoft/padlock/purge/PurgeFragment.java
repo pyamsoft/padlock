@@ -124,18 +124,16 @@ public class PurgeFragment extends Fragment implements PurgePresenter.RetrievalC
           }
         });
       }
-      presenter.retrieveStaleApplications(this);
+      presenter.retrieveStaleApplications(this, false);
     }
   }
 
   private void refreshList() {
     fastItemAdapter.clear();
-    presenter.clearList();
-
     handler.removeCallbacksAndMessages(null);
     handler.post(startRefreshRunnable);
 
-    presenter.retrieveStaleApplications(this);
+    presenter.retrieveStaleApplications(this, true);
   }
 
   @Override public void onStop() {
