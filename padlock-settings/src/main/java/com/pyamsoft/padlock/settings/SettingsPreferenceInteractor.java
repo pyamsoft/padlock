@@ -31,9 +31,9 @@ class SettingsPreferenceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
-  @NonNull final LockListInteractor lockListInteractor;
-  @NonNull final LockInfoInteractor lockInfoInteractor;
-  @NonNull final PurgeInteractor purgeInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockInfoInteractor lockInfoInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor purgeInteractor;
 
   @Inject SettingsPreferenceInteractor(@NonNull PadLockDB padLockDB,
       @NonNull PadLockPreferences preferences, @NonNull LockListInteractor lockListInteractor,

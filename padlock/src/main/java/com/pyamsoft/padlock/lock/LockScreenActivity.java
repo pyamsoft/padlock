@@ -43,8 +43,9 @@ import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.model.LockScreenEntry;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncMap;
+import com.pyamsoft.pydroid.drawable.AsyncDrawable;
+import com.pyamsoft.pydroid.drawable.AsyncMap;
+import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.lang.ref.WeakReference;
@@ -85,7 +86,7 @@ public class LockScreenActivity extends ActivityBase {
     AppUtil.guaranteeSingleDialogFragment(LockScreenActivity.this, new ErrorDialog(), "lock_error");
   };
   @NonNull private final Intent home;
-  @NonNull private final AsyncDrawable.Mapper mapper = new AsyncDrawable.Mapper();
+  @NonNull private final AsyncMap mapper = new AsyncMap();
   @SuppressWarnings("WeakerAccess") @Inject LockScreenPresenter presenter;
   @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
@@ -252,7 +253,7 @@ public class LockScreenActivity extends ActivityBase {
       }
     });
 
-    final AsyncMap.Entry arrowGoTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp)
+    final AsyncMapEntry arrowGoTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp)
         .tint(R.color.orangeA200)
         .into(binding.lockImageGo);
     mapper.put("arrow", arrowGoTask);

@@ -31,8 +31,7 @@ import timber.log.Timber;
 public class AppIconLoaderPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final AppIconLoaderInteractor interactor;
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription loadIconSubscription =
-      Subscriptions.empty();
+  @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
 
   @Inject AppIconLoaderPresenter(@NonNull AppIconLoaderInteractor interactor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
@@ -42,18 +41,18 @@ public class AppIconLoaderPresenter extends SchedulerPresenter<Presenter.Empty> 
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    SubscriptionHelper.unsubscribe(loadIconSubscription);
+    loadIconSubscription = SubscriptionHelper.unsubscribe(loadIconSubscription);
   }
 
   public void loadApplicationIcon(@NonNull String packageName, @NonNull LoadCallback callback) {
-    SubscriptionHelper.unsubscribe(loadIconSubscription);
+    loadIconSubscription = SubscriptionHelper.unsubscribe(loadIconSubscription);
     loadIconSubscription = interactor.loadPackageIcon(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(callback::onApplicationIconLoadedSuccess, throwable -> {
           Timber.e(throwable, "onError");
           callback.onApplicationIconLoadedError();
-        }, () -> SubscriptionHelper.unsubscribe(loadIconSubscription));
+        });
   }
 
   public interface LoadCallback {

@@ -47,7 +47,7 @@ public class ApplicationInstallReceiver extends BroadcastReceiver {
   @NonNull private final Scheduler obsScheduler;
   @NonNull private final Scheduler subScheduler;
   @NonNull private final PendingIntent pendingIntent;
-  @NonNull Subscription notification = Subscriptions.empty();
+  @NonNull private Subscription notification = Subscriptions.empty();
   private int notificationId;
   private boolean registered;
 
@@ -80,7 +80,7 @@ public class ApplicationInstallReceiver extends BroadcastReceiver {
     final Uri data = intent.getData();
     final String packageName = data.getSchemeSpecificPart();
 
-    SubscriptionHelper.unsubscribe(notification);
+    notification = SubscriptionHelper.unsubscribe(notification);
     notification = packageManagerWrapper.loadPackageLabel(packageName)
         .subscribeOn(subScheduler)
         .observeOn(obsScheduler)
@@ -91,7 +91,7 @@ public class ApplicationInstallReceiver extends BroadcastReceiver {
             Timber.d("Package updated: %s", packageName);
           }
         }, throwable -> Timber.e(throwable, "onError launching notification for package: %s",
-            packageName), () -> SubscriptionHelper.unsubscribe(notification));
+            packageName));
   }
 
   @SuppressWarnings("WeakerAccess") void onNewPackageInstalled(@NonNull String packageName,
@@ -119,7 +119,7 @@ public class ApplicationInstallReceiver extends BroadcastReceiver {
   public void unregister() {
     if (registered) {
       appContext.unregisterReceiver(this);
-      SubscriptionHelper.unsubscribe(notification);
+      notification = SubscriptionHelper.unsubscribe(notification);
       registered = false;
     }
   }

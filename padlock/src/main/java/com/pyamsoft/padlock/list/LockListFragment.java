@@ -50,9 +50,10 @@ import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.ActionSingle;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.design.util.FABUtil;
+import com.pyamsoft.pydroid.drawable.AsyncDrawable;
+import com.pyamsoft.pydroid.drawable.AsyncMap;
+import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
 import com.pyamsoft.pydroid.helper.AsyncMapHelper;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncMap;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.List;
@@ -96,18 +97,18 @@ public class LockListFragment extends Fragment {
       activity.supportInvalidateOptionsMenu();
     }
   };
-  @Nullable AsyncMap.Entry fabIconTask;
+  @NonNull AsyncMapEntry fabIconTask = AsyncMap.emptyEntry();
   @NonNull final LockListPresenter.FABStateCallback fabStateCallback =
       new LockListPresenter.FABStateCallback() {
 
         @Override public void onSetFABStateEnabled() {
-          AsyncMapHelper.unsubscribe(fabIconTask);
+          fabIconTask = AsyncMapHelper.unsubscribe(fabIconTask);
           fabIconTask =
               AsyncDrawable.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
         }
 
         @Override public void onSetFABStateDisabled() {
-          AsyncMapHelper.unsubscribe(fabIconTask);
+          fabIconTask = AsyncMapHelper.unsubscribe(fabIconTask);
           fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
         }
       };
@@ -362,7 +363,7 @@ public class LockListFragment extends Fragment {
     binding.applistFab.setOnClickListener(null);
     binding.applistSwipeRefresh.setOnRefreshListener(null);
 
-    AsyncMapHelper.unsubscribe(fabIconTask);
+    fabIconTask = AsyncMapHelper.unsubscribe(fabIconTask);
     handler.removeCallbacksAndMessages(null);
     binding.unbind();
     super.onDestroyView();
@@ -396,12 +397,12 @@ public class LockListFragment extends Fragment {
   private void setupFAB() {
     binding.applistFab.setOnClickListener(v -> {
       if (PadLockService.isRunning()) {
-        presenter.clickPinFABServiceRunning(() -> AppUtil.onlyLoadOnceDialogFragment(getActivity(),
+        AppUtil.onlyLoadOnceDialogFragment(getActivity(),
             PinEntryDialog.newInstance(getContext().getPackageName(),
-                getActivity().getClass().getName()), PIN_DIALOG_TAG));
+                getActivity().getClass().getName()), PIN_DIALOG_TAG);
       } else {
-        presenter.clickPinFABServiceIdle(() -> AppUtil.onlyLoadOnceDialogFragment(getActivity(),
-            new AccessibilityRequestDialog(), "accessibility"));
+        AppUtil.onlyLoadOnceDialogFragment(getActivity(), new AccessibilityRequestDialog(),
+            "accessibility");
       }
     });
     FABUtil.setupFABBehavior(binding.applistFab, new HideScrollFABBehavior(24));

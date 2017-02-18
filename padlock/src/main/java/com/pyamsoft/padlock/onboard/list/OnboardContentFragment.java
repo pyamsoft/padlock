@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.view.LayoutInflater;
@@ -28,14 +29,15 @@ import android.view.ViewGroup;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.databinding.OnboardListPageContentBinding;
 import com.pyamsoft.padlock.onboard.OnboardChildFragment;
+import com.pyamsoft.pydroid.drawable.AsyncDrawable;
+import com.pyamsoft.pydroid.drawable.AsyncMap;
+import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
 import com.pyamsoft.pydroid.helper.AsyncMapHelper;
-import com.pyamsoft.pydroid.tool.AsyncDrawable;
-import com.pyamsoft.pydroid.tool.AsyncMap;
 
 abstract class OnboardContentFragment extends OnboardChildFragment {
 
   private OnboardListPageContentBinding binding;
-  private AsyncMap.Entry imageTask;
+  @NonNull private AsyncMapEntry imageTask = AsyncMap.emptyEntry();
 
   @CallSuper @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -55,14 +57,14 @@ abstract class OnboardContentFragment extends OnboardChildFragment {
 
   @CallSuper @Override public void onDestroyView() {
     super.onDestroyView();
-    AsyncMapHelper.unsubscribe(imageTask);
+    imageTask = AsyncMapHelper.unsubscribe(imageTask);
     binding.unbind();
   }
 
   @CallSuper @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    AsyncMapHelper.unsubscribe(imageTask);
+    imageTask = AsyncMapHelper.unsubscribe(imageTask);
     imageTask = AsyncDrawable.load(getOnboardImage()).into(binding.onboardListContentImage);
 
     binding.onboardListContentText.setText(getOnboardText());

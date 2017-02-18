@@ -35,13 +35,15 @@ import javax.inject.Inject;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class PadLockDBImpl implements PadLockDB {
 
   @SuppressWarnings("WeakerAccess") @NonNull final BriteDatabase briteDatabase;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockOpenHelper openHelper;
-  @SuppressWarnings("WeakerAccess") @Nullable volatile Subscription dbOpenSubscription;
+  @SuppressWarnings("WeakerAccess") @NonNull Subscription dbOpenSubscription =
+      Subscriptions.empty();
 
   @Inject PadLockDBImpl(@NonNull Context context, @NonNull Scheduler scheduler) {
     openHelper = new PadLockOpenHelper(context);
@@ -49,15 +51,13 @@ class PadLockDBImpl implements PadLockDB {
   }
 
   @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
-    SubscriptionHelper.unsubscribe(dbOpenSubscription);
-
+    dbOpenSubscription = SubscriptionHelper.unsubscribe(dbOpenSubscription);
     // After a 1 minute timeout, close the DB
     dbOpenSubscription =
         Observable.defer(() -> Observable.timer(1, TimeUnit.MINUTES)).subscribe(delay -> {
-              Timber.w("Closing PadLock DB");
-              briteDatabase.close();
-            }, throwable -> Timber.e(throwable, "onError closing database"),
-            () -> SubscriptionHelper.unsubscribe(dbOpenSubscription));
+          Timber.w("Closing PadLock DB");
+          briteDatabase.close();
+        }, throwable -> Timber.e(throwable, "onError closing database"));
   }
 
   @Override @CheckResult @NonNull
@@ -215,7 +215,7 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.fromCallable(() -> {
       Timber.i("DB: DELETE ALL");
       briteDatabase.execute(PadLockEntry.DELETE_ALL);
-      SubscriptionHelper.unsubscribe(dbOpenSubscription);
+      dbOpenSubscription = SubscriptionHelper.unsubscribe(dbOpenSubscription);
       briteDatabase.close();
       deleteDatabase();
       return 1;

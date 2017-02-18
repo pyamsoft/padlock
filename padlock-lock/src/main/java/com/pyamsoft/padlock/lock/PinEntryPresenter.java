@@ -29,11 +29,9 @@ import timber.log.Timber;
 
 class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final PinEntryInteractor interactor;
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription pinEntrySubscription =
-      Subscriptions.empty();
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription pinCheckSubscription =
-      Subscriptions.empty();
+  @NonNull private final PinEntryInteractor interactor;
+  @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
+  @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
 
   @Inject PinEntryPresenter(@NonNull final PinEntryInteractor interactor,
       @NonNull Scheduler obsScheduler, @NonNull Scheduler subScheduler) {
@@ -43,13 +41,14 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    SubscriptionHelper.unsubscribe(pinEntrySubscription, pinCheckSubscription);
+    pinCheckSubscription = SubscriptionHelper.unsubscribe(pinCheckSubscription);
+    pinEntrySubscription = SubscriptionHelper.unsubscribe(pinEntrySubscription);
   }
 
   public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
       @NonNull String hint, @NonNull SubmitCallback callback) {
     Timber.d("Attempt PIN submission");
-    SubscriptionHelper.unsubscribe(pinEntrySubscription);
+    pinEntrySubscription = SubscriptionHelper.unsubscribe(pinEntrySubscription);
     pinEntrySubscription = interactor.submitPin(currentAttempt, reEntryAttempt, hint)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -63,12 +62,12 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
         }, throwable -> {
           Timber.e(throwable, "attemptPinSubmission onError");
           callback.onSubmitError();
-        }, () -> SubscriptionHelper.unsubscribe(pinEntrySubscription));
+        });
   }
 
   public void hideUnimportantViews(@NonNull HideViewsCallback callback) {
     Timber.d("Check if we have a master");
-    SubscriptionHelper.unsubscribe(pinCheckSubscription);
+    pinCheckSubscription = SubscriptionHelper.unsubscribe(pinCheckSubscription);
     pinCheckSubscription = interactor.hasMasterPin()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -78,10 +77,7 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
           } else {
             callback.showExtraPinEntryViews();
           }
-        }, throwable -> {
-          Timber.e(throwable, "onError hideUnimportantViews");
-          // TODO
-        }, () -> SubscriptionHelper.unsubscribe(pinCheckSubscription));
+        }, throwable -> Timber.e(throwable, "onError hideUnimportantViews"));
   }
 
   interface HideViewsCallback {

@@ -30,10 +30,9 @@ import timber.log.Timber;
 
 class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final LockServiceInteractor interactor;
-  @SuppressWarnings("WeakerAccess") @NonNull Subscription lockedEntrySubscription =
-      Subscriptions.empty();
-  @Nullable @SuppressWarnings("WeakerAccess") Subscription recheckSubscription;
+  @NonNull private final LockServiceInteractor interactor;
+  @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
+  @Nullable private Subscription recheckSubscription;
 
   @Inject LockServicePresenter(@NonNull LockServiceInteractor interactor,
       @NonNull Scheduler obsScheduler, @NonNull Scheduler subScheduler) {
@@ -44,38 +43,35 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    SubscriptionHelper.unsubscribe(lockedEntrySubscription, recheckSubscription);
+    lockedEntrySubscription = SubscriptionHelper.unsubscribe(lockedEntrySubscription);
+    recheckSubscription = SubscriptionHelper.unsubscribe(recheckSubscription);
     interactor.cleanup();
   }
 
   public void processActiveApplicationIfMatching(@NonNull String packageName,
       @NonNull String className, @NonNull ProcessCallback callback) {
-    SubscriptionHelper.unsubscribe(recheckSubscription);
+    recheckSubscription = SubscriptionHelper.unsubscribe(recheckSubscription);
     recheckSubscription = interactor.processActiveIfMatching(packageName, className)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(recheck -> {
-              if (recheck) {
-                processAccessibilityEvent(packageName, className,
-                    RecheckStatus.FORCE, callback);
-              }
-            }, throwable -> Timber.e(throwable, "onError processActiveApplicationIfMatching"),
-            () -> SubscriptionHelper.unsubscribe(recheckSubscription));
+          if (recheck) {
+            processAccessibilityEvent(packageName, className, RecheckStatus.FORCE, callback);
+          }
+        }, throwable -> Timber.e(throwable, "onError processActiveApplicationIfMatching"));
   }
 
   public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
-      @NonNull RecheckStatus forcedRecheck,
-      @NonNull ProcessCallback callback) {
-    SubscriptionHelper.unsubscribe(lockedEntrySubscription);
+      @NonNull RecheckStatus forcedRecheck, @NonNull ProcessCallback callback) {
+    lockedEntrySubscription = SubscriptionHelper.unsubscribe(lockedEntrySubscription);
     lockedEntrySubscription = interactor.processEvent(packageName, className, forcedRecheck)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(padLockEntry -> {
-              Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
-                  padLockEntry.activityName());
-              callback.startLockScreen(padLockEntry, className);
-            }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"),
-            () -> SubscriptionHelper.unsubscribe(lockedEntrySubscription));
+          Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
+              padLockEntry.activityName());
+          callback.startLockScreen(padLockEntry, className);
+        }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"));
   }
 
   public void setLockScreenPassed() {
