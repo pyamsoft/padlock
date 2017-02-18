@@ -53,7 +53,6 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onRetrievalComplete)
-        .subscribeOn(getObserveScheduler())
         .subscribe(callback::onStaleApplicationRetrieved,
             throwable -> Timber.e(throwable, "onError retrieveStaleApplications"),
             () -> SubscriptionHelper.unsubscribe(retrievalSubscription));
