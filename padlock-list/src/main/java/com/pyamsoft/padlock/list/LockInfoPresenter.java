@@ -59,7 +59,6 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onListPopulated)
-        .subscribeOn(getObserveScheduler())
         .subscribe(callback::onEntryAddedToList, throwable -> {
           Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
           callback.onListPopulateError();
