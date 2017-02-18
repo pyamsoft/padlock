@@ -60,29 +60,17 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
         fabStateSubscription, databaseSubscription, populateListSubscription);
   }
 
-  public void clearList(@NonNull ClearCallback callback) {
-    lockListInteractor.clearCache();
-    callback.onListCleared();
-  }
-
-  public void updateCachedEntryLockState(@NonNull String name, @NonNull String packageName,
-      boolean newLockState) {
-    lockListInteractor.updateCacheEntry(name, packageName, newLockState);
-  }
-
-  public void populateList(@NonNull PopulateListCallback callback) {
+  public void populateList(@NonNull PopulateListCallback callback, boolean forceRefresh) {
     SubscriptionHelper.unsubscribe(populateListSubscription);
-    populateListSubscription = lockListInteractor.populateList()
+    populateListSubscription = lockListInteractor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
+        .doAfterTerminate(callback::onListPopulated)
+        .subscribeOn(getObserveScheduler())
         .subscribe(callback::onEntryAddedToList, throwable -> {
           Timber.e(throwable, "populateList onError");
           callback.onListPopulateError();
-          callback.onListPopulated();
-        }, () -> {
-          callback.onListPopulated();
-          SubscriptionHelper.unsubscribe(populateListSubscription);
-        });
+        }, () -> SubscriptionHelper.unsubscribe(populateListSubscription));
   }
 
   public void setFABStateFromPreference(@NonNull FABStateCallback callback) {
@@ -137,14 +125,13 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboard -> {
-          if (onboard) {
-            callback.onOnboardingComplete();
-          } else {
-            callback.onShowOnboarding();
-          }
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-        }, () -> SubscriptionHelper.unsubscribe(onboardSubscription));
+              if (onboard) {
+                callback.onOnboardingComplete();
+              } else {
+                callback.onShowOnboarding();
+              }
+            }, throwable -> Timber.e(throwable, "onError"),
+            () -> SubscriptionHelper.unsubscribe(onboardSubscription));
   }
 
   public void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
