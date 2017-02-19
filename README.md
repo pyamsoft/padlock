@@ -17,11 +17,6 @@ Padlock is developed in the Open on GitHub at:
 https://github.com/pyamsoft/padlock
 ```
 
-Padlock has a publicly view able Trello board at:
-```
-https://trello.com/b/NzUr4ASV
-```
-
 # Issues or Questions
 
 Please post any issues with the code in the Issues section on GitHub. Pull  
