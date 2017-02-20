@@ -18,25 +18,24 @@ package com.pyamsoft.padlock.pin;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.lock.LockSubmitCallback;
+import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
+class PinEntryPresenter extends LockTypePresenter {
 
   @NonNull private final PinEntryInteractor interactor;
   @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
   @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
 
-  @Inject PinEntryPresenter(@NonNull final PinEntryInteractor interactor,
-      @NonNull Scheduler obsScheduler, @NonNull Scheduler subScheduler) {
-    super(obsScheduler, subScheduler);
+  @Inject PinEntryPresenter(@NonNull PinEntryInteractor interactor, @NonNull Scheduler obsScheduler,
+      @NonNull Scheduler subScheduler) {
+    super(interactor, obsScheduler, subScheduler);
     this.interactor = interactor;
   }
 

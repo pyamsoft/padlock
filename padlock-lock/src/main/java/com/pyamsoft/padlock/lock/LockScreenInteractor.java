@@ -27,18 +27,17 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
+import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import com.pyamsoft.padlock.model.LockScreenType;
 import com.pyamsoft.padlock.model.Recheck;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-class LockScreenInteractor extends LockInteractor {
+class LockScreenInteractor extends LockTypeInteractor {
 
   @SuppressWarnings("WeakerAccess") static final int DEFAULT_MAX_FAIL_COUNT = 2;
   @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
-  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends IntentService>
@@ -52,17 +51,13 @@ class LockScreenInteractor extends LockInteractor {
       @NonNull final MasterPinInteractor masterPinInteractor,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB,
       @NonNull Class<? extends IntentService> recheckServiceClass) {
+    super(preferences);
     this.appContext = context.getApplicationContext();
     this.jobSchedulerCompat = jobSchedulerCompat;
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
-    this.preferences = preferences;
     this.pinInteractor = masterPinInteractor;
     this.recheckServiceClass = recheckServiceClass;
-  }
-
-  @CheckResult @NonNull public Observable<LockScreenType> getLockScreenType() {
-    return Observable.fromCallable(() -> LockScreenType.TYPE_PATTERN);
   }
 
   @CheckResult @NonNull
@@ -92,7 +87,7 @@ class LockScreenInteractor extends LockInteractor {
       @NonNull String attempt, @NonNull String pin) {
     return Observable.fromCallable(() -> pin)
         .filter(pin1 -> pin1 != null)
-        .flatMap(pin1 -> checkSubmissionAttempt(attempt, pin1));
+        .flatMap(pin1 -> LockInteractor.get().checkSubmissionAttempt(attempt, pin1));
   }
 
   @CheckResult @NonNull Observable<Boolean> postUnlock(@NonNull String packageName,
@@ -164,7 +159,7 @@ class LockScreenInteractor extends LockInteractor {
   }
 
   @NonNull @CheckResult public Observable<Long> getDefaultIgnoreTime() {
-    return Observable.fromCallable(preferences::getDefaultIgnoreTime);
+    return Observable.fromCallable(getPreferences()::getDefaultIgnoreTime);
   }
 
   @WorkerThread @NonNull @CheckResult
@@ -187,7 +182,8 @@ class LockScreenInteractor extends LockInteractor {
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
   Observable<Long> getTimeoutPeriodMinutesInMillis() {
-    return Observable.fromCallable(preferences::getTimeoutPeriod).map(period -> period * 60 * 1000);
+    return Observable.fromCallable(getPreferences()::getTimeoutPeriod)
+        .map(period -> period * 60 * 1000);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> lockEntry(
