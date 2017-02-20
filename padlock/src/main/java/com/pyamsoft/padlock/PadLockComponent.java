@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.list.LockListComponent;
 import com.pyamsoft.padlock.list.LockListSingletonModule;
 import com.pyamsoft.padlock.lock.LockScreenComponent;
 import com.pyamsoft.padlock.lock.LockScreenSingletonModule;
+import com.pyamsoft.padlock.lock.common.LockTypeSingletonModule;
 import com.pyamsoft.padlock.lock.master.MasterPinModule;
 import com.pyamsoft.padlock.main.MainComponent;
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFirstLaunchComponent;
@@ -49,7 +50,7 @@ import javax.inject.Singleton;
     PadLockDBModule.class, ReceiverModule.class, LockListSingletonModule.class,
     LockInfoSingletonModule.class, PurgeSingletonModule.class, AppIconLoaderInteractorModule.class,
     LockScreenSingletonModule.class, PinEntrySingletonModule.class, MasterPinModule.class,
-    LockServiceStateModule.class
+    LockServiceStateModule.class, LockTypeSingletonModule.class
 }) public interface PadLockComponent {
 
   LockInfoComponent plusLockInfoComponent();

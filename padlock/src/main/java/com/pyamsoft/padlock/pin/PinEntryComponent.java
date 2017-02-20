@@ -17,11 +17,14 @@
 package com.pyamsoft.padlock.pin;
 
 import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
+import com.pyamsoft.padlock.lock.common.LockTypeModule;
 import dagger.Subcomponent;
 
 @Subcomponent(modules = {
-    PinEntryModule.class, AppIconLoaderModule.class
+    PinEntryModule.class, AppIconLoaderModule.class, LockTypeModule.class
 }) public interface PinEntryComponent {
 
-  void inject(PinEntryDialog dialog);
+  void inject(PinEntryTextFragment layout);
+
+  void inject(PinEntryDialog pinEntryDialog);
 }
