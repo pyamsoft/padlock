@@ -25,7 +25,6 @@ import javax.inject.Inject;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
-import timber.log.Timber;
 
 public class LockTypePresenter extends SchedulerPresenter<Presenter.Empty> {
 
@@ -59,8 +58,6 @@ public class LockTypePresenter extends SchedulerPresenter<Presenter.Empty> {
             default:
               throw new IllegalStateException("Invalid lock screen type: " + lockScreenType);
           }
-        }, throwable -> {
-          Timber.e(throwable, "onError");
         });
   }
 
