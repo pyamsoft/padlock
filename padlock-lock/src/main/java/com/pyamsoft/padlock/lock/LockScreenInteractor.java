@@ -27,8 +27,9 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
-import com.pyamsoft.padlock.model.Recheck;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
+import com.pyamsoft.padlock.model.LockScreenType;
+import com.pyamsoft.padlock.model.Recheck;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -58,6 +59,10 @@ class LockScreenInteractor extends LockInteractor {
     this.preferences = preferences;
     this.pinInteractor = masterPinInteractor;
     this.recheckServiceClass = recheckServiceClass;
+  }
+
+  @CheckResult @NonNull public Observable<LockScreenType> getLockScreenType() {
+    return Observable.fromCallable(() -> LockScreenType.TYPE_PATTERN);
   }
 
   @CheckResult @NonNull
