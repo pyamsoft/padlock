@@ -16,8 +16,6 @@
 
 package com.pyamsoft.padlock.pin;
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -28,10 +26,5 @@ import rx.Scheduler;
   @Provides PinEntryPresenter providePinEntryPresenter(PinEntryInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
     return new PinEntryPresenter(interactor, obsScheduler, subScheduler);
-  }
-
-  @Provides PinEntryInteractor providePinEntryInteractor(
-      @NonNull MasterPinInteractor masterPinInteractor) {
-    return new PinEntryInteractor(masterPinInteractor);
   }
 }

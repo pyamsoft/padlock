@@ -169,6 +169,9 @@ public class LockScreenActivity extends ActivityBase {
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
     Injector.get().provideComponent().plusLockScreenComponent().inject(this);
+    if (savedInstanceState == null) {
+      presenter.resetFailCount();
+    }
 
     populateIgnoreTimes();
     getValuesFromBundle();
