@@ -41,6 +41,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.ErrorDialog;
+import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.padlock.model.LockScreenEntry;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.drawable.AsyncDrawable;
@@ -175,8 +176,16 @@ public class LockScreenActivity extends ActivityBase {
 
     populateIgnoreTimes();
     getValuesFromBundle();
-    setupInputManager();
     setupActionBar();
+    presenter.initializeLockScreenType(new LockTypePresenter.LockScreenTypeCallback() {
+      @Override public void onTypeText() {
+
+      }
+
+      @Override public void onTypePattern() {
+
+      }
+    });
 
     LockSubmitCallback submitCallback = new LockSubmitCallback() {
 
@@ -227,6 +236,8 @@ public class LockScreenActivity extends ActivityBase {
             "unlock_error");
       }
     };
+
+    setupInputManager();
     setupTextInput(submitCallback);
     setupGoArrow(submitCallback);
     clearDisplay();

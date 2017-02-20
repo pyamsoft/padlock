@@ -43,6 +43,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.LockListFragment;
+import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.padlock.lock.master.MasterPinSubmitCallback;
 import com.pyamsoft.pydroid.ActionSingle;
@@ -160,6 +161,16 @@ public class PinEntryDialog extends DialogFragment {
     super.onViewCreated(view, savedInstanceState);
     setupCloseButton();
     setupToolbar();
+
+    presenter.initializeLockScreenType(new LockTypePresenter.LockScreenTypeCallback() {
+      @Override public void onTypeText() {
+
+      }
+
+      @Override public void onTypePattern() {
+
+      }
+    });
 
     // Resolve TextInputLayout edit texts
     pinEntryText = binding.pinEntryCode.getEditText();
