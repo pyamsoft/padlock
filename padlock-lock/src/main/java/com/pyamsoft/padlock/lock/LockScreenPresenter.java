@@ -18,9 +18,8 @@ package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -28,7 +27,7 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
+class LockScreenPresenter extends LockTypePresenter {
 
   @NonNull private final LockScreenInteractor interactor;
   @NonNull private Subscription postUnlockSubscription = Subscriptions.empty();
@@ -37,11 +36,10 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
   @NonNull private Subscription unlockSubscription = Subscriptions.empty();
   @NonNull private Subscription lockSubscription = Subscriptions.empty();
   @NonNull private Subscription hintSubscription = Subscriptions.empty();
-  @NonNull private Subscription typeSubscription = Subscriptions.empty();
 
-  @Inject LockScreenPresenter(@NonNull final LockScreenInteractor lockScreenInteractor,
+  @Inject LockScreenPresenter(@NonNull LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
-    super(obsScheduler, subScheduler);
+    super(lockScreenInteractor, obsScheduler, subScheduler);
     this.interactor = lockScreenInteractor;
   }
 
@@ -57,27 +55,6 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   public void resetFailCount() {
     interactor.resetFailCount();
-  }
-
-  public void initializeLockScreenType(@NonNull LockScreenTypeCallback callback) {
-    typeSubscription = SubscriptionHelper.unsubscribe(typeSubscription);
-    typeSubscription = interactor.getLockScreenType()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(lockScreenType -> {
-          switch (lockScreenType) {
-            case TYPE_PATTERN:
-              callback.onTypePattern();
-              break;
-            case TYPE_TEXT:
-              callback.onTypeText();
-              break;
-            default:
-              throw new IllegalStateException("Invalid lock screen type: " + lockScreenType);
-          }
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-        });
   }
 
   public void displayLockedHint(@NonNull LockHintCallback callback) {
@@ -191,11 +168,5 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
   interface LockHintCallback {
 
     void setDisplayHint(@NonNull String hint);
-  }
-
-  interface LockScreenTypeCallback {
-    void onTypeText();
-
-    void onTypePattern();
   }
 }

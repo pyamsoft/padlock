@@ -18,18 +18,22 @@ package com.pyamsoft.padlock.pin;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.lock.LockInteractor;
+import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
 
-class PinEntryInteractor extends LockInteractor {
+class PinEntryInteractor extends LockTypeInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final MasterPinInteractor masterPinInteractor;
 
-  @Inject PinEntryInteractor(@NonNull MasterPinInteractor masterPinInteractor) {
+  @Inject PinEntryInteractor(@NonNull MasterPinInteractor masterPinInteractor,
+      @NonNull PadLockPreferences preferences) {
+    super(preferences);
     this.masterPinInteractor = masterPinInteractor;
   }
 
@@ -54,8 +58,7 @@ class PinEntryInteractor extends LockInteractor {
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<PinEntryEvent> clearPin(
       @NonNull String masterPin, @NonNull String attempt) {
-    return checkSubmissionAttempt(attempt, masterPin).map(success -> {
-
+    return LockInteractor.get().checkSubmissionAttempt(attempt, masterPin).map(success -> {
       if (success) {
         Timber.d("Clear master pin");
         masterPinInteractor.setMasterPin(null);
@@ -76,7 +79,8 @@ class PinEntryInteractor extends LockInteractor {
       final boolean success = attempt.equals(reentry);
       if (success) {
         Timber.d("Entry and Re-Entry match, create");
-        final String encodedMasterPin = encodeSHA256(attempt).toBlocking().first();
+        final String encodedMasterPin =
+            LockInteractor.get().encodeSHA256(attempt).toBlocking().first();
         masterPinInteractor.setMasterPin(encodedMasterPin);
 
         if (!hint.isEmpty()) {

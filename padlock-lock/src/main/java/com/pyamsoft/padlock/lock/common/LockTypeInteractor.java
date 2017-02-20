@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.pin;
+package com.pyamsoft.padlock.lock.common;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import dagger.Module;
-import dagger.Provides;
-import javax.inject.Singleton;
+import com.pyamsoft.padlock.model.LockScreenType;
+import rx.Observable;
 
-@Module public class PinEntrySingletonModule {
+public abstract class LockTypeInteractor {
 
-  @Singleton @Provides PinEntryInteractor providePinEntryInteractor(
-      @NonNull MasterPinInteractor masterPinInteractor, @NonNull PadLockPreferences preferences) {
-    return new PinEntryInteractor(masterPinInteractor, preferences);
+  @NonNull private final PadLockPreferences preferences;
+
+  protected LockTypeInteractor(@NonNull PadLockPreferences preferences) {
+    this.preferences = preferences;
+  }
+
+  @NonNull @CheckResult protected PadLockPreferences getPreferences() {
+    return preferences;
+  }
+
+  @CheckResult @NonNull public Observable<LockScreenType> getLockScreenType() {
+    return Observable.fromCallable(() -> LockScreenType.TYPE_PATTERN);
   }
 }
