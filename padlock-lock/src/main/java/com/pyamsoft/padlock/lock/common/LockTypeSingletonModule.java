@@ -16,25 +16,16 @@
 
 package com.pyamsoft.padlock.lock.common;
 
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
-import com.pyamsoft.padlock.model.LockScreenType;
-import rx.Observable;
+import dagger.Module;
+import dagger.Provides;
+import javax.inject.Singleton;
 
-public class LockTypeInteractor {
+@Module public class LockTypeSingletonModule {
 
-  @NonNull private final PadLockPreferences preferences;
-
-  protected LockTypeInteractor(@NonNull PadLockPreferences preferences) {
-    this.preferences = preferences;
-  }
-
-  @NonNull @CheckResult protected PadLockPreferences getPreferences() {
-    return preferences;
-  }
-
-  @CheckResult @NonNull public Observable<LockScreenType> getLockScreenType() {
-    return Observable.fromCallable(() -> LockScreenType.TYPE_TEXT);
+  @Singleton @Provides LockTypeInteractor provideLockTypeInteractor(
+      @NonNull PadLockPreferences preferences) {
+    return new LockTypeInteractor(preferences);
   }
 }

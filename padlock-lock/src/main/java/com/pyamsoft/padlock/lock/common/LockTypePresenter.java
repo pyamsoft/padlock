@@ -21,17 +21,18 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import javax.inject.Inject;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public abstract class LockTypePresenter extends SchedulerPresenter<Presenter.Empty> {
+public class LockTypePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final LockTypeInteractor interactor;
   @NonNull private Subscription typeSubscription = Subscriptions.empty();
 
-  protected LockTypePresenter(@NonNull LockTypeInteractor interactor,
+  @Inject protected LockTypePresenter(@NonNull LockTypeInteractor interactor,
       @NonNull Scheduler observeScheduler, @NonNull Scheduler subscribeScheduler) {
     super(observeScheduler, subscribeScheduler);
     this.interactor = interactor;
