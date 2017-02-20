@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.lock;
 
+import android.support.annotation.NonNull;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -23,8 +24,14 @@ import rx.Scheduler;
 
 @Module public class LockScreenModule {
 
-  @Provides LockScreenPresenter provideLockScreenPresenter(LockScreenInteractor interactor,
+  @Provides LockScreenPresenter provideLockScreenPresenter(@NonNull LockScreenInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
     return new LockScreenPresenter(interactor, obsScheduler, subScheduler);
+  }
+
+  @Provides LockScreenEntryPresenter provideLockScreenEntryPresenter(
+      @NonNull LockScreenEntryInteractor interactor, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
+    return new LockScreenEntryPresenter(interactor, obsScheduler, subScheduler);
   }
 }
