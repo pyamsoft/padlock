@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.service;
 
-import com.pyamsoft.padlock.pin.MasterPinModule;
+import com.pyamsoft.padlock.lock.master.MasterPinModule;
 import dagger.Subcomponent;
 
 @Subcomponent(modules = {

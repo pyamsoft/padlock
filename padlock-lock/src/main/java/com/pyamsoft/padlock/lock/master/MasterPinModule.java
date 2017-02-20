@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.pin;
+package com.pyamsoft.padlock.lock.master;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;

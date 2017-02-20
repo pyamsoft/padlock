@@ -28,7 +28,7 @@ import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.Recheck;
-import com.pyamsoft.padlock.pin.MasterPinInteractor;
+import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;

@@ -16,13 +16,13 @@
 
 package com.pyamsoft.padlock.pin;
 
-public interface MasterPinSubmitCallback {
+import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
+import com.pyamsoft.padlock.lock.master.MasterPinModule;
+import dagger.Subcomponent;
 
-  void onCreateMasterPinSuccess();
+@Subcomponent(modules = {
+    PinEntryModule.class, MasterPinModule.class, AppIconLoaderModule.class
+}) public interface PinEntryComponent {
 
-  void onCreateMasterPinFailure();
-
-  void onClearMasterPinSuccess();
-
-  void onClearMasterPinFailure();
+  void inject(PinEntryDialog dialog);
 }

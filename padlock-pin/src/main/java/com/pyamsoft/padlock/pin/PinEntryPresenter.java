@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.pin;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.lock.LockSubmitCallback;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;

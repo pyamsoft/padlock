@@ -24,11 +24,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import rx.Observable;
 
-abstract class LockInteractor {
+public abstract class LockInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final MessageDigest messageDigest;
 
-  LockInteractor() {
+  protected LockInteractor() {
     try {
       messageDigest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {

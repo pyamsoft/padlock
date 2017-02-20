@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
-import com.pyamsoft.padlock.pin.MasterPinInteractor;
+import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

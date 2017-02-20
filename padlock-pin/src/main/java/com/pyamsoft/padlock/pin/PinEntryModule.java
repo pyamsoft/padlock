@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.pin;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.pin.MasterPinInteractor;
+import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.pin;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -44,7 +44,7 @@ import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
-import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
+import com.pyamsoft.padlock.lock.master.MasterPinSubmitCallback;
 import com.pyamsoft.pydroid.ActionSingle;
 import com.pyamsoft.pydroid.drawable.AsyncDrawable;
 import com.pyamsoft.pydroid.drawable.AsyncMap;
