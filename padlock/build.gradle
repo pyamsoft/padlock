@@ -101,6 +101,9 @@ dependencies {
   // Firebase Crash
   compile "com.google.firebase:firebase-crash:$firebase"
 
+  // Pattern Lock
+  compile "me.zhanghai.android.patternlock:library:$patternLock"
+
   // PYDroid
   compile("com.github.pyamsoft.pydroid:pydroid-ui:$pydroid@aar") {
     transitive = true
