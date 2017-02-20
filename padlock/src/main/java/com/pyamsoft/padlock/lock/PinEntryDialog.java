@@ -158,6 +158,9 @@ public class PinEntryDialog extends DialogFragment {
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    setupCloseButton();
+    setupToolbar();
+
     // Resolve TextInputLayout edit texts
     pinEntryText = binding.pinEntryCode.getEditText();
     if (pinEntryText == null) {
@@ -179,9 +182,7 @@ public class PinEntryDialog extends DialogFragment {
         .getSystemService(Context.INPUT_METHOD_SERVICE);
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
-    setupCloseButton();
     clearDisplay();
-    setupToolbar();
     setupGoArrow(submitCallback);
 
     if (savedInstanceState != null) {
