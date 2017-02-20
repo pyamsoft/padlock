@@ -49,16 +49,6 @@
           android:layout_height="wrap_content"
           />
 
-      <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
-          android:id="@+id/lock_display_hint"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_below="@id/lock_screen_container"
-          android:gravity="center_horizontal"
-          android:textAppearance="?android:attr/textAppearanceSmall"
-          android:textColor="@color/material_light_background"
-          />
-
       <com.pyamsoft.pydroid.ui.widget.SquareImageView
           android:id="@+id/lock_image"
           android:layout_width="64dp"

@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.lock;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
@@ -25,7 +24,6 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
@@ -33,7 +31,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
@@ -45,7 +42,6 @@ import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -147,46 +143,6 @@ public class LockScreenActivity extends ActivityBase {
     return LOCK_SCREEN_MAP.get(entry);
   }
 
-  static void showHint(@NonNull Activity activity) {
-    if (activity instanceof LockScreenActivity) {
-      ((LockScreenActivity) activity).binding.lockDisplayHint.setVisibility(View.VISIBLE);
-    }
-  }
-
-  @CheckResult static boolean isExcluded(@NonNull Activity activity) {
-    return activity instanceof LockScreenActivity
-        && ((LockScreenActivity) activity).menuExclude.isChecked();
-  }
-
-  @CheckResult static long getSelectedIgnoreTime(@NonNull Activity activity) {
-    if (activity instanceof LockScreenActivity) {
-      return ((LockScreenActivity) activity).getIgnoreTimeFromSelectedIndex();
-    } else {
-      return 0;
-    }
-  }
-
-  static void setLockedUntilTime(@NonNull Activity activity, long time) {
-    if (activity instanceof LockScreenActivity) {
-      ((LockScreenActivity) activity).lockUntilTime = time;
-    }
-  }
-
-  @CheckResult static long getLockedUntilTime(@NonNull Activity activity) {
-    if (activity instanceof LockScreenActivity) {
-      return ((LockScreenActivity) activity).lockUntilTime;
-    } else {
-      return 0;
-    }
-  }
-
-  static void showSnackbarWithText(@NonNull Activity activity, @NonNull String text) {
-    if (activity instanceof LockScreenActivity) {
-      Snackbar.make(((LockScreenActivity) activity).binding.activityLockScreen, text,
-          Snackbar.LENGTH_SHORT).show();
-    }
-  }
-
   @CallSuper @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light_Lock);
     super.onCreate(savedInstanceState);
@@ -222,9 +178,6 @@ public class LockScreenActivity extends ActivityBase {
 
       }
     });
-
-    // Hide hint to begin with
-    binding.lockDisplayHint.setVisibility(View.GONE);
   }
 
   private void setupActionBar() {
@@ -262,12 +215,6 @@ public class LockScreenActivity extends ActivityBase {
     Timber.d("onStart");
     appIconLoaderPresenter.bindView(null);
     presenter.bindView(null);
-    presenter.displayLockedHint(hint -> {
-      Timber.d("Settings hint");
-      binding.lockDisplayHint.setText(
-          String.format(Locale.getDefault(), "Hint: %s", hint.isEmpty() ? "NO HINT" : hint));
-    });
-
     presenter.loadDisplayNameFromPackage(lockedPackageName, name -> {
       Timber.d("Set toolbar name %s", name);
       binding.toolbar.setTitle(name);
@@ -389,13 +336,16 @@ public class LockScreenActivity extends ActivityBase {
     final int itemId = item.getItemId();
     switch (itemId) {
       case R.id.menu_lockscreen_forgot:
-        showForgotPasscodeDialog();
+        AppUtil.onlyLoadOnceDialogFragment(this, new ForgotPasswordDialog(), FORGOT_PASSWORD_TAG);
         break;
       case R.id.menu_exclude:
         item.setChecked(!item.isChecked());
         break;
       case R.id.menu_lockscreen_info:
-        showInfoDialog();
+        AppUtil.onlyLoadOnceDialogFragment(this,
+            LockedStatDialog.newInstance(binding.toolbar.getTitle().toString(), lockedPackageName,
+                lockedActivityName, lockedRealName, lockedSystem, binding.lockImage.getDrawable()),
+            "info_dialog");
         break;
       default:
         item.setChecked(true);
@@ -433,16 +383,5 @@ public class LockScreenActivity extends ActivityBase {
     }
 
     return ignoreTimes[index];
-  }
-
-  private void showInfoDialog() {
-    AppUtil.onlyLoadOnceDialogFragment(this,
-        LockedStatDialog.newInstance(binding.toolbar.getTitle().toString(), lockedPackageName,
-            lockedActivityName, lockedRealName, lockedSystem, binding.lockImage.getDrawable()),
-        "info_dialog");
-  }
-
-  private void showForgotPasscodeDialog() {
-    AppUtil.onlyLoadOnceDialogFragment(this, new ForgotPasswordDialog(), FORGOT_PASSWORD_TAG);
   }
 }

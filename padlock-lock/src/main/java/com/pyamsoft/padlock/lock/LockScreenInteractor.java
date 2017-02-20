@@ -168,16 +168,13 @@ class LockScreenInteractor extends LockTypeInteractor {
   }
 
   @CheckResult @NonNull
-  public Observable<Long> incrementAndGetFailCount(String packageName, String activityName) {
+  public Observable<TimePair> incrementAndGetFailCount(String packageName, String activityName) {
     return Observable.fromCallable(() -> ++failCount)
         .filter(count -> count > DEFAULT_MAX_FAIL_COUNT)
         .flatMap(integer -> getTimeoutPeriodMinutesInMillis())
-        .flatMap(timeOutMinutesInMillis -> {
-          final long newLockUntilTime = System.currentTimeMillis() + timeOutMinutesInMillis;
-          Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
-              timeOutMinutesInMillis);
-          return lockEntry(newLockUntilTime, packageName, activityName);
-        });
+        .filter(timeoutPeriod -> timeoutPeriod > 0)
+        .flatMap(
+            timeOutMinutesInMillis -> lockEntry(timeOutMinutesInMillis, packageName, activityName));
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
@@ -186,11 +183,15 @@ class LockScreenInteractor extends LockTypeInteractor {
         .map(period -> period * 60 * 1000);
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> lockEntry(
-      long lockUntilTime, @NonNull String packageName, @NonNull String activityName) {
-    return padLockDB.updateLockTime(lockUntilTime, packageName, activityName).map(integer -> {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<TimePair> lockEntry(
+      long timeOutMinutesInMillis, @NonNull String packageName, @NonNull String activityName) {
+    final long currentTime = System.currentTimeMillis();
+    final long newLockUntilTime = currentTime + timeOutMinutesInMillis;
+    Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
+        timeOutMinutesInMillis);
+    return padLockDB.updateLockTime(newLockUntilTime, packageName, activityName).map(integer -> {
       Timber.d("Update result: %s", integer);
-      return lockUntilTime;
+      return new TimePair(currentTime, newLockUntilTime);
     });
   }
 
@@ -201,5 +202,15 @@ class LockScreenInteractor extends LockTypeInteractor {
 
   @NonNull @CheckResult public Observable<String> getHint() {
     return pinInteractor.getHint().map(s -> s == null ? "" : s);
+  }
+
+  static class TimePair {
+    public final long currentTime;
+    public final long lockUntilTime;
+
+    TimePair(long currentTime, long lockUntilTime) {
+      this.currentTime = currentTime;
+      this.lockUntilTime = lockUntilTime;
+    }
   }
 }

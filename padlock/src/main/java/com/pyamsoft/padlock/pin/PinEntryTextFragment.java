@@ -21,8 +21,6 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,10 +31,7 @@ import android.widget.EditText;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.PinEntryTextBinding;
-import com.pyamsoft.padlock.list.LockListFragment;
-import com.pyamsoft.padlock.lock.master.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
-import com.pyamsoft.pydroid.ActionSingle;
 import com.pyamsoft.pydroid.drawable.AsyncDrawable;
 import com.pyamsoft.pydroid.drawable.AsyncMap;
 import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
@@ -44,7 +39,7 @@ import com.pyamsoft.pydroid.helper.AsyncMapHelper;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class PinEntryTextFragment extends Fragment {
+public class PinEntryTextFragment extends PinEntryBaseFragment {
 
   @NonNull static final String TAG = "PinEntryTextFragment";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
@@ -151,6 +146,7 @@ public class PinEntryTextFragment extends Fragment {
 
   @Override public void onStart() {
     super.onStart();
+    presenter.bindView(null);
     presenter.hideUnimportantViews(new PinEntryPresenter.HideViewsCallback() {
       @Override public void showExtraPinEntryViews() {
         Timber.d("No active master, show extra views");
@@ -166,6 +162,11 @@ public class PinEntryTextFragment extends Fragment {
         setupSubmissionView(pinEntryText, submitCallback);
       }
     });
+  }
+
+  @Override public void onStop() {
+    super.onStop();
+    presenter.unbindView();
   }
 
   void setupSubmissionView(@NonNull EditText view,
@@ -249,26 +250,6 @@ public class PinEntryTextFragment extends Fragment {
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull String getCurrentHint() {
     return pinHintText.getText().toString();
-  }
-
-  void dismissParent() {
-    final FragmentManager fragmentManager = getParentFragment().getFragmentManager();
-    final Fragment pinFragment = fragmentManager.findFragmentByTag(PinEntryDialog.TAG);
-    if (pinFragment instanceof PinEntryDialog) {
-      ((PinEntryDialog) pinFragment).dismiss();
-    } else {
-      throw new ClassCastException("Fragment is not PinEntryDialog");
-    }
-  }
-
-  void actOnLockList(@NonNull ActionSingle<MasterPinSubmitCallback> action) {
-    final FragmentManager fragmentManager = getParentFragment().getFragmentManager();
-    final Fragment lockListFragment = fragmentManager.findFragmentByTag(LockListFragment.TAG);
-    if (lockListFragment instanceof LockListFragment) {
-      ((LockListFragment) lockListFragment).provideMasterSubmitCallback(action);
-    } else {
-      throw new ClassCastException("Fragment is not MasterPinSubmitCallback");
-    }
   }
 }
 
