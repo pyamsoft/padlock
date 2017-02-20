@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.lock;
 
 import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
-import com.pyamsoft.padlock.pin.MasterPinModule;
+import com.pyamsoft.padlock.lock.master.MasterPinModule;
 import dagger.Subcomponent;
 
 @Subcomponent(modules = {

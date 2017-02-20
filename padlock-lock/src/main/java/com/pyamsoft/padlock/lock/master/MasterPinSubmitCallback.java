@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.lock.master;
 
-import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
-import com.pyamsoft.padlock.pin.MasterPinModule;
-import dagger.Subcomponent;
+public interface MasterPinSubmitCallback {
 
-@Subcomponent(modules = {
-    PinEntryModule.class, MasterPinModule.class, AppIconLoaderModule.class
-}) public interface PinEntryComponent {
+  void onCreateMasterPinSuccess();
 
-  void inject(PinEntryDialog dialog);
+  void onCreateMasterPinFailure();
+
+  void onClearMasterPinSuccess();
+
+  void onClearMasterPinFailure();
 }

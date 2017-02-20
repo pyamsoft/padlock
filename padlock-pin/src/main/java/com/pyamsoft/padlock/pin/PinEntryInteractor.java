@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.pin;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.lock.LockInteractor;
+import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
-import com.pyamsoft.padlock.pin.MasterPinInteractor;
 import javax.inject.Inject;
 import rx.Observable;
 import timber.log.Timber;
@@ -28,7 +29,7 @@ class PinEntryInteractor extends LockInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final MasterPinInteractor masterPinInteractor;
 
-  @Inject PinEntryInteractor(@NonNull final MasterPinInteractor masterPinInteractor) {
+  @Inject PinEntryInteractor(@NonNull MasterPinInteractor masterPinInteractor) {
     this.masterPinInteractor = masterPinInteractor;
   }
 

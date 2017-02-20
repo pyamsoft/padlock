@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.service;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.pin.MasterPinInteractor;
+import com.pyamsoft.padlock.pin.master.MasterPinInteractor;
 import dagger.Module;
 import dagger.Provides;
 

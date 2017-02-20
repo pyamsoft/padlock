@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.service;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.pin.MasterPinInteractor;
+import com.pyamsoft.padlock.pin.master.MasterPinInteractor;
 import javax.inject.Inject;
 import rx.Observable;
 

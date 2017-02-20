@@ -29,7 +29,7 @@ import com.pyamsoft.padlock.list.LockInfoSingletonModule;
 import com.pyamsoft.padlock.list.LockListComponent;
 import com.pyamsoft.padlock.list.LockListSingletonModule;
 import com.pyamsoft.padlock.lock.LockScreenComponent;
-import com.pyamsoft.padlock.lock.PinEntryComponent;
+import com.pyamsoft.padlock.pin.PinEntryComponent;
 import com.pyamsoft.padlock.main.MainComponent;
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFirstLaunchComponent;
 import com.pyamsoft.padlock.onboard.list.OnboardListComponent;
