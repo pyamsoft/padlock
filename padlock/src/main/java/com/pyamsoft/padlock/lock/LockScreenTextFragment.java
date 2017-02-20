@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,18 +38,13 @@ import com.pyamsoft.pydroid.drawable.AsyncMap;
 import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
 import com.pyamsoft.pydroid.helper.AsyncMapHelper;
 import com.pyamsoft.pydroid.util.AppUtil;
+import java.util.Locale;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_ACTIVITY_NAME;
-import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_IS_SYSTEM;
-import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_LOCK_CODE;
 import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_LOCK_UNTIL_TIME;
-import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_PACKAGE_NAME;
-import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_REAL_NAME;
-import static com.pyamsoft.padlock.service.PadLockService.finish;
 
-public class LockScreenTextFragment extends Fragment {
+public class LockScreenTextFragment extends LockScreenBaseFragment {
 
   @NonNull static final String TAG = "LockScreenTextFragment";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
@@ -58,14 +52,9 @@ public class LockScreenTextFragment extends Fragment {
     Timber.e("LOCK ERROR");
     AppUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "lock_error");
   };
-  @SuppressWarnings("WeakerAccess") String lockedActivityName;
-  @SuppressWarnings("WeakerAccess") String lockedPackageName;
-  @SuppressWarnings("WeakerAccess") String lockedCode;
-  String lockedRealName;
-  boolean lockedSystem;
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") @Inject LockScreenPresenter presenter;
-  private FragmentLockScreenTextBinding binding;
+  FragmentLockScreenTextBinding binding;
   private EditText editText;
   @NonNull private AsyncMapEntry arrowGoTask = AsyncMap.emptyEntry();
 
@@ -73,31 +62,16 @@ public class LockScreenTextFragment extends Fragment {
   public static LockScreenTextFragment newInstance(@NonNull String lockedPackageName,
       @NonNull String lockedActivityName, @Nullable String lockedCode,
       @NonNull String lockedRealName, boolean lockedSystem) {
-    Bundle args = new Bundle();
     LockScreenTextFragment fragment = new LockScreenTextFragment();
-    args.putString(ENTRY_PACKAGE_NAME, lockedPackageName);
-    args.putString(ENTRY_ACTIVITY_NAME, lockedActivityName);
-    args.putString(ENTRY_LOCK_CODE, lockedCode);
-    args.putString(ENTRY_REAL_NAME, lockedRealName);
-    args.putBoolean(ENTRY_IS_SYSTEM, lockedSystem);
-    fragment.setArguments(args);
+    fragment.setArguments(
+        buildBundle(lockedPackageName, lockedActivityName, lockedCode, lockedRealName,
+            lockedSystem));
     return fragment;
   }
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     Injector.get().provideComponent().plusLockScreenComponent().inject(this);
-
-    final Bundle bundle = getArguments();
-    lockedPackageName = bundle.getString(ENTRY_PACKAGE_NAME);
-    lockedActivityName = bundle.getString(ENTRY_ACTIVITY_NAME);
-    lockedRealName = bundle.getString(ENTRY_REAL_NAME);
-    lockedCode = bundle.getString(ENTRY_LOCK_CODE);
-    lockedSystem = bundle.getBoolean(ENTRY_IS_SYSTEM, false);
-
-    if (lockedPackageName == null || lockedActivityName == null || lockedRealName == null) {
-      throw new NullPointerException("Missing required lock attributes");
-    }
   }
 
   @Nullable @Override
@@ -123,14 +97,13 @@ public class LockScreenTextFragment extends Fragment {
         Timber.d("Unlocked!");
         clearDisplay();
 
-        presenter.postUnlock(lockedPackageName, lockedActivityName, lockedRealName, lockedCode,
-            lockedSystem, LockScreenActivity.isExcluded(getActivity()),
-            LockScreenActivity.getSelectedIgnoreTime(getActivity()),
+        presenter.postUnlock(getLockedPackageName(), getLockedActivityName(), getLockedRealName(),
+            getLockedCode(), isLockedSystem(), isExcluded(), getSelectedIgnoreTime(),
             new LockScreenPresenter.PostUnlockCallback() {
               @Override public void onPostUnlock() {
                 Timber.d("POST Unlock Finished! 1");
                 PadLockService.passLockScreen();
-                finish();
+                getActivity().finish();
               }
 
               @Override public void onLockedError() {
@@ -142,18 +115,17 @@ public class LockScreenTextFragment extends Fragment {
       @Override public void onSubmitFailure() {
         Timber.e("Failed to unlock");
         clearDisplay();
-        LockScreenActivity.showSnackbarWithText(getActivity(), "Error: Invalid PIN");
-        LockScreenActivity.showHint(getActivity());
+        showSnackbarWithText("Error: Invalid PIN");
+        binding.lockDisplayHint.setVisibility(View.VISIBLE);
 
         // Once fail count is tripped once, continue to update it every time following until time elapses
-        presenter.lockEntry(lockedPackageName, lockedActivityName,
+        presenter.lockEntry(getLockedPackageName(), getLockedActivityName(),
             new LockScreenPresenter.LockCallback() {
               @Override public void onLocked(long lockUntilTime) {
-                LockScreenActivity.setLockedUntilTime(getActivity(), lockUntilTime);
+                setLockedUntilTime(lockUntilTime);
                 getActivity().getIntent().removeExtra(ENTRY_LOCK_UNTIL_TIME);
                 getActivity().getIntent().putExtra(ENTRY_LOCK_UNTIL_TIME, lockUntilTime);
-                LockScreenActivity.showSnackbarWithText(getActivity(),
-                    "This entry is temporarily locked");
+                showSnackbarWithText("This entry is temporarily locked");
               }
 
               @Override public void onLockedError() {
@@ -172,6 +144,24 @@ public class LockScreenTextFragment extends Fragment {
     setupGoArrow(submitCallback);
     setupInputManager();
     clearDisplay();
+
+    // Hide hint to begin with
+    binding.lockDisplayHint.setVisibility(View.GONE);
+  }
+
+  @Override public void onStart() {
+    super.onStart();
+    presenter.bindView(null);
+    presenter.displayLockedHint(hint -> {
+      Timber.d("Settings hint");
+      binding.lockDisplayHint.setText(
+          String.format(Locale.getDefault(), "Hint: %s", hint.isEmpty() ? "NO HINT" : hint));
+    });
+  }
+
+  @Override public void onStop() {
+    super.onStop();
+    presenter.unbindView();
   }
 
   public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
@@ -200,9 +190,8 @@ public class LockScreenTextFragment extends Fragment {
 
   private void setupGoArrow(@NonNull LockSubmitCallback submitCallback) {
     binding.lockImageGo.setOnClickListener(view -> {
-      presenter.submit(lockedPackageName, lockedActivityName, lockedCode,
-          LockScreenActivity.getLockedUntilTime(getActivity()), getCurrentAttempt(),
-          submitCallback);
+      presenter.submit(getLockedPackageName(), getLockedActivityName(), getLockedCode(),
+          getLockedUntilTime(), getCurrentAttempt(), submitCallback);
       imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0,
           0);
     });
@@ -240,9 +229,8 @@ public class LockScreenTextFragment extends Fragment {
 
       if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
         Timber.d("KeyEvent is Enter pressed");
-        presenter.submit(lockedPackageName, lockedActivityName, lockedCode,
-            LockScreenActivity.getLockedUntilTime(getActivity()), getCurrentAttempt(),
-            submitCallback);
+        presenter.submit(getLockedPackageName(), getLockedActivityName(), getLockedCode(),
+            getLockedUntilTime(), getCurrentAttempt(), submitCallback);
         return true;
       }
 

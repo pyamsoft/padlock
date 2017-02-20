@@ -81,9 +81,13 @@ class LockScreenPresenter extends LockTypePresenter {
     lockSubscription = interactor.incrementAndGetFailCount(packageName, activityName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(lockTime -> {
-          Timber.d("Received lock entry result");
-          callback.onLocked(lockTime);
+        .subscribe(timePair -> {
+          if (timePair.currentTime < timePair.lockUntilTime) {
+            Timber.d("Received lock entry result");
+            callback.onLocked(timePair.lockUntilTime);
+          } else {
+            Timber.w("No timeout period set, entry not locked");
+          }
         }, throwable -> {
           Timber.e(throwable, "lockEntry onError");
           callback.onLockedError();
