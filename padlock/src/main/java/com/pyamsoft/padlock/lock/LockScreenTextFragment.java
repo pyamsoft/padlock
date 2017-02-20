@@ -39,7 +39,6 @@ import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
 import com.pyamsoft.pydroid.helper.AsyncMapHelper;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.Locale;
-import javax.inject.Inject;
 import timber.log.Timber;
 
 import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_LOCK_UNTIL_TIME;
@@ -53,7 +52,6 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
     AppUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "lock_error");
   };
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
-  @SuppressWarnings("WeakerAccess") @Inject LockScreenPresenter presenter;
   FragmentLockScreenTextBinding binding;
   private EditText editText;
   @NonNull private AsyncMapEntry arrowGoTask = AsyncMap.emptyEntry();
@@ -99,7 +97,7 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
 
         presenter.postUnlock(getLockedPackageName(), getLockedActivityName(), getLockedRealName(),
             getLockedCode(), isLockedSystem(), isExcluded(), getSelectedIgnoreTime(),
-            new LockScreenPresenter.PostUnlockCallback() {
+            new LockScreenEntryPresenter.PostUnlockCallback() {
               @Override public void onPostUnlock() {
                 Timber.d("POST Unlock Finished! 1");
                 PadLockService.passLockScreen();
@@ -120,7 +118,7 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
 
         // Once fail count is tripped once, continue to update it every time following until time elapses
         presenter.lockEntry(getLockedPackageName(), getLockedActivityName(),
-            new LockScreenPresenter.LockCallback() {
+            new LockScreenEntryPresenter.LockCallback() {
               @Override public void onLocked(long lockUntilTime) {
                 setLockedUntilTime(lockUntilTime);
                 getActivity().getIntent().removeExtra(ENTRY_LOCK_UNTIL_TIME);

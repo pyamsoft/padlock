@@ -30,11 +30,16 @@ import javax.inject.Singleton;
 
 @Module public class LockScreenSingletonModule {
 
-  @Singleton @Provides LockScreenInteractor provideLockScreenInteractor(Context context,
+  @Singleton @Provides LockScreenInteractor provideLockScreenInteractor(
+      PadLockPreferences preference, PackageManagerWrapper packageManagerWrapper) {
+    return new LockScreenInteractor(preference, packageManagerWrapper);
+  }
+
+  @Singleton @Provides LockScreenEntryInteractor provideLockScreenEntryInteractor(Context context,
       PadLockPreferences preference, JobSchedulerCompat jobSchedulerCompat,
-      MasterPinInteractor masterPinInteractor, PackageManagerWrapper packageManagerWrapper,
-      PadLockDB padLockDB, @Named("recheck") Class<? extends IntentService> recheckServiceClass) {
-    return new LockScreenInteractor(context, preference, jobSchedulerCompat, masterPinInteractor,
-        packageManagerWrapper, padLockDB, recheckServiceClass);
+      MasterPinInteractor masterPinInteractor, PadLockDB padLockDB,
+      @Named("recheck") Class<? extends IntentService> recheckServiceClass) {
+    return new LockScreenEntryInteractor(context.getApplicationContext(), preference,
+        jobSchedulerCompat, masterPinInteractor, padLockDB, recheckServiceClass);
   }
 }

@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import javax.inject.Inject;
 
 import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_ACTIVITY_NAME;
 import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_IS_SYSTEM;
@@ -33,15 +34,16 @@ import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_REAL_NAME;
 
 abstract class LockScreenBaseFragment extends Fragment {
 
+  @SuppressWarnings("WeakerAccess") @Inject LockScreenEntryPresenter presenter;
   private String lockedActivityName;
   private String lockedPackageName;
   private String lockedCode;
   private String lockedRealName;
   private boolean lockedSystem;
 
-  @CheckResult @NonNull static Bundle buildBundle(@NonNull String lockedPackageName,
-      @NonNull String lockedActivityName, @Nullable String lockedCode,
-      @NonNull String lockedRealName, boolean lockedSystem) {
+  @CheckResult @NonNull
+  static Bundle buildBundle(@NonNull String lockedPackageName, @NonNull String lockedActivityName,
+      @Nullable String lockedCode, @NonNull String lockedRealName, boolean lockedSystem) {
     Bundle args = new Bundle();
     args.putString(ENTRY_PACKAGE_NAME, lockedPackageName);
     args.putString(ENTRY_ACTIVITY_NAME, lockedActivityName);
@@ -112,6 +114,9 @@ abstract class LockScreenBaseFragment extends Fragment {
 
   @CallSuper @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    if (savedInstanceState == null) {
+      presenter.resetFailCount();
+    }
 
     final Bundle bundle = getArguments();
     lockedPackageName = bundle.getString(ENTRY_PACKAGE_NAME);
