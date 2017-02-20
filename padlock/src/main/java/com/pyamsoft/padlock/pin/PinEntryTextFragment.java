@@ -40,15 +40,16 @@ import com.pyamsoft.pydroid.ActionSingle;
 import com.pyamsoft.pydroid.drawable.AsyncDrawable;
 import com.pyamsoft.pydroid.drawable.AsyncMap;
 import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
+import com.pyamsoft.pydroid.helper.AsyncMapHelper;
 import javax.inject.Inject;
 import timber.log.Timber;
 
 public class PinEntryTextFragment extends Fragment {
 
+  @NonNull static final String TAG = "PinEntryTextFragment";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY";
   @NonNull private static final String HINT_DISPLAY = "HINT_DISPLAY";
-  @NonNull private final AsyncMap taskMap = new AsyncMap();
   @SuppressWarnings("WeakerAccess") @Inject PinEntryPresenter presenter;
   EditText pinEntryText;
   EditText pinHintText;
@@ -96,6 +97,7 @@ public class PinEntryTextFragment extends Fragment {
           });
         }
       };
+  @NonNull private AsyncMapEntry goTask = AsyncMap.emptyEntry();
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -111,6 +113,7 @@ public class PinEntryTextFragment extends Fragment {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
+    goTask = AsyncMapHelper.unsubscribe(goTask);
     imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0, 0);
     binding.unbind();
   }
@@ -195,9 +198,10 @@ public class PinEntryTextFragment extends Fragment {
     // Force keyboard focus
     pinEntryText.requestFocus();
 
-    final AsyncMapEntry task =
-        AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.pinImageGo);
-    taskMap.put("arrow", task);
+    goTask = AsyncMapHelper.unsubscribe(goTask);
+    goTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp)
+        .tint(R.color.orangeA200)
+        .into(binding.pinImageGo);
   }
 
   private void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {

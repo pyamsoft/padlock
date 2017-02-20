@@ -23,6 +23,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,20 +40,20 @@ import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.pydroid.drawable.AsyncDrawable;
 import com.pyamsoft.pydroid.drawable.AsyncMap;
 import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
+import com.pyamsoft.pydroid.helper.AsyncMapHelper;
 import javax.inject.Inject;
 import timber.log.Timber;
 
 public class PinEntryDialog extends DialogFragment {
 
   @NonNull public static final String TAG = "PinEntryDialog";
-  @NonNull static final String CHILD_TAG = "Child_PinEntry";
   @NonNull private static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull private static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
-  @NonNull private final AsyncMap taskMap = new AsyncMap();
   @SuppressWarnings("WeakerAccess") @Inject LockTypePresenter presenter;
   @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   DialogPinEntryBinding binding;
   private String packageName;
+  @NonNull private AsyncMapEntry closeTask = AsyncMap.emptyEntry();
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -106,9 +108,14 @@ public class PinEntryDialog extends DialogFragment {
     presenter.initializeLockScreenType(new LockTypePresenter.LockScreenTypeCallback() {
       @Override public void onTypeText() {
         // Push text as child fragment
-        getChildFragmentManager().beginTransaction()
-            .replace(R.id.pin_entry_dialog_container, new PinEntryTextFragment(), CHILD_TAG)
-            .commitNow();
+        FragmentManager fragmentManager = getChildFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(PinEntryTextFragment.TAG);
+        if (fragment == null) {
+          getChildFragmentManager().beginTransaction()
+              .replace(R.id.pin_entry_dialog_container, new PinEntryTextFragment(),
+                  PinEntryTextFragment.TAG)
+              .commitNow();
+        }
       }
 
       @Override public void onTypePattern() {
@@ -123,10 +130,10 @@ public class PinEntryDialog extends DialogFragment {
       dismiss();
     });
 
-    final AsyncMapEntry task = AsyncDrawable.load(R.drawable.ic_close_24dp)
+    closeTask = AsyncMapHelper.unsubscribe(closeTask);
+    closeTask = AsyncDrawable.load(R.drawable.ic_close_24dp)
         .tint(android.R.color.black)
         .into(binding.pinEntryClose);
-    taskMap.put("close", task);
   }
 
   @Override public void onStart() {
@@ -161,7 +168,7 @@ public class PinEntryDialog extends DialogFragment {
     super.onDestroyView();
 
     Timber.d("Destroy AlertDialog");
-    taskMap.clear();
+    closeTask = AsyncMapHelper.unsubscribe(closeTask);
     binding.unbind();
   }
 

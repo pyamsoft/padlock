@@ -23,5 +23,7 @@ import dagger.Subcomponent;
     LockScreenModule.class, AppIconLoaderModule.class
 }) public interface LockScreenComponent {
 
+  void inject(LockScreenTextFragment fragment);
+
   void inject(LockScreenActivity activity);
 }
