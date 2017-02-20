@@ -19,23 +19,27 @@ package com.pyamsoft.padlock;
 import com.pyamsoft.padlock.base.PadLockModule;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDBModule;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderInteractorModule;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.base.receiver.ReceiverModule;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatModule;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperModule;
+import com.pyamsoft.padlock.iconloader.AppIconLoaderInteractorModule;
 import com.pyamsoft.padlock.list.LockInfoComponent;
 import com.pyamsoft.padlock.list.LockInfoSingletonModule;
 import com.pyamsoft.padlock.list.LockListComponent;
 import com.pyamsoft.padlock.list.LockListSingletonModule;
 import com.pyamsoft.padlock.lock.LockScreenComponent;
-import com.pyamsoft.padlock.pin.PinEntryComponent;
+import com.pyamsoft.padlock.lock.LockScreenSingletonModule;
+import com.pyamsoft.padlock.lock.master.MasterPinModule;
 import com.pyamsoft.padlock.main.MainComponent;
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFirstLaunchComponent;
 import com.pyamsoft.padlock.onboard.list.OnboardListComponent;
+import com.pyamsoft.padlock.pin.PinEntryComponent;
+import com.pyamsoft.padlock.pin.PinEntrySingletonModule;
 import com.pyamsoft.padlock.purge.PurgeComponent;
 import com.pyamsoft.padlock.purge.PurgeSingletonModule;
 import com.pyamsoft.padlock.service.LockServiceComponent;
+import com.pyamsoft.padlock.service.LockServiceStateModule;
 import com.pyamsoft.padlock.settings.SettingsPreferenceComponent;
 import dagger.Component;
 import javax.inject.Singleton;
@@ -43,7 +47,9 @@ import javax.inject.Singleton;
 @Singleton @Component(modules = {
     PadLockModule.class, PackageManagerWrapperModule.class, JobSchedulerCompatModule.class,
     PadLockDBModule.class, ReceiverModule.class, LockListSingletonModule.class,
-    LockInfoSingletonModule.class, PurgeSingletonModule.class, AppIconLoaderInteractorModule.class
+    LockInfoSingletonModule.class, PurgeSingletonModule.class, AppIconLoaderInteractorModule.class,
+    LockScreenSingletonModule.class, PinEntrySingletonModule.class, MasterPinModule.class,
+    LockServiceStateModule.class
 }) public interface PadLockComponent {
 
   LockInfoComponent plusLockInfoComponent();

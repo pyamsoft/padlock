@@ -20,10 +20,11 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Singleton;
 
 @Module public class MasterPinModule {
 
-  @Provides MasterPinInteractor provideMasterPinInteractor(
+  @Singleton @Provides MasterPinInteractor provideMasterPinInteractor(
       @NonNull PadLockPreferences preferences) {
     return new MasterPinInteractor(preferences);
   }

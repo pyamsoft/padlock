@@ -16,11 +16,10 @@
 
 package com.pyamsoft.padlock.service;
 
-import com.pyamsoft.padlock.lock.master.MasterPinModule;
 import dagger.Subcomponent;
 
 @Subcomponent(modules = {
-    LockServiceModule.class, MasterPinModule.class, LockServiceStateModule.class
+    LockServiceModule.class,
 }) public interface LockServiceComponent {
   void inject(PadLockService service);
 }

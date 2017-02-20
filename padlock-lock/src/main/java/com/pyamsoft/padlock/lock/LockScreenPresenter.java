@@ -42,6 +42,9 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = lockScreenInteractor;
+  }
+
+  public void resetFailCount() {
     interactor.resetFailCount();
   }
 
