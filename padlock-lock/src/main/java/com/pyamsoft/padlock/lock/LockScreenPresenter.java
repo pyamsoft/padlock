@@ -37,15 +37,12 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
   @NonNull private Subscription unlockSubscription = Subscriptions.empty();
   @NonNull private Subscription lockSubscription = Subscriptions.empty();
   @NonNull private Subscription hintSubscription = Subscriptions.empty();
+  @NonNull private Subscription typeSubscription = Subscriptions.empty();
 
   @Inject LockScreenPresenter(@NonNull final LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = lockScreenInteractor;
-  }
-
-  public void resetFailCount() {
-    interactor.resetFailCount();
   }
 
   @Override protected void onUnbind() {
@@ -56,6 +53,31 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
     unlockSubscription = SubscriptionHelper.unsubscribe(unlockSubscription);
     lockSubscription = SubscriptionHelper.unsubscribe(lockSubscription);
     hintSubscription = SubscriptionHelper.unsubscribe(hintSubscription);
+  }
+
+  public void resetFailCount() {
+    interactor.resetFailCount();
+  }
+
+  public void initializeLockScreenType(@NonNull LockScreenTypeCallback callback) {
+    typeSubscription = SubscriptionHelper.unsubscribe(typeSubscription);
+    typeSubscription = interactor.getLockScreenType()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(lockScreenType -> {
+          switch (lockScreenType) {
+            case TYPE_PATTERN:
+              callback.onTypePattern();
+              break;
+            case TYPE_TEXT:
+              callback.onTypeText();
+              break;
+            default:
+              throw new IllegalStateException("Invalid lock screen type: " + lockScreenType);
+          }
+        }, throwable -> {
+          Timber.e(throwable, "onError");
+        });
   }
 
   public void displayLockedHint(@NonNull LockHintCallback callback) {
@@ -169,5 +191,11 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
   interface LockHintCallback {
 
     void setDisplayHint(@NonNull String hint);
+  }
+
+  interface LockScreenTypeCallback {
+    void onTypeText();
+
+    void onTypePattern();
   }
 }
