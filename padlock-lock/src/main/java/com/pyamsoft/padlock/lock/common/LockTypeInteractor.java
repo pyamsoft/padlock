@@ -20,13 +20,14 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.model.LockScreenType;
+import javax.inject.Inject;
 import rx.Observable;
 
 public class LockTypeInteractor {
 
   @NonNull private final PadLockPreferences preferences;
 
-  protected LockTypeInteractor(@NonNull PadLockPreferences preferences) {
+  @Inject protected LockTypeInteractor(@NonNull PadLockPreferences preferences) {
     this.preferences = preferences;
   }
 
