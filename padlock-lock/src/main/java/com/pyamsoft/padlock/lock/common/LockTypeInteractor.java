@@ -36,6 +36,6 @@ public class LockTypeInteractor {
   }
 
   @CheckResult @NonNull public Observable<LockScreenType> getLockScreenType() {
-    return Observable.fromCallable(() -> LockScreenType.TYPE_TEXT);
+    return Observable.fromCallable(() -> LockScreenType.TYPE_PATTERN);
   }
 }

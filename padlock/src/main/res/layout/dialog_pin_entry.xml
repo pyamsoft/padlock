@@ -56,22 +56,42 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="8dp"
         >
 
       <ImageView
           android:id="@+id/pin_image"
           android:layout_width="56dp"
           android:layout_height="56dp"
-          android:layout_marginBottom="16dp"
+          android:layout_margin="8dp"
           android:contentDescription="@string/blank"
           />
 
       <FrameLayout
           android:id="@+id/pin_entry_dialog_container"
           android:layout_width="match_parent"
-          android:layout_height="match_parent"
+          android:layout_height="0dp"
+          android:layout_margin="8dp"
+          android:layout_weight="1"
           />
+
+      <LinearLayout
+          android:id="@+id/pin_next_button_layout"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="end"
+          android:orientation="horizontal"
+          >
+
+        <Button
+            android:id="@+id/pin_next_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            style="?attr/buttonBarButtonStyle"
+            />
+
+      </LinearLayout>
 
     </LinearLayout>
 
