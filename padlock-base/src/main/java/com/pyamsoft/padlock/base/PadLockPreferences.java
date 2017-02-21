@@ -69,7 +69,7 @@ public interface PadLockPreferences {
 
   class Instance {
 
-    @CheckResult @NonNull public PadLockPreferences wrap(@NonNull Context context,
+    @CheckResult @NonNull public static PadLockPreferences wrap(@NonNull Context context,
         @NonNull SharedPreferences preferences) {
       return new PadLockPreferencesImpl(context, preferences);
     }

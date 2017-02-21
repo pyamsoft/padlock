@@ -25,7 +25,7 @@ import rx.Observable;
 
 public class LockTypeInteractor {
 
-  @NonNull private final PadLockPreferences preferences;
+  @NonNull final PadLockPreferences preferences;
 
   @Inject protected LockTypeInteractor(@NonNull PadLockPreferences preferences) {
     this.preferences = preferences;
@@ -36,6 +36,6 @@ public class LockTypeInteractor {
   }
 
   @CheckResult @NonNull public Observable<LockScreenType> getLockScreenType() {
-    return Observable.fromCallable(() -> LockScreenType.TYPE_PATTERN);
+    return Observable.fromCallable(preferences::getCurrentLockType);
   }
 }
