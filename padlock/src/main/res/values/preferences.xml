@@ -101,8 +101,8 @@
   <string name="lock_screen_type_summary">Type of password to lock with (pattern, pin)</string>
 
   <string-array name="lock_screen_type_names">
-    <item name="type_text">Do Not Timeout</item>
-    <item name="type_pattern">Timeout For 1 Minute</item>
+    <item name="type_text">PIN Password</item>
+    <item name="type_pattern">Pattern Password</item>
   </string-array>
 
   <string-array name="lock_screen_type_values">
