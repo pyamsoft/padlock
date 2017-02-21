@@ -19,16 +19,20 @@ package com.pyamsoft.padlock.settings;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.preference.Preference;
 import android.view.View;
+import android.widget.Toast;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.main.MainActivity;
+import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment;
@@ -74,6 +78,28 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
     installListener.setOnPreferenceClickListener(preference -> {
       presenter.setApplicationInstallReceiverState();
       return true;
+    });
+
+    final Preference lockType = findPreference(getString(R.string.lock_screen_type_key));
+    lockType.setOnPreferenceChangeListener((preference, newValue) -> {
+      // KLUDGE Accessing preference from View layer
+      // We do this because going through an interactor is not synchronous, which can lead to lags
+      // While we could properly architect here, we choose user experience over correct arch.
+      SharedPreferences sharedPreferences = preference.getSharedPreferences();
+      PadLockPreferences padLockPreferences =
+          PadLockPreferences.Instance.wrap(getContext(), sharedPreferences);
+
+      // If we have a master pin, don't let user switch
+      if (padLockPreferences.getMasterPassword() == null) {
+        return true;
+      } else {
+        Toast.makeText(getContext(), "Must clear Master Password before changing Lock Screen Type",
+            Toast.LENGTH_SHORT).show();
+        AppUtil.onlyLoadOnceDialogFragment(getActivity(),
+            PinEntryDialog.newInstance(getContext().getPackageName(),
+                getActivity().getClass().getName()), PinEntryDialog.TAG);
+        return false;
+      }
     });
   }
 
