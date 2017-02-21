@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.databinding.PinEntryPatternBinding;
+import com.pyamsoft.pydroid.FuncNone;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -43,10 +44,10 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
   boolean repeatPattern = false;
   PinEntryPatternBinding binding;
   @Inject PinEntryPresenter presenter;
-  @NonNull private String patternText = "";
+  @Nullable FuncNone<Boolean> nextButtonOnClickRunnable;
+  @NonNull String patternText = "";
 
-  @NonNull @CheckResult
-  private static String cellPatternToString(@NonNull List<PatternView.Cell> cells) {
+  @NonNull @CheckResult static String cellPatternToString(@NonNull List<PatternView.Cell> cells) {
     StringBuilder builder = new StringBuilder(4);
     for (PatternView.Cell cell : cells) {
       String cellString =
@@ -140,11 +141,35 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
 
     presenter.checkMasterPinPresent(new PinEntryPresenter.MasterPinStatusCallback() {
       @Override public void onMasterPinMissing() {
-
+        nextButtonOnClickRunnable = () -> {
+          if (repeatPattern) {
+            // Submit
+            String repeatText = cellPatternToString(repeatCellPattern);
+            submitPin(repeatText);
+            // No follow up acton
+            return false;
+          } else {
+            // process and show next
+            if (cellPattern.size() < MINIMUM_PATTERN_LENGTH) {
+              binding.patternLock.setDisplayMode(PatternView.DisplayMode.Wrong);
+              return false;
+            } else {
+              patternText = cellPatternToString(cellPattern);
+              repeatPattern = true;
+              binding.patternLock.clearPattern();
+              return true;
+            }
+          }
+        };
       }
 
       @Override public void onMasterPinPresent() {
-
+        nextButtonOnClickRunnable = () -> {
+          patternText = cellPatternToString(cellPattern);
+          binding.patternLock.clearPattern();
+          submitPin(null);
+          return false;
+        };
       }
     });
   }
@@ -155,51 +180,46 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
   }
 
   @CheckResult boolean onNextButtonClicked() {
-    if (repeatPattern) {
-      // Submit
-      String repeatText = cellPatternToString(repeatCellPattern);
-      presenter.submit(patternText, repeatText, "", new PinEntryPresenter.SubmitCallback() {
-
-        @Override public void onSubmitSuccess(boolean creating) {
-          actOnLockList(callback -> {
-            if (creating) {
-              callback.onCreateMasterPinSuccess();
-            } else {
-              callback.onClearMasterPinSuccess();
-            }
-          });
-          dismissParent();
-        }
-
-        @Override public void onSubmitFailure(boolean creating) {
-          actOnLockList(callback -> {
-            if (creating) {
-              callback.onCreateMasterPinFailure();
-            } else {
-              callback.onClearMasterPinFailure();
-            }
-          });
-          dismissParent();
-        }
-
-        @Override public void onSubmitError() {
-          dismissParent();
-        }
-      });
-
-      // No follow up acton
+    if (nextButtonOnClickRunnable == null) {
+      Timber.w("onClick runnable is NULL");
       return false;
     } else {
-      // process and show next
-      if (cellPattern.size() < MINIMUM_PATTERN_LENGTH) {
-        binding.patternLock.setDisplayMode(PatternView.DisplayMode.Wrong);
-        return false;
-      } else {
-        patternText = cellPatternToString(cellPattern);
-        repeatPattern = true;
-        binding.patternLock.clearPattern();
-        return true;
-      }
+      return nextButtonOnClickRunnable.call();
     }
+  }
+
+  void submitPin(@Nullable String repeatText) {
+    if (repeatText == null) {
+      repeatText = "";
+    }
+
+    presenter.submit(patternText, repeatText, "", new PinEntryPresenter.SubmitCallback() {
+
+      @Override public void onSubmitSuccess(boolean creating) {
+        actOnLockList(callback -> {
+          if (creating) {
+            callback.onCreateMasterPinSuccess();
+          } else {
+            callback.onClearMasterPinSuccess();
+          }
+        });
+        dismissParent();
+      }
+
+      @Override public void onSubmitFailure(boolean creating) {
+        actOnLockList(callback -> {
+          if (creating) {
+            callback.onCreateMasterPinFailure();
+          } else {
+            callback.onClearMasterPinFailure();
+          }
+        });
+        dismissParent();
+      }
+
+      @Override public void onSubmitError() {
+        dismissParent();
+      }
+    });
   }
 }
