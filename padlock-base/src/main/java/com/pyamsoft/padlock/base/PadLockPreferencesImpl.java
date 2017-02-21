@@ -20,7 +20,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.preference.PreferenceManager;
+import com.pyamsoft.padlock.model.LockScreenType;
 import javax.inject.Inject;
 
 class PadLockPreferencesImpl implements PadLockPreferences {
@@ -39,14 +41,21 @@ class PadLockPreferencesImpl implements PadLockPreferences {
   @NonNull private final String lockPackageChangeKey;
   @NonNull private final String installListener;
   @NonNull private final String ignoreKeyguard;
+  @NonNull private final String lockScreenType;
+  @NonNull private final String lockScreenTypeDefault;
   private final boolean lockPackageChangeDefault;
   private final boolean installListenerDefault;
   private final boolean ignoreKeyguardDefault;
 
-  @Inject PadLockPreferencesImpl(final @NonNull Context context) {
+  @Inject PadLockPreferencesImpl(@NonNull Context context) {
+    this(context.getApplicationContext(),
+        PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext()));
+  }
+
+  PadLockPreferencesImpl(@NonNull Context context, @NonNull SharedPreferences preferences) {
     final Context appContext = context.getApplicationContext();
     final Resources res = appContext.getResources();
-    preferences = PreferenceManager.getDefaultSharedPreferences(appContext);
+    this.preferences = preferences;
     ignoreTimeKey = res.getString(R.string.ignore_time_key);
     ignoreTimeDefault = res.getString(R.string.ignore_time_default);
     timeoutTimeKey = res.getString(R.string.timeout_time_key);
@@ -57,6 +66,12 @@ class PadLockPreferencesImpl implements PadLockPreferences {
     installListenerDefault = res.getBoolean(R.bool.install_listener_default);
     ignoreKeyguard = res.getString(R.string.ignore_keyguard_key);
     ignoreKeyguardDefault = res.getBoolean(R.bool.ignore_keyguard_default);
+    lockScreenType = res.getString(R.string.lock_screen_type_key);
+    lockScreenTypeDefault = res.getString(R.string.lock_screen_type_default);
+  }
+
+  @NonNull @Override public LockScreenType getCurrentLockType() {
+    return LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault));
   }
 
   @Override public boolean isIgnoreInKeyguard() {
@@ -67,7 +82,7 @@ class PadLockPreferencesImpl implements PadLockPreferences {
     return preferences.getBoolean(installListener, installListenerDefault);
   }
 
-  @Override public String getHint() {
+  @Nullable @Override public String getHint() {
     return preferences.getString(HINT, null);
   }
 
@@ -103,7 +118,7 @@ class PadLockPreferencesImpl implements PadLockPreferences {
     preferences.edit().putBoolean(IS_SYSTEM, b).apply();
   }
 
-  @Override public String getMasterPassword() {
+  @Nullable @Override public String getMasterPassword() {
     return preferences.getString(MASTER_PASSWORD, null);
   }
 
