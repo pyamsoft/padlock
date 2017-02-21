@@ -148,6 +148,27 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
     super.onStart();
     presenter.bindView(null);
     presenter.hideUnimportantViews(new PinEntryPresenter.HideViewsCallback() {
+
+      private void setupSubmissionView(@NonNull EditText view,
+          @NonNull PinEntryPresenter.SubmitCallback submitCallback) {
+        view.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+          if (keyEvent == null) {
+            Timber.e("KeyEvent was not caused by keypress");
+            return false;
+          }
+
+          if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
+            Timber.d("KeyEvent is Enter pressed");
+            presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint(),
+                submitCallback);
+            return true;
+          }
+
+          Timber.d("Do not handle key event");
+          return false;
+        });
+      }
+
       @Override public void showExtraPinEntryViews() {
         Timber.d("No active master, show extra views");
         binding.pinReentryCode.setVisibility(View.VISIBLE);
@@ -167,26 +188,6 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
   @Override public void onStop() {
     super.onStop();
     presenter.unbindView();
-  }
-
-  void setupSubmissionView(@NonNull EditText view,
-      @NonNull PinEntryPresenter.SubmitCallback submitCallback) {
-    view.setOnEditorActionListener((textView, actionId, keyEvent) -> {
-      if (keyEvent == null) {
-        Timber.e("KeyEvent was not caused by keypress");
-        return false;
-      }
-
-      if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
-        Timber.d("KeyEvent is Enter pressed");
-        presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint(),
-            submitCallback);
-        return true;
-      }
-
-      Timber.d("Do not handle key event");
-      return false;
-    });
   }
 
   private void setupGoArrow(@NonNull PinEntryPresenter.SubmitCallback submitCallback) {
