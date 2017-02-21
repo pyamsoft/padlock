@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.pin;
 
 import android.os.Bundle;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -25,22 +26,42 @@ import android.view.ViewGroup;
 import com.pyamsoft.padlock.databinding.PinEntryPatternBinding;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import me.zhanghai.android.patternlock.PatternView;
 import timber.log.Timber;
 
 public class PinEntryPatternFragment extends PinEntryBaseFragment {
 
   @NonNull static final String TAG = "PinEntryPatternFragment";
-  @NonNull private static final String REPEAT_CELL_PATTER = "repeat_cell_pattern";
+  @NonNull private static final String REPEAT_CELL_PATTERN = "repeat_cell_pattern";
+  @NonNull private static final String PATTERN_TEXT = "pattern_text";
+  static int MINIMUM_PATTERN_LENGTH = 4;
   @NonNull final List<PatternView.Cell> cellPattern = new ArrayList<>();
   @NonNull final List<PatternView.Cell> repeatCellPattern = new ArrayList<>();
   boolean repeatPattern = false;
-  private PinEntryPatternBinding binding;
+  PinEntryPatternBinding binding;
+  @NonNull private String patternText = "";
+
+  @NonNull @CheckResult
+  private static String cellPatternToString(@NonNull List<PatternView.Cell> cells) {
+    StringBuilder builder = new StringBuilder(4);
+    for (PatternView.Cell cell : cells) {
+      String cellString =
+          String.format(Locale.getDefault(), "%s%s", cell.getRow(), cell.getColumn());
+      builder.append(cellString);
+    }
+    return builder.toString();
+  }
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    repeatPattern =
-        savedInstanceState != null && savedInstanceState.getBoolean(REPEAT_CELL_PATTER, false);
+    if (savedInstanceState == null) {
+      repeatPattern = false;
+      patternText = "";
+    } else {
+      repeatPattern = savedInstanceState.getBoolean(REPEAT_CELL_PATTERN, false);
+      patternText = savedInstanceState.getString(PATTERN_TEXT, "");
+    }
   }
 
   @Nullable @Override
@@ -68,6 +89,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
       }
 
       @Override public void onPatternStart() {
+        binding.patternLock.setDisplayMode(PatternView.DisplayMode.Correct);
         clearPattern();
       }
 
@@ -79,6 +101,10 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
       }
 
       @Override public void onPatternDetected(List<PatternView.Cell> pattern) {
+        if (pattern.size() < MINIMUM_PATTERN_LENGTH) {
+          binding.patternLock.setDisplayMode(PatternView.DisplayMode.Wrong);
+        }
+
         Timber.d("onPatternDetected");
         List<PatternView.Cell> cellList;
         if (repeatPattern) {
@@ -93,12 +119,38 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    outState.putBoolean(REPEAT_CELL_PATTER, repeatPattern);
+    outState.putBoolean(REPEAT_CELL_PATTERN, repeatPattern);
+    outState.putString(PATTERN_TEXT, patternText);
     super.onSaveInstanceState(outState);
   }
 
   @Override public void onStart() {
     super.onStart();
+
+    // Pattern gets visually screwed up in multiwindow mode, clear it
     binding.patternLock.clearPattern();
+  }
+
+  @CheckResult boolean onNextButtonClicked() {
+    if (repeatPattern) {
+      // Submit
+      String repeatText = cellPatternToString(repeatCellPattern);
+      Timber.d("Submit: %s and %s", patternText, repeatText);
+      dismissParent();
+
+      // No follow up acton
+      return false;
+    } else {
+      // process and show next
+      if (cellPattern.size() < MINIMUM_PATTERN_LENGTH) {
+        binding.patternLock.setDisplayMode(PatternView.DisplayMode.Wrong);
+        return false;
+      } else {
+        patternText = cellPatternToString(cellPattern);
+        repeatPattern = true;
+        binding.patternLock.clearPattern();
+        return true;
+      }
+    }
   }
 }
