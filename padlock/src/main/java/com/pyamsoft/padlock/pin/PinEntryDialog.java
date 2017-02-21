@@ -25,6 +25,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,10 +38,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
-import com.pyamsoft.pydroid.drawable.AsyncDrawable;
-import com.pyamsoft.pydroid.drawable.AsyncMap;
-import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
-import com.pyamsoft.pydroid.helper.AsyncMapHelper;
+import com.pyamsoft.pydroid.util.DrawableUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -53,7 +51,6 @@ public class PinEntryDialog extends DialogFragment {
   @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   DialogPinEntryBinding binding;
   private String packageName;
-  @NonNull private AsyncMapEntry closeTask = AsyncMap.emptyEntry();
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -102,7 +99,6 @@ public class PinEntryDialog extends DialogFragment {
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    setupCloseButton();
     setupToolbar();
 
     // Start hidden
@@ -144,18 +140,6 @@ public class PinEntryDialog extends DialogFragment {
     });
   }
 
-  private void setupCloseButton() {
-    binding.pinEntryClose.setOnClickListener(view -> {
-      Timber.d("onClick Arrow");
-      dismiss();
-    });
-
-    closeTask = AsyncMapHelper.unsubscribe(closeTask);
-    closeTask = AsyncDrawable.load(R.drawable.ic_close_24dp)
-        .tint(android.R.color.black)
-        .into(binding.pinEntryClose);
-  }
-
   @Override public void onStart() {
     super.onStart();
     appIconLoaderPresenter.bindView(null);
@@ -181,14 +165,20 @@ public class PinEntryDialog extends DialogFragment {
 
   @SuppressLint("SetTextI18n") private void setupToolbar() {
     // Maybe something more descriptive
-    binding.pinEntryToolbar.setText("PIN");
+    binding.pinEntryToolbar.setTitle("PIN");
+    binding.pinEntryToolbar.setNavigationOnClickListener(v -> dismiss());
+    Drawable icon = binding.pinEntryToolbar.getNavigationIcon();
+    if (icon != null) {
+      icon = DrawableUtil.tintDrawableFromColor(icon,
+          ContextCompat.getColor(getContext(), android.R.color.black));
+      binding.pinEntryToolbar.setNavigationIcon(icon);
+    }
   }
 
   @Override public void onDestroyView() {
     super.onDestroyView();
 
     Timber.d("Destroy AlertDialog");
-    closeTask = AsyncMapHelper.unsubscribe(closeTask);
     binding.unbind();
   }
 
