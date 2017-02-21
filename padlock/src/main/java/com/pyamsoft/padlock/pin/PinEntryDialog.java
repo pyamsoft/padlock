@@ -130,6 +130,16 @@ public class PinEntryDialog extends DialogFragment {
         // Push text as child fragment
         binding.pinNextButtonLayout.setVisibility(View.VISIBLE);
         pushIfNotPresent(new PinEntryPatternFragment(), PinEntryPatternFragment.TAG);
+
+        binding.pinNextButton.setOnClickListener(v -> {
+          FragmentManager fragmentManager = getChildFragmentManager();
+          Fragment fragment = fragmentManager.findFragmentByTag(PinEntryPatternFragment.TAG);
+          if (fragment instanceof PinEntryPatternFragment) {
+            if (((PinEntryPatternFragment) fragment).onNextButtonClicked()) {
+              binding.pinNextButton.setText("Submit");
+            }
+          }
+        });
       }
     });
   }
