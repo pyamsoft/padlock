@@ -23,10 +23,12 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.databinding.PinEntryPatternBinding;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import javax.inject.Inject;
 import me.zhanghai.android.patternlock.PatternView;
 import timber.log.Timber;
 
@@ -40,6 +42,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
   @NonNull final List<PatternView.Cell> repeatCellPattern = new ArrayList<>();
   boolean repeatPattern = false;
   PinEntryPatternBinding binding;
+  @Inject PinEntryPresenter presenter;
   @NonNull private String patternText = "";
 
   @NonNull @CheckResult
@@ -55,6 +58,8 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    Injector.get().provideComponent().plusPinEntryComponent().inject(this);
+
     if (savedInstanceState == null) {
       repeatPattern = false;
       patternText = "";
@@ -128,17 +133,59 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
 
   @Override public void onStart() {
     super.onStart();
+    presenter.bindView(null);
 
     // Pattern gets visually screwed up in multiwindow mode, clear it
     binding.patternLock.clearPattern();
+
+    presenter.checkMasterPinPresent(new PinEntryPresenter.MasterPinStatusCallback() {
+      @Override public void onMasterPinMissing() {
+
+      }
+
+      @Override public void onMasterPinPresent() {
+
+      }
+    });
+  }
+
+  @Override public void onStop() {
+    super.onStop();
+    presenter.unbindView();
   }
 
   @CheckResult boolean onNextButtonClicked() {
     if (repeatPattern) {
       // Submit
       String repeatText = cellPatternToString(repeatCellPattern);
-      Timber.d("Submit: %s and %s", patternText, repeatText);
-      dismissParent();
+      presenter.submit(patternText, repeatText, "", new PinEntryPresenter.SubmitCallback() {
+
+        @Override public void onSubmitSuccess(boolean creating) {
+          actOnLockList(callback -> {
+            if (creating) {
+              callback.onCreateMasterPinSuccess();
+            } else {
+              callback.onClearMasterPinSuccess();
+            }
+          });
+          dismissParent();
+        }
+
+        @Override public void onSubmitFailure(boolean creating) {
+          actOnLockList(callback -> {
+            if (creating) {
+              callback.onCreateMasterPinFailure();
+            } else {
+              callback.onClearMasterPinFailure();
+            }
+          });
+          dismissParent();
+        }
+
+        @Override public void onSubmitError() {
+          dismissParent();
+        }
+      });
 
       // No follow up acton
       return false;

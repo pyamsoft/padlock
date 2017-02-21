@@ -67,7 +67,7 @@ class PinEntryInteractor extends LockTypeInteractor {
         Timber.d("Failed to clear master pin");
       }
 
-      return PinEntryEvent.builder().complete(success).type(1).build();
+      return PinEntryEvent.create(PinEntryEvent.Type.TYPE_CLEAR, success);
     });
   }
 
@@ -91,7 +91,7 @@ class PinEntryInteractor extends LockTypeInteractor {
         Timber.e("Entry and re-entry do not match");
       }
 
-      return PinEntryEvent.builder().complete(success).type(0).build();
+      return PinEntryEvent.create(PinEntryEvent.Type.TYPE_CREATE, success);
     });
   }
 }

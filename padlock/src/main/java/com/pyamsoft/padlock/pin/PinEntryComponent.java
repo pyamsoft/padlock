@@ -24,7 +24,9 @@ import dagger.Subcomponent;
     PinEntryModule.class, AppIconLoaderModule.class, LockTypeModule.class
 }) public interface PinEntryComponent {
 
-  void inject(PinEntryTextFragment layout);
+  void inject(PinEntryTextFragment fragment);
 
   void inject(PinEntryDialog pinEntryDialog);
+
+  void inject(PinEntryPatternFragment pinEntryPatternFragment);
 }
