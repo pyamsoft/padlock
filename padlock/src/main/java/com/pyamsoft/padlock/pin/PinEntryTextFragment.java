@@ -30,7 +30,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.databinding.PinEntryTextBinding;
+import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding;
 import com.pyamsoft.pydroid.drawable.AsyncDrawable;
 import com.pyamsoft.pydroid.drawable.AsyncMap;
 import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
@@ -48,7 +48,7 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
   EditText pinEntryText;
   EditText pinHintText;
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
-  PinEntryTextBinding binding;
+  FragmentPinEntryTextBinding binding;
   private EditText pinReentryText;
   @NonNull final PinEntryPresenter.SubmitCallback submitCallback =
       new PinEntryPresenter.SubmitCallback() {
@@ -92,7 +92,7 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = PinEntryTextBinding.inflate(inflater, container, false);
+    binding = FragmentPinEntryTextBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 
