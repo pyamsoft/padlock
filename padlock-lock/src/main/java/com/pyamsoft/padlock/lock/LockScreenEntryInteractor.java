@@ -97,16 +97,12 @@ class LockScreenEntryInteractor {
       if (shouldExclude) {
         whitelistObservable =
             whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
-      } else {
-        whitelistObservable = Observable.just(0L);
-      }
-
-      if (ignoreTime != 0 && !shouldExclude) {
-        ignoreObservable = ignoreEntryForTime(ignoreMinutesInMillis, packageName, activityName);
-        recheckObservable = queueRecheckJob(packageName, activityName, ignoreMinutesInMillis);
-      } else {
         ignoreObservable = Observable.just(0);
         recheckObservable = Observable.just(0);
+      } else {
+        whitelistObservable = Observable.just(0L);
+        ignoreObservable = ignoreEntryForTime(ignoreMinutesInMillis, packageName, activityName);
+        recheckObservable = queueRecheckJob(packageName, activityName, ignoreMinutesInMillis);
       }
 
       return Observable.zip(ignoreObservable, recheckObservable, whitelistObservable,
@@ -150,7 +146,9 @@ class LockScreenEntryInteractor {
     final long newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis;
     Timber.d("Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
         ignoreMinutesInMillis);
-    return padLockDB.updateIgnoreTime(newIgnoreTime, packageName, activityName);
+
+    // Add an extra second here to artificially de-bounce quick requests, like those commonly in multi window mode
+    return padLockDB.updateIgnoreTime(newIgnoreTime + 1000L, packageName, activityName);
   }
 
   @CheckResult @NonNull
@@ -174,6 +172,7 @@ class LockScreenEntryInteractor {
     final long newLockUntilTime = currentTime + timeOutMinutesInMillis;
     Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
         timeOutMinutesInMillis);
+
     return padLockDB.updateLockTime(newLockUntilTime, packageName, activityName).map(integer -> {
       Timber.d("Update result: %s", integer);
       return new TimePair(currentTime, newLockUntilTime);
