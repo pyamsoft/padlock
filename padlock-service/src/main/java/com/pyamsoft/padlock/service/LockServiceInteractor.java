@@ -179,23 +179,12 @@ class LockServiceInteractor {
       Timber.d("Get list of locked classes with package: %s, class: %s", packageName, className);
       setLockScreenPassed(false);
       return getEntry(packageName, className);
-    }).doOnNext(entry -> {
-      if (PadLockEntry.isEmpty(entry)) {
-        Timber.w("Returned entry is EMPTY");
-      } else {
-        Timber.d("Default entry PN %s, AN %s", entry.packageName(), entry.activityName());
-      }
     }).filter(padLockEntry -> !PadLockEntry.isEmpty(padLockEntry)).filter(entry -> {
       final long ignoreUntilTime = entry.ignoreUntilTime();
       final long currentTime = System.currentTimeMillis();
       Timber.d("Ignore until time: %d", ignoreUntilTime);
       Timber.d("Current time: %d", currentTime);
-      if (currentTime < ignoreUntilTime) {
-        Timber.d("Ignore period has not elapsed yet");
-        return Boolean.FALSE;
-      }
-
-      return Boolean.TRUE;
+      return currentTime >= ignoreUntilTime;
     }).filter(entry -> {
       if (PadLockEntry.PACKAGE_ACTIVITY_NAME.equals(entry.activityName()) && entry.whitelist()) {
         throw new RuntimeException(
