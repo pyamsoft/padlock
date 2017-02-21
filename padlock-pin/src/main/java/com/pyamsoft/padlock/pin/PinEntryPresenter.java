@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.pin;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.lock.LockSubmitCallback;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
@@ -53,12 +52,12 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
     pinEntrySubscription = interactor.submitPin(currentAttempt, reEntryAttempt, hint)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(pinEntryEvent -> {
-          callback.handOffPinEvent(pinEntryEvent);
-          if (pinEntryEvent.complete()) {
-            callback.onSubmitSuccess();
+        .subscribe(event -> {
+          boolean creating = (event.type() == PinEntryEvent.Type.TYPE_CREATE);
+          if (event.complete()) {
+            callback.onSubmitSuccess(creating);
           } else {
-            callback.onSubmitFailure();
+            callback.onSubmitFailure(creating);
           }
         }, throwable -> {
           Timber.e(throwable, "attemptPinSubmission onError");
@@ -66,7 +65,7 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
         });
   }
 
-  public void hideUnimportantViews(@NonNull HideViewsCallback callback) {
+  public void checkMasterPinPresent(@NonNull MasterPinStatusCallback callback) {
     Timber.d("Check if we have a master");
     pinCheckSubscription = SubscriptionHelper.unsubscribe(pinCheckSubscription);
     pinCheckSubscription = interactor.hasMasterPin()
@@ -74,22 +73,26 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
         .observeOn(getObserveScheduler())
         .subscribe(hasMaster -> {
           if (hasMaster) {
-            callback.hideExtraPinEntryViews();
+            callback.onMasterPinPresent();
           } else {
-            callback.showExtraPinEntryViews();
+            callback.onMasterPinMissing();
           }
-        }, throwable -> Timber.e(throwable, "onError hideUnimportantViews"));
+        }, throwable -> Timber.e(throwable, "onError checkMasterPinPresent"));
   }
 
-  interface HideViewsCallback {
+  interface MasterPinStatusCallback {
 
-    void showExtraPinEntryViews();
+    void onMasterPinMissing();
 
-    void hideExtraPinEntryViews();
+    void onMasterPinPresent();
   }
 
-  interface SubmitCallback extends LockSubmitCallback {
+  interface SubmitCallback {
 
-    void handOffPinEvent(@NonNull PinEntryEvent event);
+    void onSubmitSuccess(boolean creating);
+
+    void onSubmitFailure(boolean creating);
+
+    void onSubmitError();
   }
 }

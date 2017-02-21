@@ -31,7 +31,6 @@ import android.widget.EditText;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.PinEntryTextBinding;
-import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.drawable.AsyncDrawable;
 import com.pyamsoft.pydroid.drawable.AsyncMap;
 import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
@@ -54,42 +53,33 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
   @NonNull final PinEntryPresenter.SubmitCallback submitCallback =
       new PinEntryPresenter.SubmitCallback() {
 
-        @Override public void onSubmitSuccess() {
+        @Override public void onSubmitSuccess(boolean creating) {
           clearDisplay();
+          actOnLockList(callback -> {
+            if (creating) {
+              callback.onCreateMasterPinSuccess();
+            } else {
+              callback.onClearMasterPinSuccess();
+            }
+          });
           dismissParent();
         }
 
-        @Override public void onSubmitFailure() {
+        @Override public void onSubmitFailure(boolean creating) {
           clearDisplay();
+          actOnLockList(callback -> {
+            if (creating) {
+              callback.onCreateMasterPinFailure();
+            } else {
+              callback.onClearMasterPinFailure();
+            }
+          });
           dismissParent();
         }
 
         @Override public void onSubmitError() {
           clearDisplay();
           dismissParent();
-        }
-
-        @Override public void handOffPinEvent(@NonNull PinEntryEvent event) {
-          actOnLockList(callback -> {
-            switch (event.type()) {
-              case 0:
-                if (event.complete()) {
-                  callback.onCreateMasterPinSuccess();
-                } else {
-                  callback.onCreateMasterPinFailure();
-                }
-                break;
-              case 1:
-                if (event.complete()) {
-                  callback.onClearMasterPinSuccess();
-                } else {
-                  callback.onClearMasterPinFailure();
-                }
-                break;
-              default:
-                throw new RuntimeException("Invalid event type: " + event.type());
-            }
-          });
         }
       };
   @NonNull private AsyncMapEntry goTask = AsyncMap.emptyEntry();
@@ -147,7 +137,7 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
   @Override public void onStart() {
     super.onStart();
     presenter.bindView(null);
-    presenter.hideUnimportantViews(new PinEntryPresenter.HideViewsCallback() {
+    presenter.checkMasterPinPresent(new PinEntryPresenter.MasterPinStatusCallback() {
 
       private void setupSubmissionView(@NonNull EditText view,
           @NonNull PinEntryPresenter.SubmitCallback submitCallback) {
@@ -169,14 +159,14 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
         });
       }
 
-      @Override public void showExtraPinEntryViews() {
+      @Override public void onMasterPinMissing() {
         Timber.d("No active master, show extra views");
         binding.pinReentryCode.setVisibility(View.VISIBLE);
         binding.pinHint.setVisibility(View.VISIBLE);
         setupSubmissionView(pinHintText, submitCallback);
       }
 
-      @Override public void hideExtraPinEntryViews() {
+      @Override public void onMasterPinPresent() {
         Timber.d("Active master, hide extra views");
         binding.pinReentryCode.setVisibility(View.GONE);
         binding.pinHint.setVisibility(View.GONE);
