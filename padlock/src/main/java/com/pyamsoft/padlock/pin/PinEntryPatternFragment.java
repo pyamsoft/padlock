@@ -101,8 +101,10 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
       }
 
       @Override public void onPatternDetected(List<PatternView.Cell> pattern) {
-        if (pattern.size() < MINIMUM_PATTERN_LENGTH) {
-          binding.patternLock.setDisplayMode(PatternView.DisplayMode.Wrong);
+        if (!repeatPattern) {
+          if (pattern.size() < MINIMUM_PATTERN_LENGTH) {
+            binding.patternLock.setDisplayMode(PatternView.DisplayMode.Wrong);
+          }
         }
 
         Timber.d("onPatternDetected");
