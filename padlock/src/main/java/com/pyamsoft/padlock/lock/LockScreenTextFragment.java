@@ -47,10 +47,6 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
 
   @NonNull static final String TAG = "LockScreenTextFragment";
   @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
-  @NonNull final LockScreenPresenter.LockErrorCallback lockErrorCallback = () -> {
-    Timber.e("LOCK ERROR");
-    AppUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "lock_error");
-  };
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   FragmentLockScreenTextBinding binding;
   private EditText editText;
@@ -90,6 +86,11 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
     super.onViewCreated(view, savedInstanceState);
 
     LockSubmitCallback submitCallback = new LockSubmitCallback() {
+
+      @NonNull final LockScreenPresenter.LockErrorCallback lockErrorCallback = () -> {
+        Timber.e("LOCK ERROR");
+        AppUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "lock_error");
+      };
 
       @Override public void onSubmitSuccess() {
         Timber.d("Unlocked!");

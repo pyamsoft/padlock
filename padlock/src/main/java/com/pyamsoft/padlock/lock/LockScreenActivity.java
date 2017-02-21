@@ -158,21 +158,28 @@ public class LockScreenActivity extends ActivityBase {
 
     final String lockedCode = getIntent().getExtras().getString(ENTRY_LOCK_CODE);
     presenter.initializeLockScreenType(new LockTypePresenter.LockScreenTypeCallback() {
-      @Override public void onTypeText() {
-        // Push text as child fragment
+
+      private void pushFragment(@NonNull Fragment pushFragment, @NonNull String tag) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag(LockScreenTextFragment.TAG);
         if (fragment == null) {
           fragmentManager.beginTransaction()
-              .replace(R.id.lock_screen_container,
-                  LockScreenTextFragment.newInstance(lockedPackageName, lockedActivityName,
-                      lockedCode, lockedRealName, lockedSystem), LockScreenTextFragment.TAG)
+              .replace(R.id.lock_screen_container, pushFragment, tag)
               .commitNow();
         }
       }
 
-      @Override public void onTypePattern() {
+      @Override public void onTypeText() {
+        // Push text as child fragment
+        pushFragment(
+            LockScreenTextFragment.newInstance(lockedPackageName, lockedActivityName, lockedCode,
+                lockedRealName, lockedSystem), LockScreenTextFragment.TAG);
+      }
 
+      @Override public void onTypePattern() {
+        pushFragment(
+            LockScreenPatternFragment.newInstance(lockedPackageName, lockedActivityName, lockedCode,
+                lockedRealName, lockedSystem), LockScreenPatternFragment.TAG);
       }
     });
   }

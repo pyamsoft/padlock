@@ -26,4 +26,6 @@ import dagger.Subcomponent;
   void inject(LockScreenTextFragment fragment);
 
   void inject(LockScreenActivity activity);
+
+  void inject(LockScreenPatternFragment fragment);
 }

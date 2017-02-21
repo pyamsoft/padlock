@@ -25,10 +25,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding;
+import com.pyamsoft.padlock.uicommon.LockCellUtils;
 import com.pyamsoft.pydroid.FuncNone;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import javax.inject.Inject;
 import me.zhanghai.android.patternlock.PatternView;
 import timber.log.Timber;
@@ -46,16 +46,6 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
   @Inject PinEntryPresenter presenter;
   @Nullable FuncNone<Boolean> nextButtonOnClickRunnable;
   @NonNull String patternText = "";
-
-  @NonNull @CheckResult static String cellPatternToString(@NonNull List<PatternView.Cell> cells) {
-    StringBuilder builder = new StringBuilder(4);
-    for (PatternView.Cell cell : cells) {
-      String cellString =
-          String.format(Locale.getDefault(), "%s%s", cell.getRow(), cell.getColumn());
-      builder.append(cellString);
-    }
-    return builder.toString();
-  }
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -144,7 +134,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
         nextButtonOnClickRunnable = () -> {
           if (repeatPattern) {
             // Submit
-            String repeatText = cellPatternToString(repeatCellPattern);
+            String repeatText = LockCellUtils.cellPatternToString(repeatCellPattern);
             submitPin(repeatText);
             // No follow up acton
             return false;
@@ -154,7 +144,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
               binding.patternLock.setDisplayMode(PatternView.DisplayMode.Wrong);
               return false;
             } else {
-              patternText = cellPatternToString(cellPattern);
+              patternText = LockCellUtils.cellPatternToString(cellPattern);
               repeatPattern = true;
               binding.patternLock.clearPattern();
               return true;
@@ -165,7 +155,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
 
       @Override public void onMasterPinPresent() {
         nextButtonOnClickRunnable = () -> {
-          patternText = cellPatternToString(cellPattern);
+          patternText = LockCellUtils.cellPatternToString(cellPattern);
           binding.patternLock.clearPattern();
           submitPin(null);
           return false;

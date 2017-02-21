@@ -36,30 +36,30 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:padding="16dp"
+        android:orientation="vertical"
         >
+
+      <com.pyamsoft.pydroid.ui.widget.SquareImageView
+          android:id="@+id/lock_image"
+          android:layout_width="56dp"
+          android:layout_height="56dp"
+          android:layout_gravity="center"
+          android:layout_marginTop="16dp"
+          android:contentDescription="@string/blank"
+          />
 
       <FrameLayout
           android:id="@+id/lock_screen_container"
           android:layout_width="match_parent"
-          android:layout_height="wrap_content"
+          android:layout_height="0dp"
+          android:layout_margin="16dp"
+          android:layout_weight="1"
           />
 
-      <com.pyamsoft.pydroid.ui.widget.SquareImageView
-          android:id="@+id/lock_image"
-          android:layout_width="64dp"
-          android:layout_height="64dp"
-          android:layout_above="@id/lock_screen_container"
-          android:layout_centerHorizontal="true"
-          android:layout_gravity="center"
-          android:contentDescription="@string/blank"
-          />
-
-    </RelativeLayout>
+    </LinearLayout>
 
   </LinearLayout>
 

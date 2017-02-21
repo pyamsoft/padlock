@@ -53,8 +53,7 @@
         android:excludeFromRecents="true"
         android:exported="false"
         android:launchMode="singleTop"
-        android:noHistory="true"
-        android:windowSoftInputMode="stateVisible">
+        android:noHistory="true">
 
       <!-- Sets a default width/height for the lock screen when in freeform mode -->
       <!--suppress AndroidElementNotAllowed -->
