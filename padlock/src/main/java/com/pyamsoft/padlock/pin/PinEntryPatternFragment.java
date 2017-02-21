@@ -24,7 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.Injector;
-import com.pyamsoft.padlock.databinding.PinEntryPatternBinding;
+import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding;
 import com.pyamsoft.pydroid.FuncNone;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
   @NonNull final List<PatternView.Cell> cellPattern = new ArrayList<>();
   @NonNull final List<PatternView.Cell> repeatCellPattern = new ArrayList<>();
   boolean repeatPattern = false;
-  PinEntryPatternBinding binding;
+  FragmentPinEntryPatternBinding binding;
   @Inject PinEntryPresenter presenter;
   @Nullable FuncNone<Boolean> nextButtonOnClickRunnable;
   @NonNull String patternText = "";
@@ -73,7 +73,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    binding = PinEntryPatternBinding.inflate(inflater, container, false);
+    binding = FragmentPinEntryPatternBinding.inflate(inflater, container, false);
     return binding.getRoot();
   }
 
