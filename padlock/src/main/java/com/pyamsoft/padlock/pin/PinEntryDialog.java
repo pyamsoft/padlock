@@ -105,21 +105,31 @@ public class PinEntryDialog extends DialogFragment {
     setupCloseButton();
     setupToolbar();
 
+    // Start hidden
+    binding.pinNextButtonLayout.setVisibility(View.GONE);
     presenter.initializeLockScreenType(new LockTypePresenter.LockScreenTypeCallback() {
-      @Override public void onTypeText() {
-        // Push text as child fragment
+
+      private void pushIfNotPresent(@NonNull PinEntryBaseFragment pushFragment,
+          @NonNull String tag) {
         FragmentManager fragmentManager = getChildFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(PinEntryTextFragment.TAG);
+        Fragment fragment = fragmentManager.findFragmentByTag(tag);
         if (fragment == null) {
           getChildFragmentManager().beginTransaction()
-              .replace(R.id.pin_entry_dialog_container, new PinEntryTextFragment(),
-                  PinEntryTextFragment.TAG)
+              .replace(R.id.pin_entry_dialog_container, pushFragment, tag)
               .commitNow();
         }
       }
 
+      @Override public void onTypeText() {
+        // Push text as child fragment
+        binding.pinNextButtonLayout.setVisibility(View.GONE);
+        pushIfNotPresent(new PinEntryTextFragment(), PinEntryTextFragment.TAG);
+      }
+
       @Override public void onTypePattern() {
-        // TODO
+        // Push text as child fragment
+        binding.pinNextButtonLayout.setVisibility(View.VISIBLE);
+        pushIfNotPresent(new PinEntryPatternFragment(), PinEntryPatternFragment.TAG);
       }
     });
   }
