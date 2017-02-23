@@ -97,4 +97,17 @@
   <string name="lock_package_change_summary_checked">Check for locked applications only when package has changed</string>
   <string name="lock_package_change_summary_unchecked">Check for locked applications when the window changes</string>
 
+  <string name="lock_screen_type_title">Lock Screen Type</string>
+  <string name="lock_screen_type_summary">Type of password to lock with (pattern, pin)</string>
+
+  <string-array name="lock_screen_type_names">
+    <item name="type_text">PIN Password</item>
+    <item name="type_pattern">Pattern Password</item>
+  </string-array>
+
+  <string-array name="lock_screen_type_values">
+    <item name="type_text">TYPE_TEXT</item>
+    <item name="type_pattern">TYPE_PATTERN</item>
+  </string-array>
+
 </resources>

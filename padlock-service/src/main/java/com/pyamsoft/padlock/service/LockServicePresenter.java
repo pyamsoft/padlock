@@ -68,8 +68,6 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(padLockEntry -> {
-          Timber.d("Got PadLockEntry for LockScreen: %s %s", padLockEntry.packageName(),
-              padLockEntry.activityName());
           callback.startLockScreen(padLockEntry, className);
         }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"));
   }

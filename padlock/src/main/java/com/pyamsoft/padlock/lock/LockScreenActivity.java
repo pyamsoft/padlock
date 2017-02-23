@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.lock;
 
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
@@ -25,32 +24,24 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.ErrorDialog;
+import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.padlock.model.LockScreenEntry;
-import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.drawable.AsyncDrawable;
-import com.pyamsoft.pydroid.drawable.AsyncMap;
-import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -63,7 +54,6 @@ public class LockScreenActivity extends ActivityBase {
   @NonNull public static final String ENTRY_LOCK_CODE = "lock_code";
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
   @NonNull public static final String ENTRY_LOCK_UNTIL_TIME = "lock_until_time";
-  @NonNull private static final String CODE_DISPLAY = "CODE_DISPLAY";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
 
   /**
@@ -81,18 +71,11 @@ public class LockScreenActivity extends ActivityBase {
     LOCK_SCREEN_MAP = new HashMap<>();
   }
 
-  @NonNull final LockScreenPresenter.LockErrorCallback lockErrorCallback = () -> {
-    Timber.e("LOCK ERROR");
-    AppUtil.guaranteeSingleDialogFragment(LockScreenActivity.this, new ErrorDialog(), "lock_error");
-  };
   @NonNull private final Intent home;
-  @NonNull private final AsyncMap mapper = new AsyncMap();
   @SuppressWarnings("WeakerAccess") @Inject LockScreenPresenter presenter;
   @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
-  @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   @SuppressWarnings("WeakerAccess") String lockedActivityName;
   @SuppressWarnings("WeakerAccess") String lockedPackageName;
-  @SuppressWarnings("WeakerAccess") String lockedCode;
   @SuppressWarnings("WeakerAccess") long lockUntilTime;
   ActivityLockBinding binding;
   MenuItem menuIgnoreNone;
@@ -134,7 +117,6 @@ public class LockScreenActivity extends ActivityBase {
   boolean lockedSystem;
   private long ignorePeriod = -1;
   private boolean excludeEntry;
-  private EditText editText;
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -172,98 +154,39 @@ public class LockScreenActivity extends ActivityBase {
 
     populateIgnoreTimes();
     getValuesFromBundle();
-    setupInputManager();
     setupActionBar();
 
-    LockSubmitCallback submitCallback = new LockSubmitCallback() {
+    final String lockedCode = getIntent().getExtras().getString(ENTRY_LOCK_CODE);
+    presenter.initializeLockScreenType(new LockTypePresenter.LockScreenTypeCallback() {
 
-      @Override public void onSubmitSuccess() {
-        Timber.d("Unlocked!");
-        clearDisplay();
-
-        presenter.postUnlock(lockedPackageName, lockedActivityName, lockedRealName, lockedCode,
-            lockedSystem, menuExclude.isChecked(), getIgnoreTimeFromSelectedIndex(),
-            new LockScreenPresenter.PostUnlockCallback() {
-              @Override public void onPostUnlock() {
-                Timber.d("POST Unlock Finished! 1");
-                PadLockService.passLockScreen();
-                finish();
-              }
-
-              @Override public void onLockedError() {
-                lockErrorCallback.onLockedError();
-              }
-            });
+      private void pushFragment(@NonNull Fragment pushFragment, @NonNull String tag) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(LockScreenTextFragment.TAG);
+        if (fragment == null) {
+          fragmentManager.beginTransaction()
+              .replace(R.id.lock_screen_container, pushFragment, tag)
+              .commitNow();
+        }
       }
 
-      @Override public void onSubmitFailure() {
-        Timber.e("Failed to unlock");
-        clearDisplay();
-        showSnackbarWithText("Error: Invalid PIN");
-        binding.lockDisplayHint.setVisibility(View.VISIBLE);
-
-        // Once fail count is tripped once, continue to update it every time following until time elapses
-        presenter.lockEntry(lockedPackageName, lockedActivityName,
-            new LockScreenPresenter.LockCallback() {
-              @Override public void onLocked(long lockUntilTime) {
-                LockScreenActivity.this.lockUntilTime = lockUntilTime;
-                getIntent().removeExtra(ENTRY_LOCK_UNTIL_TIME);
-                getIntent().putExtra(ENTRY_LOCK_UNTIL_TIME, lockUntilTime);
-                showSnackbarWithText("This entry is temporarily locked");
-              }
-
-              @Override public void onLockedError() {
-                lockErrorCallback.onLockedError();
-              }
-            });
+      @Override public void onTypeText() {
+        // Push text as child fragment
+        pushFragment(
+            LockScreenTextFragment.newInstance(lockedPackageName, lockedActivityName, lockedCode,
+                lockedRealName, lockedSystem), LockScreenTextFragment.TAG);
       }
 
-      @Override public void onSubmitError() {
-        clearDisplay();
-        AppUtil.guaranteeSingleDialogFragment(LockScreenActivity.this, new ErrorDialog(),
-            "unlock_error");
+      @Override public void onTypePattern() {
+        pushFragment(
+            LockScreenPatternFragment.newInstance(lockedPackageName, lockedActivityName, lockedCode,
+                lockedRealName, lockedSystem), LockScreenPatternFragment.TAG);
       }
-    };
-    setupTextInput(submitCallback);
-    setupGoArrow(submitCallback);
-    clearDisplay();
-
-    // Hide hint to begin with
-    binding.lockDisplayHint.setVisibility(View.GONE);
+    });
   }
 
   private void setupActionBar() {
     setSupportActionBar(binding.toolbar);
     ViewCompat.setElevation(binding.toolbar, 0);
-  }
-
-  private void setupGoArrow(@NonNull LockSubmitCallback submitCallback) {
-    binding.lockImageGo.setOnClickListener(view -> {
-      presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
-          getCurrentAttempt(), submitCallback);
-      imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
-    });
-
-    // Force keyboard focus
-    editText.requestFocus();
-
-    editText.setOnFocusChangeListener((view, hasFocus) -> {
-      if (hasFocus) {
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-      }
-    });
-
-    final AsyncMapEntry arrowGoTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp)
-        .tint(R.color.orangeA200)
-        .into(binding.lockImageGo);
-    mapper.put("arrow", arrowGoTask);
-  }
-
-  private void setupInputManager() {
-    // Force the keyboard
-    imm =
-        (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
   }
 
   private void populateIgnoreTimes() {
@@ -275,42 +198,11 @@ public class LockScreenActivity extends ActivityBase {
     }
   }
 
-  private void setupTextInput(@NonNull LockSubmitCallback submitCallback) {
-    editText = binding.lockText.getEditText();
-    if (editText == null) {
-      throw new NullPointerException("Edit text is NULL");
-    }
-
-    editText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
-      if (keyEvent == null) {
-        Timber.e("KeyEvent was not caused by keypress");
-        return false;
-      }
-
-      if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
-        Timber.d("KeyEvent is Enter pressed");
-        presenter.submit(lockedPackageName, lockedActivityName, lockedCode, lockUntilTime,
-            getCurrentAttempt(), submitCallback);
-        return true;
-      }
-
-      Timber.d("Do not handle key event");
-      return false;
-    });
-  }
-
-  void clearDisplay() {
-    if (editText != null) {
-      editText.setText("");
-    }
-  }
-
   private void getValuesFromBundle() {
     final Bundle bundle = getIntent().getExtras();
     lockedPackageName = bundle.getString(ENTRY_PACKAGE_NAME);
     lockedActivityName = bundle.getString(ENTRY_ACTIVITY_NAME);
     lockedRealName = bundle.getString(ENTRY_REAL_NAME);
-    lockedCode = bundle.getString(ENTRY_LOCK_CODE);
     lockUntilTime = bundle.getLong(ENTRY_LOCK_UNTIL_TIME, 0);
     lockedSystem = bundle.getBoolean(ENTRY_IS_SYSTEM, false);
 
@@ -327,12 +219,6 @@ public class LockScreenActivity extends ActivityBase {
     Timber.d("onStart");
     appIconLoaderPresenter.bindView(null);
     presenter.bindView(null);
-    presenter.displayLockedHint(hint -> {
-      Timber.d("Settings hint");
-      binding.lockDisplayHint.setText(
-          String.format(Locale.getDefault(), "Hint: %s", hint.isEmpty() ? "NO HINT" : hint));
-    });
-
     presenter.loadDisplayNameFromPackage(lockedPackageName, name -> {
       Timber.d("Set toolbar name %s", name);
       binding.toolbar.setTitle(name);
@@ -384,8 +270,6 @@ public class LockScreenActivity extends ActivityBase {
     super.onDestroy();
 
     Timber.d("Clear currently locked");
-    imm.toggleSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0, 0);
-    mapper.clear();
     binding.unbind();
   }
 
@@ -395,29 +279,20 @@ public class LockScreenActivity extends ActivityBase {
     overridePendingTransition(0, 0);
   }
 
-  void showSnackbarWithText(@NonNull String text) {
-    Snackbar.make(binding.activityLockScreen, text, Snackbar.LENGTH_SHORT).show();
-  }
-
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     Timber.d("onRestoreInstanceState");
     ignorePeriod = savedInstanceState.getLong("IGNORE", -1);
     excludeEntry = savedInstanceState.getBoolean("EXCLUDE", false);
-    final String attempt = savedInstanceState.getString(CODE_DISPLAY, null);
-    if (attempt == null) {
-      Timber.d("Empty attempt");
-      clearDisplay();
-    } else {
-      Timber.d("Set attempt %s", attempt);
-      editText.setText(attempt);
+    Fragment lockScreenText =
+        getSupportFragmentManager().findFragmentByTag(LockScreenTextFragment.TAG);
+    if (lockScreenText instanceof LockScreenTextFragment) {
+      ((LockScreenTextFragment) lockScreenText).onRestoreInstanceState(savedInstanceState);
     }
     super.onRestoreInstanceState(savedInstanceState);
   }
 
   @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
-    final String attempt = getCurrentAttempt();
     final long ignoreTime = getIgnoreTimeFromSelectedIndex();
-    outState.putString(CODE_DISPLAY, attempt);
     outState.putLong("IGNORE", ignoreTime);
 
     boolean exclude;
@@ -428,10 +303,6 @@ public class LockScreenActivity extends ActivityBase {
     }
     outState.putBoolean("EXCLUDE", exclude);
     super.onSaveInstanceState(outState);
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull String getCurrentAttempt() {
-    return editText.getText().toString();
   }
 
   @Override public boolean onCreateOptionsMenu(@NonNull Menu menu) {
@@ -469,13 +340,16 @@ public class LockScreenActivity extends ActivityBase {
     final int itemId = item.getItemId();
     switch (itemId) {
       case R.id.menu_lockscreen_forgot:
-        showForgotPasscodeDialog();
+        AppUtil.onlyLoadOnceDialogFragment(this, new ForgotPasswordDialog(), FORGOT_PASSWORD_TAG);
         break;
       case R.id.menu_exclude:
         item.setChecked(!item.isChecked());
         break;
       case R.id.menu_lockscreen_info:
-        showInfoDialog();
+        AppUtil.onlyLoadOnceDialogFragment(this,
+            LockedStatDialog.newInstance(binding.toolbar.getTitle().toString(), lockedPackageName,
+                lockedActivityName, lockedRealName, lockedSystem, binding.lockImage.getDrawable()),
+            "info_dialog");
         break;
       default:
         item.setChecked(true);
@@ -513,16 +387,5 @@ public class LockScreenActivity extends ActivityBase {
     }
 
     return ignoreTimes[index];
-  }
-
-  private void showInfoDialog() {
-    AppUtil.onlyLoadOnceDialogFragment(this,
-        LockedStatDialog.newInstance(binding.toolbar.getTitle().toString(), lockedPackageName,
-            lockedActivityName, lockedRealName, lockedSystem, binding.lockImage.getDrawable()),
-        "info_dialog");
-  }
-
-  private void showForgotPasscodeDialog() {
-    AppUtil.onlyLoadOnceDialogFragment(this, new ForgotPasswordDialog(), FORGOT_PASSWORD_TAG);
   }
 }

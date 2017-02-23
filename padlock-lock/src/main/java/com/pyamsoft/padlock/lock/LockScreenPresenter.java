@@ -17,10 +17,8 @@
 package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
@@ -28,40 +26,22 @@ import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
+class LockScreenPresenter extends LockTypePresenter {
 
   @NonNull private final LockScreenInteractor interactor;
-  @NonNull private Subscription postUnlockSubscription = Subscriptions.empty();
   @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
   @NonNull private Subscription ignoreTimeSubscription = Subscriptions.empty();
-  @NonNull private Subscription unlockSubscription = Subscriptions.empty();
-  @NonNull private Subscription lockSubscription = Subscriptions.empty();
-  @NonNull private Subscription hintSubscription = Subscriptions.empty();
 
-  @Inject LockScreenPresenter(@NonNull final LockScreenInteractor lockScreenInteractor,
+  @Inject LockScreenPresenter(@NonNull LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
-    super(obsScheduler, subScheduler);
+    super(lockScreenInteractor, obsScheduler, subScheduler);
     this.interactor = lockScreenInteractor;
-    interactor.resetFailCount();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    postUnlockSubscription = SubscriptionHelper.unsubscribe(postUnlockSubscription);
     displayNameSubscription = SubscriptionHelper.unsubscribe(displayNameSubscription);
     ignoreTimeSubscription = SubscriptionHelper.unsubscribe(ignoreTimeSubscription);
-    unlockSubscription = SubscriptionHelper.unsubscribe(unlockSubscription);
-    lockSubscription = SubscriptionHelper.unsubscribe(lockSubscription);
-    hintSubscription = SubscriptionHelper.unsubscribe(hintSubscription);
-  }
-
-  public void displayLockedHint(@NonNull LockHintCallback callback) {
-    hintSubscription = SubscriptionHelper.unsubscribe(hintSubscription);
-    hintSubscription = interactor.getHint()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(callback::setDisplayHint,
-            throwable -> Timber.e(throwable, "onError displayLockedHint"));
   }
 
   public void createWithDefaultIgnoreTime(@NonNull IgnoreTimeCallback callback) {
@@ -71,42 +51,6 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
         .observeOn(getObserveScheduler())
         .subscribe(callback::onInitializeWithIgnoreTime,
             throwable -> Timber.e(throwable, "onError createWithDefaultIgnoreTime"));
-  }
-
-  public void lockEntry(@NonNull String packageName, @NonNull String activityName,
-      @NonNull LockCallback callback) {
-    lockSubscription = SubscriptionHelper.unsubscribe(lockSubscription);
-    lockSubscription = interactor.incrementAndGetFailCount(packageName, activityName)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(lockTime -> {
-          Timber.d("Received lock entry result");
-          callback.onLocked(lockTime);
-        }, throwable -> {
-          Timber.e(throwable, "lockEntry onError");
-          callback.onLockedError();
-        });
-  }
-
-  public void submit(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long lockUntilTime, @NonNull String currentAttempt,
-      @NonNull LockSubmitCallback callback) {
-    unlockSubscription = SubscriptionHelper.unsubscribe(unlockSubscription);
-    unlockSubscription =
-        interactor.submitPin(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
-            .subscribe(unlocked -> {
-              Timber.d("Received unlock entry result");
-              if (unlocked) {
-                callback.onSubmitSuccess();
-              } else {
-                callback.onSubmitFailure();
-              }
-            }, throwable -> {
-              Timber.e(throwable, "unlockEntry onError");
-              callback.onSubmitError();
-            });
   }
 
   public void loadDisplayNameFromPackage(@NonNull String packageName,
@@ -121,32 +65,9 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
         });
   }
 
-  public void postUnlock(@NonNull String packageName, @NonNull String activityName,
-      @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
-      long ignoreTime, @NonNull PostUnlockCallback callback) {
-    postUnlockSubscription = SubscriptionHelper.unsubscribe(postUnlockSubscription);
-    postUnlockSubscription =
-        interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
-            shouldExclude, ignoreTime)
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
-            .subscribe(result -> {
-              Timber.d("onPostUnlock");
-              callback.onPostUnlock();
-            }, throwable -> {
-              Timber.e(throwable, "Error postunlock");
-              callback.onLockedError();
-            });
-  }
-
   interface LockErrorCallback {
 
     void onLockedError();
-  }
-
-  interface PostUnlockCallback extends LockErrorCallback {
-
-    void onPostUnlock();
   }
 
   interface DisplayNameLoadCallback {
@@ -154,17 +75,7 @@ class LockScreenPresenter extends SchedulerPresenter<Presenter.Empty> {
     void setDisplayName(@NonNull String name);
   }
 
-  interface LockCallback extends LockErrorCallback {
-
-    void onLocked(long lockUntilTime);
-  }
-
   interface IgnoreTimeCallback {
     void onInitializeWithIgnoreTime(long time);
-  }
-
-  interface LockHintCallback {
-
-    void setDisplayHint(@NonNull String hint);
   }
 }

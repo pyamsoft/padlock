@@ -17,13 +17,14 @@
 package com.pyamsoft.padlock.service;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.pin.MasterPinInteractor;
+import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Singleton;
 
 @Module public class LockServiceStateModule {
 
-  @Provides LockServiceStateInteractor provideLockServiceStateInteractor(
+  @Singleton @Provides LockServiceStateInteractor provideLockServiceStateInteractor(
       @NonNull MasterPinInteractor pinInteractor) {
     return new LockServiceStateInteractor(pinInteractor);
   }

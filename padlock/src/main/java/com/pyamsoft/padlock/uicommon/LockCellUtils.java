@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service;
+package com.pyamsoft.padlock.uicommon;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import javax.inject.Inject;
-import rx.Observable;
+import java.util.List;
+import java.util.Locale;
+import me.zhanghai.android.patternlock.PatternView;
 
-public class LockServiceStateInteractor {
+public final class LockCellUtils {
 
-  @NonNull private final MasterPinInteractor pinInteractor;
-
-  @Inject LockServiceStateInteractor(@NonNull MasterPinInteractor pinInteractor) {
-    this.pinInteractor = pinInteractor;
+  private LockCellUtils() {
+    throw new RuntimeException("No instances");
   }
 
-  @NonNull @CheckResult public Observable<Boolean> isServiceEnabled() {
-    return pinInteractor.getMasterPin().map(pin -> pin != null);
+  @NonNull @CheckResult
+  public static String cellPatternToString(@NonNull List<PatternView.Cell> cells) {
+    StringBuilder builder = new StringBuilder(4);
+    for (PatternView.Cell cell : cells) {
+      String cellString =
+          String.format(Locale.getDefault(), "%s%s", cell.getRow(), cell.getColumn());
+      builder.append(cellString);
+    }
+    return builder.toString();
   }
 }

@@ -24,8 +24,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import rx.Observable;
 
-abstract class LockInteractor {
+public class LockInteractor {
 
+  @NonNull private static LockInteractor INSTANCE = new LockInteractor();
   @SuppressWarnings("WeakerAccess") @NonNull final MessageDigest messageDigest;
 
   LockInteractor() {
@@ -34,6 +35,14 @@ abstract class LockInteractor {
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException("Could not create SHA-256 Digest", e);
     }
+  }
+
+  public static void set(@NonNull LockInteractor interactor) {
+    INSTANCE = interactor;
+  }
+
+  @CheckResult @NonNull public static LockInteractor get() {
+    return INSTANCE;
   }
 
   @CheckResult @NonNull public Observable<String> encodeSHA256(@NonNull String attempt) {

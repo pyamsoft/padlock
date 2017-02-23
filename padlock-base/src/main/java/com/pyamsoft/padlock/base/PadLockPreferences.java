@@ -16,16 +16,22 @@
 
 package com.pyamsoft.padlock.base;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.model.LockScreenType;
 
 public interface PadLockPreferences {
+
+  @CheckResult @NonNull LockScreenType getCurrentLockType();
 
   @CheckResult boolean isIgnoreInKeyguard();
 
   @CheckResult boolean isInstallListenerEnabled();
 
-  @CheckResult String getHint();
+  @CheckResult @Nullable String getHint();
 
   void setHint(@NonNull String hint);
 
@@ -43,7 +49,7 @@ public interface PadLockPreferences {
 
   void setSystemVisible(boolean b);
 
-  @CheckResult String getMasterPassword();
+  @CheckResult @Nullable String getMasterPassword();
 
   void setMasterPassword(@NonNull String masterPassword);
 
@@ -60,4 +66,12 @@ public interface PadLockPreferences {
   void setInfoDialogOnBoard();
 
   void clearAll();
+
+  class Instance {
+
+    @CheckResult @NonNull public static PadLockPreferences wrap(@NonNull Context context,
+        @NonNull SharedPreferences preferences) {
+      return new PadLockPreferencesImpl(context, preferences);
+    }
+  }
 }

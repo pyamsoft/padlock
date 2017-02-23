@@ -25,6 +25,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -190,6 +191,7 @@ public class LockInfoDialog extends DialogFragment {
   }
 
   private void setupToolbar() {
+    ViewCompat.setElevation(binding.lockInfoToolbar, AppUtil.convertToDP(getContext(), 4));
     binding.lockInfoToolbar.setTitle(appName);
     binding.lockInfoToolbar.setNavigationOnClickListener(v -> dismiss());
     binding.lockInfoToolbar.inflateMenu(R.menu.search_menu);

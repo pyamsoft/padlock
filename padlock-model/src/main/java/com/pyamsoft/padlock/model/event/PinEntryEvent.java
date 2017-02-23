@@ -16,24 +16,22 @@
 
 package com.pyamsoft.padlock.model.event;
 
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
 @AutoValue public abstract class PinEntryEvent {
 
-  public static PinEntryEvent.Builder builder() {
-    return new AutoValue_PinEntryEvent.Builder();
+  @CheckResult @NonNull public static PinEntryEvent create(@NonNull Type type, boolean complete) {
+    return new AutoValue_PinEntryEvent(type, complete);
   }
 
-  public abstract int type();
+  public abstract Type type();
 
   public abstract boolean complete();
 
-  @AutoValue.Builder public static abstract class Builder {
-
-    public abstract Builder type(int type);
-
-    public abstract Builder complete(boolean b);
-
-    public abstract PinEntryEvent build();
+  public enum Type {
+    TYPE_CREATE,
+    TYPE_CLEAR
   }
 }
