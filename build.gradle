@@ -45,6 +45,7 @@ buildscript {
     robolectric = "3.2.2"
     junit = "4.12"
     mockito = "2.7.2"
+    patternLock = "2.0.4"
   }
 
   dependencies {

@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.lock.common;
 
-import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
-import com.pyamsoft.padlock.pin.MasterPinModule;
-import dagger.Subcomponent;
+import android.support.annotation.NonNull;
+import dagger.Module;
+import dagger.Provides;
+import javax.inject.Named;
+import rx.Scheduler;
 
-@Subcomponent(modules = {
-    PinEntryModule.class, MasterPinModule.class, AppIconLoaderModule.class
-}) public interface PinEntryComponent {
+@Module public class LockTypeModule {
 
-  void inject(PinEntryDialog dialog);
+  @Provides LockTypePresenter provideLockTypePresenter(@NonNull LockTypeInteractor interactor,
+      @Named("obs") Scheduler obScheduler, @Named("sub") Scheduler subScheduler) {
+    return new LockTypePresenter(interactor, obScheduler, subScheduler);
+  }
 }

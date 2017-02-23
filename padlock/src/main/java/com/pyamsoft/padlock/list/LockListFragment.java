@@ -41,11 +41,11 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding;
-import com.pyamsoft.padlock.lock.PinEntryDialog;
+import com.pyamsoft.padlock.lock.master.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.onboard.list.OnboardListDialog;
-import com.pyamsoft.padlock.pin.MasterPinSubmitCallback;
+import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.ActionSingle;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
@@ -63,7 +63,6 @@ import timber.log.Timber;
 public class LockListFragment extends Fragment {
 
   @NonNull public static final String TAG = "LockListFragment";
-  @NonNull private static final String PIN_DIALOG_TAG = "pin_dialog";
   @NonNull final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockListItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") @Inject LockListPresenter presenter;
@@ -399,7 +398,7 @@ public class LockListFragment extends Fragment {
       if (PadLockService.isRunning()) {
         AppUtil.onlyLoadOnceDialogFragment(getActivity(),
             PinEntryDialog.newInstance(getContext().getPackageName(),
-                getActivity().getClass().getName()), PIN_DIALOG_TAG);
+                getActivity().getClass().getName()), PinEntryDialog.TAG);
       } else {
         AppUtil.onlyLoadOnceDialogFragment(getActivity(), new AccessibilityRequestDialog(),
             "accessibility");

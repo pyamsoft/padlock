@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.pin;
+package com.pyamsoft.padlock.model;
 
-public interface MasterPinSubmitCallback {
-
-  void onCreateMasterPinSuccess();
-
-  void onCreateMasterPinFailure();
-
-  void onClearMasterPinSuccess();
-
-  void onClearMasterPinFailure();
+public enum LockScreenType {
+  TYPE_PATTERN,
+  TYPE_TEXT
 }

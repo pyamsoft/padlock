@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service;
+package com.pyamsoft.padlock.pin;
 
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import javax.inject.Inject;
-import rx.Observable;
+import dagger.Module;
+import dagger.Provides;
+import javax.inject.Singleton;
 
-public class LockServiceStateInteractor {
+@Module public class PinEntrySingletonModule {
 
-  @NonNull private final MasterPinInteractor pinInteractor;
-
-  @Inject LockServiceStateInteractor(@NonNull MasterPinInteractor pinInteractor) {
-    this.pinInteractor = pinInteractor;
-  }
-
-  @NonNull @CheckResult public Observable<Boolean> isServiceEnabled() {
-    return pinInteractor.getMasterPin().map(pin -> pin != null);
+  @Singleton @Provides PinEntryInteractor providePinEntryInteractor(
+      @NonNull MasterPinInteractor masterPinInteractor, @NonNull PadLockPreferences preferences) {
+    return new PinEntryInteractor(masterPinInteractor, preferences);
   }
 }

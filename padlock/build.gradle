@@ -35,8 +35,8 @@ android {
     applicationId "com.pyamsoft.padlock"
     minSdkVersion rootProject.ext.minSdk
     targetSdkVersion rootProject.ext.maxSdk
-    versionCode 74
-    versionName "2.2.0"
+    versionCode 75
+    versionName "2.2.1pre1"
 
     // For vector drawables
     vectorDrawables.useSupportLibrary = true
@@ -101,6 +101,9 @@ dependencies {
   // Firebase Crash
   compile "com.google.firebase:firebase-crash:$firebase"
 
+  // Pattern Lock
+  compile "me.zhanghai.android.patternlock:library:$patternLock"
+
   // PYDroid
   compile("com.github.pyamsoft.pydroid:pydroid-ui:$pydroid@aar") {
     transitive = true
@@ -115,8 +118,8 @@ dependencies {
   releaseCompile project(path: ":padlock-main", configuration: "release")
   debugCompile project(path: ":padlock-onboard", configuration: "debug")
   releaseCompile project(path: ":padlock-onboard", configuration: "release")
-  debugCompile project(path: ":padlock-lock", configuration: "debug")
-  releaseCompile project(path: ":padlock-lock", configuration: "release")
+  debugCompile project(path: ":padlock-pin", configuration: "debug")
+  releaseCompile project(path: ":padlock-pin", configuration: "release")
   debugCompile project(path: ":padlock-settings", configuration: "debug")
   releaseCompile project(path: ":padlock-settings", configuration: "release")
 }

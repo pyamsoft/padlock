@@ -82,16 +82,11 @@ class LockServiceInteractor {
       @NonNull String className) {
     return Observable.fromCallable((Func0<Boolean>) () -> {
       Timber.d("Check against current window values: %s, %s", activePackageName, activeClassName);
-      if (activePackageName.equals(packageName) && (activeClassName.equals(className)
-          || className.equals(PadLockEntry.PACKAGE_ACTIVITY_NAME))) {
-        // We can replace the actual passed classname with the stored classname because:
-        // either it is equal to the passed name or the passed name is PACKAGE
-        // which will respond to any class name
-        Timber.d("Run recheck for: %s %s", activePackageName, activeClassName);
-        return true;
-      } else {
-        return false;
-      }
+      // We can replace the actual passed classname with the stored classname because:
+      // either it is equal to the passed name or the passed name is PACKAGE
+      // which will respond to any class name
+      return activePackageName.equals(packageName) && (activeClassName.equals(className)
+          || className.equals(PadLockEntry.PACKAGE_ACTIVITY_NAME));
     });
   }
 
@@ -147,7 +142,6 @@ class LockServiceInteractor {
             })
             .map(fromLockScreen -> {
               final boolean passed = !fromLockScreen;
-              Timber.i("Window has passed checks so far: %s", passed);
               activePackageName = packageName;
               activeClassName = className;
               return passed;
@@ -170,10 +164,8 @@ class LockServiceInteractor {
             lastClassName = className;
           }
 
-          Timber.d("Window change if class changed");
           boolean windowHasChanged = classChanged;
           if (lockOnPackageChange) {
-            Timber.d("Window change if package changed");
             windowHasChanged &= packageChanged;
           }
 
@@ -187,24 +179,12 @@ class LockServiceInteractor {
       Timber.d("Get list of locked classes with package: %s, class: %s", packageName, className);
       setLockScreenPassed(false);
       return getEntry(packageName, className);
-    }).doOnNext(entry -> {
-      if (PadLockEntry.isEmpty(entry)) {
-        Timber.w("Returned entry is EMPTY");
-      } else {
-        Timber.d("Default entry PN %s, AN %s", entry.packageName(), entry.activityName());
-      }
     }).filter(padLockEntry -> !PadLockEntry.isEmpty(padLockEntry)).filter(entry -> {
-      Timber.d("Check ignore time for: %s %s", entry.packageName(), entry.activityName());
       final long ignoreUntilTime = entry.ignoreUntilTime();
       final long currentTime = System.currentTimeMillis();
       Timber.d("Ignore until time: %d", ignoreUntilTime);
       Timber.d("Current time: %d", currentTime);
-      if (currentTime < ignoreUntilTime) {
-        Timber.d("Ignore period has not elapsed yet");
-        return Boolean.FALSE;
-      }
-
-      return Boolean.TRUE;
+      return currentTime >= ignoreUntilTime;
     }).filter(entry -> {
       if (PadLockEntry.PACKAGE_ACTIVITY_NAME.equals(entry.activityName()) && entry.whitelist()) {
         throw new RuntimeException(
@@ -226,7 +206,6 @@ class LockServiceInteractor {
    */
   public void cleanup() {
     Timber.d("Cleanup LockService");
-    Timber.d("Cancel ALL jobs");
     final Intent intent = new Intent(appContext, recheckService);
     jobSchedulerCompat.cancel(intent);
   }
@@ -248,17 +227,13 @@ class LockServiceInteractor {
    */
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Boolean> hasNameChanged(
       @NonNull String name, @NonNull String oldName) {
-    return Observable.fromCallable((Func0<Boolean>) () -> {
-      Timber.d("Check if name has change");
-      return !name.equals(oldName);
-    });
+    return Observable.fromCallable(() -> !name.equals(oldName));
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
   Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
       @NonNull String className) {
     return Observable.fromCallable(() -> {
-      Timber.d("Check if window is from lock screen");
       final String lockScreenPackageName = lockScreenActivity.getPackage().getName();
       final String lockScreenClassName = lockScreenActivity.getName();
 
@@ -269,30 +244,21 @@ class LockServiceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
   Observable<Boolean> isOnlyLockOnPackageChange() {
-    return Observable.fromCallable(() -> {
-      Timber.d("Check if locking only happens on package change");
-      return preferences.getLockOnPackageChange();
-    });
+    return Observable.fromCallable(preferences::getLockOnPackageChange);
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<PadLockEntry> getEntry(
       @NonNull String packageName, @NonNull String activityName) {
-    Timber.d("Query DB for entry with PN %s and AN %s", packageName, activityName);
     return padLockDB.queryWithPackageActivityNameDefault(packageName, activityName).first();
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
   Observable<Boolean> isRestrictedWhileLocked() {
-    return Observable.fromCallable(() -> {
-      Timber.d("Check if window is restricted while device is locked");
-      return preferences.isIgnoreInKeyguard();
-    });
+    return Observable.fromCallable(preferences::isIgnoreInKeyguard);
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<Boolean> isDeviceLocked() {
-    return Observable.fromCallable(() -> {
-      Timber.d("Check if device is locked");
-      return keyguardManager.inKeyguardRestrictedInputMode() || keyguardManager.isKeyguardLocked();
-    });
+    return Observable.fromCallable(() -> keyguardManager.inKeyguardRestrictedInputMode()
+        || keyguardManager.isKeyguardLocked());
   }
 }

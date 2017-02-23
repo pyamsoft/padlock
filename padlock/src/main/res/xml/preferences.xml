@@ -38,6 +38,15 @@
         android:summary="@string/timeout_time_summary"
         android:title="@string/timeout_time_title"/>
 
+    <ListPreference
+        android:defaultValue="@string/lock_screen_type_default"
+        android:dialogTitle="@string/lock_screen_type_title"
+        android:entries="@array/lock_screen_type_names"
+        android:entryValues="@array/lock_screen_type_values"
+        android:key="@string/lock_screen_type_key"
+        android:summary="@string/lock_screen_type_summary"
+        android:title="@string/lock_screen_type_title"/>
+
     <CheckBoxPreference
         android:defaultValue="@bool/lock_package_change_default"
         android:key="@string/lock_package_change_key"
