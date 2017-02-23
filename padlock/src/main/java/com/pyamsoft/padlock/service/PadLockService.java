@@ -27,7 +27,6 @@ import android.view.accessibility.AccessibilityEvent;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.lock.LockScreenActivity;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import java.lang.ref.WeakReference;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -144,17 +143,12 @@ public class PadLockService extends AccessibilityService
 
     final String packageName = entry.packageName();
     final String className = entry.activityName();
-    final WeakReference<LockScreenActivity> isAlreadyLockedEntry =
+    final LockScreenActivity isAlreadyLockedEntry =
         LockScreenActivity.hasLockedMapEntry(packageName, className);
     if (isAlreadyLockedEntry != null) {
       Timber.w("We have a locked entry for %s %s, attempt to finish it first", packageName,
           className);
-      final LockScreenActivity oldLockScreen = isAlreadyLockedEntry.get();
-      if (oldLockScreen != null) {
-        Timber.w("HACK: Finish old lock screen for %s %s before staring new one", packageName,
-            className);
-        oldLockScreen.finish();
-      }
+      isAlreadyLockedEntry.finish();
     }
 
     getApplicationContext().startActivity(lockActivity);
