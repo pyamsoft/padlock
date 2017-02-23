@@ -40,7 +40,6 @@ import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.padlock.model.LockScreenEntry;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.util.AppUtil;
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
@@ -64,8 +63,7 @@ public class LockScreenActivity extends ActivityBase {
    * More of a proof of concept, only publishable if it works just, really really well and
    * is LOCKED DOWN TO NOT LEAK
    */
-  @NonNull private static final Map<LockScreenEntry, WeakReference<LockScreenActivity>>
-      LOCK_SCREEN_MAP;
+  @NonNull private static final Map<LockScreenEntry, LockScreenActivity> LOCK_SCREEN_MAP;
 
   static {
     LOCK_SCREEN_MAP = new HashMap<>();
@@ -127,17 +125,22 @@ public class LockScreenActivity extends ActivityBase {
   private static void addToLockedMap(@NonNull String packageName, @NonNull String className,
       @NonNull LockScreenActivity instance) {
     final LockScreenEntry entry = LockScreenEntry.create(packageName, className);
-    if (LOCK_SCREEN_MAP.containsKey(entry)) {
-      Timber.e("Instance for %s %s already exists. I hope you called finish before this",
-          packageName, className);
-    }
-
     Timber.i("Add instance to map for activity: %s %s", packageName, className);
-    LOCK_SCREEN_MAP.put(entry, new WeakReference<>(instance));
+    if (LOCK_SCREEN_MAP.put(entry, instance) != null) {
+      Timber.e("Instance for %s %s existed. I hope you called finish before this", packageName,
+          className);
+    }
+  }
+
+  private static void removeFromLockedMap(@NonNull String packageName, @NonNull String className) {
+    final LockScreenEntry entry = LockScreenEntry.create(packageName, className);
+    if (LOCK_SCREEN_MAP.remove(entry) != null) {
+      Timber.i("Remove instance from map for activity: %s %s", packageName, className);
+    }
   }
 
   @CheckResult @Nullable
-  public static WeakReference<LockScreenActivity> hasLockedMapEntry(@NonNull String packageName,
+  public static LockScreenActivity hasLockedMapEntry(@NonNull String packageName,
       @NonNull String className) {
     final LockScreenEntry entry = LockScreenEntry.create(packageName, className);
     return LOCK_SCREEN_MAP.get(entry);
@@ -249,6 +252,7 @@ public class LockScreenActivity extends ActivityBase {
     super.onStop();
     presenter.unbindView();
     appIconLoaderPresenter.unbindView();
+    removeFromLockedMap(lockedPackageName, lockedActivityName);
   }
 
   @Override protected void onPause() {
@@ -382,7 +386,7 @@ public class LockScreenActivity extends ActivityBase {
         index = 0;
       }
     } catch (NullPointerException e) {
-      Timber.e(e, "NULL menu item");
+      Timber.w("NULL menu item, default to 0");
       index = 0;
     }
 
