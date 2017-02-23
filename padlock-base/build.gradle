@@ -70,15 +70,6 @@ dependencies {
     transitive = true
   }
 
-  // Roboelectric for Android on JVM
-  testCompile "org.robolectric:robolectric:$robolectric"
-
-  // JUnit for unit tests
-  testCompile "junit:junit:$junit"
-
-  // Mockito for unit tests
-  testCompile "org.mockito:mockito-core:$mockito"
-
   debugCompile project(path: ":padlock-model", configuration: "debug")
   releaseCompile project(path: ":padlock-model", configuration: "release")
 }
