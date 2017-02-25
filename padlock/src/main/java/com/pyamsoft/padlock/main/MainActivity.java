@@ -41,7 +41,9 @@ import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFragment;
 import com.pyamsoft.padlock.purge.PurgeFragment;
 import com.pyamsoft.padlock.settings.SettingsFragment;
+import com.pyamsoft.pydroid.ads.AdSource;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
+import com.pyamsoft.pydroid.ui.ads.OnlineAdSource;
 import com.pyamsoft.pydroid.ui.sec.TamperActivity;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -352,6 +354,10 @@ public class MainActivity extends TamperActivity
         peekNavigationDrawer();
       }
     }
+  }
+
+  @Nullable @Override protected AdSource provideOnlineAdSource() {
+    return new OnlineAdSource(R.string.banner_main_ad_id);
   }
 
   private enum FragmentHasChanged {
