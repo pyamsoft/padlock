@@ -357,7 +357,9 @@ public class MainActivity extends TamperActivity
   }
 
   @Nullable @Override protected AdSource provideOnlineAdSource() {
-    return new OnlineAdSource(R.string.banner_main_ad_id);
+    OnlineAdSource source =  new OnlineAdSource(R.string.banner_main_ad_id);
+    source.addTestAdIds("E1241303FDC266381AD6C9FF6FAD056B");
+    return source;
   }
 
   private enum FragmentHasChanged {
