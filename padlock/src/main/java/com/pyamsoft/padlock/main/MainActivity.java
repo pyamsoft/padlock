@@ -147,7 +147,7 @@ public class MainActivity extends TamperActivity
     // These fragments are a level up
     if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null) {
       drawerShowUpNavigation();
-      changed = FragmentHasChanged.CHANGD_WITH_UP;
+      changed = FragmentHasChanged.CHANGED_WITH_UP;
       // These are base fragments
     } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
@@ -344,7 +344,7 @@ public class MainActivity extends TamperActivity
           actionBar.show();
         }
       }
-      if (changed == FragmentHasChanged.CHANGD_WITH_UP) {
+      if (changed == FragmentHasChanged.CHANGED_WITH_UP) {
         drawerShowUpNavigation();
       } else {
         drawerNormalNavigation();
@@ -364,7 +364,7 @@ public class MainActivity extends TamperActivity
 
   private enum FragmentHasChanged {
     NOT_CHANGED,
-    CHANGD_WITH_UP,
+    CHANGED_WITH_UP,
     CHANGED_NO_UP,
   }
 }
