@@ -26,14 +26,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;
+  @NonNull private final CompositeSubscription compositeSubscription;
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
-  @NonNull private Subscription databaseSubscription = Subscriptions.empty();
   @NonNull private Subscription onboardSubscription = Subscriptions.empty();
 
   @Inject LockInfoPresenter(final @NonNull LockInfoInteractor lockInfoInteractor,
@@ -41,11 +42,11 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
       final @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.lockInfoInteractor = lockInfoInteractor;
+    compositeSubscription = new CompositeSubscription();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    databaseSubscription = SubscriptionHelper.unsubscribe(databaseSubscription);
     onboardSubscription = SubscriptionHelper.unsubscribe(onboardSubscription);
     populateListSubscription = SubscriptionHelper.unsubscribe(populateListSubscription);
   }
@@ -67,8 +68,7 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
       @NonNull String activityName, @SuppressWarnings("SameParameterValue") @Nullable String code,
       boolean system, boolean whitelist, boolean forceDelete,
       @NonNull ModifyDatabaseCallback callback) {
-    databaseSubscription = SubscriptionHelper.unsubscribe(databaseSubscription);
-    databaseSubscription =
+    Subscription databaseSubscription =
         lockInfoInteractor.modifySingleDatabaseEntry(isNotDefault, packageName, activityName, code,
             system, whitelist, forceDelete)
             .subscribeOn(getSubscribeScheduler())
@@ -91,6 +91,7 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
               Timber.e(throwable, "onError modifyDatabaseEntry");
               callback.onDatabaseEntryError(position);
             });
+    compositeSubscription.add(databaseSubscription);
   }
 
   public void showOnBoarding(@NonNull OnBoardingCallback callback) {

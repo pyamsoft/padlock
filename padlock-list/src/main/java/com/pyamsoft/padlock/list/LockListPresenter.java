@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
@@ -35,11 +36,11 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
+  @NonNull private final CompositeSubscription compositeSubscription;
   @NonNull private Subscription populateListSubscription = Subscriptions.empty();
   @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
   @NonNull private Subscription onboardSubscription = Subscriptions.empty();
   @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
-  @NonNull private Subscription databaseSubscription = Subscriptions.empty();
 
   @Inject LockListPresenter(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -47,6 +48,7 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
     super(obsScheduler, subScheduler);
     this.lockListInteractor = lockListInteractor;
     this.stateInteractor = stateInteractor;
+    compositeSubscription = new CompositeSubscription();
   }
 
   @Override protected void onUnbind() {
@@ -54,8 +56,8 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
     systemVisibleSubscription = SubscriptionHelper.unsubscribe(systemVisibleSubscription);
     onboardSubscription = SubscriptionHelper.unsubscribe(onboardSubscription);
     fabStateSubscription = SubscriptionHelper.unsubscribe(fabStateSubscription);
-    databaseSubscription = SubscriptionHelper.unsubscribe(databaseSubscription);
     populateListSubscription = SubscriptionHelper.unsubscribe(populateListSubscription);
+    compositeSubscription.clear();
   }
 
   public void populateList(@NonNull PopulateListCallback callback, boolean forceRefresh) {
@@ -124,26 +126,27 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
       @SuppressWarnings("SameParameterValue") @Nullable String code, boolean system,
       @NonNull DatabaseCallback callback) {
     // No whitelisting for modifications from the List
-    databaseSubscription = SubscriptionHelper.unsubscribe(databaseSubscription);
-    databaseSubscription = lockListInteractor.modifySingleDatabaseEntry(isChecked, packageName,
-        PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system, false, false)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(lockState -> {
-          switch (lockState) {
-            case DEFAULT:
-              callback.onDatabaseEntryDeleted(position);
-              break;
-            case LOCKED:
-              callback.onDatabaseEntryCreated(position);
-              break;
-            default:
-              throw new RuntimeException("Whitelist results are not handled");
-          }
-        }, throwable -> {
-          Timber.e(throwable, "onError modifyDatabaseEntry");
-          callback.onDatabaseEntryError(position);
-        });
+    Subscription databaseSubscription =
+        lockListInteractor.modifySingleDatabaseEntry(isChecked, packageName,
+            PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system, false, false)
+            .subscribeOn(getSubscribeScheduler())
+            .observeOn(getObserveScheduler())
+            .subscribe(lockState -> {
+              switch (lockState) {
+                case DEFAULT:
+                  callback.onDatabaseEntryDeleted(position);
+                  break;
+                case LOCKED:
+                  callback.onDatabaseEntryCreated(position);
+                  break;
+                default:
+                  throw new RuntimeException("Whitelist results are not handled");
+              }
+            }, throwable -> {
+              Timber.e(throwable, "onError modifyDatabaseEntry");
+              callback.onDatabaseEntryError(position);
+            });
+    compositeSubscription.add(databaseSubscription);
   }
 
   interface OnboardingCallback {

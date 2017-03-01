@@ -27,10 +27,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import rx.Observable;
 import timber.log.Timber;
 
-public class PurgeInteractor {
+@Singleton public class PurgeInteractor {
 
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final PadLockDB padLockDB;

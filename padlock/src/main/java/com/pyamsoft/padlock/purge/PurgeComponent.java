@@ -18,6 +18,6 @@ package com.pyamsoft.padlock.purge;
 
 import dagger.Subcomponent;
 
-@Subcomponent(modules = PurgeModule.class) public interface PurgeComponent {
+@Subcomponent public interface PurgeComponent {
   void inject(PurgeFragment fragment);
 }

@@ -31,10 +31,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import rx.Observable;
 import timber.log.Timber;
 
-public class LockListInteractor extends LockCommonInteractor {
+@Singleton public class LockListInteractor extends LockCommonInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManagerWrapper;

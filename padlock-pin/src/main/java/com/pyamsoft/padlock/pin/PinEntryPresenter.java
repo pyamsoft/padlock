@@ -22,6 +22,7 @@ import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
@@ -33,8 +34,8 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
   @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
   @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
 
-  @Inject PinEntryPresenter(@NonNull PinEntryInteractor interactor, @NonNull Scheduler obsScheduler,
-      @NonNull Scheduler subScheduler) {
+  @Inject PinEntryPresenter(@NonNull PinEntryInteractor interactor,
+      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
   }

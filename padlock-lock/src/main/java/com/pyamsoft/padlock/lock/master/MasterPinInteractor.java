@@ -21,9 +21,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import rx.Observable;
 
-public class MasterPinInteractor {
+@Singleton public class MasterPinInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
 

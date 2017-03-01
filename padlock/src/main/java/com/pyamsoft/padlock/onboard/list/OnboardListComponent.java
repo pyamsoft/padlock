@@ -18,6 +18,6 @@ package com.pyamsoft.padlock.onboard.list;
 
 import dagger.Subcomponent;
 
-@Subcomponent(modules = OnboardListModule.class) public interface OnboardListComponent {
+@Subcomponent public interface OnboardListComponent {
   void inject(OnboardListDialog dialog);
 }

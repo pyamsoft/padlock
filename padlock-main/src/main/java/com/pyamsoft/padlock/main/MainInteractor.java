@@ -20,9 +20,10 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import rx.Observable;
 
-class MainInteractor {
+@Singleton class MainInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
 

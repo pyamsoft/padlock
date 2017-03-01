@@ -20,9 +20,10 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import rx.Observable;
 
-public class LockServiceStateInteractor {
+@Singleton public class LockServiceStateInteractor {
 
   @NonNull private final MasterPinInteractor pinInteractor;
 

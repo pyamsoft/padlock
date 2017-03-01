@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
@@ -30,9 +31,9 @@ class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
   @NonNull private final MainInteractor interactor;
   @NonNull private Subscription onboardingSubscription = Subscriptions.empty();
 
-  @Inject MainPresenter(@NonNull MainInteractor interactor, @NonNull Scheduler observeScheduler,
-      @NonNull Scheduler subscribeScheduler) {
-    super(observeScheduler, subscribeScheduler);
+  @Inject MainPresenter(@NonNull MainInteractor interactor, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
+    super(obsScheduler, subScheduler);
     this.interactor = interactor;
   }
 

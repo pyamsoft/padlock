@@ -22,7 +22,9 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.PadLockModule;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
+import com.pyamsoft.padlock.lock.LockHelper;
 import com.pyamsoft.padlock.lock.LockScreenActivity;
+import com.pyamsoft.padlock.lock.SHA256LockHelper;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.service.RecheckService;
 import com.pyamsoft.pydroid.BuildConfigChecker;
@@ -40,6 +42,7 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider {
   }
 
   @Override protected void onInstanceCreated(@NonNull Context context) {
+    LockHelper.set(SHA256LockHelper.newInstance());
     final PadLockModule padLockModule =
         new PadLockModule(context.getApplicationContext(), MainActivity.class,
             LockScreenActivity.class, RecheckService.class);

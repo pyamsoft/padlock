@@ -29,11 +29,13 @@ import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import rx.Observable;
 import rx.functions.Func0;
 import timber.log.Timber;
 
-class LockServiceInteractor {
+@Singleton class LockServiceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
@@ -53,18 +55,17 @@ class LockServiceInteractor {
   @Inject LockServiceInteractor(@NonNull Context context, @NonNull PadLockPreferences preferences,
       @NonNull JobSchedulerCompat jobSchedulerCompat,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB,
-      @NonNull Class<? extends Activity> lockScreenActivity,
-      @NonNull Class<? extends IntentService> recheckService,
+      @NonNull @Named("lockscreen") Class<? extends Activity> lockScreenActivityClass,
+      @NonNull @Named("recheck") Class<? extends IntentService> recheckServiceClass,
       @NonNull LockServiceStateInteractor stateInteractor) {
     this.appContext = context.getApplicationContext();
     this.jobSchedulerCompat = jobSchedulerCompat;
     this.packageManagerWrapper = packageManagerWrapper;
     this.padLockDB = padLockDB;
     this.preferences = preferences;
-    this.keyguardManager = (KeyguardManager) context.getApplicationContext()
-        .getSystemService(Context.KEYGUARD_SERVICE);
-    this.lockScreenActivity = lockScreenActivity;
-    this.recheckService = recheckService;
+    this.keyguardManager = (KeyguardManager) appContext.getSystemService(Context.KEYGUARD_SERVICE);
+    this.lockScreenActivity = lockScreenActivityClass;
+    this.recheckService = recheckServiceClass;
     this.stateInteractor = stateInteractor;
   }
 

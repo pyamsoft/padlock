@@ -22,9 +22,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import rx.Observable;
 
-class AppIconLoaderInteractor {
+@Singleton class AppIconLoaderInteractor {
 
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 

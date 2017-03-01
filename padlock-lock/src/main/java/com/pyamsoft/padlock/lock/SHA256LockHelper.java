@@ -24,12 +24,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import rx.Observable;
 
-public class LockInteractor {
+public class SHA256LockHelper extends LockHelper {
 
-  @NonNull private static LockInteractor INSTANCE = new LockInteractor();
   @SuppressWarnings("WeakerAccess") @NonNull final MessageDigest messageDigest;
 
-  LockInteractor() {
+  private SHA256LockHelper() {
     try {
       messageDigest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {
@@ -37,24 +36,15 @@ public class LockInteractor {
     }
   }
 
-  public static void set(@NonNull LockInteractor interactor) {
-    INSTANCE = interactor;
+  @CheckResult @NonNull public static SHA256LockHelper newInstance() {
+    return new SHA256LockHelper();
   }
 
-  @CheckResult @NonNull public static LockInteractor get() {
-    return INSTANCE;
-  }
-
-  @CheckResult @NonNull public Observable<String> encodeSHA256(@NonNull String attempt) {
+  @NonNull @Override public Observable<String> encodeSHA256(@NonNull String attempt) {
     return Observable.fromCallable(() -> {
       messageDigest.reset();
       final byte[] output = messageDigest.digest(attempt.getBytes(Charset.defaultCharset()));
       return Base64.encodeToString(output, Base64.DEFAULT).trim();
     });
-  }
-
-  @NonNull @CheckResult public Observable<Boolean> checkSubmissionAttempt(@NonNull String attempt,
-      @NonNull String encodedPin) {
-    return encodeSHA256(attempt).map(encodedPin::equals);
   }
 }
