@@ -24,10 +24,11 @@ import com.pyamsoft.padlock.list.LockInfoInteractor;
 import com.pyamsoft.padlock.list.LockListInteractor;
 import com.pyamsoft.padlock.purge.PurgeInteractor;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import rx.Observable;
 import timber.log.Timber;
 
-class SettingsPreferenceInteractor {
+@Singleton class SettingsPreferenceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;

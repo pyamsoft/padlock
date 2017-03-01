@@ -21,6 +21,7 @@ import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
@@ -33,9 +34,9 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
   @NonNull private final CompositeSubscription compositeSubscription;
   @NonNull private Subscription retrievalSubscription = Subscriptions.empty();
 
-  @Inject PurgePresenter(@NonNull PurgeInteractor interactor, @NonNull Scheduler observeScheduler,
-      @NonNull Scheduler subscribeScheduler) {
-    super(observeScheduler, subscribeScheduler);
+  @Inject PurgePresenter(@NonNull PurgeInteractor interactor, @Named("obs") Scheduler obsScheduler,
+      @Named("sub") Scheduler subScheduler) {
+    super(obsScheduler, subScheduler);
     this.interactor = interactor;
     compositeSubscription = new CompositeSubscription();
   }

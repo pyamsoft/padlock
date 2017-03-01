@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.settings;
 
 import dagger.Subcomponent;
 
-@Subcomponent(modules = SettingsPreferenceModule.class)
-public interface SettingsPreferenceComponent {
+@Subcomponent public interface SettingsPreferenceComponent {
   void inject(SettingsFragment fragment);
 }

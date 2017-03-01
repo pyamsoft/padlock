@@ -19,8 +19,9 @@ package com.pyamsoft.padlock.onboard.list;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
-class OnboardListInteractor {
+@Singleton class OnboardListInteractor {
 
   @NonNull private final PadLockPreferences preferences;
 

@@ -33,10 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import rx.Observable;
 import timber.log.Timber;
 
-public class LockInfoInteractor extends LockCommonInteractor {
+@Singleton public class LockInfoInteractor extends LockCommonInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenClass;
@@ -46,7 +48,7 @@ public class LockInfoInteractor extends LockCommonInteractor {
 
   @Inject LockInfoInteractor(PadLockDB padLockDB,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
-      @NonNull Class<? extends Activity> lockScreenClass) {
+      @NonNull @Named("lockscreen") Class<? extends Activity> lockScreenClass) {
     super(padLockDB);
     this.packageManagerWrapper = packageManagerWrapper;
     this.preferences = preferences;

@@ -22,6 +22,7 @@ import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
@@ -32,8 +33,8 @@ public class LockTypePresenter extends SchedulerPresenter<Presenter.Empty> {
   @NonNull private Subscription typeSubscription = Subscriptions.empty();
 
   @Inject protected LockTypePresenter(@NonNull LockTypeInteractor interactor,
-      @NonNull Scheduler observeScheduler, @NonNull Scheduler subscribeScheduler) {
-    super(observeScheduler, subscribeScheduler);
+      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
+    super(obsScheduler, subScheduler);
     this.interactor = interactor;
   }
 

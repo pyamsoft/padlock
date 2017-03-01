@@ -14,29 +14,33 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock.common;
+package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.PadLockPreferences;
-import com.pyamsoft.padlock.model.LockScreenType;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import android.support.annotation.Nullable;
 import rx.Observable;
 
-@Singleton public class LockTypeInteractor {
+public abstract class LockHelper {
 
-  @NonNull private final PadLockPreferences preferences;
+  @Nullable private static LockHelper INSTANCE;
 
-  @Inject protected LockTypeInteractor(@NonNull PadLockPreferences preferences) {
-    this.preferences = preferences;
+  public static void set(@NonNull LockHelper interactor) {
+    INSTANCE = interactor;
   }
 
-  @NonNull @CheckResult protected PadLockPreferences getPreferences() {
-    return preferences;
+  @CheckResult @NonNull public static LockHelper get() {
+    if (INSTANCE == null) {
+      throw new IllegalStateException("LockHelper instance is NULL");
+    }
+    return INSTANCE;
   }
 
-  @CheckResult @NonNull public Observable<LockScreenType> getLockScreenType() {
-    return Observable.fromCallable(getPreferences()::getCurrentLockType);
+  @NonNull @CheckResult
+  public final Observable<Boolean> checkSubmissionAttempt(@NonNull String attempt,
+      @NonNull String encodedPin) {
+    return encodeSHA256(attempt).map(encodedPin::equals);
   }
+
+  @CheckResult @NonNull public abstract Observable<String> encodeSHA256(@NonNull String attempt);
 }

@@ -28,10 +28,12 @@ import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import com.pyamsoft.padlock.model.Recheck;
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import rx.Observable;
 import timber.log.Timber;
 
-class LockScreenEntryInteractor {
+@Singleton class LockScreenEntryInteractor {
 
   @SuppressWarnings("WeakerAccess") static final int DEFAULT_MAX_FAIL_COUNT = 2;
   @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
@@ -44,9 +46,9 @@ class LockScreenEntryInteractor {
   @SuppressWarnings("WeakerAccess") int failCount;
 
   @Inject LockScreenEntryInteractor(@NonNull Context context,
-      @NonNull final PadLockPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
-      @NonNull final MasterPinInteractor masterPinInteractor, @NonNull PadLockDB padLockDB,
-      @NonNull Class<? extends IntentService> recheckServiceClass) {
+      @NonNull PadLockPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
+      @NonNull MasterPinInteractor masterPinInteractor, @NonNull PadLockDB padLockDB,
+      @NonNull @Named("recheck") Class<? extends IntentService> recheckServiceClass) {
     this.preferences = preferences;
     this.appContext = context.getApplicationContext();
     this.jobSchedulerCompat = jobSchedulerCompat;
@@ -82,7 +84,7 @@ class LockScreenEntryInteractor {
       @NonNull String attempt, @NonNull String pin) {
     return Observable.fromCallable(() -> pin)
         .filter(pin1 -> pin1 != null)
-        .flatMap(pin1 -> LockInteractor.get().checkSubmissionAttempt(attempt, pin1));
+        .flatMap(pin1 -> LockHelper.get().checkSubmissionAttempt(attempt, pin1));
   }
 
   @CheckResult @NonNull Observable<Boolean> postUnlock(@NonNull String packageName,

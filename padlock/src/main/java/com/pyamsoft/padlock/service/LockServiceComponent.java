@@ -18,8 +18,6 @@ package com.pyamsoft.padlock.service;
 
 import dagger.Subcomponent;
 
-@Subcomponent(modules = {
-    LockServiceModule.class,
-}) public interface LockServiceComponent {
+@Subcomponent public interface LockServiceComponent {
   void inject(PadLockService service);
 }

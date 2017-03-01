@@ -16,12 +16,9 @@
 
 package com.pyamsoft.padlock.lock;
 
-import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
 import dagger.Subcomponent;
 
-@Subcomponent(modules = {
-    LockScreenModule.class, AppIconLoaderModule.class
-}) public interface LockScreenComponent {
+@Subcomponent public interface LockScreenComponent {
 
   void inject(LockScreenTextFragment fragment);
 

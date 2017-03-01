@@ -33,12 +33,14 @@ import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.pydroid.helper.SchedulerHelper;
 import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
-public class ApplicationInstallReceiver extends BroadcastReceiver {
+@Singleton public class ApplicationInstallReceiver extends BroadcastReceiver {
 
   @NonNull private final Context appContext;
   @NonNull private final NotificationManagerCompat notificationManager;
@@ -52,8 +54,9 @@ public class ApplicationInstallReceiver extends BroadcastReceiver {
   private boolean registered;
 
   @Inject ApplicationInstallReceiver(@NonNull Context context,
-      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull Scheduler obsScheduler,
-      @NonNull Scheduler subScheduler, @NonNull Class<? extends Activity> mainActivityClass) {
+      @NonNull PackageManagerWrapper packageManagerWrapper,
+      @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("sub") Scheduler subScheduler,
+      @NonNull @Named("main") Class<? extends Activity> mainActivityClass) {
     this.obsScheduler = obsScheduler;
     this.subScheduler = subScheduler;
     appContext = context.getApplicationContext();

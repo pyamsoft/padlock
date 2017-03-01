@@ -16,6 +16,6 @@
 
 package com.pyamsoft.padlock.service;
 
-public enum RecheckStatus {
+enum RecheckStatus {
   FORCE, NOT_FORCE
 }

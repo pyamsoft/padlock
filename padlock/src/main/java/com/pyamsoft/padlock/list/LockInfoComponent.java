@@ -16,12 +16,9 @@
 
 package com.pyamsoft.padlock.list;
 
-import com.pyamsoft.padlock.iconloader.AppIconLoaderModule;
 import dagger.Subcomponent;
 
-@Subcomponent(modules = {
-    LockInfoModule.class, AppIconLoaderModule.class
-}) public interface LockInfoComponent {
+@Subcomponent public interface LockInfoComponent {
 
   void inject(LockInfoDialog dialog);
 }

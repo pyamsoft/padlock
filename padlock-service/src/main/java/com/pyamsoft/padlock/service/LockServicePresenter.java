@@ -23,6 +23,7 @@ import com.pyamsoft.pydroid.helper.SubscriptionHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.Subscriptions;
@@ -35,7 +36,7 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
   @Nullable private Subscription recheckSubscription;
 
   @Inject LockServicePresenter(@NonNull LockServiceInteractor interactor,
-      @NonNull Scheduler obsScheduler, @NonNull Scheduler subScheduler) {
+      @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
     interactor.reset();

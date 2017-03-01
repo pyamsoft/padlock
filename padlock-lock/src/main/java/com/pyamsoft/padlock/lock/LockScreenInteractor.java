@@ -23,9 +23,10 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import rx.Observable;
 
-class LockScreenInteractor extends LockTypeInteractor {
+@Singleton class LockScreenInteractor extends LockTypeInteractor {
 
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 

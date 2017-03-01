@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.main;
 
 import dagger.Subcomponent;
 
-@Subcomponent(modules = MainModule.class) public interface MainComponent {
+@Subcomponent public interface MainComponent {
 
   void inject(MainActivity activity);
 }

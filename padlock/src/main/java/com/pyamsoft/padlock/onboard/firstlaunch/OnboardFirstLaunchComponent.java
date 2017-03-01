@@ -18,8 +18,7 @@ package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import dagger.Subcomponent;
 
-@Subcomponent(modules = OnboardFirstLaunchModule.class)
-public interface OnboardFirstLaunchComponent {
+@Subcomponent public interface OnboardFirstLaunchComponent {
 
   void inject(OnboardEnableServiceFragment fragment);
 
