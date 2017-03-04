@@ -32,7 +32,7 @@ buildscript {
     buildTools = "25.0.2"
     heapSize = "2g"
 
-    retrolambda = "2.5.0"
+    retrolambda = "2.5.1"
     supportLib = "25.2.0"
     firebase = "10.2.0"
     leakCanary = "1.5"
@@ -45,10 +45,10 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.2.3'
+    classpath 'com.android.tools.build:gradle:2.3.0'
 
     // Retro lambda
-    classpath 'me.tatarka:gradle-retrolambda:3.3.1'
+    classpath 'me.tatarka:gradle-retrolambda:3.6.0'
 
     // Dex count
     classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.2'
