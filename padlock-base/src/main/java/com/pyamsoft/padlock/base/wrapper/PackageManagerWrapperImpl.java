@@ -160,17 +160,14 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
   @NonNull @Override
   public Observable<ApplicationInfo> getApplicationInfo(@NonNull String packageName) {
-    return Observable.fromCallable(() -> {
-      ApplicationInfo info;
+    return Observable.defer(() -> {
       try {
-        info = packageManager.getApplicationInfo(packageName, 0);
+        return Observable.just(packageManager.getApplicationInfo(packageName, 0));
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "onError getApplicationInfo");
-        info = null;
+        return Observable.empty();
       }
-
-      return info;
-    }).filter(applicationInfo -> applicationInfo != null);
+    });
   }
 
   @NonNull @Override public Observable<String> loadPackageLabel(@NonNull ApplicationInfo info) {
@@ -178,35 +175,29 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
   }
 
   @NonNull @Override public Observable<String> loadPackageLabel(@NonNull String packageName) {
-    return Observable.fromCallable(() -> {
-      ApplicationInfo info;
+    return Observable.defer(() -> {
       try {
-        info = packageManager.getApplicationInfo(packageName, 0);
+        return Observable.just(packageManager.getApplicationInfo(packageName, 0));
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "EXCEPTION");
-        info = null;
+        return Observable.empty();
       }
-
-      return info;
-    }).filter(applicationInfo -> applicationInfo != null).flatMap(this::loadPackageLabel);
+    }).flatMap(this::loadPackageLabel);
   }
 
   @NonNull @Override public Observable<ActivityInfo> getActivityInfo(@NonNull String packageName,
       @NonNull String activityName) {
-    return Observable.fromCallable(() -> {
+    return Observable.defer(() -> {
       if (packageName.isEmpty() || activityName.isEmpty()) {
-        return null;
+        return Observable.empty();
       }
 
       final ComponentName componentName = new ComponentName(packageName, activityName);
-      ActivityInfo info;
       try {
-        info = packageManager.getActivityInfo(componentName, 0);
+        return Observable.just(packageManager.getActivityInfo(componentName, 0));
       } catch (PackageManager.NameNotFoundException e) {
-        info = null;
+        return Observable.empty();
       }
-
-      return info;
-    }).filter(activityInfo -> activityInfo != null);
+    });
   }
 }
