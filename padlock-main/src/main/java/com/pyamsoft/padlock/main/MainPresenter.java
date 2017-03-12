@@ -17,19 +17,19 @@
 package com.pyamsoft.padlock.main;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
 
   @NonNull private final MainInteractor interactor;
-  @NonNull private Subscription onboardingSubscription = Subscriptions.empty();
+  @NonNull private Disposable onboardingDisposable = Disposables.empty();
 
   @Inject MainPresenter(@NonNull MainInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
@@ -38,8 +38,8 @@ class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
   }
 
   public void showOnboardingOrDefault(@NonNull OnboardingCallback callback) {
-    onboardingSubscription = SubscriptionHelper.unsubscribe(onboardingSubscription);
-    onboardingSubscription = interactor.isOnboardingComplete()
+    onboardingDisposable = DisposableHelper.unsubscribe(onboardingDisposable);
+    onboardingDisposable = interactor.isOnboardingComplete()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboardingComplete -> {
@@ -53,7 +53,7 @@ class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    onboardingSubscription = SubscriptionHelper.unsubscribe(onboardingSubscription);
+    onboardingDisposable = DisposableHelper.unsubscribe(onboardingDisposable);
   }
 
   interface OnboardingCallback {

@@ -28,11 +28,10 @@ import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import rx.Observable;
-import rx.functions.Func0;
 import timber.log.Timber;
 
 @Singleton class LockServiceInteractor {
@@ -81,7 +80,7 @@ import timber.log.Timber;
   @CheckResult @NonNull
   public Observable<Boolean> processActiveIfMatching(@NonNull String packageName,
       @NonNull String className) {
-    return Observable.fromCallable((Func0<Boolean>) () -> {
+    return Observable.fromCallable(() -> {
       Timber.d("Check against current window values: %s, %s", activePackageName, activeClassName);
       // We can replace the actual passed classname with the stored classname because:
       // either it is equal to the passed name or the passed name is PACKAGE
@@ -250,7 +249,9 @@ import timber.log.Timber;
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Observable<PadLockEntry> getEntry(
       @NonNull String packageName, @NonNull String activityName) {
-    return padLockDB.queryWithPackageActivityNameDefault(packageName, activityName).first();
+    return padLockDB.queryWithPackageActivityNameDefault(packageName, activityName)
+        .first(PadLockEntry.EMPTY)
+        .toObservable();
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult

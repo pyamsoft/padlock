@@ -20,9 +20,10 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.model.PinOptional;
+import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import rx.Observable;
 
 @Singleton public class MasterPinInteractor {
 
@@ -32,8 +33,8 @@ import rx.Observable;
     this.preferences = preferences;
   }
 
-  @CheckResult @NonNull public Observable<String> getMasterPin() {
-    return Observable.fromCallable(preferences::getMasterPassword);
+  @CheckResult @NonNull public Observable<PinOptional> getMasterPin() {
+    return Observable.fromCallable(() -> PinOptional.create(preferences.getMasterPassword()));
   }
 
   public void setMasterPin(@Nullable String pin) {
@@ -44,8 +45,8 @@ import rx.Observable;
     }
   }
 
-  @CheckResult @NonNull public Observable<String> getHint() {
-    return Observable.fromCallable(preferences::getHint);
+  @CheckResult @NonNull public Observable<PinOptional> getHint() {
+    return Observable.fromCallable(() -> PinOptional.create(preferences.getHint()));
   }
 
   public void setHint(@Nullable String hint) {

@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.model;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import io.reactivex.Observable;
+import com.google.auto.value.AutoValue;
 
-public abstract class LockHelper {
+@AutoValue public abstract class PinOptional {
 
-  @Nullable private static LockHelper INSTANCE;
-
-  public static void set(@NonNull LockHelper interactor) {
-    INSTANCE = interactor;
+  @CheckResult @NonNull public static PinOptional create(@Nullable String pin) {
+    return new AutoValue_PinOptional(pin);
   }
 
-  @CheckResult @NonNull public static LockHelper get() {
-    if (INSTANCE == null) {
-      throw new IllegalStateException("LockHelper instance is NULL");
-    }
-    return INSTANCE;
-  }
+  @Nullable public abstract String pin();
 
-  @NonNull @CheckResult
-  public final Observable<Boolean> checkSubmissionAttempt(@NonNull String attempt,
-      @NonNull String encodedPin) {
-    return encodeSHA256(attempt).map(encodedPin::equals);
+  @CheckResult public final boolean isPresent() {
+    return pin() != null;
   }
-
-  @CheckResult @NonNull public abstract Observable<String> encodeSHA256(@NonNull String attempt);
 }

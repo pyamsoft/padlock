@@ -22,20 +22,22 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import rx.Observable;
 import timber.log.Timber;
 
 @Singleton public class PurgeInteractor {
 
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
   @NonNull private final PadLockDB padLockDB;
-  @SuppressWarnings("WeakerAccess") @Nullable Observable<List<String>> cachedStalePackages;
+  @SuppressWarnings("WeakerAccess") @Nullable Single<List<String>> cachedStalePackages;
 
   @Inject PurgeInteractor(@NonNull PackageManagerWrapper packageManagerWrapper,
       @NonNull PadLockDB padLockDB) {
@@ -48,8 +50,8 @@ import timber.log.Timber;
   }
 
   @NonNull public Observable<String> populateList(boolean forceRefresh) {
-    return Observable.defer(() -> {
-      final Observable<List<String>> dataSource;
+    return Single.defer(() -> {
+      final Single<List<String>> dataSource;
       if (cachedStalePackages == null || forceRefresh) {
         Timber.d("Refresh stale package");
         dataSource = fetchFreshData().cache();
@@ -59,11 +61,10 @@ import timber.log.Timber;
         dataSource = cachedStalePackages;
       }
       return dataSource;
-    }).flatMap(Observable::from).sorted(String::compareToIgnoreCase);
+    }).toObservable().flatMap(Observable::fromIterable).sorted(String::compareToIgnoreCase);
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<List<String>> fetchFreshData() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Single<List<String>> fetchFreshData() {
     return getAppEntryList().zipWith(getActiveApplicationPackageNames().toList(),
         (allEntries, packageNames) -> {
           final List<String> stalePackageNames = new ArrayList<>();
@@ -105,8 +106,8 @@ import timber.log.Timber;
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
-    return padLockDB.queryAll().first();
+  Single<List<PadLockEntry.AllEntries>> getAppEntryList() {
+    return padLockDB.queryAll().first(Collections.emptyList());
   }
 
   @CheckResult @NonNull public Observable<Integer> deleteEntry(@NonNull String packageName) {

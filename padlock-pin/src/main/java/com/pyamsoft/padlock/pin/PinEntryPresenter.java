@@ -18,21 +18,21 @@ package com.pyamsoft.padlock.pin;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final PinEntryInteractor interactor;
-  @NonNull private Subscription pinEntrySubscription = Subscriptions.empty();
-  @NonNull private Subscription pinCheckSubscription = Subscriptions.empty();
+  @NonNull private Disposable pinEntryDisposable = Disposables.empty();
+  @NonNull private Disposable pinCheckDisposable = Disposables.empty();
 
   @Inject PinEntryPresenter(@NonNull PinEntryInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
@@ -42,15 +42,15 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    pinCheckSubscription = SubscriptionHelper.unsubscribe(pinCheckSubscription);
-    pinEntrySubscription = SubscriptionHelper.unsubscribe(pinEntrySubscription);
+    pinCheckDisposable = DisposableHelper.unsubscribe(pinCheckDisposable);
+    pinEntryDisposable = DisposableHelper.unsubscribe(pinEntryDisposable);
   }
 
   public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
       @NonNull String hint, @NonNull SubmitCallback callback) {
     Timber.d("Attempt PIN submission");
-    pinEntrySubscription = SubscriptionHelper.unsubscribe(pinEntrySubscription);
-    pinEntrySubscription = interactor.submitPin(currentAttempt, reEntryAttempt, hint)
+    pinEntryDisposable = DisposableHelper.unsubscribe(pinEntryDisposable);
+    pinEntryDisposable = interactor.submitPin(currentAttempt, reEntryAttempt, hint)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(event -> {
@@ -68,8 +68,8 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   public void checkMasterPinPresent(@NonNull MasterPinStatusCallback callback) {
     Timber.d("Check if we have a master");
-    pinCheckSubscription = SubscriptionHelper.unsubscribe(pinCheckSubscription);
-    pinCheckSubscription = interactor.hasMasterPin()
+    pinCheckDisposable = DisposableHelper.unsubscribe(pinCheckDisposable);
+    pinCheckDisposable = interactor.hasMasterPin()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(hasMaster -> {

@@ -17,23 +17,22 @@
 package com.pyamsoft.padlock.service;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final LockServiceInteractor interactor;
-  @NonNull private Subscription lockedEntrySubscription = Subscriptions.empty();
-  @Nullable private Subscription recheckSubscription;
+  @NonNull private Disposable lockedEntryDisposable = Disposables.empty();
+  @NonNull private Disposable recheckDisposable = Disposables.empty();
 
   @Inject LockServicePresenter(@NonNull LockServiceInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
@@ -44,15 +43,15 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    lockedEntrySubscription = SubscriptionHelper.unsubscribe(lockedEntrySubscription);
-    recheckSubscription = SubscriptionHelper.unsubscribe(recheckSubscription);
+    lockedEntryDisposable = DisposableHelper.unsubscribe(lockedEntryDisposable);
+    recheckDisposable = DisposableHelper.unsubscribe(recheckDisposable);
     interactor.cleanup();
   }
 
   public void processActiveApplicationIfMatching(@NonNull String packageName,
       @NonNull String className, @NonNull ProcessCallback callback) {
-    recheckSubscription = SubscriptionHelper.unsubscribe(recheckSubscription);
-    recheckSubscription = interactor.processActiveIfMatching(packageName, className)
+    recheckDisposable = DisposableHelper.unsubscribe(recheckDisposable);
+    recheckDisposable = interactor.processActiveIfMatching(packageName, className)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(recheck -> {
@@ -64,8 +63,8 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
       @NonNull RecheckStatus forcedRecheck, @NonNull ProcessCallback callback) {
-    lockedEntrySubscription = SubscriptionHelper.unsubscribe(lockedEntrySubscription);
-    lockedEntrySubscription = interactor.processEvent(packageName, className, forcedRecheck)
+    lockedEntryDisposable = DisposableHelper.unsubscribe(lockedEntryDisposable);
+    lockedEntryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(padLockEntry -> {

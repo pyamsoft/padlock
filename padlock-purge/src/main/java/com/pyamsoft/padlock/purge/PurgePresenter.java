@@ -17,39 +17,39 @@
 package com.pyamsoft.padlock.purge;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final PurgeInteractor interactor;
-  @NonNull private final CompositeSubscription compositeSubscription;
-  @NonNull private Subscription retrievalSubscription = Subscriptions.empty();
+  @NonNull private final CompositeDisposable compositeDisposable;
+  @NonNull private Disposable retrievalDisposable = Disposables.empty();
 
   @Inject PurgePresenter(@NonNull PurgeInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
-    compositeSubscription = new CompositeSubscription();
+    compositeDisposable = new CompositeDisposable();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    compositeSubscription.clear();
-    retrievalSubscription = SubscriptionHelper.unsubscribe(retrievalSubscription);
+    compositeDisposable.clear();
+    retrievalDisposable = DisposableHelper.unsubscribe(retrievalDisposable);
   }
 
   public void retrieveStaleApplications(@NonNull RetrievalCallback callback, boolean forceRefresh) {
-    retrievalSubscription = SubscriptionHelper.unsubscribe(retrievalSubscription);
-    retrievalSubscription = interactor.populateList(forceRefresh)
+    retrievalDisposable = DisposableHelper.unsubscribe(retrievalDisposable);
+    retrievalDisposable = interactor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onRetrievalComplete)
@@ -58,7 +58,7 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback) {
-    final Subscription subscription = interactor.deleteEntry(packageName)
+    final Disposable subscription = interactor.deleteEntry(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(deleteResult -> {
@@ -69,7 +69,7 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
         }, throwable -> {
           Timber.e(throwable, "onError deleteStale");
         });
-    compositeSubscription.add(subscription);
+    compositeDisposable.add(subscription);
   }
 
   interface RetrievalCallback {
