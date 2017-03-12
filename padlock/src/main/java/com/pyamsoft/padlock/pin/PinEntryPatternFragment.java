@@ -26,7 +26,7 @@ import android.view.ViewGroup;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding;
 import com.pyamsoft.padlock.uicommon.LockCellUtils;
-import com.pyamsoft.pydroid.FuncNone;
+import com.pyamsoft.pydroid.function.FuncNone;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;

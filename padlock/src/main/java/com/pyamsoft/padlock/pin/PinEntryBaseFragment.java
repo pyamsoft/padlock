@@ -21,7 +21,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.lock.master.MasterPinSubmitCallback;
-import com.pyamsoft.pydroid.ActionSingle;
+import com.pyamsoft.pydroid.function.ActionSingle;
 
 abstract class PinEntryBaseFragment extends Fragment {
 

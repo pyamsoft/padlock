@@ -30,7 +30,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.ActionSingle;
+import com.pyamsoft.pydroid.function.ActionSingle;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import javax.inject.Inject;

@@ -20,7 +20,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.PadLockPreferences;
-import com.pyamsoft.padlock.model.OptionalWrapper;
+import com.pyamsoft.pydroid.function.OptionalWrapper;
 import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
