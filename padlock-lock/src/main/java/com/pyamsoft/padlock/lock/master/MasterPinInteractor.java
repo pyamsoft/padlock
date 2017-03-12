@@ -33,8 +33,8 @@ import javax.inject.Singleton;
     this.preferences = preferences;
   }
 
-  @CheckResult @NonNull public Observable<OptionalWrapper> getMasterPin() {
-    return Observable.fromCallable(() -> OptionalWrapper.create(preferences.getMasterPassword()));
+  @CheckResult @NonNull public Observable<OptionalWrapper<String>> getMasterPin() {
+    return Observable.fromCallable(() -> OptionalWrapper.ofNullable(preferences.getMasterPassword()));
   }
 
   public void setMasterPin(@Nullable String pin) {
@@ -45,8 +45,8 @@ import javax.inject.Singleton;
     }
   }
 
-  @CheckResult @NonNull public Observable<OptionalWrapper> getHint() {
-    return Observable.fromCallable(() -> OptionalWrapper.create(preferences.getHint()));
+  @CheckResult @NonNull public Observable<OptionalWrapper<String>> getHint() {
+    return Observable.fromCallable(() -> OptionalWrapper.ofNullable(preferences.getHint()));
   }
 
   public void setHint(@Nullable String hint) {

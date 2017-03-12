@@ -69,13 +69,13 @@ import timber.log.Timber;
         return null;
       }
 
-      final OptionalWrapper pin;
+      final OptionalWrapper<String> pin;
       if (lockCode == null) {
         Timber.d("No app specific code, use Master PIN");
         pin = masterPin;
       } else {
         Timber.d("App specific code present, compare attempt");
-        pin = OptionalWrapper.create(lockCode);
+        pin = OptionalWrapper.ofNullable(lockCode);
       }
       return pin;
     }).flatMap(pinOptional -> {
