@@ -20,14 +20,11 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import dagger.Module;
 import dagger.Provides;
-import javax.inject.Named;
 import javax.inject.Singleton;
-import rx.Scheduler;
 
 @Module public class PadLockDBModule {
 
-  @Singleton @Provides @NonNull PadLockDB providePadLockDB(@NonNull Context context,
-      @Named("io") Scheduler scheduler) {
-    return new PadLockDBImpl(context, scheduler);
+  @Singleton @Provides @NonNull PadLockDB providePadLockDB(@NonNull Context context) {
+    return new PadLockDBImpl(context);
   }
 }
