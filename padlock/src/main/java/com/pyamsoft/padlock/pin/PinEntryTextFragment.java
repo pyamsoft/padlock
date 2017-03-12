@@ -108,17 +108,17 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
     // Resolve TextInputLayout edit texts
     pinEntryText = binding.pinEntryCode.getEditText();
     if (pinEntryText == null) {
-      throw new NullPointerException("No pin entry edit text");
+      throw new NullPointerException("No item entry edit text");
     }
 
     pinReentryText = binding.pinReentryCode.getEditText();
     if (pinReentryText == null) {
-      throw new NullPointerException("No pin re-entry edit text");
+      throw new NullPointerException("No item re-entry edit text");
     }
 
     pinHintText = binding.pinHint.getEditText();
     if (pinHintText == null) {
-      throw new NullPointerException("No pin hint edit text");
+      throw new NullPointerException("No item hint edit text");
     }
 
     // Force the keyboard

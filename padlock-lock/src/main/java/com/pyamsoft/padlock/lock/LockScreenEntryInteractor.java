@@ -26,7 +26,7 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import com.pyamsoft.padlock.model.PinOptional;
+import com.pyamsoft.padlock.model.OptionalWrapper;
 import com.pyamsoft.padlock.model.Recheck;
 import io.reactivex.Observable;
 import javax.inject.Inject;
@@ -69,17 +69,17 @@ import timber.log.Timber;
         return null;
       }
 
-      final PinOptional pin;
+      final OptionalWrapper pin;
       if (lockCode == null) {
         Timber.d("No app specific code, use Master PIN");
         pin = masterPin;
       } else {
         Timber.d("App specific code present, compare attempt");
-        pin = PinOptional.create(lockCode);
+        pin = OptionalWrapper.create(lockCode);
       }
       return pin;
     }).flatMap(pinOptional -> {
-      String pin = pinOptional.pin();
+      String pin = pinOptional.item();
       if (pin == null) {
         Timber.e("Cannot submit against PIN which is NULL");
         return Observable.just(false);
@@ -190,7 +190,7 @@ import timber.log.Timber;
 
   @NonNull @CheckResult public Observable<String> getHint() {
     return pinInteractor.getHint().map(pinOptional -> {
-      String hint = pinOptional.pin();
+      String hint = pinOptional.item();
       String result;
       if (hint == null) {
         result = "";

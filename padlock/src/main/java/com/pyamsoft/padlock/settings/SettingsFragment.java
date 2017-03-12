@@ -89,7 +89,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
       PadLockPreferences padLockPreferences =
           PadLockPreferences.Instance.wrap(getContext(), sharedPreferences);
 
-      // If we have a master pin, don't let user switch
+      // If we have a master item, don't let user switch
       if (padLockPreferences.getMasterPassword() == null) {
         return true;
       } else {
