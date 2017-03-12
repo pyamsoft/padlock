@@ -19,9 +19,9 @@ package com.pyamsoft.padlock.service;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
+import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import rx.Observable;
 
 @Singleton public class LockServiceStateInteractor {
 
@@ -32,6 +32,6 @@ import rx.Observable;
   }
 
   @NonNull @CheckResult public Observable<Boolean> isServiceEnabled() {
-    return pinInteractor.getMasterPin().map(pin -> pin != null);
+    return pinInteractor.getMasterPin().isEmpty().map(aBoolean -> !aBoolean).toObservable();
   }
 }

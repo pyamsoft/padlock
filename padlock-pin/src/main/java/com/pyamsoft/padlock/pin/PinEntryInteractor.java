@@ -22,10 +22,11 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.lock.LockHelper;
 import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
+import com.pyamsoft.padlock.model.PinOptional;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
+import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import rx.Observable;
 import timber.log.Timber;
 
 @Singleton class PinEntryInteractor extends LockTypeInteractor {
@@ -39,21 +40,22 @@ import timber.log.Timber;
   }
 
   @NonNull @CheckResult public Observable<Boolean> hasMasterPin() {
-    return getMasterPin().map(s -> s != null);
+    return getMasterPin().map(PinOptional::isPresent);
   }
 
   @NonNull @CheckResult public Observable<PinEntryEvent> submitPin(@NonNull String currentAttempt,
       @NonNull String reEntryAttempt, @NonNull String hint) {
     return getMasterPin().flatMap(masterPin -> {
-      if (masterPin == null) {
+      String pin = masterPin.pin();
+      if (pin == null) {
         return createPin(currentAttempt, reEntryAttempt, hint);
       } else {
-        return clearPin(masterPin, currentAttempt);
+        return clearPin(pin, currentAttempt);
       }
-    }).filter(pinEntryEvent -> pinEntryEvent != null);
+    });
   }
 
-  @CheckResult @NonNull private Observable<String> getMasterPin() {
+  @CheckResult @NonNull private Observable<PinOptional> getMasterPin() {
     return masterPinInteractor.getMasterPin();
   }
 
@@ -80,8 +82,7 @@ import timber.log.Timber;
       final boolean success = attempt.equals(reentry);
       if (success) {
         Timber.d("Entry and Re-Entry match, create");
-        final String encodedMasterPin =
-            LockHelper.get().encodeSHA256(attempt).toBlocking().first();
+        final String encodedMasterPin = LockHelper.get().encodeSHA256(attempt).blockingFirst();
         masterPinInteractor.setMasterPin(encodedMasterPin);
 
         if (!hint.isEmpty()) {

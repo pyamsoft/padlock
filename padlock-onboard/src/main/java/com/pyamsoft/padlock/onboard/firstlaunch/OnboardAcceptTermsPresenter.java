@@ -17,20 +17,20 @@
 package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class OnboardAcceptTermsPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final OnboardAcceptTermsInteractor interactor;
-  @NonNull private Subscription termsSubscription = Subscriptions.empty();
+  @NonNull private Disposable termsDisposable = Disposables.empty();
 
   @Inject OnboardAcceptTermsPresenter(@NonNull OnboardAcceptTermsInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
@@ -40,12 +40,12 @@ class OnboardAcceptTermsPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    termsSubscription = SubscriptionHelper.unsubscribe(termsSubscription);
+    termsDisposable = DisposableHelper.unsubscribe(termsDisposable);
   }
 
   public void acceptUsageTerms(@NonNull UsageTermsCallback callback) {
-    termsSubscription = SubscriptionHelper.unsubscribe(termsSubscription);
-    termsSubscription = interactor.agreeToTerms()
+    termsDisposable = DisposableHelper.unsubscribe(termsDisposable);
+    termsDisposable = interactor.agreeToTerms()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(agreed -> {
