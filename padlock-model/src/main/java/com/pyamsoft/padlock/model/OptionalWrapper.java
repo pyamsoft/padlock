@@ -21,15 +21,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 
-@AutoValue public abstract class PinOptional {
+@AutoValue public abstract class OptionalWrapper {
 
-  @CheckResult @NonNull public static PinOptional create(@Nullable String pin) {
-    return new AutoValue_PinOptional(pin);
+  @CheckResult @NonNull public static OptionalWrapper create(@Nullable String pin) {
+    return new AutoValue_OptionalWrapper(pin);
   }
 
-  @Nullable public abstract String pin();
+  @Nullable public abstract String item();
 
   @CheckResult public final boolean isPresent() {
-    return pin() != null;
+    return item() != null;
   }
 }

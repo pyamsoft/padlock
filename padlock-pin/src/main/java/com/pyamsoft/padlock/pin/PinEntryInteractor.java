@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.lock.LockHelper;
 import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import com.pyamsoft.padlock.model.PinOptional;
+import com.pyamsoft.padlock.model.OptionalWrapper;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import io.reactivex.Observable;
 import javax.inject.Inject;
@@ -40,13 +40,13 @@ import timber.log.Timber;
   }
 
   @NonNull @CheckResult public Observable<Boolean> hasMasterPin() {
-    return getMasterPin().map(PinOptional::isPresent);
+    return getMasterPin().map(OptionalWrapper::isPresent);
   }
 
   @NonNull @CheckResult public Observable<PinEntryEvent> submitPin(@NonNull String currentAttempt,
       @NonNull String reEntryAttempt, @NonNull String hint) {
     return getMasterPin().flatMap(masterPin -> {
-      String pin = masterPin.pin();
+      String pin = masterPin.item();
       if (pin == null) {
         return createPin(currentAttempt, reEntryAttempt, hint);
       } else {
@@ -55,7 +55,7 @@ import timber.log.Timber;
     });
   }
 
-  @CheckResult @NonNull private Observable<PinOptional> getMasterPin() {
+  @CheckResult @NonNull private Observable<OptionalWrapper> getMasterPin() {
     return masterPinInteractor.getMasterPin();
   }
 
@@ -63,11 +63,11 @@ import timber.log.Timber;
       @NonNull String masterPin, @NonNull String attempt) {
     return LockHelper.get().checkSubmissionAttempt(attempt, masterPin).map(success -> {
       if (success) {
-        Timber.d("Clear master pin");
+        Timber.d("Clear master item");
         masterPinInteractor.setMasterPin(null);
         masterPinInteractor.setHint(null);
       } else {
-        Timber.d("Failed to clear master pin");
+        Timber.d("Failed to clear master item");
       }
 
       return PinEntryEvent.create(PinEntryEvent.Type.TYPE_CLEAR, success);
@@ -77,7 +77,7 @@ import timber.log.Timber;
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<PinEntryEvent> createPin(
       @NonNull String attempt, @NonNull String reentry, @NonNull String hint) {
     return Observable.fromCallable(() -> {
-      Timber.d("No existing master pin, attempt to create a new one");
+      Timber.d("No existing master item, attempt to create a new one");
 
       final boolean success = attempt.equals(reentry);
       if (success) {
