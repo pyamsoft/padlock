@@ -21,7 +21,7 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import rx.Observable;
+import io.reactivex.Observable;
 
 public interface PackageManagerWrapper {
 

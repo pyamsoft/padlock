@@ -30,14 +30,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
 import com.pyamsoft.padlock.base.R;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.helper.SchedulerHelper;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 @Singleton public class ApplicationInstallReceiver extends BroadcastReceiver {
@@ -49,7 +49,7 @@ import timber.log.Timber;
   @NonNull private final Scheduler obsScheduler;
   @NonNull private final Scheduler subScheduler;
   @NonNull private final PendingIntent pendingIntent;
-  @NonNull private Subscription notification = Subscriptions.empty();
+  @NonNull private Disposable notification = Disposables.empty();
   private int notificationId;
   private boolean registered;
 
@@ -83,7 +83,7 @@ import timber.log.Timber;
     final Uri data = intent.getData();
     final String packageName = data.getSchemeSpecificPart();
 
-    notification = SubscriptionHelper.unsubscribe(notification);
+    notification = DisposableHelper.unsubscribe(notification);
     notification = packageManagerWrapper.loadPackageLabel(packageName)
         .subscribeOn(subScheduler)
         .observeOn(obsScheduler)
@@ -122,7 +122,7 @@ import timber.log.Timber;
   public void unregister() {
     if (registered) {
       appContext.unregisterReceiver(this);
-      notification = SubscriptionHelper.unsubscribe(notification);
+      notification = DisposableHelper.unsubscribe(notification);
       registered = false;
     }
   }

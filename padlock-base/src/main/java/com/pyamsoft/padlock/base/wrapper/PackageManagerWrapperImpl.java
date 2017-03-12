@@ -28,6 +28,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.support.annotation.WorkerThread;
+import io.reactivex.Observable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,7 +36,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
-import rx.Observable;
 import timber.log.Timber;
 
 class PackageManagerWrapperImpl implements PackageManagerWrapper {
@@ -81,7 +81,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         Timber.e(e, "PackageManager error, return what we have for %s", packageName);
       }
       return activityEntries;
-    }).flatMap(Observable::from);
+    }).flatMap(Observable::fromIterable);
   }
 
   @VisibleForTesting @SuppressWarnings("WeakerAccess") @WorkerThread @NonNull @CheckResult
@@ -131,7 +131,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
       return packageNames;
     })
-        .flatMap(Observable::from)
+        .flatMap(Observable::fromIterable)
         .map(packageNameWithPrefix -> packageNameWithPrefix.replaceFirst("^package:", ""))
         .flatMap(this::getApplicationInfo);
   }
