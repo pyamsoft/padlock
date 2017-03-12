@@ -60,6 +60,7 @@ dependencies {
 
   // SQLBrite
   compile "com.squareup.sqlbrite:sqlbrite:$sqlbrite"
+  compile "com.github.akarnokd:rxjava2-interop:0.9.3"
 
   // Dagger
   compile "com.google.dagger:dagger:$dagger"
