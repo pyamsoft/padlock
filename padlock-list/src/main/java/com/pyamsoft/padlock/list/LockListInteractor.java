@@ -26,9 +26,11 @@ import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
+import com.pyamsoft.padlock.model.OptionalWrapper;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.functions.BiFunction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -99,18 +101,35 @@ import timber.log.Timber;
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Single<List<AppEntry>> fetchFreshData() {
     return getActiveApplications().withLatestFrom(isSystemVisible(),
-        (applicationInfo, systemVisible) -> {
-          if (systemVisible) {
-            // If system visible, we show all apps
-            return applicationInfo;
-          } else {
-            return isSystemApplication(applicationInfo) ? null : applicationInfo;
+        new BiFunction<ApplicationInfo, Boolean, OptionalWrapper<ApplicationInfo>>() {
+          @Override public OptionalWrapper<ApplicationInfo> apply(
+              @io.reactivex.annotations.NonNull ApplicationInfo applicationInfo,
+              @io.reactivex.annotations.NonNull Boolean systemVisible) throws Exception {
+            if (systemVisible) {
+              // If system visible, we show all apps
+              return OptionalWrapper.ofNullable(applicationInfo);
+            } else {
+              return isSystemApplication(applicationInfo) ? OptionalWrapper.ofNullable(null)
+                  : OptionalWrapper.ofNullable(applicationInfo);
+            }
           }
         })
-        .filter(applicationInfo -> applicationInfo != null)
-        .flatMap(applicationInfo -> getActivityListForApplication(applicationInfo).toList()
-            .toObservable()
-            .map(activityList -> activityList.isEmpty() ? "" : applicationInfo.packageName))
+        .filter(OptionalWrapper::isPresent)
+        .flatMap(wrapper -> {
+          ApplicationInfo info = wrapper.item();
+          if (info == null) {
+            throw new IllegalStateException(
+                "ApplicationInfo object is NULL after filter, this should not happen.");
+          }
+
+          return getActivityListForApplication(info).toList().map(activityList -> {
+            if (activityList.isEmpty()) {
+              return "";
+            } else {
+              return info.packageName;
+            }
+          }).toObservable();
+        })
         .filter(s -> !s.isEmpty())
         .toList()
         .zipWith(getAppEntryList(), (packageNames, padLockEntries) -> {
