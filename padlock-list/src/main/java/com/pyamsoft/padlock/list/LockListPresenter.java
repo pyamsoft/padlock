@@ -21,26 +21,26 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.padlock.service.LockServiceStateInteractor;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
-  @NonNull private final CompositeSubscription compositeSubscription;
-  @NonNull private Subscription populateListSubscription = Subscriptions.empty();
-  @NonNull private Subscription systemVisibleSubscription = Subscriptions.empty();
-  @NonNull private Subscription onboardSubscription = Subscriptions.empty();
-  @NonNull private Subscription fabStateSubscription = Subscriptions.empty();
+  @NonNull private final CompositeDisposable compositeDisposable;
+  @NonNull private Disposable populateListDisposable = Disposables.empty();
+  @NonNull private Disposable systemVisibleDisposable = Disposables.empty();
+  @NonNull private Disposable onboardDisposable = Disposables.empty();
+  @NonNull private Disposable fabStateDisposable = Disposables.empty();
 
   @Inject LockListPresenter(final @NonNull LockListInteractor lockListInteractor,
       final @NonNull LockServiceStateInteractor stateInteractor,
@@ -48,21 +48,21 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
     super(obsScheduler, subScheduler);
     this.lockListInteractor = lockListInteractor;
     this.stateInteractor = stateInteractor;
-    compositeSubscription = new CompositeSubscription();
+    compositeDisposable = new CompositeDisposable();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    systemVisibleSubscription = SubscriptionHelper.unsubscribe(systemVisibleSubscription);
-    onboardSubscription = SubscriptionHelper.unsubscribe(onboardSubscription);
-    fabStateSubscription = SubscriptionHelper.unsubscribe(fabStateSubscription);
-    populateListSubscription = SubscriptionHelper.unsubscribe(populateListSubscription);
-    compositeSubscription.clear();
+    systemVisibleDisposable = DisposableHelper.unsubscribe(systemVisibleDisposable);
+    onboardDisposable = DisposableHelper.unsubscribe(onboardDisposable);
+    fabStateDisposable = DisposableHelper.unsubscribe(fabStateDisposable);
+    populateListDisposable = DisposableHelper.unsubscribe(populateListDisposable);
+    compositeDisposable.clear();
   }
 
   public void populateList(@NonNull PopulateListCallback callback, boolean forceRefresh) {
-    populateListSubscription = SubscriptionHelper.unsubscribe(populateListSubscription);
-    populateListSubscription = lockListInteractor.populateList(forceRefresh)
+    populateListDisposable = DisposableHelper.unsubscribe(populateListDisposable);
+    populateListDisposable = lockListInteractor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onListPopulated)
@@ -73,8 +73,8 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void setFABStateFromPreference(@NonNull FABStateCallback callback) {
-    fabStateSubscription = SubscriptionHelper.unsubscribe(fabStateSubscription);
-    fabStateSubscription = stateInteractor.isServiceEnabled()
+    fabStateDisposable = DisposableHelper.unsubscribe(fabStateDisposable);
+    fabStateDisposable = stateInteractor.isServiceEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(enabled -> {
@@ -95,8 +95,8 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void setSystemVisibilityFromPreference(@NonNull SystemVisibilityCallback callback) {
-    systemVisibleSubscription = SubscriptionHelper.unsubscribe(systemVisibleSubscription);
-    systemVisibleSubscription = lockListInteractor.isSystemVisible()
+    systemVisibleDisposable = DisposableHelper.unsubscribe(systemVisibleDisposable);
+    systemVisibleDisposable = lockListInteractor.isSystemVisible()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(visible -> {
@@ -109,8 +109,8 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void showOnBoarding(@NonNull OnboardingCallback callback) {
-    onboardSubscription = SubscriptionHelper.unsubscribe(onboardSubscription);
-    onboardSubscription = lockListInteractor.hasShownOnBoarding()
+    onboardDisposable = DisposableHelper.unsubscribe(onboardDisposable);
+    onboardDisposable = lockListInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboard -> {
@@ -126,7 +126,7 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
       @SuppressWarnings("SameParameterValue") @Nullable String code, boolean system,
       @NonNull DatabaseCallback callback) {
     // No whitelisting for modifications from the List
-    Subscription databaseSubscription =
+    Disposable databaseDisposable =
         lockListInteractor.modifySingleDatabaseEntry(isChecked, packageName,
             PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system, false, false)
             .subscribeOn(getSubscribeScheduler())
@@ -146,7 +146,7 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
               Timber.e(throwable, "onError modifyDatabaseEntry");
               callback.onDatabaseEntryError(position);
             });
-    compositeSubscription.add(databaseSubscription);
+    compositeDisposable.add(databaseDisposable);
   }
 
   interface OnboardingCallback {

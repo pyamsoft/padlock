@@ -21,9 +21,9 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
+import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import rx.Observable;
 
 @Singleton class AppIconLoaderInteractor {
 

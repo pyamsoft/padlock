@@ -22,7 +22,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.model.LockState;
-import rx.Observable;
+import io.reactivex.Observable;
 import timber.log.Timber;
 
 abstract class LockCommonInteractor {

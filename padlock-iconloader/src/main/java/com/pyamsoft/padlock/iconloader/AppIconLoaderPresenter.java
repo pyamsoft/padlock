@@ -18,20 +18,20 @@ package com.pyamsoft.padlock.iconloader;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 public class AppIconLoaderPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final AppIconLoaderInteractor interactor;
-  @NonNull private Subscription loadIconSubscription = Subscriptions.empty();
+  @NonNull private Disposable loadIconDisposable = Disposables.empty();
 
   @Inject AppIconLoaderPresenter(@NonNull AppIconLoaderInteractor interactor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
@@ -41,12 +41,12 @@ public class AppIconLoaderPresenter extends SchedulerPresenter<Presenter.Empty> 
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    loadIconSubscription = SubscriptionHelper.unsubscribe(loadIconSubscription);
+    loadIconDisposable = DisposableHelper.unsubscribe(loadIconDisposable);
   }
 
   public void loadApplicationIcon(@NonNull String packageName, @NonNull LoadCallback callback) {
-    loadIconSubscription = SubscriptionHelper.unsubscribe(loadIconSubscription);
-    loadIconSubscription = interactor.loadPackageIcon(packageName)
+    loadIconDisposable = DisposableHelper.unsubscribe(loadIconDisposable);
+    loadIconDisposable = interactor.loadPackageIcon(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(callback::onApplicationIconLoadedSuccess, throwable -> {
