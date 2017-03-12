@@ -18,14 +18,14 @@ package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
@@ -34,8 +34,8 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
   @SuppressWarnings("WeakerAccess") static final int CONFIRM_ALL = 1;
   @SuppressWarnings("WeakerAccess") @NonNull final ApplicationInstallReceiver receiver;
   @NonNull private final SettingsPreferenceInteractor interactor;
-  @NonNull private Subscription confirmedSubscription = Subscriptions.empty();
-  @NonNull private Subscription applicationInstallSubscription = Subscriptions.empty();
+  @NonNull private Disposable confirmedDisposable = Disposables.empty();
+  @NonNull private Disposable applicationInstallDisposable = Disposables.empty();
 
   @Inject SettingsPreferencePresenter(@NonNull SettingsPreferenceInteractor interactor,
       @NonNull ApplicationInstallReceiver receiver, @Named("obs") Scheduler obsScheduler,
@@ -47,8 +47,8 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    confirmedSubscription = SubscriptionHelper.unsubscribe(confirmedSubscription);
-    applicationInstallSubscription = SubscriptionHelper.unsubscribe(applicationInstallSubscription);
+    confirmedDisposable = DisposableHelper.unsubscribe(confirmedDisposable);
+    applicationInstallDisposable = DisposableHelper.unsubscribe(applicationInstallDisposable);
   }
 
   public void requestClearAll(@NonNull RequestCallback callback) {
@@ -60,8 +60,8 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void setApplicationInstallReceiverState() {
-    applicationInstallSubscription = SubscriptionHelper.unsubscribe(applicationInstallSubscription);
-    applicationInstallSubscription = interactor.isInstallListenerEnabled()
+    applicationInstallDisposable = DisposableHelper.unsubscribe(applicationInstallDisposable);
+    applicationInstallDisposable = interactor.isInstallListenerEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(result -> {
@@ -87,16 +87,16 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   private void clearAll(@NonNull ClearCallback callback) {
-    confirmedSubscription = SubscriptionHelper.unsubscribe(confirmedSubscription);
-    confirmedSubscription = interactor.clearAll()
+    confirmedDisposable = DisposableHelper.unsubscribe(confirmedDisposable);
+    confirmedDisposable = interactor.clearAll()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(aBoolean -> callback.onClearAll(), throwable -> Timber.e(throwable, "onError"));
   }
 
   private void clearDatabase(@NonNull ClearCallback callback) {
-    confirmedSubscription = SubscriptionHelper.unsubscribe(confirmedSubscription);
-    confirmedSubscription = interactor.clearDatabase()
+    confirmedDisposable = DisposableHelper.unsubscribe(confirmedDisposable);
+    confirmedDisposable = interactor.clearDatabase()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(aBoolean -> callback.onClearDatabase(),

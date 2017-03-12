@@ -23,9 +23,9 @@ import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.list.LockInfoInteractor;
 import com.pyamsoft.padlock.list.LockListInteractor;
 import com.pyamsoft.padlock.purge.PurgeInteractor;
+import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import rx.Observable;
 import timber.log.Timber;
 
 @Singleton class SettingsPreferenceInteractor {
