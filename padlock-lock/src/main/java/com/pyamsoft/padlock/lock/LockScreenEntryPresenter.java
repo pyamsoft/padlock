@@ -18,23 +18,23 @@ package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final LockScreenEntryInteractor interactor;
-  @NonNull private Subscription postUnlockSubscription = Subscriptions.empty();
-  @NonNull private Subscription unlockSubscription = Subscriptions.empty();
-  @NonNull private Subscription lockSubscription = Subscriptions.empty();
-  @NonNull private Subscription hintSubscription = Subscriptions.empty();
+  @NonNull private Disposable postUnlockDisposable = Disposables.empty();
+  @NonNull private Disposable unlockDisposable = Disposables.empty();
+  @NonNull private Disposable lockDisposable = Disposables.empty();
+  @NonNull private Disposable hintDisposable = Disposables.empty();
 
   @Inject LockScreenEntryPresenter(@NonNull LockScreenEntryInteractor lockScreenInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
@@ -44,10 +44,10 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    postUnlockSubscription = SubscriptionHelper.unsubscribe(postUnlockSubscription);
-    unlockSubscription = SubscriptionHelper.unsubscribe(unlockSubscription);
-    lockSubscription = SubscriptionHelper.unsubscribe(lockSubscription);
-    hintSubscription = SubscriptionHelper.unsubscribe(hintSubscription);
+    postUnlockDisposable = DisposableHelper.unsubscribe(postUnlockDisposable);
+    unlockDisposable = DisposableHelper.unsubscribe(unlockDisposable);
+    lockDisposable = DisposableHelper.unsubscribe(lockDisposable);
+    hintDisposable = DisposableHelper.unsubscribe(hintDisposable);
   }
 
   public void resetFailCount() {
@@ -55,8 +55,8 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void displayLockedHint(@NonNull LockHintCallback callback) {
-    hintSubscription = SubscriptionHelper.unsubscribe(hintSubscription);
-    hintSubscription = interactor.getHint()
+    hintDisposable = DisposableHelper.unsubscribe(hintDisposable);
+    hintDisposable = interactor.getHint()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(callback::setDisplayHint,
@@ -65,8 +65,8 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   public void lockEntry(@NonNull String packageName, @NonNull String activityName,
       @NonNull LockCallback callback) {
-    lockSubscription = SubscriptionHelper.unsubscribe(lockSubscription);
-    lockSubscription = interactor.incrementAndGetFailCount(packageName, activityName)
+    lockDisposable = DisposableHelper.unsubscribe(lockDisposable);
+    lockDisposable = interactor.incrementAndGetFailCount(packageName, activityName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(timePair -> {
@@ -85,8 +85,8 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
   public void submit(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, @NonNull String currentAttempt,
       @NonNull LockSubmitCallback callback) {
-    unlockSubscription = SubscriptionHelper.unsubscribe(unlockSubscription);
-    unlockSubscription =
+    unlockDisposable = DisposableHelper.unsubscribe(unlockDisposable);
+    unlockDisposable =
         interactor.submitPin(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
@@ -106,8 +106,8 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
   public void postUnlock(@NonNull String packageName, @NonNull String activityName,
       @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
       long ignoreTime, @NonNull PostUnlockCallback callback) {
-    postUnlockSubscription = SubscriptionHelper.unsubscribe(postUnlockSubscription);
-    postUnlockSubscription =
+    postUnlockDisposable = DisposableHelper.unsubscribe(postUnlockDisposable);
+    postUnlockDisposable =
         interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
             shouldExclude, ignoreTime)
             .subscribeOn(getSubscribeScheduler())

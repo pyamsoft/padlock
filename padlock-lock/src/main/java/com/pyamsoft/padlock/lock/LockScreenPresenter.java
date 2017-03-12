@@ -18,19 +18,19 @@ package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class LockScreenPresenter extends LockTypePresenter {
 
   @NonNull private final LockScreenInteractor interactor;
-  @NonNull private Subscription displayNameSubscription = Subscriptions.empty();
-  @NonNull private Subscription ignoreTimeSubscription = Subscriptions.empty();
+  @NonNull private Disposable displayNameDisposable = Disposables.empty();
+  @NonNull private Disposable ignoreTimeDisposable = Disposables.empty();
 
   @Inject LockScreenPresenter(@NonNull LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
@@ -40,13 +40,13 @@ class LockScreenPresenter extends LockTypePresenter {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    displayNameSubscription = SubscriptionHelper.unsubscribe(displayNameSubscription);
-    ignoreTimeSubscription = SubscriptionHelper.unsubscribe(ignoreTimeSubscription);
+    displayNameDisposable = DisposableHelper.unsubscribe(displayNameDisposable);
+    ignoreTimeDisposable = DisposableHelper.unsubscribe(ignoreTimeDisposable);
   }
 
   public void createWithDefaultIgnoreTime(@NonNull IgnoreTimeCallback callback) {
-    ignoreTimeSubscription = SubscriptionHelper.unsubscribe(ignoreTimeSubscription);
-    ignoreTimeSubscription = interactor.getDefaultIgnoreTime()
+    ignoreTimeDisposable = DisposableHelper.unsubscribe(ignoreTimeDisposable);
+    ignoreTimeDisposable = interactor.getDefaultIgnoreTime()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(callback::onInitializeWithIgnoreTime,
@@ -55,8 +55,8 @@ class LockScreenPresenter extends LockTypePresenter {
 
   public void loadDisplayNameFromPackage(@NonNull String packageName,
       @NonNull DisplayNameLoadCallback callback) {
-    displayNameSubscription = SubscriptionHelper.unsubscribe(displayNameSubscription);
-    displayNameSubscription = interactor.getDisplayName(packageName)
+    displayNameDisposable = DisposableHelper.unsubscribe(displayNameDisposable);
+    displayNameDisposable = interactor.getDisplayName(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(callback::setDisplayName, throwable -> {

@@ -26,11 +26,12 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
+import com.pyamsoft.padlock.model.PinOptional;
 import com.pyamsoft.padlock.model.Recheck;
+import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import rx.Observable;
 import timber.log.Timber;
 
 @Singleton class LockScreenEntryInteractor {
@@ -59,7 +60,7 @@ import timber.log.Timber;
 
   @CheckResult @NonNull
   public Observable<Boolean> submitPin(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long lockUntilTime, String currentAttempt) {
+      @Nullable String lockCode, long lockUntilTime, final String currentAttempt) {
     return pinInteractor.getMasterPin().map(masterPin -> {
       Timber.d("Attempt unlock: %s %s", packageName, activityName);
       Timber.d("Check entry is not locked: %d", lockUntilTime);
@@ -68,23 +69,24 @@ import timber.log.Timber;
         return null;
       }
 
-      final String pin;
+      final PinOptional pin;
       if (lockCode == null) {
         Timber.d("No app specific code, use Master PIN");
         pin = masterPin;
       } else {
         Timber.d("App specific code present, compare attempt");
-        pin = lockCode;
+        pin = PinOptional.create(lockCode);
       }
       return pin;
-    }).flatMap(nullablePin -> unlockEntry(currentAttempt, nullablePin));
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Boolean> unlockEntry(
-      @NonNull String attempt, @NonNull String pin) {
-    return Observable.fromCallable(() -> pin)
-        .filter(pin1 -> pin1 != null)
-        .flatMap(pin1 -> LockHelper.get().checkSubmissionAttempt(attempt, pin1));
+    }).flatMap(pinOptional -> {
+      String pin = pinOptional.pin();
+      if (pin == null) {
+        Timber.e("Cannot submit against PIN which is NULL");
+        return Observable.just(false);
+      } else {
+        return LockHelper.get().checkSubmissionAttempt(currentAttempt, pin);
+      }
+    });
   }
 
   @CheckResult @NonNull Observable<Boolean> postUnlock(@NonNull String packageName,
@@ -187,12 +189,21 @@ import timber.log.Timber;
   }
 
   @NonNull @CheckResult public Observable<String> getHint() {
-    return pinInteractor.getHint().map(s -> s == null ? "" : s);
+    return pinInteractor.getHint().map(pinOptional -> {
+      String hint = pinOptional.pin();
+      String result;
+      if (hint == null) {
+        result = "";
+      } else {
+        result = hint;
+      }
+      return result;
+    });
   }
 
   static class TimePair {
-    public final long currentTime;
-    public final long lockUntilTime;
+    final long currentTime;
+    final long lockUntilTime;
 
     TimePair(long currentTime, long lockUntilTime) {
       this.currentTime = currentTime;

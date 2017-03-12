@@ -19,10 +19,10 @@ package com.pyamsoft.padlock.lock;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.util.Base64;
+import io.reactivex.Observable;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import rx.Observable;
 
 public class SHA256LockHelper extends LockHelper {
 

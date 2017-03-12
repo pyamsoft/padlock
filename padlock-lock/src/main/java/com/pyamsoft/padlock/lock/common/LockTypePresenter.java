@@ -18,19 +18,19 @@ package com.pyamsoft.padlock.lock.common;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.Subscriptions;
 
 public class LockTypePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final LockTypeInteractor interactor;
-  @NonNull private Subscription typeSubscription = Subscriptions.empty();
+  @NonNull private Disposable typeDisposable = Disposables.empty();
 
   @Inject protected LockTypePresenter(@NonNull LockTypeInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
@@ -40,12 +40,12 @@ public class LockTypePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @CallSuper @Override protected void onUnbind() {
     super.onUnbind();
-    typeSubscription = SubscriptionHelper.unsubscribe(typeSubscription);
+    typeDisposable = DisposableHelper.unsubscribe(typeDisposable);
   }
 
   public void initializeLockScreenType(@NonNull LockScreenTypeCallback callback) {
-    typeSubscription = SubscriptionHelper.unsubscribe(typeSubscription);
-    typeSubscription = interactor.getLockScreenType()
+    typeDisposable = DisposableHelper.unsubscribe(typeDisposable);
+    typeDisposable = interactor.getLockScreenType()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(lockScreenType -> {

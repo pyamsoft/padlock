@@ -22,9 +22,9 @@ import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
+import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import rx.Observable;
 
 @Singleton class LockScreenInteractor extends LockTypeInteractor {
 
