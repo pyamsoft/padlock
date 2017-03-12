@@ -55,7 +55,7 @@ import timber.log.Timber;
     });
   }
 
-  @CheckResult @NonNull private Observable<OptionalWrapper> getMasterPin() {
+  @CheckResult @NonNull private Observable<OptionalWrapper<String>> getMasterPin() {
     return masterPinInteractor.getMasterPin();
   }
 

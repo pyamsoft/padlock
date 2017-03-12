@@ -21,13 +21,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 
-@AutoValue public abstract class OptionalWrapper {
+@AutoValue public abstract class OptionalWrapper<T> {
 
-  @CheckResult @NonNull public static OptionalWrapper create(@Nullable String pin) {
-    return new AutoValue_OptionalWrapper(pin);
+  @CheckResult @NonNull public static <T> OptionalWrapper<T> ofNullable(@Nullable T source) {
+    return new AutoValue_OptionalWrapper<>(source);
   }
 
-  @Nullable public abstract String item();
+  @Nullable @CheckResult public abstract T item();
 
   @CheckResult public final boolean isPresent() {
     return item() != null;
