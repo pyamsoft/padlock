@@ -137,25 +137,25 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
   }
 
   @NonNull @Override public Observable<ApplicationInfo> getActiveApplications() {
-    return getInstalledApplications().map(info -> {
+    return getInstalledApplications().flatMap(info -> {
       if (!info.enabled) {
         Timber.i("Application %s is disabled", info.packageName);
-        return null;
+        return Observable.empty();
       }
 
       if (ANDROID_PACKAGE.equals(info.packageName)) {
         Timber.i("Application %s is Android", info.packageName);
-        return null;
+        return Observable.empty();
       }
 
       if (ANDROID_SYSTEM_UI_PACKAGE.equals(info.packageName)) {
         Timber.i("Application %s is System UI", info.packageName);
-        return null;
+        return Observable.empty();
       }
 
       Timber.d("Successfully processed application: %s", info.packageName);
-      return info;
-    }).filter(applicationInfo -> applicationInfo != null);
+      return Observable.just(info);
+    });
   }
 
   @NonNull @Override
