@@ -26,6 +26,8 @@ import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,14 +37,13 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import rx.Observable;
 import timber.log.Timber;
 
 @Singleton public class LockInfoInteractor extends LockCommonInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenClass;
-  @SuppressWarnings("WeakerAccess") @NonNull final Map<String, Observable<List<ActivityEntry>>>
+  @SuppressWarnings("WeakerAccess") @NonNull final Map<String, Single<List<ActivityEntry>>>
       cachedInfoObservableMap;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
@@ -118,8 +119,8 @@ import timber.log.Timber;
 
   @NonNull @CheckResult
   public Observable<ActivityEntry> populateList(@NonNull String packageName, boolean forceRefresh) {
-    return Observable.defer(() -> {
-      final Observable<List<ActivityEntry>> dataSource;
+    return Single.defer(() -> {
+      final Single<List<ActivityEntry>> dataSource;
       if (cachedInfoObservableMap.get(packageName) == null || forceRefresh) {
         Timber.d("Refresh info list data");
         dataSource = fetchFreshData(packageName).cache();
@@ -129,7 +130,7 @@ import timber.log.Timber;
         dataSource = cachedInfoObservableMap.get(packageName);
       }
       return dataSource;
-    }).flatMap(Observable::from).sorted((activityEntry, activityEntry2) -> {
+    }).toObservable().flatMap(Observable::fromIterable).sorted((activityEntry, activityEntry2) -> {
       // Package names are all the same
       final String entry1Name = activityEntry.name();
       final String entry2Name = activityEntry2.name();
@@ -163,7 +164,7 @@ import timber.log.Timber;
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<List<ActivityEntry>> fetchFreshData(@NonNull String packageName) {
+  Single<List<ActivityEntry>> fetchFreshData(@NonNull String packageName) {
     return getPackageActivities(packageName).zipWith(getLockedActivityEntries(packageName),
         (activityNames, padLockEntries) -> {
           // Sort here to avoid stream break
@@ -196,13 +197,12 @@ import timber.log.Timber;
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Observable<List<PadLockEntry.WithPackageName>> getLockedActivityEntries(
-      @NonNull String packageName) {
-    return getPadLockDB().queryWithPackageName(packageName).first();
+  Single<List<PadLockEntry.WithPackageName>> getLockedActivityEntries(@NonNull String packageName) {
+    return getPadLockDB().queryWithPackageName(packageName).first(Collections.emptyList());
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Observable<List<String>> getPackageActivities(@NonNull String packageName) {
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Single<List<String>> getPackageActivities(
+      @NonNull String packageName) {
     return packageManagerWrapper.getActivityListForPackage(packageName)
         .filter(activityEntry -> !activityEntry.equalsIgnoreCase(lockScreenClass.getName()))
         .toList();

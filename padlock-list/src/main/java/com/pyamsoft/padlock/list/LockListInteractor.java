@@ -27,19 +27,20 @@ import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import rx.Observable;
 import timber.log.Timber;
 
 @Singleton public class LockListInteractor extends LockCommonInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManagerWrapper;
-  @SuppressWarnings("WeakerAccess") @Nullable Observable<List<AppEntry>> cachedEntriesObservable;
+  @SuppressWarnings("WeakerAccess") @Nullable Single<List<AppEntry>> cachedEntriesObservable;
 
   @Inject LockListInteractor(PadLockDB padLockDB,
       @NonNull PackageManagerWrapper packageManagerWrapper,
@@ -54,8 +55,8 @@ import timber.log.Timber;
   }
 
   @CheckResult @NonNull public Observable<AppEntry> populateList(boolean forceRefresh) {
-    return Observable.defer(() -> {
-      final Observable<List<AppEntry>> dataSource;
+    return Single.defer(() -> {
+      final Single<List<AppEntry>> dataSource;
       if (cachedEntriesObservable == null || forceRefresh) {
         Timber.d("Refresh into cache");
         dataSource = fetchFreshData().cache();
@@ -65,7 +66,7 @@ import timber.log.Timber;
         dataSource = cachedEntriesObservable;
       }
       return dataSource;
-    }).concatMap(Observable::from);
+    }).toObservable().concatMap(Observable::fromIterable);
   }
 
   @NonNull @Override public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
@@ -73,7 +74,7 @@ import timber.log.Timber;
       boolean system, boolean whitelist, boolean forceLock) {
     return super.modifySingleDatabaseEntry(notInDatabase, packageName, activityName, code, system,
         whitelist, forceLock).map(lockState -> {
-      updateCacheEntry(packageManagerWrapper.loadPackageLabel(packageName).toBlocking().first(),
+      updateCacheEntry(packageManagerWrapper.loadPackageLabel(packageName).blockingFirst(),
           packageName, lockState == LockState.LOCKED);
       return lockState;
     });
@@ -96,8 +97,7 @@ import timber.log.Timber;
     }
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<List<AppEntry>> fetchFreshData() {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Single<List<AppEntry>> fetchFreshData() {
     return getActiveApplications().withLatestFrom(isSystemVisible(),
         (applicationInfo, systemVisible) -> {
           if (systemVisible) {
@@ -109,8 +109,9 @@ import timber.log.Timber;
         })
         .filter(applicationInfo -> applicationInfo != null)
         .flatMap(applicationInfo -> getActivityListForApplication(applicationInfo).toList()
-            .map(activityList -> activityList.isEmpty() ? null : applicationInfo.packageName))
-        .filter(s -> s != null)
+            .toObservable()
+            .map(activityList -> activityList.isEmpty() ? "" : applicationInfo.packageName))
+        .filter(s -> !s.isEmpty())
         .toList()
         .zipWith(getAppEntryList(), (packageNames, padLockEntries) -> {
           // Sort here to avoid stream break
@@ -139,7 +140,8 @@ import timber.log.Timber;
 
           return lockPairs;
         })
-        .flatMap(Observable::from)
+        .toObservable()
+        .flatMap(Observable::fromIterable)
         .flatMap(pair -> createFromPackageInfo(pair.first, pair.second))
         .toSortedList((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()));
   }
@@ -148,7 +150,7 @@ import timber.log.Timber;
   Observable<AppEntry> createFromPackageInfo(@NonNull String packageName, boolean locked) {
     return packageManagerWrapper.getApplicationInfo(packageName)
         .map(info -> AppEntry.builder()
-            .name(packageManagerWrapper.loadPackageLabel(info).toBlocking().first())
+            .name(packageManagerWrapper.loadPackageLabel(info).blockingFirst())
             .packageName(packageName)
             .system(isSystemApplication(info))
             .locked(locked)
@@ -170,8 +172,8 @@ import timber.log.Timber;
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<List<PadLockEntry.AllEntries>> getAppEntryList() {
-    return getPadLockDB().queryAll().first();
+  Single<List<PadLockEntry.AllEntries>> getAppEntryList() {
+    return getPadLockDB().queryAll().first(Collections.emptyList());
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Pair<String, Boolean> findAppEntry(

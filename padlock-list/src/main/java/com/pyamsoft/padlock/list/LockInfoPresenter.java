@@ -19,42 +19,42 @@ package com.pyamsoft.padlock.list;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.ActivityEntry;
-import com.pyamsoft.pydroid.helper.SubscriptionHelper;
+import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
-import rx.Scheduler;
-import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
-import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;
-  @NonNull private final CompositeSubscription compositeSubscription;
-  @NonNull private Subscription populateListSubscription = Subscriptions.empty();
-  @NonNull private Subscription onboardSubscription = Subscriptions.empty();
+  @NonNull private final CompositeDisposable compositeDisposable;
+  @NonNull private Disposable populateListDisposable = Disposables.empty();
+  @NonNull private Disposable onboardDisposable = Disposables.empty();
 
   @Inject LockInfoPresenter(final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("obs") Scheduler obsScheduler,
       final @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.lockInfoInteractor = lockInfoInteractor;
-    compositeSubscription = new CompositeSubscription();
+    compositeDisposable = new CompositeDisposable();
   }
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    onboardSubscription = SubscriptionHelper.unsubscribe(onboardSubscription);
-    populateListSubscription = SubscriptionHelper.unsubscribe(populateListSubscription);
+    onboardDisposable = DisposableHelper.unsubscribe(onboardDisposable);
+    populateListDisposable = DisposableHelper.unsubscribe(populateListDisposable);
   }
 
   public void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback,
       boolean forceRefresh) {
-    populateListSubscription = SubscriptionHelper.unsubscribe(populateListSubscription);
-    populateListSubscription = lockInfoInteractor.populateList(packageName, forceRefresh)
+    populateListDisposable = DisposableHelper.unsubscribe(populateListDisposable);
+    populateListDisposable = lockInfoInteractor.populateList(packageName, forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onListPopulated)
@@ -68,7 +68,7 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
       @NonNull String activityName, @SuppressWarnings("SameParameterValue") @Nullable String code,
       boolean system, boolean whitelist, boolean forceDelete,
       @NonNull ModifyDatabaseCallback callback) {
-    Subscription databaseSubscription =
+    Disposable databaseDisposable =
         lockInfoInteractor.modifySingleDatabaseEntry(isNotDefault, packageName, activityName, code,
             system, whitelist, forceDelete)
             .subscribeOn(getSubscribeScheduler())
@@ -91,12 +91,12 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
               Timber.e(throwable, "onError modifyDatabaseEntry");
               callback.onDatabaseEntryError(position);
             });
-    compositeSubscription.add(databaseSubscription);
+    compositeDisposable.add(databaseDisposable);
   }
 
   public void showOnBoarding(@NonNull OnBoardingCallback callback) {
-    onboardSubscription = SubscriptionHelper.unsubscribe(onboardSubscription);
-    onboardSubscription = lockInfoInteractor.hasShownOnBoarding()
+    onboardDisposable = DisposableHelper.unsubscribe(onboardDisposable);
+    onboardDisposable = lockInfoInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboard -> {
