@@ -20,31 +20,21 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.model.event.PurgeAllEvent;
+import com.pyamsoft.pydroid.bus.EventBus;
 
 public class PurgeAllDialog extends DialogFragment {
 
   @NonNull @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
     return new AlertDialog.Builder(getActivity()).setMessage("Really delete all old entries?")
         .setPositiveButton("Delete", (dialogInterface, i) -> {
-          sendDeleteAllEvent();
+          EventBus.get().publish(new PurgeAllEvent());
           dismiss();
         })
         .setNegativeButton("Cancel", (dialogInterface, i) -> dismiss())
         .create();
-  }
-
-  @SuppressWarnings("WeakerAccess") void sendDeleteAllEvent() {
-    final FragmentManager fragmentManager = getFragmentManager();
-    final Fragment purgeFragment = fragmentManager.findFragmentByTag(PurgeFragment.TAG);
-    if (purgeFragment instanceof PurgeFragment) {
-      ((PurgeFragment) purgeFragment).purgeAll();
-    } else {
-      throw new ClassCastException("Fragment is not PurgeFragment");
-    }
   }
 
   @Override public void onDestroy() {

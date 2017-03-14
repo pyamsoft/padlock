@@ -17,6 +17,9 @@
 package com.pyamsoft.padlock.purge;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.model.event.PurgeAllEvent;
+import com.pyamsoft.padlock.model.event.PurgeEvent;
+import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
@@ -33,6 +36,8 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
   @NonNull private final PurgeInteractor interactor;
   @NonNull private final CompositeDisposable compositeDisposable;
   @NonNull private Disposable retrievalDisposable = Disposables.empty();
+  @NonNull private Disposable purgeBus = Disposables.empty();
+  @NonNull private Disposable purgeAllBus = Disposables.empty();
 
   @Inject PurgePresenter(@NonNull PurgeInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
@@ -45,6 +50,26 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
     super.onUnbind();
     compositeDisposable.clear();
     retrievalDisposable = DisposableHelper.unsubscribe(retrievalDisposable);
+    purgeBus = DisposableHelper.unsubscribe(purgeBus);
+    purgeAllBus = DisposableHelper.unsubscribe(purgeAllBus);
+  }
+
+  public void registerOnBus(@NonNull PurgeCallback callback) {
+    purgeBus = DisposableHelper.unsubscribe(purgeBus);
+    purgeBus = EventBus.get()
+        .listen(PurgeEvent.class)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(purgeEvent -> callback.purge(purgeEvent.packageName()),
+            throwable -> Timber.e(throwable, "onError purge single"));
+
+    purgeAllBus = DisposableHelper.unsubscribe(purgeAllBus);
+    purgeAllBus = EventBus.get()
+        .listen(PurgeAllEvent.class)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(purgeAllEvent -> callback.purgeAll(),
+            throwable -> Timber.e(throwable, "onError purge all"));
   }
 
   public void retrieveStaleApplications(@NonNull RetrievalCallback callback, boolean forceRefresh) {
@@ -70,6 +95,13 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
           Timber.e(throwable, "onError deleteStale");
         });
     compositeDisposable.add(subscription);
+  }
+
+  interface PurgeCallback {
+
+    void purge(@NonNull String packageName);
+
+    void purgeAll();
   }
 
   interface RetrievalCallback {

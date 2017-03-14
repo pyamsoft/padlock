@@ -18,22 +18,25 @@ package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
+import com.pyamsoft.padlock.model.event.ConfirmEvent;
+import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
+import io.reactivex.functions.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
 class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
 
-  @SuppressWarnings("WeakerAccess") static final int CONFIRM_DATABASE = 0;
-  @SuppressWarnings("WeakerAccess") static final int CONFIRM_ALL = 1;
   @SuppressWarnings("WeakerAccess") @NonNull final ApplicationInstallReceiver receiver;
-  @NonNull private final SettingsPreferenceInteractor interactor;
+  @SuppressWarnings("WeakerAccess") @NonNull final SettingsPreferenceInteractor interactor;
   @NonNull private Disposable confirmedDisposable = Disposables.empty();
   @NonNull private Disposable applicationInstallDisposable = Disposables.empty();
 
@@ -51,14 +54,6 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
     applicationInstallDisposable = DisposableHelper.unsubscribe(applicationInstallDisposable);
   }
 
-  public void requestClearAll(@NonNull RequestCallback callback) {
-    callback.showConfirmDialog(CONFIRM_ALL);
-  }
-
-  public void requestClearDatabase(@NonNull RequestCallback callback) {
-    callback.showConfirmDialog(CONFIRM_DATABASE);
-  }
-
   public void setApplicationInstallReceiverState() {
     applicationInstallDisposable = DisposableHelper.unsubscribe(applicationInstallDisposable);
     applicationInstallDisposable = interactor.isInstallListenerEnabled()
@@ -73,44 +68,48 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
         }, throwable -> Timber.e(throwable, "onError setApplicationInstallReceiverState"));
   }
 
-  public void processClearRequest(int type, @NonNull ClearCallback callback) {
-    switch (type) {
-      case CONFIRM_DATABASE:
-        clearDatabase(callback);
-        break;
-      case CONFIRM_ALL:
-        clearAll(callback);
-        break;
-      default:
-        throw new IllegalStateException("Received invalid confirmation event type: " + type);
-    }
-  }
-
-  private void clearAll(@NonNull ClearCallback callback) {
+  public void registerOnBus(@NonNull ClearCallback callback) {
     confirmedDisposable = DisposableHelper.unsubscribe(confirmedDisposable);
-    confirmedDisposable = interactor.clearAll()
+    confirmedDisposable = EventBus.get()
+        .listen(ConfirmEvent.class)
+        .flatMap(new Function<ConfirmEvent, ObservableSource<ConfirmEvent.Type>>() {
+          @Override public ObservableSource<ConfirmEvent.Type> apply(
+              @io.reactivex.annotations.NonNull ConfirmEvent confirmEvent) throws Exception {
+            Observable<Boolean> result;
+            switch (confirmEvent.type()) {
+              case DATABASE:
+                result = interactor.clearDatabase();
+                break;
+              case ALL:
+                result = interactor.clearAll();
+                break;
+              default:
+                throw new IllegalStateException(
+                    "Received invalid confirmation event type: " + confirmEvent.type());
+            }
+
+            return result.map(ignore -> confirmEvent.type());
+          }
+        })
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(aBoolean -> callback.onClearAll(), throwable -> Timber.e(throwable, "onError"));
-  }
-
-  private void clearDatabase(@NonNull ClearCallback callback) {
-    confirmedDisposable = DisposableHelper.unsubscribe(confirmedDisposable);
-    confirmedDisposable = interactor.clearDatabase()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(aBoolean -> callback.onClearDatabase(),
-            throwable -> Timber.e(throwable, "onError"));
+        .subscribe(type -> {
+          switch (type) {
+            case DATABASE:
+              callback.onClearDatabase();
+              break;
+            case ALL:
+              callback.onClearAll();
+              break;
+            default:
+              throw new IllegalStateException("Received invalid confirmation event type: " + type);
+          }
+        }, throwable -> Timber.e(throwable, "onError clear bus"));
   }
 
   interface ClearCallback {
     void onClearAll();
 
     void onClearDatabase();
-  }
-
-  interface RequestCallback {
-
-    void showConfirmDialog(int type);
   }
 }
