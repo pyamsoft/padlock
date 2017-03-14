@@ -114,6 +114,44 @@ public class PurgeFragment extends Fragment implements PurgePresenter.RetrievalC
   @Override public void onStart() {
     super.onStart();
     presenter.bindView(null);
+
+    presenter.registerOnBus(new PurgePresenter.PurgeCallback() {
+      @Override public void purge(@NonNull String packageName) {
+        Timber.d("Purge stale: %s", packageName);
+        presenter.deleteStale(packageName, packageName1 -> {
+          final int itemCount = fastItemAdapter.getItemCount();
+          if (itemCount == 0) {
+            Timber.e("Adapter is EMPTY");
+          } else {
+            int found = -1;
+            for (int i = 0; i < itemCount; ++i) {
+              final PurgeItem item = fastItemAdapter.getAdapterItem(i);
+              if (item.getModel().equals(packageName1)) {
+                found = i;
+                break;
+              }
+            }
+
+            if (found != -1) {
+              Timber.d("Remove deleted item: %s", packageName1);
+              fastItemAdapter.remove(found);
+            }
+          }
+        });
+      }
+
+      @Override public void purgeAll() {
+        final int itemCount = fastItemAdapter.getItemCount();
+        if (itemCount == 0) {
+          Timber.e("Adapter is EMPTY");
+        } else {
+          for (final PurgeItem item : fastItemAdapter.getAdapterItems()) {
+            purge(item.getModel());
+          }
+        }
+      }
+    });
+
     if (!listIsRefreshed) {
       if (!binding.purgeSwipeRefresh.isRefreshing()) {
         binding.purgeSwipeRefresh.post(() -> {
@@ -205,40 +243,5 @@ public class PurgeFragment extends Fragment implements PurgePresenter.RetrievalC
     // TODO show empty view if empty list
     handler.removeCallbacksAndMessages(null);
     handler.post(stopRefreshRunnable);
-  }
-
-  void purge(@NonNull String packageName) {
-    Timber.d("Purge stale: %s", packageName);
-    presenter.deleteStale(packageName, packageName1 -> {
-      final int itemCount = fastItemAdapter.getItemCount();
-      if (itemCount == 0) {
-        Timber.e("Adapter is EMPTY");
-      } else {
-        int found = -1;
-        for (int i = 0; i < itemCount; ++i) {
-          final PurgeItem item = fastItemAdapter.getAdapterItem(i);
-          if (item.getModel().equals(packageName1)) {
-            found = i;
-            break;
-          }
-        }
-
-        if (found != -1) {
-          Timber.d("Remove deleted item: %s", packageName1);
-          fastItemAdapter.remove(found);
-        }
-      }
-    });
-  }
-
-  void purgeAll() {
-    final int itemCount = fastItemAdapter.getItemCount();
-    if (itemCount == 0) {
-      Timber.e("Adapter is EMPTY");
-    } else {
-      for (final PurgeItem item : fastItemAdapter.getAdapterItems()) {
-        purge(item.getModel());
-      }
-    }
   }
 }

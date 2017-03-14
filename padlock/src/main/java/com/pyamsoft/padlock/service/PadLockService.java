@@ -22,54 +22,43 @@ import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.view.accessibility.AccessibilityEvent;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.lock.LockScreenActivity;
+import com.pyamsoft.padlock.model.event.RecheckEvent;
+import com.pyamsoft.padlock.model.event.ServiceEvent;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.bus.EventBus;
 import javax.inject.Inject;
 import timber.log.Timber;
 
 public class PadLockService extends AccessibilityService
     implements LockServicePresenter.ProcessCallback {
 
-  private static volatile PadLockService instance = null;
+  private static boolean running;
   @Inject LockServicePresenter presenter;
   private Intent lockActivity;
 
-  @NonNull @CheckResult static synchronized PadLockService getInstance() {
-    if (instance == null) {
-      throw new NullPointerException("Current service instance is NULL");
-    }
-
-    //noinspection ConstantConditions
-    return instance;
-  }
-
-  @VisibleForTesting @SuppressWarnings("WeakerAccess")
-  static synchronized void setInstance(@Nullable PadLockService i) {
-    instance = i;
-  }
-
   @CheckResult public static boolean isRunning() {
-    return instance != null;
+    return running;
+  }
+
+  private static void setRunning(boolean running) {
+    PadLockService.running = running;
   }
 
   public static void finish() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      getInstance().disableSelf();
-    }
+    EventBus.get().publish(ServiceEvent.create(ServiceEvent.Type.FINISH));
   }
 
   public static void passLockScreen() {
-    getInstance().getPresenter().setLockScreenPassed();
+    EventBus.get().publish(ServiceEvent.create(ServiceEvent.Type.PASS_LOCK));
   }
 
   public static void recheck(@NonNull String packageName, @NonNull String className) {
     if (!packageName.isEmpty() && !className.isEmpty()) {
       Timber.d("Recheck was requested for: %s, %s", packageName, className);
-      PadLockService service = getInstance();
-      service.getPresenter().processActiveApplicationIfMatching(packageName, className, service);
+      EventBus.get().publish(RecheckEvent.create(packageName, className));
     }
   }
 
@@ -121,19 +110,45 @@ public class PadLockService extends AccessibilityService
 
   @Override public boolean onUnbind(Intent intent) {
     presenter.unbindView();
-    setInstance(null);
+    setRunning(false);
     return super.onUnbind(intent);
   }
 
   @Override protected void onServiceConnected() {
     super.onServiceConnected();
     Timber.d("onServiceConnected");
-    lockActivity = new Intent(getApplicationContext(), LockScreenActivity.class).setFlags(
-        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+    if (lockActivity == null) {
+      lockActivity = new Intent(getApplicationContext(), LockScreenActivity.class).setFlags(
+          Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+    }
 
-    Injector.get().provideComponent().plusLockServiceComponent().inject(this);
+    if (presenter == null) {
+      Injector.get().provideComponent().plusLockServiceComponent().inject(this);
+    }
     presenter.bindView(null);
-    setInstance(this);
+
+    LockServicePresenter.ProcessCallback callback = this;
+    presenter.registerOnBus(new LockServicePresenter.ServiceCallback() {
+      @Override public void onFinish() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+          disableSelf();
+        }
+      }
+
+      @Override public void onPassLockScreen() {
+        presenter.setLockScreenPassed();
+      }
+
+      @Override public void onRecheck(@NonNull String packageName, @NonNull String className) {
+        presenter.processActiveApplicationIfMatching(packageName, className, callback);
+      }
+    });
+    setRunning(true);
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    presenter.destroy();
   }
 
   @Override public void startLockScreen(@NonNull PadLockEntry entry, @NonNull String realName) {

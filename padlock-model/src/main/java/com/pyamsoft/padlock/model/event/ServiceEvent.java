@@ -20,17 +20,15 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
-@AutoValue public abstract class PinEntryEvent {
+@AutoValue public abstract class ServiceEvent {
 
-  @CheckResult @NonNull public static PinEntryEvent create(@NonNull Type type, boolean complete) {
-    return new AutoValue_PinEntryEvent(type, complete);
+  @CheckResult @NonNull public static ServiceEvent create(@NonNull Type type) {
+    return new AutoValue_ServiceEvent(type);
   }
 
   @CheckResult public abstract Type type();
 
-  @CheckResult public abstract boolean complete();
-
   public enum Type {
-    TYPE_CREATE, TYPE_CLEAR
+    FINISH, PASS_LOCK
   }
 }

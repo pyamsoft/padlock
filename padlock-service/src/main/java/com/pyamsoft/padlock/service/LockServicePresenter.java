@@ -17,7 +17,10 @@
 package com.pyamsoft.padlock.service;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.model.event.RecheckEvent;
+import com.pyamsoft.padlock.model.event.ServiceEvent;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
@@ -33,6 +36,8 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
   @NonNull private final LockServiceInteractor interactor;
   @NonNull private Disposable lockedEntryDisposable = Disposables.empty();
   @NonNull private Disposable recheckDisposable = Disposables.empty();
+  @NonNull private Disposable serviceBus = Disposables.empty();
+  @NonNull private Disposable recheckBus = Disposables.empty();
 
   @Inject LockServicePresenter(@NonNull LockServiceInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
@@ -45,7 +50,38 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
     super.onUnbind();
     lockedEntryDisposable = DisposableHelper.unsubscribe(lockedEntryDisposable);
     recheckDisposable = DisposableHelper.unsubscribe(recheckDisposable);
+    serviceBus = DisposableHelper.unsubscribe(serviceBus);
+    recheckBus = DisposableHelper.unsubscribe(recheckBus);
     interactor.cleanup();
+  }
+
+  public void registerOnBus(@NonNull ServiceCallback callback) {
+    serviceBus = DisposableHelper.unsubscribe(serviceBus);
+    serviceBus = EventBus.get()
+        .listen(ServiceEvent.class)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(serviceEvent -> {
+          switch (serviceEvent.type()) {
+            case FINISH:
+              callback.onFinish();
+              break;
+            case PASS_LOCK:
+              callback.onPassLockScreen();
+              break;
+            default:
+              throw new IllegalArgumentException(
+                  "Invalid ServiceEvent.Type: " + serviceEvent.type());
+          }
+        }, throwable -> Timber.e(throwable, "onError service bus"));
+
+    recheckBus = DisposableHelper.unsubscribe(recheckBus);
+    recheckBus = EventBus.get()
+        .listen(RecheckEvent.class)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(recheckEvent -> callback.onRecheck(recheckEvent.packageName(),
+            recheckEvent.className()), throwable -> Timber.e(throwable, "onError recheck bus"));
   }
 
   public void processActiveApplicationIfMatching(@NonNull String packageName,
@@ -61,6 +97,10 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
         }, throwable -> Timber.e(throwable, "onError processActiveApplicationIfMatching"));
   }
 
+  public void setLockScreenPassed() {
+    interactor.setLockScreenPassed(true);
+  }
+
   public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
       @NonNull RecheckStatus forcedRecheck, @NonNull ProcessCallback callback) {
     lockedEntryDisposable = DisposableHelper.unsubscribe(lockedEntryDisposable);
@@ -72,12 +112,17 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
         }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"));
   }
 
-  public void setLockScreenPassed() {
-    interactor.setLockScreenPassed(true);
-  }
-
   interface ProcessCallback {
 
     void startLockScreen(@NonNull PadLockEntry entry, @NonNull String realName);
+  }
+
+  interface ServiceCallback {
+
+    void onFinish();
+
+    void onPassLockScreen();
+
+    void onRecheck(@NonNull String packageName, @NonNull String className);
   }
 }

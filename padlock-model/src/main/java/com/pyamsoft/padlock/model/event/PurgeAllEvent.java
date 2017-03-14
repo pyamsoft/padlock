@@ -16,21 +16,5 @@
 
 package com.pyamsoft.padlock.model.event;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
-
-@AutoValue public abstract class PinEntryEvent {
-
-  @CheckResult @NonNull public static PinEntryEvent create(@NonNull Type type, boolean complete) {
-    return new AutoValue_PinEntryEvent(type, complete);
-  }
-
-  @CheckResult public abstract Type type();
-
-  @CheckResult public abstract boolean complete();
-
-  public enum Type {
-    TYPE_CREATE, TYPE_CLEAR
-  }
+public class PurgeAllEvent {
 }

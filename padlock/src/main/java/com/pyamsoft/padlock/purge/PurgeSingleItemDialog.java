@@ -22,15 +22,15 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import com.pyamsoft.padlock.PadLock;
+import com.pyamsoft.padlock.model.event.PurgeEvent;
+import com.pyamsoft.pydroid.bus.EventBus;
 
 public class PurgeSingleItemDialog extends DialogFragment {
 
   @NonNull private static final String PACKAGE = "package_name";
-  private String packageName;
+  String packageName;
 
   @CheckResult @NonNull
   public static PurgeSingleItemDialog newInstance(@NonNull String packageName) {
@@ -53,21 +53,11 @@ public class PurgeSingleItemDialog extends DialogFragment {
     return new AlertDialog.Builder(getActivity()).setMessage(
         "Really delete old entry for " + packageName + "?")
         .setPositiveButton("Delete", (dialogInterface, i) -> {
-          sendDeleteEvent(packageName);
+          EventBus.get().publish(PurgeEvent.create(packageName));
           dismiss();
         })
         .setNegativeButton("Cancel", (dialogInterface, i) -> dismiss())
         .create();
-  }
-
-  @SuppressWarnings("WeakerAccess") void sendDeleteEvent(@NonNull String packageName) {
-    final FragmentManager fragmentManager = getFragmentManager();
-    final Fragment purgeFragment = fragmentManager.findFragmentByTag(PurgeFragment.TAG);
-    if (purgeFragment instanceof PurgeFragment) {
-      ((PurgeFragment) purgeFragment).purge(packageName);
-    } else {
-      throw new ClassCastException("Fragment is not PurgeFragment");
-    }
   }
 
   @Override public void onDestroy() {

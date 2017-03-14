@@ -32,6 +32,7 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.main.MainActivity;
+import com.pyamsoft.padlock.model.event.ConfirmEvent;
 import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
@@ -40,9 +41,7 @@ import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class SettingsFragment extends ActionBarSettingsPreferenceFragment
-    implements SettingsPreferencePresenter.RequestCallback,
-    SettingsPreferencePresenter.ClearCallback {
+public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
 
   @NonNull public static final String TAG = "SettingsPreferenceFragment";
   @SuppressWarnings("WeakerAccess") @Inject SettingsPreferencePresenter presenter;
@@ -70,7 +69,8 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));
     clearDb.setOnPreferenceClickListener(preference -> {
       Timber.d("Clear DB onClick");
-      presenter.requestClearDatabase(this);
+      AppUtil.onlyLoadOnceDialogFragment(getActivity(),
+          ConfirmationDialog.newInstance(ConfirmEvent.Type.DATABASE), "confirm_dialog");
       return true;
     });
 
@@ -83,7 +83,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
     final Preference lockType = findPreference(getString(R.string.lock_screen_type_key));
     lockType.setOnPreferenceChangeListener((preference, newValue) -> {
       // KLUDGE Accessing preference from View layer
-      // We do this because going through an interactor is not synchronous, which can lead to lags
+      // We do this because going through an interactor is not synchronous, type can lead to lags
       // While we could properly architect here, we choose user experience over correct arch.
       SharedPreferences sharedPreferences = preference.getSharedPreferences();
       PadLockPreferences padLockPreferences =
@@ -116,7 +116,8 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   }
 
   @Override protected boolean onClearAllPreferenceClicked() {
-    presenter.requestClearAll(this);
+    AppUtil.onlyLoadOnceDialogFragment(getActivity(),
+        ConfirmationDialog.newInstance(ConfirmEvent.Type.ALL), "confirm_dialog");
     return true;
   }
 
@@ -125,14 +126,33 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
     return super.onLicenseItemClicked();
   }
 
-  @Override public void showConfirmDialog(int type) {
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(), ConfirmationDialog.newInstance(type),
-        "confirm_dialog");
-  }
-
   @Override public void onStart() {
     super.onStart();
     presenter.bindView(null);
+
+    presenter.registerOnBus(new SettingsPreferencePresenter.ClearCallback() {
+      @Override public void onClearAll() {
+        Timber.d("Everything is cleared, kill self");
+        try {
+          PadLockService.finish();
+        } catch (NullPointerException e) {
+          Timber.e(e, "Expected NPE when Service is NULL");
+        }
+        final ActivityManager activityManager =
+            (ActivityManager) getActivity().getApplicationContext()
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        activityManager.clearApplicationUserData();
+      }
+
+      @Override public void onClearDatabase() {
+        final Activity activity = getActivity();
+        if (activity instanceof MainActivity) {
+          ((MainActivity) activity).onForceRefresh();
+        } else {
+          throw new ClassCastException("Activity is not MainActivity");
+        }
+      }
+    });
   }
 
   @Override public void onStop() {
@@ -149,26 +169,5 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment
   @Override public void onDestroy() {
     super.onDestroy();
     PadLock.getRefWatcher(this).watch(this);
-  }
-
-  @Override public void onClearAll() {
-    Timber.d("Everything is cleared, kill self");
-    try {
-      PadLockService.finish();
-    } catch (NullPointerException e) {
-      Timber.e(e, "Expected NPE when Service is NULL");
-    }
-    final ActivityManager activityManager = (ActivityManager) getActivity().getApplicationContext()
-        .getSystemService(Context.ACTIVITY_SERVICE);
-    activityManager.clearApplicationUserData();
-  }
-
-  @Override public void onClearDatabase() {
-    final Activity activity = getActivity();
-    if (activity instanceof MainActivity) {
-      ((MainActivity) activity).onForceRefresh();
-    } else {
-      throw new ClassCastException("Activity is not MainActivity");
-    }
   }
 }
