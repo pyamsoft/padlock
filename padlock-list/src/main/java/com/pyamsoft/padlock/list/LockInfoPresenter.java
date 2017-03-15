@@ -47,13 +47,13 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    onboardDisposable = DisposableHelper.unsubscribe(onboardDisposable);
-    populateListDisposable = DisposableHelper.unsubscribe(populateListDisposable);
+    onboardDisposable = DisposableHelper.dispose(onboardDisposable);
+    populateListDisposable = DisposableHelper.dispose(populateListDisposable);
   }
 
   public void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback,
       boolean forceRefresh) {
-    populateListDisposable = DisposableHelper.unsubscribe(populateListDisposable);
+    populateListDisposable = DisposableHelper.dispose(populateListDisposable);
     populateListDisposable = lockInfoInteractor.populateList(packageName, forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -95,7 +95,7 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void showOnBoarding(@NonNull OnBoardingCallback callback) {
-    onboardDisposable = DisposableHelper.unsubscribe(onboardDisposable);
+    onboardDisposable = DisposableHelper.dispose(onboardDisposable);
     onboardDisposable = lockInfoInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

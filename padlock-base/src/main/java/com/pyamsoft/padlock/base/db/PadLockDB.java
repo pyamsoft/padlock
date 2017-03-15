@@ -38,9 +38,9 @@ public interface PadLockDB {
   @CheckResult @NonNull Observable<Integer> updateWhitelist(boolean whitelist,
       @NonNull String packageName, @NonNull String activityName);
 
-  @NonNull @CheckResult
-  Observable<PadLockEntry.WithPackageActivityName> queryWithPackageActivityName(
-      @NonNull String packageName, @NonNull String activityName);
+  //@NonNull @CheckResult
+  //Observable<PadLockEntry.WithPackageActivityName> queryWithPackageActivityName(
+  //    @NonNull String packageName, @NonNull String activityName);
 
   /**
    * Get either the package with specific name of the PACKAGE entry
@@ -67,5 +67,5 @@ public interface PadLockDB {
 
   @NonNull @CheckResult Observable<Integer> deleteAll();
 
-  void deleteDatabase();
+  @NonNull @CheckResult Observable<Boolean> deleteDatabase();
 }

@@ -48,15 +48,15 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    lockedEntryDisposable = DisposableHelper.unsubscribe(lockedEntryDisposable);
-    recheckDisposable = DisposableHelper.unsubscribe(recheckDisposable);
-    serviceBus = DisposableHelper.unsubscribe(serviceBus);
-    recheckBus = DisposableHelper.unsubscribe(recheckBus);
+    lockedEntryDisposable = DisposableHelper.dispose(lockedEntryDisposable);
+    recheckDisposable = DisposableHelper.dispose(recheckDisposable);
+    serviceBus = DisposableHelper.dispose(serviceBus);
+    recheckBus = DisposableHelper.dispose(recheckBus);
     interactor.cleanup();
   }
 
   public void registerOnBus(@NonNull ServiceCallback callback) {
-    serviceBus = DisposableHelper.unsubscribe(serviceBus);
+    serviceBus = DisposableHelper.dispose(serviceBus);
     serviceBus = EventBus.get()
         .listen(ServiceEvent.class)
         .subscribeOn(getSubscribeScheduler())
@@ -75,7 +75,7 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
           }
         }, throwable -> Timber.e(throwable, "onError service bus"));
 
-    recheckBus = DisposableHelper.unsubscribe(recheckBus);
+    recheckBus = DisposableHelper.dispose(recheckBus);
     recheckBus = EventBus.get()
         .listen(RecheckEvent.class)
         .subscribeOn(getSubscribeScheduler())
@@ -86,7 +86,7 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   public void processActiveApplicationIfMatching(@NonNull String packageName,
       @NonNull String className, @NonNull ProcessCallback callback) {
-    recheckDisposable = DisposableHelper.unsubscribe(recheckDisposable);
+    recheckDisposable = DisposableHelper.dispose(recheckDisposable);
     recheckDisposable = interactor.processActiveIfMatching(packageName, className)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -103,7 +103,7 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
       @NonNull RecheckStatus forcedRecheck, @NonNull ProcessCallback callback) {
-    lockedEntryDisposable = DisposableHelper.unsubscribe(lockedEntryDisposable);
+    lockedEntryDisposable = DisposableHelper.dispose(lockedEntryDisposable);
     lockedEntryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

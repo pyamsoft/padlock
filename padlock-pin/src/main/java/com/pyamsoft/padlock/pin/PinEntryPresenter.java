@@ -42,14 +42,14 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    pinCheckDisposable = DisposableHelper.unsubscribe(pinCheckDisposable);
-    pinEntryDisposable = DisposableHelper.unsubscribe(pinEntryDisposable);
+    pinCheckDisposable = DisposableHelper.dispose(pinCheckDisposable);
+    pinEntryDisposable = DisposableHelper.dispose(pinEntryDisposable);
   }
 
   public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
       @NonNull String hint, @NonNull SubmitCallback callback) {
     Timber.d("Attempt PIN submission");
-    pinEntryDisposable = DisposableHelper.unsubscribe(pinEntryDisposable);
+    pinEntryDisposable = DisposableHelper.dispose(pinEntryDisposable);
     pinEntryDisposable = interactor.submitPin(currentAttempt, reEntryAttempt, hint)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -68,7 +68,7 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   public void checkMasterPinPresent(@NonNull MasterPinStatusCallback callback) {
     Timber.d("Check if we have a master");
-    pinCheckDisposable = DisposableHelper.unsubscribe(pinCheckDisposable);
+    pinCheckDisposable = DisposableHelper.dispose(pinCheckDisposable);
     pinCheckDisposable = interactor.hasMasterPin()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
