@@ -50,12 +50,12 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    confirmedDisposable = DisposableHelper.unsubscribe(confirmedDisposable);
-    applicationInstallDisposable = DisposableHelper.unsubscribe(applicationInstallDisposable);
+    confirmedDisposable = DisposableHelper.dispose(confirmedDisposable);
+    applicationInstallDisposable = DisposableHelper.dispose(applicationInstallDisposable);
   }
 
   public void setApplicationInstallReceiverState() {
-    applicationInstallDisposable = DisposableHelper.unsubscribe(applicationInstallDisposable);
+    applicationInstallDisposable = DisposableHelper.dispose(applicationInstallDisposable);
     applicationInstallDisposable = interactor.isInstallListenerEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -69,7 +69,7 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void registerOnBus(@NonNull ClearCallback callback) {
-    confirmedDisposable = DisposableHelper.unsubscribe(confirmedDisposable);
+    confirmedDisposable = DisposableHelper.dispose(confirmedDisposable);
     confirmedDisposable = EventBus.get()
         .listen(ConfirmEvent.class)
         .flatMap(new Function<ConfirmEvent, ObservableSource<ConfirmEvent.Type>>() {

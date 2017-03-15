@@ -44,10 +44,10 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    postUnlockDisposable = DisposableHelper.unsubscribe(postUnlockDisposable);
-    unlockDisposable = DisposableHelper.unsubscribe(unlockDisposable);
-    lockDisposable = DisposableHelper.unsubscribe(lockDisposable);
-    hintDisposable = DisposableHelper.unsubscribe(hintDisposable);
+    postUnlockDisposable = DisposableHelper.dispose(postUnlockDisposable);
+    unlockDisposable = DisposableHelper.dispose(unlockDisposable);
+    lockDisposable = DisposableHelper.dispose(lockDisposable);
+    hintDisposable = DisposableHelper.dispose(hintDisposable);
   }
 
   public void resetFailCount() {
@@ -55,7 +55,7 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void displayLockedHint(@NonNull LockHintCallback callback) {
-    hintDisposable = DisposableHelper.unsubscribe(hintDisposable);
+    hintDisposable = DisposableHelper.dispose(hintDisposable);
     hintDisposable = interactor.getHint()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -65,7 +65,7 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   public void lockEntry(@NonNull String packageName, @NonNull String activityName,
       @NonNull LockCallback callback) {
-    lockDisposable = DisposableHelper.unsubscribe(lockDisposable);
+    lockDisposable = DisposableHelper.dispose(lockDisposable);
     lockDisposable = interactor.incrementAndGetFailCount(packageName, activityName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -85,7 +85,7 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
   public void submit(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, @NonNull String currentAttempt,
       @NonNull LockSubmitCallback callback) {
-    unlockDisposable = DisposableHelper.unsubscribe(unlockDisposable);
+    unlockDisposable = DisposableHelper.dispose(unlockDisposable);
     unlockDisposable =
         interactor.submitPin(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
             .subscribeOn(getSubscribeScheduler())
@@ -106,7 +106,7 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
   public void postUnlock(@NonNull String packageName, @NonNull String activityName,
       @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
       long ignoreTime, @NonNull PostUnlockCallback callback) {
-    postUnlockDisposable = DisposableHelper.unsubscribe(postUnlockDisposable);
+    postUnlockDisposable = DisposableHelper.dispose(postUnlockDisposable);
     postUnlockDisposable =
         interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
             shouldExclude, ignoreTime)

@@ -40,12 +40,12 @@ class LockScreenPresenter extends LockTypePresenter {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    displayNameDisposable = DisposableHelper.unsubscribe(displayNameDisposable);
-    ignoreTimeDisposable = DisposableHelper.unsubscribe(ignoreTimeDisposable);
+    displayNameDisposable = DisposableHelper.dispose(displayNameDisposable);
+    ignoreTimeDisposable = DisposableHelper.dispose(ignoreTimeDisposable);
   }
 
   public void createWithDefaultIgnoreTime(@NonNull IgnoreTimeCallback callback) {
-    ignoreTimeDisposable = DisposableHelper.unsubscribe(ignoreTimeDisposable);
+    ignoreTimeDisposable = DisposableHelper.dispose(ignoreTimeDisposable);
     ignoreTimeDisposable = interactor.getDefaultIgnoreTime()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -55,7 +55,7 @@ class LockScreenPresenter extends LockTypePresenter {
 
   public void loadDisplayNameFromPackage(@NonNull String packageName,
       @NonNull DisplayNameLoadCallback callback) {
-    displayNameDisposable = DisposableHelper.unsubscribe(displayNameDisposable);
+    displayNameDisposable = DisposableHelper.dispose(displayNameDisposable);
     displayNameDisposable = interactor.getDisplayName(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

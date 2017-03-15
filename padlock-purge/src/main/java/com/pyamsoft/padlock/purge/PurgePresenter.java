@@ -49,13 +49,13 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
   @Override protected void onUnbind() {
     super.onUnbind();
     compositeDisposable.clear();
-    retrievalDisposable = DisposableHelper.unsubscribe(retrievalDisposable);
-    purgeBus = DisposableHelper.unsubscribe(purgeBus);
-    purgeAllBus = DisposableHelper.unsubscribe(purgeAllBus);
+    retrievalDisposable = DisposableHelper.dispose(retrievalDisposable);
+    purgeBus = DisposableHelper.dispose(purgeBus);
+    purgeAllBus = DisposableHelper.dispose(purgeAllBus);
   }
 
   public void registerOnBus(@NonNull PurgeCallback callback) {
-    purgeBus = DisposableHelper.unsubscribe(purgeBus);
+    purgeBus = DisposableHelper.dispose(purgeBus);
     purgeBus = EventBus.get()
         .listen(PurgeEvent.class)
         .subscribeOn(getSubscribeScheduler())
@@ -63,7 +63,7 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
         .subscribe(purgeEvent -> callback.purge(purgeEvent.packageName()),
             throwable -> Timber.e(throwable, "onError purge single"));
 
-    purgeAllBus = DisposableHelper.unsubscribe(purgeAllBus);
+    purgeAllBus = DisposableHelper.dispose(purgeAllBus);
     purgeAllBus = EventBus.get()
         .listen(PurgeAllEvent.class)
         .subscribeOn(getSubscribeScheduler())
@@ -73,7 +73,7 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void retrieveStaleApplications(@NonNull RetrievalCallback callback, boolean forceRefresh) {
-    retrievalDisposable = DisposableHelper.unsubscribe(retrievalDisposable);
+    retrievalDisposable = DisposableHelper.dispose(retrievalDisposable);
     retrievalDisposable = interactor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

@@ -53,15 +53,15 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    systemVisibleDisposable = DisposableHelper.unsubscribe(systemVisibleDisposable);
-    onboardDisposable = DisposableHelper.unsubscribe(onboardDisposable);
-    fabStateDisposable = DisposableHelper.unsubscribe(fabStateDisposable);
-    populateListDisposable = DisposableHelper.unsubscribe(populateListDisposable);
+    systemVisibleDisposable = DisposableHelper.dispose(systemVisibleDisposable);
+    onboardDisposable = DisposableHelper.dispose(onboardDisposable);
+    fabStateDisposable = DisposableHelper.dispose(fabStateDisposable);
+    populateListDisposable = DisposableHelper.dispose(populateListDisposable);
     compositeDisposable.clear();
   }
 
   public void populateList(@NonNull PopulateListCallback callback, boolean forceRefresh) {
-    populateListDisposable = DisposableHelper.unsubscribe(populateListDisposable);
+    populateListDisposable = DisposableHelper.dispose(populateListDisposable);
     populateListDisposable = lockListInteractor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -73,7 +73,7 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void setFABStateFromPreference(@NonNull FABStateCallback callback) {
-    fabStateDisposable = DisposableHelper.unsubscribe(fabStateDisposable);
+    fabStateDisposable = DisposableHelper.dispose(fabStateDisposable);
     fabStateDisposable = stateInteractor.isServiceEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -95,7 +95,7 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void setSystemVisibilityFromPreference(@NonNull SystemVisibilityCallback callback) {
-    systemVisibleDisposable = DisposableHelper.unsubscribe(systemVisibleDisposable);
+    systemVisibleDisposable = DisposableHelper.dispose(systemVisibleDisposable);
     systemVisibleDisposable = lockListInteractor.isSystemVisible()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -109,7 +109,7 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
   }
 
   public void showOnBoarding(@NonNull OnboardingCallback callback) {
-    onboardDisposable = DisposableHelper.unsubscribe(onboardDisposable);
+    onboardDisposable = DisposableHelper.dispose(onboardDisposable);
     onboardDisposable = lockListInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

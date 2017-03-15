@@ -83,7 +83,7 @@ import timber.log.Timber;
     final Uri data = intent.getData();
     final String packageName = data.getSchemeSpecificPart();
 
-    notification = DisposableHelper.unsubscribe(notification);
+    notification = DisposableHelper.dispose(notification);
     notification = packageManagerWrapper.loadPackageLabel(packageName)
         .subscribeOn(subScheduler)
         .observeOn(obsScheduler)
@@ -122,7 +122,7 @@ import timber.log.Timber;
   public void unregister() {
     if (registered) {
       appContext.unregisterReceiver(this);
-      notification = DisposableHelper.unsubscribe(notification);
+      notification = DisposableHelper.dispose(notification);
       registered = false;
     }
   }

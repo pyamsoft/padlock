@@ -41,11 +41,11 @@ public class AppIconLoaderPresenter extends SchedulerPresenter<Presenter.Empty> 
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    loadIconDisposable = DisposableHelper.unsubscribe(loadIconDisposable);
+    loadIconDisposable = DisposableHelper.dispose(loadIconDisposable);
   }
 
   public void loadApplicationIcon(@NonNull String packageName, @NonNull LoadCallback callback) {
-    loadIconDisposable = DisposableHelper.unsubscribe(loadIconDisposable);
+    loadIconDisposable = DisposableHelper.dispose(loadIconDisposable);
     loadIconDisposable = interactor.loadPackageIcon(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

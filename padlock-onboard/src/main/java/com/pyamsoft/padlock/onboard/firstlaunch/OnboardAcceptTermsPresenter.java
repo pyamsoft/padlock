@@ -40,11 +40,11 @@ class OnboardAcceptTermsPresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    termsDisposable = DisposableHelper.unsubscribe(termsDisposable);
+    termsDisposable = DisposableHelper.dispose(termsDisposable);
   }
 
   public void acceptUsageTerms(@NonNull UsageTermsCallback callback) {
-    termsDisposable = DisposableHelper.unsubscribe(termsDisposable);
+    termsDisposable = DisposableHelper.dispose(termsDisposable);
     termsDisposable = interactor.agreeToTerms()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

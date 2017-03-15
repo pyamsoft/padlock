@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
+import com.squareup.sqldelight.SqlDelightStatement;
 import hu.akarnokd.rxjava.interop.RxJavaInterop;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -51,7 +52,7 @@ class PadLockDBImpl implements PadLockDB {
   }
 
   @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
-    dbOpenDisposable = DisposableHelper.unsubscribe(dbOpenDisposable);
+    dbOpenDisposable = DisposableHelper.dispose(dbOpenDisposable);
     // After a 1 minute timeout, close the DB
     dbOpenDisposable =
         Observable.defer(() -> Observable.timer(1, TimeUnit.MINUTES)).subscribe(delay -> {
@@ -66,8 +67,8 @@ class PadLockDBImpl implements PadLockDB {
       boolean whitelist) {
     return Observable.fromCallable(() -> {
       final PadLockEntry entry =
-          PadLockEntry.CREATOR.create(packageName, activityName, lockCode, lockUntilTime,
-              ignoreUntilTime, isSystem, whitelist);
+          PadLockEntry.create(packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime,
+              isSystem, whitelist);
       if (PadLockEntry.isEmpty(entry)) {
         throw new RuntimeException("Cannot insert EMPTY entry");
       }
@@ -128,18 +129,21 @@ class PadLockDBImpl implements PadLockDB {
     });
   }
 
-  @Override @NonNull @CheckResult
-  public Observable<PadLockEntry.WithPackageActivityName> queryWithPackageActivityName(
-      final @NonNull String packageName, final @NonNull String activityName) {
-    return Observable.defer(() -> {
-      Timber.i("DB: QUERY PACKAGE ACTIVITY");
-      openDatabase();
-      return RxJavaInterop.toV2Observable(briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
-          PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME, packageName, activityName)
-          .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_MAPPER::map,
-              PadLockEntry.WithPackageActivityName.empty()));
-    });
-  }
+  //@Override @NonNull @CheckResult
+  //public Observable<PadLockEntry.WithPackageActivityName> queryWithPackageActivityName(
+  //    final @NonNull String packageName, final @NonNull String activityName) {
+  //  return Observable.defer(() -> {
+  //    Timber.i("DB: QUERY PACKAGE ACTIVITY");
+  //    openDatabase();
+  //
+  //    SqlDelightStatement statement =
+  //        PadLockEntry.withPackageActivityName(packageName, activityName);
+  //    return RxJavaInterop.toV2Observable(
+  //        briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
+  //            .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_MAPPER::map,
+  //                PadLockEntry.WithPackageActivityName.empty()));
+  //  });
+  //}
 
   /**
    * Get either the package with specific name of the PACKAGE entry
@@ -157,12 +161,13 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT");
       openDatabase();
-      return RxJavaInterop.toV2Observable(briteDatabase.createQuery(PadLockEntry.TABLE_NAME,
-          PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT, packageName,
-          PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName, PadLockEntry.PACKAGE_ACTIVITY_NAME,
-          activityName)
-          .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER::map,
-              PadLockEntry.EMPTY));
+
+      SqlDelightStatement statement =
+          PadLockEntry.withPackageActivityNameDefault(packageName, activityName);
+      return RxJavaInterop.toV2Observable(
+          briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
+              .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER::map,
+                  PadLockEntry.EMPTY));
     });
   }
 
@@ -172,9 +177,11 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: QUERY PACKAGE");
       openDatabase();
+
+      SqlDelightStatement statement = PadLockEntry.withPackageName(packageName);
       return RxJavaInterop.toV2Observable(
-          briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.WITH_PACKAGE_NAME,
-              packageName).mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map));
+          briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
+              .mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map));
     });
   }
 
@@ -182,8 +189,10 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.defer(() -> {
       Timber.i("DB: QUERY ALL");
       openDatabase();
+
+      SqlDelightStatement statement = PadLockEntry.queryAll();
       return RxJavaInterop.toV2Observable(
-          briteDatabase.createQuery(PadLockEntry.TABLE_NAME, PadLockEntry.ALL_ENTRIES)
+          briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
               .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map));
     });
   }
@@ -217,15 +226,18 @@ class PadLockDBImpl implements PadLockDB {
     return Observable.fromCallable(() -> {
       Timber.i("DB: DELETE ALL");
       briteDatabase.execute(PadLockEntry.DELETE_ALL);
-      dbOpenDisposable = DisposableHelper.unsubscribe(dbOpenDisposable);
+      dbOpenDisposable = DisposableHelper.dispose(dbOpenDisposable);
       briteDatabase.close();
       deleteDatabase();
       return 1;
     });
   }
 
-  @Override public void deleteDatabase() {
-    openHelper.deleteDatabase();
+  @NonNull @Override public Observable<Boolean> deleteDatabase() {
+    return Observable.fromCallable(() -> {
+      openHelper.deleteDatabase();
+      return Boolean.TRUE;
+    });
   }
 
   @SuppressWarnings("WeakerAccess") static class PadLockOpenHelper extends SQLiteOpenHelper {

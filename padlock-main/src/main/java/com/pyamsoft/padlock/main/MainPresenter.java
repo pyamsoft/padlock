@@ -38,7 +38,7 @@ class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
   }
 
   public void showOnboardingOrDefault(@NonNull OnboardingCallback callback) {
-    onboardingDisposable = DisposableHelper.unsubscribe(onboardingDisposable);
+    onboardingDisposable = DisposableHelper.dispose(onboardingDisposable);
     onboardingDisposable = interactor.isOnboardingComplete()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -53,7 +53,7 @@ class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
 
   @Override protected void onUnbind() {
     super.onUnbind();
-    onboardingDisposable = DisposableHelper.unsubscribe(onboardingDisposable);
+    onboardingDisposable = DisposableHelper.dispose(onboardingDisposable);
   }
 
   interface OnboardingCallback {

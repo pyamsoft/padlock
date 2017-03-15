@@ -40,11 +40,11 @@ public class LockTypePresenter extends SchedulerPresenter<Presenter.Empty> {
 
   @CallSuper @Override protected void onUnbind() {
     super.onUnbind();
-    typeDisposable = DisposableHelper.unsubscribe(typeDisposable);
+    typeDisposable = DisposableHelper.dispose(typeDisposable);
   }
 
   public void initializeLockScreenType(@NonNull LockScreenTypeCallback callback) {
-    typeDisposable = DisposableHelper.unsubscribe(typeDisposable);
+    typeDisposable = DisposableHelper.dispose(typeDisposable);
     typeDisposable = interactor.getLockScreenType()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

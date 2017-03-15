@@ -51,11 +51,7 @@ import timber.log.Timber;
   }
 
   @NonNull @CheckResult public Observable<Boolean> clearDatabase() {
-    return padLockDB.deleteAll().map(deleteResult -> {
-      Timber.d("Database is cleared: %s", deleteResult);
-      padLockDB.deleteDatabase();
-
-      // TODO just return something valid
+    return padLockDB.deleteAll().flatMap(result -> padLockDB.deleteDatabase()).map(aBoolean -> {
       lockListInteractor.clearCached();
       lockInfoInteractor.clearCached();
       purgeInteractor.clearCached();

@@ -19,8 +19,10 @@ package com.pyamsoft.padlock.model.sql;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 import com.squareup.sqldelight.RowMapper;
+import com.squareup.sqldelight.SqlDelightStatement;
 
 @AutoValue public abstract class PadLockEntry implements PadLockEntryModel {
 
@@ -34,16 +36,45 @@ import com.squareup.sqldelight.RowMapper;
       EMPTY = new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false);
   @SuppressWarnings("StaticInitializerReferencesSubClass") @NonNull
   private static final Factory<PadLockEntry> FACTORY = new Factory<>(AutoValue_PadLockEntry::new);
-  @NonNull public static final Creator<PadLockEntry> CREATOR = FACTORY.creator;
   @NonNull public static final RowMapper<AllEntries> ALL_ENTRIES_MAPPER =
       FACTORY.all_entriesMapper(AutoValue_PadLockEntry_AllEntries::new);
   @NonNull public static final RowMapper<WithPackageName> WITH_PACKAGE_NAME_MAPPER =
       FACTORY.with_package_nameMapper(AutoValue_PadLockEntry_WithPackageName::new);
   @NonNull public static final Mapper<PadLockEntry> WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER =
       FACTORY.with_package_activity_name_defaultMapper();
-  @NonNull public static final RowMapper<WithPackageActivityName>
-      WITH_PACKAGE_ACTIVITY_NAME_MAPPER =
-      FACTORY.with_package_activity_nameMapper(AutoValue_PadLockEntry_WithPackageActivityName::new);
+  //@NonNull public static final RowMapper<WithPackageActivityName>
+  //    WITH_PACKAGE_ACTIVITY_NAME_MAPPER =
+  //    FACTORY.with_package_activity_nameMapper(AutoValue_PadLockEntry_WithPackageActivityName::new);
+
+  //@CheckResult @NonNull
+  //public static SqlDelightStatement withPackageActivityName(@NonNull String packageName,
+  //    @NonNull String activityName) {
+  //  return FACTORY.with_package_activity_name(packageName, activityName);
+  //}
+
+  @CheckResult @NonNull
+  public static SqlDelightStatement withPackageActivityNameDefault(@NonNull String packageName,
+      @NonNull String activityName) {
+    return FACTORY.with_package_activity_name_default(packageName, PACKAGE_ACTIVITY_NAME,
+        activityName, PACKAGE_ACTIVITY_NAME, activityName);
+  }
+
+  @CheckResult @NonNull
+  public static SqlDelightStatement withPackageName(@NonNull String packageName) {
+    return FACTORY.with_package_name(packageName);
+  }
+
+  @CheckResult @NonNull public static SqlDelightStatement queryAll() {
+    return FACTORY.all_entries();
+  }
+
+  @CheckResult @NonNull
+  public static PadLockEntry create(@NonNull String packageName, @NonNull String activityName,
+      @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem,
+      boolean whitelist) {
+    return FACTORY.creator.create(packageName, activityName, lockCode, lockUntilTime,
+        ignoreUntilTime, isSystem, whitelist);
+  }
 
   @CheckResult public static boolean isEmpty(@NonNull PadLockEntry entry) {
     return PACKAGE_EMPTY.equals(entry.packageName()) && ACTIVITY_EMPTY.equals(entry.activityName());
@@ -87,19 +118,19 @@ import com.squareup.sqldelight.RowMapper;
 
   }
 
-  @AutoValue public static abstract class WithPackageActivityName
-      implements With_package_activity_nameModel {
-
-    @NonNull @CheckResult public static WithPackageActivityName empty() {
-      return new AutoValue_PadLockEntry_WithPackageActivityName(PACKAGE_EMPTY, ACTIVITY_EMPTY, null,
-          0, 0, false);
-    }
-
-    @CheckResult public static boolean isEmpty(@NonNull WithPackageActivityName entry) {
-      return PACKAGE_EMPTY.equals(entry.packageName()) && ACTIVITY_EMPTY.equals(
-          entry.activityName());
-    }
-  }
+  //@AutoValue public static abstract class WithPackageActivityName
+  //    implements With_package_activity_nameModel {
+  //
+  //  @NonNull @CheckResult public static WithPackageActivityName empty() {
+  //    return new AutoValue_PadLockEntry_WithPackageActivityName(PACKAGE_EMPTY, ACTIVITY_EMPTY, null,
+  //        0, 0, false);
+  //  }
+  //
+  //  @CheckResult public static boolean isEmpty(@NonNull WithPackageActivityName entry) {
+  //    return PACKAGE_EMPTY.equals(entry.packageName()) && ACTIVITY_EMPTY.equals(
+  //        entry.activityName());
+  //  }
+  //}
 
   @SuppressWarnings("WeakerAccess") public static class InsertManager {
     @NonNull private final Insert_entry insertEntry;
