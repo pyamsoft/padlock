@@ -46,11 +46,10 @@ import timber.log.Timber;
   @NonNull @CheckResult public Observable<PinEntryEvent> submitPin(@NonNull String currentAttempt,
       @NonNull String reEntryAttempt, @NonNull String hint) {
     return getMasterPin().flatMap(masterPin -> {
-      String pin = masterPin.item();
-      if (pin == null) {
-        return createPin(currentAttempt, reEntryAttempt, hint);
+      if (masterPin.isPresent()) {
+        return clearPin(masterPin.item(), currentAttempt);
       } else {
-        return clearPin(pin, currentAttempt);
+        return createPin(currentAttempt, reEntryAttempt, hint);
       }
     });
   }
