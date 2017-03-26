@@ -24,10 +24,6 @@ import com.google.auto.value.AutoValue;
     return new AutoValue_ActivityEntry.Builder();
   }
 
-  public static Builder builder(final ActivityEntry entry) {
-    return new AutoValue_ActivityEntry.Builder(entry);
-  }
-
   public abstract String name();
 
   public abstract LockState lockState();

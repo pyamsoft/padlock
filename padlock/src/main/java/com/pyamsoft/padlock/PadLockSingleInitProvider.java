@@ -27,8 +27,8 @@ import com.pyamsoft.padlock.lock.LockScreenActivity;
 import com.pyamsoft.padlock.lock.SHA256LockHelper;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.service.RecheckService;
-import com.pyamsoft.pydroid.BuildConfigChecker;
 import com.pyamsoft.pydroid.about.Licenses;
+import com.pyamsoft.pydroid.helper.BuildConfigChecker;
 import com.pyamsoft.pydroid.ui.SingleInitContentProvider;
 
 public class PadLockSingleInitProvider extends SingleInitContentProvider {

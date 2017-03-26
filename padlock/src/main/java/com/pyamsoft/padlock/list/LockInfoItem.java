@@ -50,7 +50,7 @@ class LockInfoItem extends GenericAbstractItem<ActivityEntry, LockInfoItem, Lock
 
   @CheckResult @NonNull LockInfoItem copyWithNewLockState(@NonNull LockState newState) {
     return new LockInfoItem(packageName,
-        ActivityEntry.builder(getModel()).lockState(newState).build());
+        ActivityEntry.builder().name(getModel().name()).lockState(newState).build());
   }
 
   @Override public int getType() {

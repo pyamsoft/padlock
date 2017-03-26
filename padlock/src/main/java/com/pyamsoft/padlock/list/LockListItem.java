@@ -55,7 +55,12 @@ public class LockListItem
   }
 
   @CheckResult @NonNull LockListItem copyWithNewLockState(boolean locked) {
-    return new LockListItem(AppEntry.builder(getModel()).locked(locked).build());
+    return new LockListItem(AppEntry.builder()
+        .name(getModel().name())
+        .packageName(getModel().packageName())
+        .system(getModel().system())
+        .locked(locked)
+        .build());
   }
 
   @Override public int getType() {
