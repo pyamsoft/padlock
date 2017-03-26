@@ -24,10 +24,6 @@ import com.google.auto.value.AutoValue;
     return new AutoValue_AppEntry.Builder();
   }
 
-  public static Builder builder(final AppEntry entry) {
-    return new AutoValue_AppEntry.Builder(entry);
-  }
-
   public abstract String name();
 
   public abstract String packageName();

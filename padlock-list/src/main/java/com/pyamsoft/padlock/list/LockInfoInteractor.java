@@ -108,8 +108,10 @@ import timber.log.Timber;
               final ActivityEntry activityEntry = activityEntries.get(i);
               if (activityEntry.name().equals(name)) {
                 Timber.d("Update cached entry: %s %s", name, lockState);
-                activityEntries.set(i,
-                    ActivityEntry.builder(activityEntry).lockState(lockState).build());
+                activityEntries.set(i, ActivityEntry.builder()
+                    .name(activityEntry.name())
+                    .lockState(lockState)
+                    .build());
               }
             }
             return activityEntries;

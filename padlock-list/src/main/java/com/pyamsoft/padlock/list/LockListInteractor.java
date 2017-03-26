@@ -91,7 +91,12 @@ import timber.log.Timber;
           final AppEntry appEntry = appEntries.get(i);
           if (appEntry.name().equals(name) && appEntry.packageName().equals(packageName)) {
             Timber.d("Update cached entry: %s %s", name, packageName);
-            appEntries.set(i, AppEntry.builder(appEntry).locked(newLockState).build());
+            appEntries.set(i, AppEntry.builder()
+                .name(appEntry.name())
+                .packageName(appEntry.packageName())
+                .system(appEntry.system())
+                .locked(newLockState)
+                .build());
           }
         }
         return appEntries;
@@ -117,11 +122,6 @@ import timber.log.Timber;
         .filter(OptionalWrapper::isPresent)
         .flatMap(wrapper -> {
           ApplicationInfo info = wrapper.item();
-          if (info == null) {
-            throw new IllegalStateException(
-                "ApplicationInfo object is NULL after filter, this should not happen.");
-          }
-
           return getActivityListForApplication(info).toList().map(activityList -> {
             if (activityList.isEmpty()) {
               return "";
