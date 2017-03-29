@@ -33,14 +33,14 @@ buildscript {
     heapSize = "2g"
 
     retrolambda = "2.5.1"
-    supportLib = "25.3.0"
+    supportLib = "25.3.1"
     firebase = "10.2.1"
     leakCanary = "1.5"
-    pydroid = "8.3.0"
+    pydroid = "8.3.4"
     autoValue = "1.4"
     sqlbrite = "1.1.1"
-    sqldelight = "0.6.0"
-    dagger = "2.9"
+    sqldelight = "0.6.1"
+    dagger = "2.10"
     patternLock = "2.0.4"
   }
 
