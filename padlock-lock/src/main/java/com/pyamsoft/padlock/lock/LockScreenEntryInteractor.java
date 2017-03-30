@@ -66,7 +66,8 @@ import timber.log.Timber;
       Timber.d("Check entry is not locked: %d", lockUntilTime);
       if (System.currentTimeMillis() < lockUntilTime) {
         Timber.e("Entry is still locked. Fail unlock");
-        return null;
+        final String needToDoThisOrLambdaComplains = null;
+        return OptionalWrapper.ofNullable(needToDoThisOrLambdaComplains);
       }
 
       final OptionalWrapper<String> pin;
@@ -79,12 +80,11 @@ import timber.log.Timber;
       }
       return pin;
     }).flatMap(pinOptional -> {
-      String pin = pinOptional.item();
-      if (pin == null) {
+      if (pinOptional.isPresent()) {
+        return LockHelper.get().checkSubmissionAttempt(currentAttempt, pinOptional.item());
+      } else {
         Timber.e("Cannot submit against PIN which is NULL");
         return Observable.just(false);
-      } else {
-        return LockHelper.get().checkSubmissionAttempt(currentAttempt, pin);
       }
     });
   }
