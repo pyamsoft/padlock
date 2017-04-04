@@ -190,18 +190,17 @@ import timber.log.Timber;
 
   @NonNull @CheckResult public Observable<String> getHint() {
     return pinInteractor.getHint().map(pinOptional -> {
-      String hint = pinOptional.item();
       String result;
-      if (hint == null) {
+      if (pinOptional.isPresent()) {
         result = "";
       } else {
-        result = hint;
+        result = pinOptional.item();
       }
       return result;
     });
   }
 
-  static class TimePair {
+  @SuppressWarnings("WeakerAccess") static class TimePair {
     final long currentTime;
     final long lockUntilTime;
 
