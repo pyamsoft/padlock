@@ -186,13 +186,12 @@ public class MainActivity extends TamperActivity
 
   @Override protected void onStart() {
     super.onStart();
-    presenter.bindView(this);
     presenter.showOnboardingOrDefault(this);
   }
 
   @Override protected void onStop() {
     super.onStop();
-    presenter.unbindView();
+    presenter.stop();
   }
 
   @Override protected void onPause() {
@@ -221,6 +220,7 @@ public class MainActivity extends TamperActivity
 
   @Override protected void onDestroy() {
     super.onDestroy();
+    presenter.destroy();
     handler.removeCallbacksAndMessages(null);
     binding.drawerLayout.removeDrawerListener(drawerToggle);
     binding.unbind();
@@ -357,15 +357,13 @@ public class MainActivity extends TamperActivity
   }
 
   @Nullable @Override protected AdSource provideOnlineAdSource() {
-    OnlineAdSource source =  new OnlineAdSource(R.string.banner_main_ad_id);
+    OnlineAdSource source = new OnlineAdSource(R.string.banner_main_ad_id);
     source.addTestAdIds("E1241303FDC266381AD6C9FF6FAD056B");
     return source;
   }
 
   private enum FragmentHasChanged {
-    NOT_CHANGED,
-    CHANGED_WITH_UP,
-    CHANGED_NO_UP,
+    NOT_CHANGED, CHANGED_WITH_UP, CHANGED_NO_UP,
   }
 }
 

@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.pin;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
@@ -28,7 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
+class PinEntryPresenter extends SchedulerPresenter {
 
   @NonNull private final PinEntryInteractor interactor;
   @NonNull private Disposable pinEntryDisposable = Disposables.empty();
@@ -40,8 +39,8 @@ class PinEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
     this.interactor = interactor;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     pinCheckDisposable = DisposableHelper.dispose(pinCheckDisposable);
     pinEntryDisposable = DisposableHelper.dispose(pinEntryDisposable);
   }

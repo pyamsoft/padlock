@@ -18,5 +18,5 @@ package com.pyamsoft.padlock.list;
 
 interface LockDatabaseWhitelistView extends LockDatabaseView {
 
-  void onDatabaseEntryWhitelisted(int position);
+  void onDatabaseEntryWhitelisted();
 }

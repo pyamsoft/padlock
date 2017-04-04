@@ -16,32 +16,36 @@
 
 package com.pyamsoft.padlock.model;
 
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
 @AutoValue public abstract class AppEntry {
 
-  public static Builder builder() {
+  @CheckResult @NonNull public static Builder builder() {
     return new AutoValue_AppEntry.Builder();
   }
 
-  public abstract String name();
+  @CheckResult @NonNull public abstract Builder toBuilder();
 
-  public abstract String packageName();
+  @CheckResult public abstract String name();
 
-  public abstract boolean system();
+  @CheckResult public abstract String packageName();
 
-  public abstract boolean locked();
+  @CheckResult public abstract boolean system();
+
+  @CheckResult public abstract boolean locked();
 
   @AutoValue.Builder public static abstract class Builder {
 
-    public abstract Builder name(String s);
+    @CheckResult public abstract Builder name(String s);
 
-    public abstract Builder packageName(String s);
+    @CheckResult public abstract Builder packageName(String s);
 
-    public abstract Builder system(boolean b);
+    @CheckResult public abstract Builder system(boolean b);
 
-    public abstract Builder locked(boolean b);
+    @CheckResult public abstract Builder locked(boolean b);
 
-    public abstract AppEntry build();
+    @CheckResult public abstract AppEntry build();
   }
 }

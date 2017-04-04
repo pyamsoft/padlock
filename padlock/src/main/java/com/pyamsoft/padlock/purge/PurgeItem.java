@@ -48,16 +48,18 @@ class PurgeItem extends GenericAbstractItem<String, PurgeItem, PurgeItem.ViewHol
 
   @Override public void unbindView(ViewHolder holder) {
     super.unbindView(holder);
-    holder.unbind();
+    holder.binding.itemPurgeName.setText(null);
   }
 
   @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
-    holder.bind(getModel());
+    holder.binding.itemPurgeName.setText(getModel());
   }
 
-  @SuppressWarnings("WeakerAccess") protected static class ItemFactory
-      implements ViewHolderFactory<ViewHolder> {
+  private static class ItemFactory implements ViewHolderFactory<ViewHolder> {
+    ItemFactory() {
+    }
+
     @Override public ViewHolder create(View v) {
       return new ViewHolder(v);
     }
@@ -65,19 +67,11 @@ class PurgeItem extends GenericAbstractItem<String, PurgeItem, PurgeItem.ViewHol
 
   static class ViewHolder extends RecyclerView.ViewHolder {
 
-    @NonNull private final AdapterItemPurgeBinding binding;
+    @NonNull final AdapterItemPurgeBinding binding;
 
     ViewHolder(View itemView) {
       super(itemView);
       binding = DataBindingUtil.bind(itemView);
-    }
-
-    void bind(@NonNull String packageName) {
-      binding.itemPurgeName.setText(packageName);
-    }
-
-    void unbind() {
-      binding.itemPurgeName.setText(null);
     }
   }
 }

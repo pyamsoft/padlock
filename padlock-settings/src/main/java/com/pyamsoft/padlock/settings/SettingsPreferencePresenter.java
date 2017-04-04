@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.model.event.ConfirmEvent;
 import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -33,7 +32,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
+class SettingsPreferencePresenter extends SchedulerPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final ApplicationInstallReceiver receiver;
   @SuppressWarnings("WeakerAccess") @NonNull final SettingsPreferenceInteractor interactor;
@@ -48,8 +47,8 @@ class SettingsPreferencePresenter extends SchedulerPresenter<Presenter.Empty> {
     this.receiver = receiver;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     confirmedDisposable = DisposableHelper.dispose(confirmedDisposable);
     applicationInstallDisposable = DisposableHelper.dispose(applicationInstallDisposable);
   }

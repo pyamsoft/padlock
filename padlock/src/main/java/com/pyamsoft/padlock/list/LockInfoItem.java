@@ -17,40 +17,42 @@
 package com.pyamsoft.padlock.list;
 
 import android.databinding.DataBindingUtil;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import com.mikepenz.fastadapter.items.GenericAbstractItem;
 import com.mikepenz.fastadapter.utils.ViewHolderFactory;
+import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
-import java.lang.ref.WeakReference;
+import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.List;
+import javax.inject.Inject;
 import timber.log.Timber;
 
-class LockInfoItem extends GenericAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>
+import static com.pyamsoft.padlock.model.LockState.DEFAULT;
+import static com.pyamsoft.padlock.model.LockState.LOCKED;
+import static com.pyamsoft.padlock.model.LockState.WHITELISTED;
+
+public class LockInfoItem
+    extends GenericAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>
     implements FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
   @NonNull private final String packageName;
+  private final boolean system;
+  @SuppressWarnings("WeakerAccess") @Inject LockInfoItemPresenter presenter;
 
-  LockInfoItem(@NonNull String packageName, @NonNull ActivityEntry entry) {
+  LockInfoItem(@NonNull String packageName, boolean system, @NonNull ActivityEntry entry) {
     super(entry);
     this.packageName = packageName;
-  }
+    this.system = system;
 
-  @NonNull @CheckResult String getName() {
-    return getModel().name();
-  }
-
-  @CheckResult @NonNull LockInfoItem copyWithNewLockState(@NonNull LockState newState) {
-    return new LockInfoItem(packageName,
-        ActivityEntry.builder().name(getModel().name()).lockState(newState).build());
+    Injector.get().provideComponent().plusLockInfoComponent().inject(this);
   }
 
   @Override public int getType() {
@@ -63,12 +65,102 @@ class LockInfoItem extends GenericAbstractItem<ActivityEntry, LockInfoItem, Lock
 
   @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
-    holder.bind(packageName, getModel());
+    // Remove any old binds
+    final RadioButton lockedButton;
+    switch (getModel().lockState()) {
+      case DEFAULT:
+        lockedButton = holder.binding.lockInfoRadioDefault;
+        break;
+      case WHITELISTED:
+        lockedButton = holder.binding.lockInfoRadioWhite;
+        break;
+      case LOCKED:
+        lockedButton = holder.binding.lockInfoRadioBlack;
+        break;
+      default:
+        throw new IllegalStateException("Illegal enum state");
+    }
+    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
+    lockedButton.setChecked(true);
+
+    final String entryName = getModel().name();
+    String activityName = entryName;
+    if (entryName.startsWith(packageName)) {
+      final String strippedPackageName = entryName.replace(packageName, "");
+      if (strippedPackageName.charAt(0) == '.') {
+        activityName = strippedPackageName;
+      }
+    }
+    holder.binding.lockInfoActivity.setText(activityName);
+
+    holder.binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener((radioGroup, i) -> {
+      final int id = radioGroup.getCheckedRadioButtonId();
+      Timber.d("Checked radio id: %d", id);
+      if (id == 0) {
+        Timber.e("No radiobutton is checked, set to default");
+        holder.binding.lockInfoRadioDefault.setChecked(true);
+      }
+    });
+
+    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener((buttonView, isChecked) -> {
+      if (isChecked) {
+        processModifyDatabaseEntry(holder, DEFAULT);
+      }
+    });
+
+    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener((buttonView, isChecked) -> {
+      if (isChecked) {
+        processModifyDatabaseEntry(holder, WHITELISTED);
+      }
+    });
+    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener((buttonView, isChecked) -> {
+      if (isChecked) {
+        processModifyDatabaseEntry(holder, LOCKED);
+      }
+    });
+  }
+
+  @SuppressWarnings("WeakerAccess") void processModifyDatabaseEntry(@NonNull ViewHolder viewHolder,
+      @NonNull LockState newLockState) {
+    presenter.modifyDatabaseEntry(getModel().lockState(), newLockState, packageName,
+        getModel().name(), null, system, new LockInfoItemPresenter.ModifyDatabaseCallback() {
+          @Override public void onDatabaseEntryError() {
+            AppUtil.onlyLoadOnceDialogFragment((FragmentActivity) viewHolder.itemView.getContext(),
+                new ErrorDialog(), "error");
+          }
+
+          private void updateModel(@NonNull LockState newState) {
+            withModel(getModel().toBuilder().lockState(newState).build());
+          }
+
+          @Override public void onDatabaseEntryWhitelisted() {
+            updateModel(WHITELISTED);
+            viewHolder.binding.lockInfoRadioWhite.setChecked(true);
+          }
+
+          @Override public void onDatabaseEntryCreated() {
+            updateModel(LOCKED);
+            viewHolder.binding.lockInfoRadioBlack.setChecked(true);
+          }
+
+          @Override public void onDatabaseEntryDeleted() {
+            updateModel(DEFAULT);
+            viewHolder.binding.lockInfoRadioDefault.setChecked(true);
+          }
+        });
   }
 
   @Override public void unbindView(ViewHolder holder) {
     super.unbindView(holder);
-    holder.unbind();
+    presenter.stop();
+    presenter.destroy();
+    holder.binding.lockInfoActivity.setText(null);
+    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
+    holder.binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener(null);
   }
 
   @Override public boolean filterAgainst(@NonNull String query) {
@@ -81,12 +173,6 @@ class LockInfoItem extends GenericAbstractItem<ActivityEntry, LockInfoItem, Lock
     return FACTORY;
   }
 
-  interface OnLockRadioCheckedChanged {
-
-    void call(int position, @NonNull String name, @NonNull LockState oldState,
-        @NonNull LockState newState);
-  }
-
   @SuppressWarnings("WeakerAccess") protected static class ItemFactory
       implements ViewHolderFactory<ViewHolder> {
     @Override public ViewHolder create(View v) {
@@ -96,108 +182,11 @@ class LockInfoItem extends GenericAbstractItem<ActivityEntry, LockInfoItem, Lock
 
   static final class ViewHolder extends RecyclerView.ViewHolder {
 
-    @NonNull private final AdapterItemLockinfoBinding binding;
-    @NonNull private WeakReference<ActivityEntry> weakEntry;
+    @NonNull final AdapterItemLockinfoBinding binding;
 
     ViewHolder(View itemView) {
       super(itemView);
       binding = DataBindingUtil.bind(itemView);
-      weakEntry = new WeakReference<>(null);
-    }
-
-    @CheckResult @NonNull AdapterItemLockinfoBinding getBinding() {
-      return binding;
-    }
-
-    void bind(@NonNull String packageName, @NonNull ActivityEntry entry) {
-      // Remove any old binds
-      final RadioButton lockedButton;
-      switch (entry.lockState()) {
-        case DEFAULT:
-          lockedButton = binding.lockInfoRadioDefault;
-          break;
-        case WHITELISTED:
-          lockedButton = binding.lockInfoRadioWhite;
-          break;
-        case LOCKED:
-          lockedButton = binding.lockInfoRadioBlack;
-          break;
-        default:
-          throw new IllegalStateException("Illegal enum state");
-      }
-      binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
-      binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
-      binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
-      lockedButton.setChecked(true);
-
-      final String entryName = entry.name();
-      String activityName = entryName;
-      if (entryName.startsWith(packageName)) {
-        final String strippedPackageName = entryName.replace(packageName, "");
-        if (strippedPackageName.charAt(0) == '.') {
-          activityName = strippedPackageName;
-        }
-      }
-      binding.lockInfoActivity.setText(activityName);
-
-      weakEntry.clear();
-      weakEntry = new WeakReference<>(entry);
-    }
-
-    void bind(@NonNull OnLockRadioCheckedChanged onCheckedChanged) {
-      binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener((radioGroup, i) -> {
-        final int id = radioGroup.getCheckedRadioButtonId();
-        Timber.d("Checked radio id: %d", id);
-        if (id == 0) {
-          Timber.e("No radiobutton is checked, set to default");
-          getBinding().lockInfoRadioDefault.setChecked(true);
-        }
-      });
-      binding.lockInfoRadioDefault.setOnCheckedChangeListener(
-          new OnRadioCheckChangedListener(getAdapterPosition(), weakEntry, onCheckedChanged,
-              LockState.DEFAULT));
-      binding.lockInfoRadioWhite.setOnCheckedChangeListener(
-          new OnRadioCheckChangedListener(getAdapterPosition(), weakEntry, onCheckedChanged,
-              LockState.WHITELISTED));
-      binding.lockInfoRadioBlack.setOnCheckedChangeListener(
-          new OnRadioCheckChangedListener(getAdapterPosition(), weakEntry, onCheckedChanged,
-              LockState.LOCKED));
-    }
-
-    void unbind() {
-      binding.lockInfoActivity.setText(null);
-      binding.lockInfoRadioBlack.setOnCheckedChangeListener(null);
-      binding.lockInfoRadioWhite.setOnCheckedChangeListener(null);
-      binding.lockInfoRadioDefault.setOnCheckedChangeListener(null);
-      binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener(null);
-      weakEntry.clear();
-    }
-
-    static class OnRadioCheckChangedListener implements CompoundButton.OnCheckedChangeListener {
-
-      private final int position;
-      @NonNull private final WeakReference<ActivityEntry> weakEntry;
-      @NonNull private final OnLockRadioCheckedChanged onCheckedChanged;
-      @NonNull private final LockState changeToState;
-
-      OnRadioCheckChangedListener(int position, @NonNull WeakReference<ActivityEntry> weakEntry,
-          @NonNull OnLockRadioCheckedChanged onCheckedChanged, @NonNull LockState changeToState) {
-        this.position = position;
-        this.weakEntry = weakEntry;
-        this.onCheckedChanged = onCheckedChanged;
-        this.changeToState = changeToState;
-      }
-
-      @Override public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-        if (b) {
-          final ActivityEntry entry = weakEntry.get();
-          if (entry != null) {
-            onCheckedChanged.call(position, entry.name(), entry.lockState(), changeToState);
-          } else {
-            Timber.e("Entry is NULL");
-          }
-        }
-      }
     }
   }
 }

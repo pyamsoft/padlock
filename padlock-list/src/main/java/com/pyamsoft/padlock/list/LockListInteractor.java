@@ -25,7 +25,6 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
 import io.reactivex.Observable;
@@ -38,70 +37,37 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import timber.log.Timber;
 
-@Singleton public class LockListInteractor extends LockCommonInteractor {
+@Singleton class LockListInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManagerWrapper;
-  @SuppressWarnings("WeakerAccess") @Nullable Single<List<AppEntry>> cachedEntriesObservable;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockListCacheInteractor cacheInteractor;
+  @NonNull private final PadLockDB padLockDB;
 
-  @Inject LockListInteractor(PadLockDB padLockDB,
-      @NonNull PackageManagerWrapper packageManagerWrapper,
-      @NonNull PadLockPreferences preferences) {
-    super(padLockDB);
+  @Inject LockListInteractor(@NonNull PadLockDB padLockDB,
+      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
+      @NonNull LockListCacheInteractor cacheInteractor) {
+    this.padLockDB = padLockDB;
     this.packageManagerWrapper = packageManagerWrapper;
     this.preferences = preferences;
-  }
-
-  @Override public void clearCached() {
-    cachedEntriesObservable = null;
+    this.cacheInteractor = cacheInteractor;
   }
 
   @CheckResult @NonNull public Observable<AppEntry> populateList(boolean forceRefresh) {
     return Single.defer(() -> {
       final Single<List<AppEntry>> dataSource;
-      if (cachedEntriesObservable == null || forceRefresh) {
+
+      Single<List<AppEntry>> cache = cacheInteractor.retrieve();
+      if (cache == null || forceRefresh) {
         Timber.d("Refresh into cache");
         dataSource = fetchFreshData().cache();
-        cachedEntriesObservable = dataSource;
+        cacheInteractor.cache(dataSource);
       } else {
         Timber.d("Fetch from cache");
-        dataSource = cachedEntriesObservable;
+        dataSource = cache;
       }
       return dataSource;
     }).toObservable().concatMap(Observable::fromIterable);
-  }
-
-  @NonNull @Override public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
-      @NonNull String packageName, @NonNull String activityName, @Nullable String code,
-      boolean system, boolean whitelist, boolean forceLock) {
-    return super.modifySingleDatabaseEntry(notInDatabase, packageName, activityName, code, system,
-        whitelist, forceLock).map(lockState -> {
-      updateCacheEntry(packageManagerWrapper.loadPackageLabel(packageName).blockingFirst(),
-          packageName, lockState == LockState.LOCKED);
-      return lockState;
-    });
-  }
-
-  @SuppressWarnings("WeakerAccess") void updateCacheEntry(@NonNull String name,
-      @NonNull String packageName, boolean newLockState) {
-    if (cachedEntriesObservable != null) {
-      cachedEntriesObservable = cachedEntriesObservable.map(appEntries -> {
-        final int size = appEntries.size();
-        for (int i = 0; i < size; ++i) {
-          final AppEntry appEntry = appEntries.get(i);
-          if (appEntry.name().equals(name) && appEntry.packageName().equals(packageName)) {
-            Timber.d("Update cached entry: %s %s", name, packageName);
-            appEntries.set(i, AppEntry.builder()
-                .name(appEntry.name())
-                .packageName(appEntry.packageName())
-                .system(appEntry.system())
-                .locked(newLockState)
-                .build());
-          }
-        }
-        return appEntries;
-      });
-    }
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Single<List<AppEntry>> fetchFreshData() {
@@ -192,7 +158,7 @@ import timber.log.Timber;
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
   Single<List<PadLockEntry.AllEntries>> getAppEntryList() {
-    return getPadLockDB().queryAll().first(Collections.emptyList());
+    return padLockDB.queryAll().first(Collections.emptyList());
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Pair<String, Boolean> findAppEntry(

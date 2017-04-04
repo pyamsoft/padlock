@@ -28,14 +28,12 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
-import com.mikepenz.fastadapter.FastAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
@@ -44,9 +42,7 @@ import com.pyamsoft.padlock.databinding.DialogLockInfoBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.util.AppUtil;
-import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -77,6 +73,7 @@ public class LockInfoDialog extends DialogFragment {
   });
   String appPackageName;
   boolean listIsRefreshed;
+  boolean appIsSystem;
   @NonNull private final LockInfoPresenter.PopulateListCallback populateListCallback =
       new LockInfoPresenter.PopulateListCallback() {
 
@@ -92,7 +89,7 @@ public class LockInfoDialog extends DialogFragment {
             });
           }
 
-          fastItemAdapter.add(new LockInfoItem(appPackageName, entry));
+          fastItemAdapter.add(new LockInfoItem(appPackageName, appIsSystem, entry));
         }
 
         @Override public void onListPopulated() {
@@ -134,7 +131,6 @@ public class LockInfoDialog extends DialogFragment {
         }
       };
   private String appName;
-  private boolean appIsSystem;
   private DividerItemDecoration dividerDecoration;
   private FilterListDelegate filterListDelegate;
 
@@ -215,33 +211,6 @@ public class LockInfoDialog extends DialogFragment {
       return item.filterAgainst(queryString);
     });
 
-    fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
-
-      @CheckResult @NonNull
-      private LockInfoItem.ViewHolder toLockInfoViewHolder(RecyclerView.ViewHolder viewHolder) {
-        if (viewHolder instanceof LockInfoItem.ViewHolder) {
-          return (LockInfoItem.ViewHolder) viewHolder;
-        } else {
-          throw new IllegalStateException("ViewHolder is not LockInfoItem.ViewHolder");
-        }
-      }
-
-      @Override
-      public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List<Object> list) {
-        final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).bindView(holder, list);
-        holder.bind(LockInfoDialog.this::processDatabaseModifyEvent);
-      }
-
-      @Override public void unBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-        final LockInfoItem.ViewHolder holder = toLockInfoViewHolder(viewHolder);
-        final LockInfoItem item = (LockInfoItem) holder.itemView.getTag();
-        if (item != null) {
-          item.unbindView(holder);
-        }
-      }
-    });
-
     binding.lockInfoRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
     binding.lockInfoRecycler.addItemDecoration(dividerDecoration);
     binding.lockInfoRecycler.setAdapter(fastItemAdapter);
@@ -261,13 +230,13 @@ public class LockInfoDialog extends DialogFragment {
 
   @Override public void onDestroy() {
     super.onDestroy();
+    presenter.destroy();
+    appIconLoaderPresenter.destroy();
     PadLock.getRefWatcher(this).watch(this);
   }
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(null);
-    appIconLoaderPresenter.bindView(null);
     appIconLoaderPresenter.loadApplicationIcon(appPackageName,
         new AppIconLoaderPresenter.LoadCallback() {
 
@@ -295,8 +264,8 @@ public class LockInfoDialog extends DialogFragment {
 
   @Override public void onStop() {
     super.onStop();
-    presenter.unbindView();
-    appIconLoaderPresenter.unbindView();
+    presenter.stop();
+    appIconLoaderPresenter.stop();
   }
 
   @Override public void onResume() {
@@ -314,39 +283,5 @@ public class LockInfoDialog extends DialogFragment {
     populateListCallback.onListCleared();
     binding.lockInfoRecycler.setClickable(false);
     presenter.populateList(appPackageName, populateListCallback, true);
-  }
-
-  void onDatabaseUpdated(int position, @NonNull LockState newLockState) {
-    final LockInfoItem oldItem = fastItemAdapter.getItem(position);
-    final LockInfoItem newItem = oldItem.copyWithNewLockState(newLockState);
-    fastItemAdapter.set(position, newItem);
-  }
-
-  @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(int position,
-      @NonNull String activityName, @NonNull LockState previousLockState,
-      @NonNull LockState newLockState) {
-    Timber.d("Received a database modify event request for %s %s at %d [%s]", appPackageName,
-        activityName, position, newLockState.name());
-    final boolean whitelist = newLockState == LockState.WHITELISTED;
-    final boolean forceLock = newLockState == LockState.LOCKED;
-    final boolean wasDefault = previousLockState == LockState.DEFAULT;
-    presenter.modifyDatabaseEntry(wasDefault, position, appPackageName, activityName, null,
-        appIsSystem, whitelist, forceLock, new LockInfoPresenter.ModifyDatabaseCallback() {
-          @Override public void onDatabaseEntryError(int position) {
-            AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
-          }
-
-          @Override public void onDatabaseEntryWhitelisted(int position) {
-            onDatabaseUpdated(position, LockState.WHITELISTED);
-          }
-
-          @Override public void onDatabaseEntryCreated(int position) {
-            onDatabaseUpdated(position, LockState.LOCKED);
-          }
-
-          @Override public void onDatabaseEntryDeleted(int position) {
-            onDatabaseUpdated(position, LockState.DEFAULT);
-          }
-        });
   }
 }

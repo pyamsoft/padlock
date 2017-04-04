@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.list;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -27,7 +26,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,7 +33,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import com.mikepenz.fastadapter.FastAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
@@ -56,7 +53,6 @@ import com.pyamsoft.pydroid.function.ActionSingle;
 import com.pyamsoft.pydroid.helper.AsyncMapHelper;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
-import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -231,7 +227,6 @@ public class LockListFragment extends Fragment {
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(null);
 
     presenter.setFABStateFromPreference(fabStateCallback);
     if (!listIsRefreshed) {
@@ -250,7 +245,7 @@ public class LockListFragment extends Fragment {
 
   @Override public void onStop() {
     super.onStop();
-    presenter.unbindView();
+    presenter.stop();
   }
 
   @Override public void onResume() {
@@ -278,37 +273,9 @@ public class LockListFragment extends Fragment {
 
   private void setupRecyclerView() {
     dividerDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
-
-    fastItemAdapter.withOnBindViewHolderListener(new FastAdapter.OnBindViewHolderListener() {
-
-      @CheckResult @NonNull
-      private LockListItem.ViewHolder toLockListViewHolder(RecyclerView.ViewHolder viewHolder) {
-        if (viewHolder instanceof LockListItem.ViewHolder) {
-          return (LockListItem.ViewHolder) viewHolder;
-        } else {
-          throw new IllegalStateException("ViewHolder is not LockListItem.ViewHolder");
-        }
-      }
-
-      @Override
-      public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i, List<Object> list) {
-        final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
-        fastItemAdapter.getAdapterItem(holder.getAdapterPosition()).bindView(holder, list);
-        holder.bind(LockListFragment.this::processDatabaseModifyEvent);
-      }
-
-      @Override public void unBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-        final LockListItem.ViewHolder holder = toLockListViewHolder(viewHolder);
-        final LockListItem item = (LockListItem) holder.itemView.getTag();
-        if (item != null) {
-          item.unbindView(holder);
-        }
-      }
-    });
-
     fastItemAdapter.withSelectable(true);
     fastItemAdapter.withOnClickListener((view, iAdapter, item, i) -> {
-      item.onClick(this::displayLockInfoFragment);
+      displayLockInfoFragment(item.getModel());
       return true;
     });
 
@@ -370,6 +337,7 @@ public class LockListFragment extends Fragment {
 
   @Override public void onDestroy() {
     super.onDestroy();
+    presenter.destroy();
     PadLock.getRefWatcher(this).watch(this);
   }
 
@@ -418,32 +386,6 @@ public class LockListFragment extends Fragment {
     fastItemAdapter.clear();
     populateListCallback.onListCleared();
     presenter.populateList(populateListCallback, true);
-  }
-
-  void onDatabaseUpdated(int position, boolean locked) {
-    final LockListItem oldItem = fastItemAdapter.getItem(position);
-    final LockListItem newItem = oldItem.copyWithNewLockState(locked);
-    fastItemAdapter.set(position, newItem);
-  }
-
-  @SuppressWarnings("WeakerAccess") void processDatabaseModifyEvent(boolean lock, int position,
-      @NonNull AppEntry entry) {
-    Timber.d("Received a database modify event request for %s at %d [%s]", entry.packageName(),
-        position, lock ? "LOCK" : "NO LOCK");
-    presenter.modifyDatabaseEntry(lock, position, entry.packageName(), null, entry.system(),
-        new LockListPresenter.DatabaseCallback() {
-          @Override public void onDatabaseEntryError(int position) {
-            AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
-          }
-
-          @Override public void onDatabaseEntryCreated(int position) {
-            onDatabaseUpdated(position, true);
-          }
-
-          @Override public void onDatabaseEntryDeleted(int position) {
-            onDatabaseUpdated(position, false);
-          }
-        });
   }
 
   @SuppressWarnings("WeakerAccess") void displayLockInfoFragment(@NonNull AppEntry entry) {

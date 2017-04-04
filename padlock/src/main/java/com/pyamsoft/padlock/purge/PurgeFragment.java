@@ -73,6 +73,7 @@ public class PurgeFragment extends Fragment implements PurgePresenter.RetrievalC
 
   @Override public void onDestroy() {
     super.onDestroy();
+    presenter.destroy();
     PadLock.getRefWatcher(this).watch(this);
   }
 
@@ -113,8 +114,6 @@ public class PurgeFragment extends Fragment implements PurgePresenter.RetrievalC
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(null);
-
     presenter.registerOnBus(new PurgePresenter.PurgeCallback() {
       @Override public void purge(@NonNull String packageName) {
         Timber.d("Purge stale: %s", packageName);
@@ -176,7 +175,7 @@ public class PurgeFragment extends Fragment implements PurgePresenter.RetrievalC
 
   @Override public void onStop() {
     super.onStop();
-    presenter.unbindView();
+    presenter.stop();
   }
 
   @Override public void onResume() {

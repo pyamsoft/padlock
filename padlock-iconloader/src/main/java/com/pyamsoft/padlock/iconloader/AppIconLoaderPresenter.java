@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.iconloader;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
@@ -28,7 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-public class AppIconLoaderPresenter extends SchedulerPresenter<Presenter.Empty> {
+public class AppIconLoaderPresenter extends SchedulerPresenter {
 
   @NonNull private final AppIconLoaderInteractor interactor;
   @NonNull private Disposable loadIconDisposable = Disposables.empty();
@@ -39,8 +38,8 @@ public class AppIconLoaderPresenter extends SchedulerPresenter<Presenter.Empty> 
     this.interactor = interactor;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     loadIconDisposable = DisposableHelper.dispose(loadIconDisposable);
   }
 

@@ -45,7 +45,7 @@ import timber.log.Timber;
     this.padLockDB = padLockDB;
   }
 
-  public void clearCached() {
+  public void clearCache() {
     cachedStalePackages = null;
   }
 

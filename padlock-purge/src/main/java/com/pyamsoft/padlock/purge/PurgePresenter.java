@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.model.event.PurgeAllEvent;
 import com.pyamsoft.padlock.model.event.PurgeEvent;
 import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.CompositeDisposable;
@@ -31,7 +30,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
+class PurgePresenter extends SchedulerPresenter {
 
   @NonNull private final PurgeInteractor interactor;
   @NonNull private final CompositeDisposable compositeDisposable;
@@ -46,8 +45,8 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
     compositeDisposable = new CompositeDisposable();
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     compositeDisposable.clear();
     retrievalDisposable = DisposableHelper.dispose(retrievalDisposable);
     purgeBus = DisposableHelper.dispose(purgeBus);
@@ -91,9 +90,7 @@ class PurgePresenter extends SchedulerPresenter<Presenter.Empty> {
           if (deleteResult > 0) {
             callback.onDeleted(packageName);
           }
-        }, throwable -> {
-          Timber.e(throwable, "onError deleteStale");
-        });
+        }, throwable -> Timber.e(throwable, "onError deleteStale"));
     compositeDisposable.add(subscription);
   }
 

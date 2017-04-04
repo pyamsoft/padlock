@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
@@ -27,7 +26,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-class OnboardAcceptTermsPresenter extends SchedulerPresenter<Presenter.Empty> {
+class OnboardAcceptTermsPresenter extends SchedulerPresenter {
 
   @NonNull private final OnboardAcceptTermsInteractor interactor;
   @NonNull private Disposable termsDisposable = Disposables.empty();
@@ -38,8 +37,8 @@ class OnboardAcceptTermsPresenter extends SchedulerPresenter<Presenter.Empty> {
     this.interactor = interactor;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     termsDisposable = DisposableHelper.dispose(termsDisposable);
   }
 

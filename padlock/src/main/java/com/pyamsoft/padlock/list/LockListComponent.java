@@ -22,6 +22,6 @@ import dagger.Subcomponent;
 
   void inject(LockListFragment fragment);
 
-  void inject(LockListItem.ViewHolder viewHolder);
+  void inject(LockListItem lockListItem);
 }
 

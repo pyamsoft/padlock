@@ -20,9 +20,7 @@ import dagger.Subcomponent;
 
 @Subcomponent public interface LockScreenComponent {
 
-  void inject(LockScreenTextFragment fragment);
-
   void inject(LockScreenActivity activity);
 
-  void inject(LockScreenPatternFragment fragment);
+  void inject(LockScreenBaseFragment fragment);
 }

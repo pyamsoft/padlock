@@ -109,7 +109,7 @@ public class PadLockService extends AccessibilityService
   }
 
   @Override public boolean onUnbind(Intent intent) {
-    presenter.unbindView();
+    presenter.stop();
     setRunning(false);
     return super.onUnbind(intent);
   }
@@ -125,7 +125,6 @@ public class PadLockService extends AccessibilityService
     if (presenter == null) {
       Injector.get().provideComponent().plusLockServiceComponent().inject(this);
     }
-    presenter.bindView(null);
 
     LockServicePresenter.ProcessCallback callback = this;
     presenter.registerOnBus(new LockServicePresenter.ServiceCallback() {
