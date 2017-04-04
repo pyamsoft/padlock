@@ -21,5 +21,7 @@ import dagger.Subcomponent;
 @Subcomponent public interface LockInfoComponent {
 
   void inject(LockInfoDialog dialog);
+
+  void inject(LockInfoItem lockInfoItem);
 }
 

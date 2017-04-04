@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding;
 import com.pyamsoft.padlock.list.ErrorDialog;
@@ -61,11 +60,6 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
         buildBundle(lockedPackageName, lockedActivityName, lockedCode, lockedRealName,
             lockedSystem));
     return fragment;
-  }
-
-  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    Injector.get().provideComponent().plusLockScreenComponent().inject(this);
   }
 
   @Nullable @Override
@@ -150,17 +144,11 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(null);
     presenter.displayLockedHint(hint -> {
       Timber.d("Settings hint");
       binding.lockDisplayHint.setText(
           String.format(Locale.getDefault(), "Hint: %s", hint.isEmpty() ? "NO HINT" : hint));
     });
-  }
-
-  @Override public void onStop() {
-    super.onStop();
-    presenter.unbindView();
   }
 
   public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {

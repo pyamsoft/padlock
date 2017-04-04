@@ -26,7 +26,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
+class MainPresenter extends SchedulerPresenter {
 
   @NonNull private final MainInteractor interactor;
   @NonNull private Disposable onboardingDisposable = Disposables.empty();
@@ -51,8 +51,8 @@ class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
         }, throwable -> Timber.e(throwable, "onError"));
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     onboardingDisposable = DisposableHelper.dispose(onboardingDisposable);
   }
 
@@ -63,7 +63,7 @@ class MainPresenter extends SchedulerPresenter<MainPresenter.MainView> {
     void onShowDefaultPage();
   }
 
-  interface MainView {
+  @Deprecated interface MainView {
 
     void onForceRefresh();
   }

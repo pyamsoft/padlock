@@ -18,8 +18,8 @@ package com.pyamsoft.padlock.list;
 
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -30,8 +30,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.function.ActionSingle;
-import java.lang.ref.WeakReference;
+import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -42,25 +41,12 @@ public class LockListItem
 
   @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
+  @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
+  @SuppressWarnings("WeakerAccess") @Inject LockListItemPresenter presenter;
+
   LockListItem(@NonNull AppEntry entry) {
     super(entry);
-  }
-
-  @NonNull @CheckResult String getName() {
-    return getModel().name();
-  }
-
-  @NonNull @CheckResult String getPackageName() {
-    return getModel().packageName();
-  }
-
-  @CheckResult @NonNull LockListItem copyWithNewLockState(boolean locked) {
-    return new LockListItem(AppEntry.builder()
-        .name(getModel().name())
-        .packageName(getModel().packageName())
-        .system(getModel().system())
-        .locked(locked)
-        .build());
+    Injector.get().provideComponent().plusLockListComponent().inject(this);
   }
 
   @Override public int getType() {
@@ -83,100 +69,86 @@ public class LockListItem
 
   @Override public void bindView(ViewHolder holder, List<Object> payloads) {
     super.bindView(holder, payloads);
-    holder.bind(getModel());
+    holder.binding.lockListTitle.setText(getModel().name());
+    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
+    holder.binding.lockListToggle.setChecked(getModel().locked());
+
+    appIconLoaderPresenter.loadApplicationIcon(getModel().packageName(),
+        new AppIconLoaderPresenter.LoadCallback() {
+          @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
+            holder.binding.lockListIcon.setImageDrawable(icon);
+          }
+
+          @Override public void onApplicationIconLoadedError() {
+            Timber.e("Failed to load icon into ViewHolder");
+          }
+        });
+
+    holder.binding.lockListToggle.setOnCheckedChangeListener(
+        new CompoundButton.OnCheckedChangeListener() {
+          @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            buttonView.setOnCheckedChangeListener(null);
+            buttonView.setChecked(!isChecked);
+
+            final CompoundButton.OnCheckedChangeListener listener = this;
+            presenter.modifyDatabaseEntry(isChecked, getModel().packageName(), null,
+                getModel().system(), new LockListItemPresenter.DatabaseCallback() {
+
+                  @Override public void onDatabaseEntryError() {
+                    AppUtil.onlyLoadOnceDialogFragment(
+                        (FragmentActivity) holder.itemView.getContext(), new ErrorDialog(),
+                        "error");
+                  }
+
+                  private void updateModel(boolean locked) {
+                    withModel(getModel().toBuilder().locked(locked).build());
+                  }
+
+                  @Override public void onDatabaseEntryCreated() {
+                    updateModel(true);
+                    buttonView.setChecked(true);
+                    buttonView.setOnCheckedChangeListener(listener);
+                  }
+
+                  @Override public void onDatabaseEntryDeleted() {
+                    updateModel(false);
+                    buttonView.setChecked(false);
+                    buttonView.setOnCheckedChangeListener(listener);
+                  }
+                });
+          }
+        });
   }
 
   @Override public void unbindView(ViewHolder holder) {
     super.unbindView(holder);
-    holder.unbind();
+    holder.binding.lockListTitle.setText(null);
+    holder.binding.lockListIcon.setImageDrawable(null);
+    holder.binding.lockListToggle.setOnCheckedChangeListener(null);
+
+    presenter.stop();
+    appIconLoaderPresenter.stop();
+
+    presenter.destroy();
+    appIconLoaderPresenter.destroy();
   }
 
-  void onClick(@NonNull ActionSingle<AppEntry> click) {
-    click.call(getModel());
-  }
+  private static class ItemFactory implements ViewHolderFactory<ViewHolder> {
+    ItemFactory() {
+    }
 
-  interface OnLockSwitchCheckedChanged {
-
-    void call(boolean isChecked, int position, @NonNull AppEntry entry);
-  }
-
-  @SuppressWarnings("WeakerAccess") protected static class ItemFactory
-      implements ViewHolderFactory<ViewHolder> {
     @Override public ViewHolder create(View v) {
       return new ViewHolder(v);
     }
   }
 
-  public static final class ViewHolder extends RecyclerView.ViewHolder {
+  static final class ViewHolder extends RecyclerView.ViewHolder {
 
     @NonNull final AdapterItemLocklistEntryBinding binding;
-    @Inject AppIconLoaderPresenter appIconLoaderPresenter;
-    @NonNull WeakReference<AppEntry> weakEntry;
 
     ViewHolder(View itemView) {
       super(itemView);
       binding = DataBindingUtil.bind(itemView);
-      weakEntry = new WeakReference<>(null);
-
-      Injector.get().provideComponent().plusLockListComponent().inject(this);
-    }
-
-    @NonNull @CheckResult AdapterItemLocklistEntryBinding getBinding() {
-      return binding;
-    }
-
-    void loadImage(@NonNull String packageName) {
-      appIconLoaderPresenter.loadApplicationIcon(packageName,
-          new AppIconLoaderPresenter.LoadCallback() {
-            @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-              binding.lockListIcon.setImageDrawable(icon);
-            }
-
-            @Override public void onApplicationIconLoadedError() {
-              Timber.e("Failed to load icon into ViewHolder");
-            }
-          });
-    }
-
-    void bind(@NonNull AppEntry entry) {
-      appIconLoaderPresenter.bindView(null);
-      binding.lockListTitle.setText(entry.name());
-      binding.lockListToggle.setOnCheckedChangeListener(null);
-      binding.lockListToggle.setChecked(entry.locked());
-      loadImage(entry.packageName());
-
-      weakEntry.clear();
-      weakEntry = new WeakReference<>(entry);
-    }
-
-    void unbind() {
-      appIconLoaderPresenter.unbindView();
-      binding.lockListTitle.setText(null);
-      binding.lockListIcon.setImageDrawable(null);
-      binding.lockListToggle.setOnCheckedChangeListener(null);
-      weakEntry.clear();
-    }
-
-    void bind(@NonNull OnLockSwitchCheckedChanged onCheckChanged) {
-      final CompoundButton.OnCheckedChangeListener listener =
-          new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
-              // Don't check it yet, get auth first
-              compoundButton.setOnCheckedChangeListener(null);
-              compoundButton.setChecked(!b);
-              compoundButton.setOnCheckedChangeListener(this);
-
-              // TODO Authorize for package access
-              final AppEntry entry = weakEntry.get();
-              if (entry != null) {
-                onCheckChanged.call(b, getAdapterPosition(), entry);
-              } else {
-                Timber.e("AppEntry is NULL");
-              }
-            }
-          };
-      binding.lockListToggle.setOnCheckedChangeListener(listener);
     }
   }
 }

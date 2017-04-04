@@ -38,8 +38,8 @@ class LockScreenPresenter extends LockTypePresenter {
     this.interactor = lockScreenInteractor;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     displayNameDisposable = DisposableHelper.dispose(displayNameDisposable);
     ignoreTimeDisposable = DisposableHelper.dispose(ignoreTimeDisposable);
   }

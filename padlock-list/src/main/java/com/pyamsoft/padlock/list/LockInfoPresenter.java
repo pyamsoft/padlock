@@ -17,23 +17,19 @@
 package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
+class LockInfoPresenter extends SchedulerPresenter {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;
-  @NonNull private final CompositeDisposable compositeDisposable;
   @NonNull private Disposable populateListDisposable = Disposables.empty();
   @NonNull private Disposable onboardDisposable = Disposables.empty();
 
@@ -42,11 +38,10 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
       final @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.lockInfoInteractor = lockInfoInteractor;
-    compositeDisposable = new CompositeDisposable();
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     onboardDisposable = DisposableHelper.dispose(onboardDisposable);
     populateListDisposable = DisposableHelper.dispose(populateListDisposable);
   }
@@ -64,36 +59,6 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
         });
   }
 
-  public void modifyDatabaseEntry(boolean isNotDefault, int position, @NonNull String packageName,
-      @NonNull String activityName, @SuppressWarnings("SameParameterValue") @Nullable String code,
-      boolean system, boolean whitelist, boolean forceDelete,
-      @NonNull ModifyDatabaseCallback callback) {
-    Disposable databaseDisposable =
-        lockInfoInteractor.modifySingleDatabaseEntry(isNotDefault, packageName, activityName, code,
-            system, whitelist, forceDelete)
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
-            .subscribe(lockState -> {
-              switch (lockState) {
-                case DEFAULT:
-                  callback.onDatabaseEntryDeleted(position);
-                  break;
-                case WHITELISTED:
-                  callback.onDatabaseEntryWhitelisted(position);
-                  break;
-                case LOCKED:
-                  callback.onDatabaseEntryCreated(position);
-                  break;
-                default:
-                  throw new IllegalStateException("Unsupported lock state: " + lockState);
-              }
-            }, throwable -> {
-              Timber.e(throwable, "onError modifyDatabaseEntry");
-              callback.onDatabaseEntryError(position);
-            });
-    compositeDisposable.add(databaseDisposable);
-  }
-
   public void showOnBoarding(@NonNull OnBoardingCallback callback) {
     onboardDisposable = DisposableHelper.dispose(onboardDisposable);
     onboardDisposable = lockInfoInteractor.hasShownOnBoarding()
@@ -108,10 +73,6 @@ class LockInfoPresenter extends SchedulerPresenter<Presenter.Empty> {
         }, throwable -> {
           Timber.e(throwable, "onError");
         });
-  }
-
-  public interface ModifyDatabaseCallback extends LockDatabaseErrorView, LockDatabaseWhitelistView {
-
   }
 
   public interface OnBoardingCallback {

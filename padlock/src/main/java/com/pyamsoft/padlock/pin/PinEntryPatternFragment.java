@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.Injector;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding;
 import com.pyamsoft.padlock.uicommon.LockCellUtils;
 import com.pyamsoft.pydroid.function.FuncNone;
@@ -70,6 +71,12 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
   @Override public void onDestroyView() {
     super.onDestroyView();
     binding.unbind();
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    presenter.destroy();
+    PadLock.getRefWatcher(this).watch(this);
   }
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -124,7 +131,6 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(null);
 
     // Pattern gets visually screwed up in multiwindow mode, clear it
     binding.patternLock.clearPattern();
@@ -166,7 +172,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
 
   @Override public void onStop() {
     super.onStop();
-    presenter.unbindView();
+    presenter.stop();
   }
 
   @CheckResult boolean onNextButtonClicked() {

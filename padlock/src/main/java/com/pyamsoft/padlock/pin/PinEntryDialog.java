@@ -142,8 +142,6 @@ public class PinEntryDialog extends DialogFragment {
 
   @Override public void onStart() {
     super.onStart();
-    appIconLoaderPresenter.bindView(null);
-    presenter.bindView(null);
     appIconLoaderPresenter.loadApplicationIcon(packageName,
         new AppIconLoaderPresenter.LoadCallback() {
           @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
@@ -159,8 +157,8 @@ public class PinEntryDialog extends DialogFragment {
 
   @Override public void onStop() {
     super.onStop();
-    presenter.unbindView();
-    appIconLoaderPresenter.unbindView();
+    presenter.stop();
+    appIconLoaderPresenter.stop();
   }
 
   @SuppressLint("SetTextI18n") private void setupToolbar() {
@@ -184,6 +182,8 @@ public class PinEntryDialog extends DialogFragment {
 
   @Override public void onDestroy() {
     super.onDestroy();
+    presenter.destroy();
+    appIconLoaderPresenter.destroy();
     PadLock.getRefWatcher(this).watch(this);
   }
 }

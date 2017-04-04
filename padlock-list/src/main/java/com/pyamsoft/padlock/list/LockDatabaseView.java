@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.list;
 
 interface LockDatabaseView {
 
-  void onDatabaseEntryCreated(int position);
+  void onDatabaseEntryCreated();
 
-  void onDatabaseEntryDeleted(int position);
+  void onDatabaseEntryDeleted();
 }

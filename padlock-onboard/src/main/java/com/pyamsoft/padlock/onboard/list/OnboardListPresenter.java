@@ -17,13 +17,12 @@
 package com.pyamsoft.padlock.onboard.list;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-class OnboardListPresenter extends SchedulerPresenter<Presenter.Empty> {
+class OnboardListPresenter extends SchedulerPresenter {
 
   @NonNull private final OnboardListInteractor interactor;
 

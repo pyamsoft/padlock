@@ -24,7 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.view.View;
+import com.pyamsoft.padlock.Injector;
 import javax.inject.Inject;
 
 import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_ACTIVITY_NAME;
@@ -33,7 +33,7 @@ import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_LOCK_CODE;
 import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_PACKAGE_NAME;
 import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_REAL_NAME;
 
-abstract class LockScreenBaseFragment extends Fragment {
+public abstract class LockScreenBaseFragment extends Fragment {
 
   @SuppressWarnings("WeakerAccess") @Inject LockScreenEntryPresenter presenter;
   private String lockedActivityName;
@@ -126,12 +126,17 @@ abstract class LockScreenBaseFragment extends Fragment {
     if (lockedPackageName == null || lockedActivityName == null || lockedRealName == null) {
       throw new NullPointerException("Missing required lock attributes");
     }
+
+    Injector.get().provideComponent().plusLockScreenComponent().inject(this);
   }
 
-  @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-    super.onViewCreated(view, savedInstanceState);
-    if (savedInstanceState == null) {
-      presenter.resetFailCount();
-    }
+  @CallSuper @Override public void onStop() {
+    super.onStop();
+    presenter.stop();
+  }
+
+  @CallSuper @Override public void onDestroy() {
+    super.onDestroy();
+    presenter.destroy();
   }
 }

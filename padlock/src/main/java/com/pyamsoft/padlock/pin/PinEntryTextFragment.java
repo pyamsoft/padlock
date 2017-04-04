@@ -29,6 +29,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import com.pyamsoft.padlock.Injector;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding;
 import com.pyamsoft.pydroid.drawable.AsyncDrawable;
@@ -136,7 +137,6 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(null);
     presenter.checkMasterPinPresent(new PinEntryPresenter.MasterPinStatusCallback() {
 
       private void setupSubmissionView(@NonNull EditText view,
@@ -177,7 +177,13 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
 
   @Override public void onStop() {
     super.onStop();
-    presenter.unbindView();
+    presenter.stop();
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    presenter.destroy();
+    PadLock.getRefWatcher(this).watch(this);
   }
 
   private void setupGoArrow(@NonNull PinEntryPresenter.SubmitCallback submitCallback) {

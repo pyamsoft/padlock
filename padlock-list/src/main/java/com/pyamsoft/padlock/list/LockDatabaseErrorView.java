@@ -18,5 +18,5 @@ package com.pyamsoft.padlock.list;
 
 interface LockDatabaseErrorView extends LockDatabaseView {
 
-  void onDatabaseEntryError(int position);
+  void onDatabaseEntryError();
 }

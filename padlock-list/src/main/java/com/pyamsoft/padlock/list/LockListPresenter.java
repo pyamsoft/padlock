@@ -17,47 +17,40 @@
 package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.padlock.service.LockServiceStateInteractor;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
+class LockListPresenter extends SchedulerPresenter {
 
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
-  @NonNull private final CompositeDisposable compositeDisposable;
   @NonNull private Disposable populateListDisposable = Disposables.empty();
   @NonNull private Disposable systemVisibleDisposable = Disposables.empty();
   @NonNull private Disposable onboardDisposable = Disposables.empty();
   @NonNull private Disposable fabStateDisposable = Disposables.empty();
 
-  @Inject LockListPresenter(final @NonNull LockListInteractor lockListInteractor,
-      final @NonNull LockServiceStateInteractor stateInteractor,
+  @Inject LockListPresenter(@NonNull LockListInteractor lockListInteractor,
+      @NonNull LockServiceStateInteractor stateInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.lockListInteractor = lockListInteractor;
     this.stateInteractor = stateInteractor;
-    compositeDisposable = new CompositeDisposable();
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     systemVisibleDisposable = DisposableHelper.dispose(systemVisibleDisposable);
     onboardDisposable = DisposableHelper.dispose(onboardDisposable);
     fabStateDisposable = DisposableHelper.dispose(fabStateDisposable);
     populateListDisposable = DisposableHelper.dispose(populateListDisposable);
-    compositeDisposable.clear();
   }
 
   public void populateList(@NonNull PopulateListCallback callback, boolean forceRefresh) {
@@ -122,33 +115,6 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
         }, throwable -> Timber.e(throwable, "onError"));
   }
 
-  public void modifyDatabaseEntry(boolean isChecked, int position, @NonNull String packageName,
-      @SuppressWarnings("SameParameterValue") @Nullable String code, boolean system,
-      @NonNull DatabaseCallback callback) {
-    // No whitelisting for modifications from the List
-    Disposable databaseDisposable =
-        lockListInteractor.modifySingleDatabaseEntry(isChecked, packageName,
-            PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system, false, false)
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
-            .subscribe(lockState -> {
-              switch (lockState) {
-                case DEFAULT:
-                  callback.onDatabaseEntryDeleted(position);
-                  break;
-                case LOCKED:
-                  callback.onDatabaseEntryCreated(position);
-                  break;
-                default:
-                  throw new RuntimeException("Whitelist results are not handled");
-              }
-            }, throwable -> {
-              Timber.e(throwable, "onError modifyDatabaseEntry");
-              callback.onDatabaseEntryError(position);
-            });
-    compositeDisposable.add(databaseDisposable);
-  }
-
   interface OnboardingCallback {
 
     void onShowOnboarding();
@@ -173,18 +139,5 @@ class LockListPresenter extends SchedulerPresenter<Presenter.Empty> {
   interface PopulateListCallback extends LockCommon {
 
     void onEntryAddedToList(@NonNull AppEntry entry);
-  }
-
-  interface DatabaseCallback extends LockDatabaseErrorView {
-  }
-
-  interface ShowPinCallback {
-
-    void onCreatePinDialog();
-  }
-
-  interface ShowAccessibilityCallback {
-
-    void onCreateAccessibilityDialog();
   }
 }

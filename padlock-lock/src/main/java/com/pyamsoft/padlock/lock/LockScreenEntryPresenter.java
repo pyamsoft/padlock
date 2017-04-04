@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.lock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
@@ -28,7 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
+class LockScreenEntryPresenter extends SchedulerPresenter {
 
   @NonNull private final LockScreenEntryInteractor interactor;
   @NonNull private Disposable postUnlockDisposable = Disposables.empty();
@@ -42,15 +41,16 @@ class LockScreenEntryPresenter extends SchedulerPresenter<Presenter.Empty> {
     this.interactor = lockScreenInteractor;
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     postUnlockDisposable = DisposableHelper.dispose(postUnlockDisposable);
     unlockDisposable = DisposableHelper.dispose(unlockDisposable);
     lockDisposable = DisposableHelper.dispose(lockDisposable);
     hintDisposable = DisposableHelper.dispose(hintDisposable);
   }
 
-  public void resetFailCount() {
+  @Override protected void onDestroy() {
+    super.onDestroy();
     interactor.resetFailCount();
   }
 

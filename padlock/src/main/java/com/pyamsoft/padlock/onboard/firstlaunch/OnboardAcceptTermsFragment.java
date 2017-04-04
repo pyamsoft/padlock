@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.Injector;
+import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.databinding.OnboardFirstlaunchAcceptTermsBinding;
 import com.pyamsoft.padlock.onboard.OnboardChildFragment;
 import javax.inject.Inject;
@@ -55,14 +56,15 @@ public class OnboardAcceptTermsFragment extends OnboardChildFragment {
     setupCancelButton();
   }
 
-  @Override public void onStart() {
-    super.onStart();
-    presenter.bindView(null);
-  }
-
   @Override public void onStop() {
     super.onStop();
-    presenter.unbindView();
+    presenter.stop();
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    presenter.destroy();
+    PadLock.getRefWatcher(this).watch(this);
   }
 
   private void setupCancelButton() {

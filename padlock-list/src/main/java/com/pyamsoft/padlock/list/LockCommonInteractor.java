@@ -58,48 +58,48 @@ abstract class LockCommonInteractor {
     });
   }
 
-  public abstract void clearCached();
-
   @NonNull @CheckResult
-  public Observable<LockState> modifySingleDatabaseEntry(boolean notInDatabase,
-      @NonNull String packageName, @NonNull String activityName, @Nullable String code,
-      boolean system, boolean whitelist, boolean forceLock) {
-    if (whitelist) {
+  public Observable<LockState> modifySingleDatabaseEntry(@NonNull LockState oldLockState,
+      @NonNull LockState newLockState, @NonNull String packageName, @NonNull String activityName,
+      @Nullable String code, boolean system) {
+    if (newLockState == LockState.WHITELISTED) {
       return Observable.defer(() -> {
-        final Observable<LockState> lockState;
-        if (notInDatabase) {
+        final Observable<LockState> newState;
+        if (oldLockState == LockState.DEFAULT) {
           Timber.d("Add new as whitelisted");
-          lockState = createNewEntry(packageName, activityName, code, system, true);
+          newState = createNewEntry(packageName, activityName, code, system, true);
         } else {
           // Update existing entry
-          lockState = Observable.just(LockState.NONE);
+          newState = Observable.just(LockState.NONE);
         }
-        return lockState;
+        return newState;
       });
-    } else if (forceLock) {
+    } else if (newLockState == LockState.LOCKED) {
       return Observable.defer(() -> {
-        final Observable<LockState> lockState;
-        if (notInDatabase) {
+        final Observable<LockState> newState;
+        if (oldLockState == LockState.DEFAULT) {
           Timber.d("Add new as force locked");
-          lockState = createNewEntry(packageName, activityName, code, system, false);
+          newState = createNewEntry(packageName, activityName, code, system, false);
         } else {
           // Update existing entry
-          lockState = Observable.just(LockState.NONE);
+          newState = Observable.just(LockState.NONE);
         }
-        return lockState;
+        return newState;
       });
     } else {
       return Observable.defer(() -> {
-        final Observable<LockState> lockState;
-        if (notInDatabase) {
+        final Observable<LockState> newState;
+        if (oldLockState == LockState.DEFAULT) {
           Timber.d("Add new entry");
-          lockState = createNewEntry(packageName, activityName, code, system, false);
+          newState = createNewEntry(packageName, activityName, code, system, false);
         } else {
           Timber.d("Delete existing entry");
-          lockState = deleteEntry(packageName, activityName);
+          newState = deleteEntry(packageName, activityName);
         }
-        return lockState;
+        return newState;
       });
     }
   }
+
+  public abstract void clearCache();
 }

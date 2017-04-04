@@ -23,14 +23,12 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.padlock.uicommon.LockCellUtils;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.List;
-import javax.inject.Inject;
 import me.zhanghai.android.patternlock.PatternView;
 import timber.log.Timber;
 
@@ -39,7 +37,6 @@ import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_LOCK_UNTIL_TIME
 public class LockScreenPatternFragment extends LockScreenBaseFragment {
 
   @NonNull static final String TAG = "LockScreenPatternFragment";
-  @Inject LockScreenEntryPresenter presenter;
   FragmentLockScreenPatternBinding binding;
 
   @CheckResult @NonNull
@@ -51,11 +48,6 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
         buildBundle(lockedPackageName, lockedActivityName, lockedCode, lockedRealName,
             lockedSystem));
     return fragment;
-  }
-
-  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    Injector.get().provideComponent().plusLockScreenComponent().inject(this);
   }
 
   @Nullable @Override
@@ -144,12 +136,6 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(null);
     binding.patternLock.clearPattern();
-  }
-
-  @Override public void onStop() {
-    super.onStop();
-    presenter.unbindView();
   }
 }

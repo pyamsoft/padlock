@@ -16,10 +16,8 @@
 
 package com.pyamsoft.padlock.lock.common;
 
-import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
@@ -27,7 +25,7 @@ import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-public class LockTypePresenter extends SchedulerPresenter<Presenter.Empty> {
+public class LockTypePresenter extends SchedulerPresenter {
 
   @NonNull private final LockTypeInteractor interactor;
   @NonNull private Disposable typeDisposable = Disposables.empty();
@@ -38,8 +36,8 @@ public class LockTypePresenter extends SchedulerPresenter<Presenter.Empty> {
     this.interactor = interactor;
   }
 
-  @CallSuper @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     typeDisposable = DisposableHelper.dispose(typeDisposable);
   }
 

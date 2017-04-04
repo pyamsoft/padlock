@@ -148,6 +148,7 @@ public class LockScreenActivity extends ActivityBase {
 
   @CallSuper @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light_Lock);
+    overridePendingTransition(0, 0);
     super.onCreate(savedInstanceState);
 
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock);
@@ -220,8 +221,6 @@ public class LockScreenActivity extends ActivityBase {
   @Override protected void onStart() {
     super.onStart();
     Timber.d("onStart");
-    appIconLoaderPresenter.bindView(null);
-    presenter.bindView(null);
     presenter.loadDisplayNameFromPackage(lockedPackageName, name -> {
       Timber.d("Set toolbar name %s", name);
       binding.toolbar.setTitle(name);
@@ -250,8 +249,8 @@ public class LockScreenActivity extends ActivityBase {
 
   @Override protected void onStop() {
     super.onStop();
-    presenter.unbindView();
-    appIconLoaderPresenter.unbindView();
+    presenter.stop();
+    appIconLoaderPresenter.stop();
     removeFromLockedMap(lockedPackageName, lockedActivityName);
   }
 
@@ -272,6 +271,9 @@ public class LockScreenActivity extends ActivityBase {
 
   @CallSuper @Override protected void onDestroy() {
     super.onDestroy();
+    overridePendingTransition(0, 0);
+    presenter.destroy();
+    appIconLoaderPresenter.stop();
 
     Timber.d("Clear currently locked");
     binding.unbind();
@@ -280,7 +282,6 @@ public class LockScreenActivity extends ActivityBase {
   @Override public void finish() {
     super.finish();
     Timber.d("Finish called, either from Us or from Outside");
-    overridePendingTransition(0, 0);
   }
 
   @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {

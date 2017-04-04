@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.model.event.ServiceEvent;
 import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
-import com.pyamsoft.pydroid.presenter.Presenter;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
@@ -31,7 +30,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
+class LockServicePresenter extends SchedulerPresenter {
 
   @NonNull private final LockServiceInteractor interactor;
   @NonNull private Disposable lockedEntryDisposable = Disposables.empty();
@@ -46,8 +45,8 @@ class LockServicePresenter extends SchedulerPresenter<Presenter.Empty> {
     interactor.reset();
   }
 
-  @Override protected void onUnbind() {
-    super.onUnbind();
+  @Override protected void onStop() {
+    super.onStop();
     lockedEntryDisposable = DisposableHelper.dispose(lockedEntryDisposable);
     recheckDisposable = DisposableHelper.dispose(recheckDisposable);
     serviceBus = DisposableHelper.dispose(serviceBus);

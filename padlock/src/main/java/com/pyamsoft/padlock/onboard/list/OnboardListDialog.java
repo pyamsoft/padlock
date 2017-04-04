@@ -60,6 +60,7 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
 
   @Override public void onDestroy() {
     super.onDestroy();
+    presenter.destroy();
     PadLock.getRefWatcher(this).watch(this);
   }
 
@@ -111,14 +112,9 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
     }
   }
 
-  @Override public void onStart() {
-    super.onStart();
-    presenter.bindView(null);
-  }
-
   @Override public void onStop() {
     super.onStop();
-    presenter.unbindView();
+    presenter.stop();
   }
 
   private void setupButtons(int position) {

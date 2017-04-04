@@ -20,8 +20,8 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
-import com.pyamsoft.padlock.list.LockInfoInteractor;
-import com.pyamsoft.padlock.list.LockListInteractor;
+import com.pyamsoft.padlock.list.LockInfoItemInteractor;
+import com.pyamsoft.padlock.list.LockListItemInteractor;
 import com.pyamsoft.padlock.purge.PurgeInteractor;
 import io.reactivex.Observable;
 import javax.inject.Inject;
@@ -32,13 +32,14 @@ import timber.log.Timber;
 
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
-  @SuppressWarnings("WeakerAccess") @NonNull final LockListInteractor lockListInteractor;
-  @SuppressWarnings("WeakerAccess") @NonNull final LockInfoInteractor lockInfoInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockListItemInteractor lockListInteractor;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockInfoItemInteractor lockInfoInteractor;
   @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor purgeInteractor;
 
   @Inject SettingsPreferenceInteractor(@NonNull PadLockDB padLockDB,
-      @NonNull PadLockPreferences preferences, @NonNull LockListInteractor lockListInteractor,
-      @NonNull LockInfoInteractor lockInfoInteractor, @NonNull PurgeInteractor purgeInteractor) {
+      @NonNull PadLockPreferences preferences, @NonNull LockListItemInteractor lockListInteractor,
+      @NonNull LockInfoItemInteractor lockInfoInteractor,
+      @NonNull PurgeInteractor purgeInteractor) {
     this.padLockDB = padLockDB;
     this.preferences = preferences;
     this.lockListInteractor = lockListInteractor;
@@ -52,9 +53,9 @@ import timber.log.Timber;
 
   @NonNull @CheckResult public Observable<Boolean> clearDatabase() {
     return padLockDB.deleteAll().flatMap(result -> padLockDB.deleteDatabase()).map(aBoolean -> {
-      lockListInteractor.clearCached();
-      lockInfoInteractor.clearCached();
-      purgeInteractor.clearCached();
+      lockListInteractor.clearCache();
+      lockInfoInteractor.clearCache();
+      purgeInteractor.clearCache();
       return Boolean.TRUE;
     });
   }

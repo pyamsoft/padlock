@@ -128,8 +128,6 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
 
   @Override public void onStart() {
     super.onStart();
-    presenter.bindView(null);
-
     presenter.registerOnBus(new SettingsPreferencePresenter.ClearCallback() {
       @Override public void onClearAll() {
         Timber.d("Everything is cleared, kill self");
@@ -157,7 +155,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
 
   @Override public void onStop() {
     super.onStop();
-    presenter.unbindView();
+    presenter.stop();
   }
 
   @Override public void onResume() {
@@ -168,6 +166,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
 
   @Override public void onDestroy() {
     super.onDestroy();
+    presenter.destroy();
     PadLock.getRefWatcher(this).watch(this);
   }
 }

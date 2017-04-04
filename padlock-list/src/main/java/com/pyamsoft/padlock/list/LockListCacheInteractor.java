@@ -14,30 +14,34 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model;
+package com.pyamsoft.padlock.list;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
+import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.model.AppEntry;
+import io.reactivex.Single;
+import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-@AutoValue public abstract class ActivityEntry {
+@Singleton class LockListCacheInteractor {
 
-  @CheckResult @NonNull public static Builder builder() {
-    return new AutoValue_ActivityEntry.Builder();
+  @Nullable private Single<List<AppEntry>> cachedListObservable;
+
+  @Inject LockListCacheInteractor() {
+    cachedListObservable = null;
   }
 
-  @CheckResult public abstract Builder toBuilder();
+  void cache(@NonNull Single<List<AppEntry>> cache) {
+    cachedListObservable = cache;
+  }
 
-  @CheckResult public abstract String name();
+  @CheckResult @Nullable Single<List<AppEntry>> retrieve() {
+    return cachedListObservable;
+  }
 
-  @CheckResult public abstract LockState lockState();
-
-  @AutoValue.Builder public static abstract class Builder {
-
-    @CheckResult public abstract Builder name(String s);
-
-    @CheckResult public abstract Builder lockState(LockState state);
-
-    @CheckResult public abstract ActivityEntry build();
+  void clearCache() {
+    cachedListObservable = null;
   }
 }
