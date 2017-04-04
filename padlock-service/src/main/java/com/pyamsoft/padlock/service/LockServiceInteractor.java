@@ -234,8 +234,10 @@ import timber.log.Timber;
   Observable<Boolean> isWindowFromLockScreen(@NonNull String packageName,
       @NonNull String className) {
     return Observable.fromCallable(() -> {
-      final String lockScreenPackageName = lockScreenActivity.getPackage().getName();
+      final String lockScreenPackageName = appContext.getPackageName();
       final String lockScreenClassName = lockScreenActivity.getName();
+      Timber.d("Check if window is lock screen (%s %s)", lockScreenPackageName,
+          lockScreenClassName);
 
       final boolean isPackage = packageName.equals(lockScreenPackageName);
       return isPackage && className.equals(lockScreenClassName);
