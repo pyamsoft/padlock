@@ -270,7 +270,6 @@ public class LockScreenActivity extends ActivityBase {
 
   @CallSuper @Override protected void onDestroy() {
     super.onDestroy();
-    overridePendingTransition(0, 0);
     presenter.destroy();
     appIconLoaderPresenter.stop();
 
@@ -280,6 +279,7 @@ public class LockScreenActivity extends ActivityBase {
 
   @Override public void finish() {
     super.finish();
+    overridePendingTransition(0, 0);
     Timber.d("Finish called, either from Us or from Outside");
   }
 
