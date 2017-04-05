@@ -17,8 +17,6 @@
 package com.pyamsoft.padlock.purge;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.event.PurgeAllEvent;
-import com.pyamsoft.padlock.model.event.PurgeEvent;
 import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;

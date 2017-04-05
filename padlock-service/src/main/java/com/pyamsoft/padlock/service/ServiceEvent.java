@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model;
+package com.pyamsoft.padlock.service;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
-@AutoValue public abstract class LockScreenEntry {
+@AutoValue abstract class ServiceEvent {
 
-  @NonNull @CheckResult
-  public static LockScreenEntry create(@NonNull String packageName, @NonNull String className) {
-    return new AutoValue_LockScreenEntry(packageName, className);
+  @CheckResult @NonNull static ServiceEvent create(@NonNull Type type) {
+    return new AutoValue_ServiceEvent(type);
   }
 
-  public abstract String packageName();
+  @CheckResult abstract Type type();
 
-  public abstract String className();
+  enum Type {
+    FINISH, PASS_LOCK
+  }
 }

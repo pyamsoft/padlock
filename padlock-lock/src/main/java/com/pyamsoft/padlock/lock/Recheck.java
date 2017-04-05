@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model.event;
+package com.pyamsoft.padlock.lock;
 
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
 
-@AutoValue public abstract class RecheckEvent {
+public interface Recheck {
 
-  @CheckResult @NonNull
-  public static RecheckEvent create(@NonNull String packageName, @NonNull String className) {
-    return new AutoValue_RecheckEvent(packageName, className);
-  }
-
-  @CheckResult public abstract String packageName();
-
-  @CheckResult public abstract String className();
+  @NonNull String EXTRA_PACKAGE_NAME = "extra_package_name";
+  @NonNull String EXTRA_CLASS_NAME = "extra_class_name";
 }

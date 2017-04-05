@@ -22,7 +22,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import com.pyamsoft.padlock.PadLock;
-import com.pyamsoft.padlock.model.event.PurgeAllEvent;
 import com.pyamsoft.pydroid.bus.EventBus;
 
 public class PurgeAllDialog extends DialogFragment {

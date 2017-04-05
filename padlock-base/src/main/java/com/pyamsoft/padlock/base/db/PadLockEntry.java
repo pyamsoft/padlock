@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model.sql;
+package com.pyamsoft.padlock.base.db;
 
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
+import com.pyamsoft.padlock.service.db.PadLockEntryModel;
 import com.squareup.sqldelight.RowMapper;
 import com.squareup.sqldelight.SqlDelightStatement;
 

@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model.event;
+package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
-@AutoValue public abstract class PinEntryEvent {
+@AutoValue abstract class LockScreenEntry {
 
-  @CheckResult @NonNull public static PinEntryEvent create(@NonNull Type type, boolean complete) {
-    return new AutoValue_PinEntryEvent(type, complete);
+  @NonNull @CheckResult
+  static LockScreenEntry create(@NonNull String packageName, @NonNull String className) {
+    return new AutoValue_LockScreenEntry(packageName, className);
   }
 
-  @CheckResult public abstract Type type();
+  abstract String packageName();
 
-  @CheckResult public abstract boolean complete();
-
-  public enum Type {
-    TYPE_CREATE, TYPE_CLEAR
-  }
+  abstract String className();
 }

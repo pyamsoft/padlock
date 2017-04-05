@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
-import com.pyamsoft.padlock.model.event.ConfirmEvent;
 import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
@@ -53,7 +52,10 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
     applicationInstallDisposable = DisposableHelper.dispose(applicationInstallDisposable);
   }
 
-  public void setApplicationInstallReceiverState() {
+  /**
+   * public
+   */
+  void setApplicationInstallReceiverState() {
     applicationInstallDisposable = DisposableHelper.dispose(applicationInstallDisposable);
     applicationInstallDisposable = interactor.isInstallListenerEnabled()
         .subscribeOn(getSubscribeScheduler())
@@ -67,7 +69,10 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
         }, throwable -> Timber.e(throwable, "onError setApplicationInstallReceiverState"));
   }
 
-  public void registerOnBus(@NonNull ClearCallback callback) {
+  /**
+   * public
+   */
+  void registerOnBus(@NonNull ClearCallback callback) {
     confirmedDisposable = DisposableHelper.dispose(confirmedDisposable);
     confirmedDisposable = EventBus.get()
         .listen(ConfirmEvent.class)

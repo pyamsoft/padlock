@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model;
+package com.pyamsoft.padlock.pin;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.google.auto.value.AutoValue;
 
-public interface Recheck {
+@AutoValue public abstract class PinEntryEvent {
 
-  @NonNull String EXTRA_PACKAGE_NAME = "extra_package_name";
-  @NonNull String EXTRA_CLASS_NAME = "extra_class_name";
+  @CheckResult @NonNull public static PinEntryEvent create(@NonNull Type type, boolean complete) {
+    return new AutoValue_PinEntryEvent(type, complete);
+  }
+
+  @CheckResult public abstract Type type();
+
+  @CheckResult public abstract boolean complete();
+
+  public enum Type {
+    TYPE_CREATE, TYPE_CLEAR
+  }
 }

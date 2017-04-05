@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model.event;
+package com.pyamsoft.padlock.purge;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
-@AutoValue public abstract class ConfirmEvent {
+@AutoValue abstract class PurgeEvent {
 
-  @CheckResult @NonNull public static ConfirmEvent create(@NonNull Type type) {
-    return new AutoValue_ConfirmEvent(type);
+  @CheckResult @NonNull static PurgeEvent create(@NonNull String packageName) {
+    return new AutoValue_PurgeEvent(packageName);
   }
 
-  @CheckResult public abstract Type type();
-
-  public enum Type {
-    DATABASE, ALL
-  }
+  @CheckResult abstract String packageName();
 }

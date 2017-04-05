@@ -32,7 +32,6 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.main.MainActivity;
-import com.pyamsoft.padlock.model.event.ConfirmEvent;
 import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;

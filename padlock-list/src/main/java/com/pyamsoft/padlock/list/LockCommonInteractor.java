@@ -20,8 +20,8 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.model.LockState;
+import com.pyamsoft.padlock.base.db.PadLockDB;
 import io.reactivex.Observable;
 import timber.log.Timber;
 

@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.base.db;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import io.reactivex.Observable;
 import java.util.List;
 

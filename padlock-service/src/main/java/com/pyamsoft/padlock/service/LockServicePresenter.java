@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.service;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.event.RecheckEvent;
-import com.pyamsoft.padlock.model.event.ServiceEvent;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;

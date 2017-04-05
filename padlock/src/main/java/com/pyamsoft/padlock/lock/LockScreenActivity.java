@@ -37,7 +37,6 @@ import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
-import com.pyamsoft.padlock.model.LockScreenEntry;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.HashMap;
