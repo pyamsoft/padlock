@@ -18,7 +18,10 @@ package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.padlock.pin.ClearPinEvent;
+import com.pyamsoft.padlock.pin.CreatePinEvent;
 import com.pyamsoft.padlock.service.LockServiceStateInteractor;
+import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
@@ -36,6 +39,8 @@ class LockListPresenter extends SchedulerPresenter {
   @NonNull private Disposable systemVisibleDisposable = Disposables.empty();
   @NonNull private Disposable onboardDisposable = Disposables.empty();
   @NonNull private Disposable fabStateDisposable = Disposables.empty();
+  @NonNull private Disposable pinCreateBus = Disposables.empty();
+  @NonNull private Disposable pinClearBus = Disposables.empty();
 
   @Inject LockListPresenter(@NonNull LockListInteractor lockListInteractor,
       @NonNull LockServiceStateInteractor stateInteractor,
@@ -51,6 +56,39 @@ class LockListPresenter extends SchedulerPresenter {
     onboardDisposable = DisposableHelper.dispose(onboardDisposable);
     fabStateDisposable = DisposableHelper.dispose(fabStateDisposable);
     populateListDisposable = DisposableHelper.dispose(populateListDisposable);
+    pinCreateBus = DisposableHelper.dispose(pinCreateBus);
+    pinClearBus = DisposableHelper.dispose(pinClearBus);
+  }
+
+  /**
+   * public
+   */
+  void registerOnBus(@NonNull BusCallback callback) {
+    pinCreateBus = DisposableHelper.dispose(pinCreateBus);
+    pinCreateBus = EventBus.get()
+        .listen(CreatePinEvent.class)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(createPinEvent -> {
+          if (createPinEvent.success()) {
+            callback.onMasterPinCreateSuccess();
+          } else {
+            callback.onMasterPinCreateFailure();
+          }
+        }, throwable -> Timber.e(throwable, "on error create pin bus"));
+
+    pinClearBus = DisposableHelper.dispose(pinClearBus);
+    pinClearBus = EventBus.get()
+        .listen(ClearPinEvent.class)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(clearPinEvent -> {
+          if (clearPinEvent.success()) {
+            callback.onMasterPinClearSuccess();
+          } else {
+            callback.onMasterPinClearFailure();
+          }
+        }, throwable -> Timber.e(throwable, "on error clear pin bus"));
   }
 
   /**
@@ -131,6 +169,17 @@ class LockListPresenter extends SchedulerPresenter {
             callback.onShowOnboarding();
           }
         }, throwable -> Timber.e(throwable, "onError"));
+  }
+
+  interface BusCallback {
+
+    void onMasterPinCreateSuccess();
+
+    void onMasterPinCreateFailure();
+
+    void onMasterPinClearSuccess();
+
+    void onMasterPinClearFailure();
   }
 
   interface OnboardingCallback {

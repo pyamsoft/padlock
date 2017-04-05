@@ -27,6 +27,7 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding;
 import com.pyamsoft.padlock.uicommon.LockCellUtils;
+import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.function.FuncNone;
 import java.util.ArrayList;
 import java.util.List;
@@ -192,24 +193,20 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
     presenter.submit(patternText, repeatText, "", new PinEntryPresenter.SubmitCallback() {
 
       @Override public void onSubmitSuccess(boolean creating) {
-        actOnLockList(callback -> {
-          if (creating) {
-            callback.onCreateMasterPinSuccess();
-          } else {
-            callback.onClearMasterPinSuccess();
-          }
-        });
+        if (creating) {
+          EventBus.get().publish(CreatePinEvent.create(true));
+        } else {
+          EventBus.get().publish(ClearPinEvent.create(true));
+        }
         dismissParent();
       }
 
       @Override public void onSubmitFailure(boolean creating) {
-        actOnLockList(callback -> {
-          if (creating) {
-            callback.onCreateMasterPinFailure();
-          } else {
-            callback.onClearMasterPinFailure();
-          }
-        });
+        if (creating) {
+          EventBus.get().publish(CreatePinEvent.create(false));
+        } else {
+          EventBus.get().publish(ClearPinEvent.create(false));
+        }
         dismissParent();
       }
 
