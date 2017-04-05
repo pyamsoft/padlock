@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.pin;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;

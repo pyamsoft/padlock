@@ -18,10 +18,10 @@ package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.padlock.model.LockState;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import java.util.List;

@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
 import io.reactivex.Observable;
 import io.reactivex.Single;

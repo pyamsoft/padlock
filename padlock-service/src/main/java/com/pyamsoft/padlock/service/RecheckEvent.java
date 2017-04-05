@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model.event;
+package com.pyamsoft.padlock.service;
 
-public class PurgeAllEvent {
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import com.google.auto.value.AutoValue;
+
+@AutoValue public abstract class RecheckEvent {
+
+  @CheckResult @NonNull
+  public static RecheckEvent create(@NonNull String packageName, @NonNull String className) {
+    return new AutoValue_RecheckEvent(packageName, className);
+  }
+
+  @CheckResult public abstract String packageName();
+
+  @CheckResult public abstract String className();
 }

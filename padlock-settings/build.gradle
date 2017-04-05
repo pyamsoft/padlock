@@ -64,6 +64,10 @@ dependencies {
 
   annotationProcessor "com.google.dagger:dagger-compiler:$dagger"
 
+  // Auto value
+  provided "com.google.auto.value:auto-value:$autoValue"
+  annotationProcessor "com.google.auto.value:auto-value:$autoValue"
+
   debugCompile project(path: ":padlock-list", configuration: "debug")
   releaseCompile project(path: ":padlock-list", configuration: "release")
   debugCompile project(path: ":padlock-purge", configuration: "debug")

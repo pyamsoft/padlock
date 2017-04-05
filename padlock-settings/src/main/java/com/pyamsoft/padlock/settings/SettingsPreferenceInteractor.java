@@ -47,11 +47,17 @@ import timber.log.Timber;
     this.purgeInteractor = purgeInteractor;
   }
 
-  @NonNull @CheckResult public Observable<Boolean> isInstallListenerEnabled() {
+  /**
+   * public
+   */
+  @NonNull @CheckResult Observable<Boolean> isInstallListenerEnabled() {
     return Observable.fromCallable(preferences::isInstallListenerEnabled);
   }
 
-  @NonNull @CheckResult public Observable<Boolean> clearDatabase() {
+  /**
+   * public
+   */
+  @NonNull @CheckResult Observable<Boolean> clearDatabase() {
     return padLockDB.deleteAll().flatMap(result -> padLockDB.deleteDatabase()).map(aBoolean -> {
       lockListInteractor.clearCache();
       lockInfoInteractor.clearCache();
@@ -60,7 +66,10 @@ import timber.log.Timber;
     });
   }
 
-  @NonNull @CheckResult public Observable<Boolean> clearAll() {
+  /**
+   * public
+   */
+  @NonNull @CheckResult Observable<Boolean> clearAll() {
     return clearDatabase().map(aBoolean -> {
       Timber.d("Clear all preferences");
       preferences.clearAll();

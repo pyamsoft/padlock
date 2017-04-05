@@ -26,7 +26,6 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import com.pyamsoft.padlock.model.Recheck;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
 import io.reactivex.Observable;
 import javax.inject.Inject;

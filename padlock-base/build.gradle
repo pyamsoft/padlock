@@ -22,6 +22,7 @@ tasks.whenTaskAdded { task ->
 
 apply plugin: "com.android.library"
 apply plugin: "com.github.ben-manes.versions"
+apply plugin: "com.squareup.sqldelight"
 apply plugin: "com.getkeepsafe.dexcount"
 apply plugin: "net.ltgt.errorprone"
 apply plugin: "me.tatarka.retrolambda"
@@ -57,6 +58,10 @@ dependencies {
   compile fileTree(dir: "libs", include: ["*.jar"])
 
   retrolambdaConfig "net.orfjackal.retrolambda:retrolambda:${rootProject.ext.retrolambda}"
+
+  // Auto value
+  provided "com.google.auto.value:auto-value:$autoValue"
+  annotationProcessor "com.google.auto.value:auto-value:$autoValue"
 
   // SQLBrite
   compile "com.squareup.sqlbrite:sqlbrite:$sqlbrite"

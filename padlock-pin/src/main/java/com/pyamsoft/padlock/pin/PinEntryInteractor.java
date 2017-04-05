@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.lock.LockHelper;
 import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import com.pyamsoft.padlock.model.event.PinEntryEvent;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
 import io.reactivex.Observable;
 import javax.inject.Inject;

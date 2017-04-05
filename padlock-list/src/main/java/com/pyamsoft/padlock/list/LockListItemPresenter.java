@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.list;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.LockState;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;

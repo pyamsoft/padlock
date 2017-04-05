@@ -27,7 +27,7 @@ import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
+import com.pyamsoft.padlock.base.db.PadLockEntry;
 import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Named;

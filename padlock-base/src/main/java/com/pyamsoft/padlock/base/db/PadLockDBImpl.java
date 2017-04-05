@@ -24,7 +24,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
-import com.pyamsoft.padlock.model.sql.PadLockEntry;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
