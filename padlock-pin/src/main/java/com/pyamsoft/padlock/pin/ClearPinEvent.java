@@ -23,7 +23,7 @@ import com.google.auto.value.AutoValue;
 @AutoValue public abstract class ClearPinEvent {
 
   @CheckResult @NonNull public static ClearPinEvent create(boolean success) {
-    return null;
+    return new AutoValue_ClearPinEvent(success);
   }
 
   @CheckResult public abstract boolean success();
