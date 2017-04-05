@@ -20,11 +20,10 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
-
 @AutoValue public abstract class CreatePinEvent {
 
   @CheckResult @NonNull public static CreatePinEvent create(boolean success) {
-return null;
+    return new AutoValue_CreatePinEvent(success);
   }
 
   @CheckResult public abstract boolean success();
