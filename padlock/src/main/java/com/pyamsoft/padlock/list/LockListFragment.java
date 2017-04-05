@@ -38,7 +38,6 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding;
-import com.pyamsoft.padlock.lock.master.MasterPinSubmitCallback;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.onboard.list.OnboardListDialog;
@@ -49,7 +48,6 @@ import com.pyamsoft.pydroid.design.util.FABUtil;
 import com.pyamsoft.pydroid.drawable.AsyncDrawable;
 import com.pyamsoft.pydroid.drawable.AsyncMap;
 import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
-import com.pyamsoft.pydroid.function.ActionSingle;
 import com.pyamsoft.pydroid.helper.AsyncMapHelper;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.util.AppUtil;
@@ -105,33 +103,6 @@ public class LockListFragment extends Fragment {
         @Override public void onSetFABStateDisabled() {
           fabIconTask = AsyncMapHelper.unsubscribe(fabIconTask);
           fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
-        }
-      };
-  @NonNull private final MasterPinSubmitCallback masterPinSubmitCallback =
-      new MasterPinSubmitCallback() {
-
-        @Override public void onCreateMasterPinSuccess() {
-          fabStateCallback.onSetFABStateEnabled();
-          final View v = getView();
-          if (v != null) {
-            Snackbar.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT).show();
-          }
-        }
-
-        @Override public void onCreateMasterPinFailure() {
-          Toast.makeText(getContext(), "Error: Mismatched PIN", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override public void onClearMasterPinSuccess() {
-          fabStateCallback.onSetFABStateDisabled();
-          final View v = getView();
-          if (v != null) {
-            Snackbar.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT).show();
-          }
-        }
-
-        @Override public void onClearMasterPinFailure() {
-          Toast.makeText(getContext(), "Error: Invalid PIN", Toast.LENGTH_SHORT).show();
         }
       };
   boolean listIsRefreshed;
@@ -227,6 +198,33 @@ public class LockListFragment extends Fragment {
 
   @Override public void onStart() {
     super.onStart();
+
+    presenter.registerOnBus(new LockListPresenter.BusCallback() {
+
+      @Override public void onMasterPinCreateSuccess() {
+        fabStateCallback.onSetFABStateEnabled();
+        final View v = getView();
+        if (v != null) {
+          Snackbar.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT).show();
+        }
+      }
+
+      @Override public void onMasterPinCreateFailure() {
+        Toast.makeText(getContext(), "Error: Mismatched PIN", Toast.LENGTH_SHORT).show();
+      }
+
+      @Override public void onMasterPinClearSuccess() {
+        fabStateCallback.onSetFABStateDisabled();
+        final View v = getView();
+        if (v != null) {
+          Snackbar.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT).show();
+        }
+      }
+
+      @Override public void onMasterPinClearFailure() {
+        Toast.makeText(getContext(), "Error: Invalid PIN", Toast.LENGTH_SHORT).show();
+      }
+    });
 
     presenter.setFABStateFromPreference(fabStateCallback);
     if (!listIsRefreshed) {
@@ -391,12 +389,5 @@ public class LockListFragment extends Fragment {
   @SuppressWarnings("WeakerAccess") void displayLockInfoFragment(@NonNull AppEntry entry) {
     AppUtil.onlyLoadOnceDialogFragment(getActivity(), LockInfoDialog.newInstance(entry),
         LockInfoDialog.TAG);
-  }
-
-  /**
-   * Called from {@link PinEntryDialog}
-   */
-  public void provideMasterSubmitCallback(@NonNull ActionSingle<MasterPinSubmitCallback> action) {
-    action.call(masterPinSubmitCallback);
   }
 }

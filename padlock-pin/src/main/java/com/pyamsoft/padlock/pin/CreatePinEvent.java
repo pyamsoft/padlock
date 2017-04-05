@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock.master;
+package com.pyamsoft.padlock.pin;
 
-public interface MasterPinSubmitCallback {
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import com.google.auto.value.AutoValue;
 
-  void onCreateMasterPinSuccess();
 
-  void onCreateMasterPinFailure();
+@AutoValue public abstract class CreatePinEvent {
 
-  void onClearMasterPinSuccess();
+  @CheckResult @NonNull public static CreatePinEvent create(boolean success) {
+return null;
+  }
 
-  void onClearMasterPinFailure();
+  @CheckResult public abstract boolean success();
 }

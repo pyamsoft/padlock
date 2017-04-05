@@ -16,18 +16,15 @@
 
 package com.pyamsoft.padlock.pin;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import com.google.auto.value.AutoValue;
 
-abstract class PinEntryBaseFragment extends Fragment {
+@AutoValue public abstract class ClearPinEvent {
 
-  void dismissParent() {
-    final FragmentManager fragmentManager = getParentFragment().getFragmentManager();
-    final Fragment pinFragment = fragmentManager.findFragmentByTag(PinEntryDialog.TAG);
-    if (pinFragment instanceof PinEntryDialog) {
-      ((PinEntryDialog) pinFragment).dismiss();
-    } else {
-      throw new ClassCastException("Fragment is not PinEntryDialog");
-    }
+  @CheckResult @NonNull public static ClearPinEvent create(boolean success) {
+    return null;
   }
+
+  @CheckResult public abstract boolean success();
 }
