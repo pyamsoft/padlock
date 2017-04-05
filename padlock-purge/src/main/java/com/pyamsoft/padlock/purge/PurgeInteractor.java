@@ -49,7 +49,10 @@ import timber.log.Timber;
     cachedStalePackages = null;
   }
 
-  @NonNull public Observable<String> populateList(boolean forceRefresh) {
+  /**
+   * public
+   */
+  @NonNull Observable<String> populateList(boolean forceRefresh) {
     return Single.defer(() -> {
       final Single<List<String>> dataSource;
       if (cachedStalePackages == null || forceRefresh) {
@@ -110,7 +113,10 @@ import timber.log.Timber;
     return padLockDB.queryAll().first(Collections.emptyList());
   }
 
-  @CheckResult @NonNull public Observable<Integer> deleteEntry(@NonNull String packageName) {
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<Integer> deleteEntry(@NonNull String packageName) {
     return padLockDB.deleteWithPackageName(packageName).map(integer -> {
       cachedStalePackages = null;
       return integer;

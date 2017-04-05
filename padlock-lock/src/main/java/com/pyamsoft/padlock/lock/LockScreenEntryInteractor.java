@@ -57,9 +57,12 @@ import timber.log.Timber;
     this.recheckServiceClass = recheckServiceClass;
   }
 
-  @CheckResult @NonNull
-  public Observable<Boolean> submitPin(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long lockUntilTime, final String currentAttempt) {
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<Boolean> submitPin(@NonNull String packageName,
+      @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
+      final String currentAttempt) {
     return pinInteractor.getMasterPin().map(masterPin -> {
       Timber.d("Attempt unlock: %s %s", packageName, activityName);
       Timber.d("Check entry is not locked: %d", lockUntilTime);
@@ -154,8 +157,11 @@ import timber.log.Timber;
     return padLockDB.updateIgnoreTime(newIgnoreTime + 1000L, packageName, activityName);
   }
 
-  @CheckResult @NonNull
-  public Observable<TimePair> incrementAndGetFailCount(String packageName, String activityName) {
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<TimePair> incrementAndGetFailCount(String packageName,
+      String activityName) {
     return Observable.fromCallable(() -> ++failCount)
         .filter(count -> count > DEFAULT_MAX_FAIL_COUNT)
         .flatMap(integer -> getTimeoutPeriodMinutesInMillis())
@@ -182,7 +188,10 @@ import timber.log.Timber;
     });
   }
 
-  public void resetFailCount() {
+  /**
+   * public
+   */
+  void resetFailCount() {
     Timber.d("Reset fail count to 0");
     failCount = 0;
   }

@@ -44,7 +44,10 @@ class LockScreenPresenter extends LockTypePresenter {
     ignoreTimeDisposable = DisposableHelper.dispose(ignoreTimeDisposable);
   }
 
-  public void createWithDefaultIgnoreTime(@NonNull IgnoreTimeCallback callback) {
+  /**
+   * public
+   */
+  void createWithDefaultIgnoreTime(@NonNull IgnoreTimeCallback callback) {
     ignoreTimeDisposable = DisposableHelper.dispose(ignoreTimeDisposable);
     ignoreTimeDisposable = interactor.getDefaultIgnoreTime()
         .subscribeOn(getSubscribeScheduler())
@@ -53,7 +56,10 @@ class LockScreenPresenter extends LockTypePresenter {
             throwable -> Timber.e(throwable, "onError createWithDefaultIgnoreTime"));
   }
 
-  public void loadDisplayNameFromPackage(@NonNull String packageName,
+  /**
+   * public
+   */
+  void loadDisplayNameFromPackage(@NonNull String packageName,
       @NonNull DisplayNameLoadCallback callback) {
     displayNameDisposable = DisposableHelper.dispose(displayNameDisposable);
     displayNameDisposable = interactor.getDisplayName(packageName)

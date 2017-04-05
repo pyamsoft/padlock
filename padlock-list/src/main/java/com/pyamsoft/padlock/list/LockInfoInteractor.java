@@ -21,11 +21,11 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.PadLockPreferences;
-import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.base.db.PadLockDB;
+import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.ActivityEntry;
-import com.pyamsoft.padlock.base.db.PadLockEntry;
+import com.pyamsoft.padlock.model.LockState;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import java.util.ArrayList;
@@ -56,12 +56,18 @@ import timber.log.Timber;
     this.lockScreenClass = lockScreenClass;
   }
 
-  @CheckResult @NonNull public Observable<Boolean> hasShownOnBoarding() {
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding() {
     return Observable.fromCallable(preferences::isDialogOnBoard).delay(300, TimeUnit.MILLISECONDS);
   }
 
-  @NonNull @CheckResult
-  public Observable<ActivityEntry> populateList(@NonNull String packageName, boolean forceRefresh) {
+  /**
+   * public
+   */
+  @NonNull @CheckResult Observable<ActivityEntry> populateList(@NonNull String packageName,
+      boolean forceRefresh) {
     return Single.defer(() -> {
       final Single<List<ActivityEntry>> dataSource;
       Single<List<ActivityEntry>> cached = cacheInteractor.getFromCache(packageName);

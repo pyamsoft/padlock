@@ -44,8 +44,11 @@ class PinEntryPresenter extends SchedulerPresenter {
     pinEntryDisposable = DisposableHelper.dispose(pinEntryDisposable);
   }
 
-  public void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt,
-      @NonNull String hint, @NonNull SubmitCallback callback) {
+  /**
+   * public
+   */
+  void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt, @NonNull String hint,
+      @NonNull SubmitCallback callback) {
     Timber.d("Attempt PIN submission");
     pinEntryDisposable = DisposableHelper.dispose(pinEntryDisposable);
     pinEntryDisposable = interactor.submitPin(currentAttempt, reEntryAttempt, hint)
@@ -64,7 +67,10 @@ class PinEntryPresenter extends SchedulerPresenter {
         });
   }
 
-  public void checkMasterPinPresent(@NonNull MasterPinStatusCallback callback) {
+  /**
+   * public
+   */
+  void checkMasterPinPresent(@NonNull MasterPinStatusCallback callback) {
     Timber.d("Check if we have a master");
     pinCheckDisposable = DisposableHelper.dispose(pinCheckDisposable);
     pinCheckDisposable = interactor.hasMasterPin()

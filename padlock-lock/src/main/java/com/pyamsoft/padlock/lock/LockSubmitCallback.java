@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.lock;
 
-public interface LockSubmitCallback {
+interface LockSubmitCallback {
 
   void onSubmitSuccess();
 

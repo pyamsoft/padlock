@@ -32,7 +32,10 @@ class OnboardListPresenter extends SchedulerPresenter {
     this.interactor = interactor;
   }
 
-  public void finishOnboarding() {
+  /**
+   * public
+   */
+  void finishOnboarding() {
     interactor.completeOnboarding();
   }
 }

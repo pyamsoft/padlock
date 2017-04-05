@@ -31,17 +31,17 @@ import com.squareup.sqldelight.SqlDelightStatement;
    * The activity name of the PACKAGE entry in the database
    */
   @NonNull public static final String PACKAGE_ACTIVITY_NAME = "PACKAGE";
-  @NonNull public static final String PACKAGE_EMPTY = "EMPTY";
-  @NonNull public static final String ACTIVITY_EMPTY = "EMPTY";
+  @NonNull static final String PACKAGE_EMPTY = "EMPTY";
+  @NonNull static final String ACTIVITY_EMPTY = "EMPTY";
   @SuppressWarnings("StaticInitializerReferencesSubClass") @NonNull public static final PadLockEntry
       EMPTY = new AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false);
   @SuppressWarnings("StaticInitializerReferencesSubClass") @NonNull
   private static final Factory<PadLockEntry> FACTORY = new Factory<>(AutoValue_PadLockEntry::new);
-  @NonNull public static final RowMapper<AllEntries> ALL_ENTRIES_MAPPER =
+  @NonNull static final RowMapper<AllEntries> ALL_ENTRIES_MAPPER =
       FACTORY.all_entriesMapper(AutoValue_PadLockEntry_AllEntries::new);
-  @NonNull public static final RowMapper<WithPackageName> WITH_PACKAGE_NAME_MAPPER =
+  @NonNull static final RowMapper<WithPackageName> WITH_PACKAGE_NAME_MAPPER =
       FACTORY.with_package_nameMapper(AutoValue_PadLockEntry_WithPackageName::new);
-  @NonNull public static final Mapper<PadLockEntry> WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER =
+  @NonNull static final Mapper<PadLockEntry> WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER =
       FACTORY.with_package_activity_name_defaultMapper();
   //@NonNull public static final RowMapper<WithPackageActivityName>
   //    WITH_PACKAGE_ACTIVITY_NAME_MAPPER =
@@ -54,18 +54,17 @@ import com.squareup.sqldelight.SqlDelightStatement;
   //}
 
   @CheckResult @NonNull
-  public static SqlDelightStatement withPackageActivityNameDefault(@NonNull String packageName,
+  static SqlDelightStatement withPackageActivityNameDefault(@NonNull String packageName,
       @NonNull String activityName) {
     return FACTORY.with_package_activity_name_default(packageName, PACKAGE_ACTIVITY_NAME,
         activityName, PACKAGE_ACTIVITY_NAME, activityName);
   }
 
-  @CheckResult @NonNull
-  public static SqlDelightStatement withPackageName(@NonNull String packageName) {
+  @CheckResult @NonNull static SqlDelightStatement withPackageName(@NonNull String packageName) {
     return FACTORY.with_package_name(packageName);
   }
 
-  @CheckResult @NonNull public static SqlDelightStatement queryAll() {
+  @CheckResult @NonNull static SqlDelightStatement queryAll() {
     return FACTORY.all_entries();
   }
 
@@ -81,33 +80,32 @@ import com.squareup.sqldelight.SqlDelightStatement;
     return PACKAGE_EMPTY.equals(entry.packageName()) && ACTIVITY_EMPTY.equals(entry.activityName());
   }
 
-  @CheckResult @NonNull
-  public static InsertManager insertEntry(@NonNull SQLiteOpenHelper openHelper) {
+  @CheckResult @NonNull static InsertManager insertEntry(@NonNull SQLiteOpenHelper openHelper) {
     return new InsertManager(openHelper);
   }
 
   @CheckResult @NonNull
-  public static DeletePackageManager deletePackage(@NonNull SQLiteOpenHelper openHelper) {
+  static DeletePackageManager deletePackage(@NonNull SQLiteOpenHelper openHelper) {
     return new DeletePackageManager(openHelper);
   }
 
-  @CheckResult @NonNull public static DeletePackageActivityManager deletePackageActivity(
-      @NonNull SQLiteOpenHelper openHelper) {
+  @CheckResult @NonNull
+  static DeletePackageActivityManager deletePackageActivity(@NonNull SQLiteOpenHelper openHelper) {
     return new DeletePackageActivityManager(openHelper);
   }
 
   @CheckResult @NonNull
-  public static UpdateLockTimeManager updateLockTime(@NonNull SQLiteOpenHelper openHelper) {
+  static UpdateLockTimeManager updateLockTime(@NonNull SQLiteOpenHelper openHelper) {
     return new UpdateLockTimeManager(openHelper);
   }
 
   @CheckResult @NonNull
-  public static UpdateIgnoreTimeManager updateIgnoreTime(@NonNull SQLiteOpenHelper openHelper) {
+  static UpdateIgnoreTimeManager updateIgnoreTime(@NonNull SQLiteOpenHelper openHelper) {
     return new UpdateIgnoreTimeManager(openHelper);
   }
 
   @CheckResult @NonNull
-  public static UpdateWhitelistManager updateWhitelist(@NonNull SQLiteOpenHelper openHelper) {
+  static UpdateWhitelistManager updateWhitelist(@NonNull SQLiteOpenHelper openHelper) {
     return new UpdateWhitelistManager(openHelper);
   }
 

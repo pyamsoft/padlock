@@ -54,7 +54,10 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
     interactor.resetFailCount();
   }
 
-  public void displayLockedHint(@NonNull LockHintCallback callback) {
+  /**
+   * public
+   */
+  void displayLockedHint(@NonNull LockHintCallback callback) {
     hintDisposable = DisposableHelper.dispose(hintDisposable);
     hintDisposable = interactor.getHint()
         .subscribeOn(getSubscribeScheduler())
@@ -63,7 +66,10 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
             throwable -> Timber.e(throwable, "onError displayLockedHint"));
   }
 
-  public void lockEntry(@NonNull String packageName, @NonNull String activityName,
+  /**
+   * public
+   */
+  void lockEntry(@NonNull String packageName, @NonNull String activityName,
       @NonNull LockCallback callback) {
     lockDisposable = DisposableHelper.dispose(lockDisposable);
     lockDisposable = interactor.incrementAndGetFailCount(packageName, activityName)
@@ -82,7 +88,10 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
         });
   }
 
-  public void submit(@NonNull String packageName, @NonNull String activityName,
+  /**
+   * public
+   */
+  void submit(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, @NonNull String currentAttempt,
       @NonNull LockSubmitCallback callback) {
     unlockDisposable = DisposableHelper.dispose(unlockDisposable);
@@ -103,7 +112,10 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
             });
   }
 
-  public void postUnlock(@NonNull String packageName, @NonNull String activityName,
+  /**
+   * public
+   */
+  void postUnlock(@NonNull String packageName, @NonNull String activityName,
       @NonNull String realName, @Nullable String lockCode, boolean isSystem, boolean shouldExclude,
       long ignoreTime, @NonNull PostUnlockCallback callback) {
     postUnlockDisposable = DisposableHelper.dispose(postUnlockDisposable);

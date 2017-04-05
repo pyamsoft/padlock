@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.iconloader;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.WorkerThread;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import io.reactivex.Observable;
 import javax.inject.Inject;
@@ -33,8 +32,10 @@ import javax.inject.Singleton;
     this.packageManagerWrapper = packageManagerWrapper;
   }
 
-  @NonNull @WorkerThread @CheckResult
-  public Observable<Drawable> loadPackageIcon(final @NonNull String packageName) {
+  /**
+   * public
+   */
+  @NonNull @CheckResult Observable<Drawable> loadPackageIcon(final @NonNull String packageName) {
     return packageManagerWrapper.loadDrawableForPackageOrDefault(packageName);
   }
 }

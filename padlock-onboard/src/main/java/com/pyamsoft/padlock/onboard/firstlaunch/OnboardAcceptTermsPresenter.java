@@ -42,7 +42,10 @@ class OnboardAcceptTermsPresenter extends SchedulerPresenter {
     termsDisposable = DisposableHelper.dispose(termsDisposable);
   }
 
-  public void acceptUsageTerms(@NonNull UsageTermsCallback callback) {
+  /**
+   * public
+   */
+  void acceptUsageTerms(@NonNull UsageTermsCallback callback) {
     termsDisposable = DisposableHelper.dispose(termsDisposable);
     termsDisposable = interactor.agreeToTerms()
         .subscribeOn(getSubscribeScheduler())

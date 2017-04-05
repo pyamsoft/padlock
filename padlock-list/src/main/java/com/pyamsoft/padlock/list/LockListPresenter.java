@@ -53,7 +53,10 @@ class LockListPresenter extends SchedulerPresenter {
     populateListDisposable = DisposableHelper.dispose(populateListDisposable);
   }
 
-  public void populateList(@NonNull PopulateListCallback callback, boolean forceRefresh) {
+  /**
+   * public
+   */
+  void populateList(@NonNull PopulateListCallback callback, boolean forceRefresh) {
     populateListDisposable = DisposableHelper.dispose(populateListDisposable);
     populateListDisposable = lockListInteractor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
@@ -65,7 +68,10 @@ class LockListPresenter extends SchedulerPresenter {
         });
   }
 
-  public void setFABStateFromPreference(@NonNull FABStateCallback callback) {
+  /**
+   * public
+   */
+  void setFABStateFromPreference(@NonNull FABStateCallback callback) {
     fabStateDisposable = DisposableHelper.dispose(fabStateDisposable);
     fabStateDisposable = stateInteractor.isServiceEnabled()
         .subscribeOn(getSubscribeScheduler())
@@ -79,15 +85,24 @@ class LockListPresenter extends SchedulerPresenter {
         }, throwable -> Timber.e(throwable, "onError"));
   }
 
-  public void setSystemVisible() {
+  /**
+   * public
+   */
+  void setSystemVisible() {
     lockListInteractor.setSystemVisible(true);
   }
 
-  public void setSystemInvisible() {
+  /**
+   * public
+   */
+  void setSystemInvisible() {
     lockListInteractor.setSystemVisible(false);
   }
 
-  public void setSystemVisibilityFromPreference(@NonNull SystemVisibilityCallback callback) {
+  /**
+   * public
+   */
+  void setSystemVisibilityFromPreference(@NonNull SystemVisibilityCallback callback) {
     systemVisibleDisposable = DisposableHelper.dispose(systemVisibleDisposable);
     systemVisibleDisposable = lockListInteractor.isSystemVisible()
         .subscribeOn(getSubscribeScheduler())
@@ -101,7 +116,10 @@ class LockListPresenter extends SchedulerPresenter {
         }, throwable -> Timber.e(throwable, "onError"));
   }
 
-  public void showOnBoarding(@NonNull OnboardingCallback callback) {
+  /**
+   * public
+   */
+  void showOnBoarding(@NonNull OnboardingCallback callback) {
     onboardDisposable = DisposableHelper.dispose(onboardDisposable);
     onboardDisposable = lockListInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())

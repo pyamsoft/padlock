@@ -38,11 +38,17 @@ import timber.log.Timber;
     this.masterPinInteractor = masterPinInteractor;
   }
 
-  @NonNull @CheckResult public Observable<Boolean> hasMasterPin() {
+  /**
+   * public
+   */
+  @NonNull @CheckResult Observable<Boolean> hasMasterPin() {
     return getMasterPin().map(OptionalWrapper::isPresent);
   }
 
-  @NonNull @CheckResult public Observable<PinEntryEvent> submitPin(@NonNull String currentAttempt,
+  /**
+   * public
+   */
+  @NonNull @CheckResult Observable<PinEntryEvent> submitPin(@NonNull String currentAttempt,
       @NonNull String reEntryAttempt, @NonNull String hint) {
     return getMasterPin().flatMap(masterPin -> {
       if (masterPin.isPresent()) {

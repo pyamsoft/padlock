@@ -31,7 +31,10 @@ import javax.inject.Singleton;
     this.preferences = preferences;
   }
 
-  @NonNull @CheckResult public Observable<Boolean> isOnboardingComplete() {
+  /**
+   * public
+   */
+  @NonNull @CheckResult Observable<Boolean> isOnboardingComplete() {
     return Observable.fromCallable(preferences::hasAgreed);
   }
 }
