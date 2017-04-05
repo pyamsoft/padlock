@@ -25,9 +25,9 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
+import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
-import com.pyamsoft.padlock.base.db.PadLockEntry;
 import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -77,8 +77,10 @@ import timber.log.Timber;
     setLockScreenPassed(false);
   }
 
-  @CheckResult @NonNull
-  public Observable<Boolean> processActiveIfMatching(@NonNull String packageName,
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<Boolean> processActiveIfMatching(@NonNull String packageName,
       @NonNull String className) {
     return Observable.fromCallable(() -> {
       Timber.d("Check against current window values: %s, %s", activePackageName, activeClassName);
@@ -90,7 +92,10 @@ import timber.log.Timber;
     });
   }
 
-  @CheckResult @NonNull public Observable<PadLockEntry> processEvent(@NonNull String packageName,
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<PadLockEntry> processEvent(@NonNull String packageName,
       @NonNull String className, @NonNull RecheckStatus forcedRecheck) {
     final Observable<Boolean> windowEventObservable =
         stateInteractor.isServiceEnabled()
@@ -196,15 +201,20 @@ import timber.log.Timber;
     });
   }
 
-  public void setLockScreenPassed(boolean b) {
+  /**
+   * public
+   */
+  void setLockScreenPassed(boolean b) {
     Timber.d("Set lockScreenPassed: %s", b);
     lockScreenPassed = b;
   }
 
   /**
    * Clean up the lock service, cancel background jobs
+   *
+   * public
    */
-  public void cleanup() {
+  void cleanup() {
     Timber.d("Cleanup LockService");
     final Intent intent = new Intent(appContext, recheckService);
     jobSchedulerCompat.cancel(intent);

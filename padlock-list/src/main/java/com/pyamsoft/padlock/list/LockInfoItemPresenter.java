@@ -45,7 +45,10 @@ class LockInfoItemPresenter extends SchedulerPresenter {
     databaseDisposable = DisposableHelper.dispose(databaseDisposable);
   }
 
-  public void modifyDatabaseEntry(@NonNull LockState oldLockState, @NonNull LockState newLockState,
+  /**
+   * public
+   */
+  void modifyDatabaseEntry(@NonNull LockState oldLockState, @NonNull LockState newLockState,
       @NonNull String packageName, @NonNull String activityName, @Nullable String code,
       boolean system, @NonNull ModifyDatabaseCallback callback) {
     databaseDisposable = DisposableHelper.dispose(databaseDisposable);
@@ -74,7 +77,7 @@ class LockInfoItemPresenter extends SchedulerPresenter {
             });
   }
 
-  public interface ModifyDatabaseCallback extends LockDatabaseErrorView, LockDatabaseWhitelistView {
+  interface ModifyDatabaseCallback extends LockDatabaseErrorView, LockDatabaseWhitelistView {
 
   }
 }

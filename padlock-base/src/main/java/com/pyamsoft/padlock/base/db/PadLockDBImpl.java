@@ -239,7 +239,7 @@ class PadLockDBImpl implements PadLockDB {
     });
   }
 
-  @SuppressWarnings("WeakerAccess") static class PadLockOpenHelper extends SQLiteOpenHelper {
+  private static class PadLockOpenHelper extends SQLiteOpenHelper {
 
     @NonNull private static final String DB_NAME = "padlock_db";
     private static final int DATABASE_VERSION = 4;

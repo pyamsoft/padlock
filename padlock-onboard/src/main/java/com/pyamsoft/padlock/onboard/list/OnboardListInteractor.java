@@ -29,7 +29,10 @@ import javax.inject.Singleton;
     this.preferences = preferences;
   }
 
-  public void completeOnboarding() {
+  /**
+   * public
+   */
+  void completeOnboarding() {
     preferences.setListOnBoard();
   }
 }

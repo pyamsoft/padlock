@@ -52,7 +52,10 @@ class LockServicePresenter extends SchedulerPresenter {
     interactor.cleanup();
   }
 
-  public void registerOnBus(@NonNull ServiceCallback callback) {
+  /**
+   * public
+   */
+  void registerOnBus(@NonNull ServiceCallback callback) {
     serviceBus = DisposableHelper.dispose(serviceBus);
     serviceBus = EventBus.get()
         .listen(ServiceEvent.class)
@@ -81,8 +84,11 @@ class LockServicePresenter extends SchedulerPresenter {
             recheckEvent.className()), throwable -> Timber.e(throwable, "onError recheck bus"));
   }
 
-  public void processActiveApplicationIfMatching(@NonNull String packageName,
-      @NonNull String className, @NonNull ProcessCallback callback) {
+  /**
+   * public
+   */
+  void processActiveApplicationIfMatching(@NonNull String packageName, @NonNull String className,
+      @NonNull ProcessCallback callback) {
     recheckDisposable = DisposableHelper.dispose(recheckDisposable);
     recheckDisposable = interactor.processActiveIfMatching(packageName, className)
         .subscribeOn(getSubscribeScheduler())
@@ -94,19 +100,24 @@ class LockServicePresenter extends SchedulerPresenter {
         }, throwable -> Timber.e(throwable, "onError processActiveApplicationIfMatching"));
   }
 
-  public void setLockScreenPassed() {
+  /**
+   * public
+   */
+  void setLockScreenPassed() {
     interactor.setLockScreenPassed(true);
   }
 
-  public void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
+  /**
+   * public
+   */
+  void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
       @NonNull RecheckStatus forcedRecheck, @NonNull ProcessCallback callback) {
     lockedEntryDisposable = DisposableHelper.dispose(lockedEntryDisposable);
     lockedEntryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(padLockEntry -> {
-          callback.startLockScreen(padLockEntry, className);
-        }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"));
+        .subscribe(padLockEntry -> callback.startLockScreen(padLockEntry, className),
+            throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"));
   }
 
   interface ProcessCallback {

@@ -20,14 +20,14 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
-@AutoValue public abstract class RecheckEvent {
+@AutoValue abstract class RecheckEvent {
 
   @CheckResult @NonNull
-  public static RecheckEvent create(@NonNull String packageName, @NonNull String className) {
+  static RecheckEvent create(@NonNull String packageName, @NonNull String className) {
     return new AutoValue_RecheckEvent(packageName, className);
   }
 
-  @CheckResult public abstract String packageName();
+  @CheckResult abstract String packageName();
 
-  @CheckResult public abstract String className();
+  @CheckResult abstract String className();
 }

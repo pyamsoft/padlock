@@ -23,9 +23,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
+import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -53,7 +53,10 @@ import timber.log.Timber;
     this.cacheInteractor = cacheInteractor;
   }
 
-  @CheckResult @NonNull public Observable<AppEntry> populateList(boolean forceRefresh) {
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<AppEntry> populateList(boolean forceRefresh) {
     return Single.defer(() -> {
       final Single<List<AppEntry>> dataSource;
 
@@ -217,15 +220,24 @@ import timber.log.Timber;
     return foundEntry;
   }
 
-  @CheckResult @NonNull public Observable<Boolean> hasShownOnBoarding() {
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding() {
     return Observable.fromCallable(preferences::isListOnBoard);
   }
 
-  @CheckResult @NonNull public Observable<Boolean> isSystemVisible() {
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<Boolean> isSystemVisible() {
     return Observable.fromCallable(preferences::isSystemVisible);
   }
 
-  public void setSystemVisible(boolean visible) {
+  /**
+   * public
+   */
+  void setSystemVisible(boolean visible) {
     preferences.setSystemVisible(visible);
   }
 }

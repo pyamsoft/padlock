@@ -36,7 +36,10 @@ import javax.inject.Singleton;
     return preferences;
   }
 
-  @CheckResult @NonNull public Observable<LockScreenType> getLockScreenType() {
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<LockScreenType> getLockScreenType() {
     return Observable.fromCallable(getPreferences()::getCurrentLockType);
   }
 }

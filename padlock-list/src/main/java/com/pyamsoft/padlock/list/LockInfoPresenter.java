@@ -46,7 +46,10 @@ class LockInfoPresenter extends SchedulerPresenter {
     populateListDisposable = DisposableHelper.dispose(populateListDisposable);
   }
 
-  public void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback,
+  /**
+   * public
+   */
+  void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback,
       boolean forceRefresh) {
     populateListDisposable = DisposableHelper.dispose(populateListDisposable);
     populateListDisposable = lockInfoInteractor.populateList(packageName, forceRefresh)
@@ -59,7 +62,10 @@ class LockInfoPresenter extends SchedulerPresenter {
         });
   }
 
-  public void showOnBoarding(@NonNull OnBoardingCallback callback) {
+  /**
+   * public
+   */
+  void showOnBoarding(@NonNull OnBoardingCallback callback) {
     onboardDisposable = DisposableHelper.dispose(onboardDisposable);
     onboardDisposable = lockInfoInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
@@ -75,14 +81,14 @@ class LockInfoPresenter extends SchedulerPresenter {
         });
   }
 
-  public interface OnBoardingCallback {
+  interface OnBoardingCallback {
 
     void onShowOnboarding();
 
     void onOnboardingComplete();
   }
 
-  public interface PopulateListCallback extends LockCommon {
+  interface PopulateListCallback extends LockCommon {
 
     void onEntryAddedToList(@NonNull ActivityEntry entry);
   }

@@ -51,7 +51,10 @@ class PurgePresenter extends SchedulerPresenter {
     purgeAllBus = DisposableHelper.dispose(purgeAllBus);
   }
 
-  public void registerOnBus(@NonNull PurgeCallback callback) {
+  /**
+   * public
+   */
+  void registerOnBus(@NonNull PurgeCallback callback) {
     purgeBus = DisposableHelper.dispose(purgeBus);
     purgeBus = EventBus.get()
         .listen(PurgeEvent.class)
@@ -69,7 +72,10 @@ class PurgePresenter extends SchedulerPresenter {
             throwable -> Timber.e(throwable, "onError purge all"));
   }
 
-  public void retrieveStaleApplications(@NonNull RetrievalCallback callback, boolean forceRefresh) {
+  /**
+   * public
+   */
+  void retrieveStaleApplications(@NonNull RetrievalCallback callback, boolean forceRefresh) {
     retrievalDisposable = DisposableHelper.dispose(retrievalDisposable);
     retrievalDisposable = interactor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
@@ -79,7 +85,10 @@ class PurgePresenter extends SchedulerPresenter {
             throwable -> Timber.e(throwable, "onError retrieveStaleApplications"));
   }
 
-  public void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback) {
+  /**
+   * public
+   */
+  void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback) {
     final Disposable subscription = interactor.deleteEntry(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())

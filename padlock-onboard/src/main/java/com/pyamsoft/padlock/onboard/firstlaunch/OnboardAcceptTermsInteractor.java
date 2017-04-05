@@ -31,7 +31,10 @@ import javax.inject.Singleton;
     this.preferences = preferences;
   }
 
-  @NonNull @CheckResult public Observable<Boolean> agreeToTerms() {
+  /**
+   * public
+   */
+  @NonNull @CheckResult Observable<Boolean> agreeToTerms() {
     return Observable.fromCallable(() -> {
       preferences.setAgreed();
       return true;

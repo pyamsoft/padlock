@@ -45,7 +45,10 @@ class LockListItemPresenter extends SchedulerPresenter {
     databaseDisposable = DisposableHelper.dispose(databaseDisposable);
   }
 
-  public void modifyDatabaseEntry(boolean isChecked, @NonNull String packageName,
+  /**
+   * public
+   */
+  void modifyDatabaseEntry(boolean isChecked, @NonNull String packageName,
       @Nullable String code, boolean system, @NonNull DatabaseCallback callback) {
     // No whitelisting for modifications from the List
     LockState oldState = (isChecked ? LockState.DEFAULT : LockState.LOCKED);

@@ -37,7 +37,10 @@ class MainPresenter extends SchedulerPresenter {
     this.interactor = interactor;
   }
 
-  public void showOnboardingOrDefault(@NonNull OnboardingCallback callback) {
+  /**
+   * public
+   */
+  void showOnboardingOrDefault(@NonNull OnboardingCallback callback) {
     onboardingDisposable = DisposableHelper.dispose(onboardingDisposable);
     onboardingDisposable = interactor.isOnboardingComplete()
         .subscribeOn(getSubscribeScheduler())
