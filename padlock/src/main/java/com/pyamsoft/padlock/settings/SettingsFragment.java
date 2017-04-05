@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.settings;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -142,12 +141,8 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
       }
 
       @Override public void onClearDatabase() {
-        final Activity activity = getActivity();
-        if (activity instanceof MainActivity) {
-          ((MainActivity) activity).onForceRefresh();
-        } else {
-          throw new ClassCastException("Activity is not MainActivity");
-        }
+        Toast.makeText(getContext(), "Locked application database has been cleared",
+            Toast.LENGTH_SHORT).show();
       }
     });
   }
