@@ -51,8 +51,7 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 public class MainActivity extends TamperActivity
-    implements MainPresenter.MainView, NavigationDrawerController,
-    MainPresenter.OnboardingCallback {
+    implements NavigationDrawerController, MainPresenter.OnboardingCallback {
 
   @NonNull private static final String FIRST_LAUNCH = "main_first_launch";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
@@ -302,15 +301,6 @@ public class MainActivity extends TamperActivity
     // Lock the navigation drawer if we are showing onboarding
     // Action bar is hidden so the drawer toggle state wont matter
     drawerShowUpNavigation();
-  }
-
-  @Override public void onForceRefresh() {
-    Timber.d("Force lock list refresh");
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-    binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
-
-    // TODO reload the list to remove cached items
   }
 
   public void onOnboardingCompleted() {

@@ -65,9 +65,4 @@ class MainPresenter extends SchedulerPresenter {
 
     void onShowDefaultPage();
   }
-
-  @Deprecated interface MainView {
-
-    void onForceRefresh();
-  }
 }
