@@ -32,6 +32,7 @@
         android:layout_gravity="center"
         app:aspectRatio="square"
         app:aspectRatioEnabled="true"
+        app:correctStateColor="?attr/colorAccent"
         app:normalStateColor="@android:color/black"
         />
 
