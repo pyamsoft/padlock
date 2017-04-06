@@ -23,6 +23,8 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.andrognito.patternlockview.PatternLockView;
+import com.andrognito.patternlockview.listener.PatternLockViewListener;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding;
@@ -32,7 +34,6 @@ import com.pyamsoft.pydroid.function.FuncNone;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
-import me.zhanghai.android.patternlock.PatternView;
 import timber.log.Timber;
 
 public class PinEntryPatternFragment extends PinEntryBaseFragment {
@@ -41,13 +42,14 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
   @NonNull private static final String REPEAT_CELL_PATTERN = "repeat_cell_pattern";
   @NonNull private static final String PATTERN_TEXT = "pattern_text";
   static int MINIMUM_PATTERN_LENGTH = 4;
-  @NonNull final List<PatternView.Cell> cellPattern = new ArrayList<>();
-  @NonNull final List<PatternView.Cell> repeatCellPattern = new ArrayList<>();
+  @NonNull final List<PatternLockView.Dot> cellPattern = new ArrayList<>();
+  @NonNull final List<PatternLockView.Dot> repeatCellPattern = new ArrayList<>();
   boolean repeatPattern = false;
   FragmentPinEntryPatternBinding binding;
   @Inject PinEntryPresenter presenter;
   @Nullable FuncNone<Boolean> nextButtonOnClickRunnable;
   @NonNull String patternText = "";
+  @Nullable private PatternLockViewListener listener;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -71,6 +73,10 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
+    if (listener != null) {
+      binding.patternLock.removePatternLockListener(listener);
+      listener = null;
+    }
     binding.unbind();
   }
 
@@ -82,7 +88,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    binding.patternLock.setOnPatternListener(new PatternView.OnPatternListener() {
+    listener = new PatternLockViewListener() {
 
       private void clearPattern() {
         if (repeatPattern) {
@@ -92,36 +98,39 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
         }
       }
 
-      @Override public void onPatternStart() {
-        binding.patternLock.setDisplayMode(PatternView.DisplayMode.Correct);
+      @Override public void onStarted() {
+        binding.patternLock.setViewMode(PatternLockView.PatternViewMode.CORRECT);
         clearPattern();
       }
 
-      @Override public void onPatternCleared() {
-        clearPattern();
+      @Override public void onProgress(List<PatternLockView.Dot> list) {
+
       }
 
-      @Override public void onPatternCellAdded(List<PatternView.Cell> pattern) {
-      }
-
-      @Override public void onPatternDetected(List<PatternView.Cell> pattern) {
+      @Override public void onComplete(List<PatternLockView.Dot> list) {
         if (!repeatPattern) {
-          if (pattern.size() < MINIMUM_PATTERN_LENGTH) {
-            binding.patternLock.setDisplayMode(PatternView.DisplayMode.Wrong);
+          if (list.size() < MINIMUM_PATTERN_LENGTH) {
+            binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG);
           }
         }
 
         Timber.d("onPatternDetected");
-        List<PatternView.Cell> cellList;
+        List<PatternLockView.Dot> cellList;
         if (repeatPattern) {
           cellList = repeatCellPattern;
         } else {
           cellList = cellPattern;
         }
         cellList.clear();
-        cellList.addAll(pattern);
+        cellList.addAll(list);
       }
-    });
+
+      @Override public void onCleared() {
+        clearPattern();
+      }
+    };
+
+    binding.patternLock.addPatternLockListener(listener);
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
@@ -148,7 +157,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
           } else {
             // process and show next
             if (cellPattern.size() < MINIMUM_PATTERN_LENGTH) {
-              binding.patternLock.setDisplayMode(PatternView.DisplayMode.Wrong);
+              binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG);
               return false;
             } else {
               patternText = LockCellUtils.cellPatternToString(cellPattern);

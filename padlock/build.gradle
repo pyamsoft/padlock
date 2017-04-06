@@ -110,7 +110,7 @@ dependencies {
   compile "com.google.firebase:firebase-crash:$firebase"
 
   // Pattern Lock
-  compile "me.zhanghai.android.patternlock:library:$patternLock"
+  compile "com.andrognito.patternlockview:patternlockview:$patternLock"
 
   // PYDroid
   compile("com.github.pyamsoft.pydroid:pydroid-ui:$pydroid@aar") {
