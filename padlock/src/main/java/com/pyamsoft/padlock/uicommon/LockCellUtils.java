@@ -18,9 +18,9 @@ package com.pyamsoft.padlock.uicommon;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.andrognito.patternlockview.PatternLockView;
 import java.util.List;
 import java.util.Locale;
-import me.zhanghai.android.patternlock.PatternView;
 
 public final class LockCellUtils {
 
@@ -29,9 +29,9 @@ public final class LockCellUtils {
   }
 
   @NonNull @CheckResult
-  public static String cellPatternToString(@NonNull List<PatternView.Cell> cells) {
+  public static String cellPatternToString(@NonNull List<PatternLockView.Dot> cells) {
     StringBuilder builder = new StringBuilder(4);
-    for (PatternView.Cell cell : cells) {
+    for (PatternLockView.Dot cell : cells) {
       String cellString =
           String.format(Locale.getDefault(), "%s%s", cell.getRow(), cell.getColumn());
       builder.append(cellString);

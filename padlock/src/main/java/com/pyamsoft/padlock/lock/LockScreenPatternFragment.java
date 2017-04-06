@@ -23,13 +23,14 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.andrognito.patternlockview.PatternLockView;
+import com.andrognito.patternlockview.listener.PatternLockViewListener;
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.padlock.uicommon.LockCellUtils;
 import com.pyamsoft.pydroid.util.AppUtil;
 import java.util.List;
-import me.zhanghai.android.patternlock.PatternView;
 import timber.log.Timber;
 
 import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_LOCK_UNTIL_TIME;
@@ -38,6 +39,7 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
 
   @NonNull static final String TAG = "LockScreenPatternFragment";
   FragmentLockScreenPatternBinding binding;
+  @Nullable private PatternLockViewListener listener;
 
   @CheckResult @NonNull
   public static LockScreenPatternFragment newInstance(@NonNull String lockedPackageName,
@@ -59,6 +61,10 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
+    if (listener != null) {
+      binding.patternLock.removePatternLockListener(listener);
+      listener = null;
+    }
     binding.unbind();
   }
 
@@ -113,25 +119,45 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
       }
     };
 
-    binding.patternLock.setOnPatternListener(new PatternView.OnPatternListener() {
-      @Override public void onPatternStart() {
+    listener = new PatternLockViewListener() {
+      @Override public void onStarted() {
 
       }
 
-      @Override public void onPatternCleared() {
+      @Override public void onProgress(List<PatternLockView.Dot> list) {
 
       }
 
-      @Override public void onPatternCellAdded(List<PatternView.Cell> pattern) {
-
-      }
-
-      @Override public void onPatternDetected(List<PatternView.Cell> pattern) {
+      @Override public void onComplete(List<PatternLockView.Dot> list) {
         presenter.submit(getLockedPackageName(), getLockedActivityName(), getLockedCode(),
-            getLockedUntilTime(), LockCellUtils.cellPatternToString(pattern), submitCallback);
+            getLockedUntilTime(), LockCellUtils.cellPatternToString(list), submitCallback);
         binding.patternLock.clearPattern();
       }
-    });
+
+      @Override public void onCleared() {
+
+      }
+    };
+    binding.patternLock.addPatternLockListener(listener);
+    //    new .OnPatternListener() {
+    //  @Override public void onPatternStart() {
+    //
+    //  }
+    //
+    //  @Override public void onPatternCleared() {
+    //
+    //  }
+    //
+    //  @Override public void onPatternCellAdded(List<PatternView.Cell> pattern) {
+    //
+    //  }
+    //
+    //  @Override public void onPatternDetected(List<PatternView.Cell> pattern) {
+    //    presenter.submit(getLockedPackageName(), getLockedActivityName(), getLockedCode(),
+    //        getLockedUntilTime(), LockCellUtils.cellPatternToString(pattern), submitCallback);
+    //    binding.patternLock.clearPattern();
+    //  }
+    //});
   }
 
   @Override public void onStart() {
