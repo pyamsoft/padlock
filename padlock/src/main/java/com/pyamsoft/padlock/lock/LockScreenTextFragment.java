@@ -32,11 +32,9 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.drawable.AsyncDrawable;
-import com.pyamsoft.pydroid.drawable.AsyncMap;
-import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
-import com.pyamsoft.pydroid.helper.AsyncMapHelper;
-import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.ui.loader.DrawableHelper;
+import com.pyamsoft.pydroid.ui.loader.DrawableLoader;
+import com.pyamsoft.pydroid.util.DialogUtil;
 import java.util.Locale;
 import timber.log.Timber;
 
@@ -49,7 +47,7 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   FragmentLockScreenTextBinding binding;
   private EditText editText;
-  @NonNull private AsyncMapEntry arrowGoTask = AsyncMap.emptyEntry();
+  @NonNull private DrawableLoader.Loaded arrowGoTask = DrawableLoader.empty();
 
   @CheckResult @NonNull
   public static LockScreenTextFragment newInstance(@NonNull String lockedPackageName,
@@ -71,7 +69,7 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    arrowGoTask = AsyncMapHelper.unsubscribe(arrowGoTask);
+    arrowGoTask = DrawableHelper.unload(arrowGoTask);
     imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0, 0);
     binding.unbind();
   }
@@ -83,7 +81,7 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
 
       @NonNull final LockScreenPresenter.LockErrorCallback lockErrorCallback = () -> {
         Timber.e("LOCK ERROR");
-        AppUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "lock_error");
+        DialogUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "lock_error");
       };
 
       @Override public void onSubmitSuccess() {
@@ -129,7 +127,7 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
 
       @Override public void onSubmitError() {
         clearDisplay();
-        AppUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "unlock_error");
+        DialogUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "unlock_error");
       }
     };
 
@@ -192,8 +190,8 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
       }
     });
 
-    arrowGoTask = AsyncMapHelper.unsubscribe(arrowGoTask);
-    arrowGoTask = AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp)
+    arrowGoTask = DrawableHelper.unload(arrowGoTask);
+    arrowGoTask = DrawableLoader.load(R.drawable.ic_arrow_forward_24dp)
         .tint(R.color.orangeA200)
         .into(binding.lockImageGo);
   }

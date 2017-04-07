@@ -30,7 +30,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.DialogUtil;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -95,7 +95,7 @@ public class LockListItem
                 getModel().system(), new LockListItemPresenter.DatabaseCallback() {
 
                   @Override public void onDatabaseEntryError() {
-                    AppUtil.onlyLoadOnceDialogFragment(
+                    DialogUtil.onlyLoadOnceDialogFragment(
                         (FragmentActivity) holder.itemView.getContext(), new ErrorDialog(),
                         "error");
                   }
