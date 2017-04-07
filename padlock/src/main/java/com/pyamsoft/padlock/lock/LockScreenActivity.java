@@ -38,7 +38,7 @@ import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
-import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.DialogUtil;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
@@ -236,7 +236,7 @@ public class LockScreenActivity extends ActivityBase {
           }
 
           @Override public void onApplicationIconLoadedError() {
-            AppUtil.guaranteeSingleDialogFragment(LockScreenActivity.this, new ErrorDialog(),
+            DialogUtil.onlyLoadOnceDialogFragment(LockScreenActivity.this, new ErrorDialog(),
                 "error");
           }
         });
@@ -344,13 +344,14 @@ public class LockScreenActivity extends ActivityBase {
     final int itemId = item.getItemId();
     switch (itemId) {
       case R.id.menu_lockscreen_forgot:
-        AppUtil.onlyLoadOnceDialogFragment(this, new ForgotPasswordDialog(), FORGOT_PASSWORD_TAG);
+        DialogUtil.guaranteeSingleDialogFragment(this, new ForgotPasswordDialog(),
+            FORGOT_PASSWORD_TAG);
         break;
       case R.id.menu_exclude:
         item.setChecked(!item.isChecked());
         break;
       case R.id.menu_lockscreen_info:
-        AppUtil.onlyLoadOnceDialogFragment(this,
+        DialogUtil.guaranteeSingleDialogFragment(this,
             LockedStatDialog.newInstance(binding.toolbar.getTitle().toString(), lockedPackageName,
                 lockedActivityName, lockedRealName, lockedSystem, binding.lockImage.getDrawable()),
             "info_dialog");

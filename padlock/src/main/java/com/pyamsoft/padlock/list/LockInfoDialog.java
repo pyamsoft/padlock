@@ -43,6 +43,7 @@ import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -118,8 +119,7 @@ public class LockInfoDialog extends DialogFragment {
 
         @Override public void onListPopulateError() {
           Timber.e("onListPopulateError");
-          onListPopulated();
-          AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
+          DialogUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "error");
         }
 
         @Override public void onListCleared() {

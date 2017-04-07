@@ -29,7 +29,7 @@ import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.padlock.uicommon.LockCellUtils;
-import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.DialogUtil;
 import java.util.List;
 import timber.log.Timber;
 
@@ -74,7 +74,7 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
 
       @NonNull final LockScreenPresenter.LockErrorCallback lockErrorCallback = () -> {
         Timber.e("LOCK ERROR");
-        AppUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "lock_error");
+        DialogUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "lock_error");
       };
 
       @Override public void onSubmitSuccess() {
@@ -115,7 +115,7 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
       }
 
       @Override public void onSubmitError() {
-        AppUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "unlock_error");
+        DialogUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "unlock_error");
       }
     };
 
@@ -138,26 +138,9 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
 
       }
     };
+
+    binding.patternLock.setTactileFeedbackEnabled(false);
     binding.patternLock.addPatternLockListener(listener);
-    //    new .OnPatternListener() {
-    //  @Override public void onPatternStart() {
-    //
-    //  }
-    //
-    //  @Override public void onPatternCleared() {
-    //
-    //  }
-    //
-    //  @Override public void onPatternCellAdded(List<PatternView.Cell> pattern) {
-    //
-    //  }
-    //
-    //  @Override public void onPatternDetected(List<PatternView.Cell> pattern) {
-    //    presenter.submit(getLockedPackageName(), getLockedActivityName(), getLockedCode(),
-    //        getLockedUntilTime(), LockCellUtils.cellPatternToString(pattern), submitCallback);
-    //    binding.patternLock.clearPattern();
-    //  }
-    //});
   }
 
   @Override public void onStart() {

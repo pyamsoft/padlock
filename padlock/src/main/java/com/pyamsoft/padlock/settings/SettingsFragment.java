@@ -35,7 +35,7 @@ import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment;
-import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -67,7 +67,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
     final Preference clearDb = findPreference(getString(R.string.clear_db_key));
     clearDb.setOnPreferenceClickListener(preference -> {
       Timber.d("Clear DB onClick");
-      AppUtil.onlyLoadOnceDialogFragment(getActivity(),
+      DialogUtil.guaranteeSingleDialogFragment(getActivity(),
           ConfirmationDialog.newInstance(ConfirmEvent.Type.DATABASE), "confirm_dialog");
       return true;
     });
@@ -93,7 +93,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
       } else {
         Toast.makeText(getContext(), "Must clear Master Password before changing Lock Screen Type",
             Toast.LENGTH_SHORT).show();
-        AppUtil.onlyLoadOnceDialogFragment(getActivity(),
+        DialogUtil.guaranteeSingleDialogFragment(getActivity(),
             PinEntryDialog.newInstance(getContext().getPackageName(),
                 getActivity().getClass().getName()), PinEntryDialog.TAG);
         return false;
@@ -114,7 +114,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
   }
 
   @Override protected boolean onClearAllPreferenceClicked() {
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(),
+    DialogUtil.guaranteeSingleDialogFragment(getActivity(),
         ConfirmationDialog.newInstance(ConfirmEvent.Type.ALL), "confirm_dialog");
     return true;
   }

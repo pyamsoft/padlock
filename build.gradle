@@ -36,10 +36,9 @@ buildscript {
     supportLib = "25.3.1"
     firebase = "10.2.1"
     leakCanary = "1.5"
-    pydroid = "8.4.1"
+    pydroid = "8.5.0"
     autoValue = "1.4"
     sqlbrite = "1.1.1"
-    sqldelight = "0.6.1"
     dagger = "2.10"
     patternLock = "1.0.0"
   }
@@ -63,7 +62,7 @@ buildscript {
     classpath "net.ltgt.gradle:gradle-errorprone-plugin:0.0.8"
 
     // SQLDelight
-    classpath "com.squareup.sqldelight:gradle-plugin:$sqldelight"
+    classpath "com.squareup.sqldelight:gradle-plugin:0.6.1"
   }
 }
 

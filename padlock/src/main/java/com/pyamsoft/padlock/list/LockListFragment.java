@@ -45,12 +45,10 @@ import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.design.util.FABUtil;
-import com.pyamsoft.pydroid.drawable.AsyncDrawable;
-import com.pyamsoft.pydroid.drawable.AsyncMap;
-import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
-import com.pyamsoft.pydroid.helper.AsyncMapHelper;
+import com.pyamsoft.pydroid.ui.loader.DrawableHelper;
+import com.pyamsoft.pydroid.ui.loader.DrawableLoader;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
-import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -90,19 +88,19 @@ public class LockListFragment extends Fragment {
       activity.supportInvalidateOptionsMenu();
     }
   };
-  @NonNull AsyncMapEntry fabIconTask = AsyncMap.emptyEntry();
+  @NonNull DrawableLoader.Loaded fabIconTask = DrawableLoader.empty();
   @NonNull final LockListPresenter.FABStateCallback fabStateCallback =
       new LockListPresenter.FABStateCallback() {
 
         @Override public void onSetFABStateEnabled() {
-          fabIconTask = AsyncMapHelper.unsubscribe(fabIconTask);
+          fabIconTask = DrawableHelper.unload(fabIconTask);
           fabIconTask =
-              AsyncDrawable.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
+              DrawableLoader.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
         }
 
         @Override public void onSetFABStateDisabled() {
-          fabIconTask = AsyncMapHelper.unsubscribe(fabIconTask);
-          fabIconTask = AsyncDrawable.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
+          fabIconTask = DrawableHelper.unload(fabIconTask);
+          fabIconTask = DrawableLoader.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
         }
       };
   boolean listIsRefreshed;
@@ -137,7 +135,7 @@ public class LockListFragment extends Fragment {
             presenter.showOnBoarding(new LockListPresenter.OnboardingCallback() {
               @Override public void onShowOnboarding() {
                 Timber.d("Show onboarding");
-                AppUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(),
+                DialogUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(),
                     OnboardListDialog.TAG);
               }
 
@@ -154,7 +152,7 @@ public class LockListFragment extends Fragment {
         @Override public void onListPopulateError() {
           Timber.e("onListPopulateError");
           onListPopulated();
-          AppUtil.onlyLoadOnceDialogFragment(getActivity(), new ErrorDialog(), "error");
+          DialogUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "error");
         }
 
         @Override public void onListCleared() {
@@ -327,7 +325,7 @@ public class LockListFragment extends Fragment {
     binding.applistFab.setOnClickListener(null);
     binding.applistSwipeRefresh.setOnRefreshListener(null);
 
-    fabIconTask = AsyncMapHelper.unsubscribe(fabIconTask);
+    fabIconTask = DrawableHelper.unload(fabIconTask);
     handler.removeCallbacksAndMessages(null);
     binding.unbind();
     super.onDestroyView();
@@ -362,11 +360,11 @@ public class LockListFragment extends Fragment {
   private void setupFAB() {
     binding.applistFab.setOnClickListener(v -> {
       if (PadLockService.isRunning()) {
-        AppUtil.onlyLoadOnceDialogFragment(getActivity(),
+        DialogUtil.guaranteeSingleDialogFragment(getActivity(),
             PinEntryDialog.newInstance(getContext().getPackageName(),
                 getActivity().getClass().getName()), PinEntryDialog.TAG);
       } else {
-        AppUtil.onlyLoadOnceDialogFragment(getActivity(), new AccessibilityRequestDialog(),
+        DialogUtil.guaranteeSingleDialogFragment(getActivity(), new AccessibilityRequestDialog(),
             "accessibility");
       }
     });
@@ -387,7 +385,7 @@ public class LockListFragment extends Fragment {
   }
 
   @SuppressWarnings("WeakerAccess") void displayLockInfoFragment(@NonNull AppEntry entry) {
-    AppUtil.onlyLoadOnceDialogFragment(getActivity(), LockInfoDialog.newInstance(entry),
+    DialogUtil.guaranteeSingleDialogFragment(getActivity(), LockInfoDialog.newInstance(entry),
         LockInfoDialog.TAG);
   }
 }

@@ -37,9 +37,8 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.OnboardListDialogBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.onboard.Onboard;
-import com.pyamsoft.pydroid.drawable.AsyncDrawable;
-import com.pyamsoft.pydroid.drawable.AsyncMap;
-import com.pyamsoft.pydroid.drawable.AsyncMapEntry;
+import com.pyamsoft.pydroid.ui.loader.DrawableLoader;
+import com.pyamsoft.pydroid.ui.loader.DrawableMap;
 import javax.inject.Inject;
 
 public class OnboardListDialog extends DialogFragment implements Onboard {
@@ -47,7 +46,7 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
   @NonNull public static final String TAG = "OnboardListDialog";
   @NonNull private static final String KEY_LAST_POSITION = "key_onboard_list_dialog_position";
   private static final int PAGER_PAGE_COUNT = 3;
-  @NonNull private final AsyncMap mapper = new AsyncMap();
+  @NonNull private final DrawableMap mapper = new DrawableMap();
   @Inject OnboardListPresenter presenter;
   private OnboardListDialogBinding binding;
   private ViewPager.OnPageChangeListener pageChangeListener;
@@ -123,16 +122,16 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
     binding.onboardListNext.setOnClickListener(v -> scrollToNextPage());
     binding.onboardListConfirm.setOnClickListener(v -> completeOnboarding());
 
-    final AsyncMapEntry backTask =
-        AsyncDrawable.load(R.drawable.ic_arrow_back_24dp).into(binding.onboardListBack);
+    final DrawableLoader.Loaded backTask =
+        DrawableLoader.load(R.drawable.ic_arrow_back_24dp).into(binding.onboardListBack);
     mapper.put("back", backTask);
 
-    final AsyncMapEntry nextTask =
-        AsyncDrawable.load(R.drawable.ic_arrow_forward_24dp).into(binding.onboardListNext);
+    final DrawableLoader.Loaded nextTask =
+        DrawableLoader.load(R.drawable.ic_arrow_forward_24dp).into(binding.onboardListNext);
     mapper.put("next", nextTask);
 
-    final AsyncMapEntry confirmTask =
-        AsyncDrawable.load(R.drawable.ic_check_24dp).into(binding.onboardListConfirm);
+    final DrawableLoader.Loaded confirmTask =
+        DrawableLoader.load(R.drawable.ic_check_24dp).into(binding.onboardListConfirm);
     mapper.put("confirm", confirmTask);
 
     onPageChangeToolbarResponse(position);

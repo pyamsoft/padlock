@@ -29,7 +29,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
-import com.pyamsoft.pydroid.util.AppUtil;
+import com.pyamsoft.pydroid.util.DialogUtil;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -127,8 +127,8 @@ public class LockInfoItem
     presenter.modifyDatabaseEntry(getModel().lockState(), newLockState, packageName,
         getModel().name(), null, system, new LockInfoItemPresenter.ModifyDatabaseCallback() {
           @Override public void onDatabaseEntryError() {
-            AppUtil.onlyLoadOnceDialogFragment((FragmentActivity) viewHolder.itemView.getContext(),
-                new ErrorDialog(), "error");
+            DialogUtil.onlyLoadOnceDialogFragment(
+                (FragmentActivity) viewHolder.itemView.getContext(), new ErrorDialog(), "error");
           }
 
           private void updateModel(@NonNull LockState newState) {

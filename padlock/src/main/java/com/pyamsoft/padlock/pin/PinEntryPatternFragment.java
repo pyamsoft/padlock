@@ -130,6 +130,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
       }
     };
 
+    binding.patternLock.setTactileFeedbackEnabled(false);
     binding.patternLock.addPatternLockListener(listener);
   }
 
