@@ -33,4 +33,5 @@ public interface MasterPinPreference {
   void setMasterPassword(@NonNull String masterPassword);
 
   void clearMasterPassword();
+
 }

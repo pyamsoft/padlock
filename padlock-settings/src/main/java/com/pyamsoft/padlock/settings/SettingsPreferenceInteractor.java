@@ -18,11 +18,13 @@ package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.MasterPinPreference;
 import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.list.LockInfoItemInteractor;
 import com.pyamsoft.padlock.list.LockListItemInteractor;
 import com.pyamsoft.padlock.purge.PurgeInteractor;
+import com.pyamsoft.pydroid.function.OptionalWrapper;
 import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,6 +32,7 @@ import timber.log.Timber;
 
 @Singleton class SettingsPreferenceInteractor {
 
+  @SuppressWarnings("WeakerAccess") @NonNull final MasterPinPreference masterPinPreference;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
   @SuppressWarnings("WeakerAccess") @NonNull final LockListItemInteractor lockListInteractor;
@@ -37,10 +40,12 @@ import timber.log.Timber;
   @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor purgeInteractor;
 
   @Inject SettingsPreferenceInteractor(@NonNull PadLockDB padLockDB,
-      @NonNull PadLockPreferences preferences, @NonNull LockListItemInteractor lockListInteractor,
+      @NonNull MasterPinPreference masterPinPreference, @NonNull PadLockPreferences preferences,
+      @NonNull LockListItemInteractor lockListInteractor,
       @NonNull LockInfoItemInteractor lockInfoInteractor,
       @NonNull PurgeInteractor purgeInteractor) {
     this.padLockDB = padLockDB;
+    this.masterPinPreference = masterPinPreference;
     this.preferences = preferences;
     this.lockListInteractor = lockListInteractor;
     this.lockInfoInteractor = lockInfoInteractor;
@@ -75,5 +80,14 @@ import timber.log.Timber;
       preferences.clearAll();
       return Boolean.TRUE;
     });
+  }
+
+  /**
+   * public
+   */
+  @CheckResult @NonNull Observable<Boolean> hasExistingMasterPassword() {
+    return Observable.fromCallable(
+        () -> OptionalWrapper.ofNullable(masterPinPreference.getMasterPassword()))
+        .map(OptionalWrapper::isPresent);
   }
 }

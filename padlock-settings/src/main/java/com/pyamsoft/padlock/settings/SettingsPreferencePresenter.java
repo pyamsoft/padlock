@@ -37,6 +37,7 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
   @SuppressWarnings("WeakerAccess") @NonNull final SettingsPreferenceInteractor interactor;
   @NonNull private Disposable confirmedDisposable = Disposables.empty();
   @NonNull private Disposable applicationInstallDisposable = Disposables.empty();
+  @NonNull private Disposable lockTypeDisposable = Disposables.empty();
 
   @Inject SettingsPreferencePresenter(@NonNull SettingsPreferenceInteractor interactor,
       @NonNull ApplicationInstallReceiver receiver, @Named("obs") Scheduler obsScheduler,
@@ -50,6 +51,7 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
     super.onStop();
     confirmedDisposable = DisposableHelper.dispose(confirmedDisposable);
     applicationInstallDisposable = DisposableHelper.dispose(applicationInstallDisposable);
+    lockTypeDisposable = DisposableHelper.dispose(lockTypeDisposable);
   }
 
   /**
@@ -109,6 +111,39 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
               throw new IllegalStateException("Received invalid confirmation event type: " + type);
           }
         }, throwable -> Timber.e(throwable, "onError clear bus"));
+  }
+
+  public void checkLockType(@NonNull LockTypeCallback callback) {
+    callback.onBegin();
+
+    lockTypeDisposable = DisposableHelper.dispose(lockTypeDisposable);
+    lockTypeDisposable = interactor.hasExistingMasterPassword()
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .doAfterTerminate(callback::onEnd)
+        .subscribe(hasMasterPin -> {
+          if (hasMasterPin) {
+            callback.onLockTypeChangePrevented();
+          } else {
+            callback.onLockTypeChangeAccepted();
+          }
+        }, throwable -> {
+          Timber.e(throwable, "on error lock type change");
+          callback.onLockTypeChangeError(throwable);
+        });
+  }
+
+  interface LockTypeCallback {
+
+    void onBegin();
+
+    void onLockTypeChangeAccepted();
+
+    void onLockTypeChangePrevented();
+
+    void onLockTypeChangeError(@NonNull Throwable throwable);
+
+    void onEnd();
   }
 
   interface ClearCallback {
