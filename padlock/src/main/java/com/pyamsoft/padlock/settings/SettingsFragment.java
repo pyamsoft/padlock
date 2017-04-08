@@ -18,23 +18,24 @@ package com.pyamsoft.padlock.settings;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.view.View;
 import android.widget.Toast;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment;
+import com.pyamsoft.pydroid.ui.helper.ProgressOverlay;
+import com.pyamsoft.pydroid.ui.helper.ProgressOverlayHelper;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -43,6 +44,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
 
   @NonNull public static final String TAG = "SettingsPreferenceFragment";
   @SuppressWarnings("WeakerAccess") @Inject SettingsPreferencePresenter presenter;
+  @NonNull ProgressOverlay overlay = ProgressOverlay.empty();
 
   @NonNull @Override protected AboutLibrariesFragment.BackStackState isLastOnBackStack() {
     return AboutLibrariesFragment.BackStackState.LAST;
@@ -78,26 +80,44 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
       return true;
     });
 
-    final Preference lockType = findPreference(getString(R.string.lock_screen_type_key));
+    final ListPreference lockType =
+        (ListPreference) findPreference(getString(R.string.lock_screen_type_key));
     lockType.setOnPreferenceChangeListener((preference, newValue) -> {
-      // KLUDGE Accessing preference from View layer
-      // We do this because going through an interactor is not synchronous, type can lead to lags
-      // While we could properly architect here, we choose user experience over correct arch.
-      SharedPreferences sharedPreferences = preference.getSharedPreferences();
-      PadLockPreferences padLockPreferences =
-          PadLockPreferences.Instance.wrap(getContext(), sharedPreferences);
+      presenter.checkLockType(new SettingsPreferencePresenter.LockTypeCallback() {
+        @Override public void onBegin() {
+          overlay = ProgressOverlayHelper.dispose(overlay);
+          overlay = ProgressOverlay.builder().build(getActivity());
+        }
 
-      // If we have a master item, don't let user switch
-      if (padLockPreferences.getMasterPassword() == null) {
-        return true;
-      } else {
-        Toast.makeText(getContext(), "Must clear Master Password before changing Lock Screen Type",
-            Toast.LENGTH_SHORT).show();
-        DialogUtil.guaranteeSingleDialogFragment(getActivity(),
-            PinEntryDialog.newInstance(getContext().getPackageName(),
-                getActivity().getClass().getName()), PinEntryDialog.TAG);
-        return false;
-      }
+        @Override public void onLockTypeChangeAccepted() {
+          if (newValue instanceof String) {
+            String value = (String) newValue;
+            Timber.d("Change accepted, set value: %s", value);
+            lockType.setValue(value);
+          }
+        }
+
+        @Override public void onLockTypeChangePrevented() {
+          Toast.makeText(getContext(),
+              "Must clear Master Password before changing Lock Screen Type", Toast.LENGTH_SHORT)
+              .show();
+          DialogUtil.guaranteeSingleDialogFragment(getActivity(),
+              PinEntryDialog.newInstance(getContext().getPackageName(),
+                  getActivity().getClass().getName()), PinEntryDialog.TAG);
+        }
+
+        @Override public void onLockTypeChangeError(@NonNull Throwable throwable) {
+          Toast.makeText(getContext(), "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT)
+              .show();
+        }
+
+        @Override public void onEnd() {
+          overlay = ProgressOverlayHelper.dispose(overlay);
+        }
+      });
+
+      Timber.d("Always return false here, the callback will decide if we can set value properly");
+      return false;
     });
   }
 

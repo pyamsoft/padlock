@@ -16,8 +16,6 @@
 
 package com.pyamsoft.padlock.base;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.LockScreenType;
@@ -53,12 +51,4 @@ public interface PadLockPreferences {
   void setInfoDialogOnBoard();
 
   void clearAll();
-
-  class Instance {
-
-    @CheckResult @NonNull public static PadLockPreferences wrap(@NonNull Context context,
-        @NonNull SharedPreferences preferences) {
-      return new PadLockPreferencesImpl(context, preferences);
-    }
-  }
 }
