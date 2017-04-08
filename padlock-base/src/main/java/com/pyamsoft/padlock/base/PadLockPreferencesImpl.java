@@ -25,7 +25,7 @@ import android.support.v7.preference.PreferenceManager;
 import com.pyamsoft.padlock.model.LockScreenType;
 import javax.inject.Inject;
 
-class PadLockPreferencesImpl implements PadLockPreferences {
+class PadLockPreferencesImpl implements PadLockPreferences, MasterPinPreference {
 
   @NonNull private static final String IS_SYSTEM = "is_system";
   @NonNull private static final String MASTER_PASSWORD = "master_password";
