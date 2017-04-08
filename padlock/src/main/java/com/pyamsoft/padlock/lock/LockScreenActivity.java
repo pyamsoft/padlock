@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.lock;
 
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
@@ -33,6 +34,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
+import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
 import com.pyamsoft.padlock.list.ErrorDialog;
@@ -53,7 +55,6 @@ public class LockScreenActivity extends ActivityBase {
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
   @NonNull public static final String ENTRY_LOCK_UNTIL_TIME = "lock_until_time";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
-
   /**
    * KLUDGE This is a map that holds references to Activities
    *
@@ -119,6 +120,29 @@ public class LockScreenActivity extends ActivityBase {
     home = new Intent(Intent.ACTION_MAIN);
     home.addCategory(Intent.CATEGORY_HOME);
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+  }
+
+  /**
+   * Starts a LockScreenActivity instance
+   */
+  public static void start(@NonNull Context context, @NonNull PadLockEntry entry,
+      @NonNull String realName) {
+    Intent intent = new Intent(context.getApplicationContext(), LockScreenActivity.class);
+    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+        | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+    intent.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName());
+    intent.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName());
+    intent.putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode());
+    intent.putExtra(LockScreenActivity.ENTRY_IS_SYSTEM, entry.systemApplication());
+    intent.putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName);
+    intent.putExtra(LockScreenActivity.ENTRY_LOCK_UNTIL_TIME, entry.lockUntilTime());
+
+    if (entry.whitelist()) {
+      throw new RuntimeException("Cannot launch LockScreen for whitelisted applications");
+    }
+
+    context.getApplicationContext().startActivity(intent);
   }
 
   private static void addToLockedMap(@NonNull String packageName, @NonNull String className,
