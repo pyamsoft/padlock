@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.lock.master;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.MasterPinPreference;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
 import io.reactivex.Observable;
 import javax.inject.Inject;
@@ -27,14 +27,15 @@ import javax.inject.Singleton;
 
 @Singleton public class MasterPinInteractor {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final MasterPinPreference preferences;
 
-  @Inject MasterPinInteractor(@NonNull final PadLockPreferences preferences) {
+  @Inject MasterPinInteractor(@NonNull MasterPinPreference preferences) {
     this.preferences = preferences;
   }
 
   @CheckResult @NonNull public Observable<OptionalWrapper<String>> getMasterPin() {
-    return Observable.fromCallable(() -> OptionalWrapper.ofNullable(preferences.getMasterPassword()));
+    return Observable.fromCallable(
+        () -> OptionalWrapper.ofNullable(preferences.getMasterPassword()));
   }
 
   public void setMasterPin(@Nullable String pin) {

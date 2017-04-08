@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.model.LockScreenType;
 
 public interface PadLockPreferences {
@@ -30,12 +29,6 @@ public interface PadLockPreferences {
   @CheckResult boolean isIgnoreInKeyguard();
 
   @CheckResult boolean isInstallListenerEnabled();
-
-  @CheckResult @Nullable String getHint();
-
-  void setHint(@NonNull String hint);
-
-  void clearHint();
 
   @CheckResult boolean isDialogOnBoard();
 
@@ -48,12 +41,6 @@ public interface PadLockPreferences {
   @CheckResult boolean isSystemVisible();
 
   void setSystemVisible(boolean b);
-
-  @CheckResult @Nullable String getMasterPassword();
-
-  void setMasterPassword(@NonNull String masterPassword);
-
-  void clearMasterPassword();
 
   @CheckResult boolean hasAgreed();
 

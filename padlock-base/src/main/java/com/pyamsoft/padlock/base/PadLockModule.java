@@ -31,7 +31,7 @@ import javax.inject.Singleton;
 @Module public class PadLockModule {
 
   @NonNull private final Context appContext;
-  @NonNull private final PadLockPreferences preferences;
+  @NonNull private final PadLockPreferencesImpl preferences;
   @NonNull private final Class<? extends IntentService> recheckServiceClass;
   @NonNull private final Class<? extends Activity> mainActivityClass;
   @NonNull private final Class<? extends Activity> lockScreenActivityClass;
@@ -52,6 +52,10 @@ import javax.inject.Singleton;
   }
 
   @Singleton @Provides @NonNull PadLockPreferences providePreferences() {
+    return preferences;
+  }
+
+  @Singleton @Provides @NonNull MasterPinPreference provideMasterPinPreference() {
     return preferences;
   }
 
