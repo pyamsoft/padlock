@@ -5,23 +5,6 @@
       <GradleProjectSettings>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/padlock" />
-            <option value="$PROJECT_DIR$/padlock-base" />
-            <option value="$PROJECT_DIR$/padlock-iconloader" />
-            <option value="$PROJECT_DIR$/padlock-list" />
-            <option value="$PROJECT_DIR$/padlock-lock" />
-            <option value="$PROJECT_DIR$/padlock-main" />
-            <option value="$PROJECT_DIR$/padlock-model" />
-            <option value="$PROJECT_DIR$/padlock-onboard" />
-            <option value="$PROJECT_DIR$/padlock-pin" />
-            <option value="$PROJECT_DIR$/padlock-purge" />
-            <option value="$PROJECT_DIR$/padlock-service" />
-            <option value="$PROJECT_DIR$/padlock-settings" />
-          </set>
-        </option>
         <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>

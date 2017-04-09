@@ -27,6 +27,7 @@ import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.functions.BiFunction;
@@ -56,7 +57,7 @@ import timber.log.Timber;
   /**
    * public
    */
-  @CheckResult @NonNull Observable<AppEntry> populateList(boolean forceRefresh) {
+  @CheckResult @NonNull Flowable<AppEntry> populateList(boolean forceRefresh) {
     return Single.defer(() -> {
       final Single<List<AppEntry>> dataSource;
 
@@ -70,7 +71,11 @@ import timber.log.Timber;
         dataSource = cache;
       }
       return dataSource;
-    }).toObservable().concatMap(Observable::fromIterable);
+    })
+        .toFlowable()
+        .concatMap(Flowable::fromIterable)
+        .onBackpressureBuffer(16,
+            () -> Timber.e("LockListInteractor populateList backpressure overflow"));
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Single<List<AppEntry>> fetchFreshData() {
