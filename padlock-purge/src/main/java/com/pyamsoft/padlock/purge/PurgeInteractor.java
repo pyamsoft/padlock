@@ -22,6 +22,7 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import java.util.ArrayList;
@@ -103,8 +104,10 @@ import timber.log.Timber;
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Observable<String> getActiveApplicationPackageNames() {
+  Flowable<String> getActiveApplicationPackageNames() {
     return packageManagerWrapper.getActiveApplications()
+        .toFlowable()
+        .flatMap(Flowable::fromIterable)
         .map(applicationInfo -> applicationInfo.packageName);
   }
 

@@ -26,9 +26,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
-import android.support.annotation.WorkerThread;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -65,8 +66,8 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
   }
 
   @NonNull @Override
-  public Observable<String> getActivityListForPackage(@NonNull String packageName) {
-    return Observable.fromCallable(() -> {
+  public Single<List<String>> getActivityListForPackage(@NonNull String packageName) {
+    return Single.fromCallable(() -> {
       final List<String> activityEntries = new ArrayList<>();
       try {
         final PackageInfo packageInfo =
@@ -81,12 +82,12 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
         Timber.e(e, "PackageManager error, return what we have for %s", packageName);
       }
       return activityEntries;
-    }).flatMap(Observable::fromIterable);
+    });
   }
 
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") @WorkerThread @NonNull @CheckResult
-  Observable<ApplicationInfo> getInstalledApplications() {
-    return Observable.fromCallable(() -> {
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
+  Flowable<ApplicationInfo> getInstalledApplications() {
+    return Flowable.fromCallable(() -> {
       final Process process;
       boolean caughtPermissionDenial = false;
       final List<String> packageNames = new ArrayList<>();
@@ -131,31 +132,34 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
       return packageNames;
     })
-        .flatMap(Observable::fromIterable)
+        .flatMap(Flowable::fromIterable)
+        .onBackpressureBuffer(16, () -> Timber.e(
+            "PackageManagerWrapperImpl getInstalledApplications backpressure overflow"))
         .map(packageNameWithPrefix -> packageNameWithPrefix.replaceFirst("^package:", ""))
-        .flatMap(this::getApplicationInfo);
+        .flatMap(
+            packageName -> getApplicationInfo(packageName).toFlowable(BackpressureStrategy.BUFFER));
   }
 
-  @NonNull @Override public Observable<ApplicationInfo> getActiveApplications() {
+  @NonNull @Override public Single<List<ApplicationInfo>> getActiveApplications() {
     return getInstalledApplications().flatMap(info -> {
       if (!info.enabled) {
         Timber.i("Application %s is disabled", info.packageName);
-        return Observable.empty();
+        return Flowable.empty();
       }
 
       if (ANDROID_PACKAGE.equals(info.packageName)) {
         Timber.i("Application %s is Android", info.packageName);
-        return Observable.empty();
+        return Flowable.empty();
       }
 
       if (ANDROID_SYSTEM_UI_PACKAGE.equals(info.packageName)) {
         Timber.i("Application %s is System UI", info.packageName);
-        return Observable.empty();
+        return Flowable.empty();
       }
 
       Timber.d("Successfully processed application: %s", info.packageName);
-      return Observable.just(info);
-    });
+      return Flowable.just(info);
+    }).toList();
   }
 
   @NonNull @Override
@@ -164,7 +168,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
       try {
         return Observable.just(packageManager.getApplicationInfo(packageName, 0));
       } catch (PackageManager.NameNotFoundException e) {
-        Timber.e(e, "onError getApplicationInfo");
+        Timber.e(e, "onError getApplicationInfo: '" + packageName + "'");
         return Observable.empty();
       }
     });
@@ -179,7 +183,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
       try {
         return Observable.just(packageManager.getApplicationInfo(packageName, 0));
       } catch (PackageManager.NameNotFoundException e) {
-        Timber.e(e, "EXCEPTION");
+        Timber.e(e, "onError loadPackageLabel: '" + packageName + "'");
         return Observable.empty();
       }
     }).flatMap(this::loadPackageLabel);
@@ -196,6 +200,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
       try {
         return Observable.just(packageManager.getActivityInfo(componentName, 0));
       } catch (PackageManager.NameNotFoundException e) {
+        Timber.e(e, "onError getActivityInfo: '" + packageName + "', '" + activityName + "'");
         return Observable.empty();
       }
     });
