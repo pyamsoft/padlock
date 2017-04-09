@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ import timber.log.Timber;
   /**
    * public
    */
-  @NonNull @CheckResult Observable<ActivityEntry> populateList(@NonNull String packageName,
+  @NonNull @CheckResult Flowable<ActivityEntry> populateList(@NonNull String packageName,
       boolean forceRefresh) {
     return Single.defer(() -> {
       final Single<List<ActivityEntry>> dataSource;
@@ -80,37 +81,42 @@ import timber.log.Timber;
         dataSource = cached;
       }
       return dataSource;
-    }).toObservable().flatMap(Observable::fromIterable).sorted((activityEntry, activityEntry2) -> {
-      // Package names are all the same
-      final String entry1Name = activityEntry.name();
-      final String entry2Name = activityEntry2.name();
+    })
+        .toFlowable()
+        .flatMap(Flowable::fromIterable)
+        .onBackpressureBuffer(16,
+            () -> Timber.e("LockInfoInteractor populateList backpressure overflow"))
+        .sorted((activityEntry, activityEntry2) -> {
+          // Package names are all the same
+          final String entry1Name = activityEntry.name();
+          final String entry2Name = activityEntry2.name();
 
-      // Calculate if the starting X characters in the activity name is the exact package name
-      boolean activity1Package = false;
-      if (entry1Name.startsWith(packageName)) {
-        final String strippedPackageName = entry1Name.replace(packageName, "");
-        if (strippedPackageName.charAt(0) == '.') {
-          activity1Package = true;
-        }
-      }
+          // Calculate if the starting X characters in the activity name is the exact package name
+          boolean activity1Package = false;
+          if (entry1Name.startsWith(packageName)) {
+            final String strippedPackageName = entry1Name.replace(packageName, "");
+            if (strippedPackageName.charAt(0) == '.') {
+              activity1Package = true;
+            }
+          }
 
-      boolean activity2Package = false;
-      if (entry2Name.startsWith(packageName)) {
-        final String strippedPackageName = entry2Name.replace(packageName, "");
-        if (strippedPackageName.charAt(0) == '.') {
-          activity2Package = true;
-        }
-      }
-      if (activity1Package && activity2Package) {
-        return entry1Name.compareToIgnoreCase(entry2Name);
-      } else if (activity1Package) {
-        return -1;
-      } else if (activity2Package) {
-        return 1;
-      } else {
-        return entry1Name.compareToIgnoreCase(entry2Name);
-      }
-    });
+          boolean activity2Package = false;
+          if (entry2Name.startsWith(packageName)) {
+            final String strippedPackageName = entry2Name.replace(packageName, "");
+            if (strippedPackageName.charAt(0) == '.') {
+              activity2Package = true;
+            }
+          }
+          if (activity1Package && activity2Package) {
+            return entry1Name.compareToIgnoreCase(entry2Name);
+          } else if (activity1Package) {
+            return -1;
+          } else if (activity2Package) {
+            return 1;
+          } else {
+            return entry1Name.compareToIgnoreCase(entry2Name);
+          }
+        });
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
