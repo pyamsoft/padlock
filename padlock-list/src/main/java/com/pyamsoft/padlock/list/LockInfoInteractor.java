@@ -160,6 +160,8 @@ import timber.log.Timber;
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Single<List<String>> getPackageActivities(
       @NonNull String packageName) {
     return packageManagerWrapper.getActivityListForPackage(packageName)
+        .toFlowable()
+        .flatMap(Flowable::fromIterable)
         .filter(activityEntry -> !activityEntry.equalsIgnoreCase(lockScreenClass.getName()))
         .toList();
   }

@@ -102,7 +102,7 @@ import timber.log.Timber;
             } else {
               return info.packageName;
             }
-          }).toObservable();
+          }).toFlowable();
         })
         .filter(s -> !s.isEmpty())
         .toList()
@@ -155,13 +155,17 @@ import timber.log.Timber;
     return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull Observable<ApplicationInfo> getActiveApplications() {
-    return packageManagerWrapper.getActiveApplications();
+  @SuppressWarnings("WeakerAccess") @NonNull Flowable<ApplicationInfo> getActiveApplications() {
+    return packageManagerWrapper.getActiveApplications()
+        .toFlowable()
+        .flatMap(Flowable::fromIterable);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<String> getActivityListForApplication(@NonNull ApplicationInfo info) {
-    return packageManagerWrapper.getActivityListForPackage(info.packageName);
+  Flowable<String> getActivityListForApplication(@NonNull ApplicationInfo info) {
+    return packageManagerWrapper.getActivityListForPackage(info.packageName)
+        .toFlowable()
+        .flatMap(Flowable::fromIterable);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
@@ -235,8 +239,8 @@ import timber.log.Timber;
   /**
    * public
    */
-  @CheckResult @NonNull Observable<Boolean> isSystemVisible() {
-    return Observable.fromCallable(preferences::isSystemVisible);
+  @CheckResult @NonNull Flowable<Boolean> isSystemVisible() {
+    return Flowable.fromCallable(preferences::isSystemVisible);
   }
 
   /**
