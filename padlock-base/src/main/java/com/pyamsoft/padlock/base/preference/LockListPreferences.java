@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard.list;
+package com.pyamsoft.padlock.base.preference;
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import android.support.annotation.CheckResult;
 
-@Singleton class OnboardListInteractor {
+public interface LockListPreferences {
 
-  @NonNull private final OnboardingPreferences preferences;
+  @CheckResult boolean isSystemVisible();
 
-  @Inject OnboardListInteractor(@NonNull OnboardingPreferences preferences) {
-    this.preferences = preferences;
-  }
-
-  /**
-   * public
-   */
-  void completeOnboarding() {
-    preferences.setListOnBoard();
-  }
+  void setSystemVisible(boolean b);
 }

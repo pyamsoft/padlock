@@ -18,16 +18,16 @@ package com.pyamsoft.padlock.main;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
 import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton class MainInteractor {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final OnboardingPreferences preferences;
 
-  @Inject MainInteractor(final @NonNull PadLockPreferences preferences) {
+  @Inject MainInteractor(final @NonNull OnboardingPreferences preferences) {
     this.preferences = preferences;
   }
 

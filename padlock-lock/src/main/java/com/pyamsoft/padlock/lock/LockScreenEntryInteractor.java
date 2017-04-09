@@ -22,7 +22,7 @@ import android.content.Intent;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
@@ -42,12 +42,12 @@ import timber.log.Timber;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends IntentService>
       recheckServiceClass;
-  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockScreenPreferences preferences;
   @NonNull private final MasterPinInteractor pinInteractor;
   @SuppressWarnings("WeakerAccess") int failCount;
 
   @Inject LockScreenEntryInteractor(@NonNull Context context,
-      @NonNull PadLockPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
+      @NonNull LockScreenPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
       @NonNull MasterPinInteractor masterPinInteractor, @NonNull PadLockDB padLockDB,
       @NonNull @Named("recheck") Class<? extends IntentService> recheckServiceClass) {
     this.preferences = preferences;

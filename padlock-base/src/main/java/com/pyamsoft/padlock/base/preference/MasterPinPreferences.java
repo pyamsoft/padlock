@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard.list;
+package com.pyamsoft.padlock.base.preference;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import android.support.annotation.Nullable;
 
-@Singleton class OnboardListInteractor {
+public interface MasterPinPreferences {
 
-  @NonNull private final OnboardingPreferences preferences;
+  @CheckResult @Nullable String getHint();
 
-  @Inject OnboardListInteractor(@NonNull OnboardingPreferences preferences) {
-    this.preferences = preferences;
-  }
+  void setHint(@NonNull String hint);
 
-  /**
-   * public
-   */
-  void completeOnboarding() {
-    preferences.setListOnBoard();
-  }
+  void clearHint();
+
+  @CheckResult @Nullable String getMasterPassword();
+
+  void setMasterPassword(@NonNull String masterPassword);
+
+  void clearMasterPassword();
+
 }

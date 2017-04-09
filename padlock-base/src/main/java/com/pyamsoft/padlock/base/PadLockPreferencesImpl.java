@@ -22,10 +22,18 @@ import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.preference.PreferenceManager;
+import com.pyamsoft.padlock.base.preference.ClearPreferences;
+import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
+import com.pyamsoft.padlock.base.preference.LockListPreferences;
+import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
+import com.pyamsoft.padlock.base.preference.MasterPinPreferences;
+import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
 import com.pyamsoft.padlock.model.LockScreenType;
 import javax.inject.Inject;
 
-class PadLockPreferencesImpl implements PadLockPreferences, MasterPinPreference {
+class PadLockPreferencesImpl
+    implements MasterPinPreferences, ClearPreferences, InstallListenerPreferences,
+    LockListPreferences, LockScreenPreferences, OnboardingPreferences {
 
   @NonNull private static final String IS_SYSTEM = "is_system";
   @NonNull private static final String MASTER_PASSWORD = "master_password";
@@ -48,14 +56,10 @@ class PadLockPreferencesImpl implements PadLockPreferences, MasterPinPreference 
   private final boolean ignoreKeyguardDefault;
 
   @Inject PadLockPreferencesImpl(@NonNull Context context) {
-    this(context.getApplicationContext(),
-        PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext()));
-  }
+    Context appContext = context.getApplicationContext();
+    Resources res = appContext.getResources();
 
-  PadLockPreferencesImpl(@NonNull Context context, @NonNull SharedPreferences preferences) {
-    final Context appContext = context.getApplicationContext();
-    final Resources res = appContext.getResources();
-    this.preferences = preferences;
+    this.preferences = PreferenceManager.getDefaultSharedPreferences(appContext);
     ignoreTimeKey = res.getString(R.string.ignore_time_key);
     ignoreTimeDefault = res.getString(R.string.ignore_time_default);
     timeoutTimeKey = res.getString(R.string.timeout_time_key);
@@ -94,7 +98,7 @@ class PadLockPreferencesImpl implements PadLockPreferences, MasterPinPreference 
     preferences.edit().remove(HINT).apply();
   }
 
-  @Override public boolean isDialogOnBoard() {
+  @Override public boolean isInfoDialogOnBoard() {
     return preferences.getBoolean(LOCK_DIALOG_ONBOARD, false);
   }
 

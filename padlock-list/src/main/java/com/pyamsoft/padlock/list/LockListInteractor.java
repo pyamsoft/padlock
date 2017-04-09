@@ -21,7 +21,8 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
-import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.preference.LockListPreferences;
+import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
@@ -40,18 +41,21 @@ import timber.log.Timber;
 
 @Singleton class LockListInteractor {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockListPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final OnboardingPreferences onboardingPreferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManagerWrapper;
   @SuppressWarnings("WeakerAccess") @NonNull final LockListCacheInteractor cacheInteractor;
   @NonNull private final PadLockDB padLockDB;
 
   @Inject LockListInteractor(@NonNull PadLockDB padLockDB,
-      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
-      @NonNull LockListCacheInteractor cacheInteractor) {
+      @NonNull PackageManagerWrapper packageManagerWrapper,
+      @NonNull OnboardingPreferences onboardingPreferences,
+      @NonNull LockListPreferences preferences, @NonNull LockListCacheInteractor cacheInteractor) {
     this.padLockDB = padLockDB;
     this.packageManagerWrapper = packageManagerWrapper;
     this.preferences = preferences;
     this.cacheInteractor = cacheInteractor;
+    this.onboardingPreferences = onboardingPreferences;
   }
 
   /**
@@ -233,7 +237,7 @@ import timber.log.Timber;
    * public
    */
   @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding() {
-    return Observable.fromCallable(preferences::isListOnBoard);
+    return Observable.fromCallable(onboardingPreferences::isListOnBoard);
   }
 
   /**

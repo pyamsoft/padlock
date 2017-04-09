@@ -14,24 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base;
+package com.pyamsoft.padlock.base.preference;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+public interface ClearPreferences {
 
-public interface MasterPinPreference {
-
-  @CheckResult @Nullable String getHint();
-
-  void setHint(@NonNull String hint);
-
-  void clearHint();
-
-  @CheckResult @Nullable String getMasterPassword();
-
-  void setMasterPassword(@NonNull String masterPassword);
-
-  void clearMasterPassword();
-
+  void clearAll();
 }

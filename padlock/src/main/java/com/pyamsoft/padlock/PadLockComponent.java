@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock;
 
+import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
 import com.pyamsoft.padlock.base.PadLockModule;
-import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDBModule;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatModule;
@@ -61,7 +61,7 @@ import javax.inject.Singleton;
   SettingsPreferenceComponent plusSettingsPreferenceComponent();
 
   // To be used directly by PadLockSingleInitProvider
-  PadLockPreferences providePreferences();
+  InstallListenerPreferences provideInstallListenerPreferences();
 
   // To be used directly by PadLockSingleInitProvider
   ApplicationInstallReceiver provideApplicationInstallReceiver();

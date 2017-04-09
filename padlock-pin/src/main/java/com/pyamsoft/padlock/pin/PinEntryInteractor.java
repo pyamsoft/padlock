@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.pin;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
 import com.pyamsoft.padlock.lock.LockHelper;
 import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
@@ -33,7 +33,7 @@ import timber.log.Timber;
   @SuppressWarnings("WeakerAccess") @NonNull final MasterPinInteractor masterPinInteractor;
 
   @Inject PinEntryInteractor(@NonNull MasterPinInteractor masterPinInteractor,
-      @NonNull PadLockPreferences preferences) {
+      @NonNull LockScreenPreferences preferences) {
     super(preferences);
     this.masterPinInteractor = masterPinInteractor;
   }
