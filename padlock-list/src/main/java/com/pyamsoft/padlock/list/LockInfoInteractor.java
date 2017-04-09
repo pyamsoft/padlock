@@ -20,7 +20,7 @@ import android.app.Activity;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
@@ -40,7 +40,7 @@ import timber.log.Timber;
 
 @Singleton class LockInfoInteractor {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final OnboardingPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenClass;
   @SuppressWarnings("WeakerAccess") @NonNull final LockInfoCacheInteractor cacheInteractor;
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
@@ -48,7 +48,8 @@ import timber.log.Timber;
 
   @Inject LockInfoInteractor(@NonNull PadLockDB padLockDB,
       @NonNull LockInfoCacheInteractor cacheInteractor,
-      @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockPreferences preferences,
+      @NonNull PackageManagerWrapper packageManagerWrapper,
+      @NonNull OnboardingPreferences preferences,
       @NonNull @Named("lockscreen") Class<? extends Activity> lockScreenClass) {
     this.padlockDB = padLockDB;
     this.cacheInteractor = cacheInteractor;
@@ -61,7 +62,8 @@ import timber.log.Timber;
    * public
    */
   @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding() {
-    return Observable.fromCallable(preferences::isDialogOnBoard).delay(300, TimeUnit.MILLISECONDS);
+    return Observable.fromCallable(preferences::isInfoDialogOnBoard)
+        .delay(300, TimeUnit.MILLISECONDS);
   }
 
   /**

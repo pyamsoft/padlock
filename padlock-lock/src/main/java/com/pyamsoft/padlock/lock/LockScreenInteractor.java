@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
 import io.reactivex.Observable;
@@ -29,7 +29,7 @@ import javax.inject.Singleton;
 
   @NonNull private final PackageManagerWrapper packageManagerWrapper;
 
-  @Inject LockScreenInteractor(@NonNull final PadLockPreferences preferences,
+  @Inject LockScreenInteractor(@NonNull LockScreenPreferences preferences,
       @NonNull PackageManagerWrapper packageManagerWrapper) {
     super(preferences);
     this.packageManagerWrapper = packageManagerWrapper;
@@ -45,8 +45,7 @@ import javax.inject.Singleton;
   /**
    * public
    */
-  @NonNull @CheckResult
-  Observable<String> getDisplayName(@NonNull String packageName) {
+  @NonNull @CheckResult Observable<String> getDisplayName(@NonNull String packageName) {
     return packageManagerWrapper.loadPackageLabel(packageName);
   }
 }

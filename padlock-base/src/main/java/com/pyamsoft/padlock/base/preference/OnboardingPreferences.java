@@ -14,31 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base;
+package com.pyamsoft.padlock.base.preference;
 
 import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.LockScreenType;
 
-public interface PadLockPreferences {
-
-  @CheckResult @NonNull LockScreenType getCurrentLockType();
-
-  @CheckResult boolean isIgnoreInKeyguard();
-
-  @CheckResult boolean isInstallListenerEnabled();
-
-  @CheckResult boolean isDialogOnBoard();
-
-  @CheckResult long getDefaultIgnoreTime();
-
-  @CheckResult long getTimeoutPeriod();
-
-  @CheckResult boolean getLockOnPackageChange();
-
-  @CheckResult boolean isSystemVisible();
-
-  void setSystemVisible(boolean b);
+public interface OnboardingPreferences {
 
   @CheckResult boolean hasAgreed();
 
@@ -48,7 +28,7 @@ public interface PadLockPreferences {
 
   void setListOnBoard();
 
-  void setInfoDialogOnBoard();
+  @CheckResult boolean isInfoDialogOnBoard();
 
-  void clearAll();
+  void setInfoDialogOnBoard();
 }

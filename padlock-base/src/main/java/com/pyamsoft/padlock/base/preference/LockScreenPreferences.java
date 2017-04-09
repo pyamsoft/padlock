@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard.list;
+package com.pyamsoft.padlock.base.preference;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import com.pyamsoft.padlock.model.LockScreenType;
 
-@Singleton class OnboardListInteractor {
+public interface LockScreenPreferences {
 
-  @NonNull private final OnboardingPreferences preferences;
+  @CheckResult @NonNull LockScreenType getCurrentLockType();
 
-  @Inject OnboardListInteractor(@NonNull OnboardingPreferences preferences) {
-    this.preferences = preferences;
-  }
+  @CheckResult boolean isIgnoreInKeyguard();
 
-  /**
-   * public
-   */
-  void completeOnboarding() {
-    preferences.setListOnBoard();
-  }
+  @CheckResult long getDefaultIgnoreTime();
+
+  @CheckResult long getTimeoutPeriod();
+
+  @CheckResult boolean getLockOnPackageChange();
 }

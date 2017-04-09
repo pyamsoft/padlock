@@ -23,7 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
@@ -37,7 +37,7 @@ import timber.log.Timber;
 @Singleton class LockServiceInteractor {
 
   @SuppressWarnings("WeakerAccess") @NonNull final Context appContext;
-  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final LockScreenPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final JobSchedulerCompat jobSchedulerCompat;
   @SuppressWarnings("WeakerAccess") @NonNull final KeyguardManager keyguardManager;
   @SuppressWarnings("WeakerAccess") @NonNull final Class<? extends Activity> lockScreenActivity;
@@ -51,8 +51,8 @@ import timber.log.Timber;
   @SuppressWarnings("WeakerAccess") @NonNull String activeClassName = "";
   @SuppressWarnings("WeakerAccess") boolean lockScreenPassed;
 
-  @Inject LockServiceInteractor(@NonNull Context context, @NonNull PadLockPreferences preferences,
-      @NonNull JobSchedulerCompat jobSchedulerCompat,
+  @Inject LockServiceInteractor(@NonNull Context context,
+      @NonNull LockScreenPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
       @NonNull PackageManagerWrapper packageManagerWrapper, @NonNull PadLockDB padLockDB,
       @NonNull @Named("lockscreen") Class<? extends Activity> lockScreenActivityClass,
       @NonNull @Named("recheck") Class<? extends IntentService> recheckServiceClass,

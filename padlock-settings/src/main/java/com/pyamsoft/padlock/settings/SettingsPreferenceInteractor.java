@@ -18,8 +18,9 @@ package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.MasterPinPreference;
-import com.pyamsoft.padlock.base.PadLockPreferences;
+import com.pyamsoft.padlock.base.preference.ClearPreferences;
+import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
+import com.pyamsoft.padlock.base.preference.MasterPinPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.list.LockInfoItemInteractor;
 import com.pyamsoft.padlock.list.LockListItemInteractor;
@@ -33,21 +34,25 @@ import timber.log.Timber;
 
 @Singleton class SettingsPreferenceInteractor {
 
-  @SuppressWarnings("WeakerAccess") @NonNull final MasterPinPreference masterPinPreference;
-  @SuppressWarnings("WeakerAccess") @NonNull final PadLockPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final MasterPinPreferences masterPinPreference;
+  @SuppressWarnings("WeakerAccess") @NonNull final ClearPreferences preferences;
+  @SuppressWarnings("WeakerAccess") @NonNull final InstallListenerPreferences
+      installListenerPreferences;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockDB padLockDB;
   @SuppressWarnings("WeakerAccess") @NonNull final LockListItemInteractor lockListInteractor;
   @SuppressWarnings("WeakerAccess") @NonNull final LockInfoItemInteractor lockInfoInteractor;
   @SuppressWarnings("WeakerAccess") @NonNull final PurgeInteractor purgeInteractor;
 
   @Inject SettingsPreferenceInteractor(@NonNull PadLockDB padLockDB,
-      @NonNull MasterPinPreference masterPinPreference, @NonNull PadLockPreferences preferences,
+      @NonNull MasterPinPreferences masterPinPreference, @NonNull ClearPreferences preferences,
+      @NonNull InstallListenerPreferences installListenerPreferences,
       @NonNull LockListItemInteractor lockListInteractor,
       @NonNull LockInfoItemInteractor lockInfoInteractor,
       @NonNull PurgeInteractor purgeInteractor) {
     this.padLockDB = padLockDB;
     this.masterPinPreference = masterPinPreference;
     this.preferences = preferences;
+    this.installListenerPreferences = installListenerPreferences;
     this.lockListInteractor = lockListInteractor;
     this.lockInfoInteractor = lockInfoInteractor;
     this.purgeInteractor = purgeInteractor;
@@ -57,7 +62,7 @@ import timber.log.Timber;
    * public
    */
   @NonNull @CheckResult Observable<Boolean> isInstallListenerEnabled() {
-    return Observable.fromCallable(preferences::isInstallListenerEnabled);
+    return Observable.fromCallable(installListenerPreferences::isInstallListenerEnabled);
   }
 
   /**

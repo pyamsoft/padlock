@@ -19,8 +19,8 @@ package com.pyamsoft.padlock;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
 import com.pyamsoft.padlock.base.PadLockModule;
-import com.pyamsoft.padlock.base.PadLockPreferences;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.lock.LockHelper;
 import com.pyamsoft.padlock.lock.LockScreenActivity;
@@ -51,7 +51,7 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider {
     Injector.set(component);
 
     final ApplicationInstallReceiver receiver = component.provideApplicationInstallReceiver();
-    final PadLockPreferences preferences = component.providePreferences();
+    final InstallListenerPreferences preferences = component.provideInstallListenerPreferences();
     if (preferences.isInstallListenerEnabled()) {
       receiver.register();
     } else {

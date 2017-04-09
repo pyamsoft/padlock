@@ -20,6 +20,12 @@ import android.app.Activity;
 import android.app.IntentService;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.preference.ClearPreferences;
+import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
+import com.pyamsoft.padlock.base.preference.LockListPreferences;
+import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
+import com.pyamsoft.padlock.base.preference.MasterPinPreferences;
+import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
 import dagger.Module;
 import dagger.Provides;
 import io.reactivex.Scheduler;
@@ -51,11 +57,27 @@ import javax.inject.Singleton;
     return appContext;
   }
 
-  @Singleton @Provides @NonNull PadLockPreferences providePreferences() {
+  @Singleton @Provides @NonNull MasterPinPreferences provideMasterPinPreference() {
     return preferences;
   }
 
-  @Singleton @Provides @NonNull MasterPinPreference provideMasterPinPreference() {
+  @Singleton @Provides @NonNull ClearPreferences provideClearPreferences() {
+    return preferences;
+  }
+
+  @Singleton @Provides @NonNull InstallListenerPreferences provideInstallListenerPreferences() {
+    return preferences;
+  }
+
+  @Singleton @Provides @NonNull LockListPreferences provideLockListPreferences() {
+    return preferences;
+  }
+
+  @Singleton @Provides @NonNull LockScreenPreferences provideLockScreenPreferences() {
+    return preferences;
+  }
+
+  @Singleton @Provides @NonNull OnboardingPreferences provideOnboardingPreferences() {
     return preferences;
   }
 
