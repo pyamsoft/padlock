@@ -19,10 +19,9 @@ package com.pyamsoft.padlock.list;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.base.db.PadLockDB;
-import io.reactivex.Observable;
+import com.pyamsoft.padlock.model.LockState;
+import io.reactivex.Flowable;
 import timber.log.Timber;
 
 abstract class LockCommonInteractor {
@@ -37,8 +36,8 @@ abstract class LockCommonInteractor {
     return padLockDB;
   }
 
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<LockState> createNewEntry(@NonNull String packageName, @NonNull String activityName,
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
+  Flowable<LockState> createNewEntry(@NonNull String packageName, @NonNull String activityName,
       @Nullable String code, boolean system, boolean whitelist) {
     Timber.d("Empty entry, create a new entry for: %s %s", packageName, activityName);
     return getPadLockDB().insert(packageName, activityName, code, 0, 0, system, whitelist)
@@ -49,8 +48,8 @@ abstract class LockCommonInteractor {
         });
   }
 
-  @VisibleForTesting @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<LockState> deleteEntry(@NonNull String packageName, @NonNull String activityName) {
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
+  Flowable<LockState> deleteEntry(@NonNull String packageName, @NonNull String activityName) {
     Timber.d("Entry already exists for: %s %s, delete it", packageName, activityName);
     return getPadLockDB().deleteWithPackageActivityName(packageName, activityName).map(result -> {
       Timber.d("Delete result: %d", result);
@@ -59,36 +58,36 @@ abstract class LockCommonInteractor {
   }
 
   @NonNull @CheckResult
-  public Observable<LockState> modifySingleDatabaseEntry(@NonNull LockState oldLockState,
+  public Flowable<LockState> modifySingleDatabaseEntry(@NonNull LockState oldLockState,
       @NonNull LockState newLockState, @NonNull String packageName, @NonNull String activityName,
       @Nullable String code, boolean system) {
     if (newLockState == LockState.WHITELISTED) {
-      return Observable.defer(() -> {
-        final Observable<LockState> newState;
+      return Flowable.defer(() -> {
+        final Flowable<LockState> newState;
         if (oldLockState == LockState.DEFAULT) {
           Timber.d("Add new as whitelisted");
           newState = createNewEntry(packageName, activityName, code, system, true);
         } else {
           // Update existing entry
-          newState = Observable.just(LockState.NONE);
+          newState = Flowable.just(LockState.NONE);
         }
         return newState;
       });
     } else if (newLockState == LockState.LOCKED) {
-      return Observable.defer(() -> {
-        final Observable<LockState> newState;
+      return Flowable.defer(() -> {
+        final Flowable<LockState> newState;
         if (oldLockState == LockState.DEFAULT) {
           Timber.d("Add new as force locked");
           newState = createNewEntry(packageName, activityName, code, system, false);
         } else {
           // Update existing entry
-          newState = Observable.just(LockState.NONE);
+          newState = Flowable.just(LockState.NONE);
         }
         return newState;
       });
     } else {
-      return Observable.defer(() -> {
-        final Observable<LockState> newState;
+      return Flowable.defer(() -> {
+        final Flowable<LockState> newState;
         if (oldLockState == LockState.DEFAULT) {
           Timber.d("Add new entry");
           newState = createNewEntry(packageName, activityName, code, system, false);

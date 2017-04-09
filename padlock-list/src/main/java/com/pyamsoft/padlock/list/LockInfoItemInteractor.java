@@ -19,10 +19,10 @@ package com.pyamsoft.padlock.list;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.model.ActivityEntry;
-import io.reactivex.Observable;
+import com.pyamsoft.padlock.model.LockState;
+import io.reactivex.Flowable;
 import io.reactivex.Single;
 import java.util.List;
 import javax.inject.Inject;
@@ -44,18 +44,18 @@ import timber.log.Timber;
   }
 
   @NonNull @Override
-  public Observable<LockState> modifySingleDatabaseEntry(@NonNull LockState oldLockState,
+  public Flowable<LockState> modifySingleDatabaseEntry(@NonNull LockState oldLockState,
       @NonNull LockState newLockState, @NonNull String packageName, @NonNull String activityName,
       @Nullable String code, boolean system) {
     return super.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
         code, system).flatMap(newState -> {
-      final Observable<LockState> resultState;
+      final Flowable<LockState> resultState;
       if (newState == LockState.NONE) {
         Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated");
         resultState =
             updateExistingEntry(packageName, activityName, newLockState == LockState.WHITELISTED);
       } else {
-        resultState = Observable.just(newState).map(lockState1 -> {
+        resultState = Flowable.just(newState).map(lockState1 -> {
           updateCacheEntry(packageName, activityName, lockState1);
           return lockState1;
         });
@@ -64,7 +64,7 @@ import timber.log.Timber;
     });
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<LockState> updateExistingEntry(
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Flowable<LockState> updateExistingEntry(
       @NonNull String packageName, @NonNull String activityName, boolean whitelist) {
     Timber.d("Entry already exists for: %s %s, update it", packageName, activityName);
     return getPadLockDB().updateWhitelist(whitelist, packageName, activityName).map(result -> {

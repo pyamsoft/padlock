@@ -27,6 +27,7 @@ import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -91,31 +92,34 @@ import timber.log.Timber;
     });
   }
 
-  @CheckResult @NonNull Observable<Boolean> postUnlock(@NonNull String packageName,
+  /**
+   * public
+   */
+  @CheckResult @NonNull Flowable<Boolean> postUnlock(@NonNull String packageName,
       @NonNull String activityName, @NonNull String realName, @Nullable String lockCode,
       boolean isSystem, boolean shouldExclude, long ignoreTime) {
-    return Observable.defer(() -> {
+    return Flowable.defer(() -> {
       final long ignoreMinutesInMillis = ignoreTime * 60 * 1000;
-      final Observable<Long> whitelistObservable;
-      final Observable<Integer> ignoreObservable;
-      final Observable<Integer> recheckObservable;
+      final Flowable<Long> whitelistObservable;
+      final Flowable<Integer> ignoreObservable;
+      final Flowable<Integer> recheckObservable;
 
       if (shouldExclude) {
         whitelistObservable =
             whitelistEntry(packageName, activityName, realName, lockCode, isSystem);
-        ignoreObservable = Observable.just(0);
-        recheckObservable = Observable.just(0);
+        ignoreObservable = Flowable.just(0);
+        recheckObservable = Flowable.just(0);
       } else {
-        whitelistObservable = Observable.just(0L);
+        whitelistObservable = Flowable.just(0L);
         ignoreObservable = ignoreEntryForTime(ignoreMinutesInMillis, packageName, activityName);
         recheckObservable = queueRecheckJob(packageName, activityName, ignoreMinutesInMillis);
       }
 
-      return Observable.zip(ignoreObservable, recheckObservable, whitelistObservable,
+      return Flowable.zip(ignoreObservable, recheckObservable, whitelistObservable,
           (ignore, recheck, whitelist) -> {
-            Timber.d("Result of Whitelist: %d", whitelist);
             Timber.d("Result of Ignore: %d", ignore);
             Timber.d("Result of Recheck: %d", recheck);
+            Timber.d("Result of Whitelist: %d", whitelist);
 
             // KLUDGE Just return something valid for now
             return Boolean.TRUE;
@@ -123,16 +127,16 @@ import timber.log.Timber;
     });
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Long> whitelistEntry(
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Flowable<Long> whitelistEntry(
       @NonNull String packageName, @NonNull String activityName, @NonNull String realName,
       @Nullable String lockCode, boolean isSystem) {
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName);
     return padLockDB.insert(packageName, realName, lockCode, 0, 0, isSystem, true);
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Integer> queueRecheckJob(
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Flowable<Integer> queueRecheckJob(
       @NonNull String packageName, @NonNull String activityName, long recheckTime) {
-    return Observable.fromCallable(() -> {
+    return Flowable.fromCallable(() -> {
       // Cancel any old recheck job for the class, but not the package
       final Intent intent = new Intent(appContext, recheckServiceClass);
       intent.putExtra(Recheck.EXTRA_PACKAGE_NAME, packageName);
@@ -147,22 +151,24 @@ import timber.log.Timber;
     });
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<Integer> ignoreEntryForTime(
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Flowable<Integer> ignoreEntryForTime(
       long ignoreMinutesInMillis, @NonNull String packageName, @NonNull String activityName) {
-    final long newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis;
-    Timber.d("Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
-        ignoreMinutesInMillis);
+    return Flowable.defer(() -> {
+      final long newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis;
+      Timber.d("Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
+          ignoreMinutesInMillis);
 
-    // Add an extra second here to artificially de-bounce quick requests, like those commonly in multi window mode
-    return padLockDB.updateIgnoreTime(newIgnoreTime + 1000L, packageName, activityName);
+      // Add an extra second here to artificially de-bounce quick requests, like those commonly in multi window mode
+      return padLockDB.updateIgnoreTime(newIgnoreTime + 1000L, packageName, activityName);
+    });
   }
 
   /**
    * public
    */
-  @CheckResult @NonNull Observable<TimePair> incrementAndGetFailCount(String packageName,
+  @CheckResult @NonNull Flowable<TimePair> incrementAndGetFailCount(String packageName,
       String activityName) {
-    return Observable.fromCallable(() -> ++failCount)
+    return Flowable.fromCallable(() -> ++failCount)
         .filter(count -> count > DEFAULT_MAX_FAIL_COUNT)
         .flatMap(integer -> getTimeoutPeriodMinutesInMillis())
         .filter(timeoutPeriod -> timeoutPeriod > 0)
@@ -171,20 +177,22 @@ import timber.log.Timber;
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Observable<Long> getTimeoutPeriodMinutesInMillis() {
-    return Observable.fromCallable(preferences::getTimeoutPeriod).map(period -> period * 60 * 1000);
+  Flowable<Long> getTimeoutPeriodMinutesInMillis() {
+    return Flowable.fromCallable(preferences::getTimeoutPeriod).map(period -> period * 60 * 1000);
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<TimePair> lockEntry(
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Flowable<TimePair> lockEntry(
       long timeOutMinutesInMillis, @NonNull String packageName, @NonNull String activityName) {
-    final long currentTime = System.currentTimeMillis();
-    final long newLockUntilTime = currentTime + timeOutMinutesInMillis;
-    Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
-        timeOutMinutesInMillis);
+    return Flowable.defer(() -> {
+      final long currentTime = System.currentTimeMillis();
+      final long newLockUntilTime = currentTime + timeOutMinutesInMillis;
+      Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
+          timeOutMinutesInMillis);
 
-    return padLockDB.updateLockTime(newLockUntilTime, packageName, activityName).map(integer -> {
-      Timber.d("Update result: %s", integer);
-      return new TimePair(currentTime, newLockUntilTime);
+      return padLockDB.updateLockTime(newLockUntilTime, packageName, activityName).map(integer -> {
+        Timber.d("Update result: %s", integer);
+        return new TimePair(currentTime, newLockUntilTime);
+      });
     });
   }
 
