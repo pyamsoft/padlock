@@ -19,27 +19,23 @@ package com.pyamsoft.padlock.base.db;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import io.reactivex.Observable;
+import io.reactivex.Flowable;
 import java.util.List;
 
 public interface PadLockDB {
 
-  @CheckResult @NonNull Observable<Long> insert(@NonNull String packageName,
+  @CheckResult @NonNull Flowable<Long> insert(@NonNull String packageName,
       @NonNull String activityName, @Nullable String lockCode, long lockUntilTime,
       long ignoreUntilTime, boolean isSystem, boolean whitelist);
 
-  @CheckResult @NonNull Observable<Integer> updateLockTime(long lockUntilTime,
+  @CheckResult @NonNull Flowable<Integer> updateLockTime(long lockUntilTime,
       @NonNull String packageName, @NonNull String activityName);
 
-  @CheckResult @NonNull Observable<Integer> updateIgnoreTime(long ignoreUntilTime,
+  @CheckResult @NonNull Flowable<Integer> updateIgnoreTime(long ignoreUntilTime,
       @NonNull String packageName, @NonNull String activityName);
 
-  @CheckResult @NonNull Observable<Integer> updateWhitelist(boolean whitelist,
+  @CheckResult @NonNull Flowable<Integer> updateWhitelist(boolean whitelist,
       @NonNull String packageName, @NonNull String activityName);
-
-  //@NonNull @CheckResult
-  //Observable<PadLockEntry.WithPackageActivityName> queryWithPackageActivityName(
-  //    @NonNull String packageName, @NonNull String activityName);
 
   /**
    * Get either the package with specific name of the PACKAGE entry
@@ -51,20 +47,20 @@ public interface PadLockDB {
    * ?4 the PadLock PACKAGE_TAG, see model.PadLockEntry
    * ?5 the specific activity name
    */
-  @NonNull @CheckResult Observable<PadLockEntry> queryWithPackageActivityNameDefault(
+  @NonNull @CheckResult Flowable<PadLockEntry> queryWithPackageActivityNameDefault(
       @NonNull String packageName, @NonNull String activityName);
 
-  @NonNull @CheckResult Observable<List<PadLockEntry.WithPackageName>> queryWithPackageName(
+  @NonNull @CheckResult Flowable<List<PadLockEntry.WithPackageName>> queryWithPackageName(
       @NonNull String packageName);
 
-  @NonNull @CheckResult Observable<List<PadLockEntry.AllEntries>> queryAll();
+  @NonNull @CheckResult Flowable<List<PadLockEntry.AllEntries>> queryAll();
 
-  @NonNull @CheckResult Observable<Integer> deleteWithPackageName(@NonNull String packageName);
+  @NonNull @CheckResult Flowable<Integer> deleteWithPackageName(@NonNull String packageName);
 
-  @NonNull @CheckResult Observable<Integer> deleteWithPackageActivityName(
-      @NonNull String packageName, @NonNull String activityName);
+  @NonNull @CheckResult Flowable<Integer> deleteWithPackageActivityName(@NonNull String packageName,
+      @NonNull String activityName);
 
-  @NonNull @CheckResult Observable<Integer> deleteAll();
+  @NonNull @CheckResult Flowable<Integer> deleteAll();
 
-  @NonNull @CheckResult Observable<Boolean> deleteDatabase();
+  @NonNull @CheckResult Flowable<Boolean> deleteDatabase();
 }

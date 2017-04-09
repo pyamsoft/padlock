@@ -119,7 +119,7 @@ import timber.log.Timber;
   /**
    * public
    */
-  @CheckResult @NonNull Observable<Integer> deleteEntry(@NonNull String packageName) {
+  @CheckResult @NonNull Flowable<Integer> deleteEntry(@NonNull String packageName) {
     return padLockDB.deleteWithPackageName(packageName).map(integer -> {
       cachedStalePackages = null;
       return integer;

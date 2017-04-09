@@ -18,11 +18,11 @@ package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
-import io.reactivex.Observable;
+import com.pyamsoft.padlock.model.LockState;
+import io.reactivex.Flowable;
 import io.reactivex.Single;
 import java.util.List;
 import javax.inject.Inject;
@@ -43,7 +43,7 @@ import timber.log.Timber;
   }
 
   @NonNull @Override
-  public Observable<LockState> modifySingleDatabaseEntry(@NonNull LockState oldLockState,
+  public Flowable<LockState> modifySingleDatabaseEntry(@NonNull LockState oldLockState,
       @NonNull LockState newLockState, @NonNull String packageName, @NonNull String activityName,
       @Nullable String code, boolean system) {
     return super.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,

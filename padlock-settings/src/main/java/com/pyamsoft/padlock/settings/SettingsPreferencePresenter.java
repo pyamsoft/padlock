@@ -21,7 +21,7 @@ import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
-import io.reactivex.Observable;
+import io.reactivex.Flowable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
@@ -81,7 +81,7 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
         .flatMap(new Function<ConfirmEvent, ObservableSource<ConfirmEvent.Type>>() {
           @Override public ObservableSource<ConfirmEvent.Type> apply(
               @io.reactivex.annotations.NonNull ConfirmEvent confirmEvent) throws Exception {
-            Observable<Boolean> result;
+            Flowable<Boolean> result;
             switch (confirmEvent.type()) {
               case DATABASE:
                 result = interactor.clearDatabase();
@@ -94,7 +94,7 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
                     "Received invalid confirmation event type: " + confirmEvent.type());
             }
 
-            return result.map(ignore -> confirmEvent.type());
+            return result.toObservable().map(ignore -> confirmEvent.type());
           }
         })
         .subscribeOn(getSubscribeScheduler())
@@ -113,7 +113,10 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
         }, throwable -> Timber.e(throwable, "onError clear bus"));
   }
 
-  public void checkLockType(@NonNull LockTypeCallback callback) {
+  /**
+   * public
+   */
+  void checkLockType(@NonNull LockTypeCallback callback) {
     callback.onBegin();
 
     lockTypeDisposable = DisposableHelper.dispose(lockTypeDisposable);
