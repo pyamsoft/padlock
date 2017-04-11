@@ -21,7 +21,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -33,9 +33,8 @@ import javax.inject.Singleton;
     this.preferences = preferences;
   }
 
-  @CheckResult @NonNull public Observable<OptionalWrapper<String>> getMasterPin() {
-    return Observable.fromCallable(
-        () -> OptionalWrapper.ofNullable(preferences.getMasterPassword()));
+  @CheckResult @NonNull public Single<OptionalWrapper<String>> getMasterPin() {
+    return Single.fromCallable(() -> OptionalWrapper.ofNullable(preferences.getMasterPassword()));
   }
 
   public void setMasterPin(@Nullable String pin) {
@@ -46,8 +45,8 @@ import javax.inject.Singleton;
     }
   }
 
-  @CheckResult @NonNull public Observable<OptionalWrapper<String>> getHint() {
-    return Observable.fromCallable(() -> OptionalWrapper.ofNullable(preferences.getHint()));
+  @CheckResult @NonNull public Single<OptionalWrapper<String>> getHint() {
+    return Single.fromCallable(() -> OptionalWrapper.ofNullable(preferences.getHint()));
   }
 
   public void setHint(@Nullable String hint) {
