@@ -34,6 +34,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -87,7 +88,7 @@ class PadLockDBImpl implements PadLockDB {
   @NonNull @Override
   public Completable updateIgnoreTime(long ignoreUntilTime, @NonNull String packageName,
       @NonNull String activityName) {
-    return Single.fromCallable(() -> {
+    return Completable.fromCallable(() -> {
       if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
           activityName)) {
         throw new RuntimeException("Cannot update EMPTY entry");
@@ -97,13 +98,13 @@ class PadLockDBImpl implements PadLockDB {
       openDatabase();
       return PadLockEntry.updateIgnoreTime(openHelper)
           .executeProgram(ignoreUntilTime, packageName, activityName);
-    }).toCompletable();
+    });
   }
 
   @NonNull @Override
   public Completable updateLockTime(long lockUntilTime, @NonNull String packageName,
       @NonNull String activityName) {
-    return Single.fromCallable(() -> {
+    return Completable.fromCallable(() -> {
       if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
           activityName)) {
         throw new RuntimeException("Cannot update EMPTY entry");
@@ -113,13 +114,13 @@ class PadLockDBImpl implements PadLockDB {
       openDatabase();
       return PadLockEntry.updateLockTime(openHelper)
           .executeProgram(lockUntilTime, packageName, activityName);
-    }).toCompletable();
+    });
   }
 
   @NonNull @Override
   public Completable updateWhitelist(boolean whitelist, @NonNull String packageName,
       @NonNull String activityName) {
-    return Flowable.fromCallable(() -> {
+    return Completable.fromCallable(() -> {
       if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
           activityName)) {
         throw new RuntimeException("Cannot update EMPTY entry");
@@ -129,10 +130,7 @@ class PadLockDBImpl implements PadLockDB {
       openDatabase();
       return PadLockEntry.updateWhitelist(openHelper)
           .executeProgram(whitelist, packageName, activityName);
-    })
-        .onBackpressureBuffer(16,
-            () -> Timber.e("PadLockDBImpl updateWhitelist backpressure overflow"))
-        .flatMapCompletable(aInteger -> Completable.complete());
+    });
   }
 
   /**
@@ -158,6 +156,7 @@ class PadLockDBImpl implements PadLockDB {
           briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
               .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER::map,
                   PadLockEntry.EMPTY)
+              .firstOrDefault(PadLockEntry.EMPTY)
               .toSingle());
     });
   }
@@ -173,7 +172,7 @@ class PadLockDBImpl implements PadLockDB {
       return RxJavaInterop.toV2Single(
           briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
               .mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map)
-              .first()
+              .firstOrDefault(Collections.emptyList())
               .toSingle());
     });
   }
@@ -187,7 +186,7 @@ class PadLockDBImpl implements PadLockDB {
       return RxJavaInterop.toV2Single(
           briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
               .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map)
-              .first()
+              .firstOrDefault(Collections.emptyList())
               .toSingle());
     });
   }
