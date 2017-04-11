@@ -29,7 +29,9 @@ import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
 import com.squareup.sqldelight.SqlDelightStatement;
 import hu.akarnokd.rxjava.interop.RxJavaInterop;
+import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
 import java.util.List;
@@ -61,10 +63,10 @@ class PadLockDBImpl implements PadLockDB {
   }
 
   @Override @CheckResult @NonNull
-  public Flowable<Long> insert(@NonNull String packageName, @NonNull String activityName,
+  public Completable insert(@NonNull String packageName, @NonNull String activityName,
       @Nullable String lockCode, long lockUntilTime, long ignoreUntilTime, boolean isSystem,
       boolean whitelist) {
-    return Flowable.fromCallable(() -> {
+    return Single.fromCallable(() -> {
       final PadLockEntry entry =
           PadLockEntry.create(packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime,
               isSystem, whitelist);
@@ -78,14 +80,14 @@ class PadLockDBImpl implements PadLockDB {
       Timber.d("Delete result: %d", deleteResult);
       return entry;
     })
-        .map(entry -> PadLockEntry.insertEntry(openHelper).executeProgram(entry))
-        .onBackpressureBuffer(16, () -> Timber.e("PadLockDBImpl insert backpressure overflow"));
+        .flatMapCompletable(padLockEntry -> Completable.fromCallable(
+            () -> PadLockEntry.insertEntry(openHelper).executeProgram(padLockEntry)));
   }
 
   @NonNull @Override
-  public Flowable<Integer> updateIgnoreTime(long ignoreUntilTime, @NonNull String packageName,
+  public Completable updateIgnoreTime(long ignoreUntilTime, @NonNull String packageName,
       @NonNull String activityName) {
-    return Flowable.fromCallable(() -> {
+    return Single.fromCallable(() -> {
       if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
           activityName)) {
         throw new RuntimeException("Cannot update EMPTY entry");
@@ -95,15 +97,13 @@ class PadLockDBImpl implements PadLockDB {
       openDatabase();
       return PadLockEntry.updateIgnoreTime(openHelper)
           .executeProgram(ignoreUntilTime, packageName, activityName);
-    })
-        .onBackpressureBuffer(16,
-            () -> Timber.e("PadLockDBImpl updateIgnoreTime backpressure overflow"));
+    }).toCompletable();
   }
 
   @NonNull @Override
-  public Flowable<Integer> updateLockTime(long lockUntilTime, @NonNull String packageName,
+  public Completable updateLockTime(long lockUntilTime, @NonNull String packageName,
       @NonNull String activityName) {
-    return Flowable.fromCallable(() -> {
+    return Single.fromCallable(() -> {
       if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
           activityName)) {
         throw new RuntimeException("Cannot update EMPTY entry");
@@ -113,13 +113,11 @@ class PadLockDBImpl implements PadLockDB {
       openDatabase();
       return PadLockEntry.updateLockTime(openHelper)
           .executeProgram(lockUntilTime, packageName, activityName);
-    })
-        .onBackpressureBuffer(16,
-            () -> Timber.e("PadLockDBImpl updateLockTime backpressure overflow"));
+    }).toCompletable();
   }
 
   @NonNull @Override
-  public Flowable<Integer> updateWhitelist(boolean whitelist, @NonNull String packageName,
+  public Completable updateWhitelist(boolean whitelist, @NonNull String packageName,
       @NonNull String activityName) {
     return Flowable.fromCallable(() -> {
       if (PadLockEntry.PACKAGE_EMPTY.equals(packageName) || PadLockEntry.ACTIVITY_EMPTY.equals(
@@ -133,7 +131,8 @@ class PadLockDBImpl implements PadLockDB {
           .executeProgram(whitelist, packageName, activityName);
     })
         .onBackpressureBuffer(16,
-            () -> Timber.e("PadLockDBImpl updateWhitelist backpressure overflow"));
+            () -> Timber.e("PadLockDBImpl updateWhitelist backpressure overflow"))
+        .flatMapCompletable(aInteger -> Completable.complete());
   }
 
   /**
@@ -146,72 +145,70 @@ class PadLockDBImpl implements PadLockDB {
    * ?4 the PadLock PACKAGE_TAG, see model.PadLockEntry
    * ?5 the specific activity name
    */
-  @Override @NonNull @CheckResult public Flowable<PadLockEntry> queryWithPackageActivityNameDefault(
+  @Override @NonNull @CheckResult public Single<PadLockEntry> queryWithPackageActivityNameDefault(
       final @NonNull String packageName, final @NonNull String activityName) {
-    return Flowable.defer(() -> {
+    return Single.defer(() -> {
       Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT");
       openDatabase();
 
       SqlDelightStatement statement =
           PadLockEntry.withPackageActivityNameDefault(packageName, activityName);
-      return RxJavaInterop.toV2Flowable(
+
+      return RxJavaInterop.toV2Single(
           briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
               .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER::map,
-                  PadLockEntry.EMPTY));
-    })
-        .onBackpressureBuffer(16, () -> Timber.e(
-            "PadLockDBImpl queryWithPackageActivityNameDefault backpressure overflow"));
+                  PadLockEntry.EMPTY)
+              .toSingle());
+    });
   }
 
   @Override @NonNull @CheckResult
-  public Flowable<List<PadLockEntry.WithPackageName>> queryWithPackageName(
-      final @NonNull String packageName) {
-    return Flowable.defer(() -> {
+  public Single<List<PadLockEntry.WithPackageName>> queryWithPackageName(
+      @NonNull String packageName) {
+    return Single.defer(() -> {
       Timber.i("DB: QUERY PACKAGE");
       openDatabase();
 
       SqlDelightStatement statement = PadLockEntry.withPackageName(packageName);
-      return RxJavaInterop.toV2Flowable(
+      return RxJavaInterop.toV2Single(
           briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
-              .mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map));
-    })
-        .onBackpressureBuffer(16,
-            () -> Timber.e("PadLockDBImpl queryWithPackageName backpressure overflow"));
+              .mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map)
+              .first()
+              .toSingle());
+    });
   }
 
-  @Override @NonNull @CheckResult public Flowable<List<PadLockEntry.AllEntries>> queryAll() {
-    return Flowable.defer(() -> {
+  @Override @NonNull @CheckResult public Single<List<PadLockEntry.AllEntries>> queryAll() {
+    return Single.defer(() -> {
       Timber.i("DB: QUERY ALL");
       openDatabase();
 
       SqlDelightStatement statement = PadLockEntry.queryAll();
-      return RxJavaInterop.toV2Flowable(
+      return RxJavaInterop.toV2Single(
           briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
-              .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map));
-    }).onBackpressureBuffer(16, () -> Timber.e("PadLockDBImpl queryAll backpressure overflow"));
+              .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map)
+              .first()
+              .toSingle());
+    });
   }
 
   @Override @NonNull @CheckResult
-  public Flowable<Integer> deleteWithPackageName(final @NonNull String packageName) {
-    return Flowable.fromCallable(() -> {
+  public Completable deleteWithPackageName(final @NonNull String packageName) {
+    return Completable.fromCallable(() -> {
       Timber.i("DB: DELETE PACKAGE");
       openDatabase();
       return PadLockEntry.deletePackage(openHelper).executeProgram(packageName);
-    })
-        .onBackpressureBuffer(16,
-            () -> Timber.e("PadLockDBImpl deleteWithPackageName backpressure overflow"));
+    });
   }
 
   @Override @NonNull @CheckResult
-  public Flowable<Integer> deleteWithPackageActivityName(final @NonNull String packageName,
+  public Completable deleteWithPackageActivityName(final @NonNull String packageName,
       final @NonNull String activityName) {
-    return Flowable.fromCallable(() -> {
+    return Completable.fromCallable(() -> {
       Timber.i("DB: DELETE PACKAGE ACTIVITY");
       openDatabase();
       return deleteWithPackageActivityNameUnguarded(packageName, activityName);
-    })
-        .onBackpressureBuffer(16,
-            () -> Timber.e("PadLockDBImpl deleteWithPackageActivityName backpressure overflow"));
+    });
   }
 
   @SuppressWarnings("WeakerAccess") @VisibleForTesting @CheckResult
@@ -220,24 +217,18 @@ class PadLockDBImpl implements PadLockDB {
     return PadLockEntry.deletePackageActivity(openHelper).executeProgram(packageName, activityName);
   }
 
-  @Override @NonNull @CheckResult public Flowable<Integer> deleteAll() {
-    return Flowable.fromCallable(() -> {
+  @Override @NonNull @CheckResult public Completable deleteAll() {
+    return Completable.fromAction(() -> {
       Timber.i("DB: DELETE ALL");
       briteDatabase.execute(PadLockEntry.DELETE_ALL);
       dbOpenDisposable = DisposableHelper.dispose(dbOpenDisposable);
       briteDatabase.close();
       deleteDatabase();
-      return 1;
-    }).onBackpressureBuffer(16, () -> Timber.e("PadLockDBImpl deleteAll backpressure overflow"));
+    });
   }
 
-  @NonNull @Override public Flowable<Boolean> deleteDatabase() {
-    return Flowable.fromCallable(() -> {
-      openHelper.deleteDatabase();
-      return Boolean.TRUE;
-    })
-        .onBackpressureBuffer(16,
-            () -> Timber.e("PadLockDBImpl deleteDatabase backpressure overflow"));
+  @NonNull @Override public Completable deleteDatabase() {
+    return Completable.fromAction(openHelper::deleteDatabase);
   }
 
   private static class PadLockOpenHelper extends SQLiteOpenHelper {
