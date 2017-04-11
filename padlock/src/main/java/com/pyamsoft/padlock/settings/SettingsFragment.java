@@ -140,6 +140,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
 
   @Override protected void onLicenseItemClicked() {
     MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
+    super.onLicenseItemClicked();
   }
 
   @Override public void onStart() {
