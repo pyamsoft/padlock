@@ -92,12 +92,8 @@ class PurgePresenter extends SchedulerPresenter {
     final Disposable subscription = interactor.deleteEntry(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(deleteResult -> {
-          Timber.d("Delete result :%d", deleteResult);
-          if (deleteResult > 0) {
-            callback.onDeleted(packageName);
-          }
-        }, throwable -> Timber.e(throwable, "onError deleteStale"));
+        .subscribe(() -> callback.onDeleted(packageName),
+            throwable -> Timber.e(throwable, "onError deleteStale"));
     compositeDisposable.add(subscription);
   }
 

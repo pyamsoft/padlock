@@ -22,11 +22,10 @@ import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
-import io.reactivex.Flowable;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,11 +64,11 @@ import timber.log.Timber;
         dataSource = cachedStalePackages;
       }
       return dataSource;
-    }).toObservable().flatMap(Observable::fromIterable).sorted(String::compareToIgnoreCase);
+    }).flatMapObservable(Observable::fromIterable).sorted(String::compareToIgnoreCase);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Single<List<String>> fetchFreshData() {
-    return getAppEntryList().zipWith(getActiveApplicationPackageNames().toList(),
+    return getAppEntryList().zipWith(getActiveApplicationPackageNames(),
         (allEntries, packageNames) -> {
           final List<String> stalePackageNames = new ArrayList<>();
           if (allEntries.isEmpty()) {
@@ -104,25 +103,23 @@ import timber.log.Timber;
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Flowable<String> getActiveApplicationPackageNames() {
+  Single<List<String>> getActiveApplicationPackageNames() {
     return packageManagerWrapper.getActiveApplications()
-        .toFlowable()
-        .flatMap(Flowable::fromIterable)
-        .map(applicationInfo -> applicationInfo.packageName);
+        .flatMapObservable(Observable::fromIterable)
+        .map(applicationInfo -> applicationInfo.packageName)
+        .toSortedList();
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
   Single<List<PadLockEntry.AllEntries>> getAppEntryList() {
-    return padLockDB.queryAll().first(Collections.emptyList());
+    return padLockDB.queryAll();
   }
 
   /**
    * public
    */
-  @CheckResult @NonNull Flowable<Integer> deleteEntry(@NonNull String packageName) {
-    return padLockDB.deleteWithPackageName(packageName).map(integer -> {
-      cachedStalePackages = null;
-      return integer;
-    });
+  @CheckResult @NonNull Completable deleteEntry(@NonNull String packageName) {
+    return padLockDB.deleteWithPackageName(packageName)
+        .andThen(Completable.fromAction(this::clearCache));
   }
 }
