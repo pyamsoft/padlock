@@ -24,7 +24,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CompoundButton;
 import com.mikepenz.fastadapter.items.GenericAbstractItem;
-import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
@@ -38,8 +37,6 @@ import timber.log.Timber;
 public class LockListItem
     extends GenericAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>
     implements FilterableItem<LockListItem, LockListItem.ViewHolder> {
-
-  @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
 
   @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") @Inject LockListItemPresenter presenter;
@@ -57,8 +54,8 @@ public class LockListItem
     return R.layout.adapter_item_locklist_entry;
   }
 
-  @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
-    return FACTORY;
+  @Override public ViewHolder getViewHolder(View view) {
+    return new ViewHolder(view);
   }
 
   @Override public boolean filterAgainst(@NonNull String query) {
@@ -131,15 +128,6 @@ public class LockListItem
 
     presenter.destroy();
     appIconLoaderPresenter.destroy();
-  }
-
-  private static class ItemFactory implements ViewHolderFactory<ViewHolder> {
-    ItemFactory() {
-    }
-
-    @Override public ViewHolder create(View v) {
-      return new ViewHolder(v);
-    }
   }
 
   static final class ViewHolder extends RecyclerView.ViewHolder {
