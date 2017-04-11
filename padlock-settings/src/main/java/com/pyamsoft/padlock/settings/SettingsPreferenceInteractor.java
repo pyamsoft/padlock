@@ -18,16 +18,16 @@ package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.preference.ClearPreferences;
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences;
-import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.list.LockInfoItemInteractor;
 import com.pyamsoft.padlock.list.LockListItemInteractor;
 import com.pyamsoft.padlock.purge.PurgeInteractor;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
-import io.reactivex.Flowable;
-import io.reactivex.Observable;
+import io.reactivex.Completable;
+import io.reactivex.Single;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import timber.log.Timber;
@@ -61,27 +61,29 @@ import timber.log.Timber;
   /**
    * public
    */
-  @NonNull @CheckResult Observable<Boolean> isInstallListenerEnabled() {
-    return Observable.fromCallable(installListenerPreferences::isInstallListenerEnabled);
+  @NonNull @CheckResult Single<Boolean> isInstallListenerEnabled() {
+    return Single.fromCallable(installListenerPreferences::isInstallListenerEnabled);
   }
 
   /**
    * public
    */
-  @NonNull @CheckResult Flowable<Boolean> clearDatabase() {
-    return padLockDB.deleteAll().flatMap(result -> padLockDB.deleteDatabase()).map(aBoolean -> {
-      lockListInteractor.clearCache();
-      lockInfoInteractor.clearCache();
-      purgeInteractor.clearCache();
-      return Boolean.TRUE;
-    });
+  @NonNull @CheckResult Single<Boolean> clearDatabase() {
+    return padLockDB.deleteAll()
+        .andThen(padLockDB.deleteDatabase())
+        .andThen(Completable.fromAction(() -> {
+          lockListInteractor.clearCache();
+          lockInfoInteractor.clearCache();
+          purgeInteractor.clearCache();
+        }))
+        .toSingleDefault(Boolean.TRUE);
   }
 
   /**
    * public
    */
-  @NonNull @CheckResult Flowable<Boolean> clearAll() {
-    return clearDatabase().map(aBoolean -> {
+  @NonNull @CheckResult Single<Boolean> clearAll() {
+    return clearDatabase().map(result -> {
       Timber.d("Clear all preferences");
       preferences.clearAll();
       return Boolean.TRUE;
@@ -91,8 +93,8 @@ import timber.log.Timber;
   /**
    * public
    */
-  @CheckResult @NonNull Observable<Boolean> hasExistingMasterPassword() {
-    return Observable.fromCallable(
+  @CheckResult @NonNull Single<Boolean> hasExistingMasterPassword() {
+    return Single.fromCallable(
         () -> OptionalWrapper.ofNullable(masterPinPreference.getMasterPassword()))
         .map(OptionalWrapper::isPresent);
   }

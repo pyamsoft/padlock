@@ -21,12 +21,10 @@ import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
-import io.reactivex.Flowable;
-import io.reactivex.ObservableSource;
 import io.reactivex.Scheduler;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
-import io.reactivex.functions.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -76,41 +74,33 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
    */
   void registerOnBus(@NonNull ClearCallback callback) {
     confirmedDisposable = DisposableHelper.dispose(confirmedDisposable);
-    confirmedDisposable = EventBus.get()
-        .listen(ConfirmEvent.class)
-        .flatMap(new Function<ConfirmEvent, ObservableSource<ConfirmEvent.Type>>() {
-          @Override public ObservableSource<ConfirmEvent.Type> apply(
-              @io.reactivex.annotations.NonNull ConfirmEvent confirmEvent) throws Exception {
-            Flowable<Boolean> result;
-            switch (confirmEvent.type()) {
-              case DATABASE:
-                result = interactor.clearDatabase();
-                break;
-              case ALL:
-                result = interactor.clearAll();
-                break;
-              default:
-                throw new IllegalStateException(
-                    "Received invalid confirmation event type: " + confirmEvent.type());
-            }
+    confirmedDisposable = EventBus.get().listen(ConfirmEvent.class).flatMapSingle(confirmEvent -> {
+      Single<ConfirmEvent.Type> result;
+      switch (confirmEvent.type()) {
+        case DATABASE:
+          result = interactor.clearDatabase().map(ignore -> ConfirmEvent.Type.DATABASE);
+          break;
+        case ALL:
+          result = interactor.clearAll().map(ignore -> ConfirmEvent.Type.ALL);
+          break;
+        default:
+          throw new IllegalStateException(
+              "Received invalid confirmation event type: " + confirmEvent.type());
+      }
 
-            return result.toObservable().map(ignore -> confirmEvent.type());
-          }
-        })
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(type -> {
-          switch (type) {
-            case DATABASE:
-              callback.onClearDatabase();
-              break;
-            case ALL:
-              callback.onClearAll();
-              break;
-            default:
-              throw new IllegalStateException("Received invalid confirmation event type: " + type);
-          }
-        }, throwable -> Timber.e(throwable, "onError clear bus"));
+      return result;
+    }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(type -> {
+      switch (type) {
+        case DATABASE:
+          callback.onClearDatabase();
+          break;
+        case ALL:
+          callback.onClearAll();
+          break;
+        default:
+          throw new IllegalStateException("Received invalid confirmation event type: " + type);
+      }
+    }, throwable -> Timber.e(throwable, "onError clear bus"));
   }
 
   /**
