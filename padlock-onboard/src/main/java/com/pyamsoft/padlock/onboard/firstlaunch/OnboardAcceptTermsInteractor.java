@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.onboard.firstlaunch;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
-import io.reactivex.Observable;
+import io.reactivex.Completable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -34,10 +34,7 @@ import javax.inject.Singleton;
   /**
    * public
    */
-  @NonNull @CheckResult Observable<Boolean> agreeToTerms() {
-    return Observable.fromCallable(() -> {
-      preferences.setAgreed();
-      return true;
-    });
+  @NonNull @CheckResult Completable agreeToTerms() {
+    return Completable.fromAction(preferences::setAgreed);
   }
 }

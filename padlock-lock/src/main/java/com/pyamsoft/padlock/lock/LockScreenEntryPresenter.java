@@ -72,7 +72,7 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
   void lockEntry(@NonNull String packageName, @NonNull String activityName,
       @NonNull LockCallback callback) {
     lockDisposable = DisposableHelper.dispose(lockDisposable);
-    lockDisposable = interactor.incrementAndGetFailCount(packageName, activityName)
+    lockDisposable = interactor.lockEntryOnFail(packageName, activityName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(timePair -> {
@@ -91,9 +91,8 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
   /**
    * public
    */
-  void submit(@NonNull String packageName, @NonNull String activityName,
-      @Nullable String lockCode, long lockUntilTime, @NonNull String currentAttempt,
-      @NonNull LockSubmitCallback callback) {
+  void submit(@NonNull String packageName, @NonNull String activityName, @Nullable String lockCode,
+      long lockUntilTime, @NonNull String currentAttempt, @NonNull LockSubmitCallback callback) {
     unlockDisposable = DisposableHelper.dispose(unlockDisposable);
     unlockDisposable =
         interactor.submitPin(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
@@ -124,7 +123,7 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
             shouldExclude, ignoreTime)
             .subscribeOn(getSubscribeScheduler())
             .observeOn(getObserveScheduler())
-            .subscribe(result -> {
+            .subscribe(() -> {
               Timber.d("onPostUnlock");
               callback.onPostUnlock();
             }, throwable -> {

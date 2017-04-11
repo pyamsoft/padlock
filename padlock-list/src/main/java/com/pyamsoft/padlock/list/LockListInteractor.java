@@ -21,14 +21,14 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
-import com.pyamsoft.padlock.base.preference.LockListPreferences;
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
+import com.pyamsoft.padlock.base.preference.LockListPreferences;
+import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
-import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.functions.BiFunction;
@@ -61,7 +61,7 @@ import timber.log.Timber;
   /**
    * public
    */
-  @CheckResult @NonNull Flowable<AppEntry> populateList(boolean forceRefresh) {
+  @CheckResult @NonNull Observable<AppEntry> populateList(boolean forceRefresh) {
     return Single.defer(() -> {
       final Single<List<AppEntry>> dataSource;
 
@@ -75,38 +75,31 @@ import timber.log.Timber;
         dataSource = cache;
       }
       return dataSource;
-    })
-        .toFlowable()
-        .concatMap(Flowable::fromIterable)
-        .onBackpressureBuffer(16,
-            () -> Timber.e("LockListInteractor populateList backpressure overflow"));
+    }).toObservable().concatMap(Observable::fromIterable);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Single<List<AppEntry>> fetchFreshData() {
-    return getActiveApplications().withLatestFrom(isSystemVisible(),
-        new BiFunction<ApplicationInfo, Boolean, OptionalWrapper<ApplicationInfo>>() {
-          @Override public OptionalWrapper<ApplicationInfo> apply(
-              @io.reactivex.annotations.NonNull ApplicationInfo applicationInfo,
-              @io.reactivex.annotations.NonNull Boolean systemVisible) throws Exception {
-            if (systemVisible) {
-              // If system visible, we show all apps
-              return OptionalWrapper.ofNullable(applicationInfo);
-            } else {
-              return isSystemApplication(applicationInfo) ? OptionalWrapper.ofNullable(null)
-                  : OptionalWrapper.ofNullable(applicationInfo);
-            }
+    return getActiveApplications().withLatestFrom(isSystemVisible().toObservable(),
+        // We need to cast this?
+        (BiFunction<ApplicationInfo, Boolean, OptionalWrapper<ApplicationInfo>>) (applicationInfo, systemVisible) -> {
+          if (systemVisible) {
+            // If system visible, we show all apps
+            return OptionalWrapper.ofNullable(applicationInfo);
+          } else {
+            return isSystemApplication(applicationInfo) ? OptionalWrapper.ofNullable(null)
+                : OptionalWrapper.ofNullable(applicationInfo);
           }
         })
         .filter(OptionalWrapper::isPresent)
-        .flatMap(wrapper -> {
+        .flatMapSingle(wrapper -> {
           ApplicationInfo info = wrapper.item();
-          return getActivityListForApplication(info).toList().map(activityList -> {
+          return getActivityListForApplication(info).map(activityList -> {
             if (activityList.isEmpty()) {
               return "";
             } else {
               return info.packageName;
             }
-          }).toFlowable();
+          });
         })
         .filter(s -> !s.isEmpty())
         .toList()
@@ -139,15 +132,15 @@ import timber.log.Timber;
         })
         .toObservable()
         .flatMap(Observable::fromIterable)
-        .flatMap(pair -> createFromPackageInfo(pair.first, pair.second))
+        .flatMapMaybe(pair -> createFromPackageInfo(pair.first, pair.second))
         .toSortedList((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()));
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Observable<AppEntry> createFromPackageInfo(@NonNull String packageName, boolean locked) {
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Maybe<AppEntry> createFromPackageInfo(
+      @NonNull String packageName, boolean locked) {
     return packageManagerWrapper.getApplicationInfo(packageName)
         .map(info -> AppEntry.builder()
-            .name(packageManagerWrapper.loadPackageLabel(info).blockingFirst())
+            .name(packageManagerWrapper.loadPackageLabel(info).blockingGet())
             .packageName(packageName)
             .system(isSystemApplication(info))
             .locked(locked)
@@ -159,22 +152,19 @@ import timber.log.Timber;
     return (info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull Flowable<ApplicationInfo> getActiveApplications() {
+  @SuppressWarnings("WeakerAccess") @NonNull Observable<ApplicationInfo> getActiveApplications() {
     return packageManagerWrapper.getActiveApplications()
-        .toFlowable()
-        .flatMap(Flowable::fromIterable);
+        .flatMapObservable(Observable::fromIterable);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
-  Flowable<String> getActivityListForApplication(@NonNull ApplicationInfo info) {
-    return packageManagerWrapper.getActivityListForPackage(info.packageName)
-        .toFlowable()
-        .flatMap(Flowable::fromIterable);
+  Single<List<String>> getActivityListForApplication(@NonNull ApplicationInfo info) {
+    return packageManagerWrapper.getActivityListForPackage(info.packageName);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
   Single<List<PadLockEntry.AllEntries>> getAppEntryList() {
-    return padLockDB.queryAll().first(Collections.emptyList());
+    return padLockDB.queryAll();
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Pair<String, Boolean> findAppEntry(
@@ -236,15 +226,15 @@ import timber.log.Timber;
   /**
    * public
    */
-  @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding() {
-    return Observable.fromCallable(onboardingPreferences::isListOnBoard);
+  @CheckResult @NonNull Single<Boolean> hasShownOnBoarding() {
+    return Single.fromCallable(onboardingPreferences::isListOnBoard);
   }
 
   /**
    * public
    */
-  @CheckResult @NonNull Flowable<Boolean> isSystemVisible() {
-    return Flowable.fromCallable(preferences::isSystemVisible);
+  @CheckResult @NonNull Single<Boolean> isSystemVisible() {
+    return Single.fromCallable(preferences::isSystemVisible);
   }
 
   /**

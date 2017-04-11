@@ -21,7 +21,7 @@ import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -38,14 +38,14 @@ import javax.inject.Singleton;
   /**
    * public
    */
-  @NonNull @CheckResult Observable<Long> getDefaultIgnoreTime() {
-    return Observable.fromCallable(getPreferences()::getDefaultIgnoreTime);
+  @NonNull @CheckResult Single<Long> getDefaultIgnoreTime() {
+    return Single.fromCallable(getPreferences()::getDefaultIgnoreTime);
   }
 
   /**
    * public
    */
-  @NonNull @CheckResult Observable<String> getDisplayName(@NonNull String packageName) {
-    return packageManagerWrapper.loadPackageLabel(packageName);
+  @NonNull @CheckResult Single<String> getDisplayName(@NonNull String packageName) {
+    return packageManagerWrapper.loadPackageLabel(packageName).toSingle("");
   }
 }

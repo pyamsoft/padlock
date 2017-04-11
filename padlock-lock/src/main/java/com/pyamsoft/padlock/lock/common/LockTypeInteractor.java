@@ -20,7 +20,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
 import com.pyamsoft.padlock.model.LockScreenType;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -39,7 +39,7 @@ import javax.inject.Singleton;
   /**
    * public
    */
-  @CheckResult @NonNull Observable<LockScreenType> getLockScreenType() {
-    return Observable.fromCallable(getPreferences()::getCurrentLockType);
+  @CheckResult @NonNull Single<LockScreenType> getLockScreenType() {
+    return Single.fromCallable(getPreferences()::getCurrentLockType);
   }
 }

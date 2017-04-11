@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.lock;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public abstract class LockHelper {
 
@@ -36,11 +36,10 @@ public abstract class LockHelper {
     return INSTANCE;
   }
 
-  @NonNull @CheckResult
-  public final Observable<Boolean> checkSubmissionAttempt(@NonNull String attempt,
+  @NonNull @CheckResult public final Single<Boolean> checkSubmissionAttempt(@NonNull String attempt,
       @NonNull String encodedPin) {
     return encodeSHA256(attempt).map(encodedPin::equals);
   }
 
-  @CheckResult @NonNull public abstract Observable<String> encodeSHA256(@NonNull String attempt);
+  @CheckResult @NonNull public abstract Single<String> encodeSHA256(@NonNull String attempt);
 }

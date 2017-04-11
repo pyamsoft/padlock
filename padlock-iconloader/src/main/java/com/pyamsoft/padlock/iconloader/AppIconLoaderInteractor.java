@@ -20,7 +20,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -35,7 +35,7 @@ import javax.inject.Singleton;
   /**
    * public
    */
-  @NonNull @CheckResult Observable<Drawable> loadPackageIcon(final @NonNull String packageName) {
+  @NonNull @CheckResult Single<Drawable> loadPackageIcon(final @NonNull String packageName) {
     return packageManagerWrapper.loadDrawableForPackageOrDefault(packageName);
   }
 }
