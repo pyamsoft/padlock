@@ -133,15 +133,13 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
     return getString(R.string.app_name);
   }
 
-  @Override protected boolean onClearAllPreferenceClicked() {
+  @Override protected void onClearAllClicked() {
     DialogUtil.guaranteeSingleDialogFragment(getActivity(),
         ConfirmationDialog.newInstance(ConfirmEvent.Type.ALL), "confirm_dialog");
-    return true;
   }
 
-  @Override protected boolean onLicenseItemClicked() {
+  @Override protected void onLicenseItemClicked() {
     MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
-    return super.onLicenseItemClicked();
   }
 
   @Override public void onStart() {

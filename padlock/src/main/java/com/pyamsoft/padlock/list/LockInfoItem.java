@@ -23,7 +23,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.RadioButton;
 import com.mikepenz.fastadapter.items.GenericAbstractItem;
-import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
@@ -42,7 +41,6 @@ public class LockInfoItem
     extends GenericAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>
     implements FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
-  @NonNull private static final ViewHolderFactory<? extends ViewHolder> FACTORY = new ItemFactory();
   @NonNull private final String packageName;
   private final boolean system;
   @SuppressWarnings("WeakerAccess") @Inject LockInfoItemPresenter presenter;
@@ -169,15 +167,8 @@ public class LockInfoItem
     return !name.contains(query);
   }
 
-  @Override public ViewHolderFactory<? extends ViewHolder> getFactory() {
-    return FACTORY;
-  }
-
-  @SuppressWarnings("WeakerAccess") protected static class ItemFactory
-      implements ViewHolderFactory<ViewHolder> {
-    @Override public ViewHolder create(View v) {
-      return new ViewHolder(v);
-    }
+  @Override public ViewHolder getViewHolder(View view) {
+    return new ViewHolder(view);
   }
 
   static final class ViewHolder extends RecyclerView.ViewHolder {
