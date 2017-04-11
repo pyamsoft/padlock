@@ -26,8 +26,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import java.io.BufferedReader;
@@ -51,8 +49,8 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
   }
 
   @NonNull @Override
-  public Observable<Drawable> loadDrawableForPackageOrDefault(@NonNull String packageName) {
-    return Observable.fromCallable(() -> {
+  public Single<Drawable> loadDrawableForPackageOrDefault(@NonNull String packageName) {
+    return Single.fromCallable(() -> {
       Drawable image;
       try {
         image = packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager);
@@ -86,8 +84,8 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Flowable<ApplicationInfo> getInstalledApplications() {
-    return Flowable.fromCallable(() -> {
+  Observable<ApplicationInfo> getInstalledApplications() {
+    return Single.fromCallable(() -> {
       final Process process;
       boolean caughtPermissionDenial = false;
       final List<String> packageNames = new ArrayList<>();
@@ -132,76 +130,73 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
 
       return packageNames;
     })
-        .flatMap(Flowable::fromIterable)
-        .onBackpressureBuffer(16, () -> Timber.e(
-            "PackageManagerWrapperImpl getInstalledApplications backpressure overflow"))
-        .map(packageNameWithPrefix -> packageNameWithPrefix.replaceFirst("^package:", ""))
-        .flatMap(
-            packageName -> getApplicationInfo(packageName).toFlowable(BackpressureStrategy.BUFFER));
+        .flatMapObservable(Observable::fromIterable)
+        .map(prefixedName -> prefixedName.replaceFirst("^package:", ""))
+        .flatMapSingle(this::getApplicationInfo);
   }
 
   @NonNull @Override public Single<List<ApplicationInfo>> getActiveApplications() {
     return getInstalledApplications().flatMap(info -> {
       if (!info.enabled) {
         Timber.i("Application %s is disabled", info.packageName);
-        return Flowable.empty();
+        return Observable.empty();
       }
 
       if (ANDROID_PACKAGE.equals(info.packageName)) {
         Timber.i("Application %s is Android", info.packageName);
-        return Flowable.empty();
+        return Observable.empty();
       }
 
       if (ANDROID_SYSTEM_UI_PACKAGE.equals(info.packageName)) {
         Timber.i("Application %s is System UI", info.packageName);
-        return Flowable.empty();
+        return Observable.empty();
       }
 
       Timber.d("Successfully processed application: %s", info.packageName);
-      return Flowable.just(info);
+      return Observable.just(info);
     }).toList();
   }
 
   @NonNull @Override
-  public Observable<ApplicationInfo> getApplicationInfo(@NonNull String packageName) {
-    return Observable.defer(() -> {
+  public Single<ApplicationInfo> getApplicationInfo(@NonNull String packageName) {
+    return Single.defer(() -> {
       try {
-        return Observable.just(packageManager.getApplicationInfo(packageName, 0));
+        return Single.just(packageManager.getApplicationInfo(packageName, 0));
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "onError getApplicationInfo: '" + packageName + "'");
-        return Observable.empty();
+        return Single.never();
       }
     });
   }
 
-  @NonNull @Override public Observable<String> loadPackageLabel(@NonNull ApplicationInfo info) {
-    return Observable.fromCallable(() -> info.loadLabel(packageManager).toString());
+  @NonNull @Override public Single<String> loadPackageLabel(@NonNull ApplicationInfo info) {
+    return Single.fromCallable(() -> info.loadLabel(packageManager).toString());
   }
 
-  @NonNull @Override public Observable<String> loadPackageLabel(@NonNull String packageName) {
-    return Observable.defer(() -> {
+  @NonNull @Override public Single<String> loadPackageLabel(@NonNull String packageName) {
+    return Single.defer(() -> {
       try {
-        return Observable.just(packageManager.getApplicationInfo(packageName, 0));
+        return Single.just(packageManager.getApplicationInfo(packageName, 0));
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "onError loadPackageLabel: '" + packageName + "'");
-        return Observable.empty();
+        return Single.never();
       }
     }).flatMap(this::loadPackageLabel);
   }
 
-  @NonNull @Override public Observable<ActivityInfo> getActivityInfo(@NonNull String packageName,
+  @NonNull @Override public Single<ActivityInfo> getActivityInfo(@NonNull String packageName,
       @NonNull String activityName) {
-    return Observable.defer(() -> {
+    return Single.defer(() -> {
       if (packageName.isEmpty() || activityName.isEmpty()) {
-        return Observable.empty();
+        return Single.never();
       }
 
       final ComponentName componentName = new ComponentName(packageName, activityName);
       try {
-        return Observable.just(packageManager.getActivityInfo(componentName, 0));
+        return Single.just(packageManager.getActivityInfo(componentName, 0));
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "onError getActivityInfo: '" + packageName + "', '" + activityName + "'");
-        return Observable.empty();
+        return Single.never();
       }
     });
   }

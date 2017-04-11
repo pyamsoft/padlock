@@ -21,7 +21,6 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import java.util.List;
 
@@ -29,18 +28,17 @@ public interface PackageManagerWrapper {
 
   @CheckResult @NonNull Single<List<ApplicationInfo>> getActiveApplications();
 
-  @CheckResult @NonNull Single<List<String>> getActivityListForPackage(
+  @CheckResult @NonNull Single<List<String>> getActivityListForPackage(@NonNull String packageName);
+
+  @CheckResult @NonNull Single<String> loadPackageLabel(@NonNull ApplicationInfo info);
+
+  @CheckResult @NonNull Single<String> loadPackageLabel(@NonNull String packageName);
+
+  @CheckResult @NonNull Single<Drawable> loadDrawableForPackageOrDefault(
       @NonNull String packageName);
 
-  @CheckResult @NonNull Observable<String> loadPackageLabel(@NonNull ApplicationInfo info);
+  @CheckResult @NonNull Single<ApplicationInfo> getApplicationInfo(@NonNull String packageName);
 
-  @CheckResult @NonNull Observable<String> loadPackageLabel(@NonNull String packageName);
-
-  @CheckResult @NonNull Observable<Drawable> loadDrawableForPackageOrDefault(
-      @NonNull String packageName);
-
-  @CheckResult @NonNull Observable<ApplicationInfo> getApplicationInfo(@NonNull String packageName);
-
-  @CheckResult @NonNull Observable<ActivityInfo> getActivityInfo(@NonNull String packageName,
+  @CheckResult @NonNull Single<ActivityInfo> getActivityInfo(@NonNull String packageName,
       @NonNull String activityName);
 }

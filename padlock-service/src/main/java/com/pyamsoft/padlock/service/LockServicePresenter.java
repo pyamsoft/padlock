@@ -116,8 +116,13 @@ class LockServicePresenter extends SchedulerPresenter {
     lockedEntryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(padLockEntry -> callback.startLockScreen(padLockEntry, className),
-            throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"));
+        .subscribe(padLockEntry -> {
+          if (PadLockEntry.isEmpty(padLockEntry)) {
+            Timber.w("PadLockEntry is EMPTY, ignore");
+          } else {
+            callback.startLockScreen(padLockEntry, className);
+          }
+        }, throwable -> Timber.e(throwable, "Error getting PadLockEntry for LockScreen"));
   }
 
   interface ProcessCallback {

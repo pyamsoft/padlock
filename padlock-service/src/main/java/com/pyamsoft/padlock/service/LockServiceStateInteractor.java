@@ -20,7 +20,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -32,7 +32,7 @@ import javax.inject.Singleton;
     this.pinInteractor = pinInteractor;
   }
 
-  @NonNull @CheckResult public Observable<Boolean> isServiceEnabled() {
+  @NonNull @CheckResult public Single<Boolean> isServiceEnabled() {
     return pinInteractor.getMasterPin().map(OptionalWrapper::isPresent);
   }
 }
