@@ -23,7 +23,7 @@ import com.pyamsoft.padlock.lock.LockHelper;
 import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
 import com.pyamsoft.pydroid.function.OptionalWrapper;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import timber.log.Timber;
@@ -41,14 +41,14 @@ import timber.log.Timber;
   /**
    * public
    */
-  @NonNull @CheckResult Observable<Boolean> hasMasterPin() {
+  @NonNull @CheckResult Single<Boolean> hasMasterPin() {
     return getMasterPin().map(OptionalWrapper::isPresent);
   }
 
   /**
    * public
    */
-  @NonNull @CheckResult Observable<PinEntryEvent> submitPin(@NonNull String currentAttempt,
+  @NonNull @CheckResult Single<PinEntryEvent> submitPin(@NonNull String currentAttempt,
       @NonNull String reEntryAttempt, @NonNull String hint) {
     return getMasterPin().flatMap(masterPin -> {
       if (masterPin.isPresent()) {
@@ -59,11 +59,11 @@ import timber.log.Timber;
     });
   }
 
-  @CheckResult @NonNull private Observable<OptionalWrapper<String>> getMasterPin() {
+  @CheckResult @NonNull private Single<OptionalWrapper<String>> getMasterPin() {
     return masterPinInteractor.getMasterPin();
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<PinEntryEvent> clearPin(
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Single<PinEntryEvent> clearPin(
       @NonNull String masterPin, @NonNull String attempt) {
     return LockHelper.get().checkSubmissionAttempt(attempt, masterPin).map(success -> {
       if (success) {
@@ -78,15 +78,17 @@ import timber.log.Timber;
     });
   }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Observable<PinEntryEvent> createPin(
+  @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Single<PinEntryEvent> createPin(
       @NonNull String attempt, @NonNull String reentry, @NonNull String hint) {
-    return Observable.fromCallable(() -> {
+    return Single.fromCallable(() -> {
       Timber.d("No existing master item, attempt to create a new one");
 
       final boolean success = attempt.equals(reentry);
       if (success) {
         Timber.d("Entry and Re-Entry match, create");
-        final String encodedMasterPin = LockHelper.get().encodeSHA256(attempt).blockingFirst();
+
+        // Blocking, should be run off main thread
+        final String encodedMasterPin = LockHelper.get().encodeSHA256(attempt).blockingGet();
         masterPinInteractor.setMasterPin(encodedMasterPin);
 
         if (!hint.isEmpty()) {

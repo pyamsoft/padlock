@@ -76,9 +76,7 @@ class LockInfoPresenter extends SchedulerPresenter {
           } else {
             callback.onShowOnboarding();
           }
-        }, throwable -> {
-          Timber.e(throwable, "onError");
-        });
+        }, throwable -> Timber.e(throwable, "onError"));
   }
 
   interface OnBoardingCallback {

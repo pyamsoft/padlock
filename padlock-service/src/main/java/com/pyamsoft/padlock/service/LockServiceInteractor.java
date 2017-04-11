@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -106,7 +107,7 @@ import timber.log.Timber;
               }
               return enabled;
             })
-            .flatMapSingle(enabled -> isDeviceLocked().map(deviceLocked -> {
+            .flatMap(enabled -> isDeviceLocked().map(deviceLocked -> {
               if (deviceLocked) {
                 Timber.w("Device is locked, reset lastPackage/lastClass");
                 reset();
@@ -121,11 +122,11 @@ import timber.log.Timber;
               }
               return fromActivity;
             })
-            .flatMapSingle(fromActivity -> isDeviceLocked().flatMap(deviceLocked -> {
+            .flatMap(fromActivity -> isDeviceLocked().flatMap(deviceLocked -> {
               if (deviceLocked) {
                 return isRestrictedWhileLocked();
               } else {
-                return Single.just(Boolean.FALSE);
+                return Maybe.just(Boolean.FALSE);
               }
             }))
             .filter(restrictedWhileLocked -> {
@@ -137,7 +138,7 @@ import timber.log.Timber;
                 return Boolean.TRUE;
               }
             })
-            .flatMapSingle(notLocked -> isWindowFromLockScreen(packageName, className))
+            .flatMap(notLocked -> isWindowFromLockScreen(packageName, className))
             .filter(isLockScreen -> {
               if (isLockScreen) {
                 Timber.w("Event for package %s class: %s is caused by LockScreen. Ignore",
@@ -145,12 +146,13 @@ import timber.log.Timber;
               }
               return !isLockScreen;
             })
-            .flatMapSingle(fromLockScreen -> {
+            .map(fromLockScreen -> {
               final boolean passed = !fromLockScreen;
               activePackageName = packageName;
               activeClassName = className;
-              return Single.just(passed);
-            });
+              return passed;
+            })
+            .toSingle(Boolean.FALSE);
 
     return Single.zip(windowEventObservable, hasNameChanged(packageName, lastPackageName),
         hasNameChanged(className, lastClassName), isOnlyLockOnPackageChange(),
@@ -180,7 +182,7 @@ import timber.log.Timber;
           }
 
           return windowHasChanged || !lockScreenPassed;
-        }).filter(lockApp -> lockApp).flatMapSingle(aBoolean -> {
+        }).filter(lockApp -> lockApp).flatMap(aBoolean -> {
       Timber.d("Get list of locked classes with package: %s, class: %s", packageName, className);
       setLockScreenPassed(false);
       return getEntry(packageName, className);
@@ -223,7 +225,7 @@ import timber.log.Timber;
   /**
    * Return true if the window event is caused by an Activity
    */
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Single<Boolean> isEventFromActivity(
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Maybe<Boolean> isEventFromActivity(
       @NonNull String packageName, @NonNull String className) {
     Timber.d("Check event from activity: %s %s", packageName, className);
     return packageManagerWrapper.getActivityInfo(packageName, className)
@@ -240,9 +242,9 @@ import timber.log.Timber;
     return Single.fromCallable(() -> !name.equals(oldName));
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Single<Boolean> isWindowFromLockScreen(
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Maybe<Boolean> isWindowFromLockScreen(
       @NonNull String packageName, @NonNull String className) {
-    return Single.fromCallable(() -> {
+    return Maybe.fromCallable(() -> {
       final String lockScreenPackageName = appContext.getPackageName();
       final String lockScreenClassName = lockScreenActivity.getName();
       Timber.d("Check if window is lock screen (%s %s)", lockScreenPackageName,
@@ -258,18 +260,17 @@ import timber.log.Timber;
     return Single.fromCallable(preferences::getLockOnPackageChange);
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Single<PadLockEntry> getEntry(
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Maybe<PadLockEntry> getEntry(
       @NonNull String packageName, @NonNull String activityName) {
-    return padLockDB.queryWithPackageActivityNameDefault(packageName, activityName);
+    return padLockDB.queryWithPackageActivityNameDefault(packageName, activityName).toMaybe();
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
-  Single<Boolean> isRestrictedWhileLocked() {
-    return Single.fromCallable(preferences::isIgnoreInKeyguard);
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Maybe<Boolean> isRestrictedWhileLocked() {
+    return Maybe.fromCallable(preferences::isIgnoreInKeyguard);
   }
 
-  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Single<Boolean> isDeviceLocked() {
-    return Single.fromCallable(() -> keyguardManager.inKeyguardRestrictedInputMode()
+  @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Maybe<Boolean> isDeviceLocked() {
+    return Maybe.fromCallable(() -> keyguardManager.inKeyguardRestrictedInputMode()
         || keyguardManager.isKeyguardLocked());
   }
 }

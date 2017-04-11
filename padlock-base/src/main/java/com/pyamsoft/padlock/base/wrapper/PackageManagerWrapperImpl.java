@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import java.io.BufferedReader;
@@ -132,7 +133,7 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
     })
         .flatMapObservable(Observable::fromIterable)
         .map(prefixedName -> prefixedName.replaceFirst("^package:", ""))
-        .flatMapSingle(this::getApplicationInfo);
+        .flatMapMaybe(this::getApplicationInfo);
   }
 
   @NonNull @Override public Single<List<ApplicationInfo>> getActiveApplications() {
@@ -157,46 +158,46 @@ class PackageManagerWrapperImpl implements PackageManagerWrapper {
     }).toList();
   }
 
-  @NonNull @Override
-  public Single<ApplicationInfo> getApplicationInfo(@NonNull String packageName) {
-    return Single.defer(() -> {
+  @NonNull @Override public Maybe<ApplicationInfo> getApplicationInfo(@NonNull String packageName) {
+    return Maybe.defer(() -> {
       try {
-        return Single.just(packageManager.getApplicationInfo(packageName, 0));
+        return Maybe.just(packageManager.getApplicationInfo(packageName, 0));
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "onError getApplicationInfo: '" + packageName + "'");
-        return Single.never();
+        return Maybe.empty();
       }
     });
   }
 
-  @NonNull @Override public Single<String> loadPackageLabel(@NonNull ApplicationInfo info) {
-    return Single.fromCallable(() -> info.loadLabel(packageManager).toString());
+  @NonNull @Override public Maybe<String> loadPackageLabel(@NonNull ApplicationInfo info) {
+    return Maybe.fromCallable(() -> info.loadLabel(packageManager).toString());
   }
 
-  @NonNull @Override public Single<String> loadPackageLabel(@NonNull String packageName) {
-    return Single.defer(() -> {
+  @NonNull @Override public Maybe<String> loadPackageLabel(@NonNull String packageName) {
+    return Maybe.defer(() -> {
       try {
-        return Single.just(packageManager.getApplicationInfo(packageName, 0));
+        return Maybe.just(packageManager.getApplicationInfo(packageName, 0));
       } catch (PackageManager.NameNotFoundException e) {
         Timber.e(e, "onError loadPackageLabel: '" + packageName + "'");
-        return Single.never();
+        return Maybe.empty();
       }
     }).flatMap(this::loadPackageLabel);
   }
 
-  @NonNull @Override public Single<ActivityInfo> getActivityInfo(@NonNull String packageName,
+  @NonNull @Override public Maybe<ActivityInfo> getActivityInfo(@NonNull String packageName,
       @NonNull String activityName) {
-    return Single.defer(() -> {
+    return Maybe.defer(() -> {
       if (packageName.isEmpty() || activityName.isEmpty()) {
-        return Single.never();
+        return Maybe.empty();
       }
 
       final ComponentName componentName = new ComponentName(packageName, activityName);
       try {
-        return Single.just(packageManager.getActivityInfo(componentName, 0));
+        return Maybe.just(packageManager.getActivityInfo(componentName, 0));
       } catch (PackageManager.NameNotFoundException e) {
-        Timber.e(e, "onError getActivityInfo: '" + packageName + "', '" + activityName + "'");
-        return Single.never();
+        // We intentionally leave out the throwable in the call to Timber or logs get too noisy
+        Timber.e("Could not get ActivityInfo for: '" + packageName + "', '" + activityName + "'");
+        return Maybe.empty();
       }
     });
   }

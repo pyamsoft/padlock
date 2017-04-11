@@ -20,13 +20,12 @@ import android.app.Activity;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
+import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
-import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import java.util.ArrayList;
@@ -61,15 +60,14 @@ import timber.log.Timber;
   /**
    * public
    */
-  @CheckResult @NonNull Observable<Boolean> hasShownOnBoarding() {
-    return Observable.fromCallable(preferences::isInfoDialogOnBoard)
-        .delay(300, TimeUnit.MILLISECONDS);
+  @CheckResult @NonNull Single<Boolean> hasShownOnBoarding() {
+    return Single.fromCallable(preferences::isInfoDialogOnBoard).delay(300, TimeUnit.MILLISECONDS);
   }
 
   /**
    * public
    */
-  @NonNull @CheckResult Flowable<ActivityEntry> populateList(@NonNull String packageName,
+  @NonNull @CheckResult Observable<ActivityEntry> populateList(@NonNull String packageName,
       boolean forceRefresh) {
     return Single.defer(() -> {
       final Single<List<ActivityEntry>> dataSource;
@@ -83,42 +81,37 @@ import timber.log.Timber;
         dataSource = cached;
       }
       return dataSource;
-    })
-        .toFlowable()
-        .flatMap(Flowable::fromIterable)
-        .onBackpressureBuffer(16,
-            () -> Timber.e("LockInfoInteractor populateList backpressure overflow"))
-        .sorted((activityEntry, activityEntry2) -> {
-          // Package names are all the same
-          final String entry1Name = activityEntry.name();
-          final String entry2Name = activityEntry2.name();
+    }).flatMapObservable(Observable::fromIterable).sorted((activityEntry, activityEntry2) -> {
+      // Package names are all the same
+      final String entry1Name = activityEntry.name();
+      final String entry2Name = activityEntry2.name();
 
-          // Calculate if the starting X characters in the activity name is the exact package name
-          boolean activity1Package = false;
-          if (entry1Name.startsWith(packageName)) {
-            final String strippedPackageName = entry1Name.replace(packageName, "");
-            if (strippedPackageName.charAt(0) == '.') {
-              activity1Package = true;
-            }
-          }
+      // Calculate if the starting X characters in the activity name is the exact package name
+      boolean activity1Package = false;
+      if (entry1Name.startsWith(packageName)) {
+        final String strippedPackageName = entry1Name.replace(packageName, "");
+        if (strippedPackageName.charAt(0) == '.') {
+          activity1Package = true;
+        }
+      }
 
-          boolean activity2Package = false;
-          if (entry2Name.startsWith(packageName)) {
-            final String strippedPackageName = entry2Name.replace(packageName, "");
-            if (strippedPackageName.charAt(0) == '.') {
-              activity2Package = true;
-            }
-          }
-          if (activity1Package && activity2Package) {
-            return entry1Name.compareToIgnoreCase(entry2Name);
-          } else if (activity1Package) {
-            return -1;
-          } else if (activity2Package) {
-            return 1;
-          } else {
-            return entry1Name.compareToIgnoreCase(entry2Name);
-          }
-        });
+      boolean activity2Package = false;
+      if (entry2Name.startsWith(packageName)) {
+        final String strippedPackageName = entry2Name.replace(packageName, "");
+        if (strippedPackageName.charAt(0) == '.') {
+          activity2Package = true;
+        }
+      }
+      if (activity1Package && activity2Package) {
+        return entry1Name.compareToIgnoreCase(entry2Name);
+      } else if (activity1Package) {
+        return -1;
+      } else if (activity2Package) {
+        return 1;
+      } else {
+        return entry1Name.compareToIgnoreCase(entry2Name);
+      }
+    });
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
@@ -156,14 +149,13 @@ import timber.log.Timber;
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult
   Single<List<PadLockEntry.WithPackageName>> getLockedActivityEntries(@NonNull String packageName) {
-    return padlockDB.queryWithPackageName(packageName).first(Collections.emptyList());
+    return padlockDB.queryWithPackageName(packageName);
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Single<List<String>> getPackageActivities(
       @NonNull String packageName) {
     return packageManagerWrapper.getActivityListForPackage(packageName)
-        .toFlowable()
-        .flatMap(Flowable::fromIterable)
+        .flatMapObservable(Observable::fromIterable)
         .filter(activityEntry -> !activityEntry.equalsIgnoreCase(lockScreenClass.getName()))
         .toList();
   }

@@ -50,11 +50,7 @@ class OnboardAcceptTermsPresenter extends SchedulerPresenter {
     termsDisposable = interactor.agreeToTerms()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(agreed -> {
-          if (agreed) {
-            callback.onUsageTermsAccepted();
-          }
-        }, throwable -> Timber.e(throwable, "onError"));
+        .subscribe(callback::onUsageTermsAccepted, throwable -> Timber.e(throwable, "onError"));
   }
 
   interface UsageTermsCallback {

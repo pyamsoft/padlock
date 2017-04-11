@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.model.LockState;
-import io.reactivex.Flowable;
 import io.reactivex.Single;
 import java.util.List;
 import javax.inject.Inject;
@@ -43,14 +42,13 @@ import timber.log.Timber;
   }
 
   @NonNull @Override
-  public Flowable<LockState> modifySingleDatabaseEntry(@NonNull LockState oldLockState,
+  public Single<LockState> modifySingleDatabaseEntry(@NonNull LockState oldLockState,
       @NonNull LockState newLockState, @NonNull String packageName, @NonNull String activityName,
       @Nullable String code, boolean system) {
     return super.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
-        code, system).map(lockState -> {
-      updateCacheEntry(packageManagerWrapper.loadPackageLabel(packageName).blockingFirst(),
+        code, system).doOnSuccess(lockState -> {
+      updateCacheEntry(packageManagerWrapper.loadPackageLabel(packageName).blockingGet(),
           packageName, lockState == LockState.LOCKED);
-      return lockState;
     });
   }
 

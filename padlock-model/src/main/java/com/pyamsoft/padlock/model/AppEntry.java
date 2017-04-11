@@ -26,7 +26,7 @@ import com.google.auto.value.AutoValue;
     return new AutoValue_AppEntry.Builder();
   }
 
-  @CheckResult @NonNull public abstract Builder toBuilder();
+  @CheckResult public abstract Builder toBuilder();
 
   @CheckResult public abstract String name();
 

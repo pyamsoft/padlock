@@ -27,7 +27,7 @@ import com.google.auto.value.AutoValue;
     return new AutoValue_LockScreenEntry(packageName, className);
   }
 
-  abstract String packageName();
+  @CheckResult abstract String packageName();
 
-  abstract String className();
+  @CheckResult abstract String className();
 }

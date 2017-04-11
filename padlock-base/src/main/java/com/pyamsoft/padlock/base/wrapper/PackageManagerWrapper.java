@@ -21,6 +21,7 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import java.util.List;
 
@@ -30,15 +31,15 @@ public interface PackageManagerWrapper {
 
   @CheckResult @NonNull Single<List<String>> getActivityListForPackage(@NonNull String packageName);
 
-  @CheckResult @NonNull Single<String> loadPackageLabel(@NonNull ApplicationInfo info);
+  @CheckResult @NonNull Maybe<String> loadPackageLabel(@NonNull ApplicationInfo info);
 
-  @CheckResult @NonNull Single<String> loadPackageLabel(@NonNull String packageName);
+  @CheckResult @NonNull Maybe<String> loadPackageLabel(@NonNull String packageName);
 
   @CheckResult @NonNull Single<Drawable> loadDrawableForPackageOrDefault(
       @NonNull String packageName);
 
-  @CheckResult @NonNull Single<ApplicationInfo> getApplicationInfo(@NonNull String packageName);
+  @CheckResult @NonNull Maybe<ApplicationInfo> getApplicationInfo(@NonNull String packageName);
 
-  @CheckResult @NonNull Single<ActivityInfo> getActivityInfo(@NonNull String packageName,
+  @CheckResult @NonNull Maybe<ActivityInfo> getActivityInfo(@NonNull String packageName,
       @NonNull String activityName);
 }
