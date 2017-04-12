@@ -30,6 +30,8 @@ import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -50,7 +52,7 @@ import timber.log.Timber;
   @SuppressWarnings("WeakerAccess") @NonNull String lastClassName = "";
   @SuppressWarnings("WeakerAccess") @NonNull String activePackageName = "";
   @SuppressWarnings("WeakerAccess") @NonNull String activeClassName = "";
-  @SuppressWarnings("WeakerAccess") boolean lockScreenPassed;
+  @SuppressWarnings("WeakerAccess") Map<String, Boolean> lockScreenPassed;
 
   @Inject LockServiceInteractor(@NonNull Context context,
       @NonNull LockScreenPreferences preferences, @NonNull JobSchedulerCompat jobSchedulerCompat,
@@ -67,6 +69,7 @@ import timber.log.Timber;
     this.lockScreenActivity = lockScreenActivityClass;
     this.recheckService = recheckServiceClass;
     this.stateInteractor = stateInteractor;
+    lockScreenPassed = new HashMap<>();
   }
 
   @SuppressWarnings("WeakerAccess") void reset() {
@@ -75,7 +78,7 @@ import timber.log.Timber;
     lastClassName = "";
     activeClassName = "";
     activePackageName = "";
-    setLockScreenPassed(false);
+    lockScreenPassed.clear();
   }
 
   /**
@@ -181,10 +184,16 @@ import timber.log.Timber;
             windowHasChanged = true;
           }
 
-          return windowHasChanged || !lockScreenPassed;
+          Boolean lockPassed = lockScreenPassed.get(packageName + className);
+          if (lockPassed == null) {
+            Timber.w("No lock map entry exists for: %s, %s", packageName, className);
+            Timber.w("default to False");
+            lockPassed = false;
+          }
+          return windowHasChanged || !lockPassed;
         }).filter(lockApp -> lockApp).flatMap(aBoolean -> {
       Timber.d("Get list of locked classes with package: %s, class: %s", packageName, className);
-      setLockScreenPassed(false);
+      setLockScreenPassed(packageName, className, false);
       return getEntry(packageName, className);
     }).filter(padLockEntry -> !PadLockEntry.isEmpty(padLockEntry)).filter(entry -> {
       final long ignoreUntilTime = entry.ignoreUntilTime();
@@ -206,9 +215,9 @@ import timber.log.Timber;
   /**
    * public
    */
-  void setLockScreenPassed(boolean b) {
-    Timber.d("Set lockScreenPassed: %s", b);
-    lockScreenPassed = b;
+  void setLockScreenPassed(@NonNull String packageName, @NonNull String className, boolean b) {
+    Timber.d("Set lockScreenPassed: %s, %s, [%s]", packageName, className, b);
+    lockScreenPassed.put(packageName + className, b ? Boolean.TRUE : Boolean.FALSE);
   }
 
   /**

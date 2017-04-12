@@ -20,15 +20,14 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
-@AutoValue abstract class ServiceEvent {
+@AutoValue abstract class LockPassEvent {
 
-  @CheckResult @NonNull static ServiceEvent create(@NonNull Type type) {
-    return new AutoValue_ServiceEvent(type);
+  @CheckResult @NonNull
+  static LockPassEvent create(@NonNull String packageName, @NonNull String className) {
+    return new AutoValue_LockPassEvent(packageName, className);
   }
 
-  @CheckResult abstract Type type();
+  @CheckResult abstract String packageName();
 
-  enum Type {
-    FINISH, PASS_LOCK
-  }
+  @CheckResult abstract String className();
 }

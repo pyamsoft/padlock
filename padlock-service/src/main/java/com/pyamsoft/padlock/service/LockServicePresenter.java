@@ -35,6 +35,7 @@ class LockServicePresenter extends SchedulerPresenter {
   @NonNull private Disposable recheckDisposable = Disposables.empty();
   @NonNull private Disposable serviceBus = Disposables.empty();
   @NonNull private Disposable recheckBus = Disposables.empty();
+  @NonNull private Disposable passBus = Disposables.empty();
 
   @Inject LockServicePresenter(@NonNull LockServiceInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
@@ -49,6 +50,7 @@ class LockServicePresenter extends SchedulerPresenter {
     recheckDisposable = DisposableHelper.dispose(recheckDisposable);
     serviceBus = DisposableHelper.dispose(serviceBus);
     recheckBus = DisposableHelper.dispose(recheckBus);
+    passBus = DisposableHelper.dispose(passBus);
     interactor.cleanup();
   }
 
@@ -58,22 +60,20 @@ class LockServicePresenter extends SchedulerPresenter {
   void registerOnBus(@NonNull ServiceCallback callback) {
     serviceBus = DisposableHelper.dispose(serviceBus);
     serviceBus = EventBus.get()
-        .listen(ServiceEvent.class)
+        .listen(ServiceFinishEvent.class)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(serviceEvent -> {
-          switch (serviceEvent.type()) {
-            case FINISH:
-              callback.onFinish();
-              break;
-            case PASS_LOCK:
-              callback.onPassLockScreen();
-              break;
-            default:
-              throw new IllegalArgumentException(
-                  "Invalid ServiceEvent.Type: " + serviceEvent.type());
-          }
+          callback.onFinish();
         }, throwable -> Timber.e(throwable, "onError service bus"));
+
+    passBus = DisposableHelper.dispose(passBus);
+    passBus = EventBus.get()
+        .listen(LockPassEvent.class)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(lockPassEvent -> setLockScreenPassed(lockPassEvent.packageName(),
+            lockPassEvent.className()), throwable -> Timber.e(throwable, "onError lock pass bus"));
 
     recheckBus = DisposableHelper.dispose(recheckBus);
     recheckBus = EventBus.get()
@@ -82,6 +82,10 @@ class LockServicePresenter extends SchedulerPresenter {
         .observeOn(getObserveScheduler())
         .subscribe(recheckEvent -> callback.onRecheck(recheckEvent.packageName(),
             recheckEvent.className()), throwable -> Timber.e(throwable, "onError recheck bus"));
+  }
+
+  void setLockScreenPassed(@NonNull String packageName, @NonNull String className) {
+    interactor.setLockScreenPassed(packageName, className, true);
   }
 
   /**
@@ -98,13 +102,6 @@ class LockServicePresenter extends SchedulerPresenter {
             processAccessibilityEvent(packageName, className, RecheckStatus.FORCE, callback);
           }
         }, throwable -> Timber.e(throwable, "onError processActiveApplicationIfMatching"));
-  }
-
-  /**
-   * public
-   */
-  void setLockScreenPassed() {
-    interactor.setLockScreenPassed(true);
   }
 
   /**
@@ -133,8 +130,6 @@ class LockServicePresenter extends SchedulerPresenter {
   interface ServiceCallback {
 
     void onFinish();
-
-    void onPassLockScreen();
 
     void onRecheck(@NonNull String packageName, @NonNull String className);
   }

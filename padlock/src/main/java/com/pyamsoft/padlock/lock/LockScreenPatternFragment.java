@@ -84,7 +84,7 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
             new LockScreenEntryPresenter.PostUnlockCallback() {
               @Override public void onPostUnlock() {
                 Timber.d("POST Unlock Finished! 1");
-                PadLockService.passLockScreen();
+                PadLockService.passLockScreen(getLockedPackageName(), getLockedActivityName());
                 getActivity().finish();
               }
 

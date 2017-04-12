@@ -45,11 +45,11 @@ public class PadLockService extends AccessibilityService
   }
 
   public static void finish() {
-    EventBus.get().publish(ServiceEvent.create(ServiceEvent.Type.FINISH));
+    EventBus.get().publish(new ServiceFinishEvent());
   }
 
-  public static void passLockScreen() {
-    EventBus.get().publish(ServiceEvent.create(ServiceEvent.Type.PASS_LOCK));
+  public static void passLockScreen(@NonNull String packageName, @NonNull String className) {
+    EventBus.get().publish(LockPassEvent.create(packageName, className));
   }
 
   public static void recheck(@NonNull String packageName, @NonNull String className) {
@@ -112,10 +112,6 @@ public class PadLockService extends AccessibilityService
         }
       }
 
-      @Override public void onPassLockScreen() {
-        presenter.setLockScreenPassed();
-      }
-
       @Override public void onRecheck(@NonNull String packageName, @NonNull String className) {
         presenter.processActiveApplicationIfMatching(packageName, className, callback);
       }
@@ -131,17 +127,6 @@ public class PadLockService extends AccessibilityService
   @Override public void startLockScreen(@NonNull PadLockEntry entry, @NonNull String realName) {
     Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
         entry.activityName(), realName);
-
-    final String packageName = entry.packageName();
-    final String className = entry.activityName();
-    final LockScreenActivity isAlreadyLockedEntry =
-        LockScreenActivity.hasLockedMapEntry(packageName, className);
-    if (isAlreadyLockedEntry != null) {
-      Timber.w("We have a locked entry for %s %s, attempt to finish it first", packageName,
-          className);
-      isAlreadyLockedEntry.finish();
-    }
-
     LockScreenActivity.start(this, entry, realName);
   }
 }

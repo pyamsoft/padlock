@@ -41,8 +41,6 @@ import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.util.DialogUtil;
-import java.util.HashMap;
-import java.util.Map;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -55,19 +53,6 @@ public class LockScreenActivity extends ActivityBase {
   @NonNull public static final String ENTRY_IS_SYSTEM = "is_system";
   @NonNull public static final String ENTRY_LOCK_UNTIL_TIME = "lock_until_time";
   @NonNull private static final String FORGOT_PASSWORD_TAG = "forgot_password";
-  /**
-   * KLUDGE This is a map that holds references to Activities
-   *
-   * That's bad mk.
-   *
-   * More of a proof of concept, only publishable if it works just, really really well and
-   * is LOCKED DOWN TO NOT LEAK
-   */
-  @NonNull private static final Map<LockScreenEntry, LockScreenActivity> LOCK_SCREEN_MAP;
-
-  static {
-    LOCK_SCREEN_MAP = new HashMap<>();
-  }
 
   @NonNull private final Intent home;
   @SuppressWarnings("WeakerAccess") @Inject LockScreenPresenter presenter;
@@ -143,30 +128,6 @@ public class LockScreenActivity extends ActivityBase {
     }
 
     context.getApplicationContext().startActivity(intent);
-  }
-
-  private static void addToLockedMap(@NonNull String packageName, @NonNull String className,
-      @NonNull LockScreenActivity instance) {
-    final LockScreenEntry entry = LockScreenEntry.create(packageName, className);
-    Timber.i("Add instance to map for activity: %s %s", packageName, className);
-    if (LOCK_SCREEN_MAP.put(entry, instance) != null) {
-      Timber.e("Instance for %s %s existed. I hope you called finish before this", packageName,
-          className);
-    }
-  }
-
-  private static void removeFromLockedMap(@NonNull String packageName, @NonNull String className) {
-    final LockScreenEntry entry = LockScreenEntry.create(packageName, className);
-    if (LOCK_SCREEN_MAP.remove(entry) != null) {
-      Timber.i("Remove instance from map for activity: %s %s", packageName, className);
-    }
-  }
-
-  @CheckResult @Nullable
-  public static LockScreenActivity hasLockedMapEntry(@NonNull String packageName,
-      @NonNull String className) {
-    final LockScreenEntry entry = LockScreenEntry.create(packageName, className);
-    return LOCK_SCREEN_MAP.get(entry);
   }
 
   @CallSuper @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
@@ -265,16 +226,12 @@ public class LockScreenActivity extends ActivityBase {
           }
         });
     supportInvalidateOptionsMenu();
-
-    // Add the lock map
-    addToLockedMap(lockedPackageName, lockedActivityName, this);
   }
 
   @Override protected void onStop() {
     super.onStop();
     presenter.stop();
     appIconLoaderPresenter.stop();
-    removeFromLockedMap(lockedPackageName, lockedActivityName);
   }
 
   @Override protected void onPause() {
