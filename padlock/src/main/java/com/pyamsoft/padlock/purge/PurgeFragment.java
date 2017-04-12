@@ -209,7 +209,12 @@ public class PurgeFragment extends Fragment implements PurgePresenter.RetrievalC
       return true;
     });
     decoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
-    binding.purgeList.setLayoutManager(new LinearLayoutManager(getContext()));
+    LinearLayoutManager manager = new LinearLayoutManager(getContext());
+    manager.setItemPrefetchEnabled(true);
+    manager.setInitialPrefetchItemCount(3);
+    binding.purgeList.setLayoutManager(manager);
+    binding.purgeList.setClipToPadding(false);
+    binding.purgeList.setHasFixedSize(false);
     binding.purgeList.addItemDecoration(decoration);
     binding.purgeList.setAdapter(fastItemAdapter);
   }

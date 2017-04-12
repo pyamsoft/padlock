@@ -275,7 +275,12 @@ public class LockListFragment extends Fragment {
       return true;
     });
 
-    binding.applistRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
+    LinearLayoutManager manager = new LinearLayoutManager(getContext());
+    manager.setItemPrefetchEnabled(true);
+    manager.setInitialPrefetchItemCount(3);
+    binding.applistRecyclerview.setLayoutManager(manager);
+    binding.applistRecyclerview.setClipToPadding(false);
+    binding.applistRecyclerview.setHasFixedSize(false);
     binding.applistRecyclerview.addItemDecoration(dividerDecoration);
     binding.applistRecyclerview.setAdapter(fastItemAdapter);
   }
