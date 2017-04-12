@@ -58,8 +58,8 @@
       <!-- Sets a default width/height for the lock screen when in freeform mode -->
       <!--suppress AndroidElementNotAllowed -->
       <layout
-          android:defaultHeight="500dp"
-          android:defaultWidth="600dp"
+          android:defaultHeight="250dp"
+          android:defaultWidth="250dp"
           tools:ignore="UnusedAttribute"/>
 
     </activity>
