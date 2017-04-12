@@ -211,7 +211,12 @@ public class LockInfoDialog extends DialogFragment {
       return item.filterAgainst(queryString);
     });
 
-    binding.lockInfoRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+    LinearLayoutManager manager = new LinearLayoutManager(getContext());
+    manager.setItemPrefetchEnabled(true);
+    manager.setInitialPrefetchItemCount(3);
+    binding.lockInfoRecycler.setLayoutManager(manager);
+    binding.lockInfoRecycler.setClipToPadding(false);
+    binding.lockInfoRecycler.setHasFixedSize(false);
     binding.lockInfoRecycler.addItemDecoration(dividerDecoration);
     binding.lockInfoRecycler.setAdapter(fastItemAdapter);
   }
