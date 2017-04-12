@@ -225,6 +225,12 @@ public class LockScreenActivity extends ActivityBase {
                 "error");
           }
         });
+
+    presenter.closeOldAndAwaitSignal(lockedPackageName, lockedActivityName, () -> {
+      Timber.w("Close event received for this LockScreen: %s", LockScreenActivity.this);
+      finish();
+    });
+
     supportInvalidateOptionsMenu();
   }
 
