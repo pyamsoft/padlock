@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list;
 
 import android.databinding.DataBindingUtil;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
@@ -27,8 +26,11 @@ import com.mikepenz.fastadapter.items.GenericAbstractItem;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistEntryBinding;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.loader.AppIconLoader;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.pydroid.ui.loader.ImageLoader;
+import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
+import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import java.util.List;
 import javax.inject.Inject;
@@ -38,8 +40,8 @@ public class LockListItem
     extends GenericAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>
     implements FilterableItem<LockListItem, LockListItem.ViewHolder> {
 
-  @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") @Inject LockListItemPresenter presenter;
+  @NonNull private Loaded appIcon = LoaderHelper.empty();
 
   LockListItem(@NonNull AppEntry entry) {
     super(entry);
@@ -70,16 +72,9 @@ public class LockListItem
     holder.binding.lockListToggle.setOnCheckedChangeListener(null);
     holder.binding.lockListToggle.setChecked(getModel().locked());
 
-    appIconLoaderPresenter.loadApplicationIcon(getModel().packageName(),
-        new AppIconLoaderPresenter.LoadCallback() {
-          @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-            holder.binding.lockListIcon.setImageDrawable(icon);
-          }
-
-          @Override public void onApplicationIconLoadedError() {
-            Timber.e("Failed to load icon into ViewHolder");
-          }
-        });
+    appIcon = LoaderHelper.unload(appIcon);
+    appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(getModel().packageName()))
+        .into(holder.binding.lockListIcon);
 
     holder.binding.lockListToggle.setOnCheckedChangeListener(
         new CompoundButton.OnCheckedChangeListener() {
@@ -124,10 +119,9 @@ public class LockListItem
     holder.binding.lockListToggle.setOnCheckedChangeListener(null);
 
     presenter.stop();
-    appIconLoaderPresenter.stop();
-
     presenter.destroy();
-    appIconLoaderPresenter.destroy();
+
+    appIcon = LoaderHelper.unload(appIcon);
   }
 
   static final class ViewHolder extends RecyclerView.ViewHolder {

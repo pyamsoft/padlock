@@ -37,8 +37,9 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.OnboardListDialogBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.onboard.Onboard;
-import com.pyamsoft.pydroid.ui.loader.DrawableLoader;
-import com.pyamsoft.pydroid.ui.loader.DrawableMap;
+import com.pyamsoft.pydroid.ui.loader.ImageLoader;
+import com.pyamsoft.pydroid.ui.loader.LoaderMap;
+import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import javax.inject.Inject;
 
 public class OnboardListDialog extends DialogFragment implements Onboard {
@@ -46,7 +47,7 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
   @NonNull public static final String TAG = "OnboardListDialog";
   @NonNull private static final String KEY_LAST_POSITION = "key_onboard_list_dialog_position";
   private static final int PAGER_PAGE_COUNT = 3;
-  @NonNull private final DrawableMap mapper = new DrawableMap();
+  @NonNull private final LoaderMap mapper = new LoaderMap();
   @Inject OnboardListPresenter presenter;
   private OnboardListDialogBinding binding;
   private ViewPager.OnPageChangeListener pageChangeListener;
@@ -122,16 +123,16 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
     binding.onboardListNext.setOnClickListener(v -> scrollToNextPage());
     binding.onboardListConfirm.setOnClickListener(v -> completeOnboarding());
 
-    final DrawableLoader.Loaded backTask =
-        DrawableLoader.load(R.drawable.ic_arrow_back_24dp).into(binding.onboardListBack);
+    final Loaded backTask =
+        ImageLoader.fromResource(R.drawable.ic_arrow_back_24dp).into(binding.onboardListBack);
     mapper.put("back", backTask);
 
-    final DrawableLoader.Loaded nextTask =
-        DrawableLoader.load(R.drawable.ic_arrow_forward_24dp).into(binding.onboardListNext);
+    final Loaded nextTask =
+        ImageLoader.fromResource(R.drawable.ic_arrow_forward_24dp).into(binding.onboardListNext);
     mapper.put("next", nextTask);
 
-    final DrawableLoader.Loaded confirmTask =
-        DrawableLoader.load(R.drawable.ic_check_24dp).into(binding.onboardListConfirm);
+    final Loaded confirmTask =
+        ImageLoader.fromResource(R.drawable.ic_check_24dp).into(binding.onboardListConfirm);
     mapper.put("confirm", confirmTask);
 
     onPageChangeToolbarResponse(position);
@@ -189,7 +190,7 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
     binding.onboardListPager.arrowScroll(View.FOCUS_RIGHT);
   }
 
-  static class OnboardListPagerAdapter extends FragmentStatePagerAdapter {
+  private static class OnboardListPagerAdapter extends FragmentStatePagerAdapter {
 
     OnboardListPagerAdapter(FragmentManager fm) {
       super(fm);

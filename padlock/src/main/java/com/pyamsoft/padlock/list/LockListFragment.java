@@ -45,8 +45,9 @@ import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.design.util.FABUtil;
-import com.pyamsoft.pydroid.ui.loader.DrawableHelper;
-import com.pyamsoft.pydroid.ui.loader.DrawableLoader;
+import com.pyamsoft.pydroid.ui.loader.ImageLoader;
+import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
+import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
@@ -88,19 +89,20 @@ public class LockListFragment extends Fragment {
       activity.supportInvalidateOptionsMenu();
     }
   };
-  @NonNull DrawableLoader.Loaded fabIconTask = DrawableLoader.empty();
+  @NonNull Loaded fabIconTask = LoaderHelper.empty();
   @NonNull final LockListPresenter.FABStateCallback fabStateCallback =
       new LockListPresenter.FABStateCallback() {
 
         @Override public void onSetFABStateEnabled() {
-          fabIconTask = DrawableHelper.unload(fabIconTask);
+          fabIconTask = LoaderHelper.unload(fabIconTask);
           fabIconTask =
-              DrawableLoader.load(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
+              ImageLoader.fromResource(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
         }
 
         @Override public void onSetFABStateDisabled() {
-          fabIconTask = DrawableHelper.unload(fabIconTask);
-          fabIconTask = DrawableLoader.load(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
+          fabIconTask = LoaderHelper.unload(fabIconTask);
+          fabIconTask =
+              ImageLoader.fromResource(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
         }
       };
   boolean listIsRefreshed;
@@ -330,7 +332,7 @@ public class LockListFragment extends Fragment {
     binding.applistFab.setOnClickListener(null);
     binding.applistSwipeRefresh.setOnRefreshListener(null);
 
-    fabIconTask = DrawableHelper.unload(fabIconTask);
+    fabIconTask = LoaderHelper.unload(fabIconTask);
     handler.removeCallbacksAndMessages(null);
     binding.unbind();
     super.onDestroyView();

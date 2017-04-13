@@ -31,13 +31,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.loader.AppIconLoader;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
+import com.pyamsoft.pydroid.ui.loader.ImageLoader;
+import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
+import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.util.DrawableUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -48,9 +50,9 @@ public class PinEntryDialog extends DialogFragment {
   @NonNull private static final String ENTRY_PACKAGE_NAME = "entry_packagename";
   @NonNull private static final String ENTRY_ACTIVITY_NAME = "entry_activityname";
   @SuppressWarnings("WeakerAccess") @Inject LockTypePresenter presenter;
-  @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   DialogPinEntryBinding binding;
   private String packageName;
+  @NonNull private Loaded appIcon = LoaderHelper.empty();
 
   public static PinEntryDialog newInstance(final @NonNull String packageName,
       final @NonNull String activityName) {
@@ -142,23 +144,15 @@ public class PinEntryDialog extends DialogFragment {
 
   @Override public void onStart() {
     super.onStart();
-    appIconLoaderPresenter.loadApplicationIcon(packageName,
-        new AppIconLoaderPresenter.LoadCallback() {
-          @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-            binding.pinImage.setImageDrawable(icon);
-          }
-
-          @Override public void onApplicationIconLoadedError() {
-            Toast.makeText(getActivity(), "Failed to load image", Toast.LENGTH_SHORT).show();
-            dismiss();
-          }
-        });
+    appIcon = LoaderHelper.unload(appIcon);
+    appIcon =
+        ImageLoader.fromLoader(AppIconLoader.forPackageName(packageName)).into(binding.pinImage);
   }
 
   @Override public void onStop() {
     super.onStop();
     presenter.stop();
-    appIconLoaderPresenter.stop();
+    appIcon = LoaderHelper.unload(appIcon);
   }
 
   @SuppressLint("SetTextI18n") private void setupToolbar() {
@@ -183,7 +177,6 @@ public class PinEntryDialog extends DialogFragment {
   @Override public void onDestroy() {
     super.onDestroy();
     presenter.destroy();
-    appIconLoaderPresenter.destroy();
     PadLock.getRefWatcher(this).watch(this);
   }
 }

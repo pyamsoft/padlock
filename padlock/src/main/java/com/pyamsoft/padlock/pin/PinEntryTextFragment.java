@@ -33,8 +33,9 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding;
 import com.pyamsoft.pydroid.bus.EventBus;
-import com.pyamsoft.pydroid.ui.loader.DrawableHelper;
-import com.pyamsoft.pydroid.ui.loader.DrawableLoader;
+import com.pyamsoft.pydroid.ui.loader.ImageLoader;
+import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
+import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -78,7 +79,7 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
           dismissParent();
         }
       };
-  @NonNull private DrawableLoader.Loaded goTask = DrawableLoader.empty();
+  @NonNull private Loaded goTask = LoaderHelper.empty();
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -94,7 +95,7 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    goTask = DrawableHelper.unload(goTask);
+    goTask = LoaderHelper.unload(goTask);
     imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0, 0);
     binding.unbind();
   }
@@ -191,8 +192,8 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
     // Force keyboard focus
     pinEntryText.requestFocus();
 
-    goTask = DrawableHelper.unload(goTask);
-    goTask = DrawableLoader.load(R.drawable.ic_arrow_forward_24dp)
+    goTask = LoaderHelper.unload(goTask);
+    goTask = ImageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
         .tint(R.color.orangeA200)
         .into(binding.pinImageGo);
   }

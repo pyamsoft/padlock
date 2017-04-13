@@ -32,8 +32,9 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.ui.loader.DrawableHelper;
-import com.pyamsoft.pydroid.ui.loader.DrawableLoader;
+import com.pyamsoft.pydroid.ui.loader.ImageLoader;
+import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
+import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import java.util.Locale;
 import timber.log.Timber;
@@ -47,7 +48,7 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
   @SuppressWarnings("WeakerAccess") InputMethodManager imm;
   FragmentLockScreenTextBinding binding;
   private EditText editText;
-  @NonNull private DrawableLoader.Loaded arrowGoTask = DrawableLoader.empty();
+  @NonNull private Loaded arrowGoTask = LoaderHelper.empty();
 
   @CheckResult @NonNull
   public static LockScreenTextFragment newInstance(@NonNull String lockedPackageName,
@@ -69,7 +70,7 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    arrowGoTask = DrawableHelper.unload(arrowGoTask);
+    arrowGoTask = LoaderHelper.unload(arrowGoTask);
     imm.toggleSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0, 0);
     binding.unbind();
   }
@@ -190,8 +191,8 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
       }
     });
 
-    arrowGoTask = DrawableHelper.unload(arrowGoTask);
-    arrowGoTask = DrawableLoader.load(R.drawable.ic_arrow_forward_24dp)
+    arrowGoTask = LoaderHelper.unload(arrowGoTask);
+    arrowGoTask = ImageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
         .tint(R.color.orangeA200)
         .into(binding.lockImageGo);
   }
