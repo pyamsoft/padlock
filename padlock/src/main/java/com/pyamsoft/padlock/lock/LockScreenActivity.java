@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.lock;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
@@ -36,10 +35,12 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
-import com.pyamsoft.padlock.list.ErrorDialog;
+import com.pyamsoft.padlock.loader.AppIconLoader;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
+import com.pyamsoft.pydroid.ui.loader.ImageLoader;
+import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
+import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -56,7 +57,6 @@ public class LockScreenActivity extends ActivityBase {
 
   @NonNull private final Intent home;
   @SuppressWarnings("WeakerAccess") @Inject LockScreenPresenter presenter;
-  @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") String lockedActivityName;
   @SuppressWarnings("WeakerAccess") String lockedPackageName;
   @SuppressWarnings("WeakerAccess") long lockUntilTime;
@@ -100,6 +100,7 @@ public class LockScreenActivity extends ActivityBase {
   boolean lockedSystem;
   private long ignorePeriod = -1;
   private boolean excludeEntry;
+  @NonNull private Loaded appIcon = LoaderHelper.empty();
 
   public LockScreenActivity() {
     home = new Intent(Intent.ACTION_MAIN);
@@ -214,17 +215,10 @@ public class LockScreenActivity extends ActivityBase {
         bar.setTitle(name);
       }
     });
-    appIconLoaderPresenter.loadApplicationIcon(lockedPackageName,
-        new AppIconLoaderPresenter.LoadCallback() {
-          @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable icon) {
-            binding.lockImage.setImageDrawable(icon);
-          }
 
-          @Override public void onApplicationIconLoadedError() {
-            DialogUtil.onlyLoadOnceDialogFragment(LockScreenActivity.this, new ErrorDialog(),
-                "error");
-          }
-        });
+    appIcon = LoaderHelper.unload(appIcon);
+    appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(lockedPackageName))
+        .into(binding.lockImage);
 
     presenter.closeOldAndAwaitSignal(lockedPackageName, lockedActivityName, () -> {
       Timber.w("Close event received for this LockScreen: %s", LockScreenActivity.this);
@@ -237,7 +231,7 @@ public class LockScreenActivity extends ActivityBase {
   @Override protected void onStop() {
     super.onStop();
     presenter.stop();
-    appIconLoaderPresenter.stop();
+    appIcon = LoaderHelper.unload(appIcon);
   }
 
   @Override protected void onPause() {
@@ -258,7 +252,6 @@ public class LockScreenActivity extends ActivityBase {
   @CallSuper @Override protected void onDestroy() {
     super.onDestroy();
     presenter.destroy();
-    appIconLoaderPresenter.stop();
 
     Timber.d("Clear currently locked");
     binding.unbind();

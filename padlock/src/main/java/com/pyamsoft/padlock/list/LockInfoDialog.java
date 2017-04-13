@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list;
 
 import android.app.Dialog;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -39,9 +38,12 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding;
-import com.pyamsoft.padlock.iconloader.AppIconLoaderPresenter;
+import com.pyamsoft.padlock.loader.AppIconLoader;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
+import com.pyamsoft.pydroid.ui.loader.ImageLoader;
+import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
+import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
@@ -55,7 +57,6 @@ public class LockInfoDialog extends DialogFragment {
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
   @NonNull final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") @Inject LockInfoPresenter presenter;
-  @SuppressWarnings("WeakerAccess") @Inject AppIconLoaderPresenter appIconLoaderPresenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") DialogLockInfoBinding binding;
   @NonNull final Runnable startRefreshRunnable = () -> binding.lockInfoSwipeRefresh.post(() -> {
@@ -133,6 +134,7 @@ public class LockInfoDialog extends DialogFragment {
   private String appName;
   private DividerItemDecoration dividerDecoration;
   private FilterListDelegate filterListDelegate;
+  @NonNull private Loaded appIcon = LoaderHelper.empty();
 
   @CheckResult @NonNull public static LockInfoDialog newInstance(@NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -236,23 +238,16 @@ public class LockInfoDialog extends DialogFragment {
   @Override public void onDestroy() {
     super.onDestroy();
     presenter.destroy();
-    appIconLoaderPresenter.destroy();
     PadLock.getRefWatcher(this).watch(this);
   }
 
   @Override public void onStart() {
     super.onStart();
-    appIconLoaderPresenter.loadApplicationIcon(appPackageName,
-        new AppIconLoaderPresenter.LoadCallback() {
 
-          @Override public void onApplicationIconLoadedError() {
-            // TODO handle
-          }
+    appIcon = LoaderHelper.unload(appIcon);
+    appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(appPackageName))
+        .into(binding.lockInfoIcon);
 
-          @Override public void onApplicationIconLoadedSuccess(@NonNull Drawable drawable) {
-            binding.lockInfoIcon.setImageDrawable(drawable);
-          }
-        });
     if (!listIsRefreshed) {
       if (!binding.lockInfoSwipeRefresh.isRefreshing()) {
         binding.lockInfoSwipeRefresh.post(() -> {
@@ -270,7 +265,7 @@ public class LockInfoDialog extends DialogFragment {
   @Override public void onStop() {
     super.onStop();
     presenter.stop();
-    appIconLoaderPresenter.stop();
+    appIcon = LoaderHelper.unload(appIcon);
   }
 
   @Override public void onResume() {

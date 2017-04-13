@@ -29,13 +29,14 @@ import android.view.ViewGroup;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.databinding.OnboardListPageContentBinding;
 import com.pyamsoft.padlock.onboard.OnboardChildFragment;
-import com.pyamsoft.pydroid.ui.loader.DrawableHelper;
-import com.pyamsoft.pydroid.ui.loader.DrawableLoader;
+import com.pyamsoft.pydroid.ui.loader.ImageLoader;
+import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
+import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 
 abstract class OnboardContentFragment extends OnboardChildFragment {
 
   private OnboardListPageContentBinding binding;
-  @NonNull private DrawableLoader.Loaded imageTask = DrawableLoader.empty();
+  @NonNull private Loaded imageTask = LoaderHelper.empty();
 
   @CallSuper @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -55,15 +56,15 @@ abstract class OnboardContentFragment extends OnboardChildFragment {
 
   @CallSuper @Override public void onDestroyView() {
     super.onDestroyView();
-    imageTask = DrawableHelper.unload(imageTask);
+    imageTask = LoaderHelper.unload(imageTask);
     binding.unbind();
   }
 
   @CallSuper @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    imageTask = DrawableHelper.unload(imageTask);
-    imageTask = DrawableLoader.load(getOnboardImage()).into(binding.onboardListContentImage);
+    imageTask = LoaderHelper.unload(imageTask);
+    imageTask = ImageLoader.fromResource(getOnboardImage()).into(binding.onboardListContentImage);
 
     binding.onboardListContentText.setText(getOnboardText());
   }

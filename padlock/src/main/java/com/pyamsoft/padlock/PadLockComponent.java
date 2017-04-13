@@ -16,14 +16,16 @@
 
 package com.pyamsoft.padlock;
 
-import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
+import android.support.annotation.CheckResult;
 import com.pyamsoft.padlock.base.PadLockModule;
 import com.pyamsoft.padlock.base.db.PadLockDBModule;
+import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatModule;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperModule;
 import com.pyamsoft.padlock.list.LockInfoComponent;
 import com.pyamsoft.padlock.list.LockListComponent;
+import com.pyamsoft.padlock.loader.LoaderComponent;
 import com.pyamsoft.padlock.lock.LockScreenComponent;
 import com.pyamsoft.padlock.main.MainComponent;
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFirstLaunchComponent;
@@ -40,29 +42,31 @@ import javax.inject.Singleton;
     PadLockDBModule.class
 }) public interface PadLockComponent {
 
-  LockInfoComponent plusLockInfoComponent();
+  @CheckResult LockInfoComponent plusLockInfoComponent();
 
-  LockListComponent plusLockListComponent();
+  @CheckResult LockListComponent plusLockListComponent();
 
-  LockScreenComponent plusLockScreenComponent();
+  @CheckResult LockScreenComponent plusLockScreenComponent();
 
-  PinEntryComponent plusPinEntryComponent();
+  @CheckResult PinEntryComponent plusPinEntryComponent();
 
-  MainComponent plusMainComponent();
+  @CheckResult MainComponent plusMainComponent();
 
-  OnboardFirstLaunchComponent plusOnboardFirstLaunchComponent();
+  @CheckResult OnboardFirstLaunchComponent plusOnboardFirstLaunchComponent();
 
-  OnboardListComponent plusOnboardListComponent();
+  @CheckResult OnboardListComponent plusOnboardListComponent();
 
-  PurgeComponent plusPurgeComponent();
+  @CheckResult PurgeComponent plusPurgeComponent();
 
-  LockServiceComponent plusLockServiceComponent();
+  @CheckResult LockServiceComponent plusLockServiceComponent();
 
-  SettingsPreferenceComponent plusSettingsPreferenceComponent();
+  @CheckResult SettingsPreferenceComponent plusSettingsPreferenceComponent();
+
+  @CheckResult LoaderComponent plusLoaderComponent();
 
   // To be used directly by PadLockSingleInitProvider
-  InstallListenerPreferences provideInstallListenerPreferences();
+  @CheckResult InstallListenerPreferences provideInstallListenerPreferences();
 
   // To be used directly by PadLockSingleInitProvider
-  ApplicationInstallReceiver provideApplicationInstallReceiver();
+  @CheckResult ApplicationInstallReceiver provideApplicationInstallReceiver();
 }
