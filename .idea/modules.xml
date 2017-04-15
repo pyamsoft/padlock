@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/PadLock.iml" filepath="$PROJECT_DIR$/PadLock.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock/padlock.iml" filepath="$PROJECT_DIR$/padlock/padlock.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-base/padlock-base.iml" filepath="$PROJECT_DIR$/padlock-base/padlock-base.iml" />
-      <module fileurl="file://$PROJECT_DIR$/padlock-iconloader/padlock-iconloader.iml" filepath="$PROJECT_DIR$/padlock-iconloader/padlock-iconloader.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-list/padlock-list.iml" filepath="$PROJECT_DIR$/padlock-list/padlock-list.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-lock/padlock-lock.iml" filepath="$PROJECT_DIR$/padlock-lock/padlock-lock.iml" />
       <module fileurl="file://$PROJECT_DIR$/padlock-main/padlock-main.iml" filepath="$PROJECT_DIR$/padlock-main/padlock-main.iml" />
