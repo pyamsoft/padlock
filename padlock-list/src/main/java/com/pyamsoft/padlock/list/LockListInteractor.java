@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.list;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
 import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.base.preference.LockListPreferences;
@@ -114,39 +113,42 @@ import timber.log.Timber;
 
           final List<PadLockEntry.AllEntries> copyEntries = new ArrayList<>(padLockEntries);
           final List<String> copyNames = new ArrayList<>(packageNames);
-          final List<Pair<String, Boolean>> lockPairs = new ArrayList<>();
+          final List<LockTuple> lockTuples = new ArrayList<>();
           for (final String packageName : copyNames) {
+            boolean locked = false;
+            boolean otherLocked = false;
             final Set<PadLockEntry.AllEntries> removeEntries = new HashSet<>();
-            PadLockEntry.AllEntries foundEntry = null;
             for (final PadLockEntry.AllEntries entry : copyEntries) {
               if (entry.packageName().equals(packageName)) {
                 removeEntries.add(entry);
                 if (entry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
-                  foundEntry = entry;
+                  locked = true;
+                } else {
+                  otherLocked = true;
                 }
               }
             }
 
             copyEntries.removeAll(removeEntries);
-            lockPairs.add(
-                new Pair<>(packageName, foundEntry == null ? Boolean.FALSE : Boolean.TRUE));
+            lockTuples.add(new LockTuple(packageName, locked, otherLocked));
           }
 
-          return lockPairs;
+          return lockTuples;
         })
         .flatMapObservable(Observable::fromIterable)
-        .flatMapMaybe(pair -> createFromPackageInfo(pair.first, pair.second))
+        .flatMapMaybe(this::createFromPackageInfo)
         .toSortedList((entry, entry2) -> entry.name().compareToIgnoreCase(entry2.name()));
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Maybe<AppEntry> createFromPackageInfo(
-      @NonNull String packageName, boolean locked) {
-    return packageManagerWrapper.getApplicationInfo(packageName)
+      @NonNull LockTuple tuple) {
+    return packageManagerWrapper.getApplicationInfo(tuple.packageName)
         .map(info -> AppEntry.builder()
             .name(packageManagerWrapper.loadPackageLabel(info).blockingGet())
-            .packageName(packageName)
+            .packageName(tuple.packageName)
             .system(isSystemApplication(info))
-            .locked(locked)
+            .locked(tuple.locked)
+            .otherLocked(tuple.otherLocked)
             .build());
   }
 
@@ -189,5 +191,18 @@ import timber.log.Timber;
    */
   void setSystemVisible(boolean visible) {
     preferences.setSystemVisible(visible);
+  }
+
+  private static final class LockTuple {
+
+    @NonNull final String packageName;
+    final boolean locked;
+    final boolean otherLocked;
+
+    LockTuple(@NonNull String packageName, boolean locked, boolean otherLocked) {
+      this.packageName = packageName;
+      this.locked = locked;
+      this.otherLocked = otherLocked;
+    }
   }
 }
