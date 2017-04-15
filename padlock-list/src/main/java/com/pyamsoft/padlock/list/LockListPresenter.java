@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.list.bus.OtherLockedChangeEvent;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.pin.ClearPinEvent;
 import com.pyamsoft.padlock.pin.CreatePinEvent;
@@ -41,6 +42,7 @@ class LockListPresenter extends SchedulerPresenter {
   @NonNull private Disposable fabStateDisposable = Disposables.empty();
   @NonNull private Disposable pinCreateBus = Disposables.empty();
   @NonNull private Disposable pinClearBus = Disposables.empty();
+  @NonNull private Disposable otherLockBus = Disposables.empty();
 
   @Inject LockListPresenter(@NonNull LockListInteractor lockListInteractor,
       @NonNull LockServiceStateInteractor stateInteractor,
@@ -58,6 +60,7 @@ class LockListPresenter extends SchedulerPresenter {
     populateListDisposable = DisposableHelper.dispose(populateListDisposable);
     pinCreateBus = DisposableHelper.dispose(pinCreateBus);
     pinClearBus = DisposableHelper.dispose(pinClearBus);
+    otherLockBus = DisposableHelper.dispose(otherLockBus);
   }
 
   /**
@@ -89,6 +92,19 @@ class LockListPresenter extends SchedulerPresenter {
             callback.onMasterPinClearFailure();
           }
         }, throwable -> Timber.e(throwable, "on error clear pin bus"));
+
+    otherLockBus = DisposableHelper.dispose(otherLockBus);
+    otherLockBus = EventBus.get()
+        .listen(OtherLockedChangeEvent.class)
+        .subscribeOn(getSubscribeScheduler())
+        .observeOn(getObserveScheduler())
+        .subscribe(otherLockedChangeEvent -> {
+          if (otherLockedChangeEvent.otherLocked()) {
+            callback.onOtherLockedSet(otherLockedChangeEvent.packageName());
+          } else {
+            callback.onOtherLockedUnset(otherLockedChangeEvent.packageName());
+          }
+        }, throwable -> Timber.e(throwable, "onError otherChanged lock bus"));
   }
 
   /**
@@ -171,7 +187,7 @@ class LockListPresenter extends SchedulerPresenter {
         }, throwable -> Timber.e(throwable, "onError"));
   }
 
-  interface BusCallback {
+  interface BusCallback extends OtherLockedChangeCallback {
 
     void onMasterPinCreateSuccess();
 
@@ -206,5 +222,12 @@ class LockListPresenter extends SchedulerPresenter {
   interface PopulateListCallback extends LockCommon {
 
     void onEntryAddedToList(@NonNull AppEntry entry);
+  }
+
+  interface OtherLockedChangeCallback {
+
+    void onOtherLockedSet(@NonNull String packageName);
+
+    void onOtherLockedUnset(@NonNull String packageName);
   }
 }

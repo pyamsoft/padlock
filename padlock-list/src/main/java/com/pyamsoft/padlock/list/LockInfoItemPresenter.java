@@ -18,7 +18,9 @@ package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.pyamsoft.padlock.list.bus.OtherLockedChangeEvent;
 import com.pyamsoft.padlock.model.LockState;
+import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
@@ -60,12 +62,15 @@ class LockInfoItemPresenter extends SchedulerPresenter {
             .subscribe(newState -> {
               switch (newState) {
                 case DEFAULT:
+                  EventBus.get().publish(OtherLockedChangeEvent.create(packageName, false));
                   callback.onDatabaseEntryDeleted();
                   break;
                 case WHITELISTED:
+                  EventBus.get().publish(OtherLockedChangeEvent.create(packageName, true));
                   callback.onDatabaseEntryWhitelisted();
                   break;
                 case LOCKED:
+                  EventBus.get().publish(OtherLockedChangeEvent.create(packageName, true));
                   callback.onDatabaseEntryCreated();
                   break;
                 default:

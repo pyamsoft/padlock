@@ -56,6 +56,14 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         />
 
+    <ImageView
+        android:id="@+id/lock_list_other"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@string/blank"
+        />
+
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/lock_list_toggle"
         android:layout_width="wrap_content"
