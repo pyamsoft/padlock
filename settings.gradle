@@ -20,6 +20,6 @@ include ':padlock', ':padlock-model', ':padlock-base', ':padlock-pin', ':padlock
     ':padlock-main',
     ':padlock-service',
     ':padlock-lock',
-    ':padlock-list',
-    ':padlock-iconloader'
+    ':padlock-list'
+
 
