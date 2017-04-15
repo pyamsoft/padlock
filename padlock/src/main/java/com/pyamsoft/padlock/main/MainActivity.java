@@ -266,9 +266,9 @@ public class MainActivity extends TamperActivity
   }
 
   @NonNull @Override protected String[] getChangeLogLines() {
-    final String line1 = "BUGFIX: Cache loaded lists for quicker performance";
-    final String line2 = "BUGFIX: Shrink APK size";
-    final String line3 = "BUGFIX: Less memory usage";
+    final String line1 = "BUGFIX: Bugfixes and improvements";
+    final String line2 = "BUGFIX: Removed all Advertisements";
+    final String line3 = "BUGFIX: Faster loading of Open Source Licenses page";
     return new String[] { line1, line2, line3 };
   }
 

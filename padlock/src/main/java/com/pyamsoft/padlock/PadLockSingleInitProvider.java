@@ -19,8 +19,8 @@ package com.pyamsoft.padlock;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
 import com.pyamsoft.padlock.base.PadLockModule;
+import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.lock.LockHelper;
 import com.pyamsoft.padlock.lock.LockScreenActivity;
@@ -64,9 +64,11 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider {
   }
 
   @Override public void insertCustomLicensesIntoMap() {
-    super.insertCustomLicensesIntoMap();
     Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite");
     Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight");
     Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2");
+    Licenses.create("Firebase", "https://firebase.google.com", "licenses/firebase");
+    Licenses.create("PatternLockView", "https://github.com/aritraroy/PatternLockView",
+        "licenses/patternlock");
   }
 }
