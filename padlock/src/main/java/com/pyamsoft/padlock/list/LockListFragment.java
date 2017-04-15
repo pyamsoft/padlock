@@ -201,6 +201,26 @@ public class LockListFragment extends Fragment {
 
     presenter.registerOnBus(new LockListPresenter.BusCallback() {
 
+      @Override public void onOtherLockedSet(@NonNull String packageName) {
+        updateListOtherLockChanged(packageName, true);
+      }
+
+      @Override public void onOtherLockedUnset(@NonNull String packageName) {
+        updateListOtherLockChanged(packageName, false);
+      }
+
+      private void updateListOtherLockChanged(@NonNull String packageName, boolean set) {
+        final int size = fastItemAdapter.getAdapterItemCount();
+        for (int i = 0; i < size; ++i) {
+          LockListItem item = fastItemAdapter.getAdapterItem(i);
+          if (item.getModel().packageName().equals(packageName)) {
+            item.withModel(item.getModel().toBuilder().otherLocked(set).build());
+            fastItemAdapter.notifyItemChanged(i);
+            break;
+          }
+        }
+      }
+
       @Override public void onMasterPinCreateSuccess() {
         fabStateCallback.onSetFABStateEnabled();
         final View v = getView();

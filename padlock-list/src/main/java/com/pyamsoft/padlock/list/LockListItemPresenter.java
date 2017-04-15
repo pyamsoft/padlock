@@ -18,8 +18,8 @@ package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
+import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
@@ -48,8 +48,8 @@ class LockListItemPresenter extends SchedulerPresenter {
   /**
    * public
    */
-  void modifyDatabaseEntry(boolean isChecked, @NonNull String packageName,
-      @Nullable String code, boolean system, @NonNull DatabaseCallback callback) {
+  void modifyDatabaseEntry(boolean isChecked, @NonNull String packageName, @Nullable String code,
+      boolean system, @NonNull DatabaseCallback callback) {
     // No whitelisting for modifications from the List
     LockState oldState = (isChecked ? LockState.DEFAULT : LockState.LOCKED);
     LockState newState = (isChecked ? LockState.LOCKED : LockState.DEFAULT);
