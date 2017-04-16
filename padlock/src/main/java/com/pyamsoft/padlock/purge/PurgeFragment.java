@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
@@ -35,12 +34,12 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding;
-import com.pyamsoft.pydroid.ui.util.ActionBarUtil;
+import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class PurgeFragment extends Fragment implements PurgePresenter.RetrievalCallback {
+public class PurgeFragment extends ActionBarFragment implements PurgePresenter.RetrievalCallback {
 
   @NonNull public static final String TAG = "PurgeFragment";
   @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
@@ -180,7 +179,7 @@ public class PurgeFragment extends Fragment implements PurgePresenter.RetrievalC
 
   @Override public void onResume() {
     super.onResume();
-    ActionBarUtil.setActionBarUpEnabled(getActivity(), false);
+    setActionBarUpEnabled(false);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

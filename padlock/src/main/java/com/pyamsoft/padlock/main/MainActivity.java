@@ -207,6 +207,20 @@ public class MainActivity extends TamperActivity {
     showOnboardingOrDefault();
   }
 
+  /**
+   * Called from SettingsFragment
+   */
+  public void hideBottomBar() {
+    binding.bottomTabs.setVisibility(View.GONE);
+  }
+
+  /**
+   * Called from SettingsFragment
+   */
+  public void showBottomBar() {
+    binding.bottomTabs.setVisibility(View.VISIBLE);
+  }
+
   private void showOnboardingOrDefault() {
     presenter.showOnboardingOrDefault(new MainPresenter.OnboardingCallback() {
       @Override public void onShowOnboarding() {
@@ -239,16 +253,17 @@ public class MainActivity extends TamperActivity {
           }
           if (changed == FragmentHasChanged.CHANGED_WITH_UP) {
             ActionBarUtil.setActionBarUpEnabled(MainActivity.this, true);
+            showBottomBar = false;
           } else {
             ActionBarUtil.setActionBarUpEnabled(MainActivity.this, false);
             binding.bottomTabs.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
+            showBottomBar = true;
           }
 
-          showBottomBar = true;
         }
 
         if (showBottomBar) {
-          binding.bottomTabs.setVisibility(View.VISIBLE);
+          showBottomBar();
         }
       }
     });
@@ -264,7 +279,7 @@ public class MainActivity extends TamperActivity {
     }
 
     // Hide bottom bar
-    binding.bottomTabs.setVisibility(View.GONE);
+    hideBottomBar();
   }
 
   private enum FragmentHasChanged {
