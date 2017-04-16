@@ -26,6 +26,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
+import android.view.View;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
@@ -47,15 +48,12 @@ public class MainActivity extends TamperActivity {
   @NonNull private static final String FIRST_LAUNCH = "main_first_launch";
   @SuppressWarnings("WeakerAccess") @Inject MainPresenter presenter;
   @SuppressWarnings("WeakerAccess") ActivityMainBinding binding;
-  @SuppressWarnings("WeakerAccess") boolean firstLaunch;
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
     super.onCreate(savedInstanceState);
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
-
-    firstLaunch = savedInstanceState != null && savedInstanceState.getBoolean(FIRST_LAUNCH, false);
 
     Injector.get().provideComponent().plusMainComponent().inject(this);
 
@@ -172,11 +170,6 @@ public class MainActivity extends TamperActivity {
     }
   }
 
-  @Override protected void onSaveInstanceState(Bundle outState) {
-    outState.putBoolean(FIRST_LAUNCH, firstLaunch);
-    super.onSaveInstanceState(outState);
-  }
-
   @Override protected void onPostResume() {
     super.onPostResume();
     AnimUtil.animateActionBarToolbar(binding.toolbar);
@@ -201,6 +194,9 @@ public class MainActivity extends TamperActivity {
     return R.mipmap.ic_launcher;
   }
 
+  /**
+   * Called from Onboarding fragments
+   */
   public void onOnboardingCompleted() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     final Fragment onboarding = fragmentManager.findFragmentByTag(OnboardFragment.TAG);
@@ -244,10 +240,7 @@ public class MainActivity extends TamperActivity {
             binding.bottomTabs.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
           }
 
-          if (firstLaunch) {
-            Timber.d("First launch");
-            // TODO animate
-          }
+          binding.bottomTabs.setVisibility(View.VISIBLE);
         }
       }
     });
@@ -261,6 +254,9 @@ public class MainActivity extends TamperActivity {
         actionBar.hide();
       }
     }
+
+    // Hide bottom bar
+    binding.bottomTabs.setVisibility(View.GONE);
   }
 
   private enum FragmentHasChanged {

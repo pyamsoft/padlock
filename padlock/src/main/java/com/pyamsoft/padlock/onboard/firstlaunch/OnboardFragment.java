@@ -108,7 +108,7 @@ public class OnboardFragment extends Fragment implements Onboard {
     binding.onboardingPager.arrowScroll(View.FOCUS_RIGHT);
   }
 
-  static class OnboardingPagerAdapter extends FragmentStatePagerAdapter {
+  private static class OnboardingPagerAdapter extends FragmentStatePagerAdapter {
 
     OnboardingPagerAdapter(@NonNull FragmentManager fm) {
       super(fm);
