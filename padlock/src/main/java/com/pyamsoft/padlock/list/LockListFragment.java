@@ -22,7 +22,6 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -44,16 +43,16 @@ import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.design.util.FABUtil;
+import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.ui.loader.ImageLoader;
 import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
 import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
-import com.pyamsoft.pydroid.ui.util.ActionBarUtil;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class LockListFragment extends Fragment {
+public class LockListFragment extends ActionBarFragment {
 
   @NonNull public static final String TAG = "LockListFragment";
   @NonNull final Handler handler = new Handler(Looper.getMainLooper());
@@ -250,7 +249,7 @@ public class LockListFragment extends Fragment {
     super.onResume();
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> binding.applistFab.show(), 300L);
-    ActionBarUtil.setActionBarUpEnabled(getActivity(), false);
+    setActionBarUpEnabled(false);
   }
 
   @Override public void onPause() {
@@ -322,6 +321,7 @@ public class LockListFragment extends Fragment {
   @Override public void onDestroyView() {
     filterListDelegate.onDestroyView();
     displaySystemItem = null;
+    stopRefreshRunnable.run();
 
     binding.applistRecyclerview.removeItemDecoration(dividerDecoration);
     binding.applistRecyclerview.setOnClickListener(null);
