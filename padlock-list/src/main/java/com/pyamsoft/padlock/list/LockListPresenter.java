@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.list.bus.OtherLockedChangeEvent;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.pin.ClearPinEvent;
 import com.pyamsoft.padlock.pin.CreatePinEvent;
@@ -92,19 +91,6 @@ class LockListPresenter extends SchedulerPresenter {
             callback.onMasterPinClearFailure();
           }
         }, throwable -> Timber.e(throwable, "on error clear pin bus"));
-
-    otherLockBus = DisposableHelper.dispose(otherLockBus);
-    otherLockBus = EventBus.get()
-        .listen(OtherLockedChangeEvent.class)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(otherLockedChangeEvent -> {
-          if (otherLockedChangeEvent.otherLocked()) {
-            callback.onOtherLockedSet(otherLockedChangeEvent.packageName());
-          } else {
-            callback.onOtherLockedUnset(otherLockedChangeEvent.packageName());
-          }
-        }, throwable -> Timber.e(throwable, "onError otherChanged lock bus"));
   }
 
   /**
@@ -187,7 +173,7 @@ class LockListPresenter extends SchedulerPresenter {
         }, throwable -> Timber.e(throwable, "onError"));
   }
 
-  interface BusCallback extends OtherLockedChangeCallback {
+  interface BusCallback {
 
     void onMasterPinCreateSuccess();
 
@@ -222,12 +208,5 @@ class LockListPresenter extends SchedulerPresenter {
   interface PopulateListCallback extends LockCommon {
 
     void onEntryAddedToList(@NonNull AppEntry entry);
-  }
-
-  interface OtherLockedChangeCallback {
-
-    void onOtherLockedSet(@NonNull String packageName);
-
-    void onOtherLockedUnset(@NonNull String packageName);
   }
 }

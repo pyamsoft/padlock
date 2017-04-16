@@ -36,8 +36,6 @@ import com.google.auto.value.AutoValue;
 
   @CheckResult public abstract boolean locked();
 
-  @CheckResult public abstract boolean otherLocked();
-
   @AutoValue.Builder public static abstract class Builder {
 
     @CheckResult public abstract Builder name(String s);
@@ -47,8 +45,6 @@ import com.google.auto.value.AutoValue;
     @CheckResult public abstract Builder system(boolean b);
 
     @CheckResult public abstract Builder locked(boolean b);
-
-    @CheckResult public abstract Builder otherLocked(boolean b);
 
     @CheckResult public abstract AppEntry build();
   }
