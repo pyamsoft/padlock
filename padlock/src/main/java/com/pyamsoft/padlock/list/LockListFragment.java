@@ -247,9 +247,9 @@ public class LockListFragment extends ActionBarFragment {
 
   @Override public void onResume() {
     super.onResume();
+    setActionBarUpEnabled(false);
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> binding.applistFab.show(), 300L);
-    setActionBarUpEnabled(false);
   }
 
   @Override public void onPause() {

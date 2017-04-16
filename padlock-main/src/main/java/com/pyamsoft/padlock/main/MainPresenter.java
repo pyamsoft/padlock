@@ -37,6 +37,11 @@ class MainPresenter extends SchedulerPresenter {
     this.interactor = interactor;
   }
 
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    onboardingDisposable = DisposableHelper.dispose(onboardingDisposable);
+  }
+
   /**
    * public
    */
@@ -52,11 +57,6 @@ class MainPresenter extends SchedulerPresenter {
             callback.onShowOnboarding();
           }
         }, throwable -> Timber.e(throwable, "onError"));
-  }
-
-  @Override protected void onStop() {
-    super.onStop();
-    onboardingDisposable = DisposableHelper.dispose(onboardingDisposable);
   }
 
   interface OnboardingCallback {

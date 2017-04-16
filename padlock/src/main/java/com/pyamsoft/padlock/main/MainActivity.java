@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.main;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -26,18 +25,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.preference.PreferenceManager;
-import android.view.View;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.ActivityMainBinding;
-import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFragment;
-import com.pyamsoft.padlock.purge.PurgeFragment;
-import com.pyamsoft.padlock.settings.SettingsFragment;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.sec.TamperActivity;
-import com.pyamsoft.pydroid.ui.util.ActionBarUtil;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
@@ -45,7 +39,6 @@ import timber.log.Timber;
 
 public class MainActivity extends TamperActivity {
 
-  @NonNull private static final String FIRST_LAUNCH = "main_first_launch";
   @SuppressWarnings("WeakerAccess") @Inject MainPresenter presenter;
   @SuppressWarnings("WeakerAccess") ActivityMainBinding binding;
 
@@ -58,70 +51,6 @@ public class MainActivity extends TamperActivity {
     Injector.get().provideComponent().plusMainComponent().inject(this);
 
     setAppBarState();
-    setupBottomNavigation();
-  }
-
-  private void setupBottomNavigation() {
-    binding.bottomTabs.setOnNavigationItemSelectedListener(item -> {
-      final boolean toggleChecked;
-      switch (item.getItemId()) {
-        case R.id.menu_locklist:
-          toggleChecked = replaceFragment(new LockListFragment(), LockListFragment.TAG);
-          break;
-        case R.id.menu_settings:
-          toggleChecked = replaceFragment(new SettingsFragment(), SettingsFragment.TAG);
-          break;
-        case R.id.menu_purge:
-          toggleChecked = replaceFragment(new PurgeFragment(), PurgeFragment.TAG);
-          break;
-        default:
-          toggleChecked = false;
-      }
-
-      if (toggleChecked) {
-        item.setChecked(!item.isChecked());
-      }
-
-      return toggleChecked;
-    });
-  }
-
-  @SuppressWarnings("WeakerAccess") @CheckResult boolean replaceFragment(@NonNull Fragment fragment,
-      @NonNull String tag) {
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    if (fragmentManager.findFragmentByTag(tag) == null) {
-      fragmentManager.beginTransaction().replace(R.id.main_view_container, fragment, tag).commit();
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * Returns if the fragment has changed
-   */
-  @CheckResult @NonNull FragmentHasChanged loadFragment() {
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    final FragmentHasChanged changed;
-
-    // These fragments are a level up
-    if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null) {
-      changed = FragmentHasChanged.CHANGED_WITH_UP;
-      // These are base fragments
-    } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(OnboardFragment.TAG) == null
-        && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null) {
-      changed = FragmentHasChanged.CHANGED_NO_UP;
-    } else {
-      changed = FragmentHasChanged.NOT_CHANGED;
-    }
-
-    return changed;
-  }
-
-  @Override protected void onStart() {
-    super.onStart();
     showOnboardingOrDefault();
   }
 
@@ -207,42 +136,25 @@ public class MainActivity extends TamperActivity {
     showOnboardingOrDefault();
   }
 
-  /**
-   * Called from SettingsFragment
-   */
-  public void hideBottomBar() {
-    binding.bottomTabs.setVisibility(View.GONE);
-  }
-
-  /**
-   * Called from SettingsFragment
-   */
-  public void showBottomBar() {
-    binding.bottomTabs.setVisibility(View.VISIBLE);
-  }
-
   private void showOnboardingOrDefault() {
     presenter.showOnboardingOrDefault(new MainPresenter.OnboardingCallback() {
       @Override public void onShowOnboarding() {
-        if (replaceFragment(new OnboardFragment(), OnboardFragment.TAG)) {
-          Timber.d("New onboarding fragment placed");
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.findFragmentByTag(OnboardFragment.TAG) == null) {
+          fm.beginTransaction()
+              .replace(R.id.fragment_container, new OnboardFragment(), OnboardFragment.TAG)
+              .commitNow();
         }
-
         prepareActivityForOnboarding();
       }
 
       @Override public void onShowDefaultPage() {
         // Set normal navigation
-        final boolean showBottomBar;
-        final FragmentHasChanged changed = loadFragment();
-        if (changed == FragmentHasChanged.NOT_CHANGED) {
-          Timber.d("Fragment has not changed");
-          if (getSupportFragmentManager().findFragmentByTag(OnboardFragment.TAG) != null) {
-            prepareActivityForOnboarding();
-            showBottomBar = false;
-          } else {
-            showBottomBar = true;
-          }
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.findFragmentByTag(OnboardFragment.TAG) != null) {
+          Timber.w(
+              "Show default page was called, but Onboarding fragment still exists, continue onboarding");
+          prepareActivityForOnboarding();
         } else {
           // Un hide the action bar in case it was hidden
           final ActionBar actionBar = getSupportActionBar();
@@ -251,19 +163,16 @@ public class MainActivity extends TamperActivity {
               actionBar.show();
             }
           }
-          if (changed == FragmentHasChanged.CHANGED_WITH_UP) {
-            ActionBarUtil.setActionBarUpEnabled(MainActivity.this, true);
-            showBottomBar = false;
+
+          if (fm.findFragmentByTag(MainFragment.TAG) == null
+              && fm.findFragmentByTag(AboutLibrariesFragment.TAG) == null) {
+            Timber.d("Load default page");
+            fm.beginTransaction()
+                .replace(R.id.fragment_container, new MainFragment(), MainFragment.TAG)
+                .commitNow();
           } else {
-            ActionBarUtil.setActionBarUpEnabled(MainActivity.this, false);
-            binding.bottomTabs.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
-            showBottomBar = true;
+            Timber.w("Default page or About libraries was already loaded");
           }
-
-        }
-
-        if (showBottomBar) {
-          showBottomBar();
         }
       }
     });
@@ -277,13 +186,6 @@ public class MainActivity extends TamperActivity {
         actionBar.hide();
       }
     }
-
-    // Hide bottom bar
-    hideBottomBar();
-  }
-
-  private enum FragmentHasChanged {
-    NOT_CHANGED, CHANGED_WITH_UP, CHANGED_NO_UP,
   }
 }
 

@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.settings;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Bundle;
@@ -30,7 +29,6 @@ import android.widget.Toast;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
@@ -128,7 +126,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
   }
 
   @Override protected int getRootViewContainer() {
-    return R.id.main_view_container;
+    return R.id.fragment_container;
   }
 
   @NonNull @Override protected String getApplicationName() {
@@ -142,10 +140,6 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
 
   @Override protected void onLicenseItemClicked() {
     ActionBarUtil.setActionBarUpEnabled(getActivity(), true);
-    Activity activity = getActivity();
-    if (activity instanceof MainActivity) {
-      ((MainActivity) activity).hideBottomBar();
-    }
     super.onLicenseItemClicked();
   }
 
@@ -180,11 +174,6 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
   @Override public void onResume() {
     super.onResume();
     setActionBarUpEnabled(false);
-
-    Activity activity = getActivity();
-    if (activity instanceof MainActivity) {
-      ((MainActivity) activity).showBottomBar();
-    }
   }
 
   @Override public void onDestroy() {
