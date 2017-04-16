@@ -27,19 +27,23 @@
       android:orientation="vertical"
       >
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+    <FrameLayout
+        android:id="@+id/main_view_container"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         />
 
-    <FrameLayout
-        android:id="@+id/fragment_container"
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottom_tabs"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:visibility="gone"
+        app:elevation="8dp"
+        app:itemIconTint="@drawable/bottom_nav_state"
+        app:itemTextColor="@drawable/bottom_nav_state"
+        app:menu="@menu/navigation_menu"
         />
 
   </LinearLayout>
