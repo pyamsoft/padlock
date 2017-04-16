@@ -39,7 +39,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
-        android:visibility="gone"
         app:elevation="8dp"
         app:itemIconTint="@drawable/bottom_nav_state"
         app:itemTextColor="@drawable/bottom_nav_state"
