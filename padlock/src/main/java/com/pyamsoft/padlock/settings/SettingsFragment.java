@@ -29,13 +29,13 @@ import android.widget.Toast;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
-import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.ui.helper.ProgressOverlay;
 import com.pyamsoft.pydroid.ui.helper.ProgressOverlayHelper;
+import com.pyamsoft.pydroid.ui.util.ActionBarUtil;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -139,7 +139,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
   }
 
   @Override protected void onLicenseItemClicked() {
-    MainActivity.getNavigationDrawerController(getActivity()).drawerShowUpNavigation();
+    ActionBarUtil.setActionBarUpEnabled(getActivity(), true);
     super.onLicenseItemClicked();
   }
 
@@ -174,7 +174,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
   @Override public void onResume() {
     super.onResume();
     setActionBarUpEnabled(true);
-    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
+    ActionBarUtil.setActionBarUpEnabled(getActivity(), false);
   }
 
   @Override public void onDestroy() {
