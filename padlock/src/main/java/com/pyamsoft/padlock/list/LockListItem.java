@@ -71,13 +71,6 @@ public class LockListItem
     holder.binding.lockListTitle.setText(getModel().name());
     holder.binding.lockListToggle.setOnCheckedChangeListener(null);
     holder.binding.lockListToggle.setChecked(getModel().locked());
-    if (getModel().otherLocked()) {
-      Loaded otherIcon =
-          ImageLoader.fromResource(R.drawable.ic_other_locked).into(holder.binding.lockListOther);
-      loaderMap.put("other", otherIcon);
-    } else {
-      holder.binding.lockListOther.setImageDrawable(null);
-    }
 
     Loaded appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(getModel().packageName()))
         .into(holder.binding.lockListIcon);
@@ -124,7 +117,6 @@ public class LockListItem
     holder.binding.lockListTitle.setText(null);
     holder.binding.lockListIcon.setImageDrawable(null);
     holder.binding.lockListToggle.setOnCheckedChangeListener(null);
-    holder.binding.lockListOther.setImageDrawable(null);
 
     presenter.stop();
     presenter.destroy();

@@ -15,7 +15,7 @@ CREATE TABLE padlock_entry (
 -- Get all entries in the table
 
 all_entries:
-SELECT packageName, activityName
+SELECT packageName, activityName, whitelist
 FROM padlock_entry;
 
 -- Get all entries with the package name

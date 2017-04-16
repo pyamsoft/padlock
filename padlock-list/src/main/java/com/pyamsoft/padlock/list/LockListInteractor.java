@@ -116,21 +116,24 @@ import timber.log.Timber;
           final List<LockTuple> lockTuples = new ArrayList<>();
           for (final String packageName : copyNames) {
             boolean locked = false;
-            boolean otherLocked = false;
+            boolean whitelist = false;
+            boolean hardLocked = false;
             final Set<PadLockEntry.AllEntries> removeEntries = new HashSet<>();
             for (final PadLockEntry.AllEntries entry : copyEntries) {
               if (entry.packageName().equals(packageName)) {
                 removeEntries.add(entry);
                 if (entry.activityName().equals(PadLockEntry.PACKAGE_ACTIVITY_NAME)) {
                   locked = true;
+                } else if (entry.whitelist()) {
+                  whitelist = true;
                 } else {
-                  otherLocked = true;
+                  hardLocked = true;
                 }
               }
             }
 
             copyEntries.removeAll(removeEntries);
-            lockTuples.add(new LockTuple(packageName, locked, otherLocked));
+            lockTuples.add(new LockTuple(packageName, locked, whitelist, hardLocked));
           }
 
           return lockTuples;
@@ -148,7 +151,6 @@ import timber.log.Timber;
             .packageName(tuple.packageName)
             .system(isSystemApplication(info))
             .locked(tuple.locked)
-            .otherLocked(tuple.otherLocked)
             .build());
   }
 
@@ -197,12 +199,14 @@ import timber.log.Timber;
 
     @NonNull final String packageName;
     final boolean locked;
-    final boolean otherLocked;
+    final boolean whitelist;
+    final boolean hardLocked;
 
-    LockTuple(@NonNull String packageName, boolean locked, boolean otherLocked) {
+    LockTuple(@NonNull String packageName, boolean locked, boolean whitelist, boolean hardLocked) {
       this.packageName = packageName;
       this.locked = locked;
-      this.otherLocked = otherLocked;
+      this.whitelist = whitelist;
+      this.hardLocked = hardLocked;
     }
   }
 }
