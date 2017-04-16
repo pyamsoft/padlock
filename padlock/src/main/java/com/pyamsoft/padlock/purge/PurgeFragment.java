@@ -35,7 +35,7 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding;
-import com.pyamsoft.padlock.main.MainActivity;
+import com.pyamsoft.pydroid.ui.util.ActionBarUtil;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -180,7 +180,7 @@ public class PurgeFragment extends Fragment implements PurgePresenter.RetrievalC
 
   @Override public void onResume() {
     super.onResume();
-    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
+    ActionBarUtil.setActionBarUpEnabled(getActivity(), false);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

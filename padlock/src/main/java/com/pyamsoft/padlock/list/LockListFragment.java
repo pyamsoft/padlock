@@ -38,7 +38,6 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding;
-import com.pyamsoft.padlock.main.MainActivity;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.padlock.onboard.list.OnboardListDialog;
 import com.pyamsoft.padlock.pin.PinEntryDialog;
@@ -49,6 +48,7 @@ import com.pyamsoft.pydroid.ui.loader.ImageLoader;
 import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
 import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
+import com.pyamsoft.pydroid.ui.util.ActionBarUtil;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -250,8 +250,7 @@ public class LockListFragment extends Fragment {
     super.onResume();
     handler.removeCallbacksAndMessages(null);
     handler.postDelayed(() -> binding.applistFab.show(), 300L);
-
-    MainActivity.getNavigationDrawerController(getActivity()).drawerNormalNavigation();
+    ActionBarUtil.setActionBarUpEnabled(getActivity(), false);
   }
 
   @Override public void onPause() {

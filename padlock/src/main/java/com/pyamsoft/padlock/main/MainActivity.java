@@ -16,23 +16,16 @@
 
 package com.pyamsoft.padlock.main;
 
-import android.app.Activity;
-import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.preference.PreferenceManager;
-import android.view.MenuItem;
 import com.pyamsoft.padlock.BuildConfig;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
@@ -43,29 +36,18 @@ import com.pyamsoft.padlock.purge.PurgeFragment;
 import com.pyamsoft.padlock.settings.SettingsFragment;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.sec.TamperActivity;
+import com.pyamsoft.pydroid.ui.util.ActionBarUtil;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
-public class MainActivity extends TamperActivity
-    implements NavigationDrawerController, MainPresenter.OnboardingCallback {
+public class MainActivity extends TamperActivity {
 
   @NonNull private static final String FIRST_LAUNCH = "main_first_launch";
-  @NonNull private final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") @Inject MainPresenter presenter;
   @SuppressWarnings("WeakerAccess") ActivityMainBinding binding;
   @SuppressWarnings("WeakerAccess") boolean firstLaunch;
-  private ActionBarDrawerToggle drawerToggle;
-
-  @CheckResult @NonNull public static NavigationDrawerController getNavigationDrawerController(
-      @NonNull Activity activity) {
-    if (activity instanceof NavigationDrawerController) {
-      return (NavigationDrawerController) activity;
-    } else {
-      throw new IllegalStateException("Activity is not Drawer Controller");
-    }
-  }
 
   @Override public void onCreate(final @Nullable Bundle savedInstanceState) {
     setTheme(R.style.Theme_PadLock_Light);
@@ -78,17 +60,11 @@ public class MainActivity extends TamperActivity
     Injector.get().provideComponent().plusMainComponent().inject(this);
 
     setAppBarState();
-    setupDrawerLayout();
+    setupBottomNavigation();
   }
 
-  private void setupDrawerLayout() {
-    drawerToggle =
-        new ActionBarDrawerToggle(this, binding.drawerLayout, binding.toolbar, R.string.blank,
-            R.string.blank);
-
-    drawerToggle.setToolbarNavigationClickListener(v -> onBackPressed());
-
-    binding.navigationDrawer.setNavigationItemSelectedListener(item -> {
+  private void setupBottomNavigation() {
+    binding.bottomTabs.setOnNavigationItemSelectedListener(item -> {
       final boolean toggleChecked;
       switch (item.getItemId()) {
         case R.id.menu_locklist:
@@ -106,22 +82,10 @@ public class MainActivity extends TamperActivity
 
       if (toggleChecked) {
         item.setChecked(!item.isChecked());
-        binding.drawerLayout.closeDrawer(binding.navigationDrawer);
       }
 
       return toggleChecked;
     });
-    binding.drawerLayout.addDrawerListener(drawerToggle);
-  }
-
-  void peekNavigationDrawer() {
-    binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN,
-        binding.navigationDrawer);
-
-    handler.postDelayed(() -> {
-      binding.drawerLayout.closeDrawer(binding.navigationDrawer);
-      drawerNormalNavigation();
-    }, 1200L);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult boolean replaceFragment(@NonNull Fragment fragment,
@@ -144,42 +108,23 @@ public class MainActivity extends TamperActivity
 
     // These fragments are a level up
     if (fragmentManager.findFragmentByTag(AboutLibrariesFragment.TAG) != null) {
-      drawerShowUpNavigation();
       changed = FragmentHasChanged.CHANGED_WITH_UP;
       // These are base fragments
     } else if (fragmentManager.findFragmentByTag(LockListFragment.TAG) == null
         && fragmentManager.findFragmentByTag(SettingsFragment.TAG) == null
         && fragmentManager.findFragmentByTag(OnboardFragment.TAG) == null
         && fragmentManager.findFragmentByTag(PurgeFragment.TAG) == null) {
-      binding.navigationDrawer.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
       changed = FragmentHasChanged.CHANGED_NO_UP;
     } else {
-      if (fragmentManager.findFragmentByTag(OnboardFragment.TAG) != null) {
-        prepareActivityForOnboarding();
-      }
       changed = FragmentHasChanged.NOT_CHANGED;
     }
 
     return changed;
   }
 
-  @Override public void drawerNormalNavigation() {
-    binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
-        binding.navigationDrawer);
-    drawerToggle.setDrawerIndicatorEnabled(true);
-    drawerToggle.syncState();
-  }
-
-  @Override public void drawerShowUpNavigation() {
-    binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED,
-        binding.navigationDrawer);
-    drawerToggle.setDrawerIndicatorEnabled(false);
-    drawerToggle.syncState();
-  }
-
   @Override protected void onStart() {
     super.onStart();
-    presenter.showOnboardingOrDefault(this);
+    showOnboardingOrDefault();
   }
 
   @Override protected void onStop() {
@@ -214,8 +159,6 @@ public class MainActivity extends TamperActivity
   @Override protected void onDestroy() {
     super.onDestroy();
     presenter.destroy();
-    handler.removeCallbacksAndMessages(null);
-    binding.drawerLayout.removeDrawerListener(drawerToggle);
     binding.unbind();
   }
 
@@ -224,9 +167,6 @@ public class MainActivity extends TamperActivity
     final int backStackCount = fragmentManager.getBackStackEntryCount();
     if (backStackCount > 0) {
       fragmentManager.popBackStackImmediate();
-      if (backStackCount == 1) {
-        drawerNormalNavigation();
-      }
     } else {
       super.onBackPressed();
     }
@@ -235,25 +175,6 @@ public class MainActivity extends TamperActivity
   @Override protected void onSaveInstanceState(Bundle outState) {
     outState.putBoolean(FIRST_LAUNCH, firstLaunch);
     super.onSaveInstanceState(outState);
-  }
-
-  @Override public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    drawerToggle.onConfigurationChanged(newConfig);
-  }
-
-  @Override protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    drawerToggle.syncState();
-  }
-
-  @Override public boolean onOptionsItemSelected(final @NonNull MenuItem item) {
-    if (drawerToggle.onOptionsItemSelected(item)) {
-      Timber.d("Handled by drawer toggle");
-      return true;
-    }
-
-    return super.onOptionsItemSelected(item);
   }
 
   @Override protected void onPostResume() {
@@ -280,23 +201,6 @@ public class MainActivity extends TamperActivity
     return R.mipmap.ic_launcher;
   }
 
-  /**
-   * Hide action bar, lock drawer
-   */
-  void prepareActivityForOnboarding() {
-    // Hide the action bar
-    final ActionBar actionBar = getSupportActionBar();
-    if (actionBar != null) {
-      if (actionBar.isShowing()) {
-        actionBar.hide();
-      }
-    }
-
-    // Lock the navigation drawer if we are showing onboarding
-    // Action bar is hidden so the drawer toggle state wont matter
-    drawerShowUpNavigation();
-  }
-
   public void onOnboardingCompleted() {
     final FragmentManager fragmentManager = getSupportFragmentManager();
     final Fragment onboarding = fragmentManager.findFragmentByTag(OnboardFragment.TAG);
@@ -304,38 +208,57 @@ public class MainActivity extends TamperActivity
       fragmentManager.beginTransaction().remove(onboarding).commitNow();
     }
 
-    presenter.showOnboardingOrDefault(this);
+    showOnboardingOrDefault();
   }
 
-  @Override public void onShowOnboarding() {
-    if (replaceFragment(new OnboardFragment(), OnboardFragment.TAG)) {
-      Timber.d("New onboarding fragment placed");
-    }
+  private void showOnboardingOrDefault() {
+    presenter.showOnboardingOrDefault(new MainPresenter.OnboardingCallback() {
+      @Override public void onShowOnboarding() {
+        if (replaceFragment(new OnboardFragment(), OnboardFragment.TAG)) {
+          Timber.d("New onboarding fragment placed");
+        }
 
-    prepareActivityForOnboarding();
-  }
+        prepareActivityForOnboarding();
+      }
 
-  @Override public void onShowDefaultPage() {
-    // Set normal navigation
-    final FragmentHasChanged changed = loadFragment();
-    if (changed == FragmentHasChanged.NOT_CHANGED) {
-      Timber.d("Fragment has not changed");
-    } else {
-      // Un hide the action bar in case it was hidden
-      final ActionBar actionBar = getSupportActionBar();
-      if (actionBar != null) {
-        if (!actionBar.isShowing()) {
-          actionBar.show();
+      @Override public void onShowDefaultPage() {
+        // Set normal navigation
+        final FragmentHasChanged changed = loadFragment();
+        if (changed == FragmentHasChanged.NOT_CHANGED) {
+          Timber.d("Fragment has not changed");
+          if (getSupportFragmentManager().findFragmentByTag(OnboardFragment.TAG) != null) {
+            prepareActivityForOnboarding();
+          }
+        } else {
+          // Un hide the action bar in case it was hidden
+          final ActionBar actionBar = getSupportActionBar();
+          if (actionBar != null) {
+            if (!actionBar.isShowing()) {
+              actionBar.show();
+            }
+          }
+          if (changed == FragmentHasChanged.CHANGED_WITH_UP) {
+            ActionBarUtil.setActionBarUpEnabled(MainActivity.this, true);
+          } else {
+            ActionBarUtil.setActionBarUpEnabled(MainActivity.this, false);
+            binding.bottomTabs.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
+          }
+
+          if (firstLaunch) {
+            Timber.d("First launch");
+            // TODO animate
+          }
         }
       }
-      if (changed == FragmentHasChanged.CHANGED_WITH_UP) {
-        drawerShowUpNavigation();
-      } else {
-        drawerNormalNavigation();
-      }
+    });
+  }
 
-      if (firstLaunch) {
-        peekNavigationDrawer();
+  void prepareActivityForOnboarding() {
+    // Hide the action bar
+    final ActionBar actionBar = getSupportActionBar();
+    if (actionBar != null) {
+      if (actionBar.isShowing()) {
+        actionBar.hide();
       }
     }
   }

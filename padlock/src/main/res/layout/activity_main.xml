@@ -21,45 +21,39 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
-  <android.support.v4.widget.DrawerLayout
-      android:id="@+id/drawer_layout"
+  <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:fitsSystemWindows="true"
+      android:orientation="vertical"
       >
 
-    <LinearLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        >
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        />
 
-      <android.support.v7.widget.Toolbar
-          android:id="@+id/toolbar"
-          android:layout_width="match_parent"
-          android:layout_height="?attr/actionBarSize"
-          android:background="?attr/colorPrimary"
-          android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-          app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-          />
+    <FrameLayout
+        android:id="@+id/main_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
 
-      <FrameLayout
-          android:id="@+id/main_view_container"
-          android:layout_width="match_parent"
-          android:layout_height="0dp"
-          android:layout_weight="1"
-          />
-
-    </LinearLayout>
-
-    <android.support.design.widget.NavigationView
-        android:id="@+id/navigation_drawer"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottom_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        app:elevation="8dp"
+        app:itemIconTint="@drawable/bottom_nav_state"
+        app:itemTextColor="@drawable/bottom_nav_state"
         app:menu="@menu/navigation_menu"
         />
 
-  </android.support.v4.widget.DrawerLayout>
+  </LinearLayout>
 
 </layout>
