@@ -219,11 +219,15 @@ public class MainActivity extends TamperActivity {
 
       @Override public void onShowDefaultPage() {
         // Set normal navigation
+        final boolean showBottomBar;
         final FragmentHasChanged changed = loadFragment();
         if (changed == FragmentHasChanged.NOT_CHANGED) {
           Timber.d("Fragment has not changed");
           if (getSupportFragmentManager().findFragmentByTag(OnboardFragment.TAG) != null) {
             prepareActivityForOnboarding();
+            showBottomBar = false;
+          } else {
+            showBottomBar = true;
           }
         } else {
           // Un hide the action bar in case it was hidden
@@ -240,6 +244,10 @@ public class MainActivity extends TamperActivity {
             binding.bottomTabs.getMenu().performIdentifierAction(R.id.menu_locklist, 0);
           }
 
+          showBottomBar = true;
+        }
+
+        if (showBottomBar) {
           binding.bottomTabs.setVisibility(View.VISIBLE);
         }
       }
