@@ -22,14 +22,15 @@
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/orangeA200</item>
-    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
   </style>
 
   <!-- Normal App Theme
 
   On devices API 21 and up, includes a transparent status bar
   -->
-  <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light"/>
+  <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light">
+    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+  </style>
 
   <!-- Lock Screen Theme -->
   <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
