@@ -20,9 +20,11 @@ import android.os.Bundle;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import com.pyamsoft.padlock.R;
@@ -56,39 +58,44 @@ public class MainFragment extends ActionBarFragment {
   }
 
   private void setupBottomNavigation() {
-    binding.bottomTabs.setOnNavigationItemSelectedListener(item -> {
-      final boolean toggleChecked;
-      switch (item.getItemId()) {
-        case R.id.menu_locklist:
-          toggleChecked = replaceFragment(new LockListFragment(), LockListFragment.TAG);
-          break;
-        case R.id.menu_settings:
-          toggleChecked = replaceFragment(new SettingsFragment(), SettingsFragment.TAG);
-          break;
-        case R.id.menu_purge:
-          toggleChecked = replaceFragment(new PurgeFragment(), PurgeFragment.TAG);
-          break;
-        default:
-          toggleChecked = false;
-      }
+    binding.bottomTabs.setOnNavigationItemSelectedListener(
+        new BottomNavigationView.OnNavigationItemSelectedListener() {
+          @Override public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            final boolean handled;
+            switch (item.getItemId()) {
+              case R.id.menu_locklist:
+                handled = replaceFragment(new LockListFragment(), LockListFragment.TAG);
+                break;
+              case R.id.menu_settings:
+                handled = replaceFragment(new SettingsFragment(), SettingsFragment.TAG);
+                break;
+              case R.id.menu_purge:
+                handled = replaceFragment(new PurgeFragment(), PurgeFragment.TAG);
+                break;
+              default:
+                handled = false;
+            }
 
-      if (toggleChecked) {
-        item.setChecked(!item.isChecked());
-      }
+            if (handled) {
+              item.setChecked(!item.isChecked());
+            }
 
-      return toggleChecked;
-    });
-  }
+            return handled;
+          }
 
-  @SuppressWarnings("WeakerAccess") @CheckResult boolean replaceFragment(@NonNull Fragment fragment,
-      @NonNull String tag) {
-    final FragmentManager fragmentManager = getChildFragmentManager();
-    if (fragmentManager.findFragmentByTag(tag) == null) {
-      fragmentManager.beginTransaction().replace(R.id.main_view_container, fragment, tag).commit();
-      return true;
-    } else {
-      return false;
-    }
+          @CheckResult
+          private boolean replaceFragment(@NonNull Fragment fragment, @NonNull String tag) {
+            final FragmentManager fragmentManager = getChildFragmentManager();
+            if (fragmentManager.findFragmentByTag(tag) == null) {
+              fragmentManager.beginTransaction()
+                  .replace(R.id.main_view_container, fragment, tag)
+                  .commit();
+              return true;
+            } else {
+              return false;
+            }
+          }
+        });
   }
 
   @Override public void onResume() {
