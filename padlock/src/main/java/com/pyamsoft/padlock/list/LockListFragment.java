@@ -17,8 +17,6 @@
 package com.pyamsoft.padlock.list;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -48,6 +46,7 @@ import com.pyamsoft.pydroid.ui.loader.ImageLoader;
 import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
 import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
+import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -55,39 +54,9 @@ import timber.log.Timber;
 public class LockListFragment extends ActionBarFragment {
 
   @NonNull public static final String TAG = "LockListFragment";
-  @NonNull final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockListItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") @Inject LockListPresenter presenter;
   @SuppressWarnings("WeakerAccess") FragmentLockListBinding binding;
-  @NonNull final Runnable startRefreshRunnable = () -> {
-    binding.applistSwipeRefresh.post(() -> {
-      if (binding != null) {
-        if (binding.applistSwipeRefresh != null) {
-          binding.applistSwipeRefresh.setRefreshing(true);
-        }
-      }
-    });
-
-    final FragmentActivity activity = getActivity();
-    if (activity != null) {
-      Timber.d("Reload options");
-      activity.supportInvalidateOptionsMenu();
-    }
-  };
-  @NonNull final Runnable stopRefreshRunnable = () -> {
-    binding.applistSwipeRefresh.post(() -> {
-      if (binding != null) {
-        if (binding.applistSwipeRefresh != null) {
-          binding.applistSwipeRefresh.setRefreshing(false);
-        }
-      }
-    });
-    final FragmentActivity activity = getActivity();
-    if (activity != null) {
-      Timber.d("Reload options");
-      activity.supportInvalidateOptionsMenu();
-    }
-  };
   @NonNull Loaded fabIconTask = LoaderHelper.empty();
   @NonNull final LockListPresenter.FABStateCallback fabStateCallback =
       new LockListPresenter.FABStateCallback() {
@@ -104,74 +73,14 @@ public class LockListFragment extends ActionBarFragment {
               ImageLoader.fromResource(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
         }
       };
-  boolean listIsRefreshed;
-  @NonNull private final LockListPresenter.PopulateListCallback populateListCallback =
-      new LockListPresenter.PopulateListCallback() {
-
-        @Override public void onEntryAddedToList(@NonNull AppEntry entry) {
-          // In case the configuration changes, we do the animation again
-          if (!binding.applistSwipeRefresh.isRefreshing()) {
-            binding.applistSwipeRefresh.post(() -> {
-              if (binding != null) {
-                if (binding.applistSwipeRefresh != null) {
-                  binding.applistSwipeRefresh.setRefreshing(true);
-                }
-              }
-            });
-          }
-
-          fastItemAdapter.add(new LockListItem(entry));
-        }
-
-        @Override public void onListPopulated() {
-          Timber.d("onListPopulated");
-
-          handler.removeCallbacksAndMessages(null);
-          handler.post(stopRefreshRunnable);
-          handler.post(() -> binding.applistFab.show());
-
-          if (fastItemAdapter.getAdapterItemCount() > 1) {
-            Timber.d("We have refreshed");
-            listIsRefreshed = true;
-            presenter.showOnBoarding(new LockListPresenter.OnboardingCallback() {
-              @Override public void onShowOnboarding() {
-                Timber.d("Show onboarding");
-                DialogUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(),
-                    OnboardListDialog.TAG);
-              }
-
-              @Override public void onOnboardingComplete() {
-                onCompletedOnboarding();
-              }
-            });
-          } else {
-            Toast.makeText(getContext(), "Error while loading list. Please try again.",
-                Toast.LENGTH_SHORT).show();
-          }
-        }
-
-        @Override public void onListPopulateError() {
-          Timber.e("onListPopulateError");
-          onListPopulated();
-          DialogUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "error");
-        }
-
-        @Override public void onListCleared() {
-          Timber.d("Prepare for refresh");
-          listIsRefreshed = false;
-
-          Timber.d("onListCleared");
-          handler.removeCallbacksAndMessages(null);
-          handler.post(startRefreshRunnable);
-          handler.post(() -> binding.applistFab.hide());
-        }
-      };
+  boolean listDoneRefreshing;
   @Nullable private MenuItem displaySystemItem;
   @Nullable private DividerItemDecoration dividerDecoration;
   private FilterListDelegate filterListDelegate;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    listDoneRefreshing = false;
     setHasOptionsMenu(true);
 
     Injector.get().provideComponent().plusLockListComponent().inject(this);
@@ -180,7 +89,6 @@ public class LockListFragment extends ActionBarFragment {
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    listIsRefreshed = false;
     filterListDelegate = new FilterListDelegate();
     fastItemAdapter = new FastItemAdapter<>();
     binding = FragmentLockListBinding.inflate(inflater, container, false);
@@ -226,17 +134,9 @@ public class LockListFragment extends ActionBarFragment {
     });
 
     presenter.setFABStateFromPreference(fabStateCallback);
-    if (!listIsRefreshed) {
-      if (!binding.applistSwipeRefresh.isRefreshing()) {
-        binding.applistSwipeRefresh.post(() -> {
-          if (binding != null) {
-            if (binding.applistSwipeRefresh != null) {
-              binding.applistSwipeRefresh.setRefreshing(true);
-            }
-          }
-        });
-      }
-      presenter.populateList(populateListCallback, false);
+
+    if (!listDoneRefreshing) {
+      refreshList(false);
     }
   }
 
@@ -248,14 +148,12 @@ public class LockListFragment extends ActionBarFragment {
   @Override public void onResume() {
     super.onResume();
     setActionBarUpEnabled(false);
-    handler.removeCallbacksAndMessages(null);
-    handler.postDelayed(() -> binding.applistFab.show(), 300L);
+    AnimUtil.popShow(binding.applistFab, 300, 400);
   }
 
   @Override public void onPause() {
     super.onPause();
-    handler.removeCallbacksAndMessages(null);
-    handler.postDelayed(() -> binding.applistFab.hide(), 300L);
+    AnimUtil.popHide(binding.applistFab, 300, 400);
   }
 
   private void setupSwipeRefresh() {
@@ -263,7 +161,7 @@ public class LockListFragment extends ActionBarFragment {
         R.color.blue700, R.color.amber500);
     binding.applistSwipeRefresh.setOnRefreshListener(() -> {
       Timber.d("onRefresh");
-      refreshList();
+      refreshList(true);
     });
   }
 
@@ -321,7 +219,6 @@ public class LockListFragment extends ActionBarFragment {
   @Override public void onDestroyView() {
     filterListDelegate.onDestroyView();
     displaySystemItem = null;
-    stopRefreshRunnable.run();
 
     binding.applistRecyclerview.removeItemDecoration(dividerDecoration);
     binding.applistRecyclerview.setOnClickListener(null);
@@ -332,7 +229,6 @@ public class LockListFragment extends ActionBarFragment {
     binding.applistSwipeRefresh.setOnRefreshListener(null);
 
     fabIconTask = LoaderHelper.unload(fabIconTask);
-    handler.removeCallbacksAndMessages(null);
     binding.unbind();
     super.onDestroyView();
   }
@@ -354,7 +250,7 @@ public class LockListFragment extends ActionBarFragment {
             presenter.setSystemVisible();
           }
 
-          refreshList();
+          refreshList(true);
         }
         break;
       default:
@@ -384,14 +280,69 @@ public class LockListFragment extends ActionBarFragment {
     }
   }
 
-  public void refreshList() {
-    fastItemAdapter.clear();
-    populateListCallback.onListCleared();
-    presenter.populateList(populateListCallback, true);
-  }
-
   @SuppressWarnings("WeakerAccess") void displayLockInfoFragment(@NonNull AppEntry entry) {
     DialogUtil.guaranteeSingleDialogFragment(getActivity(), LockInfoDialog.newInstance(entry),
         LockInfoDialog.TAG);
+  }
+
+  void refreshList(boolean force) {
+    fastItemAdapter.clear();
+    presenter.populateList(force, new LockListPresenter.PopulateListCallback() {
+
+      private void setRefreshing(boolean refresh) {
+        binding.applistSwipeRefresh.post(() -> {
+          if (binding != null) {
+            if (binding.applistSwipeRefresh != null) {
+              binding.applistSwipeRefresh.setRefreshing(refresh);
+            }
+          }
+        });
+
+        final FragmentActivity activity = getActivity();
+        if (activity != null) {
+          Timber.d("Reload options");
+          activity.supportInvalidateOptionsMenu();
+        }
+      }
+
+      @Override public void onListPopulateBegin() {
+        listDoneRefreshing = false;
+        setRefreshing(true);
+        fastItemAdapter.clear();
+        binding.applistFab.hide();
+      }
+
+      @Override public void onEntryAddedToList(@NonNull AppEntry entry) {
+        fastItemAdapter.add(new LockListItem(entry));
+      }
+
+      @Override public void onListPopulated() {
+        listDoneRefreshing = true;
+        setRefreshing(false);
+        binding.applistFab.show();
+
+        if (fastItemAdapter.getAdapterItemCount() > 1) {
+          Timber.d("We have refreshed");
+          presenter.showOnBoarding(new LockListPresenter.OnboardingCallback() {
+            @Override public void onShowOnboarding() {
+              Timber.d("Show onboarding");
+              DialogUtil.onlyLoadOnceDialogFragment(getActivity(), new OnboardListDialog(),
+                  OnboardListDialog.TAG);
+            }
+
+            @Override public void onOnboardingComplete() {
+              onCompletedOnboarding();
+            }
+          });
+        } else {
+          Toast.makeText(getContext(), "Error while loading list. Please try again.",
+              Toast.LENGTH_SHORT).show();
+        }
+      }
+
+      @Override public void onListPopulateError() {
+        DialogUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "error");
+      }
+    });
   }
 }

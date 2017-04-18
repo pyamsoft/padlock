@@ -17,11 +17,8 @@
 package com.pyamsoft.padlock.main;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -29,7 +26,6 @@ import timber.log.Timber;
 class MainPresenter extends SchedulerPresenter {
 
   @NonNull private final MainInteractor interactor;
-  @NonNull private Disposable onboardingDisposable = Disposables.empty();
 
   @Inject MainPresenter(@NonNull MainInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
@@ -37,17 +33,11 @@ class MainPresenter extends SchedulerPresenter {
     this.interactor = interactor;
   }
 
-  @Override protected void onDestroy() {
-    super.onDestroy();
-    onboardingDisposable = DisposableHelper.dispose(onboardingDisposable);
-  }
-
   /**
    * public
    */
   void showOnboardingOrDefault(@NonNull OnboardingCallback callback) {
-    onboardingDisposable = DisposableHelper.dispose(onboardingDisposable);
-    onboardingDisposable = interactor.isOnboardingComplete()
+    disposeOnStop(interactor.isOnboardingComplete()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboardingComplete -> {
@@ -56,7 +46,7 @@ class MainPresenter extends SchedulerPresenter {
           } else {
             callback.onShowOnboarding();
           }
-        }, throwable -> Timber.e(throwable, "onError"));
+        }, throwable -> Timber.e(throwable, "onError")));
   }
 
   interface OnboardingCallback {

@@ -19,12 +19,9 @@ package com.pyamsoft.padlock.settings;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.pydroid.bus.EventBus;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -33,9 +30,6 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
 
   @SuppressWarnings("WeakerAccess") @NonNull final ApplicationInstallReceiver receiver;
   @SuppressWarnings("WeakerAccess") @NonNull final SettingsPreferenceInteractor interactor;
-  @NonNull private Disposable confirmedDisposable = Disposables.empty();
-  @NonNull private Disposable applicationInstallDisposable = Disposables.empty();
-  @NonNull private Disposable lockTypeDisposable = Disposables.empty();
 
   @Inject SettingsPreferencePresenter(@NonNull SettingsPreferenceInteractor interactor,
       @NonNull ApplicationInstallReceiver receiver, @Named("obs") Scheduler obsScheduler,
@@ -45,19 +39,11 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
     this.receiver = receiver;
   }
 
-  @Override protected void onStop() {
-    super.onStop();
-    confirmedDisposable = DisposableHelper.dispose(confirmedDisposable);
-    applicationInstallDisposable = DisposableHelper.dispose(applicationInstallDisposable);
-    lockTypeDisposable = DisposableHelper.dispose(lockTypeDisposable);
-  }
-
   /**
    * public
    */
   void setApplicationInstallReceiverState() {
-    applicationInstallDisposable = DisposableHelper.dispose(applicationInstallDisposable);
-    applicationInstallDisposable = interactor.isInstallListenerEnabled()
+    disposeOnStop(interactor.isInstallListenerEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(result -> {
@@ -66,15 +52,14 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
           } else {
             receiver.unregister();
           }
-        }, throwable -> Timber.e(throwable, "onError setApplicationInstallReceiverState"));
+        }, throwable -> Timber.e(throwable, "onError setApplicationInstallReceiverState")));
   }
 
   /**
    * public
    */
   void registerOnBus(@NonNull ClearCallback callback) {
-    confirmedDisposable = DisposableHelper.dispose(confirmedDisposable);
-    confirmedDisposable = EventBus.get().listen(ConfirmEvent.class).flatMapSingle(confirmEvent -> {
+    disposeOnStop(EventBus.get().listen(ConfirmEvent.class).flatMapSingle(confirmEvent -> {
       Single<ConfirmEvent.Type> result;
       switch (confirmEvent.type()) {
         case DATABASE:
@@ -100,20 +85,18 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
         default:
           throw new IllegalStateException("Received invalid confirmation event type: " + type);
       }
-    }, throwable -> Timber.e(throwable, "onError clear bus"));
+    }, throwable -> Timber.e(throwable, "onError clear bus")));
   }
 
   /**
    * public
    */
   void checkLockType(@NonNull LockTypeCallback callback) {
-    callback.onBegin();
-
-    lockTypeDisposable = DisposableHelper.dispose(lockTypeDisposable);
-    lockTypeDisposable = interactor.hasExistingMasterPassword()
+    disposeOnStop(interactor.hasExistingMasterPassword()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onEnd)
+        .doOnSubscribe(disposable -> callback.onBegin())
         .subscribe(hasMasterPin -> {
           if (hasMasterPin) {
             callback.onLockTypeChangePrevented();
@@ -123,7 +106,7 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
         }, throwable -> {
           Timber.e(throwable, "on error lock type change");
           callback.onLockTypeChangeError(throwable);
-        });
+        }));
   }
 
   interface LockTypeCallback {

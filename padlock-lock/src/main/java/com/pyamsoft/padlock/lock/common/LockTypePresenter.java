@@ -17,18 +17,14 @@
 package com.pyamsoft.padlock.lock.common;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 public class LockTypePresenter extends SchedulerPresenter {
 
   @NonNull private final LockTypeInteractor interactor;
-  @NonNull private Disposable typeDisposable = Disposables.empty();
 
   @Inject protected LockTypePresenter(@NonNull LockTypeInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
@@ -38,12 +34,10 @@ public class LockTypePresenter extends SchedulerPresenter {
 
   @Override protected void onStop() {
     super.onStop();
-    typeDisposable = DisposableHelper.dispose(typeDisposable);
   }
 
   public void initializeLockScreenType(@NonNull LockScreenTypeCallback callback) {
-    typeDisposable = DisposableHelper.dispose(typeDisposable);
-    typeDisposable = interactor.getLockScreenType()
+    disposeOnStop(interactor.getLockScreenType()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(lockScreenType -> {
@@ -57,7 +51,7 @@ public class LockTypePresenter extends SchedulerPresenter {
             default:
               throw new IllegalStateException("Invalid lock screen type: " + lockScreenType);
           }
-        });
+        }));
   }
 
   public interface LockScreenTypeCallback {

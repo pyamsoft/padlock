@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.OnboardListDialogBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
+import com.pyamsoft.padlock.main.MainFragment;
 import com.pyamsoft.padlock.onboard.Onboard;
 import com.pyamsoft.pydroid.ui.loader.ImageLoader;
 import com.pyamsoft.pydroid.ui.loader.LoaderMap;
@@ -176,9 +177,13 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
 
     // Talk to list fragment
     final FragmentManager fragmentManager = getFragmentManager();
-    final Fragment fragment = fragmentManager.findFragmentByTag(LockListFragment.TAG);
-    if (fragment instanceof LockListFragment) {
-      ((LockListFragment) fragment).onCompletedOnboarding();
+    final Fragment fragment = fragmentManager.findFragmentByTag(MainFragment.TAG);
+    if (fragment instanceof MainFragment) {
+      Fragment lockList =
+          fragment.getChildFragmentManager().findFragmentByTag(LockListFragment.TAG);
+      if (lockList instanceof LockListFragment) {
+        ((LockListFragment) lockList).onCompletedOnboarding();
+      }
     }
   }
 

@@ -30,11 +30,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
 import com.pyamsoft.padlock.base.R;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.helper.SchedulerHelper;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
+import io.reactivex.disposables.CompositeDisposable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -49,7 +47,7 @@ import timber.log.Timber;
   @NonNull private final Scheduler obsScheduler;
   @NonNull private final Scheduler subScheduler;
   @NonNull private final PendingIntent pendingIntent;
-  @NonNull private Disposable notification = Disposables.empty();
+  @NonNull private final CompositeDisposable compositeDisposable;
   private int notificationId;
   private boolean registered;
 
@@ -59,6 +57,7 @@ import timber.log.Timber;
       @NonNull @Named("main") Class<? extends Activity> mainActivityClass) {
     this.obsScheduler = obsScheduler;
     this.subScheduler = subScheduler;
+    compositeDisposable = new CompositeDisposable();
     appContext = context.getApplicationContext();
     this.packageManagerWrapper = packageManagerWrapper;
     filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
@@ -83,8 +82,7 @@ import timber.log.Timber;
     final Uri data = intent.getData();
     final String packageName = data.getSchemeSpecificPart();
 
-    notification = DisposableHelper.dispose(notification);
-    notification = packageManagerWrapper.loadPackageLabel(packageName)
+    compositeDisposable.add(packageManagerWrapper.loadPackageLabel(packageName)
         .subscribeOn(subScheduler)
         .observeOn(obsScheduler)
         .subscribe(s -> {
@@ -94,7 +92,7 @@ import timber.log.Timber;
             Timber.d("Package updated: %s", packageName);
           }
         }, throwable -> Timber.e(throwable, "onError launching notification for package: %s",
-            packageName));
+            packageName)));
   }
 
   @SuppressWarnings("WeakerAccess") void onNewPackageInstalled(@NonNull String packageName,
@@ -122,8 +120,8 @@ import timber.log.Timber;
   public void unregister() {
     if (registered) {
       appContext.unregisterReceiver(this);
-      notification = DisposableHelper.dispose(notification);
       registered = false;
+      compositeDisposable.clear();
     }
   }
 }

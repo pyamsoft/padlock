@@ -20,11 +20,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.model.LockState;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -32,17 +29,11 @@ import timber.log.Timber;
 class LockListItemPresenter extends SchedulerPresenter {
 
   @NonNull private final LockListItemInteractor interactor;
-  @NonNull private Disposable databaseDisposable = Disposables.empty();
 
   @Inject LockListItemPresenter(@NonNull LockListItemInteractor interactor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
-  }
-
-  @Override protected void onStop() {
-    super.onStop();
-    databaseDisposable = DisposableHelper.dispose(databaseDisposable);
   }
 
   /**
@@ -54,8 +45,7 @@ class LockListItemPresenter extends SchedulerPresenter {
     LockState oldState = (isChecked ? LockState.DEFAULT : LockState.LOCKED);
     LockState newState = (isChecked ? LockState.LOCKED : LockState.DEFAULT);
 
-    databaseDisposable = DisposableHelper.dispose(databaseDisposable);
-    databaseDisposable = interactor.modifySingleDatabaseEntry(oldState, newState, packageName,
+    disposeOnStop(interactor.modifySingleDatabaseEntry(oldState, newState, packageName,
         PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -73,7 +63,7 @@ class LockListItemPresenter extends SchedulerPresenter {
         }, throwable -> {
           Timber.e(throwable, "onError modifyDatabaseEntry");
           callback.onDatabaseEntryError();
-        });
+        }));
   }
 
   interface DatabaseCallback extends LockDatabaseErrorView {

@@ -17,11 +17,8 @@
 package com.pyamsoft.padlock.onboard.firstlaunch;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -29,7 +26,6 @@ import timber.log.Timber;
 class OnboardAcceptTermsPresenter extends SchedulerPresenter {
 
   @NonNull private final OnboardAcceptTermsInteractor interactor;
-  @NonNull private Disposable termsDisposable = Disposables.empty();
 
   @Inject OnboardAcceptTermsPresenter(@NonNull OnboardAcceptTermsInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
@@ -37,20 +33,14 @@ class OnboardAcceptTermsPresenter extends SchedulerPresenter {
     this.interactor = interactor;
   }
 
-  @Override protected void onStop() {
-    super.onStop();
-    termsDisposable = DisposableHelper.dispose(termsDisposable);
-  }
-
   /**
    * public
    */
   void acceptUsageTerms(@NonNull UsageTermsCallback callback) {
-    termsDisposable = DisposableHelper.dispose(termsDisposable);
-    termsDisposable = interactor.agreeToTerms()
+    disposeOnStop(interactor.agreeToTerms()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
-        .subscribe(callback::onUsageTermsAccepted, throwable -> Timber.e(throwable, "onError"));
+        .subscribe(callback::onUsageTermsAccepted, throwable -> Timber.e(throwable, "onError")));
   }
 
   interface UsageTermsCallback {
