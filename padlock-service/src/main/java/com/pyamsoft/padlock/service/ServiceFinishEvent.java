@@ -16,5 +16,5 @@
 
 package com.pyamsoft.padlock.service;
 
-class ServiceFinishEvent {
+final class ServiceFinishEvent {
 }

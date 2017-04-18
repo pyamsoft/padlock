@@ -36,8 +36,8 @@ buildscript {
     supportLib = "25.3.1"
     firebase = "10.2.1"
     leakCanary = "1.5"
-    pydroid = "9.0.4"
-    autoValue = "1.4"
+    pydroid = "9.1.0"
+    autoValue = "1.4.1"
     sqlbrite = "1.1.1"
     dagger = "2.10"
     patternLock = "1.0.0"
@@ -50,7 +50,7 @@ buildscript {
     classpath 'me.tatarka:gradle-retrolambda:3.6.0'
 
     // Dex count
-    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.3'
+    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
 
     // Gradle version checker
     classpath 'com.github.ben-manes:gradle-versions-plugin:0.14.0'

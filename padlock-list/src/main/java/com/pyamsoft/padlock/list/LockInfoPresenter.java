@@ -18,11 +18,8 @@ package com.pyamsoft.padlock.list;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.model.ActivityEntry;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -30,8 +27,6 @@ import timber.log.Timber;
 class LockInfoPresenter extends SchedulerPresenter {
 
   @NonNull private final LockInfoInteractor lockInfoInteractor;
-  @NonNull private Disposable populateListDisposable = Disposables.empty();
-  @NonNull private Disposable onboardDisposable = Disposables.empty();
 
   @Inject LockInfoPresenter(final @NonNull LockInfoInteractor lockInfoInteractor,
       final @NonNull @Named("obs") Scheduler obsScheduler,
@@ -40,34 +35,27 @@ class LockInfoPresenter extends SchedulerPresenter {
     this.lockInfoInteractor = lockInfoInteractor;
   }
 
-  @Override protected void onStop() {
-    super.onStop();
-    onboardDisposable = DisposableHelper.dispose(onboardDisposable);
-    populateListDisposable = DisposableHelper.dispose(populateListDisposable);
-  }
-
   /**
    * public
    */
-  void populateList(@NonNull String packageName, @NonNull PopulateListCallback callback,
-      boolean forceRefresh) {
-    populateListDisposable = DisposableHelper.dispose(populateListDisposable);
-    populateListDisposable = lockInfoInteractor.populateList(packageName, forceRefresh)
+  void populateList(@NonNull String packageName, boolean forceRefresh,
+      @NonNull PopulateListCallback callback) {
+    disposeOnStop(lockInfoInteractor.populateList(packageName, forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onListPopulated)
+        .doOnSubscribe(disposable -> callback.onListPopulateBegin())
         .subscribe(callback::onEntryAddedToList, throwable -> {
           Timber.e(throwable, "LockInfoPresenterImpl populateList onError");
           callback.onListPopulateError();
-        });
+        }));
   }
 
   /**
    * public
    */
   void showOnBoarding(@NonNull OnBoardingCallback callback) {
-    onboardDisposable = DisposableHelper.dispose(onboardDisposable);
-    onboardDisposable = lockInfoInteractor.hasShownOnBoarding()
+    disposeOnStop(lockInfoInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboard -> {
@@ -76,7 +64,7 @@ class LockInfoPresenter extends SchedulerPresenter {
           } else {
             callback.onShowOnboarding();
           }
-        }, throwable -> Timber.e(throwable, "onError"));
+        }, throwable -> Timber.e(throwable, "onError")));
   }
 
   interface OnBoardingCallback {

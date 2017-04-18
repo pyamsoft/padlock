@@ -17,11 +17,8 @@
 package com.pyamsoft.padlock.pin;
 
 import android.support.annotation.NonNull;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -29,8 +26,6 @@ import timber.log.Timber;
 class PinEntryPresenter extends SchedulerPresenter {
 
   @NonNull private final PinEntryInteractor interactor;
-  @NonNull private Disposable pinEntryDisposable = Disposables.empty();
-  @NonNull private Disposable pinCheckDisposable = Disposables.empty();
 
   @Inject PinEntryPresenter(@NonNull PinEntryInteractor interactor,
       @Named("obs") Scheduler obsScheduler, @Named("sub") Scheduler subScheduler) {
@@ -38,20 +33,12 @@ class PinEntryPresenter extends SchedulerPresenter {
     this.interactor = interactor;
   }
 
-  @Override protected void onStop() {
-    super.onStop();
-    pinCheckDisposable = DisposableHelper.dispose(pinCheckDisposable);
-    pinEntryDisposable = DisposableHelper.dispose(pinEntryDisposable);
-  }
-
   /**
    * public
    */
   void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt, @NonNull String hint,
       @NonNull SubmitCallback callback) {
-    Timber.d("Attempt PIN submission");
-    pinEntryDisposable = DisposableHelper.dispose(pinEntryDisposable);
-    pinEntryDisposable = interactor.submitPin(currentAttempt, reEntryAttempt, hint)
+    disposeOnStop(interactor.submitPin(currentAttempt, reEntryAttempt, hint)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(event -> {
@@ -64,16 +51,14 @@ class PinEntryPresenter extends SchedulerPresenter {
         }, throwable -> {
           Timber.e(throwable, "attemptPinSubmission onError");
           callback.onSubmitError();
-        });
+        }));
   }
 
   /**
    * public
    */
   void checkMasterPinPresent(@NonNull MasterPinStatusCallback callback) {
-    Timber.d("Check if we have a master");
-    pinCheckDisposable = DisposableHelper.dispose(pinCheckDisposable);
-    pinCheckDisposable = interactor.hasMasterPin()
+    disposeOnStop(interactor.hasMasterPin()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(hasMaster -> {
@@ -82,7 +67,7 @@ class PinEntryPresenter extends SchedulerPresenter {
           } else {
             callback.onMasterPinMissing();
           }
-        }, throwable -> Timber.e(throwable, "onError checkMasterPinPresent"));
+        }, throwable -> Timber.e(throwable, "onError checkMasterPinPresent")));
   }
 
   interface MasterPinStatusCallback {

@@ -16,5 +16,5 @@
 
 package com.pyamsoft.padlock.purge;
 
-class PurgeAllEvent {
+final class PurgeAllEvent {
 }

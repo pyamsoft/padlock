@@ -22,11 +22,8 @@ import com.pyamsoft.padlock.pin.ClearPinEvent;
 import com.pyamsoft.padlock.pin.CreatePinEvent;
 import com.pyamsoft.padlock.service.LockServiceStateInteractor;
 import com.pyamsoft.pydroid.bus.EventBus;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -35,13 +32,6 @@ class LockListPresenter extends SchedulerPresenter {
 
   @NonNull private final LockListInteractor lockListInteractor;
   @NonNull private final LockServiceStateInteractor stateInteractor;
-  @NonNull private Disposable populateListDisposable = Disposables.empty();
-  @NonNull private Disposable systemVisibleDisposable = Disposables.empty();
-  @NonNull private Disposable onboardDisposable = Disposables.empty();
-  @NonNull private Disposable fabStateDisposable = Disposables.empty();
-  @NonNull private Disposable pinCreateBus = Disposables.empty();
-  @NonNull private Disposable pinClearBus = Disposables.empty();
-  @NonNull private Disposable otherLockBus = Disposables.empty();
 
   @Inject LockListPresenter(@NonNull LockListInteractor lockListInteractor,
       @NonNull LockServiceStateInteractor stateInteractor,
@@ -51,23 +41,11 @@ class LockListPresenter extends SchedulerPresenter {
     this.stateInteractor = stateInteractor;
   }
 
-  @Override protected void onStop() {
-    super.onStop();
-    systemVisibleDisposable = DisposableHelper.dispose(systemVisibleDisposable);
-    onboardDisposable = DisposableHelper.dispose(onboardDisposable);
-    fabStateDisposable = DisposableHelper.dispose(fabStateDisposable);
-    populateListDisposable = DisposableHelper.dispose(populateListDisposable);
-    pinCreateBus = DisposableHelper.dispose(pinCreateBus);
-    pinClearBus = DisposableHelper.dispose(pinClearBus);
-    otherLockBus = DisposableHelper.dispose(otherLockBus);
-  }
-
   /**
    * public
    */
   void registerOnBus(@NonNull BusCallback callback) {
-    pinCreateBus = DisposableHelper.dispose(pinCreateBus);
-    pinCreateBus = EventBus.get()
+    disposeOnStop(EventBus.get()
         .listen(CreatePinEvent.class)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -77,10 +55,9 @@ class LockListPresenter extends SchedulerPresenter {
           } else {
             callback.onMasterPinCreateFailure();
           }
-        }, throwable -> Timber.e(throwable, "on error create pin bus"));
+        }, throwable -> Timber.e(throwable, "on error create pin bus")));
 
-    pinClearBus = DisposableHelper.dispose(pinClearBus);
-    pinClearBus = EventBus.get()
+    disposeOnStop(EventBus.get()
         .listen(ClearPinEvent.class)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
@@ -90,30 +67,29 @@ class LockListPresenter extends SchedulerPresenter {
           } else {
             callback.onMasterPinClearFailure();
           }
-        }, throwable -> Timber.e(throwable, "on error clear pin bus"));
+        }, throwable -> Timber.e(throwable, "on error clear pin bus")));
   }
 
   /**
    * public
    */
-  void populateList(@NonNull PopulateListCallback callback, boolean forceRefresh) {
-    populateListDisposable = DisposableHelper.dispose(populateListDisposable);
-    populateListDisposable = lockListInteractor.populateList(forceRefresh)
+  void populateList(boolean forceRefresh, @NonNull PopulateListCallback callback) {
+    disposeOnStop(lockListInteractor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onListPopulated)
+        .doOnSubscribe(disposable -> callback.onListPopulateBegin())
         .subscribe(callback::onEntryAddedToList, throwable -> {
           Timber.e(throwable, "populateList onError");
           callback.onListPopulateError();
-        });
+        }));
   }
 
   /**
    * public
    */
   void setFABStateFromPreference(@NonNull FABStateCallback callback) {
-    fabStateDisposable = DisposableHelper.dispose(fabStateDisposable);
-    fabStateDisposable = stateInteractor.isServiceEnabled()
+    disposeOnStop(stateInteractor.isServiceEnabled()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(enabled -> {
@@ -122,7 +98,7 @@ class LockListPresenter extends SchedulerPresenter {
           } else {
             callback.onSetFABStateDisabled();
           }
-        }, throwable -> Timber.e(throwable, "onError"));
+        }, throwable -> Timber.e(throwable, "onError")));
   }
 
   /**
@@ -143,8 +119,7 @@ class LockListPresenter extends SchedulerPresenter {
    * public
    */
   void setSystemVisibilityFromPreference(@NonNull SystemVisibilityCallback callback) {
-    systemVisibleDisposable = DisposableHelper.dispose(systemVisibleDisposable);
-    systemVisibleDisposable = lockListInteractor.isSystemVisible()
+    disposeOnStop(lockListInteractor.isSystemVisible()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(visible -> {
@@ -153,15 +128,14 @@ class LockListPresenter extends SchedulerPresenter {
           } else {
             callback.onSetSystemInvisible();
           }
-        }, throwable -> Timber.e(throwable, "onError"));
+        }, throwable -> Timber.e(throwable, "onError")));
   }
 
   /**
    * public
    */
   void showOnBoarding(@NonNull OnboardingCallback callback) {
-    onboardDisposable = DisposableHelper.dispose(onboardDisposable);
-    onboardDisposable = lockListInteractor.hasShownOnBoarding()
+    disposeOnStop(lockListInteractor.hasShownOnBoarding()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboard -> {
@@ -170,7 +144,7 @@ class LockListPresenter extends SchedulerPresenter {
           } else {
             callback.onShowOnboarding();
           }
-        }, throwable -> Timber.e(throwable, "onError"));
+        }, throwable -> Timber.e(throwable, "onError")));
   }
 
   interface BusCallback {

@@ -16,7 +16,9 @@
 
 package com.pyamsoft.padlock.list;
 
-interface LockCommon extends ClearCallback {
+interface LockCommon {
+
+  void onListPopulateBegin();
 
   void onListPopulated();
 

@@ -18,12 +18,8 @@ package com.pyamsoft.padlock.purge;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.pydroid.bus.EventBus;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -31,70 +27,53 @@ import timber.log.Timber;
 class PurgePresenter extends SchedulerPresenter {
 
   @NonNull private final PurgeInteractor interactor;
-  @NonNull private final CompositeDisposable compositeDisposable;
-  @NonNull private Disposable retrievalDisposable = Disposables.empty();
-  @NonNull private Disposable purgeBus = Disposables.empty();
-  @NonNull private Disposable purgeAllBus = Disposables.empty();
 
   @Inject PurgePresenter(@NonNull PurgeInteractor interactor, @Named("obs") Scheduler obsScheduler,
       @Named("sub") Scheduler subScheduler) {
     super(obsScheduler, subScheduler);
     this.interactor = interactor;
-    compositeDisposable = new CompositeDisposable();
-  }
-
-  @Override protected void onStop() {
-    super.onStop();
-    compositeDisposable.clear();
-    retrievalDisposable = DisposableHelper.dispose(retrievalDisposable);
-    purgeBus = DisposableHelper.dispose(purgeBus);
-    purgeAllBus = DisposableHelper.dispose(purgeAllBus);
   }
 
   /**
    * public
    */
   void registerOnBus(@NonNull PurgeCallback callback) {
-    purgeBus = DisposableHelper.dispose(purgeBus);
-    purgeBus = EventBus.get()
+    disposeOnStop(EventBus.get()
         .listen(PurgeEvent.class)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(purgeEvent -> callback.purge(purgeEvent.packageName()),
-            throwable -> Timber.e(throwable, "onError purge single"));
+            throwable -> Timber.e(throwable, "onError purge single")));
 
-    purgeAllBus = DisposableHelper.dispose(purgeAllBus);
-    purgeAllBus = EventBus.get()
+    disposeOnStop(EventBus.get()
         .listen(PurgeAllEvent.class)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(purgeAllEvent -> callback.purgeAll(),
-            throwable -> Timber.e(throwable, "onError purge all"));
+            throwable -> Timber.e(throwable, "onError purge all")));
   }
 
   /**
    * public
    */
   void retrieveStaleApplications(@NonNull RetrievalCallback callback, boolean forceRefresh) {
-    retrievalDisposable = DisposableHelper.dispose(retrievalDisposable);
-    retrievalDisposable = interactor.populateList(forceRefresh)
+    disposeOnStop(interactor.populateList(forceRefresh)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .doAfterTerminate(callback::onRetrievalComplete)
         .subscribe(callback::onStaleApplicationRetrieved,
-            throwable -> Timber.e(throwable, "onError retrieveStaleApplications"));
+            throwable -> Timber.e(throwable, "onError retrieveStaleApplications")));
   }
 
   /**
    * public
    */
   void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback) {
-    final Disposable subscription = interactor.deleteEntry(packageName)
+    disposeOnStop(interactor.deleteEntry(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(() -> callback.onDeleted(packageName),
-            throwable -> Timber.e(throwable, "onError deleteStale"));
-    compositeDisposable.add(subscription);
+            throwable -> Timber.e(throwable, "onError deleteStale")));
   }
 
   interface PurgeCallback {

@@ -19,10 +19,7 @@ package com.pyamsoft.padlock.lock;
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.pydroid.bus.EventBus;
-import com.pyamsoft.pydroid.helper.DisposableHelper;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -30,9 +27,6 @@ import timber.log.Timber;
 class LockScreenPresenter extends LockTypePresenter {
 
   @NonNull private final LockScreenInteractor interactor;
-  @NonNull private Disposable displayNameDisposable = Disposables.empty();
-  @NonNull private Disposable ignoreTimeDisposable = Disposables.empty();
-  @NonNull private Disposable closeOldBus = Disposables.empty();
 
   @Inject LockScreenPresenter(@NonNull LockScreenInteractor lockScreenInteractor,
       @NonNull @Named("obs") Scheduler obsScheduler, @NonNull @Named("io") Scheduler subScheduler) {
@@ -40,23 +34,15 @@ class LockScreenPresenter extends LockTypePresenter {
     this.interactor = lockScreenInteractor;
   }
 
-  @Override protected void onStop() {
-    super.onStop();
-    displayNameDisposable = DisposableHelper.dispose(displayNameDisposable);
-    ignoreTimeDisposable = DisposableHelper.dispose(ignoreTimeDisposable);
-    closeOldBus = DisposableHelper.dispose(closeOldBus);
-  }
-
   /**
    * public
    */
   void createWithDefaultIgnoreTime(@NonNull IgnoreTimeCallback callback) {
-    ignoreTimeDisposable = DisposableHelper.dispose(ignoreTimeDisposable);
-    ignoreTimeDisposable = interactor.getDefaultIgnoreTime()
+    disposeOnStop(interactor.getDefaultIgnoreTime()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(callback::onInitializeWithIgnoreTime,
-            throwable -> Timber.e(throwable, "onError createWithDefaultIgnoreTime"));
+            throwable -> Timber.e(throwable, "onError createWithDefaultIgnoreTime")));
   }
 
   /**
@@ -64,14 +50,13 @@ class LockScreenPresenter extends LockTypePresenter {
    */
   void loadDisplayNameFromPackage(@NonNull String packageName,
       @NonNull DisplayNameLoadCallback callback) {
-    displayNameDisposable = DisposableHelper.dispose(displayNameDisposable);
-    displayNameDisposable = interactor.getDisplayName(packageName)
+    disposeOnStop(interactor.getDisplayName(packageName)
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(callback::setDisplayName, throwable -> {
           Timber.e(throwable, "Error loading display name from package");
           callback.setDisplayName("");
-        });
+        }));
   }
 
   /**
@@ -82,8 +67,7 @@ class LockScreenPresenter extends LockTypePresenter {
     // Send bus event first before we register or we may catch our own event.
     EventBus.get().publish(CloseOldEvent.create(packageName, activityName));
 
-    closeOldBus = DisposableHelper.dispose(closeOldBus);
-    closeOldBus = EventBus.get()
+    disposeOnStop(EventBus.get()
         .listen(CloseOldEvent.class)
         .filter(closeOldEvent -> closeOldEvent.packageName().equals(packageName)
             && closeOldEvent.activityName().equals(activityName))
@@ -93,7 +77,7 @@ class LockScreenPresenter extends LockTypePresenter {
           Timber.w("Received a CloseOld event: %s %s", closeOldEvent.packageName(),
               closeOldEvent.activityName());
           callback.onCloseOldReceived();
-        }, throwable -> Timber.e(throwable, "error bus close old"));
+        }, throwable -> Timber.e(throwable, "error bus close old")));
   }
 
   interface CloseCallback {

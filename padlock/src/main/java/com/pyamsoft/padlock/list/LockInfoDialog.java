@@ -18,8 +18,6 @@ package com.pyamsoft.padlock.list;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -55,86 +53,16 @@ public class LockInfoDialog extends DialogFragment {
   @NonNull private static final String ARG_APP_PACKAGE_NAME = "app_packagename";
   @NonNull private static final String ARG_APP_NAME = "app_name";
   @NonNull private static final String ARG_APP_SYSTEM = "app_system";
-  @NonNull final Handler handler = new Handler(Looper.getMainLooper());
   @SuppressWarnings("WeakerAccess") @Inject LockInfoPresenter presenter;
   @SuppressWarnings("WeakerAccess") FastItemAdapter<LockInfoItem> fastItemAdapter;
   @SuppressWarnings("WeakerAccess") DialogLockInfoBinding binding;
-  @NonNull final Runnable startRefreshRunnable = () -> binding.lockInfoSwipeRefresh.post(() -> {
-    if (binding != null) {
-      if (binding.lockInfoSwipeRefresh != null) {
-        binding.lockInfoSwipeRefresh.setRefreshing(true);
-      }
-    }
-  });
-  @NonNull final Runnable stopRefreshRunnable = () -> binding.lockInfoSwipeRefresh.post(() -> {
-    if (binding != null) {
-      if (binding.lockInfoSwipeRefresh != null) {
-        binding.lockInfoSwipeRefresh.setRefreshing(false);
-      }
-    }
-  });
   String appPackageName;
-  boolean listIsRefreshed;
   boolean appIsSystem;
-  @NonNull private final LockInfoPresenter.PopulateListCallback populateListCallback =
-      new LockInfoPresenter.PopulateListCallback() {
-
-        @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
-          // In case the configuration changes, we do the animation again
-          if (!binding.lockInfoSwipeRefresh.isRefreshing()) {
-            binding.lockInfoSwipeRefresh.post(() -> {
-              if (binding != null) {
-                if (binding.lockInfoSwipeRefresh != null) {
-                  binding.lockInfoSwipeRefresh.setRefreshing(true);
-                }
-              }
-            });
-          }
-
-          fastItemAdapter.add(new LockInfoItem(appPackageName, appIsSystem, entry));
-        }
-
-        @Override public void onListPopulated() {
-          binding.lockInfoRecycler.setClickable(true);
-          handler.removeCallbacksAndMessages(null);
-          handler.post(stopRefreshRunnable);
-
-          if (fastItemAdapter.getAdapterItemCount() > 0) {
-            Timber.d("Refresh finished");
-            listIsRefreshed = true;
-            presenter.showOnBoarding(new LockInfoPresenter.OnBoardingCallback() {
-              @Override public void onShowOnboarding() {
-                Timber.d("Show onboarding");
-                // TODO
-              }
-
-              @Override public void onOnboardingComplete() {
-                // TODO
-              }
-            });
-          } else {
-            Toast.makeText(getContext(), "Error while loading list. Please try again.",
-                Toast.LENGTH_SHORT).show();
-          }
-        }
-
-        @Override public void onListPopulateError() {
-          Timber.e("onListPopulateError");
-          DialogUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "error");
-        }
-
-        @Override public void onListCleared() {
-          Timber.d("Prepare for refresh");
-          listIsRefreshed = false;
-
-          handler.removeCallbacksAndMessages(null);
-          handler.post(startRefreshRunnable);
-        }
-      };
   private String appName;
   private DividerItemDecoration dividerDecoration;
   private FilterListDelegate filterListDelegate;
   @NonNull private Loaded appIcon = LoaderHelper.empty();
+  boolean listDoneRefreshing;
 
   @CheckResult @NonNull public static LockInfoDialog newInstance(@NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -156,6 +84,7 @@ public class LockInfoDialog extends DialogFragment {
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    listDoneRefreshing = false;
 
     appPackageName = getArguments().getString(ARG_APP_PACKAGE_NAME, null);
     appName = getArguments().getString(ARG_APP_NAME, null);
@@ -171,7 +100,6 @@ public class LockInfoDialog extends DialogFragment {
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    listIsRefreshed = false;
     filterListDelegate = new FilterListDelegate();
     fastItemAdapter = new FastItemAdapter<>();
     binding = DialogLockInfoBinding.inflate(inflater, container, false);
@@ -201,7 +129,7 @@ public class LockInfoDialog extends DialogFragment {
         R.color.blue700, R.color.amber500);
     binding.lockInfoSwipeRefresh.setOnRefreshListener(() -> {
       Timber.d("onRefresh");
-      refreshList();
+      refreshList(true);
     });
   }
 
@@ -227,7 +155,6 @@ public class LockInfoDialog extends DialogFragment {
     super.onDestroyView();
     filterListDelegate.onDestroyView();
 
-    handler.removeCallbacksAndMessages(null);
     binding.lockInfoRecycler.removeItemDecoration(dividerDecoration);
     binding.lockInfoRecycler.setOnClickListener(null);
     binding.lockInfoRecycler.setLayoutManager(null);
@@ -248,17 +175,8 @@ public class LockInfoDialog extends DialogFragment {
     appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(appPackageName))
         .into(binding.lockInfoIcon);
 
-    if (!listIsRefreshed) {
-      if (!binding.lockInfoSwipeRefresh.isRefreshing()) {
-        binding.lockInfoSwipeRefresh.post(() -> {
-          if (binding != null) {
-            if (binding.lockInfoSwipeRefresh != null) {
-              binding.lockInfoSwipeRefresh.setRefreshing(true);
-            }
-          }
-        });
-      }
-      presenter.populateList(appPackageName, populateListCallback, false);
+    if (!listDoneRefreshing) {
+      refreshList(false);
     }
   }
 
@@ -278,10 +196,55 @@ public class LockInfoDialog extends DialogFragment {
     }
   }
 
-  void refreshList() {
-    fastItemAdapter.clear();
-    populateListCallback.onListCleared();
-    binding.lockInfoRecycler.setClickable(false);
-    presenter.populateList(appPackageName, populateListCallback, true);
+  void refreshList(boolean force) {
+    presenter.populateList(appPackageName, force, new LockInfoPresenter.PopulateListCallback() {
+
+      private void setRefreshing(boolean refresh) {
+        // In case the configuration changes, we do the animation again
+        binding.lockInfoSwipeRefresh.post(() -> {
+          if (binding != null) {
+            if (binding.lockInfoSwipeRefresh != null) {
+              binding.lockInfoSwipeRefresh.setRefreshing(refresh);
+            }
+          }
+        });
+      }
+
+      @Override public void onListPopulateBegin() {
+        listDoneRefreshing = false;
+        setRefreshing(true);
+        fastItemAdapter.clear();
+      }
+
+      @Override public void onEntryAddedToList(@NonNull ActivityEntry entry) {
+        fastItemAdapter.add(new LockInfoItem(appPackageName, appIsSystem, entry));
+      }
+
+      @Override public void onListPopulated() {
+        listDoneRefreshing = true;
+        setRefreshing(false);
+
+        if (fastItemAdapter.getAdapterItemCount() > 0) {
+          Timber.d("Refresh finished");
+          presenter.showOnBoarding(new LockInfoPresenter.OnBoardingCallback() {
+            @Override public void onShowOnboarding() {
+              Timber.d("Show onboarding");
+              // TODO
+            }
+
+            @Override public void onOnboardingComplete() {
+              // TODO
+            }
+          });
+        } else {
+          Toast.makeText(getContext(), "Error while loading list. Please try again.",
+              Toast.LENGTH_SHORT).show();
+        }
+      }
+
+      @Override public void onListPopulateError() {
+        DialogUtil.guaranteeSingleDialogFragment(getActivity(), new ErrorDialog(), "error");
+      }
+    });
   }
 }
