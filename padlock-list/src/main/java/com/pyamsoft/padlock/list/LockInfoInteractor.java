@@ -72,7 +72,7 @@ import timber.log.Timber;
     return Single.defer(() -> {
       final Single<List<ActivityEntry>> dataSource;
       Single<List<ActivityEntry>> cached = cacheInteractor.getFromCache(packageName);
-      if (cached == null || forceRefresh) {
+      if (cached == null || forceRefresh || cached.blockingGet().isEmpty()) {
         Timber.d("Refresh info list data");
         dataSource = fetchFreshData(packageName).cache();
         cacheInteractor.putIntoCache(packageName, dataSource);

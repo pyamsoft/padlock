@@ -66,7 +66,7 @@ import timber.log.Timber;
       final Single<List<AppEntry>> dataSource;
 
       Single<List<AppEntry>> cache = cacheInteractor.retrieve();
-      if (cache == null || forceRefresh) {
+      if (cache == null || forceRefresh || cache.blockingGet().isEmpty()) {
         Timber.d("Refresh into cache");
         dataSource = fetchFreshData().cache();
         cacheInteractor.cache(dataSource);
