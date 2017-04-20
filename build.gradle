@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Kenji Yamanaka
+ * Copyright 2017 Peter Kenji Yamanaka
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ buildscript {
     supportLib = "25.3.1"
     firebase = "10.2.1"
     leakCanary = "1.5"
-    pydroid = "9.1.0"
+    pydroid = "9.1.2"
     autoValue = "1.4.1"
     sqlbrite = "1.1.1"
     dagger = "2.10"
