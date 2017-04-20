@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Peter Kenji Yamanaka
+ * Copyright 2017 Peter Kenji Yamanaka
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,8 @@ public class PadLockSingleInitProvider extends SingleInitContentProvider {
     }
   }
 
-  @Nullable @Override public String provideGoogleOpenSourceLicenses(@NonNull Context context) {
-    return null;
-  }
-
-  @Override public void insertCustomLicensesIntoMap() {
+  @Override public void insertCustomLicensesIntoMap(@NonNull Context context) {
+    super.insertCustomLicensesIntoMap(context);
     Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite");
     Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight");
     Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2");
