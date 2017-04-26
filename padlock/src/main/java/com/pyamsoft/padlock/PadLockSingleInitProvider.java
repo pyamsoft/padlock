@@ -18,7 +18,6 @@ package com.pyamsoft.padlock;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.pyamsoft.padlock.base.PadLockModule;
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;

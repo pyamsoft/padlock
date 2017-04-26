@@ -29,7 +29,7 @@ buildscript {
 
     minSdk = 19
     maxSdk = 25
-    buildTools = "25.0.2"
+    buildTools = "25.0.3"
     heapSize = "2g"
 
     retrolambda = "2.5.1"
