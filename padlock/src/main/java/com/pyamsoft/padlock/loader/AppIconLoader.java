@@ -18,10 +18,12 @@ package com.pyamsoft.padlock.loader;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.widget.ImageView;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
+import com.pyamsoft.pydroid.function.ActionSingle;
 import com.pyamsoft.pydroid.helper.Checker;
 import com.pyamsoft.pydroid.helper.SchedulerHelper;
 import com.pyamsoft.pydroid.ui.loader.GenericLoader;
@@ -34,7 +36,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
 
-public class AppIconLoader extends GenericLoader<Drawable> {
+public class AppIconLoader extends GenericLoader<AppIconLoader, Drawable> {
 
   @NonNull private final String packageName;
   @SuppressWarnings("WeakerAccess") @Inject PackageManagerWrapper packageManagerWrapper;
@@ -54,6 +56,29 @@ public class AppIconLoader extends GenericLoader<Drawable> {
 
   @CheckResult @NonNull public static AppIconLoader forPackageName(@NonNull String packageName) {
     return new AppIconLoader(packageName);
+  }
+
+  @NonNull @Override public AppIconLoader tint(@ColorRes int i) {
+    this.tint = i;
+    return this;
+  }
+
+  @NonNull @Override
+  public AppIconLoader setStartAction(@NonNull ActionSingle<Target<Drawable>> actionSingle) {
+    this.startAction = actionSingle;
+    return this;
+  }
+
+  @NonNull @Override
+  public AppIconLoader setErrorAction(@NonNull ActionSingle<Target<Drawable>> actionSingle) {
+    this.errorAction = actionSingle;
+    return this;
+  }
+
+  @NonNull @Override
+  public AppIconLoader setCompleteAction(@NonNull ActionSingle<Target<Drawable>> actionSingle) {
+    this.completeAction = actionSingle;
+    return this;
   }
 
   @NonNull @Override public Loaded into(@NonNull ImageView imageView) {
