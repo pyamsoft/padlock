@@ -37,7 +37,7 @@ class MainPresenter extends SchedulerPresenter {
    * public
    */
   void showOnboardingOrDefault(@NonNull OnboardingCallback callback) {
-    disposeOnStop(interactor.isOnboardingComplete()
+    disposeOnDestroy(interactor.isOnboardingComplete()
         .subscribeOn(getSubscribeScheduler())
         .observeOn(getObserveScheduler())
         .subscribe(onboardingComplete -> {
