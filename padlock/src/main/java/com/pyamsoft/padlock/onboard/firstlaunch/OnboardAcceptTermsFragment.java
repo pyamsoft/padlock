@@ -35,7 +35,7 @@ public class OnboardAcceptTermsFragment extends OnboardChildFragment {
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Injector.get().provideComponent().plusOnboardFirstLaunchComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @Nullable @Override

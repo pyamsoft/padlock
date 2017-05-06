@@ -48,7 +48,7 @@ public class MainActivity extends TamperActivity {
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    Injector.get().provideComponent().plusMainComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
 
     setAppBarState();
     showOnboardingOrDefault();

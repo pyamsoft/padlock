@@ -29,9 +29,9 @@ import android.view.ViewGroup;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.databinding.OnboardListPageContentBinding;
 import com.pyamsoft.padlock.onboard.OnboardChildFragment;
-import com.pyamsoft.pydroid.ui.loader.ImageLoader;
-import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
-import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
+import com.pyamsoft.pydroid.loader.ImageLoader;
+import com.pyamsoft.pydroid.loader.LoaderHelper;
+import com.pyamsoft.pydroid.loader.loaded.Loaded;
 
 abstract class OnboardContentFragment extends OnboardChildFragment {
 
@@ -64,7 +64,8 @@ abstract class OnboardContentFragment extends OnboardChildFragment {
     super.onViewCreated(view, savedInstanceState);
 
     imageTask = LoaderHelper.unload(imageTask);
-    imageTask = ImageLoader.fromResource(getOnboardImage()).into(binding.onboardListContentImage);
+    imageTask = ImageLoader.fromResource(getContext(), getOnboardImage())
+        .into(binding.onboardListContentImage);
 
     binding.onboardListContentText.setText(getOnboardText());
   }

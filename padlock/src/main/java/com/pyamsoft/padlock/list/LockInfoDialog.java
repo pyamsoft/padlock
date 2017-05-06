@@ -39,9 +39,9 @@ import com.pyamsoft.padlock.databinding.DialogLockInfoBinding;
 import com.pyamsoft.padlock.loader.AppIconLoader;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.ui.loader.ImageLoader;
-import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
-import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
+import com.pyamsoft.pydroid.loader.ImageLoader;
+import com.pyamsoft.pydroid.loader.LoaderHelper;
+import com.pyamsoft.pydroid.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.util.AppUtil;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
@@ -94,7 +94,7 @@ public class LockInfoDialog extends DialogFragment {
       throw new NullPointerException("App information is NULL");
     }
 
-    Injector.get().provideComponent().plusLockInfoComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @Nullable @Override

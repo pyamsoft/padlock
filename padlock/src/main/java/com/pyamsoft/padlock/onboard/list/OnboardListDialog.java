@@ -38,9 +38,9 @@ import com.pyamsoft.padlock.databinding.OnboardListDialogBinding;
 import com.pyamsoft.padlock.list.LockListFragment;
 import com.pyamsoft.padlock.main.MainFragment;
 import com.pyamsoft.padlock.onboard.Onboard;
-import com.pyamsoft.pydroid.ui.loader.ImageLoader;
-import com.pyamsoft.pydroid.ui.loader.LoaderMap;
-import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
+import com.pyamsoft.pydroid.loader.ImageLoader;
+import com.pyamsoft.pydroid.loader.LoaderMap;
+import com.pyamsoft.pydroid.loader.loaded.Loaded;
 import javax.inject.Inject;
 
 public class OnboardListDialog extends DialogFragment implements Onboard {
@@ -56,7 +56,7 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setCancelable(false);
-    Injector.get().provideComponent().plusOnboardListComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @Override public void onDestroy() {
@@ -124,16 +124,17 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
     binding.onboardListNext.setOnClickListener(v -> scrollToNextPage());
     binding.onboardListConfirm.setOnClickListener(v -> completeOnboarding());
 
-    final Loaded backTask =
-        ImageLoader.fromResource(R.drawable.ic_arrow_back_24dp).into(binding.onboardListBack);
+    final Loaded backTask = ImageLoader.fromResource(getActivity(), R.drawable.ic_arrow_back_24dp)
+        .into(binding.onboardListBack);
     mapper.put("back", backTask);
 
     final Loaded nextTask =
-        ImageLoader.fromResource(R.drawable.ic_arrow_forward_24dp).into(binding.onboardListNext);
+        ImageLoader.fromResource(getActivity(), R.drawable.ic_arrow_forward_24dp)
+            .into(binding.onboardListNext);
     mapper.put("next", nextTask);
 
-    final Loaded confirmTask =
-        ImageLoader.fromResource(R.drawable.ic_check_24dp).into(binding.onboardListConfirm);
+    final Loaded confirmTask = ImageLoader.fromResource(getActivity(), R.drawable.ic_check_24dp)
+        .into(binding.onboardListConfirm);
     mapper.put("confirm", confirmTask);
 
     onPageChangeToolbarResponse(position);

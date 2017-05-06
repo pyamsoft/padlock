@@ -41,10 +41,10 @@ import com.pyamsoft.padlock.pin.PinEntryDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior;
 import com.pyamsoft.pydroid.design.util.FABUtil;
+import com.pyamsoft.pydroid.loader.ImageLoader;
+import com.pyamsoft.pydroid.loader.LoaderHelper;
+import com.pyamsoft.pydroid.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
-import com.pyamsoft.pydroid.ui.loader.ImageLoader;
-import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
-import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
 import com.pyamsoft.pydroid.util.AnimUtil;
 import com.pyamsoft.pydroid.util.DialogUtil;
@@ -63,14 +63,14 @@ public class LockListFragment extends ActionBarFragment {
 
         @Override public void onSetFABStateEnabled() {
           fabIconTask = LoaderHelper.unload(fabIconTask);
-          fabIconTask =
-              ImageLoader.fromResource(R.drawable.ic_lock_outline_24dp).into(binding.applistFab);
+          fabIconTask = ImageLoader.fromResource(getActivity(), R.drawable.ic_lock_outline_24dp)
+              .into(binding.applistFab);
         }
 
         @Override public void onSetFABStateDisabled() {
           fabIconTask = LoaderHelper.unload(fabIconTask);
-          fabIconTask =
-              ImageLoader.fromResource(R.drawable.ic_lock_open_24dp).into(binding.applistFab);
+          fabIconTask = ImageLoader.fromResource(getActivity(), R.drawable.ic_lock_open_24dp)
+              .into(binding.applistFab);
         }
       };
   boolean listDoneRefreshing;
@@ -83,7 +83,7 @@ public class LockListFragment extends ActionBarFragment {
     listDoneRefreshing = false;
     setHasOptionsMenu(true);
 
-    Injector.get().provideComponent().plusLockListComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @Nullable @Override

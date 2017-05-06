@@ -23,17 +23,23 @@ import com.pyamsoft.padlock.base.preference.InstallListenerPreferences;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatModule;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperModule;
-import com.pyamsoft.padlock.list.LockInfoComponent;
-import com.pyamsoft.padlock.list.LockListComponent;
-import com.pyamsoft.padlock.loader.LoaderComponent;
-import com.pyamsoft.padlock.lock.LockScreenComponent;
-import com.pyamsoft.padlock.main.MainComponent;
-import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFirstLaunchComponent;
-import com.pyamsoft.padlock.onboard.list.OnboardListComponent;
-import com.pyamsoft.padlock.pin.PinEntryComponent;
-import com.pyamsoft.padlock.purge.PurgeComponent;
-import com.pyamsoft.padlock.service.LockServiceComponent;
-import com.pyamsoft.padlock.settings.SettingsPreferenceComponent;
+import com.pyamsoft.padlock.list.LockInfoDialog;
+import com.pyamsoft.padlock.list.LockInfoItem;
+import com.pyamsoft.padlock.list.LockListFragment;
+import com.pyamsoft.padlock.list.LockListItem;
+import com.pyamsoft.padlock.loader.AppIconLoader;
+import com.pyamsoft.padlock.lock.LockScreenActivity;
+import com.pyamsoft.padlock.lock.LockScreenBaseFragment;
+import com.pyamsoft.padlock.main.MainActivity;
+import com.pyamsoft.padlock.onboard.firstlaunch.OnboardAcceptTermsFragment;
+import com.pyamsoft.padlock.onboard.firstlaunch.OnboardEnableServiceFragment;
+import com.pyamsoft.padlock.onboard.list.OnboardListDialog;
+import com.pyamsoft.padlock.pin.PinEntryDialog;
+import com.pyamsoft.padlock.pin.PinEntryPatternFragment;
+import com.pyamsoft.padlock.pin.PinEntryTextFragment;
+import com.pyamsoft.padlock.purge.PurgeFragment;
+import com.pyamsoft.padlock.service.PadLockService;
+import com.pyamsoft.padlock.settings.SettingsFragment;
 import dagger.Component;
 import javax.inject.Singleton;
 
@@ -42,27 +48,39 @@ import javax.inject.Singleton;
     PadLockDBModule.class
 }) public interface PadLockComponent {
 
-  @CheckResult LockInfoComponent plusLockInfoComponent();
+  void inject(LockInfoDialog dialog);
 
-  @CheckResult LockListComponent plusLockListComponent();
+  void inject(LockInfoItem lockInfoItem);
 
-  @CheckResult LockScreenComponent plusLockScreenComponent();
+  void inject(LockListFragment fragment);
 
-  @CheckResult PinEntryComponent plusPinEntryComponent();
+  void inject(LockListItem lockListItem);
 
-  @CheckResult MainComponent plusMainComponent();
+  void inject(AppIconLoader appIconLoader);
 
-  @CheckResult OnboardFirstLaunchComponent plusOnboardFirstLaunchComponent();
+  void inject(LockScreenActivity lockScreenActivity);
 
-  @CheckResult OnboardListComponent plusOnboardListComponent();
+  void inject(LockScreenBaseFragment lockScreenBaseFragment);
 
-  @CheckResult PurgeComponent plusPurgeComponent();
+  void inject(MainActivity mainActivity);
 
-  @CheckResult LockServiceComponent plusLockServiceComponent();
+  void inject(OnboardAcceptTermsFragment onboardAcceptTermsFragment);
 
-  @CheckResult SettingsPreferenceComponent plusSettingsPreferenceComponent();
+  void inject(OnboardEnableServiceFragment onboardEnableServiceFragment);
 
-  @CheckResult LoaderComponent plusLoaderComponent();
+  void inject(OnboardListDialog onboardListDialog);
+
+  void inject(PinEntryTextFragment fragment);
+
+  void inject(PinEntryDialog pinEntryDialog);
+
+  void inject(PinEntryPatternFragment pinEntryPatternFragment);
+
+  void inject(PurgeFragment purgeFragment);
+
+  void inject(PadLockService padLockService);
+
+  void inject(SettingsFragment settingsFragment);
 
   // To be used directly by PadLockSingleInitProvider
   @CheckResult InstallListenerPreferences provideInstallListenerPreferences();

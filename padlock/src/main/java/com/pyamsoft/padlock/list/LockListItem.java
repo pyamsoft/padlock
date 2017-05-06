@@ -28,9 +28,9 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding;
 import com.pyamsoft.padlock.loader.AppIconLoader;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.ui.loader.ImageLoader;
-import com.pyamsoft.pydroid.ui.loader.LoaderMap;
-import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
+import com.pyamsoft.pydroid.loader.ImageLoader;
+import com.pyamsoft.pydroid.loader.LoaderMap;
+import com.pyamsoft.pydroid.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import java.util.List;
 import javax.inject.Inject;
@@ -45,7 +45,7 @@ public class LockListItem
 
   LockListItem(@NonNull AppEntry entry) {
     super(entry);
-    Injector.get().provideComponent().plusLockListComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @Override public int getType() {

@@ -53,7 +53,7 @@ public class SettingsFragment extends ActionBarSettingsPreferenceFragment {
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    Injector.get().provideComponent().plusSettingsPreferenceComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @CheckResult @NonNull SettingsPreferencePresenter getPresenter() {

@@ -26,11 +26,11 @@ import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.pydroid.function.ActionSingle;
 import com.pyamsoft.pydroid.helper.Checker;
 import com.pyamsoft.pydroid.helper.SchedulerHelper;
-import com.pyamsoft.pydroid.ui.loader.GenericLoader;
-import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
-import com.pyamsoft.pydroid.ui.loader.loaded.RxLoaded;
-import com.pyamsoft.pydroid.ui.loader.targets.DrawableImageTarget;
-import com.pyamsoft.pydroid.ui.loader.targets.Target;
+import com.pyamsoft.pydroid.loader.GenericLoader;
+import com.pyamsoft.pydroid.loader.loaded.Loaded;
+import com.pyamsoft.pydroid.loader.loaded.RxLoaded;
+import com.pyamsoft.pydroid.loader.targets.DrawableImageTarget;
+import com.pyamsoft.pydroid.loader.targets.Target;
 import io.reactivex.Scheduler;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -45,7 +45,7 @@ public class AppIconLoader extends GenericLoader<AppIconLoader, Drawable> {
 
   private AppIconLoader(@NonNull String packageName) {
     this.packageName = Checker.checkNonNull(packageName);
-    Injector.get().provideComponent().plusLoaderComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
     if (this.packageName.isEmpty()) {
       throw new IllegalArgumentException("AppIconLoader packageName must be non-empty");
     }

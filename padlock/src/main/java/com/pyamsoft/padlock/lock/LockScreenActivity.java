@@ -38,9 +38,9 @@ import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.padlock.loader.AppIconLoader;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
-import com.pyamsoft.pydroid.ui.loader.ImageLoader;
-import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
-import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
+import com.pyamsoft.pydroid.loader.ImageLoader;
+import com.pyamsoft.pydroid.loader.LoaderHelper;
+import com.pyamsoft.pydroid.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -139,7 +139,7 @@ public class LockScreenActivity extends ActivityBase {
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock);
     PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.preferences, false);
 
-    Injector.get().provideComponent().plusLockScreenComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
 
     populateIgnoreTimes();
     getValuesFromBundle();

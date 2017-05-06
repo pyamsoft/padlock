@@ -37,9 +37,9 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding;
 import com.pyamsoft.padlock.loader.AppIconLoader;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
-import com.pyamsoft.pydroid.ui.loader.ImageLoader;
-import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
-import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
+import com.pyamsoft.pydroid.loader.ImageLoader;
+import com.pyamsoft.pydroid.loader.LoaderHelper;
+import com.pyamsoft.pydroid.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.util.DrawableUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
@@ -79,7 +79,7 @@ public class PinEntryDialog extends DialogFragment {
 
     setCancelable(true);
 
-    Injector.get().provideComponent().plusPinEntryComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @Override public void onResume() {
