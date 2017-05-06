@@ -67,7 +67,7 @@ public class PurgeFragment extends ActionBarFragment implements PurgePresenter.R
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-    Injector.get().provideComponent().plusPurgeComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @Override public void onDestroy() {

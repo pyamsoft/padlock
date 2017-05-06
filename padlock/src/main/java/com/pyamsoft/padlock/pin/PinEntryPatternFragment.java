@@ -53,7 +53,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Injector.get().provideComponent().plusPinEntryComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
 
     if (savedInstanceState == null) {
       repeatPattern = false;

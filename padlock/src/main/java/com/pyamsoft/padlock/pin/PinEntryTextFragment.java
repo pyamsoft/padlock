@@ -33,9 +33,9 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding;
 import com.pyamsoft.pydroid.bus.EventBus;
-import com.pyamsoft.pydroid.ui.loader.ImageLoader;
-import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
-import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
+import com.pyamsoft.pydroid.loader.ImageLoader;
+import com.pyamsoft.pydroid.loader.LoaderHelper;
+import com.pyamsoft.pydroid.loader.loaded.Loaded;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -83,7 +83,7 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Injector.get().provideComponent().plusPinEntryComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @Nullable @Override
@@ -193,7 +193,7 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
     pinEntryText.requestFocus();
 
     goTask = LoaderHelper.unload(goTask);
-    goTask = ImageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
+    goTask = ImageLoader.fromResource(getActivity(), R.drawable.ic_arrow_forward_24dp)
         .tint(R.color.orangeA200)
         .into(binding.pinImageGo);
   }

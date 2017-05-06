@@ -97,12 +97,14 @@ public class PadLockService extends AccessibilityService
     return super.onUnbind(intent);
   }
 
+  @Override public void onCreate() {
+    super.onCreate();
+    Injector.get().provideComponent().inject(this);
+  }
+
   @Override protected void onServiceConnected() {
     super.onServiceConnected();
     Timber.d("onServiceConnected");
-    if (presenter == null) {
-      Injector.get().provideComponent().plusLockServiceComponent().inject(this);
-    }
 
     LockServicePresenter.ProcessCallback callback = this;
     presenter.registerOnBus(new LockServicePresenter.ServiceCallback() {

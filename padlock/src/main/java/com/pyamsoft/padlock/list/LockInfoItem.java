@@ -50,7 +50,7 @@ public class LockInfoItem
     this.packageName = packageName;
     this.system = system;
 
-    Injector.get().provideComponent().plusLockInfoComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @Override public int getType() {

@@ -32,9 +32,9 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.service.PadLockService;
-import com.pyamsoft.pydroid.ui.loader.ImageLoader;
-import com.pyamsoft.pydroid.ui.loader.LoaderHelper;
-import com.pyamsoft.pydroid.ui.loader.loaded.Loaded;
+import com.pyamsoft.pydroid.loader.ImageLoader;
+import com.pyamsoft.pydroid.loader.LoaderHelper;
+import com.pyamsoft.pydroid.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.util.DialogUtil;
 import java.util.Locale;
 import timber.log.Timber;
@@ -192,7 +192,7 @@ public class LockScreenTextFragment extends LockScreenBaseFragment {
     });
 
     arrowGoTask = LoaderHelper.unload(arrowGoTask);
-    arrowGoTask = ImageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
+    arrowGoTask = ImageLoader.fromResource(getActivity(), R.drawable.ic_arrow_forward_24dp)
         .tint(R.color.orangeA200)
         .into(binding.lockImageGo);
   }

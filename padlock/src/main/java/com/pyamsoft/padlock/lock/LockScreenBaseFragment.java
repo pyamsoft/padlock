@@ -127,7 +127,7 @@ public abstract class LockScreenBaseFragment extends Fragment {
       throw new NullPointerException("Missing required lock attributes");
     }
 
-    Injector.get().provideComponent().plusLockScreenComponent().inject(this);
+    Injector.get().provideComponent().inject(this);
   }
 
   @CallSuper @Override public void onStop() {
