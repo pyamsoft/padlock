@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service;
+package com.pyamsoft.padlock;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import com.pyamsoft.pydroid.helper.Optional;
-import io.reactivex.Single;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton public class LockServiceStateInteractor {
+/**
+ * Created by pyamsoft on 7/8/17.
+ */
 
-  @NonNull private final MasterPinInteractor pinInteractor;
+public interface ComponentProvider {
 
-  @Inject LockServiceStateInteractor(@NonNull MasterPinInteractor pinInteractor) {
-    this.pinInteractor = pinInteractor;
-  }
-
-  @NonNull @CheckResult public Single<Boolean> isServiceEnabled() {
-    return pinInteractor.getMasterPin().map(Optional::isPresent);
-  }
+  @CheckResult @NonNull PadLockComponent getComponent();
 }

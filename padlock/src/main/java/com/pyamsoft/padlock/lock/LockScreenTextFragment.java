@@ -35,7 +35,7 @@ import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.pydroid.loader.ImageLoader;
 import com.pyamsoft.pydroid.loader.LoaderHelper;
 import com.pyamsoft.pydroid.loader.loaded.Loaded;
-import com.pyamsoft.pydroid.util.DialogUtil;
+import com.pyamsoft.pydroid.ui.util.DialogUtil;
 import java.util.Locale;
 import timber.log.Timber;
 

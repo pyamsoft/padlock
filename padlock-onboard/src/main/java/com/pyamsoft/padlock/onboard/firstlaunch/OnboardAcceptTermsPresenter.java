@@ -38,8 +38,8 @@ class OnboardAcceptTermsPresenter extends SchedulerPresenter {
    */
   void acceptUsageTerms(@NonNull UsageTermsCallback callback) {
     disposeOnStop(interactor.agreeToTerms()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(callback::onUsageTermsAccepted, throwable -> Timber.e(throwable, "onError")));
   }
 

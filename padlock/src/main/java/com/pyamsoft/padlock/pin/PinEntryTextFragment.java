@@ -32,7 +32,6 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding;
-import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.loader.ImageLoader;
 import com.pyamsoft.pydroid.loader.LoaderHelper;
 import com.pyamsoft.pydroid.loader.loaded.Loaded;
@@ -56,21 +55,21 @@ public class PinEntryTextFragment extends PinEntryBaseFragment {
 
         @Override public void onSubmitSuccess(boolean creating) {
           clearDisplay();
-          if (creating) {
-            EventBus.get().publish(CreatePinEvent.create(true));
-          } else {
-            EventBus.get().publish(ClearPinEvent.create(true));
-          }
+          //if (creating) {
+          //  EventBus.get().publish(CreatePinEvent.create(true));
+          //} else {
+          //  EventBus.get().publish(ClearPinEvent.create(true));
+          //}
           dismissParent();
         }
 
         @Override public void onSubmitFailure(boolean creating) {
           clearDisplay();
-          if (creating) {
-            EventBus.get().publish(CreatePinEvent.create(false));
-          } else {
-            EventBus.get().publish(ClearPinEvent.create(false));
-          }
+          //if (creating) {
+          //  EventBus.get().publish(CreatePinEvent.create(false));
+          //} else {
+          //  EventBus.get().publish(ClearPinEvent.create(false));
+          //}
           dismissParent();
         }
 

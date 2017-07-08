@@ -45,17 +45,17 @@ public class PadLockService extends AccessibilityService
   }
 
   public static void finish() {
-    EventBus.get().publish(new ServiceFinishEvent());
+    //EventBus.get().publish(new ServiceFinishEvent());
   }
 
   public static void passLockScreen(@NonNull String packageName, @NonNull String className) {
-    EventBus.get().publish(LockPassEvent.create(packageName, className));
+    //EventBus.get().publish(LockPassEvent.create(packageName, className));
   }
 
   public static void recheck(@NonNull String packageName, @NonNull String className) {
     if (!packageName.isEmpty() && !className.isEmpty()) {
       Timber.d("Recheck was requested for: %s, %s", packageName, className);
-      EventBus.get().publish(RecheckEvent.create(packageName, className));
+      //EventBus.get().publish(RecheckEvent.create(packageName, className));
     }
   }
 

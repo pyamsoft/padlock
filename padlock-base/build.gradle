@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-tasks.whenTaskAdded { task ->
-  if (task.name.startsWith("lint")) {
-    task.enabled = false
-  }
-}
-
 apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-kapt"
 apply plugin: "com.github.ben-manes.versions"
 apply plugin: "com.squareup.sqldelight"
 apply plugin: "com.getkeepsafe.dexcount"
-apply plugin: "net.ltgt.errorprone"
 apply plugin: "me.tatarka.retrolambda"
 
 //noinspection GroovyMissingReturnStatement
@@ -46,12 +41,6 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
-
-  buildTypes {
-    release {
-      minifyEnabled false
-    }
-  }
 }
 
 dependencies {
@@ -61,19 +50,14 @@ dependencies {
 
   // Auto value
   provided "com.google.auto.value:auto-value:$autoValue"
-  annotationProcessor "com.google.auto.value:auto-value:$autoValue"
+  kapt "com.google.auto.value:auto-value:$autoValue"
 
   // SQLBrite
-  compile "com.squareup.sqlbrite:sqlbrite:$sqlbrite"
-
-  //For RxJava1 (SQLBrite)
-  compile "com.github.akarnokd:rxjava2-interop:0.9.7"
-  compile 'io.reactivex:rxjava:1.2.10'
-  compile 'com.artemzin.rxjava:proguard-rules:1.2.10.0'
+  compile "com.squareup.sqlbrite2:sqlbrite:$sqlbrite"
 
   // Dagger
   compile "com.google.dagger:dagger:$dagger"
-  annotationProcessor "com.google.dagger:dagger-compiler:$dagger"
+  kapt "com.google.dagger:dagger-compiler:$dagger"
 
   // PYDroid
   compile("com.github.pyamsoft.pydroid:pydroid:$pydroid@aar") {
@@ -82,5 +66,7 @@ dependencies {
 
   debugCompile project(path: ":padlock-model", configuration: "debug")
   releaseCompile project(path: ":padlock-model", configuration: "release")
+
+  compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
 

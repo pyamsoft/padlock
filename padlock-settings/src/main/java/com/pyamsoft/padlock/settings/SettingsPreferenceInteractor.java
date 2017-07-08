@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.base.preference.MasterPinPreferences;
 import com.pyamsoft.padlock.list.LockInfoItemInteractor;
 import com.pyamsoft.padlock.list.LockListItemInteractor;
 import com.pyamsoft.padlock.purge.PurgeInteractor;
-import com.pyamsoft.pydroid.function.OptionalWrapper;
+import com.pyamsoft.pydroid.helper.Optional;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import javax.inject.Inject;
@@ -94,8 +94,7 @@ import timber.log.Timber;
    * public
    */
   @CheckResult @NonNull Single<Boolean> hasExistingMasterPassword() {
-    return Single.fromCallable(
-        () -> OptionalWrapper.ofNullable(masterPinPreference.getMasterPassword()))
-        .map(OptionalWrapper::isPresent);
+    return Single.fromCallable(() -> Optional.ofNullable(masterPinPreference.getMasterPassword()))
+        .map(Optional::isPresent);
   }
 }

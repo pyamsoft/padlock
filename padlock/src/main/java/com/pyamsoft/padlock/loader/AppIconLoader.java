@@ -18,13 +18,10 @@ package com.pyamsoft.padlock.loader;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
-import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.widget.ImageView;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
-import com.pyamsoft.pydroid.function.ActionSingle;
-import com.pyamsoft.pydroid.helper.Checker;
 import com.pyamsoft.pydroid.helper.SchedulerHelper;
 import com.pyamsoft.pydroid.loader.GenericLoader;
 import com.pyamsoft.pydroid.loader.loaded.Loaded;
@@ -34,6 +31,9 @@ import com.pyamsoft.pydroid.loader.targets.Target;
 import io.reactivex.Scheduler;
 import javax.inject.Inject;
 import javax.inject.Named;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
 public class AppIconLoader extends GenericLoader<AppIconLoader, Drawable> {
@@ -44,40 +44,35 @@ public class AppIconLoader extends GenericLoader<AppIconLoader, Drawable> {
   @SuppressWarnings("WeakerAccess") @Inject @Named("sub") Scheduler subScheduler;
 
   private AppIconLoader(@NonNull String packageName) {
-    this.packageName = Checker.checkNonNull(packageName);
+    this.packageName = packageName;
     Injector.get().provideComponent().inject(this);
     if (this.packageName.isEmpty()) {
       throw new IllegalArgumentException("AppIconLoader packageName must be non-empty");
     }
 
-    SchedulerHelper.enforceObserveScheduler(obsScheduler);
-    SchedulerHelper.enforceSubscribeScheduler(subScheduler);
+    SchedulerHelper.enforceForegroundScheduler(obsScheduler);
+    SchedulerHelper.enforceBackgroundScheduler(subScheduler);
   }
 
   @CheckResult @NonNull public static AppIconLoader forPackageName(@NonNull String packageName) {
     return new AppIconLoader(packageName);
   }
 
-  @NonNull @Override public AppIconLoader tint(@ColorRes int i) {
-    this.tint = i;
+  @Override public AppIconLoader withCompleteAction(
+      Function1<? super Target<? super Drawable>, Unit> function1) {
+    setCompleteAction(function1);
     return this;
   }
 
-  @NonNull @Override
-  public AppIconLoader setStartAction(@NonNull ActionSingle<Target<Drawable>> actionSingle) {
-    this.startAction = actionSingle;
+  @Override public AppIconLoader withErrorAction(
+      Function1<? super Target<? super Drawable>, Unit> function1) {
+    setErrorAction(function1);
     return this;
   }
 
-  @NonNull @Override
-  public AppIconLoader setErrorAction(@NonNull ActionSingle<Target<Drawable>> actionSingle) {
-    this.errorAction = actionSingle;
-    return this;
-  }
-
-  @NonNull @Override
-  public AppIconLoader setCompleteAction(@NonNull ActionSingle<Target<Drawable>> actionSingle) {
-    this.completeAction = actionSingle;
+  @Override public AppIconLoader withStartAction(
+      Function1<? super Target<? super Drawable>, Unit> function1) {
+    setStartAction(function1);
     return this;
   }
 
@@ -85,17 +80,22 @@ public class AppIconLoader extends GenericLoader<AppIconLoader, Drawable> {
     return into(DrawableImageTarget.forImageView(imageView));
   }
 
-  @NonNull @Override public Loaded into(@NonNull Target<Drawable> target) {
+  @NotNull @Override public Loaded into(Target<? super Drawable> target) {
     return load(target, packageName);
   }
 
   @CheckResult @NonNull
-  private Loaded load(@NonNull Target<Drawable> target, @NonNull String packageName) {
+  private Loaded load(@NonNull Target<? super Drawable> target, @NonNull String packageName) {
     return new RxLoaded(packageManagerWrapper.loadDrawableForPackageOrDefault(packageName)
         .subscribeOn(subScheduler)
         .observeOn(obsScheduler)
         .subscribe(target::loadImage,
             throwable -> Timber.e(throwable, "Error loading Drawable AppIconLoader for: %s",
                 packageName)));
+  }
+
+  @Override public AppIconLoader tint(int i) {
+    setTint(i);
+    return this;
   }
 }

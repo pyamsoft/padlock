@@ -32,7 +32,7 @@ import com.pyamsoft.padlock.databinding.ActivityMainBinding;
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardFragment;
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment;
 import com.pyamsoft.pydroid.ui.sec.TamperActivity;
-import com.pyamsoft.pydroid.util.AnimUtil;
+import com.pyamsoft.pydroid.ui.util.AnimUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
 import javax.inject.Inject;
 import timber.log.Timber;

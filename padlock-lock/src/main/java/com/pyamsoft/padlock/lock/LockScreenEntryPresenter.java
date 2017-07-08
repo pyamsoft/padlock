@@ -44,8 +44,8 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
    */
   void displayLockedHint(@NonNull LockHintCallback callback) {
     disposeOnStop(interactor.getHint()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(callback::setDisplayHint,
             throwable -> Timber.e(throwable, "onError displayLockedHint")));
   }
@@ -56,8 +56,8 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
   void lockEntry(@NonNull String packageName, @NonNull String activityName,
       @NonNull LockCallback callback) {
     disposeOnStop(interactor.lockEntryOnFail(packageName, activityName)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(timePair -> {
           if (timePair.currentTime < timePair.lockUntilTime) {
             Timber.d("Received lock entry result");
@@ -78,8 +78,8 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
       long lockUntilTime, @NonNull String currentAttempt, @NonNull LockSubmitCallback callback) {
     disposeOnStop(
         interactor.submitPin(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
+            .subscribeOn(getBackgroundScheduler())
+            .observeOn(getForegroundScheduler())
             .subscribe(unlocked -> {
               Timber.d("Received unlock entry result");
               if (unlocked) {
@@ -101,8 +101,8 @@ class LockScreenEntryPresenter extends SchedulerPresenter {
       long ignoreTime, @NonNull PostUnlockCallback callback) {
     disposeOnStop(interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
         shouldExclude, ignoreTime)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(() -> {
           Timber.d("onPostUnlock");
           callback.onPostUnlock();

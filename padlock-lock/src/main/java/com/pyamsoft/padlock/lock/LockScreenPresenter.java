@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.lock;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.lock.common.LockTypePresenter;
-import com.pyamsoft.pydroid.bus.EventBus;
 import io.reactivex.Scheduler;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,8 +38,8 @@ class LockScreenPresenter extends LockTypePresenter {
    */
   void createWithDefaultIgnoreTime(@NonNull IgnoreTimeCallback callback) {
     disposeOnStop(interactor.getDefaultIgnoreTime()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(callback::onInitializeWithIgnoreTime,
             throwable -> Timber.e(throwable, "onError createWithDefaultIgnoreTime")));
   }
@@ -51,8 +50,8 @@ class LockScreenPresenter extends LockTypePresenter {
   void loadDisplayNameFromPackage(@NonNull String packageName,
       @NonNull DisplayNameLoadCallback callback) {
     disposeOnStop(interactor.getDisplayName(packageName)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(callback::setDisplayName, throwable -> {
           Timber.e(throwable, "Error loading display name from package");
           callback.setDisplayName("");
@@ -65,19 +64,19 @@ class LockScreenPresenter extends LockTypePresenter {
   void closeOldAndAwaitSignal(@NonNull String packageName, @NonNull String activityName,
       @NonNull CloseCallback callback) {
     // Send bus event first before we register or we may catch our own event.
-    EventBus.get().publish(CloseOldEvent.create(packageName, activityName));
-
-    disposeOnStop(EventBus.get()
-        .listen(CloseOldEvent.class)
-        .filter(closeOldEvent -> closeOldEvent.packageName().equals(packageName)
-            && closeOldEvent.activityName().equals(activityName))
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(closeOldEvent -> {
-          Timber.w("Received a CloseOld event: %s %s", closeOldEvent.packageName(),
-              closeOldEvent.activityName());
-          callback.onCloseOldReceived();
-        }, throwable -> Timber.e(throwable, "error bus close old")));
+    //EventBus.get().publish(CloseOldEvent.create(packageName, activityName));
+    //
+    //disposeOnStop(EventBus.get()
+    //    .listen(CloseOldEvent.class)
+    //    .filter(closeOldEvent -> closeOldEvent.packageName().equals(packageName)
+    //        && closeOldEvent.activityName().equals(activityName))
+    //    .subscribeOn(getBackgroundScheduler())
+    //    .observeOn(getForegroundScheduler())
+    //    .subscribe(closeOldEvent -> {
+    //      Timber.w("Received a CloseOld event: %s %s", closeOldEvent.packageName(),
+    //          closeOldEvent.activityName());
+    //      callback.onCloseOldReceived();
+    //    }, throwable -> Timber.e(throwable, "error bus close old")));
   }
 
   interface CloseCallback {

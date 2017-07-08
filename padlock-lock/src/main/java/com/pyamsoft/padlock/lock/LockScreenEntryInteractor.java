@@ -26,7 +26,7 @@ import com.pyamsoft.padlock.base.db.PadLockDB;
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import com.pyamsoft.pydroid.function.OptionalWrapper;
+import com.pyamsoft.pydroid.helper.Optional;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
@@ -71,16 +71,16 @@ import timber.log.Timber;
       if (System.currentTimeMillis() < lockUntilTime) {
         Timber.e("Entry is still locked. Fail unlock");
         final String needToDoThisOrLambdaComplains = null;
-        return OptionalWrapper.ofNullable(needToDoThisOrLambdaComplains);
+        return Optional.ofNullable(needToDoThisOrLambdaComplains);
       }
 
-      final OptionalWrapper<String> pin;
+      final Optional<String> pin;
       if (lockCode == null) {
         Timber.d("No app specific code, use Master PIN");
         pin = masterPin;
       } else {
         Timber.d("App specific code present, compare attempt");
-        pin = OptionalWrapper.ofNullable(lockCode);
+        pin = Optional.ofNullable(lockCode);
       }
       return pin;
     }).flatMap(pinOptional -> {

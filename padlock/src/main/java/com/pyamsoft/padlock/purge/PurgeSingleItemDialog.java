@@ -52,7 +52,7 @@ public class PurgeSingleItemDialog extends DialogFragment {
     return new AlertDialog.Builder(getActivity()).setMessage(
         "Really delete old entry for " + packageName + "?")
         .setPositiveButton("Delete", (dialogInterface, i) -> {
-          EventBus.get().publish(PurgeEvent.create(packageName));
+          //EventBus.get().publish(PurgeEvent.create(packageName));
           dismiss();
         })
         .setNegativeButton("Cancel", (dialogInterface, i) -> dismiss())

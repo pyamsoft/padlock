@@ -35,7 +35,7 @@ import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding;
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
-import com.pyamsoft.pydroid.util.DialogUtil;
+import com.pyamsoft.pydroid.ui.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 

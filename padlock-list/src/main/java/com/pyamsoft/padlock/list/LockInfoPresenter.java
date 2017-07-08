@@ -41,8 +41,8 @@ class LockInfoPresenter extends SchedulerPresenter {
   void populateList(@NonNull String packageName, boolean forceRefresh,
       @NonNull PopulateListCallback callback) {
     disposeOnStop(lockInfoInteractor.populateList(packageName, forceRefresh)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .doAfterTerminate(callback::onListPopulated)
         .doOnSubscribe(disposable -> callback.onListPopulateBegin())
         .subscribe(callback::onEntryAddedToList, throwable -> {
@@ -56,8 +56,8 @@ class LockInfoPresenter extends SchedulerPresenter {
    */
   void showOnBoarding(@NonNull OnBoardingCallback callback) {
     disposeOnStop(lockInfoInteractor.hasShownOnBoarding()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(onboard -> {
           if (onboard) {
             callback.onOnboardingComplete();

@@ -29,7 +29,7 @@ import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding;
 import com.pyamsoft.padlock.list.ErrorDialog;
 import com.pyamsoft.padlock.service.PadLockService;
 import com.pyamsoft.padlock.uicommon.LockCellUtils;
-import com.pyamsoft.pydroid.util.DialogUtil;
+import com.pyamsoft.pydroid.ui.util.DialogUtil;
 import java.util.List;
 import timber.log.Timber;
 

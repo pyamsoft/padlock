@@ -29,7 +29,7 @@ public class PurgeAllDialog extends DialogFragment {
   @NonNull @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
     return new AlertDialog.Builder(getActivity()).setMessage("Really delete all old entries?")
         .setPositiveButton("Delete", (dialogInterface, i) -> {
-          EventBus.get().publish(new PurgeAllEvent());
+          //EventBus.get().publish(new PurgeAllEvent());
           dismiss();
         })
         .setNegativeButton("Cancel", (dialogInterface, i) -> dismiss())

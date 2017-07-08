@@ -36,7 +36,7 @@ import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment;
 import com.pyamsoft.pydroid.ui.helper.ProgressOverlay;
 import com.pyamsoft.pydroid.ui.helper.ProgressOverlayHelper;
 import com.pyamsoft.pydroid.ui.util.ActionBarUtil;
-import com.pyamsoft.pydroid.util.DialogUtil;
+import com.pyamsoft.pydroid.ui.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 

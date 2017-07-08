@@ -68,8 +68,8 @@ import timber.log.Timber;
         PendingIntent.getActivity(appContext, 421, new Intent(appContext, mainActivityClass), 0);
     notificationManager = NotificationManagerCompat.from(appContext);
 
-    SchedulerHelper.enforceObserveScheduler(obsScheduler);
-    SchedulerHelper.enforceSubscribeScheduler(subScheduler);
+    SchedulerHelper.enforceForegroundScheduler(obsScheduler);
+    SchedulerHelper.enforceBackgroundScheduler(subScheduler);
   }
 
   @Override public void onReceive(Context context, Intent intent) {
