@@ -38,19 +38,19 @@ class PurgePresenter extends SchedulerPresenter {
    * public
    */
   void registerOnBus(@NonNull PurgeCallback callback) {
-    disposeOnStop(EventBus.get()
-        .listen(PurgeEvent.class)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(purgeEvent -> callback.purge(purgeEvent.packageName()),
-            throwable -> Timber.e(throwable, "onError purge single")));
-
-    disposeOnStop(EventBus.get()
-        .listen(PurgeAllEvent.class)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(purgeAllEvent -> callback.purgeAll(),
-            throwable -> Timber.e(throwable, "onError purge all")));
+    //disposeOnStop(EventBus.get()
+    //    .listen(PurgeEvent.class)
+    //    .subscribeOn(getBackgroundScheduler())
+    //    .observeOn(getForegroundScheduler())
+    //    .subscribe(purgeEvent -> callback.purge(purgeEvent.packageName()),
+    //        throwable -> Timber.e(throwable, "onError purge single")));
+    //
+    //disposeOnStop(EventBus.get()
+    //    .listen(PurgeAllEvent.class)
+    //    .subscribeOn(getBackgroundScheduler())
+    //    .observeOn(getForegroundScheduler())
+    //    .subscribe(purgeAllEvent -> callback.purgeAll(),
+    //        throwable -> Timber.e(throwable, "onError purge all")));
   }
 
   /**
@@ -58,8 +58,8 @@ class PurgePresenter extends SchedulerPresenter {
    */
   void retrieveStaleApplications(@NonNull RetrievalCallback callback, boolean forceRefresh) {
     disposeOnStop(interactor.populateList(forceRefresh)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .doAfterTerminate(callback::onRetrievalComplete)
         .subscribe(callback::onStaleApplicationRetrieved,
             throwable -> Timber.e(throwable, "onError retrieveStaleApplications")));
@@ -70,8 +70,8 @@ class PurgePresenter extends SchedulerPresenter {
    */
   void deleteStale(@NonNull String packageName, @NonNull DeleteCallback callback) {
     disposeOnStop(interactor.deleteEntry(packageName)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(() -> callback.onDeleted(packageName),
             throwable -> Timber.e(throwable, "onError deleteStale")));
   }

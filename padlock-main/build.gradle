@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-tasks.whenTaskAdded { task ->
-  if (task.name.startsWith("lint")) {
-    task.enabled = false
-  }
-}
-
 apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-kapt"
 apply plugin: "com.github.ben-manes.versions"
 apply plugin: "com.getkeepsafe.dexcount"
-apply plugin: "net.ltgt.errorprone"
 apply plugin: "me.tatarka.retrolambda"
 
 //noinspection GroovyMissingReturnStatement
@@ -45,16 +40,6 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
-
-  buildTypes {
-    release {
-      minifyEnabled false
-    }
-  }
-
-  dexOptions {
-    javaMaxHeapSize "${rootProject.ext.heapSize}"
-  }
 }
 
 dependencies {
@@ -62,9 +47,11 @@ dependencies {
 
   retrolambdaConfig "net.orfjackal.retrolambda:retrolambda:${rootProject.ext.retrolambda}"
 
-  annotationProcessor "com.google.dagger:dagger-compiler:$dagger"
+  kapt "com.google.dagger:dagger-compiler:$dagger"
 
   debugCompile project(path: ":padlock-base", configuration: "debug")
   releaseCompile project(path: ":padlock-base", configuration: "release")
+
+  compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
 

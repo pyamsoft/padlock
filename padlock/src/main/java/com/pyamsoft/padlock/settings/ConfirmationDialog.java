@@ -50,7 +50,7 @@ public class ConfirmationDialog extends DialogFragment {
         ? "Really clear entire database?\n\nYou will have to re-configure all locked applications again"
         : "Really clear all application settings?\n\nYou will have to manually restart the Accessibility Service component of PadLock")
         .setPositiveButton("Yes", (dialog, which) -> {
-          EventBus.get().publish(ConfirmEvent.create(type));
+          //EventBus.get().publish(ConfirmEvent.create(type));
           dismiss();
         })
         .setNegativeButton("No", (dialogInterface, i) -> dismiss())

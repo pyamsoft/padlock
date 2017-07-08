@@ -18,10 +18,8 @@ package com.pyamsoft.padlock.settings;
 
 import android.support.annotation.NonNull;
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver;
-import com.pyamsoft.pydroid.bus.EventBus;
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter;
 import io.reactivex.Scheduler;
-import io.reactivex.Single;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -44,8 +42,8 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
    */
   void setApplicationInstallReceiverState() {
     disposeOnStop(interactor.isInstallListenerEnabled()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(result -> {
           if (result) {
             receiver.register();
@@ -59,33 +57,33 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
    * public
    */
   void registerOnBus(@NonNull ClearCallback callback) {
-    disposeOnStop(EventBus.get().listen(ConfirmEvent.class).flatMapSingle(confirmEvent -> {
-      Single<ConfirmEvent.Type> result;
-      switch (confirmEvent.type()) {
-        case DATABASE:
-          result = interactor.clearDatabase().map(ignore -> ConfirmEvent.Type.DATABASE);
-          break;
-        case ALL:
-          result = interactor.clearAll().map(ignore -> ConfirmEvent.Type.ALL);
-          break;
-        default:
-          throw new IllegalStateException(
-              "Received invalid confirmation event type: " + confirmEvent.type());
-      }
-
-      return result;
-    }).subscribeOn(getSubscribeScheduler()).observeOn(getObserveScheduler()).subscribe(type -> {
-      switch (type) {
-        case DATABASE:
-          callback.onClearDatabase();
-          break;
-        case ALL:
-          callback.onClearAll();
-          break;
-        default:
-          throw new IllegalStateException("Received invalid confirmation event type: " + type);
-      }
-    }, throwable -> Timber.e(throwable, "onError clear bus")));
+    //disposeOnStop(EventBus.get().listen(ConfirmEvent.class).flatMapSingle(confirmEvent -> {
+    //  Single<ConfirmEvent.Type> result;
+    //  switch (confirmEvent.type()) {
+    //    case DATABASE:
+    //      result = interactor.clearDatabase().map(ignore -> ConfirmEvent.Type.DATABASE);
+    //      break;
+    //    case ALL:
+    //      result = interactor.clearAll().map(ignore -> ConfirmEvent.Type.ALL);
+    //      break;
+    //    default:
+    //      throw new IllegalStateException(
+    //          "Received invalid confirmation event type: " + confirmEvent.type());
+    //  }
+    //
+    //  return result;
+    //}).subscribeOn(getBackgroundScheduler()).observeOn(getForegroundScheduler()).subscribe(type -> {
+    //  switch (type) {
+    //    case DATABASE:
+    //      callback.onClearDatabase();
+    //      break;
+    //    case ALL:
+    //      callback.onClearAll();
+    //      break;
+    //    default:
+    //      throw new IllegalStateException("Received invalid confirmation event type: " + type);
+    //  }
+    //}, throwable -> Timber.e(throwable, "onError clear bus")));
   }
 
   /**
@@ -93,8 +91,8 @@ class SettingsPreferencePresenter extends SchedulerPresenter {
    */
   void checkLockType(@NonNull LockTypeCallback callback) {
     disposeOnStop(interactor.hasExistingMasterPassword()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .doAfterTerminate(callback::onEnd)
         .doOnSubscribe(disposable -> callback.onBegin())
         .subscribe(hasMasterPin -> {

@@ -45,29 +45,29 @@ class LockListPresenter extends SchedulerPresenter {
    * public
    */
   void registerOnBus(@NonNull BusCallback callback) {
-    disposeOnStop(EventBus.get()
-        .listen(CreatePinEvent.class)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(createPinEvent -> {
-          if (createPinEvent.success()) {
-            callback.onMasterPinCreateSuccess();
-          } else {
-            callback.onMasterPinCreateFailure();
-          }
-        }, throwable -> Timber.e(throwable, "on error create pin bus")));
-
-    disposeOnStop(EventBus.get()
-        .listen(ClearPinEvent.class)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(clearPinEvent -> {
-          if (clearPinEvent.success()) {
-            callback.onMasterPinClearSuccess();
-          } else {
-            callback.onMasterPinClearFailure();
-          }
-        }, throwable -> Timber.e(throwable, "on error clear pin bus")));
+    //disposeOnStop(EventBus.get()
+    //    .listen(CreatePinEvent.class)
+    //    .subscribeOn(getBackgroundScheduler())
+    //    .observeOn(getForegroundScheduler())
+    //    .subscribe(createPinEvent -> {
+    //      if (createPinEvent.success()) {
+    //        callback.onMasterPinCreateSuccess();
+    //      } else {
+    //        callback.onMasterPinCreateFailure();
+    //      }
+    //    }, throwable -> Timber.e(throwable, "on error create pin bus")));
+    //
+    //disposeOnStop(EventBus.get()
+    //    .listen(ClearPinEvent.class)
+    //    .subscribeOn(getBackgroundScheduler())
+    //    .observeOn(getForegroundScheduler())
+    //    .subscribe(clearPinEvent -> {
+    //      if (clearPinEvent.success()) {
+    //        callback.onMasterPinClearSuccess();
+    //      } else {
+    //        callback.onMasterPinClearFailure();
+    //      }
+    //    }, throwable -> Timber.e(throwable, "on error clear pin bus")));
   }
 
   /**
@@ -75,8 +75,8 @@ class LockListPresenter extends SchedulerPresenter {
    */
   void populateList(boolean forceRefresh, @NonNull PopulateListCallback callback) {
     disposeOnStop(lockListInteractor.populateList(forceRefresh)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .doAfterTerminate(callback::onListPopulated)
         .doOnSubscribe(disposable -> callback.onListPopulateBegin())
         .subscribe(callback::onEntryAddedToList, throwable -> {
@@ -90,8 +90,8 @@ class LockListPresenter extends SchedulerPresenter {
    */
   void setFABStateFromPreference(@NonNull FABStateCallback callback) {
     disposeOnStop(stateInteractor.isServiceEnabled()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(enabled -> {
           if (enabled) {
             callback.onSetFABStateEnabled();
@@ -120,8 +120,8 @@ class LockListPresenter extends SchedulerPresenter {
    */
   void setSystemVisibilityFromPreference(@NonNull SystemVisibilityCallback callback) {
     disposeOnStop(lockListInteractor.isSystemVisible()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(visible -> {
           if (visible) {
             callback.onSetSystemVisible();
@@ -136,8 +136,8 @@ class LockListPresenter extends SchedulerPresenter {
    */
   void showOnBoarding(@NonNull OnboardingCallback callback) {
     disposeOnStop(lockListInteractor.hasShownOnBoarding()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(onboard -> {
           if (onboard) {
             callback.onOnboardingComplete();

@@ -31,7 +31,7 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.loader.ImageLoader;
 import com.pyamsoft.pydroid.loader.LoaderMap;
 import com.pyamsoft.pydroid.loader.loaded.Loaded;
-import com.pyamsoft.pydroid.util.DialogUtil;
+import com.pyamsoft.pydroid.ui.util.DialogUtil;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;

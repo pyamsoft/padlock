@@ -45,26 +45,26 @@ class LockServicePresenter extends SchedulerPresenter {
    * public
    */
   void registerOnBus(@NonNull ServiceCallback callback) {
-    disposeOnStop(EventBus.get()
-        .listen(ServiceFinishEvent.class)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(serviceEvent -> callback.onFinish(),
-            throwable -> Timber.e(throwable, "onError service bus")));
-
-    disposeOnStop(EventBus.get()
-        .listen(LockPassEvent.class)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(lockPassEvent -> setLockScreenPassed(lockPassEvent.packageName(),
-            lockPassEvent.className()), throwable -> Timber.e(throwable, "onError lock pass bus")));
-
-    disposeOnStop(EventBus.get()
-        .listen(RecheckEvent.class)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
-        .subscribe(recheckEvent -> callback.onRecheck(recheckEvent.packageName(),
-            recheckEvent.className()), throwable -> Timber.e(throwable, "onError recheck bus")));
+    //disposeOnStop(EventBus.get()
+    //    .listen(ServiceFinishEvent.class)
+    //    .subscribeOn(getBackgroundScheduler())
+    //    .observeOn(getForegroundScheduler())
+    //    .subscribe(serviceEvent -> callback.onFinish(),
+    //        throwable -> Timber.e(throwable, "onError service bus")));
+    //
+    //disposeOnStop(EventBus.get()
+    //    .listen(LockPassEvent.class)
+    //    .subscribeOn(getBackgroundScheduler())
+    //    .observeOn(getForegroundScheduler())
+    //    .subscribe(lockPassEvent -> setLockScreenPassed(lockPassEvent.packageName(),
+    //        lockPassEvent.className()), throwable -> Timber.e(throwable, "onError lock pass bus")));
+    //
+    //disposeOnStop(EventBus.get()
+    //    .listen(RecheckEvent.class)
+    //    .subscribeOn(getBackgroundScheduler())
+    //    .observeOn(getForegroundScheduler())
+    //    .subscribe(recheckEvent -> callback.onRecheck(recheckEvent.packageName(),
+    //        recheckEvent.className()), throwable -> Timber.e(throwable, "onError recheck bus")));
   }
 
   @SuppressWarnings("WeakerAccess") void setLockScreenPassed(@NonNull String packageName,
@@ -78,8 +78,8 @@ class LockServicePresenter extends SchedulerPresenter {
   void processActiveApplicationIfMatching(@NonNull String packageName, @NonNull String className,
       @NonNull ProcessCallback callback) {
     disposeOnStop(interactor.processActiveIfMatching(packageName, className)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(recheck -> {
           if (recheck) {
             processAccessibilityEvent(packageName, className, RecheckStatus.FORCE, callback);
@@ -93,8 +93,8 @@ class LockServicePresenter extends SchedulerPresenter {
   void processAccessibilityEvent(@NonNull String packageName, @NonNull String className,
       @NonNull RecheckStatus forcedRecheck, @NonNull ProcessCallback callback) {
     disposeOnStop(interactor.processEvent(packageName, className, forcedRecheck)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(padLockEntry -> {
           if (PadLockEntry.isEmpty(padLockEntry)) {
             Timber.w("PadLockEntry is EMPTY, ignore");

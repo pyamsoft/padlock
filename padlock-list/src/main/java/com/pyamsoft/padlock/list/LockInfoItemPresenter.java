@@ -45,8 +45,8 @@ class LockInfoItemPresenter extends SchedulerPresenter {
     disposeOnStop(
         interactor.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
             code, system)
-            .subscribeOn(getSubscribeScheduler())
-            .observeOn(getObserveScheduler())
+            .subscribeOn(getBackgroundScheduler())
+            .observeOn(getForegroundScheduler())
             .subscribe(newState -> {
               switch (newState) {
                 case DEFAULT:

@@ -38,8 +38,8 @@ class MainPresenter extends SchedulerPresenter {
    */
   void showOnboardingOrDefault(@NonNull OnboardingCallback callback) {
     disposeOnDestroy(interactor.isOnboardingComplete()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(onboardingComplete -> {
           if (onboardingComplete) {
             callback.onShowDefaultPage();

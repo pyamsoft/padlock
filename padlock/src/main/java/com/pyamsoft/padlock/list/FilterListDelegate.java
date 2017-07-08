@@ -49,7 +49,7 @@ class FilterListDelegate {
    * Sets the list adapter to use a filter predicate
    */
   void onViewCreated(@NonNull FastItemAdapter<? extends FilterableItem> listAdapter) {
-    listAdapter.withFilterPredicate((item, query) -> {
+    listAdapter.getItemFilter().withFilterPredicate((item, query) -> {
       final String queryString = String.valueOf(query).toLowerCase().trim();
       return item.filterAgainst(queryString);
     });

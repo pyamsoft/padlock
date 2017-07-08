@@ -39,8 +39,8 @@ class PinEntryPresenter extends SchedulerPresenter {
   void submit(@NonNull String currentAttempt, @NonNull String reEntryAttempt, @NonNull String hint,
       @NonNull SubmitCallback callback) {
     disposeOnStop(interactor.submitPin(currentAttempt, reEntryAttempt, hint)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(event -> {
           boolean creating = (event.type() == PinEntryEvent.Type.TYPE_CREATE);
           if (event.complete()) {
@@ -59,8 +59,8 @@ class PinEntryPresenter extends SchedulerPresenter {
    */
   void checkMasterPinPresent(@NonNull MasterPinStatusCallback callback) {
     disposeOnStop(interactor.hasMasterPin()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(hasMaster -> {
           if (hasMaster) {
             callback.onMasterPinPresent();

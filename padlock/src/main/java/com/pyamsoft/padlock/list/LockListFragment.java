@@ -46,8 +46,8 @@ import com.pyamsoft.pydroid.loader.LoaderHelper;
 import com.pyamsoft.pydroid.loader.loaded.Loaded;
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment;
 import com.pyamsoft.pydroid.ui.rating.RatingDialog;
-import com.pyamsoft.pydroid.util.AnimUtil;
-import com.pyamsoft.pydroid.util.DialogUtil;
+import com.pyamsoft.pydroid.ui.util.AnimUtil;
+import com.pyamsoft.pydroid.ui.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 

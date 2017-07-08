@@ -24,41 +24,26 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
-import com.squareup.sqlbrite.BriteDatabase;
-import com.squareup.sqlbrite.SqlBrite;
+import com.squareup.sqlbrite2.BriteDatabase;
+import com.squareup.sqlbrite2.SqlBrite;
 import com.squareup.sqldelight.SqlDelightStatement;
-import hu.akarnokd.rxjava.interop.RxJavaInterop;
 import io.reactivex.Completable;
-import io.reactivex.Flowable;
+import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 class PadLockDBImpl implements PadLockDB {
 
   @SuppressWarnings("WeakerAccess") @NonNull final BriteDatabase briteDatabase;
   @SuppressWarnings("WeakerAccess") @NonNull final PadLockOpenHelper openHelper;
-  @NonNull private Disposable disposable = Disposables.empty();
 
-  @Inject PadLockDBImpl(@NonNull Context context) {
+  @Inject PadLockDBImpl(@NonNull Context context, @NonNull Scheduler scheduler) {
     openHelper = new PadLockOpenHelper(context);
-    briteDatabase = new SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, Schedulers.io());
-  }
-
-  @SuppressWarnings("WeakerAccess") synchronized void openDatabase() {
-    // After a 1 minute timeout, close the DB
-    disposable.dispose();
-    disposable = Flowable.defer(() -> Flowable.timer(1, TimeUnit.MINUTES)).subscribe(delay -> {
-      Timber.w("Closing PadLock DB");
-      briteDatabase.close();
-    }, throwable -> Timber.e(throwable, "onError closing database"));
+    briteDatabase = new SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler);
   }
 
   @Override @CheckResult @NonNull
@@ -74,7 +59,6 @@ class PadLockDBImpl implements PadLockDB {
       }
 
       Timber.i("DB: INSERT");
-      openDatabase();
       final int deleteResult = deleteWithPackageActivityNameUnguarded(packageName, activityName);
       Timber.d("Delete result: %d", deleteResult);
       return entry;
@@ -93,7 +77,6 @@ class PadLockDBImpl implements PadLockDB {
       }
 
       Timber.i("DB: UPDATE IGNORE");
-      openDatabase();
       return PadLockEntry.updateIgnoreTime(openHelper)
           .executeProgram(ignoreUntilTime, packageName, activityName);
     });
@@ -109,7 +92,6 @@ class PadLockDBImpl implements PadLockDB {
       }
 
       Timber.i("DB: UPDATE LOCK");
-      openDatabase();
       return PadLockEntry.updateLockTime(openHelper)
           .executeProgram(lockUntilTime, packageName, activityName);
     });
@@ -125,7 +107,6 @@ class PadLockDBImpl implements PadLockDB {
       }
 
       Timber.i("DB: UPDATE WHITELIST");
-      openDatabase();
       return PadLockEntry.updateWhitelist(openHelper)
           .executeProgram(whitelist, packageName, activityName);
     });
@@ -145,17 +126,14 @@ class PadLockDBImpl implements PadLockDB {
       final @NonNull String packageName, final @NonNull String activityName) {
     return Single.defer(() -> {
       Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT");
-      openDatabase();
 
       SqlDelightStatement statement =
           PadLockEntry.withPackageActivityNameDefault(packageName, activityName);
 
-      return RxJavaInterop.toV2Single(
-          briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
-              .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER::map,
-                  PadLockEntry.EMPTY)
-              .firstOrDefault(PadLockEntry.EMPTY)
-              .toSingle());
+      return briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
+          .mapToOneOrDefault(PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER::map,
+              PadLockEntry.EMPTY)
+          .first(PadLockEntry.EMPTY);
     });
   }
 
@@ -164,28 +142,22 @@ class PadLockDBImpl implements PadLockDB {
       @NonNull String packageName) {
     return Single.defer(() -> {
       Timber.i("DB: QUERY PACKAGE");
-      openDatabase();
 
       SqlDelightStatement statement = PadLockEntry.withPackageName(packageName);
-      return RxJavaInterop.toV2Single(
-          briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
-              .mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map)
-              .firstOrDefault(Collections.emptyList())
-              .toSingle());
+      return briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
+          .mapToList(PadLockEntry.WITH_PACKAGE_NAME_MAPPER::map)
+          .first(Collections.emptyList());
     });
   }
 
   @Override @NonNull @CheckResult public Single<List<PadLockEntry.AllEntries>> queryAll() {
     return Single.defer(() -> {
       Timber.i("DB: QUERY ALL");
-      openDatabase();
 
       SqlDelightStatement statement = PadLockEntry.queryAll();
-      return RxJavaInterop.toV2Single(
-          briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
-              .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map)
-              .firstOrDefault(Collections.emptyList())
-              .toSingle());
+      return briteDatabase.createQuery(statement.tables, statement.statement, statement.args)
+          .mapToList(PadLockEntry.ALL_ENTRIES_MAPPER::map)
+          .first(Collections.emptyList());
     });
   }
 
@@ -193,7 +165,6 @@ class PadLockDBImpl implements PadLockDB {
   public Completable deleteWithPackageName(final @NonNull String packageName) {
     return Completable.fromCallable(() -> {
       Timber.i("DB: DELETE PACKAGE");
-      openDatabase();
       return PadLockEntry.deletePackage(openHelper).executeProgram(packageName);
     });
   }
@@ -203,7 +174,6 @@ class PadLockDBImpl implements PadLockDB {
       final @NonNull String activityName) {
     return Completable.fromCallable(() -> {
       Timber.i("DB: DELETE PACKAGE ACTIVITY");
-      openDatabase();
       return deleteWithPackageActivityNameUnguarded(packageName, activityName);
     });
   }
@@ -219,10 +189,7 @@ class PadLockDBImpl implements PadLockDB {
       Timber.i("DB: DELETE ALL");
       briteDatabase.execute(PadLockEntry.DELETE_ALL);
       briteDatabase.close();
-      disposable.dispose();
-      disposable = Disposables.empty();
-      deleteDatabase();
-    });
+    }).andThen(deleteDatabase());
   }
 
   @NonNull @Override public Completable deleteDatabase() {

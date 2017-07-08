@@ -42,8 +42,8 @@ import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.loader.ImageLoader;
 import com.pyamsoft.pydroid.loader.LoaderHelper;
 import com.pyamsoft.pydroid.loader.loaded.Loaded;
+import com.pyamsoft.pydroid.ui.util.DialogUtil;
 import com.pyamsoft.pydroid.util.AppUtil;
-import com.pyamsoft.pydroid.util.DialogUtil;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -58,11 +58,11 @@ public class LockInfoDialog extends DialogFragment {
   @SuppressWarnings("WeakerAccess") DialogLockInfoBinding binding;
   String appPackageName;
   boolean appIsSystem;
+  boolean listDoneRefreshing;
   private String appName;
   private DividerItemDecoration dividerDecoration;
   private FilterListDelegate filterListDelegate;
   @NonNull private Loaded appIcon = LoaderHelper.empty();
-  boolean listDoneRefreshing;
 
   @CheckResult @NonNull public static LockInfoDialog newInstance(@NonNull AppEntry appEntry) {
     final LockInfoDialog fragment = new LockInfoDialog();
@@ -136,7 +136,7 @@ public class LockInfoDialog extends DialogFragment {
   private void setupRecyclerView() {
     dividerDecoration = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
 
-    fastItemAdapter.withFilterPredicate((item, query) -> {
+    fastItemAdapter.getItemFilter().withFilterPredicate((item, query) -> {
       final String queryString = String.valueOf(query).toLowerCase().trim();
       return item.filterAgainst(queryString);
     });

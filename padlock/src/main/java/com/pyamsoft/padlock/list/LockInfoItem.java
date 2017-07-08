@@ -28,7 +28,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
-import com.pyamsoft.pydroid.util.DialogUtil;
+import com.pyamsoft.pydroid.ui.util.DialogUtil;
 import java.util.List;
 import javax.inject.Inject;
 import timber.log.Timber;

@@ -19,9 +19,8 @@ package com.pyamsoft.padlock;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.pyamsoft.pydroid.ui.IPYDroidApp;
 
-public class Injector implements IPYDroidApp<PadLockComponent> {
+public class Injector {
 
   @Nullable private static volatile Injector instance = null;
   @NonNull private final PadLockComponent component;
@@ -46,7 +45,7 @@ public class Injector implements IPYDroidApp<PadLockComponent> {
     return instance;
   }
 
-  @NonNull @Override public PadLockComponent provideComponent() {
+  @NonNull public PadLockComponent provideComponent() {
     return component;
   }
 }

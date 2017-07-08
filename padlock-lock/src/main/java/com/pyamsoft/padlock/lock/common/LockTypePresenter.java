@@ -38,8 +38,8 @@ public class LockTypePresenter extends SchedulerPresenter {
 
   public void initializeLockScreenType(@NonNull LockScreenTypeCallback callback) {
     disposeOnStop(interactor.getLockScreenType()
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(lockScreenType -> {
           switch (lockScreenType) {
             case TYPE_PATTERN:

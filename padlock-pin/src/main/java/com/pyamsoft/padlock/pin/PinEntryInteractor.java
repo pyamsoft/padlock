@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences;
 import com.pyamsoft.padlock.lock.LockHelper;
 import com.pyamsoft.padlock.lock.common.LockTypeInteractor;
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor;
-import com.pyamsoft.pydroid.function.OptionalWrapper;
+import com.pyamsoft.pydroid.helper.Optional;
 import io.reactivex.Single;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,7 +42,7 @@ import timber.log.Timber;
    * public
    */
   @NonNull @CheckResult Single<Boolean> hasMasterPin() {
-    return getMasterPin().map(OptionalWrapper::isPresent);
+    return getMasterPin().map(Optional::isPresent);
   }
 
   /**
@@ -59,7 +59,7 @@ import timber.log.Timber;
     });
   }
 
-  @CheckResult @NonNull private Single<OptionalWrapper<String>> getMasterPin() {
+  @CheckResult @NonNull private Single<Optional<String>> getMasterPin() {
     return masterPinInteractor.getMasterPin();
   }
 

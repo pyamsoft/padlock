@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.base.preference.LockListPreferences;
 import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper;
 import com.pyamsoft.padlock.model.AppEntry;
-import com.pyamsoft.pydroid.function.OptionalWrapper;
+import com.pyamsoft.pydroid.helper.Optional;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -43,16 +43,16 @@ import timber.log.Timber;
 
   @SuppressWarnings("WeakerAccess") @NonNull final LockListPreferences preferences;
   @SuppressWarnings("WeakerAccess") @NonNull final OnboardingPreferences onboardingPreferences;
-  @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManagerWrapper;
+  @SuppressWarnings("WeakerAccess") @NonNull final PackageManagerWrapper packageManager;
   @SuppressWarnings("WeakerAccess") @NonNull final LockListCacheInteractor cacheInteractor;
   @NonNull private final PadLockDB padLockDB;
 
   @Inject LockListInteractor(@NonNull PadLockDB padLockDB,
-      @NonNull PackageManagerWrapper packageManagerWrapper,
+      @NonNull PackageManagerWrapper packageManager,
       @NonNull OnboardingPreferences onboardingPreferences,
       @NonNull LockListPreferences preferences, @NonNull LockListCacheInteractor cacheInteractor) {
     this.padLockDB = padLockDB;
-    this.packageManagerWrapper = packageManagerWrapper;
+    this.packageManager = packageManager;
     this.preferences = preferences;
     this.cacheInteractor = cacheInteractor;
     this.onboardingPreferences = onboardingPreferences;
@@ -81,16 +81,16 @@ import timber.log.Timber;
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull Single<List<AppEntry>> fetchFreshData() {
     return getActiveApplications().withLatestFrom(isSystemVisible().toObservable(),
         // We need to cast this?
-        (BiFunction<ApplicationInfo, Boolean, OptionalWrapper<ApplicationInfo>>) (applicationInfo, systemVisible) -> {
+        (BiFunction<ApplicationInfo, Boolean, Optional<ApplicationInfo>>) (applicationInfo, systemVisible) -> {
           if (systemVisible) {
             // If system visible, we show all apps
-            return OptionalWrapper.ofNullable(applicationInfo);
+            return Optional.ofNullable(applicationInfo);
           } else {
-            return isSystemApplication(applicationInfo) ? OptionalWrapper.ofNullable(null)
-                : OptionalWrapper.ofNullable(applicationInfo);
+            return isSystemApplication(applicationInfo) ? Optional.ofNullable(null)
+                : Optional.ofNullable(applicationInfo);
           }
         })
-        .filter(OptionalWrapper::isPresent)
+        .filter(Optional::isPresent)
         .flatMapSingle(wrapper -> {
           ApplicationInfo info = wrapper.item();
           return getActivityListForApplication(info).map(activityList -> {
@@ -145,9 +145,9 @@ import timber.log.Timber;
 
   @SuppressWarnings("WeakerAccess") @NonNull @CheckResult Maybe<AppEntry> createFromPackageInfo(
       @NonNull LockTuple tuple) {
-    return packageManagerWrapper.getApplicationInfo(tuple.packageName)
+    return packageManager.getApplicationInfo(tuple.packageName)
         .map(info -> AppEntry.builder()
-            .name(packageManagerWrapper.loadPackageLabel(info).blockingGet())
+            .name(packageManager.loadPackageLabel(info).blockingGet())
             .packageName(tuple.packageName)
             .system(isSystemApplication(info))
             .locked(tuple.locked)
@@ -160,13 +160,12 @@ import timber.log.Timber;
   }
 
   @SuppressWarnings("WeakerAccess") @NonNull Observable<ApplicationInfo> getActiveApplications() {
-    return packageManagerWrapper.getActiveApplications()
-        .flatMapObservable(Observable::fromIterable);
+    return packageManager.getActiveApplications().flatMapObservable(Observable::fromIterable);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull
   Single<List<String>> getActivityListForApplication(@NonNull ApplicationInfo info) {
-    return packageManagerWrapper.getActivityListForPackage(info.packageName);
+    return packageManager.getActivityListForPackage(info.packageName);
   }
 
   @SuppressWarnings("WeakerAccess") @CheckResult @NonNull

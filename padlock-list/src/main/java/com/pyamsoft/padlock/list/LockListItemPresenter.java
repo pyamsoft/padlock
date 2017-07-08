@@ -47,8 +47,8 @@ class LockListItemPresenter extends SchedulerPresenter {
 
     disposeOnStop(interactor.modifySingleDatabaseEntry(oldState, newState, packageName,
         PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system)
-        .subscribeOn(getSubscribeScheduler())
-        .observeOn(getObserveScheduler())
+        .subscribeOn(getBackgroundScheduler())
+        .observeOn(getForegroundScheduler())
         .subscribe(lockState -> {
           switch (lockState) {
             case DEFAULT:

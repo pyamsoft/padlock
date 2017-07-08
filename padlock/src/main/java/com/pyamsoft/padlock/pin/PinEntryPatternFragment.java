@@ -29,10 +29,9 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding;
 import com.pyamsoft.padlock.uicommon.LockCellUtils;
-import com.pyamsoft.pydroid.bus.EventBus;
-import com.pyamsoft.pydroid.function.FuncNone;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import javax.inject.Inject;
 import timber.log.Timber;
 
@@ -47,7 +46,7 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
   boolean repeatPattern = false;
   FragmentPinEntryPatternBinding binding;
   @Inject PinEntryPresenter presenter;
-  @Nullable FuncNone<Boolean> nextButtonOnClickRunnable;
+  @Nullable Callable<Boolean> nextButtonOnClickRunnable;
   @NonNull String patternText = "";
   @Nullable private PatternLockViewListener listener;
 
@@ -191,7 +190,11 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
       Timber.w("onClick runnable is NULL");
       return false;
     } else {
-      return nextButtonOnClickRunnable.call();
+      try {
+        return nextButtonOnClickRunnable.call();
+      } catch (Exception e) {
+        return false;
+      }
     }
   }
 
@@ -203,20 +206,20 @@ public class PinEntryPatternFragment extends PinEntryBaseFragment {
     presenter.submit(patternText, repeatText, "", new PinEntryPresenter.SubmitCallback() {
 
       @Override public void onSubmitSuccess(boolean creating) {
-        if (creating) {
-          EventBus.get().publish(CreatePinEvent.create(true));
-        } else {
-          EventBus.get().publish(ClearPinEvent.create(true));
-        }
+        //if (creating) {
+        //  EventBus.get().publish(CreatePinEvent.create(true));
+        //} else {
+        //  EventBus.get().publish(ClearPinEvent.create(true));
+        //}
         dismissParent();
       }
 
       @Override public void onSubmitFailure(boolean creating) {
-        if (creating) {
-          EventBus.get().publish(CreatePinEvent.create(false));
-        } else {
-          EventBus.get().publish(ClearPinEvent.create(false));
-        }
+        //if (creating) {
+        //  EventBus.get().publish(CreatePinEvent.create(false));
+        //} else {
+        //  EventBus.get().publish(ClearPinEvent.create(false));
+        //}
         dismissParent();
       }
 
