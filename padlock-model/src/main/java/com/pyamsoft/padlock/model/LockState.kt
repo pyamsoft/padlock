@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model;
+package com.pyamsoft.padlock.model
 
-public enum LockState {
+enum class LockState {
   NONE, DEFAULT, WHITELISTED, LOCKED
 }
