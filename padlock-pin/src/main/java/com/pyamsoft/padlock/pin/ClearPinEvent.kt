@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.purge;
+package com.pyamsoft.padlock.pin
 
-final class PurgeAllEvent {
+import android.support.annotation.CheckResult
+import com.google.auto.value.AutoValue
+
+@AutoValue abstract class ClearPinEvent protected constructor() {
+
+  @CheckResult abstract fun success(): Boolean
+
+  companion object {
+
+    @JvmStatic
+    @CheckResult fun create(success: Boolean): ClearPinEvent {
+      return AutoValue_ClearPinEvent(success)
+    }
+  }
 }
