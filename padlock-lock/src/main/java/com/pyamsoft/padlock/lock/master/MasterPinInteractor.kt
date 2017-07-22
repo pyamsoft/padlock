@@ -27,7 +27,7 @@ import javax.inject.Singleton
     private val preferences: MasterPinPreferences) {
 
   @CheckResult fun getMasterPin(): Single<Optional<String>> {
-    return Single.fromCallable { Optional.ofNullable(preferences.masterPassword) }
+    return Single.fromCallable { Optional.ofNullable(preferences.getMasterPassword()) }
   }
 
   fun setMasterPin(pin: String?) {
@@ -39,7 +39,7 @@ import javax.inject.Singleton
   }
 
   @CheckResult fun getHint(): Single<Optional<String>> {
-    return Single.fromCallable { Optional.ofNullable(preferences.hint) }
+    return Single.fromCallable { Optional.ofNullable(preferences.getHint()) }
   }
 
   fun setHint(hint: String?) {

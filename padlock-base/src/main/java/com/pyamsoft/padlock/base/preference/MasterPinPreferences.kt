@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.wrapper;
+package com.pyamsoft.padlock.base.preference
 
-import android.content.Context;
-import dagger.Module;
-import dagger.Provides;
-import javax.inject.Singleton;
+import android.support.annotation.CheckResult
 
-@Module public class JobSchedulerCompatModule {
+interface MasterPinPreferences {
 
-  @Singleton @Provides JobSchedulerCompat provideJobSchedulerCompat(Context context) {
-    return new JobSchedulerCompatImpl(context);
-  }
+  @CheckResult fun getHint(): String?
+
+  fun setHint(hint: String)
+
+  fun clearHint()
+
+  @CheckResult fun getMasterPassword(): String?
+
+  fun setMasterPassword(pw: String)
+
+  fun clearMasterPassword()
+
 }

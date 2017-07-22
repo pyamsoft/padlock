@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.preference;
+package com.pyamsoft.padlock.base.preference
 
-import android.support.annotation.CheckResult;
+interface ClearPreferences {
 
-public interface LockListPreferences {
-
-  @CheckResult boolean isSystemVisible();
-
-  void setSystemVisible(boolean b);
+  fun clearAll()
 }

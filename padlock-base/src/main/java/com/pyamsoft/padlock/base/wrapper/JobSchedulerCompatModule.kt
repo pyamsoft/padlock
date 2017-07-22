@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.wrapper;
+package com.pyamsoft.padlock.base.wrapper
 
-import android.content.Intent;
-import android.support.annotation.NonNull;
+import android.content.Context
+import dagger.Module
+import dagger.Provides
+import javax.inject.Singleton
 
-public interface JobSchedulerCompat {
+@Module class JobSchedulerCompatModule {
 
-  void cancel(@NonNull Intent intent);
-
-  void set(@NonNull Intent intent, long triggerTime);
+  @Singleton @Provides internal fun provideJobSchedulerCompat(
+      context: Context): JobSchedulerCompat {
+    return JobSchedulerCompatImpl(context)
+  }
 }

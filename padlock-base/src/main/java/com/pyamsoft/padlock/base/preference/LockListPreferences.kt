@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.preference;
+package com.pyamsoft.padlock.base.preference
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.model.LockScreenType;
+import android.support.annotation.CheckResult
 
-public interface LockScreenPreferences {
+interface LockListPreferences {
 
-  @CheckResult @NonNull LockScreenType getCurrentLockType();
+  @CheckResult fun isSystemVisible(): Boolean
 
-  @CheckResult boolean isIgnoreInKeyguard();
-
-  @CheckResult long getDefaultIgnoreTime();
-
-  @CheckResult long getTimeoutPeriod();
-
-  @CheckResult boolean getLockOnPackageChange();
+  fun setSystemVisible(visible: Boolean)
 }

@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.db;
+package com.pyamsoft.padlock.base.wrapper
 
-import android.content.Context;
-import android.support.annotation.NonNull;
-import dagger.Module;
-import dagger.Provides;
-import io.reactivex.Scheduler;
-import javax.inject.Named;
-import javax.inject.Singleton;
+import android.content.Intent
 
-@Module public class PadLockDBModule {
+interface JobSchedulerCompat {
 
-  @Singleton @Provides @NonNull PadLockDB providePadLockDB(@NonNull Context context,
-      @Named("io") Scheduler scheduler) {
-    return new PadLockDBImpl(context.getApplicationContext(), scheduler);
-  }
+  fun cancel(intent: Intent)
+
+  operator fun set(intent: Intent, triggerTime: Long)
 }

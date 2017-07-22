@@ -29,7 +29,7 @@ import javax.inject.Singleton
     private val packageManagerWrapper: PackageManagerWrapper) : LockTypeInteractor(preferences) {
 
   @CheckResult fun getDefaultIgnoreTime(): Single<Long> {
-    return Single.fromCallable { preferences.defaultIgnoreTime }
+    return Single.fromCallable { preferences.getDefaultIgnoreTime() }
   }
 
   @CheckResult fun getDisplayName(packageName: String): Single<String> {
