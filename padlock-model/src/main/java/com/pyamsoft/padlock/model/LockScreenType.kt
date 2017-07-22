@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model;
+package com.pyamsoft.padlock.model
 
-public enum LockScreenType {
+enum class LockScreenType {
   TYPE_PATTERN, TYPE_TEXT
 }
