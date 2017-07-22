@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.lock
 
-interface LockSubmitCallback {
+interface Recheck {
 
-  void onSubmitSuccess();
+  companion object {
 
-  void onSubmitFailure();
-
-  void onSubmitError();
+    const val EXTRA_PACKAGE_NAME = "extra_package_name"
+    const val EXTRA_CLASS_NAME = "extra_class_name"
+  }
 }

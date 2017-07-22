@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.lock
 
-import android.support.annotation.NonNull;
+import android.support.annotation.CheckResult
+import com.google.auto.value.AutoValue
 
-public interface Recheck {
+@AutoValue internal abstract class LockScreenEntry protected constructor() {
 
-  @NonNull String EXTRA_PACKAGE_NAME = "extra_package_name";
-  @NonNull String EXTRA_CLASS_NAME = "extra_class_name";
+  @CheckResult internal abstract fun packageName(): String
+
+  @CheckResult internal abstract fun className(): String
+
+  companion object {
+
+    @JvmStatic
+    @CheckResult
+    fun create(packageName: String, className: String): LockScreenEntry {
+      return AutoValue_LockScreenEntry(packageName, className)
+    }
+  }
 }

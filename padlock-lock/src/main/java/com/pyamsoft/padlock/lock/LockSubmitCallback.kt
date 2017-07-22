@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.lock
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
+internal interface LockSubmitCallback {
 
-@AutoValue abstract class CloseOldEvent {
+  fun onSubmitSuccess()
 
-  @CheckResult @NonNull
-  static CloseOldEvent create(@NonNull String packageName, @NonNull String activityName) {
-    return new AutoValue_CloseOldEvent(packageName, activityName);
-  }
+  fun onSubmitFailure()
 
-  @CheckResult abstract String packageName();
-
-  @CheckResult abstract String activityName();
+  fun onSubmitError()
 }
