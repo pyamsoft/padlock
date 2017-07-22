@@ -118,7 +118,9 @@ import javax.inject.Singleton
 
   @CheckResult
   private fun getTimeoutPeriodMinutesInMillis(): Maybe<Long> {
-    return Maybe.fromCallable { preferences.timeoutPeriod }.map { TimeUnit.MINUTES.toMillis(it) }
+    return Maybe.fromCallable { preferences.getTimeoutPeriod() }.map {
+      TimeUnit.MINUTES.toMillis(it)
+    }
   }
 
   @CheckResult private fun lockEntry(

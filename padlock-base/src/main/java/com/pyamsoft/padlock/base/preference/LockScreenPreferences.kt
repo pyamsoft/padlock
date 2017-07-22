@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.preference;
+package com.pyamsoft.padlock.base.preference
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.model.LockScreenType
 
-public interface MasterPinPreferences {
+interface LockScreenPreferences {
 
-  @CheckResult @Nullable String getHint();
+  @CheckResult fun getCurrentLockType(): LockScreenType
 
-  void setHint(@NonNull String hint);
+  @CheckResult fun isIgnoreInKeyguard(): Boolean
 
-  void clearHint();
+  @CheckResult fun getDefaultIgnoreTime(): Long
 
-  @CheckResult @Nullable String getMasterPassword();
+  @CheckResult fun getTimeoutPeriod(): Long
 
-  void setMasterPassword(@NonNull String masterPassword);
-
-  void clearMasterPassword();
-
+  @CheckResult fun isLockOnPackageChange(): Boolean
 }

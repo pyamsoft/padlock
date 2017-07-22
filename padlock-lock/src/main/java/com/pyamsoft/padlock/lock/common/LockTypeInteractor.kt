@@ -27,6 +27,6 @@ import javax.inject.Singleton
     protected val preferences: LockScreenPreferences) {
 
   @CheckResult fun getLockScreenType(): Single<LockScreenType> {
-    return Single.fromCallable { preferences.currentLockType }
+    return Single.fromCallable { preferences.getCurrentLockType() }
   }
 }

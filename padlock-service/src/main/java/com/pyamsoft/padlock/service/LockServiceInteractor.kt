@@ -122,7 +122,7 @@ import javax.inject.Singleton
   }
 
   @CheckResult fun isOnlyLockOnPackageChange(): Single<Boolean> {
-    return Single.fromCallable { preferences.lockOnPackageChange }
+    return Single.fromCallable { preferences.isLockOnPackageChange() }
   }
 
   @CheckResult fun getEntry(packageName: String, activityName: String): Single<PadLockEntry> {
@@ -130,7 +130,7 @@ import javax.inject.Singleton
   }
 
   @CheckResult fun isRestrictedWhileLocked(): Single<Boolean> {
-    return Single.fromCallable { preferences.isIgnoreInKeyguard }
+    return Single.fromCallable { preferences.isIgnoreInKeyguard() }
   }
 
   @CheckResult fun isDeviceLocked(): Single<Boolean> {
@@ -223,7 +223,7 @@ import javax.inject.Singleton
             windowHasChanged = true
           }
 
-          var lockPassed: Boolean? = lockScreenPassed.get(packageName + className)
+          var lockPassed: Boolean? = lockScreenPassed[packageName + className]
           if (lockPassed == null) {
             Timber.w("No lock map entry exists for: %s, %s", packageName, className)
             Timber.w("default to False")

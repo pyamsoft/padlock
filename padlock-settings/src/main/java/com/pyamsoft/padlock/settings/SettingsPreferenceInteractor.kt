@@ -42,7 +42,7 @@ import javax.inject.Singleton
 
   @CheckResult fun isInstallListenerEnabled(): Single<Boolean> {
     return Single.fromCallable {
-      installListenerPreferences.isInstallListenerEnabled
+      installListenerPreferences.isInstallListenerEnabled()
     }
   }
 
@@ -70,7 +70,7 @@ import javax.inject.Singleton
   }
 
   @CheckResult fun hasExistingMasterPassword(): Single<Boolean> {
-    return Single.fromCallable { Optional.ofNullable(masterPinPreference.masterPassword) }
+    return Single.fromCallable { Optional.ofNullable(masterPinPreference.getMasterPassword()) }
         .map { it.isPresent() }
   }
 }

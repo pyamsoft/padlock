@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.preference;
+package com.pyamsoft.padlock.base.preference
 
-import android.support.annotation.CheckResult;
+import android.support.annotation.CheckResult
 
-public interface OnboardingPreferences {
+interface InstallListenerPreferences {
 
-  @CheckResult boolean hasAgreed();
-
-  void setAgreed();
-
-  @CheckResult boolean isListOnBoard();
-
-  void setListOnBoard();
-
-  @CheckResult boolean isInfoDialogOnBoard();
-
-  void setInfoDialogOnBoard();
+  @CheckResult fun isInstallListenerEnabled(): Boolean
 }

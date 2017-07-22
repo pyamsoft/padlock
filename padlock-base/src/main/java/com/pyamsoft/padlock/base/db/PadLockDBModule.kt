@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.preference;
+package com.pyamsoft.padlock.base.db
 
-public interface ClearPreferences {
+import android.content.Context
+import dagger.Module
+import dagger.Provides
+import io.reactivex.Scheduler
+import javax.inject.Named
+import javax.inject.Singleton
 
-  void clearAll();
+@Module class PadLockDBModule {
+
+  @Singleton @Provides internal fun providePadLockDB(context: Context,
+      @Named("io") scheduler: Scheduler): PadLockDB {
+    return PadLockDBImpl(context.applicationContext, scheduler)
+  }
 }

@@ -37,7 +37,7 @@ import javax.inject.Singleton
 
   private val activeApplicationPackageNames: Single<List<String>>
     @CheckResult
-    get() = packageManagerWrapper.activeApplications
+    get() = packageManagerWrapper.getActiveApplications()
         .flatMapObservable { Observable.fromIterable(it) }
         .map { it.packageName }
         .toSortedList()
