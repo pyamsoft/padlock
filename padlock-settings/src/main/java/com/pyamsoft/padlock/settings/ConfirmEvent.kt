@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.settings;
+package com.pyamsoft.padlock.settings
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
+import android.support.annotation.CheckResult
+import com.google.auto.value.AutoValue
 
 @AutoValue abstract class ConfirmEvent {
 
-  @CheckResult @NonNull static ConfirmEvent create(@NonNull Type type) {
-    return new AutoValue_ConfirmEvent(type);
+  @CheckResult internal abstract fun type(): Type
+
+  enum class Type {
+    DATABASE, ALL
   }
 
-  @CheckResult abstract Type type();
+  companion object {
 
-  enum Type {
-    DATABASE, ALL
+    @CheckResult fun create(type: Type): ConfirmEvent {
+      return AutoValue_ConfirmEvent(type)
+    }
   }
 }
