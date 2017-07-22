@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service;
+package com.pyamsoft.padlock.service
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
-
-@AutoValue abstract class RecheckEvent {
-
-  @CheckResult @NonNull
-  static RecheckEvent create(@NonNull String packageName, @NonNull String className) {
-    return new AutoValue_RecheckEvent(packageName, className);
-  }
-
-  @CheckResult abstract String packageName();
-
-  @CheckResult abstract String className();
+internal enum class RecheckStatus {
+  FORCE, NOT_FORCE
 }

@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.model
 import android.support.annotation.CheckResult
 import com.google.auto.value.AutoValue
 
-@AutoValue abstract class AppEntry {
+@AutoValue abstract class AppEntry protected constructor() {
 
   @CheckResult abstract fun toBuilder(): Builder
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service;
+package com.pyamsoft.padlock.service
 
-final class ServiceFinishEvent {
-}
+object ServiceFinishEvent

@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.service
 
 import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
+import com.pyamsoft.padlock.lock.master.MasterPinInteractor
+import io.reactivex.Single
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@AutoValue abstract class ActivityEntry protected constructor() {
+@Singleton internal class LockServiceStateInteractor @Inject internal constructor(
+    private val pinInteractor: MasterPinInteractor) {
 
-  @CheckResult abstract fun toBuilder(): Builder
-
-  @CheckResult abstract fun name(): String
-
-  @CheckResult abstract fun lockState(): LockState
-
-  @AutoValue.Builder abstract class Builder {
-
-    @CheckResult abstract fun name(s: String): Builder
-
-    @CheckResult abstract fun lockState(state: LockState): Builder
-
-    @CheckResult abstract fun build(): ActivityEntry
-  }
-
-  companion object {
-
-    @JvmStatic
-    @CheckResult fun builder(): Builder {
-      return AutoValue_ActivityEntry.Builder()
+  @CheckResult fun isServiceEnabled(): Single<Boolean> {
+    return pinInteractor.masterPin.map {
+      it.isPresent()
     }
   }
+
 }

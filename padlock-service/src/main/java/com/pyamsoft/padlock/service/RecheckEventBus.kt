@@ -14,8 +14,25 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service;
+package com.pyamsoft.padlock.service
 
-enum RecheckStatus {
-  FORCE, NOT_FORCE
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton class RecheckEventBus @Inject internal constructor() : EventBus<RecheckEvent> {
+
+  private val bus: EventBus<RecheckEvent> = RxBus.create()
+
+  override fun listen(): Observable<RecheckEvent> {
+    return bus.listen()
+  }
+
+  override fun publish(event: RecheckEvent) {
+    bus.publish(event)
+  }
+
 }
+
