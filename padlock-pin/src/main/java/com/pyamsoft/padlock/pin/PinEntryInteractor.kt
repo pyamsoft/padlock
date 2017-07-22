@@ -31,16 +31,17 @@ import javax.inject.Singleton
     private val masterPinInteractor: MasterPinInteractor,
     preferences: LockScreenPreferences) : LockTypeInteractor(preferences) {
 
-  private val masterPin: Single<Optional<String>>
-    @CheckResult get() = masterPinInteractor.masterPin
+  @CheckResult private fun getMasterPin(): Single<Optional<String>> {
+    return masterPinInteractor.getMasterPin()
+  }
 
   @CheckResult fun hasMasterPin(): Single<Boolean> {
-    return masterPin.map { it.isPresent() }
+    return getMasterPin().map { it.isPresent() }
   }
 
   @CheckResult fun submitPin(currentAttempt: String,
       reEntryAttempt: String, hint: String): Single<PinEntryEvent> {
-    return masterPin.flatMap {
+    return getMasterPin().flatMap {
       if (it.isPresent()) {
         return@flatMap clearPin(it.item(), currentAttempt)
       } else {
