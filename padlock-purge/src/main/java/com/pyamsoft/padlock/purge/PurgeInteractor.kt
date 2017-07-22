@@ -70,7 +70,7 @@ import javax.inject.Singleton
 
   @CheckResult internal fun fetchFreshData(): Single<List<String>> {
     return appEntryList.zipWith(activeApplicationPackageNames,
-        BiFunction<List<PadLockEntry.AllEntries>, List<String>, List<String>> {
+        BiFunction {
           allEntries, packageNames ->
           val mutableAllEntries: MutableList<PadLockEntry.AllEntries> = ArrayList(allEntries)
           val stalePackageNames: MutableList<String> = ArrayList()
