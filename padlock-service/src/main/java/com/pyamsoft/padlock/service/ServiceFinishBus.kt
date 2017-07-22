@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service;
+package com.pyamsoft.padlock.service
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@AutoValue abstract class LockPassEvent {
+@Singleton class ServiceFinishBus @Inject internal constructor() : EventBus<ServiceFinishEvent> {
 
-  @CheckResult @NonNull
-  static LockPassEvent create(@NonNull String packageName, @NonNull String className) {
-    return new AutoValue_LockPassEvent(packageName, className);
+  private val bus: EventBus<ServiceFinishEvent> = RxBus.create()
+
+  override fun listen(): Observable<ServiceFinishEvent> {
+    return bus.listen()
   }
 
-  @CheckResult abstract String packageName();
+  override fun publish(event: ServiceFinishEvent) {
+    bus.publish(event)
+  }
 
-  @CheckResult abstract String className();
 }
+

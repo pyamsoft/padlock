@@ -14,33 +14,23 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.service
 
 import android.support.annotation.CheckResult
 import com.google.auto.value.AutoValue
 
-@AutoValue abstract class ActivityEntry protected constructor() {
+@AutoValue abstract class LockPassEvent protected constructor() {
 
-  @CheckResult abstract fun toBuilder(): Builder
+  @CheckResult internal abstract fun packageName(): String
 
-  @CheckResult abstract fun name(): String
-
-  @CheckResult abstract fun lockState(): LockState
-
-  @AutoValue.Builder abstract class Builder {
-
-    @CheckResult abstract fun name(s: String): Builder
-
-    @CheckResult abstract fun lockState(state: LockState): Builder
-
-    @CheckResult abstract fun build(): ActivityEntry
-  }
+  @CheckResult internal abstract fun className(): String
 
   companion object {
 
     @JvmStatic
-    @CheckResult fun builder(): Builder {
-      return AutoValue_ActivityEntry.Builder()
+    @CheckResult
+    fun create(packageName: String, className: String): LockPassEvent {
+      return AutoValue_LockPassEvent(packageName, className)
     }
   }
 }
