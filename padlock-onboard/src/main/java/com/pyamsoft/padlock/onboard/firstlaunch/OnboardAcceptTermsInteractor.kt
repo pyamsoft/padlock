@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard.list;
+package com.pyamsoft.padlock.onboard.firstlaunch
 
-import android.support.annotation.NonNull;
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.base.preference.OnboardingPreferences
+import io.reactivex.Completable
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@Singleton class OnboardListInteractor {
-
-  @NonNull private final OnboardingPreferences preferences;
-
-  @Inject OnboardListInteractor(@NonNull OnboardingPreferences preferences) {
-    this.preferences = preferences;
-  }
+@Singleton internal class OnboardAcceptTermsInteractor @Inject internal constructor(
+    private val preferences: OnboardingPreferences) {
 
   /**
    * public
    */
-  void completeOnboarding() {
-    preferences.setListOnBoard();
+  @CheckResult fun agreeToTerms(): Completable {
+    return Completable.fromAction({ preferences.setAgreed() })
   }
 }
