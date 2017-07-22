@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock;
+package com.pyamsoft.padlock.lock
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@AutoValue abstract class LockScreenEntry {
+@Singleton class CloseOldBus @Inject internal constructor() : EventBus<CloseOldEvent> {
 
-  @NonNull @CheckResult
-  static LockScreenEntry create(@NonNull String packageName, @NonNull String className) {
-    return new AutoValue_LockScreenEntry(packageName, className);
+  private val bus: EventBus<CloseOldEvent> = RxBus.create()
+
+  override fun listen(): Observable<CloseOldEvent> {
+    return bus.listen()
   }
 
-  @CheckResult abstract String packageName();
+  override fun publish(event: CloseOldEvent) {
+    bus.publish(event)
+  }
 
-  @CheckResult abstract String className();
 }
+

@@ -66,7 +66,7 @@ public class PadLock extends Application implements ComponentProvider {
     Licenses.create("PatternLockView", "https://github.com/aritraroy/PatternLockView",
         "licenses/patternlock");
 
-    LockHelper.set(SHA256LockHelper.newInstance());
+    LockHelper.Companion.set(SHA256LockHelper.newInstance());
     final PadLockModule padLockModule =
         new PadLockModule(getApplicationContext(), MainActivity.class, LockScreenActivity.class,
             RecheckService.class);

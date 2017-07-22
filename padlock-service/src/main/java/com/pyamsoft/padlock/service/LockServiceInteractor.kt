@@ -40,8 +40,8 @@ import javax.inject.Singleton
     private val preferences: LockScreenPreferences,
     private val jobSchedulerCompat: JobSchedulerCompat,
     private val packageManagerWrapper: PackageManagerWrapper, private val padLockDB: PadLockDB,
-    @field:Named("lockscreen") private val lockScreenActivityClass: Class<out Activity>,
-    @field:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
+    @param:Named("lockscreen") private val lockScreenActivityClass: Class<out Activity>,
+    @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
     private val stateInteractor: LockServiceStateInteractor) {
 
   private val appContext = context.applicationContext
