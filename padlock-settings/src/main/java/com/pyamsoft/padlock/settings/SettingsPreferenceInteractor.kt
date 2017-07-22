@@ -32,18 +32,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class SettingsPreferenceInteractor @Inject internal constructor(
-    val padLockDB: PadLockDB,
-    val masterPinPreference: MasterPinPreferences,
-    val preferences: ClearPreferences,
-    val installListenerPreferences: InstallListenerPreferences,
-    val lockListInteractor: LockListItemInteractor,
-    val lockInfoInteractor: LockInfoItemInteractor,
-    val purgeInteractor: PurgeInteractor) {
+    private val padLockDB: PadLockDB,
+    private val masterPinPreference: MasterPinPreferences,
+    private val preferences: ClearPreferences,
+    private val installListenerPreferences: InstallListenerPreferences,
+    private val lockListInteractor: LockListItemInteractor,
+    private val lockInfoInteractor: LockInfoItemInteractor,
+    private val purgeInteractor: PurgeInteractor) {
 
-  val isInstallListenerEnabled: Single<Boolean>
-    @CheckResult get() = Single.fromCallable<Boolean> {
+  @CheckResult fun isInstallListenerEnabled(): Single<Boolean> {
+    return Single.fromCallable {
       installListenerPreferences.isInstallListenerEnabled
     }
+  }
 
   @CheckResult fun clearDatabase(): Single<Boolean> {
     return padLockDB.deleteAll()
