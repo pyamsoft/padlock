@@ -107,18 +107,26 @@ import com.squareup.sqldelight.SqlDelightStatement
     const internal val PACKAGE_EMPTY = "EMPTY"
     const internal val ACTIVITY_EMPTY = "EMPTY"
 
+    @JvmStatic
     private var insertManager: InsertManager? = null
+    @JvmStatic
     private var deletePackageManager: DeletePackageManager? = null
+    @JvmStatic
     private var deletePackageActivityManager: DeletePackageActivityManager? = null
+    @JvmStatic
     private var updateLockTimeManager: UpdateLockTimeManager? = null
+    @JvmStatic
     private var updateIgnoreTimeManager: UpdateIgnoreTimeManager? = null
+    @JvmStatic
     private var updateWhitelistManager: UpdateWhitelistManager? = null
 
+    @JvmStatic
     val EMPTY: PadLockEntry by lazy {
       AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0,
           false, false)
     }
 
+    @JvmStatic
     private val FACTORY by lazy {
       PadLockEntryModel.Factory(
           { packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication,
@@ -129,24 +137,26 @@ import com.squareup.sqldelight.SqlDelightStatement
           })
     }
 
+    @JvmStatic
     internal val ALL_ENTRIES_MAPPER: RowMapper<AllEntries> by lazy {
-      FACTORY.all_entriesMapper<AllEntries>(
-          { packageName, activityName, whitelist ->
-            AutoValue_PadLockEntry_AllEntries(packageName, activityName, whitelist)
-          })
+      FACTORY.all_entriesMapper({ packageName, activityName, whitelist ->
+        AutoValue_PadLockEntry_AllEntries(packageName, activityName, whitelist)
+      })
     }
 
+    @JvmStatic
     internal val WITH_PACKAGE_NAME_MAPPER: RowMapper<WithPackageName> by lazy {
-      FACTORY.with_package_nameMapper<WithPackageName>(
-          { activityName, whitelist ->
-            AutoValue_PadLockEntry_WithPackageName(activityName, whitelist)
-          })
+      FACTORY.with_package_nameMapper({ activityName, whitelist ->
+        AutoValue_PadLockEntry_WithPackageName(activityName, whitelist)
+      })
     }
 
+    @JvmStatic
     internal val WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER: PadLockEntryModel.Mapper<out PadLockEntry> by lazy {
       FACTORY.with_package_activity_name_defaultMapper()
     }
 
+    @JvmStatic
     @CheckResult
     internal fun withPackageActivityNameDefault(packageName: String,
         activityName: String): SqlDelightStatement {
@@ -154,14 +164,17 @@ import com.squareup.sqldelight.SqlDelightStatement
           activityName, PACKAGE_ACTIVITY_NAME, activityName)
     }
 
+    @JvmStatic
     @CheckResult internal fun withPackageName(packageName: String): SqlDelightStatement {
       return FACTORY.with_package_name(packageName)
     }
 
+    @JvmStatic
     @CheckResult internal fun queryAll(): SqlDelightStatement {
       return FACTORY.all_entries()
     }
 
+    @JvmStatic
     @CheckResult
     fun create(packageName: String, activityName: String,
         lockCode: String?, lockUntilTime: Long, ignoreUntilTime: Long, isSystem: Boolean,
@@ -170,10 +183,12 @@ import com.squareup.sqldelight.SqlDelightStatement
           ignoreUntilTime, isSystem, whitelist)
     }
 
+    @JvmStatic
     @CheckResult fun isEmpty(entry: PadLockEntry): Boolean {
       return PACKAGE_EMPTY == entry.packageName() && ACTIVITY_EMPTY == entry.activityName()
     }
 
+    @JvmStatic
     @CheckResult internal fun insertEntry(openHelper: SQLiteOpenHelper): InsertManager {
       val obj: InsertManager? = insertManager
       if (obj == null) {
@@ -185,6 +200,7 @@ import com.squareup.sqldelight.SqlDelightStatement
       }
     }
 
+    @JvmStatic
     @CheckResult
     internal fun deletePackage(openHelper: SQLiteOpenHelper): DeletePackageManager {
       val obj: DeletePackageManager? = deletePackageManager
@@ -197,8 +213,10 @@ import com.squareup.sqldelight.SqlDelightStatement
       }
     }
 
+    @JvmStatic
     @CheckResult
-    internal fun deletePackageActivity(openHelper: SQLiteOpenHelper): DeletePackageActivityManager {
+    internal fun deletePackageActivity(
+        openHelper: SQLiteOpenHelper): DeletePackageActivityManager {
       val obj: DeletePackageActivityManager? = deletePackageActivityManager
       if (obj == null) {
         val dpam = DeletePackageActivityManager(openHelper)
@@ -209,6 +227,7 @@ import com.squareup.sqldelight.SqlDelightStatement
       }
     }
 
+    @JvmStatic
     @CheckResult
     internal fun updateLockTime(openHelper: SQLiteOpenHelper): UpdateLockTimeManager {
       val obj: UpdateLockTimeManager? = updateLockTimeManager
@@ -221,6 +240,7 @@ import com.squareup.sqldelight.SqlDelightStatement
       }
     }
 
+    @JvmStatic
     @CheckResult
     internal fun updateIgnoreTime(openHelper: SQLiteOpenHelper): UpdateIgnoreTimeManager {
       val obj: UpdateIgnoreTimeManager? = updateIgnoreTimeManager
@@ -233,6 +253,7 @@ import com.squareup.sqldelight.SqlDelightStatement
       }
     }
 
+    @JvmStatic
     @CheckResult
     internal fun updateWhitelist(openHelper: SQLiteOpenHelper): UpdateWhitelistManager {
       val obj: UpdateWhitelistManager? = updateWhitelistManager

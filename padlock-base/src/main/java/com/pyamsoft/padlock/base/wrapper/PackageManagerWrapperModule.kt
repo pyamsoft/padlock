@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.wrapper;
+package com.pyamsoft.padlock.base.wrapper
 
-import android.content.Context;
-import dagger.Module;
-import dagger.Provides;
-import javax.inject.Singleton;
+import android.content.Context
+import dagger.Module
+import dagger.Provides
+import javax.inject.Singleton
 
-@Module public class PackageManagerWrapperModule {
+@Module class PackageManagerWrapperModule {
 
-  @Singleton @Provides PackageManagerWrapper providePackageManagerWrapper(Context context) {
-    return new PackageManagerWrapperImpl(context);
+  @Singleton @Provides internal fun providePackageManagerWrapper(
+      context: Context): PackageManagerWrapper {
+    return PackageManagerWrapperImpl(context)
   }
 }
