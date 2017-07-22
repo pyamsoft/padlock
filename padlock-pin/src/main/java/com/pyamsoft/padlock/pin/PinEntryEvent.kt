@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.settings
+package com.pyamsoft.padlock.pin
 
 import android.support.annotation.CheckResult
 import com.google.auto.value.AutoValue
 
-@AutoValue abstract class ConfirmEvent protected constructor() {
+@AutoValue abstract class PinEntryEvent protected constructor() {
 
-  @CheckResult internal abstract fun type(): Type
+  @CheckResult abstract fun type(): Type
+
+  @CheckResult abstract fun complete(): Boolean
 
   enum class Type {
-    DATABASE, ALL
+    TYPE_CREATE, TYPE_CLEAR
   }
 
   companion object {
 
     @JvmStatic
-    @CheckResult fun create(type: Type): ConfirmEvent {
-      return AutoValue_ConfirmEvent(type)
+    @CheckResult fun create(type: Type, complete: Boolean): PinEntryEvent {
+      return AutoValue_PinEntryEvent(type, complete)
     }
   }
 }

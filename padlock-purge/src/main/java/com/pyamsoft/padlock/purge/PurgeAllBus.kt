@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.pin;
+package com.pyamsoft.padlock.purge
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Singleton
 
-@AutoValue public abstract class PinEntryEvent {
+@Singleton class PurgeAllBus internal constructor() : EventBus<PurgeAllEvent> {
 
-  @CheckResult @NonNull public static PinEntryEvent create(@NonNull Type type, boolean complete) {
-    return new AutoValue_PinEntryEvent(type, complete);
+  private val bus: EventBus<PurgeAllEvent> = RxBus.create()
+
+  override fun listen(): Observable<PurgeAllEvent> {
+    return bus.listen()
   }
 
-  @CheckResult public abstract Type type();
-
-  @CheckResult public abstract boolean complete();
-
-  public enum Type {
-    TYPE_CREATE, TYPE_CLEAR
+  override fun publish(event: PurgeAllEvent) {
+    bus.publish(event)
   }
+
 }
+

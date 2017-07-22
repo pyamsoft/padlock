@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.pin;
+package com.pyamsoft.padlock.pin
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
+import android.support.annotation.CheckResult
+import com.google.auto.value.AutoValue
 
-@AutoValue public abstract class CreatePinEvent {
+@AutoValue abstract class CreatePinEvent protected constructor() {
 
-  @CheckResult @NonNull public static CreatePinEvent create(boolean success) {
-    return new AutoValue_CreatePinEvent(success);
+  @CheckResult abstract fun success(): Boolean
+
+  companion object {
+
+    @JvmStatic
+    @CheckResult fun create(success: Boolean): CreatePinEvent {
+      return AutoValue_CreatePinEvent(success)
+    }
   }
-
-  @CheckResult public abstract boolean success();
 }

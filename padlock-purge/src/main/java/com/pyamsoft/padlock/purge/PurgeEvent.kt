@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.settings
+package com.pyamsoft.padlock.purge
 
 import android.support.annotation.CheckResult
 import com.google.auto.value.AutoValue
 
-@AutoValue abstract class ConfirmEvent protected constructor() {
+@AutoValue abstract class PurgeEvent protected constructor() {
 
-  @CheckResult internal abstract fun type(): Type
-
-  enum class Type {
-    DATABASE, ALL
-  }
+  @CheckResult internal abstract fun packageName(): String
 
   companion object {
 
     @JvmStatic
-    @CheckResult fun create(type: Type): ConfirmEvent {
-      return AutoValue_ConfirmEvent(type)
+    @CheckResult fun create(packageName: String): PurgeEvent {
+      return AutoValue_PurgeEvent(packageName)
     }
   }
 }

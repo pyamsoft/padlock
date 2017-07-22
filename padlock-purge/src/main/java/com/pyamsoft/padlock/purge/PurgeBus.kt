@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.purge;
+package com.pyamsoft.padlock.purge
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import com.google.auto.value.AutoValue;
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Singleton
 
-@AutoValue abstract class PurgeEvent {
+@Singleton class PurgeBus internal constructor() : EventBus<PurgeEvent> {
 
-  @CheckResult @NonNull static PurgeEvent create(@NonNull String packageName) {
-    return new AutoValue_PurgeEvent(packageName);
+  private val bus: EventBus<PurgeEvent> = RxBus.create()
+
+  override fun listen(): Observable<PurgeEvent> {
+    return bus.listen()
   }
 
-  @CheckResult abstract String packageName();
+  override fun publish(event: PurgeEvent) {
+    bus.publish(event)
+  }
+
 }
+
