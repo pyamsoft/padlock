@@ -34,7 +34,7 @@ class SettingsPreferencePresenter @Inject internal constructor(
     @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
 
   fun setApplicationInstallReceiverState() {
-    disposeOnStop(interactor.isInstallListenerEnabled
+    disposeOnStop(interactor.isInstallListenerEnabled()
         .subscribeOn(backgroundScheduler)
         .observeOn(foregroundScheduler)
         .subscribe({
