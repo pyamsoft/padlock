@@ -16,15 +16,25 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
+import com.pyamsoft.pydroid.presenter.SchedulerViewPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
 class PinEntryPresenter @Inject internal constructor(private val interactor: PinEntryInteractor,
+    private val createPinBus: CreatePinBus,
+    private val clearPinBus: ClearPinBus,
     @Named("obs") obsScheduler: Scheduler,
-    @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
+    @Named("sub") subScheduler: Scheduler) : SchedulerViewPresenter(obsScheduler, subScheduler) {
+
+  fun publish(event: CreatePinEvent) {
+    createPinBus.publish(event)
+  }
+
+  fun publish(event: ClearPinEvent) {
+    clearPinBus.publish(event)
+  }
 
   fun submit(currentAttempt: String, reEntryAttempt: String, hint: String,
       onSubmitSuccess: (Boolean) -> Unit, onSubmitFailure: (Boolean) -> Unit,

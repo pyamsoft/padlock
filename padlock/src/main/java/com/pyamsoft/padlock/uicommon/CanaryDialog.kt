@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.uicommon;
+package com.pyamsoft.padlock.uicommon
 
-import android.app.Activity;
-import android.content.Intent;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.PadLock
+import com.pyamsoft.pydroid.ui.app.fragment.DialogFragmentBase
 
-public class AccessibilityRequestDelegate {
+abstract class CanaryDialog : DialogFragmentBase() {
 
-  @NonNull private final static Intent INTENT;
-
-  static {
-    INTENT = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-  }
-
-  public void launchAccessibilityIntent(@NonNull Activity activity) {
-    activity.startActivity(INTENT);
+  override fun onDestroy() {
+    super.onDestroy()
+    PadLock.getRefWatcher(this).watch(this)
   }
 }
+

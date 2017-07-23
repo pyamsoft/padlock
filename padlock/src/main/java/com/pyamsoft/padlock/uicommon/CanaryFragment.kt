@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock;
+package com.pyamsoft.padlock.uicommon
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
+import com.pyamsoft.padlock.PadLock
+import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment
 
-/**
- * Created by pyamsoft on 7/8/17.
- */
+abstract class CanaryFragment : ActionBarFragment() {
 
-public interface ComponentProvider {
-
-  @CheckResult @NonNull PadLockComponent getComponent();
+  override fun onDestroy() {
+    super.onDestroy()
+    PadLock.getRefWatcher(this).watch(this)
+  }
 }
+

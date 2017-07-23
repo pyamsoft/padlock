@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.pin;
+package com.pyamsoft.padlock.uicommon
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.app.Activity
+import android.content.Intent
+import android.provider.Settings
 
-abstract class PinEntryBaseFragment extends Fragment {
+class AccessibilityRequestDelegate {
 
-  void dismissParent() {
-    final FragmentManager fragmentManager = getParentFragment().getFragmentManager();
-    final Fragment pinFragment = fragmentManager.findFragmentByTag(PinEntryDialog.TAG);
-    if (pinFragment instanceof PinEntryDialog) {
-      ((PinEntryDialog) pinFragment).dismiss();
-    } else {
-      throw new ClassCastException("Fragment is not PinEntryDialog");
-    }
+  fun launchAccessibilityIntent(activity: Activity) {
+    activity.startActivity(INTENT)
+  }
+
+  companion object {
+
+    @JvmStatic
+    private val INTENT: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+
   }
 }
