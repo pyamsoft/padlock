@@ -14,21 +14,32 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.list
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor
+import com.pyamsoft.padlock.model.ActivityEntry
 import io.reactivex.Single
+import java.util.HashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton class LockServiceStateInteractor @Inject internal constructor(
-    private val pinInteractor: MasterPinInteractor) {
+@Singleton internal class LockInfoCacheInteractor @Inject internal constructor() {
 
-  @CheckResult fun isServiceEnabled(): Single<Boolean> {
-    return pinInteractor.getMasterPin().map {
-      it.isPresent()
-    }
+  private val cachedInfoObservableMap: MutableMap<String, Single<MutableList<ActivityEntry>>>
+
+  init {
+    cachedInfoObservableMap = HashMap<String, Single<MutableList<ActivityEntry>>>()
   }
 
+  fun putIntoCache(packageName: String, dataSource: Single<MutableList<ActivityEntry>>) {
+    cachedInfoObservableMap.put(packageName, dataSource)
+  }
+
+  @CheckResult fun getFromCache(packageName: String): Single<MutableList<ActivityEntry>>? {
+    return cachedInfoObservableMap[packageName]
+  }
+
+  fun clearCache() {
+    cachedInfoObservableMap.clear()
+  }
 }

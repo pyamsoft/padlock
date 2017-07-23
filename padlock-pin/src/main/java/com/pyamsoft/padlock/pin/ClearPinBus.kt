@@ -14,11 +14,25 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list;
+package com.pyamsoft.padlock.pin
 
-interface LockDatabaseView {
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
+import javax.inject.Singleton
 
-  void onDatabaseEntryCreated();
+@Singleton class ClearPinBus @Inject internal constructor() : EventBus<ClearPinEvent> {
 
-  void onDatabaseEntryDeleted();
+  private val bus: EventBus<ClearPinEvent> = RxBus.create()
+
+  override fun listen(): Observable<ClearPinEvent> {
+    return bus.listen()
+  }
+
+  override fun publish(event: ClearPinEvent) {
+    bus.publish(event)
+  }
+
 }
+
