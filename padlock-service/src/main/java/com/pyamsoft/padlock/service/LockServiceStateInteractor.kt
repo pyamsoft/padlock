@@ -22,10 +22,10 @@ import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class LockServiceStateInteractor @Inject internal constructor(
+@Singleton class LockServiceStateInteractor @Inject internal constructor(
     private val pinInteractor: MasterPinInteractor) {
 
-  @CheckResult internal fun isServiceEnabled(): Single<Boolean> {
+  @CheckResult fun isServiceEnabled(): Single<Boolean> {
     return pinInteractor.getMasterPin().map {
       it.isPresent()
     }

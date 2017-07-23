@@ -35,17 +35,16 @@ import javax.inject.Inject
 internal class PadLockDBImpl @Inject internal constructor(context: Context,
     scheduler: Scheduler) : PadLockDB {
 
-  private val briteDatabase: BriteDatabase
-  private val openHelper: PadLockOpenHelper
+  protected @JvmField val briteDatabase: BriteDatabase
+  protected @JvmField val openHelper: PadLockOpenHelper
 
   init {
     openHelper = PadLockOpenHelper(context)
     briteDatabase = SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler)
   }
 
-  @VisibleForTesting
-  @CheckResult
-  fun deleteWithPackageActivityNameUnguarded(packageName: String,
+  @VisibleForTesting @CheckResult protected fun deleteWithPackageActivityNameUnguarded(
+      packageName: String,
       activityName: String): Int {
     return PadLockEntry.deletePackageActivity(openHelper).executeProgram(packageName, activityName)
   }
@@ -180,7 +179,7 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context,
     return Completable.fromAction({ openHelper.deleteDatabase() })
   }
 
-  private class PadLockOpenHelper internal constructor(context: Context) : SQLiteOpenHelper(
+  internal class PadLockOpenHelper internal constructor(context: Context) : SQLiteOpenHelper(
       context.applicationContext, DB_NAME, null, DATABASE_VERSION) {
 
     private val appContext: Context = context.applicationContext

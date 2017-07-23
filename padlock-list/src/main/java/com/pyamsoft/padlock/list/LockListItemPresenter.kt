@@ -24,8 +24,8 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class LockListItemPresenter @Inject constructor(
-    private val interactor: LockListItemInteractor,
+class LockListItemPresenter @Inject constructor(
+    protected @JvmField val interactor: LockListItemInteractor,
     @Named("obs") obsScheduler: Scheduler,
     @Named("io") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
 
