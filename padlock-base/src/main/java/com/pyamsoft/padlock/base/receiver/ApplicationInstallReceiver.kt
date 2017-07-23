@@ -72,16 +72,16 @@ import javax.inject.Singleton
     compositeDisposable.add(packageManagerWrapper.loadPackageLabel(packageName)
         .subscribeOn(subScheduler)
         .observeOn(obsScheduler)
-        .subscribe({ s ->
+        .subscribe({
           if (isNew) {
-            onNewPackageInstalled(packageName, s)
+            onNewPackageInstalled(packageName, it)
           } else {
             Timber.d("Package updated: %s", packageName)
           }
-        }) { throwable ->
-          Timber.e(throwable, "onError launching notification for package: %s",
+        }, {
+          Timber.e(it, "onError launching notification for package: %s",
               packageName)
-        })
+        }))
   }
 
   internal fun onNewPackageInstalled(packageName: String,

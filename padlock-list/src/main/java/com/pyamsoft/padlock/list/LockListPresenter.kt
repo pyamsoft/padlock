@@ -26,11 +26,11 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class LockListPresenter @Inject constructor(
-    private val lockListInteractor: LockListInteractor,
-    private val stateInteractor: LockServiceStateInteractor,
-    private val clearPinBus: ClearPinBus,
-    private val createPinBus: CreatePinBus,
+class LockListPresenter @Inject internal constructor(
+    protected @JvmField val lockListInteractor: LockListInteractor,
+    protected @JvmField val stateInteractor: LockServiceStateInteractor,
+    protected @JvmField val clearPinBus: ClearPinBus,
+    protected @JvmField val createPinBus: CreatePinBus,
     @Named("obs") obsScheduler: Scheduler,
     @Named("io") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
 

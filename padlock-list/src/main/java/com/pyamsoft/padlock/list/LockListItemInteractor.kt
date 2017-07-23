@@ -25,8 +25,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton class LockListItemInteractor @Inject internal constructor(padLockDB: PadLockDB,
-    private val packageManagerWrapper: PackageManagerWrapper,
-    private val cacheInteractor: LockListCacheInteractor) : LockCommonInteractor(padLockDB) {
+    protected @JvmField val packageManagerWrapper: PackageManagerWrapper,
+    protected @JvmField val cacheInteractor: LockListCacheInteractor) : LockCommonInteractor(
+    padLockDB) {
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState,
       newLockState: LockState, packageName: String, activityName: String,
@@ -44,7 +45,7 @@ import javax.inject.Singleton
     cacheInteractor.clearCache()
   }
 
-  private fun updateCacheEntry(name: String, packageName: String, newLockState: Boolean) {
+  protected fun updateCacheEntry(name: String, packageName: String, newLockState: Boolean) {
     val cached = cacheInteractor.retrieve()
     if (cached != null) {
       cacheInteractor.cache(cached.map {

@@ -22,9 +22,10 @@ import com.pyamsoft.padlock.model.LockState
 import io.reactivex.Single
 import timber.log.Timber
 
-abstract class LockCommonInteractor(protected val padLockDB: PadLockDB) {
+abstract class LockCommonInteractor protected constructor(
+    protected @JvmField val padLockDB: PadLockDB) {
 
-  @CheckResult private fun createNewEntry(
+  @CheckResult protected fun createNewEntry(
       packageName: String, activityName: String, code: String?,
       system: Boolean, whitelist: Boolean): Single<LockState> {
     Timber.d("Empty entry, create a new entry for: %s %s", packageName, activityName)
@@ -32,7 +33,7 @@ abstract class LockCommonInteractor(protected val padLockDB: PadLockDB) {
         .toSingleDefault(if (whitelist) LockState.WHITELISTED else LockState.LOCKED)
   }
 
-  @CheckResult private fun deleteEntry(
+  @CheckResult protected fun deleteEntry(
       packageName: String, activityName: String): Single<LockState> {
     Timber.d("Entry already exists for: %s %s, delete it", packageName, activityName)
     return padLockDB.deleteWithPackageActivityName(packageName, activityName)
@@ -40,7 +41,7 @@ abstract class LockCommonInteractor(protected val padLockDB: PadLockDB) {
   }
 
   @CheckResult
-  open fun modifySingleDatabaseEntry(oldLockState: LockState,
+  open internal fun modifySingleDatabaseEntry(oldLockState: LockState,
       newLockState: LockState, packageName: String, activityName: String,
       code: String?, system: Boolean): Single<LockState> {
     if (newLockState === LockState.WHITELISTED) {
