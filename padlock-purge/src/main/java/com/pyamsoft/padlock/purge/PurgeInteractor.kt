@@ -29,22 +29,22 @@ import java.util.HashSet
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton class PurgeInteractor @Inject internal constructor(
+@Singleton internal class PurgeInteractor @Inject internal constructor(
     private val packageManagerWrapper: PackageManagerWrapper,
     private val padLockDB: PadLockDB) {
 
-  private var cachedStalePackages: Single<List<String>>? = null
+  @JvmField protected var cachedStalePackages: Single<List<String>>? = null
 
-  private val activeApplicationPackageNames: Single<List<String>>
-    @CheckResult
-    get() = packageManagerWrapper.getActiveApplications()
+  @CheckResult private fun getActiveApplicationPackageNames(): Single<List<String>> {
+    return packageManagerWrapper.getActiveApplications()
         .flatMapObservable { Observable.fromIterable(it) }
         .map { it.packageName }
         .toSortedList()
+  }
 
-  private val appEntryList: Single<List<PadLockEntry.AllEntries>>
-    @CheckResult
-    get() = padLockDB.queryAll()
+  @CheckResult private fun getAppEntryList(): Single<List<PadLockEntry.AllEntries>> {
+    return padLockDB.queryAll()
+  }
 
   fun clearCache() {
     cachedStalePackages = null
@@ -68,8 +68,8 @@ import javax.inject.Singleton
     }.sorted { obj, str -> obj.compareTo(str, ignoreCase = true) }
   }
 
-  @CheckResult internal fun fetchFreshData(): Single<List<String>> {
-    return appEntryList.zipWith(activeApplicationPackageNames,
+  @CheckResult protected fun fetchFreshData(): Single<List<String>> {
+    return getAppEntryList().zipWith(getActiveApplicationPackageNames(),
         BiFunction {
           allEntries, packageNames ->
           val mutableAllEntries: MutableList<PadLockEntry.AllEntries> = ArrayList(allEntries)

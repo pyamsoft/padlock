@@ -35,7 +35,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton class LockServiceInteractor @Inject internal constructor(
+@Singleton internal class LockServiceInteractor @Inject internal constructor(
     context: Context,
     @JvmField protected val preferences: LockScreenPreferences,
     private val jobSchedulerCompat: JobSchedulerCompat,
