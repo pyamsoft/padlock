@@ -23,9 +23,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class MainInteractor @Inject internal constructor(
-    private val preferences: OnboardingPreferences) {
+    protected @JvmField val preferences: OnboardingPreferences) {
 
-  @CheckResult fun isOnboardingComplete(): Single<Boolean> {
+  @CheckResult internal fun isOnboardingComplete(): Single<Boolean> {
     return Single.fromCallable { preferences.hasAgreed() }
   }
 }
