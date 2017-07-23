@@ -22,9 +22,10 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-class PurgePresenter @Inject internal constructor(private val interactor: PurgeInteractor,
-    private val purgeBus: PurgeBus,
-    private val purgeAllBus: PurgeAllBus,
+class PurgePresenter @Inject internal constructor(
+    protected @JvmField val interactor: PurgeInteractor,
+    protected @JvmField val purgeBus: PurgeBus,
+    protected @JvmField val purgeAllBus: PurgeAllBus,
     @Named("obs") obsScheduler: Scheduler,
     @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
 
