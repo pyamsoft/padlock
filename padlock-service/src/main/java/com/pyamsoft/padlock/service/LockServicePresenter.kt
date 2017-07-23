@@ -24,10 +24,10 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockServicePresenter @Inject internal constructor(
-    private val lockPassBus: LockPassBus,
-    private val serviceFinishBus: ServiceFinishBus,
-    private val recheckEventBus: RecheckEventBus,
-    private val interactor: LockServiceInteractor,
+    protected @JvmField val lockPassBus: LockPassBus,
+    protected @JvmField val serviceFinishBus: ServiceFinishBus,
+    protected @JvmField val recheckEventBus: RecheckEventBus,
+    protected @JvmField val interactor: LockServiceInteractor,
     @Named("obs") obsScheduler: Scheduler,
     @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
 

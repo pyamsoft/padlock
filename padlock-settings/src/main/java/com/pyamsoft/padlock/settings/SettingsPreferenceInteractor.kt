@@ -40,13 +40,13 @@ import javax.inject.Singleton
     private val lockInfoInteractor: LockInfoItemInteractor,
     private val purgeInteractor: PurgeInteractor) {
 
-  @CheckResult fun isInstallListenerEnabled(): Single<Boolean> {
+  @CheckResult internal fun isInstallListenerEnabled(): Single<Boolean> {
     return Single.fromCallable {
       installListenerPreferences.isInstallListenerEnabled()
     }
   }
 
-  @CheckResult fun clearDatabase(): Single<Boolean> {
+  @CheckResult internal fun clearDatabase(): Single<Boolean> {
     return padLockDB.deleteAll()
         .andThen(padLockDB.deleteDatabase())
         .andThen(Completable.fromAction {
@@ -61,7 +61,7 @@ import javax.inject.Singleton
         .toSingleDefault(true)
   }
 
-  @CheckResult fun clearAll(): Single<Boolean> {
+  @CheckResult internal fun clearAll(): Single<Boolean> {
     return clearDatabase().map {
       Timber.d("Clear all preferences")
       preferences.clearAll()
@@ -69,7 +69,7 @@ import javax.inject.Singleton
     }
   }
 
-  @CheckResult fun hasExistingMasterPassword(): Single<Boolean> {
+  @CheckResult internal fun hasExistingMasterPassword(): Single<Boolean> {
     return Single.fromCallable { Optional.ofNullable(masterPinPreference.getMasterPassword()) }
         .map { it.isPresent() }
   }

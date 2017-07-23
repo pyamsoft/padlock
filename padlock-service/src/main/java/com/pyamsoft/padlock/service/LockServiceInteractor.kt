@@ -37,24 +37,24 @@ import javax.inject.Singleton
 
 @Singleton class LockServiceInteractor @Inject internal constructor(
     context: Context,
-    private val preferences: LockScreenPreferences,
+    @JvmField protected val preferences: LockScreenPreferences,
     private val jobSchedulerCompat: JobSchedulerCompat,
     private val packageManagerWrapper: PackageManagerWrapper, private val padLockDB: PadLockDB,
-    @param:Named("lockscreen") private val lockScreenActivityClass: Class<out Activity>,
+    @param:Named("lockscreen") @JvmField protected val lockScreenActivityClass: Class<out Activity>,
     @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
     private val stateInteractor: LockServiceStateInteractor) {
 
-  private val appContext = context.applicationContext
-  private val keyguardManager = appContext.getSystemService(
+  @JvmField protected val appContext = context.applicationContext
+  @JvmField protected val keyguardManager = appContext.getSystemService(
       Context.KEYGUARD_SERVICE) as KeyguardManager
-  private var lastPackageName = ""
-  private var lastClassName = ""
-  private var activePackageName = ""
-  private var activeClassName = ""
-  private val lockScreenPassed: MutableMap<String, Boolean> = HashMap()
+  @JvmField protected var lastPackageName = ""
+  @JvmField protected var lastClassName = ""
+  @JvmField protected var activePackageName = ""
+  @JvmField protected var activeClassName = ""
+  @JvmField protected val lockScreenPassed: MutableMap<String, Boolean> = HashMap()
 
 
-  fun reset() {
+  internal fun reset() {
     Timber.i("Reset name state")
     lastPackageName = ""
     lastClassName = ""
@@ -63,7 +63,7 @@ import javax.inject.Singleton
     lockScreenPassed.clear()
   }
 
-  @CheckResult fun processActiveIfMatching(packageName: String,
+  @CheckResult internal fun processActiveIfMatching(packageName: String,
       className: String): Single<Boolean> {
     return Single.fromCallable {
       Timber.d("Check against current window values: %s, %s", activePackageName, activeClassName)
@@ -75,7 +75,7 @@ import javax.inject.Singleton
     }
   }
 
-  fun setLockScreenPassed(packageName: String, className: String, b: Boolean) {
+  internal fun setLockScreenPassed(packageName: String, className: String, b: Boolean) {
     Timber.d("Set lockScreenPassed: %s, %s, [%s]", packageName, className, b)
     lockScreenPassed.put(packageName + className, b)
   }
@@ -83,7 +83,7 @@ import javax.inject.Singleton
   /**
    * Clean up the lock service, cancel background jobs
    */
-  fun cleanup() {
+  internal fun cleanup() {
     Timber.d("Cleanup LockService")
     val intent = Intent(appContext, recheckServiceClass)
     jobSchedulerCompat.cancel(intent)
@@ -92,7 +92,7 @@ import javax.inject.Singleton
   /**
    * Return true if the window event is caused by a non-Activity
    */
-  @CheckResult fun isEventNotActivity(
+  @CheckResult internal fun isEventNotActivity(
       packageName: String, className: String): Single<Boolean> {
     Timber.d("Check event from activity: %s %s", packageName, className)
     return packageManagerWrapper.getActivityInfo(packageName, className).isEmpty
@@ -103,12 +103,12 @@ import javax.inject.Singleton
    * This will prevent the lock screen from opening twice when the same
    * app opens multiple activities for example.
    */
-  @CheckResult fun hasNameChanged(
+  @CheckResult internal fun hasNameChanged(
       name: String, oldName: String): Single<Boolean> {
     return Single.fromCallable { name != oldName }
   }
 
-  @CheckResult fun isWindowFromLockScreen(
+  @CheckResult internal fun isWindowFromLockScreen(
       packageName: String, className: String): Single<Boolean> {
     return Single.fromCallable {
       val lockScreenPackageName = appContext.packageName
@@ -121,26 +121,27 @@ import javax.inject.Singleton
     }
   }
 
-  @CheckResult fun isOnlyLockOnPackageChange(): Single<Boolean> {
+  @CheckResult internal fun isOnlyLockOnPackageChange(): Single<Boolean> {
     return Single.fromCallable { preferences.isLockOnPackageChange() }
   }
 
-  @CheckResult fun getEntry(packageName: String, activityName: String): Single<PadLockEntry> {
+  @CheckResult internal fun getEntry(packageName: String,
+      activityName: String): Single<PadLockEntry> {
     return padLockDB.queryWithPackageActivityNameDefault(packageName, activityName)
   }
 
-  @CheckResult fun isRestrictedWhileLocked(): Single<Boolean> {
+  @CheckResult internal fun isRestrictedWhileLocked(): Single<Boolean> {
     return Single.fromCallable { preferences.isIgnoreInKeyguard() }
   }
 
-  @CheckResult fun isDeviceLocked(): Single<Boolean> {
+  @CheckResult internal fun isDeviceLocked(): Single<Boolean> {
     return Single.fromCallable {
       keyguardManager.inKeyguardRestrictedInputMode()
           || keyguardManager.isKeyguardLocked
     }
   }
 
-  @CheckResult fun processEvent(packageName: String, className: String,
+  @CheckResult internal fun processEvent(packageName: String, className: String,
       forcedRecheck: RecheckStatus): Single<PadLockEntry> {
     val windowEventObservable: Single<Boolean> = stateInteractor.isServiceEnabled()
         .filter {

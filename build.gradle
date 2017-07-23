@@ -42,9 +42,9 @@ buildscript {
 
     retrolambda = "2.5.1"
     supportLib = "25.4.0"
-    firebase = "11.0.1"
+    firebase = "11.0.2"
     leakCanary = "1.5.1"
-    pydroid = "10.6.10"
+    pydroid = "10.6.12"
     autoValue = "1.4.1"
     sqlbrite = "2.0.0"
     dagger = "2.11"
