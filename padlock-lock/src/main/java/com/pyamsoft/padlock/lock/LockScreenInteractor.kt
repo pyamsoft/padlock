@@ -26,7 +26,8 @@ import javax.inject.Singleton
 
 @Singleton internal class LockScreenInteractor @Inject internal constructor(
     preferences: LockScreenPreferences,
-    private val packageManagerWrapper: PackageManagerWrapper) : LockTypeInteractor(preferences) {
+    private val packageManagerWrapper: PackageManagerWrapper) : LockTypeInteractor(
+    preferences) {
 
   @CheckResult fun getDefaultIgnoreTime(): Single<Long> {
     return Single.fromCallable { preferences.getDefaultIgnoreTime() }
