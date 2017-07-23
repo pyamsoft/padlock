@@ -22,9 +22,10 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-class PinEntryPresenter @Inject internal constructor(private val interactor: PinEntryInteractor,
-    private val createPinBus: CreatePinBus,
-    private val clearPinBus: ClearPinBus,
+class PinEntryPresenter @Inject internal constructor(
+    protected @JvmField val interactor: PinEntryInteractor,
+    protected @JvmField val createPinBus: CreatePinBus,
+    protected @JvmField val clearPinBus: ClearPinBus,
     @Named("obs") obsScheduler: Scheduler,
     @Named("sub") subScheduler: Scheduler) : SchedulerViewPresenter(obsScheduler, subScheduler) {
 
@@ -39,32 +40,36 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
   fun submit(currentAttempt: String, reEntryAttempt: String, hint: String,
       onSubmitSuccess: (Boolean) -> Unit, onSubmitFailure: (Boolean) -> Unit,
       onSubmitError: (Throwable) -> Unit) {
-    disposeOnStop(interactor.submitPin(currentAttempt, reEntryAttempt, hint)
-        .subscribeOn(backgroundScheduler)
-        .observeOn(foregroundScheduler)
-        .subscribe({
-          val creating = (it.type() === PinEntryEvent.Type.TYPE_CREATE)
-          if (it.complete()) {
-            onSubmitSuccess(creating)
-          } else {
-            onSubmitFailure(creating)
-          }
-        }, {
-          Timber.e(it, "attemptPinSubmission onError")
-          onSubmitError(it)
-        }))
+    disposeOnStop {
+      interactor.submitPin(currentAttempt, reEntryAttempt, hint)
+          .subscribeOn(backgroundScheduler)
+          .observeOn(foregroundScheduler)
+          .subscribe({
+            val creating = (it.type() === PinEntryEvent.Type.TYPE_CREATE)
+            if (it.complete()) {
+              onSubmitSuccess(creating)
+            } else {
+              onSubmitFailure(creating)
+            }
+          }, {
+            Timber.e(it, "attemptPinSubmission onError")
+            onSubmitError(it)
+          })
+    }
   }
 
   fun checkMasterPinPresent(onMasterPinMissing: () -> Unit, onMasterPinPresent: () -> Unit) {
-    disposeOnStop(interactor.hasMasterPin()
-        .subscribeOn(backgroundScheduler)
-        .observeOn(foregroundScheduler)
-        .subscribe({
-          if (it) {
-            onMasterPinPresent()
-          } else {
-            onMasterPinMissing()
-          }
-        }, { Timber.e(it, "onError checkMasterPinPresent") }))
+    disposeOnStop {
+      interactor.hasMasterPin()
+          .subscribeOn(backgroundScheduler)
+          .observeOn(foregroundScheduler)
+          .subscribe({
+            if (it) {
+              onMasterPinPresent()
+            } else {
+              onMasterPinMissing()
+            }
+          }, { Timber.e(it, "onError checkMasterPinPresent") })
+    }
   }
 }
