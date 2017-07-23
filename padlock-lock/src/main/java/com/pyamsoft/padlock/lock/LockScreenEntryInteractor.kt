@@ -35,15 +35,16 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockScreenEntryInteractor @Inject internal constructor(context: Context,
-    private val preferences: LockScreenPreferences,
-    private val jobSchedulerCompat: JobSchedulerCompat,
-    private val masterPinInteractor: MasterPinInteractor, private val padLockDB: PadLockDB,
-    @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>) {
+    protected @JvmField val preferences: LockScreenPreferences,
+    protected @JvmField val jobSchedulerCompat: JobSchedulerCompat,
+    private val masterPinInteractor: MasterPinInteractor,
+    protected @JvmField val padLockDB: PadLockDB,
+    @param:Named("recheck") protected @JvmField val recheckServiceClass: Class<out IntentService>) {
 
-  private val appContext = context.applicationContext
-  private var failCount: Int = 0
+  protected @JvmField val appContext = context.applicationContext
+  protected @JvmField var failCount: Int = 0
 
-  @CheckResult fun submitPin(packageName: String, activityName: String, lockCode: String?,
+  @CheckResult internal fun submitPin(packageName: String, activityName: String, lockCode: String?,
       lockUntilTime: Long, currentAttempt: String): Single<Boolean> {
     return masterPinInteractor.getMasterPin().map {
       Timber.d("Attempt unlock: %s %s", packageName, activityName)
@@ -72,14 +73,14 @@ import javax.inject.Singleton
     }
   }
 
-  @CheckResult private fun whitelistEntry(
+  @CheckResult protected fun whitelistEntry(
       packageName: String, activityName: String, realName: String,
       lockCode: String?, isSystem: Boolean): Completable {
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName)
     return padLockDB.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
   }
 
-  @CheckResult private fun queueRecheckJob(
+  @CheckResult protected fun queueRecheckJob(
       packageName: String, activityName: String, recheckTime: Long): Completable {
     return Completable.fromAction {
       // Cancel any old recheck job for the class, but not the package
@@ -89,11 +90,11 @@ import javax.inject.Singleton
       jobSchedulerCompat.cancel(intent)
 
       // Queue up a new recheck job
-      jobSchedulerCompat.set(intent, System.currentTimeMillis() + recheckTime)
+      jobSchedulerCompat.queue(intent, System.currentTimeMillis() + recheckTime)
     }
   }
 
-  @CheckResult private fun ignoreEntryForTime(
+  @CheckResult protected fun ignoreEntryForTime(
       ignoreMinutesInMillis: Long, packageName: String, activityName: String): Completable {
     return Completable.defer {
       val newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis
@@ -105,10 +106,8 @@ import javax.inject.Singleton
     }
   }
 
-  /**
-   * public
-   */
-  @CheckResult fun lockEntryOnFail(packageName: String, activityName: String): Maybe<TimePair> {
+  @CheckResult internal fun lockEntryOnFail(packageName: String,
+      activityName: String): Maybe<TimePair> {
     return Single.fromCallable { ++failCount }
         .filter { it > DEFAULT_MAX_FAIL_COUNT }
         .flatMap { getTimeoutPeriodMinutesInMillis() }
@@ -117,13 +116,13 @@ import javax.inject.Singleton
   }
 
   @CheckResult
-  private fun getTimeoutPeriodMinutesInMillis(): Maybe<Long> {
+  protected fun getTimeoutPeriodMinutesInMillis(): Maybe<Long> {
     return Maybe.fromCallable { preferences.getTimeoutPeriod() }.map {
       TimeUnit.MINUTES.toMillis(it)
     }
   }
 
-  @CheckResult private fun lockEntry(
+  @CheckResult protected fun lockEntry(
       timeOutMinutesInMillis: Long, packageName: String, activityName: String): Maybe<TimePair> {
     return Maybe.defer {
       val currentTime = System.currentTimeMillis()
@@ -136,12 +135,12 @@ import javax.inject.Singleton
     }
   }
 
-  fun resetFailCount() {
+  internal fun resetFailCount() {
     Timber.d("Reset fail count to 0")
     failCount = 0
   }
 
-  @CheckResult fun getHint(): Single<String> {
+  @CheckResult internal fun getHint(): Single<String> {
     return masterPinInteractor.getHint().map {
       val result: String
       if (it.isPresent()) {
@@ -153,7 +152,7 @@ import javax.inject.Singleton
     }
   }
 
-  @CheckResult fun postUnlock(packageName: String,
+  @CheckResult internal fun postUnlock(packageName: String,
       activityName: String, realName: String, lockCode: String?,
       isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long): Completable {
     return Completable.defer {
@@ -180,7 +179,7 @@ import javax.inject.Singleton
   internal data class TimePair(val currentTime: Long, val lockUntilTime: Long)
 
   companion object {
-    const val DEFAULT_MAX_FAIL_COUNT: Int = 2
+    const internal val DEFAULT_MAX_FAIL_COUNT: Int = 2
   }
 
 }

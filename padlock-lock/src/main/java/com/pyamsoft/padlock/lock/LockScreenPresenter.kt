@@ -22,15 +22,16 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class LockScreenPresenter @Inject constructor(private val interactor: LockScreenInteractor,
-    private val bus: CloseOldBus,
+class LockScreenPresenter @Inject internal constructor(
+    protected @JvmField val screenInteractor: LockScreenInteractor,
+    protected @JvmField val bus: CloseOldBus,
     @Named("obs") obsScheduler: Scheduler,
-    @Named("io") subScheduler: Scheduler) : LockTypePresenter(interactor, obsScheduler,
+    @Named("io") subScheduler: Scheduler) : LockTypePresenter(screenInteractor, obsScheduler,
     subScheduler) {
 
   fun createWithDefaultIgnoreTime(onInitializeWithIgnoreTime: (Long) -> Unit) {
     disposeOnStop {
-      interactor.getDefaultIgnoreTime()
+      screenInteractor.getDefaultIgnoreTime()
           .subscribeOn(backgroundScheduler)
           .observeOn(foregroundScheduler)
           .subscribe({ onInitializeWithIgnoreTime(it) }, {
@@ -41,7 +42,7 @@ internal class LockScreenPresenter @Inject constructor(private val interactor: L
 
   fun loadDisplayNameFromPackage(packageName: String, setDisplayName: (String) -> Unit) {
     disposeOnStop {
-      interactor.getDisplayName(packageName)
+      screenInteractor.getDisplayName(packageName)
           .subscribeOn(backgroundScheduler)
           .observeOn(foregroundScheduler)
           .subscribe({ setDisplayName(it) }, { throwable ->
