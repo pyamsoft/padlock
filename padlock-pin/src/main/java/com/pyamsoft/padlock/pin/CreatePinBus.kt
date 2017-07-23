@@ -14,9 +14,25 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list;
+package com.pyamsoft.padlock.pin
 
-interface LockDatabaseWhitelistView extends LockDatabaseView {
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
+import javax.inject.Singleton
 
-  void onDatabaseEntryWhitelisted();
+@Singleton class CreatePinBus @Inject internal constructor() : EventBus<CreatePinEvent> {
+
+  private val bus: EventBus<CreatePinEvent> = RxBus.create()
+
+  override fun listen(): Observable<CreatePinEvent> {
+    return bus.listen()
+  }
+
+  override fun publish(event: CreatePinEvent) {
+    bus.publish(event)
+  }
+
 }
+
