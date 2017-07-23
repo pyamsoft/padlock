@@ -106,7 +106,7 @@ internal class LockListPresenter @Inject constructor(
   fun setSystemVisibilityFromPreference(onSetSystemVisible: () -> Unit,
       onSetSystemInvisible: () -> Unit) {
     disposeOnStop {
-      lockListInteractor.isSystemVisible
+      lockListInteractor.isSystemVisible()
           .subscribeOn(backgroundScheduler)
           .observeOn(foregroundScheduler)
           .subscribe({
