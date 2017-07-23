@@ -23,7 +23,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class OnboardAcceptTermsPresenter @Inject internal constructor(
-    private val interactor: OnboardAcceptTermsInteractor,
+    protected @JvmField val interactor: OnboardAcceptTermsInteractor,
     @Named("obs") obsScheduler: Scheduler,
     @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
 
