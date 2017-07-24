@@ -25,7 +25,6 @@ import android.view.View
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.PinEntryDialog
-import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.helper.ProgressOverlay
@@ -118,12 +117,7 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment() {
 
     presenter.registerOnBus(onClearAll = {
       Timber.d("Everything is cleared, kill self")
-      try {
-        PadLockService.finish()
-      } catch (e: NullPointerException) {
-        Timber.e(e, "Expected NPE when Service is NULL")
-      }
-
+      presenter.publishFinish()
       val activityManager = activity.applicationContext
           .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
       activityManager.clearApplicationUserData()

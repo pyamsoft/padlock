@@ -88,7 +88,7 @@ class LockServicePresenter @Inject internal constructor(
     }
   }
 
-  private fun processAccessibilityEvent(packageName: String, className: String,
+  fun processAccessibilityEvent(packageName: String, className: String,
       forcedRecheck: RecheckStatus, startLockScreen: (PadLockEntry, String) -> Unit) {
     disposeOnStop {
       interactor.processEvent(packageName, className, forcedRecheck)
