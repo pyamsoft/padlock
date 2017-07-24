@@ -39,6 +39,7 @@ import com.pyamsoft.padlock.pin.PinEntryPatternFragment
 import com.pyamsoft.padlock.pin.PinEntryTextFragment
 import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.service.PadLockService
+import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.settings.SettingsFragment
 import dagger.Component
 import javax.inject.Singleton
@@ -81,6 +82,8 @@ interface PadLockComponent {
   fun inject(padLockService: PadLockService)
 
   fun inject(settingsFragment: SettingsFragment)
+
+  fun inject(recheckService: RecheckService)
 
   // To be used directly by PadLockSingleInitProvider
   @CheckResult fun provideInstallListenerPreferences(): InstallListenerPreferences

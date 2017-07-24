@@ -16,11 +16,8 @@
 
 package com.pyamsoft.padlock.lock
 
-interface Recheck {
+object Recheck {
 
-  companion object {
-
-    const val EXTRA_PACKAGE_NAME = "extra_package_name"
-    const val EXTRA_CLASS_NAME = "extra_class_name"
-  }
+  const val EXTRA_PACKAGE_NAME = "extra_package_name"
+  const val EXTRA_CLASS_NAME = "extra_class_name"
 }

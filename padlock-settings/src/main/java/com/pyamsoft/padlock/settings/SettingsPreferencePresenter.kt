@@ -17,6 +17,8 @@
 package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
+import com.pyamsoft.padlock.service.ServiceFinishBus
+import com.pyamsoft.padlock.service.ServiceFinishEvent
 import com.pyamsoft.padlock.settings.ConfirmEvent.Type
 import com.pyamsoft.padlock.settings.ConfirmEvent.Type.ALL
 import com.pyamsoft.padlock.settings.ConfirmEvent.Type.DATABASE
@@ -30,9 +32,14 @@ import javax.inject.Named
 class SettingsPreferencePresenter @Inject internal constructor(
     private val interactor: SettingsPreferenceInteractor,
     private val bus: ConfirmEventBus,
+    private val serviceFinishBus: ServiceFinishBus,
     private val receiver: ApplicationInstallReceiver, @Named("obs") obsScheduler: Scheduler,
     @Named("sub") subScheduler: Scheduler) : SchedulerPreferencePresenter(obsScheduler,
     subScheduler) {
+
+  fun publishFinish() {
+    serviceFinishBus.publish(ServiceFinishEvent)
+  }
 
   fun setApplicationInstallReceiverState() {
     disposeOnStop(interactor.isInstallListenerEnabled()
