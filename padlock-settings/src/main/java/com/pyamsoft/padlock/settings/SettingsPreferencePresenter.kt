@@ -20,7 +20,7 @@ import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.settings.ConfirmEvent.Type
 import com.pyamsoft.padlock.settings.ConfirmEvent.Type.ALL
 import com.pyamsoft.padlock.settings.ConfirmEvent.Type.DATABASE
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
+import com.pyamsoft.pydroid.presenter.SchedulerPreferencePresenter
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import timber.log.Timber
@@ -31,7 +31,8 @@ class SettingsPreferencePresenter @Inject internal constructor(
     private val interactor: SettingsPreferenceInteractor,
     private val bus: ConfirmEventBus,
     private val receiver: ApplicationInstallReceiver, @Named("obs") obsScheduler: Scheduler,
-    @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
+    @Named("sub") subScheduler: Scheduler) : SchedulerPreferencePresenter(obsScheduler,
+    subScheduler) {
 
   fun setApplicationInstallReceiverState() {
     disposeOnStop(interactor.isInstallListenerEnabled()

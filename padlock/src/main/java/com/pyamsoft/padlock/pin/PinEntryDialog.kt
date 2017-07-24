@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.pin
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.annotation.CheckResult
 import android.support.v4.content.ContextCompat
@@ -89,7 +88,7 @@ class PinEntryDialog : CanaryDialog() {
       binding.pinNextButtonLayout.visibility = View.VISIBLE
       pushIfNotPresent(PinEntryPatternFragment(), PinEntryPatternFragment.TAG)
 
-      binding.pinNextButton.setOnClickListener { v ->
+      binding.pinNextButton.setOnClickListener {
         val fragmentManager = childFragmentManager
         val fragment = fragmentManager.findFragmentByTag(PinEntryPatternFragment.TAG)
         if (fragment is PinEntryPatternFragment) {
@@ -116,12 +115,13 @@ class PinEntryDialog : CanaryDialog() {
     super.onStop()
     presenter.stop()
     appIcon = LoaderHelper.unload(appIcon)
+    binding.pinNextButton.setOnClickListener(null)
   }
 
-  @SuppressLint("SetTextI18n") private fun setupToolbar() {
+  private fun setupToolbar() {
     // Maybe something more descriptive
     binding.pinEntryToolbar.title = "PIN"
-    binding.pinEntryToolbar.setNavigationOnClickListener { v -> dismiss() }
+    binding.pinEntryToolbar.setNavigationOnClickListener { dismiss() }
     var icon = binding.pinEntryToolbar.navigationIcon
     if (icon != null) {
       icon = DrawableUtil.tintDrawableFromColor(icon,
@@ -145,14 +145,11 @@ class PinEntryDialog : CanaryDialog() {
 
     const val TAG = "PinEntryDialog"
     const private val ENTRY_PACKAGE_NAME = "entry_packagename"
-    const private val ENTRY_ACTIVITY_NAME = "entry_activityname"
 
-    @JvmStatic @CheckResult fun newInstance(packageName: String,
-        activityName: String): PinEntryDialog {
+    @JvmStatic @CheckResult fun newInstance(packageName: String): PinEntryDialog {
       val fragment = PinEntryDialog()
       val args = Bundle()
       args.putString(ENTRY_PACKAGE_NAME, packageName)
-      args.putString(ENTRY_ACTIVITY_NAME, activityName)
       fragment.arguments = args
       return fragment
     }
