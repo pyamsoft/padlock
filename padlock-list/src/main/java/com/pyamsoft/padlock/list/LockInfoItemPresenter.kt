@@ -24,11 +24,14 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockInfoItemPresenter @Inject internal constructor(
-    protected @JvmField val interactor: LockInfoItemInteractor,
+    private val interactor: LockInfoItemInteractor,
     @Named("obs") observeScheduler: Scheduler,
     @Named("sub") subscribeScheduler: Scheduler) : SchedulerPresenter(observeScheduler,
     subscribeScheduler) {
 
+  /**
+   * public
+   */
   fun modifyDatabaseEntry(oldLockState: LockState, newLockState: LockState,
       packageName: String, activityName: String, code: String?,
       system: Boolean, onDatabaseEntryCreated: () -> Unit, onDatabaseEntryDeleted: () -> Unit,

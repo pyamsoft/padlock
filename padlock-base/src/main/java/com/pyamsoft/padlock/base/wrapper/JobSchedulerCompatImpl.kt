@@ -35,7 +35,7 @@ internal class JobSchedulerCompatImpl @Inject constructor(context: Context) : Jo
     pendingIntent.cancel()
   }
 
-  override fun queue(intent: Intent, triggerTime: Long) {
+  override fun set(intent: Intent, triggerTime: Long) {
     alarmManager.set(AlarmManager.RTC, triggerTime,
         PendingIntent.getService(appContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
   }

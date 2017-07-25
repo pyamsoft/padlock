@@ -29,7 +29,7 @@ import com.squareup.sqldelight.SqlDelightStatement
 
   @AutoValue abstract class WithPackageName : PadLockEntryModel.With_package_nameModel
 
-  internal class InsertManager internal constructor(openHelper: SQLiteOpenHelper) {
+  class InsertManager internal constructor(openHelper: SQLiteOpenHelper) {
 
     private val insertEntry = PadLockEntryModel.Insert_entry(openHelper.writableDatabase)
 
@@ -41,7 +41,7 @@ import com.squareup.sqldelight.SqlDelightStatement
     }
   }
 
-  internal class DeletePackageManager internal constructor(openHelper: SQLiteOpenHelper) {
+  class DeletePackageManager internal constructor(openHelper: SQLiteOpenHelper) {
 
     private val deletePackage = PadLockEntryModel.Delete_with_package_name(
         openHelper.writableDatabase)
@@ -52,7 +52,7 @@ import com.squareup.sqldelight.SqlDelightStatement
     }
   }
 
-  internal class DeletePackageActivityManager internal constructor(openHelper: SQLiteOpenHelper) {
+  class DeletePackageActivityManager internal constructor(openHelper: SQLiteOpenHelper) {
 
     private val deletePackageActivity = PadLockEntryModel.Delete_with_package_activity_name(
         openHelper.writableDatabase)
@@ -64,7 +64,7 @@ import com.squareup.sqldelight.SqlDelightStatement
     }
   }
 
-  internal class UpdateLockTimeManager internal constructor(openHelper: SQLiteOpenHelper) {
+  class UpdateLockTimeManager internal constructor(openHelper: SQLiteOpenHelper) {
 
     private val updateLockUntilTime = PadLockEntryModel.Update_lock_until_time(
         openHelper.writableDatabase)
@@ -76,7 +76,7 @@ import com.squareup.sqldelight.SqlDelightStatement
     }
   }
 
-  internal class UpdateIgnoreTimeManager internal constructor(openHelper: SQLiteOpenHelper) {
+  class UpdateIgnoreTimeManager internal constructor(openHelper: SQLiteOpenHelper) {
 
     private val updateIgnoreUntilTime = PadLockEntryModel.Update_ignore_until_time(
         openHelper.writableDatabase)
@@ -88,7 +88,7 @@ import com.squareup.sqldelight.SqlDelightStatement
     }
   }
 
-  internal class UpdateWhitelistManager internal constructor(openHelper: SQLiteOpenHelper) {
+  class UpdateWhitelistManager internal constructor(openHelper: SQLiteOpenHelper) {
     private val updateWhitelist = PadLockEntryModel.Update_whitelist(openHelper.writableDatabase)
 
     @CheckResult fun executeProgram(whitelist: Boolean, packageName: String,

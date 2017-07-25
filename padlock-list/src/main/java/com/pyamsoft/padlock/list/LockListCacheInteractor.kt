@@ -26,6 +26,10 @@ import javax.inject.Singleton
 
   private var cachedListObservable: Single<MutableList<AppEntry>>? = null
 
+  init {
+    cachedListObservable = null
+  }
+
   fun cache(cache: Single<MutableList<AppEntry>>) {
     cachedListObservable = cache
   }
