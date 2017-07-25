@@ -37,7 +37,9 @@ import com.pyamsoft.padlock.onboard.list.OnboardListDialog
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.pin.PinEntryPatternFragment
 import com.pyamsoft.padlock.pin.PinEntryTextFragment
+import com.pyamsoft.padlock.purge.PurgeAllDialog
 import com.pyamsoft.padlock.purge.PurgeFragment
+import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.settings.SettingsFragment
@@ -84,6 +86,10 @@ interface PadLockComponent {
   fun inject(settingsFragment: SettingsFragment)
 
   fun inject(recheckService: RecheckService)
+
+  fun inject(purgeAllDialog: PurgeAllDialog)
+
+  fun inject(purgeSingleItemDialog: PurgeSingleItemDialog)
 
   // To be used directly by PadLockSingleInitProvider
   @CheckResult fun provideInstallListenerPreferences(): InstallListenerPreferences
