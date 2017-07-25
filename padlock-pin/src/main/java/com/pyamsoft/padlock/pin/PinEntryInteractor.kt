@@ -28,18 +28,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class PinEntryInteractor @Inject constructor(
-    protected @JvmField val masterPinInteractor: MasterPinInteractor,
+    private val masterPinInteractor: MasterPinInteractor,
     preferences: LockScreenPreferences) : LockTypeInteractor(preferences) {
 
   @CheckResult private fun getMasterPin(): Single<Optional<String>> {
     return masterPinInteractor.getMasterPin()
   }
 
-  @CheckResult internal fun hasMasterPin(): Single<Boolean> {
+  @CheckResult fun hasMasterPin(): Single<Boolean> {
     return getMasterPin().map { it.isPresent() }
   }
 
-  @CheckResult internal fun submitPin(currentAttempt: String,
+  @CheckResult fun submitPin(currentAttempt: String,
       reEntryAttempt: String, hint: String): Single<PinEntryEvent> {
     return getMasterPin().flatMap {
       if (it.isPresent()) {
@@ -50,7 +50,7 @@ import javax.inject.Singleton
     }
   }
 
-  @CheckResult protected fun clearPin(
+  @CheckResult private fun clearPin(
       masterPin: String, attempt: String): Single<PinEntryEvent> {
     return LockHelper.get().checkSubmissionAttempt(attempt, masterPin).map {
       if (it) {
@@ -65,7 +65,7 @@ import javax.inject.Singleton
     }
   }
 
-  @CheckResult protected fun createPin(
+  @CheckResult private fun createPin(
       attempt: String, reentry: String, hint: String): Single<PinEntryEvent> {
     return Single.fromCallable {
       Timber.d("No existing master item, attempt to create a new one")
