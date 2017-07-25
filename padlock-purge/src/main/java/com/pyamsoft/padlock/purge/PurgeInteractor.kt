@@ -29,7 +29,7 @@ import java.util.HashSet
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton class PurgeInteractor @Inject internal constructor(
+@Singleton internal class PurgeInteractor @Inject internal constructor(
     private val packageManagerWrapper: PackageManagerWrapper,
     private val padLockDB: PadLockDB) {
 

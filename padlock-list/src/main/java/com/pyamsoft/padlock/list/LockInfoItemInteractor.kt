@@ -26,8 +26,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton class LockInfoItemInteractor @Inject internal constructor(padLockDB: PadLockDB,
-    protected @JvmField val cacheInteractor: LockInfoCacheInteractor) : LockCommonInteractor(
-    padLockDB) {
+    internal val cacheInteractor: LockInfoCacheInteractor) : LockCommonInteractor(padLockDB) {
 
   override fun clearCache() {
     cacheInteractor.clearCache()
@@ -53,7 +52,7 @@ import javax.inject.Singleton
     }
   }
 
-  @CheckResult protected fun updateExistingEntry(
+  @CheckResult private fun updateExistingEntry(
       packageName: String, activityName: String, whitelist: Boolean): Single<LockState> {
     Timber.d("Entry already exists for: %s %s, update it", packageName, activityName)
     return padLockDB.updateWhitelist(whitelist, packageName, activityName)
@@ -61,7 +60,7 @@ import javax.inject.Singleton
         .doOnSuccess { updateCacheEntry(packageName, activityName, it) }
   }
 
-  protected fun updateCacheEntry(packageName: String,
+  private fun updateCacheEntry(packageName: String,
       name: String, lockState: LockState) {
     val cached = cacheInteractor.getFromCache(packageName)
     if (cached != null) {

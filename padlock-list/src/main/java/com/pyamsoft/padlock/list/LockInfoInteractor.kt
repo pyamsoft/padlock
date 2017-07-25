@@ -36,20 +36,19 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton internal class LockInfoInteractor @Inject internal constructor(
-    protected @JvmField val padLockDB: PadLockDB,
-    protected @JvmField val cacheInteractor: LockInfoCacheInteractor,
-    protected @JvmField val packageManagerWrapper: PackageManagerWrapper,
-    protected @JvmField val preferences: OnboardingPreferences,
-    @param:Named("lockscreen") protected @JvmField val lockScreenClass: Class<out Activity>) {
+@Singleton internal class LockInfoInteractor @Inject internal constructor(private val padLockDB: PadLockDB,
+    private val cacheInteractor: LockInfoCacheInteractor,
+    private val packageManagerWrapper: PackageManagerWrapper,
+    private val preferences: OnboardingPreferences,
+    @param:Named("lockscreen") private val lockScreenClass: Class<out Activity>) {
 
 
-  @CheckResult internal fun hasShownOnBoarding(): Single<Boolean> {
+  @CheckResult fun hasShownOnBoarding(): Single<Boolean> {
     return Single.fromCallable { preferences.isInfoDialogOnBoard() }
         .delay(300, TimeUnit.MILLISECONDS)
   }
 
-  @CheckResult internal fun populateList(packageName: String,
+  @CheckResult fun populateList(packageName: String,
       forceRefresh: Boolean): Observable<ActivityEntry> {
     return Single.defer {
       val dataSource: Single<MutableList<ActivityEntry>>
@@ -96,7 +95,7 @@ import javax.inject.Singleton
     }
   }
 
-  @CheckResult protected fun fetchFreshData(packageName: String): Single<MutableList<ActivityEntry>> {
+  @CheckResult private fun fetchFreshData(packageName: String): Single<MutableList<ActivityEntry>> {
     return getPackageActivities(packageName).zipWith(getLockedActivityEntries(packageName),
         BiFunction { activityNames, padLockEntries ->
           // Sort here to avoid stream break
@@ -131,26 +130,26 @@ import javax.inject.Singleton
         })
   }
 
-  @CheckResult protected fun getLockedActivityEntries(
+  @CheckResult private fun getLockedActivityEntries(
       packageName: String): Single<List<PadLockEntry.WithPackageName>> {
     return padLockDB.queryWithPackageName(packageName)
   }
 
-  @CheckResult protected fun getPackageActivities(packageName: String): Single<List<String>> {
+  @CheckResult private fun getPackageActivities(packageName: String): Single<List<String>> {
     return packageManagerWrapper.getActivityListForPackage(packageName)
         .flatMapObservable { Observable.fromIterable(it) }
         .filter { !it.equals(lockScreenClass.name, ignoreCase = true) }
         .toList()
   }
 
-  @CheckResult protected fun findActivityEntry(activityNames: List<String>,
+  @CheckResult private fun findActivityEntry(activityNames: List<String>,
       padLockEntries: MutableList<PadLockEntry.WithPackageName>, index: Int): ActivityEntry {
     val activityName = activityNames[index]
     val foundEntry = findMatchingEntry(padLockEntries, activityName)
     return createActivityEntry(activityName, foundEntry)
   }
 
-  @CheckResult protected fun findMatchingEntry(
+  @CheckResult private fun findMatchingEntry(
       padLockEntries: MutableList<PadLockEntry.WithPackageName>,
       activityName: String): PadLockEntry.WithPackageName? {
     if (padLockEntries.isEmpty()) {
@@ -199,7 +198,7 @@ import javax.inject.Singleton
     return foundEntry
   }
 
-  @CheckResult protected fun createActivityEntry(name: String,
+  @CheckResult private fun createActivityEntry(name: String,
       foundEntry: PadLockEntry.WithPackageName?): ActivityEntry {
     val state: LockState
     if (foundEntry == null) {

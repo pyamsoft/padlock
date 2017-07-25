@@ -38,7 +38,7 @@ import javax.inject.Inject
 internal class PackageManagerWrapperImpl @Inject internal constructor(
     context: Context) : PackageManagerWrapper {
 
-  protected @JvmField val packageManager: PackageManager = context.applicationContext.packageManager
+  private val packageManager: PackageManager = context.applicationContext.packageManager
 
   override fun loadDrawableForPackageOrDefault(packageName: String): Single<Drawable> {
     return Single.fromCallable {

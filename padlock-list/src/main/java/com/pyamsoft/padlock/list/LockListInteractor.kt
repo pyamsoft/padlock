@@ -38,11 +38,11 @@ import javax.inject.Singleton
 
 
 @Singleton internal class LockListInteractor @Inject internal constructor(
-    protected @JvmField val padLockDB: PadLockDB,
-    protected @JvmField val packageManager: PackageManagerWrapper,
-    protected @JvmField val onboardingPreferences: OnboardingPreferences,
-    protected @JvmField val preferences: LockListPreferences,
-    protected @JvmField val cacheInteractor: LockListCacheInteractor) {
+    private val padLockDB: PadLockDB,
+    private val packageManager: PackageManagerWrapper,
+    private val onboardingPreferences: OnboardingPreferences,
+    private val preferences: LockListPreferences,
+    private val cacheInteractor: LockListCacheInteractor) {
 
   @CheckResult fun populateList(forceRefresh: Boolean): Observable<AppEntry> {
     return Single.defer {
@@ -60,7 +60,7 @@ import javax.inject.Singleton
     }.toObservable().concatMap { Observable.fromIterable(it) }
   }
 
-  @CheckResult protected fun fetchFreshData(): Single<MutableList<AppEntry>> {
+  @CheckResult private fun fetchFreshData(): Single<MutableList<AppEntry>> {
     return getActiveApplications().withLatestFrom(isSystemVisible().toObservable(),
         BiFunction<ApplicationInfo, Boolean, Optional<ApplicationInfo>> { application, systemVisible ->
           if (systemVisible) {
@@ -121,7 +121,7 @@ import javax.inject.Singleton
         .toSortedList { o1, o2 -> o1.name().compareTo(o2.name(), ignoreCase = true) }
   }
 
-  @CheckResult protected fun createFromPackageInfo(tuple: LockTuple): Maybe<AppEntry> {
+  @CheckResult private fun createFromPackageInfo(tuple: LockTuple): Maybe<AppEntry> {
     return packageManager.getApplicationInfo(tuple.packageName)
         .flatMap { info ->
           packageManager.loadPackageLabel(info).map {
@@ -135,20 +135,20 @@ import javax.inject.Singleton
         }
   }
 
-  @CheckResult protected fun isSystemApplication(info: ApplicationInfo): Boolean {
+  @CheckResult private fun isSystemApplication(info: ApplicationInfo): Boolean {
     return info.flags and ApplicationInfo.FLAG_SYSTEM != 0
   }
 
-  @CheckResult protected fun getActiveApplications(): Observable<ApplicationInfo> {
+  @CheckResult private fun getActiveApplications(): Observable<ApplicationInfo> {
     return packageManager.getActiveApplications().flatMapObservable { Observable.fromIterable(it) }
   }
 
-  @CheckResult protected fun getActivityListForApplication(
+  @CheckResult private fun getActivityListForApplication(
       info: ApplicationInfo): Single<List<String>> {
     return packageManager.getActivityListForPackage(info.packageName)
   }
 
-  @CheckResult protected fun getAppEntryList(): Single<List<PadLockEntry.AllEntries>> {
+  @CheckResult private fun getAppEntryList(): Single<List<PadLockEntry.AllEntries>> {
     return padLockDB.queryAll()
   }
 
@@ -164,7 +164,7 @@ import javax.inject.Singleton
     preferences.setSystemVisible(visible)
   }
 
-  internal data class LockTuple internal constructor(internal val packageName: String,
+  private data class LockTuple internal constructor(internal val packageName: String,
       internal val locked: Boolean, internal val whitelist: Boolean,
       internal val hardLocked: Boolean)
 }
