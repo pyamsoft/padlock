@@ -23,9 +23,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class OnboardAcceptTermsInteractor @Inject internal constructor(
-    protected @JvmField val preferences: OnboardingPreferences) {
+    private val preferences: OnboardingPreferences) {
 
-  @CheckResult internal fun agreeToTerms(): Completable {
+  /**
+   * public
+   */
+  @CheckResult fun agreeToTerms(): Completable {
     return Completable.fromAction({ preferences.setAgreed() })
   }
 }
