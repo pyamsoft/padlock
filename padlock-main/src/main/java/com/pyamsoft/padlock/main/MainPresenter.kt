@@ -22,7 +22,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-class MainPresenter @Inject internal constructor(protected @JvmField val interactor: MainInteractor,
+class MainPresenter @Inject internal constructor(private val interactor: MainInteractor,
     @Named("obs") obsScheduler: Scheduler,
     @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
 
