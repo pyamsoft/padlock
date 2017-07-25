@@ -33,18 +33,18 @@ import javax.inject.Singleton
     private val packageManagerWrapper: PackageManagerWrapper,
     private val padLockDB: PadLockDB) {
 
-  @JvmField protected var cachedStalePackages: Single<List<String>>? = null
+  private var cachedStalePackages: Single<List<String>>? = null
 
-  @CheckResult private fun getActiveApplicationPackageNames(): Single<List<String>> {
-    return packageManagerWrapper.getActiveApplications()
+  private val activeApplicationPackageNames: Single<List<String>>
+    @CheckResult
+    get() = packageManagerWrapper.getActiveApplications()
         .flatMapObservable { Observable.fromIterable(it) }
         .map { it.packageName }
         .toSortedList()
-  }
 
-  @CheckResult private fun getAppEntryList(): Single<List<PadLockEntry.AllEntries>> {
-    return padLockDB.queryAll()
-  }
+  private val appEntryList: Single<List<PadLockEntry.AllEntries>>
+    @CheckResult
+    get() = padLockDB.queryAll()
 
   fun clearCache() {
     cachedStalePackages = null
@@ -68,8 +68,8 @@ import javax.inject.Singleton
     }.sorted { obj, str -> obj.compareTo(str, ignoreCase = true) }
   }
 
-  @CheckResult protected fun fetchFreshData(): Single<List<String>> {
-    return getAppEntryList().zipWith(getActiveApplicationPackageNames(),
+  @CheckResult internal fun fetchFreshData(): Single<List<String>> {
+    return appEntryList.zipWith(activeApplicationPackageNames,
         BiFunction {
           allEntries, packageNames ->
           val mutableAllEntries: MutableList<PadLockEntry.AllEntries> = ArrayList(allEntries)
