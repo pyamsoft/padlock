@@ -21,12 +21,12 @@ import io.reactivex.Single
 
 abstract class LockHelper protected constructor() {
 
-  @CheckResult internal fun checkSubmissionAttempt(attempt: String,
+  @CheckResult fun checkSubmissionAttempt(attempt: String,
       encodedPin: String): Single<Boolean> {
     return encodeSHA256(attempt).map { encodedPin == it }
   }
 
-  @CheckResult abstract internal fun encodeSHA256(attempt: String): Single<String>
+  @CheckResult abstract fun encodeSHA256(attempt: String): Single<String>
 
   companion object {
 
@@ -39,7 +39,7 @@ abstract class LockHelper protected constructor() {
     }
 
     @JvmStatic
-    @CheckResult internal fun get(): LockHelper {
+    @CheckResult fun get(): LockHelper {
       val obj: LockHelper? = instance
       if (obj == null) {
         throw IllegalStateException("LockHelper instance is NULL")

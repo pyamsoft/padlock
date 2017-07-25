@@ -24,7 +24,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton class MasterPinInteractor @Inject internal constructor(
-    protected @JvmField val preferences: MasterPinPreferences) {
+    private val preferences: MasterPinPreferences) {
 
   @CheckResult fun getMasterPin(): Single<Optional<String>> {
     return Single.fromCallable { Optional.ofNullable(preferences.getMasterPassword()) }
@@ -38,7 +38,7 @@ import javax.inject.Singleton
     }
   }
 
-  @CheckResult internal fun getHint(): Single<Optional<String>> {
+  @CheckResult fun getHint(): Single<Optional<String>> {
     return Single.fromCallable { Optional.ofNullable(preferences.getHint()) }
   }
 

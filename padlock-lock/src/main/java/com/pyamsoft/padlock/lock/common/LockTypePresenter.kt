@@ -25,7 +25,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 open class LockTypePresenter @Inject protected constructor(
-    protected @JvmField val interactor: LockTypeInteractor,
+    private val interactor: LockTypeInteractor,
     @Named("obs") obsScheduler: Scheduler,
     @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
 

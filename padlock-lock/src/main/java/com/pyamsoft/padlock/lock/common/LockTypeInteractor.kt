@@ -24,7 +24,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton open class LockTypeInteractor @Inject protected constructor(
-    protected @JvmField val preferences: LockScreenPreferences) {
+    protected val preferences: LockScreenPreferences) {
 
   @CheckResult fun getLockScreenType(): Single<LockScreenType> {
     return Single.fromCallable { preferences.getCurrentLockType() }
