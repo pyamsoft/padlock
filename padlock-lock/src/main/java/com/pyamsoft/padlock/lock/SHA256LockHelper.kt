@@ -26,7 +26,7 @@ import java.security.NoSuchAlgorithmException
 
 class SHA256LockHelper private constructor() : LockHelper() {
 
-  protected @JvmField val messageDigest: MessageDigest
+  private val messageDigest: MessageDigest
 
   init {
     try {
