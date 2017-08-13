@@ -20,9 +20,9 @@ import android.app.Application
 import android.support.annotation.CheckResult
 import android.support.v4.app.Fragment
 import com.pyamsoft.padlock.base.PadLockModule
-import com.pyamsoft.padlock.lock.LockHelper
+import com.pyamsoft.padlock.lock.helper.LockHelper
 import com.pyamsoft.padlock.lock.LockScreenActivity
-import com.pyamsoft.padlock.lock.SHA256LockHelper
+import com.pyamsoft.padlock.lock.helper.SHA256LockHelper
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.uicommon.CanaryDialog
@@ -52,7 +52,8 @@ class PadLock : Application(), ComponentProvider {
     Licenses.create("PatternLockView", "https://github.com/aritraroy/PatternLockView",
         "licenses/patternlock")
 
-    LockHelper.set(SHA256LockHelper.newInstance())
+    LockHelper.set(
+        SHA256LockHelper.newInstance())
     val padLockModule = PadLockModule(applicationContext, MainActivity::class.java,
         LockScreenActivity::class.java,
         RecheckService::class.java)
