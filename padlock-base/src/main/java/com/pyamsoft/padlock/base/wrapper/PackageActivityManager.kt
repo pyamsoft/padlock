@@ -17,27 +17,13 @@
 package com.pyamsoft.padlock.base.wrapper
 
 import android.content.pm.ActivityInfo
-import android.content.pm.ApplicationInfo
-import android.graphics.drawable.Drawable
 import android.support.annotation.CheckResult
 import io.reactivex.Maybe
 import io.reactivex.Single
 
-interface PackageManagerWrapper {
-
-  @CheckResult fun getActiveApplications(): Single<List<ApplicationInfo>>
+interface PackageActivityManager {
 
   @CheckResult fun getActivityListForPackage(packageName: String): Single<List<String>>
 
-  @CheckResult fun loadPackageLabel(info: ApplicationInfo): Maybe<String>
-
-  @CheckResult fun loadPackageLabel(packageName: String): Maybe<String>
-
-  @CheckResult fun loadDrawableForPackageOrDefault(
-      packageName: String): Single<Drawable>
-
-  @CheckResult fun getApplicationInfo(packageName: String): Maybe<ApplicationInfo>
-
-  @CheckResult fun getActivityInfo(packageName: String,
-      activityName: String): Maybe<ActivityInfo>
+  @CheckResult fun getActivityInfo(packageName: String, activityName: String): Maybe<ActivityInfo>
 }
