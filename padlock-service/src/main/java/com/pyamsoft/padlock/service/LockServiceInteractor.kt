@@ -28,7 +28,7 @@ internal interface LockServiceInteractor {
 
   fun setLockScreenPassed(packageName: String, className: String, passed: Boolean)
 
-  @CheckResult fun processActiveIfMatching(packageName: String, className: String): Single<Boolean>
+  @CheckResult fun isActiveMatching(packageName: String, className: String): Single<Boolean>
 
   @CheckResult fun processEvent(packageName: String, className: String,
       forcedRecheck: RecheckStatus): Single<PadLockEntry>
