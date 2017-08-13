@@ -44,13 +44,15 @@ import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
+import com.pyamsoft.padlock.service.ServiceModule
 import com.pyamsoft.padlock.settings.SettingsFragment
 import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
 @Component(modules = arrayOf(PadLockModule::class, PackageManagerWrapperModule::class,
-    JobSchedulerCompatModule::class, PadLockDBModule::class, LockModule::class, PinModule::class))
+    JobSchedulerCompatModule::class, PadLockDBModule::class, LockModule::class, PinModule::class,
+    ServiceModule::class))
 interface PadLockComponent {
 
   fun inject(dialog: LockInfoDialog)

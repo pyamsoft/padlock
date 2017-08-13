@@ -17,18 +17,10 @@
 package com.pyamsoft.padlock.service
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor
 import io.reactivex.Single
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton internal class LockServiceStateInteractor @Inject internal constructor(
-    private val pinInteractor: MasterPinInteractor) {
+internal interface LockServiceStateInteractor {
 
-  @CheckResult internal fun isServiceEnabled(): Single<Boolean> {
-    return pinInteractor.getMasterPin().map {
-      it.isPresent()
-    }
-  }
+  @CheckResult fun isServiceEnabled(): Single<Boolean>
 
 }

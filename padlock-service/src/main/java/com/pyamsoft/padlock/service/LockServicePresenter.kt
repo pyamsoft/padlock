@@ -17,6 +17,8 @@
 package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.base.db.PadLockEntry
+import com.pyamsoft.padlock.service.LockServicePresenter.Callback
+import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -24,45 +26,53 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockServicePresenter @Inject internal constructor(
-    private val lockPassBus: LockPassBus,
-    private val serviceFinishBus: ServiceFinishBus,
-    private val recheckEventBus: RecheckEventBus,
+    private val lockPassBus: EventBus<LockPassEvent>,
+    private val serviceFinishBus: EventBus<ServiceFinishEvent>,
+    private val recheckEventBus: EventBus<RecheckEvent>,
     private val interactor: LockServiceInteractor,
-    @Named("obs") obsScheduler: Scheduler,
-    @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
+    @Named("computation") compScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(compScheduler, ioScheduler,
+    mainScheduler) {
 
   init {
     interactor.reset()
   }
 
-  override fun onDestroy() {
-    super.onDestroy()
-    interactor.cleanup()
+  override fun onStart(bound: Callback) {
+    super.onStart(bound)
+    registerOnBus(bound::onRecheck, bound::onFinish)
   }
 
-  fun registerOnBus(onRecheck: (String, String) -> Unit, onFinish: () -> Unit) {
-    disposeOnDestroy {
+  override fun onStop() {
+    super.onStop()
+    interactor.cleanup()
+    interactor.reset()
+  }
+
+  private fun registerOnBus(onRecheck: (String, String) -> Unit, onFinish: () -> Unit) {
+    disposeOnStop {
       serviceFinishBus.listen()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             onFinish()
           }, { Timber.e(it, "onError service finish bus") })
     }
 
-    disposeOnDestroy {
+    disposeOnStop {
       lockPassBus.listen()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             setLockScreenPassed(it.packageName(), it.className())
           }, { Timber.e(it, "onError lock passed bus") })
     }
 
-    disposeOnDestroy {
+    disposeOnStop {
       recheckEventBus.listen()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             onRecheck(it.packageName(), it.className())
           }, { Timber.e(it, "onError recheck event bus") })
@@ -77,8 +87,8 @@ class LockServicePresenter @Inject internal constructor(
       startLockScreen: (PadLockEntry, String) -> Unit) {
     disposeOnStop {
       interactor.processActiveIfMatching(packageName, className)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
               processAccessibilityEvent(packageName, className, RecheckStatus.FORCE,
@@ -92,8 +102,8 @@ class LockServicePresenter @Inject internal constructor(
       forcedRecheck: RecheckStatus, startLockScreen: (PadLockEntry, String) -> Unit) {
     disposeOnStop {
       interactor.processEvent(packageName, className, forcedRecheck)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             if (PadLockEntry.isEmpty(it)) {
               Timber.w("PadLockEntry is EMPTY, ignore")
@@ -102,5 +112,12 @@ class LockServicePresenter @Inject internal constructor(
             }
           }, { Timber.e(it, "Error getting PadLockEntry for LockScreen") })
     }
+  }
+
+  interface Callback {
+
+    fun onFinish()
+
+    fun onRecheck(packageName: String, className: String)
   }
 }
