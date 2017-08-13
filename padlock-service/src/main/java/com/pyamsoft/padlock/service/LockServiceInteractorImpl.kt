@@ -28,8 +28,10 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.service.RecheckStatus.FORCE
+import io.reactivex.Maybe
+import io.reactivex.MaybeTransformer
 import io.reactivex.Single
-import io.reactivex.functions.Function4
+import io.reactivex.SingleTransformer
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -86,167 +88,182 @@ import javax.inject.Singleton
   }
 
   /**
-   * Return true if the window event is caused by a non-Activity
-   */
-  @CheckResult private fun isEventNotActivity(packageName: String,
-      className: String): Single<Boolean> {
-    Timber.d("Check event from activity: %s %s", packageName, className)
-    return packageActivityManager.getActivityInfo(packageName, className).isEmpty
-  }
-
-  /**
    * If the screen has changed, update the last package.
    * This will prevent the lock screen from opening twice when the same
    * app opens multiple activities for example.
    */
-  @CheckResult private fun hasNameChanged(name: String, oldName: String): Single<Boolean> {
-    return Single.fromCallable { name != oldName }
+  @CheckResult private fun hasNameChanged(name: String, oldName: String): Boolean {
+    return name != oldName
   }
 
-  @CheckResult private fun isWindowFromLockScreen(packageName: String,
-      className: String): Single<Boolean> {
-    return Single.fromCallable {
-      val lockScreenPackageName = appContext.packageName
-      val lockScreenClassName = lockScreenActivityClass.name
-      Timber.d("Check if window is lock screen (%s %s)", lockScreenPackageName,
-          lockScreenClassName)
-
-      val isPackage = packageName == lockScreenPackageName
-      return@fromCallable isPackage && className == lockScreenClassName
-    }
-  }
-
-  @CheckResult private fun isOnlyLockOnPackageChange(): Single<Boolean> {
-    return Single.fromCallable { preferences.isLockOnPackageChange() }
+  @CheckResult private fun isOnlyLockOnPackageChange(): Boolean {
+    return preferences.isLockOnPackageChange()
   }
 
   @CheckResult private fun getEntry(packageName: String,
-      activityName: String): Single<PadLockEntry> {
-    return padLockDBQuery.queryWithPackageActivityNameDefault(packageName, activityName)
-  }
+      activityName: String): SingleTransformer<Boolean, PadLockEntry> {
 
-  @CheckResult private fun isRestrictedWhileLocked(): Single<Boolean> {
-    return Single.fromCallable { preferences.isIgnoreInKeyguard() }
-  }
-
-  @CheckResult private fun isDeviceLocked(): Single<Boolean> {
-    return Single.fromCallable {
-      keyguardManager.inKeyguardRestrictedInputMode()
-          || keyguardManager.isKeyguardLocked
+    @CheckResult fun prepareLockScreen(): MaybeTransformer<Boolean, PadLockEntry> {
+      return MaybeTransformer {
+        it.flatMapSingle {
+          Timber.d("Get list of locked classes with package: %s, class: %s", packageName,
+              activityName)
+          setLockScreenPassed(packageName, activityName, false)
+          return@flatMapSingle padLockDBQuery.queryWithPackageActivityNameDefault(packageName,
+              activityName)
+        }.filter { PadLockEntry.isEmpty(it).not() }
+      }
     }
-  }
 
-  override fun processEvent(packageName: String, className: String,
-      forcedRecheck: RecheckStatus): Single<PadLockEntry> {
-    val windowEventObservable: Single<Boolean> = stateInteractor.isServiceEnabled()
-        .filter {
-          if (!it) {
-            Timber.e("Service is not user enabled, ignore event")
-            reset()
-          }
-
-          return@filter it
-        }.flatMapSingle { enabled ->
-      isDeviceLocked().map {
-        if (it) {
-          Timber.w("Device is locked, reset last")
-          reset()
-        }
-
-        return@map enabled
-      }
-    }.flatMap { isEventNotActivity(packageName, className) }.filter {
-      if (it) {
-        Timber.w("Event not caused by activity.")
-        Timber.w("P: %s, C: %s", packageName, className)
-        Timber.w("Ignore")
-      }
-
-      return@filter !it
-    }.flatMapSingle {
-      isDeviceLocked().flatMap {
-        if (it) isRestrictedWhileLocked() else Single.just(false)
-      }
-    }.filter {
-      if (it) {
-        Timber.w("Locking is restricted while device in keyguard.")
-        Timber.w("P: %s, C: %s", packageName, className)
-        Timber.w("Ignore")
-      }
-      return@filter !it
-    }.flatMapSingle { isWindowFromLockScreen(packageName, className) }
-        .filter {
-          if (it) {
-            Timber.w("Event is caused by lock screen")
-            Timber.w("P: %s, C: %s", packageName, className)
-            Timber.w("Ignore")
-          }
-
-          return@filter !it
-        }.map {
-      val passed: Boolean = !it
-      activePackageName = packageName
-      activeClassName = className
-      return@map passed
-    }.toSingle(false)
-
-
-    return Single.zip(windowEventObservable, hasNameChanged(packageName, lastPackageName),
-        hasNameChanged(className, lastClassName), isOnlyLockOnPackageChange(),
-        Function4<Boolean, Boolean, Boolean, Boolean, Boolean> { windowEvent, packageChanged, classChanged, lockOnPackageChange ->
-          if (!windowEvent) {
-            Timber.e("Failed to pass window checking")
-            return@Function4 false
-          }
-
-          if (packageChanged) {
-            Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName)
-            lastPackageName = packageName
-          }
-
-          if (classChanged) {
-            Timber.d("Last Class: %s - New Class: %s", lastClassName, className)
-            lastClassName = className
-          }
-
-          var windowHasChanged: Boolean = classChanged
-          if (lockOnPackageChange) {
-            windowHasChanged = windowHasChanged && packageChanged
-          }
-
-          if (forcedRecheck === FORCE) {
-            Timber.d("Pass filter via forced recheck")
-            windowHasChanged = true
-          }
-
-          var lockPassed: Boolean? = lockScreenPassed[packageName + className]
-          if (lockPassed == null) {
-            Timber.w("No lock map entry exists for: %s, %s", packageName, className)
-            Timber.w("default to False")
-            lockPassed = false
-          }
-
-          return@Function4 windowHasChanged || !lockPassed
-        }).filter { it }
-        .flatMapSingle {
-          Timber.d("Get list of locked classes with package: %s, class: %s", packageName, className)
-          setLockScreenPassed(packageName, className, false)
-          return@flatMapSingle getEntry(packageName, className)
-        }.filter { !PadLockEntry.isEmpty(it) }
-        .filter {
+    @CheckResult fun filterOutInvalidEntries(): MaybeTransformer<PadLockEntry, PadLockEntry> {
+      return MaybeTransformer {
+        it.filter {
           val ignoreUntilTime: Long = it.ignoreUntilTime()
           val currentTime: Long = System.currentTimeMillis()
           Timber.d("Ignore until time: %d", ignoreUntilTime)
           Timber.d("Current time: %d", currentTime)
           return@filter currentTime >= ignoreUntilTime
         }.filter {
-      if (PadLockEntry.PACKAGE_ACTIVITY_NAME == it.activityName() && it.whitelist()) {
-        throw RuntimeException(
-            "PACKAGE entry for package: ${it.packageName()} cannot be whitelisted")
+          if (PadLockEntry.PACKAGE_ACTIVITY_NAME == it.activityName() && it.whitelist()) {
+            throw RuntimeException(
+                "PACKAGE entry for package: ${it.packageName()} cannot be whitelisted")
+          }
+
+          Timber.d("Filter out whitelisted packages")
+          return@filter it.whitelist().not()
+        }
+      }
+    }
+
+    return SingleTransformer {
+      it.filter { it }
+          .compose(prepareLockScreen())
+          .compose(filterOutInvalidEntries()).toSingle(PadLockEntry.EMPTY)
+    }
+  }
+
+  @CheckResult private fun isDeviceLocked(): Boolean {
+    return keyguardManager.inKeyguardRestrictedInputMode()
+        || keyguardManager.isKeyguardLocked
+  }
+
+  @CheckResult private fun isServiceEnabled(): Maybe<Boolean> {
+    return stateInteractor.isServiceEnabled()
+        .filter {
+          if (it.not()) {
+            Timber.e("Service is not user enabled, ignore event")
+            reset()
+          }
+          return@filter it
+        }.doOnSuccess {
+      if (isDeviceLocked()) {
+        Timber.w("Device is locked, reset last")
+        reset()
+      }
+    }
+  }
+
+  @CheckResult private fun isEventFromActivity(packageName: String,
+      className: String): MaybeTransformer<Boolean, Boolean> {
+    return MaybeTransformer {
+      it.flatMapSingle {
+        Timber.d("Check event from activity: %s %s", packageName, className)
+        return@flatMapSingle packageActivityManager.getActivityInfo(packageName,
+            className).isEmpty.map { it.not() }
+      }.filter {
+        if (it.not()) {
+          Timber.w("Event not caused by activity.")
+          Timber.w("P: %s, C: %s", packageName, className)
+          Timber.w("Ignore")
+        }
+
+        return@filter it
+      }
+    }
+  }
+
+  @CheckResult private fun isEventRestricted(packageName: String,
+      className: String): MaybeTransformer<Boolean, Boolean> {
+
+    @CheckResult fun isWindowFromLockScreen(): Boolean {
+      val lockScreenPackageName = appContext.packageName
+      val lockScreenClassName = lockScreenActivityClass.name
+      Timber.d("Check if window is lock screen (%s %s)", lockScreenPackageName,
+          lockScreenClassName)
+
+      val isPackage = packageName == lockScreenPackageName
+      return isPackage && className == lockScreenClassName
+    }
+
+    return MaybeTransformer {
+      it.filter {
+        val restrict: Boolean = preferences.isIgnoreInKeyguard() && isDeviceLocked()
+        if (restrict) {
+          Timber.w("Locking is restricted while device in keyguard.")
+          Timber.w("P: %s, C: %s", packageName, className)
+          Timber.w("Ignore")
+        }
+        return@filter restrict.not()
+      }.filter {
+        val isLockScreen: Boolean = isWindowFromLockScreen()
+        if (isLockScreen) {
+          Timber.w("Event is caused by lock screen")
+          Timber.w("P: %s, C: %s", packageName, className)
+          Timber.w("Ignore")
+        }
+        return@filter isLockScreen.not()
+      }
+    }
+  }
+
+  override fun processEvent(packageName: String, className: String,
+      forcedRecheck: RecheckStatus): Single<PadLockEntry> {
+    val windowEventObservable: Single<Boolean> = isServiceEnabled().compose(
+        isEventFromActivity(packageName, className)).compose(
+        isEventRestricted(packageName, className))
+        .doOnSuccess {
+          activePackageName = packageName
+          activeClassName = className
+        }.toSingle(false)
+
+
+    return windowEventObservable.map {
+      val packageChanged: Boolean = hasNameChanged(packageName, lastPackageName)
+      val classChanged: Boolean = hasNameChanged(className, lastClassName)
+      val lockOnPackageChanged: Boolean = isOnlyLockOnPackageChange()
+      if (it.not()) {
+        Timber.e("Failed to pass window checking")
+        return@map false
       }
 
-      Timber.d("Filter out whitelisted packages")
-      return@filter !it.whitelist()
-    }.toSingle(PadLockEntry.EMPTY)
+      if (packageChanged) {
+        Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName)
+        lastPackageName = packageName
+      }
+
+      if (classChanged) {
+        Timber.d("Last Class: %s - New Class: %s", lastClassName, className)
+        lastClassName = className
+      }
+
+      var windowHasChanged: Boolean = classChanged
+      if (lockOnPackageChanged) {
+        windowHasChanged = windowHasChanged && packageChanged
+      }
+
+      if (forcedRecheck === FORCE) {
+        Timber.d("Pass filter via forced recheck")
+        windowHasChanged = true
+      }
+
+      var lockPassed: Boolean? = lockScreenPassed[packageName + className]
+      if (lockPassed == null) {
+        Timber.w("No lock map entry exists for: %s, %s", packageName, className)
+        Timber.w("default to False")
+        lockPassed = false
+      }
+
+      return@map windowHasChanged || !lockPassed
+    }.compose(getEntry(packageName, className))
   }
 }
