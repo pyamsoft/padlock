@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.settings
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDB
 import com.pyamsoft.padlock.base.preference.ClearPreferences
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences

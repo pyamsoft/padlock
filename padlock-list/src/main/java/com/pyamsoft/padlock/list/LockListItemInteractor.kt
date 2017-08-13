@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.list
 
-import com.pyamsoft.padlock.base.db.PadLockDB
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper
 import com.pyamsoft.padlock.model.LockState
 import io.reactivex.Single
