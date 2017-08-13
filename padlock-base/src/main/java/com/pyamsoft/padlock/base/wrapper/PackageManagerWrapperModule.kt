@@ -24,7 +24,27 @@ import javax.inject.Singleton
 @Module class PackageManagerWrapperModule {
 
   @Singleton @Provides internal fun providePackageManagerWrapper(
-      context: Context): PackageManagerWrapper {
+      context: Context): PackageManagerWrapperImpl {
     return PackageManagerWrapperImpl(context)
+  }
+
+  @Singleton @Provides internal fun providePackageActivityManager(
+      manager: PackageManagerWrapperImpl): PackageActivityManager {
+    return manager
+  }
+
+  @Singleton @Provides internal fun providePackageLabelManager(
+      manager: PackageManagerWrapperImpl): PackageLabelManager {
+    return manager
+  }
+
+  @Singleton @Provides internal fun providePackageApplicationManager(
+      manager: PackageManagerWrapperImpl): PackageApplicationManager {
+    return manager
+  }
+
+  @Singleton @Provides internal fun providePackageDrawableManager(
+      manager: PackageManagerWrapperImpl): PackageDrawableManager {
+    return manager
   }
 }
