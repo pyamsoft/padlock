@@ -90,7 +90,7 @@ import javax.inject.Singleton
     return recheckServiceClass
   }
 
-  @Singleton @Provides @Named("sub") internal fun provideSubScheduler(): Scheduler {
+  @Singleton @Provides @Named("computation") internal fun provideComputationScheduler(): Scheduler {
     return Schedulers.computation()
   }
 
@@ -98,7 +98,7 @@ import javax.inject.Singleton
     return Schedulers.io()
   }
 
-  @Singleton @Provides @Named("obs") internal fun provideObsScheduler(): Scheduler {
+  @Singleton @Provides @Named("main") internal fun provideMainScheduler(): Scheduler {
     return AndroidSchedulers.mainThread()
   }
 }
