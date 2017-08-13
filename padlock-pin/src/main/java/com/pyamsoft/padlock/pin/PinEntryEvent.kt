@@ -16,24 +16,11 @@
 
 package com.pyamsoft.padlock.pin
 
-import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
+sealed class PinEntryEvent {
 
-@AutoValue abstract class PinEntryEvent protected constructor() {
+  data class Create(val complete: Boolean) : PinEntryEvent()
 
-  @CheckResult abstract fun type(): Type
+  data class Clear(val complete: Boolean) : PinEntryEvent()
 
-  @CheckResult abstract fun complete(): Boolean
-
-  enum class Type {
-    TYPE_CREATE, TYPE_CLEAR
-  }
-
-  companion object {
-
-    @JvmStatic
-    @CheckResult fun create(type: Type, complete: Boolean): PinEntryEvent {
-      return AutoValue_PinEntryEvent(type, complete)
-    }
-  }
 }
+

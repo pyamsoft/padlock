@@ -23,4 +23,6 @@ interface LockHelper {
 
   @CheckResult fun checkSubmissionAttempt(attempt: String, encodedPin: String): Single<Boolean>
 
+  @CheckResult fun encode(attempt: String): Single<String>
+
 }

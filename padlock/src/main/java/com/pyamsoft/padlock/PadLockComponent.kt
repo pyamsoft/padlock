@@ -28,9 +28,9 @@ import com.pyamsoft.padlock.list.LockInfoItem
 import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.list.LockListItem
 import com.pyamsoft.padlock.loader.AppIconLoader
-import com.pyamsoft.padlock.lock.helper.LockModule
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.lock.LockScreenBaseFragment
+import com.pyamsoft.padlock.lock.helper.LockModule
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardAcceptTermsFragment
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardEnableServiceFragment
@@ -38,6 +38,7 @@ import com.pyamsoft.padlock.onboard.list.OnboardListDialog
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.pin.PinEntryPatternFragment
 import com.pyamsoft.padlock.pin.PinEntryTextFragment
+import com.pyamsoft.padlock.pin.PinModule
 import com.pyamsoft.padlock.purge.PurgeAllDialog
 import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
@@ -49,7 +50,7 @@ import javax.inject.Singleton
 
 @Singleton
 @Component(modules = arrayOf(PadLockModule::class, PackageManagerWrapperModule::class,
-    JobSchedulerCompatModule::class, PadLockDBModule::class, LockModule::class))
+    JobSchedulerCompatModule::class, PadLockDBModule::class, LockModule::class, PinModule::class))
 interface PadLockComponent {
 
   fun inject(dialog: LockInfoDialog)
