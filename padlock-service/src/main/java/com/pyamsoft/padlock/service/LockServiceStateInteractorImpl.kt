@@ -16,22 +16,18 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.bus.RxBus
-import io.reactivex.Observable
+import com.pyamsoft.padlock.lock.master.MasterPinInteractor
+import io.reactivex.Single
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class LockPassBus @Inject internal constructor() : EventBus<LockPassEvent> {
+@Singleton internal class LockServiceStateInteractorImpl @Inject internal constructor(
+    private val pinInteractor: MasterPinInteractor) : LockServiceStateInteractor {
 
-  private val bus: EventBus<LockPassEvent> = RxBus.create()
-
-  override fun listen(): Observable<LockPassEvent> {
-    return bus.listen()
-  }
-
-  override fun publish(event: LockPassEvent) {
-    bus.publish(event)
+  override fun isServiceEnabled(): Single<Boolean> {
+    return pinInteractor.getMasterPin().map {
+      it.isPresent()
+    }
   }
 
 }
-
