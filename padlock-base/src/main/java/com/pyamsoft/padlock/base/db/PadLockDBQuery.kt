@@ -17,23 +17,9 @@
 package com.pyamsoft.padlock.base.db
 
 import android.support.annotation.CheckResult
-import io.reactivex.Completable
 import io.reactivex.Single
 
-interface PadLockDB {
-
-  @CheckResult fun insert(packageName: String,
-      activityName: String, lockCode: String?, lockUntilTime: Long,
-      ignoreUntilTime: Long, isSystem: Boolean, whitelist: Boolean): Completable
-
-  @CheckResult fun updateLockTime(lockUntilTime: Long, packageName: String,
-      activityName: String): Completable
-
-  @CheckResult fun updateIgnoreTime(ignoreUntilTime: Long,
-      packageName: String, activityName: String): Completable
-
-  @CheckResult fun updateWhitelist(whitelist: Boolean, packageName: String,
-      activityName: String): Completable
+interface PadLockDBQuery {
 
   /**
    * Get either the package with specific name of the PACKAGE entry
@@ -52,13 +38,4 @@ interface PadLockDB {
       packageName: String): Single<List<PadLockEntry.WithPackageName>>
 
   @CheckResult fun queryAll(): Single<List<PadLockEntry.AllEntries>>
-
-  @CheckResult fun deleteWithPackageName(packageName: String): Completable
-
-  @CheckResult fun deleteWithPackageActivityName(packageName: String,
-      activityName: String): Completable
-
-  @CheckResult fun deleteAll(): Completable
-
-  @CheckResult fun deleteDatabase(): Completable
 }

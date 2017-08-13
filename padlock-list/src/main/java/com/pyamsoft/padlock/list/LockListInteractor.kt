@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.list
 
 import android.content.pm.ApplicationInfo
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDB
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.base.db.PadLockEntry.AllEntries
 import com.pyamsoft.padlock.base.preference.LockListPreferences

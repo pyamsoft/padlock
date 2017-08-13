@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDB
 import com.pyamsoft.padlock.model.LockState
 import io.reactivex.Single
 import timber.log.Timber
