@@ -63,7 +63,7 @@ import javax.inject.Singleton
     lockScreenPassed.clear()
   }
 
-  override fun processActiveIfMatching(packageName: String, className: String): Single<Boolean> {
+  override fun isActiveMatching(packageName: String, className: String): Single<Boolean> {
     return Single.fromCallable {
       Timber.d("Check against current window values: %s, %s", activePackageName, activeClassName)
       // We can replace the actual passed classname with the stored classname because:

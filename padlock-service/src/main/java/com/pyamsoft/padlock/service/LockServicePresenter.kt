@@ -86,7 +86,7 @@ class LockServicePresenter @Inject internal constructor(
   fun processActiveApplicationIfMatching(packageName: String, className: String,
       startLockScreen: (PadLockEntry, String) -> Unit) {
     disposeOnStop {
-      interactor.processActiveIfMatching(packageName, className)
+      interactor.isActiveMatching(packageName, className)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
