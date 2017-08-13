@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock
+package com.pyamsoft.padlock.lock.helper
 
-import android.support.annotation.CheckResult
 import android.util.Base64
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -24,7 +23,7 @@ import java.nio.charset.Charset
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
-class SHA256LockHelper private constructor() : LockHelper() {
+internal class SHA256LockHelper internal constructor() : LockHelper {
 
   private val messageDigest: MessageDigest
 
@@ -37,18 +36,14 @@ class SHA256LockHelper private constructor() : LockHelper() {
 
   }
 
-  override fun encodeSHA256(attempt: String): Single<String> {
+  override fun checkSubmissionAttempt(attempt: String, encodedPin: String): Single<Boolean> {
+    return encodeSHA256(attempt).map { it == encodedPin }
+  }
+
+  private fun encodeSHA256(attempt: String): Single<String> {
     return Completable.fromAction({ messageDigest.reset() })
         .andThen(Single.fromCallable {
           messageDigest.digest(attempt.toByteArray(Charset.defaultCharset()))
         }).map { Base64.encodeToString(it, Base64.DEFAULT).trim() }
-  }
-
-  companion object {
-
-    @JvmStatic
-    @CheckResult fun newInstance(): SHA256LockHelper {
-      return SHA256LockHelper()
-    }
   }
 }

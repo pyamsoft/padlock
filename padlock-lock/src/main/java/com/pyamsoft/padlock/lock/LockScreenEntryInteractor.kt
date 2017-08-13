@@ -22,6 +22,7 @@ import android.content.Intent
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
+import com.pyamsoft.padlock.lock.helper.LockHelper
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor
 import com.pyamsoft.pydroid.helper.Optional
 import io.reactivex.Completable
