@@ -16,17 +16,22 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.pydroid.presenter.SchedulerViewPresenter
+import com.pyamsoft.padlock.pin.PinEntryEvent.Clear
+import com.pyamsoft.padlock.pin.PinEntryEvent.Create
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
 class PinEntryPresenter @Inject internal constructor(private val interactor: PinEntryInteractor,
-    private val createPinBus: CreatePinBus,
-    private val clearPinBus: ClearPinBus,
-    @Named("obs") obsScheduler: Scheduler,
-    @Named("sub") subScheduler: Scheduler) : SchedulerViewPresenter(obsScheduler, subScheduler) {
+    private val createPinBus: EventBus<CreatePinEvent>,
+    private val clearPinBus: EventBus<ClearPinEvent>,
+    @Named("computation") computationScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
+    ioScheduler, mainScheduler) {
 
   fun publish(event: CreatePinEvent) {
     createPinBus.publish(event)
@@ -37,17 +42,28 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
   }
 
   fun submit(currentAttempt: String, reEntryAttempt: String, hint: String,
-      onSubmitSuccess: (Boolean) -> Unit, onSubmitFailure: (Boolean) -> Unit,
+      onCreateSuccess: () -> Unit, onCreateFailure: () -> Unit,
+      onClearSuccess: () -> Unit, onClearFailure: () -> Unit,
       onSubmitError: (Throwable) -> Unit) {
     disposeOnStop(interactor.submitPin(currentAttempt, reEntryAttempt, hint)
-        .subscribeOn(backgroundScheduler)
-        .observeOn(foregroundScheduler)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainThreadScheduler)
         .subscribe({
-          val creating = (it.type() === PinEntryEvent.Type.TYPE_CREATE)
-          if (it.complete()) {
-            onSubmitSuccess(creating)
-          } else {
-            onSubmitFailure(creating)
+          when (it) {
+            is Create -> {
+              if (it.complete) {
+                onCreateSuccess()
+              } else {
+                onCreateFailure()
+              }
+            }
+            is Clear -> {
+              if (it.complete) {
+                onClearSuccess()
+              } else {
+                onClearFailure()
+              }
+            }
           }
         }, {
           Timber.e(it, "attemptPinSubmission onError")
@@ -57,8 +73,8 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
 
   fun checkMasterPinPresent(onMasterPinMissing: () -> Unit, onMasterPinPresent: () -> Unit) {
     disposeOnStop(interactor.hasMasterPin()
-        .subscribeOn(backgroundScheduler)
-        .observeOn(foregroundScheduler)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainThreadScheduler)
         .subscribe({
           if (it) {
             onMasterPinPresent()

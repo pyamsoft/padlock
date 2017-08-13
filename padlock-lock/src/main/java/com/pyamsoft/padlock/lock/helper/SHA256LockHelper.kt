@@ -37,10 +37,10 @@ internal class SHA256LockHelper internal constructor() : LockHelper {
   }
 
   override fun checkSubmissionAttempt(attempt: String, encodedPin: String): Single<Boolean> {
-    return encodeSHA256(attempt).map { it == encodedPin }
+    return encode(attempt).map { it == encodedPin }
   }
 
-  private fun encodeSHA256(attempt: String): Single<String> {
+  override fun encode(attempt: String): Single<String> {
     return Completable.fromAction({ messageDigest.reset() })
         .andThen(Single.fromCallable {
           messageDigest.digest(attempt.toByteArray(Charset.defaultCharset()))
