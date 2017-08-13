@@ -36,7 +36,7 @@ import java.util.ArrayList
 import javax.inject.Inject
 
 internal class PackageManagerWrapperImpl @Inject internal constructor(
-    context: Context) : PackageManagerWrapper {
+    context: Context) : PackageActivityManager, PackageApplicationManager, PackageLabelManager, PackageDrawableManager {
 
   private val packageManager: PackageManager = context.applicationContext.packageManager
 
@@ -90,7 +90,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
         BufferedReader(
             InputStreamReader(process.inputStream, StandardCharsets.UTF_8)).use {
           var line: String? = it.readLine()
-          while (line != null && !line.isEmpty()) {
+          while (line != null && line.isNotBlank()) {
             if (line.startsWith("Permission Denial")) {
               Timber.e("Command resulted in permission denial")
               caughtPermissionDenial = true
@@ -164,8 +164,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
     }.flatMap { loadPackageLabel(it) }
   }
 
-  override fun getActivityInfo(packageName: String,
-      activityName: String): Maybe<ActivityInfo> {
+  override fun getActivityInfo(packageName: String, activityName: String): Maybe<ActivityInfo> {
     return Maybe.defer<ActivityInfo> {
       if (packageName.isEmpty() || activityName.isEmpty()) {
         return@defer Maybe.empty()
