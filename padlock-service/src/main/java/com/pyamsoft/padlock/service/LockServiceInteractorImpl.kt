@@ -264,7 +264,7 @@ import javax.inject.Singleton
         lockPassed = false
       }
 
-      return@map windowHasChanged || !lockPassed
+      return@map windowHasChanged || lockPassed.not()
     }.compose(getEntry(packageName, className))
   }
 }
