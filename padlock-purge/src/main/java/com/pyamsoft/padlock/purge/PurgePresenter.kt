@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlock.purge
 
+import com.pyamsoft.padlock.purge.PurgePresenter.Callback
+import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -23,16 +25,23 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class PurgePresenter @Inject internal constructor(private val interactor: PurgeInteractor,
-    private val purgeBus: PurgeBus,
-    private val purgeAllBus: PurgeAllBus,
-    @Named("obs") obsScheduler: Scheduler,
-    @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
+    private val purgeBus: EventBus<PurgeEvent>,
+    private val purgeAllBus: EventBus<PurgeAllEvent>,
+    @Named("computation") computationScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    ioScheduler, mainScheduler) {
 
-  fun registerOnBus(onPurge: (String) -> Unit, onPurgeAll: () -> Unit) {
+  override fun onStart(bound: Callback) {
+    super.onStart(bound)
+    registerOnBus(bound::onPurge, bound::onPurgeAll)
+  }
+
+  private fun registerOnBus(onPurge: (String) -> Unit, onPurgeAll: () -> Unit) {
     disposeOnStop {
       purgeBus.listen()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({ onPurge(it.packageName()) }, {
             Timber.e(it, "onError purge single")
           })
@@ -40,20 +49,20 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
 
     disposeOnStop {
       purgeAllBus.listen()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({ onPurgeAll() }, {
             Timber.e(it, "onError purge all")
           })
     }
   }
 
-  fun retrieveStaleApplications(forceRefresh: Boolean,
-      onStaleApplicationRetrieved: (String) -> Unit, onRetrievalComplete: () -> Unit) {
+  fun retrieveStaleApplications(force: Boolean, onStaleApplicationRetrieved: (String) -> Unit,
+      onRetrievalComplete: () -> Unit) {
     disposeOnStop {
-      interactor.populateList(forceRefresh)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+      interactor.populateList(force)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .doAfterTerminate { onRetrievalComplete() }
           .subscribe({ onStaleApplicationRetrieved(it) },
               { Timber.e(it, "onError retrieveStaleApplications") })
@@ -63,10 +72,17 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
   fun deleteStale(packageName: String, onDeleted: (String) -> Unit) {
     disposeOnStop {
       interactor.deleteEntry(packageName)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({ onDeleted(it) }
               , { Timber.e(it, "onError deleteStale") })
     }
+  }
+
+  interface Callback {
+
+    fun onPurge(packageName: String)
+
+    fun onPurgeAll()
   }
 }
