@@ -103,14 +103,15 @@ import javax.inject.Singleton
   @CheckResult private fun getEntry(packageName: String,
       activityName: String): SingleTransformer<Boolean, PadLockEntry> {
 
-    @CheckResult fun prepareLockScreen(): MaybeTransformer<Boolean, PadLockEntry> {
+    @CheckResult fun prepareLockScreen(db: PadLockDBQuery, windowPackage: String,
+        windowActivity: String): MaybeTransformer<Boolean, PadLockEntry> {
       return MaybeTransformer {
         it.flatMapSingle {
-          Timber.d("Get list of locked classes with package: %s, class: %s", packageName,
-              activityName)
-          setLockScreenPassed(packageName, activityName, false)
-          return@flatMapSingle padLockDBQuery.queryWithPackageActivityNameDefault(packageName,
-              activityName)
+          Timber.d("Get list of locked classes with package: %s, class: %s", windowPackage,
+              windowActivity)
+          setLockScreenPassed(windowPackage, windowActivity, false)
+          return@flatMapSingle db.queryWithPackageActivityNameDefault(windowPackage,
+              windowActivity)
         }.filter { PadLockEntry.isEmpty(it).not() }
       }
     }
@@ -137,7 +138,7 @@ import javax.inject.Singleton
 
     return SingleTransformer {
       it.filter { it }
-          .compose(prepareLockScreen())
+          .compose(prepareLockScreen(padLockDBQuery, packageName, activityName))
           .compose(filterOutInvalidEntries()).toSingle(PadLockEntry.EMPTY)
     }
   }
@@ -185,14 +186,14 @@ import javax.inject.Singleton
   @CheckResult private fun isEventRestricted(packageName: String,
       className: String): MaybeTransformer<Boolean, Boolean> {
 
-    @CheckResult fun isWindowFromLockScreen(): Boolean {
-      val lockScreenPackageName = appContext.packageName
-      val lockScreenClassName = lockScreenActivityClass.name
-      Timber.d("Check if window is lock screen (%s %s)", lockScreenPackageName,
-          lockScreenClassName)
+    // Pass the parameters in to make it non capturing
+    @CheckResult fun isWindowFromLockScreen(lockScreenPackage: String, lockScreenActivity: String,
+        windowPackage: String, windowActivity: String): Boolean {
+      Timber.d("Check if window is lock screen (%s %s)", lockScreenPackage,
+          lockScreenActivity)
 
-      val isPackage = packageName == lockScreenPackageName
-      return isPackage && className == lockScreenClassName
+      val isPackage = (windowPackage == lockScreenPackage)
+      return isPackage && (windowActivity == lockScreenActivity)
     }
 
     return MaybeTransformer {
@@ -205,7 +206,8 @@ import javax.inject.Singleton
         }
         return@filter restrict.not()
       }.filter {
-        val isLockScreen: Boolean = isWindowFromLockScreen()
+        val isLockScreen: Boolean = isWindowFromLockScreen(appContext.packageName,
+            lockScreenActivityClass.name, packageName, className)
         if (isLockScreen) {
           Timber.w("Event is caused by lock screen")
           Timber.w("P: %s, C: %s", packageName, className)
@@ -225,7 +227,6 @@ import javax.inject.Singleton
           activePackageName = packageName
           activeClassName = className
         }.toSingle(false)
-
 
     return windowEventObservable.map {
       val packageChanged: Boolean = hasNameChanged(packageName, lastPackageName)
