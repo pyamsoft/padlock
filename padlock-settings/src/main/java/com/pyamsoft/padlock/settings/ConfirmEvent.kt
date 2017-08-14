@@ -16,22 +16,9 @@
 
 package com.pyamsoft.padlock.settings
 
-import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
+sealed class ConfirmEvent {
 
-@AutoValue abstract class ConfirmEvent protected constructor() {
+  object Database : ConfirmEvent()
+  object All : ConfirmEvent()
 
-  @CheckResult internal abstract fun type(): Type
-
-  enum class Type {
-    DATABASE, ALL
-  }
-
-  companion object {
-
-    @JvmStatic
-    @CheckResult fun create(type: Type): ConfirmEvent {
-      return AutoValue_ConfirmEvent(type)
-    }
-  }
 }

@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.purge
 
+import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockDBDelete
 import com.pyamsoft.padlock.base.db.PadLockDBQuery
 import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager
@@ -23,30 +24,32 @@ import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
 import dagger.Module
 import dagger.Provides
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module class PurgeModule {
 
-  @Singleton @Provides internal fun providePurgeBus(): EventBus<PurgeEvent> {
+  @Singleton @Provides @CheckResult internal fun providePurgeBus(): EventBus<PurgeEvent> {
     return PurgeBus()
   }
 
-  @Singleton @Provides internal fun providePurgeAllBus(): EventBus<PurgeAllEvent> {
+  @Singleton @Provides @CheckResult internal fun providePurgeAllBus(): EventBus<PurgeAllEvent> {
     return PurgeAllBus()
   }
 
-  @Singleton @Provides internal fun providePurgeInteractorCache(
+  @Singleton @Provides @CheckResult internal fun providePurgeInteractorCache(
       applicationManager: PackageApplicationManager, deleteDb: PadLockDBDelete,
       queryDb: PadLockDBQuery): PurgeInteractorCache {
     return PurgeInteractorCache(PurgeInteractorImpl(applicationManager, deleteDb, queryDb))
   }
 
-  @Singleton @Provides internal fun providePurgeInteractor(
+  @Singleton @Provides @CheckResult internal fun providePurgeInteractor(
       cache: PurgeInteractorCache): PurgeInteractor {
     return cache
   }
 
-  @Singleton @Provides internal fun provideCache(cache: PurgeInteractorCache): Cache {
+  @Singleton @Provides @CheckResult @Named("cache_purge") internal fun provideCache(
+      cache: PurgeInteractorCache): Cache {
     return cache
   }
 }

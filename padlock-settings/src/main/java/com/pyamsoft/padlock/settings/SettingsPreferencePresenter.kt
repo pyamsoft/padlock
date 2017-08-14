@@ -17,14 +17,13 @@
 package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
-import com.pyamsoft.padlock.service.ServiceFinishBus
 import com.pyamsoft.padlock.service.ServiceFinishEvent
-import com.pyamsoft.padlock.settings.ConfirmEvent.Type
-import com.pyamsoft.padlock.settings.ConfirmEvent.Type.ALL
-import com.pyamsoft.padlock.settings.ConfirmEvent.Type.DATABASE
-import com.pyamsoft.pydroid.presenter.SchedulerPreferencePresenter
+import com.pyamsoft.padlock.settings.ConfirmEvent.All
+import com.pyamsoft.padlock.settings.ConfirmEvent.Database
+import com.pyamsoft.padlock.settings.SettingsPreferencePresenter.Callback
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
-import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
@@ -32,43 +31,31 @@ import javax.inject.Named
 class SettingsPreferencePresenter @Inject internal constructor(
     private val interactor: SettingsPreferenceInteractor,
     private val bus: ConfirmEventBus,
-    private val serviceFinishBus: ServiceFinishBus,
-    private val receiver: ApplicationInstallReceiver, @Named("obs") obsScheduler: Scheduler,
-    @Named("sub") subScheduler: Scheduler) : SchedulerPreferencePresenter(obsScheduler,
-    subScheduler) {
+    private val serviceFinishBus: EventBus<ServiceFinishEvent>,
+    private val receiver: ApplicationInstallReceiver,
+    @Named("computation") computationScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    ioScheduler, mainScheduler) {
 
-  fun publishFinish() {
-    serviceFinishBus.publish(ServiceFinishEvent)
+  override fun onStart(bound: Callback) {
+    super.onStart(bound)
+    registerOnBus(bound::onClearDatabase, bound::onClearAll)
   }
 
-  fun setApplicationInstallReceiverState() {
-    disposeOnStop(interactor.isInstallListenerEnabled()
-        .subscribeOn(backgroundScheduler)
-        .observeOn(foregroundScheduler)
-        .subscribe({
-          if (it) {
-            receiver.register()
-          } else {
-            receiver.unregister()
-          }
-        }, { Timber.e(it, "onError setApplicationInstallReceiverState") }))
-  }
-
-  fun registerOnBus(onClearDatabase: () -> Unit, onClearAll: () -> Unit) {
+  private fun registerOnBus(onClearDatabase: () -> Unit, onClearAll: () -> Unit) {
     disposeOnStop {
-      bus.listen().flatMapSingle {
-        val result: Single<Type>
-        when (it.type()) {
-          DATABASE -> result = interactor.clearDatabase().map { Type.DATABASE }
-          ALL -> result = interactor.clearAll().map { Type.ALL }
+      bus.listen().map {
+        when (it) {
+          is Database -> interactor.clearDatabase()
+          is All -> interactor.clearAll()
         }
-
-        return@flatMapSingle result
-      }.subscribeOn(backgroundScheduler).observeOn(foregroundScheduler)
+        return@map it
+      }.subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
-              DATABASE -> onClearDatabase()
-              ALL -> onClearAll()
+              is Database -> onClearDatabase()
+              is All -> onClearAll()
             }
           }, {
             Timber.e(it, "onError clear bus")
@@ -76,23 +63,51 @@ class SettingsPreferencePresenter @Inject internal constructor(
     }
   }
 
+  fun publishFinish() {
+    serviceFinishBus.publish(ServiceFinishEvent)
+  }
+
+  fun setApplicationInstallReceiverState() {
+    disposeOnStop {
+      interactor.isInstallListenerEnabled()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            if (it) {
+              receiver.register()
+            } else {
+              receiver.unregister()
+            }
+          }, { Timber.e(it, "onError setApplicationInstallReceiverState") })
+    }
+  }
+
   fun checkLockType(onBegin: () -> Unit, onLockTypeChangeAccepted: () -> Unit,
       onLockTypeChangePrevented: () -> Unit, onLockTypeChangeError: (Throwable) -> Unit,
       onEnd: () -> Unit) {
-    disposeOnStop(interactor.hasExistingMasterPassword()
-        .subscribeOn(backgroundScheduler)
-        .observeOn(foregroundScheduler)
-        .doAfterTerminate { onEnd() }
-        .doOnSubscribe { onBegin() }
-        .subscribe({ hasMasterPin ->
-          if (hasMasterPin) {
-            onLockTypeChangePrevented()
-          } else {
-            onLockTypeChangeAccepted()
-          }
-        }, { throwable ->
-          Timber.e(throwable, "on error lock type change")
-          onLockTypeChangeError(throwable)
-        }))
+    disposeOnStop {
+      interactor.hasExistingMasterPassword()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .doAfterTerminate { onEnd() }
+          .doOnSubscribe { onBegin() }
+          .subscribe({
+            if (it) {
+              onLockTypeChangePrevented()
+            } else {
+              onLockTypeChangeAccepted()
+            }
+          }, {
+            Timber.e(it, "on error lock type change")
+            onLockTypeChangeError(it)
+          })
+    }
+  }
+
+  interface Callback {
+
+    fun onClearDatabase()
+
+    fun onClearAll()
   }
 }

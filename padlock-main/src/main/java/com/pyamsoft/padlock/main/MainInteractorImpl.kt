@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.settings
+package com.pyamsoft.padlock.main
 
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.base.preference.OnboardingPreferences
 import io.reactivex.Single
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal interface SettingsPreferenceInteractor {
+@Singleton internal class MainInteractorImpl @Inject internal constructor(
+    private val preferences: OnboardingPreferences) : MainInteractor {
 
-  @CheckResult fun isInstallListenerEnabled(): Single<Boolean>
-
-  @CheckResult fun clearDatabase(): Single<Boolean>
-
-  @CheckResult fun clearAll(): Single<Boolean>
-
-  @CheckResult fun hasExistingMasterPassword(): Single<Boolean>
+  override fun isOnboardingComplete(): Single<Boolean> {
+    return Single.fromCallable { preferences.hasAgreed() }
+  }
 }
