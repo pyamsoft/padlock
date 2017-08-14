@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.main
 
+import com.pyamsoft.padlock.main.MainPresenter.Callback
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -23,14 +24,21 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class MainPresenter @Inject internal constructor(private val interactor: MainInteractor,
-    @Named("obs") obsScheduler: Scheduler,
-    @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
+    @Named("computation") computationScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    ioScheduler, mainScheduler) {
 
-  fun showOnboardingOrDefault(onShowDefaultPage: () -> Unit, onShowOnboarding: () -> Unit) {
-    disposeOnDestroy {
+  override fun onStart(bound: Callback) {
+    super.onStart(bound)
+    showOnboardingOrDefault(bound::onShowDefaultPage, bound::onShowOnboarding)
+  }
+
+  private fun showOnboardingOrDefault(onShowDefaultPage: () -> Unit, onShowOnboarding: () -> Unit) {
+    disposeOnStop {
       interactor.isOnboardingComplete()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
               onShowDefaultPage()
@@ -39,5 +47,12 @@ class MainPresenter @Inject internal constructor(private val interactor: MainInt
             }
           }, { Timber.e(it, "onError") })
     }
+  }
+
+  interface Callback {
+
+    fun onShowDefaultPage()
+
+    fun onShowOnboarding()
   }
 }

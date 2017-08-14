@@ -20,9 +20,8 @@ import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.bus.RxBus
 import io.reactivex.Observable
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton class ConfirmEventBus @Inject internal constructor() : EventBus<ConfirmEvent> {
+internal class ConfirmEventBus @Inject internal constructor() : EventBus<ConfirmEvent> {
 
   private val bus: EventBus<ConfirmEvent> = RxBus.create()
 

@@ -27,6 +27,4 @@ interface PadLockDBDelete {
       activityName: String): Completable
 
   @CheckResult fun deleteAll(): Completable
-
-  @CheckResult fun deleteDatabase(): Completable
 }

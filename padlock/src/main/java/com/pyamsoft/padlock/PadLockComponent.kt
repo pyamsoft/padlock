@@ -32,6 +32,7 @@ import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.lock.LockScreenBaseFragment
 import com.pyamsoft.padlock.lock.helper.LockModule
 import com.pyamsoft.padlock.main.MainActivity
+import com.pyamsoft.padlock.main.MainModule
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardAcceptTermsFragment
 import com.pyamsoft.padlock.onboard.firstlaunch.OnboardEnableServiceFragment
 import com.pyamsoft.padlock.onboard.list.OnboardListDialog
@@ -47,13 +48,14 @@ import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.service.ServiceModule
 import com.pyamsoft.padlock.settings.SettingsFragment
+import com.pyamsoft.padlock.settings.SettingsModule
 import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
 @Component(modules = arrayOf(PadLockModule::class, PackageManagerWrapperModule::class,
     JobSchedulerCompatModule::class, PadLockDBModule::class, LockModule::class, PinModule::class,
-    ServiceModule::class, PurgeModule::class))
+    ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class))
 interface PadLockComponent {
 
   fun inject(dialog: LockInfoDialog)

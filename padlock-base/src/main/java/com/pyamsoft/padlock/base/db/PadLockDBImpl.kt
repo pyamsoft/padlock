@@ -165,11 +165,7 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context,
       Timber.i("DB: DELETE ALL")
       briteDatabase.execute(PadLockEntryModel.DELETE_ALL)
       briteDatabase.close()
-    }.andThen(deleteDatabase())
-  }
-
-  override fun deleteDatabase(): Completable {
-    return Completable.fromAction({ openHelper.deleteDatabase() })
+    }.andThen(Completable.fromAction { openHelper.deleteDatabase() })
   }
 
   private class PadLockOpenHelper internal constructor(context: Context) : SQLiteOpenHelper(
