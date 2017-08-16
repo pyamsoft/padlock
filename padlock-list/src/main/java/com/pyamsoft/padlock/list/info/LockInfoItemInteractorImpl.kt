@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.list.info
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockDBUpdate
-import com.pyamsoft.padlock.list.LockStateModifyInteractor
+import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Single

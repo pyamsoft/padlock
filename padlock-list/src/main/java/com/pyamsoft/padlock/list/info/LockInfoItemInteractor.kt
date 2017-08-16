@@ -16,6 +16,6 @@
 
 package com.pyamsoft.padlock.list.info
 
-import com.pyamsoft.padlock.list.LockStateModifyInteractor
+import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 
 internal interface LockInfoItemInteractor : LockStateModifyInteractor

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.modify
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockDBDelete

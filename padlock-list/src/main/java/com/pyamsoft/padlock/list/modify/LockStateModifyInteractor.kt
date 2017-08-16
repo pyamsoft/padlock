@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.modify
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDBDelete
-import com.pyamsoft.padlock.base.db.PadLockDBInsert
-import dagger.Module
-import dagger.Provides
-import javax.inject.Singleton
+import com.pyamsoft.padlock.model.LockState
+import io.reactivex.Single
 
-@Module class LockStateModule {
+internal interface LockStateModifyInteractor {
 
-  @Singleton @Provides @CheckResult internal fun provideInteractor(insertDb: PadLockDBInsert,
-      deleteDb: PadLockDBDelete): LockStateModifyInteractor {
-    return LockStateModifyInteractorImpl(insertDb, deleteDb)
-  }
+  @CheckResult fun modifySingleDatabaseEntry(oldLockState: LockState,
+      newLockState: LockState, packageName: String, activityName: String,
+      code: String?, system: Boolean): Single<LockState>
+
 }
-

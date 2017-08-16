@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.list
 
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper
+import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.LockState
 import io.reactivex.Single
 import timber.log.Timber
