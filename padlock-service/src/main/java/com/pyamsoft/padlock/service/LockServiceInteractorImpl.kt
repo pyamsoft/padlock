@@ -100,45 +100,44 @@ import javax.inject.Singleton
     return preferences.isLockOnPackageChange()
   }
 
+  @CheckResult private fun prepareLockScreen(windowPackage: String,
+      windowActivity: String): MaybeTransformer<Boolean, PadLockEntry> {
+    return MaybeTransformer {
+      it.flatMapSingle {
+        Timber.d("Get list of locked classes with package: %s, class: %s", windowPackage,
+            windowActivity)
+        setLockScreenPassed(windowPackage, windowActivity, false)
+        return@flatMapSingle padLockDBQuery.queryWithPackageActivityNameDefault(windowPackage,
+            windowActivity)
+      }.filter { PadLockEntry.isEmpty(it).not() }
+    }
+  }
+
+  @CheckResult private fun filterOutInvalidEntries(): MaybeTransformer<PadLockEntry, PadLockEntry> {
+    return MaybeTransformer {
+      it.filter {
+        val ignoreUntilTime: Long = it.ignoreUntilTime()
+        val currentTime: Long = System.currentTimeMillis()
+        Timber.d("Ignore until time: %d", ignoreUntilTime)
+        Timber.d("Current time: %d", currentTime)
+        return@filter currentTime >= ignoreUntilTime
+      }.filter {
+        if (PadLockEntry.PACKAGE_ACTIVITY_NAME == it.activityName() && it.whitelist()) {
+          throw RuntimeException(
+              "PACKAGE entry for package: ${it.packageName()} cannot be whitelisted")
+        }
+
+        Timber.d("Filter out whitelisted packages")
+        return@filter it.whitelist().not()
+      }
+    }
+  }
+
   @CheckResult private fun getEntry(packageName: String,
       activityName: String): SingleTransformer<Boolean, PadLockEntry> {
-
-    @CheckResult fun prepareLockScreen(db: PadLockDBQuery, windowPackage: String,
-        windowActivity: String): MaybeTransformer<Boolean, PadLockEntry> {
-      return MaybeTransformer {
-        it.flatMapSingle {
-          Timber.d("Get list of locked classes with package: %s, class: %s", windowPackage,
-              windowActivity)
-          setLockScreenPassed(windowPackage, windowActivity, false)
-          return@flatMapSingle db.queryWithPackageActivityNameDefault(windowPackage,
-              windowActivity)
-        }.filter { PadLockEntry.isEmpty(it).not() }
-      }
-    }
-
-    @CheckResult fun filterOutInvalidEntries(): MaybeTransformer<PadLockEntry, PadLockEntry> {
-      return MaybeTransformer {
-        it.filter {
-          val ignoreUntilTime: Long = it.ignoreUntilTime()
-          val currentTime: Long = System.currentTimeMillis()
-          Timber.d("Ignore until time: %d", ignoreUntilTime)
-          Timber.d("Current time: %d", currentTime)
-          return@filter currentTime >= ignoreUntilTime
-        }.filter {
-          if (PadLockEntry.PACKAGE_ACTIVITY_NAME == it.activityName() && it.whitelist()) {
-            throw RuntimeException(
-                "PACKAGE entry for package: ${it.packageName()} cannot be whitelisted")
-          }
-
-          Timber.d("Filter out whitelisted packages")
-          return@filter it.whitelist().not()
-        }
-      }
-    }
-
     return SingleTransformer {
       it.filter { it }
-          .compose(prepareLockScreen(padLockDBQuery, packageName, activityName))
+          .compose(prepareLockScreen(packageName, activityName))
           .compose(filterOutInvalidEntries()).toSingle(PadLockEntry.EMPTY)
     }
   }
@@ -183,19 +182,20 @@ import javax.inject.Singleton
     }
   }
 
+
+  @CheckResult private fun isWindowFromLockScreen(windowPackage: String,
+      windowActivity: String): Boolean {
+    val lockScreenPackage: String = appContext.packageName
+    val lockScreenActivity: String = lockScreenActivityClass.name
+    Timber.d("Check if window is lock screen (%s %s)", lockScreenPackage,
+        lockScreenActivity)
+
+    val isPackage = (windowPackage == lockScreenPackage)
+    return isPackage && (windowActivity == lockScreenActivity)
+  }
+
   @CheckResult private fun isEventRestricted(packageName: String,
       className: String): MaybeTransformer<Boolean, Boolean> {
-
-    // Pass the parameters in to make it non capturing
-    @CheckResult fun isWindowFromLockScreen(lockScreenPackage: String, lockScreenActivity: String,
-        windowPackage: String, windowActivity: String): Boolean {
-      Timber.d("Check if window is lock screen (%s %s)", lockScreenPackage,
-          lockScreenActivity)
-
-      val isPackage = (windowPackage == lockScreenPackage)
-      return isPackage && (windowActivity == lockScreenActivity)
-    }
-
     return MaybeTransformer {
       it.filter {
         val restrict: Boolean = preferences.isIgnoreInKeyguard() && isDeviceLocked()
@@ -206,8 +206,7 @@ import javax.inject.Singleton
         }
         return@filter restrict.not()
       }.filter {
-        val isLockScreen: Boolean = isWindowFromLockScreen(appContext.packageName,
-            lockScreenActivityClass.name, packageName, className)
+        val isLockScreen: Boolean = isWindowFromLockScreen(packageName, className)
         if (isLockScreen) {
           Timber.w("Event is caused by lock screen")
           Timber.w("P: %s, C: %s", packageName, className)

@@ -23,10 +23,13 @@ import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatModule
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperModule
-import com.pyamsoft.padlock.list.LockInfoDialog
+import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.LockInfoItem
 import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.list.LockListItem
+import com.pyamsoft.padlock.list.LockStateModule
+import com.pyamsoft.padlock.list.info.LockInfoModule
+import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.lock.LockScreenBaseFragment
@@ -55,10 +58,9 @@ import javax.inject.Singleton
 @Singleton
 @Component(modules = arrayOf(PadLockModule::class, PackageManagerWrapperModule::class,
     JobSchedulerCompatModule::class, PadLockDBModule::class, LockModule::class, PinModule::class,
-    ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class))
+    ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class,
+    LockInfoSingletonModule::class, LockStateModule::class))
 interface PadLockComponent {
-
-  fun inject(dialog: LockInfoDialog)
 
   fun inject(lockInfoItem: LockInfoItem)
 
@@ -103,4 +105,6 @@ interface PadLockComponent {
 
   // To be used directly by PadLockSingleInitProvider
   @CheckResult fun provideApplicationInstallReceiver(): ApplicationInstallReceiver
+
+  @CheckResult fun plusLockInfoComponent(module: LockInfoModule): LockInfoComponent
 }

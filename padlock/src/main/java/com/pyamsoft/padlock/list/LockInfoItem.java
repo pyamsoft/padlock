@@ -26,6 +26,7 @@ import com.mikepenz.fastadapter.items.GenericAbstractItem;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
+import com.pyamsoft.padlock.list.info.LockInfoItemPresenter;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.ui.util.DialogUtil;

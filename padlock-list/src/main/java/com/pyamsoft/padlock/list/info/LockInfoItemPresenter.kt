@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
