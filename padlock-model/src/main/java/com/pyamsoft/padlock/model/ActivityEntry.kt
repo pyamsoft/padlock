@@ -25,11 +25,19 @@ import com.google.auto.value.AutoValue
 
   @CheckResult abstract fun name(): String
 
+  @CheckResult abstract fun packageName(): String
+
   @CheckResult abstract fun lockState(): LockState
+
+  @CheckResult fun id(): String {
+    return "${packageName()}|${name()}"
+  }
 
   @AutoValue.Builder abstract class Builder {
 
     @CheckResult abstract fun name(s: String): Builder
+
+    @CheckResult abstract fun packageName(s: String): Builder
 
     @CheckResult abstract fun lockState(state: LockState): Builder
 
