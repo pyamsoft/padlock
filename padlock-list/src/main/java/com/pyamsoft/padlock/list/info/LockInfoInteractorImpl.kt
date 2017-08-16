@@ -106,14 +106,14 @@ import javax.inject.Singleton
     return foundEntry
   }
 
-  @CheckResult private fun findActivityEntry(activityNames: List<String>,
+  @CheckResult private fun findActivityEntry(packageName: String, activityNames: List<String>,
       padLockEntries: MutableList<PadLockEntry.WithPackageName>, index: Int): ActivityEntry {
     val activityName = activityNames[index]
     val foundEntry = findMatchingEntry(padLockEntries, activityName)
-    return createActivityEntry(activityName, foundEntry)
+    return createActivityEntry(packageName, activityName, foundEntry)
   }
 
-  @CheckResult private fun createActivityEntry(name: String,
+  @CheckResult private fun createActivityEntry(packageName: String, name: String,
       foundEntry: PadLockEntry.WithPackageName?): ActivityEntry {
     val state: LockState
     if (foundEntry == null) {
@@ -125,7 +125,7 @@ import javax.inject.Singleton
         state = LockState.LOCKED
       }
     }
-    return ActivityEntry.builder().name(name).lockState(state).build()
+    return ActivityEntry.builder().name(name).lockState(state).packageName(packageName).build()
   }
 
   @CheckResult private fun fetchData(fetchName: String): Single<MutableList<ActivityEntry>> {
@@ -146,11 +146,11 @@ import javax.inject.Singleton
 
           while (start <= end) {
             // Find entry to compare against
-            val entry1 = findActivityEntry(activityNames, mutablePadLockEntries, start)
+            val entry1 = findActivityEntry(fetchName, activityNames, mutablePadLockEntries, start)
             activityEntries.add(entry1)
 
             if (start != end) {
-              val entry2 = findActivityEntry(activityNames, mutablePadLockEntries, end)
+              val entry2 = findActivityEntry(fetchName, activityNames, mutablePadLockEntries, end)
               activityEntries.add(entry2)
             }
 

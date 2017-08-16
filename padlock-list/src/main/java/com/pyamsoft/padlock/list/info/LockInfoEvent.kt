@@ -16,19 +16,38 @@
 
 package com.pyamsoft.padlock.list.info
 
+import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 
 sealed class LockInfoEvent {
 
-  data class Modify(val oldState: LockState, val newState: LockState, val packageName: String,
-      val activityName: String, val code: String?, val system: Boolean) : LockInfoEvent()
+  data class Modify(private val entry: ActivityEntry, val newState: LockState,
+      val code: String?, val system: Boolean) : LockInfoEvent() {
+
+    @CheckResult fun packageName(): String {
+      return entry.packageName()
+    }
+
+    @CheckResult fun name(): String {
+      return entry.name()
+    }
+
+    @CheckResult fun oldState(): LockState {
+      return entry.lockState()
+    }
+
+    @CheckResult fun id(): String {
+      return entry.id()
+    }
+  }
 
   sealed class Callback : LockInfoEvent() {
 
-    data class Created(val hook: (String) -> Unit) : Callback()
-    data class Deleted(val hook: (String) -> Unit) : Callback()
-    data class Whitelisted(val hook: (String) -> Unit) : Callback()
-    data class Error(val hook: (Throwable) -> Unit) : Callback()
+    data class Created(val id: String) : Callback()
+    data class Deleted(val id: String) : Callback()
+    data class Whitelisted(val id: String) : Callback()
+    data class Error(val throwable: Throwable) : Callback()
   }
 }
 

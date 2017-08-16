@@ -16,8 +16,15 @@
 
 package com.pyamsoft.padlock.list.info
 
+import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Created
+import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Deleted
+import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Error
+import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Whitelisted
 import com.pyamsoft.padlock.list.info.LockInfoPresenter.Callback
+import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.ActivityEntry
+import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -25,6 +32,8 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockInfoPresenter @Inject internal constructor(
+    private val bus: EventBus<LockInfoEvent>,
+    private val modifyInteractor: LockStateModifyInteractor,
     private val packageName: String,
     private val lockInfoInteractor: LockInfoInteractor,
     @Named("computation") compScheduler: Scheduler,
@@ -35,6 +44,39 @@ class LockInfoPresenter @Inject internal constructor(
   override fun onStart(bound: Callback) {
     super.onStart(bound)
     populateList(false, bound::onBegin, bound::onAdd, bound::onError, bound::onPopulated)
+
+    disposeOnStop {
+      bus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+          .subscribe({
+            if (it is LockInfoEvent.Modify) {
+              modifyDatabaseEntry(it)
+            }
+          }, {
+            Timber.e(it, "Error listening to lock info bus")
+          })
+    }
+  }
+
+  private fun modifyDatabaseEntry(event: LockInfoEvent.Modify) {
+    disposeOnStop {
+      modifyInteractor.modifySingleDatabaseEntry(event.oldState(), event.newState,
+          event.packageName(),
+          event.name(), event.code, event.system)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            val id: String = event.id()
+            when (it) {
+              LockState.LOCKED -> bus.publish(Created(id))
+              LockState.DEFAULT -> bus.publish(Deleted(id))
+              LockState.WHITELISTED -> bus.publish(Whitelisted(id))
+              else -> throw IllegalStateException("Unsupported lock state: $it")
+            }
+          }, {
+            Timber.e(it, "onError modifyDatabaseEntry")
+            bus.publish(Error(it))
+          })
+    }
   }
 
   fun populateList(forceRefresh: Boolean, onListPopulateBegin: () -> Unit,

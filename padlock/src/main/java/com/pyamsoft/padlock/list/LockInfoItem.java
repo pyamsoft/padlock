@@ -26,7 +26,7 @@ import com.mikepenz.fastadapter.items.GenericAbstractItem;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding;
-import com.pyamsoft.padlock.list.info.LockInfoItemPresenter;
+import com.pyamsoft.padlock.list.info.LockInfoItemPublisher;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.LockState;
 import com.pyamsoft.pydroid.ui.util.DialogUtil;
@@ -44,7 +44,7 @@ public class LockInfoItem
 
   @NonNull private final String packageName;
   private final boolean system;
-  @SuppressWarnings("WeakerAccess") @Inject LockInfoItemPresenter presenter;
+  @SuppressWarnings("WeakerAccess") @Inject LockInfoItemPublisher presenter;
 
   LockInfoItem(@NonNull String packageName, boolean system, @NonNull ActivityEntry entry) {
     super(entry);
@@ -124,7 +124,7 @@ public class LockInfoItem
   @SuppressWarnings("WeakerAccess") void processModifyDatabaseEntry(@NonNull ViewHolder viewHolder,
       @NonNull LockState newLockState) {
     presenter.modifyDatabaseEntry(getModel().lockState(), newLockState, packageName,
-        getModel().name(), null, system, new LockInfoItemPresenter.ModifyDatabaseCallback() {
+        getModel().name(), null, system, new LockInfoItemPublisher.ModifyDatabaseCallback() {
           @Override public void onDatabaseEntryError() {
             DialogUtil.onlyLoadOnceDialogFragment(
                 (FragmentActivity) viewHolder.itemView.getContext(), new ErrorDialog(), "error");
