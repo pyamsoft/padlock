@@ -27,7 +27,7 @@ import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.LockInfoItem
 import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.list.LockListItem
-import com.pyamsoft.padlock.list.LockStateModule
+import com.pyamsoft.padlock.list.modify.LockStateModule
 import com.pyamsoft.padlock.list.info.LockInfoModule
 import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
 import com.pyamsoft.padlock.loader.AppIconLoader

@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.base.db.PadLockDBQuery
 import com.pyamsoft.padlock.base.db.PadLockDBUpdate
 import com.pyamsoft.padlock.base.preference.OnboardingPreferences
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
-import com.pyamsoft.padlock.list.LockStateModifyInteractor
+import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.pydroid.data.Cache
 import dagger.Module
 import dagger.Provides
