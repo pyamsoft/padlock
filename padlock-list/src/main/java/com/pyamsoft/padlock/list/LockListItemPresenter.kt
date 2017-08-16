@@ -26,8 +26,10 @@ import javax.inject.Named
 
 internal class LockListItemPresenter @Inject constructor(
     private val interactor: LockListItemInteractor,
-    @Named("obs") obsScheduler: Scheduler,
-    @Named("io") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
+    @Named("computation") compScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Unit>(compScheduler, ioScheduler,
+    mainScheduler) {
 
   fun modifyDatabaseEntry(isChecked: Boolean, packageName: String, code: String?,
       system: Boolean, onDatabaseEntryCreated: () -> Unit, onDatabaseEntryDeleted: () -> Unit,
@@ -39,8 +41,8 @@ internal class LockListItemPresenter @Inject constructor(
     disposeOnStop {
       interactor.modifySingleDatabaseEntry(oldState, newState, packageName,
           PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
               LockState.DEFAULT -> onDatabaseEntryDeleted()

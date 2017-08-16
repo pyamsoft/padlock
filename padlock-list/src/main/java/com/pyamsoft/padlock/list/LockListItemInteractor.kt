@@ -16,48 +16,6 @@
 
 package com.pyamsoft.padlock.list
 
-import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper
 import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
-import com.pyamsoft.padlock.model.LockState
-import io.reactivex.Single
-import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton class LockListItemInteractor @Inject internal constructor(padLockDB: PadLockDB,
-    private val packageManagerWrapper: PackageManagerWrapper,
-    private val cacheInteractor: LockListCacheInteractor) : LockStateModifyInteractor(padLockDB) {
-
-  override fun modifySingleDatabaseEntry(oldLockState: LockState,
-      newLockState: LockState, packageName: String, activityName: String,
-      code: String?, system: Boolean): Single<LockState> {
-    return super.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
-        code, system).flatMap { lockState ->
-      return@flatMap packageManagerWrapper.loadPackageLabel(packageName)
-          .doOnSuccess {
-            updateCacheEntry(it, packageName, lockState === LockState.LOCKED)
-          }.flatMapSingle { Single.just(lockState) }
-    }
-  }
-
-  override fun clearCache() {
-    cacheInteractor.clearCache()
-  }
-
-  private fun updateCacheEntry(name: String, packageName: String, newLockState: Boolean) {
-    val cached = cacheInteractor.retrieve()
-    if (cached != null) {
-      cacheInteractor.cache(cached.map {
-        val size = it.size
-        for (i in 0..size - 1) {
-          val appEntry = it[i]
-          if (appEntry.name() == name && appEntry.packageName() == packageName) {
-            Timber.d("Update cached entry: %s %s", name, packageName)
-            it[i] = appEntry.toBuilder().locked(newLockState).build()
-          }
-        }
-        return@map it
-      })
-    }
-  }
-}
+internal interface LockListItemInteractor : LockStateModifyInteractor

@@ -24,12 +24,10 @@ import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockInfoItemInteractorImpl @Inject internal constructor(
-    @param:Named("cache_lock_info") private val cache: Cache,
-    private val updateDb: PadLockDBUpdate,
+    private val cache: Cache, private val updateDb: PadLockDBUpdate,
     private val modifyInteractor: LockStateModifyInteractor) : LockInfoItemInteractor {
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
