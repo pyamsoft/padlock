@@ -25,7 +25,7 @@ import javax.inject.Singleton
 
 @Singleton class LockListItemInteractor @Inject internal constructor(padLockDB: PadLockDB,
     private val packageManagerWrapper: PackageManagerWrapper,
-    private val cacheInteractor: LockListCacheInteractor) : LockCommonInteractor(padLockDB) {
+    private val cacheInteractor: LockListCacheInteractor) : LockStateModifyInteractor(padLockDB) {
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState,
       newLockState: LockState, packageName: String, activityName: String,

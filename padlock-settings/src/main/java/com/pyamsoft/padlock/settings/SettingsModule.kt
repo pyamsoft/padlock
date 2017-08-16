@@ -21,7 +21,7 @@ import com.pyamsoft.padlock.base.db.PadLockDBDelete
 import com.pyamsoft.padlock.base.preference.ClearPreferences
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences
-import com.pyamsoft.padlock.list.LockInfoItemInteractor
+import com.pyamsoft.padlock.list.info.LockInfoItemInteractor
 import com.pyamsoft.padlock.list.LockListItemInteractor
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache

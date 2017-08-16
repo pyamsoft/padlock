@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.PadLock;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding;
+import com.pyamsoft.padlock.list.info.LockInfoPresenter;
 import com.pyamsoft.padlock.loader.AppIconLoader;
 import com.pyamsoft.padlock.model.ActivityEntry;
 import com.pyamsoft.padlock.model.AppEntry;

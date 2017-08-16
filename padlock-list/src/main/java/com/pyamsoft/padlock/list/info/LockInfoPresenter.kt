@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
+import com.pyamsoft.padlock.list.info.LockInfoPresenter.Callback
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -23,18 +24,26 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class LockInfoPresenter @Inject constructor(
+class LockInfoPresenter @Inject internal constructor(
+    private val packageName: String,
     private val lockInfoInteractor: LockInfoInteractor,
-    @Named("obs") obsScheduler: Scheduler,
-    @Named("io") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
+    @Named("computation") compScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(compScheduler, ioScheduler,
+    mainScheduler) {
 
-  fun populateList(packageName: String, forceRefresh: Boolean, onListPopulateBegin: () -> Unit,
+  override fun onStart(bound: Callback) {
+    super.onStart(bound)
+    populateList(false, bound::onBegin, bound::onAdd, bound::onError, bound::onPopulated)
+  }
+
+  fun populateList(forceRefresh: Boolean, onListPopulateBegin: () -> Unit,
       onEntryAddedToList: (ActivityEntry) -> Unit, onListPopulateError: (Throwable) -> Unit,
       onListPopulated: () -> Unit) {
     disposeOnStop {
       lockInfoInteractor.populateList(packageName, forceRefresh)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .doAfterTerminate { onListPopulated() }
           .doOnSubscribe { onListPopulateBegin() }
           .subscribe({ onEntryAddedToList(it) }, {
@@ -47,8 +56,8 @@ internal class LockInfoPresenter @Inject constructor(
   fun showOnBoarding(onShowOnboarding: () -> Unit, onOnboardingComplete: () -> Unit) {
     disposeOnStop {
       lockInfoInteractor.hasShownOnBoarding()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
               onOnboardingComplete()
@@ -57,5 +66,16 @@ internal class LockInfoPresenter @Inject constructor(
             }
           }, { Timber.e(it, "onError") })
     }
+  }
+
+  interface Callback {
+
+    fun onBegin()
+
+    fun onAdd(entry: ActivityEntry)
+
+    fun onError(throwable: Throwable)
+
+    fun onPopulated()
   }
 }
