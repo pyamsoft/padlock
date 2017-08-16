@@ -25,13 +25,11 @@ import javax.inject.Named
 
 class LockInfoItemPresenter @Inject internal constructor(
     private val interactor: LockInfoItemInteractor,
-    @Named("obs") observeScheduler: Scheduler,
-    @Named("sub") subscribeScheduler: Scheduler) : SchedulerPresenter(observeScheduler,
-    subscribeScheduler) {
+    @Named("computation") compScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Unit>(compScheduler, ioScheduler,
+    mainScheduler) {
 
-  /**
-   * public
-   */
   fun modifyDatabaseEntry(oldLockState: LockState, newLockState: LockState,
       packageName: String, activityName: String, code: String?,
       system: Boolean, onDatabaseEntryCreated: () -> Unit, onDatabaseEntryDeleted: () -> Unit,
@@ -39,8 +37,8 @@ class LockInfoItemPresenter @Inject internal constructor(
     disposeOnStop {
       interactor.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
           code, system)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
               LockState.DEFAULT -> onDatabaseEntryDeleted()

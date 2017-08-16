@@ -71,7 +71,7 @@ import javax.inject.Singleton
 
   @Singleton
   @Provides
-  @Named("main")
+  @Named("main_activity")
   internal fun provideMainActivityClass(): Class<out Activity> {
     return mainActivityClass
   }

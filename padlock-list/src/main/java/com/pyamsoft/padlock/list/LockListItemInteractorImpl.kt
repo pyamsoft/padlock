@@ -16,29 +16,20 @@
 
 package com.pyamsoft.padlock.list
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
+import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class LockListCacheInteractor @Inject internal constructor() {
+@Singleton class LockListItemInteractorImpl @Inject internal constructor(private val cache: Cache,
+    private val modifyInteractor: LockStateModifyInteractor) : LockListItemInteractor {
 
-  private var cachedListObservable: Single<MutableList<AppEntry>>? = null
-
-  init {
-    cachedListObservable = null
-  }
-
-  fun cache(cache: Single<MutableList<AppEntry>>) {
-    cachedListObservable = cache
-  }
-
-  @CheckResult fun retrieve(): Single<MutableList<AppEntry>>? {
-    return cachedListObservable
-  }
-
-  fun clearCache() {
-    cachedListObservable = null
+  override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
+      packageName: String, activityName: String, code: String?,
+      system: Boolean): Single<LockState> {
+    return modifyInteractor.modifySingleDatabaseEntry(oldLockState, newLockState, packageName,
+        activityName, code, system).doOnSuccess { cache.clearCache() }
   }
 }

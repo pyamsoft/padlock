@@ -127,32 +127,29 @@ import com.squareup.sqldelight.SqlDelightStatement
     }
 
     @JvmStatic
-    private val FACTORY by lazy {
-      PadLockEntryModel.Factory(
-          { packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication,
-              whitelist ->
-            AutoValue_PadLockEntry(packageName, activityName, lockCode, lockUntilTime,
-                ignoreUntilTime,
-                systemApplication, whitelist)
-          })
+    private val FACTORY: PadLockEntryModel.Factory<PadLockEntry> by lazy<PadLockEntryModel.Factory<PadLockEntry>> {
+      PadLockEntryModel.Factory { packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication, whitelist ->
+        AutoValue_PadLockEntry(packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime,
+            systemApplication, whitelist)
+      }
     }
 
     @JvmStatic
-    internal val ALL_ENTRIES_MAPPER: RowMapper<AllEntries> by lazy {
-      FACTORY.all_entriesMapper({ packageName, activityName, whitelist ->
+    internal val ALL_ENTRIES_MAPPER: RowMapper<AllEntries> by lazy<RowMapper<AllEntries>> {
+      FACTORY.all_entriesMapper { packageName, activityName, whitelist ->
         AutoValue_PadLockEntry_AllEntries(packageName, activityName, whitelist)
-      })
+      }
     }
 
     @JvmStatic
-    internal val WITH_PACKAGE_NAME_MAPPER: RowMapper<WithPackageName> by lazy {
-      FACTORY.with_package_nameMapper({ activityName, whitelist ->
+    internal val WITH_PACKAGE_NAME_MAPPER: RowMapper<WithPackageName> by lazy<RowMapper<WithPackageName>> {
+      FACTORY.with_package_nameMapper { activityName, whitelist ->
         AutoValue_PadLockEntry_WithPackageName(activityName, whitelist)
-      })
+      }
     }
 
     @JvmStatic
-    internal val WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER: PadLockEntryModel.Mapper<out PadLockEntry> by lazy {
+    internal val WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER: PadLockEntryModel.Mapper<PadLockEntry> by lazy {
       FACTORY.with_package_activity_name_defaultMapper()
     }
 

@@ -17,17 +17,25 @@
 package com.pyamsoft.padlock.base.receiver
 
 import android.app.Activity
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
+import android.os.Build.VERSION_CODES
+import android.support.annotation.RequiresApi
+import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.NotificationCompat
 import com.pyamsoft.padlock.base.R
-import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper
-import com.pyamsoft.pydroid.helper.SchedulerHelper
+import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
+import com.pyamsoft.pydroid.helper.enforceComputation
+import com.pyamsoft.pydroid.helper.enforceIo
+import com.pyamsoft.pydroid.helper.enforceMainThread
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import timber.log.Timber
@@ -36,13 +44,15 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton class ApplicationInstallReceiver @Inject internal constructor(context: Context,
-    private val packageManagerWrapper: PackageManagerWrapper,
-    @param:Named("obs") private val obsScheduler: Scheduler,
-    @param:Named("sub") private val subScheduler: Scheduler,
-    @Named("main") mainActivityClass: Class<out Activity>) : BroadcastReceiver() {
+    private val packageManagerWrapper: PackageLabelManager,
+    @param:Named("computation") private val computationScheduler: Scheduler,
+    @param:Named("io") private val ioScheduler: Scheduler,
+    @param:Named("main") private val mainThreadScheduler: Scheduler,
+    @Named("main_activity") mainActivityClass: Class<out Activity>) : BroadcastReceiver() {
 
+  private val notificationChannelId: String = "padlock_new_apps"
   private val appContext: Context = context.applicationContext
-  private val notificationManager: NotificationManagerCompat
+  private val notificationManager: NotificationManager
   private val filter: IntentFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
   private val pendingIntent: PendingIntent
   private val compositeDisposable: CompositeDisposable = CompositeDisposable()
@@ -53,10 +63,31 @@ import javax.inject.Singleton
     filter.addDataScheme("package")
     pendingIntent = PendingIntent.getActivity(appContext, 421,
         Intent(appContext, mainActivityClass), 0)
-    notificationManager = NotificationManagerCompat.from(appContext)
+    notificationManager = appContext.getSystemService(
+        Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    SchedulerHelper.enforceForegroundScheduler(obsScheduler)
-    SchedulerHelper.enforceBackgroundScheduler(subScheduler)
+    computationScheduler.enforceComputation()
+    ioScheduler.enforceIo()
+    mainThreadScheduler.enforceMainThread()
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      setupNotificationChannel(notificationChannelId)
+    }
+  }
+
+  @RequiresApi(VERSION_CODES.O) private fun setupNotificationChannel(
+      notificationChannelId: String) {
+    val name = "App Lock Suggestions"
+    val description = "Suggestions to secure newly installed applications with PadLock"
+    val importance = NotificationManagerCompat.IMPORTANCE_MIN
+    val notificationChannel = NotificationChannel(notificationChannelId, name, importance)
+    notificationChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+    notificationChannel.description = description
+    notificationChannel.enableLights(false)
+    notificationChannel.enableVibration(false)
+
+    Timber.d("Create notification channel with id: %s", notificationChannelId)
+    notificationManager.createNotificationChannel(notificationChannel)
   }
 
   override fun onReceive(context: Context, intent: Intent?) {
@@ -70,8 +101,8 @@ import javax.inject.Singleton
     val packageName = data.schemeSpecificPart
 
     compositeDisposable.add(packageManagerWrapper.loadPackageLabel(packageName)
-        .subscribeOn(subScheduler)
-        .observeOn(obsScheduler)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainThreadScheduler)
         .subscribe({ s ->
           if (isNew) {
             onNewPackageInstalled(packageName, s)
@@ -87,7 +118,8 @@ import javax.inject.Singleton
   internal fun onNewPackageInstalled(packageName: String,
       name: String) {
     Timber.i("Package Added: %s", packageName)
-    val notification1 = NotificationCompat.Builder(appContext).setContentTitle(
+    val notification1 = NotificationCompat.Builder(appContext,
+        notificationChannelId).setContentTitle(
         "Lock New Application")
         .setSmallIcon(R.drawable.ic_notification_lock)
         .setColor(ContextCompat.getColor(appContext, R.color.blue500))

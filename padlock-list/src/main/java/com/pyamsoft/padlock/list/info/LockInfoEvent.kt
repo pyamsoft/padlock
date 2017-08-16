@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.list.info
 
-import android.support.annotation.CheckResult
-import io.reactivex.Single
+import com.pyamsoft.padlock.model.LockState
 
-interface LockServiceStateInteractor {
+sealed class LockInfoEvent {
 
-  @CheckResult fun isServiceEnabled(): Single<Boolean>
+  data class Modify(val oldState: LockState, val newState: LockState, val packageName: String,
+      val activityName: String, val code: String?, val system: Boolean) : LockInfoEvent()
 
+  sealed class Callback : LockInfoEvent() {
+
+    data class Created(val hook: (String) -> Unit) : Callback()
+    data class Deleted(val hook: (String) -> Unit) : Callback()
+    data class Whitelisted(val hook: (String) -> Unit) : Callback()
+    data class Error(val hook: (Throwable) -> Unit) : Callback()
+  }
 }
+

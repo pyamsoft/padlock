@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.list.info
 
-import android.support.annotation.CheckResult
-import io.reactivex.Single
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
 
-interface LockServiceStateInteractor {
+internal class LockInfoBus @Inject internal constructor() : EventBus<LockInfoEvent> {
 
-  @CheckResult fun isServiceEnabled(): Single<Boolean>
+  private val bus: EventBus<LockInfoEvent> = RxBus.create()
+
+  override fun listen(): Observable<LockInfoEvent> {
+    return bus.listen()
+  }
+
+  override fun publish(event: LockInfoEvent) {
+    bus.publish(event)
+  }
 
 }
+

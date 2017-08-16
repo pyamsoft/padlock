@@ -17,9 +17,10 @@
 package com.pyamsoft.padlock.list
 
 import com.pyamsoft.padlock.model.AppEntry
-import com.pyamsoft.padlock.pin.ClearPinBus
-import com.pyamsoft.padlock.pin.CreatePinBus
+import com.pyamsoft.padlock.pin.ClearPinEvent
+import com.pyamsoft.padlock.pin.CreatePinEvent
 import com.pyamsoft.padlock.service.LockServiceStateInteractor
+import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -29,15 +30,17 @@ import javax.inject.Named
 internal class LockListPresenter @Inject constructor(
     private val lockListInteractor: LockListInteractor,
     private val stateInteractor: LockServiceStateInteractor,
-    private val clearPinBus: ClearPinBus,
-    private val createPinBus: CreatePinBus,
-    @Named("obs") obsScheduler: Scheduler,
-    @Named("io") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
+    private val clearPinBus: EventBus<ClearPinEvent>,
+    private val createPinBus: EventBus<CreatePinEvent>,
+    @Named("computation") compScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Unit>(compScheduler, ioScheduler,
+    mainScheduler) {
 
   fun registerOnBus(onMasterPinCreateSuccess: () -> Unit, onMasterPinCreateFailure: () -> Unit,
       onMasterPinClearSuccess: () -> Unit, onMasterPinClearFailure: () -> Unit) {
     disposeOnStop {
-      createPinBus.listen().subscribeOn(backgroundScheduler).observeOn(foregroundScheduler)
+      createPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             if (it.success()) {
               onMasterPinCreateSuccess()
@@ -50,7 +53,7 @@ internal class LockListPresenter @Inject constructor(
     }
 
     disposeOnStop {
-      clearPinBus.listen().subscribeOn(backgroundScheduler).observeOn(foregroundScheduler)
+      clearPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             if (it.success()) {
               onMasterPinClearSuccess()
@@ -68,8 +71,8 @@ internal class LockListPresenter @Inject constructor(
       onListPopulateError: (Throwable) -> Unit) {
     disposeOnStop {
       lockListInteractor.populateList(forceRefresh)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .doAfterTerminate { onListPopulated() }
           .doOnSubscribe { onListPopulateBegin() }
           .subscribe({ onEntryAddedToList(it) }, {
@@ -83,8 +86,8 @@ internal class LockListPresenter @Inject constructor(
       onSetFABStateDisabled: () -> Unit) {
     disposeOnStop {
       stateInteractor.isServiceEnabled()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
               onSetFABStateEnabled()
@@ -107,8 +110,8 @@ internal class LockListPresenter @Inject constructor(
       onSetSystemInvisible: () -> Unit) {
     disposeOnStop {
       lockListInteractor.isSystemVisible()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
               onSetSystemVisible()
@@ -122,8 +125,8 @@ internal class LockListPresenter @Inject constructor(
   fun showOnBoarding(onOnboardingComplete: () -> Unit, onShowOnboarding: () -> Unit) {
     disposeOnStop {
       lockListInteractor.hasShownOnBoarding()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
               onOnboardingComplete()
