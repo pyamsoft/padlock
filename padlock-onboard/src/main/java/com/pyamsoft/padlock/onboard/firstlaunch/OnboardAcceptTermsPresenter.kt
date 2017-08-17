@@ -24,14 +24,16 @@ import javax.inject.Named
 
 class OnboardAcceptTermsPresenter @Inject internal constructor(
     private val interactor: OnboardAcceptTermsInteractor,
-    @Named("obs") obsScheduler: Scheduler,
-    @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
+    @Named("computation") compScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Unit>(compScheduler, ioScheduler,
+    mainScheduler) {
 
   fun acceptUsageTerms(onUsageTermsAccepted: () -> Unit) {
     disposeOnStop {
       interactor.agreeToTerms()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({ onUsageTermsAccepted() }, {
             Timber.e(it, "onError")
           })
