@@ -16,15 +16,10 @@
 
 package com.pyamsoft.padlock.onboard.list
 
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
 import javax.inject.Inject
-import javax.inject.Named
 
-class OnboardListPresenter @Inject internal constructor(
-    private val interactor: OnboardListInteractor,
-    @Named("obs") obsScheduler: Scheduler,
-    @Named("sub") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
+class OnboardListPublisher @Inject internal constructor(
+    private val interactor: OnboardListInteractor) {
 
   fun finishOnboarding() {
     interactor.completeOnboarding()

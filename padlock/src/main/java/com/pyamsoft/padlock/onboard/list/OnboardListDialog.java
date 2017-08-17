@@ -49,7 +49,7 @@ public class OnboardListDialog extends DialogFragment implements Onboard {
   @NonNull private static final String KEY_LAST_POSITION = "key_onboard_list_dialog_position";
   private static final int PAGER_PAGE_COUNT = 3;
   @NonNull private final LoaderMap mapper = new LoaderMap();
-  @Inject OnboardListPresenter presenter;
+  @Inject OnboardListPublisher presenter;
   private OnboardListDialogBinding binding;
   private ViewPager.OnPageChangeListener pageChangeListener;
 
