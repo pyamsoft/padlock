@@ -35,7 +35,7 @@ import static com.pyamsoft.padlock.lock.LockScreenActivity.ENTRY_REAL_NAME;
 
 public abstract class LockScreenBaseFragment extends Fragment {
 
-  @SuppressWarnings("WeakerAccess") @Inject LockScreenEntryPresenter presenter;
+  @SuppressWarnings("WeakerAccess") @Inject LockEntryPresenter presenter;
   private String lockedActivityName;
   private String lockedPackageName;
   private String lockedCode;

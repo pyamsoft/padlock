@@ -21,8 +21,6 @@ import com.pyamsoft.padlock.base.db.PadLockDBDelete
 import com.pyamsoft.padlock.base.preference.ClearPreferences
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences
-import com.pyamsoft.padlock.list.info.LockInfoItemInteractor
-import com.pyamsoft.padlock.list.LockListItemInteractor
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
 import dagger.Module
@@ -39,7 +37,8 @@ import javax.inject.Singleton
   @Singleton @Provides @CheckResult internal fun provideSettingsInteractor(
       deleteDb: PadLockDBDelete, masterPinPreference: MasterPinPreferences,
       clearPreference: ClearPreferences, installListenerPreferences: InstallListenerPreferences,
-      lockListInteractor: LockListItemInteractor, lockInfoInteractor: LockInfoItemInteractor,
+      @Named("cache_lock_list") lockListInteractor: Cache,
+      @Named("cache_lock_info") lockInfoInteractor: Cache,
       @Named("cache_purge") purgeInteractor: Cache): SettingsPreferenceInteractor {
     return SettingsPreferenceInteractorImpl(deleteDb, masterPinPreference, clearPreference,
         installListenerPreferences, lockListInteractor, lockInfoInteractor, purgeInteractor)

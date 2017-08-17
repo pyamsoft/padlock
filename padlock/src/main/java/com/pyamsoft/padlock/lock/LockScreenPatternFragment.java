@@ -81,7 +81,7 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
         Timber.d("Unlocked!");
         presenter.postUnlock(getLockedPackageName(), getLockedActivityName(), getLockedRealName(),
             getLockedCode(), isLockedSystem(), isExcluded(), getSelectedIgnoreTime(),
-            new LockScreenEntryPresenter.PostUnlockCallback() {
+            new LockEntryPresenter.PostUnlockCallback() {
               @Override public void onPostUnlock() {
                 Timber.d("POST Unlock Finished! 1");
                 PadLockService.passLockScreen(getLockedPackageName(), getLockedActivityName());
@@ -100,7 +100,7 @@ public class LockScreenPatternFragment extends LockScreenBaseFragment {
 
         // Once fail count is tripped once, continue to update it every time following until time elapses
         presenter.lockEntry(getLockedPackageName(), getLockedActivityName(),
-            new LockScreenEntryPresenter.LockCallback() {
+            new LockEntryPresenter.LockCallback() {
               @Override public void onLocked(long lockUntilTime) {
                 setLockedUntilTime(lockUntilTime);
                 getActivity().getIntent().removeExtra(ENTRY_LOCK_UNTIL_TIME);

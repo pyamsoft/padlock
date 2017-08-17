@@ -20,6 +20,8 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.base.db.PadLockDBInsert
+import com.pyamsoft.padlock.base.db.PadLockDBUpdate
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.lock.helper.LockHelper
@@ -34,16 +36,20 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton internal class LockScreenEntryInteractor @Inject internal constructor(context: Context,
+@Singleton internal class LockEntryInteractorImpl @Inject internal constructor(
+    context: Context,
+    private val lockHelper: LockHelper,
     private val preferences: LockScreenPreferences,
     private val jobSchedulerCompat: JobSchedulerCompat,
-    private val masterPinInteractor: MasterPinInteractor, private val padLockDB: PadLockDB,
-    @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>) {
+    private val masterPinInteractor: MasterPinInteractor, private val dbInsert: PadLockDBInsert,
+    private val dbUpdate: PadLockDBUpdate,
+    @param:Named(
+        "recheck") private val recheckServiceClass: Class<out IntentService>) : LockEntryInteractor {
 
   private val appContext = context.applicationContext
   private var failCount: Int = 0
 
-  @CheckResult fun submitPin(packageName: String, activityName: String, lockCode: String?,
+  override fun submitPin(packageName: String, activityName: String, lockCode: String?,
       lockUntilTime: Long, currentAttempt: String): Single<Boolean> {
     return masterPinInteractor.getMasterPin().map {
       Timber.d("Attempt unlock: %s %s", packageName, activityName)
@@ -64,7 +70,7 @@ import javax.inject.Singleton
       return@map pin
     }.flatMap {
       if (it.isPresent()) {
-        return@flatMap LockHelper.get().checkSubmissionAttempt(currentAttempt, it.item())
+        return@flatMap lockHelper.checkSubmissionAttempt(currentAttempt, it.item())
       } else {
         Timber.e("Cannot submit against PIN which is NULL")
         return@flatMap Single.just(false)
@@ -76,7 +82,7 @@ import javax.inject.Singleton
       packageName: String, activityName: String, realName: String,
       lockCode: String?, isSystem: Boolean): Completable {
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName)
-    return padLockDB.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
+    return dbInsert.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
   }
 
   @CheckResult private fun queueRecheckJob(
@@ -101,19 +107,16 @@ import javax.inject.Singleton
           ignoreMinutesInMillis)
 
       // Add an extra second here to artificially de-bounce quick requests, like those commonly in multi window mode
-      return@defer padLockDB.updateIgnoreTime(newIgnoreTime + 1000L, packageName, activityName)
+      return@defer dbUpdate.updateIgnoreTime(newIgnoreTime + 1000L, packageName, activityName)
     }
   }
 
-  /**
-   * public
-   */
-  @CheckResult fun lockEntryOnFail(packageName: String, activityName: String): Maybe<TimePair> {
+  override fun lockEntryOnFail(packageName: String, activityName: String): Completable {
     return Single.fromCallable { ++failCount }
         .filter { it > DEFAULT_MAX_FAIL_COUNT }
         .flatMap { getTimeoutPeriodMinutesInMillis() }
         .filter { it > 0 }
-        .flatMap { lockEntry(it, packageName, activityName) }
+        .flatMapCompletable { lockEntry(it, packageName, activityName) }
   }
 
   @CheckResult
@@ -124,24 +127,18 @@ import javax.inject.Singleton
   }
 
   @CheckResult private fun lockEntry(
-      timeOutMinutesInMillis: Long, packageName: String, activityName: String): Maybe<TimePair> {
-    return Maybe.defer {
+      timeOutMinutesInMillis: Long, packageName: String, activityName: String): Completable {
+    return Completable.defer {
       val currentTime = System.currentTimeMillis()
       val newLockUntilTime = currentTime + timeOutMinutesInMillis
       Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
           timeOutMinutesInMillis)
 
-      return@defer padLockDB.updateLockTime(newLockUntilTime, packageName, activityName)
-          .andThen(Maybe.just(TimePair(currentTime, newLockUntilTime)))
+      return@defer dbUpdate.updateLockTime(newLockUntilTime, packageName, activityName)
     }
   }
 
-  fun resetFailCount() {
-    Timber.d("Reset fail count to 0")
-    failCount = 0
-  }
-
-  @CheckResult fun getHint(): Single<String> {
+  override fun getHint(): Single<String> {
     return masterPinInteractor.getHint().map {
       val result: String
       if (it.isPresent()) {
@@ -153,7 +150,7 @@ import javax.inject.Singleton
     }
   }
 
-  @CheckResult fun postUnlock(packageName: String,
+  override fun postUnlock(packageName: String,
       activityName: String, realName: String, lockCode: String?,
       isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long): Completable {
     return Completable.defer {
@@ -177,11 +174,8 @@ import javax.inject.Singleton
     }
   }
 
-  internal data class TimePair(val currentTime: Long, val lockUntilTime: Long)
-
   companion object {
     const val DEFAULT_MAX_FAIL_COUNT: Int = 2
   }
-
 }
 

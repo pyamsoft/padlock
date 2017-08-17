@@ -36,7 +36,7 @@ import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.base.db.PadLockEntry;
 import com.pyamsoft.padlock.databinding.ActivityLockBinding;
 import com.pyamsoft.padlock.loader.AppIconLoader;
-import com.pyamsoft.padlock.lock.common.LockTypePresenter;
+import com.pyamsoft.padlock.lock.screen.LockScreenPresenter;
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase;
 import com.pyamsoft.pydroid.loader.ImageLoader;
 import com.pyamsoft.pydroid.loader.LoaderHelper;
@@ -146,7 +146,7 @@ public class LockScreenActivity extends ActivityBase {
     setupActionBar();
 
     final String lockedCode = getIntent().getExtras().getString(ENTRY_LOCK_CODE);
-    presenter.initializeLockScreenType(new LockTypePresenter.LockScreenTypeCallback() {
+    presenter.initializeLockScreenType(new LockScreenPresenter.LockScreenTypeCallback() {
 
       private void pushFragment(@NonNull Fragment pushFragment, @NonNull String tag) {
         FragmentManager fragmentManager = getSupportFragmentManager();

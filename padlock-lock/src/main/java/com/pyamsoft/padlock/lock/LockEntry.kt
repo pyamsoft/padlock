@@ -14,19 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock.common
+package com.pyamsoft.padlock.lock
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.preference.LockScreenPreferences
-import com.pyamsoft.padlock.model.LockScreenType
-import io.reactivex.Single
-import javax.inject.Inject
-import javax.inject.Singleton
-
-@Singleton open class LockTypeInteractor @Inject protected constructor(
-    protected val preferences: LockScreenPreferences) {
-
-  @CheckResult fun getLockScreenType(): Single<LockScreenType> {
-    return Single.fromCallable { preferences.getCurrentLockType() }
-  }
-}
+internal data class LockEntry internal constructor(val packageName: String,
+    val activityName: String)

@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock
+package com.pyamsoft.padlock.lock.screen
 
-internal interface LockSubmitCallback {
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
 
-  fun onSubmitSuccess()
+internal class CloseOldBus @Inject internal constructor() : EventBus<CloseOldEvent> {
 
-  fun onSubmitFailure()
+  private val bus: EventBus<CloseOldEvent> = RxBus.create()
 
-  fun onSubmitError()
+  override fun listen(): Observable<CloseOldEvent> {
+    return bus.listen()
+  }
+
+  override fun publish(event: CloseOldEvent) {
+    bus.publish(event)
+  }
+
 }
+
