@@ -46,12 +46,11 @@ class LockInfoPresenter @Inject internal constructor(
     populateList(false, bound::onBegin, bound::onAdd, bound::onError, bound::onPopulated)
 
     disposeOnStop {
-      bus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-          .subscribe({
-            if (it is LockInfoEvent.Modify) {
-              modifyDatabaseEntry(it)
-            }
-          }, {
+      bus.listen()
+          .filter { it is LockInfoEvent.Modify }
+          .map { it as LockInfoEvent.Modify }
+          .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+          .subscribe({ modifyDatabaseEntry(it) }, {
             Timber.e(it, "Error listening to lock info bus")
           })
     }

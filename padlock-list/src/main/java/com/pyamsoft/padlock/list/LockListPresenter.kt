@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
+import com.pyamsoft.padlock.list.LockListPresenter.Callback
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.ClearPinEvent
 import com.pyamsoft.padlock.pin.CreatePinEvent
@@ -34,10 +35,22 @@ internal class LockListPresenter @Inject constructor(
     private val createPinBus: EventBus<CreatePinEvent>,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Unit>(compScheduler, ioScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(compScheduler, ioScheduler,
     mainScheduler) {
 
-  fun registerOnBus(onMasterPinCreateSuccess: () -> Unit, onMasterPinCreateFailure: () -> Unit,
+  override fun onStart(bound: Callback) {
+    super.onStart(bound)
+    registerOnBus(bound::onMasterPinCreateSuccess, bound::onMasterPinCreateFailure,
+        bound::onMasterPinClearSuccess, bound::onMasterPinClearFailure)
+    setFABStateFromPreference(bound::onSetFABStateEnabled, bound::onSetFABStateDisabled)
+    setSystemVisibilityFromPreference(bound::onSetSystemVisible, bound::onSetSystemInvisible)
+    showOnBoarding(bound::onOnboardingComplete, bound::onShowOnboarding)
+    populateList(false, bound::onListPopulateBegin, bound::onEntryAddedToList,
+        bound::onListPopulated, bound::onListPopulateError)
+  }
+
+  private fun registerOnBus(onMasterPinCreateSuccess: () -> Unit,
+      onMasterPinCreateFailure: () -> Unit,
       onMasterPinClearSuccess: () -> Unit, onMasterPinClearFailure: () -> Unit) {
     disposeOnStop {
       createPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
@@ -66,23 +79,7 @@ internal class LockListPresenter @Inject constructor(
     }
   }
 
-  fun populateList(forceRefresh: Boolean, onListPopulateBegin: () -> Unit,
-      onEntryAddedToList: (AppEntry) -> Unit, onListPopulated: () -> Unit,
-      onListPopulateError: (Throwable) -> Unit) {
-    disposeOnStop {
-      lockListInteractor.populateList(forceRefresh)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .doAfterTerminate { onListPopulated() }
-          .doOnSubscribe { onListPopulateBegin() }
-          .subscribe({ onEntryAddedToList(it) }, {
-            Timber.e(it, "populateList onError")
-            onListPopulateError(it)
-          })
-    }
-  }
-
-  fun setFABStateFromPreference(onSetFABStateEnabled: () -> Unit,
+  private fun setFABStateFromPreference(onSetFABStateEnabled: () -> Unit,
       onSetFABStateDisabled: () -> Unit) {
     disposeOnStop {
       stateInteractor.isServiceEnabled()
@@ -98,15 +95,7 @@ internal class LockListPresenter @Inject constructor(
     }
   }
 
-  fun setSystemVisible() {
-    lockListInteractor.setSystemVisible(true)
-  }
-
-  fun setSystemInvisible() {
-    lockListInteractor.setSystemVisible(false)
-  }
-
-  fun setSystemVisibilityFromPreference(onSetSystemVisible: () -> Unit,
+  private fun setSystemVisibilityFromPreference(onSetSystemVisible: () -> Unit,
       onSetSystemInvisible: () -> Unit) {
     disposeOnStop {
       lockListInteractor.isSystemVisible()
@@ -122,7 +111,7 @@ internal class LockListPresenter @Inject constructor(
     }
   }
 
-  fun showOnBoarding(onOnboardingComplete: () -> Unit, onShowOnboarding: () -> Unit) {
+  private fun showOnBoarding(onOnboardingComplete: () -> Unit, onShowOnboarding: () -> Unit) {
     disposeOnStop {
       lockListInteractor.hasShownOnBoarding()
           .subscribeOn(ioScheduler)
@@ -135,5 +124,52 @@ internal class LockListPresenter @Inject constructor(
             }
           }, { Timber.e(it, "onError") })
     }
+  }
+
+  fun setSystemVisible() {
+    lockListInteractor.setSystemVisible(true)
+  }
+
+  fun setSystemInvisible() {
+    lockListInteractor.setSystemVisible(false)
+  }
+
+  fun populateList(force: Boolean, onListPopulateBegin: () -> Unit,
+      onEntryAddedToList: (AppEntry) -> Unit, onListPopulated: () -> Unit,
+      onListPopulateError: (Throwable) -> Unit) {
+    disposeOnStop {
+      lockListInteractor.populateList(force)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .doAfterTerminate { onListPopulated() }
+          .doOnSubscribe { onListPopulateBegin() }
+          .subscribe({ onEntryAddedToList(it) }, {
+            Timber.e(it, "populateList onError")
+            onListPopulateError(it)
+          })
+    }
+  }
+
+  interface Callback {
+
+    fun onMasterPinCreateSuccess()
+    fun onMasterPinCreateFailure()
+    fun onMasterPinClearSuccess()
+    fun onMasterPinClearFailure()
+
+    fun onListPopulateBegin()
+    fun onEntryAddedToList(entry: AppEntry)
+    fun onListPopulated()
+    fun onListPopulateError(throwable: Throwable)
+
+    fun onSetFABStateEnabled()
+    fun onSetFABStateDisabled()
+
+    fun onSetSystemVisible()
+    fun onSetSystemInvisible()
+
+    fun onOnboardingComplete()
+    fun onShowOnboarding()
+
   }
 }
