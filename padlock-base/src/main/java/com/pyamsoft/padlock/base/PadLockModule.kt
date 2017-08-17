@@ -19,12 +19,16 @@ package com.pyamsoft.padlock.base
 import android.app.Activity
 import android.app.IntentService
 import android.content.Context
+import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.preference.ClearPreferences
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.preference.LockListPreferences
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences
 import com.pyamsoft.padlock.base.preference.OnboardingPreferences
+import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
+import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiverImpl
+import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
 import dagger.Module
 import dagger.Provides
 import io.reactivex.Scheduler
@@ -41,64 +45,69 @@ import javax.inject.Singleton
   private val appContext: Context = context.applicationContext
   private val preferences: PadLockPreferencesImpl = PadLockPreferencesImpl(appContext)
 
-  @Singleton @Provides internal fun provideContext(): Context {
+  @Singleton @Provides @CheckResult internal fun provideContext(): Context {
     return appContext
   }
 
-  @Singleton @Provides internal fun provideMasterPinPreference(): MasterPinPreferences {
+  @Singleton @Provides @CheckResult internal fun provideMasterPinPreference(): MasterPinPreferences {
     return preferences
   }
 
-  @Singleton @Provides internal fun provideClearPreferences(): ClearPreferences {
+  @Singleton @Provides @CheckResult internal fun provideClearPreferences(): ClearPreferences {
     return preferences
   }
 
-  @Singleton @Provides internal fun provideInstallListenerPreferences(): InstallListenerPreferences {
+  @Singleton @Provides @CheckResult internal fun provideInstallListenerPreferences(): InstallListenerPreferences {
     return preferences
   }
 
-  @Singleton @Provides internal fun provideLockListPreferences(): LockListPreferences {
+  @Singleton @Provides @CheckResult internal fun provideLockListPreferences(): LockListPreferences {
     return preferences
   }
 
-  @Singleton @Provides internal fun provideLockScreenPreferences(): LockScreenPreferences {
+  @Singleton @Provides @CheckResult internal fun provideLockScreenPreferences(): LockScreenPreferences {
     return preferences
   }
 
-  @Singleton @Provides internal fun provideOnboardingPreferences(): OnboardingPreferences {
+  @Singleton @Provides @CheckResult internal fun provideOnboardingPreferences(): OnboardingPreferences {
     return preferences
   }
 
-  @Singleton
-  @Provides
-  @Named("main_activity")
-  internal fun provideMainActivityClass(): Class<out Activity> {
+  @Singleton @Provides @CheckResult internal fun provideApplicationInstallReceiver(
+      packageManagerWrapper: PackageLabelManager,
+      @Named("computation") computationScheduler: Scheduler,
+      @Named("io") ioScheduler: Scheduler,
+      @Named("main") mainThreadScheduler: Scheduler,
+      @Named("main_activity") mainActivityClass: Class<out Activity>): ApplicationInstallReceiver {
+    return ApplicationInstallReceiverImpl(appContext, packageManagerWrapper, computationScheduler,
+        ioScheduler, mainThreadScheduler, mainActivityClass)
+  }
+
+  @Singleton @Provides @Named(
+      "main_activity") @CheckResult internal fun provideMainActivityClass(): Class<out Activity> {
     return mainActivityClass
   }
 
-  @Singleton
-  @Provides
-  @Named("lockscreen")
-  internal fun provideLockScreenActivityClas(): Class<out Activity> {
+  @Singleton @Provides @Named(
+      "lockscreen") @CheckResult internal fun provideLockScreenActivityClas(): Class<out Activity> {
     return lockScreenActivityClass
   }
 
-  @Singleton
-  @Provides
-  @Named("recheck")
-  internal fun provideRecheckServiceClass(): Class<out IntentService> {
+  @Singleton @Provides @Named(
+      "recheck") @CheckResult internal fun provideRecheckServiceClass(): Class<out IntentService> {
     return recheckServiceClass
   }
 
-  @Singleton @Provides @Named("computation") internal fun provideComputationScheduler(): Scheduler {
+  @Singleton @Provides @Named(
+      "computation") @CheckResult internal fun provideComputationScheduler(): Scheduler {
     return Schedulers.computation()
   }
 
-  @Singleton @Provides @Named("io") internal fun provideIOScheduler(): Scheduler {
+  @Singleton @Provides @Named("io") @CheckResult internal fun provideIOScheduler(): Scheduler {
     return Schedulers.io()
   }
 
-  @Singleton @Provides @Named("main") internal fun provideMainScheduler(): Scheduler {
+  @Singleton @Provides @Named("main") @CheckResult internal fun provideMainScheduler(): Scheduler {
     return AndroidSchedulers.mainThread()
   }
 }

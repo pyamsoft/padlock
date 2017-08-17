@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock
+package com.pyamsoft.padlock.lock.screen
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences
-import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapper
-import com.pyamsoft.padlock.lock.common.LockTypeInteractor
-import io.reactivex.Single
-import javax.inject.Inject
+import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
+import com.pyamsoft.pydroid.bus.EventBus
+import dagger.Module
+import dagger.Provides
 import javax.inject.Singleton
 
-@Singleton internal class LockScreenInteractor @Inject internal constructor(
-    preferences: LockScreenPreferences,
-    private val packageManagerWrapper: PackageManagerWrapper) : LockTypeInteractor(preferences) {
+@Module class LockScreenSingletonModule() {
 
-  @CheckResult fun getDefaultIgnoreTime(): Single<Long> {
-    return Single.fromCallable { preferences.getDefaultIgnoreTime() }
+  @Singleton @Provides @CheckResult internal fun provideCloseBus(): EventBus<CloseOldEvent> {
+    return CloseOldBus()
   }
 
-  @CheckResult fun getDisplayName(packageName: String): Single<String> {
-    return packageManagerWrapper.loadPackageLabel(packageName).toSingle("")
+  @Singleton @Provides @CheckResult internal fun provideInteractor(
+      labelManager: PackageLabelManager,
+      lockScreenPreferences: LockScreenPreferences): LockScreenInteractor {
+    return LockScreenInteractorImpl(labelManager, lockScreenPreferences)
   }
+
 }
+

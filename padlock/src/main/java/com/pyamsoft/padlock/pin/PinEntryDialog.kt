@@ -27,7 +27,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.loader.AppIconLoader
-import com.pyamsoft.padlock.lock.common.LockTypePresenter
+import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
@@ -37,7 +37,7 @@ import javax.inject.Inject
 
 class PinEntryDialog : CanaryDialog() {
 
-  @field:Inject internal lateinit var presenter: LockTypePresenter
+  @field:Inject internal lateinit var presenter: LockScreenPresenter
   private lateinit var binding: DialogPinEntryBinding
   private lateinit var packageName: String
   private var appIcon = LoaderHelper.empty()

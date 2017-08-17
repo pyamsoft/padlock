@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock
+package com.pyamsoft.padlock.lock.screen
 
 import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
+import com.pyamsoft.padlock.model.LockScreenType
+import io.reactivex.Single
 
-@AutoValue abstract class CloseOldEvent protected constructor() {
+internal interface LockScreenInteractor {
 
-  @CheckResult internal abstract fun packageName(): String
+  @CheckResult fun getLockScreenType(): Single<LockScreenType>
 
-  @CheckResult internal abstract fun activityName(): String
+  @CheckResult fun getDefaultIgnoreTime(): Single<Long>
 
-  companion object {
-
-    @JvmStatic
-    @CheckResult
-    fun create(packageName: String, activityName: String): CloseOldEvent {
-      return AutoValue_CloseOldEvent(packageName, activityName)
-    }
-  }
+  @CheckResult fun getDisplayName(packageName: String): Single<String>
 }

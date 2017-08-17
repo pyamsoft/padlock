@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list.info
+package com.pyamsoft.padlock.lock.screen
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.queue.ActionQueue
-import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.pydroid.bus.EventBus
 import dagger.Module
 import dagger.Provides
 import io.reactivex.Scheduler
 import javax.inject.Named
 
-@Module class LockInfoModule(private val packageName: String) {
+@Module class LockScreenModule(private val packageName: String, private val activityName: String) {
 
-  @Provides @CheckResult internal fun provideInfoPresenter(lockInfoInteractor: LockInfoInteractor,
-      actionQueue: ActionQueue, @Named("computation") computationScheduler: Scheduler,
-      @Named("io") ioScheduler: Scheduler, bus: EventBus<LockInfoEvent>,
-      modifyInteractor: LockStateModifyInteractor,
-      @Named("main") mainScheduler: Scheduler): LockInfoPresenter {
-    return LockInfoPresenter(actionQueue, bus, modifyInteractor, packageName, lockInfoInteractor,
-        computationScheduler, ioScheduler, mainScheduler)
+  @Provides @CheckResult internal fun providePresenter(bus: EventBus<CloseOldEvent>,
+      interactor: LockScreenInteractor, @Named("computation") compScheduler: Scheduler,
+      @Named("main") mainScheduler: Scheduler,
+      @Named("io") ioScheduler: Scheduler): LockScreenPresenter {
+    return LockScreenPresenter(packageName, activityName, bus, interactor, compScheduler,
+        ioScheduler, mainScheduler)
   }
 }
 

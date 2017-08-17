@@ -20,8 +20,6 @@ import com.pyamsoft.padlock.base.db.PadLockDBDelete
 import com.pyamsoft.padlock.base.preference.ClearPreferences
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences
-import com.pyamsoft.padlock.list.info.LockInfoItemInteractor
-import com.pyamsoft.padlock.list.LockListItemInteractor
 import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.helper.Optional
 import io.reactivex.Completable
@@ -35,11 +33,8 @@ import javax.inject.Singleton
     private val masterPinPreference: MasterPinPreferences,
     private val preferences: ClearPreferences,
     private val installListenerPreferences: InstallListenerPreferences,
-
-    // TODO cache instead of actual interactor
-    private val lockListInteractor: LockListItemInteractor,
-    // TODO cache instead of actual interactor
-    private val lockInfoInteractor: LockInfoItemInteractor,
+    private val lockListInteractor: Cache,
+    private val lockInfoInteractor: Cache,
     private val purgeInteractor: Cache) : SettingsPreferenceInteractor {
 
   override fun isInstallListenerEnabled(): Single<Boolean> {

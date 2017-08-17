@@ -16,45 +16,41 @@
 
 package com.pyamsoft.padlock.lock
 
+import com.pyamsoft.padlock.base.queue.ActionQueue
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class LockScreenEntryPresenter @Inject constructor(
-    private val interactor: LockScreenEntryInteractor,
-    @Named("obs") obsScheduler: Scheduler,
-    @Named("io") subScheduler: Scheduler) : SchedulerPresenter(obsScheduler, subScheduler) {
-
-  override fun onDestroy() {
-    super.onDestroy()
-    interactor.resetFailCount()
-  }
+internal class LockEntryPresenter @Inject constructor(
+    private val packageName: String,
+    private val activityName: String,
+    private val realName: String,
+    private val actionQueue: ActionQueue,
+    private val interactor: LockEntryInteractor,
+    @Named("computation") computationScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
+    ioScheduler, mainScheduler) {
 
   fun displayLockedHint(setDisplayHint: (String) -> Unit) {
     disposeOnStop {
       interactor.getHint()
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
-          .subscribe({ setDisplayHint(it) }
-              , { Timber.e(it, "onError displayLockedHint") })
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ setDisplayHint(it) }, { Timber.e(it, "onError displayLockedHint") })
     }
   }
 
-  fun lockEntry(packageName: String, activityName: String, onLocked: (Long) -> Unit,
-      onLockedError: (Throwable) -> Unit) {
-    disposeOnStop {
+  fun lockEntry(onLocked: () -> Unit, onLockedError: (Throwable) -> Unit) {
+    actionQueue.queue {
       interactor.lockEntryOnFail(packageName, activityName)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
-            if (it.currentTime < it.lockUntilTime) {
-              Timber.d("Received lock entry result")
-              onLocked(it.lockUntilTime)
-            } else {
-              Timber.w("No timeout period set, entry not locked")
-            }
+            Timber.w("Lock em up")
+            onLocked()
           }, {
             Timber.e(it, "lockEntry onError")
             onLockedError(it)
@@ -62,13 +58,13 @@ internal class LockScreenEntryPresenter @Inject constructor(
     }
   }
 
-  fun submit(packageName: String, activityName: String, lockCode: String?,
-      lockUntilTime: Long, currentAttempt: String, onSubmitSuccess: () -> Unit,
-      onSubmitFailure: () -> Unit, onSubmitError: (Throwable) -> Unit) {
+  fun submit(lockCode: String?, lockUntilTime: Long, currentAttempt: String,
+      onSubmitSuccess: () -> Unit, onSubmitFailure: () -> Unit,
+      onSubmitError: (Throwable) -> Unit) {
     disposeOnStop {
       interactor.submitPin(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
             Timber.d("Received unlock entry result")
             if (it) {
@@ -83,20 +79,16 @@ internal class LockScreenEntryPresenter @Inject constructor(
     }
   }
 
-  fun postUnlock(packageName: String, activityName: String,
-      realName: String, lockCode: String?, isSystem: Boolean, shouldExclude: Boolean,
-      ignoreTime: Long, onPostUnlock: () -> Unit, onLockedError: (Throwable) -> Unit) {
-    disposeOnStop {
+  fun postUnlock(lockCode: String?, isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long) {
+    actionQueue.queue {
       interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
           shouldExclude, ignoreTime)
-          .subscribeOn(backgroundScheduler)
-          .observeOn(foregroundScheduler)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
           .subscribe({
-            Timber.d("onPostUnlock")
-            onPostUnlock()
+            Timber.d("onPostUnlock complete")
           }, {
             Timber.e(it, "Error postunlock")
-            onLockedError(it)
           })
     }
   }

@@ -17,36 +17,16 @@
 package com.pyamsoft.padlock.lock.master
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.preference.MasterPinPreferences
 import com.pyamsoft.pydroid.helper.Optional
 import io.reactivex.Single
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton class MasterPinInteractor @Inject internal constructor(
-    private val preferences: MasterPinPreferences) {
+interface MasterPinInteractor {
 
-  @CheckResult fun getMasterPin(): Single<Optional<String>> {
-    return Single.fromCallable { Optional.ofNullable(preferences.getMasterPassword()) }
-  }
+  @CheckResult fun getMasterPin(): Single<Optional<String>>
 
-  fun setMasterPin(pin: String?) {
-    if (pin == null) {
-      preferences.clearMasterPassword()
-    } else {
-      preferences.setMasterPassword(pin)
-    }
-  }
+  fun setMasterPin(pin: String?)
 
-  @CheckResult fun getHint(): Single<Optional<String>> {
-    return Single.fromCallable { Optional.ofNullable(preferences.getHint()) }
-  }
+  @CheckResult fun getHint(): Single<Optional<String>>
 
-  fun setHint(hint: String?) {
-    if (hint == null) {
-      preferences.clearHint()
-    } else {
-      preferences.setHint(hint)
-    }
-  }
+  fun setHint(hint: String?)
 }

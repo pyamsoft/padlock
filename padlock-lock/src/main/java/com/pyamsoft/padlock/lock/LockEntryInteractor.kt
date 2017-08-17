@@ -17,20 +17,20 @@
 package com.pyamsoft.padlock.lock
 
 import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
+import io.reactivex.Completable
+import io.reactivex.Single
 
-@AutoValue internal abstract class LockScreenEntry protected constructor() {
+internal interface LockEntryInteractor {
 
-  @CheckResult internal abstract fun packageName(): String
+  @CheckResult fun submitPin(packageName: String, activityName: String, lockCode: String?,
+      lockUntilTime: Long, currentAttempt: String): Single<Boolean>
 
-  @CheckResult internal abstract fun className(): String
+  @CheckResult fun lockEntryOnFail(packageName: String, activityName: String): Completable
 
-  companion object {
+  @CheckResult fun getHint(): Single<String>
 
-    @JvmStatic
-    @CheckResult
-    fun create(packageName: String, className: String): LockScreenEntry {
-      return AutoValue_LockScreenEntry(packageName, className)
-    }
-  }
+  @CheckResult fun postUnlock(packageName: String, activityName: String, realName: String,
+      lockCode: String?,
+      isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long): Completable
 }
+
