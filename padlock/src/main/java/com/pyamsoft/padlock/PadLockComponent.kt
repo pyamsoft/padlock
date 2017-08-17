@@ -20,6 +20,7 @@ import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.PadLockModule
 import com.pyamsoft.padlock.base.db.PadLockDBModule
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
+import com.pyamsoft.padlock.base.queue.QueueModule
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatModule
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperModule
@@ -60,7 +61,8 @@ import javax.inject.Singleton
 @Component(modules = arrayOf(PadLockModule::class, PackageManagerWrapperModule::class,
     JobSchedulerCompatModule::class, PadLockDBModule::class, LockModule::class, PinModule::class,
     ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class,
-    LockInfoSingletonModule::class, LockStateModule::class, LockListSingletonModule::class))
+    LockInfoSingletonModule::class, LockStateModule::class, LockListSingletonModule::class,
+    QueueModule::class))
 interface PadLockComponent {
 
   fun inject(lockInfoItem: LockInfoItem)

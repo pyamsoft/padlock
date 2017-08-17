@@ -17,7 +17,10 @@
 package com.pyamsoft.padlock.list
 
 import com.pyamsoft.padlock.base.db.PadLockEntry
+import com.pyamsoft.padlock.base.queue.ActionQueue
 import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.LockState.DEFAULT
+import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -25,6 +28,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 internal class LockListItemPresenter @Inject constructor(
+    private val actionQueue: ActionQueue,
     private val interactor: LockListItemInteractor,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
@@ -35,10 +39,17 @@ internal class LockListItemPresenter @Inject constructor(
       system: Boolean, onDatabaseEntryCreated: () -> Unit, onDatabaseEntryDeleted: () -> Unit,
       onDatabaseEntryError: (Throwable) -> Unit) {
     // No whitelisting for modifications from the List
-    val oldState = if (isChecked) LockState.DEFAULT else LockState.LOCKED
-    val newState = if (isChecked) LockState.LOCKED else LockState.DEFAULT
+    val oldState: LockState
+    val newState: LockState
+    if (isChecked) {
+      oldState = DEFAULT
+      newState = LOCKED
+    } else {
+      oldState = LOCKED
+      newState = DEFAULT
+    }
 
-    disposeOnStop {
+    actionQueue.queue {
       interactor.modifySingleDatabaseEntry(oldState, newState, packageName,
           PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system)
           .subscribeOn(ioScheduler)

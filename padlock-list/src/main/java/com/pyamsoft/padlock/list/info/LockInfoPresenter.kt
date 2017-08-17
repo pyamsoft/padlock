@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list.info
 
+import com.pyamsoft.padlock.base.queue.ActionQueue
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Created
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Deleted
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Error
@@ -32,6 +33,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockInfoPresenter @Inject internal constructor(
+    private val actionQueue: ActionQueue,
     private val bus: EventBus<LockInfoEvent>,
     private val modifyInteractor: LockStateModifyInteractor,
     private val packageName: String,
@@ -57,7 +59,7 @@ class LockInfoPresenter @Inject internal constructor(
   }
 
   private fun modifyDatabaseEntry(event: LockInfoEvent.Modify) {
-    disposeOnStop {
+    actionQueue.queue {
       modifyInteractor.modifySingleDatabaseEntry(event.oldState(), event.newState,
           event.packageName(),
           event.name(), event.code, event.system)
