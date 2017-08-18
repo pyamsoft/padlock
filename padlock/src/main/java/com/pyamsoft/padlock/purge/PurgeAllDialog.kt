@@ -25,7 +25,8 @@ import javax.inject.Inject
 
 class PurgeAllDialog : CanaryDialog() {
 
-  @field:Inject internal lateinit var purgeBus: PurgeAllBus
+  @Suppress("MemberVisibilityCanPrivate")
+  @field:Inject internal lateinit var purgePublisher: PurgePublisher
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -37,7 +38,7 @@ class PurgeAllDialog : CanaryDialog() {
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(activity).setMessage("Really delete all old entries?")
         .setPositiveButton("Delete") { _, _ ->
-          purgeBus.publish(PurgeAllEvent)
+          purgePublisher.publish(PurgeAllEvent)
           dismiss()
         }
         .setNegativeButton("Cancel") { _, _ -> dismiss() }

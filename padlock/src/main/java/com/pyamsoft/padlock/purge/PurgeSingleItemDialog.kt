@@ -26,7 +26,8 @@ import javax.inject.Inject
 
 class PurgeSingleItemDialog : CanaryDialog() {
 
-  @field:Inject internal lateinit var purgeBus: PurgeBus
+  @Suppress("MemberVisibilityCanPrivate")
+  @field:Inject internal lateinit var purgePublisher: PurgePublisher
   private lateinit var packageName: String
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +42,7 @@ class PurgeSingleItemDialog : CanaryDialog() {
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(activity).setMessage("Really delete old entry for $packageName?")
         .setPositiveButton("Delete") { _, _ ->
-          purgeBus.publish(PurgeEvent.create(packageName))
+          purgePublisher.publish(PurgeEvent.create(packageName))
           dismiss()
         }
         .setNegativeButton("Cancel") { _, _ -> dismiss() }

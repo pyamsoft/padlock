@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.onboard;
+package com.pyamsoft.padlock.purge
 
-public interface Onboard {
+import com.pyamsoft.pydroid.bus.EventBus
+import javax.inject.Inject
+import javax.inject.Singleton
 
-  void completeOnboarding();
+@Singleton
+class PurgePublisher @Inject internal constructor(private val bus: EventBus<PurgeEvent>,
+    private val allBus: EventBus<PurgeAllEvent>) {
 
-  void scrollToPreviousPage();
+  fun publish(event: PurgeEvent) {
+    bus.publish(event)
+  }
 
-  void scrollToNextPage();
+  fun publish(event: PurgeAllEvent) {
+    allBus.publish(event)
+  }
 }

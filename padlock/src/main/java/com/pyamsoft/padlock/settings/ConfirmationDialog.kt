@@ -45,8 +45,8 @@ class ConfirmationDialog : CanaryDialog() {
     else
       "Really clear all application settings?\n\nYou will have to manually restart the Accessibility Service component of PadLock")
         .setPositiveButton("Yes") { _, _ ->
-          dismiss()
           publisher.publish(type)
+          dismiss()
         }
         .setNegativeButton("No") { _, _ -> dismiss() }
         .create()

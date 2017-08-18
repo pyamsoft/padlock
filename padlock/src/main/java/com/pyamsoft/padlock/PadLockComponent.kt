@@ -40,9 +40,6 @@ import com.pyamsoft.padlock.lock.helper.LockModule
 import com.pyamsoft.padlock.lock.screen.LockScreenSingletonModule
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.main.MainModule
-import com.pyamsoft.padlock.onboard.firstlaunch.OnboardAcceptTermsFragment
-import com.pyamsoft.padlock.onboard.firstlaunch.OnboardEnableServiceFragment
-import com.pyamsoft.padlock.onboard.list.OnboardListDialog
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.pin.PinEntryPatternFragment
 import com.pyamsoft.padlock.pin.PinEntryTextFragment
@@ -81,12 +78,6 @@ interface PadLockComponent {
   fun inject(lockScreenBaseFragment: LockScreenBaseFragment)
 
   fun inject(mainActivity: MainActivity)
-
-  fun inject(onboardAcceptTermsFragment: OnboardAcceptTermsFragment)
-
-  fun inject(onboardEnableServiceFragment: OnboardEnableServiceFragment)
-
-  fun inject(onboardListDialog: OnboardListDialog)
 
   fun inject(fragment: PinEntryTextFragment)
 
