@@ -18,9 +18,9 @@ package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.service.ServiceFinishEvent
-import com.pyamsoft.padlock.settings.ConfirmEvent.All
-import com.pyamsoft.padlock.settings.ConfirmEvent.Database
-import com.pyamsoft.padlock.settings.SettingsPreferencePresenter.Callback
+import com.pyamsoft.padlock.settings.ConfirmEvent.ALL
+import com.pyamsoft.padlock.settings.ConfirmEvent.DATABASE
+import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -28,8 +28,8 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-class SettingsPreferencePresenter @Inject internal constructor(
-    private val interactor: SettingsPreferenceInteractor,
+class SettingsPresenter @Inject internal constructor(
+    private val interactor: SettingsInteractor,
     private val bus: ConfirmEventBus,
     private val serviceFinishBus: EventBus<ServiceFinishEvent>,
     private val receiver: ApplicationInstallReceiver,
@@ -47,15 +47,16 @@ class SettingsPreferencePresenter @Inject internal constructor(
     disposeOnStop {
       bus.listen().map {
         when (it) {
-          is Database -> interactor.clearDatabase()
-          is All -> interactor.clearAll()
+          DATABASE -> interactor.clearDatabase()
+          ALL -> interactor.clearAll()
         }
         return@map it
       }.subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
-              is Database -> onClearDatabase()
-              is All -> onClearAll()
+              DATABASE -> onClearDatabase()
+              ALL -> onClearAll()
+              else -> throw IllegalArgumentException("Invalid enum: $it")
             }
           }, {
             Timber.e(it, "onError clear bus")
@@ -82,15 +83,12 @@ class SettingsPreferencePresenter @Inject internal constructor(
     }
   }
 
-  fun checkLockType(onBegin: () -> Unit, onLockTypeChangeAccepted: () -> Unit,
-      onLockTypeChangePrevented: () -> Unit, onLockTypeChangeError: (Throwable) -> Unit,
-      onEnd: () -> Unit) {
+  fun checkLockType(onLockTypeChangeAccepted: () -> Unit,
+      onLockTypeChangePrevented: () -> Unit, onLockTypeChangeError: (Throwable) -> Unit) {
     disposeOnStop {
       interactor.hasExistingMasterPassword()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .doAfterTerminate { onEnd() }
-          .doOnSubscribe { onBegin() }
           .subscribe({
             if (it) {
               onLockTypeChangePrevented()

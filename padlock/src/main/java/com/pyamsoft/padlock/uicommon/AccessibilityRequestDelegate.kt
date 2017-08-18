@@ -20,16 +20,12 @@ import android.app.Activity
 import android.content.Intent
 import android.provider.Settings
 
-class AccessibilityRequestDelegate {
+object AccessibilityRequestDelegate {
+
+  @JvmStatic private val INTENT: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
 
   fun launchAccessibilityIntent(activity: Activity) {
     activity.startActivity(INTENT)
   }
 
-  companion object {
-
-    @JvmStatic
-    private val INTENT: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-
-  }
 }

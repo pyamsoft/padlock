@@ -16,6 +16,16 @@
 
 package com.pyamsoft.padlock.settings
 
-enum class ConfirmEvent {
-  DATABASE, ALL
+import android.support.annotation.CheckResult
+import io.reactivex.Single
+
+internal interface SettingsInteractor {
+
+  @CheckResult fun isInstallListenerEnabled(): Single<Boolean>
+
+  @CheckResult fun clearDatabase(): Single<Boolean>
+
+  @CheckResult fun clearAll(): Single<Boolean>
+
+  @CheckResult fun hasExistingMasterPassword(): Single<Boolean>
 }

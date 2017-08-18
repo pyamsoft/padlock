@@ -28,14 +28,14 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class SettingsPreferenceInteractorImpl @Inject internal constructor(
+@Singleton internal class SettingsInteractorImpl @Inject internal constructor(
     private val deleteDb: PadLockDBDelete,
     private val masterPinPreference: MasterPinPreferences,
     private val preferences: ClearPreferences,
     private val installListenerPreferences: InstallListenerPreferences,
     private val lockListInteractor: Cache,
     private val lockInfoInteractor: Cache,
-    private val purgeInteractor: Cache) : SettingsPreferenceInteractor {
+    private val purgeInteractor: Cache) : SettingsInteractor {
 
   override fun isInstallListenerEnabled(): Single<Boolean> {
     return Single.fromCallable {

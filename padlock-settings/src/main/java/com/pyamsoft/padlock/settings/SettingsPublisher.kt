@@ -16,16 +16,15 @@
 
 package com.pyamsoft.padlock.settings
 
-import android.support.annotation.CheckResult
-import io.reactivex.Single
+import com.pyamsoft.pydroid.bus.EventBus
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal interface SettingsPreferenceInteractor {
+@Singleton
+class SettingsPublisher @Inject internal constructor(private val bus: EventBus<ConfirmEvent>) {
 
-  @CheckResult fun isInstallListenerEnabled(): Single<Boolean>
-
-  @CheckResult fun clearDatabase(): Single<Boolean>
-
-  @CheckResult fun clearAll(): Single<Boolean>
-
-  @CheckResult fun hasExistingMasterPassword(): Single<Boolean>
+  fun publish(event: ConfirmEvent) {
+    bus.publish(event)
+  }
 }
+
