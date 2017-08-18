@@ -25,7 +25,8 @@ import javax.inject.Inject
 
 class RecheckService : IntentService(RecheckService::class.java.name) {
 
-  @field:Inject internal lateinit var recheckBus: RecheckEventBus
+  @Suppress("MemberVisibilityCanPrivate")
+  @field:Inject internal lateinit var recheckBus: RecheckPublisher
 
   override fun onCreate() {
     super.onCreate()

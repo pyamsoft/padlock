@@ -24,13 +24,14 @@ import android.view.accessibility.AccessibilityEvent
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.lock.LockScreenActivity
+import com.pyamsoft.padlock.service.LockServicePresenter.Callback
 import timber.log.Timber
 import javax.inject.Inject
 
-class PadLockService : AccessibilityService() {
+class PadLockService : AccessibilityService(), Callback {
 
   @field:Inject internal lateinit var presenter: LockServicePresenter
-  protected @JvmField val startLockScreen: (PadLockEntry, String) -> Unit = { entry, realName ->
+  private val startLockScreen: (PadLockEntry, String) -> Unit = { entry, realName ->
     Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
         entry.activityName(), realName)
     LockScreenActivity.start(this, entry, realName)
@@ -44,11 +45,10 @@ class PadLockService : AccessibilityService() {
 
     val eventPackage = event.packageName
     val eventClass = event.className
-
     if (eventPackage != null && eventClass != null) {
       val pName = eventPackage.toString()
       val cName = eventClass.toString()
-      if (!pName.isEmpty() && !cName.isEmpty()) {
+      if (pName.isNotBlank() && cName.isNotBlank()) {
         presenter.processAccessibilityEvent(pName, cName, RecheckStatus.NOT_FORCE,
             startLockScreen)
       }
@@ -61,12 +61,6 @@ class PadLockService : AccessibilityService() {
     Timber.e("onInterrupt")
   }
 
-  override fun onUnbind(intent: Intent): Boolean {
-    presenter.stop()
-    isRunning = false
-    return super.onUnbind(intent)
-  }
-
   override fun onCreate() {
     super.onCreate()
     Injector.with(this) {
@@ -76,25 +70,30 @@ class PadLockService : AccessibilityService() {
 
   override fun onServiceConnected() {
     super.onServiceConnected()
-    Timber.d("onServiceConnected")
-    presenter.registerOnBus(onRecheck = { packageName, className ->
-      presenter.processActiveApplicationIfMatching(packageName, className, startLockScreen)
-    }, onFinish = {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        disableSelf()
-      }
-    })
+    presenter.start(this)
     isRunning = true
   }
 
-  override fun onDestroy() {
-    super.onDestroy()
-    presenter.destroy()
+  override fun onFinish() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      disableSelf()
+    }
+  }
+
+  override fun onRecheck(packageName: String, className: String) {
+    presenter.processActiveApplicationIfMatching(packageName, className, startLockScreen)
+  }
+
+  override fun onUnbind(intent: Intent): Boolean {
+    presenter.stop()
+    isRunning = false
+    return super.onUnbind(intent)
   }
 
   companion object {
 
-    @JvmStatic var isRunning: Boolean = false
+    @JvmStatic
+    var isRunning: Boolean = false
       @CheckResult get
       private set
   }
