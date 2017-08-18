@@ -39,8 +39,8 @@ import javax.inject.Singleton
       clearPreference: ClearPreferences, installListenerPreferences: InstallListenerPreferences,
       @Named("cache_lock_list") lockListInteractor: Cache,
       @Named("cache_lock_info") lockInfoInteractor: Cache,
-      @Named("cache_purge") purgeInteractor: Cache): SettingsPreferenceInteractor {
-    return SettingsPreferenceInteractorImpl(deleteDb, masterPinPreference, clearPreference,
+      @Named("cache_purge") purgeInteractor: Cache): SettingsInteractor {
+    return SettingsInteractorImpl(deleteDb, masterPinPreference, clearPreference,
         installListenerPreferences, lockListInteractor, lockInfoInteractor, purgeInteractor)
   }
 }

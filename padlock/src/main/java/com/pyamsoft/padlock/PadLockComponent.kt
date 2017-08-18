@@ -54,6 +54,7 @@ import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.service.ServiceModule
+import com.pyamsoft.padlock.settings.ConfirmationDialog
 import com.pyamsoft.padlock.settings.SettingsFragment
 import com.pyamsoft.padlock.settings.SettingsModule
 import dagger.Component
@@ -105,11 +106,16 @@ interface PadLockComponent {
 
   fun inject(purgeSingleItemDialog: PurgeSingleItemDialog)
 
-  // To be used directly by PadLockSingleInitProvider
-  @CheckResult fun provideInstallListenerPreferences(): InstallListenerPreferences
+  fun inject(confirmationDialog: ConfirmationDialog)
 
   // To be used directly by PadLockSingleInitProvider
-  @CheckResult fun provideApplicationInstallReceiver(): ApplicationInstallReceiver
+  @CheckResult
+  fun provideInstallListenerPreferences(): InstallListenerPreferences
 
-  @CheckResult fun plusLockInfoComponent(module: LockInfoModule): LockInfoComponent
+  // To be used directly by PadLockSingleInitProvider
+  @CheckResult
+  fun provideApplicationInstallReceiver(): ApplicationInstallReceiver
+
+  @CheckResult
+  fun plusLockInfoComponent(module: LockInfoModule): LockInfoComponent
 }
