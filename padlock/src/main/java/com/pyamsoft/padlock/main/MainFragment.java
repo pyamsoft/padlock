@@ -70,7 +70,7 @@ public class MainFragment extends ActionBarFragment {
                 handled = replaceFragment(new SettingsFragment(), SettingsFragment.TAG);
                 break;
               case R.id.menu_purge:
-                handled = replaceFragment(new PurgeFragment(), PurgeFragment.TAG);
+                handled = replaceFragment(new PurgeFragment(), PurgeFragment.Companion.getTAG());
                 break;
               default:
                 handled = false;

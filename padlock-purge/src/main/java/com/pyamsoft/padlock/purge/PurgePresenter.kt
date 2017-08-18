@@ -35,6 +35,7 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
   override fun onStart(bound: Callback) {
     super.onStart(bound)
     registerOnBus(bound::onPurge, bound::onPurgeAll)
+    retrieveStaleApplications(false, bound::onStaleApplicationReceived, bound::onRetrievalCompleted)
   }
 
   private fun registerOnBus(onPurge: (String) -> Unit, onPurgeAll: () -> Unit) {
@@ -84,5 +85,9 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
     fun onPurge(packageName: String)
 
     fun onPurgeAll()
+
+    fun onStaleApplicationReceived(pacakgeName: String)
+
+    fun onRetrievalCompleted()
   }
 }

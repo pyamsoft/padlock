@@ -26,17 +26,9 @@ internal class PurgeItem internal constructor(
     packageName: String) : GenericAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
     packageName) {
 
-  override fun getType(): Int {
-    return R.id.adapter_purge
-  }
-
-  override fun getLayoutRes(): Int {
-    return R.layout.adapter_item_purge
-  }
-
-  override fun getViewHolder(view: View): ViewHolder {
-    return ViewHolder(view)
-  }
+  override fun getType(): Int = R.id.adapter_purge
+  override fun getLayoutRes(): Int = R.layout.adapter_item_purge
+  override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
 
   override fun unbindView(holder: ViewHolder?) {
     super.unbindView(holder)
