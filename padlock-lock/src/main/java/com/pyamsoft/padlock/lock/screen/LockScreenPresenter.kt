@@ -38,7 +38,6 @@ class LockScreenPresenter @Inject internal constructor(
   override fun onStart(bound: Callback) {
     super.onStart(bound)
     lockScreenInputPresenter.start(bound)
-    createWithDefaultIgnoreTime(bound::onInitializeIgnoreTime)
     loadDisplayNameFromPackage(bound::setDisplayName)
     closeOldAndAwaitSignal(bound::onCloseOldReceived)
   }
@@ -46,17 +45,6 @@ class LockScreenPresenter @Inject internal constructor(
   override fun onStop() {
     super.onStop()
     lockScreenInputPresenter.stop()
-  }
-
-  private fun createWithDefaultIgnoreTime(onInitializeWithIgnoreTime: (Long) -> Unit) {
-    disposeOnStop {
-      interactor.getDefaultIgnoreTime()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({ onInitializeWithIgnoreTime(it) }, {
-            Timber.e(it, "onError createWithDefaultIgnoreTime")
-          })
-    }
   }
 
   private fun loadDisplayNameFromPackage(setDisplayName: (String) -> Unit) {
@@ -88,6 +76,18 @@ class LockScreenPresenter @Inject internal constructor(
           })
     }
   }
+
+  fun createWithDefaultIgnoreTime(onInitializeWithIgnoreTime: (Long) -> Unit) {
+    disposeOnStop {
+      interactor.getDefaultIgnoreTime()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ onInitializeWithIgnoreTime(it) }, {
+            Timber.e(it, "onError createWithDefaultIgnoreTime")
+          })
+    }
+  }
+
 
   interface Callback : LockScreenInputPresenter.Callback {
 

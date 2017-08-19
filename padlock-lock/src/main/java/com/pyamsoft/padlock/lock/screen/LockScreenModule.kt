@@ -23,13 +23,18 @@ import dagger.Provides
 import io.reactivex.Scheduler
 import javax.inject.Named
 
-@Module class LockScreenModule(private val packageName: String, private val activityName: String) {
+@Module
+class LockScreenModule(private val packageName: String, private val activityName: String) {
 
-  @Provides @CheckResult internal fun providePresenter(bus: EventBus<CloseOldEvent>,
+  @Provides
+  @CheckResult internal fun providePresenter(
+      inputPresenter: LockScreenInputPresenter,
+      bus: EventBus<CloseOldEvent>,
       interactor: LockScreenInteractor, @Named("computation") compScheduler: Scheduler,
       @Named("main") mainScheduler: Scheduler,
       @Named("io") ioScheduler: Scheduler): LockScreenPresenter {
-    return LockScreenPresenter(packageName, activityName, bus, interactor, compScheduler,
+    return LockScreenPresenter(inputPresenter, packageName, activityName, bus, interactor,
+        compScheduler,
         ioScheduler, mainScheduler)
   }
 }
