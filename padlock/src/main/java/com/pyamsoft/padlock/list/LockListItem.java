@@ -26,7 +26,7 @@ import com.mikepenz.fastadapter.items.GenericAbstractItem;
 import com.pyamsoft.padlock.Injector;
 import com.pyamsoft.padlock.R;
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding;
-import com.pyamsoft.padlock.loader.AppIconLoader;
+import com.pyamsoft.padlock.uicommon.AppIconLoader;
 import com.pyamsoft.padlock.model.AppEntry;
 import com.pyamsoft.pydroid.loader.ImageLoader;
 import com.pyamsoft.pydroid.loader.LoaderMap;

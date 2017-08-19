@@ -32,11 +32,11 @@ import com.pyamsoft.padlock.list.LockListSingletonModule
 import com.pyamsoft.padlock.list.info.LockInfoModule
 import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
 import com.pyamsoft.padlock.list.modify.LockStateModule
-import com.pyamsoft.padlock.loader.AppIconLoader
+import com.pyamsoft.padlock.lock.LockEntryModule
 import com.pyamsoft.padlock.lock.LockEntrySingletonModule
-import com.pyamsoft.padlock.lock.LockScreenActivity
-import com.pyamsoft.padlock.lock.LockScreenBaseFragment
+import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.helper.LockModule
+import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.padlock.lock.screen.LockScreenSingletonModule
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.main.MainModule
@@ -54,6 +54,7 @@ import com.pyamsoft.padlock.service.ServiceModule
 import com.pyamsoft.padlock.settings.ConfirmationDialog
 import com.pyamsoft.padlock.settings.SettingsFragment
 import com.pyamsoft.padlock.settings.SettingsModule
+import com.pyamsoft.padlock.uicommon.AppIconLoader
 import dagger.Component
 import javax.inject.Singleton
 
@@ -72,10 +73,6 @@ interface PadLockComponent {
   fun inject(lockListItem: LockListItem)
 
   fun inject(appIconLoader: AppIconLoader)
-
-  fun inject(lockScreenActivity: LockScreenActivity)
-
-  fun inject(lockScreenBaseFragment: LockScreenBaseFragment)
 
   fun inject(mainActivity: MainActivity)
 
@@ -109,4 +106,8 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusLockInfoComponent(module: LockInfoModule): LockInfoComponent
+
+  @CheckResult
+  fun plusLockScreenComponent(screenModule: LockScreenModule,
+      entryModule: LockEntryModule): LockScreenComponent
 }

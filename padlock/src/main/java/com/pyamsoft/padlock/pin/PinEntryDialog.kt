@@ -26,7 +26,7 @@ import android.view.WindowManager
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
-import com.pyamsoft.padlock.loader.AppIconLoader
+import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter.Callback
 import com.pyamsoft.padlock.uicommon.CanaryDialog
@@ -105,9 +105,7 @@ class PinEntryDialog : CanaryDialog(), Callback {
         val fragmentManager = childFragmentManager
         val fragment = fragmentManager.findFragmentByTag(PinEntryPatternFragment.TAG)
         if (fragment is PinEntryPatternFragment) {
-          if (fragment.onNextButtonClicked()) {
-            binding.pinNextButton.text = "Submit"
-          }
+          binding.pinNextButton.text = "Submit"
         }
       }
     }
@@ -123,7 +121,6 @@ class PinEntryDialog : CanaryDialog(), Callback {
     super.onStop()
     presenter.stop()
     appIcon = LoaderHelper.unload(appIcon)
-    binding.pinNextButton.setOnClickListener(null)
   }
 
   private fun setupToolbar() {
