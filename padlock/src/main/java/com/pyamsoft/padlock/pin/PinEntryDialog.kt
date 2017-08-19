@@ -27,7 +27,8 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.loader.AppIconLoader
-import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
+import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
+import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter.Callback
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
@@ -35,9 +36,9 @@ import com.pyamsoft.pydroid.util.DrawableUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class PinEntryDialog : CanaryDialog() {
+class PinEntryDialog : CanaryDialog(), Callback {
 
-  @field:Inject internal lateinit var presenter: LockScreenPresenter
+  @field:Inject internal lateinit var presenter: LockScreenInputPresenter
   private lateinit var binding: DialogPinEntryBinding
   private lateinit var packageName: String
   private var appIcon = LoaderHelper.empty()
@@ -66,14 +67,17 @@ class PinEntryDialog : CanaryDialog() {
     return binding.root
   }
 
-  private fun pushIfNotPresent(pushFragment: PinEntryBaseFragment,
-      tag: String) {
+  @CheckResult private fun pushIfNotPresent(pushFragment: PinEntryBaseFragment,
+      tag: String): Boolean {
     val fragmentManager = childFragmentManager
     val fragment = fragmentManager.findFragmentByTag(tag)
     if (fragment == null) {
       childFragmentManager.beginTransaction()
           .replace(R.id.pin_entry_dialog_container, pushFragment, tag)
           .commit()
+      return true
+    } else {
+      return false
     }
   }
 
@@ -83,11 +87,20 @@ class PinEntryDialog : CanaryDialog() {
 
     // Start hidden
     binding.pinNextButtonLayout.visibility = View.GONE
-    presenter.initializeLockScreenType(onTypePattern = {
-      // Push text as child fragment
-      binding.pinNextButtonLayout.visibility = View.VISIBLE
-      pushIfNotPresent(PinEntryPatternFragment(), PinEntryPatternFragment.TAG)
+  }
 
+  override fun onStart() {
+    super.onStart()
+    appIcon = LoaderHelper.unload(appIcon)
+    appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(packageName)).into(
+        binding.pinImage)
+    presenter.start(this)
+  }
+
+  override fun onTypePattern() {
+    // Push text as child fragment
+    if (pushIfNotPresent(PinEntryPatternFragment(), PinEntryPatternFragment.TAG)) {
+      binding.pinNextButtonLayout.visibility = View.VISIBLE
       binding.pinNextButton.setOnClickListener {
         val fragmentManager = childFragmentManager
         val fragment = fragmentManager.findFragmentByTag(PinEntryPatternFragment.TAG)
@@ -97,18 +110,13 @@ class PinEntryDialog : CanaryDialog() {
           }
         }
       }
-    }, onTypeText = {
-      // Push text as child fragment
-      binding.pinNextButtonLayout.visibility = View.GONE
-      pushIfNotPresent(PinEntryTextFragment(), PinEntryTextFragment.TAG)
-    })
+    }
   }
 
-  override fun onStart() {
-    super.onStart()
-    appIcon = LoaderHelper.unload(appIcon)
-    appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(packageName)).into(
-        binding.pinImage)
+  override fun onTypeText() {
+    if (pushIfNotPresent(PinEntryTextFragment(), PinEntryTextFragment.TAG)) {
+      binding.pinNextButtonLayout.visibility = View.GONE
+    }
   }
 
   override fun onStop() {
@@ -136,17 +144,14 @@ class PinEntryDialog : CanaryDialog() {
     binding.unbind()
   }
 
-  override fun onDestroy() {
-    super.onDestroy()
-    presenter.destroy()
-  }
-
   companion object {
 
     const val TAG = "PinEntryDialog"
     const private val ENTRY_PACKAGE_NAME = "entry_packagename"
 
-    @JvmStatic @CheckResult fun newInstance(packageName: String): PinEntryDialog {
+    @JvmStatic
+    @CheckResult
+    fun newInstance(packageName: String): PinEntryDialog {
       val fragment = PinEntryDialog()
       val args = Bundle()
       args.putString(ENTRY_PACKAGE_NAME, packageName)

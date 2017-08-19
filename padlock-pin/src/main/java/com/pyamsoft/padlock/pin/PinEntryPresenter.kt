@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.pin
 
 import com.pyamsoft.padlock.pin.PinEntryEvent.Clear
 import com.pyamsoft.padlock.pin.PinEntryEvent.Create
+import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -30,8 +31,27 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
     private val clearPinBus: EventBus<ClearPinEvent>,
     @Named("computation") computationScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
     ioScheduler, mainScheduler) {
+
+  override fun onStart(bound: Callback) {
+    super.onStart(bound)
+    checkMasterPinPresent(bound::onMasterPinMissing, bound::onMasterPinPresent)
+  }
+
+  private fun checkMasterPinPresent(onMasterPinMissing: () -> Unit,
+      onMasterPinPresent: () -> Unit) {
+    disposeOnStop(interactor.hasMasterPin()
+        .subscribeOn(ioScheduler)
+        .observeOn(mainThreadScheduler)
+        .subscribe({
+          if (it) {
+            onMasterPinPresent()
+          } else {
+            onMasterPinMissing()
+          }
+        }, { Timber.e(it, "onError checkMasterPinPresent") }))
+  }
 
   fun publish(event: CreatePinEvent) {
     createPinBus.publish(event)
@@ -44,10 +64,11 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
   fun submit(currentAttempt: String, reEntryAttempt: String, hint: String,
       onCreateSuccess: () -> Unit, onCreateFailure: () -> Unit,
       onClearSuccess: () -> Unit, onClearFailure: () -> Unit,
-      onSubmitError: (Throwable) -> Unit) {
+      onSubmitError: (Throwable) -> Unit, onComplete: () -> Unit) {
     disposeOnStop(interactor.submitPin(currentAttempt, reEntryAttempt, hint)
         .subscribeOn(ioScheduler)
         .observeOn(mainThreadScheduler)
+        .doAfterTerminate { onComplete() }
         .subscribe({
           when (it) {
             is Create -> {
@@ -71,16 +92,9 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
         }))
   }
 
-  fun checkMasterPinPresent(onMasterPinMissing: () -> Unit, onMasterPinPresent: () -> Unit) {
-    disposeOnStop(interactor.hasMasterPin()
-        .subscribeOn(ioScheduler)
-        .observeOn(mainThreadScheduler)
-        .subscribe({
-          if (it) {
-            onMasterPinPresent()
-          } else {
-            onMasterPinMissing()
-          }
-        }, { Timber.e(it, "onError checkMasterPinPresent") }))
+  interface Callback {
+    fun onMasterPinMissing()
+    fun onMasterPinPresent()
   }
+
 }

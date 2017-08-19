@@ -17,8 +17,6 @@
 package com.pyamsoft.padlock.lock.screen
 
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter.Callback
-import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
-import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -26,7 +24,8 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class LockScreenPresenter @Inject internal constructor(
+class LockScreenPresenter @Inject internal constructor(
+    private val lockScreenInputPresenter: LockScreenInputPresenter,
     private val packageName: String,
     private val activityName: String,
     private val bus: EventBus<CloseOldEvent>,
@@ -38,27 +37,15 @@ internal class LockScreenPresenter @Inject internal constructor(
 
   override fun onStart(bound: Callback) {
     super.onStart(bound)
-    initializeLockScreenType(bound::onTypePattern, bound::onTypeText)
+    lockScreenInputPresenter.start(bound)
     createWithDefaultIgnoreTime(bound::onInitializeIgnoreTime)
     loadDisplayNameFromPackage(bound::setDisplayName)
     closeOldAndAwaitSignal(bound::onCloseOldReceived)
   }
 
-  private fun initializeLockScreenType(onTypePattern: () -> Unit, onTypeText: () -> Unit) {
-    disposeOnStop {
-      interactor.getLockScreenType()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            when (it) {
-              TYPE_PATTERN -> onTypePattern()
-              TYPE_TEXT -> onTypeText()
-              else -> throw IllegalArgumentException("Invalid enum: $it")
-            }
-          }, {
-            Timber.e(it, "Error initializing lock screen type")
-          })
-    }
+  override fun onStop() {
+    super.onStop()
+    lockScreenInputPresenter.stop()
   }
 
   private fun createWithDefaultIgnoreTime(onInitializeWithIgnoreTime: (Long) -> Unit) {
@@ -102,10 +89,7 @@ internal class LockScreenPresenter @Inject internal constructor(
     }
   }
 
-  interface Callback {
-
-    fun onTypePattern()
-    fun onTypeText()
+  interface Callback : LockScreenInputPresenter.Callback {
 
     fun onInitializeIgnoreTime(time: Long)
 

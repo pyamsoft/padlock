@@ -29,13 +29,14 @@ import android.widget.EditText
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
+import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import timber.log.Timber
 import javax.inject.Inject
 
-class PinEntryTextFragment : PinEntryBaseFragment() {
+class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
 
   @field:Inject internal lateinit var presenter: PinEntryPresenter
   private lateinit var imm: InputMethodManager
@@ -43,29 +44,6 @@ class PinEntryTextFragment : PinEntryBaseFragment() {
   private var pinReentryText: EditText? = null
   private var pinEntryText: EditText? = null
   private var pinHintText: EditText? = null
-  private val submitSuccessCallback: (Boolean) -> Unit = {
-    clearDisplay()
-    if (it) {
-      presenter.publish(CreatePinEvent.create(true))
-    } else {
-      presenter.publish(ClearPinEvent.create(true))
-    }
-    dismissParent()
-  }
-  private val submitFailureCallback: (Boolean) -> Unit = {
-    clearDisplay()
-    if (it) {
-      presenter.publish(CreatePinEvent.create(false))
-    } else {
-      presenter.publish(ClearPinEvent.create(false))
-    }
-    dismissParent()
-  }
-  private val submitErrorCallback: (Throwable) -> Unit = {
-    clearDisplay()
-    Toasty.makeText(context, it.message.toString(), Toasty.LENGTH_SHORT).show()
-    dismissParent()
-  }
   private var goTask = LoaderHelper.empty()
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -120,11 +98,16 @@ class PinEntryTextFragment : PinEntryBaseFragment() {
     clearDisplay()
     setupGoArrow()
 
+    binding.pinImageGo.setOnClickListener {
+      submit()
+      imm.toggleSoftInputFromWindow(activity.window.decorView.windowToken, 0,
+          0)
+    }
+
     if (savedInstanceState != null) {
       onRestoreInstanceState(savedInstanceState)
     }
   }
-
 
   private fun setupSubmissionView(view: EditText) {
     view.setOnEditorActionListener { _, actionId, keyEvent ->
@@ -135,58 +118,64 @@ class PinEntryTextFragment : PinEntryBaseFragment() {
 
       if (keyEvent.action == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
         Timber.d("KeyEvent is Enter pressed")
-        presenter.submit(currentAttempt, currentReentry, currentHint,
-            onSubmitSuccess = submitSuccessCallback, onSubmitFailure = submitFailureCallback,
-            onSubmitError = submitErrorCallback)
+        submit()
         return@setOnEditorActionListener true
       }
 
       Timber.d("Do not handle key event")
-      false
+      return@setOnEditorActionListener false
     }
+  }
+
+  private fun submit() {
+    presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint(), onCreateSuccess = {
+      clearDisplay()
+      presenter.publish(CreatePinEvent.create(true))
+    }, onCreateFailure = {
+      clearDisplay()
+      presenter.publish(CreatePinEvent.create(false))
+    }, onClearSuccess = {
+      clearDisplay()
+      presenter.publish(ClearPinEvent.create(true))
+    }, onClearFailure = {
+      clearDisplay()
+      presenter.publish(ClearPinEvent.create(false))
+    }, onSubmitError = {
+      clearDisplay()
+      Toasty.makeText(context, it.message.toString(), Toasty.LENGTH_SHORT).show()
+    }, onComplete = {
+      dismissParent()
+    })
   }
 
   override fun onStart() {
     super.onStart()
+    presenter.start(this)
+  }
 
-    presenter.clickEvent(binding.pinImageGo, {
-      presenter.submit(currentAttempt, currentReentry, currentHint,
-          onSubmitSuccess = submitSuccessCallback, onSubmitFailure = submitFailureCallback,
-          onSubmitError = submitErrorCallback)
-      imm.toggleSoftInputFromWindow(activity.window.decorView.windowToken, 0,
-          0)
-    })
+  override fun onMasterPinMissing() {
+    Timber.d("No active master, show extra views")
+    binding.pinReentryCode.visibility = View.VISIBLE
+    binding.pinHint.visibility = View.VISIBLE
+    val obj = pinHintText
+    if (obj != null) {
+      setupSubmissionView(obj)
+    }
+  }
 
-    presenter.checkMasterPinPresent(onMasterPinPresent = {
-      Timber.d("Active master, hide extra views")
-      binding.pinReentryCode.visibility = View.GONE
-      binding.pinHint.visibility = View.GONE
-      val obj = pinEntryText
-      if (obj != null) {
-        setupSubmissionView(obj)
-      }
-    }, onMasterPinMissing = {
-      Timber.d("No active master, show extra views")
-      binding.pinReentryCode.visibility = View.VISIBLE
-      binding.pinHint.visibility = View.VISIBLE
-      val obj = pinHintText
-      if (obj != null) {
-        setupSubmissionView(obj)
-      }
-    })
+  override fun onMasterPinPresent() {
+    Timber.d("Active master, hide extra views")
+    binding.pinReentryCode.visibility = View.GONE
+    binding.pinHint.visibility = View.GONE
+    val obj = pinEntryText
+    if (obj != null) {
+      setupSubmissionView(obj)
+    }
   }
 
   override fun onStop() {
     super.onStop()
     presenter.stop()
-
-    pinEntryText?.setOnEditorActionListener(null)
-    pinHintText?.setOnEditorActionListener(null)
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    presenter.destroy()
   }
 
   private fun setupGoArrow() {
@@ -219,9 +208,9 @@ class PinEntryTextFragment : PinEntryBaseFragment() {
 
   override fun onSaveInstanceState(outState: Bundle) {
     Timber.d("onSaveInstanceState")
-    outState.putString(CODE_DISPLAY, currentAttempt)
-    outState.putString(CODE_REENTRY_DISPLAY, currentReentry)
-    outState.putString(HINT_DISPLAY, currentHint)
+    outState.putString(CODE_DISPLAY, getCurrentAttempt())
+    outState.putString(CODE_REENTRY_DISPLAY, getCurrentReentry())
+    outState.putString(HINT_DISPLAY, getCurrentHint())
     super.onSaveInstanceState(outState)
   }
 
@@ -234,14 +223,11 @@ class PinEntryTextFragment : PinEntryBaseFragment() {
     pinHintText?.setText("")
   }
 
-  private val currentAttempt: String
-    @CheckResult get() = pinEntryText?.text.toString()
+  @CheckResult private fun getCurrentAttempt(): String = pinEntryText?.text?.toString() ?: ""
 
-  private val currentReentry: String
-    @CheckResult get() = pinReentryText?.text.toString()
+  @CheckResult private fun getCurrentReentry(): String = pinReentryText?.text?.toString() ?: ""
 
-  private val currentHint: String
-    @CheckResult get() = pinHintText?.text.toString()
+  @CheckResult private fun getCurrentHint(): String = pinHintText?.text?.toString() ?: ""
 
   companion object {
 
