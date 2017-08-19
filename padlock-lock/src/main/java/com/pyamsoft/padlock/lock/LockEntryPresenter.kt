@@ -23,7 +23,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class LockEntryPresenter @Inject constructor(
+class LockEntryPresenter @Inject internal constructor(
     private val packageName: String,
     private val activityName: String,
     private val realName: String,

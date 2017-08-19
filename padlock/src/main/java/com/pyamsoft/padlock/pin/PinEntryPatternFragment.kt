@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.pin
 
 import android.os.Bundle
-import android.support.annotation.CheckResult
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,22 +24,23 @@ import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding
+import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
 import com.pyamsoft.padlock.uicommon.LockCellUtils
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import timber.log.Timber
 import java.util.ArrayList
 import javax.inject.Inject
 
-class PinEntryPatternFragment : PinEntryBaseFragment() {
+class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
 
   @field:Inject internal lateinit var presenter: PinEntryPresenter
+  private lateinit var binding: FragmentPinEntryPatternBinding
   private val cellPattern: MutableList<PatternLockView.Dot> = ArrayList()
   private val repeatCellPattern: MutableList<PatternLockView.Dot> = ArrayList()
-  private var repeatPattern = false
-  private lateinit var binding: FragmentPinEntryPatternBinding
-  private var nextButtonOnClickRunnable: (() -> Boolean)? = null
+  private var nextButtonOnClickRunnable: (() -> Boolean) = { false }
   private var patternText = ""
   private var listener: PatternLockViewListener? = null
+  private var repeatPattern = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -72,11 +72,6 @@ class PinEntryPatternFragment : PinEntryBaseFragment() {
     binding.unbind()
   }
 
-  override fun onDestroy() {
-    super.onDestroy()
-    presenter.destroy()
-  }
-
   override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     listener = object : PatternLockViewListener {
@@ -106,12 +101,12 @@ class PinEntryPatternFragment : PinEntryBaseFragment() {
         }
 
         Timber.d("onPatternDetected")
-        val cellList: MutableList<PatternLockView.Dot>
-        if (repeatPattern) {
-          cellList = repeatCellPattern
+        val cellList: MutableList<PatternLockView.Dot> = cellList@ if (repeatPattern) {
+          return@cellList repeatCellPattern
         } else {
-          cellList = cellPattern
+          return@cellList cellPattern
         }
+
         cellList.clear()
         cellList.addAll(list)
       }
@@ -122,10 +117,11 @@ class PinEntryPatternFragment : PinEntryBaseFragment() {
     }
 
     binding.patternLock.isTactileFeedbackEnabled = false
+    binding.patternLock.addPatternLockListener(listener)
   }
 
-  override fun onSaveInstanceState(outState: Bundle?) {
-    outState!!.putBoolean(REPEAT_CELL_PATTERN, repeatPattern)
+  override fun onSaveInstanceState(outState: Bundle) {
+    outState.putBoolean(REPEAT_CELL_PATTERN, repeatPattern)
     outState.putString(PATTERN_TEXT, patternText)
     super.onSaveInstanceState(outState)
   }
@@ -136,86 +132,57 @@ class PinEntryPatternFragment : PinEntryBaseFragment() {
     // Pattern gets visually screwed up in multiwindow mode, clear it
     binding.patternLock.clearPattern()
 
-    presenter.checkMasterPinPresent(onMasterPinMissing = {
-      nextButtonOnClickRunnable = runnable@ {
-        if (repeatPattern) {
-          // Submit
-          val repeatText = LockCellUtils.cellPatternToString(repeatCellPattern)
-          submitPin(repeatText)
-          // No follow up acton
+    presenter.start(this)
+  }
+
+  override fun onMasterPinMissing() {
+    nextButtonOnClickRunnable = runnable@ {
+      if (repeatPattern) {
+        // Submit
+        val repeatText = LockCellUtils.cellPatternToString(repeatCellPattern)
+        submitPin(repeatText)
+        // No follow up acton
+        return@runnable false
+      } else {
+        // process and show next
+        if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
+          binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
           return@runnable false
         } else {
-          // process and show next
-          if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
-            binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
-            return@runnable false
-          } else {
-            patternText = LockCellUtils.cellPatternToString(cellPattern)
-            repeatPattern = true
-            binding.patternLock.clearPattern()
-            return@runnable false
-          }
+          patternText = LockCellUtils.cellPatternToString(cellPattern)
+          repeatPattern = true
+          binding.patternLock.clearPattern()
+          return@runnable false
         }
       }
-    }, onMasterPinPresent = {
-      nextButtonOnClickRunnable = runnable@ {
-        patternText = LockCellUtils.cellPatternToString(cellPattern)
-        binding.patternLock.clearPattern()
-        submitPin(null)
-        return@runnable false
-      }
-    })
+    }
+  }
 
-    binding.patternLock.addPatternLockListener(listener)
+  override fun onMasterPinPresent() {
+    nextButtonOnClickRunnable = runnable@ {
+      patternText = LockCellUtils.cellPatternToString(cellPattern)
+      binding.patternLock.clearPattern()
+      submitPin("")
+      return@runnable false
+    }
   }
 
   override fun onStop() {
     super.onStop()
     presenter.stop()
-    if (listener != null) {
-      binding.patternLock.removePatternLockListener(listener)
-    }
   }
 
-  @CheckResult internal fun onNextButtonClicked(): Boolean {
-    val callable: (() -> Boolean)? = nextButtonOnClickRunnable
-    if (callable == null) {
-      Timber.w("onClick runnable is NULL")
-      return false
-    } else {
-      try {
-        return callable()
-      } catch (e: Exception) {
-        return false
-      }
-
-    }
-  }
-
-  internal fun submitPin(repeatText: String?) {
-    var text = repeatText
-    if (text == null) {
-      text = ""
-    }
-
-    presenter.submit(patternText, text, "", onSubmitSuccess = {
-      if (it) {
-        presenter.publish(CreatePinEvent.create(true))
-      } else {
-        presenter.publish(ClearPinEvent.create(true))
-      }
-      dismissParent()
-    }, onSubmitFailure = {
-      if (it) {
-        presenter.publish(CreatePinEvent.create(false))
-      } else {
-        presenter.publish(ClearPinEvent.create(false))
-      }
-      dismissParent()
+  private fun submitPin(repeatText: String) {
+    // Hint is blank for PIN code
+    presenter.submit(patternText, repeatText, "", onCreateSuccess = {
+      presenter.publish(CreatePinEvent.create(true))
+    }, onCreateFailure = {
+      presenter.publish(CreatePinEvent.create(false))
+    }, onClearSuccess = { presenter.publish(ClearPinEvent.create(true)) }, onClearFailure = {
+      presenter.publish(ClearPinEvent.create(false))
     }, onSubmitError = {
       Toasty.makeText(context, it.message.toString(), Toasty.LENGTH_SHORT).show()
-      dismissParent()
-    })
+    }, onComplete = { dismissParent() })
   }
 
   companion object {
