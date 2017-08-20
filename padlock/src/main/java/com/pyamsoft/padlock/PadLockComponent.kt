@@ -66,11 +66,7 @@ import javax.inject.Singleton
     QueueModule::class, LockScreenSingletonModule::class, LockEntrySingletonModule::class))
 interface PadLockComponent {
 
-  fun inject(lockInfoItem: LockInfoItem)
-
   fun inject(fragment: LockListFragment)
-
-  fun inject(lockListItem: LockListItem)
 
   fun inject(appIconLoader: AppIconLoader)
 
@@ -95,6 +91,10 @@ interface PadLockComponent {
   fun inject(purgeSingleItemDialog: PurgeSingleItemDialog)
 
   fun inject(confirmationDialog: ConfirmationDialog)
+
+  fun inject(viewHolder: LockInfoItem.ViewHolder)
+
+  fun inject(viewHolder: LockListItem.ViewHolder)
 
   // To be used directly by PadLockSingleInitProvider
   @CheckResult
