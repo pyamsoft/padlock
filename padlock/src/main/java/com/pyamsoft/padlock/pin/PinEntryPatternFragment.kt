@@ -175,11 +175,11 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
   private fun submitPin(repeatText: String) {
     // Hint is blank for PIN code
     presenter.submit(patternText, repeatText, "", onCreateSuccess = {
-      presenter.publish(CreatePinEvent.create(true))
+      presenter.publish(CreatePinEvent(true))
     }, onCreateFailure = {
-      presenter.publish(CreatePinEvent.create(false))
-    }, onClearSuccess = { presenter.publish(ClearPinEvent.create(true)) }, onClearFailure = {
-      presenter.publish(ClearPinEvent.create(false))
+      presenter.publish(CreatePinEvent(false))
+    }, onClearSuccess = { presenter.publish(ClearPinEvent(true)) }, onClearFailure = {
+      presenter.publish(ClearPinEvent(false))
     }, onSubmitError = {
       Toasty.makeText(context, it.message.toString(), Toasty.LENGTH_SHORT).show()
     }, onComplete = { dismissParent() })

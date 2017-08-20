@@ -56,6 +56,24 @@ class LockInfoPresenter @Inject internal constructor(
             Timber.e(it, "Error listening to lock info bus")
           })
     }
+
+    disposeOnStop {
+      bus.listen()
+          .filter { it is LockInfoEvent.Callback }
+          .map { it as LockInfoEvent.Callback }
+          .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+          .subscribe({
+            when (it) {
+              is Created -> bound.onEntryCreated(it.id)
+              is Deleted -> bound.onEntryDeleted(it.id)
+              is Whitelisted -> bound.onEntryWhitelisted(it.id)
+            }
+          }, {
+            Timber.e(it, "Error listening to lock info bus")
+            bound.onEntryError(it)
+          })
+    }
+
   }
 
   private fun modifyDatabaseEntry(event: LockInfoEvent.Modify) {
@@ -120,5 +138,13 @@ class LockInfoPresenter @Inject internal constructor(
     fun onError(throwable: Throwable)
 
     fun onPopulated()
+
+    fun onEntryCreated(id: String)
+
+    fun onEntryDeleted(id: String)
+
+    fun onEntryWhitelisted(id: String)
+
+    fun onEntryError(throwable: Throwable)
   }
 }

@@ -20,16 +20,14 @@ import android.app.Application
 import android.support.annotation.CheckResult
 import android.support.v4.app.Fragment
 import com.pyamsoft.padlock.base.PadLockModule
-import com.pyamsoft.padlock.lock.helper.LockHelper
 import com.pyamsoft.padlock.lock.LockScreenActivity
-import com.pyamsoft.padlock.lock.helper.SHA256LockHelper
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.RecheckService
+import com.pyamsoft.padlock.settings.SettingsFragment
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.about.Licenses
 import com.pyamsoft.pydroid.ui.PYDroid
-import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
 
@@ -52,8 +50,6 @@ class PadLock : Application(), ComponentProvider {
     Licenses.create("PatternLockView", "https://github.com/aritraroy/PatternLockView",
         "licenses/patternlock")
 
-    LockHelper.set(
-        SHA256LockHelper.newInstance())
     val padLockModule = PadLockModule(applicationContext, MainActivity::class.java,
         LockScreenActivity::class.java,
         RecheckService::class.java)
@@ -66,13 +62,12 @@ class PadLock : Application(), ComponentProvider {
     } else {
       receiver.unregister()
     }
-    Injector.set(dagger)
     component = dagger
 
-    if (BuildConfig.DEBUG) {
-      refWatcher = LeakCanary.install(this)
+    refWatcher = assign@ if (BuildConfig.DEBUG) {
+      return@assign LeakCanary.install(this)
     } else {
-      refWatcher = RefWatcher.DISABLED
+      return@assign RefWatcher.DISABLED
     }
   }
 
@@ -98,19 +93,16 @@ class PadLock : Application(), ComponentProvider {
   companion object {
 
     @JvmStatic
-    @CheckResult fun getRefWatcher(fragment: CanaryFragment): RefWatcher {
-      return getRefWatcherInternal(fragment)
-    }
+    @CheckResult
+    fun getRefWatcher(fragment: CanaryFragment): RefWatcher = getRefWatcherInternal(fragment)
 
     @JvmStatic
-    @CheckResult fun getRefWatcher(fragment: CanaryDialog): RefWatcher {
-      return getRefWatcherInternal(fragment)
-    }
+    @CheckResult
+    fun getRefWatcher(fragment: CanaryDialog): RefWatcher = getRefWatcherInternal(fragment)
 
     @JvmStatic
-    @CheckResult fun getRefWatcher(fragment: ActionBarSettingsPreferenceFragment): RefWatcher {
-      return getRefWatcherInternal(fragment)
-    }
+    @CheckResult
+    fun getRefWatcher(fragment: SettingsFragment): RefWatcher = getRefWatcherInternal(fragment)
 
     @JvmStatic
     @CheckResult

@@ -130,16 +130,16 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
   private fun submit() {
     presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint(), onCreateSuccess = {
       clearDisplay()
-      presenter.publish(CreatePinEvent.create(true))
+      presenter.publish(CreatePinEvent(true))
     }, onCreateFailure = {
       clearDisplay()
-      presenter.publish(CreatePinEvent.create(false))
+      presenter.publish(CreatePinEvent(false))
     }, onClearSuccess = {
       clearDisplay()
-      presenter.publish(ClearPinEvent.create(true))
+      presenter.publish(ClearPinEvent(true))
     }, onClearFailure = {
       clearDisplay()
-      presenter.publish(ClearPinEvent.create(false))
+      presenter.publish(ClearPinEvent(false))
     }, onSubmitError = {
       clearDisplay()
       Toasty.makeText(context, it.message.toString(), Toasty.LENGTH_SHORT).show()

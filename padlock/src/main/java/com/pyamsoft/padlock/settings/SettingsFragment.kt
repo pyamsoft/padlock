@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.support.v7.preference.ListPreference
 import android.view.View
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
@@ -133,6 +134,11 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
   override fun onResume() {
     super.onResume()
     setActionBarUpEnabled(false)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    PadLock.getRefWatcher(this).watch(this)
   }
 
   companion object {

@@ -26,9 +26,9 @@ import android.view.WindowManager
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
-import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter.Callback
+import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
@@ -92,7 +92,7 @@ class PinEntryDialog : CanaryDialog(), Callback {
   override fun onStart() {
     super.onStart()
     appIcon = LoaderHelper.unload(appIcon)
-    appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(packageName)).into(
+    appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(activity, packageName)).into(
         binding.pinImage)
     presenter.start(this)
   }
