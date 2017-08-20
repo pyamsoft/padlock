@@ -22,14 +22,18 @@ import io.reactivex.Single
 
 internal interface LockEntryInteractor {
 
-  @CheckResult fun submitPin(packageName: String, activityName: String, lockCode: String?,
-      lockUntilTime: Long, currentAttempt: String): Single<Boolean>
+  @CheckResult
+  fun submitPin(packageName: String, activityName: String, lockCode: String?,
+      currentAttempt: String): Single<Boolean>
 
-  @CheckResult fun lockEntryOnFail(packageName: String, activityName: String): Completable
+  @CheckResult
+  fun lockEntryOnFail(packageName: String, activityName: String): Completable
 
-  @CheckResult fun getHint(): Single<String>
+  @CheckResult
+  fun getHint(): Single<String>
 
-  @CheckResult fun postUnlock(packageName: String, activityName: String, realName: String,
+  @CheckResult
+  fun postUnlock(packageName: String, activityName: String, realName: String,
       lockCode: String?,
       isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long): Completable
 }

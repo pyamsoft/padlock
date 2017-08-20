@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockDBInsert
+import com.pyamsoft.padlock.base.db.PadLockDBQuery
 import com.pyamsoft.padlock.base.db.PadLockDBUpdate
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
@@ -43,6 +44,7 @@ import javax.inject.Singleton
     private val jobSchedulerCompat: JobSchedulerCompat,
     private val masterPinInteractor: MasterPinInteractor, private val dbInsert: PadLockDBInsert,
     private val dbUpdate: PadLockDBUpdate,
+    private val dbQuery: PadLockDBQuery,
     @param:Named(
         "recheck") private val recheckServiceClass: Class<out IntentService>) : LockEntryInteractor {
 
@@ -50,32 +52,35 @@ import javax.inject.Singleton
   private var failCount: Int = 0
 
   override fun submitPin(packageName: String, activityName: String, lockCode: String?,
-      lockUntilTime: Long, currentAttempt: String): Single<Boolean> {
-    return masterPinInteractor.getMasterPin().map {
-      Timber.d("Attempt unlock: %s %s", packageName, activityName)
-      Timber.d("Check entry is not locked: %d", lockUntilTime)
-      if (System.currentTimeMillis() < lockUntilTime) {
-        Timber.e("Entry is still locked. Fail unlock")
-        return@map Optional.ofNullable(null)
-      }
+      currentAttempt: String): Single<Boolean> {
+    return dbQuery.queryWithPackageActivityNameDefault(packageName, activityName)
+        .flatMap {
+          val lockUntilTime = it.lockUntilTime()
+          masterPinInteractor.getMasterPin().map {
+            Timber.d("Attempt unlock: %s %s", packageName, activityName)
+            Timber.d("Check entry is not locked: %d", lockUntilTime)
+            if (System.currentTimeMillis() < lockUntilTime) {
+              Timber.e("Entry is still locked. Fail unlock")
+              return@map Optional.ofNullable(null)
+            }
 
-      val pin: Optional<String>
-      if (lockCode == null) {
-        Timber.d("No app specific code, use Master PIN")
-        pin = it
-      } else {
-        Timber.d("App specific code present, compare attempt")
-        pin = Optional.ofNullable(lockCode)
-      }
-      return@map pin
-    }.flatMap {
-      if (it.isPresent()) {
-        return@flatMap lockHelper.checkSubmissionAttempt(currentAttempt, it.item())
-      } else {
-        Timber.e("Cannot submit against PIN which is NULL")
-        return@flatMap Single.just(false)
-      }
-    }
+            if (lockCode == null) {
+              Timber.d("No app specific code, use Master PIN")
+              return@map it
+            } else {
+              Timber.d("App specific code present, compare attempt")
+              return@map Optional.ofNullable(lockCode)
+            }
+          }.flatMap innerFlat@ {
+            if (it.isPresent()) {
+              return@innerFlat lockHelper.checkSubmissionAttempt(currentAttempt, it.item())
+            } else {
+              Timber.e("Cannot submit against PIN which is NULL")
+              return@innerFlat Single.just(false)
+            }
+          }
+        }
+
   }
 
   @CheckResult private fun whitelistEntry(
@@ -95,7 +100,7 @@ import javax.inject.Singleton
       jobSchedulerCompat.cancel(intent)
 
       // Queue up a new recheck job
-      jobSchedulerCompat.set(intent, System.currentTimeMillis() + recheckTime)
+      jobSchedulerCompat[intent] = System.currentTimeMillis() + recheckTime
     }
   }
 

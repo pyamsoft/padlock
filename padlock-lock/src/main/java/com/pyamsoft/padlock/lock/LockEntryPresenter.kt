@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.lock
 
 import com.pyamsoft.padlock.base.queue.ActionQueue
+import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -24,6 +25,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockEntryPresenter @Inject internal constructor(
+    private val bus: EventBus<LockPassEvent>,
     private val packageName: String,
     private val activityName: String,
     private val realName: String,
@@ -33,6 +35,10 @@ class LockEntryPresenter @Inject internal constructor(
     @Named("main") mainScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
     ioScheduler, mainScheduler) {
+
+  fun passLockScreen() {
+    bus.publish(LockPassEvent.create(packageName, activityName))
+  }
 
   fun displayLockedHint(setDisplayHint: (String) -> Unit) {
     disposeOnStop {
@@ -58,11 +64,11 @@ class LockEntryPresenter @Inject internal constructor(
     }
   }
 
-  fun submit(lockCode: String?, lockUntilTime: Long, currentAttempt: String,
+  fun submit(lockCode: String?, currentAttempt: String,
       onSubmitSuccess: () -> Unit, onSubmitFailure: () -> Unit,
       onSubmitError: (Throwable) -> Unit) {
     disposeOnStop {
-      interactor.submitPin(packageName, activityName, lockCode, lockUntilTime, currentAttempt)
+      interactor.submitPin(packageName, activityName, lockCode, currentAttempt)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
@@ -79,7 +85,8 @@ class LockEntryPresenter @Inject internal constructor(
     }
   }
 
-  fun postUnlock(lockCode: String?, isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long) {
+  fun postUnlock(lockCode: String?, isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long,
+      onPostUnlocked: () -> Unit, onUnlockError: (Throwable) -> Unit) {
     actionQueue.queue {
       interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
           shouldExclude, ignoreTime)
@@ -87,8 +94,10 @@ class LockEntryPresenter @Inject internal constructor(
           .observeOn(mainThreadScheduler)
           .subscribe({
             Timber.d("onPostUnlock complete")
+            onPostUnlocked()
           }, {
             Timber.e(it, "Error postunlock")
+            onUnlockError(it)
           })
     }
   }

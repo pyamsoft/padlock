@@ -23,5 +23,9 @@ import dagger.Subcomponent
 interface LockScreenComponent {
 
   fun inject(activity: LockScreenActivity)
+
+  fun inject(fragment: LockScreenPatternFragment)
+
+  fun inject(fragment: LockScreenTextFragment)
 }
 

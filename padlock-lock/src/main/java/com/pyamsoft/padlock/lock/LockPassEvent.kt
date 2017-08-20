@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.lock
 
 import android.support.annotation.CheckResult
 import com.google.auto.value.AutoValue
