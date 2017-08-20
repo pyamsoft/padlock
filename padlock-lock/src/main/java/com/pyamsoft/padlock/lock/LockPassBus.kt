@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list;
+package com.pyamsoft.padlock.lock
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
-import com.mikepenz.fastadapter.IItem;
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
 
-interface FilterableItem<T, VH extends RecyclerView.ViewHolder> extends IItem<T, VH> {
+internal class LockPassBus @Inject internal constructor() : EventBus<LockPassEvent> {
 
-  @CheckResult boolean filterAgainst(@NonNull String query);
+  private val bus: EventBus<LockPassEvent> = RxBus.create()
+
+  override fun listen(): Observable<LockPassEvent> {
+    return bus.listen()
+  }
+
+  override fun publish(event: LockPassEvent) {
+    bus.publish(event)
+  }
+
 }
+

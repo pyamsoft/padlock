@@ -59,14 +59,13 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
   private lateinit var menuIgnoreFourtyFive: MenuItem
   private lateinit var menuIgnoreSixty: MenuItem
   private lateinit var ignoreTimes: LongArray
-  private lateinit var menuExclude: MenuItem
   private lateinit var lockedRealName: String
-  private var lockUntilTime: Long = 0
   private var lockedSystem: Boolean = false
   private var ignorePeriod: Long = -1
   private var excludeEntry: Boolean = false
   private var appIcon = LoaderHelper.empty()
   private var lockedCode: String? = null
+  internal lateinit var menuExclude: MenuItem
 
   private val ignoreCallback: (Long) -> Unit = {
     when (it) {
@@ -85,29 +84,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
       }
     }
   }
-  private val ignoreTimeFromSelectedIndex: Long
-    @CheckResult get() {
-      var index: Int
-      try {
-        index = when {
-          menuIgnoreNone.isChecked -> 0
-          menuIgnoreOne.isChecked -> 1
-          menuIgnoreFive.isChecked -> 2
-          menuIgnoreTen.isChecked -> 3
-          menuIgnoreFifteen.isChecked -> 4
-          menuIgnoreTwenty.isChecked -> 5
-          menuIgnoreThirty.isChecked -> 6
-          menuIgnoreFourtyFive.isChecked -> 7
-          menuIgnoreSixty.isChecked -> 8
-          else -> 0
-        }
-      } catch (e: NullPointerException) {
-        Timber.w("NULL menu item, default to 0")
-        index = 0
-      }
-
-      return ignoreTimes[index]
-    }
 
   init {
     home.addCategory(Intent.CATEGORY_HOME)
@@ -115,7 +91,31 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
   }
 
   @CheckResult
-  fun getRootView(): ViewGroup = binding.activityLockScreen
+  internal fun getRootView(): ViewGroup = binding.activityLockScreen
+
+  @CheckResult
+  internal fun getIgnoreTimeFromSelectedIndex(): Long {
+    var index: Int
+    try {
+      index = when {
+        menuIgnoreNone.isChecked -> 0
+        menuIgnoreOne.isChecked -> 1
+        menuIgnoreFive.isChecked -> 2
+        menuIgnoreTen.isChecked -> 3
+        menuIgnoreFifteen.isChecked -> 4
+        menuIgnoreTwenty.isChecked -> 5
+        menuIgnoreThirty.isChecked -> 6
+        menuIgnoreFourtyFive.isChecked -> 7
+        menuIgnoreSixty.isChecked -> 8
+        else -> 0
+      }
+    } catch (e: NullPointerException) {
+      Timber.w("NULL menu item, default to 0")
+      index = 0
+    }
+
+    return ignoreTimes[index]
+  }
 
   @CallSuper public override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.Theme_PadLock_Light_Lock)
@@ -156,7 +156,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
     lockedPackageName = bundle.getString(ENTRY_PACKAGE_NAME)
     lockedActivityName = bundle.getString(ENTRY_ACTIVITY_NAME)
     lockedRealName = bundle.getString(ENTRY_REAL_NAME)
-    lockUntilTime = bundle.getLong(ENTRY_LOCK_UNTIL_TIME, 0)
     lockedSystem = bundle.getBoolean(ENTRY_IS_SYSTEM, false)
 
     // Reload options
@@ -267,7 +266,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
-    val ignoreTime = ignoreTimeFromSelectedIndex
+    val ignoreTime = getIgnoreTimeFromSelectedIndex()
     outState.putLong("IGNORE", ignoreTime)
 
     val exclude: Boolean = assign@ try {
@@ -322,7 +321,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
     const val ENTRY_REAL_NAME = "real_name"
     const val ENTRY_LOCK_CODE = "lock_code"
     const val ENTRY_IS_SYSTEM = "is_system"
-    const val ENTRY_LOCK_UNTIL_TIME = "lock_until_time"
 
     /**
      * Starts a LockScreenActivity instance
@@ -336,7 +334,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
       intent.putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode())
       intent.putExtra(LockScreenActivity.ENTRY_IS_SYSTEM, entry.systemApplication())
       intent.putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName)
-      intent.putExtra(LockScreenActivity.ENTRY_LOCK_UNTIL_TIME, entry.lockUntilTime())
 
       if (entry.whitelist()) {
         throw RuntimeException("Cannot launch LockScreen for whitelisted applications")

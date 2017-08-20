@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.base.db.PadLockEntry
+import com.pyamsoft.padlock.lock.LockPassEvent
 import com.pyamsoft.padlock.service.LockServicePresenter.Callback
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -65,7 +66,7 @@ class LockServicePresenter @Inject internal constructor(
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
-            setLockScreenPassed(it.packageName(), it.className())
+            interactor.setLockScreenPassed(it.packageName(), it.className(), true)
           }, { Timber.e(it, "onError lock passed bus") })
     }
 
@@ -77,10 +78,6 @@ class LockServicePresenter @Inject internal constructor(
             onRecheck(it.packageName(), it.className())
           }, { Timber.e(it, "onError recheck event bus") })
     }
-  }
-
-  fun setLockScreenPassed(packageName: String, className: String) {
-    interactor.setLockScreenPassed(packageName, className, true)
   }
 
   fun processActiveApplicationIfMatching(packageName: String, className: String,

@@ -44,20 +44,12 @@ import javax.inject.Singleton
   }
 
   @Singleton @Provides internal fun provideServiceStateInteractor(
-      masterPinInteractor: MasterPinInteractor): LockServiceStateInteractor {
-    return LockServiceStateInteractorImpl(masterPinInteractor)
-  }
+      masterPinInteractor: MasterPinInteractor): LockServiceStateInteractor =
+      LockServiceStateInteractorImpl(masterPinInteractor)
 
-  @Singleton @Provides internal fun provideLockPassBus(): EventBus<LockPassEvent> {
-    return LockPassBus()
-  }
+  @Singleton @Provides internal fun provideRecheckBus(): EventBus<RecheckEvent> = RecheckEventBus()
 
-  @Singleton @Provides internal fun provideRecheckBus(): EventBus<RecheckEvent> {
-    return RecheckEventBus()
-  }
-
-  @Singleton @Provides internal fun provideServiceFinishBus(): EventBus<ServiceFinishEvent> {
-    return ServiceFinishBus()
-  }
+  @Singleton @Provides internal fun provideServiceFinishBus(): EventBus<ServiceFinishEvent> =
+      ServiceFinishBus()
 }
 

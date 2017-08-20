@@ -25,6 +25,7 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.lock.helper.LockHelper
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor
+import com.pyamsoft.pydroid.bus.EventBus
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -40,5 +41,7 @@ import javax.inject.Singleton
     return LockEntryInteractorImpl(context, lockHelper, lockScreenPreferences,
         jobSchedulerCompat, masterPinInteractor, dbInsert, dbUpdate, recheckServiceClass)
   }
+
+  @Singleton @Provides internal fun provideLockPassBus(): EventBus<LockPassEvent> = LockPassBus()
 }
 
