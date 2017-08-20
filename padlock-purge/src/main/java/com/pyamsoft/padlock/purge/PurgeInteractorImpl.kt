@@ -40,23 +40,20 @@ import javax.inject.Singleton
     }.sorted { obj, str -> obj.compareTo(str, ignoreCase = true) }
   }
 
-  @CheckResult internal fun fetchFreshData(): Single<List<String>> {
 
-    @CheckResult fun getAllEntries(db: PadLockDBQuery): Single<List<PadLockEntry.AllEntries>> {
-      return db.queryAll()
-    }
+  @CheckResult
+  private fun getAllEntries(): Single<List<PadLockEntry.AllEntries>> = queryDb.queryAll()
 
-    @CheckResult fun getActiveApplications(
-        applicationWrapper: PackageApplicationManager): Single<List<String>> {
-      return applicationWrapper.getActiveApplications()
-          .flatMapObservable { Observable.fromIterable(it) }
-          .map { it.packageName }
-          .toSortedList()
-    }
+  @CheckResult
+  private fun getActiveApplications(): Single<List<String>> = applicationManager.getActiveApplications()
+      .flatMapObservable { Observable.fromIterable(it) }
+      .map { it.packageName }
+      .toSortedList()
 
-    return getAllEntries(queryDb).zipWith(getActiveApplications(applicationManager),
-        BiFunction {
-          allEntries, packageNames ->
+
+  @CheckResult private fun fetchFreshData(): Single<List<String>> {
+    return getAllEntries().zipWith(getActiveApplications(),
+        BiFunction { allEntries, packageNames ->
           val mutableAllEntries: MutableList<PadLockEntry.AllEntries> = ArrayList(allEntries)
           if (mutableAllEntries.isEmpty()) {
             Timber.e("Database does not have any AppEntry items")
@@ -85,7 +82,6 @@ import javax.inject.Singleton
         })
   }
 
-  override fun deleteEntry(packageName: String): Single<String> {
-    return deleteDb.deleteWithPackageName(packageName).andThen(Single.just(packageName))
-  }
+  override fun deleteEntry(packageName: String): Single<String> =
+      deleteDb.deleteWithPackageName(packageName).andThen(Single.just(packageName))
 }

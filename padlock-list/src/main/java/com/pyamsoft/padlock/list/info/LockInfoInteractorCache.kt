@@ -32,9 +32,7 @@ import javax.inject.Singleton
     cache.clear()
   }
 
-  override fun hasShownOnBoarding(): Single<Boolean> {
-    return impl.hasShownOnBoarding()
-  }
+  override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
 
   override fun populateList(packageName: String, force: Boolean): Observable<ActivityEntry> {
     return Observable.defer {

@@ -47,8 +47,6 @@ import com.google.auto.value.AutoValue
   companion object {
 
     @JvmStatic
-    @CheckResult fun builder(): Builder {
-      return AutoValue_AppEntry.Builder()
-    }
+    @CheckResult fun builder(): Builder = AutoValue_AppEntry.Builder()
   }
 }

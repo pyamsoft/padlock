@@ -43,7 +43,7 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
       purgeBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .subscribe({ onPurge(it.packageName()) }, {
+          .subscribe({ onPurge(it.packageName) }, {
             Timber.e(it, "onError purge single")
           })
     }

@@ -25,9 +25,7 @@ internal class ServiceFinishBus @Inject internal constructor() : EventBus<Servic
 
   private val bus: EventBus<ServiceFinishEvent> = RxBus.create()
 
-  override fun listen(): Observable<ServiceFinishEvent> {
-    return bus.listen()
-  }
+  override fun listen(): Observable<ServiceFinishEvent> = bus.listen()
 
   override fun publish(event: ServiceFinishEvent) {
     bus.publish(event)

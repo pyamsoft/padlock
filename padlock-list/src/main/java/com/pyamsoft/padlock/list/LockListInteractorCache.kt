@@ -27,15 +27,11 @@ import javax.inject.Singleton
 @Singleton internal class LockListInteractorCache @Inject internal constructor(
     private val impl: LockListInteractor) : LockListInteractor, Cache {
 
-  override fun hasShownOnBoarding(): Single<Boolean> {
-    return impl.hasShownOnBoarding()
-  }
-
   private var cache: Observable<AppEntry>? = null
 
-  override fun isSystemVisible(): Single<Boolean> {
-    return impl.isSystemVisible()
-  }
+  override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
+
+  override fun isSystemVisible(): Single<Boolean> = impl.isSystemVisible()
 
   override fun setSystemVisible(visible: Boolean) {
     impl.setSystemVisible(visible)

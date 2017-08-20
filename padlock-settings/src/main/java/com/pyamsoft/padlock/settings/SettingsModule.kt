@@ -30,9 +30,8 @@ import javax.inject.Singleton
 
 @Module class SettingsModule {
 
-  @Singleton @Provides @CheckResult internal fun provideConfirmBus(): EventBus<ConfirmEvent> {
-    return ConfirmEventBus()
-  }
+  @Singleton @Provides @CheckResult internal fun provideConfirmBus(): EventBus<ConfirmEvent> =
+      ConfirmEventBus()
 
   @Singleton @Provides @CheckResult internal fun provideSettingsInteractor(
       deleteDb: PadLockDBDelete, masterPinPreference: MasterPinPreferences,

@@ -46,9 +46,8 @@ import javax.inject.Singleton
     private val onboardingPreferences: OnboardingPreferences,
     private val preferences: LockListPreferences) : LockListInteractor {
 
-  override fun isSystemVisible(): Single<Boolean> {
-    return Single.fromCallable { preferences.isSystemVisible() }
-  }
+  override fun isSystemVisible(): Single<Boolean> =
+      Single.fromCallable { preferences.isSystemVisible() }
 
   override fun setSystemVisible(visible: Boolean) {
     preferences.setSystemVisible(visible)
@@ -68,12 +67,10 @@ import javax.inject.Singleton
             for (entry in copyEntries) {
               if (entry.packageName() == packageName) {
                 removeEntries.add(entry)
-                if (entry.activityName() == PadLockEntry.PACKAGE_ACTIVITY_NAME) {
-                  locked = true
-                } else if (entry.whitelist()) {
-                  whitelist = true
-                } else {
-                  hardLocked = true
+                when {
+                  entry.activityName() == PadLockEntry.PACKAGE_ACTIVITY_NAME -> locked = true
+                  entry.whitelist() -> whitelist = true
+                  else -> hardLocked = true
                 }
               }
             }
@@ -103,10 +100,8 @@ import javax.inject.Singleton
         }
   }
 
-  @CheckResult private fun isSystemApplication(info: ApplicationInfo): Boolean {
-    return info.flags and ApplicationInfo.FLAG_SYSTEM != 0
-  }
-
+  @CheckResult private fun isSystemApplication(info: ApplicationInfo): Boolean =
+      info.flags and ApplicationInfo.FLAG_SYSTEM != 0
 
   @CheckResult private fun getActiveApplications(): Observable<ApplicationInfo> {
     return applicationManager.getActiveApplications()
@@ -128,9 +123,8 @@ import javax.inject.Singleton
 
 
   @CheckResult private fun getActivityListForApplication(
-      info: ApplicationInfo): Single<List<String>> {
-    return activityManager.getActivityListForPackage(info.packageName)
-  }
+      info: ApplicationInfo): Single<List<String>> =
+      activityManager.getActivityListForPackage(info.packageName)
 
   @CheckResult private fun getValidPackageNames(): Single<List<String>> {
     return getValidApplicationList().flatMapSingle { info ->
@@ -146,13 +140,11 @@ import javax.inject.Singleton
         .toList()
   }
 
-  @CheckResult private fun getAppEntryList(): Single<List<PadLockEntry.AllEntries>> {
-    return queryDb.queryAll()
-  }
+  @CheckResult private fun getAppEntryList(): Single<List<PadLockEntry.AllEntries>> =
+      queryDb.queryAll()
 
-  override fun hasShownOnBoarding(): Single<Boolean> {
-    return Single.fromCallable { onboardingPreferences.isListOnBoard() }
-  }
+  override fun hasShownOnBoarding(): Single<Boolean> =
+      Single.fromCallable { onboardingPreferences.isListOnBoard() }
 
   private data class LockTuple internal constructor(internal val packageName: String,
       internal val locked: Boolean, internal val whitelist: Boolean,

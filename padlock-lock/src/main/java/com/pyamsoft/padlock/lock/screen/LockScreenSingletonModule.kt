@@ -24,17 +24,20 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
-@Module class LockScreenSingletonModule() {
+@Module
+class LockScreenSingletonModule() {
 
-  @Singleton @Provides @CheckResult internal fun provideCloseBus(): EventBus<CloseOldEvent> {
-    return CloseOldBus()
-  }
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideCloseBus(): EventBus<CloseOldEvent> =
+      CloseOldBus()
 
-  @Singleton @Provides @CheckResult internal fun provideInteractor(
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideInteractor(
       labelManager: PackageLabelManager,
-      lockScreenPreferences: LockScreenPreferences): LockScreenInteractor {
-    return LockScreenInteractorImpl(labelManager, lockScreenPreferences)
-  }
+      lockScreenPreferences: LockScreenPreferences): LockScreenInteractor =
+      LockScreenInteractorImpl(labelManager, lockScreenPreferences)
 
 }
 

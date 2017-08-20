@@ -27,15 +27,12 @@ import javax.inject.Singleton
     private val labelManager: PackageLabelManager,
     private val preferences: LockScreenPreferences) : LockScreenInteractor {
 
-  override fun getLockScreenType(): Single<LockScreenType> {
-    return Single.fromCallable { preferences.getCurrentLockType() }
-  }
+  override fun getLockScreenType(): Single<LockScreenType> =
+      Single.fromCallable { preferences.getCurrentLockType() }
 
-  override fun getDefaultIgnoreTime(): Single<Long> {
-    return Single.fromCallable { preferences.getDefaultIgnoreTime() }
-  }
+  override fun getDefaultIgnoreTime(): Single<Long> =
+      Single.fromCallable { preferences.getDefaultIgnoreTime() }
 
-  override fun getDisplayName(packageName: String): Single<String> {
-    return labelManager.loadPackageLabel(packageName).toSingle("")
-  }
+  override fun getDisplayName(packageName: String): Single<String> =
+      labelManager.loadPackageLabel(packageName).toSingle("")
 }

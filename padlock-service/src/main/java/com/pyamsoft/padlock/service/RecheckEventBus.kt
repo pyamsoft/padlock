@@ -25,9 +25,7 @@ internal class RecheckEventBus @Inject internal constructor() : EventBus<Recheck
 
   private val bus: EventBus<RecheckEvent> = RxBus.create()
 
-  override fun listen(): Observable<RecheckEvent> {
-    return bus.listen()
-  }
+  override fun listen(): Observable<RecheckEvent> = bus.listen()
 
   override fun publish(event: RecheckEvent) {
     bus.publish(event)

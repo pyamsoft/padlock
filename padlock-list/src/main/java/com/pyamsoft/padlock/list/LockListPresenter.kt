@@ -55,7 +55,7 @@ internal class LockListPresenter @Inject constructor(
     disposeOnStop {
       createPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
-            if (it.success()) {
+            if (it.success) {
               onMasterPinCreateSuccess()
             } else {
               onMasterPinCreateFailure()
@@ -68,7 +68,7 @@ internal class LockListPresenter @Inject constructor(
     disposeOnStop {
       clearPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
-            if (it.success()) {
+            if (it.success) {
               onMasterPinClearSuccess()
             } else {
               onMasterPinClearFailure()

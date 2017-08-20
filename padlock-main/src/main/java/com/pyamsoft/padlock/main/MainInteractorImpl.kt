@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.main
 
-import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.preference.OnboardingPreferences
 import io.reactivex.Single
 import javax.inject.Inject
@@ -25,7 +24,6 @@ import javax.inject.Singleton
 @Singleton internal class MainInteractorImpl @Inject internal constructor(
     private val preferences: OnboardingPreferences) : MainInteractor {
 
-  override fun isOnboardingComplete(): Single<Boolean> {
-    return Single.fromCallable { preferences.hasAgreed() }
-  }
+  override fun isOnboardingComplete(): Single<Boolean> =
+      Single.fromCallable { preferences.hasAgreed() }
 }

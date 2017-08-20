@@ -47,9 +47,7 @@ import javax.inject.Singleton
   }
 
   @CheckResult private fun getLockedActivityEntries(
-      name: String): Single<List<PadLockEntry.WithPackageName>> {
-    return queryDb.queryWithPackageName(name)
-  }
+      name: String): Single<List<PadLockEntry.WithPackageName>> = queryDb.queryWithPackageName(name)
 
   @CheckResult private fun getPackageActivities(name: String): Single<List<String>> {
     return packageActivityManager.getActivityListForPackage(name)
@@ -72,19 +70,23 @@ import javax.inject.Singleton
     var start: Int
     var end: Int
     var foundEntry: PadLockEntry.WithPackageName? = null
-    if (pivotPoint.activityName() == activityName) {
-      // We are the pivot
-      foundEntry = pivotPoint
-      start = 0
-      end = -1
-    } else if (activityName.compareTo(pivotPoint.activityName(), ignoreCase = true) < 0) {
-      //  We are before the pivot point
-      start = 0
-      end = middle - 1
-    } else {
-      // We are after the pivot point
-      start = middle + 1
-      end = lockEntries.size - 1
+    when {
+      pivotPoint.activityName() == activityName -> {
+        // We are the pivot
+        foundEntry = pivotPoint
+        start = 0
+        end = -1
+      }
+      activityName.compareTo(pivotPoint.activityName(), ignoreCase = true) < 0 -> {
+        //  We are before the pivot point
+        start = 0
+        end = middle - 1
+      }
+      else -> {
+        // We are after the pivot point
+        start = middle + 1
+        end = lockEntries.size - 1
+      }
     }
 
     while (start <= end) {
@@ -115,14 +117,13 @@ import javax.inject.Singleton
 
   @CheckResult private fun createActivityEntry(packageName: String, name: String,
       foundEntry: PadLockEntry.WithPackageName?): ActivityEntry {
-    val state: LockState
-    if (foundEntry == null) {
-      state = LockState.DEFAULT
+    val state: LockState = assign@ if (foundEntry == null) {
+      return@assign LockState.DEFAULT
     } else {
       if (foundEntry.whitelist()) {
-        state = LockState.WHITELISTED
+        return@assign LockState.WHITELISTED
       } else {
-        state = LockState.LOCKED
+        return@assign LockState.LOCKED
       }
     }
     return ActivityEntry.builder().name(name).lockState(state).packageName(packageName).build()
@@ -172,7 +173,7 @@ import javax.inject.Singleton
       val entry2Name: String = activityEntry2.name()
 
       // Calculate if the starting X characters in the activity name is the exact package name
-      var activity1Package: Boolean = false
+      var activity1Package = false
       if (entry1Name.startsWith(packageName)) {
         val strippedPackageName = entry1Name.replace(packageName, "")
         if (strippedPackageName[0] == '.') {
@@ -180,7 +181,7 @@ import javax.inject.Singleton
         }
       }
 
-      var activity2Package: Boolean = false
+      var activity2Package = false
       if (entry2Name.startsWith(packageName)) {
         val strippedPackageName = entry2Name.replace(packageName, "")
         if (strippedPackageName[0] == '.') {

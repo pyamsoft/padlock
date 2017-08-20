@@ -24,7 +24,5 @@ import javax.inject.Singleton
 @Module class JobSchedulerCompatModule {
 
   @Singleton @Provides internal fun provideJobSchedulerCompat(
-      context: Context): JobSchedulerCompat {
-    return JobSchedulerCompatImpl(context)
-  }
+      context: Context): JobSchedulerCompat = JobSchedulerCompatImpl(context)
 }

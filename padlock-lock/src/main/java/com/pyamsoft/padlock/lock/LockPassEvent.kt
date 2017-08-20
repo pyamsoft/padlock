@@ -16,21 +16,4 @@
 
 package com.pyamsoft.padlock.lock
 
-import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
-
-@AutoValue abstract class LockPassEvent protected constructor() {
-
-  @CheckResult internal abstract fun packageName(): String
-
-  @CheckResult internal abstract fun className(): String
-
-  companion object {
-
-    @JvmStatic
-    @CheckResult
-    fun create(packageName: String, className: String): LockPassEvent {
-      return AutoValue_LockPassEvent(packageName, className)
-    }
-  }
-}
+data class LockPassEvent(val packageName: String, val className: String)

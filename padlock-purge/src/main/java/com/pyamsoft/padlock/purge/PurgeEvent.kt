@@ -16,18 +16,4 @@
 
 package com.pyamsoft.padlock.purge
 
-import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
-
-@AutoValue abstract class PurgeEvent protected constructor() {
-
-  @CheckResult internal abstract fun packageName(): String
-
-  companion object {
-
-    @JvmStatic
-    @CheckResult fun create(packageName: String): PurgeEvent {
-      return AutoValue_PurgeEvent(packageName)
-    }
-  }
-}
+data class PurgeEvent(val packageName: String)

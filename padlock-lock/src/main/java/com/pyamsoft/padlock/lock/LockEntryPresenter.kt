@@ -37,7 +37,7 @@ class LockEntryPresenter @Inject internal constructor(
     ioScheduler, mainScheduler) {
 
   fun passLockScreen() {
-    bus.publish(LockPassEvent.create(packageName, activityName))
+    bus.publish(LockPassEvent(packageName, activityName))
   }
 
   fun displayLockedHint(setDisplayHint: (String) -> Unit) {

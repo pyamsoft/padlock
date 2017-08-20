@@ -23,19 +23,18 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
-@Module class PinModule {
+@Module
+class PinModule {
 
-  @Singleton @Provides internal fun provideInteractor(lockHelper: LockHelper,
-      masterPinInteractor: MasterPinInteractor): PinEntryInteractor {
-    return PinEntryInteractorImpl(lockHelper, masterPinInteractor)
-  }
+  @Singleton
+  @Provides internal fun provideInteractor(lockHelper: LockHelper,
+      masterPinInteractor: MasterPinInteractor): PinEntryInteractor =
+      PinEntryInteractorImpl(lockHelper, masterPinInteractor)
 
-  @Singleton @Provides internal fun provideClearBus(): EventBus<ClearPinEvent> {
-    return ClearPinBus()
-  }
+  @Singleton
+  @Provides internal fun provideClearBus(): EventBus<ClearPinEvent> = ClearPinBus()
 
-  @Singleton @Provides internal fun provideCreateBus(): EventBus<CreatePinEvent> {
-    return CreatePinBus()
-  }
+  @Singleton
+  @Provides internal fun provideCreateBus(): EventBus<CreatePinEvent> = CreatePinBus()
 }
 

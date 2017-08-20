@@ -2,6 +2,10 @@
   <dictionary name="pyamsoft">
     <words>
       <w>interactor</w>
+      <w>onboarding</w>
+      <w>whitelist</w>
+      <w>whitelisted</w>
+      <w>whitelisting</w>
     </words>
   </dictionary>
 </component>

@@ -24,9 +24,7 @@ internal class PurgeAllBus internal constructor() : EventBus<PurgeAllEvent> {
 
   private val bus: EventBus<PurgeAllEvent> = RxBus.create()
 
-  override fun listen(): Observable<PurgeAllEvent> {
-    return bus.listen()
-  }
+  override fun listen(): Observable<PurgeAllEvent> = bus.listen()
 
   override fun publish(event: PurgeAllEvent) {
     bus.publish(event)

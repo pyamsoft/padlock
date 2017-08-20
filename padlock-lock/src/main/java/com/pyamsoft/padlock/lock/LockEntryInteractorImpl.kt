@@ -145,13 +145,11 @@ import javax.inject.Singleton
 
   override fun getHint(): Single<String> {
     return masterPinInteractor.getHint().map {
-      val result: String
       if (it.isPresent()) {
-        result = ""
+        return@map ""
       } else {
-        result = it.item()
+        return@map it.item()
       }
-      return@map result
     }
   }
 

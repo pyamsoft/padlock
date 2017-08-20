@@ -25,10 +25,6 @@ import javax.inject.Singleton
 @Singleton internal class OnboardAcceptTermsInteractor @Inject internal constructor(
     private val preferences: OnboardingPreferences) {
 
-  /**
-   * public
-   */
-  @CheckResult fun agreeToTerms(): Completable {
-    return Completable.fromAction({ preferences.setAgreed() })
-  }
+  @CheckResult
+  fun agreeToTerms(): Completable = Completable.fromAction({ preferences.setAgreed() })
 }

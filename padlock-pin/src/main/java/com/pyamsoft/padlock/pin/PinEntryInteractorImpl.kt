@@ -29,13 +29,10 @@ import javax.inject.Singleton
     private val lockHelper: LockHelper,
     private val masterPinInteractor: MasterPinInteractor) : PinEntryInteractor {
 
-  @CheckResult private fun getMasterPin(): Single<Optional<String>> {
-    return masterPinInteractor.getMasterPin()
-  }
+  @CheckResult private fun getMasterPin(): Single<Optional<String>> =
+      masterPinInteractor.getMasterPin()
 
-  override fun hasMasterPin(): Single<Boolean> {
-    return getMasterPin().map { it.isPresent() }
-  }
+  override fun hasMasterPin(): Single<Boolean> = getMasterPin().map { it.isPresent() }
 
   override fun submitPin(currentAttempt: String, reEntryAttempt: String,
       hint: String): Single<PinEntryEvent> {
@@ -67,14 +64,11 @@ import javax.inject.Singleton
       attempt: String, reentry: String, hint: String): Single<PinEntryEvent> {
     return Single.defer {
       Timber.d("No existing master item, attempt to create a new one")
-      val matches: Boolean = (attempt == reentry)
-      val result: Single<String>
-      if (matches) {
-        result = lockHelper.encode(attempt)
+      if (attempt == reentry) {
+        return@defer lockHelper.encode(attempt)
       } else {
-        result = Single.just("")
+        return@defer Single.just("")
       }
-      return@defer result
     }.map {
       val success = it.isNotBlank()
       if (success) {
