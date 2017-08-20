@@ -66,7 +66,7 @@ class LockServicePresenter @Inject internal constructor(
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
-            interactor.setLockScreenPassed(it.packageName(), it.className(), true)
+            interactor.setLockScreenPassed(it.packageName, it.className, true)
           }, { Timber.e(it, "onError lock passed bus") })
     }
 

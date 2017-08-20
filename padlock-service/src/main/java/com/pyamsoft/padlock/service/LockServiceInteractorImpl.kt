@@ -92,13 +92,10 @@ import javax.inject.Singleton
    * This will prevent the lock screen from opening twice when the same
    * app opens multiple activities for example.
    */
-  @CheckResult private fun hasNameChanged(name: String, oldName: String): Boolean {
-    return name != oldName
-  }
+  @CheckResult private fun hasNameChanged(name: String, oldName: String): Boolean = name != oldName
 
-  @CheckResult private fun isOnlyLockOnPackageChange(): Boolean {
-    return preferences.isLockOnPackageChange()
-  }
+  @CheckResult private fun isOnlyLockOnPackageChange(): Boolean =
+      preferences.isLockOnPackageChange()
 
   @CheckResult private fun prepareLockScreen(windowPackage: String,
       windowActivity: String): MaybeTransformer<Boolean, PadLockEntry> {

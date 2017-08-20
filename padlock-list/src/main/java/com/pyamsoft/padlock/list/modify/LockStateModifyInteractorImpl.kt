@@ -20,6 +20,8 @@ import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockDBDelete
 import com.pyamsoft.padlock.base.db.PadLockDBInsert
 import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.LockState.DEFAULT
+import com.pyamsoft.padlock.model.LockState.NONE
 import io.reactivex.Single
 import timber.log.Timber
 
@@ -46,16 +48,14 @@ internal class LockStateModifyInteractorImpl internal constructor(
       activityName: String,
       code: String?, system: Boolean): Single<LockState> {
     return Single.defer<LockState> {
-      val newState: Single<LockState>
-      if (oldLockState === LockState.DEFAULT) {
+      if (oldLockState === DEFAULT) {
         Timber.d("Add new as whitelisted")
-        newState = createNewEntry(packageName, activityName, code, system, true)
+        return@defer createNewEntry(packageName, activityName, code, system, true)
       } else {
         // Update existing entry
         Timber.d("Update existing entry to NONE")
-        newState = Single.just(LockState.NONE)
+        return@defer Single.just(NONE)
       }
-      return@defer newState
     }
   }
 
@@ -63,16 +63,14 @@ internal class LockStateModifyInteractorImpl internal constructor(
       activityName: String,
       code: String?, system: Boolean): Single<LockState> {
     return Single.defer<LockState> {
-      val newState: Single<LockState>
-      if (oldLockState === LockState.DEFAULT) {
+      if (oldLockState === DEFAULT) {
         Timber.d("Add new as force locked")
-        newState = createNewEntry(packageName, activityName, code, system, false)
+        return@defer createNewEntry(packageName, activityName, code, system, false)
       } else {
         // Update existing entry
         Timber.d("Update existing entry to NONE")
-        newState = Single.just(LockState.NONE)
+        return@defer Single.just(NONE)
       }
-      return@defer newState
     }
   }
 
@@ -80,27 +78,23 @@ internal class LockStateModifyInteractorImpl internal constructor(
       activityName: String,
       code: String?, system: Boolean): Single<LockState> {
     return Single.defer<LockState> {
-      val newState: Single<LockState>
       if (oldLockState === LockState.DEFAULT) {
         Timber.d("Add new entry")
-        newState = createNewEntry(packageName, activityName, code, system, false)
+        return@defer createNewEntry(packageName, activityName, code, system, false)
       } else {
         Timber.d("Delete existing entry")
-        newState = deleteEntry(packageName, activityName)
+        return@defer deleteEntry(packageName, activityName)
       }
-      return@defer newState
     }
   }
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState,
       newLockState: LockState, packageName: String, activityName: String,
-      code: String?, system: Boolean): Single<LockState> {
-    if (newLockState === LockState.WHITELISTED) {
-      return whitelistEntry(oldLockState, packageName, activityName, code, system)
-    } else if (newLockState === LockState.LOCKED) {
-      return forceLockEntry(oldLockState, packageName, activityName, code, system)
-    } else {
-      return addNewEntry(oldLockState, packageName, activityName, code, system)
-    }
+      code: String?, system: Boolean): Single<LockState> = when {
+    newLockState === LockState.WHITELISTED -> whitelistEntry(oldLockState, packageName,
+        activityName, code, system)
+    newLockState === LockState.LOCKED -> forceLockEntry(oldLockState, packageName, activityName,
+        code, system)
+    else -> addNewEntry(oldLockState, packageName, activityName, code, system)
   }
 }

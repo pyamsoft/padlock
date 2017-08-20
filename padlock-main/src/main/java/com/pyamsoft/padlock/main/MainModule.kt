@@ -22,11 +22,13 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
-@Module class MainModule {
+@Module
+class MainModule {
 
-  @Singleton @Provides @CheckResult internal fun provideMainInteractor(
-      onboardingPreferences: OnboardingPreferences): MainInteractor {
-    return MainInteractorImpl(onboardingPreferences)
-  }
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideMainInteractor(
+      onboardingPreferences: OnboardingPreferences): MainInteractor =
+      MainInteractorImpl(onboardingPreferences)
 }
 

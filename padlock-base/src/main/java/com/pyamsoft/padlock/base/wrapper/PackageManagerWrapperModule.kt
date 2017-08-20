@@ -21,30 +21,26 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
-@Module class PackageManagerWrapperModule {
+@Module
+class PackageManagerWrapperModule {
 
-  @Singleton @Provides internal fun providePackageManagerWrapper(
-      context: Context): PackageManagerWrapperImpl {
-    return PackageManagerWrapperImpl(context)
-  }
+  @Singleton
+  @Provides internal fun providePackageManagerWrapper(
+      context: Context): PackageManagerWrapperImpl = PackageManagerWrapperImpl(context)
 
-  @Singleton @Provides internal fun providePackageActivityManager(
-      manager: PackageManagerWrapperImpl): PackageActivityManager {
-    return manager
-  }
+  @Singleton
+  @Provides internal fun providePackageActivityManager(
+      manager: PackageManagerWrapperImpl): PackageActivityManager = manager
 
-  @Singleton @Provides internal fun providePackageLabelManager(
-      manager: PackageManagerWrapperImpl): PackageLabelManager {
-    return manager
-  }
+  @Singleton
+  @Provides internal fun providePackageLabelManager(
+      manager: PackageManagerWrapperImpl): PackageLabelManager = manager
 
-  @Singleton @Provides internal fun providePackageApplicationManager(
-      manager: PackageManagerWrapperImpl): PackageApplicationManager {
-    return manager
-  }
+  @Singleton
+  @Provides internal fun providePackageApplicationManager(
+      manager: PackageManagerWrapperImpl): PackageApplicationManager = manager
 
-  @Singleton @Provides internal fun providePackageDrawableManager(
-      manager: PackageManagerWrapperImpl): PackageDrawableManager {
-    return manager
-  }
+  @Singleton
+  @Provides internal fun providePackageDrawableManager(
+      manager: PackageManagerWrapperImpl): PackageDrawableManager = manager
 }

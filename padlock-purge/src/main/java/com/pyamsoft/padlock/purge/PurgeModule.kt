@@ -27,30 +27,35 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module class PurgeModule {
+@Module
+class PurgeModule {
 
-  @Singleton @Provides @CheckResult internal fun providePurgeBus(): EventBus<PurgeEvent> {
-    return PurgeBus()
-  }
+  @Singleton
+  @Provides
+  @CheckResult internal fun providePurgeBus(): EventBus<PurgeEvent> =
+      PurgeBus()
 
-  @Singleton @Provides @CheckResult internal fun providePurgeAllBus(): EventBus<PurgeAllEvent> {
-    return PurgeAllBus()
-  }
+  @Singleton
+  @Provides
+  @CheckResult internal fun providePurgeAllBus(): EventBus<PurgeAllEvent> =
+      PurgeAllBus()
 
-  @Singleton @Provides @CheckResult internal fun providePurgeInteractorCache(
+  @Singleton
+  @Provides
+  @CheckResult internal fun providePurgeInteractorCache(
       applicationManager: PackageApplicationManager, deleteDb: PadLockDBDelete,
-      queryDb: PadLockDBQuery): PurgeInteractorCache {
-    return PurgeInteractorCache(PurgeInteractorImpl(applicationManager, deleteDb, queryDb))
-  }
+      queryDb: PadLockDBQuery): PurgeInteractorCache =
+      PurgeInteractorCache(PurgeInteractorImpl(applicationManager, deleteDb, queryDb))
 
-  @Singleton @Provides @CheckResult internal fun providePurgeInteractor(
-      cache: PurgeInteractorCache): PurgeInteractor {
-    return cache
-  }
+  @Singleton
+  @Provides
+  @CheckResult internal fun providePurgeInteractor(
+      cache: PurgeInteractorCache): PurgeInteractor = cache
 
-  @Singleton @Provides @CheckResult @Named("cache_purge") internal fun provideCache(
-      cache: PurgeInteractorCache): Cache {
-    return cache
-  }
+  @Singleton
+  @Provides
+  @CheckResult
+  @Named("cache_purge") internal fun provideCache(
+      cache: PurgeInteractorCache): Cache = cache
 }
 

@@ -29,9 +29,8 @@ import com.google.auto.value.AutoValue
 
   @CheckResult abstract fun lockState(): LockState
 
-  @CheckResult fun id(): String {
-    return "${packageName()}|${name()}"
-  }
+  @CheckResult
+  fun id(): String = "${packageName()}|${name()}"
 
   @AutoValue.Builder abstract class Builder {
 
@@ -47,8 +46,7 @@ import com.google.auto.value.AutoValue
   companion object {
 
     @JvmStatic
-    @CheckResult fun builder(): Builder {
-      return AutoValue_ActivityEntry.Builder()
-    }
+    @CheckResult
+    fun builder(): Builder = AutoValue_ActivityEntry.Builder()
   }
 }

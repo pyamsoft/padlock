@@ -25,9 +25,7 @@ internal class CloseOldBus @Inject internal constructor() : EventBus<CloseOldEve
 
   private val bus: EventBus<CloseOldEvent> = RxBus.create()
 
-  override fun listen(): Observable<CloseOldEvent> {
-    return bus.listen()
-  }
+  override fun listen(): Observable<CloseOldEvent> = bus.listen()
 
   override fun publish(event: CloseOldEvent) {
     bus.publish(event)

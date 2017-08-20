@@ -25,9 +25,8 @@ import javax.inject.Singleton
 @Singleton internal class MasterPinInteractorImpl @Inject internal constructor(
     private val preferences: MasterPinPreferences) : MasterPinInteractor {
 
-  override fun getMasterPin(): Single<Optional<String>> {
-    return Single.fromCallable { Optional.ofNullable(preferences.getMasterPassword()) }
-  }
+  override fun getMasterPin(): Single<Optional<String>> =
+      Single.fromCallable { Optional.ofNullable(preferences.getMasterPassword()) }
 
   override fun setMasterPin(pin: String?) {
     if (pin == null) {
@@ -37,9 +36,8 @@ import javax.inject.Singleton
     }
   }
 
-  override fun getHint(): Single<Optional<String>> {
-    return Single.fromCallable { Optional.ofNullable(preferences.getHint()) }
-  }
+  override fun getHint(): Single<Optional<String>> =
+      Single.fromCallable { Optional.ofNullable(preferences.getHint()) }
 
   override fun setHint(hint: String?) {
     if (hint == null) {

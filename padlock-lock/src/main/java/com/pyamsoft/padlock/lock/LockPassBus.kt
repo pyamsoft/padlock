@@ -25,9 +25,7 @@ internal class LockPassBus @Inject internal constructor() : EventBus<LockPassEve
 
   private val bus: EventBus<LockPassEvent> = RxBus.create()
 
-  override fun listen(): Observable<LockPassEvent> {
-    return bus.listen()
-  }
+  override fun listen(): Observable<LockPassEvent> = bus.listen()
 
   override fun publish(event: LockPassEvent) {
     bus.publish(event)

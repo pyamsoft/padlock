@@ -26,8 +26,7 @@ import javax.inject.Singleton
 @Module class LockStateModule {
 
   @Singleton @Provides @CheckResult internal fun provideInteractor(insertDb: PadLockDBInsert,
-      deleteDb: PadLockDBDelete): LockStateModifyInteractor {
-    return LockStateModifyInteractorImpl(insertDb, deleteDb)
-  }
+      deleteDb: PadLockDBDelete): LockStateModifyInteractor =
+      LockStateModifyInteractorImpl(insertDb, deleteDb)
 }
 

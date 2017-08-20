@@ -25,9 +25,7 @@ internal class ConfirmEventBus @Inject internal constructor() : EventBus<Confirm
 
   private val bus: EventBus<ConfirmEvent> = RxBus.create()
 
-  override fun listen(): Observable<ConfirmEvent> {
-    return bus.listen()
-  }
+  override fun listen(): Observable<ConfirmEvent> = bus.listen()
 
   override fun publish(event: ConfirmEvent) {
     bus.publish(event)

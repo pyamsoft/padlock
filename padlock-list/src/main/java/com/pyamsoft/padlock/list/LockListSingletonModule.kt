@@ -30,9 +30,12 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module class LockListSingletonModule() {
+@Module
+class LockListSingletonModule() {
 
-  @Singleton @Provides @CheckResult internal fun provideInteractorCache(queryDb: PadLockDBQuery,
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideInteractorCache(queryDb: PadLockDBQuery,
       applicationManager: PackageApplicationManager, labelManager: PackageLabelManager,
       activityManager: PackageActivityManager, onboardingPreferences: OnboardingPreferences,
       lockListPreferences: LockListPreferences): LockListInteractorCache {
@@ -40,20 +43,22 @@ import javax.inject.Singleton
         activityManager, onboardingPreferences, lockListPreferences))
   }
 
-  @Singleton @Provides @CheckResult internal fun provideInteractor(
-      cache: LockListInteractorCache): LockListInteractor {
-    return cache
-  }
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideInteractor(
+      cache: LockListInteractorCache): LockListInteractor = cache
 
-  @Singleton @Provides @CheckResult internal fun provideItemInteractor(
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideItemInteractor(
       @Named("cache_lock_list") cache: Cache,
-      modifyInteractor: LockStateModifyInteractor): LockListItemInteractor {
-    return LockListItemInteractorImpl(cache, modifyInteractor)
-  }
+      modifyInteractor: LockStateModifyInteractor): LockListItemInteractor =
+      LockListItemInteractorImpl(cache, modifyInteractor)
 
-  @Singleton @Provides @CheckResult @Named("cache_lock_list") internal fun provideCache(
-      cache: LockListInteractorCache): Cache {
-    return cache
-  }
+  @Singleton
+  @Provides
+  @CheckResult
+  @Named("cache_lock_list") internal fun provideCache(
+      cache: LockListInteractorCache): Cache = cache
 }
 

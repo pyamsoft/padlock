@@ -23,11 +23,13 @@ import io.reactivex.Scheduler
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module class QueueModule {
+@Module
+class QueueModule {
 
-  @Singleton @Provides @CheckResult internal fun provideActionQueue(
-      @Named("io") ioScheduler: Scheduler, @Named("main") mainScheduler: Scheduler): ActionQueue {
-    return ActionQueueImpl(ioScheduler, mainScheduler)
-  }
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideActionQueue(
+      @Named("io") ioScheduler: Scheduler, @Named("main") mainScheduler: Scheduler): ActionQueue =
+      ActionQueueImpl(ioScheduler, mainScheduler)
 }
 

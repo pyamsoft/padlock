@@ -20,6 +20,7 @@ import android.app.IntentService
 import android.content.Context
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockDBInsert
+import com.pyamsoft.padlock.base.db.PadLockDBQuery
 import com.pyamsoft.padlock.base.db.PadLockDBUpdate
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
@@ -31,17 +32,21 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module class LockEntrySingletonModule {
+@Module
+class LockEntrySingletonModule {
 
-  @Singleton @Provides @CheckResult internal fun provideInteractor(context: Context,
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideInteractor(context: Context,
       lockHelper: LockHelper, lockScreenPreferences: LockScreenPreferences,
       jobSchedulerCompat: JobSchedulerCompat, masterPinInteractor: MasterPinInteractor,
-      dbInsert: PadLockDBInsert, dbUpdate: PadLockDBUpdate,
+      dbInsert: PadLockDBInsert, dbUpdate: PadLockDBUpdate, dbQuery: PadLockDBQuery,
       @Named("recheck") recheckServiceClass: Class<out IntentService>): LockEntryInteractor {
     return LockEntryInteractorImpl(context, lockHelper, lockScreenPreferences,
-        jobSchedulerCompat, masterPinInteractor, dbInsert, dbUpdate, recheckServiceClass)
+        jobSchedulerCompat, masterPinInteractor, dbInsert, dbUpdate, dbQuery, recheckServiceClass)
   }
 
-  @Singleton @Provides internal fun provideLockPassBus(): EventBus<LockPassEvent> = LockPassBus()
+  @Singleton
+  @Provides internal fun provideLockPassBus(): EventBus<LockPassEvent> = LockPassBus()
 }
 

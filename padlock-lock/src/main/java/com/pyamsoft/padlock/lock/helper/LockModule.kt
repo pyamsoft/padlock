@@ -22,8 +22,6 @@ import javax.inject.Singleton
 
 @Module class LockModule {
 
-  @Singleton @Provides fun provideLockHelper(): LockHelper {
-    return SHA256LockHelper()
-  }
+  @Singleton @Provides fun provideLockHelper(): LockHelper = SHA256LockHelper()
 }
 

@@ -25,21 +25,13 @@ sealed class LockInfoEvent {
   data class Modify(private val entry: ActivityEntry, val newState: LockState,
       val code: String?, val system: Boolean) : LockInfoEvent() {
 
-    @CheckResult fun packageName(): String {
-      return entry.packageName()
-    }
+    @CheckResult fun packageName(): String = entry.packageName()
 
-    @CheckResult fun name(): String {
-      return entry.name()
-    }
+    @CheckResult fun name(): String = entry.name()
 
-    @CheckResult fun oldState(): LockState {
-      return entry.lockState()
-    }
+    @CheckResult fun oldState(): LockState = entry.lockState()
 
-    @CheckResult fun id(): String {
-      return entry.id()
-    }
+    @CheckResult fun id(): String = entry.id()
   }
 
   sealed class Callback : LockInfoEvent() {

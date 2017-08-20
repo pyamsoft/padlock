@@ -25,9 +25,7 @@ internal class ClearPinBus @Inject internal constructor() : EventBus<ClearPinEve
 
   private val bus: EventBus<ClearPinEvent> = RxBus.create()
 
-  override fun listen(): Observable<ClearPinEvent> {
-    return bus.listen()
-  }
+  override fun listen(): Observable<ClearPinEvent> = bus.listen()
 
   override fun publish(event: ClearPinEvent) {
     bus.publish(event)

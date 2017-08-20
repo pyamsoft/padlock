@@ -32,9 +32,8 @@ import javax.inject.Singleton
 
 @Module class LockInfoSingletonModule() {
 
-  @Singleton @Provides @CheckResult internal fun provideBus(): EventBus<LockInfoEvent> {
-    return LockInfoBus()
-  }
+  @Singleton @Provides @CheckResult internal fun provideBus(): EventBus<LockInfoEvent> =
+      LockInfoBus()
 
   @Singleton @Provides @CheckResult internal fun provideInteractorCache(queryDb: PadLockDBQuery,
       packageActivityManager: PackageActivityManager, preferences: OnboardingPreferences,
@@ -44,19 +43,14 @@ import javax.inject.Singleton
   }
 
   @Singleton @Provides @CheckResult internal fun provideInteractor(
-      cache: LockInfoInteractorCache): LockInfoInteractor {
-    return cache
-  }
+      cache: LockInfoInteractorCache): LockInfoInteractor = cache
 
   @Singleton @Provides @CheckResult internal fun provideItemInteractor(
       @Named("cache_lock_info") cache: Cache, updateDb: PadLockDBUpdate,
-      modifyInteractor: LockStateModifyInteractor): LockInfoItemInteractor {
-    return LockInfoItemInteractorImpl(cache, updateDb, modifyInteractor)
-  }
+      modifyInteractor: LockStateModifyInteractor): LockInfoItemInteractor =
+      LockInfoItemInteractorImpl(cache, updateDb, modifyInteractor)
 
   @Singleton @Provides @CheckResult @Named("cache_lock_info") internal fun provideCache(
-      cache: LockInfoInteractorCache): Cache {
-    return cache
-  }
+      cache: LockInfoInteractorCache): Cache = cache
 }
 
