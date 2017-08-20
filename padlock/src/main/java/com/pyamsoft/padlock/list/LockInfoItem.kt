@@ -22,6 +22,7 @@ import android.view.View
 import android.widget.RadioButton
 import com.mikepenz.fastadapter.items.GenericAbstractItem
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding
 import com.pyamsoft.padlock.list.info.LockInfoItemPresenter
 import com.pyamsoft.padlock.model.ActivityEntry
@@ -32,9 +33,8 @@ import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockInfoItem internal constructor(
-    private val system: Boolean,
-    entry: ActivityEntry) : GenericAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
+class LockInfoItem internal constructor(entry: ActivityEntry,
+    private val system: Boolean) : GenericAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
     entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
   override fun getType(): Int = R.id.adapter_lock_info
@@ -90,6 +90,8 @@ class LockInfoItem internal constructor(
         processModifyDatabaseEntry(holder, LOCKED)
       }
     }
+
+    holder.presenter.start(Unit)
   }
 
   private fun processModifyDatabaseEntry(holder: ViewHolder, newLockState: LockState) {

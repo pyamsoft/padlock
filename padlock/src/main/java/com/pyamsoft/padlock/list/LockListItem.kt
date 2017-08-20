@@ -22,6 +22,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.mikepenz.fastadapter.items.GenericAbstractItem
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.uicommon.AppIconLoader
@@ -74,6 +75,8 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
         DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
       })
     }
+
+    holder.presenter.start(Unit)
   }
 
   private fun updateModel(locked: Boolean) {

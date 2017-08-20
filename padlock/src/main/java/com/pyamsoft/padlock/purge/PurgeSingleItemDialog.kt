@@ -42,7 +42,7 @@ class PurgeSingleItemDialog : CanaryDialog() {
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(activity).setMessage("Really delete old entry for $packageName?")
         .setPositiveButton("Delete") { _, _ ->
-          purgePublisher.publish(PurgeEvent.create(packageName))
+          purgePublisher.publish(PurgeEvent(packageName))
           dismiss()
         }
         .setNegativeButton("Cancel") { _, _ -> dismiss() }

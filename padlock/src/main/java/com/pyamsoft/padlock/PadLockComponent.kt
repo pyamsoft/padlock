@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.lock.LockEntryModule
 import com.pyamsoft.padlock.lock.LockEntrySingletonModule
 import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.helper.LockModule
+import com.pyamsoft.padlock.lock.master.MasterPinModule
 import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.padlock.lock.screen.LockScreenSingletonModule
 import com.pyamsoft.padlock.main.MainActivity
@@ -63,7 +64,8 @@ import javax.inject.Singleton
     JobSchedulerCompatModule::class, PadLockDBModule::class, LockModule::class, PinModule::class,
     ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class,
     LockInfoSingletonModule::class, LockStateModule::class, LockListSingletonModule::class,
-    QueueModule::class, LockScreenSingletonModule::class, LockEntrySingletonModule::class))
+    QueueModule::class, LockScreenSingletonModule::class, LockEntrySingletonModule::class,
+    MasterPinModule::class))
 interface PadLockComponent {
 
   fun inject(fragment: LockListFragment)
