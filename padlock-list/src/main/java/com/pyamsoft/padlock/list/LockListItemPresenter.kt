@@ -27,7 +27,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class LockListItemPresenter @Inject constructor(
+class LockListItemPresenter @Inject internal constructor(
     private val actionQueue: ActionQueue,
     private val interactor: LockListItemInteractor,
     @Named("computation") compScheduler: Scheduler,

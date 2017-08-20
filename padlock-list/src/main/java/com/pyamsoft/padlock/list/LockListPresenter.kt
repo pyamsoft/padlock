@@ -28,7 +28,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class LockListPresenter @Inject constructor(
+class LockListPresenter @Inject internal constructor(
     private val lockListInteractor: LockListInteractor,
     private val stateInteractor: LockServiceStateInteractor,
     private val clearPinBus: EventBus<ClearPinEvent>,
