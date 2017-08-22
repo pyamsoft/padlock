@@ -42,6 +42,12 @@ class PadLock : Application(), ComponentProvider {
       return
     }
 
+    refWatcher = if (BuildConfig.DEBUG) {
+      LeakCanary.install(this)
+    } else {
+      RefWatcher.DISABLED
+    }
+
     PYDroid.initialize(this, BuildConfig.DEBUG)
     Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
     Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight")
@@ -63,12 +69,6 @@ class PadLock : Application(), ComponentProvider {
       receiver.unregister()
     }
     component = dagger
-
-    refWatcher = assign@ if (BuildConfig.DEBUG) {
-      return@assign LeakCanary.install(this)
-    } else {
-      return@assign RefWatcher.DISABLED
-    }
   }
 
   private val watcher: RefWatcher

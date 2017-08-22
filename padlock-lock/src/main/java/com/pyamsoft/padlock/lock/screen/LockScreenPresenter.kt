@@ -22,18 +22,13 @@ import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 
 class LockScreenPresenter @Inject internal constructor(
-    private val lockScreenInputPresenter: LockScreenInputPresenter,
-    private val packageName: String,
-    private val activityName: String,
-    private val bus: EventBus<CloseOldEvent>,
-    private val interactor: LockScreenInteractor,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
-    ioScheduler, mainScheduler) {
+    private val lockScreenInputPresenter: LockScreenInputPresenter, private val packageName: String,
+    private val activityName: String, private val bus: EventBus<CloseOldEvent>,
+    private val interactor: LockScreenInteractor, computationScheduler: Scheduler,
+    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<Callback>(
+    computationScheduler, ioScheduler, mainScheduler) {
 
   override fun onStart(bound: Callback) {
     super.onStart(bound)

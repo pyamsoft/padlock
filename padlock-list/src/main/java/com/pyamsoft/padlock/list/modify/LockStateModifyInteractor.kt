@@ -18,12 +18,13 @@ package com.pyamsoft.padlock.list.modify
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.LockState
+import io.reactivex.Maybe
 import io.reactivex.Single
 
 internal interface LockStateModifyInteractor {
 
   @CheckResult fun modifySingleDatabaseEntry(oldLockState: LockState,
       newLockState: LockState, packageName: String, activityName: String,
-      code: String?, system: Boolean): Single<LockState>
+      code: String?, system: Boolean): Maybe<LockState>
 
 }

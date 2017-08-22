@@ -31,7 +31,7 @@ abstract class LockScreenBaseFragment protected constructor() : Fragment() {
 
   protected lateinit var lockedActivityName: String
   protected lateinit var lockedPackageName: String
-  protected lateinit var lockedCode: String
+  protected var lockedCode: String? = null
   protected lateinit var lockedRealName: String
   protected var isLockedSystem: Boolean = false
 

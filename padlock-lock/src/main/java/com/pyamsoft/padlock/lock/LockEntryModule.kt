@@ -35,7 +35,7 @@ class LockEntryModule(private val packageName: String, private val activityName:
       @Named("main") mainScheduler: Scheduler,
       @Named("io") ioScheduler: Scheduler): LockEntryPresenter {
     return LockEntryPresenter(bus, packageName, activityName, realName, actionQueue, interactor,
-        compScheduler, mainScheduler, ioScheduler)
+        compScheduler, ioScheduler, mainScheduler)
   }
 }
 

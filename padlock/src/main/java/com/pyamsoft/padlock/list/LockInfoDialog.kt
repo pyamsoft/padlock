@@ -91,9 +91,9 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback {
     setupToolbar()
     binding.lockInfoPackageName.text = appPackageName
     binding.lockInfoSystem.text = if (appIsSystem) "YES" else "NO"
-    filterListDelegate.onViewCreated(fastItemAdapter)
     setupSwipeRefresh()
     setupRecyclerView()
+    filterListDelegate.onViewCreated(fastItemAdapter)
   }
 
   private fun setupToolbar() {
@@ -115,11 +115,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback {
 
   private fun setupRecyclerView() {
     dividerDecoration = DividerItemDecoration(activity, DividerItemDecoration.VERTICAL)
-
-    fastItemAdapter.itemFilter.withFilterPredicate { item, query ->
-      val queryString = query.toString().toLowerCase().trim { it <= ' ' }
-      item.filterAgainst(queryString)
-    }
 
     val manager = LinearLayoutManager(context)
     manager.isItemPrefetchEnabled = true

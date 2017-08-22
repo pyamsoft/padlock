@@ -19,16 +19,17 @@ package com.pyamsoft.padlock.list
 import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.data.Cache
-import io.reactivex.Single
+import io.reactivex.Maybe
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton class LockListItemInteractorImpl @Inject internal constructor(private val cache: Cache,
+@Singleton
+class LockListItemInteractorImpl @Inject internal constructor(private val cache: Cache,
     private val modifyInteractor: LockStateModifyInteractor) : LockListItemInteractor {
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
       packageName: String, activityName: String, code: String?,
-      system: Boolean): Single<LockState> {
+      system: Boolean): Maybe<LockState> {
     return modifyInteractor.modifySingleDatabaseEntry(oldLockState, newLockState, packageName,
         activityName, code, system).doOnSuccess { cache.clearCache() }
   }

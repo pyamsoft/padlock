@@ -41,16 +41,19 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
 
   private fun checkMasterPinPresent(onMasterPinMissing: () -> Unit,
       onMasterPinPresent: () -> Unit) {
-    disposeOnStop(interactor.hasMasterPin()
-        .subscribeOn(ioScheduler)
-        .observeOn(mainThreadScheduler)
-        .subscribe({
-          if (it) {
-            onMasterPinPresent()
-          } else {
-            onMasterPinMissing()
-          }
-        }, { Timber.e(it, "onError checkMasterPinPresent") }))
+    Timber.d("Check master pin present")
+    disposeOnStop {
+      interactor.hasMasterPin()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            if (it) {
+              onMasterPinPresent()
+            } else {
+              onMasterPinMissing()
+            }
+          }, { Timber.e(it, "onError checkMasterPinPresent") })
+    }
   }
 
   fun publish(event: CreatePinEvent) {
@@ -65,31 +68,33 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
       onCreateSuccess: () -> Unit, onCreateFailure: () -> Unit,
       onClearSuccess: () -> Unit, onClearFailure: () -> Unit,
       onSubmitError: (Throwable) -> Unit, onComplete: () -> Unit) {
-    disposeOnStop(interactor.submitPin(currentAttempt, reEntryAttempt, hint)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainThreadScheduler)
-        .doAfterTerminate { onComplete() }
-        .subscribe({
-          when (it) {
-            is Create -> {
-              if (it.complete) {
-                onCreateSuccess()
-              } else {
-                onCreateFailure()
+    disposeOnStop {
+      interactor.submitPin(currentAttempt, reEntryAttempt, hint)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .doAfterTerminate { onComplete() }
+          .subscribe({
+            when (it) {
+              is Create -> {
+                if (it.complete) {
+                  onCreateSuccess()
+                } else {
+                  onCreateFailure()
+                }
+              }
+              is Clear -> {
+                if (it.complete) {
+                  onClearSuccess()
+                } else {
+                  onClearFailure()
+                }
               }
             }
-            is Clear -> {
-              if (it.complete) {
-                onClearSuccess()
-              } else {
-                onClearFailure()
-              }
-            }
-          }
-        }, {
-          Timber.e(it, "attemptPinSubmission onError")
-          onSubmitError(it)
-        }))
+          }, {
+            Timber.e(it, "attemptPinSubmission onError")
+            onSubmitError(it)
+          })
+    }
   }
 
   interface Callback {

@@ -101,10 +101,12 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
         }
 
         Timber.d("onPatternDetected")
-        val cellList: MutableList<PatternLockView.Dot> = cellList@ if (repeatPattern) {
-          return@cellList repeatCellPattern
+        val cellList: MutableList<PatternLockView.Dot> = if (repeatPattern) {
+          // Assign to cellList
+          repeatCellPattern
         } else {
-          return@cellList cellPattern
+          // Assign to cellList
+          cellPattern
         }
 
         cellList.clear()
@@ -138,6 +140,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
   override fun onMasterPinMissing() {
     nextButtonOnClickRunnable = runnable@ {
       if (repeatPattern) {
+        Timber.d("Submit repeat attempt")
         // Submit
         val repeatText = LockCellUtils.cellPatternToString(repeatCellPattern)
         submitPin(repeatText)
@@ -146,9 +149,11 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
       } else {
         // process and show next
         if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
+          Timber.d("Pattern is not long enough")
           binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
           return@runnable false
         } else {
+          Timber.d("Submit initial attempt")
           patternText = LockCellUtils.cellPatternToString(cellPattern)
           repeatPattern = true
           binding.patternLock.clearPattern()
@@ -165,6 +170,11 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
       submitPin("")
       return@runnable false
     }
+  }
+
+  fun onNextButtonPressed() {
+    Timber.d("Next button pressed, store pattern for re-entry")
+    nextButtonOnClickRunnable()
   }
 
   override fun onStop() {

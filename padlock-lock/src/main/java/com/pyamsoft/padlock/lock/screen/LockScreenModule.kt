@@ -34,8 +34,7 @@ class LockScreenModule(private val packageName: String, private val activityName
       @Named("main") mainScheduler: Scheduler,
       @Named("io") ioScheduler: Scheduler): LockScreenPresenter {
     return LockScreenPresenter(inputPresenter, packageName, activityName, bus, interactor,
-        compScheduler,
-        ioScheduler, mainScheduler)
+        compScheduler, ioScheduler, mainScheduler)
   }
 }
 

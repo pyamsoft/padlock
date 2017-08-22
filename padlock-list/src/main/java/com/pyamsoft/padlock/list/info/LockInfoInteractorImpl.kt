@@ -117,13 +117,13 @@ import javax.inject.Singleton
 
   @CheckResult private fun createActivityEntry(packageName: String, name: String,
       foundEntry: PadLockEntry.WithPackageName?): ActivityEntry {
-    val state: LockState = assign@ if (foundEntry == null) {
-      return@assign LockState.DEFAULT
+    val state: LockState = if (foundEntry == null) {
+      LockState.DEFAULT
     } else {
       if (foundEntry.whitelist()) {
-        return@assign LockState.WHITELISTED
+        LockState.WHITELISTED
       } else {
-        return@assign LockState.LOCKED
+        LockState.LOCKED
       }
     }
     return ActivityEntry.builder().name(name).lockState(state).packageName(packageName).build()

@@ -21,7 +21,7 @@ import com.pyamsoft.padlock.base.db.PadLockDBUpdate
 import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.data.Cache
-import io.reactivex.Single
+import io.reactivex.Maybe
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,18 +32,21 @@ import javax.inject.Singleton
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
       packageName: String, activityName: String, code: String?,
-      system: Boolean): Single<LockState> {
+      system: Boolean): Maybe<LockState> {
     return modifyInteractor.modifySingleDatabaseEntry(oldLockState, newLockState, packageName,
         activityName, code, system)
         .flatMap {
-          val resultState: Single<LockState>
-          if (it === LockState.NONE) {
+          val resultState: Maybe<LockState> = if (it === LockState.NONE) {
             Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated")
-            resultState = updateExistingEntry(packageName, activityName,
+
+            // Assigned to resultState
+            updateExistingEntry(packageName, activityName,
                 newLockState === LockState.WHITELISTED)
           } else {
             Timber.d("Entry handled, just pass through")
-            resultState = Single.just(it)
+
+            // Assigned to resultState
+            Maybe.just(it)
           }
 
           return@flatMap resultState.doOnSuccess {
@@ -54,9 +57,9 @@ import javax.inject.Singleton
   }
 
   @CheckResult private fun updateExistingEntry(
-      packageName: String, activityName: String, whitelist: Boolean): Single<LockState> {
+      packageName: String, activityName: String, whitelist: Boolean): Maybe<LockState> {
     Timber.d("Entry already exists for: %s %s, update it", packageName, activityName)
     return updateDb.updateWhitelist(whitelist, packageName, activityName)
-        .toSingleDefault(if (whitelist) LockState.WHITELISTED else LockState.LOCKED)
+        .toSingleDefault(if (whitelist) LockState.WHITELISTED else LockState.LOCKED).toMaybe()
   }
 }

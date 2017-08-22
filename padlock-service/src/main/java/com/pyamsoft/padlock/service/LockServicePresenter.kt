@@ -107,7 +107,13 @@ class LockServicePresenter @Inject internal constructor(
             } else {
               startLockScreen(it, className)
             }
-          }, { Timber.e(it, "Error getting PadLockEntry for LockScreen") })
+          }, {
+            if (it is NoSuchElementException) {
+              Timber.w("PadLock not locking: $packageName, $className")
+            } else {
+              Timber.e(it, "Error getting PadLockEntry for LockScreen")
+            }
+          })
     }
   }
 
