@@ -163,7 +163,10 @@ import javax.inject.Singleton
   @CheckResult private fun isEventFromActivity(packageName: String,
       className: String): MaybeTransformer<Boolean, Boolean> {
     return MaybeTransformer {
-      it.flatMapSingle {
+      it.isEmpty.filter {
+        Timber.d("Filter if empty: $it")
+        return@filter it.not()
+      }.flatMapSingle {
         Timber.d("Check event from activity: %s %s", packageName, className)
         return@flatMapSingle packageActivityManager.getActivityInfo(packageName,
             className).isEmpty.map { it.not() }

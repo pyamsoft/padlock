@@ -33,6 +33,11 @@ class LockScreenInputPresenter @Inject internal constructor(
     ioScheduler, mainScheduler) {
 
 
+  override fun onStart(bound: Callback) {
+    super.onStart(bound)
+    initializeLockScreenType(bound::onTypePattern, bound::onTypeText)
+  }
+
   private fun initializeLockScreenType(onTypePattern: () -> Unit, onTypeText: () -> Unit) {
     disposeOnStop {
       interactor.getLockScreenType()

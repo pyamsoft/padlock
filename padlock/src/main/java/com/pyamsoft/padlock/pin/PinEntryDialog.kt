@@ -71,13 +71,16 @@ class PinEntryDialog : CanaryDialog(), Callback {
       tag: String): Boolean {
     val fragmentManager = childFragmentManager
     val fragment = fragmentManager.findFragmentByTag(tag)
-    if (fragment == null) {
+    return if (fragment == null) {
+      Timber.d("Push new pin fragment: $tag")
       childFragmentManager.beginTransaction()
           .replace(R.id.pin_entry_dialog_container, pushFragment, tag)
           .commit()
-      return true
+      // Return
+      true
     } else {
-      return false
+      // Return
+      false
     }
   }
 
@@ -99,12 +102,14 @@ class PinEntryDialog : CanaryDialog(), Callback {
 
   override fun onTypePattern() {
     // Push text as child fragment
+    Timber.d("Type Pattern")
     if (pushIfNotPresent(PinEntryPatternFragment(), PinEntryPatternFragment.TAG)) {
       binding.pinNextButtonLayout.visibility = View.VISIBLE
       binding.pinNextButton.setOnClickListener {
         val fragmentManager = childFragmentManager
         val fragment = fragmentManager.findFragmentByTag(PinEntryPatternFragment.TAG)
         if (fragment is PinEntryPatternFragment) {
+          fragment.onNextButtonPressed()
           binding.pinNextButton.text = "Submit"
         }
       }
@@ -112,6 +117,7 @@ class PinEntryDialog : CanaryDialog(), Callback {
   }
 
   override fun onTypeText() {
+    Timber.d("Type Text")
     if (pushIfNotPresent(PinEntryTextFragment(), PinEntryTextFragment.TAG)) {
       binding.pinNextButtonLayout.visibility = View.GONE
     }

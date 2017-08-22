@@ -22,18 +22,12 @@ import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 
-class LockEntryPresenter @Inject internal constructor(
-    private val bus: EventBus<LockPassEvent>,
-    private val packageName: String,
-    private val activityName: String,
-    private val realName: String,
-    private val actionQueue: ActionQueue,
-    private val interactor: LockEntryInteractor,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
+class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<LockPassEvent>,
+    private val packageName: String, private val activityName: String, private val realName: String,
+    private val actionQueue: ActionQueue, private val interactor: LockEntryInteractor,
+    computationScheduler: Scheduler, ioScheduler: Scheduler,
+    mainScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
     ioScheduler, mainScheduler) {
 
   fun passLockScreen() {

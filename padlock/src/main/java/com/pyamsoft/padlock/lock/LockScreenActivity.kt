@@ -269,10 +269,12 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
     val ignoreTime = getIgnoreTimeFromSelectedIndex()
     outState.putLong("IGNORE", ignoreTime)
 
-    val exclude: Boolean = assign@ try {
-      return@assign menuExclude.isChecked
+    val exclude: Boolean = try {
+      // Assigned to exclude
+      menuExclude.isChecked
     } catch (e: NullPointerException) {
-      return@assign false
+      // Assigned to exclude
+      false
     }
 
     outState.putBoolean("EXCLUDE", exclude)
