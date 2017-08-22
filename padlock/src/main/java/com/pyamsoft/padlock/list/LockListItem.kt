@@ -20,6 +20,8 @@ import android.databinding.DataBindingUtil
 import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import android.widget.CompoundButton
+import android.widget.CompoundButton.OnCheckedChangeListener
 import com.mikepenz.fastadapter.items.GenericAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
@@ -61,21 +63,31 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
         .into(holder.binding.lockListIcon)
     loaderMap.put("locked", appIcon)
 
-    holder.binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
-      buttonView.isChecked = !isChecked
+    holder.binding.lockListToggle.setOnCheckedChangeListener(object : OnCheckedChangeListener {
+      override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
+        buttonView.isChecked = !isChecked
 
-      holder.presenter.modifyDatabaseEntry(isChecked, model.packageName(), null,
-          model.system(), onDatabaseEntryCreated = {
-        updateModel(true)
-        buttonView.isChecked = true
-      }, onDatabaseEntryDeleted = {
-        updateModel(false)
-        buttonView.isChecked = false
-      }, onDatabaseEntryError = {
-        DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
-      })
-    }
+        // Unset the listener here so that it is not double bound
+        buttonView.setOnCheckedChangeListener(null)
 
+        Timber.d("Modify the database entry: ${model.packageName()} $isChecked")
+        holder.presenter.modifyDatabaseEntry(isChecked, model.packageName(), null,
+            model.system(), onDatabaseEntryCreated = {
+          Timber.d("Entry created for ${model.packageName()}")
+          updateModel(true)
+          buttonView.isChecked = true
+        }, onDatabaseEntryDeleted = {
+          Timber.d("Entry deleted for ${model.packageName()}")
+          updateModel(false)
+          buttonView.isChecked = false
+        }, onComplete = {
+          // Rebind the listener again once we complete
+          buttonView.setOnCheckedChangeListener(this)
+        }, onDatabaseEntryError = {
+          DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
+        })
+      }
+    })
     holder.presenter.start(Unit)
   }
 
