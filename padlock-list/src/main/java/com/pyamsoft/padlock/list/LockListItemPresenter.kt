@@ -37,7 +37,7 @@ class LockListItemPresenter @Inject internal constructor(
 
   fun modifyDatabaseEntry(isChecked: Boolean, packageName: String, code: String?,
       system: Boolean, onDatabaseEntryCreated: () -> Unit, onDatabaseEntryDeleted: () -> Unit,
-      onDatabaseEntryError: (Throwable) -> Unit) {
+      onComplete: () -> Unit, onDatabaseEntryError: (Throwable) -> Unit) {
     // No whitelisting for modifications from the List
     val oldState: LockState
     val newState: LockState
@@ -54,6 +54,7 @@ class LockListItemPresenter @Inject internal constructor(
           PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
+          .doAfterTerminate { onComplete() }
           .subscribe({
             when (it) {
               LockState.DEFAULT -> onDatabaseEntryDeleted()
