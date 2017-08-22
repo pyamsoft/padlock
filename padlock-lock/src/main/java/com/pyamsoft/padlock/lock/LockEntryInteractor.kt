@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.lock
 
 import android.support.annotation.CheckResult
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
 
 internal interface LockEntryInteractor {
@@ -27,7 +28,7 @@ internal interface LockEntryInteractor {
       currentAttempt: String): Single<Boolean>
 
   @CheckResult
-  fun lockEntryOnFail(packageName: String, activityName: String): Completable
+  fun lockEntryOnFail(packageName: String, activityName: String): Maybe<Long>
 
   @CheckResult
   fun getHint(): Single<String>

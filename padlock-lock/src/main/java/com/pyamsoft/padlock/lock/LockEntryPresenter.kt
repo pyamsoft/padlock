@@ -49,8 +49,10 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
-            Timber.w("Lock em up")
-            onLocked()
+            if (System.currentTimeMillis() < it) {
+              Timber.w("Lock em up")
+              onLocked()
+            }
           }, {
             Timber.e(it, "lockEntry onError")
             onLockedError(it)
