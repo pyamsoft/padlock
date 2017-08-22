@@ -34,8 +34,7 @@ internal class FilterListDelegate {
    *
    * Must have an already inflater menu item to work
    */
-  fun onPrepareOptionsMenu(menu: Menu,
-      listAdapter: FastItemAdapter<out FilterableItem<*, *>>) {
+  fun onPrepareOptionsMenu(menu: Menu, listAdapter: FastItemAdapter<out FilterableItem<*, *>>) {
     searchItem = menu.findItem(R.id.menu_search)
     val obj = searchItem
     if (obj != null) {
@@ -47,10 +46,10 @@ internal class FilterListDelegate {
   /**
    * Sets the list adapter to use a filter predicate
    */
-  fun onViewCreated(listAdapter: FastItemAdapter<out FilterableItem<*, *>>) {
+  fun <T : FilterableItem<*, *>> onViewCreated(listAdapter: FastItemAdapter<T>) {
     listAdapter.itemFilter.withFilterPredicate { item, query ->
       val queryString = query.toString().toLowerCase().trim { it <= ' ' }
-      item.filterAgainst(queryString)
+      return@withFilterPredicate item.filterAgainst(queryString)
     }
   }
 
