@@ -29,8 +29,8 @@
       android:allowBackup="true"
       android:fullBackupContent="@xml/backup_config"
       android:icon="@mipmap/ic_launcher"
-      android:roundIcon="@mipmap/ic_launcher"
       android:label="@string/app_name"
+      android:roundIcon="@mipmap/ic_launcher"
       android:theme="@style/Theme.PadLock.Light">
 
     <!-- Support super wide screen -->
@@ -85,12 +85,6 @@
     <service
         android:name=".service.RecheckService"
         android:exported="false"/>
-
-    <provider
-        android:name=".PadLockSingleInitProvider"
-        android:authorities="com.pyamsoft.padlock.PadLockSingleInitProvider"
-        android:exported="false"
-        android:syncable="false"/>
 
   </application>
 
