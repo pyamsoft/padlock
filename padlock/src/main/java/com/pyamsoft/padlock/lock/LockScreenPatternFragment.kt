@@ -117,6 +117,11 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
     binding.patternLock.clearPattern()
   }
 
+  override fun onStop() {
+    super.onStop()
+    presenter.stop()
+  }
+
   companion object {
 
     internal val TAG = "LockScreenPatternFragment"
