@@ -116,30 +116,33 @@ import javax.inject.Singleton
     }
   }
 
-  override fun lockEntryOnFail(packageName: String, activityName: String): Completable {
+  override fun lockEntryOnFail(packageName: String, activityName: String): Maybe<Long> {
     return Single.fromCallable { ++failCount }
         .filter { it > DEFAULT_MAX_FAIL_COUNT }
         .flatMap { getTimeoutPeriodMinutesInMillis() }
         .filter { it > 0 }
-        .flatMapCompletable { lockEntry(it, packageName, activityName) }
+        .flatMap { lockEntry(it, packageName, activityName) }
   }
 
   @CheckResult
   private fun getTimeoutPeriodMinutesInMillis(): Maybe<Long> {
     return Maybe.fromCallable { preferences.getTimeoutPeriod() }.map {
       TimeUnit.MINUTES.toMillis(it)
+    }.doOnSuccess {
+      Timber.d("Current timeout period: $it")
     }
   }
 
   @CheckResult private fun lockEntry(
-      timeOutMinutesInMillis: Long, packageName: String, activityName: String): Completable {
-    return Completable.defer {
+      timeOutMinutesInMillis: Long, packageName: String, activityName: String): Maybe<Long> {
+    return Maybe.defer {
       val currentTime = System.currentTimeMillis()
       val newLockUntilTime = currentTime + timeOutMinutesInMillis
       Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
           timeOutMinutesInMillis)
 
       return@defer dbUpdate.updateLockTime(newLockUntilTime, packageName, activityName)
+          .andThen(Maybe.just(newLockUntilTime))
     }
   }
 
