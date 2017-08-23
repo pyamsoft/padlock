@@ -20,6 +20,7 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
+import android.view.MenuItem
 import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
@@ -42,9 +43,8 @@ class MainActivity : TamperActivity(), MainPresenter.Callback {
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
-    Injector.with(this) { padLockComponent ->
-      padLockComponent.inject(this)
-      Unit
+    Injector.with(this) {
+      it.inject(this)
     }
 
     setAppBarState()
@@ -119,6 +119,18 @@ class MainActivity : TamperActivity(), MainPresenter.Callback {
     } else {
       super.onBackPressed()
     }
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    val handled: Boolean
+    when (item.itemId) {
+      android.R.id.home -> {
+        handled = true
+        onBackPressed()
+      }
+      else -> handled = false
+    }
+    return handled
   }
 
   override fun onPostResume() {

@@ -67,24 +67,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
   private var lockedCode: String? = null
   internal lateinit var menuExclude: MenuItem
 
-  private val ignoreCallback: (Long) -> Unit = {
-    when (it) {
-      ignoreTimes[0] -> menuIgnoreNone.isChecked = true
-      ignoreTimes[1] -> menuIgnoreOne.isChecked = true
-      ignoreTimes[2] -> menuIgnoreFive.isChecked = true
-      ignoreTimes[3] -> menuIgnoreTen.isChecked = true
-      ignoreTimes[4] -> menuIgnoreFifteen.isChecked = true
-      ignoreTimes[5] -> menuIgnoreTwenty.isChecked = true
-      ignoreTimes[6] -> menuIgnoreThirty.isChecked = true
-      ignoreTimes[7] -> menuIgnoreFourtyFive.isChecked = true
-      ignoreTimes[8] -> menuIgnoreSixty.isChecked = true
-      else -> {
-        Timber.e("No valid ignore time, initialize to None")
-        menuIgnoreNone.isChecked = true
-      }
-    }
-  }
-
   init {
     home.addCategory(Intent.CATEGORY_HOME)
     home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -129,11 +111,10 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
     getValuesFromBundle()
     setupActionBar()
 
-    Injector.with(this) { padLockComponent ->
-      padLockComponent.plusLockScreenComponent(
+    Injector.with(this) {
+      it.plusLockScreenComponent(
           LockScreenModule(lockedPackageName, lockedActivityName),
           LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
-      Unit
     }
   }
 
@@ -171,17 +152,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
         .into(binding.lockImage)
 
     invalidateOptionsMenu()
-  }
-
-  override fun onInitializeIgnoreTime(time: Long) {
-    val apply: Long
-    if (ignorePeriod == -1L) {
-      apply = time
-      Timber.d("No previous selection, load ignore time from preference")
-    } else {
-      apply = ignorePeriod
-    }
-    ignoreCallback.invoke(apply)
   }
 
   override fun setDisplayName(name: String) {
@@ -299,6 +269,33 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
 
   override fun onPrepareOptionsMenu(menu: Menu): Boolean {
     menuExclude.isChecked = excludeEntry
+    presenter.createWithDefaultIgnoreTime {
+      val apply: Long
+      if (ignorePeriod == -1L) {
+        apply = it
+        Timber.d("No previous selection, load ignore time from preference")
+      } else {
+        Timber.d("ignore period: $ignorePeriod")
+        apply = ignorePeriod
+      }
+
+      when (apply) {
+        ignoreTimes[0] -> menuIgnoreNone.isChecked = true
+        ignoreTimes[1] -> menuIgnoreOne.isChecked = true
+        ignoreTimes[2] -> menuIgnoreFive.isChecked = true
+        ignoreTimes[3] -> menuIgnoreTen.isChecked = true
+        ignoreTimes[4] -> menuIgnoreFifteen.isChecked = true
+        ignoreTimes[5] -> menuIgnoreTwenty.isChecked = true
+        ignoreTimes[6] -> menuIgnoreThirty.isChecked = true
+        ignoreTimes[7] -> menuIgnoreFourtyFive.isChecked = true
+        ignoreTimes[8] -> menuIgnoreSixty.isChecked = true
+        else -> {
+          Timber.e("No valid ignore time, initialize to None")
+          menuIgnoreNone.isChecked = true
+        }
+      }
+    }
+
     return super.onPrepareOptionsMenu(menu)
   }
 

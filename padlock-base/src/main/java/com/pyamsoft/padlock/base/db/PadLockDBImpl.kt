@@ -179,6 +179,7 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context,
       Timber.i("DB: DELETE ALL")
       val db = openDatabase()
       db.execute(PadLockEntryModel.DELETE_ALL)
+      db.close()
     }.andThen(Completable.fromAction { openHelper.deleteDatabase() })
         .andThen(Completable.fromAction { briteDatabase = null })
         .andThen(Completable.fromAction { PadLockEntry.reset() })

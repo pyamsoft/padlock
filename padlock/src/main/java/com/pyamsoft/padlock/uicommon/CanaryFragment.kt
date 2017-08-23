@@ -17,9 +17,15 @@
 package com.pyamsoft.padlock.uicommon
 
 import com.pyamsoft.padlock.PadLock
+import com.pyamsoft.padlock.R
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarFragment
 
 abstract class CanaryFragment : ActionBarFragment() {
+
+  override fun onResume() {
+    super.onResume()
+    setActionBarTitle(R.string.app_name)
+  }
 
   override fun onDestroy() {
     super.onDestroy()
