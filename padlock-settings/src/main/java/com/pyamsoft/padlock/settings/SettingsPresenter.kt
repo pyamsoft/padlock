@@ -30,7 +30,7 @@ import javax.inject.Named
 
 class SettingsPresenter @Inject internal constructor(
     private val interactor: SettingsInteractor,
-    private val bus: ConfirmEventBus,
+    private val bus: EventBus<ConfirmEvent>,
     private val serviceFinishBus: EventBus<ServiceFinishEvent>,
     private val receiver: ApplicationInstallReceiver,
     @Named("computation") computationScheduler: Scheduler,

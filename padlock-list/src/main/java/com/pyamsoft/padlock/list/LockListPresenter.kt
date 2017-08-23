@@ -43,7 +43,6 @@ class LockListPresenter @Inject internal constructor(
     registerOnBus(bound::onMasterPinCreateSuccess, bound::onMasterPinCreateFailure,
         bound::onMasterPinClearSuccess, bound::onMasterPinClearFailure)
     setFABStateFromPreference(bound::onSetFABStateEnabled, bound::onSetFABStateDisabled)
-    setSystemVisibilityFromPreference(bound::onSetSystemVisible, bound::onSetSystemInvisible)
     populateList(false, bound::onListPopulateBegin, bound::onEntryAddedToList,
         bound::onListPopulated, bound::onListPopulateError)
   }
@@ -94,28 +93,20 @@ class LockListPresenter @Inject internal constructor(
     }
   }
 
-  private fun setSystemVisibilityFromPreference(onSetSystemVisible: () -> Unit,
-      onSetSystemInvisible: () -> Unit) {
+  fun setSystemVisibilityFromPreference(onSetSystemVisibility: (Boolean) -> Unit) {
     disposeOnStop {
       lockListInteractor.isSystemVisible()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
-            if (it) {
-              onSetSystemVisible()
-            } else {
-              onSetSystemInvisible()
-            }
+            setSystemVisibility(it)
+            onSetSystemVisibility(it)
           }, { Timber.e(it, "onError") })
     }
   }
 
-  fun setSystemVisible() {
-    lockListInteractor.setSystemVisible(true)
-  }
-
-  fun setSystemInvisible() {
-    lockListInteractor.setSystemVisible(false)
+  fun setSystemVisibility(visible: Boolean) {
+    lockListInteractor.setSystemVisible(visible)
   }
 
   fun showOnBoarding(onOnboardingComplete: () -> Unit, onShowOnboarding: () -> Unit) {
@@ -164,9 +155,6 @@ class LockListPresenter @Inject internal constructor(
 
     fun onSetFABStateEnabled()
     fun onSetFABStateDisabled()
-
-    fun onSetSystemVisible()
-    fun onSetSystemInvisible()
 
   }
 }
