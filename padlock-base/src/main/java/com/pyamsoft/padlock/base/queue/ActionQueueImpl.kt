@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.base.queue
 
 import com.pyamsoft.pydroid.helper.clear
-import io.reactivex.Observable
 import io.reactivex.Scheduler
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import timber.log.Timber
@@ -62,7 +62,7 @@ import javax.inject.Singleton
   private fun restartInterval() {
     disposeCurrentInterval()
 
-    intervalDisposable = Observable.interval(1L, MINUTES)
+    intervalDisposable = Single.timer(1L, MINUTES)
         .subscribeOn(ioScheduler)
         .observeOn(mainThreadScheduler)
         .subscribe({

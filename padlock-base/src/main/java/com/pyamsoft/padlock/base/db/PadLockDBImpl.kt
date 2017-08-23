@@ -31,20 +31,31 @@ import timber.log.Timber
 import javax.inject.Inject
 
 internal class PadLockDBImpl @Inject internal constructor(context: Context,
-    scheduler: Scheduler) : PadLockDBInsert, PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
+    private val scheduler: Scheduler) : PadLockDBInsert, PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
 
-  private val briteDatabase: BriteDatabase
+  private var briteDatabase: BriteDatabase? = null
   private val openHelper: PadLockOpenHelper
 
   init {
     openHelper = PadLockOpenHelper(context)
-    briteDatabase = SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler)
+  }
+
+  @CheckResult private fun openDatabase(): BriteDatabase {
+    if (briteDatabase == null) {
+      briteDatabase = SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler)
+    }
+
+    val db = briteDatabase
+    if (db == null) {
+      throw IllegalStateException("Cannot open BriteDatabase, database is NULL")
+    } else {
+      return db
+    }
   }
 
   @CheckResult private fun deleteWithPackageActivityNameUnguarded(packageName: String,
-      activityName: String): Int {
-    return PadLockEntry.deletePackageActivity(openHelper).executeProgram(packageName, activityName)
-  }
+      activityName: String): Int =
+      PadLockEntry.deletePackageActivity(openHelper).executeProgram(packageName, activityName)
 
   @CheckResult override fun insert(packageName: String, activityName: String,
       lockCode: String?, lockUntilTime: Long, ignoreUntilTime: Long, isSystem: Boolean,
@@ -118,7 +129,8 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context,
     return Single.defer {
       Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT")
       val statement = PadLockEntry.withPackageActivityNameDefault(packageName, activityName)
-      return@defer briteDatabase.createQuery(statement.tables, statement.statement, *statement.args)
+      return@defer openDatabase().createQuery(statement.tables, statement.statement,
+          *statement.args)
           .mapToOne { PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER.map(it) }
           .first(PadLockEntry.EMPTY)
     }
@@ -129,7 +141,8 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context,
     return Single.defer {
       Timber.i("DB: QUERY PACKAGE")
       val statement = PadLockEntry.withPackageName(packageName)
-      return@defer briteDatabase.createQuery(statement.tables, statement.statement, *statement.args)
+      return@defer openDatabase().createQuery(statement.tables, statement.statement,
+          *statement.args)
           .mapToList { PadLockEntry.WITH_PACKAGE_NAME_MAPPER.map(it) }
           .first(emptyList())
     }
@@ -139,7 +152,8 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context,
     return Single.defer {
       Timber.i("DB: QUERY ALL")
       val statement = PadLockEntry.queryAll()
-      return@defer briteDatabase.createQuery(statement.tables, statement.statement, *statement.args)
+      return@defer openDatabase().createQuery(statement.tables, statement.statement,
+          *statement.args)
           .mapToList { PadLockEntry.ALL_ENTRIES_MAPPER.map(it) }
           .first(emptyList())
     }
@@ -163,9 +177,11 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context,
   @CheckResult override fun deleteAll(): Completable {
     return Completable.fromAction {
       Timber.i("DB: DELETE ALL")
-      briteDatabase.execute(PadLockEntryModel.DELETE_ALL)
-      briteDatabase.close()
+      val db = openDatabase()
+      db.execute(PadLockEntryModel.DELETE_ALL)
     }.andThen(Completable.fromAction { openHelper.deleteDatabase() })
+        .andThen(Completable.fromAction { briteDatabase = null })
+        .andThen(Completable.fromAction { PadLockEntry.reset() })
   }
 
   private class PadLockOpenHelper internal constructor(context: Context) : SQLiteOpenHelper(

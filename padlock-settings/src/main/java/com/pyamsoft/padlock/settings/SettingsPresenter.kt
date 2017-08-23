@@ -45,12 +45,11 @@ class SettingsPresenter @Inject internal constructor(
 
   private fun registerOnBus(onClearDatabase: () -> Unit, onClearAll: () -> Unit) {
     disposeOnStop {
-      bus.listen().map {
-        when (it) {
+      bus.listen().flatMapSingle { type ->
+        when (type) {
           DATABASE -> interactor.clearDatabase()
           ALL -> interactor.clearAll()
-        }
-        return@map it
+        }.map { type }
       }.subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {

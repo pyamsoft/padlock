@@ -164,7 +164,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback {
     when (item.itemId) {
       R.id.menu_is_system -> if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing) {
         Timber.d("List is not refreshing. Allow change of system preference")
-        presenter.setSystemVisibility(item.isChecked)
+        presenter.setSystemVisibility(!item.isChecked)
         presenter.populateList(true, this::onListPopulateBegin, this::onEntryAddedToList,
             this::onListPopulated, this::onListPopulateError)
       }
