@@ -99,7 +99,6 @@ class LockListPresenter @Inject internal constructor(
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
-            setSystemVisibility(it)
             onSetSystemVisibility(it)
           }, { Timber.e(it, "onError") })
     }

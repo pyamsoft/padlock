@@ -44,6 +44,7 @@ import javax.inject.Singleton
   }
 
   override fun clearDatabase(): Single<Boolean> {
+    Timber.d("clear database")
     return deleteDb.deleteAll()
         .andThen(Completable.fromAction {
           lockListInteractor.clearCache()

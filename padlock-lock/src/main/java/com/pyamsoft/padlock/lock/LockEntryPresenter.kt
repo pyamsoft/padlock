@@ -21,6 +21,7 @@ import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<LockPassEvent>,
@@ -40,23 +41,6 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({ setDisplayHint(it) }, { Timber.e(it, "onError displayLockedHint") })
-    }
-  }
-
-  fun lockEntry(onLocked: () -> Unit, onLockedError: (Throwable) -> Unit) {
-    actionQueue.queue {
-      interactor.lockEntryOnFail(packageName, activityName)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            if (System.currentTimeMillis() < it) {
-              Timber.w("Lock em up")
-              onLocked()
-            }
-          }, {
-            Timber.e(it, "lockEntry onError")
-            onLockedError(it)
-          })
     }
   }
 
@@ -81,19 +65,40 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
     }
   }
 
+  fun lockEntry(onLocked: () -> Unit, onLockedError: (Throwable) -> Unit) {
+    actionQueue.queue {
+      val weakOnLocked: WeakReference<() -> Unit> = WeakReference(onLocked)
+      val weakOnLockedError: WeakReference<(Throwable) -> Unit> = WeakReference(onLockedError)
+      interactor.lockEntryOnFail(packageName, activityName)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            if (System.currentTimeMillis() < it) {
+              Timber.w("Lock em up")
+              weakOnLocked.get()?.invoke()
+            }
+          }, {
+            Timber.e(it, "lockEntry onError")
+            weakOnLockedError.get()?.invoke(it)
+          })
+    }
+  }
+
   fun postUnlock(lockCode: String?, isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long,
       onPostUnlocked: () -> Unit, onUnlockError: (Throwable) -> Unit) {
     actionQueue.queue {
+      val weakOnPostUnlocked: WeakReference<() -> Unit> = WeakReference(onPostUnlocked)
+      val weakOnUnlockError: WeakReference<(Throwable) -> Unit> = WeakReference(onUnlockError)
       interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
           shouldExclude, ignoreTime)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
             Timber.d("onPostUnlock complete")
-            onPostUnlocked()
+            weakOnPostUnlocked.get()?.invoke()
           }, {
             Timber.e(it, "Error postunlock")
-            onUnlockError(it)
+            weakOnUnlockError.get()?.invoke(it)
           })
     }
   }

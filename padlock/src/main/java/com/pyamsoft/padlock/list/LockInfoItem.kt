@@ -65,7 +65,7 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
     }
     holder.binding.lockInfoActivity.text = activityName
 
-    holder.binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener { radioGroup, i ->
+    holder.binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener { radioGroup, _ ->
       val id = radioGroup.checkedRadioButtonId
       Timber.d("Checked radio id: %d", id)
       if (id == 0) {
