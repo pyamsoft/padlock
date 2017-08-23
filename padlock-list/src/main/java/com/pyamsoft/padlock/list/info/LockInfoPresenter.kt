@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Deleted
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Error
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Whitelisted
 import com.pyamsoft.padlock.list.info.LockInfoPresenter.Callback
-import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.bus.EventBus
@@ -33,7 +32,7 @@ import javax.inject.Inject
 
 class LockInfoPresenter @Inject internal constructor(private val actionQueue: ActionQueue,
     private val bus: EventBus<LockInfoEvent>,
-    private val modifyInteractor: LockStateModifyInteractor, private val packageName: String,
+    private val modifyInteractor: LockInfoItemInteractor, private val packageName: String,
     private val lockInfoInteractor: LockInfoInteractor, compScheduler: Scheduler,
     ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<Callback>(compScheduler,
     ioScheduler, mainScheduler) {
