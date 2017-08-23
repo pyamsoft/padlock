@@ -86,8 +86,6 @@ class LockScreenPresenter @Inject internal constructor(
 
   interface Callback : LockScreenInputPresenter.Callback {
 
-    fun onInitializeIgnoreTime(time: Long)
-
     fun setDisplayName(name: String)
 
     fun onCloseOldReceived()
