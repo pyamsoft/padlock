@@ -28,8 +28,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
-import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
@@ -49,7 +49,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback {
   @field:Inject internal lateinit var presenter: LockListPresenter
   private lateinit var fastItemAdapter: FastItemAdapter<LockListItem>
   private lateinit var binding: FragmentLockListBinding
-  private lateinit var displaySystemItem: MenuItem
   private lateinit var filterListDelegate: FilterListDelegate
   private var fabIconTask = LoaderHelper.empty()
   private var dividerDecoration: DividerItemDecoration? = null
@@ -141,11 +140,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback {
   }
 
   private fun setupDisplaySystemVisibleItem(menu: Menu) {
-    displaySystemItem = menu.findItem(R.id.menu_is_system)
-  }
-
-  private fun setSystemVisible(visible: Boolean) {
-    displaySystemItem.isChecked = visible
+    val displaySystemItem: MenuItem = menu.findItem(R.id.menu_is_system)
+    presenter.setSystemVisibilityFromPreference { displaySystemItem.isChecked = it }
   }
 
   override fun onDestroyView() {
@@ -168,12 +164,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback {
     when (item.itemId) {
       R.id.menu_is_system -> if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing) {
         Timber.d("List is not refreshing. Allow change of system preference")
-        if (item.isChecked) {
-          presenter.setSystemInvisible()
-        } else {
-          presenter.setSystemVisible()
-        }
-
+        presenter.setSystemVisibility(item.isChecked)
         presenter.populateList(true, this::onListPopulateBegin, this::onEntryAddedToList,
             this::onListPopulated, this::onListPopulateError)
       }
@@ -279,14 +270,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback {
     fabIconTask = LoaderHelper.unload(fabIconTask)
     fabIconTask = ImageLoader.fromResource(activity, R.drawable.ic_lock_open_24dp)
         .into(binding.applistFab)
-  }
-
-  override fun onSetSystemVisible() {
-    setSystemVisible(true)
-  }
-
-  override fun onSetSystemInvisible() {
-    setSystemVisible(false)
   }
 
   companion object {
