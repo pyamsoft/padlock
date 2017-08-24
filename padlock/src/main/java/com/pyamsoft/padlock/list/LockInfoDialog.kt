@@ -136,11 +136,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback {
     binding.unbind()
   }
 
-  override fun onDestroy() {
-    super.onDestroy()
-    presenter.destroy()
-  }
-
   override fun onStart() {
     super.onStart()
 
