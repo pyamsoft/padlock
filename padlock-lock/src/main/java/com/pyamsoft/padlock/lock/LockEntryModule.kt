@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.lock
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.queue.ActionQueue
 import com.pyamsoft.pydroid.bus.EventBus
 import dagger.Module
 import dagger.Provides
@@ -29,12 +28,11 @@ class LockEntryModule(private val packageName: String, private val activityName:
     private val realName: String) {
 
   @Provides
-  @CheckResult internal fun providePresenter(actionQueue: ActionQueue,
-      bus: EventBus<LockPassEvent>,
-      interactor: LockEntryInteractor, @Named("computation") compScheduler: Scheduler,
-      @Named("main") mainScheduler: Scheduler,
-      @Named("io") ioScheduler: Scheduler): LockEntryPresenter {
-    return LockEntryPresenter(bus, packageName, activityName, realName, actionQueue, interactor,
+  @CheckResult internal fun providePresenter(bus: EventBus<LockPassEvent>,
+      interactor: LockEntryInteractor, @Named("computation") compScheduler: Scheduler, @Named(
+          "main") mainScheduler: Scheduler, @Named(
+          "io") ioScheduler: Scheduler): LockEntryPresenter {
+    return LockEntryPresenter(bus, packageName, activityName, realName, interactor,
         compScheduler, ioScheduler, mainScheduler)
   }
 }

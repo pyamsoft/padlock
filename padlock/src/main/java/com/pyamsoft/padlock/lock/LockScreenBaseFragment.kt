@@ -26,8 +26,9 @@ import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_IS_SYSTEM
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_PACKAGE_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_REAL_NAME
+import com.pyamsoft.padlock.uicommon.CanaryFragment
 
-abstract class LockScreenBaseFragment protected constructor() : Fragment() {
+abstract class LockScreenBaseFragment protected constructor() : CanaryFragment() {
 
   protected lateinit var lockedActivityName: String
   protected lateinit var lockedPackageName: String

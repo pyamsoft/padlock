@@ -17,19 +17,16 @@
 package com.pyamsoft.padlock.list
 
 import com.pyamsoft.padlock.base.db.PadLockEntry
-import com.pyamsoft.padlock.base.queue.ActionQueue
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Named
 
 class LockListItemPresenter @Inject internal constructor(
-    private val actionQueue: ActionQueue,
     private val interactor: LockListItemInteractor,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
@@ -39,7 +36,7 @@ class LockListItemPresenter @Inject internal constructor(
   fun modifyDatabaseEntry(isChecked: Boolean, packageName: String, code: String?,
       system: Boolean, onDatabaseEntryCreated: () -> Unit, onDatabaseEntryDeleted: () -> Unit,
       onComplete: () -> Unit, onDatabaseEntryError: (Throwable) -> Unit) {
-    actionQueue.queue {
+    disposeOnStop {
       // No whitelisting for modifications from the List
       val oldState: LockState
       val newState: LockState
@@ -51,27 +48,20 @@ class LockListItemPresenter @Inject internal constructor(
         newState = DEFAULT
       }
 
-      val weakOnDatabaseEntryCreated: WeakReference<() -> Unit> = WeakReference(
-          onDatabaseEntryCreated)
-      val weakOnDatabaseEntryDeleted: WeakReference<() -> Unit> = WeakReference(
-          onDatabaseEntryDeleted)
-      val weakOnComplete: WeakReference<() -> Unit> = WeakReference(onComplete)
-      val weakOnDatabaseEntryError: WeakReference<(Throwable) -> Unit> = WeakReference(
-          onDatabaseEntryError)
       interactor.modifySingleDatabaseEntry(oldState, newState, packageName,
           PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .doAfterTerminate { weakOnComplete.get()?.invoke() }
+          .doAfterTerminate { onComplete() }
           .subscribe({
             when (it) {
-              LockState.DEFAULT -> weakOnDatabaseEntryDeleted.get()?.invoke()
-              LockState.LOCKED -> weakOnDatabaseEntryCreated.get()?.invoke()
+              LockState.DEFAULT -> onDatabaseEntryDeleted()
+              LockState.LOCKED -> onDatabaseEntryCreated()
               else -> throw RuntimeException("Whitelist/None results are not handled")
             }
           }, {
             Timber.e(it, "onError modifyDatabaseEntry")
-            weakOnDatabaseEntryError.get()?.invoke(it)
+            onDatabaseEntryError(it)
           })
     }
   }
