@@ -32,6 +32,7 @@ import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
+import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.util.DrawableUtil
 import timber.log.Timber
 import javax.inject.Inject
@@ -42,6 +43,8 @@ class PinEntryDialog : CanaryDialog(), Callback {
   private lateinit var binding: DialogPinEntryBinding
   private lateinit var packageName: String
   private var appIcon = LoaderHelper.empty()
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -90,6 +93,8 @@ class PinEntryDialog : CanaryDialog(), Callback {
 
     // Start hidden
     binding.pinNextButtonLayout.visibility = View.GONE
+
+    presenter.create(this)
   }
 
   override fun onStart() {
@@ -97,7 +102,7 @@ class PinEntryDialog : CanaryDialog(), Callback {
     appIcon = LoaderHelper.unload(appIcon)
     appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(activity, packageName)).into(
         binding.pinImage)
-    presenter.start(this)
+    presenter.start(Unit)
   }
 
   override fun onTypePattern() {
@@ -125,7 +130,6 @@ class PinEntryDialog : CanaryDialog(), Callback {
 
   override fun onStop() {
     super.onStop()
-    presenter.stop()
     appIcon = LoaderHelper.unload(appIcon)
   }
 

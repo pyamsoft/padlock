@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding
 import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
 import com.pyamsoft.padlock.uicommon.LockCellUtils
+import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import timber.log.Timber
 import java.util.ArrayList
@@ -41,6 +42,8 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
   private var patternText = ""
   private var listener: PatternLockViewListener? = null
   private var repeatPattern = false
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -120,6 +123,8 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
 
     binding.patternLock.isTactileFeedbackEnabled = false
     binding.patternLock.addPatternLockListener(listener)
+
+    presenter.create(this)
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -134,7 +139,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
     // Pattern gets visually screwed up in multiwindow mode, clear it
     binding.patternLock.clearPattern()
 
-    presenter.start(this)
+    presenter.start(Unit)
   }
 
   override fun onMasterPinMissing() {
@@ -175,11 +180,6 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
   fun onNextButtonPressed() {
     Timber.d("Next button pressed, store pattern for re-entry")
     nextButtonOnClickRunnable()
-  }
-
-  override fun onStop() {
-    super.onStop()
-    presenter.stop()
   }
 
   private fun submitPin(repeatText: String) {

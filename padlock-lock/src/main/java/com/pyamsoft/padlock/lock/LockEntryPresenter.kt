@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.lock
 
+import com.pyamsoft.padlock.lock.LockEntryPresenter.Callback
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -26,20 +27,26 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
     private val packageName: String, private val activityName: String, private val realName: String,
     private val interactor: LockEntryInteractor,
     computationScheduler: Scheduler, ioScheduler: Scheduler,
-    mainScheduler: Scheduler) : SchedulerPresenter<Unit, Unit>(computationScheduler,
+    mainScheduler: Scheduler) : SchedulerPresenter<Unit, Callback>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  fun passLockScreen() {
-    bus.publish(LockPassEvent(packageName, activityName))
+  override fun onStart(bound: Callback) {
+    super.onStart(bound)
+    displayLockedHint(bound::onDisplayHint)
   }
 
-  fun displayLockedHint(setDisplayHint: (String) -> Unit) {
+  private fun displayLockedHint(setDisplayHint: (String) -> Unit) {
     disposeOnStop {
       interactor.getHint()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({ setDisplayHint(it) }, { Timber.e(it, "onError displayLockedHint") })
     }
+  }
+
+
+  fun passLockScreen() {
+    bus.publish(LockPassEvent(packageName, activityName))
   }
 
   fun submit(lockCode: String?, currentAttempt: String,
@@ -95,5 +102,10 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
             onUnlockError(it)
           })
     }
+  }
+
+  interface Callback {
+
+    fun onDisplayHint(hint: String)
   }
 }
