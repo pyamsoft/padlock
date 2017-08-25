@@ -54,7 +54,7 @@ import javax.inject.Singleton
   @CheckResult private fun fetchFreshData(): Single<List<String>> {
     return getAllEntries().zipWith(getActiveApplications(),
         BiFunction { allEntries, packageNames ->
-          val mutableAllEntries: MutableList<PadLockEntry.AllEntries> = ArrayList(allEntries)
+          val mutableAllEntries = allEntries.toMutableList()
           if (mutableAllEntries.isEmpty()) {
             Timber.e("Database does not have any AppEntry items")
             return@BiFunction emptyList()
@@ -66,7 +66,7 @@ import javax.inject.Singleton
             foundLocations.clear()
 
             // Filter out the list to only the package names, add them to foundLocations
-            allEntries.filterTo(foundLocations) {
+            mutableAllEntries.filterTo(foundLocations) {
               // If an entry is found in the database remove it
               it.packageName() == packageName
             }
@@ -77,7 +77,7 @@ import javax.inject.Singleton
 
           // The remaining entries in the database are stale
           val stalePackageNames: MutableList<String> = ArrayList()
-          allEntries.mapTo(stalePackageNames) { it.packageName() }
+          mutableAllEntries.mapTo(stalePackageNames) { it.packageName() }
           return@BiFunction stalePackageNames
         })
   }

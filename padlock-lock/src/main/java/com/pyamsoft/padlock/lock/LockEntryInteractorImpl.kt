@@ -49,7 +49,7 @@ import javax.inject.Singleton
         "recheck") private val recheckServiceClass: Class<out IntentService>) : LockEntryInteractor {
 
   private val appContext = context.applicationContext
-  private var failCount: Int = 0
+  private var failCount: MutableMap<String, Int> = HashMap()
 
   override fun submitPin(packageName: String, activityName: String, lockCode: String?,
       currentAttempt: String): Single<Boolean> {
@@ -117,11 +117,13 @@ import javax.inject.Singleton
   }
 
   override fun lockEntryOnFail(packageName: String, activityName: String): Maybe<Long> {
-    return Single.fromCallable { ++failCount }
-        .filter { it > DEFAULT_MAX_FAIL_COUNT }
-        .flatMap { getTimeoutPeriodMinutesInMillis() }
-        .filter { it > 0 }
-        .flatMap { lockEntry(it, packageName, activityName) }
+    return Single.fromCallable {
+      val failId: String = getFailId(packageName, activityName)
+      val newFailCount: Int = failCount.getOrPut(failId, { 0 }) + 1
+      failCount[failId] = newFailCount
+      return@fromCallable newFailCount
+    }.filter { it > DEFAULT_MAX_FAIL_COUNT }.flatMap { getTimeoutPeriodMinutesInMillis() }
+        .filter { it > 0 }.flatMap { lockEntry(it, packageName, activityName) }
   }
 
   @CheckResult
@@ -156,6 +158,10 @@ import javax.inject.Singleton
     }
   }
 
+  override fun clearFailCount() {
+    failCount.clear()
+  }
+
   override fun postUnlock(packageName: String,
       activityName: String, realName: String, lockCode: String?,
       isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long): Completable {
@@ -177,8 +183,13 @@ import javax.inject.Singleton
       }
 
       return@defer ignoreObservable.andThen(recheckObservable).andThen(whitelistObservable)
-    }
+    }.andThen(Completable.fromAction {
+      failCount[getFailId(packageName, activityName)] = 0
+    })
   }
+
+  @CheckResult private fun getFailId(packageName: String, activityName: String): String =
+      "$packageName|$activityName"
 
   companion object {
     const val DEFAULT_MAX_FAIL_COUNT: Int = 2

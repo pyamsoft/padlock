@@ -28,19 +28,26 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module class SettingsModule {
+@Module
+class SettingsModule {
 
-  @Singleton @Provides @CheckResult internal fun provideConfirmBus(): EventBus<ConfirmEvent> =
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideConfirmBus(): EventBus<ConfirmEvent> =
       ConfirmEventBus()
 
-  @Singleton @Provides @CheckResult internal fun provideSettingsInteractor(
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideSettingsInteractor(
       deleteDb: PadLockDBDelete, masterPinPreference: MasterPinPreferences,
       clearPreference: ClearPreferences, installListenerPreferences: InstallListenerPreferences,
       @Named("cache_lock_list") lockListInteractor: Cache,
       @Named("cache_lock_info") lockInfoInteractor: Cache,
+      @Named("cache_lock_entry") lockEntryInteractor: Cache,
       @Named("cache_purge") purgeInteractor: Cache): SettingsInteractor {
     return SettingsInteractorImpl(deleteDb, masterPinPreference, clearPreference,
-        installListenerPreferences, lockListInteractor, lockInfoInteractor, purgeInteractor)
+        installListenerPreferences, lockListInteractor, lockInfoInteractor, lockEntryInteractor,
+        purgeInteractor)
   }
 }
 

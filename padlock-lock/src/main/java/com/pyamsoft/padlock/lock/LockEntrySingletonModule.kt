@@ -27,6 +27,7 @@ import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.lock.helper.LockHelper
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor
 import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.data.Cache
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -37,14 +38,27 @@ class LockEntrySingletonModule {
 
   @Singleton
   @Provides
-  @CheckResult internal fun provideInteractor(context: Context,
+  @CheckResult internal fun provideInteractorCache(context: Context,
       lockHelper: LockHelper, lockScreenPreferences: LockScreenPreferences,
       jobSchedulerCompat: JobSchedulerCompat, masterPinInteractor: MasterPinInteractor,
       dbInsert: PadLockDBInsert, dbUpdate: PadLockDBUpdate, dbQuery: PadLockDBQuery,
-      @Named("recheck") recheckServiceClass: Class<out IntentService>): LockEntryInteractor {
-    return LockEntryInteractorImpl(context, lockHelper, lockScreenPreferences,
-        jobSchedulerCompat, masterPinInteractor, dbInsert, dbUpdate, dbQuery, recheckServiceClass)
+      @Named(
+          "recheck") recheckServiceClass: Class<out IntentService>): LockEntryInteractorImplCache {
+    return LockEntryInteractorImplCache(
+        LockEntryInteractorImpl(context, lockHelper, lockScreenPreferences,
+            jobSchedulerCompat, masterPinInteractor, dbInsert, dbUpdate, dbQuery,
+            recheckServiceClass))
   }
+
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideInteractor(
+      cache: LockEntryInteractorImplCache): LockEntryInteractor = cache
+
+  @Singleton
+  @Provides
+  @Named("cache_lock_entry")
+  @CheckResult internal fun provideCache(cache: LockEntryInteractorImplCache): Cache = cache
 
   @Singleton
   @Provides internal fun provideLockPassBus(): EventBus<LockPassEvent> = LockPassBus()
