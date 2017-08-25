@@ -88,6 +88,8 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
         })
       }
     })
+
+    holder.presenter.create(Unit)
     holder.presenter.start(Unit)
   }
 
@@ -102,6 +104,7 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
       holder.binding.lockListIcon.setImageDrawable(null)
       holder.binding.lockListToggle.setOnCheckedChangeListener(null)
       holder.presenter.stop()
+      holder.presenter.destroy()
     }
 
     loaderMap.clear()

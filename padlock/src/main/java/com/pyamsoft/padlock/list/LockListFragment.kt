@@ -32,6 +32,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
+import com.pyamsoft.padlock.list.LockListPresenter.BusCallback
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.PadLockService
@@ -40,19 +41,23 @@ import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
 import com.pyamsoft.pydroid.design.util.FABUtil
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
+import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.AnimUtil
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockListFragment : CanaryFragment(), LockListPresenter.Callback {
+class LockListFragment : CanaryFragment(), LockListPresenter.Callback, LockListPresenter.BusCallback {
+
   @field:Inject internal lateinit var presenter: LockListPresenter
   private lateinit var fastItemAdapter: FastItemAdapter<LockListItem>
   private lateinit var binding: FragmentLockListBinding
   private lateinit var filterListDelegate: FilterListDelegate
   private var fabIconTask = LoaderHelper.empty()
   private var dividerDecoration: DividerItemDecoration? = null
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -85,16 +90,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback {
     setupRecyclerView()
     setupSwipeRefresh()
     setupFAB()
+
+    presenter.create(this)
   }
 
   override fun onStart() {
     super.onStart()
     presenter.start(this)
-  }
-
-  override fun onStop() {
-    super.onStop()
-    presenter.stop()
   }
 
   override fun onResume() {

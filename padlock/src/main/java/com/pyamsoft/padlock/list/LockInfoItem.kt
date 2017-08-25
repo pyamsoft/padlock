@@ -90,8 +90,6 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
         processModifyDatabaseEntry(holder, LOCKED)
       }
     }
-
-    holder.publisher.start(Unit)
   }
 
   private fun processModifyDatabaseEntry(holder: ViewHolder, newLockState: LockState) {
@@ -106,7 +104,6 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
       holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null)
       holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null)
       holder.binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener(null)
-      holder.publisher.stop()
     }
   }
 
