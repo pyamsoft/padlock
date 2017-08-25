@@ -26,6 +26,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
+// TODO Turn into publisher just like lock info item
 class LockListItemPresenter @Inject internal constructor(
     private val interactor: LockListItemInteractor,
     @Named("computation") compScheduler: Scheduler,

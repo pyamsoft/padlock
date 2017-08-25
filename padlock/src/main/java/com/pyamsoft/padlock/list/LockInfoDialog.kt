@@ -34,6 +34,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.list.info.LockInfoModule
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
+import com.pyamsoft.padlock.list.info.LockInfoPresenter.BusCallback
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
@@ -44,13 +45,15 @@ import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
+import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.util.AppUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback {
+class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback, LockInfoPresenter.BusCallback {
+
   @field:Inject internal lateinit var presenter: LockInfoPresenter
   private lateinit var fastItemAdapter: FastItemAdapter<LockInfoItem>
   private lateinit var binding: DialogLockInfoBinding
@@ -60,6 +63,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback {
   private var appIsSystem: Boolean = false
   private var dividerDecoration: DividerItemDecoration? = null
   private var appIcon = LoaderHelper.empty()
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     val dialog = super.onCreateDialog(savedInstanceState)
@@ -94,6 +99,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback {
     setupSwipeRefresh()
     setupRecyclerView()
     filterListDelegate.onViewCreated(fastItemAdapter)
+
+    presenter.create(this)
   }
 
   private fun setupToolbar() {
@@ -148,7 +155,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback {
 
   override fun onStop() {
     super.onStop()
-    presenter.stop()
     appIcon = LoaderHelper.unload(appIcon)
   }
 
