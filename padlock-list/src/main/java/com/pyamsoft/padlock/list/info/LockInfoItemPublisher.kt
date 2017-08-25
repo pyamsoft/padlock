@@ -19,17 +19,9 @@ package com.pyamsoft.padlock.list.info
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
 import javax.inject.Inject
-import javax.inject.Named
 
-class LockInfoItemPresenter @Inject internal constructor(
-    private val bus: EventBus<LockInfoEvent>,
-    @Named("computation") compScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Unit>(compScheduler, ioScheduler,
-    mainScheduler) {
+class LockInfoItemPublisher @Inject internal constructor(private val bus: EventBus<LockInfoEvent>) {
 
   fun publish(entry: ActivityEntry, newState: LockState, code: String?, system: Boolean) {
     bus.publish(LockInfoEvent.Modify(entry, newState, code, system))

@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
+import com.pyamsoft.padlock.list.LockListPresenter.BusCallback
 import com.pyamsoft.padlock.list.LockListPresenter.Callback
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.ClearPinEvent
@@ -37,13 +38,18 @@ class LockListPresenter @Inject internal constructor(
     private val createPinBus: EventBus<CreatePinEvent>,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(compScheduler, ioScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<BusCallback, Callback>(compScheduler,
+    ioScheduler,
     mainScheduler) {
+
+  override fun onCreate(bound: BusCallback) {
+    super.onCreate(bound)
+    registerOnBus(bound::onMasterPinCreateSuccess, bound::onMasterPinCreateFailure,
+        bound::onMasterPinClearSuccess, bound::onMasterPinClearFailure)
+  }
 
   override fun onStart(bound: Callback) {
     super.onStart(bound)
-    registerOnBus(bound::onMasterPinCreateSuccess, bound::onMasterPinCreateFailure,
-        bound::onMasterPinClearSuccess, bound::onMasterPinClearFailure)
     setFABStateFromPreference(bound::onSetFABStateEnabled, bound::onSetFABStateDisabled)
     populateList(false, bound::onListPopulateBegin, bound::onEntryAddedToList,
         bound::onListPopulated, bound::onListPopulateError)
@@ -149,12 +155,16 @@ class LockListPresenter @Inject internal constructor(
     cache.clearCache()
   }
 
-  interface Callback {
+  interface BusCallback {
 
     fun onMasterPinCreateSuccess()
     fun onMasterPinCreateFailure()
     fun onMasterPinClearSuccess()
     fun onMasterPinClearFailure()
+
+  }
+
+  interface Callback {
 
     fun onListPopulateBegin()
     fun onEntryAddedToList(entry: AppEntry)
