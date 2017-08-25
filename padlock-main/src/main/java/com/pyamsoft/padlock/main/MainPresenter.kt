@@ -26,7 +26,8 @@ import javax.inject.Named
 class MainPresenter @Inject internal constructor(private val interactor: MainInteractor,
     @Named("computation") computationScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Unit, Callback>(
+    computationScheduler,
     ioScheduler, mainScheduler) {
 
   override fun onStart(bound: Callback) {
