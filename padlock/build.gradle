@@ -19,7 +19,6 @@ apply plugin: "kotlin-android"
 apply plugin: "kotlin-kapt"
 apply plugin: "com.github.ben-manes.versions"
 apply plugin: "com.getkeepsafe.dexcount"
-apply plugin: "me.tatarka.retrolambda"
 
 //noinspection GroovyMissingReturnStatement
 android {
@@ -48,8 +47,8 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
   }
 
   signingConfigs {
@@ -86,8 +85,6 @@ android {
 
 dependencies {
   compile fileTree(dir: "libs", include: ["*.jar"])
-
-  retrolambdaConfig "net.orfjackal.retrolambda:retrolambda:${rootProject.ext.retrolambda}"
 
   // Databinding
   kapt "com.android.databinding:compiler:$plugin_version"

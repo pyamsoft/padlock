@@ -40,7 +40,6 @@ buildscript {
     maxSdk = 26
     buildTools = "26.0.1"
 
-    retrolambda = "2.5.1"
     supportLib = "26.0.1"
     firebase = "11.2.0"
     leakCanary = "1.5.1"
@@ -56,9 +55,6 @@ buildscript {
   dependencies {
     classpath "com.android.tools.build:gradle:$plugin_version"
 
-    // Retro lambda
-    classpath 'me.tatarka:gradle-retrolambda:3.6.0'
-
     // Dex count
     classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.7.1'
 
@@ -70,6 +66,8 @@ buildscript {
 
     // SQLDelight
     classpath "com.squareup.sqldelight:gradle-plugin:0.6.1"
+
+    // Kotlin
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
 }
