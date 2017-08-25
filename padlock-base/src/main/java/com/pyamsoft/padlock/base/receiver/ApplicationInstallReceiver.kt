@@ -18,6 +18,11 @@ package com.pyamsoft.padlock.base.receiver
 
 interface ApplicationInstallReceiver {
 
+  companion object {
+
+    const val FORCE_REFRESH_LIST = "force_refresh_list"
+  }
+
   fun register()
 
   fun unregister()

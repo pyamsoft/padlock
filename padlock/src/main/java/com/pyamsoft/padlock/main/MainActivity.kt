@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.main
 
+import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
@@ -48,6 +49,11 @@ class MainActivity : TamperActivity(), MainPresenter.Callback {
     }
 
     setAppBarState()
+  }
+
+  override fun onNewIntent(intent: Intent?) {
+    super.onNewIntent(intent)
+    setIntent(intent)
   }
 
   override fun onStart() {

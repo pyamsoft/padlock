@@ -30,6 +30,7 @@ import android.widget.Toast
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
@@ -59,6 +60,14 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback {
 
     Injector.with(context) {
       it.inject(this)
+    }
+
+    val intent = activity.intent
+    if (intent.hasExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)) {
+      intent.removeExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)
+
+      Timber.d("Launched from notification, clear list")
+      presenter.forceClearCache()
     }
   }
 

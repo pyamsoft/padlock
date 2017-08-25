@@ -22,6 +22,7 @@ import com.pyamsoft.padlock.pin.ClearPinEvent
 import com.pyamsoft.padlock.pin.CreatePinEvent
 import com.pyamsoft.padlock.service.LockServiceStateInteractor
 import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -30,6 +31,7 @@ import javax.inject.Named
 
 class LockListPresenter @Inject internal constructor(
     private val lockListInteractor: LockListInteractor,
+    @Named("cache_lock_list") private val cache: Cache,
     private val stateInteractor: LockServiceStateInteractor,
     private val clearPinBus: EventBus<ClearPinEvent>,
     private val createPinBus: EventBus<CreatePinEvent>,
@@ -138,6 +140,13 @@ class LockListPresenter @Inject internal constructor(
             onListPopulateError(it)
           })
     }
+  }
+
+  /**
+   * Used when the activity is launched from Notification
+   */
+  fun forceClearCache() {
+    cache.clearCache()
   }
 
   interface Callback {
