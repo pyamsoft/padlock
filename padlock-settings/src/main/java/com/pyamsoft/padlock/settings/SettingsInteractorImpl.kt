@@ -35,6 +35,7 @@ import javax.inject.Singleton
     private val installListenerPreferences: InstallListenerPreferences,
     private val lockListInteractor: Cache,
     private val lockInfoInteractor: Cache,
+    private val lockEntryInteractor: Cache,
     private val purgeInteractor: Cache) : SettingsInteractor {
 
   override fun isInstallListenerEnabled(): Single<Boolean> {
@@ -50,6 +51,7 @@ import javax.inject.Singleton
           lockListInteractor.clearCache()
           lockInfoInteractor.clearCache()
           purgeInteractor.clearCache()
+          lockEntryInteractor.clearCache()
         })
         .toSingleDefault(true)
   }
