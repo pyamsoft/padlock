@@ -26,7 +26,7 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
     private val packageName: String, private val activityName: String, private val realName: String,
     private val interactor: LockEntryInteractor,
     computationScheduler: Scheduler, ioScheduler: Scheduler,
-    mainScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
+    mainScheduler: Scheduler) : SchedulerPresenter<Unit, Unit>(computationScheduler,
     ioScheduler, mainScheduler) {
 
   fun passLockScreen() {

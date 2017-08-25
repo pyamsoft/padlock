@@ -29,17 +29,16 @@ class LockScreenInputPresenter @Inject internal constructor(
     private val interactor: LockScreenInteractor,
     @Named("computation") computationScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback, Unit>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-
-  override fun onStart(bound: Callback) {
-    super.onStart(bound)
+  override fun onCreate(bound: Callback) {
+    super.onCreate(bound)
     initializeLockScreenType(bound::onTypePattern, bound::onTypeText)
   }
 
   private fun initializeLockScreenType(onTypePattern: () -> Unit, onTypeText: () -> Unit) {
-    disposeOnStop {
+    disposeOnDestroy {
       interactor.getLockScreenType()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
