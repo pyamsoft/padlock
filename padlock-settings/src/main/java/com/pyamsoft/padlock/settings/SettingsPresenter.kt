@@ -35,16 +35,16 @@ class SettingsPresenter @Inject internal constructor(
     private val receiver: ApplicationInstallReceiver,
     @Named("computation") computationScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback, Unit>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onStart(bound: Callback) {
-    super.onStart(bound)
+  override fun onCreate(bound: Callback) {
+    super.onCreate(bound)
     registerOnBus(bound::onClearDatabase, bound::onClearAll)
   }
 
   private fun registerOnBus(onClearDatabase: () -> Unit, onClearAll: () -> Unit) {
-    disposeOnStop {
+    disposeOnDestroy {
       bus.listen().flatMapSingle { type ->
         when (type) {
           DATABASE -> interactor.clearDatabase()
