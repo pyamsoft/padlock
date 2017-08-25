@@ -33,26 +33,27 @@ class LockServicePresenter @Inject internal constructor(
     private val interactor: LockServiceInteractor,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(compScheduler, ioScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback, Unit>(compScheduler,
+    ioScheduler,
     mainScheduler) {
 
   init {
     interactor.reset()
   }
 
-  override fun onStart(bound: Callback) {
-    super.onStart(bound)
+  override fun onCreate(bound: Callback) {
+    super.onCreate(bound)
     registerOnBus(bound::onRecheck, bound::onFinish)
   }
 
-  override fun onStop() {
-    super.onStop()
+  override fun onDestroy() {
+    super.onDestroy()
     interactor.cleanup()
     interactor.reset()
   }
 
   private fun registerOnBus(onRecheck: (String, String) -> Unit, onFinish: () -> Unit) {
-    disposeOnStop {
+    disposeOnDestroy {
       serviceFinishBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)

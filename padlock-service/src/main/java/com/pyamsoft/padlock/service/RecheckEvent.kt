@@ -29,8 +29,7 @@ import com.google.auto.value.AutoValue
 
     @JvmStatic
     @CheckResult
-    fun create(packageName: String, className: String): RecheckEvent {
-      return AutoValue_RecheckEvent(packageName, className)
-    }
+    fun create(packageName: String, className: String): RecheckEvent =
+        AutoValue_RecheckEvent(packageName, className)
   }
 }

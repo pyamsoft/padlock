@@ -66,11 +66,18 @@ class PadLockService : AccessibilityService(), Callback {
     Injector.with(this) {
       it.inject(this)
     }
+
+    presenter.create(this)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    presenter.destroy()
   }
 
   override fun onServiceConnected() {
     super.onServiceConnected()
-    presenter.start(this)
+    presenter.start(Unit)
     isRunning = true
   }
 
