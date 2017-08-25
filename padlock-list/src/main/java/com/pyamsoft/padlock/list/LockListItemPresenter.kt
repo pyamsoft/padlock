@@ -30,13 +30,14 @@ class LockListItemPresenter @Inject internal constructor(
     private val interactor: LockListItemInteractor,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Unit>(compScheduler, ioScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Unit, Unit>(compScheduler,
+    ioScheduler,
     mainScheduler) {
 
   fun modifyDatabaseEntry(isChecked: Boolean, packageName: String, code: String?,
       system: Boolean, onDatabaseEntryCreated: () -> Unit, onDatabaseEntryDeleted: () -> Unit,
       onComplete: () -> Unit, onDatabaseEntryError: (Throwable) -> Unit) {
-    disposeOnStop {
+    disposeOnDestroy {
       // No whitelisting for modifications from the List
       val oldState: LockState
       val newState: LockState

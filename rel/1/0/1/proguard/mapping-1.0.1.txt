@@ -13649,7 +13649,7 @@ com.pyamsoft.padlock.app.list.LockListFragment -> com.pyamsoft.padlock.app.list.
     com.pyamsoft.padlock.app.AsyncVectorDrawableTask fabIconTask -> f
     android.support.v7.widget.SwitchCompat displaySystem -> g
     butterknife.Unbinder unbinder -> h
-    com.pyamsoft.padlock.app.list.LockListPresenter presenter -> a
+    com.pyamsoft.padlock.app.list.LockListPresenter publisher -> a
     void <init>() -> <init>
     android.view.View onCreateView$469ccb8a(android.view.LayoutInflater,android.view.ViewGroup) -> a
     void onViewCreated(android.view.View,android.os.Bundle) -> a
@@ -13737,7 +13737,7 @@ com.pyamsoft.padlock.app.list.LockListFragment$2 -> com.pyamsoft.padlock.app.lis
     void <init>(com.pyamsoft.padlock.app.list.LockListFragment) -> <init>
     void onShown(android.support.design.widget.FloatingActionButton) -> a
 com.pyamsoft.padlock.app.list.LockListFragment_MembersInjector -> com.pyamsoft.padlock.app.list.LockListFragment_MembersInjector:
-    javax.inject.Provider presenter -> b
+    javax.inject.Provider publisher -> b
     boolean $assertionsDisabled -> a
     void <init>(javax.inject.Provider) -> <init>
     dagger.MembersInjector create(javax.inject.Provider) -> a
@@ -14001,7 +14001,7 @@ com.pyamsoft.padlock.app.list.info.LockInfoDialog -> com.pyamsoft.padlock.app.li
     boolean firstRefresh -> an
     com.pyamsoft.padlock.app.list.LockListLayoutManager layoutManager -> ao
     butterknife.Unbinder unbinder -> ap
-    com.pyamsoft.padlock.app.list.info.LockInfoPresenter presenter -> ai
+    com.pyamsoft.padlock.app.list.info.LockInfoPresenter publisher -> ai
     void <init>() -> <init>
     com.pyamsoft.padlock.app.list.info.LockInfoDialog newInstance(com.pyamsoft.padlock.model.AppEntry) -> a
     void onCreate(android.os.Bundle) -> a
@@ -14053,7 +14053,7 @@ com.pyamsoft.padlock.app.list.info.LockInfoDialog$$ViewBinder$InnerUnbinder -> c
     void <init>(com.pyamsoft.padlock.app.list.info.LockInfoDialog) -> <init>
     void unbind() -> unbind
 com.pyamsoft.padlock.app.list.info.LockInfoDialog_MembersInjector -> com.pyamsoft.padlock.app.list.info.LockInfoDialog_MembersInjector:
-    javax.inject.Provider presenter -> b
+    javax.inject.Provider publisher -> b
     boolean $assertionsDisabled -> a
     void <init>(javax.inject.Provider) -> <init>
     dagger.MembersInjector create(javax.inject.Provider) -> a
@@ -14224,7 +14224,7 @@ com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate -> com.pyamsoft.padlock.
     void onSaveInstanceState(android.os.Bundle) -> b
 com.pyamsoft.padlock.app.lock.delegate.LockViewDelegateImpl -> com.pyamsoft.padlock.app.lock.delegate.LockViewDelegateImpl:
     java.lang.String TAG -> a
-    com.pyamsoft.padlock.app.lock.LockPresenter presenter -> b
+    com.pyamsoft.padlock.app.lock.LockPresenter publisher -> b
     java.lang.ref.WeakReference weakView -> c
     android.widget.TextView codeDisplay -> codeDisplay
     android.widget.Button button1 -> button1
@@ -14399,7 +14399,7 @@ com.pyamsoft.padlock.app.lockscreen.LockScreenActivity -> com.pyamsoft.padlock.a
     android.view.View rootView -> rootView
     android.support.v7.widget.Toolbar toolbar -> toolbar
     android.support.design.widget.AppBarLayout appBarLayout -> appBarLayout
-    com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter presenter -> n
+    com.pyamsoft.padlock.app.lockscreen.LockScreenPresenter publisher -> n
     com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate lockViewDelegate -> q
     java.lang.String appName -> r
     long lockUntilTime -> s
@@ -14458,7 +14458,7 @@ com.pyamsoft.padlock.app.lockscreen.LockScreenActivity$$ViewBinder$InnerUnbinder
     void <init>(com.pyamsoft.padlock.app.lockscreen.LockScreenActivity) -> <init>
     void unbind() -> unbind
 com.pyamsoft.padlock.app.lockscreen.LockScreenActivity_MembersInjector -> com.pyamsoft.padlock.app.lockscreen.LockScreenActivity_MembersInjector:
-    javax.inject.Provider presenter -> b
+    javax.inject.Provider publisher -> b
     boolean $assertionsDisabled -> a
     void <init>(javax.inject.Provider) -> <init>
     dagger.MembersInjector create(javax.inject.Provider) -> a
@@ -14654,7 +14654,7 @@ com.pyamsoft.padlock.app.main.MainActivity -> com.pyamsoft.padlock.app.main.Main
     com.anjlab.android.iab.v3.BillingProcessor billingProcessor -> q
     com.pyamsoft.padlock.app.main.MainPagerAdapter adapter -> r
     butterknife.Unbinder unbinder -> s
-    com.pyamsoft.padlock.app.main.MainPresenter presenter -> l
+    com.pyamsoft.padlock.app.main.MainPresenter publisher -> l
     void <init>() -> <init>
     void onCreate(android.os.Bundle) -> onCreate
     com.anjlab.android.iab.v3.BillingProcessor getBillingProcessor() -> w
@@ -14710,7 +14710,7 @@ com.pyamsoft.padlock.app.main.MainActivity$2 -> com.pyamsoft.padlock.app.main.Ma
     void onPageSelected(int) -> b
     void onPageScrollStateChanged(int) -> a
 com.pyamsoft.padlock.app.main.MainActivity_MembersInjector -> com.pyamsoft.padlock.app.main.MainActivity_MembersInjector:
-    javax.inject.Provider presenter -> b
+    javax.inject.Provider publisher -> b
     boolean $assertionsDisabled -> a
     void <init>(javax.inject.Provider) -> <init>
     dagger.MembersInjector create(javax.inject.Provider) -> a
@@ -14826,7 +14826,7 @@ com.pyamsoft.padlock.app.pinentry.MasterPinSubmitCallback -> com.pyamsoft.padloc
     void onClearMasterPinFailure() -> E
 com.pyamsoft.padlock.app.pinentry.PinEntryDialog -> com.pyamsoft.padlock.app.pinentry.PinEntryDialog:
     java.lang.String TAG -> aj
-    com.pyamsoft.padlock.app.pinentry.PinEntryPresenter presenter -> ai
+    com.pyamsoft.padlock.app.pinentry.PinEntryPresenter publisher -> ai
     com.pyamsoft.padlock.app.lock.delegate.LockViewDelegate lockViewDelegate -> ak
     android.support.v7.widget.Toolbar toolbar -> toolbar
     android.widget.ImageView close -> close
@@ -14872,7 +14872,7 @@ com.pyamsoft.padlock.app.pinentry.PinEntryDialog$PinEntryBus -> com.pyamsoft.pad
     com.pyamsoft.padlock.app.pinentry.PinEntryDialog$PinEntryBus get() -> a
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.app.pinentry.PinEntryDialog_MembersInjector -> com.pyamsoft.padlock.app.pinentry.PinEntryDialog_MembersInjector:
-    javax.inject.Provider presenter -> b
+    javax.inject.Provider publisher -> b
     boolean $assertionsDisabled -> a
     void <init>(javax.inject.Provider) -> <init>
     dagger.MembersInjector create(javax.inject.Provider) -> a
@@ -15068,7 +15068,7 @@ com.pyamsoft.padlock.app.service.PadLockService -> com.pyamsoft.padlock.app.serv
     com.pyamsoft.padlock.app.service.PadLockService instance -> c
     boolean enabled -> d
     android.content.Intent lockActivity -> e
-    com.pyamsoft.padlock.app.service.LockServicePresenter presenter -> a
+    com.pyamsoft.padlock.app.service.LockServicePresenter publisher -> a
     void <init>() -> <init>
     boolean isEnabled() -> b
     com.pyamsoft.padlock.app.service.PadLockService getInstance() -> c
@@ -15081,7 +15081,7 @@ com.pyamsoft.padlock.app.service.PadLockService -> com.pyamsoft.padlock.app.serv
     void passLockScreen() -> a
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.app.service.PadLockService_MembersInjector -> com.pyamsoft.padlock.app.service.PadLockService_MembersInjector:
-    javax.inject.Provider presenter -> b
+    javax.inject.Provider publisher -> b
     boolean $assertionsDisabled -> a
     void <init>(javax.inject.Provider) -> <init>
     dagger.MembersInjector create(javax.inject.Provider) -> a
@@ -15113,7 +15113,7 @@ com.pyamsoft.padlock.app.settings.ConfirmationDialog$ConfirmationDialogBus -> co
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.app.settings.SettingsFragment -> com.pyamsoft.padlock.app.settings.SettingsFragment:
     java.lang.String TAG -> b
-    com.pyamsoft.padlock.app.settings.SettingsPresenter presenter -> a
+    com.pyamsoft.padlock.app.settings.SettingsPresenter publisher -> a
     android.widget.RadioButton ignoreNone -> ignoreNone
     android.widget.RadioButton ignoreFive -> ignoreFive
     android.widget.RadioButton ignoreTen -> ignoreTen
@@ -15222,7 +15222,7 @@ com.pyamsoft.padlock.app.settings.SettingsFragment$$ViewBinder$InnerUnbinder -> 
     void <init>(com.pyamsoft.padlock.app.settings.SettingsFragment) -> <init>
     void unbind() -> unbind
 com.pyamsoft.padlock.app.settings.SettingsFragment_MembersInjector -> com.pyamsoft.padlock.app.settings.SettingsFragment_MembersInjector:
-    javax.inject.Provider presenter -> b
+    javax.inject.Provider publisher -> b
     boolean $assertionsDisabled -> a
     void <init>(javax.inject.Provider) -> <init>
     dagger.MembersInjector create(javax.inject.Provider) -> a
@@ -15460,7 +15460,7 @@ com.pyamsoft.padlock.dagger.db.DBModule_ProvideDBInteractorFactory -> com.pyamso
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.dagger.db.DBModule_ProvideDBPresenterFactory -> com.pyamsoft.padlock.dagger.db.DBModule_ProvideDBPresenterFactory:
     com.pyamsoft.padlock.dagger.db.DBModule module -> b
-    javax.inject.Provider presenter -> c
+    javax.inject.Provider publisher -> c
     boolean $assertionsDisabled -> a
     void <init>(com.pyamsoft.padlock.dagger.db.DBModule,javax.inject.Provider) -> <init>
     dagger.internal.Factory create(com.pyamsoft.padlock.dagger.db.DBModule,javax.inject.Provider) -> a
@@ -15554,7 +15554,7 @@ com.pyamsoft.padlock.dagger.list.LockListModule_ProvideLockScreenInteractorFacto
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.dagger.list.LockListModule_ProvideLockScreenPresenterFactory -> com.pyamsoft.padlock.dagger.list.LockListModule_ProvideLockScreenPresenterFactory:
     com.pyamsoft.padlock.dagger.list.LockListModule module -> b
-    javax.inject.Provider presenter -> c
+    javax.inject.Provider publisher -> c
     boolean $assertionsDisabled -> a
     void <init>(com.pyamsoft.padlock.dagger.list.LockListModule,javax.inject.Provider) -> <init>
     dagger.internal.Factory create(com.pyamsoft.padlock.dagger.list.LockListModule,javax.inject.Provider) -> a
@@ -15602,7 +15602,7 @@ com.pyamsoft.padlock.dagger.list.info.LockInfoModule_ProvideLockInfoInteractorFa
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.dagger.list.info.LockInfoModule_ProvideLockInfoPresenterFactory -> com.pyamsoft.padlock.dagger.list.info.LockInfoModule_ProvideLockInfoPresenterFactory:
     com.pyamsoft.padlock.dagger.list.info.LockInfoModule module -> b
-    javax.inject.Provider presenter -> c
+    javax.inject.Provider publisher -> c
     boolean $assertionsDisabled -> a
     void <init>(com.pyamsoft.padlock.dagger.list.info.LockInfoModule,javax.inject.Provider) -> <init>
     dagger.internal.Factory create(com.pyamsoft.padlock.dagger.list.info.LockInfoModule,javax.inject.Provider) -> a
@@ -15679,7 +15679,7 @@ com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule_ProvideLockScreenInterac
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule_ProvideLockScreenPresenterFactory -> com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule_ProvideLockScreenPresenterFactory:
     com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule module -> b
-    javax.inject.Provider presenter -> c
+    javax.inject.Provider publisher -> c
     boolean $assertionsDisabled -> a
     void <init>(com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule,javax.inject.Provider) -> <init>
     dagger.internal.Factory create(com.pyamsoft.padlock.dagger.lockscreen.LockScreenModule,javax.inject.Provider) -> a
@@ -15727,7 +15727,7 @@ com.pyamsoft.padlock.dagger.main.MainModule_ProvidePinEntryInteractorFactory -> 
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.dagger.main.MainModule_ProvidePinEntryPresenterFactory -> com.pyamsoft.padlock.dagger.main.MainModule_ProvidePinEntryPresenterFactory:
     com.pyamsoft.padlock.dagger.main.MainModule module -> b
-    javax.inject.Provider presenter -> c
+    javax.inject.Provider publisher -> c
     boolean $assertionsDisabled -> a
     void <init>(com.pyamsoft.padlock.dagger.main.MainModule,javax.inject.Provider) -> <init>
     dagger.internal.Factory create(com.pyamsoft.padlock.dagger.main.MainModule,javax.inject.Provider) -> a
@@ -15800,7 +15800,7 @@ com.pyamsoft.padlock.dagger.pinentry.PinEntryModule_ProvidePinEntryInteractorFac
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.dagger.pinentry.PinEntryModule_ProvidePinEntryPresenterFactory -> com.pyamsoft.padlock.dagger.pinentry.PinEntryModule_ProvidePinEntryPresenterFactory:
     com.pyamsoft.padlock.dagger.pinentry.PinEntryModule module -> b
-    javax.inject.Provider presenter -> c
+    javax.inject.Provider publisher -> c
     boolean $assertionsDisabled -> a
     void <init>(com.pyamsoft.padlock.dagger.pinentry.PinEntryModule,javax.inject.Provider) -> <init>
     dagger.internal.Factory create(com.pyamsoft.padlock.dagger.pinentry.PinEntryModule,javax.inject.Provider) -> a
@@ -15863,7 +15863,7 @@ com.pyamsoft.padlock.dagger.service.LockServiceModule_ProvideLockServiceInteract
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.dagger.service.LockServiceModule_ProvideLockServicePresenterFactory -> com.pyamsoft.padlock.dagger.service.LockServiceModule_ProvideLockServicePresenterFactory:
     com.pyamsoft.padlock.dagger.service.LockServiceModule module -> b
-    javax.inject.Provider presenter -> c
+    javax.inject.Provider publisher -> c
     boolean $assertionsDisabled -> a
     void <init>(com.pyamsoft.padlock.dagger.service.LockServiceModule,javax.inject.Provider) -> <init>
     dagger.internal.Factory create(com.pyamsoft.padlock.dagger.service.LockServiceModule,javax.inject.Provider) -> a
@@ -15944,7 +15944,7 @@ com.pyamsoft.padlock.dagger.settings.SettingsModule_ProvideSettingsInteractorFac
     void <clinit>() -> <clinit>
 com.pyamsoft.padlock.dagger.settings.SettingsModule_ProvideSettingsPresenterFactory -> com.pyamsoft.padlock.dagger.settings.SettingsModule_ProvideSettingsPresenterFactory:
     com.pyamsoft.padlock.dagger.settings.SettingsModule module -> b
-    javax.inject.Provider presenter -> c
+    javax.inject.Provider publisher -> c
     boolean $assertionsDisabled -> a
     void <init>(com.pyamsoft.padlock.dagger.settings.SettingsModule,javax.inject.Provider) -> <init>
     dagger.internal.Factory create(com.pyamsoft.padlock.dagger.settings.SettingsModule,javax.inject.Provider) -> a
@@ -17402,7 +17402,7 @@ com.pyamsoft.pydroid.support.DonationUnavailableDialog$$Lambda$1 -> com.pyamsoft
     android.content.DialogInterface$OnClickListener lambdaFactory$() -> a
 com.pyamsoft.pydroid.support.SupportDialog -> com.pyamsoft.pydroid.support.SupportDialog:
     java.lang.String TAG -> ai
-    com.pyamsoft.pydroid.social.SocialMediaPresenter presenter -> aj
+    com.pyamsoft.pydroid.social.SocialMediaPresenter publisher -> aj
     java.lang.String APP_SKU_DONATE_ONE -> ak
     java.lang.String APP_SKU_DONATE_TWO -> al
     java.lang.String APP_SKU_DONATE_FIVE -> am

@@ -24,7 +24,7 @@ import com.mikepenz.fastadapter.items.GenericAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding
-import com.pyamsoft.padlock.list.info.LockInfoItemPresenter
+import com.pyamsoft.padlock.list.info.LockInfoItemPublisher
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
@@ -91,11 +91,11 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
       }
     }
 
-    holder.presenter.start(Unit)
+    holder.publisher.start(Unit)
   }
 
   private fun processModifyDatabaseEntry(holder: ViewHolder, newLockState: LockState) {
-    holder.presenter.publish(model, newLockState, null, system)
+    holder.publisher.publish(model, newLockState, null, system)
   }
 
   override fun unbindView(holder: ViewHolder?) {
@@ -106,7 +106,7 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
       holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null)
       holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null)
       holder.binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener(null)
-      holder.presenter.stop()
+      holder.publisher.stop()
     }
   }
 
@@ -121,7 +121,7 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     internal val binding: AdapterItemLockinfoBinding = DataBindingUtil.bind(itemView)
-    @Inject internal lateinit var presenter: LockInfoItemPresenter
+    @Inject internal lateinit var publisher: LockInfoItemPublisher
 
     init {
       Injector.with(itemView.context) {
