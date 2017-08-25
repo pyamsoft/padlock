@@ -31,18 +31,18 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
     private val clearPinBus: EventBus<ClearPinEvent>,
     @Named("computation") computationScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Callback, Unit>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onStart(bound: Callback) {
-    super.onStart(bound)
+  override fun onCreate(bound: Callback) {
+    super.onCreate(bound)
     checkMasterPinPresent(bound::onMasterPinMissing, bound::onMasterPinPresent)
   }
 
   private fun checkMasterPinPresent(onMasterPinMissing: () -> Unit,
       onMasterPinPresent: () -> Unit) {
     Timber.d("Check master pin present")
-    disposeOnStop {
+    disposeOnDestroy {
       interactor.hasMasterPin()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
