@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
+import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.helper.Toasty
@@ -37,6 +38,9 @@ import javax.inject.Inject
 class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
 
   @field:Inject internal lateinit var presenter: SettingsPresenter
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> =
+      listOf(presenter) + super.provideBoundPresenters()
 
   override val isLastOnBackStack: AboutLibrariesFragment.BackStackState
     get() = AboutLibrariesFragment.BackStackState.LAST
@@ -66,6 +70,8 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
     Injector.with(context) {
       it.inject(this)
     }
+
+    presenter.create(this)
   }
 
   override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -110,7 +116,7 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
 
   override fun onStart() {
     super.onStart()
-    presenter.start(this)
+    presenter.start(Unit)
   }
 
   override fun onClearDatabase() {
@@ -124,11 +130,6 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
     val activityManager = activity.applicationContext
         .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     activityManager.clearApplicationUserData()
-  }
-
-  override fun onStop() {
-    super.onStop()
-    presenter.stop()
   }
 
   override fun onResume() {
