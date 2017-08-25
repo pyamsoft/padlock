@@ -32,16 +32,19 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.uicommon.CanaryFragment
+import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class PurgeFragment : CanaryFragment(), PurgePresenter.Callback {
+class PurgeFragment : CanaryFragment(), PurgePresenter.Callback, PurgePresenter.BusCallback {
   @Inject internal lateinit var presenter: PurgePresenter
   private val handler = Handler(Looper.getMainLooper())
   private lateinit var fastItemAdapter: FastItemAdapter<PurgeItem>
   private lateinit var binding: FragmentPurgeBinding
   private var decoration: DividerItemDecoration? = null
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -72,6 +75,8 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.Callback {
     super.onViewCreated(view, savedInstanceState)
     setupRecyclerView()
     setupSwipeRefresh()
+
+    presenter.create(this)
   }
 
   private fun setupSwipeRefresh() {
@@ -108,11 +113,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.Callback {
     }, {
       onRetrievalCompleted()
     })
-  }
-
-  override fun onStop() {
-    super.onStop()
-    presenter.stop()
   }
 
   override fun onResume() {

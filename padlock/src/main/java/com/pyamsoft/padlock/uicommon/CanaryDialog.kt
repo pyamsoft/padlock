@@ -16,11 +16,13 @@
 
 package com.pyamsoft.padlock.uicommon
 
+import android.support.annotation.CallSuper
 import com.pyamsoft.padlock.PadLock
-import com.pyamsoft.pydroid.ui.app.fragment.DialogFragmentBase
+import com.pyamsoft.pydroid.ui.app.fragment.DisposableDialogFragment
 
-abstract class CanaryDialog : DialogFragmentBase() {
+abstract class CanaryDialog : DisposableDialogFragment() {
 
+  @CallSuper
   override fun onDestroy() {
     super.onDestroy()
     PadLock.getRefWatcher(this).watch(this)
