@@ -32,6 +32,7 @@ import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
 import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
+import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import timber.log.Timber
 import javax.inject.Inject
@@ -45,6 +46,8 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
   private var pinEntryText: EditText? = null
   private var pinHintText: EditText? = null
   private var goTask = LoaderHelper.empty()
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -107,6 +110,8 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
     if (savedInstanceState != null) {
       onRestoreInstanceState(savedInstanceState)
     }
+
+    presenter.create(this)
   }
 
   private fun setupSubmissionView(view: EditText) {
@@ -150,7 +155,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
 
   override fun onStart() {
     super.onStart()
-    presenter.start(this)
+    presenter.start(Unit)
   }
 
   override fun onMasterPinMissing() {
@@ -171,11 +176,6 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
     if (obj != null) {
       setupSubmissionView(obj)
     }
-  }
-
-  override fun onStop() {
-    super.onStop()
-    presenter.stop()
   }
 
   private fun setupGoArrow() {

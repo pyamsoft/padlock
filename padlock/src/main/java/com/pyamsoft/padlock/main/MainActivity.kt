@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
+import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.sec.TamperActivity
 import com.pyamsoft.pydroid.ui.util.AnimUtil
@@ -38,6 +39,9 @@ class MainActivity : TamperActivity(), MainPresenter.Callback {
   @Inject internal lateinit var presenter: MainPresenter
   private lateinit var binding: ActivityMainBinding
 
+  override fun provideBoundPresenters(): List<Presenter<*, *>> =
+      listOf(presenter) + super.provideBoundPresenters()
+
   public override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.Theme_PadLock_Light)
     super.onCreate(savedInstanceState)
@@ -49,6 +53,8 @@ class MainActivity : TamperActivity(), MainPresenter.Callback {
     }
 
     setAppBarState()
+
+    presenter.create(Unit)
   }
 
   override fun onNewIntent(intent: Intent?) {
@@ -86,11 +92,6 @@ class MainActivity : TamperActivity(), MainPresenter.Callback {
   override fun onShowOnboarding() {
     // TODO
     onShowDefaultPage()
-  }
-
-  override fun onStop() {
-    super.onStop()
-    presenter.stop()
   }
 
   override fun onPause() {

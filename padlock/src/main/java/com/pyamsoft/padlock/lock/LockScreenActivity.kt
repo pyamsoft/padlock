@@ -34,15 +34,18 @@ import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
+import com.pyamsoft.padlock.lock.screen.LockScreenPresenter.NameCallback
 import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
+import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
+import com.pyamsoft.pydroid.ui.app.activity.DisposableActivity
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
+class LockScreenActivity : DisposableActivity(), LockScreenPresenter.Callback, LockScreenPresenter.NameCallback {
 
   private val home: Intent = Intent(Intent.ACTION_MAIN)
   @field:Inject internal lateinit var presenter: LockScreenPresenter
@@ -66,6 +69,11 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
   private var appIcon = LoaderHelper.empty()
   private var lockedCode: String? = null
   internal lateinit var menuExclude: MenuItem
+
+  override val shouldConfirmBackPress: Boolean
+    get() = false
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
 
   init {
     home.addCategory(Intent.CATEGORY_HOME)
@@ -116,6 +124,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
           LockScreenModule(lockedPackageName, lockedActivityName),
           LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
     }
+
+    presenter.create(this)
   }
 
   private fun setupActionBar() {
@@ -193,7 +203,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.Callback {
 
   override fun onStop() {
     super.onStop()
-    presenter.stop()
     appIcon = LoaderHelper.unload(appIcon)
   }
 

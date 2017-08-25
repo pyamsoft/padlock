@@ -30,19 +30,24 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
 import com.pyamsoft.padlock.list.ErrorDialog
+import com.pyamsoft.padlock.lock.LockEntryPresenter.Callback
 import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
+import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenTextFragment : LockScreenBaseFragment() {
+class LockScreenTextFragment : LockScreenBaseFragment(), Callback {
+
   private lateinit var imm: InputMethodManager
   private lateinit var binding: FragmentLockScreenTextBinding
   private var arrowGoTask = LoaderHelper.empty()
   private var editText: EditText? = null
   @Inject internal lateinit var presenter: LockEntryPresenter
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
 
   @CheckResult private fun getCurrentAttempt(): String = editText?.text?.toString() ?: ""
 
@@ -77,20 +82,17 @@ class LockScreenTextFragment : LockScreenBaseFragment() {
 
     // Hide hint to begin with
     binding.lockDisplayHint.visibility = View.GONE
+
+    presenter.create(Unit)
   }
 
   override fun onStart() {
     super.onStart()
-    presenter.start(Unit)
-    presenter.displayLockedHint {
-      Timber.d("Settings hint")
-      binding.lockDisplayHint.text = "Hint: %s".format(if (it.isEmpty()) "NO HINT" else it)
-    }
+    presenter.start(this)
   }
 
-  override fun onStop() {
-    super.onStop()
-    presenter.stop()
+  override fun onDisplayHint(hint: String) {
+    binding.lockDisplayHint.text = "Hint: %s".format(if (hint.isEmpty()) "NO HINT" else hint)
   }
 
   fun onRestoreInstanceState(savedInstanceState: Bundle) {
