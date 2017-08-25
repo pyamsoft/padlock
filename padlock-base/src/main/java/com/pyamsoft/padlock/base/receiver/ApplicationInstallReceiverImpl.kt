@@ -43,12 +43,14 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton internal class ApplicationInstallReceiverImpl @Inject internal constructor(context: Context,
+@Singleton internal class ApplicationInstallReceiverImpl @Inject internal constructor(
+    context: Context,
     private val packageManagerWrapper: PackageLabelManager,
     @param:Named("computation") private val computationScheduler: Scheduler,
     @param:Named("io") private val ioScheduler: Scheduler,
     @param:Named("main") private val mainThreadScheduler: Scheduler,
-    @Named("main_activity") mainActivityClass: Class<out Activity>) : BroadcastReceiver(), ApplicationInstallReceiver {
+    @Named(
+        "main_activity") mainActivityClass: Class<out Activity>) : BroadcastReceiver(), ApplicationInstallReceiver {
 
   private val notificationChannelId: String = "padlock_new_apps"
   private val appContext: Context = context.applicationContext
@@ -61,8 +63,9 @@ import javax.inject.Singleton
 
   init {
     filter.addDataScheme("package")
-    pendingIntent = PendingIntent.getActivity(appContext, 421,
-        Intent(appContext, mainActivityClass), 0)
+    val intent = Intent(appContext, mainActivityClass)
+    intent.putExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST, true)
+    pendingIntent = PendingIntent.getActivity(appContext, 421, intent, 0)
     notificationManager = appContext.getSystemService(
         Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -115,7 +118,7 @@ import javax.inject.Singleton
         })
   }
 
-  internal fun onNewPackageInstalled(packageName: String,
+  private fun onNewPackageInstalled(packageName: String,
       name: String) {
     Timber.i("Package Added: %s", packageName)
     val notification1 = NotificationCompat.Builder(appContext,
