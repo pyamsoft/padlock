@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.purge
 
+import com.pyamsoft.padlock.purge.PurgePresenter.BusCallback
 import com.pyamsoft.padlock.purge.PurgePresenter.Callback
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -26,20 +27,24 @@ import javax.inject.Named
 
 class PurgePresenter @Inject internal constructor(private val interactor: PurgeInteractor,
     private val purgeBus: EventBus<PurgeEvent>,
-    private val purgeAllBus: EventBus<PurgeAllEvent>,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    private val purgeAllBus: EventBus<PurgeAllEvent>, @Named(
+        "computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler, @Named(
+        "main") mainScheduler: Scheduler) : SchedulerPresenter<BusCallback, Callback>(
+    computationScheduler,
     ioScheduler, mainScheduler) {
+
+  override fun onCreate(bound: BusCallback) {
+    super.onCreate(bound)
+    registerOnBus(bound::onPurge, bound::onPurgeAll)
+  }
 
   override fun onStart(bound: Callback) {
     super.onStart(bound)
-    registerOnBus(bound::onPurge, bound::onPurgeAll)
     retrieveStaleApplications(false, bound::onStaleApplicationReceived, bound::onRetrievalCompleted)
   }
 
   private fun registerOnBus(onPurge: (String) -> Unit, onPurgeAll: () -> Unit) {
-    disposeOnStop {
+    disposeOnDestroy {
       purgeBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -48,7 +53,7 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
           })
     }
 
-    disposeOnStop {
+    disposeOnDestroy {
       purgeAllBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -80,11 +85,14 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
     }
   }
 
-  interface Callback {
+  interface BusCallback {
 
     fun onPurge(packageName: String)
 
     fun onPurgeAll()
+  }
+
+  interface Callback {
 
     fun onStaleApplicationReceived(pacakgeName: String)
 
