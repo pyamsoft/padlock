@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.lock.screen
 
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter.Callback
+import com.pyamsoft.padlock.lock.screen.LockScreenPresenter.NameCallback
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -27,13 +28,18 @@ class LockScreenPresenter @Inject internal constructor(
     private val lockScreenInputPresenter: LockScreenInputPresenter, private val packageName: String,
     private val activityName: String, private val bus: EventBus<CloseOldEvent>,
     private val interactor: LockScreenInteractor, computationScheduler: Scheduler,
-    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<Callback>(
+    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<NameCallback, Callback>(
     computationScheduler, ioScheduler, mainScheduler) {
+
+  override fun onCreate(bound: NameCallback) {
+    super.onCreate(bound)
+    lockScreenInputPresenter.create(bound)
+    loadDisplayNameFromPackage(bound::setDisplayName)
+  }
 
   override fun onStart(bound: Callback) {
     super.onStart(bound)
-    lockScreenInputPresenter.start(bound)
-    loadDisplayNameFromPackage(bound::setDisplayName)
+    lockScreenInputPresenter.start(Unit)
     closeOldAndAwaitSignal(bound::onCloseOldReceived)
   }
 
@@ -42,8 +48,13 @@ class LockScreenPresenter @Inject internal constructor(
     lockScreenInputPresenter.stop()
   }
 
+  override fun onDestroy() {
+    super.onDestroy()
+    lockScreenInputPresenter.destroy()
+  }
+
   private fun loadDisplayNameFromPackage(setDisplayName: (String) -> Unit) {
-    disposeOnStop {
+    disposeOnDestroy {
       interactor.getDisplayName(packageName)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -84,9 +95,12 @@ class LockScreenPresenter @Inject internal constructor(
   }
 
 
-  interface Callback : LockScreenInputPresenter.Callback {
+  interface NameCallback : LockScreenInputPresenter.Callback {
 
     fun setDisplayName(name: String)
+  }
+
+  interface Callback {
 
     fun onCloseOldReceived()
   }
