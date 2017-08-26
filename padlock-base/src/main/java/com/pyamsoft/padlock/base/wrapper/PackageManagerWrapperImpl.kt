@@ -24,6 +24,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.support.annotation.CheckResult
+import com.pyamsoft.pydroid.helper.Optional
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.exceptions.Exceptions
@@ -117,7 +118,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
       return@fromCallable packageNames
     }.flatMapObservable { Observable.fromIterable(it) }.map {
       it.replaceFirst("^package:".toRegex(), "")
-    }.flatMapSingle { getApplicationInfo(it) }
+    }.flatMapSingle { getApplicationInfo(it) }.filter { it.isPresent() }.map { it.item() }
   }
 
   override fun getActiveApplications(): Single<List<ApplicationInfo>> {
@@ -142,13 +143,14 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
     }.toList()
   }
 
-  override fun getApplicationInfo(packageName: String): Single<ApplicationInfo> {
+  override fun getApplicationInfo(packageName: String): Single<Optional<ApplicationInfo>> {
     return Single.defer {
       try {
-        return@defer Single.just(packageManager.getApplicationInfo(packageName, 0))
+        return@defer Single.just(
+            Optional.ofNullable(packageManager.getApplicationInfo(packageName, 0)))
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "onError getApplicationInfo: '$packageName'")
-        throw Exceptions.propagate(e)
+        return@defer Single.just(Optional.ofNullable(null))
       }
     }
   }
@@ -167,18 +169,21 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
     }.flatMap { loadPackageLabel(it) }
   }
 
-  override fun getActivityInfo(packageName: String, activityName: String): Single<ActivityInfo> {
+  override fun getActivityInfo(packageName: String,
+      activityName: String): Single<Optional<ActivityInfo>> {
     return Single.defer {
       if (packageName.isEmpty() || activityName.isEmpty()) {
-        return@defer Single.just(ActivityInfo())
+        return@defer Single.just(Optional.ofNullable(null))
       }
+
       val componentName = ComponentName(packageName, activityName)
       try {
-        return@defer Single.just(packageManager.getActivityInfo(componentName, 0))
+        return@defer Single.just(
+            Optional.ofNullable(packageManager.getActivityInfo(componentName, 0)))
       } catch (e: PackageManager.NameNotFoundException) {
         // We intentionally leave out the throwable in the call to Timber or logs get too noisy
         Timber.e("Could not get ActivityInfo for: '$packageName', '$activityName'")
-        throw Exceptions.propagate(e)
+        return@defer Single.just(Optional.ofNullable(null))
       }
     }
   }

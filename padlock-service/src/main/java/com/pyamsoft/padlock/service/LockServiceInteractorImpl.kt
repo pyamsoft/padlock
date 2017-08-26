@@ -100,13 +100,13 @@ import javax.inject.Singleton
   @CheckResult private fun prepareLockScreen(windowPackage: String,
       windowActivity: String): MaybeTransformer<Boolean, PadLockEntry> {
     return MaybeTransformer {
-      it.flatMapSingle {
+      it.flatMap {
         Timber.d("Get list of locked classes with package: %s, class: %s", windowPackage,
             windowActivity)
         setLockScreenPassed(windowPackage, windowActivity, false)
-        return@flatMapSingle padLockDBQuery.queryWithPackageActivityNameDefault(windowPackage,
-            windowActivity)
-      }.filter { PadLockEntry.isEmpty(it).not() }
+        return@flatMap padLockDBQuery.queryWithPackageActivityNameDefault(windowPackage,
+            windowActivity).filter { PadLockEntry.isEmpty(it).not() }
+      }
     }
   }
 
@@ -166,18 +166,18 @@ import javax.inject.Singleton
       it.isEmpty.filter {
         Timber.d("Filter if empty: $it")
         return@filter it.not()
-      }.flatMapSingle {
+      }.flatMap {
         Timber.d("Check event from activity: %s %s", packageName, className)
-        return@flatMapSingle packageActivityManager.getActivityInfo(packageName,
-            className).isEmpty.map { it.not() }
-      }.filter {
-        if (it.not()) {
-          Timber.w("Event not caused by activity.")
-          Timber.w("P: %s, C: %s", packageName, className)
-          Timber.w("Ignore")
-        }
+        return@flatMap packageActivityManager.getActivityInfo(packageName,
+            className).map { it.isPresent() }.filter {
+          if (it.not()) {
+            Timber.w("Event not caused by activity.")
+            Timber.w("P: %s, C: %s", packageName, className)
+            Timber.w("Ignore")
+          }
 
-        return@filter it
+          return@filter it
+        }
       }
     }
   }

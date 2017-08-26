@@ -30,7 +30,6 @@ import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.helper.Optional
-import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -82,15 +81,17 @@ import javax.inject.Singleton
           }
           return@BiFunction lockTuples
         }).flatMapObservable { Observable.fromIterable(it) }
-        .flatMapMaybe { createFromPackageInfo(it) }
+        .flatMapSingle { createFromPackageInfo(it) }
         .toSortedList { o1, o2 ->
           o1.name().compareTo(o2.name(), ignoreCase = true)
         }.flatMapObservable { Observable.fromIterable(it) }
   }
 
-  @CheckResult private fun createFromPackageInfo(tuple: LockTuple): Maybe<AppEntry> {
+  @CheckResult private fun createFromPackageInfo(tuple: LockTuple): Single<AppEntry> {
     return applicationManager.getApplicationInfo(tuple.packageName)
-        .flatMap { info ->
+        .filter { it.isPresent() }
+        .map { it.item() }
+        .flatMapSingle { info ->
           labelManager.loadPackageLabel(info)
               .map {
                 AppEntry.builder()
@@ -151,7 +152,7 @@ import javax.inject.Singleton
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
       packageName: String, activityName: String, code: String?,
-      system: Boolean): Maybe<LockState> {
+      system: Boolean): Single<LockState> {
     return modifyInteractor.modifySingleDatabaseEntry(oldLockState, newLockState, packageName,
         activityName, code, system)
   }

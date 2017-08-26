@@ -34,5 +34,5 @@ import javax.inject.Singleton
       Single.fromCallable { preferences.getDefaultIgnoreTime() }
 
   override fun getDisplayName(packageName: String): Single<String> =
-      labelManager.loadPackageLabel(packageName).toSingle("")
+      labelManager.loadPackageLabel(packageName)
 }

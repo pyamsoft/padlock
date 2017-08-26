@@ -100,7 +100,7 @@ import javax.inject.Singleton
       jobSchedulerCompat.cancel(intent)
 
       // Queue up a new recheck job
-      jobSchedulerCompat[intent] = System.currentTimeMillis() + recheckTime
+      jobSchedulerCompat.queue(intent, System.currentTimeMillis() + recheckTime)
     }
   }
 
