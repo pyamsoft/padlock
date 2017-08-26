@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.base.wrapper
 
 import android.content.pm.ApplicationInfo
 import android.support.annotation.CheckResult
+import com.pyamsoft.pydroid.helper.Optional
 import io.reactivex.Maybe
 import io.reactivex.Single
 
@@ -25,5 +26,5 @@ interface PackageApplicationManager {
 
   @CheckResult fun getActiveApplications(): Single<List<ApplicationInfo>>
 
-  @CheckResult fun getApplicationInfo(packageName: String): Single<ApplicationInfo>
+  @CheckResult fun getApplicationInfo(packageName: String): Single<Optional<ApplicationInfo>>
 }
