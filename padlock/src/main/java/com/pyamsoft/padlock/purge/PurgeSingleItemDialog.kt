@@ -22,13 +22,15 @@ import android.support.annotation.CheckResult
 import android.support.v7.app.AlertDialog
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.pydroid.presenter.Presenter
 import javax.inject.Inject
 
 class PurgeSingleItemDialog : CanaryDialog() {
 
-  @Suppress("MemberVisibilityCanPrivate")
   @field:Inject internal lateinit var purgePublisher: PurgePublisher
   private lateinit var packageName: String
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = emptyList()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

@@ -20,8 +20,11 @@ import android.app.Dialog
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.pydroid.presenter.Presenter
 
 class ErrorDialog : CanaryDialog() {
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = emptyList()
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(activity).setTitle("ERROR")
