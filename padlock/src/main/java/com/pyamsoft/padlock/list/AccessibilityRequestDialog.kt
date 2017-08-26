@@ -22,8 +22,11 @@ import android.support.v7.app.AlertDialog
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.uicommon.AccessibilityRequestDelegate
 import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.pydroid.presenter.Presenter
 
 class AccessibilityRequestDialog : CanaryDialog() {
+
+  override fun provideBoundPresenters(): List<Presenter<*, *>> = emptyList()
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(activity).setTitle("Enable PadLock AccessibilityService")
