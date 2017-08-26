@@ -29,10 +29,9 @@ class LockInfoModule(private val packageName: String) {
   @Provides
   @CheckResult internal fun provideInfoPresenter(lockInfoInteractor: LockInfoInteractor, @Named(
       "computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler,
-      bus: EventBus<LockInfoEvent>, modifyInteractor: LockInfoItemInteractor, @Named(
-          "main") mainScheduler: Scheduler): LockInfoPresenter {
-    return LockInfoPresenter(bus, modifyInteractor, packageName, lockInfoInteractor,
-        computationScheduler, ioScheduler, mainScheduler)
+      bus: EventBus<LockInfoEvent>, @Named("main") mainScheduler: Scheduler): LockInfoPresenter {
+    return LockInfoPresenter(bus, packageName, lockInfoInteractor, computationScheduler,
+        ioScheduler, mainScheduler)
   }
 }
 

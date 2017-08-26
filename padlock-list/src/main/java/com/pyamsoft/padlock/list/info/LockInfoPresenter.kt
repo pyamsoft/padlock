@@ -31,9 +31,8 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockInfoPresenter @Inject internal constructor(
-    private val bus: EventBus<LockInfoEvent>,
-    private val modifyInteractor: LockInfoItemInteractor, private val packageName: String,
-    private val lockInfoInteractor: LockInfoInteractor, compScheduler: Scheduler,
+    private val bus: EventBus<LockInfoEvent>, private val packageName: String,
+    private val interactor: LockInfoInteractor, compScheduler: Scheduler,
     ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<BusCallback, Callback>(
     compScheduler,
     ioScheduler, mainScheduler) {
@@ -83,7 +82,7 @@ class LockInfoPresenter @Inject internal constructor(
 
   private fun modifyDatabaseEntry(event: LockInfoEvent.Modify) {
     disposeOnDestroy {
-      modifyInteractor.modifySingleDatabaseEntry(event.oldState(), event.newState,
+      interactor.modifySingleDatabaseEntry(event.oldState(), event.newState,
           event.packageName(),
           event.name(), event.code, event.system)
           .subscribeOn(ioScheduler)
@@ -107,7 +106,7 @@ class LockInfoPresenter @Inject internal constructor(
       onEntryAddedToList: (ActivityEntry) -> Unit, onListPopulateError: (Throwable) -> Unit,
       onListPopulated: () -> Unit) {
     disposeOnStop {
-      lockInfoInteractor.populateList(packageName, forceRefresh)
+      interactor.populateList(packageName, forceRefresh)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .doAfterTerminate { onListPopulated() }
@@ -121,7 +120,7 @@ class LockInfoPresenter @Inject internal constructor(
 
   fun showOnBoarding(onShowOnboarding: () -> Unit, onOnboardingComplete: () -> Unit) {
     disposeOnStop {
-      lockInfoInteractor.hasShownOnBoarding()
+      interactor.hasShownOnBoarding()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
