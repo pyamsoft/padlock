@@ -34,7 +34,7 @@ import javax.inject.Singleton
   override fun populateList(forceRefresh: Boolean): Observable<String> {
     return Observable.defer {
       if (forceRefresh || cachedList == null) {
-        cachedList = impl.populateList(forceRefresh).cache()
+        cachedList = impl.populateList(true).cache()
       }
       return@defer cachedList
     }
