@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.list
 
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Maybe
 import io.reactivex.Observable
@@ -42,7 +43,7 @@ import javax.inject.Singleton
   override fun populateList(force: Boolean): Observable<AppEntry> {
     return Observable.defer {
       if (force || cache == null) {
-        cache = impl.populateList(force).cache()
+        cache = impl.populateList(true).cache()
       }
 
       return@defer cache
@@ -53,7 +54,20 @@ import javax.inject.Singleton
       packageName: String, activityName: String, code: String?, system: Boolean): Maybe<LockState> {
     return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
         code, system)
-        .doOnSuccess { clearCache() }
+        .doOnSuccess {
+          val obj: Observable<AppEntry>? = cache
+          if (obj != null) {
+            cache = obj.map {
+              if (it.packageName() == packageName) {
+                // Update this with the new thing
+                return@map it.toBuilder().locked(newLockState == LOCKED).build()
+              } else {
+                // Pass the original through
+                return@map it
+              }
+            }
+          }
+        }
   }
 
   override fun clearCache() {

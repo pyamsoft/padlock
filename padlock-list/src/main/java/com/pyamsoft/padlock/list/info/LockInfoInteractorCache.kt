@@ -46,7 +46,7 @@ import javax.inject.Singleton
   override fun populateList(packageName: String, force: Boolean): Observable<ActivityEntry> {
     return Observable.defer {
       if (force || cache[packageName] == null) {
-        cache.put(packageName, impl.populateList(packageName, force).cache())
+        cache.put(packageName, impl.populateList(packageName, true).cache())
       }
       return@defer cache[packageName]
     }
