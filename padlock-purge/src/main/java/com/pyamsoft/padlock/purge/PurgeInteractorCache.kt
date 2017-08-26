@@ -42,7 +42,10 @@ import javax.inject.Singleton
 
   override fun deleteEntry(packageName: String): Single<String> {
     return impl.deleteEntry(packageName).doOnSuccess {
-      clearCache()
+      val obj: Observable<String>? = cachedList
+      if (obj != null) {
+        cachedList = obj.filter { it == packageName }
+      }
     }
   }
 }
