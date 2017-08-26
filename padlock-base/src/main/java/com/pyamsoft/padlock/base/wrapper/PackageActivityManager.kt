@@ -25,5 +25,5 @@ interface PackageActivityManager {
 
   @CheckResult fun getActivityListForPackage(packageName: String): Single<List<String>>
 
-  @CheckResult fun getActivityInfo(packageName: String, activityName: String): Maybe<ActivityInfo>
+  @CheckResult fun getActivityInfo(packageName: String, activityName: String): Single<ActivityInfo>
 }

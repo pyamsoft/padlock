@@ -24,9 +24,9 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.support.annotation.CheckResult
-import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.exceptions.Exceptions
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.IOException
@@ -42,12 +42,14 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 
   override fun loadDrawableForPackageOrDefault(packageName: String): Single<Drawable> {
     return Single.fromCallable {
-      var image: Drawable
-      try {
-        image = packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager)
+      val image: Drawable
+      image = try {
+        // Assign
+        packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager)
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "PackageManager error")
-        image = packageManager.defaultActivityIcon
+        // Assign
+        packageManager.defaultActivityIcon
       }
       return@fromCallable image
     }
@@ -68,7 +70,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 
   @CheckResult
   private fun getInstalledApplications(): Observable<ApplicationInfo> {
-    return Single.fromCallable<List<String>> {
+    return Single.fromCallable {
       val process: Process
       var caughtPermissionDenial = false
       val packageNames: MutableList<String> = ArrayList()
@@ -79,12 +81,14 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
         //
         // but it is not a victim of BinderTransaction failures so it will be able to better handle
         // large sets of applications.
-        val command: String
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        val command: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
           // Android N moves package list command to a different, same format, faster command
-          command = "cmd package list packages"
+
+          // Assign
+          "cmd package list packages"
         } else {
-          command = "pm list packages"
+          // Assign
+          "pm list packages"
         }
         process = Runtime.getRuntime().exec(command)
         BufferedReader(
@@ -113,69 +117,68 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
       return@fromCallable packageNames
     }.flatMapObservable { Observable.fromIterable(it) }.map {
       it.replaceFirst("^package:".toRegex(), "")
-    }.flatMapMaybe { getApplicationInfo(it) }
+    }.flatMapSingle { getApplicationInfo(it) }
   }
 
   override fun getActiveApplications(): Single<List<ApplicationInfo>> {
-    return getInstalledApplications().flatMap<ApplicationInfo> { info ->
-      if (!info.enabled) {
-        Timber.i("Application %s is disabled", info.packageName)
+    return getInstalledApplications().flatMap<ApplicationInfo> {
+      if (!it.enabled) {
+        Timber.i("Application %s is disabled", it.packageName)
         return@flatMap Observable.empty()
       }
 
-      if (ANDROID_PACKAGE == info.packageName) {
-        Timber.i("Application %s is Android", info.packageName)
+      if (ANDROID_PACKAGE == it.packageName) {
+        Timber.i("Application %s is Android", it.packageName)
         return@flatMap Observable.empty()
       }
 
-      if (ANDROID_SYSTEM_UI_PACKAGE == info.packageName) {
-        Timber.i("Application %s is System UI", info.packageName)
+      if (ANDROID_SYSTEM_UI_PACKAGE == it.packageName) {
+        Timber.i("Application %s is System UI", it.packageName)
         return@flatMap Observable.empty()
       }
 
-      Timber.d("Successfully processed application: %s", info.packageName)
-      return@flatMap Observable.just(info)
+      Timber.d("Successfully processed application: %s", it.packageName)
+      return@flatMap Observable.just(it)
     }.toList()
   }
 
-  override fun getApplicationInfo(packageName: String): Maybe<ApplicationInfo> {
-    return Maybe.defer<ApplicationInfo> {
+  override fun getApplicationInfo(packageName: String): Single<ApplicationInfo> {
+    return Single.defer {
       try {
-        return@defer Maybe.just(packageManager.getApplicationInfo(packageName, 0))
+        return@defer Single.just(packageManager.getApplicationInfo(packageName, 0))
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "onError getApplicationInfo: '$packageName'")
-        return@defer Maybe.empty()
+        throw Exceptions.propagate(e)
       }
     }
   }
 
-  override fun loadPackageLabel(info: ApplicationInfo): Maybe<String> {
-    return Maybe.fromCallable { info.loadLabel(packageManager) }.map { it.toString() }
-  }
+  override fun loadPackageLabel(info: ApplicationInfo): Single<String> =
+      Single.fromCallable { info.loadLabel(packageManager) }.map { it.toString() }
 
-  override fun loadPackageLabel(packageName: String): Maybe<String> {
-    return Maybe.defer<ApplicationInfo> {
+  override fun loadPackageLabel(packageName: String): Single<String> {
+    return Single.defer {
       try {
-        return@defer Maybe.just(packageManager.getApplicationInfo(packageName, 0))
+        return@defer Single.just(packageManager.getApplicationInfo(packageName, 0))
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "onError loadPackageLabel: '$packageName'")
-        return@defer Maybe.empty()
+        throw Exceptions.propagate(e)
       }
     }.flatMap { loadPackageLabel(it) }
   }
 
-  override fun getActivityInfo(packageName: String, activityName: String): Maybe<ActivityInfo> {
-    return Maybe.defer<ActivityInfo> {
+  override fun getActivityInfo(packageName: String, activityName: String): Single<ActivityInfo> {
+    return Single.defer {
       if (packageName.isEmpty() || activityName.isEmpty()) {
-        return@defer Maybe.empty()
+        return@defer Single.just(ActivityInfo())
       }
       val componentName = ComponentName(packageName, activityName)
       try {
-        return@defer Maybe.just(packageManager.getActivityInfo(componentName, 0))
+        return@defer Single.just(packageManager.getActivityInfo(componentName, 0))
       } catch (e: PackageManager.NameNotFoundException) {
         // We intentionally leave out the throwable in the call to Timber or logs get too noisy
         Timber.e("Could not get ActivityInfo for: '$packageName', '$activityName'")
-        return@defer Maybe.empty()
+        throw Exceptions.propagate(e)
       }
     }
   }

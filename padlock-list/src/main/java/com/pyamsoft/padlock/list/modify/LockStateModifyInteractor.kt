@@ -25,6 +25,6 @@ internal interface LockStateModifyInteractor {
 
   @CheckResult fun modifySingleDatabaseEntry(oldLockState: LockState,
       newLockState: LockState, packageName: String, activityName: String,
-      code: String?, system: Boolean): Maybe<LockState>
+      code: String?, system: Boolean): Single<LockState>
 
 }

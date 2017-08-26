@@ -21,10 +21,12 @@ import io.reactivex.Completable
 
 interface PadLockDBDelete {
 
-  @CheckResult fun deleteWithPackageName(packageName: String): Completable
+  @CheckResult
+  fun deleteWithPackageName(packageName: String): Completable
 
-  @CheckResult fun deleteWithPackageActivityName(packageName: String,
-      activityName: String): Completable
+  @CheckResult
+  fun deleteWithPackageActivityName(packageName: String, activityName: String): Completable
 
-  @CheckResult fun deleteAll(): Completable
+  @CheckResult
+  fun deleteAll(): Completable
 }
