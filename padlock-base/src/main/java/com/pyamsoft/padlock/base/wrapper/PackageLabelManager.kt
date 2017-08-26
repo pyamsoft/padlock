@@ -19,10 +19,11 @@ package com.pyamsoft.padlock.base.wrapper
 import android.content.pm.ApplicationInfo
 import android.support.annotation.CheckResult
 import io.reactivex.Maybe
+import io.reactivex.Single
 
 interface PackageLabelManager {
 
-  @CheckResult fun loadPackageLabel(info: ApplicationInfo): Maybe<String>
+  @CheckResult fun loadPackageLabel(info: ApplicationInfo): Single<String>
 
-  @CheckResult fun loadPackageLabel(packageName: String): Maybe<String>
+  @CheckResult fun loadPackageLabel(packageName: String): Single<String>
 }

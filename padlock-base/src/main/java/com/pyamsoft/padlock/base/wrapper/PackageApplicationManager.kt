@@ -25,5 +25,5 @@ interface PackageApplicationManager {
 
   @CheckResult fun getActiveApplications(): Single<List<ApplicationInfo>>
 
-  @CheckResult fun getApplicationInfo(packageName: String): Maybe<ApplicationInfo>
+  @CheckResult fun getApplicationInfo(packageName: String): Single<ApplicationInfo>
 }

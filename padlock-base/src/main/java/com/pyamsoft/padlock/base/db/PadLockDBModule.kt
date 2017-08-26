@@ -23,26 +23,23 @@ import io.reactivex.Scheduler
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module class PadLockDBModule {
+@Module
+class PadLockDBModule {
 
-  @Singleton @Provides internal fun providePadLockDB(context: Context,
-      @Named("io") scheduler: Scheduler): PadLockDBImpl {
-    return PadLockDBImpl(context.applicationContext, scheduler)
-  }
+  @Singleton
+  @Provides internal fun providePadLockDB(context: Context,
+      @Named("io") scheduler: Scheduler): PadLockDBImpl =
+      PadLockDBImpl(context.applicationContext, scheduler)
 
-  @Singleton @Provides internal fun providePadLockInsert(db: PadLockDBImpl): PadLockDBInsert {
-    return db
-  }
+  @Singleton
+  @Provides internal fun providePadLockInsert(db: PadLockDBImpl): PadLockDBInsert = db
 
-  @Singleton @Provides internal fun providePadLockQuery(db: PadLockDBImpl): PadLockDBQuery {
-    return db
-  }
+  @Singleton
+  @Provides internal fun providePadLockQuery(db: PadLockDBImpl): PadLockDBQuery = db
 
-  @Singleton @Provides internal fun providePadLockUpdate(db: PadLockDBImpl): PadLockDBUpdate {
-    return db
-  }
+  @Singleton
+  @Provides internal fun providePadLockUpdate(db: PadLockDBImpl): PadLockDBUpdate = db
 
-  @Singleton @Provides internal fun providePadLockDelete(db: PadLockDBImpl): PadLockDBDelete {
-    return db
-  }
+  @Singleton
+  @Provides internal fun providePadLockDelete(db: PadLockDBImpl): PadLockDBDelete = db
 }

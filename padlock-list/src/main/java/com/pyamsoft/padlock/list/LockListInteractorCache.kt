@@ -51,7 +51,7 @@ import javax.inject.Singleton
   }
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
-      packageName: String, activityName: String, code: String?, system: Boolean): Maybe<LockState> {
+      packageName: String, activityName: String, code: String?, system: Boolean): Single<LockState> {
     return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
         code, system)
         .doOnSuccess {

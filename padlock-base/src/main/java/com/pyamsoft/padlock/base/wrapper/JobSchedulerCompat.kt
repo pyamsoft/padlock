@@ -22,5 +22,5 @@ interface JobSchedulerCompat {
 
   fun cancel(intent: Intent)
 
-  operator fun set(intent: Intent, triggerTime: Long)
+  fun queue(intent: Intent, triggerTime: Long)
 }
