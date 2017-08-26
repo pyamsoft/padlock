@@ -24,6 +24,7 @@ import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
 import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
+import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
 import dagger.Module
 import dagger.Provides
@@ -31,29 +32,27 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
-class LockListSingletonModule() {
+class LockListSingletonModule {
+
+  @Singleton
+  @Provides
+  @CheckResult internal fun provideBus(): EventBus<LockListEvent> =
+      LockListBus()
 
   @Singleton
   @Provides
   @CheckResult internal fun provideInteractorCache(queryDb: PadLockDBQuery,
       applicationManager: PackageApplicationManager, labelManager: PackageLabelManager,
       activityManager: PackageActivityManager, onboardingPreferences: OnboardingPreferences,
-      lockListPreferences: LockListPreferences): LockListInteractorCache {
+      lockListPreferences: LockListPreferences, modifyInteractor: LockStateModifyInteractor): LockListInteractorCache {
     return LockListInteractorCache(LockListInteractorImpl(queryDb, applicationManager, labelManager,
-        activityManager, onboardingPreferences, lockListPreferences))
+        activityManager, onboardingPreferences, modifyInteractor, lockListPreferences))
   }
 
   @Singleton
   @Provides
   @CheckResult internal fun provideInteractor(
       cache: LockListInteractorCache): LockListInteractor = cache
-
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideItemInteractor(
-      @Named("cache_lock_list") cache: Cache,
-      modifyInteractor: LockStateModifyInteractor): LockListItemInteractor =
-      LockListItemInteractorImpl(cache, modifyInteractor)
 
   @Singleton
   @Provides

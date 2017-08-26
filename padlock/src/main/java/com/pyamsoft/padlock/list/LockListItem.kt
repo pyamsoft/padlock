@@ -20,8 +20,6 @@ import android.databinding.DataBindingUtil
 import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import android.widget.CompoundButton
-import android.widget.CompoundButton.OnCheckedChangeListener
 import com.mikepenz.fastadapter.items.GenericAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
@@ -30,7 +28,6 @@ import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderMap
-import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -63,38 +60,11 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
         .into(holder.binding.lockListIcon)
     loaderMap.put("locked", appIcon)
 
-    holder.binding.lockListToggle.setOnCheckedChangeListener(object : OnCheckedChangeListener {
-      override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-        buttonView.isChecked = !isChecked
-
-        // Unset the listener here so that it is not double bound
-        buttonView.setOnCheckedChangeListener(null)
-
-        Timber.d("Modify the database entry: ${model.packageName()} $isChecked")
-        holder.presenter.modifyDatabaseEntry(isChecked, model.packageName(), null,
-            model.system(), onDatabaseEntryCreated = {
-          Timber.d("Entry created for ${model.packageName()}")
-          updateModel(true)
-          buttonView.isChecked = true
-        }, onDatabaseEntryDeleted = {
-          Timber.d("Entry deleted for ${model.packageName()}")
-          updateModel(false)
-          buttonView.isChecked = false
-        }, onComplete = {
-          // Rebind the listener again once we complete
-          buttonView.setOnCheckedChangeListener(this)
-        }, onDatabaseEntryError = {
-          DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
-        })
-      }
-    })
-
-    holder.presenter.create(Unit)
-    holder.presenter.start(Unit)
-  }
-
-  private fun updateModel(locked: Boolean) {
-    withModel(model.toBuilder().locked(locked).build())
+    holder.binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
+      buttonView.isChecked = isChecked.not()
+      Timber.d("Modify the database entry: ${model.packageName()} $isChecked")
+      holder.publisher.modifyDatabaseEntry(isChecked, model.packageName(), null, model.system())
+    }
   }
 
   override fun unbindView(holder: ViewHolder?) {
@@ -103,8 +73,6 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
       holder.binding.lockListTitle.text = null
       holder.binding.lockListIcon.setImageDrawable(null)
       holder.binding.lockListToggle.setOnCheckedChangeListener(null)
-      holder.presenter.stop()
-      holder.presenter.destroy()
     }
 
     loaderMap.clear()
@@ -113,7 +81,7 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     internal val binding: AdapterItemLocklistBinding = DataBindingUtil.bind(itemView)
-    @Inject internal lateinit var presenter: LockListItemPresenter
+    @Inject internal lateinit var publisher: LockListItemPublisher
 
     init {
       Injector.with(itemView.context) {

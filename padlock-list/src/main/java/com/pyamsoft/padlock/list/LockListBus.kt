@@ -16,6 +16,19 @@
 
 package com.pyamsoft.padlock.list
 
-import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
 
-internal interface LockListItemInteractor : LockStateModifyInteractor
+internal class LockListBus @Inject internal constructor() : EventBus<LockListEvent> {
+
+  private val bus: EventBus<LockListEvent> = RxBus.create()
+
+  override fun listen(): Observable<LockListEvent> = bus.listen()
+
+  override fun publish(event: LockListEvent) {
+    bus.publish(event)
+  }
+
+}

@@ -32,7 +32,6 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
-import com.pyamsoft.padlock.list.LockListPresenter.BusCallback
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.PadLockService
@@ -92,6 +91,31 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback, LockListP
     setupFAB()
 
     presenter.create(this)
+  }
+
+  private fun modifyList(packageName: String, checked: Boolean) {
+    for (i in fastItemAdapter.adapterItems.indices) {
+      val item: LockListItem = fastItemAdapter.getAdapterItem(i)
+      if (packageName == item.model.packageName()) {
+        fastItemAdapter.set(i,
+            LockListItem(activity, item.model.toBuilder().locked(checked).build()))
+        break
+      }
+    }
+  }
+
+  override fun onEntryCreated(packageName: String) {
+    Timber.d("Created entry for $packageName")
+    modifyList(packageName, true)
+  }
+
+  override fun onEntryDeleted(packageName: String) {
+    Timber.d("Deleted entry for $packageName")
+    modifyList(packageName, false)
+  }
+
+  override fun onEntryError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "list_error")
   }
 
   override fun onStart() {

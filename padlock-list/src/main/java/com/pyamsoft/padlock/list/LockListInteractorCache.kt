@@ -17,7 +17,9 @@
 package com.pyamsoft.padlock.list
 
 import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.data.Cache
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
@@ -45,6 +47,13 @@ import javax.inject.Singleton
 
       return@defer cache
     }
+  }
+
+  override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
+      packageName: String, activityName: String, code: String?, system: Boolean): Maybe<LockState> {
+    return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
+        code, system)
+        .doOnSuccess { clearCache() }
   }
 
   override fun clearCache() {
