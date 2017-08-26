@@ -17,11 +17,12 @@
 package com.pyamsoft.padlock.list.info
 
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.ActivityEntry
 import io.reactivex.Observable
 import io.reactivex.Single
 
-internal interface LockInfoInteractor {
+internal interface LockInfoInteractor : LockStateModifyInteractor {
 
   @CheckResult fun hasShownOnBoarding(): Single<Boolean>
 

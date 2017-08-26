@@ -19,15 +19,20 @@ package com.pyamsoft.padlock.list.info
 import android.app.Activity
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockDBQuery
+import com.pyamsoft.padlock.base.db.PadLockDBUpdate
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.base.db.PadLockEntry.WithPackageName
 import com.pyamsoft.padlock.base.preference.OnboardingPreferences
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
+import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.LockState.WHITELISTED
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
+import timber.log.Timber
 import java.util.ArrayList
 import java.util.Collections
 import java.util.concurrent.TimeUnit
@@ -38,6 +43,8 @@ import javax.inject.Singleton
     private val queryDb: PadLockDBQuery,
     private val packageActivityManager: PackageActivityManager,
     private val preferences: OnboardingPreferences,
+    private val updateDb: PadLockDBUpdate,
+    private val modifyInteractor: LockStateModifyInteractor,
     private val lockScreenClass: Class<out Activity>) : LockInfoInteractor {
 
 
@@ -198,6 +205,34 @@ import javax.inject.Singleton
         return@sorted entry1Name.compareTo(entry2Name, ignoreCase = true)
       }
     }
+  }
+
+  override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
+      packageName: String, activityName: String, code: String?,
+      system: Boolean): Maybe<LockState> {
+    return modifyInteractor.modifySingleDatabaseEntry(oldLockState, newLockState, packageName,
+        activityName, code, system)
+        .flatMap {
+          if (it === LockState.NONE) {
+            Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated")
+
+            // Assigned to resultState
+            return@flatMap updateExistingEntry(packageName, activityName,
+                newLockState === WHITELISTED)
+          } else {
+            Timber.d("Entry handled, just pass through")
+
+            // Assigned to resultState
+            return@flatMap Maybe.just(it)
+          }
+        }
+  }
+
+  @CheckResult private fun updateExistingEntry(
+      packageName: String, activityName: String, whitelist: Boolean): Maybe<LockState> {
+    Timber.d("Entry already exists for: %s %s, update it", packageName, activityName)
+    return updateDb.updateWhitelist(whitelist, packageName, activityName)
+        .toSingleDefault(if (whitelist) LockState.WHITELISTED else LockState.LOCKED).toMaybe()
   }
 }
 
