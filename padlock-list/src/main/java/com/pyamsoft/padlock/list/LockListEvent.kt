@@ -16,21 +16,15 @@
 
 package com.pyamsoft.padlock.list
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
-import com.pyamsoft.padlock.model.AppEntry
-import io.reactivex.Observable
-import io.reactivex.Single
+sealed class LockListEvent {
 
+  data class Modify(val packageName: String, val code: String?, val isSystem: Boolean,
+      val isChecked: Boolean) : LockListEvent()
 
-internal interface LockListInteractor : LockStateModifyInteractor {
+  sealed class Callback : LockListEvent() {
 
-  @CheckResult fun populateList(force: Boolean): Observable<AppEntry>
-
-  @CheckResult fun hasShownOnBoarding(): Single<Boolean>
-
-  @CheckResult fun isSystemVisible(): Single<Boolean>
-
-  fun setSystemVisible(visible: Boolean)
+    data class Created(val packageName: String) : Callback()
+    data class Deleted(val packageName: String) : Callback()
+    data class Error(val throwable: Throwable) : Callback()
+  }
 }
-

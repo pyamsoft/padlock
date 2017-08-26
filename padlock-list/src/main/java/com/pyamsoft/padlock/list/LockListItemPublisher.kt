@@ -16,21 +16,13 @@
 
 package com.pyamsoft.padlock.list
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
-import com.pyamsoft.padlock.model.AppEntry
-import io.reactivex.Observable
-import io.reactivex.Single
+import com.pyamsoft.pydroid.bus.EventBus
+import javax.inject.Inject
 
+class LockListItemPublisher @Inject internal constructor(private val bus: EventBus<LockListEvent>) {
 
-internal interface LockListInteractor : LockStateModifyInteractor {
-
-  @CheckResult fun populateList(force: Boolean): Observable<AppEntry>
-
-  @CheckResult fun hasShownOnBoarding(): Single<Boolean>
-
-  @CheckResult fun isSystemVisible(): Single<Boolean>
-
-  fun setSystemVisible(visible: Boolean)
+  fun modifyDatabaseEntry(isChecked: Boolean, packageName: String, code: String?,
+      isSystem: Boolean) {
+    bus.publish(LockListEvent.Modify(packageName, code, isSystem, isChecked))
+  }
 }
-

@@ -26,7 +26,9 @@ import com.pyamsoft.padlock.base.preference.OnboardingPreferences
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
+import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.helper.Optional
 import io.reactivex.Maybe
 import io.reactivex.Observable
@@ -44,6 +46,7 @@ import javax.inject.Singleton
     private val labelManager: PackageLabelManager,
     private val activityManager: PackageActivityManager,
     private val onboardingPreferences: OnboardingPreferences,
+    private val modifyInteractor: LockStateModifyInteractor,
     private val preferences: LockListPreferences) : LockListInteractor {
 
   override fun isSystemVisible(): Single<Boolean> =
@@ -145,6 +148,13 @@ import javax.inject.Singleton
 
   override fun hasShownOnBoarding(): Single<Boolean> =
       Single.fromCallable { onboardingPreferences.isListOnBoard() }
+
+  override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
+      packageName: String, activityName: String, code: String?,
+      system: Boolean): Maybe<LockState> {
+    return modifyInteractor.modifySingleDatabaseEntry(oldLockState, newLockState, packageName,
+        activityName, code, system)
+  }
 
   private data class LockTuple internal constructor(internal val packageName: String,
       internal val locked: Boolean, internal val whitelist: Boolean,

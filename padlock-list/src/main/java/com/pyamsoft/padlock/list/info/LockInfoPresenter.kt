@@ -34,11 +34,19 @@ class LockInfoPresenter @Inject internal constructor(
     private val bus: EventBus<LockInfoEvent>,
     private val modifyInteractor: LockInfoItemInteractor, private val packageName: String,
     private val lockInfoInteractor: LockInfoInteractor, compScheduler: Scheduler,
-    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<BusCallback, Callback>(compScheduler,
+    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<BusCallback, Callback>(
+    compScheduler,
     ioScheduler, mainScheduler) {
 
   override fun onCreate(bound: BusCallback) {
     super.onCreate(bound)
+    registerOnModifyBus(bound::onEntryCreated, bound::onEntryDeleted, bound::onEntryWhitelisted,
+        bound::onEntryError)
+  }
+
+  private fun registerOnModifyBus(onEntryCreated: (String) -> Unit,
+      onEntryDeleted: (String) -> Unit, onEntryWhitelisted: (String) -> Unit,
+      onEntryError: (Throwable) -> Unit) {
     disposeOnDestroy {
       bus.listen()
           .filter { it is LockInfoEvent.Modify }
@@ -56,16 +64,15 @@ class LockInfoPresenter @Inject internal constructor(
           .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
-              is Created -> bound.onEntryCreated(it.id)
-              is Deleted -> bound.onEntryDeleted(it.id)
-              is Whitelisted -> bound.onEntryWhitelisted(it.id)
+              is Created -> onEntryCreated(it.id)
+              is Deleted -> onEntryDeleted(it.id)
+              is Whitelisted -> onEntryWhitelisted(it.id)
             }
           }, {
             Timber.e(it, "Error listening to lock info bus")
-            bound.onEntryError(it)
+            onEntryError(it)
           })
     }
-
   }
 
   override fun onStart(bound: Callback) {
