@@ -151,9 +151,9 @@ import javax.inject.Singleton
   override fun getHint(): Single<String> {
     return masterPinInteractor.getHint().map {
       if (it.isPresent()) {
-        return@map ""
-      } else {
         return@map it.item()
+      } else {
+        return@map ""
       }
     }
   }
