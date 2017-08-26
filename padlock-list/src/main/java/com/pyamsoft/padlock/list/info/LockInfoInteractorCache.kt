@@ -34,7 +34,21 @@ import javax.inject.Singleton
       packageName: String, activityName: String, code: String?, system: Boolean): Maybe<LockState> {
     return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
         code, system)
-        .doOnSuccess { clearCache() }
+        .doOnSuccess {
+          val obj: MutableMap<String, Observable<ActivityEntry>?>? = cache
+          if (obj != null) {
+            val cached: Observable<ActivityEntry>? = obj[packageName]
+            if (cached != null) {
+              obj.put(packageName, cached.map {
+                if (it.packageName() == packageName && it.name() == activityName) {
+                  return@map it.toBuilder().lockState(newLockState).build()
+                } else {
+                  return@map it
+                }
+              })
+            }
+          }
+        }
   }
 
   override fun clearCache() {
