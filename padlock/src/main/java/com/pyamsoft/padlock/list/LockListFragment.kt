@@ -126,6 +126,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback, LockListP
   override fun onResume() {
     super.onResume()
     setActionBarUpEnabled(false)
+    setActionBarTitle(R.string.app_name)
     AnimUtil.popShow(binding.applistFab, 300, 400)
   }
 

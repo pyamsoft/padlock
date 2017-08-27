@@ -118,6 +118,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.Callback, PurgePresenter.
   override fun onResume() {
     super.onResume()
     setActionBarUpEnabled(false)
+    setActionBarTitle(R.string.app_name)
   }
 
   override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
