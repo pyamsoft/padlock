@@ -135,6 +135,7 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
   override fun onResume() {
     super.onResume()
     setActionBarUpEnabled(false)
+    setActionBarTitle(R.string.app_name)
   }
 
   override fun onDestroy() {

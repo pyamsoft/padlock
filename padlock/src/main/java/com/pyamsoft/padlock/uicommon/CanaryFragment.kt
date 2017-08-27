@@ -24,12 +24,6 @@ import com.pyamsoft.pydroid.ui.app.fragment.DisposableFragment
 abstract class CanaryFragment : DisposableFragment() {
 
   @CallSuper
-  override fun onResume() {
-    super.onResume()
-    setActionBarTitle(R.string.app_name)
-  }
-
-  @CallSuper
   override fun onDestroy() {
     super.onDestroy()
     PadLock.getRefWatcher(this).watch(this)
