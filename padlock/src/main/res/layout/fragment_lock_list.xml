@@ -32,12 +32,30 @@
         android:layout_height="wrap_content"
         >
 
-      <android.support.v7.widget.RecyclerView
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          android:id="@+id/applist_recyclerview"
+      <FrameLayout
           android:layout_width="match_parent"
           android:layout_height="match_parent"
-          />
+          >
+
+        <TextView
+            android:id="@+id/applist_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/no_applications_found"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/applist_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            />
+
+      </FrameLayout>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

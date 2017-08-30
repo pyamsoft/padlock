@@ -269,6 +269,9 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback, LockListP
     setRefreshing(true)
     fastItemAdapter.clear()
     binding.applistFab.hide()
+
+    binding.applistEmpty.visibility = View.GONE
+    binding.applistRecyclerview.visibility = View.GONE
   }
 
   override fun onEntryAddedToList(entry: AppEntry) {
@@ -279,7 +282,9 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback, LockListP
     setRefreshing(false)
     binding.applistFab.show()
 
-    if (fastItemAdapter.adapterItemCount > 1) {
+    if (fastItemAdapter.adapterItemCount > 0) {
+      binding.applistEmpty.visibility = View.GONE
+      binding.applistRecyclerview.visibility = View.VISIBLE
       Timber.d("We have refreshed")
       presenter.showOnBoarding(onOnboardingComplete = {
         Timber.d("onboarding complete")
@@ -287,6 +292,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.Callback, LockListP
         Timber.d("Show onboarding")
       })
     } else {
+      binding.applistRecyclerview.visibility = View.GONE
+      binding.applistEmpty.visibility = View.VISIBLE
       Toasty.makeText(context, "Error while loading list. Please try again.",
           Toast.LENGTH_SHORT).show()
     }

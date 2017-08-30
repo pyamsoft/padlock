@@ -109,12 +109,31 @@
         android:layout_height="wrap_content"
         >
 
-      <android.support.v7.widget.RecyclerView
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          android:id="@+id/lock_info_recycler"
+      <FrameLayout
           android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          />
+          android:layout_height="match_parent"
+          >
+
+        <TextView
+            android:id="@+id/lock_info_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:gravity="center"
+            android:text="@string/no_lockable_activities"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/lock_info_recycler"
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            android:layout_height="wrap_content"
+            />
+
+
+      </FrameLayout>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

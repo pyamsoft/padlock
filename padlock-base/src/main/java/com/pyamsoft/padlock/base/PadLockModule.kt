@@ -29,6 +29,7 @@ import com.pyamsoft.padlock.base.preference.OnboardingPreferences
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiverImpl
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
+import com.pyamsoft.pydroid.data.Cache
 import dagger.Module
 import dagger.Provides
 import io.reactivex.Scheduler
@@ -84,13 +85,12 @@ class PadLockModule(context: Context,
   @Provides
   @CheckResult internal fun provideApplicationInstallReceiver(
       packageManagerWrapper: PackageLabelManager,
-      @Named("computation") computationScheduler: Scheduler,
       @Named("io") ioScheduler: Scheduler,
       @Named("main") mainThreadScheduler: Scheduler,
-      @Named("main_activity") mainActivityClass: Class<out Activity>): ApplicationInstallReceiver {
-    return ApplicationInstallReceiverImpl(appContext, packageManagerWrapper, computationScheduler,
-        ioScheduler, mainThreadScheduler, mainActivityClass)
-  }
+      @Named("main_activity") mainActivityClass: Class<out Activity>,
+      @Named("cache_purge") purgeCache: Cache): ApplicationInstallReceiver =
+      ApplicationInstallReceiverImpl(appContext, packageManagerWrapper, ioScheduler,
+          mainThreadScheduler, mainActivityClass, purgeCache)
 
   @Singleton
   @Provides

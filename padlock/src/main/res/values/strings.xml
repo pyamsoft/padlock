@@ -79,4 +79,7 @@
   \n\nYou can set more specific options for locking applications in this detail dialog.</string>
   <string name="onboard_lock_package_msg">Toggle the switches into the ON state to lock an entire application. This will cause PadLock to secure the requested application.
   \n\nIn this mode, unlocking a single screen in an application will unlock the entire application for that session.</string>
+  <string name="purge_all_clean">No old locked items, all clean!</string>
+  <string name="no_lockable_activities">No lockable Activities found, nothing to do here!</string>
+  <string name="no_applications_found">No Applications found, go install some applications!</string>
 </resources>

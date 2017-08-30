@@ -40,7 +40,8 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
 
   override fun onStart(bound: Callback) {
     super.onStart(bound)
-    retrieveStaleApplications(false, bound::onStaleApplicationReceived, bound::onRetrievalCompleted)
+    retrieveStaleApplications(false, bound::onRetrieveBegin, bound::onStaleApplicationReceived,
+        bound::onRetrievalCompleted)
   }
 
   private fun registerOnBus(onPurge: (String) -> Unit, onPurgeAll: () -> Unit) {
@@ -63,12 +64,14 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
     }
   }
 
-  fun retrieveStaleApplications(force: Boolean, onStaleApplicationRetrieved: (String) -> Unit,
+  fun retrieveStaleApplications(force: Boolean, onRetrieveBegin: () -> Unit,
+      onStaleApplicationRetrieved: (String) -> Unit,
       onRetrievalComplete: () -> Unit) {
     disposeOnStop {
       interactor.populateList(force)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
+          .doOnSubscribe { onRetrieveBegin() }
           .doAfterTerminate { onRetrievalComplete() }
           .subscribe({ onStaleApplicationRetrieved(it) },
               { Timber.e(it, "onError retrieveStaleApplications") })
@@ -93,6 +96,8 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
   }
 
   interface Callback {
+
+    fun onRetrieveBegin()
 
     fun onStaleApplicationReceived(pacakgeName: String)
 
