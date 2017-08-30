@@ -168,9 +168,8 @@ import javax.inject.Singleton
         return@filter it.not()
       }.flatMap {
         Timber.d("Check event from activity: %s %s", packageName, className)
-        return@flatMap packageActivityManager.getActivityInfo(packageName,
-            className).map { it.isEmpty() }.filter {
-          if (it) {
+        return@flatMap packageActivityManager.isValidActivity(packageName, className).filter {
+          if (it.not()) {
             Timber.w("Event not caused by activity.")
             Timber.w("P: %s, C: %s", packageName, className)
             Timber.w("Ignore")

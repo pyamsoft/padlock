@@ -26,8 +26,8 @@ import android.os.Build
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.ext.isSystemApplication
 import com.pyamsoft.padlock.base.preference.LockListPreferences
-import com.pyamsoft.padlock.base.wrapper.PackageActivityManager.ActivityItem
 import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager.ApplicationItem
+import com.pyamsoft.pydroid.helper.Optional
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.exceptions.Exceptions
@@ -155,9 +155,13 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   override fun getApplicationInfo(packageName: String): Single<ApplicationItem> {
     return Single.defer {
       try {
-        val info: ApplicationInfo = packageManager.getApplicationInfo(packageName, 0)
-        return@defer Single.just(
-            ApplicationItem(info.packageName, info.isSystemApplication(), info.enabled))
+        val info: ApplicationInfo? = packageManager.getApplicationInfo(packageName, 0)
+        if (info == null) {
+          return@defer Single.just(ApplicationItem.EMPTY)
+        } else {
+          return@defer Single.just(
+              ApplicationItem(info.packageName, info.isSystemApplication(), info.enabled))
+        }
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "onError getApplicationInfo: '$packageName'")
         return@defer Single.just(ApplicationItem.EMPTY)
@@ -168,13 +172,18 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   override fun loadPackageLabel(packageName: String): Single<String> {
     return Single.defer {
       try {
-        return@defer Single.just(packageManager.getApplicationInfo(packageName, 0))
+        return@defer Single.just(
+            Optional.ofNullable(packageManager.getApplicationInfo(packageName, 0)))
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "onError loadPackageLabel: '$packageName'")
         throw Exceptions.propagate(e)
       }
     }.flatMap {
-      loadPackageLabel(it)
+      if (it.isPresent()) {
+        return@flatMap loadPackageLabel(it.item())
+      } else {
+        return@flatMap Single.just("")
+      }
     }
   }
 
@@ -183,21 +192,20 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
     info.loadLabel(packageManager)?.toString() ?: ""
   }
 
-  override fun getActivityInfo(packageName: String,
-      activityName: String): Single<ActivityItem> {
+  override fun isValidActivity(packageName: String, activityName: String): Single<Boolean> {
     return Single.defer {
       if (packageName.isEmpty() || activityName.isEmpty()) {
-        return@defer Single.just(ActivityItem.EMPTY)
+        return@defer Single.just(false)
       }
 
       val componentName = ComponentName(packageName, activityName)
       try {
-        val info: ActivityInfo = packageManager.getActivityInfo(componentName, 0)
-        return@defer Single.just(ActivityItem(info.packageName))
+        val info: ActivityInfo? = packageManager.getActivityInfo(componentName, 0)
+        return@defer Single.just(info != null)
       } catch (e: PackageManager.NameNotFoundException) {
         // We intentionally leave out the throwable in the call to Timber or logs get too noisy
         Timber.e("Could not get ActivityInfo for: '$packageName', '$activityName'")
-        return@defer Single.just(ActivityItem.EMPTY)
+        return@defer Single.just(false)
       }
     }
   }
