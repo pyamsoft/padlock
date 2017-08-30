@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.base.wrapper
 
 import android.content.Context
+import com.pyamsoft.padlock.base.preference.LockListPreferences
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -26,7 +27,9 @@ class PackageManagerWrapperModule {
 
   @Singleton
   @Provides internal fun providePackageManagerWrapper(
-      context: Context): PackageManagerWrapperImpl = PackageManagerWrapperImpl(context)
+      context: Context,
+      listPreferences: LockListPreferences): PackageManagerWrapperImpl = PackageManagerWrapperImpl(
+      context, listPreferences)
 
   @Singleton
   @Provides internal fun providePackageActivityManager(

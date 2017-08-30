@@ -16,15 +16,28 @@
 
 package com.pyamsoft.padlock.base.wrapper
 
-import android.content.pm.ApplicationInfo
 import android.support.annotation.CheckResult
-import com.pyamsoft.pydroid.helper.Optional
-import io.reactivex.Maybe
 import io.reactivex.Single
 
 interface PackageApplicationManager {
 
-  @CheckResult fun getActiveApplications(): Single<List<ApplicationInfo>>
+  @CheckResult
+  fun getActiveApplications(): Single<List<ApplicationItem>>
 
-  @CheckResult fun getApplicationInfo(packageName: String): Single<Optional<ApplicationInfo>>
+  @CheckResult
+  fun getApplicationInfo(packageName: String): Single<ApplicationItem>
+
+  data class ApplicationItem(val packageName: String, val system: Boolean, val enabled: Boolean) {
+
+    @CheckResult
+    fun isEmpty(): Boolean = packageName.isEmpty()
+
+    companion object {
+
+      @JvmStatic
+      val EMPTY = ApplicationItem("", false, false)
+
+    }
+
+  }
 }

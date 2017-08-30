@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.list
 
-import android.content.pm.ApplicationInfo
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockDBQuery
 import com.pyamsoft.padlock.base.db.PadLockEntry
@@ -25,11 +24,11 @@ import com.pyamsoft.padlock.base.preference.LockListPreferences
 import com.pyamsoft.padlock.base.preference.OnboardingPreferences
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager
+import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager.ApplicationItem
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
 import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
-import com.pyamsoft.pydroid.helper.Optional
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -81,67 +80,48 @@ import javax.inject.Singleton
           }
           return@BiFunction lockTuples
         }).flatMapObservable { Observable.fromIterable(it) }
-        .flatMapSingle { createFromPackageInfo(it) }
+        .flatMapSingle { createFromPackageInfo(it.packageName, it.locked) }
         .toSortedList { o1, o2 ->
           o1.name().compareTo(o2.name(), ignoreCase = true)
         }.flatMapObservable { Observable.fromIterable(it) }
   }
 
-  @CheckResult private fun createFromPackageInfo(tuple: LockTuple): Single<AppEntry> {
-    return applicationManager.getApplicationInfo(tuple.packageName)
-        .filter { it.isPresent() }
-        .map { it.item() }
-        .flatMapSingle { info ->
-          labelManager.loadPackageLabel(info)
+  @CheckResult private fun createFromPackageInfo(packageName: String,
+      locked: Boolean): Single<AppEntry> {
+    return applicationManager.getApplicationInfo(packageName)
+        .flatMap { item ->
+          labelManager.loadPackageLabel(item)
               .map {
                 AppEntry.builder()
                     .name(it)
-                    .packageName(tuple.packageName)
-                    .system(isSystemApplication(info))
-                    .locked(tuple.locked)
+                    .packageName(item.packageName)
+                    .system(item.system)
+                    .locked(locked)
                     .build()
               }
         }
   }
 
-  @CheckResult private fun isSystemApplication(info: ApplicationInfo): Boolean =
-      info.flags and ApplicationInfo.FLAG_SYSTEM != 0
-
-  @CheckResult private fun getActiveApplications(): Observable<ApplicationInfo> {
-    return applicationManager.getActiveApplications()
-        .flatMapObservable { Observable.fromIterable(it) }
-  }
-
-  @CheckResult private fun getValidApplicationList(): Observable<ApplicationInfo> {
-    return getActiveApplications().withLatestFrom(isSystemVisible().toObservable(),
-        BiFunction<ApplicationInfo, Boolean, Optional<ApplicationInfo>> { application, systemVisible ->
-          var info: ApplicationInfo? = application
-
-          // If not system visible and this is a system app, hide it
-          if (!systemVisible && isSystemApplication(application)) {
-            info = null
-          }
-          return@BiFunction Optional.ofNullable(info)
-        }).filter { it.isPresent() }.map { it.item() }
-  }
-
+  @CheckResult private fun getActiveApplications(): Observable<ApplicationItem> =
+      applicationManager.getActiveApplications().flatMapObservable {
+        Observable.fromIterable(it)
+      }
 
   @CheckResult private fun getActivityListForApplication(
-      info: ApplicationInfo): Single<List<String>> =
-      activityManager.getActivityListForPackage(info.packageName)
+      item: ApplicationItem): Single<List<String>> =
+      activityManager.getActivityListForPackage(item.packageName)
 
   @CheckResult private fun getValidPackageNames(): Single<List<String>> {
-    return getValidApplicationList().flatMapSingle { info ->
-      getActivityListForApplication(info).map {
+    return getActiveApplications().flatMapSingle { item ->
+      getActivityListForApplication(item).map {
         if (it.isEmpty()) {
-          Timber.w("Entry: %s has no activities, hide it", info.packageName)
+          Timber.w("Entry: %s has no activities, hide it", item.packageName)
           return@map ""
         } else {
-          return@map info.packageName
+          return@map item.packageName
         }
       }
-    }.filter { it.isNotBlank() }
-        .toList()
+    }.filter { it.isNotBlank() }.toList()
   }
 
   @CheckResult private fun getAppEntryList(): Single<List<PadLockEntry.AllEntries>> =
