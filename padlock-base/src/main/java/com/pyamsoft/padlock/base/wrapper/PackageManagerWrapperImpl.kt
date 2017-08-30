@@ -24,7 +24,10 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.support.annotation.CheckResult
-import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.padlock.base.ext.isSystemApplication
+import com.pyamsoft.padlock.base.preference.LockListPreferences
+import com.pyamsoft.padlock.base.wrapper.PackageActivityManager.ActivityItem
+import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager.ApplicationItem
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.exceptions.Exceptions
@@ -37,7 +40,8 @@ import java.util.ArrayList
 import javax.inject.Inject
 
 internal class PackageManagerWrapperImpl @Inject internal constructor(
-    context: Context) : PackageActivityManager, PackageApplicationManager, PackageLabelManager, PackageDrawableManager {
+    context: Context,
+    private val listPreferences: LockListPreferences) : PackageActivityManager, PackageApplicationManager, PackageLabelManager, PackageDrawableManager {
 
   private val packageManager: PackageManager = context.applicationContext.packageManager
 
@@ -70,7 +74,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getInstalledApplications(): Observable<ApplicationInfo> {
+  private fun getInstalledApplications(): Observable<ApplicationItem> {
     return Single.fromCallable {
       val process: Process
       var caughtPermissionDenial = false
@@ -118,13 +122,18 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
       return@fromCallable packageNames
     }.flatMapObservable { Observable.fromIterable(it) }.map {
       it.replaceFirst("^package:".toRegex(), "")
-    }.flatMapSingle { getApplicationInfo(it) }.filter { it.isPresent() }.map { it.item() }
+    }.flatMapSingle { getApplicationInfo(it) }.filter { it.isEmpty().not() }
   }
 
-  override fun getActiveApplications(): Single<List<ApplicationInfo>> {
-    return getInstalledApplications().flatMap<ApplicationInfo> {
+  override fun getActiveApplications(): Single<List<ApplicationItem>> {
+    return getInstalledApplications().flatMap<ApplicationItem> {
       if (!it.enabled) {
         Timber.i("Application %s is disabled", it.packageName)
+        return@flatMap Observable.empty()
+      }
+
+      if (it.system && !listPreferences.isSystemVisible()) {
+        Timber.i("Hide system application: %s", it.packageName)
         return@flatMap Observable.empty()
       }
 
@@ -143,20 +152,18 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
     }.toList()
   }
 
-  override fun getApplicationInfo(packageName: String): Single<Optional<ApplicationInfo>> {
+  override fun getApplicationInfo(packageName: String): Single<ApplicationItem> {
     return Single.defer {
       try {
+        val info: ApplicationInfo = packageManager.getApplicationInfo(packageName, 0)
         return@defer Single.just(
-            Optional.ofNullable(packageManager.getApplicationInfo(packageName, 0)))
+            ApplicationItem(info.packageName, info.isSystemApplication(), info.enabled))
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "onError getApplicationInfo: '$packageName'")
-        return@defer Single.just(Optional.ofNullable(null))
+        return@defer Single.just(ApplicationItem.EMPTY)
       }
     }
   }
-
-  override fun loadPackageLabel(info: ApplicationInfo): Single<String> =
-      Single.fromCallable { info.loadLabel(packageManager) }.map { it.toString() }
 
   override fun loadPackageLabel(packageName: String): Single<String> {
     return Single.defer {
@@ -166,24 +173,31 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
         Timber.e(e, "onError loadPackageLabel: '$packageName'")
         throw Exceptions.propagate(e)
       }
-    }.flatMap { loadPackageLabel(it) }
+    }.flatMap {
+      loadPackageLabel(it)
+    }
+  }
+
+  @CheckResult
+  private fun loadPackageLabel(info: ApplicationInfo): Single<String> = Single.fromCallable {
+    info.loadLabel(packageManager)?.toString() ?: ""
   }
 
   override fun getActivityInfo(packageName: String,
-      activityName: String): Single<Optional<ActivityInfo>> {
+      activityName: String): Single<ActivityItem> {
     return Single.defer {
       if (packageName.isEmpty() || activityName.isEmpty()) {
-        return@defer Single.just(Optional.ofNullable(null))
+        return@defer Single.just(ActivityItem.EMPTY)
       }
 
       val componentName = ComponentName(packageName, activityName)
       try {
-        return@defer Single.just(
-            Optional.ofNullable(packageManager.getActivityInfo(componentName, 0)))
+        val info: ActivityInfo = packageManager.getActivityInfo(componentName, 0)
+        return@defer Single.just(ActivityItem(info.packageName))
       } catch (e: PackageManager.NameNotFoundException) {
         // We intentionally leave out the throwable in the call to Timber or logs get too noisy
         Timber.e("Could not get ActivityInfo for: '$packageName', '$activityName'")
-        return@defer Single.just(Optional.ofNullable(null))
+        return@defer Single.just(ActivityItem.EMPTY)
       }
     }
   }

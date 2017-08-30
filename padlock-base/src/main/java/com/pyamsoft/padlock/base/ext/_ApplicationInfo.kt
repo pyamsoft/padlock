@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.wrapper
+@file:JvmName("ApplicationInfoKt")
+@file:JvmMultifileClass
 
+package com.pyamsoft.padlock.base.ext
+
+import android.content.pm.ApplicationInfo
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager.ApplicationItem
-import io.reactivex.Single
 
-interface PackageLabelManager {
-
-  @CheckResult
-  fun loadPackageLabel(info: ApplicationItem): Single<String> =
-      loadPackageLabel(info.packageName)
-
-  @CheckResult
-  fun loadPackageLabel(packageName: String): Single<String>
-}
+@CheckResult
+internal fun ApplicationInfo.isSystemApplication(): Boolean = flags and ApplicationInfo.FLAG_SYSTEM != 0
