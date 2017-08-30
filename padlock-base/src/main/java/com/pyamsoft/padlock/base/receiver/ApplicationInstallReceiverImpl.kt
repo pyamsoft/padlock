@@ -33,24 +33,22 @@ import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.base.R
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
-import com.pyamsoft.pydroid.helper.enforceComputation
+import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.helper.enforceIo
 import com.pyamsoft.pydroid.helper.enforceMainThread
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class ApplicationInstallReceiverImpl @Inject internal constructor(
     context: Context,
     private val packageManagerWrapper: PackageLabelManager,
-    @param:Named("computation") private val computationScheduler: Scheduler,
-    @param:Named("io") private val ioScheduler: Scheduler,
-    @param:Named("main") private val mainThreadScheduler: Scheduler,
-    @Named(
-        "main_activity") mainActivityClass: Class<out Activity>) : BroadcastReceiver(), ApplicationInstallReceiver {
+    private val ioScheduler: Scheduler,
+    private val mainThreadScheduler: Scheduler,
+    mainActivityClass: Class<out Activity>,
+    private val purgeCache: Cache) : BroadcastReceiver(), ApplicationInstallReceiver {
 
   private val notificationChannelId: String = "padlock_new_apps"
   private val appContext: Context = context.applicationContext
@@ -69,7 +67,6 @@ import javax.inject.Singleton
     notificationManager = appContext.getSystemService(
         Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    computationScheduler.enforceComputation()
     ioScheduler.enforceIo()
     mainThreadScheduler.enforceMainThread()
 
@@ -104,6 +101,7 @@ import javax.inject.Singleton
     val packageName = data.schemeSpecificPart
 
     compositeDisposable.add(packageManagerWrapper.loadPackageLabel(packageName)
+        .doAfterSuccess { purgeCache.clearCache() }
         .subscribeOn(ioScheduler)
         .observeOn(mainThreadScheduler)
         .subscribe({ s ->

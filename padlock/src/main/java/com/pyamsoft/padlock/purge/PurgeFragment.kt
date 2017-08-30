@@ -108,7 +108,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.Callback, PurgePresenter.
 
   private fun refreshList() {
     prepareRefresh()
-    presenter.retrieveStaleApplications(true, {
+    presenter.retrieveStaleApplications(true, { onRetrieveBegin() }, {
       onStaleApplicationReceived(it)
     }, {
       onRetrievalCompleted()
@@ -203,6 +203,11 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.Callback, PurgePresenter.
     }
   }
 
+  override fun onRetrieveBegin() {
+    binding.purgeEmpty.visibility = View.GONE
+    binding.purgeList.visibility = View.GONE
+  }
+
   override fun onStaleApplicationReceived(pacakgeName: String) {
     fastItemAdapter.add(PurgeItem(pacakgeName))
   }
@@ -215,6 +220,14 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.Callback, PurgePresenter.
           binding.purgeSwipeRefresh.isRefreshing = false
         }
       }
+    }
+
+    if (fastItemAdapter.adapterItemCount > 0) {
+      binding.purgeEmpty.visibility = View.GONE
+      binding.purgeList.visibility = View.VISIBLE
+    } else {
+      binding.purgeList.visibility = View.GONE
+      binding.purgeEmpty.visibility = View.VISIBLE
     }
   }
 

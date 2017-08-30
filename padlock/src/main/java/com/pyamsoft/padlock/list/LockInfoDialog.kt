@@ -178,6 +178,9 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback, LockInfoPrese
   override fun onBegin() {
     setRefreshing(true)
     fastItemAdapter.clear()
+
+    binding.lockInfoEmpty.visibility = View.GONE
+    binding.lockInfoRecycler.visibility = View.GONE
   }
 
   override fun onAdd(entry: ActivityEntry) {
@@ -192,6 +195,9 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback, LockInfoPrese
     setRefreshing(false)
 
     if (fastItemAdapter.adapterItemCount > 0) {
+      binding.lockInfoEmpty.visibility = View.GONE
+      binding.lockInfoRecycler.visibility = View.VISIBLE
+
       Timber.d("Refresh finished")
       presenter.showOnBoarding(onShowOnboarding = {
         Timber.d("Show onboarding")
@@ -199,6 +205,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback, LockInfoPrese
         Timber.d("No onboarding")
       })
     } else {
+      binding.lockInfoRecycler.visibility = View.GONE
+      binding.lockInfoEmpty.visibility = View.VISIBLE
       Toasty.makeText(context, "Error while loading list. Please try again.",
           Toast.LENGTH_SHORT).show()
     }
