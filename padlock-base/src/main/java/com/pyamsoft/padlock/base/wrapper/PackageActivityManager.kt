@@ -25,19 +25,5 @@ interface PackageActivityManager {
   fun getActivityListForPackage(packageName: String): Single<List<String>>
 
   @CheckResult
-  fun getActivityInfo(packageName: String, activityName: String): Single<ActivityItem>
-
-  data class ActivityItem(val packageName: String) {
-
-    @CheckResult
-    fun isEmpty(): Boolean = packageName.isEmpty()
-
-    companion object {
-
-      @JvmStatic
-      val EMPTY = ActivityItem("")
-
-    }
-
-  }
+  fun isValidActivity(packageName: String, activityName: String): Single<Boolean>
 }
