@@ -52,6 +52,8 @@ class PadLock : Application(), ComponentProvider {
     Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
     Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight")
     Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
+    Licenses.create("FastAdapter", "https://github.com/mikepenz/fastadapter",
+        "licenses/fastadapter")
     Licenses.create("Firebase", "https://firebase.google.com", "licenses/firebase")
     Licenses.create("PatternLockView", "https://github.com/aritraroy/PatternLockView",
         "licenses/patternlock")
