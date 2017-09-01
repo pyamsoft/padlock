@@ -21,8 +21,10 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
-@Module class JobSchedulerCompatModule {
+@Module
+class JobSchedulerCompatModule {
 
-  @Singleton @Provides internal fun provideJobSchedulerCompat(
+  @Singleton
+  @Provides internal fun provideJobSchedulerCompat(
       context: Context): JobSchedulerCompat = JobSchedulerCompatImpl(context)
 }

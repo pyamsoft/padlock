@@ -24,7 +24,7 @@ import com.pyamsoft.pydroid.presenter.Presenter
 
 class ErrorDialog : CanaryDialog() {
 
-  override fun provideBoundPresenters(): List<Presenter< *>> = emptyList()
+  override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(activity).setTitle("ERROR")

@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.uicommon
 
 import android.support.annotation.CallSuper
 import com.pyamsoft.padlock.PadLock
-import com.pyamsoft.padlock.R
 import com.pyamsoft.pydroid.ui.app.fragment.DisposableFragment
 
 abstract class CanaryFragment : DisposableFragment() {
