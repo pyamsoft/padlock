@@ -67,17 +67,16 @@ class PadLockService : AccessibilityService(), Callback {
       it.inject(this)
     }
 
-    presenter.create(this)
+    presenter.bind(this)
   }
 
   override fun onDestroy() {
     super.onDestroy()
-    presenter.destroy()
+    presenter.unbind()
   }
 
   override fun onServiceConnected() {
     super.onServiceConnected()
-    presenter.start(Unit)
     isRunning = true
   }
 
@@ -92,7 +91,6 @@ class PadLockService : AccessibilityService(), Callback {
   }
 
   override fun onUnbind(intent: Intent): Boolean {
-    presenter.stop()
     isRunning = false
     return super.onUnbind(intent)
   }

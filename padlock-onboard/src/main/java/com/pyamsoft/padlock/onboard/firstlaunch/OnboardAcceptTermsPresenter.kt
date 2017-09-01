@@ -26,12 +26,12 @@ class OnboardAcceptTermsPresenter @Inject internal constructor(
     private val interactor: OnboardAcceptTermsInteractor,
     @Named("computation") compScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Unit, Unit>(compScheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Unit>(compScheduler,
     ioScheduler,
     mainScheduler) {
 
   fun acceptUsageTerms(onUsageTermsAccepted: () -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.agreeToTerms()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)

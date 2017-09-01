@@ -30,7 +30,7 @@ class ConfirmationDialog : CanaryDialog() {
   @field:Inject internal lateinit var publisher: SettingsPublisher
   private lateinit var type: ConfirmEvent
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = emptyList()
+  override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

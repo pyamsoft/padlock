@@ -30,7 +30,6 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
 import com.pyamsoft.padlock.list.ErrorDialog
-import com.pyamsoft.padlock.lock.LockEntryPresenter.Callback
 import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
@@ -39,7 +38,7 @@ import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenTextFragment : LockScreenBaseFragment(), Callback {
+class LockScreenTextFragment : LockScreenBaseFragment() {
 
   private lateinit var imm: InputMethodManager
   private lateinit var binding: FragmentLockScreenTextBinding
@@ -47,7 +46,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), Callback {
   private var editText: EditText? = null
   @Inject internal lateinit var presenter: LockEntryPresenter
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
+  override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
   @CheckResult private fun getCurrentAttempt(): String = editText?.text?.toString() ?: ""
 
@@ -83,16 +82,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), Callback {
     // Hide hint to begin with
     binding.lockDisplayHint.visibility = View.GONE
 
-    presenter.create(Unit)
-  }
-
-  override fun onStart() {
-    super.onStart()
-    presenter.start(this)
-  }
-
-  override fun onDisplayHint(hint: String) {
-    binding.lockDisplayHint.text = "Hint: %s".format(if (hint.isEmpty()) "NO HINT" else hint)
+    presenter.bind(Unit)
   }
 
   fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -181,6 +171,11 @@ class LockScreenTextFragment : LockScreenBaseFragment(), Callback {
       clearDisplay()
       showSnackbarWithText("Error: Invalid PIN")
       binding.lockDisplayHint.visibility = View.VISIBLE
+
+      // Display the hint if they fail unlocking
+      presenter.displayLockedHint {
+        binding.lockDisplayHint.text = "Hint: %s".format(if (it.isEmpty()) "NO HINT" else it)
+      }
 
       // Once fail count is tripped once, continue to update it every time following until time elapses
       presenter.lockEntry(onLocked = {

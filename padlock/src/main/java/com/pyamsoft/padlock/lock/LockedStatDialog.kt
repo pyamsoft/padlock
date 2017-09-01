@@ -32,7 +32,7 @@ import com.pyamsoft.pydroid.presenter.Presenter
 
 class LockedStatDialog : CanaryDialog() {
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = emptyList()
+  override fun provideBoundPresenters(): List<Presenter< *>> = emptyList()
 
   private lateinit var displayedLabel: String
   private lateinit var activityName: String

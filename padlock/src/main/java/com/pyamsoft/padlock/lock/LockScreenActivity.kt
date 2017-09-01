@@ -45,7 +45,7 @@ import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenActivity : DisposableActivity(), LockScreenPresenter.Callback, LockScreenPresenter.NameCallback {
+class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallback {
 
   private val home: Intent = Intent(Intent.ACTION_MAIN)
   @field:Inject internal lateinit var presenter: LockScreenPresenter
@@ -73,7 +73,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.Callback, L
   override val shouldConfirmBackPress: Boolean
     get() = false
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
+  override fun provideBoundPresenters(): List<Presenter< *>> = listOf(presenter)
 
   init {
     home.addCategory(Intent.CATEGORY_HOME)
@@ -125,7 +125,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.Callback, L
           LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
     }
 
-    presenter.create(this)
+    presenter.bind(this)
   }
 
   private fun setupActionBar() {
@@ -155,7 +155,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.Callback, L
 
   override fun onStart() {
     super.onStart()
-    presenter.start(this)
 
     appIcon = LoaderHelper.unload(appIcon)
     appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(this, lockedPackageName))

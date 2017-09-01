@@ -26,7 +26,6 @@ import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.list.ErrorDialog
-import com.pyamsoft.padlock.lock.LockEntryPresenter.Callback
 import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.padlock.uicommon.LockCellUtils
 import com.pyamsoft.pydroid.presenter.Presenter
@@ -34,13 +33,13 @@ import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenPatternFragment : LockScreenBaseFragment(), Callback {
+class LockScreenPatternFragment : LockScreenBaseFragment() {
 
   private lateinit var binding: FragmentLockScreenPatternBinding
   @field:Inject internal lateinit var presenter: LockEntryPresenter
   private var listener: PatternLockViewListener? = null
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
+  override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -112,17 +111,12 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), Callback {
     binding.patternLock.isTactileFeedbackEnabled = false
     binding.patternLock.addPatternLockListener(listener)
 
-    presenter.create(Unit)
+    presenter.bind(Unit)
   }
 
   override fun onStart() {
     super.onStart()
-    presenter.start(this)
     binding.patternLock.clearPattern()
-  }
-
-  override fun onDisplayHint(hint: String) {
-    Timber.d("No hints on pin screen")
   }
 
   companion object {

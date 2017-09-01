@@ -37,14 +37,43 @@ import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class PurgeFragment : CanaryFragment(), PurgePresenter.Callback, PurgePresenter.BusCallback {
+class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
   @Inject internal lateinit var presenter: PurgePresenter
   private val handler = Handler(Looper.getMainLooper())
   private lateinit var fastItemAdapter: FastItemAdapter<PurgeItem>
   private lateinit var binding: FragmentPurgeBinding
   private var decoration: DividerItemDecoration? = null
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
+  private val onRetrieveBegin: () -> Unit = {
+    binding.purgeEmpty.visibility = View.GONE
+    binding.purgeList.visibility = View.GONE
+  }
+
+  private val onStaleApplicationReceived: (String) -> Unit = {
+    fastItemAdapter.add(PurgeItem(it))
+  }
+
+  private val onRetrievalCompleted: () -> Unit = {
+    handler.removeCallbacksAndMessages(null)
+    handler.post {
+      binding.purgeSwipeRefresh.post {
+        if (binding.purgeSwipeRefresh != null) {
+          binding.purgeSwipeRefresh.isRefreshing = false
+        }
+      }
+    }
+
+    if (fastItemAdapter.adapterItemCount > 0) {
+      binding.purgeEmpty.visibility = View.GONE
+      binding.purgeList.visibility = View.VISIBLE
+    } else {
+      binding.purgeList.visibility = View.GONE
+      binding.purgeEmpty.visibility = View.VISIBLE
+    }
+  }
+
+
+  override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -76,7 +105,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.Callback, PurgePresenter.
     setupRecyclerView()
     setupSwipeRefresh()
 
-    presenter.create(this)
+    presenter.bind(this)
   }
 
   private fun setupSwipeRefresh() {
@@ -91,7 +120,8 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.Callback, PurgePresenter.
   override fun onStart() {
     super.onStart()
     prepareRefresh()
-    presenter.start(this)
+    presenter.retrieveStaleApplications(false, onRetrieveBegin, onStaleApplicationReceived,
+        onRetrievalCompleted)
   }
 
   private fun prepareRefresh() {
@@ -108,11 +138,8 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.Callback, PurgePresenter.
 
   private fun refreshList() {
     prepareRefresh()
-    presenter.retrieveStaleApplications(true, { onRetrieveBegin() }, {
-      onStaleApplicationReceived(it)
-    }, {
-      onRetrievalCompleted()
-    })
+    presenter.retrieveStaleApplications(true, onRetrieveBegin, onStaleApplicationReceived,
+        onRetrievalCompleted)
   }
 
   override fun onResume() {
@@ -200,34 +227,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.Callback, PurgePresenter.
       for (item in fastItemAdapter.adapterItems) {
         onPurge(item.model)
       }
-    }
-  }
-
-  override fun onRetrieveBegin() {
-    binding.purgeEmpty.visibility = View.GONE
-    binding.purgeList.visibility = View.GONE
-  }
-
-  override fun onStaleApplicationReceived(pacakgeName: String) {
-    fastItemAdapter.add(PurgeItem(pacakgeName))
-  }
-
-  override fun onRetrievalCompleted() {
-    handler.removeCallbacksAndMessages(null)
-    handler.post {
-      binding.purgeSwipeRefresh.post {
-        if (binding.purgeSwipeRefresh != null) {
-          binding.purgeSwipeRefresh.isRefreshing = false
-        }
-      }
-    }
-
-    if (fastItemAdapter.adapterItemCount > 0) {
-      binding.purgeEmpty.visibility = View.GONE
-      binding.purgeList.visibility = View.VISIBLE
-    } else {
-      binding.purgeList.visibility = View.GONE
-      binding.purgeEmpty.visibility = View.VISIBLE
     }
   }
 

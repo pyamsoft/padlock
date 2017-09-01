@@ -34,12 +34,12 @@ import com.pyamsoft.pydroid.util.AppUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class MainActivity : TamperActivity(), MainPresenter.Callback {
+class MainActivity : TamperActivity() {
 
   @Inject internal lateinit var presenter: MainPresenter
   private lateinit var binding: ActivityMainBinding
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> =
+  override fun provideBoundPresenters(): List<Presenter<*>> =
       listOf(presenter) + super.provideBoundPresenters()
 
   public override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +54,7 @@ class MainActivity : TamperActivity(), MainPresenter.Callback {
 
     setAppBarState()
 
-    presenter.create(Unit)
+    presenter.bind(Unit)
   }
 
   override fun onNewIntent(intent: Intent?) {
@@ -64,34 +64,49 @@ class MainActivity : TamperActivity(), MainPresenter.Callback {
 
   override fun onStart() {
     super.onStart()
-    presenter.start(this)
-  }
-
-  override fun onShowDefaultPage() {
-    // Set normal navigation
-    val fm = supportFragmentManager
-    // Un hide the action bar in case it was hidden
-    val actionBar = supportActionBar
-    if (actionBar != null) {
-      if (!actionBar.isShowing) {
-        actionBar.show()
+    presenter.showOnboardingOrDefault(onShowDefaultPage = {
+      // Set normal navigation
+      val fm = supportFragmentManager
+      // Un hide the action bar in case it was hidden
+      val actionBar = supportActionBar
+      if (actionBar != null) {
+        if (!actionBar.isShowing) {
+          actionBar.show()
+        }
       }
-    }
 
-    if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
-        AboutLibrariesFragment.TAG) == null) {
-      Timber.d("Load default page")
-      fm.beginTransaction()
-          .replace(R.id.fragment_container, MainFragment(), MainFragment.TAG)
-          .commit()
-    } else {
-      Timber.w("Default page or About libraries was already loaded")
-    }
-  }
+      if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
+          AboutLibrariesFragment.TAG) == null) {
+        Timber.d("Load default page")
+        fm.beginTransaction()
+            .replace(R.id.fragment_container, MainFragment(), MainFragment.TAG)
+            .commit()
+      } else {
+        Timber.w("Default page or About libraries was already loaded")
+      }
+    }, onShowOnboarding = {
+      // TODO
+      // TODO For now this is duplicated
+      // Set normal navigation
+      val fm = supportFragmentManager
+      // Un hide the action bar in case it was hidden
+      val actionBar = supportActionBar
+      if (actionBar != null) {
+        if (!actionBar.isShowing) {
+          actionBar.show()
+        }
+      }
 
-  override fun onShowOnboarding() {
-    // TODO
-    onShowDefaultPage()
+      if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
+          AboutLibrariesFragment.TAG) == null) {
+        Timber.d("Load default page")
+        fm.beginTransaction()
+            .replace(R.id.fragment_container, MainFragment(), MainFragment.TAG)
+            .commit()
+      } else {
+        Timber.w("Default page or About libraries was already loaded")
+      }
+    })
   }
 
   override fun onPause() {
