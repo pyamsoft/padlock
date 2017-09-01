@@ -26,7 +26,7 @@ import com.pyamsoft.pydroid.presenter.Presenter
 
 class AccessibilityRequestDialog : CanaryDialog() {
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = emptyList()
+  override fun provideBoundPresenters(): List<Presenter< *>> = emptyList()
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(activity).setTitle("Enable PadLock AccessibilityService")

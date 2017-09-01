@@ -16,8 +16,7 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-import com.pyamsoft.padlock.lock.screen.LockScreenPresenter.Callback
-import com.pyamsoft.padlock.lock.screen.LockScreenPresenter.NameCallback
+import com.pyamsoft.padlock.lock.screen.LockScreenPresenter.FullCallback
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -28,33 +27,23 @@ class LockScreenPresenter @Inject internal constructor(
     private val lockScreenInputPresenter: LockScreenInputPresenter, private val packageName: String,
     private val activityName: String, private val bus: EventBus<CloseOldEvent>,
     private val interactor: LockScreenInteractor, computationScheduler: Scheduler,
-    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<NameCallback, Callback>(
+    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<FullCallback>(
     computationScheduler, ioScheduler, mainScheduler) {
 
-  override fun onCreate(bound: NameCallback) {
-    super.onCreate(bound)
-    lockScreenInputPresenter.create(bound)
-    loadDisplayNameFromPackage(bound::setDisplayName)
+  override fun onBind(v: FullCallback) {
+    super.onBind(v)
+    lockScreenInputPresenter.bind(v)
+    loadDisplayNameFromPackage(v::setDisplayName)
+    closeOldAndAwaitSignal(v::onCloseOldReceived)
   }
 
-  override fun onStart(bound: Callback) {
-    super.onStart(bound)
-    lockScreenInputPresenter.start(Unit)
-    closeOldAndAwaitSignal(bound::onCloseOldReceived)
-  }
-
-  override fun onStop() {
-    super.onStop()
-    lockScreenInputPresenter.stop()
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    lockScreenInputPresenter.destroy()
+  override fun onUnbind() {
+    super.onUnbind()
+    lockScreenInputPresenter.unbind()
   }
 
   private fun loadDisplayNameFromPackage(setDisplayName: (String) -> Unit) {
-    disposeOnDestroy {
+    dispose {
       interactor.getDisplayName(packageName)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -69,7 +58,7 @@ class LockScreenPresenter @Inject internal constructor(
     // Send bus event first before we register or we may catch our own event.
     bus.publish(CloseOldEvent(packageName, activityName))
 
-    disposeOnStop {
+    dispose {
       bus.listen()
           .filter { it.packageName == packageName && it.activityName == activityName }
           .subscribeOn(ioScheduler)
@@ -84,7 +73,7 @@ class LockScreenPresenter @Inject internal constructor(
   }
 
   fun createWithDefaultIgnoreTime(onInitializeWithIgnoreTime: (Long) -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.getDefaultIgnoreTime()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -95,12 +84,14 @@ class LockScreenPresenter @Inject internal constructor(
   }
 
 
-  interface NameCallback : LockScreenInputPresenter.Callback {
+  interface FullCallback : NameCallback, LockScreenInputPresenter.Callback, OldCallback
+
+  interface NameCallback {
 
     fun setDisplayName(name: String)
   }
 
-  interface Callback {
+  interface OldCallback {
 
     fun onCloseOldReceived()
   }

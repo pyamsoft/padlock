@@ -20,7 +20,6 @@ import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.list.LockListEvent.Callback.Created
 import com.pyamsoft.padlock.list.LockListEvent.Callback.Deleted
 import com.pyamsoft.padlock.list.LockListPresenter.BusCallback
-import com.pyamsoft.padlock.list.LockListPresenter.Callback
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
@@ -45,28 +44,21 @@ class LockListPresenter @Inject internal constructor(
     private val createPinBus: EventBus<CreatePinEvent>,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<BusCallback, Callback>(compScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<BusCallback>(compScheduler,
     ioScheduler,
     mainScheduler) {
 
-  override fun onCreate(bound: BusCallback) {
-    super.onCreate(bound)
-    registerOnCreateBus(bound::onMasterPinCreateSuccess, bound::onMasterPinCreateFailure)
-    registerOnClearBus(bound::onMasterPinClearSuccess, bound::onMasterPinClearFailure)
-    registerOnModifyBus(bound::onEntryCreated, bound::onEntryDeleted, bound::onEntryError)
-  }
-
-  override fun onStart(bound: Callback) {
-    super.onStart(bound)
-    setFABStateFromPreference(bound::onSetFABStateEnabled, bound::onSetFABStateDisabled)
-    populateList(false, bound::onListPopulateBegin, bound::onEntryAddedToList,
-        bound::onListPopulated, bound::onListPopulateError)
+  override fun onBind(v: BusCallback) {
+    super.onBind(v)
+    registerOnCreateBus(v::onMasterPinCreateSuccess, v::onMasterPinCreateFailure)
+    registerOnClearBus(v::onMasterPinClearSuccess, v::onMasterPinClearFailure)
+    registerOnModifyBus(v::onEntryCreated, v::onEntryDeleted, v::onEntryError)
   }
 
   private fun registerOnModifyBus(onEntryCreated: (String) -> Unit,
       onEntryDeleted: (String) -> Unit,
       onEntryError: (Throwable) -> Unit) {
-    disposeOnDestroy {
+    dispose {
       lockListBus.listen()
           .filter { it is LockListEvent.Modify }
           .map { it as LockListEvent.Modify }
@@ -76,7 +68,7 @@ class LockListPresenter @Inject internal constructor(
           })
     }
 
-    disposeOnDestroy {
+    dispose {
       lockListBus.listen()
           .filter { it is LockListEvent.Callback }
           .map { it as LockListEvent.Callback }
@@ -95,7 +87,7 @@ class LockListPresenter @Inject internal constructor(
 
   private fun registerOnClearBus(onMasterPinClearSuccess: () -> Unit,
       onMasterPinClearFailure: () -> Unit) {
-    disposeOnDestroy {
+    dispose {
       clearPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             if (it.success) {
@@ -111,7 +103,7 @@ class LockListPresenter @Inject internal constructor(
 
   private fun registerOnCreateBus(onMasterPinCreateSuccess: () -> Unit,
       onMasterPinCreateFailure: () -> Unit) {
-    disposeOnDestroy {
+    dispose {
       createPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             if (it.success) {
@@ -127,7 +119,7 @@ class LockListPresenter @Inject internal constructor(
 
   private fun modifyDatabaseEntry(isChecked: Boolean, packageName: String, code: String?,
       system: Boolean) {
-    disposeOnDestroy {
+    dispose {
       // No whitelisting for modifications from the List
       val oldState: LockState
       val newState: LockState
@@ -156,9 +148,9 @@ class LockListPresenter @Inject internal constructor(
     }
   }
 
-  private fun setFABStateFromPreference(onSetFABStateEnabled: () -> Unit,
+  fun setFABStateFromPreference(onSetFABStateEnabled: () -> Unit,
       onSetFABStateDisabled: () -> Unit) {
-    disposeOnStop {
+    dispose {
       stateInteractor.isServiceEnabled()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -173,7 +165,7 @@ class LockListPresenter @Inject internal constructor(
   }
 
   fun setSystemVisibilityFromPreference(onSetSystemVisibility: (Boolean) -> Unit) {
-    disposeOnStop {
+    dispose {
       lockListInteractor.isSystemVisible()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -188,7 +180,7 @@ class LockListPresenter @Inject internal constructor(
   }
 
   fun showOnBoarding(onOnboardingComplete: () -> Unit, onShowOnboarding: () -> Unit) {
-    disposeOnStop {
+    dispose {
       lockListInteractor.hasShownOnBoarding()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -206,7 +198,7 @@ class LockListPresenter @Inject internal constructor(
   fun populateList(force: Boolean, onListPopulateBegin: () -> Unit,
       onEntryAddedToList: (AppEntry) -> Unit, onListPopulated: () -> Unit,
       onListPopulateError: (Throwable) -> Unit) {
-    disposeOnStop {
+    dispose {
       lockListInteractor.populateList(force)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -239,18 +231,6 @@ class LockListPresenter @Inject internal constructor(
     fun onEntryDeleted(packageName: String)
 
     fun onEntryError(throwable: Throwable)
-
-  }
-
-  interface Callback {
-
-    fun onListPopulateBegin()
-    fun onEntryAddedToList(entry: AppEntry)
-    fun onListPopulated()
-    fun onListPopulateError(throwable: Throwable)
-
-    fun onSetFABStateEnabled()
-    fun onSetFABStateDisabled()
 
   }
 }

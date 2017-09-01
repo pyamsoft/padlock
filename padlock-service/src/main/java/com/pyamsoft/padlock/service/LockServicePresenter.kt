@@ -33,7 +33,7 @@ class LockServicePresenter @Inject internal constructor(
     private val interactor: LockServiceInteractor,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback, Unit>(compScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(compScheduler,
     ioScheduler,
     mainScheduler) {
 
@@ -41,19 +41,19 @@ class LockServicePresenter @Inject internal constructor(
     interactor.reset()
   }
 
-  override fun onCreate(bound: Callback) {
-    super.onCreate(bound)
-    registerOnBus(bound::onRecheck, bound::onFinish)
+  override fun onBind(v: Callback) {
+    super.onBind(v)
+    registerOnBus(v::onRecheck, v::onFinish)
   }
 
-  override fun onDestroy() {
-    super.onDestroy()
+  override fun onUnbind() {
+    super.onUnbind()
     interactor.cleanup()
     interactor.reset()
   }
 
   private fun registerOnBus(onRecheck: (String, String) -> Unit, onFinish: () -> Unit) {
-    disposeOnDestroy {
+    dispose {
       serviceFinishBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -62,7 +62,7 @@ class LockServicePresenter @Inject internal constructor(
           }, { Timber.e(it, "onError service finish bus") })
     }
 
-    disposeOnStop {
+    dispose {
       lockPassBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -71,7 +71,7 @@ class LockServicePresenter @Inject internal constructor(
           }, { Timber.e(it, "onError lock passed bus") })
     }
 
-    disposeOnStop {
+    dispose {
       recheckEventBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -83,7 +83,7 @@ class LockServicePresenter @Inject internal constructor(
 
   fun processActiveApplicationIfMatching(packageName: String, className: String,
       startLockScreen: (PadLockEntry, String) -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.isActiveMatching(packageName, className)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -98,7 +98,7 @@ class LockServicePresenter @Inject internal constructor(
 
   fun processAccessibilityEvent(packageName: String, className: String,
       forcedRecheck: RecheckStatus, startLockScreen: (PadLockEntry, String) -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.processEvent(packageName, className, forcedRecheck)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)

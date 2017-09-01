@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.purge
 
 import com.pyamsoft.padlock.purge.PurgePresenter.BusCallback
-import com.pyamsoft.padlock.purge.PurgePresenter.Callback
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -29,23 +28,16 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
     private val purgeBus: EventBus<PurgeEvent>,
     private val purgeAllBus: EventBus<PurgeAllEvent>, @Named(
         "computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler, @Named(
-        "main") mainScheduler: Scheduler) : SchedulerPresenter<BusCallback, Callback>(
-    computationScheduler,
+        "main") mainScheduler: Scheduler) : SchedulerPresenter<BusCallback>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onCreate(bound: BusCallback) {
-    super.onCreate(bound)
-    registerOnBus(bound::onPurge, bound::onPurgeAll)
-  }
-
-  override fun onStart(bound: Callback) {
-    super.onStart(bound)
-    retrieveStaleApplications(false, bound::onRetrieveBegin, bound::onStaleApplicationReceived,
-        bound::onRetrievalCompleted)
+  override fun onBind(v: BusCallback) {
+    super.onBind(v)
+    registerOnBus(v::onPurge, v::onPurgeAll)
   }
 
   private fun registerOnBus(onPurge: (String) -> Unit, onPurgeAll: () -> Unit) {
-    disposeOnDestroy {
+    dispose {
       purgeBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -54,7 +46,7 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
           })
     }
 
-    disposeOnDestroy {
+    dispose {
       purgeAllBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -67,7 +59,7 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
   fun retrieveStaleApplications(force: Boolean, onRetrieveBegin: () -> Unit,
       onStaleApplicationRetrieved: (String) -> Unit,
       onRetrievalComplete: () -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.populateList(force)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -79,7 +71,7 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
   }
 
   fun deleteStale(packageName: String, onDeleted: (String) -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.deleteEntry(packageName)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -93,14 +85,5 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
     fun onPurge(packageName: String)
 
     fun onPurgeAll()
-  }
-
-  interface Callback {
-
-    fun onRetrieveBegin()
-
-    fun onStaleApplicationReceived(pacakgeName: String)
-
-    fun onRetrievalCompleted()
   }
 }

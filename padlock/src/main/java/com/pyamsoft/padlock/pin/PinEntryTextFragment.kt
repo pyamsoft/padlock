@@ -47,7 +47,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
   private var pinHintText: EditText? = null
   private var goTask = LoaderHelper.empty()
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
+  override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -111,7 +111,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
       onRestoreInstanceState(savedInstanceState)
     }
 
-    presenter.create(this)
+    presenter.bind(this)
   }
 
   private fun setupSubmissionView(view: EditText) {
@@ -151,11 +151,6 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
     }, onComplete = {
       dismissParent()
     })
-  }
-
-  override fun onStart() {
-    super.onStart()
-    presenter.start(Unit)
   }
 
   override fun onMasterPinMissing() {

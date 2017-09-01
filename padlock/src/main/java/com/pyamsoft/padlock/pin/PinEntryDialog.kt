@@ -44,7 +44,7 @@ class PinEntryDialog : CanaryDialog(), Callback {
   private lateinit var packageName: String
   private var appIcon = LoaderHelper.empty()
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
+  override fun provideBoundPresenters(): List<Presenter< *>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -94,7 +94,7 @@ class PinEntryDialog : CanaryDialog(), Callback {
     // Start hidden
     binding.pinNextButtonLayout.visibility = View.GONE
 
-    presenter.create(this)
+    presenter.bind(this)
   }
 
   override fun onStart() {
@@ -102,7 +102,6 @@ class PinEntryDialog : CanaryDialog(), Callback {
     appIcon = LoaderHelper.unload(appIcon)
     appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(activity, packageName)).into(
         binding.pinImage)
-    presenter.start(Unit)
   }
 
   override fun onTypePattern() {

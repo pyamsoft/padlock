@@ -35,7 +35,7 @@ import timber.log.Timber
 
 class MainFragment : CanaryFragment() {
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = emptyList()
+  override fun provideBoundPresenters(): List<Presenter< *>> = emptyList()
 
   private lateinit var binding: FragmentMainBinding
 
@@ -59,14 +59,13 @@ class MainFragment : CanaryFragment() {
     binding.bottomTabs.setOnNavigationItemSelectedListener(
         object : BottomNavigationView.OnNavigationItemSelectedListener {
           override fun onNavigationItemSelected(item: MenuItem): Boolean {
-            val handled: Boolean
-            when (item.itemId) {
-              R.id.menu_locklist -> handled = replaceFragment(LockListFragment(),
+            val handled: Boolean = when (item.itemId) {
+              R.id.menu_locklist -> replaceFragment(LockListFragment(),
                   LockListFragment.TAG)
-              R.id.menu_settings -> handled = replaceFragment(SettingsFragment(),
+              R.id.menu_settings -> replaceFragment(SettingsFragment(),
                   SettingsFragment.TAG)
-              R.id.menu_purge -> handled = replaceFragment(PurgeFragment(), PurgeFragment.TAG)
-              else -> handled = false
+              R.id.menu_purge -> replaceFragment(PurgeFragment(), PurgeFragment.TAG)
+              else -> false
             }
 
             if (handled) {
@@ -79,13 +78,13 @@ class MainFragment : CanaryFragment() {
           @CheckResult
           private fun replaceFragment(fragment: Fragment, tag: String): Boolean {
             val fragmentManager = childFragmentManager
-            if (fragmentManager.findFragmentByTag(tag) == null) {
+            return if (fragmentManager.findFragmentByTag(tag) == null) {
               fragmentManager.beginTransaction()
                   .replace(R.id.main_view_container, fragment, tag)
                   .commit()
-              return true
+              true
             } else {
-              return false
+              false
             }
           }
         })

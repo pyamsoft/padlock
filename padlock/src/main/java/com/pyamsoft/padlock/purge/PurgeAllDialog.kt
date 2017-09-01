@@ -28,7 +28,7 @@ class PurgeAllDialog : CanaryDialog() {
 
   @field:Inject internal lateinit var purgePublisher: PurgePublisher
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = emptyList()
+  override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

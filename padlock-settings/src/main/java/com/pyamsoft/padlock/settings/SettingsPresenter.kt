@@ -35,16 +35,16 @@ class SettingsPresenter @Inject internal constructor(
     private val receiver: ApplicationInstallReceiver,
     @Named("computation") computationScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback, Unit>(computationScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onCreate(bound: Callback) {
-    super.onCreate(bound)
-    registerOnBus(bound::onClearDatabase, bound::onClearAll)
+  override fun onBind(v: Callback) {
+    super.onBind(v)
+    registerOnBus(v::onClearDatabase, v::onClearAll)
   }
 
   private fun registerOnBus(onClearDatabase: () -> Unit, onClearAll: () -> Unit) {
-    disposeOnDestroy {
+    dispose {
       bus.listen().flatMapSingle { type ->
         when (type) {
           DATABASE -> interactor.clearDatabase()
@@ -68,7 +68,7 @@ class SettingsPresenter @Inject internal constructor(
   }
 
   fun setApplicationInstallReceiverState() {
-    disposeOnStop {
+    dispose {
       interactor.isInstallListenerEnabled()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -84,7 +84,7 @@ class SettingsPresenter @Inject internal constructor(
 
   fun checkLockType(onLockTypeChangeAccepted: () -> Unit,
       onLockTypeChangePrevented: () -> Unit, onLockTypeChangeError: (Throwable) -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.hasExistingMasterPassword()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)

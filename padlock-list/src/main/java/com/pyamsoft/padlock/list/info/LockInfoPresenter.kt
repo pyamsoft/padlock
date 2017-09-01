@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Deleted
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Error
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Whitelisted
 import com.pyamsoft.padlock.list.info.LockInfoPresenter.BusCallback
-import com.pyamsoft.padlock.list.info.LockInfoPresenter.Callback
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.bus.EventBus
@@ -33,20 +32,20 @@ import javax.inject.Inject
 class LockInfoPresenter @Inject internal constructor(
     private val bus: EventBus<LockInfoEvent>, private val packageName: String,
     private val interactor: LockInfoInteractor, compScheduler: Scheduler,
-    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<BusCallback, Callback>(
+    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<BusCallback>(
     compScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onCreate(bound: BusCallback) {
-    super.onCreate(bound)
-    registerOnModifyBus(bound::onEntryCreated, bound::onEntryDeleted, bound::onEntryWhitelisted,
-        bound::onEntryError)
+  override fun onBind(v: BusCallback) {
+    super.onBind(v)
+    registerOnModifyBus(v::onEntryCreated, v::onEntryDeleted, v::onEntryWhitelisted,
+        v::onEntryError)
   }
 
   private fun registerOnModifyBus(onEntryCreated: (String) -> Unit,
       onEntryDeleted: (String) -> Unit, onEntryWhitelisted: (String) -> Unit,
       onEntryError: (Throwable) -> Unit) {
-    disposeOnDestroy {
+    dispose {
       bus.listen()
           .filter { it is LockInfoEvent.Modify }
           .map { it as LockInfoEvent.Modify }
@@ -56,7 +55,7 @@ class LockInfoPresenter @Inject internal constructor(
           })
     }
 
-    disposeOnDestroy {
+    dispose {
       bus.listen()
           .filter { it is LockInfoEvent.Callback }
           .map { it as LockInfoEvent.Callback }
@@ -74,14 +73,8 @@ class LockInfoPresenter @Inject internal constructor(
     }
   }
 
-  override fun onStart(bound: Callback) {
-    super.onStart(bound)
-    populateList(false, bound::onBegin, bound::onAdd, bound::onError, bound::onPopulated)
-
-  }
-
   private fun modifyDatabaseEntry(event: LockInfoEvent.Modify) {
-    disposeOnDestroy {
+    dispose {
       interactor.modifySingleDatabaseEntry(event.oldState(), event.newState,
           event.packageName(),
           event.name(), event.code, event.system)
@@ -105,7 +98,7 @@ class LockInfoPresenter @Inject internal constructor(
   fun populateList(forceRefresh: Boolean, onListPopulateBegin: () -> Unit,
       onEntryAddedToList: (ActivityEntry) -> Unit, onListPopulateError: (Throwable) -> Unit,
       onListPopulated: () -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.populateList(packageName, forceRefresh)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -119,7 +112,7 @@ class LockInfoPresenter @Inject internal constructor(
   }
 
   fun showOnBoarding(onShowOnboarding: () -> Unit, onOnboardingComplete: () -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.hasShownOnBoarding()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -142,17 +135,5 @@ class LockInfoPresenter @Inject internal constructor(
     fun onEntryWhitelisted(id: String)
 
     fun onEntryError(throwable: Throwable)
-  }
-
-  interface Callback {
-
-    fun onBegin()
-
-    fun onAdd(entry: ActivityEntry)
-
-    fun onError(throwable: Throwable)
-
-    fun onPopulated()
-
   }
 }

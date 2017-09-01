@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.padlock.lock.LockEntryPresenter.Callback
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -27,23 +26,17 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
     private val packageName: String, private val activityName: String, private val realName: String,
     private val interactor: LockEntryInteractor,
     computationScheduler: Scheduler, ioScheduler: Scheduler,
-    mainScheduler: Scheduler) : SchedulerPresenter<Unit, Callback>(computationScheduler,
+    mainScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onStart(bound: Callback) {
-    super.onStart(bound)
-    displayLockedHint(bound::onDisplayHint)
-  }
-
-  private fun displayLockedHint(setDisplayHint: (String) -> Unit) {
-    disposeOnStop {
+  fun displayLockedHint(setDisplayHint: (String) -> Unit) {
+    dispose {
       interactor.getHint()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({ setDisplayHint(it) }, { Timber.e(it, "onError displayLockedHint") })
     }
   }
-
 
   fun passLockScreen() {
     bus.publish(LockPassEvent(packageName, activityName))
@@ -52,7 +45,7 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
   fun submit(lockCode: String?, currentAttempt: String,
       onSubmitSuccess: () -> Unit, onSubmitFailure: () -> Unit,
       onSubmitError: (Throwable) -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.submitPin(packageName, activityName, lockCode, currentAttempt)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -71,7 +64,7 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
   }
 
   fun lockEntry(onLocked: () -> Unit, onLockedError: (Throwable) -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.lockEntryOnFail(packageName, activityName)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -89,7 +82,7 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
 
   fun postUnlock(lockCode: String?, isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long,
       onPostUnlocked: () -> Unit, onUnlockError: (Throwable) -> Unit) {
-    disposeOnStop {
+    dispose {
       interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
           shouldExclude, ignoreTime)
           .subscribeOn(ioScheduler)
@@ -102,10 +95,5 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
             onUnlockError(it)
           })
     }
-  }
-
-  interface Callback {
-
-    fun onDisplayHint(hint: String)
   }
 }

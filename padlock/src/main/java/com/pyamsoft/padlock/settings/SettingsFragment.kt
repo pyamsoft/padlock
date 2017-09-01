@@ -39,7 +39,7 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
 
   @field:Inject internal lateinit var presenter: SettingsPresenter
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> =
+  override fun provideBoundPresenters(): List<Presenter<*>> =
       listOf(presenter) + super.provideBoundPresenters()
 
   override val isLastOnBackStack: AboutLibrariesFragment.BackStackState
@@ -71,7 +71,7 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
       it.inject(this)
     }
 
-    presenter.create(this)
+    presenter.bind(this)
   }
 
   override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -112,11 +112,6 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
       Timber.d("Always return false here, the callback will decide if we can set value properly")
       return@setOnPreferenceChangeListener false
     }
-  }
-
-  override fun onStart() {
-    super.onStart()
-    presenter.start(Unit)
   }
 
   override fun onClearDatabase() {

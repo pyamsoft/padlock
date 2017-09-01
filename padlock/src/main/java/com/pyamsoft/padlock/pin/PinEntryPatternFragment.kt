@@ -43,7 +43,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
   private var listener: PatternLockViewListener? = null
   private var repeatPattern = false
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
+  override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -124,7 +124,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
     binding.patternLock.isTactileFeedbackEnabled = false
     binding.patternLock.addPatternLockListener(listener)
 
-    presenter.create(this)
+    presenter.bind(this)
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -138,8 +138,6 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
 
     // Pattern gets visually screwed up in multiwindow mode, clear it
     binding.patternLock.clearPattern()
-
-    presenter.start(Unit)
   }
 
   override fun onMasterPinMissing() {

@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.list
 
-import android.app.Dialog
 import android.os.Bundle
 import android.support.annotation.CheckResult
 import android.support.v4.view.ViewCompat
@@ -25,7 +24,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
@@ -34,7 +32,6 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.list.info.LockInfoModule
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
-import com.pyamsoft.padlock.list.info.LockInfoPresenter.BusCallback
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
@@ -52,7 +49,7 @@ import com.pyamsoft.pydroid.util.AppUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback, LockInfoPresenter.BusCallback {
+class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
 
   @field:Inject internal lateinit var presenter: LockInfoPresenter
   private lateinit var fastItemAdapter: FastItemAdapter<LockInfoItem>
@@ -64,13 +61,44 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback, LockInfoPrese
   private var dividerDecoration: DividerItemDecoration? = null
   private var appIcon = LoaderHelper.empty()
 
-  override fun provideBoundPresenters(): List<Presenter<*, *>> = listOf(presenter)
+  private val onBegin: () -> Unit = {
+    setRefreshing(true)
+    fastItemAdapter.clear()
 
-  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    val dialog = super.onCreateDialog(savedInstanceState)
-    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-    return dialog
+    binding.lockInfoEmpty.visibility = View.GONE
+    binding.lockInfoRecycler.visibility = View.GONE
   }
+
+  private val onAdd: (ActivityEntry) -> Unit = {
+    fastItemAdapter.add(LockInfoItem(it, appIsSystem))
+  }
+
+  private val onError: (Throwable) -> Unit = {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
+  }
+
+  private val onPopulated: () -> Unit = {
+    setRefreshing(false)
+
+    if (fastItemAdapter.adapterItemCount > 0) {
+      binding.lockInfoEmpty.visibility = View.GONE
+      binding.lockInfoRecycler.visibility = View.VISIBLE
+
+      Timber.d("Refresh finished")
+      presenter.showOnBoarding(onShowOnboarding = {
+        Timber.d("Show onboarding")
+      }, onOnboardingComplete = {
+        Timber.d("No onboarding")
+      })
+    } else {
+      binding.lockInfoRecycler.visibility = View.GONE
+      binding.lockInfoEmpty.visibility = View.VISIBLE
+      Toasty.makeText(context, "Error while loading list. Please try again.",
+          Toast.LENGTH_SHORT).show()
+    }
+  }
+
+  override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -100,7 +128,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback, LockInfoPrese
     setupRecyclerView()
     filterListDelegate.onViewCreated(fastItemAdapter)
 
-    presenter.create(this)
+    presenter.bind(this)
   }
 
   private fun setupToolbar() {
@@ -116,7 +144,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback, LockInfoPrese
         R.color.blue700, R.color.amber500)
     binding.lockInfoSwipeRefresh.setOnRefreshListener {
       Timber.d("onRefresh")
-      presenter.populateList(true, this::onBegin, this::onAdd, this::onError, this::onPopulated)
+      presenter.populateList(true, onBegin, onAdd, onError, onPopulated)
     }
   }
 
@@ -150,7 +178,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback, LockInfoPrese
     appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(context, appPackageName))
         .into(binding.lockInfoIcon)
 
-    presenter.start(this)
+    presenter.populateList(false, onBegin, onAdd, onError, onPopulated)
   }
 
   override fun onStop() {
@@ -172,43 +200,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.Callback, LockInfoPrese
       if (binding.lockInfoSwipeRefresh != null) {
         binding.lockInfoSwipeRefresh.isRefreshing = refresh
       }
-    }
-  }
-
-  override fun onBegin() {
-    setRefreshing(true)
-    fastItemAdapter.clear()
-
-    binding.lockInfoEmpty.visibility = View.GONE
-    binding.lockInfoRecycler.visibility = View.GONE
-  }
-
-  override fun onAdd(entry: ActivityEntry) {
-    fastItemAdapter.add(LockInfoItem(entry, appIsSystem))
-  }
-
-  override fun onError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
-  }
-
-  override fun onPopulated() {
-    setRefreshing(false)
-
-    if (fastItemAdapter.adapterItemCount > 0) {
-      binding.lockInfoEmpty.visibility = View.GONE
-      binding.lockInfoRecycler.visibility = View.VISIBLE
-
-      Timber.d("Refresh finished")
-      presenter.showOnBoarding(onShowOnboarding = {
-        Timber.d("Show onboarding")
-      }, onOnboardingComplete = {
-        Timber.d("No onboarding")
-      })
-    } else {
-      binding.lockInfoRecycler.visibility = View.GONE
-      binding.lockInfoEmpty.visibility = View.VISIBLE
-      Toasty.makeText(context, "Error while loading list. Please try again.",
-          Toast.LENGTH_SHORT).show()
     }
   }
 
