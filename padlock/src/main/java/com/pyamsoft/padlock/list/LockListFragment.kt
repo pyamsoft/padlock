@@ -55,6 +55,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
   private lateinit var filterListDelegate: FilterListDelegate
   private var fabIconTask = LoaderHelper.empty()
   private var dividerDecoration: DividerItemDecoration? = null
+  private var lastPosition: Int = 0
 
   private val onFabStateEnabled: () -> Unit = {
     fabIconTask = LoaderHelper.unload(fabIconTask)
@@ -94,6 +95,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
       }, onShowOnboarding = {
         Timber.d("Show onboarding")
       })
+
+      if (lastPosition != 0) {
+        val size: Int = fastItemAdapter.adapterItemCount
+        binding.applistRecyclerview.scrollToPosition(
+            if (lastPosition > size) size - 1 else lastPosition)
+        lastPosition = 0
+      }
     } else {
       binding.applistRecyclerview.visibility = View.GONE
       binding.applistEmpty.visibility = View.VISIBLE
@@ -116,14 +124,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
     Injector.with(context) {
       it.inject(this)
     }
-
-    val intent = activity.intent
-    if (intent.hasExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)) {
-      intent.removeExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)
-
-      Timber.d("Launched from notification, clear list")
-      presenter.forceClearCache()
-    }
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -141,7 +141,17 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
     setupSwipeRefresh()
     setupFAB()
 
+    lastPosition = savedInstanceState?.getInt(ListSaver.KEY_CURRENT_POSITION, 0) ?: 0
+
     presenter.bind(this)
+
+    val intent = activity.intent
+    if (intent.hasExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)) {
+      intent.removeExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)
+
+      Timber.d("Launched from notification, clear list")
+      presenter.forceClearCache()
+    }
   }
 
   private fun modifyList(packageName: String, checked: Boolean) {
@@ -174,6 +184,17 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
     presenter.populateList(false, onListPopulateBegin, onEntryAddedToList,
         onListPopulated, onListPopulateError)
     presenter.setFABStateFromPreference(onFabStateEnabled, onFabStateDisabled)
+  }
+
+  override fun onStop() {
+    super.onStop()
+    lastPosition = ListSaver.getCurrentPosition(binding.applistRecyclerview)
+  }
+
+  override fun onSaveInstanceState(outState: Bundle?) {
+    outState?.putInt(ListSaver.KEY_CURRENT_POSITION,
+        ListSaver.getCurrentPosition(binding.applistRecyclerview))
+    super.onSaveInstanceState(outState)
   }
 
   override fun onResume() {
