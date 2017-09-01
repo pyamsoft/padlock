@@ -44,7 +44,7 @@ class PinEntryDialog : CanaryDialog(), Callback {
   private lateinit var packageName: String
   private var appIcon = LoaderHelper.empty()
 
-  override fun provideBoundPresenters(): List<Presenter< *>> = listOf(presenter)
+  override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

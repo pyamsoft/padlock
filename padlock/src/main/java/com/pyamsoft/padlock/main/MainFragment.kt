@@ -35,7 +35,7 @@ import timber.log.Timber
 
 class MainFragment : CanaryFragment() {
 
-  override fun provideBoundPresenters(): List<Presenter< *>> = emptyList()
+  override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
   private lateinit var binding: FragmentMainBinding
 

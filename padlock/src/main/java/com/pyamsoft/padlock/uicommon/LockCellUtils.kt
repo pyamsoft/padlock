@@ -22,7 +22,9 @@ import com.andrognito.patternlockview.PatternLockView
 
 object LockCellUtils {
 
-  @JvmStatic @CheckResult fun cellPatternToString(cells: List<PatternLockView.Dot>): String {
+  @JvmStatic
+  @CheckResult
+  fun cellPatternToString(cells: List<PatternLockView.Dot>): String {
     val builder = StringBuilder(cells.size)
     cells.map { "${it.row}${it.column}" }.forEach { builder.append(it) }
     return builder.toString()

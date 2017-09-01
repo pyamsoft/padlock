@@ -20,15 +20,18 @@ import android.support.annotation.CheckResult
 
 interface OnboardingPreferences {
 
-  @CheckResult fun hasAgreed(): Boolean
+  @CheckResult
+  fun hasAgreed(): Boolean
 
   fun setAgreed()
 
-  @CheckResult fun isListOnBoard(): Boolean
+  @CheckResult
+  fun isListOnBoard(): Boolean
 
   fun setListOnBoard()
 
-  @CheckResult fun isInfoDialogOnBoard(): Boolean
+  @CheckResult
+  fun isInfoDialogOnBoard(): Boolean
 
   fun setInfoDialogOnBoard()
 }

@@ -20,13 +20,15 @@ import android.support.annotation.CheckResult
 
 interface MasterPinPreferences {
 
-  @CheckResult fun getHint(): String?
+  @CheckResult
+  fun getHint(): String?
 
   fun setHint(hint: String)
 
   fun clearHint()
 
-  @CheckResult fun getMasterPassword(): String?
+  @CheckResult
+  fun getMasterPassword(): String?
 
   fun setMasterPassword(pw: String)
 

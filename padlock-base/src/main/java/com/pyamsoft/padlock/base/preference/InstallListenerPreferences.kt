@@ -20,5 +20,6 @@ import android.support.annotation.CheckResult
 
 interface InstallListenerPreferences {
 
-  @CheckResult fun isInstallListenerEnabled(): Boolean
+  @CheckResult
+  fun isInstallListenerEnabled(): Boolean
 }

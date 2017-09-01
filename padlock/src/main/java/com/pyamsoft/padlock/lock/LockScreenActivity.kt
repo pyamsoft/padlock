@@ -34,12 +34,10 @@ import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
-import com.pyamsoft.padlock.lock.screen.LockScreenPresenter.NameCallback
 import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
-import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.app.activity.DisposableActivity
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
@@ -73,7 +71,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
   override val shouldConfirmBackPress: Boolean
     get() = false
 
-  override fun provideBoundPresenters(): List<Presenter< *>> = listOf(presenter)
+  override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
   init {
     home.addCategory(Intent.CATEGORY_HOME)

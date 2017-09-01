@@ -20,5 +20,6 @@ import android.support.annotation.CheckResult
 
 interface ComponentProvider {
 
-  @CheckResult fun getComponent(): PadLockComponent
+  @CheckResult
+  fun getComponent(): PadLockComponent
 }
