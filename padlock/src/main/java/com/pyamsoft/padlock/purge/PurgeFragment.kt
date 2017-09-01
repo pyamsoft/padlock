@@ -63,6 +63,10 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
       }
     }
 
+    decideListState()
+  }
+
+  private fun decideListState() {
     if (fastItemAdapter.adapterItemCount > 0) {
       binding.purgeEmpty.visibility = View.GONE
       binding.purgeList.visibility = View.VISIBLE
@@ -71,7 +75,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
       binding.purgeEmpty.visibility = View.VISIBLE
     }
   }
-
 
   override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
@@ -215,7 +218,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
         }
       }
 
-      Unit
+      decideListState()
     }
   }
 
@@ -228,6 +231,8 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
         onPurge(item.model)
       }
     }
+
+    decideListState()
   }
 
   companion object {
