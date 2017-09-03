@@ -96,12 +96,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
         Timber.d("Show onboarding")
       })
 
-      if (lastPosition != 0) {
-        val size: Int = fastItemAdapter.adapterItemCount
-        binding.applistRecyclerview.scrollToPosition(
-            if (lastPosition > size) size - 1 else lastPosition)
-        lastPosition = 0
-      }
+      lastPosition = ListSaver.restorePosition(lastPosition, binding.applistRecyclerview)
     } else {
       binding.applistRecyclerview.visibility = View.GONE
       binding.applistEmpty.visibility = View.VISIBLE
@@ -141,7 +136,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
     setupSwipeRefresh()
     setupFAB()
 
-    lastPosition = savedInstanceState?.getInt(ListSaver.KEY_CURRENT_POSITION, 0) ?: 0
+    lastPosition = ListSaver.restoreState(savedInstanceState)
 
     presenter.bind(this)
 
@@ -192,8 +187,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
   }
 
   override fun onSaveInstanceState(outState: Bundle?) {
-    outState?.putInt(ListSaver.KEY_CURRENT_POSITION,
-        ListSaver.getCurrentPosition(binding.applistRecyclerview))
+    ListSaver.saveState(outState, binding.applistRecyclerview)
     super.onSaveInstanceState(outState)
   }
 

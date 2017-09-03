@@ -92,12 +92,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
         Timber.d("No onboarding")
       })
 
-      if (lastPosition != 0) {
-        val size: Int = fastItemAdapter.adapterItemCount
-        binding.lockInfoRecycler.scrollToPosition(
-            if (lastPosition > size) size - 1 else lastPosition)
-        lastPosition = 0
-      }
+      lastPosition = ListSaver.restorePosition(lastPosition, binding.lockInfoRecycler)
     } else {
       binding.lockInfoRecycler.visibility = View.GONE
       binding.lockInfoEmpty.visibility = View.VISIBLE
@@ -135,7 +130,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
     setupSwipeRefresh()
     setupRecyclerView()
     filterListDelegate.onViewCreated(fastItemAdapter)
-    lastPosition = savedInstanceState?.getInt(ListSaver.KEY_CURRENT_POSITION, 0) ?: 0
+    lastPosition = ListSaver.restoreState(savedInstanceState)
 
     presenter.bind(this)
   }
@@ -197,8 +192,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
   }
 
   override fun onSaveInstanceState(outState: Bundle?) {
-    outState?.putInt(ListSaver.KEY_CURRENT_POSITION,
-        ListSaver.getCurrentPosition(binding.lockInfoRecycler))
+    ListSaver.saveState(outState, binding.lockInfoRecycler)
     super.onSaveInstanceState(outState)
   }
 

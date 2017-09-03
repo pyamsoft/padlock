@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
+import android.os.Bundle
 import android.support.annotation.CheckResult
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -23,7 +24,7 @@ import android.support.v7.widget.RecyclerView.LayoutManager
 
 object ListSaver {
 
-  const val KEY_CURRENT_POSITION: String = "key_current_position"
+  const private val KEY_CURRENT_POSITION: String = "key_current_position"
 
   @CheckResult
   fun getCurrentPosition(recycler: RecyclerView?): Int {
@@ -40,6 +41,30 @@ object ListSaver {
         0
       }
     }
+  }
+
+  @CheckResult
+  fun restoreState(savedInstanceState: Bundle?): Int =
+      savedInstanceState?.getInt(ListSaver.KEY_CURRENT_POSITION, 0) ?: 0
+
+  fun saveState(outState: Bundle?, recycler: RecyclerView?) {
+    outState?.putInt(ListSaver.KEY_CURRENT_POSITION, getCurrentPosition(recycler))
+  }
+
+  @CheckResult
+  fun restorePosition(lastPosition: Int, recycler: RecyclerView?) : Int {
+    if (recycler != null) {
+      if (lastPosition != 0) {
+        val adapter: RecyclerView.Adapter<*>? = recycler.adapter
+        if (adapter != null) {
+          val size: Int = adapter.itemCount
+          recycler.scrollToPosition(
+              if (lastPosition > size) size - 1 else lastPosition)
+        }
+      }
+    }
+
+    return 0
   }
 }
 
