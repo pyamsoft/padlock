@@ -20,6 +20,7 @@ import android.content.Context
 
 object Injector {
 
+  @JvmStatic
   fun with(context: Context, func: (PadLockComponent) -> Unit) {
     val app = context.applicationContext
     if (app is ComponentProvider) {
