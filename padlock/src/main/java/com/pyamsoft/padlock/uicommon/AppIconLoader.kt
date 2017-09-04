@@ -35,7 +35,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class AppIconLoader private constructor(context: Context,
-    private val packageName: String) : GenericLoader<AppIconLoader, Drawable>() {
+    private val packageName: String) : GenericLoader<Drawable>() {
 
   @Suppress("MemberVisibilityCanPrivate")
   @field:Inject internal lateinit var packageDrawableManager: PackageDrawableManager
@@ -45,7 +45,7 @@ class AppIconLoader private constructor(context: Context,
   @field:[Inject Named("io")] internal lateinit var ioScheduler: Scheduler
 
   init {
-    if (this.packageName.isEmpty()) {
+    if (packageName.isEmpty()) {
       throw IllegalArgumentException("AppIconLoader packageName must be non-empty")
     }
 
@@ -57,22 +57,6 @@ class AppIconLoader private constructor(context: Context,
     ioScheduler.enforceIo()
   }
 
-  override fun withCompleteAction(completeAction: (Target<Drawable>) -> Unit): AppIconLoader {
-    this.completeAction = completeAction
-    return this
-  }
-
-  override fun withErrorAction(errorAction: (Target<Drawable>) -> Unit): AppIconLoader {
-    this.errorAction = errorAction
-    return this
-  }
-
-  override fun withStartAction(startAction: (Target<Drawable>) -> Unit): AppIconLoader {
-    this.startAction = startAction
-    return this
-  }
-
-
   override fun into(imageView: ImageView): Loaded = into(
       DrawableImageTarget.forImageView(imageView))
 
@@ -83,16 +67,15 @@ class AppIconLoader private constructor(context: Context,
     return RxLoaded(packageDrawableManager.loadDrawableForPackageOrDefault(packageName)
         .subscribeOn(ioScheduler)
         .observeOn(mainScheduler)
-        .subscribe({ target.loadImage(it) }
-        ) { throwable ->
-          Timber.e(throwable, "Error loading Drawable AppIconLoader for: %s",
-              packageName)
-        })
-  }
-
-  override fun tint(color: Int): AppIconLoader {
-    this.tint = tint
-    return this
+        .doOnSubscribe { startAction() }
+        .subscribe({
+          target.loadImage(it)
+          completeAction(it)
+        },
+            {
+              Timber.e(it, "Error loading Drawable AppIconLoader for: %s", packageName)
+              errorAction(it)
+            }))
   }
 
   companion object {
