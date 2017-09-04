@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.uicommon.CanaryFragment
+import com.pyamsoft.padlock.uicommon.ListStateUtil
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
 import com.pyamsoft.pydroid.design.util.FABUtil
 import com.pyamsoft.pydroid.loader.ImageLoader
@@ -96,7 +97,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
         Timber.d("Show onboarding")
       })
 
-      lastPosition = ListSaver.restorePosition(lastPosition, binding.applistRecyclerview)
+      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
     } else {
       binding.applistRecyclerview.visibility = View.GONE
       binding.applistEmpty.visibility = View.VISIBLE
@@ -136,7 +137,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
     setupSwipeRefresh()
     setupFAB()
 
-    lastPosition = ListSaver.restoreState(savedInstanceState)
+    lastPosition = ListStateUtil.restoreState(savedInstanceState)
 
     presenter.bind(this)
 
@@ -183,11 +184,11 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
 
   override fun onStop() {
     super.onStop()
-    lastPosition = ListSaver.getCurrentPosition(binding.applistRecyclerview)
+    lastPosition = ListStateUtil.getCurrentPosition(binding.applistRecyclerview)
   }
 
   override fun onSaveInstanceState(outState: Bundle?) {
-    ListSaver.saveState(outState, binding.applistRecyclerview)
+    ListStateUtil.saveState(outState, binding.applistRecyclerview)
     super.onSaveInstanceState(outState)
   }
 
