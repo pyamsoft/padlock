@@ -40,6 +40,7 @@ import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.padlock.uicommon.ListStateUtil
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
@@ -92,7 +93,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
         Timber.d("No onboarding")
       })
 
-      lastPosition = ListSaver.restorePosition(lastPosition, binding.lockInfoRecycler)
+      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
     } else {
       binding.lockInfoRecycler.visibility = View.GONE
       binding.lockInfoEmpty.visibility = View.VISIBLE
@@ -130,7 +131,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
     setupSwipeRefresh()
     setupRecyclerView()
     filterListDelegate.onViewCreated(fastItemAdapter)
-    lastPosition = ListSaver.restoreState(savedInstanceState)
+    lastPosition = ListStateUtil.restoreState(savedInstanceState)
 
     presenter.bind(this)
   }
@@ -188,11 +189,11 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
   override fun onStop() {
     super.onStop()
     appIcon = LoaderHelper.unload(appIcon)
-    lastPosition = ListSaver.getCurrentPosition(binding.lockInfoRecycler)
+    lastPosition = ListStateUtil.getCurrentPosition(binding.lockInfoRecycler)
   }
 
   override fun onSaveInstanceState(outState: Bundle?) {
-    ListSaver.saveState(outState, binding.lockInfoRecycler)
+    ListStateUtil.saveState(outState, binding.lockInfoRecycler)
     super.onSaveInstanceState(outState)
   }
 

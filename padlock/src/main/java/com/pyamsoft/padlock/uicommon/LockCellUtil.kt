@@ -20,7 +20,7 @@ import android.support.annotation.CheckResult
 import com.andrognito.patternlockview.PatternLockView
 
 
-object LockCellUtils {
+object LockCellUtil {
 
   @JvmStatic
   @CheckResult

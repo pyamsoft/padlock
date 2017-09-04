@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.uicommon
 
 import android.os.Bundle
 import android.support.annotation.CheckResult
@@ -22,10 +22,11 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.RecyclerView.LayoutManager
 
-object ListSaver {
+object ListStateUtil {
 
   const private val KEY_CURRENT_POSITION: String = "key_current_position"
 
+  @JvmStatic
   @CheckResult
   fun getCurrentPosition(recycler: RecyclerView?): Int {
     return if (recycler == null) {
@@ -43,16 +44,20 @@ object ListSaver {
     }
   }
 
+  @JvmStatic
   @CheckResult
   fun restoreState(savedInstanceState: Bundle?): Int =
-      savedInstanceState?.getInt(ListSaver.KEY_CURRENT_POSITION, 0) ?: 0
+      savedInstanceState?.getInt(KEY_CURRENT_POSITION, 0) ?: 0
 
+  @JvmStatic
   fun saveState(outState: Bundle?, recycler: RecyclerView?) {
-    outState?.putInt(ListSaver.KEY_CURRENT_POSITION, getCurrentPosition(recycler))
+    outState?.putInt(KEY_CURRENT_POSITION,
+        getCurrentPosition(recycler))
   }
 
+  @JvmStatic
   @CheckResult
-  fun restorePosition(lastPosition: Int, recycler: RecyclerView?) : Int {
+  fun restorePosition(lastPosition: Int, recycler: RecyclerView?): Int {
     if (recycler != null) {
       if (lastPosition != 0) {
         val adapter: RecyclerView.Adapter<*>? = recycler.adapter

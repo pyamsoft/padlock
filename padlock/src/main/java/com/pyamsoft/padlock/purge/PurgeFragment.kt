@@ -31,7 +31,7 @@ import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
-import com.pyamsoft.padlock.list.ListSaver
+import com.pyamsoft.padlock.uicommon.ListStateUtil
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.util.DialogUtil
@@ -65,7 +65,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
       }
     }
 
-    lastPosition = ListSaver.restorePosition(lastPosition, binding.purgeList)
+    lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
 
     decideListState()
   }
@@ -111,7 +111,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
     super.onViewCreated(view, savedInstanceState)
     setupRecyclerView()
     setupSwipeRefresh()
-    lastPosition = ListSaver.restoreState(savedInstanceState)
+    lastPosition = ListStateUtil.restoreState(savedInstanceState)
 
     presenter.bind(this)
   }
@@ -134,11 +134,11 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
 
   override fun onStop() {
     super.onStop()
-    lastPosition = ListSaver.getCurrentPosition(binding.purgeList)
+    lastPosition = ListStateUtil.getCurrentPosition(binding.purgeList)
   }
 
   override fun onSaveInstanceState(outState: Bundle?) {
-    ListSaver.saveState(outState, binding.purgeList)
+    ListStateUtil.saveState(outState, binding.purgeList)
     super.onSaveInstanceState(outState)
   }
 

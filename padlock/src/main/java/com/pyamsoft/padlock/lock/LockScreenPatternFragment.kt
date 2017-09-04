@@ -27,7 +27,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.padlock.lock.screen.LockScreenModule
-import com.pyamsoft.padlock.uicommon.LockCellUtils
+import com.pyamsoft.padlock.uicommon.LockCellUtil
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
@@ -75,7 +75,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
       }
 
       override fun onComplete(list: List<PatternLockView.Dot>) {
-        presenter.submit(lockedCode, LockCellUtils.cellPatternToString(list),
+        presenter.submit(lockedCode, LockCellUtil.cellPatternToString(list),
             onSubmitSuccess = {
               Timber.d("Unlocked!")
               presenter.postUnlock(lockedCode, isLockedSystem, isExcluded, selectedIgnoreTime,
