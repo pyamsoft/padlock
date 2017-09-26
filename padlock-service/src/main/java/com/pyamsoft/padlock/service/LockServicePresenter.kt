@@ -20,8 +20,10 @@ import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.lock.LockPassEvent
 import com.pyamsoft.padlock.service.LockServicePresenter.Callback
 import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.helper.clear
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
+import io.reactivex.disposables.Disposable
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
@@ -37,6 +39,9 @@ class LockServicePresenter @Inject internal constructor(
     ioScheduler,
     mainScheduler) {
 
+  private var matchingDisposable: Disposable = null.clear()
+  private var entryDisposable: Disposable = null.clear()
+
   init {
     interactor.reset()
   }
@@ -50,6 +55,9 @@ class LockServicePresenter @Inject internal constructor(
     super.onUnbind()
     interactor.cleanup()
     interactor.reset()
+
+    matchingDisposable = matchingDisposable.clear()
+    entryDisposable = entryDisposable.clear()
   }
 
   private fun registerOnBus(onRecheck: (String, String) -> Unit, onFinish: () -> Unit) {
@@ -83,39 +91,37 @@ class LockServicePresenter @Inject internal constructor(
 
   fun processActiveApplicationIfMatching(packageName: String, className: String,
       startLockScreen: (PadLockEntry, String) -> Unit) {
-    dispose {
-      interactor.isActiveMatching(packageName, className)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            if (it) {
-              processAccessibilityEvent(packageName, className, RecheckStatus.FORCE,
-                  startLockScreen)
-            }
-          }, { Timber.e(it, "onError processActiveApplicationIfMatching") })
-    }
+    matchingDisposable = matchingDisposable.clear()
+    matchingDisposable = interactor.isActiveMatching(packageName, className)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainThreadScheduler)
+        .subscribe({
+          if (it) {
+            processAccessibilityEvent(packageName, className, RecheckStatus.FORCE,
+                startLockScreen)
+          }
+        }, { Timber.e(it, "onError processActiveApplicationIfMatching") })
   }
 
   fun processAccessibilityEvent(packageName: String, className: String,
       forcedRecheck: RecheckStatus, startLockScreen: (PadLockEntry, String) -> Unit) {
-    dispose {
-      interactor.processEvent(packageName, className, forcedRecheck)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            if (PadLockEntry.isEmpty(it)) {
-              Timber.w("PadLockEntry is EMPTY, ignore")
-            } else {
-              startLockScreen(it, className)
-            }
-          }, {
-            if (it is NoSuchElementException) {
-              Timber.w("PadLock not locking: $packageName, $className")
-            } else {
-              Timber.e(it, "Error getting PadLockEntry for LockScreen")
-            }
-          })
-    }
+    entryDisposable = entryDisposable.clear()
+    entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainThreadScheduler)
+        .subscribe({
+          if (PadLockEntry.isEmpty(it)) {
+            Timber.w("PadLockEntry is EMPTY, ignore")
+          } else {
+            startLockScreen(it, className)
+          }
+        }, {
+          if (it is NoSuchElementException) {
+            Timber.w("PadLock not locking: $packageName, $className")
+          } else {
+            Timber.e(it, "Error getting PadLockEntry for LockScreen")
+          }
+        })
   }
 
   interface Callback {
