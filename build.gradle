@@ -19,7 +19,7 @@
 buildscript {
 
   ext {
-    kotlin_version = '1.1.4-3'
+    kotlin_version = '1.1.50'
     plugin_version = '2.3.3'
   }
 
@@ -40,11 +40,11 @@ buildscript {
     maxSdk = 26
     buildTools = "26.0.1"
 
-    supportLib = "26.0.2"
-    firebase = "11.2.0"
-    leakCanary = "1.5.1"
+    supportLib = "26.1.0"
+    firebase = "11.4.0"
+    leakCanary = "1.5.4"
     pydroid = "13.0.1"
-    autoValue = "1.5"
+    autoValue = "1.5.1"
     sqlbrite = "2.0.0"
     dagger = "2.11"
     patternLock = "1.0.0"
@@ -56,7 +56,7 @@ buildscript {
     classpath "com.android.tools.build:gradle:$plugin_version"
 
     // Dex count
-    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.7.1'
+    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.1'
 
     // Gradle version checker
     classpath 'com.github.ben-manes:gradle-versions-plugin:0.15.0'
