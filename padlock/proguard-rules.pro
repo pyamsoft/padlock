@@ -21,3 +21,9 @@
 # https://code.google.com/p/android/issues/detail?id=58508
 -keep class android.support.v7.widget.SearchView { *; }
 
+# Don't warn about ourselves
+-dontwarn com.pyamsoft.padlock.**
+
+# Retrofit
+-dontwarn javax.annotation.**
+
