@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.base.ext.isSystemApplication
 import com.pyamsoft.padlock.base.preference.LockListPreferences
 import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager.ApplicationItem
 import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.exceptions.Exceptions
@@ -173,16 +174,17 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
     return Single.defer {
       try {
         return@defer Single.just(
-            Optional.ofNullable(packageManager.getApplicationInfo(packageName, 0)))
+            packageManager.getApplicationInfo(packageName, 0).asOptional())
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "onError loadPackageLabel: '$packageName'")
         throw Exceptions.propagate(e)
       }
     }.flatMap {
-      if (it.isPresent()) {
-        return@flatMap loadPackageLabel(it.item())
-      } else {
+      val info = it.get()
+      if (info == null) {
         return@flatMap Single.just("")
+      } else {
+        return@flatMap loadPackageLabel(info)
       }
     }
   }

@@ -25,22 +25,23 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class PinEntryInteractorImpl @Inject constructor(
+@Singleton internal class PinEntryInteractorImpl @Inject internal constructor(
     private val lockHelper: LockHelper,
     private val masterPinInteractor: MasterPinInteractor) : PinEntryInteractor {
 
   @CheckResult private fun getMasterPin(): Single<Optional<String>> =
       masterPinInteractor.getMasterPin()
 
-  override fun hasMasterPin(): Single<Boolean> = getMasterPin().map { it.isPresent() }
+  override fun hasMasterPin(): Single<Boolean> = getMasterPin().map { it.get() != null }
 
   override fun submitPin(currentAttempt: String, reEntryAttempt: String,
       hint: String): Single<PinEntryEvent> {
     return getMasterPin().flatMap {
-      if (it.isPresent()) {
-        return@flatMap clearPin(it.item(), currentAttempt)
-      } else {
+      val value = it.get()
+      if (value == null) {
         return@flatMap createPin(currentAttempt, reEntryAttempt, hint)
+      } else {
+        return@flatMap clearPin(value, currentAttempt)
       }
     }
   }

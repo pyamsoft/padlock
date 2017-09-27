@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.lock.master
 
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences
 import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,7 +27,7 @@ import javax.inject.Singleton
     private val preferences: MasterPinPreferences) : MasterPinInteractor {
 
   override fun getMasterPin(): Single<Optional<String>> =
-      Single.fromCallable { Optional.ofNullable(preferences.getMasterPassword()) }
+      Single.fromCallable { preferences.getMasterPassword().asOptional() }
 
   override fun setMasterPin(pin: String?) {
     if (pin == null) {
@@ -37,7 +38,7 @@ import javax.inject.Singleton
   }
 
   override fun getHint(): Single<Optional<String>> =
-      Single.fromCallable { Optional.ofNullable(preferences.getHint()) }
+      Single.fromCallable { preferences.getHint().asOptional() }
 
   override fun setHint(hint: String?) {
     if (hint == null) {
