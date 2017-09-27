@@ -24,8 +24,7 @@ import javax.inject.Singleton
 @Singleton internal class LockServiceStateInteractorImpl @Inject internal constructor(
     private val pinInteractor: MasterPinInteractor) : LockServiceStateInteractor {
 
-  override fun isServiceEnabled(): Single<Boolean> {
-    return pinInteractor.getMasterPin().map { it.isPresent() }
-  }
+  override fun isServiceEnabled(): Single<Boolean> =
+      pinInteractor.getMasterPin().map { it.get() != null }
 
 }

@@ -23,7 +23,3 @@
 
 # Don't warn about ourselves
 -dontwarn com.pyamsoft.padlock.**
-
-# Retrofit
--dontwarn javax.annotation.**
-

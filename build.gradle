@@ -43,7 +43,7 @@ buildscript {
     supportLib = "26.1.0"
     firebase = "11.4.0"
     leakCanary = "1.5.4"
-    pydroid = "13.1.0"
+    pydroid = "13.1.1"
     autoValue = "1.5.1"
     sqlbrite = "2.0.0"
     dagger = "2.11"

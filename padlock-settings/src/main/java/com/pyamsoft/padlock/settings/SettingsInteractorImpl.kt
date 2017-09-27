@@ -22,6 +22,7 @@ import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences
 import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Completable
 import io.reactivex.Single
 import timber.log.Timber
@@ -66,7 +67,7 @@ import javax.inject.Singleton
   }
 
   override fun hasExistingMasterPassword(): Single<Boolean> {
-    return Single.fromCallable { Optional.ofNullable(masterPinPreference.getMasterPassword()) }
-        .map { it.isPresent() }
+    return Single.fromCallable { masterPinPreference.getMasterPassword().asOptional() }
+        .map { it.get() != null }
   }
 }
