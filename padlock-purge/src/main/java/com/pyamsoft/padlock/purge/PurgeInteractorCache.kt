@@ -36,7 +36,7 @@ import javax.inject.Singleton
       if (forceRefresh || cachedList == null) {
         cachedList = impl.populateList(true).cache()
       }
-      return@defer cachedList
+      return@defer cachedList?.doOnError { clearCache() }
     }
   }
 
@@ -44,7 +44,7 @@ import javax.inject.Singleton
     return impl.deleteEntry(packageName).doOnSuccess {
       val obj: Observable<String>? = cachedList
       if (obj != null) {
-        cachedList = obj.filter { it == packageName }
+        cachedList = obj.filter { it == packageName }.doOnError { clearCache() }
       }
     }
   }

@@ -46,7 +46,7 @@ import javax.inject.Singleton
         cache = impl.populateList(true).cache()
       }
 
-      return@defer cache
+      return@defer cache?.doOnError { clearCache() }
     }
   }
 
@@ -65,7 +65,7 @@ import javax.inject.Singleton
                 // Pass the original through
                 return@map it
               }
-            }
+            }.doOnError { clearCache() }
           }
         }
   }
