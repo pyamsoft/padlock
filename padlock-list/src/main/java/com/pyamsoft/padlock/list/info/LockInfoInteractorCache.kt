@@ -31,7 +31,8 @@ import javax.inject.Singleton
   private var cache: MutableMap<String, Observable<ActivityEntry>?> = HashMap()
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
-      packageName: String, activityName: String, code: String?, system: Boolean): Single<LockState> {
+      packageName: String, activityName: String, code: String?,
+      system: Boolean): Single<LockState> {
     return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
         code, system)
         .doOnSuccess {
@@ -45,7 +46,7 @@ import javax.inject.Singleton
                 } else {
                   return@map it
                 }
-              })
+              }.doOnError { cache.remove(packageName) })
             }
           }
         }
@@ -62,7 +63,7 @@ import javax.inject.Singleton
       if (force || cache[packageName] == null) {
         cache.put(packageName, impl.populateList(packageName, true).cache())
       }
-      return@defer cache[packageName]
+      return@defer cache[packageName]?.doOnError { cache.remove(packageName) }
     }
   }
 }
