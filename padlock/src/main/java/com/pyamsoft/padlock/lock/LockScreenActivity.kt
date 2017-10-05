@@ -31,6 +31,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
@@ -70,8 +71,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
   private var lockedCode: String? = null
   internal lateinit var menuExclude: MenuItem
 
-  override val shouldConfirmBackPress: Boolean
-    get() = false
+  override val shouldConfirmBackPress: Boolean = false
 
   override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
@@ -119,11 +119,9 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
     getValuesFromBundle()
     setupActionBar()
 
-    Injector.with(this) {
-      it.plusLockScreenComponent(
-          LockScreenModule(lockedPackageName, lockedActivityName),
-          LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
-    }
+    (Injector.obtain(applicationContext) as PadLockComponent).plusLockScreenComponent(
+        LockScreenModule(lockedPackageName, lockedActivityName),
+        LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
 
     presenter.bind(this)
   }

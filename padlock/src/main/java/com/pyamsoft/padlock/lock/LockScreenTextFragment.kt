@@ -29,6 +29,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
 import com.pyamsoft.padlock.list.ErrorDialog
@@ -54,11 +55,10 @@ class LockScreenTextFragment : LockScreenBaseFragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.with(context) {
-      it.plusLockScreenComponent(LockScreenModule(lockedPackageName, lockedActivityName),
-          LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName))
-          .inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent)
+        .plusLockScreenComponent(LockScreenModule(lockedPackageName, lockedActivityName),
+            LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName))
+        .inject(this)
   }
 
   override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,

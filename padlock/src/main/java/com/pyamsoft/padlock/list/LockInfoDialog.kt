@@ -30,6 +30,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.list.info.LockInfoModule
@@ -112,9 +113,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
     appName = arguments.getString(ARG_APP_NAME, null)
     appIsSystem = arguments.getBoolean(ARG_APP_SYSTEM, false)
 
-    Injector.with(context) {
-      it.plusLockInfoComponent(LockInfoModule(appPackageName)).inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent).plusLockInfoComponent(
+        LockInfoModule(appPackageName)).inject(this)
   }
 
   override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
