@@ -24,6 +24,7 @@ import android.view.View
 import android.widget.RadioButton
 import com.mikepenz.fastadapter.items.GenericAbstractItem
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding
 import com.pyamsoft.padlock.list.info.LockInfoItemPublisher
@@ -123,9 +124,7 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
     @Inject internal lateinit var publisher: LockInfoItemPublisher
 
     init {
-      Injector.with(itemView.context) {
-        it.inject(this)
-      }
+      (Injector.obtain(itemView.context.applicationContext) as PadLockComponent).inject(this)
     }
   }
 }

@@ -29,6 +29,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
 import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
@@ -53,9 +54,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.with(context) {
-      it.inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
   }
 
   override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,

@@ -24,6 +24,7 @@ import android.os.Build
 import android.support.annotation.CheckResult
 import android.view.accessibility.AccessibilityEvent
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.service.LockServicePresenter.Callback
@@ -65,10 +66,7 @@ class PadLockService : AccessibilityService(), Callback {
 
   override fun onCreate() {
     super.onCreate()
-    Injector.with(this) {
-      it.inject(this)
-    }
-
+    (Injector.obtain(applicationContext) as PadLockComponent).inject(this)
     presenter.bind(this)
   }
 

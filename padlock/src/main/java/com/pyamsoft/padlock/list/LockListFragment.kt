@@ -31,6 +31,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
@@ -118,10 +119,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
-
-    Injector.with(context) {
-      it.inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -252,6 +250,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
   }
 
   override fun onDestroyView() {
+    super.onDestroyView()
     filterListDelegate.onDestroyView()
     binding.applistRecyclerview.removeItemDecoration(dividerDecoration)
     binding.applistRecyclerview.setOnClickListener(null)
@@ -264,7 +263,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
 
     fabIconTask = LoaderHelper.unload(fabIconTask)
     binding.unbind()
-    super.onDestroyView()
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {

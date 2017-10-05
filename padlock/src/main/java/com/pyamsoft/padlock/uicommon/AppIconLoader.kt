@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable
 import android.support.annotation.CheckResult
 import android.widget.ImageView
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.base.wrapper.PackageDrawableManager
 import com.pyamsoft.pydroid.helper.enforceIo
 import com.pyamsoft.pydroid.helper.enforceMainThread
@@ -50,10 +51,7 @@ class AppIconLoader private constructor(context: Context,
     if (packageName.isEmpty()) {
       throw IllegalArgumentException("AppIconLoader packageName must be non-empty")
     }
-
-    Injector.with(context) {
-      it.inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
 
     mainScheduler.enforceMainThread()
     ioScheduler.enforceIo()

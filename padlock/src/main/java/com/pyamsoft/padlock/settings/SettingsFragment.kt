@@ -25,6 +25,7 @@ import android.support.v7.preference.ListPreference
 import android.view.View
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
@@ -68,10 +69,7 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    Injector.with(context) {
-      it.inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
 
     presenter.bind(this)
   }
