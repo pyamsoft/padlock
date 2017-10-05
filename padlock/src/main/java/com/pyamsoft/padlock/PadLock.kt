@@ -33,7 +33,7 @@ import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
 
-class PadLock : Application(), ComponentProvider {
+class PadLock : Application() {
 
   private var refWatcher: RefWatcher? = null
   private var component: PadLockComponent? = null
@@ -85,12 +85,14 @@ class PadLock : Application(), ComponentProvider {
       }
     }
 
-  override fun getComponent(): PadLockComponent {
-    val obj = component
-    if (obj == null) {
-      throw IllegalStateException("PadLockComponent must be initialized before use")
+  override fun getSystemService(name: String?): Any {
+    return if (Injector.name == name) {
+      // Return
+      component ?: throw IllegalStateException("PadLock component is NULL")
     } else {
-      return obj
+
+      // Return
+      super.getSystemService(name)
     }
   }
 

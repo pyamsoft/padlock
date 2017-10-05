@@ -19,17 +19,18 @@
 package com.pyamsoft.padlock
 
 import android.content.Context
+import com.pyamsoft.pydroid.SimpleInjector
 
-object Injector {
+object Injector : SimpleInjector {
 
-  @JvmStatic
-  fun with(context: Context, func: (PadLockComponent) -> Unit) {
-    val app = context.applicationContext
-    if (app is ComponentProvider) {
-      func(app.getComponent())
+  override val name: String = "com.pyamsoft.padlock.INJECTOR"
+
+  override fun obtain(context: Context): Any {
+    val service: Any? = context.getSystemService(name)
+    if (service is PadLockComponent) {
+      return service
     } else {
-      throw ClassCastException("Application is not PadLock")
+      throw IllegalStateException("Service returned for getSystemService(\"$name\" was NULL")
     }
   }
-
 }
