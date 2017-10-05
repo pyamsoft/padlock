@@ -26,6 +26,7 @@ import android.view.ViewGroup
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.padlock.lock.screen.LockScreenModule
@@ -45,11 +46,9 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.with(context) {
-      it.plusLockScreenComponent(
-          LockScreenModule(lockedPackageName, lockedActivityName),
-          LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent).plusLockScreenComponent(
+        LockScreenModule(lockedPackageName, lockedActivityName),
+        LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
   }
 
   override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
