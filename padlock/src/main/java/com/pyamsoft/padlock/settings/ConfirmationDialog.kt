@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.support.annotation.CheckResult
 import android.support.v7.app.AlertDialog
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.presenter.Presenter
 import javax.inject.Inject
@@ -38,9 +39,7 @@ class ConfirmationDialog : CanaryDialog() {
     super.onCreate(savedInstanceState)
     type = ConfirmEvent.valueOf(arguments.getString(WHICH, ConfirmEvent.DATABASE.name))
 
-    Injector.with(activity) {
-      it.inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

@@ -27,10 +27,10 @@ object Injector : SimpleInjector {
 
   override fun obtain(context: Context): Any {
     val service: Any? = context.getSystemService(name)
-    if (service is PadLockComponent) {
-      return service
-    } else {
+    if (service == null) {
       throw IllegalStateException("Service returned for getSystemService(\"$name\" was NULL")
+    } else {
+      return service
     }
   }
 }

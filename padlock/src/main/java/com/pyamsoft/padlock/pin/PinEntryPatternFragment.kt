@@ -25,6 +25,7 @@ import android.view.ViewGroup
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding
 import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
 import com.pyamsoft.padlock.uicommon.LockCellUtil
@@ -49,9 +50,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.with(context) {
-      it.inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
 
     if (savedInstanceState == null) {
       repeatPattern = false

@@ -31,6 +31,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.uicommon.ListStateUtil
@@ -87,9 +88,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
-    Injector.with(context) {
-      it.inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
   }
 
   override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,

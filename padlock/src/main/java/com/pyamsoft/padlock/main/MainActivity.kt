@@ -26,6 +26,7 @@ import android.support.v7.preference.PreferenceManager
 import android.view.MenuItem
 import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.pydroid.presenter.Presenter
@@ -50,9 +51,7 @@ class MainActivity : TamperActivity() {
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
-    Injector.with(this) {
-      it.inject(this)
-    }
+    (Injector.obtain(applicationContext) as PadLockComponent).inject(this)
 
     setAppBarState()
 

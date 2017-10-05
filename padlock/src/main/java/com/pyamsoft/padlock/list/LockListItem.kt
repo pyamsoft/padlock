@@ -24,6 +24,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.mikepenz.fastadapter.items.GenericAbstractItem
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.model.AppEntry
@@ -86,9 +87,7 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
     @Inject internal lateinit var publisher: LockListItemPublisher
 
     init {
-      Injector.with(itemView.context) {
-        it.inject(this)
-      }
+      (Injector.obtain(itemView.context.applicationContext) as PadLockComponent).inject(this)
     }
 
   }

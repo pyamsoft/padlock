@@ -26,6 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
@@ -53,9 +54,7 @@ class PinEntryDialog : CanaryDialog(), Callback {
     packageName = arguments.getString(ENTRY_PACKAGE_NAME)
     isCancelable = true
 
-    Injector.with(context) {
-      it.inject(this)
-    }
+    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
   }
 
   override fun onResume() {
