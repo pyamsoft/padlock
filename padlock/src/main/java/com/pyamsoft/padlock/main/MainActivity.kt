@@ -29,6 +29,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
+import com.pyamsoft.padlock.main.MainPresenter.MainCallback
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.sec.TamperActivity
@@ -37,13 +38,31 @@ import com.pyamsoft.pydroid.util.AppUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class MainActivity : TamperActivity() {
+class MainActivity : TamperActivity(), MainCallback {
 
   @Inject internal lateinit var presenter: MainPresenter
   private lateinit var binding: ActivityMainBinding
 
+  override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
+
+  override val safePackageName: String = "com.pyamsoft.padlock"
+
+  override val versionName: String = BuildConfig.VERSION_NAME
+
+  override val applicationIcon: Int = R.mipmap.ic_launcher
+
+  override val applicationName: String = getString(R.string.app_name)
+
   override fun provideBoundPresenters(): List<Presenter<*>> =
       listOf(presenter) + super.provideBoundPresenters()
+
+  override val changeLogLines: Array<String>
+    get() {
+      val line1 = "BUGFIX: Bugfixes and improvements"
+      val line2 = "BUGFIX: Removed all Advertisements"
+      val line3 = "BUGFIX: Faster loading of Open Source Licenses page"
+      return arrayOf(line1, line2, line3)
+    }
 
   public override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.Theme_PadLock_Light)
@@ -55,59 +74,40 @@ class MainActivity : TamperActivity() {
 
     setAppBarState()
 
-    presenter.bind(Unit)
+    presenter.bind(this)
   }
+
+  override fun onShowDefaultPage() {
+    // Set normal navigation
+    val fm = supportFragmentManager
+    // Un hide the action bar in case it was hidden
+    val actionBar = supportActionBar
+    if (actionBar != null) {
+      if (!actionBar.isShowing) {
+        actionBar.show()
+      }
+    }
+
+    if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
+        AboutLibrariesFragment.TAG) == null) {
+      Timber.d("Load default page")
+      fm.beginTransaction()
+          .replace(R.id.fragment_container, MainFragment(), MainFragment.TAG)
+          .commit()
+    } else {
+      Timber.w("Default page or About libraries was already loaded")
+    }
+  }
+
+  override fun onShowOnboarding() {
+    // TODO for now this is duplicated
+    onShowDefaultPage()
+  }
+
 
   override fun onNewIntent(intent: Intent?) {
     super.onNewIntent(intent)
     setIntent(intent)
-  }
-
-  override fun onStart() {
-    super.onStart()
-    presenter.showOnboardingOrDefault(onShowDefaultPage = {
-      // Set normal navigation
-      val fm = supportFragmentManager
-      // Un hide the action bar in case it was hidden
-      val actionBar = supportActionBar
-      if (actionBar != null) {
-        if (!actionBar.isShowing) {
-          actionBar.show()
-        }
-      }
-
-      if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
-          AboutLibrariesFragment.TAG) == null) {
-        Timber.d("Load default page")
-        fm.beginTransaction()
-            .replace(R.id.fragment_container, MainFragment(), MainFragment.TAG)
-            .commit()
-      } else {
-        Timber.w("Default page or About libraries was already loaded")
-      }
-    }, onShowOnboarding = {
-      // TODO
-      // TODO For now this is duplicated
-      // Set normal navigation
-      val fm = supportFragmentManager
-      // Un hide the action bar in case it was hidden
-      val actionBar = supportActionBar
-      if (actionBar != null) {
-        if (!actionBar.isShowing) {
-          actionBar.show()
-        }
-      }
-
-      if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
-          AboutLibrariesFragment.TAG) == null) {
-        Timber.d("Load default page")
-        fm.beginTransaction()
-            .replace(R.id.fragment_container, MainFragment(), MainFragment.TAG)
-            .commit()
-      } else {
-        Timber.w("Default page or About libraries was already loaded")
-      }
-    })
   }
 
   override fun onPause() {
@@ -119,9 +119,6 @@ class MainActivity : TamperActivity() {
       binding.toolbar.dismissPopupMenus()
     }
   }
-
-  override val currentApplicationVersion: Int
-    get() = BuildConfig.VERSION_CODE
 
   private fun setAppBarState() {
     setSupportActionBar(binding.toolbar)
@@ -160,25 +157,5 @@ class MainActivity : TamperActivity() {
     super.onPostResume()
     AnimUtil.animateActionBarToolbar(binding.toolbar)
   }
-
-  override val safePackageName: String
-    get() = "com.pyamsoft.padlock"
-
-  override val changeLogLines: Array<String>
-    get() {
-      val line1 = "BUGFIX: Bugfixes and improvements"
-      val line2 = "BUGFIX: Removed all Advertisements"
-      val line3 = "BUGFIX: Faster loading of Open Source Licenses page"
-      return arrayOf(line1, line2, line3)
-    }
-
-  override val versionName: String
-    get() = BuildConfig.VERSION_NAME
-
-  override val applicationIcon: Int
-    get() = R.mipmap.ic_launcher
-
-  override val applicationName: String
-    get() = getString(R.string.app_name)
 }
 
