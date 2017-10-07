@@ -35,6 +35,8 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
+import com.pyamsoft.padlock.helper.isChecked
+import com.pyamsoft.padlock.helper.setChecked
 import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
 import com.pyamsoft.padlock.uicommon.AppIconLoader
@@ -71,7 +73,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
   private var menuIgnoreThirty: MenuItem? = null
   private var menuIgnoreFourtyFive: MenuItem? = null
   private var menuIgnoreSixty: MenuItem? = null
-  private var menuExclude: MenuItem? = null
+  internal var menuExclude: MenuItem? = null
 
   override val shouldConfirmBackPress: Boolean = false
 
@@ -84,15 +86,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
 
   @CheckResult
   internal fun getRootView(): ViewGroup = binding.activityLockScreen
-
-  @CheckResult
-  private fun MenuItem?.isChecked(): Boolean = this != null && isChecked
-
-  private fun MenuItem?.setChecked(checked: Boolean) {
-    if (this != null) {
-      isChecked = checked
-    }
-  }
 
   @CheckResult
   internal fun getIgnoreTimeFromSelectedIndex(): Long {
@@ -302,7 +295,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
         ignoreTimes[8] -> menuIgnoreSixty.setChecked(true)
         else -> {
           Timber.e("No valid ignore time, initialize to None")
-          menuIgnoreNone.isChecked = true
+          menuIgnoreNone.setChecked(true)
         }
       }
     }

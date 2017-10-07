@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.support.annotation.CallSuper
 import android.support.annotation.CheckResult
 import android.support.design.widget.Snackbar
+import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_ACTIVITY_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_IS_SYSTEM
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
@@ -47,7 +48,7 @@ abstract class LockScreenBaseFragment protected constructor() : CanaryFragment()
   internal val isExcluded: Boolean
     @CheckResult get() {
       val activity = activity
-      return activity is LockScreenActivity && activity.menuExclude.isChecked
+      return activity is LockScreenActivity && activity.menuExclude.isChecked()
     }
 
   internal val selectedIgnoreTime: Long
