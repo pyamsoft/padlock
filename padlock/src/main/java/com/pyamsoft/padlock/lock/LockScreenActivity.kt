@@ -53,15 +53,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
   private lateinit var lockedActivityName: String
   private lateinit var lockedPackageName: String
   private lateinit var binding: ActivityLockBinding
-  private lateinit var menuIgnoreNone: MenuItem
-  private lateinit var menuIgnoreOne: MenuItem
-  private lateinit var menuIgnoreFive: MenuItem
-  private lateinit var menuIgnoreTen: MenuItem
-  private lateinit var menuIgnoreFifteen: MenuItem
-  private lateinit var menuIgnoreTwenty: MenuItem
-  private lateinit var menuIgnoreThirty: MenuItem
-  private lateinit var menuIgnoreFourtyFive: MenuItem
-  private lateinit var menuIgnoreSixty: MenuItem
   private lateinit var ignoreTimes: LongArray
   private lateinit var lockedRealName: String
   private var lockedSystem: Boolean = false
@@ -69,7 +60,18 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
   private var excludeEntry: Boolean = false
   private var appIcon = LoaderHelper.empty()
   private var lockedCode: String? = null
-  internal lateinit var menuExclude: MenuItem
+
+  // These can potentially be unassigned in onSaveInstanceState, mark them nullable
+  private var menuIgnoreNone: MenuItem? = null
+  private var menuIgnoreOne: MenuItem? = null
+  private var menuIgnoreFive: MenuItem? = null
+  private var menuIgnoreTen: MenuItem? = null
+  private var menuIgnoreFifteen: MenuItem? = null
+  private var menuIgnoreTwenty: MenuItem? = null
+  private var menuIgnoreThirty: MenuItem? = null
+  private var menuIgnoreFourtyFive: MenuItem? = null
+  private var menuIgnoreSixty: MenuItem? = null
+  private var menuExclude: MenuItem? = null
 
   override val shouldConfirmBackPress: Boolean = false
 
@@ -84,19 +86,28 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
   internal fun getRootView(): ViewGroup = binding.activityLockScreen
 
   @CheckResult
+  private fun MenuItem?.isChecked(): Boolean = this != null && isChecked
+
+  private fun MenuItem?.setChecked(checked: Boolean) {
+    if (this != null) {
+      isChecked = checked
+    }
+  }
+
+  @CheckResult
   internal fun getIgnoreTimeFromSelectedIndex(): Long {
     var index: Int
     try {
       index = when {
-        menuIgnoreNone.isChecked -> 0
-        menuIgnoreOne.isChecked -> 1
-        menuIgnoreFive.isChecked -> 2
-        menuIgnoreTen.isChecked -> 3
-        menuIgnoreFifteen.isChecked -> 4
-        menuIgnoreTwenty.isChecked -> 5
-        menuIgnoreThirty.isChecked -> 6
-        menuIgnoreFourtyFive.isChecked -> 7
-        menuIgnoreSixty.isChecked -> 8
+        menuIgnoreNone.isChecked() -> 0
+        menuIgnoreOne.isChecked() -> 1
+        menuIgnoreFive.isChecked() -> 2
+        menuIgnoreTen.isChecked() -> 3
+        menuIgnoreFifteen.isChecked() -> 4
+        menuIgnoreTwenty.isChecked() -> 5
+        menuIgnoreThirty.isChecked() -> 6
+        menuIgnoreFourtyFive.isChecked() -> 7
+        menuIgnoreSixty.isChecked() -> 8
         else -> 0
       }
     } catch (e: NullPointerException) {
@@ -232,28 +243,22 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
 
   override fun onRestoreInstanceState(savedInstanceState: Bundle) {
     Timber.d("onRestoreInstanceState")
-    ignorePeriod = savedInstanceState.getLong("IGNORE", -1)
-    excludeEntry = savedInstanceState.getBoolean("EXCLUDE", false)
+    ignorePeriod = savedInstanceState.getLong(KEY_IGNORE_TIME, -1)
+    excludeEntry = savedInstanceState.getBoolean(KEY_EXCLUDE, false)
     val lockScreenText = supportFragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
-    if (lockScreenText is LockScreenTextFragment?) {
-      lockScreenText?.onRestoreInstanceState(savedInstanceState)
+    if (lockScreenText is LockScreenTextFragment) {
+      lockScreenText.onRestoreInstanceState(savedInstanceState)
     }
     super.onRestoreInstanceState(savedInstanceState)
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
     val ignoreTime = getIgnoreTimeFromSelectedIndex()
-    outState.putLong("IGNORE", ignoreTime)
+    outState.putLong(KEY_IGNORE_TIME, ignoreTime)
 
-    val exclude: Boolean = try {
-      // Assigned to exclude
-      menuExclude.isChecked
-    } catch (e: NullPointerException) {
-      // Assigned to exclude
-      false
-    }
+    val exclude = menuExclude.isChecked()
+    outState.putBoolean(KEY_EXCLUDE, exclude)
 
-    outState.putBoolean("EXCLUDE", exclude)
     super.onSaveInstanceState(outState)
   }
 
@@ -274,7 +279,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
   }
 
   override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-    menuExclude.isChecked = excludeEntry
+    menuExclude.setChecked(excludeEntry)
     presenter.createWithDefaultIgnoreTime {
       val apply: Long
       if (ignorePeriod == -1L) {
@@ -286,15 +291,15 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
       }
 
       when (apply) {
-        ignoreTimes[0] -> menuIgnoreNone.isChecked = true
-        ignoreTimes[1] -> menuIgnoreOne.isChecked = true
-        ignoreTimes[2] -> menuIgnoreFive.isChecked = true
-        ignoreTimes[3] -> menuIgnoreTen.isChecked = true
-        ignoreTimes[4] -> menuIgnoreFifteen.isChecked = true
-        ignoreTimes[5] -> menuIgnoreTwenty.isChecked = true
-        ignoreTimes[6] -> menuIgnoreThirty.isChecked = true
-        ignoreTimes[7] -> menuIgnoreFourtyFive.isChecked = true
-        ignoreTimes[8] -> menuIgnoreSixty.isChecked = true
+        ignoreTimes[0] -> menuIgnoreNone.setChecked(true)
+        ignoreTimes[1] -> menuIgnoreOne.setChecked(true)
+        ignoreTimes[2] -> menuIgnoreFive.setChecked(true)
+        ignoreTimes[3] -> menuIgnoreTen.setChecked(true)
+        ignoreTimes[4] -> menuIgnoreFifteen.setChecked(true)
+        ignoreTimes[5] -> menuIgnoreTwenty.setChecked(true)
+        ignoreTimes[6] -> menuIgnoreThirty.setChecked(true)
+        ignoreTimes[7] -> menuIgnoreFourtyFive.setChecked(true)
+        ignoreTimes[8] -> menuIgnoreSixty.setChecked(true)
         else -> {
           Timber.e("No valid ignore time, initialize to None")
           menuIgnoreNone.isChecked = true
@@ -321,6 +326,8 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
 
   companion object {
 
+    const private val KEY_IGNORE_TIME = "key_ignore_time"
+    const private val KEY_EXCLUDE = "key_exclude"
     const val ENTRY_PACKAGE_NAME = "entry_packagename"
     const val ENTRY_ACTIVITY_NAME = "entry_activityname"
     const val ENTRY_REAL_NAME = "real_name"
