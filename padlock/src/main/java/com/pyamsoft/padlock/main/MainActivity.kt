@@ -43,15 +43,15 @@ class MainActivity : TamperActivity(), MainCallback {
   @Inject internal lateinit var presenter: MainPresenter
   private lateinit var binding: ActivityMainBinding
 
-  override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
+  override val currentApplicationVersion: Int by lazy { BuildConfig.VERSION_CODE }
 
-  override val safePackageName: String = "com.pyamsoft.padlock"
+  override val safePackageName: String by lazy { "com.pyamsoft.padlock" }
 
-  override val versionName: String = BuildConfig.VERSION_NAME
+  override val versionName: String by lazy { BuildConfig.VERSION_NAME }
 
-  override val applicationIcon: Int = R.mipmap.ic_launcher
+  override val applicationIcon: Int  by lazy { R.mipmap.ic_launcher }
 
-  override val applicationName: String = getString(R.string.app_name)
+  override val applicationName: String by lazy { getString(R.string.app_name) }
 
   override fun provideBoundPresenters(): List<Presenter<*>> =
       listOf(presenter) + super.provideBoundPresenters()
