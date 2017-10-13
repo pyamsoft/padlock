@@ -71,7 +71,7 @@ class MainActivity : TamperActivity(), MainCallback {
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
-    (Injector.obtain(applicationContext) as PadLockComponent).inject(this)
+    Injector.obtain<PadLockComponent>(applicationContext).inject(this)
 
     setAppBarState()
 

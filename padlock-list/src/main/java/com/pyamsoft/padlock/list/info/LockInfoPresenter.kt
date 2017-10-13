@@ -30,12 +30,14 @@ import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
 
 class LockInfoPresenter @Inject internal constructor(
-    private val bus: EventBus<LockInfoEvent>, private val packageName: String,
-    private val interactor: LockInfoInteractor, compScheduler: Scheduler,
-    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<BusCallback>(
-    compScheduler,
+    private val bus: EventBus<LockInfoEvent>, @param:Named(
+        "package_name") private val packageName: String,
+    private val interactor: LockInfoInteractor, @Named("computation") compScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler, @Named(
+        "main") mainScheduler: Scheduler) : SchedulerPresenter<BusCallback>(compScheduler,
     ioScheduler, mainScheduler) {
 
   override fun onBind(v: BusCallback) {

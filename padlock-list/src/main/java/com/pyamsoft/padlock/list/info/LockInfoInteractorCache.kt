@@ -21,14 +21,15 @@ package com.pyamsoft.padlock.list.info
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.data.Cache
-import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockInfoInteractorCache @Inject internal constructor(
-    private val impl: LockInfoInteractor) : LockInfoInteractor, Cache {
+    @param:Named(
+        "interactor_lock_info") private val impl: LockInfoInteractor) : LockInfoInteractor, Cache {
 
   private var cache: MutableMap<String, Observable<ActivityEntry>?> = HashMap()
 

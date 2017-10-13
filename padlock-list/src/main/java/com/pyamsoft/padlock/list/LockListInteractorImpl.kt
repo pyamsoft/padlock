@@ -39,7 +39,6 @@ import java.util.HashSet
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
 @Singleton internal class LockListInteractorImpl @Inject internal constructor(
     private val queryDb: PadLockDBQuery,
     private val applicationManager: PackageApplicationManager,

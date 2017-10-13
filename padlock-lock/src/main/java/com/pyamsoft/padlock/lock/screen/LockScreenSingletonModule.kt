@@ -18,28 +18,18 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.preference.LockScreenPreferences
-import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
 import com.pyamsoft.pydroid.bus.EventBus
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import javax.inject.Singleton
 
 @Module
-class LockScreenSingletonModule() {
+abstract class LockScreenSingletonModule {
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideCloseBus(): EventBus<CloseOldEvent> =
-      CloseOldBus()
+  @Binds
+  internal abstract fun provideCloseBus(bus: CloseOldBus): EventBus<CloseOldEvent>
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideInteractor(
-      labelManager: PackageLabelManager,
-      lockScreenPreferences: LockScreenPreferences): LockScreenInteractor =
-      LockScreenInteractorImpl(labelManager, lockScreenPreferences)
+  @Binds
+  internal abstract fun provideInteractor(impl: LockScreenInteractorImpl): LockScreenInteractor
 
 }
 

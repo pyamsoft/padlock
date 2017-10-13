@@ -22,8 +22,9 @@ import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.bus.RxBus
 import io.reactivex.Observable
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class CreatePinBus @Inject internal constructor() : EventBus<CreatePinEvent> {
+@Singleton internal class CreatePinBus @Inject internal constructor() : EventBus<CreatePinEvent> {
 
   private val bus: EventBus<CreatePinEvent> = RxBus.create()
 

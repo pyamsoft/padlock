@@ -33,7 +33,6 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
 import com.pyamsoft.padlock.list.ErrorDialog
-import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
@@ -55,10 +54,8 @@ class LockScreenTextFragment : LockScreenBaseFragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    (Injector.obtain(context.applicationContext) as PadLockComponent)
-        .plusLockScreenComponent(LockScreenModule(lockedPackageName, lockedActivityName),
-            LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName))
-        .inject(this)
+    Injector.obtain<PadLockComponent>(context.applicationContext).plusLockScreenComponent(
+        LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
   }
 
   override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,

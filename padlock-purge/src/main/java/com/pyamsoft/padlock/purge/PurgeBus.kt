@@ -21,8 +21,10 @@ package com.pyamsoft.padlock.purge
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.bus.RxBus
 import io.reactivex.Observable
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class PurgeBus internal constructor() : EventBus<PurgeEvent> {
+@Singleton internal class PurgeBus @Inject internal constructor() : EventBus<PurgeEvent> {
 
   private val bus: EventBus<PurgeEvent> = RxBus.create()
 

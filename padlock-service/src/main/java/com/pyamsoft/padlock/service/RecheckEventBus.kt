@@ -22,8 +22,9 @@ import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.bus.RxBus
 import io.reactivex.Observable
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class RecheckEventBus @Inject internal constructor() : EventBus<RecheckEvent> {
+@Singleton internal class RecheckEventBus @Inject internal constructor() : EventBus<RecheckEvent> {
 
   private val bus: EventBus<RecheckEvent> = RxBus.create()
 

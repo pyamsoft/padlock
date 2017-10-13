@@ -87,7 +87,7 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
     @Inject internal lateinit var publisher: LockListItemPublisher
 
     init {
-      (Injector.obtain(itemView.context.applicationContext) as PadLockComponent).inject(this)
+      Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)
     }
 
   }

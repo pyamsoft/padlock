@@ -40,7 +40,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockEntryInteractorImpl @Inject internal constructor(
-    context: Context,
+    private val appContext: Context,
     private val lockHelper: LockHelper,
     private val preferences: LockScreenPreferences,
     private val jobSchedulerCompat: JobSchedulerCompat,
@@ -50,8 +50,7 @@ import javax.inject.Singleton
     @param:Named(
         "recheck") private val recheckServiceClass: Class<out IntentService>) : LockEntryInteractor {
 
-  private val appContext = context.applicationContext
-  private var failCount: MutableMap<String, Int> = HashMap()
+  private val failCount: MutableMap<String, Int> = HashMap()
 
   override fun submitPin(packageName: String, activityName: String, lockCode: String?,
       currentAttempt: String): Single<Boolean> {

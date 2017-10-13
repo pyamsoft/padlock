@@ -38,6 +38,7 @@ import java.util.ArrayList
 import java.util.Collections
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockInfoInteractorImpl @Inject internal constructor(
@@ -46,7 +47,7 @@ import javax.inject.Singleton
     private val preferences: OnboardingPreferences,
     private val updateDb: PadLockDBUpdate,
     private val modifyInteractor: LockStateModifyInteractor,
-    private val lockScreenClass: Class<out Activity>) : LockInfoInteractor {
+    @param:Named("lockscreen") private val lockScreenClass: Class<out Activity>) : LockInfoInteractor {
 
 
   override fun hasShownOnBoarding(): Single<Boolean> {

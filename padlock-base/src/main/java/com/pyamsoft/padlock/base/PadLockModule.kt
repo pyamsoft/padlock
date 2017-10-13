@@ -18,119 +18,90 @@
 
 package com.pyamsoft.padlock.base
 
-import android.app.Activity
-import android.app.IntentService
-import android.content.Context
-import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.base.db.PadLockDBDelete
+import com.pyamsoft.padlock.base.db.PadLockDBImpl
+import com.pyamsoft.padlock.base.db.PadLockDBInsert
+import com.pyamsoft.padlock.base.db.PadLockDBQuery
+import com.pyamsoft.padlock.base.db.PadLockDBUpdate
 import com.pyamsoft.padlock.base.preference.ClearPreferences
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.preference.LockListPreferences
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences
 import com.pyamsoft.padlock.base.preference.OnboardingPreferences
+import com.pyamsoft.padlock.base.preference.PadLockPreferencesImpl
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiverImpl
+import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
+import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatImpl
+import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
+import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager
+import com.pyamsoft.padlock.base.wrapper.PackageDrawableManager
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperImpl
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import io.reactivex.Scheduler
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
-import javax.inject.Named
-import javax.inject.Singleton
 
 @Module
-class PadLockModule(context: Context,
-    private val mainActivityClass: Class<out Activity>,
-    private val lockScreenActivityClass: Class<out Activity>,
-    private val recheckServiceClass: Class<out IntentService>) {
+abstract class PadLockModule {
 
-  private val appContext: Context = context.applicationContext
-  private val preferences: PadLockPreferencesImpl = PadLockPreferencesImpl(appContext)
+  @Binds
+  internal abstract fun provideApplicationInstallReceiver(
+      impl: ApplicationInstallReceiverImpl): ApplicationInstallReceiver
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideContext(): Context = appContext
+  @Binds
+  internal abstract fun provideMasterPinPreference(
+      impl: PadLockPreferencesImpl): MasterPinPreferences
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideMasterPinPreference(): MasterPinPreferences =
-      preferences
+  @Binds
+  internal abstract fun provideClearPreferences(
+      impl: PadLockPreferencesImpl): ClearPreferences
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideClearPreferences(): ClearPreferences =
-      preferences
+  @Binds
+  internal abstract fun provideInstallListenerPreferences(
+      impl: PadLockPreferencesImpl): InstallListenerPreferences
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideInstallListenerPreferences(): InstallListenerPreferences =
-      preferences
+  @Binds
+  internal abstract fun provideLockListPreferences(
+      impl: PadLockPreferencesImpl): LockListPreferences
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideLockListPreferences(): LockListPreferences =
-      preferences
+  @Binds
+  internal abstract fun provideLockScreenPreferences(
+      impl: PadLockPreferencesImpl): LockScreenPreferences
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideLockScreenPreferences(): LockScreenPreferences =
-      preferences
+  @Binds
+  internal abstract fun provideOnboardingPreferences(
+      impl: PadLockPreferencesImpl): OnboardingPreferences
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideOnboardingPreferences(): OnboardingPreferences =
-      preferences
+  @Binds
+  internal abstract fun providePackageActivityManager(
+      impl: PackageManagerWrapperImpl): PackageActivityManager
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideApplicationInstallReceiver(
-      packageManagerWrapper: PackageLabelManager,
-      @Named("io") ioScheduler: Scheduler,
-      @Named("main") mainThreadScheduler: Scheduler,
-      @Named("main_activity") mainActivityClass: Class<out Activity>,
-      @Named("cache_purge") purgeCache: Cache): ApplicationInstallReceiver =
-      ApplicationInstallReceiverImpl(appContext, packageManagerWrapper, ioScheduler,
-          mainThreadScheduler, mainActivityClass, purgeCache)
+  @Binds
+  internal abstract fun providePackageLabelManager(
+      impl: PackageManagerWrapperImpl): PackageLabelManager
 
-  @Singleton
-  @Provides
-  @Named(
-      "main_activity")
-  @CheckResult internal fun provideMainActivityClass(): Class<out Activity> =
-      mainActivityClass
+  @Binds
+  internal abstract fun providePackageApplicationManager(
+      impl: PackageManagerWrapperImpl): PackageApplicationManager
 
-  @Singleton
-  @Provides
-  @Named(
-      "lockscreen")
-  @CheckResult internal fun provideLockScreenActivityClas(): Class<out Activity> =
-      lockScreenActivityClass
+  @Binds
+  internal abstract fun providePackageDrawableManager(
+      impl: PackageManagerWrapperImpl): PackageDrawableManager
 
-  @Singleton
-  @Provides
-  @Named(
-      "recheck")
-  @CheckResult internal fun provideRecheckServiceClass(): Class<out IntentService> =
-      recheckServiceClass
+  @Binds
+  internal abstract fun provideJobSchedulerCompat(impl: JobSchedulerCompatImpl): JobSchedulerCompat
 
-  @Singleton
-  @Provides
-  @Named(
-      "computation")
-  @CheckResult internal fun provideComputationScheduler(): Scheduler =
-      Schedulers.computation()
+  @Binds
+  internal abstract fun providePadLockInsert(impl: PadLockDBImpl): PadLockDBInsert
 
-  @Singleton
-  @Provides
-  @Named("io")
-  @CheckResult internal fun provideIOScheduler(): Scheduler =
-      Schedulers.io()
+  @Binds
+  internal abstract fun providePadLockQuery(impl: PadLockDBImpl): PadLockDBQuery
 
-  @Singleton
-  @Provides
-  @Named("main")
-  @CheckResult internal fun provideMainScheduler(): Scheduler =
-      AndroidSchedulers.mainThread()
+  @Binds
+  internal abstract fun providePadLockUpdate(impl: PadLockDBImpl): PadLockDBUpdate
+
+  @Binds
+  internal abstract fun providePadLockDelete(impl: PadLockDBImpl): PadLockDBDelete
+
 }

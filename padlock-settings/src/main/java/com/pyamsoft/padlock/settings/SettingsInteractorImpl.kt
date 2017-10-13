@@ -23,12 +23,12 @@ import com.pyamsoft.padlock.base.preference.ClearPreferences
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences
 import com.pyamsoft.pydroid.data.Cache
-import com.pyamsoft.pydroid.helper.Optional
 import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Completable
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class SettingsInteractorImpl @Inject internal constructor(
@@ -36,10 +36,10 @@ import javax.inject.Singleton
     private val masterPinPreference: MasterPinPreferences,
     private val preferences: ClearPreferences,
     private val installListenerPreferences: InstallListenerPreferences,
-    private val lockListInteractor: Cache,
-    private val lockInfoInteractor: Cache,
-    private val lockEntryInteractor: Cache,
-    private val purgeInteractor: Cache) : SettingsInteractor {
+    @param:Named("cache_lock_list") private val lockListInteractor: Cache,
+    @param:Named("cache_lock_info") private val lockInfoInteractor: Cache,
+    @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
+    @param:Named("cache_purge") private val purgeInteractor: Cache) : SettingsInteractor {
 
   override fun isInstallListenerEnabled(): Single<Boolean> {
     return Single.fromCallable {

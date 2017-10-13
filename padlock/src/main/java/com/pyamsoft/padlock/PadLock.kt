@@ -21,7 +21,7 @@ package com.pyamsoft.padlock
 import android.app.Application
 import android.support.annotation.CheckResult
 import android.support.v4.app.Fragment
-import com.pyamsoft.padlock.base.PadLockModule
+import com.pyamsoft.padlock.base.PadLockProvider
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.RecheckService
@@ -35,7 +35,7 @@ import com.squareup.leakcanary.RefWatcher
 
 class PadLock : Application() {
 
-  private var refWatcher: RefWatcher? = null
+  private lateinit var refWatcher: RefWatcher
   private var component: PadLockComponent? = null
 
   override fun onCreate() {
@@ -60,10 +60,10 @@ class PadLock : Application() {
     Licenses.create("PatternLockView", "https://github.com/aritraroy/PatternLockView",
         "licenses/patternlock")
 
-    val padLockModule = PadLockModule(applicationContext, MainActivity::class.java,
+    val provider = PadLockProvider(applicationContext, MainActivity::class.java,
         LockScreenActivity::class.java,
         RecheckService::class.java)
-    val dagger = DaggerPadLockComponent.builder().padLockModule(padLockModule).build()
+    val dagger = DaggerPadLockComponent.builder().padLockProvider(provider).build()
 
     val receiver = dagger.provideApplicationInstallReceiver()
     val preferences = dagger.provideInstallListenerPreferences()
@@ -74,16 +74,6 @@ class PadLock : Application() {
     }
     component = dagger
   }
-
-  private val watcher: RefWatcher
-    @CheckResult get() {
-      val obj = refWatcher
-      if (obj == null) {
-        throw IllegalStateException("RefWatcher is NULL")
-      } else {
-        return obj
-      }
-    }
 
   override fun getSystemService(name: String?): Any {
     return if (Injector.name == name) {
@@ -115,7 +105,7 @@ class PadLock : Application() {
     private fun getRefWatcherInternal(fragment: Fragment): RefWatcher {
       val application = fragment.activity.application
       if (application is PadLock) {
-        return application.watcher
+        return application.refWatcher
       } else {
         throw IllegalStateException("Application is not PadLock")
       }

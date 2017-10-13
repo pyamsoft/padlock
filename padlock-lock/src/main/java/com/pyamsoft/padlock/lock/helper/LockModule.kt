@@ -18,12 +18,11 @@
 
 package com.pyamsoft.padlock.lock.helper
 
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import javax.inject.Singleton
 
-@Module class LockModule {
+@Module abstract class LockModule {
 
-  @Singleton @Provides fun provideLockHelper(): LockHelper = SHA256LockHelper()
+  @Binds internal abstract fun provideLockHelper(impl: SHA256LockHelper): LockHelper
 }
 

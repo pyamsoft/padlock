@@ -18,16 +18,13 @@
 
 package com.pyamsoft.padlock.lock.master
 
-import com.pyamsoft.padlock.base.preference.MasterPinPreferences
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import javax.inject.Singleton
 
 @Module
-class MasterPinModule {
+abstract class MasterPinModule {
 
-  @Singleton
-  @Provides internal fun provideMasterPin(preferences: MasterPinPreferences): MasterPinInteractor =
-      MasterPinInteractorImpl(preferences)
+  @Binds
+  internal abstract fun provideMasterPin(impl: MasterPinInteractorImpl): MasterPinInteractor
 }
 

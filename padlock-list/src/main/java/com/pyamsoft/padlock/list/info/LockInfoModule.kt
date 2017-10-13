@@ -18,22 +18,15 @@
 
 package com.pyamsoft.padlock.list.info
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.pydroid.bus.EventBus
 import dagger.Module
 import dagger.Provides
-import io.reactivex.Scheduler
 import javax.inject.Named
 
 @Module
 class LockInfoModule(private val packageName: String) {
 
   @Provides
-  @CheckResult internal fun provideInfoPresenter(lockInfoInteractor: LockInfoInteractor, @Named(
-      "computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler,
-      bus: EventBus<LockInfoEvent>, @Named("main") mainScheduler: Scheduler): LockInfoPresenter {
-    return LockInfoPresenter(bus, packageName, lockInfoInteractor, computationScheduler,
-        ioScheduler, mainScheduler)
-  }
+  @Named("package_name")
+  internal fun providePackageName(): String = packageName
 }
 

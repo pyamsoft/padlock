@@ -88,7 +88,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
-    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
+    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
   }
 
   override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,

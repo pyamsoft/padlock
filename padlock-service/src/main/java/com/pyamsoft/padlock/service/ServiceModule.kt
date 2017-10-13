@@ -18,40 +18,23 @@
 
 package com.pyamsoft.padlock.service
 
-import android.app.Activity
-import android.app.IntentService
-import android.content.Context
-import com.pyamsoft.padlock.base.db.PadLockDBQuery
-import com.pyamsoft.padlock.base.preference.LockScreenPreferences
-import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
-import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor
 import com.pyamsoft.pydroid.bus.EventBus
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import javax.inject.Named
-import javax.inject.Singleton
 
-@Module class ServiceModule {
+@Module abstract class ServiceModule {
 
-  @Singleton @Provides internal fun provideServiceInteractor(
-      context: Context, preferences: LockScreenPreferences, jobSchedulerCompat: JobSchedulerCompat,
-      packageActivityManager: PackageActivityManager, padLockDBQuery: PadLockDBQuery,
-      @Named("lockscreen") lockScreenActivityClass: Class<out Activity>,
-      @Named("recheck") recheckServiceClass: Class<out IntentService>,
-      stateInteractor: LockServiceStateInteractor): LockServiceInteractor {
-    return LockServiceInteractorImpl(context, preferences, jobSchedulerCompat,
-        packageActivityManager, padLockDBQuery, lockScreenActivityClass, recheckServiceClass,
-        stateInteractor)
-  }
+  @Binds
+  internal abstract fun provideServiceInteractor(
+      impl: LockServiceInteractorImpl): LockServiceInteractor
 
-  @Singleton @Provides internal fun provideServiceStateInteractor(
-      masterPinInteractor: MasterPinInteractor): LockServiceStateInteractor =
-      LockServiceStateInteractorImpl(masterPinInteractor)
+  @Binds internal abstract fun provideServiceStateInteractor(
+      impl: LockServiceStateInteractorImpl): LockServiceStateInteractor
 
-  @Singleton @Provides internal fun provideRecheckBus(): EventBus<RecheckEvent> = RecheckEventBus()
+  @Binds
+  internal abstract fun provideRecheckBus(bus: RecheckEventBus): EventBus<RecheckEvent>
 
-  @Singleton @Provides internal fun provideServiceFinishBus(): EventBus<ServiceFinishEvent> =
-      ServiceFinishBus()
+  @Binds
+  internal abstract fun provideServiceFinishBus(bus: ServiceFinishBus): EventBus<ServiceFinishEvent>
 }
 

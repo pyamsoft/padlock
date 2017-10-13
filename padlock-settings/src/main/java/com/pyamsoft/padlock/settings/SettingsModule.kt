@@ -18,38 +18,17 @@
 
 package com.pyamsoft.padlock.settings
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDBDelete
-import com.pyamsoft.padlock.base.preference.ClearPreferences
-import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
-import com.pyamsoft.padlock.base.preference.MasterPinPreferences
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.data.Cache
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import javax.inject.Named
-import javax.inject.Singleton
 
 @Module
-class SettingsModule {
+abstract class SettingsModule {
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideConfirmBus(): EventBus<ConfirmEvent> =
-      ConfirmEventBus()
+  @Binds
+  internal abstract fun provideConfirmBus(bus: ConfirmEventBus): EventBus<ConfirmEvent>
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideSettingsInteractor(
-      deleteDb: PadLockDBDelete, masterPinPreference: MasterPinPreferences,
-      clearPreference: ClearPreferences, installListenerPreferences: InstallListenerPreferences,
-      @Named("cache_lock_list") lockListInteractor: Cache,
-      @Named("cache_lock_info") lockInfoInteractor: Cache,
-      @Named("cache_lock_entry") lockEntryInteractor: Cache,
-      @Named("cache_purge") purgeInteractor: Cache): SettingsInteractor {
-    return SettingsInteractorImpl(deleteDb, masterPinPreference, clearPreference,
-        installListenerPreferences, lockListInteractor, lockInfoInteractor, lockEntryInteractor,
-        purgeInteractor)
-  }
+  @Binds
+  internal abstract fun provideInteractor(impl: SettingsInteractorImpl): SettingsInteractor
 }
 

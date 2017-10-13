@@ -37,7 +37,6 @@ import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
-import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
 import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.pydroid.loader.ImageLoader
@@ -123,8 +122,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
     getValuesFromBundle()
     setupActionBar()
 
-    (Injector.obtain(applicationContext) as PadLockComponent).plusLockScreenComponent(
-        LockScreenModule(lockedPackageName, lockedActivityName),
+    Injector.obtain<PadLockComponent>(applicationContext).plusLockScreenComponent(
         LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
 
     presenter.bind(this)

@@ -113,7 +113,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
     appName = arguments.getString(ARG_APP_NAME, null)
     appIsSystem = arguments.getBoolean(ARG_APP_SYSTEM, false)
 
-    (Injector.obtain(context.applicationContext) as PadLockComponent).plusLockInfoComponent(
+    Injector.obtain<PadLockComponent>(context.applicationContext).plusLockInfoComponent(
         LockInfoModule(appPackageName)).inject(this)
   }
 

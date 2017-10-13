@@ -39,7 +39,7 @@ class ConfirmationDialog : CanaryDialog() {
     super.onCreate(savedInstanceState)
     type = ConfirmEvent.valueOf(arguments.getString(WHICH, ConfirmEvent.DATABASE.name))
 
-    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
+    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
