@@ -22,9 +22,13 @@ import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
-internal class LockEntryInteractorImplCache(
-    private val impl: LockEntryInteractor) : LockEntryInteractor, Cache {
+@Singleton internal class LockEntryInteractorCache @Inject internal constructor(
+    @param:Named(
+        "interactor_lock_entry") private val impl: LockEntryInteractor) : LockEntryInteractor, Cache {
 
   override fun clearCache() {
     clearFailCount()

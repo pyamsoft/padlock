@@ -22,15 +22,15 @@ import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.pydroid.data.Cache
-import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
-
 @Singleton internal class LockListInteractorCache @Inject internal constructor(
-    private val impl: LockListInteractor) : LockListInteractor, Cache {
+    @param:Named(
+        "interactor_lock_list") private val impl: LockListInteractor) : LockListInteractor, Cache {
 
   private var cache: Observable<AppEntry>? = null
 
@@ -53,7 +53,8 @@ import javax.inject.Singleton
   }
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
-      packageName: String, activityName: String, code: String?, system: Boolean): Single<LockState> {
+      packageName: String, activityName: String, code: String?,
+      system: Boolean): Single<LockState> {
     return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
         code, system)
         .doOnSuccess {

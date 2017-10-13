@@ -36,6 +36,7 @@ import io.reactivex.Single
 import io.reactivex.SingleTransformer
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockServiceInteractorImpl @Inject internal constructor(
@@ -44,8 +45,8 @@ import javax.inject.Singleton
     private val jobSchedulerCompat: JobSchedulerCompat,
     private val packageActivityManager: PackageActivityManager,
     private val padLockDBQuery: PadLockDBQuery,
-    private val lockScreenActivityClass: Class<out Activity>,
-    private val recheckServiceClass: Class<out IntentService>,
+    @param:Named("lockscreen") private val lockScreenActivityClass: Class<out Activity>,
+    @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
     private val stateInteractor: LockServiceStateInteractor) : LockServiceInteractor {
 
   private val appContext = context.applicationContext

@@ -24,12 +24,16 @@ import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
 
 class LockScreenPresenter @Inject internal constructor(
-    private val lockScreenInputPresenter: LockScreenInputPresenter, private val packageName: String,
-    private val activityName: String, private val bus: EventBus<CloseOldEvent>,
-    private val interactor: LockScreenInteractor, computationScheduler: Scheduler,
-    ioScheduler: Scheduler, mainScheduler: Scheduler) : SchedulerPresenter<FullCallback>(
+    private val lockScreenInputPresenter: LockScreenInputPresenter, @param:Named(
+        "package_name") private val packageName: String,
+    @param:Named("activity_name") private val activityName: String,
+    private val bus: EventBus<CloseOldEvent>,
+    private val interactor: LockScreenInteractor, @Named("computation") computationScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler, @Named(
+        "main") mainScheduler: Scheduler) : SchedulerPresenter<FullCallback>(
     computationScheduler, ioScheduler, mainScheduler) {
 
   override fun onBind(v: FullCallback) {

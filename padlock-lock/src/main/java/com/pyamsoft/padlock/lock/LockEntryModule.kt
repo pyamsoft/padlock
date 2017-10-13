@@ -18,11 +18,8 @@
 
 package com.pyamsoft.padlock.lock
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.pydroid.bus.EventBus
 import dagger.Module
 import dagger.Provides
-import io.reactivex.Scheduler
 import javax.inject.Named
 
 @Module
@@ -30,12 +27,12 @@ class LockEntryModule(private val packageName: String, private val activityName:
     private val realName: String) {
 
   @Provides
-  @CheckResult internal fun providePresenter(bus: EventBus<LockPassEvent>,
-      interactor: LockEntryInteractor, @Named("computation") compScheduler: Scheduler, @Named(
-          "main") mainScheduler: Scheduler, @Named(
-          "io") ioScheduler: Scheduler): LockEntryPresenter {
-    return LockEntryPresenter(bus, packageName, activityName, realName, interactor,
-        compScheduler, ioScheduler, mainScheduler)
-  }
+  @Named("package_name") internal fun providePackageName(): String = packageName
+
+  @Provides
+  @Named("activity_name") internal fun provideActivityName(): String = activityName
+
+  @Provides
+  @Named("real_name") internal fun provideRealName(): String = realName
 }
 

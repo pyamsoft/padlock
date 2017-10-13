@@ -69,7 +69,7 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
+    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
 
     presenter.bind(this)
   }

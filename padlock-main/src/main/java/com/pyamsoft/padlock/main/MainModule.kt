@@ -18,19 +18,13 @@
 
 package com.pyamsoft.padlock.main
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import javax.inject.Singleton
 
 @Module
-class MainModule {
+abstract class MainModule {
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideMainInteractor(
-      onboardingPreferences: OnboardingPreferences): MainInteractor =
-      MainInteractorImpl(onboardingPreferences)
+  @Binds
+  internal abstract fun provideMainInteractor(impl: MainInteractorImpl): MainInteractor
 }
 

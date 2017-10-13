@@ -23,12 +23,14 @@ import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
 
 class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<LockPassEvent>,
-    private val packageName: String, private val activityName: String, private val realName: String,
-    private val interactor: LockEntryInteractor,
-    computationScheduler: Scheduler, ioScheduler: Scheduler,
-    mainScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
+    @param:Named("package_name") private val packageName: String, @param:Named(
+        "activity_name") private val activityName: String, @param:Named(
+        "real_name") private val realName: String, private val interactor: LockEntryInteractor,
+    @Named("computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
     ioScheduler, mainScheduler) {
 
   fun displayLockedHint(setDisplayHint: (String) -> Unit) {

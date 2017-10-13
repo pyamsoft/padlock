@@ -28,8 +28,9 @@ import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class LockStateModifyInteractorImpl @Inject internal constructor(
+@Singleton internal class LockStateModifyInteractorImpl @Inject internal constructor(
     private val insertDb: PadLockDBInsert,
     private val deleteDb: PadLockDBDelete) : LockStateModifyInteractor {
 

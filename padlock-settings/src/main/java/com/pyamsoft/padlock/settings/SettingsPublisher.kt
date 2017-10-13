@@ -20,9 +20,7 @@ package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.pydroid.bus.EventBus
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class SettingsPublisher @Inject internal constructor(private val bus: EventBus<ConfirmEvent>) {
 
   fun publish(event: ConfirmEvent) {

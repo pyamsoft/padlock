@@ -22,8 +22,9 @@ import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.bus.RxBus
 import io.reactivex.Observable
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class ServiceFinishBus @Inject internal constructor() : EventBus<ServiceFinishEvent> {
+@Singleton internal class ServiceFinishBus @Inject internal constructor() : EventBus<ServiceFinishEvent> {
 
   private val bus: EventBus<ServiceFinishEvent> = RxBus.create()
 

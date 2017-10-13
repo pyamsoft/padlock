@@ -124,7 +124,7 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
     @Inject internal lateinit var publisher: LockInfoItemPublisher
 
     init {
-      (Injector.obtain(itemView.context.applicationContext) as PadLockComponent).inject(this)
+      Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)
     }
   }
 }

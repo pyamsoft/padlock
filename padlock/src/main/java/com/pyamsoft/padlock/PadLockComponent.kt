@@ -20,16 +20,14 @@ package com.pyamsoft.padlock
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.PadLockModule
-import com.pyamsoft.padlock.base.db.PadLockDBModule
+import com.pyamsoft.padlock.base.PadLockProvider
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
-import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompatModule
-import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperModule
 import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.LockInfoItem
 import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.list.LockListItem
-import com.pyamsoft.padlock.list.LockListSingletonModule
+import com.pyamsoft.padlock.list.LockListModule
 import com.pyamsoft.padlock.list.info.LockInfoModule
 import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
 import com.pyamsoft.padlock.list.modify.LockStateModule
@@ -38,7 +36,6 @@ import com.pyamsoft.padlock.lock.LockEntrySingletonModule
 import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.helper.LockModule
 import com.pyamsoft.padlock.lock.master.MasterPinModule
-import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import com.pyamsoft.padlock.lock.screen.LockScreenSingletonModule
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.main.MainModule
@@ -61,10 +58,10 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = arrayOf(PadLockModule::class, PackageManagerWrapperModule::class,
-    JobSchedulerCompatModule::class, PadLockDBModule::class, LockModule::class, PinModule::class,
+@Component(modules = arrayOf(PadLockProvider::class, PadLockModule::class,
+    LockModule::class, PinModule::class,
     ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class,
-    LockInfoSingletonModule::class, LockStateModule::class, LockListSingletonModule::class,
+    LockInfoSingletonModule::class, LockStateModule::class, LockListModule::class,
     LockScreenSingletonModule::class, LockEntrySingletonModule::class,
     MasterPinModule::class))
 interface PadLockComponent {
@@ -111,6 +108,5 @@ interface PadLockComponent {
   fun plusLockInfoComponent(module: LockInfoModule): LockInfoComponent
 
   @CheckResult
-  fun plusLockScreenComponent(screenModule: LockScreenModule,
-      entryModule: LockEntryModule): LockScreenComponent
+  fun plusLockScreenComponent(entryModule: LockEntryModule): LockScreenComponent
 }

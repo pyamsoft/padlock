@@ -41,8 +41,9 @@ import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.util.ArrayList
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class PackageManagerWrapperImpl @Inject internal constructor(
+@Singleton internal class PackageManagerWrapperImpl @Inject internal constructor(
     context: Context,
     private val listPreferences: LockListPreferences) : PackageActivityManager, PackageApplicationManager, PackageLabelManager, PackageDrawableManager {
 

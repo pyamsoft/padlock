@@ -18,17 +18,12 @@
 
 package com.pyamsoft.padlock.list.modify
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDBDelete
-import com.pyamsoft.padlock.base.db.PadLockDBInsert
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import javax.inject.Singleton
 
-@Module class LockStateModule {
+@Module abstract class LockStateModule {
 
-  @Singleton @Provides @CheckResult internal fun provideInteractor(insertDb: PadLockDBInsert,
-      deleteDb: PadLockDBDelete): LockStateModifyInteractor =
-      LockStateModifyInteractorImpl(insertDb, deleteDb)
+  @Binds internal abstract fun provideInteractor(
+      impl: LockStateModifyInteractorImpl): LockStateModifyInteractor
 }
 

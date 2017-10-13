@@ -16,17 +16,28 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.base.wrapper
+package com.pyamsoft.padlock.list
 
-import android.content.Context
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.data.Cache
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import javax.inject.Singleton
+import javax.inject.Named
 
 @Module
-class JobSchedulerCompatModule {
+abstract class LockListModule {
 
-  @Singleton
-  @Provides internal fun provideJobSchedulerCompat(
-      context: Context): JobSchedulerCompat = JobSchedulerCompatImpl(context)
+  @Binds internal abstract fun provideBus(bus: LockListBus): EventBus<LockListEvent>
+
+  @Binds
+  internal abstract fun provideInteractorCache(impl: LockListInteractorCache): LockListInteractor
+
+  @Binds
+  @Named("interactor_lock_list")
+  internal abstract fun provideInteractor(impl: LockListInteractorImpl): LockListInteractor
+
+  @Binds
+  @Named("cache_lock_list")
+  internal abstract fun provideCache(cache: LockListInteractorCache): Cache
 }
+

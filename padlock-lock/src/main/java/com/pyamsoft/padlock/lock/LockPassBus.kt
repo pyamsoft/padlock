@@ -22,8 +22,9 @@ import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.bus.RxBus
 import io.reactivex.Observable
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class LockPassBus @Inject internal constructor() : EventBus<LockPassEvent> {
+@Singleton internal class LockPassBus @Inject internal constructor() : EventBus<LockPassEvent> {
 
   private val bus: EventBus<LockPassEvent> = RxBus.create()
 

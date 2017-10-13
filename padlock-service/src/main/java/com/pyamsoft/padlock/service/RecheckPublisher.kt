@@ -20,9 +20,7 @@ package com.pyamsoft.padlock.service
 
 import com.pyamsoft.pydroid.bus.EventBus
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class RecheckPublisher @Inject internal constructor(private val bus: EventBus<RecheckEvent>) {
 
   fun publish(event: RecheckEvent) {

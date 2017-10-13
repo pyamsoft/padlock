@@ -18,48 +18,26 @@
 
 package com.pyamsoft.padlock.list.info
 
-import android.app.Activity
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDBQuery
-import com.pyamsoft.padlock.base.db.PadLockDBUpdate
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences
-import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
-import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import javax.inject.Named
-import javax.inject.Singleton
 
 @Module
-class LockInfoSingletonModule() {
+abstract class LockInfoSingletonModule {
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideBus(): EventBus<LockInfoEvent> =
-      LockInfoBus()
+  @Binds internal abstract fun provideBus(bus: LockInfoBus): EventBus<LockInfoEvent>
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideInteractorCache(queryDb: PadLockDBQuery,
-      packageActivityManager: PackageActivityManager, preferences: OnboardingPreferences,
-      updateDb: PadLockDBUpdate, lockStateModifyInteractor: LockStateModifyInteractor,
-      @Named("lockscreen") lockScreenClass: Class<out Activity>): LockInfoInteractorCache {
-    return LockInfoInteractorCache(
-        LockInfoInteractorImpl(queryDb, packageActivityManager, preferences, updateDb,
-            lockStateModifyInteractor, lockScreenClass))
-  }
+  @Binds
+  internal abstract fun provideInteractorCache(impl: LockInfoInteractorCache): LockInfoInteractor
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideInteractor(
-      cache: LockInfoInteractorCache): LockInfoInteractor = cache
+  @Binds
+  @Named("interactor_lock_info")
+  internal abstract fun provideInteractor(impl: LockInfoInteractorImpl): LockInfoInteractor
 
-  @Singleton
-  @Provides
-  @CheckResult
-  @Named("cache_lock_info") internal fun provideCache(
-      cache: LockInfoInteractorCache): Cache = cache
+  @Binds
+  @Named("cache_lock_info")
+  internal abstract fun provideCache(cache: LockInfoInteractorCache): Cache
 }
 

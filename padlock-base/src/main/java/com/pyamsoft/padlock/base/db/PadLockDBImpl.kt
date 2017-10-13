@@ -31,9 +31,12 @@ import io.reactivex.Scheduler
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
-internal class PadLockDBImpl @Inject internal constructor(context: Context,
-    private val scheduler: Scheduler) : PadLockDBInsert, PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
+@Singleton internal class PadLockDBImpl @Inject internal constructor(context: Context,
+    @param:Named(
+        "io") private val scheduler: Scheduler) : PadLockDBInsert, PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
 
   private var briteDatabase: BriteDatabase? = null
   private val openHelper: PadLockOpenHelper

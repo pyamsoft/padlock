@@ -32,7 +32,7 @@ class RecheckService : IntentService(RecheckService::class.java.name) {
 
   override fun onCreate() {
     super.onCreate()
-    (Injector.obtain(applicationContext) as PadLockComponent).inject(this)
+    Injector.obtain<PadLockComponent>(applicationContext).inject(this)
   }
 
   override fun onHandleIntent(intent: Intent?) {

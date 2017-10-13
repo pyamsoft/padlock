@@ -18,10 +18,9 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.padlock.lock.screen.LockScreenModule
 import dagger.Subcomponent
 
-@Subcomponent(modules = arrayOf(LockScreenModule::class, LockEntryModule::class))
+@Subcomponent(modules = arrayOf(LockEntryModule::class))
 interface LockScreenComponent {
 
   fun inject(activity: LockScreenActivity)

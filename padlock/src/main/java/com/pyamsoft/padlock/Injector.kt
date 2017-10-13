@@ -25,12 +25,13 @@ object Injector : SimpleInjector {
 
   override val name: String = "com.pyamsoft.padlock.INJECTOR"
 
-  override fun obtain(context: Context): Any {
+  override fun <T : Any> obtain(context: Context): T {
     val service: Any? = context.getSystemService(name)
     if (service == null) {
       throw IllegalStateException("Service returned for getSystemService(\"$name\" was NULL")
     } else {
-      return service
+      @Suppress("UNCHECKED_CAST")
+      return service as T
     }
   }
 }

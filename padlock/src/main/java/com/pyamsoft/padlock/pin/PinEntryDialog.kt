@@ -54,7 +54,7 @@ class PinEntryDialog : CanaryDialog(), Callback {
     packageName = arguments.getString(ENTRY_PACKAGE_NAME)
     isCancelable = true
 
-    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
+    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
   }
 
   override fun onResume() {

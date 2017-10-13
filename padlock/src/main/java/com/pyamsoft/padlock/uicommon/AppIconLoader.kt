@@ -51,7 +51,7 @@ class AppIconLoader private constructor(context: Context,
     if (packageName.isEmpty()) {
       throw IllegalArgumentException("AppIconLoader packageName must be non-empty")
     }
-    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
+    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
 
     mainScheduler.enforceMainThread()
     ioScheduler.enforceIo()

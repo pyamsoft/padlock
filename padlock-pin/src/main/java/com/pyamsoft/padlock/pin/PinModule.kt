@@ -18,25 +18,21 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.lock.helper.LockHelper
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor
 import com.pyamsoft.pydroid.bus.EventBus
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import javax.inject.Singleton
 
 @Module
-class PinModule {
+abstract class PinModule {
 
-  @Singleton
-  @Provides internal fun provideInteractor(lockHelper: LockHelper,
-      masterPinInteractor: MasterPinInteractor): PinEntryInteractor =
-      PinEntryInteractorImpl(lockHelper, masterPinInteractor)
+  @Binds
+  internal abstract fun provideClearBus(bus: ClearPinBus): EventBus<ClearPinEvent>
 
-  @Singleton
-  @Provides internal fun provideClearBus(): EventBus<ClearPinEvent> = ClearPinBus()
+  @Binds
+  internal abstract fun provideCreateBus(bus: CreatePinBus): EventBus<CreatePinEvent>
 
-  @Singleton
-  @Provides internal fun provideCreateBus(): EventBus<CreatePinEvent> = CreatePinBus()
+  @Binds
+  internal abstract fun provideInteractor(impl: PinEntryInteractorImpl): PinEntryInteractor
+
 }
 

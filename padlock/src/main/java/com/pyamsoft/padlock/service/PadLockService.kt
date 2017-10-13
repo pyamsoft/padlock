@@ -66,7 +66,7 @@ class PadLockService : AccessibilityService(), Callback {
 
   override fun onCreate() {
     super.onCreate()
-    (Injector.obtain(applicationContext) as PadLockComponent).inject(this)
+    Injector.obtain<PadLockComponent>(applicationContext).inject(this)
     presenter.bind(this)
   }
 

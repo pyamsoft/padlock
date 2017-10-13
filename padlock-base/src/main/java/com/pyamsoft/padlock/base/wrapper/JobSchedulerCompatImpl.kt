@@ -23,8 +23,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class JobSchedulerCompatImpl @Inject constructor(context: Context) : JobSchedulerCompat {
+@Singleton internal class JobSchedulerCompatImpl @Inject internal constructor(
+    context: Context) : JobSchedulerCompat {
 
   private val appContext: Context = context.applicationContext
   private val alarmManager: AlarmManager = context.applicationContext.getSystemService(

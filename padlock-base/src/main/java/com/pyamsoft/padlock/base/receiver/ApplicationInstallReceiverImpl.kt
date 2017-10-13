@@ -42,18 +42,19 @@ import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class ApplicationInstallReceiverImpl @Inject internal constructor(
-    context: Context,
+    private val appContext: Context,
     private val packageManagerWrapper: PackageLabelManager,
-    private val ioScheduler: Scheduler,
-    private val mainThreadScheduler: Scheduler,
-    mainActivityClass: Class<out Activity>,
-    private val purgeCache: Cache) : BroadcastReceiver(), ApplicationInstallReceiver {
+    @param:Named("io") private val ioScheduler: Scheduler,
+    @param:Named("main") private val mainThreadScheduler: Scheduler,
+    @Named("main_activity") mainActivityClass: Class<out Activity>,
+    @param:Named(
+        "cache_purge") private val purgeCache: Cache) : BroadcastReceiver(), ApplicationInstallReceiver {
 
   private val notificationChannelId: String = "padlock_new_apps"
-  private val appContext: Context = context.applicationContext
   private val notificationManager: NotificationManager
   private val filter: IntentFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
   private val pendingIntent: PendingIntent

@@ -22,10 +22,11 @@ import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class PurgeInteractorCache @Inject internal constructor(
-    private val impl: PurgeInteractor) : PurgeInteractor, Cache {
+    @param:Named("interactor_purge") private val impl: PurgeInteractor) : PurgeInteractor, Cache {
 
   private var cachedList: Observable<String>? = null
 

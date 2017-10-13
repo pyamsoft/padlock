@@ -18,51 +18,28 @@
 
 package com.pyamsoft.padlock.lock
 
-import android.app.IntentService
-import android.content.Context
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDBInsert
-import com.pyamsoft.padlock.base.db.PadLockDBQuery
-import com.pyamsoft.padlock.base.db.PadLockDBUpdate
-import com.pyamsoft.padlock.base.preference.LockScreenPreferences
-import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
-import com.pyamsoft.padlock.lock.helper.LockHelper
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import javax.inject.Named
-import javax.inject.Singleton
 
 @Module
-class LockEntrySingletonModule {
+abstract class LockEntrySingletonModule {
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideInteractorCache(context: Context,
-      lockHelper: LockHelper, lockScreenPreferences: LockScreenPreferences,
-      jobSchedulerCompat: JobSchedulerCompat, masterPinInteractor: MasterPinInteractor,
-      dbInsert: PadLockDBInsert, dbUpdate: PadLockDBUpdate, dbQuery: PadLockDBQuery,
-      @Named(
-          "recheck") recheckServiceClass: Class<out IntentService>): LockEntryInteractorImplCache {
-    return LockEntryInteractorImplCache(
-        LockEntryInteractorImpl(context, lockHelper, lockScreenPreferences,
-            jobSchedulerCompat, masterPinInteractor, dbInsert, dbUpdate, dbQuery,
-            recheckServiceClass))
-  }
+  @Binds
+  internal abstract fun provideLockPassBus(bus: LockPassBus): EventBus<LockPassEvent>
 
-  @Singleton
-  @Provides
-  @CheckResult internal fun provideInteractor(
-      cache: LockEntryInteractorImplCache): LockEntryInteractor = cache
+  @Binds
+  internal abstract fun provideInteractorCache(
+      impl: LockEntryInteractorCache): LockEntryInteractor
 
-  @Singleton
-  @Provides
+  @Binds
+  @Named("interactor_lock_entry")
+  internal abstract fun provideInteractor(impl: LockEntryInteractorImpl): LockEntryInteractor
+
+  @Binds
   @Named("cache_lock_entry")
-  @CheckResult internal fun provideCache(cache: LockEntryInteractorImplCache): Cache = cache
-
-  @Singleton
-  @Provides internal fun provideLockPassBus(): EventBus<LockPassEvent> = LockPassBus()
+  internal abstract fun provideCache(impl: LockEntryInteractorCache): Cache
 }
 

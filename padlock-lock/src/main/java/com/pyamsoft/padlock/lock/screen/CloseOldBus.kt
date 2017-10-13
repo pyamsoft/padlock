@@ -22,8 +22,9 @@ import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.bus.RxBus
 import io.reactivex.Observable
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class CloseOldBus @Inject internal constructor() : EventBus<CloseOldEvent> {
+@Singleton internal class CloseOldBus @Inject internal constructor() : EventBus<CloseOldEvent> {
 
   private val bus: EventBus<CloseOldEvent> = RxBus.create()
 

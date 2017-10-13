@@ -24,8 +24,10 @@ import io.reactivex.Single
 import java.nio.charset.Charset
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class SHA256LockHelper internal constructor() : LockHelper {
+@Singleton internal class SHA256LockHelper @Inject internal constructor() : LockHelper {
 
   private val messageDigest: MessageDigest
 

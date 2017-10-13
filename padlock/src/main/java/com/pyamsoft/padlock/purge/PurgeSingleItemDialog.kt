@@ -39,7 +39,7 @@ class PurgeSingleItemDialog : CanaryDialog() {
     super.onCreate(savedInstanceState)
     packageName = arguments.getString(PACKAGE, "")
 
-    (Injector.obtain(context.applicationContext) as PadLockComponent).inject(this)
+    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

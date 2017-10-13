@@ -16,21 +16,18 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.base
+package com.pyamsoft.padlock.base.preference
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.support.v7.preference.PreferenceManager
-import com.pyamsoft.padlock.base.preference.ClearPreferences
-import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
-import com.pyamsoft.padlock.base.preference.LockListPreferences
-import com.pyamsoft.padlock.base.preference.LockScreenPreferences
-import com.pyamsoft.padlock.base.preference.MasterPinPreferences
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences
+import com.pyamsoft.padlock.base.R.bool
+import com.pyamsoft.padlock.base.R.string
 import com.pyamsoft.padlock.model.LockScreenType
 import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class PadLockPreferencesImpl @Inject internal constructor(
+@Singleton internal class PadLockPreferencesImpl @Inject internal constructor(
     context: Context) : MasterPinPreferences, ClearPreferences, InstallListenerPreferences,
     LockListPreferences, LockScreenPreferences, OnboardingPreferences {
   private val preferences: SharedPreferences
@@ -52,18 +49,21 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     val res = appContext.resources
 
     this.preferences = PreferenceManager.getDefaultSharedPreferences(appContext)
-    ignoreTimeKey = res.getString(R.string.ignore_time_key)
-    ignoreTimeDefault = res.getString(R.string.ignore_time_default)
-    timeoutTimeKey = res.getString(R.string.timeout_time_key)
-    timeoutTimeDefault = res.getString(R.string.timeout_time_default)
-    lockPackageChangeKey = res.getString(R.string.lock_package_change_key)
-    lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default)
-    installListener = res.getString(R.string.install_listener_key)
-    installListenerDefault = res.getBoolean(R.bool.install_listener_default)
-    ignoreKeyguard = res.getString(R.string.ignore_keyguard_key)
-    ignoreKeyguardDefault = res.getBoolean(R.bool.ignore_keyguard_default)
-    lockScreenType = res.getString(R.string.lock_screen_type_key)
-    lockScreenTypeDefault = res.getString(R.string.lock_screen_type_default)
+    ignoreTimeKey = res.getString(string.ignore_time_key)
+    ignoreTimeDefault = res.getString(string.ignore_time_default)
+    timeoutTimeKey = res.getString(string.timeout_time_key)
+    timeoutTimeDefault = res.getString(string.timeout_time_default)
+    lockPackageChangeKey = res.getString(string.lock_package_change_key)
+    lockPackageChangeDefault = res.getBoolean(
+        bool.lock_package_change_default)
+    installListener = res.getString(string.install_listener_key)
+    installListenerDefault = res.getBoolean(
+        bool.install_listener_default)
+    ignoreKeyguard = res.getString(string.ignore_keyguard_key)
+    ignoreKeyguardDefault = res.getBoolean(bool.ignore_keyguard_default)
+    lockScreenType = res.getString(string.lock_screen_type_key)
+    lockScreenTypeDefault = res.getString(
+        string.lock_screen_type_default)
   }
 
   override fun getCurrentLockType(): LockScreenType =
@@ -75,17 +75,21 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
   override fun isInstallListenerEnabled(): Boolean =
       preferences.getBoolean(installListener, installListenerDefault)
 
-  override fun getHint(): String? = preferences.getString(HINT, null)
+  override fun getHint(): String? = preferences.getString(
+      HINT, null)
 
   override fun setHint(hint: String) {
-    preferences.edit().putString(HINT, hint).apply()
+    preferences.edit().putString(
+        HINT, hint).apply()
   }
 
   override fun clearHint() {
-    preferences.edit().remove(HINT).apply()
+    preferences.edit().remove(
+        HINT).apply()
   }
 
-  override fun isInfoDialogOnBoard(): Boolean = preferences.getBoolean(LOCK_DIALOG_ONBOARD, false)
+  override fun isInfoDialogOnBoard(): Boolean = preferences.getBoolean(
+      LOCK_DIALOG_ONBOARD, false)
 
   override fun getDefaultIgnoreTime(): Long =
       preferences.getString(ignoreTimeKey, ignoreTimeDefault).toLong()
@@ -96,36 +100,46 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
   override fun isLockOnPackageChange(): Boolean =
       preferences.getBoolean(lockPackageChangeKey, lockPackageChangeDefault)
 
-  override fun isSystemVisible(): Boolean = preferences.getBoolean(IS_SYSTEM, false)
+  override fun isSystemVisible(): Boolean = preferences.getBoolean(
+      IS_SYSTEM, false)
 
   override fun setSystemVisible(visible: Boolean) {
-    preferences.edit().putBoolean(IS_SYSTEM, visible).apply()
+    preferences.edit().putBoolean(
+        IS_SYSTEM, visible).apply()
   }
 
-  override fun getMasterPassword(): String? = preferences.getString(MASTER_PASSWORD, null)
+  override fun getMasterPassword(): String? = preferences.getString(
+      MASTER_PASSWORD, null)
 
   override fun setMasterPassword(pw: String) {
-    preferences.edit().putString(MASTER_PASSWORD, pw).apply()
+    preferences.edit().putString(
+        MASTER_PASSWORD, pw).apply()
   }
 
   override fun clearMasterPassword() {
-    preferences.edit().remove(MASTER_PASSWORD).apply()
+    preferences.edit().remove(
+        MASTER_PASSWORD).apply()
   }
 
-  override fun hasAgreed(): Boolean = preferences.getBoolean(AGREED, false)
+  override fun hasAgreed(): Boolean = preferences.getBoolean(
+      AGREED, false)
 
   override fun setAgreed() {
-    preferences.edit().putBoolean(AGREED, true).apply()
+    preferences.edit().putBoolean(
+        AGREED, true).apply()
   }
 
-  override fun isListOnBoard(): Boolean = preferences.getBoolean(LOCK_LIST_ONBOARD, false)
+  override fun isListOnBoard(): Boolean = preferences.getBoolean(
+      LOCK_LIST_ONBOARD, false)
 
   override fun setListOnBoard() {
-    preferences.edit().putBoolean(LOCK_LIST_ONBOARD, true).apply()
+    preferences.edit().putBoolean(
+        LOCK_LIST_ONBOARD, true).apply()
   }
 
   override fun setInfoDialogOnBoard() {
-    preferences.edit().putBoolean(LOCK_DIALOG_ONBOARD, true).apply()
+    preferences.edit().putBoolean(
+        LOCK_DIALOG_ONBOARD, true).apply()
   }
 
   override fun clearAll() {
