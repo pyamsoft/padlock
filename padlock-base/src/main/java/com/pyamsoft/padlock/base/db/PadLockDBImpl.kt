@@ -24,6 +24,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.support.annotation.CheckResult
 import android.text.TextUtils
 import com.pyamsoft.padlock.service.db.PadLockEntryModel
+import com.pyamsoft.pydroid.helper.notNull
 import com.squareup.sqlbrite2.BriteDatabase
 import com.squareup.sqlbrite2.SqlBrite
 import io.reactivex.Completable
@@ -50,12 +51,7 @@ import javax.inject.Singleton
       briteDatabase = SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler)
     }
 
-    val db = briteDatabase
-    if (db == null) {
-      throw IllegalStateException("Cannot open BriteDatabase, database is NULL")
-    } else {
-      return db
-    }
+    return briteDatabase.notNull("briteDatabase")
   }
 
   @CheckResult private fun deleteWithPackageActivityNameUnguarded(packageName: String,

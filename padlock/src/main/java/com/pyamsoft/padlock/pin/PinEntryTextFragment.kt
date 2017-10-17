@@ -33,6 +33,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
 import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
+import com.pyamsoft.pydroid.helper.notNull
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
@@ -73,26 +74,11 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
   override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     // Resolve TextInputLayout edit texts
-    val obj1: EditText? = binding.pinEntryCode.editText
-    if (obj1 == null) {
-      throw NullPointerException("No item entry edit text")
-    } else {
-      pinEntryText = obj1
-    }
+    pinEntryText = binding.pinEntryCode.editText.notNull("pinEntryCode editText")
 
-    val obj2 = binding.pinReentryCode.editText
-    if (obj2 == null) {
-      throw NullPointerException("No item reentry edit text")
-    } else {
-      pinReentryText = obj2
-    }
+    pinReentryText = binding.pinReentryCode.editText.notNull("pinReentryCode editText")
 
-    val obj3 = binding.pinHint.editText
-    if (obj3 == null) {
-      throw NullPointerException("No item hint edit text")
-    } else {
-      pinHintText = obj3
-    }
+    pinHintText = binding.pinHint.editText.notNull("pinHint editText")
 
     // Force the keyboard
     imm = context.applicationContext

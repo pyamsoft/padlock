@@ -20,6 +20,7 @@ package com.pyamsoft.padlock
 
 import android.content.Context
 import com.pyamsoft.pydroid.SimpleInjector
+import com.pyamsoft.pydroid.helper.notNull
 
 object Injector : SimpleInjector {
 
@@ -27,11 +28,8 @@ object Injector : SimpleInjector {
 
   override fun <T : Any> obtain(context: Context): T {
     val service: Any? = context.getSystemService(name)
-    if (service == null) {
-      throw IllegalStateException("Service returned for getSystemService(\"$name\" was NULL")
-    } else {
-      @Suppress("UNCHECKED_CAST")
-      return service as T
-    }
+
+    @Suppress("UNCHECKED_CAST")
+    return service.notNull("service") as T
   }
 }
