@@ -50,7 +50,7 @@ class PadLock : Application() {
       RefWatcher.DISABLED
     }
 
-    PYDroid.initialize(this, BuildConfig.DEBUG)
+    PYDroid.init(this, BuildConfig.DEBUG)
     Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
     Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight")
     Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
@@ -60,11 +60,7 @@ class PadLock : Application() {
     Licenses.create("PatternLockView", "https://github.com/aritraroy/PatternLockView",
         "licenses/patternlock")
 
-    val provider = PadLockProvider(applicationContext, MainActivity::class.java,
-        LockScreenActivity::class.java,
-        RecheckService::class.java)
-    val dagger = DaggerPadLockComponent.builder().padLockProvider(provider).build()
-
+    val dagger = Injector.obtain<PadLockComponent>(applicationContext)
     val receiver = dagger.provideApplicationInstallReceiver()
     val preferences = dagger.provideInstallListenerPreferences()
     if (preferences.isInstallListenerEnabled()) {
@@ -72,15 +68,29 @@ class PadLock : Application() {
     } else {
       receiver.unregister()
     }
-    component = dagger
+  }
+
+  private fun buildDagger(): PadLockComponent {
+    val provider = PadLockProvider(applicationContext, MainActivity::class.java,
+        LockScreenActivity::class.java,
+        RecheckService::class.java)
+    return DaggerPadLockComponent.builder().padLockProvider(provider).build()
   }
 
   override fun getSystemService(name: String?): Any {
     return if (Injector.name == name) {
-      // Return
-      component ?: throw IllegalStateException("PadLock component is NULL")
-    } else {
+      val graph: PadLockComponent
+      val dagger = component
+      if (dagger == null) {
+        graph = buildDagger()
+        component = graph
+      } else {
+        graph = dagger
+      }
 
+      // Return
+      graph
+    } else {
       // Return
       super.getSystemService(name)
     }
