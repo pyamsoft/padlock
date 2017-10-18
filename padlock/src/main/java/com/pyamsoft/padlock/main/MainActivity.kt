@@ -58,12 +58,10 @@ class MainActivity : TamperActivity(), MainCallback {
       listOf(presenter) + super.provideBoundPresenters()
 
   override val changeLogLines: Array<String>
-    get() {
-      val line1 = "BUGFIX: Bugfixes and improvements"
-      val line2 = "BUGFIX: Removed all Advertisements"
-      val line3 = "BUGFIX: Faster loading of Open Source Licenses page"
-      return arrayOf(line1, line2, line3)
-    }
+    get() = arrayOf(
+        "BUGFIX: Fixed a crash on the lock screen when switching too quickly",
+        "BUGFIX: Faster application startup"
+    )
 
   public override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.Theme_PadLock_Light)
