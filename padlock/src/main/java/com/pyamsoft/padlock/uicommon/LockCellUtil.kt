@@ -24,7 +24,7 @@ import com.andrognito.patternlockview.PatternLockView
 
 object LockCellUtil {
 
-  @JvmStatic
+
   @CheckResult
   fun cellPatternToString(cells: List<PatternLockView.Dot>): String {
     val builder = StringBuilder(cells.size)

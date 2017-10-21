@@ -28,7 +28,6 @@ import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.PinEntryDialog
-import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment
@@ -38,7 +37,7 @@ import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class SettingsFragment : ActionBarSettingsPreferenceFragment(), Callback {
+class SettingsFragment : ActionBarSettingsPreferenceFragment(), SettingsPresenter.View {
 
   @field:Inject internal lateinit var presenter: SettingsPresenter
 

@@ -59,7 +59,7 @@ class ConfirmationDialog : CanaryDialog() {
 
     const private val WHICH = "which_type"
 
-    @JvmStatic
+
     @CheckResult
     fun newInstance(type: ConfirmEvent): ConfirmationDialog {
       val fragment = ConfirmationDialog()

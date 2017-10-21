@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.service.ServiceFinishEvent
 import com.pyamsoft.padlock.settings.ConfirmEvent.ALL
 import com.pyamsoft.padlock.settings.ConfirmEvent.DATABASE
-import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
+import com.pyamsoft.padlock.settings.SettingsPresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -37,15 +37,15 @@ class SettingsPresenter @Inject internal constructor(
     private val receiver: ApplicationInstallReceiver,
     @Named("computation") computationScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onBind(v: Callback) {
+  override fun onBind(v: View) {
     super.onBind(v)
-    registerOnBus(v::onClearDatabase, v::onClearAll)
+    registerOnBus(v)
   }
 
-  private fun registerOnBus(onClearDatabase: () -> Unit, onClearAll: () -> Unit) {
+  private fun registerOnBus(v: ClearCallback) {
     dispose {
       bus.listen().flatMapSingle { type ->
         when (type) {
@@ -55,8 +55,8 @@ class SettingsPresenter @Inject internal constructor(
       }.subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
-              DATABASE -> onClearDatabase()
-              ALL -> onClearAll()
+              DATABASE -> v.onClearDatabase()
+              ALL -> v.onClearAll()
               else -> throw IllegalArgumentException("Invalid enum: $it")
             }
           }, {
@@ -103,7 +103,9 @@ class SettingsPresenter @Inject internal constructor(
     }
   }
 
-  interface Callback {
+  interface View : ClearCallback
+
+  interface ClearCallback {
 
     fun onClearDatabase()
 

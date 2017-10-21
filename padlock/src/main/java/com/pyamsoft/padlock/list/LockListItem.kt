@@ -29,7 +29,6 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.uicommon.AppIconLoader
-import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderMap
 import timber.log.Timber
 import javax.inject.Inject
@@ -58,9 +57,8 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
     holder.binding.lockListToggle.setOnCheckedChangeListener(null)
     holder.binding.lockListToggle.isChecked = model.locked()
 
-    val appIcon = ImageLoader.fromLoader(
-        AppIconLoader.forPackageName(holder.itemView.context, model.packageName()))
-        .into(holder.binding.lockListIcon)
+    val appIcon = AppIconLoader.forPackageName(holder.itemView.context, model.packageName()).into(
+        holder.binding.lockListIcon)
     loaderMap.put("locked", appIcon)
 
     holder.binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->

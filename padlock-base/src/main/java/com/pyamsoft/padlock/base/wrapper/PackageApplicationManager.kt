@@ -36,7 +36,7 @@ interface PackageApplicationManager {
 
     companion object {
 
-      @JvmStatic
+
       val EMPTY = ApplicationItem("", false, false)
 
     }

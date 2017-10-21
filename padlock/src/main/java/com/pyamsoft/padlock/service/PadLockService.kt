@@ -97,7 +97,7 @@ class PadLockService : AccessibilityService(), Callback {
 
   companion object {
 
-    @JvmStatic
+
     var isRunning: Boolean = false
       @CheckResult get
       private set
