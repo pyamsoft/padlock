@@ -20,7 +20,7 @@ package com.pyamsoft.padlock.pin
 
 import com.pyamsoft.padlock.pin.PinEntryEvent.Clear
 import com.pyamsoft.padlock.pin.PinEntryEvent.Create
-import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
+import com.pyamsoft.padlock.pin.PinEntryPresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -33,16 +33,15 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
     private val clearPinBus: EventBus<ClearPinEvent>,
     @Named("computation") computationScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onBind(v: Callback) {
+  override fun onBind(v: View) {
     super.onBind(v)
-    checkMasterPinPresent(v::onMasterPinMissing, v::onMasterPinPresent)
+    checkMasterPinPresent(v)
   }
 
-  private fun checkMasterPinPresent(onMasterPinMissing: () -> Unit,
-      onMasterPinPresent: () -> Unit) {
+  private fun checkMasterPinPresent(v: MasterPinCallback) {
     Timber.d("Check master pin present")
     dispose {
       interactor.hasMasterPin()
@@ -50,9 +49,9 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
           .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
-              onMasterPinPresent()
+              v.onMasterPinPresent()
             } else {
-              onMasterPinMissing()
+              v.onMasterPinMissing()
             }
           }, { Timber.e(it, "onError checkMasterPinPresent") })
     }
@@ -66,40 +65,48 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
     clearPinBus.publish(event)
   }
 
-  fun submit(currentAttempt: String, reEntryAttempt: String, hint: String,
-      onCreateSuccess: () -> Unit, onCreateFailure: () -> Unit,
-      onClearSuccess: () -> Unit, onClearFailure: () -> Unit,
-      onSubmitError: (Throwable) -> Unit, onComplete: () -> Unit) {
+  fun submit(currentAttempt: String, reEntryAttempt: String, hint: String) {
     dispose {
       interactor.submitPin(currentAttempt, reEntryAttempt, hint)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .doAfterTerminate { onComplete() }
+          .doAfterTerminate { view?.onPinSubmitComplete() }
           .subscribe({
             when (it) {
               is Create -> {
                 if (it.complete) {
-                  onCreateSuccess()
+                  view?.onPinSubmitCreateSuccess()
                 } else {
-                  onCreateFailure()
+                  view?.onPinSubmitCreateFailure()
                 }
               }
               is Clear -> {
                 if (it.complete) {
-                  onClearSuccess()
+                  view?.onPinSubmitClearSuccess()
                 } else {
-                  onClearFailure()
+                  view?.onPinSubmitClearFailure()
                 }
               }
             }
           }, {
             Timber.e(it, "attemptPinSubmission onError")
-            onSubmitError(it)
+            view?.onPinSubmitError(it)
           })
     }
   }
 
-  interface Callback {
+  interface View : MasterPinCallback, SubmitCallback
+
+  interface SubmitCallback {
+    fun onPinSubmitCreateSuccess()
+    fun onPinSubmitCreateFailure()
+    fun onPinSubmitClearSuccess()
+    fun onPinSubmitClearFailure()
+    fun onPinSubmitError(throwable: Throwable)
+    fun onPinSubmitComplete()
+  }
+
+  interface MasterPinCallback {
     fun onMasterPinMissing()
     fun onMasterPinPresent()
   }

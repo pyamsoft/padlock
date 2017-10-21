@@ -32,7 +32,6 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
-import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
 import com.pyamsoft.pydroid.helper.notNull
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
@@ -41,7 +40,7 @@ import com.pyamsoft.pydroid.ui.helper.Toasty
 import timber.log.Timber
 import javax.inject.Inject
 
-class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
+class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   @field:Inject internal lateinit var presenter: PinEntryPresenter
   private lateinit var imm: InputMethodManager
@@ -89,7 +88,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
     setupGoArrow()
 
     binding.pinImageGo.setOnClickListener {
-      submit()
+      submitPin()
       imm.toggleSoftInputFromWindow(activity.window.decorView.windowToken, 0,
           0)
     }
@@ -110,7 +109,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
 
       if (keyEvent.action == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
         Timber.d("KeyEvent is Enter pressed")
-        submit()
+        submitPin()
         return@setOnEditorActionListener true
       }
 
@@ -119,25 +118,34 @@ class PinEntryTextFragment : PinEntryBaseFragment(), Callback {
     }
   }
 
-  private fun submit() {
-    presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint(), onCreateSuccess = {
-      clearDisplay()
-      presenter.publish(CreatePinEvent(true))
-    }, onCreateFailure = {
-      clearDisplay()
-      presenter.publish(CreatePinEvent(false))
-    }, onClearSuccess = {
-      clearDisplay()
-      presenter.publish(ClearPinEvent(true))
-    }, onClearFailure = {
-      clearDisplay()
-      presenter.publish(ClearPinEvent(false))
-    }, onSubmitError = {
-      clearDisplay()
-      Toasty.makeText(context, it.message.toString(), Toasty.LENGTH_SHORT).show()
-    }, onComplete = {
-      dismissParent()
-    })
+  override fun onPinSubmitCreateSuccess() {
+    presenter.publish(CreatePinEvent(true))
+  }
+
+  override fun onPinSubmitCreateFailure() {
+    presenter.publish(CreatePinEvent(false))
+  }
+
+  override fun onPinSubmitClearSuccess() {
+    presenter.publish(ClearPinEvent(true))
+  }
+
+  override fun onPinSubmitClearFailure() {
+    presenter.publish(ClearPinEvent(false))
+  }
+
+  override fun onPinSubmitError(throwable: Throwable) {
+    Toasty.makeText(context, throwable.message.toString(), Toasty.LENGTH_SHORT).show()
+  }
+
+  override fun onPinSubmitComplete() {
+    clearDisplay()
+    dismissParent()
+  }
+
+  private fun submitPin() {
+    // Hint is blank for PIN code
+    presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint())
   }
 
   override fun onMasterPinMissing() {

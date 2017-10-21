@@ -27,7 +27,6 @@ import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding
-import com.pyamsoft.padlock.pin.PinEntryPresenter.Callback
 import com.pyamsoft.padlock.uicommon.LockCellUtil
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
@@ -35,7 +34,7 @@ import timber.log.Timber
 import java.util.ArrayList
 import javax.inject.Inject
 
-class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
+class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   @field:Inject internal lateinit var presenter: PinEntryPresenter
   private lateinit var binding: FragmentPinEntryPatternBinding
@@ -181,17 +180,33 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), Callback {
     nextButtonOnClickRunnable()
   }
 
+  override fun onPinSubmitCreateSuccess() {
+    presenter.publish(CreatePinEvent(true))
+  }
+
+  override fun onPinSubmitCreateFailure() {
+    presenter.publish(CreatePinEvent(false))
+  }
+
+  override fun onPinSubmitClearSuccess() {
+    presenter.publish(ClearPinEvent(true))
+  }
+
+  override fun onPinSubmitClearFailure() {
+    presenter.publish(ClearPinEvent(false))
+  }
+
+  override fun onPinSubmitError(throwable: Throwable) {
+    Toasty.makeText(context, throwable.message.toString(), Toasty.LENGTH_SHORT).show()
+  }
+
+  override fun onPinSubmitComplete() {
+    dismissParent()
+  }
+
   private fun submitPin(repeatText: String) {
     // Hint is blank for PIN code
-    presenter.submit(patternText, repeatText, "", onCreateSuccess = {
-      presenter.publish(CreatePinEvent(true))
-    }, onCreateFailure = {
-      presenter.publish(CreatePinEvent(false))
-    }, onClearSuccess = { presenter.publish(ClearPinEvent(true)) }, onClearFailure = {
-      presenter.publish(ClearPinEvent(false))
-    }, onSubmitError = {
-      Toasty.makeText(context, it.message.toString(), Toasty.LENGTH_SHORT).show()
-    }, onComplete = { dismissParent() })
+    presenter.submit(patternText, repeatText, "")
   }
 
   companion object {
