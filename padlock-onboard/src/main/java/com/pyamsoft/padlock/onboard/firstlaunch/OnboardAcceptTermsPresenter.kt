@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.onboard.firstlaunch
 
+import com.pyamsoft.padlock.onboard.firstlaunch.OnboardAcceptTermsPresenter.View
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -28,18 +29,25 @@ class OnboardAcceptTermsPresenter @Inject internal constructor(
     private val interactor: OnboardAcceptTermsInteractor,
     @Named("computation") compScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Unit>(compScheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
     ioScheduler,
     mainScheduler) {
 
-  fun acceptUsageTerms(onUsageTermsAccepted: () -> Unit) {
+  fun acceptUsageTerms() {
     dispose {
       interactor.agreeToTerms()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .subscribe({ onUsageTermsAccepted() }, {
+          .subscribe({ view?.onUsageTermsAccepted() }, {
             Timber.e(it, "onError")
           })
     }
+  }
+
+  interface View : UsageTermsCallback
+
+  interface UsageTermsCallback {
+
+    fun onUsageTermsAccepted()
   }
 }
