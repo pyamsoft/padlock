@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.base.wrapper.PackageDrawableManager
 import com.pyamsoft.pydroid.helper.enforceIo
 import com.pyamsoft.pydroid.helper.enforceMainThread
 import com.pyamsoft.pydroid.loader.GenericLoader
+import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.loaded.Loaded
 import com.pyamsoft.pydroid.loader.loaded.RxLoaded
 import com.pyamsoft.pydroid.loader.targets.DrawableImageTarget
@@ -81,8 +82,7 @@ class AppIconLoader private constructor(context: Context,
   companion object {
 
     @CheckResult
-    @JvmStatic
-    fun forPackageName(context: Context, packageName: String): AppIconLoader =
+    fun forPackageName(context: Context, packageName: String): GenericLoader<Drawable> =
         AppIconLoader(context, packageName)
   }
 }

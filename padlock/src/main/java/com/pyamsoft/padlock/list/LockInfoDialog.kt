@@ -44,7 +44,6 @@ import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.ListStateUtil
-import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
@@ -182,8 +181,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
     super.onStart()
 
     appIcon = LoaderHelper.unload(appIcon)
-    appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(context, appPackageName))
-        .into(binding.lockInfoIcon)
+    appIcon = AppIconLoader.forPackageName(context, appPackageName).into(binding.lockInfoIcon)
 
     presenter.populateList(false, onBegin, onAdd, onError, onPopulated)
   }
@@ -243,7 +241,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
     DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
   }
 
-
   companion object {
 
     const internal val TAG = "LockInfoDialog"
@@ -252,7 +249,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
     const private val ARG_APP_SYSTEM = "app_system"
 
     @CheckResult
-    @JvmStatic
+
     fun newInstance(appEntry: AppEntry): LockInfoDialog {
       val fragment = LockInfoDialog()
       val args = Bundle()

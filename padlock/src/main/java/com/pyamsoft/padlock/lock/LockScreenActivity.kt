@@ -157,8 +157,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
     super.onStart()
 
     appIcon = LoaderHelper.unload(appIcon)
-    appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(this, lockedPackageName))
-        .into(binding.lockImage)
+    appIcon = AppIconLoader.forPackageName(this, lockedPackageName).into(binding.lockImage)
 
     invalidateOptionsMenu()
   }
@@ -328,7 +327,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
     /**
      * Starts a LockScreenActivity instance
      */
-    @JvmStatic
+
     fun start(context: Context, entry: PadLockEntry, realName: String) {
       val intent = Intent(context.applicationContext, LockScreenActivity::class.java)
       intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS

@@ -33,7 +33,6 @@ import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter.Callback
 import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.util.DrawableUtil
@@ -101,8 +100,7 @@ class PinEntryDialog : CanaryDialog(), Callback {
   override fun onStart() {
     super.onStart()
     appIcon = LoaderHelper.unload(appIcon)
-    appIcon = ImageLoader.fromLoader(AppIconLoader.forPackageName(activity, packageName)).into(
-        binding.pinImage)
+    appIcon = AppIconLoader.forPackageName(activity, packageName).into(binding.pinImage)
   }
 
   override fun onTypePattern() {
@@ -156,7 +154,6 @@ class PinEntryDialog : CanaryDialog(), Callback {
     const val TAG = "PinEntryDialog"
     const private val ENTRY_PACKAGE_NAME = "entry_packagename"
 
-    @JvmStatic
     @CheckResult
     fun newInstance(packageName: String): PinEntryDialog {
       val fragment = PinEntryDialog()

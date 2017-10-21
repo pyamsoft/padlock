@@ -24,9 +24,9 @@ import android.provider.Settings
 
 object AccessibilityRequestDelegate {
 
-  @JvmStatic private val INTENT: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+   private val INTENT: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
 
-  @JvmStatic
+
   fun launchAccessibilityIntent(activity: Activity) {
     activity.startActivity(INTENT)
   }

@@ -91,7 +91,7 @@ class LockedStatDialog : CanaryDialog() {
     const private val IMAGE = "image"
 
     @CheckResult
-    @JvmStatic
+
     fun newInstance(displayedLabel: String,
         packageName: String, activityName: String, realName: String,
         system: Boolean, drawable: Drawable): LockedStatDialog {

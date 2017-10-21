@@ -122,7 +122,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
 
     const val TAG = "LockScreenPatternFragment"
 
-    @JvmStatic
+
     @CheckResult
     fun newInstance(lockedPackageName: String,
         lockedActivityName: String, lockedCode: String?,

@@ -29,7 +29,7 @@ import com.google.auto.value.AutoValue
 
   companion object {
 
-    @JvmStatic
+
     @CheckResult
     fun create(packageName: String, className: String): RecheckEvent =
         AutoValue_RecheckEvent(packageName, className)

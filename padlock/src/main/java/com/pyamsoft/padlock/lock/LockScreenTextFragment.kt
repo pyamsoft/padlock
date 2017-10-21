@@ -198,7 +198,7 @@ class LockScreenTextFragment : LockScreenBaseFragment() {
     const internal val TAG = "LockScreenTextFragment"
     const private val CODE_DISPLAY = "CODE_DISPLAY"
 
-    @JvmStatic
+
     @CheckResult
     fun newInstance(lockedPackageName: String,
         lockedActivityName: String, lockedCode: String?,
