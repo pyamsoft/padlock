@@ -27,18 +27,12 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.lock.LockScreenActivity
-import com.pyamsoft.padlock.service.LockServicePresenter.Callback
 import timber.log.Timber
 import javax.inject.Inject
 
-class PadLockService : AccessibilityService(), Callback {
+class PadLockService : AccessibilityService(), LockServicePresenter.View {
 
   @field:Inject internal lateinit var presenter: LockServicePresenter
-  private val startLockScreen: (PadLockEntry, String) -> Unit = { entry, realName ->
-    Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
-        entry.activityName(), realName)
-    LockScreenActivity.start(this, entry, realName)
-  }
 
   override fun onAccessibilityEvent(event: AccessibilityEvent?) {
     if (event == null) {
@@ -52,8 +46,7 @@ class PadLockService : AccessibilityService(), Callback {
       val pName = eventPackage.toString()
       val cName = eventClass.toString()
       if (pName.isNotBlank() && cName.isNotBlank()) {
-        presenter.processAccessibilityEvent(pName, cName, RecheckStatus.NOT_FORCE,
-            startLockScreen)
+        presenter.processAccessibilityEvent(pName, cName, RecheckStatus.NOT_FORCE)
       }
     } else {
       Timber.e("Missing needed data")
@@ -87,7 +80,7 @@ class PadLockService : AccessibilityService(), Callback {
   }
 
   override fun onRecheck(packageName: String, className: String) {
-    presenter.processActiveApplicationIfMatching(packageName, className, startLockScreen)
+    presenter.processActiveApplicationIfMatching(packageName, className)
   }
 
   override fun onUnbind(intent: Intent): Boolean {
@@ -95,8 +88,13 @@ class PadLockService : AccessibilityService(), Callback {
     return super.onUnbind(intent)
   }
 
-  companion object {
+  override fun onStartLockScreen(entry: PadLockEntry, realName: String) {
+    Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
+        entry.activityName(), realName)
+    LockScreenActivity.start(this, entry, realName)
+  }
 
+  companion object {
 
     var isRunning: Boolean = false
       @CheckResult get
