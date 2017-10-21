@@ -30,7 +30,6 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
-import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter.Callback
 import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.LoaderHelper
@@ -39,7 +38,7 @@ import com.pyamsoft.pydroid.util.DrawableUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class PinEntryDialog : CanaryDialog(), Callback {
+class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
   @field:Inject internal lateinit var presenter: LockScreenInputPresenter
   private lateinit var binding: DialogPinEntryBinding

@@ -40,7 +40,7 @@ import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenTextFragment : LockScreenBaseFragment() {
+class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View {
 
   private lateinit var imm: InputMethodManager
   private lateinit var binding: FragmentLockScreenTextBinding
@@ -81,7 +81,7 @@ class LockScreenTextFragment : LockScreenBaseFragment() {
     // Hide hint to begin with
     binding.lockDisplayHint.visibility = View.GONE
 
-    presenter.bind(Unit)
+    presenter.bind(this)
   }
 
   fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -151,42 +151,56 @@ class LockScreenTextFragment : LockScreenBaseFragment() {
   }
 
   private fun submit() {
-    presenter.submit(lockedCode, getCurrentAttempt(), {
-      Timber.d("Unlocked!")
-      clearDisplay()
+    presenter.submit(lockedCode, getCurrentAttempt())
+  }
 
-      presenter.postUnlock(lockedCode, isLockedSystem,
-          isExcluded,
-          selectedIgnoreTime, onPostUnlocked = {
-        presenter.passLockScreen()
-        activity.finish()
-      }, onUnlockError = {
-        clearDisplay()
-        DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(),
-            "lock_error")
-      })
-    }, onSubmitFailure = {
-      Timber.e("Failed to unlock")
-      clearDisplay()
-      showSnackbarWithText("Error: Invalid PIN")
-      binding.lockDisplayHint.visibility = View.VISIBLE
+  override fun onSubmitSuccess() {
+    Timber.d("Unlocked!")
+    clearDisplay()
 
-      // Display the hint if they fail unlocking
-      presenter.displayLockedHint {
-        binding.lockDisplayHint.text = "Hint: %s".format(if (it.isEmpty()) "NO HINT" else it)
-      }
+    presenter.postUnlock(lockedCode, isLockedSystem, isExcluded, selectedIgnoreTime)
+  }
 
-      // Once fail count is tripped once, continue to update it every time following until time elapses
-      presenter.lockEntry(onLocked = {
-        showSnackbarWithText("This entry is temporarily locked")
-      }, onLockedError = {
-        clearDisplay()
-        DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "lock_error")
-      })
-    }, onSubmitError = {
-      clearDisplay()
-      DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "unlock_error")
-    })
+  override fun onSubmitFailure() {
+    Timber.e("Failed to unlock")
+    clearDisplay()
+    showSnackbarWithText("Error: Invalid PIN")
+    binding.lockDisplayHint.visibility = View.VISIBLE
+
+    // Display the hint if they fail unlocking
+    presenter.displayLockedHint()
+
+    // Once fail count is tripped once, continue to update it every time following until time elapses
+    presenter.lockEntry()
+  }
+
+  override fun onSubmitError(throwable: Throwable) {
+    clearDisplay()
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "unlock_error")
+  }
+
+  override fun onPostUnlocked() {
+    presenter.passLockScreen()
+    activity.finish()
+  }
+
+  override fun onUnlockError(throwable: Throwable) {
+    clearDisplay()
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(),
+        "lock_error")
+  }
+
+  override fun onLocked() {
+    showSnackbarWithText("This entry is temporarily locked")
+  }
+
+  override fun onLockedError(throwable: Throwable) {
+    clearDisplay()
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "lock_error")
+  }
+
+  override fun onDisplayHint(hint: String) {
+    binding.lockDisplayHint.text = "Hint: %s".format(if (hint.isEmpty()) "NO HINT" else hint)
   }
 
   private fun clearDisplay() {
@@ -197,7 +211,6 @@ class LockScreenTextFragment : LockScreenBaseFragment() {
 
     const internal val TAG = "LockScreenTextFragment"
     const private val CODE_DISPLAY = "CODE_DISPLAY"
-
 
     @CheckResult
     fun newInstance(lockedPackageName: String,

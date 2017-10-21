@@ -35,7 +35,7 @@ import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenPatternFragment : LockScreenBaseFragment() {
+class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.View {
 
   private lateinit var binding: FragmentLockScreenPatternBinding
   @field:Inject internal lateinit var presenter: LockEntryPresenter
@@ -74,32 +74,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
       }
 
       override fun onComplete(list: List<PatternLockView.Dot>) {
-        presenter.submit(lockedCode, LockCellUtil.cellPatternToString(list),
-            onSubmitSuccess = {
-              Timber.d("Unlocked!")
-              presenter.postUnlock(lockedCode, isLockedSystem, isExcluded, selectedIgnoreTime,
-                  onPostUnlocked = {
-                    Timber.d("POST Unlock Finished! 1")
-                    presenter.passLockScreen()
-                    activity.finish()
-                  }, onUnlockError = {
-                DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "unlock_error")
-              })
-            },
-            onSubmitFailure = {
-              Timber.e("Failed to unlock")
-              showSnackbarWithText("Error: Invalid PIN")
-
-              // Once fail count is tripped once, continue to update it every time following until time elapses
-              presenter.lockEntry(onLocked = {
-                showSnackbarWithText("This entry is temporarily locked")
-              }, onLockedError = {
-                DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "locked_error")
-              })
-            },
-            onSubmitError = {
-              DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "submit_error")
-            })
+        presenter.submit(lockedCode, LockCellUtil.cellPatternToString(list))
         binding.patternLock.clearPattern()
       }
 
@@ -110,7 +85,46 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
     binding.patternLock.isTactileFeedbackEnabled = false
     binding.patternLock.addPatternLockListener(listener)
 
-    presenter.bind(Unit)
+    presenter.bind(this)
+  }
+
+  override fun onSubmitSuccess() {
+    Timber.d("Unlocked!")
+    presenter.postUnlock(lockedCode, isLockedSystem, isExcluded, selectedIgnoreTime)
+  }
+
+  override fun onSubmitFailure() {
+    Timber.e("Failed to unlock")
+    showSnackbarWithText("Error: Invalid PIN")
+
+    // Once fail count is tripped once, continue to update it every time following until time elapses
+    presenter.lockEntry()
+  }
+
+  override fun onSubmitError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "submit_error")
+  }
+
+  override fun onPostUnlocked() {
+    Timber.d("POST Unlock Finished!")
+    presenter.passLockScreen()
+    activity.finish()
+  }
+
+  override fun onUnlockError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "unlock_error")
+  }
+
+  override fun onLocked() {
+    showSnackbarWithText("This entry is temporarily locked")
+  }
+
+  override fun onLockedError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "locked_error")
+  }
+
+  override fun onDisplayHint(hint: String) {
+    // No hints for pattern fragment
   }
 
   override fun onStart() {
@@ -121,7 +135,6 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
   companion object {
 
     const val TAG = "LockScreenPatternFragment"
-
 
     @CheckResult
     fun newInstance(lockedPackageName: String,
