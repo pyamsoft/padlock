@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.lock
 
+import com.pyamsoft.padlock.lock.LockEntryPresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -30,15 +31,15 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
         "activity_name") private val activityName: String, @param:Named(
         "real_name") private val realName: String, private val interactor: LockEntryInteractor,
     @Named("computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<Unit>(computationScheduler,
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  fun displayLockedHint(setDisplayHint: (String) -> Unit) {
+  fun displayLockedHint() {
     dispose {
       interactor.getHint()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .subscribe({ setDisplayHint(it) }, { Timber.e(it, "onError displayLockedHint") })
+          .subscribe({ view?.onDisplayHint(it) }, { Timber.e(it, "onError displayLockedHint") })
     }
   }
 
@@ -46,9 +47,7 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
     bus.publish(LockPassEvent(packageName, activityName))
   }
 
-  fun submit(lockCode: String?, currentAttempt: String,
-      onSubmitSuccess: () -> Unit, onSubmitFailure: () -> Unit,
-      onSubmitError: (Throwable) -> Unit) {
+  fun submit(lockCode: String?, currentAttempt: String) {
     dispose {
       interactor.submitPin(packageName, activityName, lockCode, currentAttempt)
           .subscribeOn(ioScheduler)
@@ -56,18 +55,18 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
           .subscribe({
             Timber.d("Received unlock entry result")
             if (it) {
-              onSubmitSuccess()
+              view?.onSubmitSuccess()
             } else {
-              onSubmitFailure()
+              view?.onSubmitFailure()
             }
           }, {
             Timber.e(it, "unlockEntry onError")
-            onSubmitError(it)
+            view?.onSubmitError(it)
           })
     }
   }
 
-  fun lockEntry(onLocked: () -> Unit, onLockedError: (Throwable) -> Unit) {
+  fun lockEntry() {
     dispose {
       interactor.lockEntryOnFail(packageName, activityName)
           .subscribeOn(ioScheduler)
@@ -75,17 +74,16 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
           .subscribe({
             if (System.currentTimeMillis() < it) {
               Timber.w("Lock em up")
-              onLocked()
+              view?.onLocked()
             }
           }, {
             Timber.e(it, "lockEntry onError")
-            onLockedError(it)
+            view?.onLockedError(it)
           })
     }
   }
 
-  fun postUnlock(lockCode: String?, isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long,
-      onPostUnlocked: () -> Unit, onUnlockError: (Throwable) -> Unit) {
+  fun postUnlock(lockCode: String?, isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long) {
     dispose {
       interactor.postUnlock(packageName, activityName, realName, lockCode, isSystem,
           shouldExclude, ignoreTime)
@@ -93,11 +91,39 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
           .observeOn(mainThreadScheduler)
           .subscribe({
             Timber.d("onPostUnlock complete")
-            onPostUnlocked()
+            view?.onPostUnlocked()
           }, {
             Timber.e(it, "Error postunlock")
-            onUnlockError(it)
+            view?.onUnlockError(it)
           })
     }
+  }
+
+  interface View : HintCallback, LockCallack, PostUnlockCallback, SubmitCallback
+
+  interface SubmitCallback {
+    fun onSubmitSuccess()
+    fun onSubmitFailure()
+    fun onSubmitError(throwable: Throwable)
+  }
+
+  interface PostUnlockCallback {
+
+    fun onPostUnlocked()
+
+    fun onUnlockError(throwable: Throwable)
+  }
+
+  interface LockCallack {
+
+    fun onLocked()
+
+    fun onLockedError(throwable: Throwable)
+
+  }
+
+  interface HintCallback {
+
+    fun onDisplayHint(hint: String)
   }
 }

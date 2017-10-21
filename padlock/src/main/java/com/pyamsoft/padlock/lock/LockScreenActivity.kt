@@ -39,7 +39,6 @@ import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
 import com.pyamsoft.padlock.uicommon.AppIconLoader
-import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.app.activity.DisposableActivity
@@ -47,7 +46,7 @@ import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallback {
+class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
   private val home: Intent = Intent(Intent.ACTION_MAIN)
   @field:Inject internal lateinit var presenter: LockScreenPresenter
@@ -270,34 +269,35 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.FullCallbac
 
   override fun onPrepareOptionsMenu(menu: Menu): Boolean {
     menuExclude.setChecked(excludeEntry)
-    presenter.createWithDefaultIgnoreTime {
-      val apply: Long
-      if (ignorePeriod == -1L) {
-        apply = it
-        Timber.d("No previous selection, load ignore time from preference")
-      } else {
-        Timber.d("ignore period: $ignorePeriod")
-        apply = ignorePeriod
-      }
+    presenter.createWithDefaultIgnoreTime()
+    return super.onPrepareOptionsMenu(menu)
+  }
 
-      when (apply) {
-        ignoreTimes[0] -> menuIgnoreNone.setChecked(true)
-        ignoreTimes[1] -> menuIgnoreOne.setChecked(true)
-        ignoreTimes[2] -> menuIgnoreFive.setChecked(true)
-        ignoreTimes[3] -> menuIgnoreTen.setChecked(true)
-        ignoreTimes[4] -> menuIgnoreFifteen.setChecked(true)
-        ignoreTimes[5] -> menuIgnoreTwenty.setChecked(true)
-        ignoreTimes[6] -> menuIgnoreThirty.setChecked(true)
-        ignoreTimes[7] -> menuIgnoreFourtyFive.setChecked(true)
-        ignoreTimes[8] -> menuIgnoreSixty.setChecked(true)
-        else -> {
-          Timber.e("No valid ignore time, initialize to None")
-          menuIgnoreNone.setChecked(true)
-        }
-      }
+  override fun onInitializeWithIgnoreTime(time: Long) {
+    val apply: Long
+    if (ignorePeriod == -1L) {
+      apply = time
+      Timber.d("No previous selection, load ignore time from preference")
+    } else {
+      Timber.d("ignore period: $ignorePeriod")
+      apply = ignorePeriod
     }
 
-    return super.onPrepareOptionsMenu(menu)
+    when (apply) {
+      ignoreTimes[0] -> menuIgnoreNone.setChecked(true)
+      ignoreTimes[1] -> menuIgnoreOne.setChecked(true)
+      ignoreTimes[2] -> menuIgnoreFive.setChecked(true)
+      ignoreTimes[3] -> menuIgnoreTen.setChecked(true)
+      ignoreTimes[4] -> menuIgnoreFifteen.setChecked(true)
+      ignoreTimes[5] -> menuIgnoreTwenty.setChecked(true)
+      ignoreTimes[6] -> menuIgnoreThirty.setChecked(true)
+      ignoreTimes[7] -> menuIgnoreFourtyFive.setChecked(true)
+      ignoreTimes[8] -> menuIgnoreSixty.setChecked(true)
+      else -> {
+        Timber.e("No valid ignore time, initialize to None")
+        menuIgnoreNone.setChecked(true)
+      }
+    }
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {

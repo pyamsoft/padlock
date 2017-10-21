@@ -18,7 +18,7 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter.Callback
+import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter.View
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -31,23 +31,23 @@ class LockScreenInputPresenter @Inject internal constructor(
     private val interactor: LockScreenInteractor,
     @Named("computation") computationScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(computationScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onBind(v: Callback) {
+  override fun onBind(v: View) {
     super.onBind(v)
-    initializeLockScreenType(v::onTypePattern, v::onTypeText)
+    initializeLockScreenType(v)
   }
 
-  private fun initializeLockScreenType(onTypePattern: () -> Unit, onTypeText: () -> Unit) {
+  private fun initializeLockScreenType(v: TypeCallback) {
     dispose {
       interactor.getLockScreenType()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
-              TYPE_PATTERN -> onTypePattern()
-              TYPE_TEXT -> onTypeText()
+              TYPE_PATTERN -> v.onTypePattern()
+              TYPE_TEXT -> v.onTypeText()
               else -> throw IllegalArgumentException("Invalid enum: $it")
             }
           }, {
@@ -56,7 +56,9 @@ class LockScreenInputPresenter @Inject internal constructor(
     }
   }
 
-  interface Callback {
+  interface View : TypeCallback
+
+  interface TypeCallback {
 
     fun onTypePattern()
     fun onTypeText()
