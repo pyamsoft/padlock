@@ -141,12 +141,13 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
   }
 
   private fun getValuesFromBundle() {
-    val bundle = intent.extras
-    lockedCode = bundle.getString(ENTRY_LOCK_CODE)
-    lockedPackageName = bundle.getString(ENTRY_PACKAGE_NAME)
-    lockedActivityName = bundle.getString(ENTRY_ACTIVITY_NAME)
-    lockedRealName = bundle.getString(ENTRY_REAL_NAME)
-    lockedSystem = bundle.getBoolean(ENTRY_IS_SYSTEM, false)
+    intent.extras.let {
+      lockedCode = it.getString(ENTRY_LOCK_CODE)
+      lockedPackageName = it.getString(ENTRY_PACKAGE_NAME)
+      lockedActivityName = it.getString(ENTRY_ACTIVITY_NAME)
+      lockedRealName = it.getString(ENTRY_REAL_NAME)
+      lockedSystem = it.getBoolean(ENTRY_IS_SYSTEM, false)
+    }
 
     // Reload options
     invalidateOptionsMenu()
@@ -234,7 +235,8 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     Timber.d("onRestoreInstanceState")
     ignorePeriod = savedInstanceState.getLong(KEY_IGNORE_TIME, -1)
     excludeEntry = savedInstanceState.getBoolean(KEY_EXCLUDE, false)
-    val lockScreenText = supportFragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
+    val lockScreenText: Fragment? = supportFragmentManager.findFragmentByTag(
+        LockScreenTextFragment.TAG)
     if (lockScreenText is LockScreenTextFragment) {
       lockScreenText.onRestoreInstanceState(savedInstanceState)
     }
@@ -242,28 +244,28 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
-    val ignoreTime = getIgnoreTimeFromSelectedIndex()
-    outState.putLong(KEY_IGNORE_TIME, ignoreTime)
-
-    val exclude = menuExclude.isChecked()
-    outState.putBoolean(KEY_EXCLUDE, exclude)
-
+    outState.apply {
+      putLong(KEY_IGNORE_TIME, getIgnoreTimeFromSelectedIndex())
+      putBoolean(KEY_EXCLUDE, menuExclude.isChecked())
+    }
     super.onSaveInstanceState(outState)
   }
 
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
     Timber.d("onCreateOptionsMenu")
-    menuInflater.inflate(R.menu.lockscreen_menu, menu)
-    menuIgnoreNone = menu.findItem(R.id.menu_ignore_none)
-    menuIgnoreOne = menu.findItem(R.id.menu_ignore_one)
-    menuIgnoreFive = menu.findItem(R.id.menu_ignore_five)
-    menuIgnoreTen = menu.findItem(R.id.menu_ignore_ten)
-    menuIgnoreFifteen = menu.findItem(R.id.menu_ignore_fifteen)
-    menuIgnoreTwenty = menu.findItem(R.id.menu_ignore_twenty)
-    menuIgnoreThirty = menu.findItem(R.id.menu_ignore_thirty)
-    menuIgnoreFourtyFive = menu.findItem(R.id.menu_ignore_fourtyfive)
-    menuIgnoreSixty = menu.findItem(R.id.menu_ignore_sixty)
-    menuExclude = menu.findItem(R.id.menu_exclude)
+    menu.let {
+      menuInflater.inflate(R.menu.lockscreen_menu, it)
+      menuIgnoreNone = it.findItem(R.id.menu_ignore_none)
+      menuIgnoreOne = it.findItem(R.id.menu_ignore_one)
+      menuIgnoreFive = it.findItem(R.id.menu_ignore_five)
+      menuIgnoreTen = it.findItem(R.id.menu_ignore_ten)
+      menuIgnoreFifteen = it.findItem(R.id.menu_ignore_fifteen)
+      menuIgnoreTwenty = it.findItem(R.id.menu_ignore_twenty)
+      menuIgnoreThirty = it.findItem(R.id.menu_ignore_thirty)
+      menuIgnoreFourtyFive = it.findItem(R.id.menu_ignore_fourtyfive)
+      menuIgnoreSixty = it.findItem(R.id.menu_ignore_sixty)
+      menuExclude = it.findItem(R.id.menu_exclude)
+    }
     return true
   }
 
@@ -329,13 +331,14 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
      */
 
     fun start(context: Context, entry: PadLockEntry, realName: String) {
-      val intent = Intent(context.applicationContext, LockScreenActivity::class.java)
-      intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-      intent.putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName())
-      intent.putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName())
-      intent.putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode())
-      intent.putExtra(LockScreenActivity.ENTRY_IS_SYSTEM, entry.systemApplication())
-      intent.putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName)
+      val intent = Intent(context.applicationContext, LockScreenActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+        putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName())
+        putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName())
+        putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode())
+        putExtra(LockScreenActivity.ENTRY_IS_SYSTEM, entry.systemApplication())
+        putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName)
+      }
 
       if (entry.whitelist()) {
         throw RuntimeException("Cannot launch LockScreen for whitelisted applications")
