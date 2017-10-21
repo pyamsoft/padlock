@@ -20,7 +20,7 @@ package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.lock.LockPassEvent
-import com.pyamsoft.padlock.service.LockServicePresenter.Callback
+import com.pyamsoft.padlock.service.LockServicePresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.helper.clear
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -37,7 +37,7 @@ class LockServicePresenter @Inject internal constructor(
     private val interactor: LockServiceInteractor,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<Callback>(compScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
     ioScheduler,
     mainScheduler) {
 
@@ -48,9 +48,9 @@ class LockServicePresenter @Inject internal constructor(
     interactor.reset()
   }
 
-  override fun onBind(v: Callback) {
+  override fun onBind(v: View) {
     super.onBind(v)
-    registerOnBus(v::onRecheck, v::onFinish)
+    registerOnBus(v)
   }
 
   override fun onUnbind() {
@@ -62,13 +62,13 @@ class LockServicePresenter @Inject internal constructor(
     entryDisposable = entryDisposable.clear()
   }
 
-  private fun registerOnBus(onRecheck: (String, String) -> Unit, onFinish: () -> Unit) {
+  private fun registerOnBus(v: BusCallback) {
     dispose {
       serviceFinishBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
-            onFinish()
+            v.onFinish()
           }, { Timber.e(it, "onError service finish bus") })
     }
 
@@ -86,27 +86,25 @@ class LockServicePresenter @Inject internal constructor(
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
-            onRecheck(it.packageName(), it.className())
+            v.onRecheck(it.packageName(), it.className())
           }, { Timber.e(it, "onError recheck event bus") })
     }
   }
 
-  fun processActiveApplicationIfMatching(packageName: String, className: String,
-      startLockScreen: (PadLockEntry, String) -> Unit) {
+  fun processActiveApplicationIfMatching(packageName: String, className: String) {
     matchingDisposable = matchingDisposable.clear()
     matchingDisposable = interactor.isActiveMatching(packageName, className)
         .subscribeOn(ioScheduler)
         .observeOn(mainThreadScheduler)
         .subscribe({
           if (it) {
-            processAccessibilityEvent(packageName, className, RecheckStatus.FORCE,
-                startLockScreen)
+            processAccessibilityEvent(packageName, className, RecheckStatus.FORCE)
           }
         }, { Timber.e(it, "onError processActiveApplicationIfMatching") })
   }
 
   fun processAccessibilityEvent(packageName: String, className: String,
-      forcedRecheck: RecheckStatus, startLockScreen: (PadLockEntry, String) -> Unit) {
+      forcedRecheck: RecheckStatus) {
     entryDisposable = entryDisposable.clear()
     entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
         .subscribeOn(ioScheduler)
@@ -115,7 +113,7 @@ class LockServicePresenter @Inject internal constructor(
           if (PadLockEntry.isEmpty(it)) {
             Timber.w("PadLockEntry is EMPTY, ignore")
           } else {
-            startLockScreen(it, className)
+            view?.onStartLockScreen(it, className)
           }
         }, {
           if (it is NoSuchElementException) {
@@ -126,7 +124,14 @@ class LockServicePresenter @Inject internal constructor(
         })
   }
 
-  interface Callback {
+  interface View : BusCallback, LockScreenCallback
+
+  interface LockScreenCallback {
+
+    fun onStartLockScreen(entry: PadLockEntry, realName: String)
+  }
+
+  interface BusCallback {
 
     fun onFinish()
 
