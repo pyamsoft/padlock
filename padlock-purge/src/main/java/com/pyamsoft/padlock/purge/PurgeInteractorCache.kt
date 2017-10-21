@@ -21,6 +21,7 @@ package com.pyamsoft.padlock.purge
 import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Observable
 import io.reactivex.Single
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -29,6 +30,7 @@ import javax.inject.Singleton
     @param:Named("interactor_purge") private val impl: PurgeInteractor) : PurgeInteractor, Cache {
 
   private var cachedList: Observable<String>? = null
+  private var lastAccessListTime: Long = 0L
 
   override fun clearCache() {
     cachedList = null
@@ -36,11 +38,18 @@ import javax.inject.Singleton
 
   override fun populateList(forceRefresh: Boolean): Observable<String> {
     return Observable.defer {
-      if (forceRefresh || cachedList == null) {
-        cachedList = impl.populateList(true).cache()
+      val cache = cachedList
+      val list: Observable<String>
+      val currentTime = System.currentTimeMillis()
+      if (forceRefresh || cache == null || lastAccessListTime + THIRTY_SECONDS_MILLIS < currentTime) {
+        list = impl.populateList(true).cache()
+        cachedList = list
+        lastAccessListTime = currentTime
+      } else {
+        list = cache
       }
-      return@defer cachedList?.doOnError { clearCache() }
-    }
+      return@defer list
+    }.doOnError { clearCache() }
   }
 
   override fun deleteEntry(packageName: String): Single<String> {
@@ -50,5 +59,10 @@ import javax.inject.Singleton
         cachedList = obj.filter { it == packageName }.doOnError { clearCache() }
       }
     }
+  }
+
+  companion object {
+
+    private val THIRTY_SECONDS_MILLIS = TimeUnit.SECONDS.toMillis(30L)
   }
 }
