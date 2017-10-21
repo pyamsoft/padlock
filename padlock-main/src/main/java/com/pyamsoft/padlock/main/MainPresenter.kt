@@ -18,7 +18,7 @@
 
 package com.pyamsoft.padlock.main
 
-import com.pyamsoft.padlock.main.MainPresenter.MainCallback
+import com.pyamsoft.padlock.main.MainPresenter.View
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -28,29 +28,31 @@ import javax.inject.Named
 class MainPresenter @Inject internal constructor(private val interactor: MainInteractor,
     @Named("computation") computationScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<MainCallback>(
+    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(
     computationScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onBind(v: MainCallback) {
+  override fun onBind(v: View) {
     super.onBind(v)
-    showOnboardingOrDefault(v::onShowDefaultPage, v::onShowOnboarding)
+    showOnboardingOrDefault(v)
   }
 
-  private fun showOnboardingOrDefault(onShowDefaultPage: () -> Unit, onShowOnboarding: () -> Unit) {
+  private fun showOnboardingOrDefault(v: MainCallback) {
     dispose {
       interactor.isOnboardingComplete()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
-              onShowDefaultPage()
+              v.onShowDefaultPage()
             } else {
-              onShowOnboarding()
+              v.onShowOnboarding()
             }
           }, { Timber.e(it, "onError") })
     }
   }
+
+  interface View : MainCallback
 
   interface MainCallback {
 

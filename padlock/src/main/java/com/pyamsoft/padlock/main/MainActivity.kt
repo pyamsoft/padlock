@@ -39,7 +39,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
-class MainActivity : TamperActivity(), MainCallback {
+class MainActivity : TamperActivity(), MainPresenter.View {
 
   @Inject internal lateinit var presenter: MainPresenter
   private lateinit var binding: ActivityMainBinding
