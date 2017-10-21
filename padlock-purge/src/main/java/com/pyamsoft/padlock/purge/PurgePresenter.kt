@@ -18,7 +18,7 @@
 
 package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.padlock.purge.PurgePresenter.BusCallback
+import com.pyamsoft.padlock.purge.PurgePresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -30,20 +30,20 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
     private val purgeBus: EventBus<PurgeEvent>,
     private val purgeAllBus: EventBus<PurgeAllEvent>, @Named(
         "computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler, @Named(
-        "main") mainScheduler: Scheduler) : SchedulerPresenter<BusCallback>(computationScheduler,
+        "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onBind(v: BusCallback) {
+  override fun onBind(v: View) {
     super.onBind(v)
-    registerOnBus(v::onPurge, v::onPurgeAll)
+    registerOnBus(v)
   }
 
-  private fun registerOnBus(onPurge: (String) -> Unit, onPurgeAll: () -> Unit) {
+  private fun registerOnBus(v: BusCallback) {
     dispose {
       purgeBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .subscribe({ onPurge(it.packageName) }, {
+          .subscribe({ v.onPurge(it.packageName) }, {
             Timber.e(it, "onError purge single")
           })
     }
@@ -52,34 +52,52 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
       purgeAllBus.listen()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .subscribe({ onPurgeAll() }, {
+          .subscribe({ v.onPurgeAll() }, {
             Timber.e(it, "onError purge all")
           })
     }
   }
 
-  fun retrieveStaleApplications(force: Boolean, onRetrieveBegin: () -> Unit,
-      onStaleApplicationRetrieved: (String) -> Unit,
-      onRetrievalComplete: () -> Unit) {
+  fun retrieveStaleApplications(force: Boolean) {
     dispose {
       interactor.populateList(force)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .doOnSubscribe { onRetrieveBegin() }
-          .doAfterTerminate { onRetrievalComplete() }
-          .subscribe({ onStaleApplicationRetrieved(it) },
-              { Timber.e(it, "onError retrieveStaleApplications") })
+          .doOnSubscribe { view?.onRetrieveBegin() }
+          .doAfterTerminate { view?.onRetrieveComplete() }
+          .subscribe({ view?.onRetrievedStale(it) }, {
+            Timber.e(it, "onError retrieveStaleApplications")
+            view?.onRetrieveError(it)
+          })
     }
   }
 
-  fun deleteStale(packageName: String, onDeleted: (String) -> Unit) {
+  fun deleteStale(packageName: String) {
     dispose {
       interactor.deleteEntry(packageName)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .subscribe({ onDeleted(it) }
+          .subscribe({ view?.onDeleted(it) }
               , { Timber.e(it, "onError deleteStale") })
     }
+  }
+
+  interface View : BusCallback, DeleteCallback, RetrieveCallback
+
+  interface RetrieveCallback {
+
+    fun onRetrieveBegin()
+
+    fun onRetrieveComplete()
+
+    fun onRetrievedStale(packageName: String)
+
+    fun onRetrieveError(throwable: Throwable)
+  }
+
+  interface DeleteCallback {
+
+    fun onDeleted(packageName: String)
   }
 
   interface BusCallback {

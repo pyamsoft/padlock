@@ -34,44 +34,21 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
-import com.pyamsoft.padlock.uicommon.ListStateUtil
 import com.pyamsoft.padlock.uicommon.CanaryFragment
+import com.pyamsoft.padlock.uicommon.ListStateUtil
 import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
+class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   @Inject internal lateinit var presenter: PurgePresenter
   private val handler = Handler(Looper.getMainLooper())
   private lateinit var fastItemAdapter: FastItemAdapter<PurgeItem>
   private lateinit var binding: FragmentPurgeBinding
   private var decoration: DividerItemDecoration? = null
   private var lastPosition: Int = 0
-
-  private val onRetrieveBegin: () -> Unit = {
-    binding.purgeEmpty.visibility = View.GONE
-    binding.purgeList.visibility = View.GONE
-  }
-
-  private val onStaleApplicationReceived: (String) -> Unit = {
-    fastItemAdapter.add(PurgeItem(it))
-  }
-
-  private val onRetrievalCompleted: () -> Unit = {
-    handler.removeCallbacksAndMessages(null)
-    handler.post {
-      binding.purgeSwipeRefresh.post {
-        if (binding.purgeSwipeRefresh != null) {
-          binding.purgeSwipeRefresh.isRefreshing = false
-        }
-      }
-    }
-
-    lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
-
-    decideListState()
-  }
 
   private fun decideListState() {
     if (fastItemAdapter.adapterItemCount > 0) {
@@ -129,8 +106,36 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
   override fun onStart() {
     super.onStart()
     prepareRefresh()
-    presenter.retrieveStaleApplications(false, onRetrieveBegin, onStaleApplicationReceived,
-        onRetrievalCompleted)
+    presenter.retrieveStaleApplications(false)
+  }
+
+  override fun onRetrieveBegin() {
+    binding.purgeEmpty.visibility = View.GONE
+    binding.purgeList.visibility = View.GONE
+
+  }
+
+  override fun onRetrieveComplete() {
+    handler.removeCallbacksAndMessages(null)
+    handler.post {
+      binding.purgeSwipeRefresh.post {
+        if (binding.purgeSwipeRefresh != null) {
+          binding.purgeSwipeRefresh.isRefreshing = false
+        }
+      }
+    }
+
+    lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
+
+    decideListState()
+  }
+
+  override fun onRetrievedStale(packageName: String) {
+    fastItemAdapter.add(PurgeItem(packageName))
+  }
+
+  override fun onRetrieveError(throwable: Throwable) {
+    Toasty.makeText(context, "Error retrieving old application list", Toasty.LENGTH_SHORT).show()
   }
 
   override fun onStop() {
@@ -157,8 +162,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
 
   private fun refreshList() {
     prepareRefresh()
-    presenter.retrieveStaleApplications(true, onRetrieveBegin, onStaleApplicationReceived,
-        onRetrievalCompleted)
+    presenter.retrieveStaleApplications(true)
   }
 
   override fun onResume() {
@@ -214,28 +218,30 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.BusCallback {
 
   override fun onPurge(packageName: String) {
     Timber.d("Purge stale: %s", packageName)
-    presenter.deleteStale(packageName) { packageName1 ->
-      val itemCount = fastItemAdapter.itemCount
-      if (itemCount == 0) {
-        Timber.e("Adapter is EMPTY")
-      } else {
-        var found = -1
-        for (i in 0 until itemCount) {
-          val item = fastItemAdapter.getAdapterItem(i)
-          if (item.model == packageName1) {
-            found = i
-            break
-          }
-        }
+    presenter.deleteStale(packageName)
+  }
 
-        if (found != -1) {
-          Timber.d("Remove deleted item: %s", packageName1)
-          fastItemAdapter.remove(found)
+  override fun onDeleted(packageName: String) {
+    val itemCount = fastItemAdapter.itemCount
+    if (itemCount == 0) {
+      Timber.e("Adapter is EMPTY")
+    } else {
+      var found = -1
+      for (i in 0 until itemCount) {
+        val item = fastItemAdapter.getAdapterItem(i)
+        if (item.model == packageName) {
+          found = i
+          break
         }
       }
 
-      decideListState()
+      if (found != -1) {
+        Timber.d("Remove deleted item: %s", packageName)
+        fastItemAdapter.remove(found)
+      }
     }
+
+    decideListState()
   }
 
   override fun onPurgeAll() {
