@@ -52,7 +52,7 @@ import com.pyamsoft.pydroid.util.AppUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
+class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
   @field:Inject internal lateinit var presenter: LockInfoPresenter
   private lateinit var fastItemAdapter: FastItemAdapter<LockInfoItem>
@@ -64,45 +64,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
   private var dividerDecoration: DividerItemDecoration? = null
   private var appIcon = LoaderHelper.empty()
   private var lastPosition: Int = 0
-
-  private val onBegin: () -> Unit = {
-    setRefreshing(true)
-    fastItemAdapter.clear()
-
-    binding.lockInfoEmpty.visibility = View.GONE
-    binding.lockInfoRecycler.visibility = View.GONE
-  }
-
-  private val onAdd: (ActivityEntry) -> Unit = {
-    fastItemAdapter.add(LockInfoItem(it, appIsSystem))
-  }
-
-  private val onError: (Throwable) -> Unit = {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
-  }
-
-  private val onPopulated: () -> Unit = {
-    setRefreshing(false)
-
-    if (fastItemAdapter.adapterItemCount > 0) {
-      binding.lockInfoEmpty.visibility = View.GONE
-      binding.lockInfoRecycler.visibility = View.VISIBLE
-
-      Timber.d("Refresh finished")
-      presenter.showOnBoarding(onShowOnboarding = {
-        Timber.d("Show onboarding")
-      }, onOnboardingComplete = {
-        Timber.d("No onboarding")
-      })
-
-      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
-    } else {
-      binding.lockInfoRecycler.visibility = View.GONE
-      binding.lockInfoEmpty.visibility = View.VISIBLE
-      Toasty.makeText(context, "Error while loading list. Please try again.",
-          Toast.LENGTH_SHORT).show()
-    }
-  }
 
   override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
@@ -150,7 +111,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
         R.color.blue700, R.color.amber500)
     binding.lockInfoSwipeRefresh.setOnRefreshListener {
       Timber.d("onRefresh")
-      presenter.populateList(true, onBegin, onAdd, onError, onPopulated)
+      presenter.populateList(true)
     }
   }
 
@@ -179,11 +140,9 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
 
   override fun onStart() {
     super.onStart()
-
     appIcon = LoaderHelper.unload(appIcon)
     appIcon = AppIconLoader.forPackageName(context, appPackageName).into(binding.lockInfoIcon)
-
-    presenter.populateList(false, onBegin, onAdd, onError, onPopulated)
+    presenter.populateList(false)
   }
 
   override fun onStop() {
@@ -225,19 +184,62 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.BusCallback {
     }
   }
 
-  override fun onEntryCreated(id: String) {
+  override fun onListPopulateBegin() {
+    setRefreshing(true)
+    fastItemAdapter.clear()
+
+    binding.lockInfoEmpty.visibility = View.GONE
+    binding.lockInfoRecycler.visibility = View.GONE
+  }
+
+  override fun onListPopulated() {
+    setRefreshing(false)
+
+    if (fastItemAdapter.adapterItemCount > 0) {
+      binding.lockInfoEmpty.visibility = View.GONE
+      binding.lockInfoRecycler.visibility = View.VISIBLE
+
+      Timber.d("Refresh finished")
+      presenter.showOnBoarding()
+
+      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
+    } else {
+      binding.lockInfoRecycler.visibility = View.GONE
+      binding.lockInfoEmpty.visibility = View.VISIBLE
+      Toasty.makeText(context, "Error while loading list. Please try again.",
+          Toast.LENGTH_SHORT).show()
+    }
+  }
+
+  override fun onEntryAddedToList(entry: ActivityEntry) {
+    fastItemAdapter.add(LockInfoItem(entry, appIsSystem))
+  }
+
+  override fun onListPopulateError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
+  }
+
+  override fun onOnboardingComplete() {
+    Timber.d("Show onboarding")
+  }
+
+  override fun onShowOnboarding() {
+    Timber.d("Onboarding complete")
+  }
+
+  override fun onModifyEntryCreated(id: String) {
     modifyList(id, LOCKED)
   }
 
-  override fun onEntryDeleted(id: String) {
+  override fun onModifyEntryDeleted(id: String) {
     modifyList(id, DEFAULT)
   }
 
-  override fun onEntryWhitelisted(id: String) {
+  override fun onModifyEntryWhitelisted(id: String) {
     modifyList(id, WHITELISTED)
   }
 
-  override fun onEntryError(throwable: Throwable) {
+  override fun onModifyEntryError(throwable: Throwable) {
     DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
   }
 

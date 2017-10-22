@@ -23,6 +23,7 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Observable
 import io.reactivex.Single
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -31,7 +32,7 @@ import javax.inject.Singleton
     @param:Named(
         "interactor_lock_info") private val impl: LockInfoInteractor) : LockInfoInteractor, Cache {
 
-  private var cache: MutableMap<String, Observable<ActivityEntry>?> = HashMap()
+  private var infoCache: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>> = HashMap()
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
       packageName: String, activityName: String, code: String?,
@@ -39,35 +40,55 @@ import javax.inject.Singleton
     return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
         code, system)
         .doOnSuccess {
-          val obj: MutableMap<String, Observable<ActivityEntry>?>? = cache
+          val obj: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>>? = infoCache
           if (obj != null) {
-            val cached: Observable<ActivityEntry>? = obj[packageName]
+            val cached: Observable<ActivityEntry>? = obj[packageName]?.first
             if (cached != null) {
-              obj.put(packageName, cached.map {
+              obj.put(packageName, Pair(cached.map {
                 if (it.packageName() == packageName && it.name() == activityName) {
                   return@map it.toBuilder().lockState(newLockState).build()
                 } else {
                   return@map it
                 }
-              }.doOnError { cache.remove(packageName) })
+              }, System.currentTimeMillis()))
             }
           }
-        }
+        }.doOnError { infoCache.remove(packageName) }
   }
 
   override fun clearCache() {
-    cache.clear()
+    infoCache.clear()
   }
 
   override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
 
   override fun populateList(packageName: String, force: Boolean): Observable<ActivityEntry> {
     return Observable.defer {
-      if (force || cache[packageName] == null) {
-        cache.put(packageName, impl.populateList(packageName, true).cache())
+      val currentTime = System.currentTimeMillis()
+      val list: Observable<ActivityEntry>
+      val cachedPair = infoCache[packageName]
+      val cache: Observable<ActivityEntry>?
+      val cachedTime: Long
+      if (cachedPair == null) {
+        cache = null
+        cachedTime = 0L
+      } else {
+        cache = cachedPair.first
+        cachedTime = cachedPair.second
       }
-      return@defer cache[packageName]?.doOnError { cache.remove(packageName) }
-    }
+      if (force || cache == null || cachedTime + TWO_MINUTES_MILLIS < currentTime) {
+        list = impl.populateList(packageName, true).cache()
+        infoCache.put(packageName, Pair(list, currentTime))
+      } else {
+        list = cache
+      }
+      return@defer list
+    }.doOnError { infoCache.remove(packageName) }
+  }
+
+  companion object {
+
+    private val TWO_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(2L)
   }
 }
 

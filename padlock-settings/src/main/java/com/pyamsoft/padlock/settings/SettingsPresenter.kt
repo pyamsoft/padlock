@@ -84,26 +84,35 @@ class SettingsPresenter @Inject internal constructor(
     }
   }
 
-  fun checkLockType(onLockTypeChangeAccepted: () -> Unit,
-      onLockTypeChangePrevented: () -> Unit, onLockTypeChangeError: (Throwable) -> Unit) {
+  fun checkLockType(value: String) {
     dispose {
       interactor.hasExistingMasterPassword()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
-              onLockTypeChangePrevented()
+              view?.onLockTypeChangePrevented()
             } else {
-              onLockTypeChangeAccepted()
+              view?.onLockTypeChangeAccepted(value)
             }
           }, {
             Timber.e(it, "on error lock type change")
-            onLockTypeChangeError(it)
+            view?.onLockTypeChangeError(it)
           })
     }
   }
 
-  interface View : ClearCallback
+  interface View : ClearCallback, LockTypeChangeCallback
+
+  interface LockTypeChangeCallback {
+
+    fun onLockTypeChangePrevented()
+
+    fun onLockTypeChangeAccepted(value: String)
+
+    fun onLockTypeChangeError(throwable: Throwable)
+
+  }
 
   interface ClearCallback {
 

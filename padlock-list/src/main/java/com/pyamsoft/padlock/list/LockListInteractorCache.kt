@@ -24,15 +24,18 @@ import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Observable
 import io.reactivex.Single
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockListInteractorCache @Inject internal constructor(
+    @param:Named("cache_purge") private val purgeCache: Cache,
     @param:Named(
         "interactor_lock_list") private val impl: LockListInteractor) : LockListInteractor, Cache {
 
-  private var cache: Observable<AppEntry>? = null
+  private var appCache: Observable<AppEntry>? = null
+  private var lastAccessCache: Long = 0L
 
   override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
 
@@ -44,12 +47,19 @@ import javax.inject.Singleton
 
   override fun populateList(force: Boolean): Observable<AppEntry> {
     return Observable.defer {
-      if (force || cache == null) {
-        cache = impl.populateList(true).cache()
+      val cache = appCache
+      val currentTime = System.currentTimeMillis()
+      val list: Observable<AppEntry>
+      if (force || cache == null || lastAccessCache + TWO_MINUTES_MILLIS < currentTime) {
+        list = impl.populateList(true).cache()
+        appCache = list
+        lastAccessCache = currentTime
+      } else {
+        list = cache
       }
 
-      return@defer cache?.doOnError { clearCache() }
-    }
+      return@defer list
+    }.doOnError { clearCache() }
   }
 
   override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
@@ -58,9 +68,9 @@ import javax.inject.Singleton
     return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
         code, system)
         .doOnSuccess {
-          val obj: Observable<AppEntry>? = cache
+          val obj: Observable<AppEntry>? = appCache
           if (obj != null) {
-            cache = obj.map {
+            appCache = obj.map {
               if (it.packageName() == packageName) {
                 // Update this with the new thing
                 return@map it.toBuilder().locked(newLockState == LOCKED).build()
@@ -68,13 +78,19 @@ import javax.inject.Singleton
                 // Pass the original through
                 return@map it
               }
-            }.doOnError { clearCache() }
+            }
           }
-        }
+        }.doOnError { clearCache() }
   }
 
   override fun clearCache() {
-    cache = null
+    appCache = null
+    purgeCache.clearCache()
+  }
+
+  companion object {
+
+    private val TWO_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(2L)
   }
 }
 

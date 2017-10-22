@@ -21,7 +21,7 @@ package com.pyamsoft.padlock.list
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.list.LockListEvent.Callback.Created
 import com.pyamsoft.padlock.list.LockListEvent.Callback.Deleted
-import com.pyamsoft.padlock.list.LockListPresenter.BusCallback
+import com.pyamsoft.padlock.list.LockListPresenter.View
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
@@ -46,20 +46,18 @@ class LockListPresenter @Inject internal constructor(
     private val createPinBus: EventBus<CreatePinEvent>,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<BusCallback>(compScheduler,
+    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
     ioScheduler,
     mainScheduler) {
 
-  override fun onBind(v: BusCallback) {
+  override fun onBind(v: View) {
     super.onBind(v)
-    registerOnCreateBus(v::onMasterPinCreateSuccess, v::onMasterPinCreateFailure)
-    registerOnClearBus(v::onMasterPinClearSuccess, v::onMasterPinClearFailure)
-    registerOnModifyBus(v::onEntryCreated, v::onEntryDeleted, v::onEntryError)
+    registerOnCreateBus(v)
+    registerOnClearBus(v)
+    registerOnModifyBus(v)
   }
 
-  private fun registerOnModifyBus(onEntryCreated: (String) -> Unit,
-      onEntryDeleted: (String) -> Unit,
-      onEntryError: (Throwable) -> Unit) {
+  private fun registerOnModifyBus(v: LockModifyCallback) {
     dispose {
       lockListBus.listen()
           .filter { it is LockListEvent.Modify }
@@ -77,25 +75,24 @@ class LockListPresenter @Inject internal constructor(
           .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
-              is Created -> onEntryCreated(it.packageName)
-              is Deleted -> onEntryDeleted(it.packageName)
+              is Created -> v.onModifyEntryCreated(it.packageName)
+              is Deleted -> v.onModifyEntryDeleted(it.packageName)
             }
           }, {
             Timber.e(it, "Error listening to lock info bus")
-            onEntryError(it)
+            v.onModifyEntryError(it)
           })
     }
   }
 
-  private fun registerOnClearBus(onMasterPinClearSuccess: () -> Unit,
-      onMasterPinClearFailure: () -> Unit) {
+  private fun registerOnClearBus(v: MasterPinClearCallback) {
     dispose {
       clearPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             if (it.success) {
-              onMasterPinClearSuccess()
+              v.onMasterPinClearSuccess()
             } else {
-              onMasterPinClearFailure()
+              v.onMasterPinClearFailure()
             }
           }, {
             Timber.e(it, "error create pin bus")
@@ -103,15 +100,14 @@ class LockListPresenter @Inject internal constructor(
     }
   }
 
-  private fun registerOnCreateBus(onMasterPinCreateSuccess: () -> Unit,
-      onMasterPinCreateFailure: () -> Unit) {
+  private fun registerOnCreateBus(v: MasterPinCreateCallback) {
     dispose {
       createPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             if (it.success) {
-              onMasterPinCreateSuccess()
+              v.onMasterPinCreateSuccess()
             } else {
-              onMasterPinCreateFailure()
+              v.onMasterPinCreateFailure()
             }
           }, {
             Timber.e(it, "error create pin bus")
@@ -150,29 +146,28 @@ class LockListPresenter @Inject internal constructor(
     }
   }
 
-  fun setFABStateFromPreference(onSetFABStateEnabled: () -> Unit,
-      onSetFABStateDisabled: () -> Unit) {
+  fun setFABStateFromPreference() {
     dispose {
       stateInteractor.isServiceEnabled()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
-              onSetFABStateEnabled()
+              view?.onFABEnabled()
             } else {
-              onSetFABStateDisabled()
+              view?.onFABDisabled()
             }
           }, { Timber.e(it, "onError") })
     }
   }
 
-  fun setSystemVisibilityFromPreference(onSetSystemVisibility: (Boolean) -> Unit) {
+  fun setSystemVisibilityFromPreference() {
     dispose {
       lockListInteractor.isSystemVisible()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
-            onSetSystemVisibility(it)
+            view?.onSystemVisibilityChanged(it)
           }, { Timber.e(it, "onError") })
     }
   }
@@ -181,34 +176,31 @@ class LockListPresenter @Inject internal constructor(
     lockListInteractor.setSystemVisible(visible)
   }
 
-  fun showOnBoarding(onOnboardingComplete: () -> Unit, onShowOnboarding: () -> Unit) {
+  fun showOnBoarding() {
     dispose {
       lockListInteractor.hasShownOnBoarding()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
-              onOnboardingComplete()
+              view?.onOnboardingComplete()
             } else {
-              onShowOnboarding()
+              view?.onShowOnboarding()
             }
           }, { Timber.e(it, "onError") })
     }
   }
 
-
-  fun populateList(force: Boolean, onListPopulateBegin: () -> Unit,
-      onEntryAddedToList: (AppEntry) -> Unit, onListPopulated: () -> Unit,
-      onListPopulateError: (Throwable) -> Unit) {
+  fun populateList(force: Boolean) {
     dispose {
       lockListInteractor.populateList(force)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .doAfterTerminate { onListPopulated() }
-          .doOnSubscribe { onListPopulateBegin() }
-          .subscribe({ onEntryAddedToList(it) }, {
+          .doAfterTerminate { view?.onListPopulated() }
+          .doOnSubscribe { view?.onListPopulateBegin() }
+          .subscribe({ view?.onEntryAddedToList(it) }, {
             Timber.e(it, "populateList onError")
-            onListPopulateError(it)
+            view?.onListPopulateError(it)
           })
     }
   }
@@ -220,19 +212,62 @@ class LockListPresenter @Inject internal constructor(
     cache.clearCache()
   }
 
-  interface BusCallback {
+  interface View : LockModifyCallback, MasterPinCreateCallback, MasterPinClearCallback,
+      FABStateCallback, SystemVisibilityChangeCallback, OnboardingCallback, ListPopulateCallback
+
+  interface LockModifyCallback {
+
+    fun onModifyEntryCreated(packageName: String)
+
+    fun onModifyEntryDeleted(packageName: String)
+
+    fun onModifyEntryError(throwable: Throwable)
+
+  }
+
+  interface MasterPinCreateCallback {
 
     fun onMasterPinCreateSuccess()
+
     fun onMasterPinCreateFailure()
 
+  }
+
+  interface MasterPinClearCallback {
+
     fun onMasterPinClearSuccess()
+
     fun onMasterPinClearFailure()
 
-    fun onEntryCreated(packageName: String)
+  }
 
-    fun onEntryDeleted(packageName: String)
+  interface FABStateCallback {
 
-    fun onEntryError(throwable: Throwable)
+    fun onFABEnabled()
 
+    fun onFABDisabled()
+  }
+
+  interface SystemVisibilityChangeCallback {
+
+    fun onSystemVisibilityChanged(visible: Boolean)
+  }
+
+  interface OnboardingCallback {
+
+    fun onOnboardingComplete()
+
+    fun onShowOnboarding()
+  }
+
+  interface ListPopulateCallback {
+
+    fun onListPopulateBegin()
+
+    fun onEntryAddedToList(entry: AppEntry)
+
+    fun onListPopulated()
+
+    fun onListPopulateError(throwable: Throwable)
   }
 }
