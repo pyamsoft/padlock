@@ -51,7 +51,7 @@ import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
+class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   @field:Inject internal lateinit var presenter: LockListPresenter
   private lateinit var fastItemAdapter: FastItemAdapter<LockListItem>
@@ -60,59 +60,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
   private var fabIconTask = LoaderHelper.empty()
   private var dividerDecoration: DividerItemDecoration? = null
   private var lastPosition: Int = 0
-
-  private val onFabStateEnabled: () -> Unit = {
-    fabIconTask = LoaderHelper.unload(fabIconTask)
-    fabIconTask = ImageLoader.fromResource(activity, R.drawable.ic_lock_outline_24dp)
-        .into(binding.applistFab)
-  }
-
-  private val onFabStateDisabled: () -> Unit = {
-    fabIconTask = LoaderHelper.unload(fabIconTask)
-    fabIconTask = ImageLoader.fromResource(activity, R.drawable.ic_lock_open_24dp)
-        .into(binding.applistFab)
-  }
-
-  private val onListPopulateBegin: () -> Unit = {
-    setRefreshing(true)
-    fastItemAdapter.clear()
-    binding.applistFab.hide()
-
-    binding.applistEmpty.visibility = View.GONE
-    binding.applistRecyclerview.visibility = View.GONE
-  }
-
-  private val onEntryAddedToList: (AppEntry) -> Unit = {
-    fastItemAdapter.add(LockListItem(activity, it))
-  }
-
-  private val onListPopulated: () -> Unit = {
-    setRefreshing(false)
-    binding.applistFab.show()
-
-    if (fastItemAdapter.adapterItemCount > 0) {
-      binding.applistEmpty.visibility = View.GONE
-      binding.applistRecyclerview.visibility = View.VISIBLE
-      Timber.d("We have refreshed")
-      presenter.showOnBoarding(onOnboardingComplete = {
-        Timber.d("onboarding complete")
-      }, onShowOnboarding = {
-        Timber.d("Show onboarding")
-      })
-
-      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
-    } else {
-      binding.applistRecyclerview.visibility = View.GONE
-      binding.applistEmpty.visibility = View.VISIBLE
-      Toasty.makeText(context, "Error while loading list. Please try again.",
-          Toast.LENGTH_SHORT).show()
-    }
-  }
-
-  private val onListPopulateError: (Throwable) -> Unit = {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "list_error")
-  }
-
+  private var displaySystemItem: MenuItem? = null
 
   override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
@@ -161,25 +109,10 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
     }
   }
 
-  override fun onEntryCreated(packageName: String) {
-    Timber.d("Created entry for $packageName")
-    modifyList(packageName, true)
-  }
-
-  override fun onEntryDeleted(packageName: String) {
-    Timber.d("Deleted entry for $packageName")
-    modifyList(packageName, false)
-  }
-
-  override fun onEntryError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "list_error")
-  }
-
   override fun onStart() {
     super.onStart()
-    presenter.populateList(false, onListPopulateBegin, onEntryAddedToList,
-        onListPopulated, onListPopulateError)
-    presenter.setFABStateFromPreference(onFabStateEnabled, onFabStateDisabled)
+    presenter.populateList(false)
+    presenter.setFABStateFromPreference()
   }
 
   override fun onStop() {
@@ -209,8 +142,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
         R.color.blue700, R.color.amber500)
     binding.applistSwipeRefresh.setOnRefreshListener {
       Timber.d("onRefresh")
-      presenter.populateList(true, onListPopulateBegin, onEntryAddedToList,
-          onListPopulated, onListPopulateError)
+      presenter.populateList(true)
     }
   }
 
@@ -245,8 +177,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
   }
 
   private fun setupDisplaySystemVisibleItem(menu: Menu) {
-    val displaySystemItem: MenuItem = menu.findItem(R.id.menu_is_system)
-    presenter.setSystemVisibilityFromPreference { displaySystemItem.isChecked = it }
+    displaySystemItem = menu.findItem(R.id.menu_is_system)
+    presenter.setSystemVisibilityFromPreference()
   }
 
   override fun onDestroyView() {
@@ -270,8 +202,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
       R.id.menu_is_system -> if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing) {
         Timber.d("List is not refreshing. Allow change of system preference")
         presenter.setSystemVisibility(!item.isChecked)
-        presenter.populateList(true, onListPopulateBegin, onEntryAddedToList,
-            onListPopulated, onListPopulateError)
+        presenter.populateList(true)
       }
       else -> Timber.w("Item selected: %d, do nothing", item.itemId)
     }
@@ -297,7 +228,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
   }
 
   override fun onMasterPinCreateSuccess() {
-    onFabStateEnabled()
+    onFABEnabled()
     val v = view
     if (v != null) {
       Snackbar.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT).show()
@@ -309,7 +240,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
   }
 
   override fun onMasterPinClearSuccess() {
-    onFabStateDisabled()
+    onFABDisabled()
     val v = view
     if (v != null) {
       Snackbar.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT).show()
@@ -332,6 +263,80 @@ class LockListFragment : CanaryFragment(), LockListPresenter.BusCallback {
       Timber.d("Reload options")
       activity.invalidateOptionsMenu()
     }
+  }
+
+  override fun onModifyEntryCreated(packageName: String) {
+    Timber.d("Created entry for $packageName")
+    modifyList(packageName, true)
+  }
+
+  override fun onModifyEntryDeleted(packageName: String) {
+    Timber.d("Deleted entry for $packageName")
+    modifyList(packageName, false)
+  }
+
+  override fun onModifyEntryError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "list_error")
+  }
+
+  override fun onFABEnabled() {
+    fabIconTask = LoaderHelper.unload(fabIconTask)
+    fabIconTask = ImageLoader.fromResource(activity, R.drawable.ic_lock_outline_24dp)
+        .into(binding.applistFab)
+  }
+
+  override fun onFABDisabled() {
+    fabIconTask = LoaderHelper.unload(fabIconTask)
+    fabIconTask = ImageLoader.fromResource(activity, R.drawable.ic_lock_open_24dp)
+        .into(binding.applistFab)
+  }
+
+  override fun onSystemVisibilityChanged(visible: Boolean) {
+    displaySystemItem?.isChecked = visible
+  }
+
+  override fun onOnboardingComplete() {
+    Timber.d("Onboarding complete")
+  }
+
+  override fun onShowOnboarding() {
+    Timber.d("Show onboarding")
+  }
+
+  override fun onListPopulateBegin() {
+    setRefreshing(true)
+    fastItemAdapter.clear()
+    binding.applistFab.hide()
+
+    binding.applistEmpty.visibility = View.GONE
+    binding.applistRecyclerview.visibility = View.GONE
+  }
+
+  override fun onEntryAddedToList(entry: AppEntry) {
+    fastItemAdapter.add(LockListItem(activity, entry))
+  }
+
+  override fun onListPopulated() {
+    setRefreshing(false)
+    binding.applistFab.show()
+
+    if (fastItemAdapter.adapterItemCount > 0) {
+      binding.applistEmpty.visibility = View.GONE
+      binding.applistRecyclerview.visibility = View.VISIBLE
+      Timber.d("We have refreshed")
+      presenter.showOnBoarding()
+
+      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
+    } else {
+      binding.applistRecyclerview.visibility = View.GONE
+      binding.applistEmpty.visibility = View.VISIBLE
+      Toasty.makeText(context, "Error while loading list. Please try again.",
+          Toast.LENGTH_SHORT).show()
+    }
+  }
+
+  override fun onListPopulateError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "list_error")
   }
 
   companion object {

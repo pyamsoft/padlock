@@ -40,6 +40,7 @@ import javax.inject.Inject
 class SettingsFragment : ActionBarSettingsPreferenceFragment(), SettingsPresenter.View {
 
   @field:Inject internal lateinit var presenter: SettingsPresenter
+  private lateinit var lockType: ListPreference
 
   override fun provideBoundPresenters(): List<Presenter<*>> =
       listOf(presenter) + super.provideBoundPresenters()
@@ -77,7 +78,7 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), SettingsPresente
     super.onViewCreated(view, savedInstanceState)
     val clearDb = findPreference(getString(R.string.clear_db_key))
     val installListener = findPreference(getString(R.string.install_listener_key))
-    val lockType = findPreference(getString(R.string.lock_screen_type_key)) as ListPreference
+    lockType = findPreference(getString(R.string.lock_screen_type_key)) as ListPreference
 
 
     clearDb.setOnPreferenceClickListener {
@@ -94,23 +95,29 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), SettingsPresente
 
     lockType.setOnPreferenceChangeListener { _, value ->
       if (value is String) {
-        presenter.checkLockType(
-            onLockTypeChangeAccepted = {
-              Timber.d("Change accepted, set value: %s", value)
-              lockType.value = value
-            }, onLockTypeChangePrevented = {
-          Toasty.makeText(context, "Must clear Master Password before changing Lock Screen Type",
-              Toasty.LENGTH_SHORT).show()
-          DialogUtil.guaranteeSingleDialogFragment(activity,
-              PinEntryDialog.newInstance(context.packageName), PinEntryDialog.TAG)
-        }, onLockTypeChangeError = {
-          Toasty.makeText(context, "Error: ${it.message}", Toasty.LENGTH_SHORT).show()
-        })
+        presenter.checkLockType(value)
       }
 
       Timber.d("Always return false here, the callback will decide if we can set value properly")
       return@setOnPreferenceChangeListener false
     }
+  }
+
+  override fun onLockTypeChangeAccepted(value: String) {
+    Timber.d("Change accepted, set value: %s", value)
+    lockType.value = value
+
+  }
+
+  override fun onLockTypeChangePrevented() {
+    Toasty.makeText(context, "Must clear Master Password before changing Lock Screen Type",
+        Toasty.LENGTH_SHORT).show()
+    DialogUtil.guaranteeSingleDialogFragment(activity,
+        PinEntryDialog.newInstance(context.packageName), PinEntryDialog.TAG)
+  }
+
+  override fun onLockTypeChangeError(throwable: Throwable) {
+    Toasty.makeText(context, "Error: ${throwable.message}", Toasty.LENGTH_SHORT).show()
   }
 
   override fun onClearDatabase() {

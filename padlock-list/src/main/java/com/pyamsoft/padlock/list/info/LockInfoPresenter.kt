@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Created
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Deleted
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Error
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Whitelisted
-import com.pyamsoft.padlock.list.info.LockInfoPresenter.BusCallback
+import com.pyamsoft.padlock.list.info.LockInfoPresenter.View
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.bus.EventBus
@@ -37,18 +37,15 @@ class LockInfoPresenter @Inject internal constructor(
         "package_name") private val packageName: String,
     private val interactor: LockInfoInteractor, @Named("computation") compScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler, @Named(
-        "main") mainScheduler: Scheduler) : SchedulerPresenter<BusCallback>(compScheduler,
+        "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
     ioScheduler, mainScheduler) {
 
-  override fun onBind(v: BusCallback) {
+  override fun onBind(v: View) {
     super.onBind(v)
-    registerOnModifyBus(v::onEntryCreated, v::onEntryDeleted, v::onEntryWhitelisted,
-        v::onEntryError)
+    registerOnModifyBus(v)
   }
 
-  private fun registerOnModifyBus(onEntryCreated: (String) -> Unit,
-      onEntryDeleted: (String) -> Unit, onEntryWhitelisted: (String) -> Unit,
-      onEntryError: (Throwable) -> Unit) {
+  private fun registerOnModifyBus(v: LockModifyCallback) {
     dispose {
       bus.listen()
           .filter { it is LockInfoEvent.Modify }
@@ -66,13 +63,13 @@ class LockInfoPresenter @Inject internal constructor(
           .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
-              is Created -> onEntryCreated(it.id)
-              is Deleted -> onEntryDeleted(it.id)
-              is Whitelisted -> onEntryWhitelisted(it.id)
+              is Created -> v.onModifyEntryCreated(it.id)
+              is Deleted -> v.onModifyEntryDeleted(it.id)
+              is Whitelisted -> v.onModifyEntryWhitelisted(it.id)
             }
           }, {
             Timber.e(it, "Error listening to lock info bus")
-            onEntryError(it)
+            v.onModifyEntryError(it)
           })
     }
   }
@@ -99,45 +96,64 @@ class LockInfoPresenter @Inject internal constructor(
     }
   }
 
-  fun populateList(forceRefresh: Boolean, onListPopulateBegin: () -> Unit,
-      onEntryAddedToList: (ActivityEntry) -> Unit, onListPopulateError: (Throwable) -> Unit,
-      onListPopulated: () -> Unit) {
+  fun populateList(forceRefresh: Boolean) {
     dispose {
       interactor.populateList(packageName, forceRefresh)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .doAfterTerminate { onListPopulated() }
-          .doOnSubscribe { onListPopulateBegin() }
-          .subscribe({ onEntryAddedToList(it) }, {
+          .doAfterTerminate { view?.onListPopulated() }
+          .doOnSubscribe { view?.onListPopulateBegin() }
+          .subscribe({ view?.onEntryAddedToList(it) }, {
             Timber.e(it, "LockInfoPresenterImpl populateList onError")
-            onListPopulateError(it)
+            view?.onListPopulateError(it)
           })
     }
   }
 
-  fun showOnBoarding(onShowOnboarding: () -> Unit, onOnboardingComplete: () -> Unit) {
+  fun showOnBoarding() {
     dispose {
       interactor.hasShownOnBoarding()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
             if (it) {
-              onOnboardingComplete()
+              view?.onOnboardingComplete()
             } else {
-              onShowOnboarding()
+              view?.onShowOnboarding()
             }
           }, { Timber.e(it, "onError") })
     }
   }
 
-  interface BusCallback {
+  interface View : LockModifyCallback, ListPopulateCallback, OnboardingCallback
 
-    fun onEntryCreated(id: String)
+  interface LockModifyCallback {
 
-    fun onEntryDeleted(id: String)
+    fun onModifyEntryCreated(id: String)
 
-    fun onEntryWhitelisted(id: String)
+    fun onModifyEntryDeleted(id: String)
 
-    fun onEntryError(throwable: Throwable)
+    fun onModifyEntryWhitelisted(id: String)
+
+    fun onModifyEntryError(throwable: Throwable)
+  }
+
+  interface ListPopulateCallback {
+
+    fun onListPopulateBegin()
+
+    fun onListPopulated()
+
+    fun onEntryAddedToList(entry: ActivityEntry)
+
+    fun onListPopulateError(throwable: Throwable)
+
+  }
+
+  interface OnboardingCallback {
+
+    fun onOnboardingComplete()
+
+    fun onShowOnboarding()
   }
 }
