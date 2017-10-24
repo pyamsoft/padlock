@@ -19,9 +19,8 @@
 package com.pyamsoft.padlock.list
 
 import com.pyamsoft.padlock.base.db.PadLockEntry
-import com.pyamsoft.padlock.list.LockListEvent.Callback.Created
-import com.pyamsoft.padlock.list.LockListEvent.Callback.Deleted
 import com.pyamsoft.padlock.list.LockListPresenter.View
+import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
@@ -42,6 +41,7 @@ class LockListPresenter @Inject internal constructor(
     @Named("cache_lock_list") private val cache: Cache,
     private val stateInteractor: LockServiceStateInteractor,
     private val lockListBus: EventBus<LockListEvent>,
+    private val lockInfoBus: EventBus<LockInfoEvent>,
     private val clearPinBus: EventBus<ClearPinEvent>,
     private val createPinBus: EventBus<CreatePinEvent>,
     @Named("computation") compScheduler: Scheduler,
@@ -75,12 +75,29 @@ class LockListPresenter @Inject internal constructor(
           .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
-              is Created -> v.onModifyEntryCreated(it.packageName)
-              is Deleted -> v.onModifyEntryDeleted(it.packageName)
+              is LockListEvent.Callback.Created -> v.onModifyEntryCreated(it.packageName)
+              is LockListEvent.Callback.Deleted -> v.onModifyEntryDeleted(it.packageName)
             }
           }, {
             Timber.e(it, "Error listening to lock info bus")
             v.onModifyEntryError(it)
+          })
+    }
+
+    dispose {
+      lockInfoBus.listen()
+          .filter { it is LockInfoEvent.Callback }
+          .map { it as LockInfoEvent.Callback }
+          .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+          .subscribe({
+            when (it) {
+              is LockInfoEvent.Callback.Created -> v.onModifySubEntryHardlocked(it.packageName)
+              is LockInfoEvent.Callback.Deleted -> v.onModifySubEntryDefaulted(it.packageName)
+              is LockInfoEvent.Callback.Whitelisted -> v.onModifySubEntryWhitelisted(it.packageName)
+            }
+          }, {
+            Timber.e(it, "Error listening to lock info bus")
+            v.onModifySubEntryError(it)
           })
     }
   }
@@ -222,6 +239,14 @@ class LockListPresenter @Inject internal constructor(
     fun onModifyEntryDeleted(packageName: String)
 
     fun onModifyEntryError(throwable: Throwable)
+
+    fun onModifySubEntryDefaulted(packageName: String)
+
+    fun onModifySubEntryWhitelisted(packageName: String)
+
+    fun onModifySubEntryHardlocked(packageName: String)
+
+    fun onModifySubEntryError(throwable: Throwable)
 
   }
 

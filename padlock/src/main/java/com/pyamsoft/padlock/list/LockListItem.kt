@@ -60,8 +60,8 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
       binding.lockListToggle.setOnCheckedChangeListener(null)
       binding.lockListToggle.isChecked = model.locked
 
-      binding.lockListWhite.visibility = if (model.whitelisted) View.VISIBLE else View.GONE
-      binding.lockListLocked.visibility = if (model.hardLocked) View.VISIBLE else View.GONE
+      binding.lockListWhite.visibility = if (model.whitelisted > 0) View.VISIBLE else View.INVISIBLE
+      binding.lockListLocked.visibility = if (model.hardLocked > 0) View.VISIBLE else View.INVISIBLE
 
       val context: Context = itemView.context
       val whitelistIcon = ImageLoader.fromResource(context, R.drawable.ic_whitelisted).into(
