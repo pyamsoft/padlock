@@ -98,15 +98,44 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     }
   }
 
-  private fun modifyList(packageName: String, checked: Boolean) {
+  private fun modifyDefaultLock(packageName: String, checked: Boolean) {
+    refreshList(packageName, checked, null, null)
+  }
+
+  private fun modifyClearExtras(packageName: String) {
+    refreshList(packageName, null, false, false)
+  }
+
+  private fun modifyWhitelist(packageName: String, whitelisted: Boolean) {
+    refreshList(packageName, null, whitelisted, null)
+  }
+
+  private fun modifyHardLock(packageName: String, hardlocked: Boolean) {
+    refreshList(packageName, null, null, hardlocked)
+  }
+
+  private fun refreshList(packageName: String, locked: Boolean? = null,
+      whitelisted: Boolean? = null, hardlocked: Boolean? = null) {
     for (i in fastItemAdapter.adapterItems.indices) {
       val item: LockListItem = fastItemAdapter.getAdapterItem(i)
       val entry: AppEntry = item.model
       if (packageName == entry.packageName) {
+        val newLocked: Boolean = locked ?: entry.locked
+        val newWhitelisted: Int = maxOf(0, when {
+          whitelisted == null -> entry.whitelisted
+          whitelisted -> entry.whitelisted + 1
+          else -> entry.whitelisted - 1
+        })
+        val newHardLocked: Int = maxOf(0, when {
+          hardlocked == null -> entry.hardLocked
+          hardlocked -> entry.hardLocked + 1
+          else -> entry.hardLocked - 1
+        })
+
         fastItemAdapter.set(i,
             LockListItem(activity,
                 AppEntry(name = entry.name, packageName = entry.packageName, system = entry.system,
-                    locked = checked, whitelisted = entry.whitelisted, hardLocked = entry.hardLocked)))
+                    locked = newLocked, whitelisted = newWhitelisted, hardLocked = newHardLocked)))
         break
       }
     }
@@ -270,15 +299,34 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   override fun onModifyEntryCreated(packageName: String) {
     Timber.d("Created entry for $packageName")
-    modifyList(packageName, true)
+    modifyDefaultLock(packageName, true)
   }
 
   override fun onModifyEntryDeleted(packageName: String) {
     Timber.d("Deleted entry for $packageName")
-    modifyList(packageName, false)
+    modifyDefaultLock(packageName, false)
   }
 
   override fun onModifyEntryError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "list_error")
+  }
+
+  override fun onModifySubEntryDefaulted(packageName: String) {
+    Timber.d("Defaulted subentry for $packageName")
+    modifyClearExtras(packageName)
+  }
+
+  override fun onModifySubEntryHardlocked(packageName: String) {
+    Timber.d("Hardlocked subentry for $packageName")
+    modifyHardLock(packageName, true)
+  }
+
+  override fun onModifySubEntryWhitelisted(packageName: String) {
+    Timber.d("Whitelisted subentry for $packageName")
+    modifyWhitelist(packageName, true)
+  }
+
+  override fun onModifySubEntryError(throwable: Throwable) {
     DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "list_error")
   }
 

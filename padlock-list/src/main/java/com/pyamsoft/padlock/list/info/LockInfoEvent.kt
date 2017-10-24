@@ -40,10 +40,10 @@ sealed class LockInfoEvent {
 
   sealed class Callback : LockInfoEvent() {
 
-    data class Created(val id: String) : Callback()
-    data class Deleted(val id: String) : Callback()
-    data class Whitelisted(val id: String) : Callback()
-    data class Error(val throwable: Throwable) : Callback()
+    data class Created(val id: String, val packageName: String) : Callback()
+    data class Deleted(val id: String, val packageName: String) : Callback()
+    data class Whitelisted(val id: String, val packageName: String) : Callback()
+    data class Error(val throwable: Throwable, val packageName: String) : Callback()
   }
 }
 

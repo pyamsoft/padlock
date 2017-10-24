@@ -63,16 +63,16 @@ import javax.inject.Singleton
           val copyNames: List<String> = ArrayList(packageNames)
           for (packageName in copyNames) {
             var locked = false
-            var whitelist = false
-            var hardLocked = false
+            var whitelist = 0
+            var hardLocked = 0
             val removeEntries = HashSet<AllEntries>()
             for (entry in copyEntries) {
               if (entry.packageName() == packageName) {
                 removeEntries.add(entry)
                 when {
                   entry.activityName() == PadLockEntry.PACKAGE_ACTIVITY_NAME -> locked = true
-                  entry.whitelist() -> whitelist = true
-                  else -> hardLocked = true
+                  entry.whitelist() -> ++whitelist
+                  else -> ++hardLocked
                 }
               }
             }
@@ -135,7 +135,7 @@ import javax.inject.Singleton
   }
 
   private data class LockTuple internal constructor(internal val packageName: String,
-      internal val locked: Boolean, internal val whitelist: Boolean,
-      internal val hardLocked: Boolean)
+      internal val locked: Boolean, internal val whitelist: Int,
+      internal val hardLocked: Int)
 }
 
