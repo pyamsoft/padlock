@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.list
 
+import android.content.Context
 import android.databinding.DataBindingUtil
 import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
@@ -29,6 +30,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.uicommon.AppIconLoader
+import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderMap
 import timber.log.Timber
 import javax.inject.Inject
@@ -53,29 +55,42 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
 
   override fun bindView(holder: ViewHolder, payloads: List<Any>?) {
     super.bindView(holder, payloads)
-    holder.binding.lockListTitle.text = model.name
-    holder.binding.lockListToggle.setOnCheckedChangeListener(null)
-    holder.binding.lockListToggle.isChecked = model.locked
+    holder.apply {
+      binding.lockListTitle.text = model.name
+      binding.lockListToggle.setOnCheckedChangeListener(null)
+      binding.lockListToggle.isChecked = model.locked
 
-    val appIcon = AppIconLoader.forPackageName(holder.itemView.context, model.packageName).into(
-        holder.binding.lockListIcon)
-    loaderMap.put("locked", appIcon)
+      binding.lockListWhite.visibility = if (model.whitelisted) View.VISIBLE else View.GONE
+      binding.lockListLocked.visibility = if (model.hardLocked) View.VISIBLE else View.GONE
 
-    holder.binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
-      buttonView.isChecked = isChecked.not()
-      Timber.d("Modify the database entry: ${model.packageName} $isChecked")
-      holder.publisher.modifyDatabaseEntry(isChecked, model.packageName, null, model.system)
+      val context: Context = itemView.context
+      val whitelistIcon = ImageLoader.fromResource(context, R.drawable.ic_whitelisted).into(
+          binding.lockListWhite)
+      loaderMap.put("whitelist", whitelistIcon)
+
+      val blacklistIcon = ImageLoader.fromResource(context, R.drawable.ic_hardlocked).into(
+          binding.lockListLocked)
+      loaderMap.put("blacklist", blacklistIcon)
+
+      val appIcon = AppIconLoader.forPackageName(context, model.packageName).into(
+          binding.lockListIcon)
+      loaderMap.put("locked", appIcon)
+
+      binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
+        buttonView.isChecked = isChecked.not()
+        Timber.d("Modify the database entry: ${model.packageName} $isChecked")
+        publisher.modifyDatabaseEntry(isChecked, model.packageName, null, model.system)
+      }
     }
   }
 
   override fun unbindView(holder: ViewHolder?) {
     super.unbindView(holder)
-    if (holder != null) {
-      holder.binding.lockListTitle.text = null
-      holder.binding.lockListIcon.setImageDrawable(null)
-      holder.binding.lockListToggle.setOnCheckedChangeListener(null)
+    holder?.apply {
+      binding.lockListTitle.text = null
+      binding.lockListIcon.setImageDrawable(null)
+      binding.lockListToggle.setOnCheckedChangeListener(null)
     }
-
     loaderMap.clear()
   }
 

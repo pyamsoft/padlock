@@ -60,8 +60,8 @@
 
     <ImageView
         android:id="@+id/lock_list_white"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
         android:layout_marginEnd="4dp"
         android:layout_marginStart="8dp"
         android:contentDescription="@string/blank"
@@ -69,8 +69,8 @@
 
     <ImageView
         android:id="@+id/lock_list_locked"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
         android:layout_marginEnd="8dp"
         android:contentDescription="@string/blank"
         />
@@ -79,7 +79,7 @@
         android:id="@+id/lock_list_toggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
+        android:padding="16dp"
         />
 
   </LinearLayout>
