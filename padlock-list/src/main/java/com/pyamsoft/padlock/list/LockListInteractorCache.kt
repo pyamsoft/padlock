@@ -74,7 +74,8 @@ import javax.inject.Singleton
               if (it.packageName == packageName) {
                 // Update this with the new thing
                 return@map AppEntry(name = it.name, packageName = it.packageName,
-                    locked = newLockState == LOCKED, system = it.system)
+                    locked = newLockState == LOCKED, system = it.system,
+                    whitelisted = it.whitelisted, hardLocked = it.hardLocked)
               } else {
                 // Pass the original through
                 return@map it

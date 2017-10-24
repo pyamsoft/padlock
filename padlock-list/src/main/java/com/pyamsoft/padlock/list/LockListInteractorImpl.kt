@@ -81,20 +81,20 @@ import javax.inject.Singleton
           }
           return@BiFunction lockTuples
         }).flatMapObservable { Observable.fromIterable(it) }
-        .flatMapSingle { createFromPackageInfo(it.packageName, it.locked) }
+        .flatMapSingle { createFromPackageInfo(it) }
         .toSortedList { o1, o2 ->
           o1.name.compareTo(o2.name, ignoreCase = true)
         }.flatMapObservable { Observable.fromIterable(it) }
   }
 
-  @CheckResult private fun createFromPackageInfo(packageName: String,
-      locked: Boolean): Single<AppEntry> {
-    return applicationManager.getApplicationInfo(packageName)
+  @CheckResult private fun createFromPackageInfo(tuple: LockTuple): Single<AppEntry> {
+    return applicationManager.getApplicationInfo(tuple.packageName)
         .flatMap { item ->
           labelManager.loadPackageLabel(item)
               .map {
                 AppEntry(name = it, packageName = item.packageName, system = item.system,
-                    locked = locked)
+                    locked = tuple.locked, whitelisted = tuple.whitelist,
+                    hardLocked = tuple.hardLocked)
               }
         }
   }

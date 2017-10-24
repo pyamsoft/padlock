@@ -106,7 +106,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         fastItemAdapter.set(i,
             LockListItem(activity,
                 AppEntry(name = entry.name, packageName = entry.packageName, system = entry.system,
-                    locked = checked)))
+                    locked = checked, whitelisted = entry.whitelisted, hardLocked = entry.hardLocked)))
         break
       }
     }
