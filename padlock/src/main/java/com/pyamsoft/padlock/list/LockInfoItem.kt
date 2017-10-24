@@ -18,7 +18,10 @@
 
 package com.pyamsoft.padlock.list
 
+import android.content.res.ColorStateList
 import android.databinding.DataBindingUtil
+import android.support.v4.content.ContextCompat
+import android.support.v7.widget.AppCompatRadioButton
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.RadioButton
@@ -46,6 +49,17 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
 
   override fun bindView(holder: ViewHolder, payloads: List<Any>?) {
     super.bindView(holder, payloads)
+
+    val whitelistButton: RadioButton = holder.binding.lockInfoRadioWhite
+    if (whitelistButton is AppCompatRadioButton) {
+      whitelistButton.supportButtonTintList = holder.stateListWhitelisted
+    }
+
+    val blacklistButton: RadioButton = holder.binding.lockInfoRadioBlack
+    if (blacklistButton is AppCompatRadioButton) {
+      blacklistButton.supportButtonTintList = holder.stateListBlacklisted
+    }
+
     // Remove any old binds
     val lockedButton: RadioButton = when (model.lockState) {
       DEFAULT -> holder.binding.lockInfoRadioDefault
@@ -122,9 +136,15 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
 
     internal val binding: AdapterItemLockinfoBinding = DataBindingUtil.bind(itemView)
     @Inject internal lateinit var publisher: LockInfoItemPublisher
+    internal val stateListWhitelisted: ColorStateList
+    internal val stateListBlacklisted: ColorStateList
 
     init {
       Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)
+      stateListWhitelisted = ContextCompat.getColorStateList(itemView.context,
+          R.color.state_list_whitelisted)
+      stateListBlacklisted = ContextCompat.getColorStateList(itemView.context,
+          R.color.state_list_hardlocked)
     }
   }
 }
