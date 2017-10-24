@@ -83,7 +83,7 @@ import javax.inject.Singleton
         }).flatMapObservable { Observable.fromIterable(it) }
         .flatMapSingle { createFromPackageInfo(it.packageName, it.locked) }
         .toSortedList { o1, o2 ->
-          o1.name().compareTo(o2.name(), ignoreCase = true)
+          o1.name.compareTo(o2.name, ignoreCase = true)
         }.flatMapObservable { Observable.fromIterable(it) }
   }
 
@@ -93,12 +93,8 @@ import javax.inject.Singleton
         .flatMap { item ->
           labelManager.loadPackageLabel(item)
               .map {
-                AppEntry.builder()
-                    .name(it)
-                    .packageName(item.packageName)
-                    .system(item.system)
-                    .locked(locked)
-                    .build()
+                AppEntry(name = it, packageName = item.packageName, system = item.system,
+                    locked = locked)
               }
         }
   }

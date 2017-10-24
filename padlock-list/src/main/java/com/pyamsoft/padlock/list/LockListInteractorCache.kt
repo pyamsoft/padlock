@@ -71,9 +71,10 @@ import javax.inject.Singleton
           val obj: Observable<AppEntry>? = appCache
           if (obj != null) {
             appCache = obj.map {
-              if (it.packageName() == packageName) {
+              if (it.packageName == packageName) {
                 // Update this with the new thing
-                return@map it.toBuilder().locked(newLockState == LOCKED).build()
+                return@map AppEntry(name = it.name, packageName = it.packageName,
+                    locked = newLockState == LOCKED, system = it.system)
               } else {
                 // Pass the original through
                 return@map it

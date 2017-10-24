@@ -24,16 +24,18 @@ import com.pyamsoft.padlock.model.LockState
 
 sealed class LockInfoEvent {
 
-  data class Modify(private val entry: ActivityEntry, val newState: LockState,
+  data class Modify internal constructor(val id: String, val name: String, val packageName: String,
+      val oldState: LockState, val newState: LockState,
       val code: String?, val system: Boolean) : LockInfoEvent() {
 
-    @CheckResult fun packageName(): String = entry.packageName()
+    companion object {
 
-    @CheckResult fun name(): String = entry.name()
-
-    @CheckResult fun oldState(): LockState = entry.lockState()
-
-    @CheckResult fun id(): String = entry.id()
+      @CheckResult
+      fun from(entry: ActivityEntry, newState: LockState, code: String?, system: Boolean): Modify {
+        return Modify(id = entry.id, name = entry.name, packageName = entry.packageName,
+            oldState = entry.lockState, newState = newState, code = code, system = system)
+      }
+    }
   }
 
   sealed class Callback : LockInfoEvent() {

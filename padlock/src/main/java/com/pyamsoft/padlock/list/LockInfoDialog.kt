@@ -176,9 +176,10 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   private fun modifyList(id: String, state: LockState) {
     for (i in fastItemAdapter.adapterItems.indices) {
       val item: LockInfoItem = fastItemAdapter.getAdapterItem(i)
-      if (id == item.model.id()) {
+      val entry: ActivityEntry = item.model
+      if (id == entry.id) {
         fastItemAdapter.set(i,
-            LockInfoItem(item.model.toBuilder().lockState(state).build(), appIsSystem))
+            LockInfoItem(ActivityEntry(name = entry.name, packageName = entry.packageName, lockState = state), appIsSystem))
         break
       }
     }
@@ -256,9 +257,9 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       val fragment = LockInfoDialog()
       val args = Bundle()
 
-      args.putString(ARG_APP_PACKAGE_NAME, appEntry.packageName())
-      args.putString(ARG_APP_NAME, appEntry.name())
-      args.putBoolean(ARG_APP_SYSTEM, appEntry.system())
+      args.putString(ARG_APP_PACKAGE_NAME, appEntry.packageName)
+      args.putString(ARG_APP_NAME, appEntry.name)
+      args.putBoolean(ARG_APP_SYSTEM, appEntry.system)
 
       fragment.arguments = args
       return fragment

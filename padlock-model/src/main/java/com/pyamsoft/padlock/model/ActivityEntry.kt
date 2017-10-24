@@ -18,37 +18,7 @@
 
 package com.pyamsoft.padlock.model
 
-import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
+data class ActivityEntry(val name: String, val packageName: String, val lockState: LockState) {
 
-@AutoValue abstract class ActivityEntry protected constructor() {
-
-  @CheckResult abstract fun toBuilder(): Builder
-
-  @CheckResult abstract fun name(): String
-
-  @CheckResult abstract fun packageName(): String
-
-  @CheckResult abstract fun lockState(): LockState
-
-  @CheckResult
-  fun id(): String = "${packageName()}|${name()}"
-
-  @AutoValue.Builder abstract class Builder {
-
-    @CheckResult abstract fun name(s: String): Builder
-
-    @CheckResult abstract fun packageName(s: String): Builder
-
-    @CheckResult abstract fun lockState(state: LockState): Builder
-
-    @CheckResult abstract fun build(): ActivityEntry
-  }
-
-  companion object {
-
-
-    @CheckResult
-    fun builder(): Builder = AutoValue_ActivityEntry.Builder()
-  }
+  val id: String = "$packageName|$name"
 }
