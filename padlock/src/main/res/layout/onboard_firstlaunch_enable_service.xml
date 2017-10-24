@@ -39,7 +39,7 @@
           android:layout_height="wrap_content"
           android:padding="16dp"
           android:text="@string/explain_accessibility_service"
-          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
           android:textColor="@color/material_light_background"
           />
 
@@ -49,7 +49,7 @@
           android:layout_height="wrap_content"
           android:layout_marginTop="16dp"
           android:padding="16dp"
-          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
           android:textColor="@color/material_light_background"
           android:textStyle="bold"
           />
@@ -63,7 +63,7 @@
           android:layout_marginEnd="32dp"
           android:layout_marginTop="8dp"
           android:gravity="center"
-          android:textAppearance="?android:attr/textAppearanceLarge"
+          android:textAppearance="@style/TextAppearance.AppCompat.Large"
           />
 
     </LinearLayout>

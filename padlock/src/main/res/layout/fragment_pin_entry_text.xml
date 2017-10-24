@@ -63,7 +63,7 @@
               android:gravity="center_horizontal"
               android:imeOptions="actionNext"
               android:inputType="textPassword"
-              android:textAppearance="?android:attr/textAppearanceMedium"
+              android:textAppearance="@style/TextAppearance.AppCompat.Medium"
               android:textColor="@android:color/black"
               />
 
@@ -84,7 +84,7 @@
               android:gravity="center_horizontal"
               android:imeOptions="actionNext"
               android:inputType="textPassword"
-              android:textAppearance="?android:attr/textAppearanceMedium"
+              android:textAppearance="@style/TextAppearance.AppCompat.Medium"
               android:textColor="@android:color/black"
               />
 
@@ -105,7 +105,7 @@
               android:gravity="center_horizontal"
               android:imeOptions="actionGo"
               android:inputType="text"
-              android:textAppearance="?android:attr/textAppearanceSmall"
+              android:textAppearance="@style/TextAppearance.AppCompat.Small"
               android:textColor="@android:color/black"
               />
 

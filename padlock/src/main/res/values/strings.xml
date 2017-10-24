@@ -84,4 +84,7 @@
   <string name="purge_all_clean">No old locked items, all clean!</string>
   <string name="no_lockable_activities">No lockable Activities found, nothing to do here!</string>
   <string name="no_applications_found">No Applications found, go install some applications!</string>
+  <string name="lock_info_whitelist_explain">Whitelisted - Never locked</string>
+  <string name="lock_info_default_explain">Default - Locking based on main switch</string>
+  <string name="lock_info_blacklist_explain">Blacklisted - Always locked</string>
 </resources>

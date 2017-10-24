@@ -73,7 +73,7 @@
           android:gravity="end"
           android:marqueeRepeatLimit="marquee_forever"
           android:maxLines="1"
-          android:textAppearance="?android:attr/textAppearanceSmall"
+          android:textAppearance="@style/TextAppearance.AppCompat.Small"
           android:textColor="@android:color/black"
           />
 
@@ -99,11 +99,49 @@
           android:gravity="end"
           android:marqueeRepeatLimit="marquee_forever"
           android:maxLines="1"
-          android:textAppearance="?android:attr/textAppearanceSmall"
+          android:textAppearance="@style/TextAppearance.AppCompat.Small"
           android:textColor="@android:color/black"
           />
 
     </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:orientation="vertical"
+        >
+
+      <RadioButton
+          xmlns:app="http://schemas.android.com/apk/res-auto"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:checked="true"
+          android:text="@string/lock_info_default_explain"
+          android:textAppearance="@style/TextAppearance.AppCompat.Small"
+          />
+
+      <RadioButton
+          xmlns:app="http://schemas.android.com/apk/res-auto"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:checked="true"
+          android:text="@string/lock_info_whitelist_explain"
+          android:textAppearance="@style/TextAppearance.AppCompat.Small"
+          app:buttonTint="@color/green500"
+          />
+
+      <RadioButton
+          xmlns:app="http://schemas.android.com/apk/res-auto"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:checked="true"
+          android:text="@string/lock_info_blacklist_explain"
+          android:textAppearance="@style/TextAppearance.AppCompat.Small"
+          app:buttonTint="@color/red500"
+          />
+
+    </LinearLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/lock_info_swipe_refresh"
@@ -121,17 +159,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="gone"
             android:gravity="center"
             android:text="@string/no_lockable_activities"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:visibility="gone"
             />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/lock_info_recycler"
             android:layout_width="match_parent"
-            android:visibility="gone"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             />
 
 
