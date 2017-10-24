@@ -47,8 +47,8 @@ import javax.inject.Singleton
     private val preferences: OnboardingPreferences,
     private val updateDb: PadLockDBUpdate,
     private val modifyInteractor: LockStateModifyInteractor,
-    @param:Named("lockscreen") private val lockScreenClass: Class<out Activity>) : LockInfoInteractor {
-
+    @param:Named(
+        "lockscreen") private val lockScreenClass: Class<out Activity>) : LockInfoInteractor {
 
   override fun hasShownOnBoarding(): Single<Boolean> {
     return Single.fromCallable { preferences.isInfoDialogOnBoard() }
@@ -135,7 +135,7 @@ import javax.inject.Singleton
         LockState.LOCKED
       }
     }
-    return ActivityEntry.builder().name(name).lockState(state).packageName(packageName).build()
+    return ActivityEntry(name = name, packageName = packageName, lockState = state)
   }
 
   @CheckResult private fun fetchData(fetchName: String): Single<MutableList<ActivityEntry>> {
@@ -178,8 +178,8 @@ import javax.inject.Singleton
       Observable.fromIterable(it)
     }.sorted { activityEntry, activityEntry2 ->
       // Package names are all the same
-      val entry1Name: String = activityEntry.name()
-      val entry2Name: String = activityEntry2.name()
+      val entry1Name: String = activityEntry.name
+      val entry2Name: String = activityEntry2.name
 
       // Calculate if the starting X characters in the activity name is the exact package name
       var activity1Package = false

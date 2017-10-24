@@ -101,9 +101,12 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   private fun modifyList(packageName: String, checked: Boolean) {
     for (i in fastItemAdapter.adapterItems.indices) {
       val item: LockListItem = fastItemAdapter.getAdapterItem(i)
-      if (packageName == item.model.packageName()) {
+      val entry: AppEntry = item.model
+      if (packageName == entry.packageName) {
         fastItemAdapter.set(i,
-            LockListItem(activity, item.model.toBuilder().locked(checked).build()))
+            LockListItem(activity,
+                AppEntry(name = entry.name, packageName = entry.packageName, system = entry.system,
+                    locked = checked)))
         break
       }
     }

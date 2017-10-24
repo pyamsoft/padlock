@@ -45,8 +45,9 @@ import javax.inject.Singleton
             val cached: Observable<ActivityEntry>? = obj[packageName]?.first
             if (cached != null) {
               obj.put(packageName, Pair(cached.map {
-                if (it.packageName() == packageName && it.name() == activityName) {
-                  return@map it.toBuilder().lockState(newLockState).build()
+                if (it.packageName == packageName && it.name == activityName) {
+                  return@map ActivityEntry(name = it.name, packageName = it.packageName,
+                      lockState = newLockState)
                 } else {
                   return@map it
                 }

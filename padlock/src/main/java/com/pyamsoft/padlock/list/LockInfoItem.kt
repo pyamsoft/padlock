@@ -47,7 +47,7 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
   override fun bindView(holder: ViewHolder, payloads: List<Any>?) {
     super.bindView(holder, payloads)
     // Remove any old binds
-    val lockedButton: RadioButton = when (model.lockState()) {
+    val lockedButton: RadioButton = when (model.lockState) {
       DEFAULT -> holder.binding.lockInfoRadioDefault
       WHITELISTED -> holder.binding.lockInfoRadioWhite
       LOCKED -> holder.binding.lockInfoRadioBlack
@@ -58,10 +58,10 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
     holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null)
     lockedButton.isChecked = true
 
-    val entryName = model.name()
+    val entryName = model.name
     var activityName = entryName
-    if (entryName.startsWith(model.packageName())) {
-      val strippedPackageName = entryName.replace(model.packageName(), "")
+    if (entryName.startsWith(model.packageName)) {
+      val strippedPackageName = entryName.replace(model.packageName, "")
       if (strippedPackageName[0] == '.') {
         activityName = strippedPackageName
       }
@@ -111,7 +111,7 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
   }
 
   override fun filterAgainst(query: String): Boolean {
-    val name = model.name().toLowerCase().trim { it <= ' ' }
+    val name = model.name.toLowerCase().trim { it <= ' ' }
     Timber.d("Filter predicate: '%s' against %s", query, name)
     return !name.contains(query)
   }

@@ -46,25 +46,25 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
   override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
 
   override fun filterAgainst(query: String): Boolean {
-    val name = model.name().toLowerCase().trim { it <= ' ' }
+    val name = model.name.toLowerCase().trim { it <= ' ' }
     Timber.d("Filter predicate: '%s' against %s", query, name)
     return !name.startsWith(query)
   }
 
   override fun bindView(holder: ViewHolder, payloads: List<Any>?) {
     super.bindView(holder, payloads)
-    holder.binding.lockListTitle.text = model.name()
+    holder.binding.lockListTitle.text = model.name
     holder.binding.lockListToggle.setOnCheckedChangeListener(null)
-    holder.binding.lockListToggle.isChecked = model.locked()
+    holder.binding.lockListToggle.isChecked = model.locked
 
-    val appIcon = AppIconLoader.forPackageName(holder.itemView.context, model.packageName()).into(
+    val appIcon = AppIconLoader.forPackageName(holder.itemView.context, model.packageName).into(
         holder.binding.lockListIcon)
     loaderMap.put("locked", appIcon)
 
     holder.binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
       buttonView.isChecked = isChecked.not()
-      Timber.d("Modify the database entry: ${model.packageName()} $isChecked")
-      holder.publisher.modifyDatabaseEntry(isChecked, model.packageName(), null, model.system())
+      Timber.d("Modify the database entry: ${model.packageName} $isChecked")
+      holder.publisher.modifyDatabaseEntry(isChecked, model.packageName, null, model.system)
     }
   }
 

@@ -76,13 +76,13 @@ class LockInfoPresenter @Inject internal constructor(
 
   private fun modifyDatabaseEntry(event: LockInfoEvent.Modify) {
     dispose {
-      interactor.modifySingleDatabaseEntry(event.oldState(), event.newState,
-          event.packageName(),
-          event.name(), event.code, event.system)
+      interactor.modifySingleDatabaseEntry(event.oldState, event.newState,
+          event.packageName,
+          event.name, event.code, event.system)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
-            val id: String = event.id()
+            val id: String = event.id
             when (it) {
               LockState.LOCKED -> bus.publish(Created(id))
               LockState.DEFAULT -> bus.publish(Deleted(id))
