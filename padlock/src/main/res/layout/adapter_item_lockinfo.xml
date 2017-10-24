@@ -74,7 +74,7 @@
         android:focusable="false"
         android:gravity="start|center_vertical"
         android:longClickable="false"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
         />
 
   </RelativeLayout>

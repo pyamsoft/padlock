@@ -40,7 +40,7 @@
           android:layout_height="wrap_content"
           android:padding="16dp"
           android:text="@string/terms_of_usage"
-          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
           android:textColor="@color/material_light_background"
           />
 
@@ -63,7 +63,7 @@
           android:layout_height="match_parent"
           android:gravity="center"
           android:text="@string/cancel"
-          android:textAppearance="?android:attr/textAppearanceLarge"
+          android:textAppearance="@style/TextAppearance.AppCompat.Large"
           android:textColor="@android:color/white"
           style="?attr/buttonBarNegativeButtonStyle"
           />
@@ -80,7 +80,7 @@
           android:layout_height="match_parent"
           android:gravity="center"
           android:text="@string/accept_terms"
-          android:textAppearance="?android:attr/textAppearanceLarge"
+          android:textAppearance="@style/TextAppearance.AppCompat.Large"
           android:textColor="@android:color/white"
           style="?attr/buttonBarPositiveButtonStyle"
           />

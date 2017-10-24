@@ -47,7 +47,7 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:gravity="center"
-          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
           />
 
     </LinearLayout>
@@ -64,14 +64,14 @@
           android:layout_height="match_parent"
           android:layout_marginEnd="8dp"
           android:text="@string/stat_real_name"
-          android:textAppearance="?android:attr/textAppearanceSmall"
+          android:textAppearance="@style/TextAppearance.AppCompat.Small"
           />
 
       <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
           android:id="@+id/stat_real_name"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
-          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
           />
 
     </LinearLayout>
@@ -88,14 +88,14 @@
           android:layout_height="match_parent"
           android:layout_marginEnd="8dp"
           android:text="@string/stat_package_name"
-          android:textAppearance="?android:attr/textAppearanceSmall"
+          android:textAppearance="@style/TextAppearance.AppCompat.Small"
           />
 
       <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
           android:id="@+id/stat_package_name"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
-          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
           />
 
     </LinearLayout>
@@ -112,14 +112,14 @@
           android:layout_height="match_parent"
           android:layout_marginEnd="8dp"
           android:text="@string/stat_locked_by"
-          android:textAppearance="?android:attr/textAppearanceSmall"
+          android:textAppearance="@style/TextAppearance.AppCompat.Small"
           />
 
       <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
           android:id="@+id/stat_locked_by"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
-          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
           />
 
     </LinearLayout>
@@ -136,14 +136,14 @@
           android:layout_height="match_parent"
           android:layout_marginEnd="8dp"
           android:text="@string/stat_system"
-          android:textAppearance="?android:attr/textAppearanceSmall"
+          android:textAppearance="@style/TextAppearance.AppCompat.Small"
           />
 
       <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
           android:id="@+id/stat_system"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
-          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
           />
 
     </LinearLayout>
