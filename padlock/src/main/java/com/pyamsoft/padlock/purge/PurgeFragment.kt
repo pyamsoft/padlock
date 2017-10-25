@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.padlock.uicommon.ListStateUtil
+import com.pyamsoft.padlock.uicommon.RecyclerViewUtil
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil
@@ -207,6 +208,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     binding.purgeList.setHasFixedSize(false)
     binding.purgeList.addItemDecoration(decoration)
     binding.purgeList.adapter = fastItemAdapter
+    binding.purgeList.itemAnimator = RecyclerViewUtil.withStandardDurations()
   }
 
   private fun handleDeleteRequest(position: Int,

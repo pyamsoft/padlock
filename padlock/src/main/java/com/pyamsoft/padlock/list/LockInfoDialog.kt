@@ -44,6 +44,7 @@ import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.ListStateUtil
+import com.pyamsoft.padlock.uicommon.RecyclerViewUtil
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
@@ -126,6 +127,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     binding.lockInfoRecycler.setHasFixedSize(false)
     binding.lockInfoRecycler.addItemDecoration(dividerDecoration)
     binding.lockInfoRecycler.adapter = fastItemAdapter
+    binding.lockInfoRecycler.itemAnimator = RecyclerViewUtil.withStandardDurations()
   }
 
   override fun onDestroyView() {

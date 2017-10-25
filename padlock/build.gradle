@@ -88,6 +88,9 @@ android {
 dependencies {
   compile fileTree(dir: "libs", include: ["*.jar"])
 
+  // Recyclerview Animators
+  compile "jp.wasabeef:recyclerview-animators:$recyclerAnimators"
+
   // Databinding
   kapt "com.android.databinding:compiler:$plugin_version"
 
