@@ -40,6 +40,7 @@ import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.padlock.uicommon.ListStateUtil
+import com.pyamsoft.padlock.uicommon.RecyclerViewUtil
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
 import com.pyamsoft.pydroid.design.util.FABUtil
 import com.pyamsoft.pydroid.loader.ImageLoader
@@ -151,6 +152,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     binding.applistRecyclerview.setHasFixedSize(false)
     binding.applistRecyclerview.addItemDecoration(dividerDecoration)
     binding.applistRecyclerview.adapter = fastItemAdapter
+    binding.applistRecyclerview.itemAnimator = RecyclerViewUtil.withStandardDurations()
   }
 
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

@@ -52,6 +52,7 @@ buildscript {
     patternLock = "1.0.0"
     fastAdapter = "2.6.3"
     fastAdapterCommons = "2.6.3"
+    recyclerAnimators = "2.2.7"
   }
 
   dependencies {
