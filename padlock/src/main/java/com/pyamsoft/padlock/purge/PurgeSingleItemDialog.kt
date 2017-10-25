@@ -37,7 +37,9 @@ class PurgeSingleItemDialog : CanaryDialog() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    packageName = arguments.getString(PACKAGE, "")
+    arguments.let {
+      packageName = it.getString(PACKAGE, "")
+    }
 
     Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
   }
@@ -56,14 +58,13 @@ class PurgeSingleItemDialog : CanaryDialog() {
 
     const private val PACKAGE = "package_name"
 
-
     @CheckResult
     fun newInstance(packageName: String): PurgeSingleItemDialog {
-      val args = Bundle()
-      val fragment = PurgeSingleItemDialog()
-      args.putString(PACKAGE, packageName)
-      fragment.arguments = args
-      return fragment
+      return PurgeSingleItemDialog().apply {
+        arguments = Bundle().apply {
+          putString(PACKAGE, packageName)
+        }
+      }
     }
   }
 }

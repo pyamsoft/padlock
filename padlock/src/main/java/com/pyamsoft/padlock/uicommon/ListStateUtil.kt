@@ -28,7 +28,6 @@ object ListStateUtil {
 
   const private val KEY_CURRENT_POSITION: String = "key_current_position"
 
-
   @CheckResult
   fun getCurrentPosition(recycler: RecyclerView?): Int {
     return if (recycler == null) {
@@ -46,17 +45,14 @@ object ListStateUtil {
     }
   }
 
-
   @CheckResult
   fun restoreState(savedInstanceState: Bundle?): Int =
       savedInstanceState?.getInt(KEY_CURRENT_POSITION, 0) ?: 0
-
 
   fun saveState(outState: Bundle?, recycler: RecyclerView?) {
     outState?.putInt(KEY_CURRENT_POSITION,
         getCurrentPosition(recycler))
   }
-
 
   @CheckResult
   fun restorePosition(lastPosition: Int, recycler: RecyclerView?): Int {

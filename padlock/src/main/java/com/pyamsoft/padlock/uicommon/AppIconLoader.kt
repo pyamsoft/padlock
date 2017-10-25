@@ -28,7 +28,6 @@ import com.pyamsoft.padlock.base.wrapper.PackageDrawableManager
 import com.pyamsoft.pydroid.helper.enforceIo
 import com.pyamsoft.pydroid.helper.enforceMainThread
 import com.pyamsoft.pydroid.loader.GenericLoader
-import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.loaded.Loaded
 import com.pyamsoft.pydroid.loader.loaded.RxLoaded
 import com.pyamsoft.pydroid.loader.targets.DrawableImageTarget
@@ -41,11 +40,8 @@ import javax.inject.Named
 class AppIconLoader private constructor(context: Context,
     private val packageName: String) : GenericLoader<Drawable>() {
 
-  @Suppress("MemberVisibilityCanPrivate")
   @field:Inject internal lateinit var packageDrawableManager: PackageDrawableManager
-  @Suppress("MemberVisibilityCanPrivate")
   @field:[Inject Named("main")] internal lateinit var mainScheduler: Scheduler
-  @Suppress("MemberVisibilityCanPrivate")
   @field:[Inject Named("io")] internal lateinit var ioScheduler: Scheduler
 
   init {

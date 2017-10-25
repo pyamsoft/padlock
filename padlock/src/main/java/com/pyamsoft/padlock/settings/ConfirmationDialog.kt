@@ -37,16 +37,22 @@ class ConfirmationDialog : CanaryDialog() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    type = ConfirmEvent.valueOf(arguments.getString(WHICH, ConfirmEvent.DATABASE.name))
+    arguments.let {
+      type = ConfirmEvent.valueOf(it.getString(WHICH, ConfirmEvent.DATABASE.name))
+    }
 
     Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(activity).setMessage(if (type === ConfirmEvent.DATABASE)
-      "Really clear entire database?\n\nYou will have to re-configure all locked applications again"
+      """Really clear entire database?
+        |
+        |You will have to re-configure all locked applications again""".trimMargin()
     else
-      "Really clear all application settings?\n\nYou will have to manually restart the Accessibility Service component of PadLock")
+      """Really clear all application settings?
+        |
+        |You will have to manually restart the Accessibility Service component of PadLock""".trimMargin())
         .setPositiveButton("Yes") { _, _ ->
           publisher.publish(type)
           dismiss()
@@ -59,14 +65,13 @@ class ConfirmationDialog : CanaryDialog() {
 
     const private val WHICH = "which_type"
 
-
     @CheckResult
     fun newInstance(type: ConfirmEvent): ConfirmationDialog {
-      val fragment = ConfirmationDialog()
-      val args = Bundle()
-      args.putString(WHICH, type.name)
-      fragment.arguments = args
-      return fragment
+      return ConfirmationDialog().apply {
+        arguments = Bundle().apply {
+          putString(WHICH, type.name)
+        }
+      }
     }
   }
 }

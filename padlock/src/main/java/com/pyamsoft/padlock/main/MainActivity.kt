@@ -29,7 +29,6 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
-import com.pyamsoft.padlock.main.MainPresenter.MainCallback
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.sec.TamperActivity
@@ -102,7 +101,6 @@ class MainActivity : TamperActivity(), MainPresenter.View {
     // TODO for now this is duplicated
     onShowDefaultPage()
   }
-
 
   override fun onNewIntent(intent: Intent?) {
     super.onNewIntent(intent)
