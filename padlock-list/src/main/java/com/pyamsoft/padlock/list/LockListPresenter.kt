@@ -25,6 +25,7 @@ import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
+import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.pin.ClearPinEvent
 import com.pyamsoft.padlock.pin.CreatePinEvent
 import com.pyamsoft.padlock.service.LockServiceStateInteractor
@@ -54,10 +55,11 @@ class LockListPresenter @Inject internal constructor(
     super.onBind(v)
     registerOnCreateBus(v)
     registerOnClearBus(v)
-    registerOnModifyBus(v)
+    registerOnModifyBus(v, v)
   }
 
-  private fun registerOnModifyBus(v: LockModifyCallback) {
+  private fun registerOnModifyBus(modifyCallback: LockModifyCallback,
+      subModifyCallback: LockSubModifyCallback) {
     dispose {
       lockListBus.listen()
           .filter { it is LockListEvent.Modify }
@@ -75,12 +77,14 @@ class LockListPresenter @Inject internal constructor(
           .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
-              is LockListEvent.Callback.Created -> v.onModifyEntryCreated(it.packageName)
-              is LockListEvent.Callback.Deleted -> v.onModifyEntryDeleted(it.packageName)
+              is LockListEvent.Callback.Created -> modifyCallback.onModifyEntryCreated(
+                  it.packageName)
+              is LockListEvent.Callback.Deleted -> modifyCallback.onModifyEntryDeleted(
+                  it.packageName)
             }
           }, {
             Timber.e(it, "Error listening to lock info bus")
-            v.onModifyEntryError(it)
+            modifyCallback.onModifyEntryError(it)
           })
     }
 
@@ -91,13 +95,31 @@ class LockListPresenter @Inject internal constructor(
           .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
           .subscribe({
             when (it) {
-              is LockInfoEvent.Callback.Created -> v.onModifySubEntryHardlocked(it.packageName)
-              is LockInfoEvent.Callback.Deleted -> v.onModifySubEntryDefaulted(it.packageName)
-              is LockInfoEvent.Callback.Whitelisted -> v.onModifySubEntryWhitelisted(it.packageName)
+              is LockInfoEvent.Callback.Created -> {
+                if (it.oldState == DEFAULT) {
+                  subModifyCallback.onModifySubEntryToHardlockedFromDefault(it.packageName)
+                } else if (it.oldState == WHITELISTED) {
+                  subModifyCallback.onModifySubEntryToHardlockedFromWhitelisted(it.packageName)
+                }
+              }
+              is LockInfoEvent.Callback.Deleted -> {
+                if (it.oldState == WHITELISTED) {
+                  subModifyCallback.onModifySubEntryToDefaultFromWhitelisted(it.packageName)
+                } else if (it.oldState == LOCKED) {
+                  subModifyCallback.onModifySubEntryToDefaultFromHardlocked(it.packageName)
+                }
+              }
+              is LockInfoEvent.Callback.Whitelisted -> {
+                if (it.oldState == LOCKED) {
+                  subModifyCallback.onModifySubEntryToWhitelistedFromHardlocked(it.packageName)
+                } else if (it.oldState == DEFAULT) {
+                  subModifyCallback.onModifySubEntryToWhitelistedFromDefault(it.packageName)
+                }
+              }
             }
           }, {
             Timber.e(it, "Error listening to lock info bus")
-            v.onModifySubEntryError(it)
+            subModifyCallback.onModifySubEntryError(it)
           })
     }
   }
@@ -230,7 +252,7 @@ class LockListPresenter @Inject internal constructor(
   }
 
   interface View : LockModifyCallback, MasterPinCreateCallback, MasterPinClearCallback,
-      FABStateCallback, SystemVisibilityChangeCallback, OnboardingCallback, ListPopulateCallback
+      FABStateCallback, SystemVisibilityChangeCallback, OnboardingCallback, ListPopulateCallback, LockSubModifyCallback
 
   interface LockModifyCallback {
 
@@ -240,11 +262,21 @@ class LockListPresenter @Inject internal constructor(
 
     fun onModifyEntryError(throwable: Throwable)
 
-    fun onModifySubEntryDefaulted(packageName: String)
+  }
 
-    fun onModifySubEntryWhitelisted(packageName: String)
+  interface LockSubModifyCallback {
 
-    fun onModifySubEntryHardlocked(packageName: String)
+    fun onModifySubEntryToDefaultFromWhitelisted(packageName: String)
+
+    fun onModifySubEntryToDefaultFromHardlocked(packageName: String)
+
+    fun onModifySubEntryToWhitelistedFromDefault(packageName: String)
+
+    fun onModifySubEntryToWhitelistedFromHardlocked(packageName: String)
+
+    fun onModifySubEntryToHardlockedFromDefault(packageName: String)
+
+    fun onModifySubEntryToHardlockedFromWhitelisted(packageName: String)
 
     fun onModifySubEntryError(throwable: Throwable)
 
