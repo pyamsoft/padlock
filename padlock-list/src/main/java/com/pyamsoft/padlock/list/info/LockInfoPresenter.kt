@@ -84,9 +84,10 @@ class LockInfoPresenter @Inject internal constructor(
           .subscribe({
             val id: String = event.id
             when (it) {
-              LockState.LOCKED -> bus.publish(Created(id, event.packageName))
-              LockState.DEFAULT -> bus.publish(Deleted(id, event.packageName))
-              LockState.WHITELISTED -> bus.publish(Whitelisted(id, event.packageName))
+              LockState.LOCKED -> bus.publish(Created(id, event.packageName, event.oldState))
+              LockState.DEFAULT -> bus.publish(Deleted(id, event.packageName, event.oldState))
+              LockState.WHITELISTED -> bus.publish(
+                  Whitelisted(id, event.packageName, event.oldState))
               else -> throw IllegalStateException("Unsupported lock state: $it")
             }
           }, {
