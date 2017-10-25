@@ -21,8 +21,10 @@ package com.pyamsoft.padlock.settings
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v7.preference.ListPreference
 import android.view.View
+import android.widget.Toast
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
@@ -123,6 +125,17 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), SettingsPresente
   override fun onClearDatabase() {
     Toasty.makeText(context, "Locked application database has been cleared",
         Toasty.LENGTH_SHORT).show()
+  }
+
+  override fun onMasterPinClearFailure() {
+    Toasty.makeText(context, "Error: Invalid PIN", Toast.LENGTH_SHORT).show()
+  }
+
+  override fun onMasterPinClearSuccess() {
+    val v = view
+    if (v != null) {
+      Snackbar.make(v, "You may now change lock type", Snackbar.LENGTH_SHORT).show()
+    }
   }
 
   override fun onClearAll() {

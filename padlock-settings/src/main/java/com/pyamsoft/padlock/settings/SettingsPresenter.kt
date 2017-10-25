@@ -19,6 +19,7 @@
 package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
+import com.pyamsoft.padlock.pin.ClearPinEvent
 import com.pyamsoft.padlock.service.ServiceFinishEvent
 import com.pyamsoft.padlock.settings.ConfirmEvent.ALL
 import com.pyamsoft.padlock.settings.ConfirmEvent.DATABASE
@@ -34,6 +35,7 @@ class SettingsPresenter @Inject internal constructor(
     private val interactor: SettingsInteractor,
     private val bus: EventBus<ConfirmEvent>,
     private val serviceFinishBus: EventBus<ServiceFinishEvent>,
+    private val clearPinBus: EventBus<ClearPinEvent>,
     private val receiver: ApplicationInstallReceiver,
     @Named("computation") computationScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
@@ -43,6 +45,7 @@ class SettingsPresenter @Inject internal constructor(
   override fun onBind(v: View) {
     super.onBind(v)
     registerOnBus(v)
+    registerOnClearBus(v)
   }
 
   private fun registerOnBus(v: ClearCallback) {
@@ -61,6 +64,21 @@ class SettingsPresenter @Inject internal constructor(
             }
           }, {
             Timber.e(it, "onError clear bus")
+          })
+    }
+  }
+
+  private fun registerOnClearBus(v: MasterPinClearCallback) {
+    dispose {
+      clearPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+          .subscribe({
+            if (it.success) {
+              v.onMasterPinClearSuccess()
+            } else {
+              v.onMasterPinClearFailure()
+            }
+          }, {
+            Timber.e(it, "error clear pin bus")
           })
     }
   }
@@ -102,7 +120,7 @@ class SettingsPresenter @Inject internal constructor(
     }
   }
 
-  interface View : ClearCallback, LockTypeChangeCallback
+  interface View : ClearCallback, LockTypeChangeCallback, MasterPinClearCallback
 
   interface LockTypeChangeCallback {
 
@@ -111,6 +129,14 @@ class SettingsPresenter @Inject internal constructor(
     fun onLockTypeChangeAccepted(value: String)
 
     fun onLockTypeChangeError(throwable: Throwable)
+
+  }
+
+  interface MasterPinClearCallback {
+
+    fun onMasterPinClearSuccess()
+
+    fun onMasterPinClearFailure()
 
   }
 

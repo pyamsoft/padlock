@@ -71,7 +71,7 @@ abstract class LockScreenBaseFragment protected constructor() : CanaryFragment()
   companion object {
 
     @CheckResult
-     internal fun buildBundle(lockedPackageName: String, lockedActivityName: String,
+    internal fun buildBundle(lockedPackageName: String, lockedActivityName: String,
         lockedCode: String?, lockedRealName: String, lockedSystem: Boolean): Bundle {
       val args = Bundle()
       args.putString(ENTRY_PACKAGE_NAME, lockedPackageName)

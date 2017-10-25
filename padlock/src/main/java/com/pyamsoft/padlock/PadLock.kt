@@ -98,18 +98,14 @@ class PadLock : Application() {
 
   companion object {
 
-
     @CheckResult
     fun getRefWatcher(fragment: CanaryFragment): RefWatcher = getRefWatcherInternal(fragment)
-
 
     @CheckResult
     fun getRefWatcher(fragment: CanaryDialog): RefWatcher = getRefWatcherInternal(fragment)
 
-
     @CheckResult
     fun getRefWatcher(fragment: SettingsFragment): RefWatcher = getRefWatcherInternal(fragment)
-
 
     @CheckResult
     private fun getRefWatcherInternal(fragment: Fragment): RefWatcher {

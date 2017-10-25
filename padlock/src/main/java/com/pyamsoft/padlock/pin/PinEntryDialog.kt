@@ -49,7 +49,9 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    packageName = arguments.getString(ENTRY_PACKAGE_NAME)
+    arguments.let {
+      packageName = it.getString(ENTRY_PACKAGE_NAME)
+    }
     isCancelable = true
 
     Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
@@ -132,8 +134,10 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
   private fun setupToolbar() {
     // Maybe something more descriptive
-    binding.pinEntryToolbar.title = "PIN"
-    binding.pinEntryToolbar.setNavigationOnClickListener { dismiss() }
+    binding.apply {
+      pinEntryToolbar.title = "PIN"
+      pinEntryToolbar.setNavigationOnClickListener { dismiss() }
+    }
     var icon = binding.pinEntryToolbar.navigationIcon
     if (icon != null) {
       icon = DrawableUtil.tintDrawableFromColor(icon,
@@ -155,11 +159,11 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
     @CheckResult
     fun newInstance(packageName: String): PinEntryDialog {
-      val fragment = PinEntryDialog()
-      val args = Bundle()
-      args.putString(ENTRY_PACKAGE_NAME, packageName)
-      fragment.arguments = args
-      return fragment
+      return PinEntryDialog().apply {
+        arguments = Bundle().apply {
+          putString(ENTRY_PACKAGE_NAME, packageName)
+        }
+      }
     }
   }
 }

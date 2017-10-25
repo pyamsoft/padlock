@@ -21,9 +21,7 @@ package com.pyamsoft.padlock.uicommon
 import android.support.annotation.CheckResult
 import com.andrognito.patternlockview.PatternLockView
 
-
 object LockCellUtil {
-
 
   @CheckResult
   fun cellPatternToString(cells: List<PatternLockView.Dot>): String {

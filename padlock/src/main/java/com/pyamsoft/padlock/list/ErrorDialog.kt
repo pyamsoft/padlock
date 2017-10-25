@@ -31,7 +31,9 @@ class ErrorDialog : CanaryDialog() {
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(activity).setTitle("ERROR")
         .setMessage(
-            "An unrecoverable error has occurred when attempting an operation. Please close and re-open PadLock")
+            """An unrecoverable error has occurred when attempting an operation.
+              |
+              |Please close and re-open PadLock""".trimMargin())
         .setPositiveButton("Okay") { _, _ ->
           dismiss()
           activity.finish()

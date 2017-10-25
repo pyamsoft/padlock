@@ -46,12 +46,14 @@ class LockedStatDialog : CanaryDialog() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    displayedLabel = arguments.getString(LABEL)
-    packageName = arguments.getString(PKG_NAME)
-    activityName = arguments.getString(ACT_NAME)
-    realName = arguments.getString(REAL_NAME)
-    system = arguments.getBoolean(SYSTEM)
-    image = arguments.getParcelable(IMAGE)
+    arguments.let {
+      displayedLabel = it.getString(LABEL)
+      packageName = it.getString(PKG_NAME)
+      activityName = it.getString(ACT_NAME)
+      realName = it.getString(REAL_NAME)
+      system = it.getBoolean(SYSTEM)
+      image = it.getParcelable(IMAGE)
+    }
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -68,12 +70,14 @@ class LockedStatDialog : CanaryDialog() {
 
   override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    binding.statImage.setImageBitmap(image)
-    binding.statDisplayName.text = displayedLabel
-    binding.statPackageName.text = packageName
-    binding.statRealName.text = realName
-    binding.statLockedBy.text = activityName
-    binding.statSystem.text = if (system) "Yes" else "No"
+    binding.apply {
+      statImage.setImageBitmap(image)
+      statDisplayName.text = displayedLabel
+      statPackageName.text = packageName
+      statRealName.text = realName
+      statLockedBy.text = activityName
+      statSystem.text = if (system) "Yes" else "No"
+    }
   }
 
   override fun onDestroyView() {
@@ -95,21 +99,19 @@ class LockedStatDialog : CanaryDialog() {
     fun newInstance(displayedLabel: String,
         packageName: String, activityName: String, realName: String,
         system: Boolean, drawable: Drawable): LockedStatDialog {
-      val fragment = LockedStatDialog()
-      val args = Bundle()
-      args.putString(LABEL, displayedLabel)
-      args.putString(PKG_NAME, packageName)
-      args.putString(ACT_NAME, activityName)
-      args.putString(REAL_NAME, realName)
-      args.putBoolean(SYSTEM, system)
-
-      if (drawable is BitmapDrawable) {
-        val bitmap = drawable.bitmap
-        args.putParcelable(IMAGE, bitmap)
+      return LockedStatDialog().apply {
+        arguments = Bundle().apply {
+          putString(LABEL, displayedLabel)
+          putString(PKG_NAME, packageName)
+          putString(ACT_NAME, activityName)
+          putString(REAL_NAME, realName)
+          putBoolean(SYSTEM, system)
+          if (drawable is BitmapDrawable) {
+            val bitmap = drawable.bitmap
+            putParcelable(IMAGE, bitmap)
+          }
+        }
       }
-
-      fragment.arguments = args
-      return fragment
     }
   }
 }

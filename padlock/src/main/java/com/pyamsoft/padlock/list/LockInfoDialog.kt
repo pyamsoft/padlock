@@ -70,9 +70,11 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    appPackageName = arguments.getString(ARG_APP_PACKAGE_NAME, null)
-    appName = arguments.getString(ARG_APP_NAME, null)
-    appIsSystem = arguments.getBoolean(ARG_APP_SYSTEM, false)
+    arguments.let {
+      appPackageName = it.getString(ARG_APP_PACKAGE_NAME, null)
+      appName = it.getString(ARG_APP_NAME, null)
+      appIsSystem = it.getBoolean(ARG_APP_SYSTEM, false)
+    }
 
     Injector.obtain<PadLockComponent>(context.applicationContext).plusLockInfoComponent(
         LockInfoModule(appPackageName)).inject(this)
@@ -89,8 +91,10 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     setupToolbar()
-    binding.lockInfoPackageName.text = appPackageName
-    binding.lockInfoSystem.text = if (appIsSystem) "YES" else "NO"
+    binding.apply {
+      lockInfoPackageName.text = appPackageName
+      lockInfoSystem.text = if (appIsSystem) "YES" else "NO"
+    }
     setupSwipeRefresh()
     setupRecyclerView()
     filterListDelegate.onViewCreated(fastItemAdapter)
@@ -100,44 +104,52 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   private fun setupToolbar() {
+    binding.apply {
+      lockInfoToolbar.title = appName
+      lockInfoToolbar.setNavigationOnClickListener { dismiss() }
+      lockInfoToolbar.inflateMenu(R.menu.search_menu)
+    }
     ViewCompat.setElevation(binding.lockInfoToolbar, AppUtil.convertToDP(context, 4f))
-    binding.lockInfoToolbar.title = appName
-    binding.lockInfoToolbar.setNavigationOnClickListener { dismiss() }
-    binding.lockInfoToolbar.inflateMenu(R.menu.search_menu)
     filterListDelegate.onPrepareOptionsMenu(binding.lockInfoToolbar.menu, fastItemAdapter)
   }
 
   private fun setupSwipeRefresh() {
-    binding.lockInfoSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
-        R.color.blue700, R.color.amber500)
-    binding.lockInfoSwipeRefresh.setOnRefreshListener {
-      Timber.d("onRefresh")
-      presenter.populateList(true)
+    binding.apply {
+      lockInfoSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
+          R.color.blue700, R.color.amber500)
+      lockInfoSwipeRefresh.setOnRefreshListener {
+        Timber.d("onRefresh")
+        presenter.populateList(true)
+      }
     }
   }
 
   private fun setupRecyclerView() {
     dividerDecoration = DividerItemDecoration(activity, DividerItemDecoration.VERTICAL)
 
-    val manager = LinearLayoutManager(context)
-    manager.isItemPrefetchEnabled = true
-    manager.initialPrefetchItemCount = 3
-    binding.lockInfoRecycler.layoutManager = manager
-    binding.lockInfoRecycler.clipToPadding = false
-    binding.lockInfoRecycler.setHasFixedSize(false)
-    binding.lockInfoRecycler.addItemDecoration(dividerDecoration)
-    binding.lockInfoRecycler.adapter = fastItemAdapter
-    binding.lockInfoRecycler.itemAnimator = RecyclerViewUtil.withStandardDurations()
+    binding.apply {
+      lockInfoRecycler.layoutManager = LinearLayoutManager(context).apply {
+        isItemPrefetchEnabled = true
+        initialPrefetchItemCount = 3
+      }
+      lockInfoRecycler.clipToPadding = false
+      lockInfoRecycler.setHasFixedSize(false)
+      lockInfoRecycler.addItemDecoration(dividerDecoration)
+      lockInfoRecycler.adapter = fastItemAdapter
+      lockInfoRecycler.itemAnimator = RecyclerViewUtil.withStandardDurations()
+    }
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
     filterListDelegate.onDestroyView()
-    binding.lockInfoRecycler.removeItemDecoration(dividerDecoration)
-    binding.lockInfoRecycler.setOnClickListener(null)
-    binding.lockInfoRecycler.layoutManager = null
-    binding.lockInfoRecycler.adapter = null
-    binding.unbind()
+    binding.apply {
+      lockInfoRecycler.removeItemDecoration(dividerDecoration)
+      lockInfoRecycler.setOnClickListener(null)
+      lockInfoRecycler.layoutManager = null
+      lockInfoRecycler.adapter = null
+      unbind()
+    }
   }
 
   override fun onStart() {
@@ -181,7 +193,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       val entry: ActivityEntry = item.model
       if (id == entry.id) {
         fastItemAdapter.set(i,
-            LockInfoItem(ActivityEntry(name = entry.name, packageName = entry.packageName, lockState = state), appIsSystem))
+            LockInfoItem(ActivityEntry(name = entry.name, packageName = entry.packageName,
+                lockState = state), appIsSystem))
         break
       }
     }
@@ -191,24 +204,30 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     setRefreshing(true)
     fastItemAdapter.clear()
 
-    binding.lockInfoEmpty.visibility = View.GONE
-    binding.lockInfoRecycler.visibility = View.GONE
+    binding.apply {
+      lockInfoEmpty.visibility = View.GONE
+      lockInfoRecycler.visibility = View.GONE
+    }
   }
 
   override fun onListPopulated() {
     setRefreshing(false)
 
     if (fastItemAdapter.adapterItemCount > 0) {
-      binding.lockInfoEmpty.visibility = View.GONE
-      binding.lockInfoRecycler.visibility = View.VISIBLE
+      binding.apply {
+        lockInfoEmpty.visibility = View.GONE
+        lockInfoRecycler.visibility = View.VISIBLE
+      }
 
       Timber.d("Refresh finished")
       presenter.showOnBoarding()
 
       lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
     } else {
-      binding.lockInfoRecycler.visibility = View.GONE
-      binding.lockInfoEmpty.visibility = View.VISIBLE
+      binding.apply {
+        lockInfoRecycler.visibility = View.GONE
+        lockInfoEmpty.visibility = View.VISIBLE
+      }
       Toasty.makeText(context, "Error while loading list. Please try again.",
           Toast.LENGTH_SHORT).show()
     }
@@ -256,15 +275,13 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     @CheckResult
 
     fun newInstance(appEntry: AppEntry): LockInfoDialog {
-      val fragment = LockInfoDialog()
-      val args = Bundle()
-
-      args.putString(ARG_APP_PACKAGE_NAME, appEntry.packageName)
-      args.putString(ARG_APP_NAME, appEntry.name)
-      args.putBoolean(ARG_APP_SYSTEM, appEntry.system)
-
-      fragment.arguments = args
-      return fragment
+      return LockInfoDialog().apply {
+        arguments = Bundle().apply {
+          putString(ARG_APP_PACKAGE_NAME, appEntry.packageName)
+          putString(ARG_APP_NAME, appEntry.name)
+          putBoolean(ARG_APP_SYSTEM, appEntry.system)
+        }
+      }
     }
   }
 }
