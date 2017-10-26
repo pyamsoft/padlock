@@ -23,25 +23,44 @@ import android.view.View
 import com.mikepenz.fastadapter.items.GenericAbstractItem
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemPurgeBinding
+import com.pyamsoft.padlock.uicommon.UpdateItem
 
 internal class PurgeItem internal constructor(
     packageName: String) : GenericAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
-    packageName) {
+    packageName), UpdateItem<String> {
+
+  private var viewHolder: ViewHolder? = null
 
   override fun getType(): Int = R.id.adapter_purge
+
   override fun getLayoutRes(): Int = R.layout.adapter_item_purge
+
   override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
+
+  override fun updateModel(model: String): Boolean {
+    withModel(model)
+    bindViewHolder()
+    return false
+  }
+
+  private fun bindViewHolder() {
+    viewHolder?.apply {
+      binding.itemPurgeName.text = model
+    }
+  }
 
   override fun unbindView(holder: ViewHolder?) {
     super.unbindView(holder)
-    if (holder != null) {
-      holder.binding.itemPurgeName.text = null
+    viewHolder = null
+    holder?.apply {
+      binding.itemPurgeName.text = null
     }
   }
 
   override fun bindView(holder: ViewHolder, payloads: List<Any>?) {
     super.bindView(holder, payloads)
-    holder.binding.itemPurgeName.text = model
+    viewHolder = holder
+    bindViewHolder()
   }
 
   internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
