@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.refreshing
+import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.PadLockService
@@ -56,6 +57,7 @@ import javax.inject.Inject
 class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   @field:Inject internal lateinit var presenter: LockListPresenter
+  private val backingSet: MutableSet<AppEntry> = LinkedHashSet()
   private lateinit var fastItemAdapter: FastItemAdapter<LockListItem>
   private lateinit var binding: FragmentLockListBinding
   private lateinit var filterListDelegate: FilterListDelegate
@@ -160,14 +162,16 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       applistRecyclerview.itemAnimator = RecyclerViewUtil.withStandardDurations()
 
       applistEmpty.visibility = View.GONE
-      applistRecyclerview.visibility = View.GONE
+      applistRecyclerview.visibility = View.VISIBLE
     }
   }
 
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
     super.onCreateOptionsMenu(menu, inflater)
-    inflater.inflate(R.menu.locklist_menu, menu)
-    inflater.inflate(R.menu.search_menu, menu)
+    inflater.apply {
+      inflate(R.menu.locklist_menu, menu)
+      inflate(R.menu.search_menu, menu)
+    }
   }
 
   override fun onPrepareOptionsMenu(menu: Menu) {
@@ -195,6 +199,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       unbind()
     }
     fastItemAdapter.clear()
+    backingSet.clear()
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -254,6 +259,12 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   private fun setRefreshing(refresh: Boolean) {
     binding.applistSwipeRefresh.refreshing(refresh)
     activity?.invalidateOptionsMenu()
+
+    if (refresh) {
+      binding.applistFab.hide()
+    } else {
+      binding.applistFab.show()
+    }
   }
 
   private fun refreshList(packageName: String, locked: Boolean? = null,
@@ -274,10 +285,9 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
           else -> entry.hardLocked - 1
         })
 
-        fastItemAdapter.set(i,
-            LockListItem(activity,
-                AppEntry(name = entry.name, packageName = entry.packageName, system = entry.system,
-                    locked = newLocked, whitelisted = newWhitelisted, hardLocked = newHardLocked)))
+        item.updateModel(
+            AppEntry(name = entry.name, packageName = entry.packageName, system = entry.system,
+                locked = newLocked, whitelisted = newWhitelisted, hardLocked = newHardLocked))
         break
       }
     }
@@ -357,18 +367,45 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   override fun onListPopulateBegin() {
     setRefreshing(true)
-    fastItemAdapter.clear()
-    binding.applistFab.hide()
+    backingSet.clear()
   }
 
   override fun onEntryAddedToList(entry: AppEntry) {
-    fastItemAdapter.add(LockListItem(activity, entry))
+    backingSet.add(entry)
+
+    var update = false
+    for (index in fastItemAdapter.adapterItems.indices) {
+      val item: LockListItem = fastItemAdapter.adapterItems[index]
+      if (item.model == entry) {
+        update = true
+        if (item.updateModel(entry)) {
+          fastItemAdapter.notifyItemChanged(index)
+        }
+        break
+      }
+    }
+
+    if (!update) {
+      var added = false
+      for (index in fastItemAdapter.adapterItems.indices) {
+        val item: LockListItem = fastItemAdapter.adapterItems[index]
+        // The entry should go before this one
+        if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
+          added = true
+          fastItemAdapter.add(index, LockListItem(activity, entry))
+          break
+        }
+      }
+
+      if (!added) {
+        // add at the end of the list
+        fastItemAdapter.add(LockListItem(activity, entry))
+      }
+    }
   }
 
   override fun onListPopulated() {
-    setRefreshing(false)
-    binding.applistFab.show()
-
+    fastItemAdapter.retainAll(backingSet)
     if (fastItemAdapter.adapterItemCount > 0) {
       binding.applistEmpty.visibility = View.GONE
       binding.applistRecyclerview.visibility = View.VISIBLE
@@ -382,6 +419,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       Toasty.makeText(context, "Error while loading list. Please try again.",
           Toast.LENGTH_SHORT).show()
     }
+
+    setRefreshing(false)
   }
 
   override fun onListPopulateError(throwable: Throwable) {
