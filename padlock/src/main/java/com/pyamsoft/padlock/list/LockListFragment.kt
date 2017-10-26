@@ -35,6 +35,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
+import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.PadLockService
@@ -128,11 +129,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   private fun setupSwipeRefresh() {
-    binding.applistSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
-        R.color.blue700, R.color.amber500)
-    binding.applistSwipeRefresh.setOnRefreshListener {
-      Timber.d("onRefresh")
-      presenter.populateList(true)
+    binding.apply {
+      applistSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
+          R.color.blue700, R.color.amber500)
+      applistSwipeRefresh.setOnRefreshListener {
+        Timber.d("onRefresh")
+        presenter.populateList(true)
+      }
     }
   }
 
@@ -144,15 +147,21 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       return@withOnClickListener true
     }
 
-    val manager = LinearLayoutManager(context)
-    manager.isItemPrefetchEnabled = true
-    manager.initialPrefetchItemCount = 3
-    binding.applistRecyclerview.layoutManager = manager
-    binding.applistRecyclerview.clipToPadding = false
-    binding.applistRecyclerview.setHasFixedSize(false)
-    binding.applistRecyclerview.addItemDecoration(dividerDecoration)
-    binding.applistRecyclerview.adapter = fastItemAdapter
-    binding.applistRecyclerview.itemAnimator = RecyclerViewUtil.withStandardDurations()
+    binding.applistRecyclerview.layoutManager = LinearLayoutManager(context).apply {
+      isItemPrefetchEnabled = true
+      initialPrefetchItemCount = 3
+    }
+
+    binding.apply {
+      applistRecyclerview.clipToPadding = false
+      applistRecyclerview.setHasFixedSize(false)
+      applistRecyclerview.addItemDecoration(dividerDecoration)
+      applistRecyclerview.adapter = fastItemAdapter
+      applistRecyclerview.itemAnimator = RecyclerViewUtil.withStandardDurations()
+
+      applistEmpty.visibility = View.GONE
+      applistRecyclerview.visibility = View.GONE
+    }
   }
 
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -175,17 +184,17 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   override fun onDestroyView() {
     super.onDestroyView()
     filterListDelegate.onDestroyView()
-    binding.applistRecyclerview.removeItemDecoration(dividerDecoration)
-    binding.applistRecyclerview.setOnClickListener(null)
-    binding.applistRecyclerview.layoutManager = null
-    binding.applistRecyclerview.adapter = null
-    fastItemAdapter.clear()
-
-    binding.applistFab.setOnClickListener(null)
-    binding.applistSwipeRefresh.setOnRefreshListener(null)
-
     fabIconTask = LoaderHelper.unload(fabIconTask)
-    binding.unbind()
+    binding.apply {
+      applistRecyclerview.removeItemDecoration(dividerDecoration)
+      applistRecyclerview.setOnClickListener(null)
+      applistRecyclerview.layoutManager = null
+      applistRecyclerview.adapter = null
+      applistFab.setOnClickListener(null)
+      applistSwipeRefresh.setOnRefreshListener(null)
+      unbind()
+    }
+    fastItemAdapter.clear()
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -243,17 +252,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   private fun setRefreshing(refresh: Boolean) {
-    binding.applistSwipeRefresh.post {
-      if (binding.applistSwipeRefresh != null) {
-        binding.applistSwipeRefresh.isRefreshing = refresh
-      }
-    }
-
-    val activity = activity
-    if (activity != null) {
-      Timber.d("Reload options")
-      activity.invalidateOptionsMenu()
-    }
+    binding.applistSwipeRefresh.refreshing(refresh)
+    activity?.invalidateOptionsMenu()
   }
 
   private fun refreshList(packageName: String, locked: Boolean? = null,
@@ -359,9 +359,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     setRefreshing(true)
     fastItemAdapter.clear()
     binding.applistFab.hide()
-
-    binding.applistEmpty.visibility = View.GONE
-    binding.applistRecyclerview.visibility = View.GONE
   }
 
   override fun onEntryAddedToList(entry: AppEntry) {
