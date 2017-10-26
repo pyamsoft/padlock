@@ -42,72 +42,88 @@ import javax.inject.Inject
 
 class LockInfoItem internal constructor(entry: ActivityEntry,
     private val system: Boolean) : GenericAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
-    entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> {
+    entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> , UpdateItem<ActivityEntry> {
+
+  private var viewHolder: ViewHolder? = null
 
   override fun getType(): Int = R.id.adapter_lock_info
 
   override fun getLayoutRes(): Int = R.layout.adapter_item_lockinfo
 
+  override fun updateModel(model: ActivityEntry): Boolean {
+    withModel(model)
+    bindViewHolder()
+    return false
+  }
+
+  private fun bindViewHolder() {
+    viewHolder?.apply {
+      val whitelistButton: RadioButton = binding.lockInfoRadioWhite
+      if (whitelistButton is AppCompatRadioButton) {
+        whitelistButton.supportButtonTintList = stateListWhitelisted
+      }
+
+      val blacklistButton: RadioButton = binding.lockInfoRadioBlack
+      if (blacklistButton is AppCompatRadioButton) {
+        blacklistButton.supportButtonTintList = stateListBlacklisted
+      }
+
+      // Remove any old binds
+      val lockedButton: RadioButton = when (model.lockState) {
+        DEFAULT -> binding.lockInfoRadioDefault
+        WHITELISTED -> binding.lockInfoRadioWhite
+        LOCKED -> binding.lockInfoRadioBlack
+        else -> throw IllegalStateException("Illegal enum state")
+      }
+      binding.apply {
+        lockInfoRadioBlack.setOnCheckedChangeListener(null)
+        lockInfoRadioWhite.setOnCheckedChangeListener(null)
+        lockInfoRadioDefault.setOnCheckedChangeListener(null)
+      }
+      lockedButton.isChecked = true
+
+      val entryName = model.name
+      var activityName = entryName
+      if (entryName.startsWith(model.packageName)) {
+        val strippedPackageName = entryName.replace(model.packageName, "")
+        if (strippedPackageName[0] == '.') {
+          activityName = strippedPackageName
+        }
+      }
+      binding.lockInfoActivity.text = activityName
+
+      binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener { radioGroup, _ ->
+        val id = radioGroup.checkedRadioButtonId
+        Timber.d("Checked radio id: %d", id)
+        if (id == 0) {
+          Timber.e("No radiobutton is checked, set to default")
+          binding.lockInfoRadioDefault.isChecked = true
+        }
+      }
+
+      binding.lockInfoRadioDefault.setOnCheckedChangeListener { _, isChecked ->
+        if (isChecked) {
+          processModifyDatabaseEntry(this, DEFAULT)
+        }
+      }
+      binding.lockInfoRadioWhite.setOnCheckedChangeListener { _, isChecked ->
+        if (isChecked) {
+          processModifyDatabaseEntry(this, WHITELISTED)
+        }
+      }
+      binding.lockInfoRadioBlack.setOnCheckedChangeListener { _, isChecked ->
+        if (isChecked) {
+          processModifyDatabaseEntry(this, LOCKED)
+        }
+      }
+    }
+  }
+
   override fun bindView(holder: ViewHolder, payloads: List<Any>?) {
     super.bindView(holder, payloads)
+    viewHolder = holder
+    bindViewHolder()
 
-    val whitelistButton: RadioButton = holder.binding.lockInfoRadioWhite
-    if (whitelistButton is AppCompatRadioButton) {
-      whitelistButton.supportButtonTintList = holder.stateListWhitelisted
-    }
-
-    val blacklistButton: RadioButton = holder.binding.lockInfoRadioBlack
-    if (blacklistButton is AppCompatRadioButton) {
-      blacklistButton.supportButtonTintList = holder.stateListBlacklisted
-    }
-
-    // Remove any old binds
-    val lockedButton: RadioButton = when (model.lockState) {
-      DEFAULT -> holder.binding.lockInfoRadioDefault
-      WHITELISTED -> holder.binding.lockInfoRadioWhite
-      LOCKED -> holder.binding.lockInfoRadioBlack
-      else -> throw IllegalStateException("Illegal enum state")
-    }
-    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null)
-    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null)
-    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null)
-    lockedButton.isChecked = true
-
-    val entryName = model.name
-    var activityName = entryName
-    if (entryName.startsWith(model.packageName)) {
-      val strippedPackageName = entryName.replace(model.packageName, "")
-      if (strippedPackageName[0] == '.') {
-        activityName = strippedPackageName
-      }
-    }
-    holder.binding.lockInfoActivity.text = activityName
-
-    holder.binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener { radioGroup, _ ->
-      val id = radioGroup.checkedRadioButtonId
-      Timber.d("Checked radio id: %d", id)
-      if (id == 0) {
-        Timber.e("No radiobutton is checked, set to default")
-        holder.binding.lockInfoRadioDefault.isChecked = true
-      }
-    }
-
-    holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener { _, isChecked ->
-      if (isChecked) {
-        processModifyDatabaseEntry(holder, DEFAULT)
-      }
-    }
-
-    holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener { _, isChecked ->
-      if (isChecked) {
-        processModifyDatabaseEntry(holder, WHITELISTED)
-      }
-    }
-    holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener { _, isChecked ->
-      if (isChecked) {
-        processModifyDatabaseEntry(holder, LOCKED)
-      }
-    }
   }
 
   private fun processModifyDatabaseEntry(holder: ViewHolder, newLockState: LockState) {
@@ -116,12 +132,13 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
 
   override fun unbindView(holder: ViewHolder?) {
     super.unbindView(holder)
-    if (holder != null) {
-      holder.binding.lockInfoActivity.text = null
-      holder.binding.lockInfoRadioBlack.setOnCheckedChangeListener(null)
-      holder.binding.lockInfoRadioWhite.setOnCheckedChangeListener(null)
-      holder.binding.lockInfoRadioDefault.setOnCheckedChangeListener(null)
-      holder.binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener(null)
+    viewHolder = null
+    holder?.apply {
+      binding.lockInfoActivity.text = null
+      binding.lockInfoRadioBlack.setOnCheckedChangeListener(null)
+      binding.lockInfoRadioWhite.setOnCheckedChangeListener(null)
+      binding.lockInfoRadioDefault.setOnCheckedChangeListener(null)
+      binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener(null)
     }
   }
 
