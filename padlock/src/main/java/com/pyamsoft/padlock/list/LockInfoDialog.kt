@@ -33,6 +33,8 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
+import com.pyamsoft.padlock.helper.refreshing
+import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.list.info.LockInfoModule
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
 import com.pyamsoft.padlock.model.ActivityEntry
@@ -65,6 +67,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   private var dividerDecoration: DividerItemDecoration? = null
   private var appIcon = LoaderHelper.empty()
   private var lastPosition: Int = 0
+  private val backingSet: MutableSet<ActivityEntry> = LinkedHashSet()
 
   override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
@@ -137,6 +140,9 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       lockInfoRecycler.addItemDecoration(dividerDecoration)
       lockInfoRecycler.adapter = fastItemAdapter
       lockInfoRecycler.itemAnimator = RecyclerViewUtil.withStandardDurations()
+
+      lockInfoEmpty.visibility = View.GONE
+      lockInfoRecycler.visibility = View.VISIBLE
     }
   }
 
@@ -150,6 +156,9 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       lockInfoRecycler.adapter = null
       unbind()
     }
+
+    fastItemAdapter.clear()
+    backingSet.clear()
   }
 
   override fun onStart() {
@@ -178,41 +187,25 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         WindowManager.LayoutParams.WRAP_CONTENT)
   }
 
-  private fun setRefreshing(refresh: Boolean) {
-    // In case the configuration changes, we do the animation again
-    binding.lockInfoSwipeRefresh.post {
-      if (binding.lockInfoSwipeRefresh != null) {
-        binding.lockInfoSwipeRefresh.isRefreshing = refresh
-      }
-    }
-  }
-
   private fun modifyList(id: String, state: LockState) {
     for (i in fastItemAdapter.adapterItems.indices) {
       val item: LockInfoItem = fastItemAdapter.getAdapterItem(i)
       val entry: ActivityEntry = item.model
       if (id == entry.id) {
-        fastItemAdapter.set(i,
-            LockInfoItem(ActivityEntry(name = entry.name, packageName = entry.packageName,
-                lockState = state), appIsSystem))
+        item.updateModel(
+            ActivityEntry(name = entry.name, packageName = entry.packageName, lockState = state))
         break
       }
     }
   }
 
   override fun onListPopulateBegin() {
-    setRefreshing(true)
-    fastItemAdapter.clear()
-
-    binding.apply {
-      lockInfoEmpty.visibility = View.GONE
-      lockInfoRecycler.visibility = View.GONE
-    }
+    binding.lockInfoSwipeRefresh.refreshing(true)
+    backingSet.clear()
   }
 
   override fun onListPopulated() {
-    setRefreshing(false)
-
+    fastItemAdapter.retainAll(backingSet)
     if (fastItemAdapter.adapterItemCount > 0) {
       binding.apply {
         lockInfoEmpty.visibility = View.GONE
@@ -231,10 +224,42 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       Toasty.makeText(context, "Error while loading list. Please try again.",
           Toast.LENGTH_SHORT).show()
     }
+
+    binding.lockInfoSwipeRefresh.refreshing(false)
   }
 
   override fun onEntryAddedToList(entry: ActivityEntry) {
-    fastItemAdapter.add(LockInfoItem(entry, appIsSystem))
+    backingSet.add(entry)
+
+    var update = false
+    for (index in fastItemAdapter.adapterItems.indices) {
+      val item: LockInfoItem = fastItemAdapter.adapterItems[index]
+      if (item.model == entry) {
+        update = true
+        if (item.updateModel(entry)) {
+          fastItemAdapter.notifyItemChanged(index)
+        }
+        break
+      }
+    }
+
+    if (!update) {
+      var added = false
+      for (index in fastItemAdapter.adapterItems.indices) {
+        val item: LockInfoItem = fastItemAdapter.adapterItems[index]
+        // The entry should go before this one
+        if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
+          added = true
+          fastItemAdapter.add(index, LockInfoItem(entry, appIsSystem))
+          break
+        }
+      }
+
+      if (!added) {
+        // add at the end of the list
+        fastItemAdapter.add(LockInfoItem(entry, appIsSystem))
+      }
+    }
   }
 
   override fun onListPopulateError(throwable: Throwable) {

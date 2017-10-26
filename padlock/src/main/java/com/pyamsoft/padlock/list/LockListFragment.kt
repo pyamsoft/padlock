@@ -57,7 +57,6 @@ import javax.inject.Inject
 class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   @field:Inject internal lateinit var presenter: LockListPresenter
-  private val backingSet: MutableSet<AppEntry> = LinkedHashSet()
   private lateinit var fastItemAdapter: FastItemAdapter<LockListItem>
   private lateinit var binding: FragmentLockListBinding
   private lateinit var filterListDelegate: FilterListDelegate
@@ -65,6 +64,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   private var dividerDecoration: DividerItemDecoration? = null
   private var lastPosition: Int = 0
   private var displaySystemItem: MenuItem? = null
+  private val backingSet: MutableSet<AppEntry> = LinkedHashSet()
 
   override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
