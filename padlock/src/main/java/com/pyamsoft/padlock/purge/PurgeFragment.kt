@@ -19,8 +19,6 @@
 package com.pyamsoft.padlock.purge
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
@@ -34,6 +32,8 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
+import com.pyamsoft.padlock.helper.refreshing
+import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.padlock.uicommon.ListStateUtil
 import com.pyamsoft.padlock.uicommon.RecyclerViewUtil
@@ -45,19 +45,21 @@ import javax.inject.Inject
 
 class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   @Inject internal lateinit var presenter: PurgePresenter
-  private val handler = Handler(Looper.getMainLooper())
   private lateinit var fastItemAdapter: FastItemAdapter<PurgeItem>
   private lateinit var binding: FragmentPurgeBinding
-  private var decoration: DividerItemDecoration? = null
+  private lateinit var decoration: DividerItemDecoration
   private var lastPosition: Int = 0
+  private val backingSet: MutableSet<String> = LinkedHashSet()
 
   private fun decideListState() {
-    if (fastItemAdapter.adapterItemCount > 0) {
-      binding.purgeEmpty.visibility = View.GONE
-      binding.purgeList.visibility = View.VISIBLE
-    } else {
-      binding.purgeList.visibility = View.GONE
-      binding.purgeEmpty.visibility = View.VISIBLE
+    binding.apply {
+      if (fastItemAdapter.adapterItemCount > 0) {
+        purgeEmpty.visibility = View.GONE
+        purgeList.visibility = View.VISIBLE
+      } else {
+        purgeList.visibility = View.GONE
+        purgeEmpty.visibility = View.VISIBLE
+      }
     }
   }
 
@@ -77,13 +79,16 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
   override fun onDestroyView() {
     super.onDestroyView()
-    handler.removeCallbacksAndMessages(null)
     fastItemAdapter.withOnClickListener(null)
-    binding.purgeList.removeItemDecoration(decoration)
-    binding.purgeList.setOnClickListener(null)
-    binding.purgeList.layoutManager = null
-    binding.purgeList.adapter = null
-    binding.unbind()
+    binding.apply {
+      purgeList.removeItemDecoration(decoration)
+      purgeList.setOnClickListener(null)
+      purgeList.layoutManager = null
+      purgeList.adapter = null
+      unbind()
+    }
+    fastItemAdapter.clear()
+    backingSet.clear()
   }
 
   override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -96,43 +101,62 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   private fun setupSwipeRefresh() {
-    binding.purgeSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
-        R.color.blue700, R.color.amber500)
-    binding.purgeSwipeRefresh.setOnRefreshListener {
-      Timber.d("onRefresh")
-      refreshList()
+    binding.apply {
+      purgeSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
+          R.color.blue700, R.color.amber500)
+      purgeSwipeRefresh.setOnRefreshListener { presenter.retrieveStaleApplications(true) }
     }
   }
 
   override fun onStart() {
     super.onStart()
-    prepareRefresh()
     presenter.retrieveStaleApplications(false)
   }
 
   override fun onRetrieveBegin() {
-    binding.purgeEmpty.visibility = View.GONE
-    binding.purgeList.visibility = View.GONE
-
+    binding.purgeSwipeRefresh.refreshing(true)
+    backingSet.clear()
   }
 
   override fun onRetrieveComplete() {
-    handler.removeCallbacksAndMessages(null)
-    handler.post {
-      binding.purgeSwipeRefresh.post {
-        if (binding.purgeSwipeRefresh != null) {
-          binding.purgeSwipeRefresh.isRefreshing = false
-        }
-      }
-    }
-
+    fastItemAdapter.retainAll(backingSet)
     lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
-
     decideListState()
+    binding.purgeSwipeRefresh.refreshing(false)
   }
 
   override fun onRetrievedStale(packageName: String) {
-    fastItemAdapter.add(PurgeItem(packageName))
+    backingSet.add(packageName)
+
+    var update = false
+    for (index in fastItemAdapter.adapterItems.indices) {
+      val item: PurgeItem = fastItemAdapter.adapterItems[index]
+      if (item.model == packageName) {
+        update = true
+        if (item.updateModel(packageName)) {
+          fastItemAdapter.notifyItemChanged(index)
+        }
+        break
+      }
+    }
+
+    if (!update) {
+      var added = false
+      for (index in fastItemAdapter.adapterItems.indices) {
+        val item: PurgeItem = fastItemAdapter.adapterItems[index]
+        // The entry should go before this one
+        if (packageName.compareTo(item.model, ignoreCase = true) < 0) {
+          added = true
+          fastItemAdapter.add(index, PurgeItem(packageName))
+          break
+        }
+      }
+
+      if (!added) {
+        // add at the end of the list
+        fastItemAdapter.add(PurgeItem(packageName))
+      }
+    }
   }
 
   override fun onRetrieveError(throwable: Throwable) {
@@ -147,23 +171,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   override fun onSaveInstanceState(outState: Bundle?) {
     ListStateUtil.saveState(outState, binding.purgeList)
     super.onSaveInstanceState(outState)
-  }
-
-  private fun prepareRefresh() {
-    fastItemAdapter.clear()
-    handler.removeCallbacksAndMessages(null)
-    handler.post {
-      binding.purgeSwipeRefresh.post {
-        if (binding.purgeSwipeRefresh != null) {
-          binding.purgeSwipeRefresh.isRefreshing = true
-        }
-      }
-    }
-  }
-
-  private fun refreshList() {
-    prepareRefresh()
-    presenter.retrieveStaleApplications(true)
   }
 
   override fun onResume() {
@@ -193,22 +200,30 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   private fun setupRecyclerView() {
-    fastItemAdapter = FastItemAdapter()
-    fastItemAdapter.withSelectable(true)
-    fastItemAdapter.withOnClickListener { _, _, item, position ->
-      handleDeleteRequest(position, item.model)
-      return@withOnClickListener true
-    }
     decoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
-    val manager = LinearLayoutManager(context)
-    manager.isItemPrefetchEnabled = true
-    manager.initialPrefetchItemCount = 3
-    binding.purgeList.layoutManager = manager
-    binding.purgeList.clipToPadding = false
-    binding.purgeList.setHasFixedSize(false)
-    binding.purgeList.addItemDecoration(decoration)
-    binding.purgeList.adapter = fastItemAdapter
-    binding.purgeList.itemAnimator = RecyclerViewUtil.withStandardDurations()
+
+    fastItemAdapter = FastItemAdapter()
+    fastItemAdapter.apply {
+      withSelectable(true)
+      withOnClickListener { _, _, item, position ->
+        handleDeleteRequest(position, item.model)
+        return@withOnClickListener true
+      }
+    }
+    binding.apply {
+      purgeList.layoutManager = LinearLayoutManager(context).apply {
+        isItemPrefetchEnabled = true
+        initialPrefetchItemCount = 3
+      }
+      purgeList.clipToPadding = false
+      purgeList.setHasFixedSize(false)
+      purgeList.addItemDecoration(decoration)
+      purgeList.adapter = fastItemAdapter
+      purgeList.itemAnimator = RecyclerViewUtil.withStandardDurations()
+
+      purgeEmpty.visibility = View.GONE
+      purgeList.visibility = View.VISIBLE
+    }
   }
 
   private fun handleDeleteRequest(position: Int,
