@@ -244,6 +244,11 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     }
 
     if (!update) {
+      binding.apply {
+        lockInfoEmpty.visibility = View.GONE
+        lockInfoRecycler.visibility = View.VISIBLE
+      }
+
       var added = false
       for (index in fastItemAdapter.adapterItems.indices) {
         val item: LockInfoItem = fastItemAdapter.adapterItems[index]

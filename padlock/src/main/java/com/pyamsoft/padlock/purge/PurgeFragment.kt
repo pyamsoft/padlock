@@ -141,6 +141,11 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     }
 
     if (!update) {
+      binding.apply {
+        purgeEmpty.visibility = View.GONE
+        purgeList.visibility = View.VISIBLE
+      }
+
       var added = false
       for (index in fastItemAdapter.adapterItems.indices) {
         val item: PurgeItem = fastItemAdapter.adapterItems[index]
