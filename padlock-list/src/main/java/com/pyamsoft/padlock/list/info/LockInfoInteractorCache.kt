@@ -77,7 +77,7 @@ import javax.inject.Singleton
         cache = cachedPair.first
         cachedTime = cachedPair.second
       }
-      if (force || cache == null || cachedTime + TWO_MINUTES_MILLIS < currentTime) {
+      if (force || cache == null || cachedTime + FIVE_MINUTES_MILLIS < currentTime) {
         list = impl.populateList(packageName, true).cache()
         infoCache.put(packageName, Pair(list, currentTime))
       } else {
@@ -89,7 +89,7 @@ import javax.inject.Singleton
 
   companion object {
 
-    private val TWO_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(2L)
+    private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
   }
 }
 
