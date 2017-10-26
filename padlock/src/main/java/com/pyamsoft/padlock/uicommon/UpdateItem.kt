@@ -16,17 +16,13 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.helper
+package com.pyamsoft.padlock.uicommon
 
 import android.support.annotation.CheckResult
-import android.view.MenuItem
 
-@CheckResult
-fun MenuItem?.isChecked(): Boolean = this != null && isChecked
+interface UpdateItem<in T : Any> {
 
-fun MenuItem?.setChecked(checked: Boolean) {
-  if (this != null) {
-    isChecked = checked
-  }
+  @CheckResult
+  fun updateModel(model: T): Boolean
+
 }
-

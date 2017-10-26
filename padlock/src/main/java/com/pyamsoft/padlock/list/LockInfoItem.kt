@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
+import com.pyamsoft.padlock.uicommon.UpdateItem
 import timber.log.Timber
 import javax.inject.Inject
 
