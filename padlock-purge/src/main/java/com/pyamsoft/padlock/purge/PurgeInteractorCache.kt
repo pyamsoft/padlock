@@ -41,7 +41,7 @@ import javax.inject.Singleton
       val cache = cachedList
       val list: Observable<String>
       val currentTime = System.currentTimeMillis()
-      if (forceRefresh || cache == null || lastAccessListTime + THIRTY_SECONDS_MILLIS < currentTime) {
+      if (forceRefresh || cache == null || lastAccessListTime + FIVE_MINUTES_MILLIS < currentTime) {
         list = impl.populateList(true).cache()
         cachedList = list
         lastAccessListTime = currentTime
@@ -63,6 +63,6 @@ import javax.inject.Singleton
 
   companion object {
 
-    private val THIRTY_SECONDS_MILLIS = TimeUnit.SECONDS.toMillis(30L)
+    private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
   }
 }
