@@ -386,6 +386,11 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     }
 
     if (!update) {
+      binding.apply {
+        applistEmpty.visibility = View.GONE
+        applistRecyclerview.visibility = View.VISIBLE
+      }
+
       var added = false
       for (index in fastItemAdapter.adapterItems.indices) {
         val item: LockListItem = fastItemAdapter.adapterItems[index]
