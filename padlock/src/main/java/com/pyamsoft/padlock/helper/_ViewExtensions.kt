@@ -41,6 +41,15 @@ fun <M : Any, T : GenericAbstractItem<M, *, *>> FastItemAdapter<T>.retainAll(
     items: Collection<M>): Boolean {
   val old: MutableSet<T> = LinkedHashSet()
   adapterItems.filterNotTo(old) { items.contains(it.model) }
-  old.map { adapterItems.indexOf(it) }.filter { it >= 0 }.forEach { remove(it) }
+
+  // Don't replace with stdlib operation, since we need the getAdapterPosition call
+  // to happen on each new loop.
+  @Suppress("LoopToCallChain")
+  for (item in old) {
+    val index = getAdapterPosition(item)
+    if (index >= 0) {
+      remove(index)
+    }
+  }
   return old.isNotEmpty()
 }
