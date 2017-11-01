@@ -382,7 +382,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       if (item.model == entry) {
         update = true
         if (item.updateModel(entry)) {
-          fastItemAdapter.notifyItemChanged(index)
+          fastItemAdapter.notifyAdapterItemChanged(index)
         }
         break
       }

@@ -50,8 +50,8 @@ buildscript {
     sqlbrite = "2.0.0"
     dagger = "2.12"
     patternLock = "1.0.0"
-    fastAdapter = "2.6.3"
-    fastAdapterCommons = "2.6.3"
+    fastAdapter = "3.0.0"
+    fastAdapterCommons = "3.0.0"
     recyclerAnimators = "2.2.7"
   }
 

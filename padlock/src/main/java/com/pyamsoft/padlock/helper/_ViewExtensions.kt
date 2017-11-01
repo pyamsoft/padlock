@@ -22,7 +22,7 @@ import android.support.annotation.CheckResult
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.MenuItem
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
-import com.mikepenz.fastadapter.items.GenericAbstractItem
+import com.mikepenz.fastadapter.items.ModelAbstractItem
 
 @CheckResult
 fun MenuItem?.isChecked(): Boolean = this != null && isChecked
@@ -37,7 +37,7 @@ fun SwipeRefreshLayout.refreshing(refreshing: Boolean) {
   post { isRefreshing = refreshing }
 }
 
-fun <M : Any, T : GenericAbstractItem<M, *, *>> FastItemAdapter<T>.retainAll(
+fun <M : Any, T : ModelAbstractItem<M, *, *>> FastItemAdapter<T>.retainAll(
     items: Collection<M>): Boolean {
   val old: MutableSet<T> = LinkedHashSet()
   adapterItems.filterNotTo(old) { items.contains(it.model) }
