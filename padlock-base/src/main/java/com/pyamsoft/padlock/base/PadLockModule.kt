@@ -18,11 +18,13 @@
 
 package com.pyamsoft.padlock.base
 
+import android.graphics.drawable.Drawable
 import com.pyamsoft.padlock.base.db.PadLockDBDelete
 import com.pyamsoft.padlock.base.db.PadLockDBImpl
 import com.pyamsoft.padlock.base.db.PadLockDBInsert
 import com.pyamsoft.padlock.base.db.PadLockDBQuery
 import com.pyamsoft.padlock.base.db.PadLockDBUpdate
+import com.pyamsoft.padlock.base.loader.AppIconImageCache
 import com.pyamsoft.padlock.base.preference.ClearPreferences
 import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
 import com.pyamsoft.padlock.base.preference.LockListPreferences
@@ -39,8 +41,11 @@ import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager
 import com.pyamsoft.padlock.base.wrapper.PackageDrawableManager
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperImpl
+import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.loader.cache.ImageCache
 import dagger.Binds
 import dagger.Module
+import javax.inject.Named
 
 @Module
 abstract class PadLockModule {
@@ -103,5 +108,14 @@ abstract class PadLockModule {
 
   @Binds
   internal abstract fun providePadLockDelete(impl: PadLockDBImpl): PadLockDBDelete
+
+  @JvmSuppressWildcards
+  @Binds
+  internal abstract fun provideAppIconImageCache(
+      cache: AppIconImageCache): ImageCache<String, Drawable>
+
+  @Binds
+  @Named("cache_app_icons")
+  internal abstract fun provideIconImageCache(cache: AppIconImageCache): Cache
 
 }

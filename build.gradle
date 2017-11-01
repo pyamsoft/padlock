@@ -22,11 +22,12 @@ buildscript {
 
   ext {
     kotlin_version = '1.1.51'
-    plugin_version = '2.3.3'
+    plugin_version = '3.0.0'
   }
 
   repositories {
     jcenter()
+    google()
 
     maven {
       url 'https://maven.google.com'
@@ -39,13 +40,12 @@ buildscript {
   ext {
 
     minSdk = 19
-    maxSdk = 26
-    buildTools = "26.0.2"
+    maxSdk = 27
 
-    supportLib = "26.1.0"
+    supportLib = "27.0.0"
     firebase = "11.4.2"
     leakCanary = "1.5.4"
-    pydroid = "13.2.3"
+    pydroid = "14.0.5"
     autoValue = "1.5.2"
     sqlbrite = "2.0.0"
     dagger = "2.12"
@@ -62,10 +62,10 @@ buildscript {
     classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.1'
 
     // Gradle version checker
-    classpath 'com.github.ben-manes:gradle-versions-plugin:0.15.0'
+    classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
 
     // Google services
-    classpath 'com.google.gms:google-services:3.1.0'
+    classpath 'com.google.gms:google-services:3.1.2'
 
     // SQLDelight
     classpath "com.squareup.sqldelight:gradle-plugin:0.6.1"
@@ -78,6 +78,7 @@ buildscript {
 allprojects {
   repositories {
     jcenter()
+    google()
 
     maven {
       url 'https://maven.google.com'

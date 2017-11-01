@@ -35,11 +35,11 @@ class PurgeAllDialog : CanaryDialog() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    return AlertDialog.Builder(activity).setMessage("Really delete all old entries?")
+    return AlertDialog.Builder(activity!!).setMessage("Really delete all old entries?")
         .setPositiveButton("Delete") { _, _ ->
           purgePublisher.publish(PurgeAllEvent)
           dismiss()

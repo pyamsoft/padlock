@@ -56,6 +56,7 @@ import javax.inject.Inject
 
 class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
+  @field:Inject internal lateinit var imageLoader: ImageLoader
   @field:Inject internal lateinit var presenter: LockListPresenter
   private lateinit var fastItemAdapter: FastItemAdapter<LockListItem>
   private lateinit var binding: FragmentLockListBinding
@@ -71,7 +72,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
-    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -93,7 +94,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     presenter.bind(this)
 
-    val intent = activity.intent
+    val intent = activity!!.intent
     if (intent.hasExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)) {
       intent.removeExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)
 
@@ -113,7 +114,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     lastPosition = ListStateUtil.getCurrentPosition(binding.applistRecyclerview)
   }
 
-  override fun onSaveInstanceState(outState: Bundle?) {
+  override fun onSaveInstanceState(outState: Bundle) {
     ListStateUtil.saveState(outState, binding.applistRecyclerview)
     super.onSaveInstanceState(outState)
   }
@@ -218,7 +219,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     binding.applistFab.setOnClickListener {
       if (PadLockService.isRunning) {
         DialogUtil.guaranteeSingleDialogFragment(activity,
-            PinEntryDialog.newInstance(context.packageName), PinEntryDialog.TAG)
+            PinEntryDialog.newInstance(context!!.packageName), PinEntryDialog.TAG)
       } else {
         DialogUtil.guaranteeSingleDialogFragment(activity, AccessibilityRequestDialog(),
             "accessibility")
@@ -241,7 +242,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinCreateFailure() {
-    Toasty.makeText(context, "Error: Mismatched PIN", Toast.LENGTH_SHORT).show()
+    Toasty.makeText(context!!, "Error: Mismatched PIN", Toast.LENGTH_SHORT).show()
   }
 
   override fun onMasterPinClearSuccess() {
@@ -253,7 +254,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinClearFailure() {
-    Toasty.makeText(context, "Error: Invalid PIN", Toast.LENGTH_SHORT).show()
+    Toasty.makeText(context!!, "Error: Invalid PIN", Toast.LENGTH_SHORT).show()
   }
 
   private fun setRefreshing(refresh: Boolean) {
@@ -285,9 +286,11 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
           else -> entry.hardLocked - 1
         })
 
-        item.updateModel(
+        if (item.updateModel(
             AppEntry(name = entry.name, packageName = entry.packageName, system = entry.system,
-                locked = newLocked, whitelisted = newWhitelisted, hardLocked = newHardLocked))
+                locked = newLocked, whitelisted = newWhitelisted, hardLocked = newHardLocked))) {
+          fastItemAdapter.notifyAdapterItemChanged(i)
+        }
         break
       }
     }
@@ -343,13 +346,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   override fun onFABEnabled() {
     fabIconTask = LoaderHelper.unload(fabIconTask)
-    fabIconTask = ImageLoader.fromResource(activity, R.drawable.ic_lock_outline_24dp)
+    fabIconTask = imageLoader.fromResource(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab)
   }
 
   override fun onFABDisabled() {
     fabIconTask = LoaderHelper.unload(fabIconTask)
-    fabIconTask = ImageLoader.fromResource(activity, R.drawable.ic_lock_open_24dp)
+    fabIconTask = imageLoader.fromResource(R.drawable.ic_lock_open_24dp)
         .into(binding.applistFab)
   }
 
@@ -397,14 +400,14 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         // The entry should go before this one
         if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
           added = true
-          fastItemAdapter.add(index, LockListItem(activity, entry))
+          fastItemAdapter.add(index, LockListItem(activity!!, entry))
           break
         }
       }
 
       if (!added) {
         // add at the end of the list
-        fastItemAdapter.add(LockListItem(activity, entry))
+        fastItemAdapter.add(LockListItem(activity!!, entry))
       }
     }
   }
@@ -421,7 +424,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     } else {
       binding.applistRecyclerview.visibility = View.GONE
       binding.applistEmpty.visibility = View.VISIBLE
-      Toasty.makeText(context, "Error while loading list. Please try again.",
+      Toasty.makeText(context!!, "Error while loading list. Please try again.",
           Toast.LENGTH_SHORT).show()
     }
 

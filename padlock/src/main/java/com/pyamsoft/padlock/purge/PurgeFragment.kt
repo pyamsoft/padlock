@@ -68,10 +68,10 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
-    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
   }
 
-  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
       savedInstanceState: Bundle?): View? {
     binding = FragmentPurgeBinding.inflate(inflater, container, false)
     return binding.root
@@ -91,7 +91,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     backingSet.clear()
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     setupRecyclerView()
     setupSwipeRefresh()
@@ -165,7 +165,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onRetrieveError(throwable: Throwable) {
-    Toasty.makeText(context, "Error retrieving old application list", Toasty.LENGTH_SHORT).show()
+    Toasty.makeText(context!!, "Error retrieving old application list", Toasty.LENGTH_SHORT).show()
   }
 
   override fun onStop() {
@@ -173,7 +173,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     lastPosition = ListStateUtil.getCurrentPosition(binding.purgeList)
   }
 
-  override fun onSaveInstanceState(outState: Bundle?) {
+  override fun onSaveInstanceState(outState: Bundle) {
     ListStateUtil.saveState(outState, binding.purgeList)
     super.onSaveInstanceState(outState)
   }

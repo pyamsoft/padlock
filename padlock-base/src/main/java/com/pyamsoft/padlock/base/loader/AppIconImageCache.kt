@@ -16,29 +16,26 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.base.loader
 
-import android.app.Dialog
-import android.os.Bundle
-import android.support.v7.app.AlertDialog
-import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.presenter.Presenter
+import android.graphics.drawable.Drawable
+import com.pyamsoft.pydroid.loader.cache.ImageCache
+import com.pyamsoft.pydroid.loader.cache.ImageCache.ImageCacheKey
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class ErrorDialog : CanaryDialog() {
+@JvmSuppressWildcards
+@Singleton internal class AppIconImageCache @Inject internal constructor() : ImageCache<String, Drawable> {
 
-  override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
+  private val cache: MutableMap<String, Drawable> = LinkedHashMap()
 
-  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    return AlertDialog.Builder(activity!!).setTitle("ERROR")
-        .setMessage(
-            """An unrecoverable error has occurred when attempting an operation.
-              |
-              |Please close and re-open PadLock""".trimMargin())
-        .setPositiveButton("Okay") { _, _ ->
-          dismiss()
-          activity?.finish()
-        }
-        .setCancelable(false)
-        .create()
+  override fun clearCache() {
+    cache.clear()
   }
+
+  override fun cache(key: ImageCacheKey<String>, entry: Drawable) {
+    cache.put(key.data, entry)
+  }
+
+  override fun retrieve(key: ImageCacheKey<String>): Drawable? = cache[key.data]
 }

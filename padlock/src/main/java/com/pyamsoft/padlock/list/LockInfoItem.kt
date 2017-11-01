@@ -18,10 +18,7 @@
 
 package com.pyamsoft.padlock.list
 
-import android.content.res.ColorStateList
 import android.databinding.DataBindingUtil
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.AppCompatRadioButton
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.RadioButton
@@ -42,7 +39,7 @@ import javax.inject.Inject
 
 class LockInfoItem internal constructor(entry: ActivityEntry,
     private val system: Boolean) : GenericAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
-    entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> , UpdateItem<ActivityEntry> {
+    entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder>, UpdateItem<ActivityEntry> {
 
   private var viewHolder: ViewHolder? = null
 
@@ -58,16 +55,6 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
 
   private fun bindViewHolder() {
     viewHolder?.apply {
-      val whitelistButton: RadioButton = binding.lockInfoRadioWhite
-      if (whitelistButton is AppCompatRadioButton) {
-        whitelistButton.supportButtonTintList = stateListWhitelisted
-      }
-
-      val blacklistButton: RadioButton = binding.lockInfoRadioBlack
-      if (blacklistButton is AppCompatRadioButton) {
-        blacklistButton.supportButtonTintList = stateListBlacklisted
-      }
-
       // Remove any old binds
       val lockedButton: RadioButton = when (model.lockState) {
         DEFAULT -> binding.lockInfoRadioDefault
@@ -145,7 +132,7 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
   override fun filterAgainst(query: String): Boolean {
     val name = model.name.toLowerCase().trim { it <= ' ' }
     Timber.d("Filter predicate: '%s' against %s", query, name)
-    return !name.contains(query)
+    return name.contains(query)
   }
 
   override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
@@ -154,15 +141,9 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
 
     internal val binding: AdapterItemLockinfoBinding = DataBindingUtil.bind(itemView)
     @Inject internal lateinit var publisher: LockInfoItemPublisher
-    internal val stateListWhitelisted: ColorStateList
-    internal val stateListBlacklisted: ColorStateList
 
     init {
       Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)
-      stateListWhitelisted = ContextCompat.getColorStateList(itemView.context,
-          R.color.state_list_whitelisted)
-      stateListBlacklisted = ContextCompat.getColorStateList(itemView.context,
-          R.color.state_list_hardlocked)
     }
   }
 }

@@ -31,14 +31,16 @@ class AccessibilityRequestDialog : CanaryDialog() {
   override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    return AlertDialog.Builder(activity).setTitle("Enable PadLock AccessibilityService")
-        .setMessage(R.string.explain_accessibility_service)
-        .setPositiveButton("Let's Go") { _, _ ->
-          AccessibilityRequestDelegate.launchAccessibilityIntent(activity)
-          dismiss()
-        }
-        .setNegativeButton("No Thanks") { _, _ -> dismiss() }
-        .create()
+    activity!!.let {
+      return AlertDialog.Builder(it).setTitle("Enable PadLock AccessibilityService")
+          .setMessage(R.string.explain_accessibility_service)
+          .setPositiveButton("Let's Go") { _, _ ->
+            AccessibilityRequestDelegate.launchAccessibilityIntent(it)
+            dismiss()
+          }
+          .setNegativeButton("No Thanks") { _, _ -> dismiss() }
+          .create()
+    }
   }
 
 }

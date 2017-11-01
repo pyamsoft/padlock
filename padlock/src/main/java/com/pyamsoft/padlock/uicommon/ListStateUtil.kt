@@ -30,17 +30,14 @@ object ListStateUtil {
 
   @CheckResult
   fun getCurrentPosition(recycler: RecyclerView?): Int {
-    return if (recycler == null) {
-      // Return
-      0
+    if (recycler == null) {
+      return 0
     } else {
       val layoutManager: LayoutManager? = recycler.layoutManager
       if (layoutManager is LinearLayoutManager) {
-        // Return
-        layoutManager.findFirstCompletelyVisibleItemPosition()
+        return layoutManager.findFirstCompletelyVisibleItemPosition()
       } else {
-        // Return
-        0
+        return 0
       }
     }
   }
@@ -58,9 +55,8 @@ object ListStateUtil {
   fun restorePosition(lastPosition: Int, recycler: RecyclerView?): Int {
     if (recycler != null) {
       if (lastPosition != 0) {
-        val adapter: RecyclerView.Adapter<*>? = recycler.adapter
-        if (adapter != null) {
-          val size: Int = adapter.itemCount
+        recycler.adapter?.let {
+          val size: Int = it.itemCount
           recycler.scrollToPosition(
               if (lastPosition > size) size - 1 else lastPosition)
         }

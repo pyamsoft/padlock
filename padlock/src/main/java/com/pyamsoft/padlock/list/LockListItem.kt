@@ -18,7 +18,6 @@
 
 package com.pyamsoft.padlock.list
 
-import android.content.Context
 import android.databinding.DataBindingUtil
 import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
@@ -27,9 +26,9 @@ import com.mikepenz.fastadapter.items.GenericAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.base.loader.AppIconLoader
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.model.AppEntry
-import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.uicommon.UpdateItem
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderMap
@@ -52,7 +51,7 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
   override fun filterAgainst(query: String): Boolean {
     val name = model.name.toLowerCase().trim { it <= ' ' }
     Timber.d("Filter predicate: '%s' against %s", query, name)
-    return !name.startsWith(query)
+    return name.startsWith(query)
   }
 
   override fun updateModel(model: AppEntry): Boolean {
@@ -70,17 +69,15 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
       binding.lockListWhite.visibility = if (model.whitelisted > 0) View.VISIBLE else View.INVISIBLE
       binding.lockListLocked.visibility = if (model.hardLocked > 0) View.VISIBLE else View.INVISIBLE
 
-      val context: Context = itemView.context
-      val whitelistIcon = ImageLoader.fromResource(context, R.drawable.ic_whitelisted).into(
+      val whitelistIcon = imageLoader.fromResource(R.drawable.ic_whitelisted).into(
           binding.lockListWhite)
       loaderMap.put("whitelist", whitelistIcon)
 
-      val blacklistIcon = ImageLoader.fromResource(context, R.drawable.ic_hardlocked).into(
+      val blacklistIcon = imageLoader.fromResource(R.drawable.ic_hardlocked).into(
           binding.lockListLocked)
       loaderMap.put("blacklist", blacklistIcon)
 
-      val appIcon = AppIconLoader.forPackageName(context, model.packageName).into(
-          binding.lockListIcon)
+      val appIcon = appIconLoader.forPackageName(model.packageName).into(binding.lockListIcon)
       loaderMap.put("locked", appIcon)
 
       binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -112,6 +109,8 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
 
     internal val binding: AdapterItemLocklistBinding = DataBindingUtil.bind(itemView)
     @Inject internal lateinit var publisher: LockListItemPublisher
+    @Inject internal lateinit var appIconLoader: AppIconLoader
+    @Inject internal lateinit var imageLoader: ImageLoader
 
     init {
       Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)

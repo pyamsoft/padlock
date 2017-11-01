@@ -18,20 +18,4 @@
 
 package com.pyamsoft.padlock.service
 
-import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
-
-@AutoValue abstract class RecheckEvent protected constructor() {
-
-  @CheckResult internal abstract fun packageName(): String
-
-  @CheckResult internal abstract fun className(): String
-
-  companion object {
-
-
-    @CheckResult
-    fun create(packageName: String, className: String): RecheckEvent =
-        AutoValue_RecheckEvent(packageName, className)
-  }
-}
+data class RecheckEvent(val packageName: String, val className: String)

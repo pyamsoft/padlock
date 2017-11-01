@@ -47,6 +47,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
   private var arrowGoTask = LoaderHelper.empty()
   private var editText: EditText? = null
   @Inject internal lateinit var presenter: LockEntryPresenter
+  @Inject internal lateinit var imageLoader: ImageLoader
 
   override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
@@ -54,11 +55,11 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context.applicationContext).plusLockScreenComponent(
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockScreenComponent(
         LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
   }
 
-  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
       savedInstanceState: Bundle?): View? {
     binding = FragmentLockScreenTextBinding.inflate(inflater, container, false)
     return binding.root
@@ -67,11 +68,13 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
   override fun onDestroyView() {
     super.onDestroyView()
     arrowGoTask = LoaderHelper.unload(arrowGoTask)
-    imm.toggleSoftInputFromWindow(activity.window.decorView.windowToken, 0, 0)
+    activity?.let {
+      imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)
+    }
     binding.unbind()
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     setupTextInput()
     setupGoArrow()
@@ -95,15 +98,15 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     }
   }
 
-  override fun onSaveInstanceState(outState: Bundle?) {
+  override fun onSaveInstanceState(outState: Bundle) {
     val attempt = getCurrentAttempt()
-    outState?.putString(CODE_DISPLAY, attempt)
+    outState.putString(CODE_DISPLAY, attempt)
     super.onSaveInstanceState(outState)
   }
 
   private fun setupInputManager() {
     // Force the keyboard
-    imm = activity.applicationContext
+    imm = activity!!.applicationContext
         .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
   }
@@ -111,8 +114,9 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
   private fun setupGoArrow() {
     binding.lockImageGo.setOnClickListener {
       submit()
-      imm.toggleSoftInputFromWindow(activity.window.decorView.windowToken, 0,
-          0)
+      activity?.let {
+        imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)
+      }
     }
 
     // Force keyboard focus
@@ -126,7 +130,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     }
 
     arrowGoTask = LoaderHelper.unload(arrowGoTask)
-    arrowGoTask = ImageLoader.fromResource(activity, R.drawable.ic_arrow_forward_24dp)
+    arrowGoTask = imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
         .tint(R.color.orangeA200)
         .into(binding.lockImageGo)
   }
@@ -181,7 +185,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
   override fun onPostUnlocked() {
     presenter.passLockScreen()
-    activity.finish()
+    activity!!.finish()
   }
 
   override fun onUnlockError(throwable: Throwable) {

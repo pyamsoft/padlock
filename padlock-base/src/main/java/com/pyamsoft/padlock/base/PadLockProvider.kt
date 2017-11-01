@@ -21,24 +21,29 @@ package com.pyamsoft.padlock.base
 import android.app.Activity
 import android.app.IntentService
 import android.content.Context
+import android.graphics.drawable.Drawable
+import com.pyamsoft.padlock.base.loader.AppIconImageCache
+import com.pyamsoft.pydroid.PYDroidModule
+import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.loader.LoaderModule
+import com.pyamsoft.pydroid.loader.cache.ImageCache
 import dagger.Module
 import dagger.Provides
 import io.reactivex.Scheduler
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import javax.inject.Named
 
 @Module
-class PadLockProvider(context: Context,
+class PadLockProvider(private val pyDroidModule: PYDroidModule,
+    private val loaderModule: LoaderModule,
     private val mainActivityClass: Class<out Activity>,
     private val lockScreenActivityClass: Class<out Activity>,
     private val recheckServiceClass: Class<out IntentService>) {
 
-  private val appContext: Context = context.applicationContext
-
+  private val appIconCache: ImageCache<String, Drawable> = AppIconImageCache()
 
   @Provides
-  internal fun provideContext(): Context = appContext
+  internal fun provideContext(): Context = pyDroidModule.provideContext()
 
   @Provides
   @Named(
@@ -61,16 +66,17 @@ class PadLockProvider(context: Context,
   @Provides
   @Named(
       "computation")
-  internal fun provideComputationScheduler(): Scheduler =
-      Schedulers.computation()
+  internal fun provideComputationScheduler(): Scheduler = pyDroidModule.provideComputationScheduler()
 
   @Provides
   @Named("io")
-  internal fun provideIOScheduler(): Scheduler =
-      Schedulers.io()
+  internal fun provideIOScheduler(): Scheduler = pyDroidModule.provideIoScheduler()
 
   @Provides
   @Named("main")
-  internal fun provideMainScheduler(): Scheduler =
-      AndroidSchedulers.mainThread()
+  internal fun provideMainScheduler(): Scheduler = pyDroidModule.provideMainThreadScheduler()
+
+  @Provides
+  internal fun provideImageLoader(): ImageLoader = loaderModule.provideImageLoader()
+
 }

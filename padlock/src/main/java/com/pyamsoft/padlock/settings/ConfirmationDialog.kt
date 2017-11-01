@@ -37,15 +37,15 @@ class ConfirmationDialog : CanaryDialog() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments.let {
+    arguments?.let {
       type = ConfirmEvent.valueOf(it.getString(WHICH, ConfirmEvent.DATABASE.name))
     }
 
-    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    return AlertDialog.Builder(activity).setMessage(if (type === ConfirmEvent.DATABASE)
+    return AlertDialog.Builder(activity!!).setMessage(if (type === ConfirmEvent.DATABASE)
       """Really clear entire database?
         |
         |You will have to re-configure all locked applications again""".trimMargin()

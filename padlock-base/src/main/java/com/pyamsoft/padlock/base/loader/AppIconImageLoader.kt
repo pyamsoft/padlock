@@ -16,39 +16,39 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.uicommon
+package com.pyamsoft.padlock.base.loader
 
-import android.content.Context
 import android.graphics.drawable.Drawable
 import android.support.annotation.CheckResult
 import android.widget.ImageView
-import com.pyamsoft.padlock.Injector
-import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.base.wrapper.PackageDrawableManager
 import com.pyamsoft.pydroid.helper.enforceIo
 import com.pyamsoft.pydroid.helper.enforceMainThread
 import com.pyamsoft.pydroid.loader.GenericLoader
+import com.pyamsoft.pydroid.loader.cache.ImageCache
+import com.pyamsoft.pydroid.loader.cache.ImageCache.ImageCacheKey
 import com.pyamsoft.pydroid.loader.loaded.Loaded
 import com.pyamsoft.pydroid.loader.loaded.RxLoaded
 import com.pyamsoft.pydroid.loader.targets.DrawableImageTarget
 import com.pyamsoft.pydroid.loader.targets.Target
 import io.reactivex.Scheduler
+import io.reactivex.Single
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Named
 
-class AppIconLoader private constructor(context: Context,
-    private val packageName: String) : GenericLoader<Drawable>() {
+@JvmSuppressWildcards
+internal class AppIconImageLoader internal constructor(private val packageName: String,
+    private val appIconImageCache: ImageCache<String, Drawable>,
+    private val packageDrawableManager: PackageDrawableManager,
+    private val mainScheduler: Scheduler,
+    private val ioScheduler: Scheduler) : GenericLoader<Drawable>() {
 
-  @field:Inject internal lateinit var packageDrawableManager: PackageDrawableManager
-  @field:[Inject Named("main")] internal lateinit var mainScheduler: Scheduler
-  @field:[Inject Named("io")] internal lateinit var ioScheduler: Scheduler
+  @CheckResult
+  private fun String.toKey(): ImageCacheKey<String> = ImageCacheKey(this)
 
   init {
     if (packageName.isEmpty()) {
       throw IllegalArgumentException("AppIconLoader packageName must be non-empty")
     }
-    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
 
     mainScheduler.enforceMainThread()
     ioScheduler.enforceIo()
@@ -61,24 +61,34 @@ class AppIconLoader private constructor(context: Context,
 
   @CheckResult
   private fun load(target: Target<Drawable>, packageName: String): Loaded {
-    return RxLoaded(packageDrawableManager.loadDrawableForPackageOrDefault(packageName)
+    return RxLoaded(loadCached(packageName)
         .subscribeOn(ioScheduler)
         .observeOn(mainScheduler)
-        .doOnSubscribe { startAction() }
+        .doOnSubscribe { startAction?.invoke() }
         .subscribe({
           target.loadImage(it)
-          completeAction(it)
-        },
-            {
-              Timber.e(it, "Error loading Drawable AppIconLoader for: %s", packageName)
-              errorAction(it)
-            }))
+          completeAction?.invoke(it)
+        }, {
+          Timber.e(it, "Error loading Drawable AppIconLoader for: %s", packageName)
+          errorAction?.invoke(it)
+        }))
   }
 
-  companion object {
-
-    @CheckResult
-    fun forPackageName(context: Context, packageName: String): GenericLoader<Drawable> =
-        AppIconLoader(context, packageName)
+  @CheckResult
+  private fun loadCached(packageName: String): Single<Drawable> {
+    val key: ImageCacheKey<String> = packageName.toKey()
+    val cached: Drawable? = appIconImageCache.retrieve(key)
+    if (cached == null) {
+      val result = loadFresh(packageName)
+      return result.doOnSuccess {
+        appIconImageCache.cache(key, it)
+      }
+    } else {
+      return Single.just(cached)
+    }
   }
+
+  @CheckResult
+  private fun loadFresh(packageName: String): Single<Drawable> =
+      packageDrawableManager.loadDrawableForPackageOrDefault(packageName)
 }

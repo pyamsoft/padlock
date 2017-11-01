@@ -47,14 +47,11 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), SettingsPresente
   override fun provideBoundPresenters(): List<Presenter<*>> =
       listOf(presenter) + super.provideBoundPresenters()
 
-  override val isLastOnBackStack: AboutLibrariesFragment.BackStackState
-    get() = AboutLibrariesFragment.BackStackState.LAST
+  override val isLastOnBackStack: AboutLibrariesFragment.BackStackState = AboutLibrariesFragment.BackStackState.LAST
 
-  override val preferenceXmlResId: Int
-    get() = R.xml.preferences
+  override val preferenceXmlResId: Int = R.xml.preferences
 
-  override val rootViewContainer: Int
-    get() = R.id.fragment_container
+  override val rootViewContainer: Int = R.id.fragment_container
 
   override val applicationName: String
     get() = getString(R.string.app_name)
@@ -65,18 +62,18 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), SettingsPresente
   }
 
   override fun onLicenseItemClicked() {
-    ActionBarUtil.setActionBarUpEnabled(activity, true)
+    ActionBarUtil.setActionBarUpEnabled(activity!!, true)
     super.onLicenseItemClicked()
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
 
     presenter.bind(this)
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     val clearDb = findPreference(getString(R.string.clear_db_key))
     val installListener = findPreference(getString(R.string.install_listener_key))
@@ -112,23 +109,25 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), SettingsPresente
   }
 
   override fun onLockTypeChangePrevented() {
-    Toasty.makeText(context, "Must clear Master Password before changing Lock Screen Type",
-        Toasty.LENGTH_SHORT).show()
-    DialogUtil.guaranteeSingleDialogFragment(activity,
-        PinEntryDialog.newInstance(context.packageName), PinEntryDialog.TAG)
+    context!!.let {
+      Toasty.makeText(it, "Must clear Master Password before changing Lock Screen Type",
+          Toasty.LENGTH_SHORT).show()
+      DialogUtil.guaranteeSingleDialogFragment(activity,
+          PinEntryDialog.newInstance(it.packageName), PinEntryDialog.TAG)
+    }
   }
 
   override fun onLockTypeChangeError(throwable: Throwable) {
-    Toasty.makeText(context, "Error: ${throwable.message}", Toasty.LENGTH_SHORT).show()
+    Toasty.makeText(context!!, "Error: ${throwable.message}", Toasty.LENGTH_SHORT).show()
   }
 
   override fun onClearDatabase() {
-    Toasty.makeText(context, "Locked application database has been cleared",
+    Toasty.makeText(context!!, "Locked application database has been cleared",
         Toasty.LENGTH_SHORT).show()
   }
 
   override fun onMasterPinClearFailure() {
-    Toasty.makeText(context, "Error: Invalid PIN", Toast.LENGTH_SHORT).show()
+    Toasty.makeText(context!!, "Error: Invalid PIN", Toast.LENGTH_SHORT).show()
   }
 
   override fun onMasterPinClearSuccess() {
@@ -141,7 +140,7 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), SettingsPresente
   override fun onClearAll() {
     Timber.d("Everything is cleared, kill self")
     presenter.publishFinish()
-    val activityManager = activity.applicationContext
+    val activityManager = activity!!.applicationContext
         .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     activityManager.clearApplicationUserData()
   }

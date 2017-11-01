@@ -55,6 +55,8 @@ import javax.inject.Singleton
     @param:Named(
         "cache_purge") private val purgeCache: Cache,
     @param:Named(
+        "cache_app_icons") private val iconCache: Cache,
+    @param:Named(
         "cache_lock_list") private val listCache: Cache,
     @param:Named(
         "cache_lock_info") private val infoCache: Cache) : BroadcastReceiver(), ApplicationInstallReceiver {
@@ -117,6 +119,7 @@ import javax.inject.Singleton
               purgeCache.clearCache()
               listCache.clearCache()
               infoCache.clearCache()
+              iconCache.clearCache()
               onNewPackageInstalled(packageName, it)
             } else {
               Timber.d("Package updated: %s", packageName)

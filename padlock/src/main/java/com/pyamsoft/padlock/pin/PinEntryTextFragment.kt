@@ -32,7 +32,6 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
-import com.pyamsoft.pydroid.helper.notNull
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
@@ -43,6 +42,7 @@ import javax.inject.Inject
 class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   @field:Inject internal lateinit var presenter: PinEntryPresenter
+  @field:Inject internal lateinit var imageLoader: ImageLoader
   private lateinit var imm: InputMethodManager
   private lateinit var binding: FragmentPinEntryTextBinding
   private var pinReentryText: EditText? = null
@@ -54,10 +54,10 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
   }
 
-  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
       savedInstanceState: Bundle?): View? {
     binding = FragmentPinEntryTextBinding.inflate(inflater, container, false)
     return binding.root
@@ -66,21 +66,21 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   override fun onDestroyView() {
     super.onDestroyView()
     goTask = LoaderHelper.unload(goTask)
-    imm.toggleSoftInputFromWindow(activity.window.decorView.windowToken, 0, 0)
+    activity?.let {
+      imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)
+    }
     binding.unbind()
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     // Resolve TextInputLayout edit texts
-    pinEntryText = binding.pinEntryCode.editText.notNull("pinEntryCode editText")
-
-    pinReentryText = binding.pinReentryCode.editText.notNull("pinReentryCode editText")
-
-    pinHintText = binding.pinHint.editText.notNull("pinHint editText")
+    pinEntryText = binding.pinEntryCode.editText!!
+    pinReentryText = binding.pinReentryCode.editText!!
+    pinHintText = binding.pinHint.editText!!
 
     // Force the keyboard
-    imm = context.applicationContext
+    imm = context!!.applicationContext
         .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
 
@@ -89,8 +89,10 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
     binding.pinImageGo.setOnClickListener {
       submitPin()
-      imm.toggleSoftInputFromWindow(activity.window.decorView.windowToken, 0,
-          0)
+      activity?.let {
+        imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0,
+            0)
+      }
     }
 
     if (savedInstanceState != null) {
@@ -135,7 +137,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onPinSubmitError(throwable: Throwable) {
-    Toasty.makeText(context, throwable.message.toString(), Toasty.LENGTH_SHORT).show()
+    Toasty.makeText(context!!, throwable.message.toString(), Toasty.LENGTH_SHORT).show()
   }
 
   override fun onPinSubmitComplete() {
@@ -173,7 +175,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     pinEntryText?.requestFocus()
 
     goTask = LoaderHelper.unload(goTask)
-    goTask = ImageLoader.fromResource(activity, R.drawable.ic_arrow_forward_24dp)
+    goTask = imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
         .tint(R.color.orangeA200)
         .into(binding.pinImageGo)
   }
