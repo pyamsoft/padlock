@@ -56,7 +56,7 @@ import javax.inject.Singleton
     return impl.deleteEntry(packageName).doOnSuccess {
       val obj: Observable<String>? = cachedList
       if (obj != null) {
-        cachedList = obj.filter { it == packageName }.doOnError { clearCache() }
+        cachedList = obj.filter { it != packageName }.doOnError { clearCache() }
       }
     }
   }
