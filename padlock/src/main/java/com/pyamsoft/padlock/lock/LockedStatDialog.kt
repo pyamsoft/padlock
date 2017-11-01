@@ -46,7 +46,7 @@ class LockedStatDialog : CanaryDialog() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments.let {
+    arguments?.let {
       displayedLabel = it.getString(LABEL)
       packageName = it.getString(PKG_NAME)
       activityName = it.getString(ACT_NAME)
@@ -59,16 +59,16 @@ class LockedStatDialog : CanaryDialog() {
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     binding = DialogLockStatBinding.inflate(LayoutInflater.from(activity), null, false)
 
-    return AlertDialog.Builder(activity).setView(binding.root)
+    return AlertDialog.Builder(activity!!).setView(binding.root)
         .setPositiveButton("Okay") { dialogInterface, _ -> dialogInterface.dismiss() }
         .setCancelable(true)
         .create()
   }
 
-  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
       savedInstanceState: Bundle?): View? = binding.root
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     binding.apply {
       statImage.setImageBitmap(image)

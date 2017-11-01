@@ -55,7 +55,7 @@ class RecheckService : IntentService(RecheckService::class.java.name) {
     val className = intent.getStringExtra(Recheck.EXTRA_CLASS_NAME)
     if (packageName.isNotEmpty() && className.isNotEmpty()) {
       Timber.d("Recheck was requested for: %s, %s", packageName, className)
-      recheckBus.publish(RecheckEvent.create(packageName, className))
+      recheckBus.publish(RecheckEvent(packageName, className))
     }
   }
 }

@@ -86,7 +86,7 @@ class LockServicePresenter @Inject internal constructor(
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .subscribe({
-            v.onRecheck(it.packageName(), it.className())
+            v.onRecheck(it.packageName, it.className)
           }, { Timber.e(it, "onError recheck event bus") })
     }
   }

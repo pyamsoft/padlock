@@ -45,11 +45,11 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context.applicationContext).plusLockScreenComponent(
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockScreenComponent(
         LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
   }
 
-  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
       savedInstanceState: Bundle?): View? {
     binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
     return binding.root
@@ -64,7 +64,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
     binding.unbind()
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     listener = object : PatternLockViewListener {
       override fun onStarted() {
@@ -108,7 +108,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
   override fun onPostUnlocked() {
     Timber.d("POST Unlock Finished!")
     presenter.passLockScreen()
-    activity.finish()
+    activity!!.finish()
   }
 
   override fun onUnlockError(throwable: Throwable) {

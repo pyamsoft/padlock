@@ -30,7 +30,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
-import com.pyamsoft.padlock.uicommon.AppIconLoader
+import com.pyamsoft.padlock.base.loader.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
@@ -41,6 +41,7 @@ import javax.inject.Inject
 class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
   @field:Inject internal lateinit var presenter: LockScreenInputPresenter
+  @field:Inject internal lateinit var appIconLoader: AppIconLoader
   private lateinit var binding: DialogPinEntryBinding
   private lateinit var packageName: String
   private var appIcon = LoaderHelper.empty()
@@ -49,12 +50,12 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments.let {
+    arguments?.let {
       packageName = it.getString(ENTRY_PACKAGE_NAME)
     }
     isCancelable = true
 
-    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
   }
 
   override fun onResume() {
@@ -65,7 +66,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         WindowManager.LayoutParams.WRAP_CONTENT)
   }
 
-  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
       savedInstanceState: Bundle?): View? {
     binding = DialogPinEntryBinding.inflate(inflater, container, false)
     return binding.root
@@ -88,7 +89,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     }
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     setupToolbar()
 
@@ -101,7 +102,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
   override fun onStart() {
     super.onStart()
     appIcon = LoaderHelper.unload(appIcon)
-    appIcon = AppIconLoader.forPackageName(activity, packageName).into(binding.pinImage)
+    appIcon = appIconLoader.forPackageName(packageName).into(binding.pinImage)
   }
 
   override fun onTypePattern() {
@@ -141,7 +142,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     var icon = binding.pinEntryToolbar.navigationIcon
     if (icon != null) {
       icon = DrawableUtil.tintDrawableFromColor(icon,
-          ContextCompat.getColor(context, android.R.color.black))
+          ContextCompat.getColor(context!!, android.R.color.black))
       binding.pinEntryToolbar.navigationIcon = icon
     }
   }

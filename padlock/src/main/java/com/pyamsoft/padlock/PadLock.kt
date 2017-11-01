@@ -28,7 +28,9 @@ import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.settings.SettingsFragment
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.CanaryFragment
+import com.pyamsoft.pydroid.PYDroidModule
 import com.pyamsoft.pydroid.about.Licenses
+import com.pyamsoft.pydroid.loader.LoaderModule
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
@@ -37,6 +39,8 @@ class PadLock : Application() {
 
   private lateinit var refWatcher: RefWatcher
   private var component: PadLockComponent? = null
+  private lateinit var pydroidModule: PYDroidModule
+  private lateinit var loaderModule: LoaderModule
 
   override fun onCreate() {
     super.onCreate()
@@ -50,7 +54,9 @@ class PadLock : Application() {
       RefWatcher.DISABLED
     }
 
-    PYDroid.init(this, BuildConfig.DEBUG)
+    pydroidModule = PYDroidModule(this, BuildConfig.DEBUG)
+    loaderModule = LoaderModule(this)
+    PYDroid.init(pydroidModule, loaderModule)
     Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
     Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight")
     Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
@@ -71,7 +77,7 @@ class PadLock : Application() {
   }
 
   private fun buildDagger(): PadLockComponent {
-    val provider = PadLockProvider(applicationContext, MainActivity::class.java,
+    val provider = PadLockProvider(pydroidModule, loaderModule, MainActivity::class.java,
         LockScreenActivity::class.java,
         RecheckService::class.java)
     return DaggerPadLockComponent.builder().padLockProvider(provider).build()
@@ -109,7 +115,7 @@ class PadLock : Application() {
 
     @CheckResult
     private fun getRefWatcherInternal(fragment: Fragment): RefWatcher {
-      val application = fragment.activity.application
+      val application = fragment.activity!!.application
       if (application is PadLock) {
         return application.refWatcher
       } else {

@@ -24,7 +24,6 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.support.annotation.CheckResult
 import android.text.TextUtils
 import com.pyamsoft.padlock.service.db.PadLockEntryModel
-import com.pyamsoft.pydroid.helper.notNull
 import com.squareup.sqlbrite2.BriteDatabase
 import com.squareup.sqlbrite2.SqlBrite
 import io.reactivex.Completable
@@ -51,7 +50,7 @@ import javax.inject.Singleton
       briteDatabase = SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler)
     }
 
-    return briteDatabase.notNull("briteDatabase")
+    return briteDatabase!!
   }
 
   @CheckResult private fun deleteWithPackageActivityNameUnguarded(packageName: String,

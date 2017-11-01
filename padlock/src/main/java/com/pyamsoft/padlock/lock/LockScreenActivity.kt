@@ -34,11 +34,11 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.db.PadLockEntry
+import com.pyamsoft.padlock.base.loader.AppIconLoader
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
-import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.app.activity.DisposableActivity
@@ -50,6 +50,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
   private val home: Intent = Intent(Intent.ACTION_MAIN)
   @field:Inject internal lateinit var presenter: LockScreenPresenter
+  @field:Inject internal lateinit var appIconLoader: AppIconLoader
   private lateinit var lockedActivityName: String
   private lateinit var lockedPackageName: String
   private lateinit var binding: ActivityLockBinding
@@ -157,7 +158,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     super.onStart()
 
     appIcon = LoaderHelper.unload(appIcon)
-    appIcon = AppIconLoader.forPackageName(this, lockedPackageName).into(binding.lockImage)
+    appIcon = appIconLoader.forPackageName(lockedPackageName).into(binding.lockImage)
 
     invalidateOptionsMenu()
   }

@@ -37,15 +37,15 @@ class PurgeSingleItemDialog : CanaryDialog() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments.let {
+    arguments?.let {
       packageName = it.getString(PACKAGE, "")
     }
 
-    Injector.obtain<PadLockComponent>(context.applicationContext).inject(this)
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    return AlertDialog.Builder(activity).setMessage("Really delete old entry for $packageName?")
+    return AlertDialog.Builder(activity!!).setMessage("Really delete old entry for $packageName?")
         .setPositiveButton("Delete") { _, _ ->
           purgePublisher.publish(PurgeEvent(packageName))
           dismiss()

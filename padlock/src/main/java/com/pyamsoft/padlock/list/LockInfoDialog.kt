@@ -32,6 +32,7 @@ import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.base.loader.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
@@ -43,7 +44,6 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
-import com.pyamsoft.padlock.uicommon.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.ListStateUtil
 import com.pyamsoft.padlock.uicommon.RecyclerViewUtil
@@ -57,6 +57,7 @@ import javax.inject.Inject
 
 class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
+  @field:Inject internal lateinit var appIconLoader: AppIconLoader
   @field:Inject internal lateinit var presenter: LockInfoPresenter
   private lateinit var fastItemAdapter: FastItemAdapter<LockInfoItem>
   private lateinit var binding: DialogLockInfoBinding
@@ -73,17 +74,17 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments.let {
+    arguments?.let {
       appPackageName = it.getString(ARG_APP_PACKAGE_NAME, null)
       appName = it.getString(ARG_APP_NAME, null)
       appIsSystem = it.getBoolean(ARG_APP_SYSTEM, false)
     }
 
-    Injector.obtain<PadLockComponent>(context.applicationContext).plusLockInfoComponent(
+    Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockInfoComponent(
         LockInfoModule(appPackageName)).inject(this)
   }
 
-  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
       savedInstanceState: Bundle?): View? {
     filterListDelegate = FilterListDelegate()
     fastItemAdapter = FastItemAdapter()
@@ -91,7 +92,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     return binding.root
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     setupToolbar()
     binding.apply {
@@ -112,7 +113,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       lockInfoToolbar.setNavigationOnClickListener { dismiss() }
       lockInfoToolbar.inflateMenu(R.menu.search_menu)
     }
-    ViewCompat.setElevation(binding.lockInfoToolbar, AppUtil.convertToDP(context, 4f))
+    ViewCompat.setElevation(binding.lockInfoToolbar,
+        AppUtil.convertToDP(binding.lockInfoToolbar.context, 4f))
     filterListDelegate.onPrepareOptionsMenu(binding.lockInfoToolbar.menu, fastItemAdapter)
   }
 
@@ -164,7 +166,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   override fun onStart() {
     super.onStart()
     appIcon = LoaderHelper.unload(appIcon)
-    appIcon = AppIconLoader.forPackageName(context, appPackageName).into(binding.lockInfoIcon)
+    appIcon = appIconLoader.forPackageName(appPackageName).into(binding.lockInfoIcon)
     presenter.populateList(false)
   }
 
@@ -174,7 +176,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     lastPosition = ListStateUtil.getCurrentPosition(binding.lockInfoRecycler)
   }
 
-  override fun onSaveInstanceState(outState: Bundle?) {
+  override fun onSaveInstanceState(outState: Bundle) {
     ListStateUtil.saveState(outState, binding.lockInfoRecycler)
     super.onSaveInstanceState(outState)
   }
@@ -192,8 +194,10 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       val item: LockInfoItem = fastItemAdapter.getAdapterItem(i)
       val entry: ActivityEntry = item.model
       if (id == entry.id) {
-        item.updateModel(
-            ActivityEntry(name = entry.name, packageName = entry.packageName, lockState = state))
+        if (item.updateModel(
+            ActivityEntry(name = entry.name, packageName = entry.packageName, lockState = state))) {
+          fastItemAdapter.notifyAdapterItemChanged(i)
+        }
         break
       }
     }
@@ -221,7 +225,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         lockInfoRecycler.visibility = View.GONE
         lockInfoEmpty.visibility = View.VISIBLE
       }
-      Toasty.makeText(context, "Error while loading list. Please try again.",
+      Toasty.makeText(binding.lockInfoToolbar.context,
+          "Error while loading list. Please try again.",
           Toast.LENGTH_SHORT).show()
     }
 

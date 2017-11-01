@@ -25,14 +25,10 @@ apply plugin: "com.getkeepsafe.dexcount"
 //noinspection GroovyMissingReturnStatement
 android {
   compileSdkVersion rootProject.ext.maxSdk
-  buildToolsVersion "$buildTools"
-
   //noinspection GroovyMissingReturnStatement
   defaultConfig {
     minSdkVersion rootProject.ext.minSdk
     targetSdkVersion rootProject.ext.maxSdk
-
-    publishNonDefault true
 
     resConfigs "en"
   }
@@ -44,13 +40,9 @@ android {
 }
 
 dependencies {
-  compile fileTree(dir: "libs", include: ["*.jar"])
-
   kapt "com.google.dagger:dagger-compiler:$dagger"
 
-  debugCompile project(path: ":padlock-base", configuration: "debug")
-  releaseCompile project(path: ":padlock-base", configuration: "release")
-
-  compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+  api project(":padlock-base")
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
 
