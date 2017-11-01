@@ -20,13 +20,13 @@ package com.pyamsoft.padlock.purge
 
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import com.mikepenz.fastadapter.items.GenericAbstractItem
+import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemPurgeBinding
 import com.pyamsoft.padlock.uicommon.UpdateItem
 
 internal class PurgeItem internal constructor(
-    packageName: String) : GenericAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
+    packageName: String) : ModelAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
     packageName), UpdateItem<String> {
 
   private var viewHolder: ViewHolder? = null

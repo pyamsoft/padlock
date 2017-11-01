@@ -22,7 +22,7 @@ import android.databinding.DataBindingUtil
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.RadioButton
-import com.mikepenz.fastadapter.items.GenericAbstractItem
+import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -38,7 +38,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockInfoItem internal constructor(entry: ActivityEntry,
-    private val system: Boolean) : GenericAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
+    private val system: Boolean) : ModelAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
     entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder>, UpdateItem<ActivityEntry> {
 
   private var viewHolder: ViewHolder? = null

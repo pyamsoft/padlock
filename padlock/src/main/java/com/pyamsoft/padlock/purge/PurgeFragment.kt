@@ -134,7 +134,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
       if (item.model == packageName) {
         update = true
         if (item.updateModel(packageName)) {
-          fastItemAdapter.notifyItemChanged(index)
+          fastItemAdapter.notifyAdapterItemChanged(index)
         }
         break
       }

@@ -22,7 +22,7 @@ import android.databinding.DataBindingUtil
 import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import com.mikepenz.fastadapter.items.GenericAbstractItem
+import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -36,7 +36,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockListItem internal constructor(internal var activity: FragmentActivity,
-    entry: AppEntry) : GenericAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(
+    entry: AppEntry) : ModelAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(
     entry), FilterableItem<LockListItem, LockListItem.ViewHolder>, UpdateItem<AppEntry> {
 
   private val loaderMap = LoaderMap()
