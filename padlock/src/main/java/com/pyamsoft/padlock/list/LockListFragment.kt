@@ -382,7 +382,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     var update = false
     for (index in fastItemAdapter.adapterItems.indices) {
       val item: LockListItem = fastItemAdapter.adapterItems[index]
-      if (item.model == entry) {
+      if (item.model.packageName == entry.packageName) {
         update = true
         if (item.updateModel(entry)) {
           fastItemAdapter.notifyAdapterItemChanged(index)

@@ -46,6 +46,7 @@ class LockListPresenter @Inject internal constructor(
     private val lockInfoBus: EventBus<LockInfoEvent>,
     private val clearPinBus: EventBus<ClearPinEvent>,
     private val createPinBus: EventBus<CreatePinEvent>,
+    private val lockInfoChangeBus: EventBus<LockInfoEvent.Callback>,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
@@ -94,34 +95,46 @@ class LockListPresenter @Inject internal constructor(
           .filter { it is LockInfoEvent.Callback }
           .map { it as LockInfoEvent.Callback }
           .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-          .subscribe({
-            when (it) {
-              is LockInfoEvent.Callback.Created -> {
-                if (it.oldState == DEFAULT) {
-                  subModifyCallback.onModifySubEntryToHardlockedFromDefault(it.packageName)
-                } else if (it.oldState == WHITELISTED) {
-                  subModifyCallback.onModifySubEntryToHardlockedFromWhitelisted(it.packageName)
-                }
-              }
-              is LockInfoEvent.Callback.Deleted -> {
-                if (it.oldState == WHITELISTED) {
-                  subModifyCallback.onModifySubEntryToDefaultFromWhitelisted(it.packageName)
-                } else if (it.oldState == LOCKED) {
-                  subModifyCallback.onModifySubEntryToDefaultFromHardlocked(it.packageName)
-                }
-              }
-              is LockInfoEvent.Callback.Whitelisted -> {
-                if (it.oldState == LOCKED) {
-                  subModifyCallback.onModifySubEntryToWhitelistedFromHardlocked(it.packageName)
-                } else if (it.oldState == DEFAULT) {
-                  subModifyCallback.onModifySubEntryToWhitelistedFromDefault(it.packageName)
-                }
-              }
-            }
-          }, {
+          .subscribe({ processLockInfoCallback(it, subModifyCallback) }, {
             Timber.e(it, "Error listening to lock info bus")
             subModifyCallback.onModifySubEntryError(it)
           })
+    }
+
+    dispose {
+      lockInfoChangeBus.listen()
+          .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+          .subscribe({ processLockInfoCallback(it, subModifyCallback) }, {
+            Timber.e(it, "Error listening to lock info change bus")
+            subModifyCallback.onModifySubEntryError(it)
+          })
+    }
+  }
+
+  private fun processLockInfoCallback(event: LockInfoEvent.Callback,
+      subModifyCallback: LockSubModifyCallback) {
+    when (event) {
+      is LockInfoEvent.Callback.Created -> {
+        if (event.oldState == DEFAULT) {
+          subModifyCallback.onModifySubEntryToHardlockedFromDefault(event.packageName)
+        } else if (event.oldState == WHITELISTED) {
+          subModifyCallback.onModifySubEntryToHardlockedFromWhitelisted(event.packageName)
+        }
+      }
+      is LockInfoEvent.Callback.Deleted -> {
+        if (event.oldState == WHITELISTED) {
+          subModifyCallback.onModifySubEntryToDefaultFromWhitelisted(event.packageName)
+        } else if (event.oldState == LOCKED) {
+          subModifyCallback.onModifySubEntryToDefaultFromHardlocked(event.packageName)
+        }
+      }
+      is LockInfoEvent.Callback.Whitelisted -> {
+        if (event.oldState == LOCKED) {
+          subModifyCallback.onModifySubEntryToWhitelistedFromHardlocked(event.packageName)
+        } else if (event.oldState == DEFAULT) {
+          subModifyCallback.onModifySubEntryToWhitelistedFromDefault(event.packageName)
+        }
+      }
     }
   }
 
@@ -202,7 +215,7 @@ class LockListPresenter @Inject internal constructor(
   }
 
   fun updateCache(packageName: String, whitelisted: Int, hardLocked: Int) {
-    dispose{
+    dispose {
       lockListUpdater.update(packageName, whitelisted, hardLocked)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)

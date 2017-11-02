@@ -19,30 +19,20 @@
 package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.data.Cache
-import dagger.Binds
-import dagger.Module
-import javax.inject.Named
+import com.pyamsoft.pydroid.bus.RxBus
+import com.pyamsoft.pydroid.bus.RxBus.Companion
+import io.reactivex.Observable
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@Module
-abstract class LockInfoSingletonModule {
+@Singleton internal class LockInfoChangeBus @Inject internal constructor() : EventBus<LockInfoEvent.Callback> {
 
-  @Binds internal abstract fun provideBus(bus: LockInfoBus): EventBus<LockInfoEvent>
+  private val bus: EventBus<LockInfoEvent.Callback> = RxBus.create()
 
-  @Binds internal abstract fun provideChangeBus(bus: LockInfoChangeBus): EventBus<LockInfoEvent.Callback>
+  override fun listen(): Observable<LockInfoEvent.Callback> = bus.listen()
 
-  @Binds
-  internal abstract fun provideInteractorCache(impl: LockInfoInteractorCache): LockInfoInteractor
+  override fun publish(event: LockInfoEvent.Callback) {
+    bus.publish(event)
+  }
 
-  @Binds
-  @Named("interactor_lock_info")
-  internal abstract fun provideInteractor(impl: LockInfoInteractorImpl): LockInfoInteractor
-
-  @Binds
-  @Named("cache_lock_info")
-  internal abstract fun provideCache(cache: LockInfoInteractorCache): Cache
-
-  @Binds
-  internal abstract fun provideUpdater(cache: LockInfoInteractorCache): LockInfoUpdater
 }
-
