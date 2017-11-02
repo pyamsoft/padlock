@@ -291,6 +291,9 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
                 locked = newLocked, whitelisted = newWhitelisted, hardLocked = newHardLocked))) {
           fastItemAdapter.notifyAdapterItemChanged(i)
         }
+
+        // Update cache with the whitelist numbers so that a soft refresh will not change visual
+        presenter.updateCache(packageName, newWhitelisted, newHardLocked)
         break
       }
     }

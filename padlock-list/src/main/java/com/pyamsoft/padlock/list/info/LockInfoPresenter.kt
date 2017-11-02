@@ -35,6 +35,7 @@ import javax.inject.Named
 class LockInfoPresenter @Inject internal constructor(
     private val bus: EventBus<LockInfoEvent>, @param:Named(
         "package_name") private val packageName: String,
+    private val lockInfoUpdater: LockInfoUpdater,
     private val interactor: LockInfoInteractor, @Named("computation") compScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler, @Named(
         "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
@@ -93,6 +94,19 @@ class LockInfoPresenter @Inject internal constructor(
           }, {
             Timber.e(it, "onError modifyDatabaseEntry")
             bus.publish(Error(it, event.packageName))
+          })
+    }
+  }
+
+  fun update(packageName: String, activityName: String, lockState: LockState) {
+    dispose {
+      lockInfoUpdater.update(packageName, activityName, lockState)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            Timber.d("Updated $packageName $activityName -- state: $lockState")
+          }, {
+            Timber.e(it, "Error updating cache for $packageName $activityName")
           })
     }
   }

@@ -22,6 +22,7 @@ import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.pydroid.data.Cache
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import java.util.concurrent.TimeUnit
@@ -32,7 +33,7 @@ import javax.inject.Singleton
 @Singleton internal class LockListInteractorCache @Inject internal constructor(
     @param:Named("cache_purge") private val purgeCache: Cache,
     @param:Named(
-        "interactor_lock_list") private val impl: LockListInteractor) : LockListInteractor, Cache {
+        "interactor_lock_list") private val impl: LockListInteractor) : LockListInteractor, Cache, LockListUpdater {
 
   private var appCache: Observable<AppEntry>? = null
   private var lastAccessCache: Long = 0L
@@ -83,6 +84,23 @@ import javax.inject.Singleton
             }
           }
         }.doOnError { clearCache() }
+  }
+
+  override fun update(packageName: String, whitelisted: Int, hardLocked: Int): Completable {
+    return Completable.fromAction {
+      val obj: Observable<AppEntry>? = appCache
+      if (obj != null) {
+        appCache = obj.map {
+          if (it.packageName == packageName) {
+            return@map AppEntry(name = it.name, packageName = it.packageName, locked = it.locked,
+                system = it.system, whitelisted = whitelisted, hardLocked = hardLocked)
+          } else {
+            // Pass the original through
+            return@map it
+          }
+        }
+      }
+    }
   }
 
   override fun clearCache() {
