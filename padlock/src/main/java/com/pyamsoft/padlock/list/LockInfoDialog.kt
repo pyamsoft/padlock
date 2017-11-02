@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.base.loader.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
+import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.list.info.LockInfoModule
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
 import com.pyamsoft.padlock.model.ActivityEntry
@@ -240,8 +241,9 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     var update = false
     for (index in fastItemAdapter.adapterItems.indices) {
       val item: LockInfoItem = fastItemAdapter.adapterItems[index]
-      if (item.model == entry) {
+      if (item.model.id == entry.id) {
         update = true
+        publishLockStateUpdates(item.model, entry)
         if (item.updateModel(entry)) {
           fastItemAdapter.notifyAdapterItemChanged(index)
         }
@@ -269,6 +271,23 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       if (!added) {
         // add at the end of the list
         fastItemAdapter.add(LockInfoItem(entry, appIsSystem))
+      }
+    }
+  }
+
+  private fun publishLockStateUpdates(model: ActivityEntry, entry: ActivityEntry) {
+    val oldState: LockState = model.lockState
+    val newState: LockState = entry.lockState
+    if (oldState != newState) {
+      Timber.d("Lock state changed for ${entry.packageName} ${entry.name}")
+      when (newState) {
+        DEFAULT -> presenter.publish(
+            LockInfoEvent.Callback.Deleted(entry.id, entry.packageName, oldState))
+        LOCKED -> presenter.publish(
+            LockInfoEvent.Callback.Created(entry.id, entry.packageName, oldState))
+        WHITELISTED -> presenter.publish(
+            LockInfoEvent.Callback.Whitelisted(entry.id, entry.packageName, oldState))
+        else -> Timber.e("Invalid lock state, do not publish: $newState")
       }
     }
   }

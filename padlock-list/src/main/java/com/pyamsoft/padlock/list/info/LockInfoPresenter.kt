@@ -33,6 +33,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockInfoPresenter @Inject internal constructor(
+    private val changeBus: EventBus<LockInfoEvent.Callback>,
     private val bus: EventBus<LockInfoEvent>, @param:Named(
         "package_name") private val packageName: String,
     private val lockInfoUpdater: LockInfoUpdater,
@@ -138,6 +139,10 @@ class LockInfoPresenter @Inject internal constructor(
             }
           }, { Timber.e(it, "onError") })
     }
+  }
+
+  fun publish(event: LockInfoEvent.Callback) {
+    changeBus.publish(event)
   }
 
   interface View : LockModifyCallback, ListPopulateCallback, OnboardingCallback
