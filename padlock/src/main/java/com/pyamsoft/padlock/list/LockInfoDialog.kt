@@ -198,6 +198,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             ActivityEntry(name = entry.name, packageName = entry.packageName, lockState = state))) {
           fastItemAdapter.notifyAdapterItemChanged(i)
         }
+        presenter.update(entry.name, entry.packageName, state)
         break
       }
     }

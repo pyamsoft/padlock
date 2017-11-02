@@ -21,6 +21,7 @@ package com.pyamsoft.padlock.list.info
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.data.Cache
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import java.util.concurrent.TimeUnit
@@ -30,7 +31,7 @@ import javax.inject.Singleton
 
 @Singleton internal class LockInfoInteractorCache @Inject internal constructor(
     @param:Named(
-        "interactor_lock_info") private val impl: LockInfoInteractor) : LockInfoInteractor, Cache {
+        "interactor_lock_info") private val impl: LockInfoInteractor) : LockInfoInteractor, Cache, LockInfoUpdater {
 
   private var infoCache: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>> = HashMap()
 
@@ -55,6 +56,28 @@ import javax.inject.Singleton
             }
           }
         }.doOnError { infoCache.remove(packageName) }
+  }
+
+  override fun update(packageName: String, activityName: String,
+      lockState: LockState): Completable {
+    return Completable.fromAction {
+      val obj: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>>? = infoCache
+      if (obj != null) {
+        val pair: Pair<Observable<ActivityEntry>?, Long>? = obj[packageName]
+        val cached: Observable<ActivityEntry>? = pair?.first
+        val time: Long = pair?.second ?: 0
+        if (cached != null && time > 0) {
+          obj.put(packageName, Pair(cached.map {
+            if (it.packageName == packageName && it.name == activityName) {
+              return@map ActivityEntry(name = it.name, packageName = it.packageName,
+                  lockState = lockState)
+            } else {
+              return@map it
+            }
+          }, time))
+        }
+      }
+    }
   }
 
   override fun clearCache() {

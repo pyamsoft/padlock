@@ -18,29 +18,10 @@
 
 package com.pyamsoft.padlock.list
 
-import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.data.Cache
-import dagger.Binds
-import dagger.Module
-import javax.inject.Named
+import io.reactivex.Completable
 
-@Module
-abstract class LockListModule {
+interface LockListUpdater {
 
-  @Binds internal abstract fun provideBus(bus: LockListBus): EventBus<LockListEvent>
-
-  @Binds
-  internal abstract fun provideInteractorCache(impl: LockListInteractorCache): LockListInteractor
-
-  @Binds
-  @Named("interactor_lock_list")
-  internal abstract fun provideInteractor(impl: LockListInteractorImpl): LockListInteractor
-
-  @Binds
-  @Named("cache_lock_list")
-  internal abstract fun provideCache(cache: LockListInteractorCache): Cache
-
-  @Binds
-  internal abstract fun provideUpdater(cache: LockListInteractorCache) : LockListUpdater
+  fun update(packageName: String, whitelisted: Int, hardLocked: Int) : Completable
 }
 
