@@ -85,9 +85,8 @@ import javax.inject.Singleton
 
   }
 
-  @CheckResult private fun whitelistEntry(
-      packageName: String, activityName: String, realName: String,
-      lockCode: String?, isSystem: Boolean): Completable {
+  @CheckResult private fun whitelistEntry(packageName: String, activityName: String,
+      realName: String, lockCode: String?, isSystem: Boolean): Completable {
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName)
     return dbInsert.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
   }
@@ -167,14 +166,14 @@ import javax.inject.Singleton
 
   override fun postUnlock(packageName: String,
       activityName: String, realName: String, lockCode: String?,
-      isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long): Completable {
+      isSystem: Boolean, whitelist: Boolean, ignoreTime: Long): Completable {
     return Completable.defer {
       val ignoreMinutesInMillis = TimeUnit.MINUTES.toMillis(ignoreTime)
       val whitelistObservable: Completable
       val ignoreObservable: Completable
       val recheckObservable: Completable
 
-      if (shouldExclude) {
+      if (whitelist) {
         whitelistObservable = whitelistEntry(packageName, activityName, realName, lockCode,
             isSystem)
         ignoreObservable = Completable.complete()

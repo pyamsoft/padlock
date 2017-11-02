@@ -37,8 +37,7 @@ internal interface LockEntryInteractor {
 
   @CheckResult
   fun postUnlock(packageName: String, activityName: String, realName: String,
-      lockCode: String?,
-      isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long): Completable
+      lockCode: String?, isSystem: Boolean, whitelist: Boolean, ignoreTime: Long): Completable
 
   fun clearFailCount()
 }
