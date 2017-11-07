@@ -88,16 +88,16 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
     }
   }
 
-  override fun bindView(holder: ViewHolder, payloads: List<Any>?) {
+  override fun bindView(holder: ViewHolder, payloads: List<Any>) {
     super.bindView(holder, payloads)
     viewHolder = holder
     bindViewHolder()
   }
 
-  override fun unbindView(holder: ViewHolder?) {
+  override fun unbindView(holder: ViewHolder) {
     super.unbindView(holder)
     viewHolder = null
-    holder?.apply {
+    holder.apply {
       binding.lockListTitle.text = null
       binding.lockListIcon.setImageDrawable(null)
       binding.lockListToggle.setOnCheckedChangeListener(null)

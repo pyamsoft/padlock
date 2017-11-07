@@ -47,11 +47,11 @@ import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.ListStateUtil
-import com.pyamsoft.padlock.uicommon.RecyclerViewUtil
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.util.RecyclerViewUtil
 import com.pyamsoft.pydroid.util.AppUtil
 import timber.log.Timber
 import javax.inject.Inject
@@ -205,8 +205,13 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     }
   }
 
+  private fun setRefreshing(refresh: Boolean) {
+    binding.lockInfoSwipeRefresh.refreshing(refresh)
+    filterListDelegate.setEnabled(!refresh)
+  }
+
   override fun onListPopulateBegin() {
-    binding.lockInfoSwipeRefresh.refreshing(true)
+    setRefreshing(true)
     backingSet.clear()
   }
 
@@ -232,7 +237,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
           Toast.LENGTH_SHORT).show()
     }
 
-    binding.lockInfoSwipeRefresh.refreshing(false)
+    setRefreshing(false)
   }
 
   override fun onEntryAddedToList(entry: ActivityEntry) {

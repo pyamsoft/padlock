@@ -42,7 +42,6 @@ import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.padlock.uicommon.ListStateUtil
-import com.pyamsoft.padlock.uicommon.RecyclerViewUtil
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
 import com.pyamsoft.pydroid.design.util.FABUtil
 import com.pyamsoft.pydroid.loader.ImageLoader
@@ -51,6 +50,7 @@ import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.AnimUtil
 import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.util.RecyclerViewUtil
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -205,7 +205,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     when (item.itemId) {
-      R.id.menu_is_system -> if (binding.applistSwipeRefresh != null && !binding.applistSwipeRefresh.isRefreshing) {
+      R.id.menu_is_system -> if (!binding.applistSwipeRefresh.isRefreshing) {
         Timber.d("List is not refreshing. Allow change of system preference")
         presenter.setSystemVisibility(!item.isChecked)
         presenter.populateList(true)
@@ -260,6 +260,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   private fun setRefreshing(refresh: Boolean) {
     binding.applistSwipeRefresh.refreshing(refresh)
     activity?.invalidateOptionsMenu()
+    filterListDelegate.setEnabled(!refresh)
 
     if (refresh) {
       binding.applistFab.hide()

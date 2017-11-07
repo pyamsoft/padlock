@@ -49,15 +49,15 @@ internal class PurgeItem internal constructor(
     }
   }
 
-  override fun unbindView(holder: ViewHolder?) {
+  override fun unbindView(holder: ViewHolder) {
     super.unbindView(holder)
     viewHolder = null
-    holder?.apply {
+    holder.apply {
       binding.itemPurgeName.text = null
     }
   }
 
-  override fun bindView(holder: ViewHolder, payloads: List<Any>?) {
+  override fun bindView(holder: ViewHolder, payloads: List<Any>) {
     super.bindView(holder, payloads)
     viewHolder = holder
     bindViewHolder()
