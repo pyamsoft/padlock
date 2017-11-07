@@ -18,14 +18,18 @@
 
 package com.pyamsoft.padlock
 
+import android.annotation.SuppressLint
 import android.content.Context
-import com.pyamsoft.pydroid.SimpleInjector
+import android.support.annotation.CheckResult
 
-object Injector : SimpleInjector {
+object Injector {
 
-  override val name: String = "com.pyamsoft.padlock.INJECTOR"
+  const internal val name: String = "com.pyamsoft.padlock.INJECTOR"
 
-  override fun <T : Any> obtain(context: Context): T {
+  @JvmStatic
+  @CheckResult
+  @SuppressLint("WrongConstant")
+  fun <T : Any> obtain(context: Context): T {
     val service: Any? = context.getSystemService(name)
 
     @Suppress("UNCHECKED_CAST")

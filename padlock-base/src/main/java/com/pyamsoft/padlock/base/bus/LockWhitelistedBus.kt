@@ -16,19 +16,22 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.uicommon
+package com.pyamsoft.padlock.base.bus
 
-import android.app.Activity
-import android.content.Intent
-import android.provider.Settings
+import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object AccessibilityRequestDelegate {
+@Singleton internal class LockWhitelistedBus @Inject internal constructor() : EventBus<LockWhitelistedEvent> {
 
-  private val INTENT: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+  private val bus: EventBus<LockWhitelistedEvent> = RxBus.create()
 
-  @JvmStatic
-  fun launchAccessibilityIntent(activity: Activity) {
-    activity.startActivity(INTENT)
+  override fun listen(): Observable<LockWhitelistedEvent> = bus.listen()
+
+  override fun publish(event: LockWhitelistedEvent) {
+    bus.publish(event)
   }
 
 }

@@ -16,19 +16,7 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.uicommon
+package com.pyamsoft.padlock.base.bus
 
-import android.app.Activity
-import android.content.Intent
-import android.provider.Settings
+data class LockWhitelistedEvent(val packageName: String, val activityName: String)
 
-object AccessibilityRequestDelegate {
-
-  private val INTENT: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-
-  @JvmStatic
-  fun launchAccessibilityIntent(activity: Activity) {
-    activity.startActivity(INTENT)
-  }
-
-}

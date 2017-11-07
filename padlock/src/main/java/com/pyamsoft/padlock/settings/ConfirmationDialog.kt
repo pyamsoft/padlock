@@ -66,6 +66,7 @@ class ConfirmationDialog : CanaryDialog() {
     const private val WHICH = "which_type"
 
     @CheckResult
+    @JvmStatic
     fun newInstance(type: ConfirmEvent): ConfirmationDialog {
       return ConfirmationDialog().apply {
         arguments = Bundle().apply {

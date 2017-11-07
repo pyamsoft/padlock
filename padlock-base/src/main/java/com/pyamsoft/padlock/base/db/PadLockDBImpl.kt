@@ -270,7 +270,6 @@ import javax.inject.Singleton
       const private val DB_NAME = "padlock_db"
       const private val DATABASE_VERSION = 4
 
-
       private val UPGRADE_1_TO_2_TABLE_COLUMNS = arrayOf(PadLockEntryModel.PACKAGENAME,
           PadLockEntryModel.ACTIVITYNAME, PadLockEntryModel.LOCKCODE,
           PadLockEntryModel.LOCKUNTILTIME,

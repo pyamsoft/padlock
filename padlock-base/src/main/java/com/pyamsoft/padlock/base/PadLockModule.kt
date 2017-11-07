@@ -19,6 +19,8 @@
 package com.pyamsoft.padlock.base
 
 import android.graphics.drawable.Drawable
+import com.pyamsoft.padlock.base.bus.LockWhitelistedBus
+import com.pyamsoft.padlock.base.bus.LockWhitelistedEvent
 import com.pyamsoft.padlock.base.db.PadLockDBDelete
 import com.pyamsoft.padlock.base.db.PadLockDBImpl
 import com.pyamsoft.padlock.base.db.PadLockDBInsert
@@ -41,6 +43,7 @@ import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager
 import com.pyamsoft.padlock.base.wrapper.PackageDrawableManager
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
 import com.pyamsoft.padlock.base.wrapper.PackageManagerWrapperImpl
+import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.loader.cache.ImageCache
 import dagger.Binds
@@ -49,6 +52,10 @@ import javax.inject.Named
 
 @Module
 abstract class PadLockModule {
+
+  @Binds
+  internal abstract fun provideLockWhitelisted(
+      bus: LockWhitelistedBus): EventBus<LockWhitelistedEvent>
 
   @Binds
   internal abstract fun provideApplicationInstallReceiver(

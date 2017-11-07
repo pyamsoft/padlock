@@ -28,9 +28,9 @@ import android.view.WindowManager
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.base.loader.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
-import com.pyamsoft.padlock.base.loader.AppIconLoader
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
@@ -158,6 +158,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     const val TAG = "PinEntryDialog"
     const private val ENTRY_PACKAGE_NAME = "entry_packagename"
 
+    @JvmStatic
     @CheckResult
     fun newInstance(packageName: String): PinEntryDialog {
       return PinEntryDialog().apply {

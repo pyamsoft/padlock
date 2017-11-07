@@ -59,6 +59,7 @@ class PurgeSingleItemDialog : CanaryDialog() {
     const private val PACKAGE = "package_name"
 
     @CheckResult
+    @JvmStatic
     fun newInstance(packageName: String): PurgeSingleItemDialog {
       return PurgeSingleItemDialog().apply {
         arguments = Bundle().apply {

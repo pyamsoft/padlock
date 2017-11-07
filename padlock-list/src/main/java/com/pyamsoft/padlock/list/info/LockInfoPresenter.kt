@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.list.info
 
+import com.pyamsoft.padlock.base.bus.LockWhitelistedEvent
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Created
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Deleted
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Error
@@ -34,6 +35,7 @@ import javax.inject.Named
 
 class LockInfoPresenter @Inject internal constructor(
     private val changeBus: EventBus<LockInfoEvent.Callback>,
+    private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
     private val bus: EventBus<LockInfoEvent>, @param:Named(
         "package_name") private val packageName: String,
     private val lockInfoUpdater: LockInfoUpdater,
@@ -45,6 +47,18 @@ class LockInfoPresenter @Inject internal constructor(
   override fun onBind(v: View) {
     super.onBind(v)
     registerOnModifyBus(v)
+    registerOnWhitelistedBus()
+  }
+
+  private fun registerOnWhitelistedBus() {
+    dispose {
+      lockWhitelistedBus.listen()
+          .filter { it.packageName == packageName }
+          .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+          .subscribe({ populateList(true) }, {
+            Timber.e(it, "Error listening to lock whitelist bus")
+          })
+    }
   }
 
   private fun registerOnModifyBus(v: LockModifyCallback) {

@@ -104,15 +104,19 @@ class PadLock : Application() {
 
   companion object {
 
+    @JvmStatic
     @CheckResult
     fun getRefWatcher(fragment: CanaryFragment): RefWatcher = getRefWatcherInternal(fragment)
 
     @CheckResult
+    @JvmStatic
     fun getRefWatcher(fragment: CanaryDialog): RefWatcher = getRefWatcherInternal(fragment)
 
+    @JvmStatic
     @CheckResult
     fun getRefWatcher(fragment: SettingsFragment): RefWatcher = getRefWatcherInternal(fragment)
 
+    @JvmStatic
     @CheckResult
     private fun getRefWatcherInternal(fragment: Fragment): RefWatcher {
       val application = fragment.activity!!.application

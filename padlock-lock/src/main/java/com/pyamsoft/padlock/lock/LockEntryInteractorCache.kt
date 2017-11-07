@@ -18,6 +18,8 @@
 
 package com.pyamsoft.padlock.lock
 
+import com.pyamsoft.padlock.base.bus.LockWhitelistedEvent
+import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Completable
 import io.reactivex.Maybe
@@ -27,6 +29,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockEntryInteractorCache @Inject internal constructor(
+    private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
     @param:Named("cache_lock_list") private val lockListCache: Cache,
     @param:Named("cache_lock_info") private val lockInfoCache: Cache,
     @param:Named(
@@ -53,6 +56,8 @@ import javax.inject.Singleton
           // Clear caches so that views update when we return to them
           lockListCache.clearCache()
           lockInfoCache.clearCache()
+          lockWhitelistedBus.publish(
+              LockWhitelistedEvent(packageName, activityName))
         }
       }
 

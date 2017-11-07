@@ -331,6 +331,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
      * Starts a LockScreenActivity instance
      */
 
+    @JvmStatic
     fun start(context: Context, entry: PadLockEntry, realName: String) {
       val intent = Intent(context.applicationContext, LockScreenActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS

@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.list
 
+import com.pyamsoft.padlock.base.bus.LockWhitelistedEvent
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.list.LockListPresenter.View
 import com.pyamsoft.padlock.list.info.LockInfoEvent
@@ -44,6 +45,7 @@ class LockListPresenter @Inject internal constructor(
     private val stateInteractor: LockServiceStateInteractor,
     private val lockListBus: EventBus<LockListEvent>,
     private val lockInfoBus: EventBus<LockInfoEvent>,
+    private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
     private val clearPinBus: EventBus<ClearPinEvent>,
     private val createPinBus: EventBus<CreatePinEvent>,
     private val lockInfoChangeBus: EventBus<LockInfoEvent.Callback>,
@@ -58,6 +60,17 @@ class LockListPresenter @Inject internal constructor(
     registerOnCreateBus(v)
     registerOnClearBus(v)
     registerOnModifyBus(v, v)
+    registerOnWhitelistedBus()
+  }
+
+  private fun registerOnWhitelistedBus() {
+    dispose {
+      lockWhitelistedBus.listen()
+          .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+          .subscribe({ populateList(true) }, {
+            Timber.e(it, "Error listening to lock whitelist bus")
+          })
+    }
   }
 
   private fun registerOnModifyBus(modifyCallback: LockModifyCallback,
