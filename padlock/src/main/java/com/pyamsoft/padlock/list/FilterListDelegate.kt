@@ -55,6 +55,13 @@ internal class FilterListDelegate {
     }
   }
 
+  fun setEnabled(enabled: Boolean) {
+    searchItem?.isEnabled = enabled
+    if (!enabled) {
+      searchItem?.collapseActionView()
+    }
+  }
+
   fun onDestroyView() {
     searchItem?.collapseActionView()
     searchItem = null

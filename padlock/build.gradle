@@ -85,8 +85,6 @@ android {
 }
 
 dependencies {
-  // Recyclerview Animators
-  implementation "jp.wasabeef:recyclerview-animators:$recyclerAnimators"
 
   // Databinding
   kapt "com.android.databinding:compiler:$plugin_version"

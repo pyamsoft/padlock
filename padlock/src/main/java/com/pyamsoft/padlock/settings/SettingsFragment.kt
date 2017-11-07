@@ -30,7 +30,6 @@ import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.PinEntryDialog
-import com.pyamsoft.padlock.uicommon.RecyclerViewUtil
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment
@@ -76,7 +75,6 @@ class SettingsFragment : ActionBarSettingsPreferenceFragment(), SettingsPresente
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    listView.itemAnimator = RecyclerViewUtil.withStandardDurations()
     val clearDb = findPreference(getString(R.string.clear_db_key))
     val installListener = findPreference(getString(R.string.install_listener_key))
     lockType = findPreference(getString(R.string.lock_screen_type_key)) as ListPreference

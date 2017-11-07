@@ -36,10 +36,10 @@ import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.padlock.uicommon.ListStateUtil
-import com.pyamsoft.padlock.uicommon.RecyclerViewUtil
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.util.RecyclerViewUtil
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -79,7 +79,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
   override fun onDestroyView() {
     super.onDestroyView()
-    fastItemAdapter.withOnClickListener(null)
     binding.apply {
       purgeList.removeItemDecoration(decoration)
       purgeList.setOnClickListener(null)

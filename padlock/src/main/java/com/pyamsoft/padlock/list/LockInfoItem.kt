@@ -106,7 +106,7 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
     }
   }
 
-  override fun bindView(holder: ViewHolder, payloads: List<Any>?) {
+  override fun bindView(holder: ViewHolder, payloads: List<Any>) {
     super.bindView(holder, payloads)
     viewHolder = holder
     bindViewHolder()
@@ -117,10 +117,10 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
     holder.publisher.publish(model, newLockState, null, system)
   }
 
-  override fun unbindView(holder: ViewHolder?) {
+  override fun unbindView(holder: ViewHolder) {
     super.unbindView(holder)
     viewHolder = null
-    holder?.apply {
+    holder.apply {
       binding.lockInfoActivity.text = null
       binding.lockInfoRadioBlack.setOnCheckedChangeListener(null)
       binding.lockInfoRadioWhite.setOnCheckedChangeListener(null)
