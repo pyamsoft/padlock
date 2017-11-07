@@ -328,7 +328,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     const private val ARG_APP_SYSTEM = "app_system"
 
     @CheckResult
-
+    @JvmStatic
     fun newInstance(appEntry: AppEntry): LockInfoDialog {
       return LockInfoDialog().apply {
         arguments = Bundle().apply {

@@ -24,6 +24,7 @@ import jp.wasabeef.recyclerview.animators.SlideInUpAnimator
 
 object RecyclerViewUtil {
 
+  @JvmStatic
   @CheckResult
   fun withStandardDurations(animator: ItemAnimator = SlideInUpAnimator()): ItemAnimator {
     return animator.apply {

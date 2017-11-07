@@ -30,6 +30,7 @@ sealed class LockInfoEvent {
 
     companion object {
 
+      @JvmStatic
       @CheckResult
       fun from(entry: ActivityEntry, newState: LockState, code: String?, system: Boolean): Modify {
         return Modify(id = entry.id, name = entry.name, packageName = entry.packageName,

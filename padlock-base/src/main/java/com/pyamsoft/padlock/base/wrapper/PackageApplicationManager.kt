@@ -36,7 +36,7 @@ interface PackageApplicationManager {
 
     companion object {
 
-
+      @JvmField
       val EMPTY = ApplicationItem("", false, false)
 
     }
