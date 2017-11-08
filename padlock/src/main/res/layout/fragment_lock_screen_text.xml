@@ -54,7 +54,7 @@
 
       </android.support.design.widget.TextInputLayout>
 
-      <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
+      <TextView
           android:id="@+id/lock_display_hint"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
 
     </LinearLayout>
 
-    <com.pyamsoft.pydroid.ui.widget.SquareImageView
+    <ImageView
         android:id="@+id/lock_image_go"
         android:layout_width="40dp"
         android:layout_height="40dp"

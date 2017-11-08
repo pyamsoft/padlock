@@ -44,7 +44,7 @@
         android:orientation="vertical"
         >
 
-      <com.pyamsoft.pydroid.ui.widget.SquareImageView
+      <ImageView
           android:id="@+id/lock_image"
           android:layout_width="56dp"
           android:layout_height="56dp"

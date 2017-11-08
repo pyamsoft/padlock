@@ -51,7 +51,7 @@ import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.service.ServiceModule
 import com.pyamsoft.padlock.settings.ConfirmationDialog
-import com.pyamsoft.padlock.settings.SettingsFragment
+import com.pyamsoft.padlock.settings.SettingsPreferenceFragment
 import com.pyamsoft.padlock.settings.SettingsModule
 import dagger.Component
 import javax.inject.Singleton
@@ -79,7 +79,7 @@ interface PadLockComponent {
 
   fun inject(padLockService: PadLockService)
 
-  fun inject(settingsFragment: SettingsFragment)
+  fun inject(settingsPreferenceFragment: SettingsPreferenceFragment)
 
   fun inject(recheckService: RecheckService)
 

@@ -35,7 +35,7 @@
         android:layout_weight="1"
         >
 
-      <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
+      <TextView
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:padding="16dp"

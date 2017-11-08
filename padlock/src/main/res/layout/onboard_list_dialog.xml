@@ -44,7 +44,7 @@
         android:orientation="horizontal"
         >
 
-      <com.pyamsoft.pydroid.ui.widget.SquareImageView
+      <ImageView
           android:id="@+id/onboard_list_back"
           android:layout_width="24dp"
           android:layout_height="24dp"
@@ -68,7 +68,7 @@
           app:pressedTranslationZ="12dp"
           />
 
-      <com.pyamsoft.pydroid.ui.widget.SquareImageView
+      <ImageView
           android:id="@+id/onboard_list_next"
           android:layout_width="24dp"
           android:layout_height="24dp"
