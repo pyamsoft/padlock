@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.base.PadLockProvider
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.RecheckService
-import com.pyamsoft.padlock.settings.SettingsFragment
+import com.pyamsoft.padlock.settings.SettingsPreferenceFragment
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.PYDroidModule
@@ -114,7 +114,8 @@ class PadLock : Application() {
 
     @JvmStatic
     @CheckResult
-    fun getRefWatcher(fragment: SettingsFragment): RefWatcher = getRefWatcherInternal(fragment)
+    fun getRefWatcher(preferenceFragment: SettingsPreferenceFragment): RefWatcher = getRefWatcherInternal(
+        preferenceFragment)
 
     @JvmStatic
     @CheckResult

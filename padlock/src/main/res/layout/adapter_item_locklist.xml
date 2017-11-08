@@ -43,7 +43,7 @@
         android:longClickable="false"
         />
 
-    <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
+    <TextView
         android:id="@+id/lock_list_title"
         android:layout_width="0dp"
         android:layout_height="match_parent"

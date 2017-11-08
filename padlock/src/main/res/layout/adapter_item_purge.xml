@@ -28,7 +28,7 @@
       android:padding="8dp"
       >
 
-    <com.pyamsoft.pydroid.ui.widget.NoLeakTextView
+    <TextView
         android:id="@+id/item_purge_name"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
