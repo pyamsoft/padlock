@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
@@ -112,7 +113,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
   }
 
   private fun setupGoArrow() {
-    binding.lockImageGo.setOnClickListener {
+    binding.lockImageGo.setOnDebouncedClickListener {
       submit()
       activity?.let {
         imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)

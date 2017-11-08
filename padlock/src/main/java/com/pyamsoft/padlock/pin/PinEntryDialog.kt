@@ -34,6 +34,7 @@ import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.util.DrawableUtil
 import timber.log.Timber
 import javax.inject.Inject
@@ -110,7 +111,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     Timber.d("Type Pattern")
     if (pushIfNotPresent(PinEntryPatternFragment(), PinEntryPatternFragment.TAG)) {
       binding.pinNextButtonLayout.visibility = View.VISIBLE
-      binding.pinNextButton.setOnClickListener {
+      binding.pinNextButton.setOnDebouncedClickListener {
         val fragmentManager = childFragmentManager
         val fragment = fragmentManager.findFragmentByTag(PinEntryPatternFragment.TAG)
         if (fragment is PinEntryPatternFragment) {
