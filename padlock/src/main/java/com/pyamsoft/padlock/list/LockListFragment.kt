@@ -48,6 +48,7 @@ import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
+import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.AnimUtil
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.ui.util.RecyclerViewUtil
@@ -192,10 +193,10 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     fabIconTask = LoaderHelper.unload(fabIconTask)
     binding.apply {
       applistRecyclerview.removeItemDecoration(dividerDecoration)
-      applistRecyclerview.setOnClickListener(null)
+      applistRecyclerview.setOnDebouncedClickListener(null)
       applistRecyclerview.layoutManager = null
       applistRecyclerview.adapter = null
-      applistFab.setOnClickListener(null)
+      applistFab.setOnDebouncedClickListener(null)
       applistSwipeRefresh.setOnRefreshListener(null)
       unbind()
     }
@@ -216,7 +217,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   private fun setupFAB() {
-    binding.applistFab.setOnClickListener {
+    binding.applistFab.setOnDebouncedClickListener {
       if (PadLockService.isRunning) {
         DialogUtil.guaranteeSingleDialogFragment(activity,
             PinEntryDialog.newInstance(context!!.packageName), PinEntryDialog.TAG)

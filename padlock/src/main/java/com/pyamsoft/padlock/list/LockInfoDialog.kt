@@ -50,6 +50,7 @@ import com.pyamsoft.padlock.uicommon.ListStateUtil
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
+import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.ui.util.RecyclerViewUtil
 import com.pyamsoft.pydroid.util.AppUtil
@@ -154,7 +155,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     filterListDelegate.onDestroyView()
     binding.apply {
       lockInfoRecycler.removeItemDecoration(dividerDecoration)
-      lockInfoRecycler.setOnClickListener(null)
+      lockInfoRecycler.setOnDebouncedClickListener(null)
       lockInfoRecycler.layoutManager = null
       lockInfoRecycler.adapter = null
       unbind()

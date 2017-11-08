@@ -81,7 +81,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     super.onDestroyView()
     binding.apply {
       purgeList.removeItemDecoration(decoration)
-      purgeList.setOnClickListener(null)
       purgeList.layoutManager = null
       purgeList.adapter = null
       unbind()

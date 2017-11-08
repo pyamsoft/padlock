@@ -36,6 +36,7 @@ import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
+import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -87,7 +88,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     clearDisplay()
     setupGoArrow()
 
-    binding.pinImageGo.setOnClickListener {
+    binding.pinImageGo.setOnDebouncedClickListener {
       submitPin()
       activity?.let {
         imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0,
