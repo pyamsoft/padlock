@@ -89,7 +89,6 @@ dependencies {
   // Databinding
   kapt "com.android.databinding:compiler:$plugin_version"
 
-  implementation "com.mikepenz:fastadapter-commons:$fastAdapterCommons@aar"
   implementation("com.mikepenz:fastadapter:$fastAdapter@aar") {
     transitive = true
   }

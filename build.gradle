@@ -51,7 +51,6 @@ buildscript {
     dagger = "2.12"
     patternLock = "1.0.0"
     fastAdapter = "3.0.1"
-    fastAdapterCommons = "3.0.1"
   }
 
   dependencies {

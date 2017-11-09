@@ -29,7 +29,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
+import com.mikepenz.fastadapter.FastAdapter
+import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -51,7 +52,6 @@ import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.AnimUtil
 import com.pyamsoft.pydroid.ui.util.DialogUtil
-import com.pyamsoft.pydroid.ui.util.RecyclerViewUtil
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -59,14 +59,14 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   @field:Inject internal lateinit var imageLoader: ImageLoader
   @field:Inject internal lateinit var presenter: LockListPresenter
-  private lateinit var fastItemAdapter: FastItemAdapter<LockListItem>
+  private lateinit var adapter: ModelAdapter<AppEntry, LockListItem>
   private lateinit var binding: FragmentLockListBinding
   private lateinit var filterListDelegate: FilterListDelegate
   private var fabIconTask = LoaderHelper.empty()
   private var dividerDecoration: DividerItemDecoration? = null
   private var lastPosition: Int = 0
   private var displaySystemItem: MenuItem? = null
-  private val backingSet: MutableSet<AppEntry> = LinkedHashSet()
+  private val backingSet: MutableCollection<AppEntry> = LinkedHashSet()
 
   override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
@@ -79,14 +79,14 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
       savedInstanceState: Bundle?): View? {
     filterListDelegate = FilterListDelegate()
-    fastItemAdapter = FastItemAdapter()
+    adapter = ModelAdapter { LockListItem(activity!!, it) }
     binding = FragmentLockListBinding.inflate(inflater, container, false)
     return binding.root
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    filterListDelegate.onViewCreated(fastItemAdapter)
+    filterListDelegate.onViewCreated(adapter)
     setupRecyclerView()
     setupSwipeRefresh()
     setupFAB()
@@ -145,12 +145,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   private fun setupRecyclerView() {
     dividerDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
-    fastItemAdapter.withSelectable(true)
-    fastItemAdapter.withOnClickListener { _, _, item, _ ->
-      displayLockInfoFragment(item.model)
-      return@withOnClickListener true
-    }
-
     binding.applistRecyclerview.layoutManager = LinearLayoutManager(context).apply {
       isItemPrefetchEnabled = true
       initialPrefetchItemCount = 3
@@ -160,7 +154,16 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       applistRecyclerview.clipToPadding = false
       applistRecyclerview.setHasFixedSize(false)
       applistRecyclerview.addItemDecoration(dividerDecoration)
-      applistRecyclerview.adapter = fastItemAdapter
+      applistRecyclerview.adapter = FastAdapter.with<LockListItem, ModelAdapter<AppEntry, LockListItem>>(
+          adapter)
+
+      adapter.fastAdapter.apply {
+        withSelectable(true)
+        withOnClickListener { _, _, item, _ ->
+          displayLockInfoFragment(item.model)
+          return@withOnClickListener true
+        }
+      }
 
       applistEmpty.visibility = View.GONE
       applistRecyclerview.visibility = View.VISIBLE
@@ -178,7 +181,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   override fun onPrepareOptionsMenu(menu: Menu) {
     super.onPrepareOptionsMenu(menu)
     setupDisplaySystemVisibleItem(menu)
-    filterListDelegate.onPrepareOptionsMenu(menu, fastItemAdapter)
+    filterListDelegate.onPrepareOptionsMenu(menu, adapter)
   }
 
   private fun setupDisplaySystemVisibleItem(menu: Menu) {
@@ -199,7 +202,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       applistSwipeRefresh.setOnRefreshListener(null)
       unbind()
     }
-    fastItemAdapter.clear()
+    adapter.clear()
     backingSet.clear()
   }
 
@@ -271,8 +274,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   private fun refreshList(packageName: String, locked: Boolean? = null,
       whitelisted: Boolean? = null, hardlocked: Boolean? = null) {
-    for (i in fastItemAdapter.adapterItems.indices) {
-      val item: LockListItem = fastItemAdapter.getAdapterItem(i)
+    for (i in adapter.adapterItems.indices) {
+      val item: LockListItem = adapter.getAdapterItem(i)
       val entry: AppEntry = item.model
       if (packageName == entry.packageName) {
         val newLocked: Boolean = locked ?: entry.locked
@@ -290,7 +293,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         if (item.updateModel(
             AppEntry(name = entry.name, packageName = entry.packageName, system = entry.system,
                 locked = newLocked, whitelisted = newWhitelisted, hardLocked = newHardLocked))) {
-          fastItemAdapter.notifyAdapterItemChanged(i)
+          adapter.fastAdapter.notifyAdapterItemChanged(i)
         }
 
         // Update cache with the whitelist numbers so that a soft refresh will not change visual
@@ -381,12 +384,12 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     backingSet.add(entry)
 
     var update = false
-    for (index in fastItemAdapter.adapterItems.indices) {
-      val item: LockListItem = fastItemAdapter.adapterItems[index]
+    for (index in adapter.adapterItems.indices) {
+      val item: LockListItem = adapter.adapterItems[index]
       if (item.model.packageName == entry.packageName) {
         update = true
         if (item.updateModel(entry)) {
-          fastItemAdapter.notifyAdapterItemChanged(index)
+          adapter.fastAdapter.notifyAdapterItemChanged(index)
         }
         break
       }
@@ -399,26 +402,26 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       }
 
       var added = false
-      for (index in fastItemAdapter.adapterItems.indices) {
-        val item: LockListItem = fastItemAdapter.adapterItems[index]
+      for (index in adapter.adapterItems.indices) {
+        val item: LockListItem = adapter.adapterItems[index]
         // The entry should go before this one
         if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
           added = true
-          fastItemAdapter.add(index, LockListItem(activity!!, entry))
+          adapter.add(index, entry)
           break
         }
       }
 
       if (!added) {
         // add at the end of the list
-        fastItemAdapter.add(LockListItem(activity!!, entry))
+        adapter.add(entry)
       }
     }
   }
 
   override fun onListPopulated() {
-    fastItemAdapter.retainAll(backingSet)
-    if (fastItemAdapter.adapterItemCount > 0) {
+    adapter.retainAll(backingSet)
+    if (adapter.adapterItemCount > 0) {
       binding.applistEmpty.visibility = View.GONE
       binding.applistRecyclerview.visibility = View.VISIBLE
       Timber.d("We have refreshed")

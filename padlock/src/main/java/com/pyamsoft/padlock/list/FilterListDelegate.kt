@@ -22,7 +22,7 @@ import android.support.annotation.CheckResult
 import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.MenuItem
-import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
+import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.R
 import timber.log.Timber
 
@@ -36,7 +36,7 @@ internal class FilterListDelegate {
    *
    * Must have an already inflater menu item to work
    */
-  fun onPrepareOptionsMenu(menu: Menu, listAdapter: FastItemAdapter<out FilterableItem<*, *>>) {
+  fun onPrepareOptionsMenu(menu: Menu, listAdapter: ModelAdapter<*, out FilterableItem<*, *>>) {
     searchItem = menu.findItem(R.id.menu_search)
     val obj = searchItem
     if (obj != null) {
@@ -48,7 +48,7 @@ internal class FilterListDelegate {
   /**
    * Sets the list adapter to use a filter predicate
    */
-  fun <T : FilterableItem<*, *>> onViewCreated(listAdapter: FastItemAdapter<T>) {
+  fun <T : FilterableItem<*, *>> onViewCreated(listAdapter: ModelAdapter<*, T>) {
     listAdapter.itemFilter.withFilterPredicate { item, query ->
       val queryString = query.toString().toLowerCase().trim { it <= ' ' }
       return@withFilterPredicate item.filterAgainst(queryString)
@@ -72,7 +72,7 @@ internal class FilterListDelegate {
   }
 
   private fun setSearchViewOnQueryTextListener(
-      listAdapter: FastItemAdapter<out FilterableItem<*, *>>) {
+      listAdapter: ModelAdapter<*, out FilterableItem<*, *>>) {
     Timber.d("Set Search View listeners")
     searchView?.setOnQueryTextListener(getOnQueryTextListener(listAdapter))
     searchView?.setOnCloseListener {
@@ -82,7 +82,7 @@ internal class FilterListDelegate {
   }
 
   @CheckResult private fun getOnQueryTextListener(
-      listAdapter: FastItemAdapter<out FilterableItem<*, *>>): SearchView.OnQueryTextListener {
+      listAdapter: ModelAdapter<*, out FilterableItem<*, *>>): SearchView.OnQueryTextListener {
     return object : SearchView.OnQueryTextListener {
 
       override fun onQueryTextChange(newText: String): Boolean {

@@ -21,7 +21,7 @@ package com.pyamsoft.padlock.helper
 import android.support.annotation.CheckResult
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.MenuItem
-import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
+import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.mikepenz.fastadapter.items.ModelAbstractItem
 
 @CheckResult
@@ -37,16 +37,16 @@ fun SwipeRefreshLayout.refreshing(refreshing: Boolean) {
   post { isRefreshing = refreshing }
 }
 
-fun <M : Any, T : ModelAbstractItem<M, *, *>> FastItemAdapter<T>.retainAll(
-    items: Collection<M>): Boolean {
-  val old: MutableSet<T> = LinkedHashSet()
+fun <M : Any> ModelAdapter<M, out ModelAbstractItem<M, *, *>>.retainAll(
+    items: Collection<*>): Boolean {
+  val old: MutableCollection<ModelAbstractItem<M, *, *>> = LinkedHashSet()
   adapterItems.filterNotTo(old) { items.contains(it.model) }
 
   // Don't replace with stdlib operation, since we need the getAdapterPosition call
   // to happen on each new loop.
   @Suppress("LoopToCallChain")
   for (item in old) {
-    val index = getAdapterPosition(item)
+    val index = getAdapterPosition(item.identifier)
     if (index >= 0) {
       remove(index)
     }
