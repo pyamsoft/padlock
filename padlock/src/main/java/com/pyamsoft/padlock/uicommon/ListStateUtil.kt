@@ -50,15 +50,14 @@ object ListStateUtil {
 
   @JvmStatic
   fun saveState(outState: Bundle?, recycler: RecyclerView?) {
-    outState?.putInt(KEY_CURRENT_POSITION,
-        getCurrentPosition(recycler))
+    outState?.putInt(KEY_CURRENT_POSITION, getCurrentPosition(recycler))
   }
 
   @JvmStatic
   @CheckResult
   fun restorePosition(lastPosition: Int, recycler: RecyclerView?): Int {
     if (recycler != null) {
-      if (lastPosition != 0) {
+      if (lastPosition > 0) {
         recycler.adapter?.let {
           val size: Int = it.itemCount
           recycler.scrollToPosition(

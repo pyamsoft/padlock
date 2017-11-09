@@ -27,7 +27,8 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
+import com.mikepenz.fastadapter.FastAdapter
+import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -39,21 +40,20 @@ import com.pyamsoft.padlock.uicommon.ListStateUtil
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil
-import com.pyamsoft.pydroid.ui.util.RecyclerViewUtil
 import timber.log.Timber
 import javax.inject.Inject
 
 class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   @Inject internal lateinit var presenter: PurgePresenter
-  private lateinit var fastItemAdapter: FastItemAdapter<PurgeItem>
+  private lateinit var adapter: ModelAdapter<String, PurgeItem>
   private lateinit var binding: FragmentPurgeBinding
   private lateinit var decoration: DividerItemDecoration
   private var lastPosition: Int = 0
-  private val backingSet: MutableSet<String> = LinkedHashSet()
+  private val backingSet: MutableCollection<String> = LinkedHashSet()
 
   private fun decideListState() {
     binding.apply {
-      if (fastItemAdapter.adapterItemCount > 0) {
+      if (adapter.adapterItemCount > 0) {
         purgeEmpty.visibility = View.GONE
         purgeList.visibility = View.VISIBLE
       } else {
@@ -85,7 +85,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
       purgeList.adapter = null
       unbind()
     }
-    fastItemAdapter.clear()
+    adapter.clear()
     backingSet.clear()
   }
 
@@ -117,7 +117,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onRetrieveComplete() {
-    fastItemAdapter.retainAll(backingSet)
+    adapter.retainAll(backingSet)
     lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
     decideListState()
     binding.purgeSwipeRefresh.refreshing(false)
@@ -127,12 +127,12 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     backingSet.add(packageName)
 
     var update = false
-    for (index in fastItemAdapter.adapterItems.indices) {
-      val item: PurgeItem = fastItemAdapter.adapterItems[index]
+    for (index in adapter.adapterItems.indices) {
+      val item: PurgeItem = adapter.adapterItems[index]
       if (item.model == packageName) {
         update = true
         if (item.updateModel(packageName)) {
-          fastItemAdapter.notifyAdapterItemChanged(index)
+          adapter.fastAdapter.notifyAdapterItemChanged(index)
         }
         break
       }
@@ -145,19 +145,19 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
       }
 
       var added = false
-      for (index in fastItemAdapter.adapterItems.indices) {
-        val item: PurgeItem = fastItemAdapter.adapterItems[index]
+      for (index in adapter.adapterItems.indices) {
+        val item: PurgeItem = adapter.adapterItems[index]
         // The entry should go before this one
         if (packageName.compareTo(item.model, ignoreCase = true) < 0) {
           added = true
-          fastItemAdapter.add(index, PurgeItem(packageName))
+          adapter.add(index, packageName)
           break
         }
       }
 
       if (!added) {
         // add at the end of the list
-        fastItemAdapter.add(PurgeItem(packageName))
+        adapter.add(packageName)
       }
     }
   }
@@ -205,14 +205,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   private fun setupRecyclerView() {
     decoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
 
-    fastItemAdapter = FastItemAdapter()
-    fastItemAdapter.apply {
-      withSelectable(true)
-      withOnClickListener { _, _, item, position ->
-        handleDeleteRequest(position, item.model)
-        return@withOnClickListener true
-      }
-    }
+    adapter = ModelAdapter { PurgeItem(it) }
     binding.apply {
       purgeList.layoutManager = LinearLayoutManager(context).apply {
         isItemPrefetchEnabled = true
@@ -221,7 +214,15 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
       purgeList.clipToPadding = false
       purgeList.setHasFixedSize(false)
       purgeList.addItemDecoration(decoration)
-      purgeList.adapter = fastItemAdapter
+      purgeList.adapter = FastAdapter.with<PurgeItem, ModelAdapter<String, PurgeItem>>(adapter)
+
+      adapter.fastAdapter.apply {
+        withSelectable(true)
+        withOnClickListener { _, _, item, position ->
+          handleDeleteRequest(position, item.model)
+          return@withOnClickListener true
+        }
+      }
 
       purgeEmpty.visibility = View.GONE
       purgeList.visibility = View.VISIBLE
@@ -241,13 +242,13 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onDeleted(packageName: String) {
-    val itemCount = fastItemAdapter.itemCount
+    val itemCount = adapter.fastAdapter.itemCount
     if (itemCount == 0) {
       Timber.e("Adapter is EMPTY")
     } else {
       var found = -1
       for (i in 0 until itemCount) {
-        val item = fastItemAdapter.getAdapterItem(i)
+        val item = adapter.getAdapterItem(i)
         if (item.model == packageName) {
           found = i
           break
@@ -256,7 +257,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
       if (found != -1) {
         Timber.d("Remove deleted item: %s", packageName)
-        fastItemAdapter.remove(found)
+        adapter.remove(found)
       }
     }
 
@@ -264,11 +265,11 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onPurgeAll() {
-    val itemCount = fastItemAdapter.itemCount
+    val itemCount = adapter.fastAdapter.itemCount
     if (itemCount == 0) {
       Timber.e("Adapter is EMPTY")
     } else {
-      for (item in fastItemAdapter.adapterItems) {
+      for (item in adapter.adapterItems) {
         onPurge(item.model)
       }
     }
