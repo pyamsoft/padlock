@@ -43,9 +43,9 @@ buildscript {
     maxSdk = 27
 
     supportLib = "27.0.0"
-    firebase = "11.4.2"
+    firebase = "11.6.0"
     leakCanary = "1.5.4"
-    pydroid = "14.0.10"
+    pydroid = "14.0.11"
     autoValue = "1.5.2"
     sqlbrite = "2.0.0"
     dagger = "2.12"

@@ -143,7 +143,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       lockInfoRecycler.setHasFixedSize(false)
       lockInfoRecycler.addItemDecoration(dividerDecoration)
       lockInfoRecycler.adapter = fastItemAdapter
-      lockInfoRecycler.itemAnimator = RecyclerViewUtil.withStandardDurations()
 
       lockInfoEmpty.visibility = View.GONE
       lockInfoRecycler.visibility = View.VISIBLE

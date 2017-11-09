@@ -222,7 +222,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
       purgeList.setHasFixedSize(false)
       purgeList.addItemDecoration(decoration)
       purgeList.adapter = fastItemAdapter
-      purgeList.itemAnimator = RecyclerViewUtil.withStandardDurations()
 
       purgeEmpty.visibility = View.GONE
       purgeList.visibility = View.VISIBLE
