@@ -161,7 +161,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       applistRecyclerview.setHasFixedSize(false)
       applistRecyclerview.addItemDecoration(dividerDecoration)
       applistRecyclerview.adapter = fastItemAdapter
-      applistRecyclerview.itemAnimator = RecyclerViewUtil.withStandardDurations()
 
       applistEmpty.visibility = View.GONE
       applistRecyclerview.visibility = View.VISIBLE
