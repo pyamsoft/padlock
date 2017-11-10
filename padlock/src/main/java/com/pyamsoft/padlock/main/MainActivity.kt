@@ -59,8 +59,10 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
   override val changeLogLines: Array<String>
     get() = arrayOf(
-        "BUGFIX: Fixed a crash on the lock screen when switching too quickly",
-        "BUGFIX: Faster application startup"
+        "FEATURE: Show indicator on main list if an application has whitelisted (never locked) or blacklisted (always locked) screens",
+        "FEATURE: Show on the info dialog which screens are whitelisted or blacklisted",
+        "BUGFIX: Explain blacklisting and whitelisting",
+        "BUGFIX: Faster list fetching, do not clear static items"
     )
 
   public override fun onCreate(savedInstanceState: Bundle?) {
