@@ -18,6 +18,18 @@
 
 package com.pyamsoft.padlock.service
 
-internal enum class RecheckStatus {
-  FORCE, NOT_FORCE
+import android.support.annotation.CheckResult
+
+internal data class ForegroundEvent(val packageName: String, val className: String) {
+
+  companion object {
+
+    @JvmField internal val EMPTY = ForegroundEvent("", "")
+
+    @JvmStatic
+    @CheckResult
+    fun isEmpty(event: ForegroundEvent): Boolean =
+        event.packageName == EMPTY.packageName || event.className == EMPTY.className
+  }
 }
+

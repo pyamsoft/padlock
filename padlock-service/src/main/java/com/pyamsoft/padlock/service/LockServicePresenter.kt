@@ -21,6 +21,7 @@ package com.pyamsoft.padlock.service
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.lock.LockPassEvent
 import com.pyamsoft.padlock.service.LockServicePresenter.View
+import com.pyamsoft.padlock.service.RecheckStatus.NOT_FORCE
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.helper.clear
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -51,6 +52,7 @@ class LockServicePresenter @Inject internal constructor(
   override fun onBind(v: View) {
     super.onBind(v)
     registerOnBus(v)
+    listenForForegroundEvents(v)
   }
 
   override fun onUnbind() {
@@ -60,6 +62,28 @@ class LockServicePresenter @Inject internal constructor(
 
     matchingDisposable = matchingDisposable.clear()
     entryDisposable = entryDisposable.clear()
+  }
+
+  private fun listenForForegroundEvents(v: ForegroundEventStreamCallback) {
+    dispose {
+      interactor.listenForForegroundEvents()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .onErrorReturn {
+            Timber.e(it, "Error while listening to foreground events")
+            return@onErrorReturn ForegroundEvent.EMPTY
+          }
+          .doAfterTerminate { v.onFinish() }
+          .subscribe({
+            if (ForegroundEvent.isEmpty(it)) {
+              Timber.w("Ignore empty foreground entry event")
+            } else {
+              processEvent(it.packageName, it.className, NOT_FORCE)
+            }
+          },
+              { Timber.e(it, "Error while listening to foreground event, killing stream") },
+              { Timber.d("Foreground event stream completed") })
+    }
   }
 
   private fun registerOnBus(v: BusCallback) {
@@ -98,13 +122,12 @@ class LockServicePresenter @Inject internal constructor(
         .observeOn(mainThreadScheduler)
         .subscribe({
           if (it) {
-            processAccessibilityEvent(packageName, className, RecheckStatus.FORCE)
+            processEvent(packageName, className, RecheckStatus.FORCE)
           }
         }, { Timber.e(it, "onError processActiveApplicationIfMatching") })
   }
 
-  fun processAccessibilityEvent(packageName: String, className: String,
-      forcedRecheck: RecheckStatus) {
+  private fun processEvent(packageName: String, className: String, forcedRecheck: RecheckStatus) {
     entryDisposable = entryDisposable.clear()
     entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
         .subscribeOn(ioScheduler)
@@ -124,16 +147,19 @@ class LockServicePresenter @Inject internal constructor(
         })
   }
 
-  interface View : BusCallback, LockScreenCallback
+  interface View : ForegroundEventStreamCallback, BusCallback, LockScreenCallback
+
+  interface ForegroundEventStreamCallback {
+
+    fun onFinish()
+  }
 
   interface LockScreenCallback {
 
     fun onStartLockScreen(entry: PadLockEntry, realName: String)
   }
 
-  interface BusCallback {
-
-    fun onFinish()
+  interface BusCallback : ForegroundEventStreamCallback {
 
     fun onRecheck(packageName: String, className: String)
   }

@@ -24,7 +24,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.app.usage.UsageStatsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -50,7 +49,6 @@ class PadLockService : Service(), LockServicePresenter.View {
   override fun onBind(ignore: Intent?): IBinder? = null
 
   @field:Inject internal lateinit var presenter: LockServicePresenter
-  private lateinit var statsManager: UsageStatsManager
 
   override fun onCreate() {
     super.onCreate()
@@ -64,8 +62,6 @@ class PadLockService : Service(), LockServicePresenter.View {
 
     Injector.obtain<PadLockComponent>(applicationContext).inject(this)
     presenter.bind(this)
-
-    statsManager = application.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     updateBootEnabledState()
 
     startInForeground()
@@ -158,18 +154,6 @@ class PadLockService : Service(), LockServicePresenter.View {
     application.let {
       val component = ComponentName(it, BootReceiver::class.java)
       it.packageManager.setComponentEnabledSetting(component, flag, PackageManager.DONT_KILL_APP)
-    }
-  }
-
-  private fun onForegroundEvent(eventPackage: String?, eventClass: String?) {
-    if (eventPackage != null && eventClass != null) {
-      val pName = eventPackage.toString()
-      val cName = eventClass.toString()
-      if (pName.isNotBlank() && cName.isNotBlank()) {
-        presenter.processAccessibilityEvent(pName, cName, RecheckStatus.NOT_FORCE)
-      }
-    } else {
-      Timber.e("Missing needed data")
     }
   }
 

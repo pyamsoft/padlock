@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.service
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockEntry
+import io.reactivex.Observable
 import io.reactivex.Single
 
 internal interface LockServiceInteractor {
@@ -30,9 +31,14 @@ internal interface LockServiceInteractor {
 
   fun setLockScreenPassed(packageName: String, className: String, passed: Boolean)
 
-  @CheckResult fun isActiveMatching(packageName: String, className: String): Single<Boolean>
+  @CheckResult
+  fun isActiveMatching(packageName: String, className: String): Single<Boolean>
 
-  @CheckResult fun processEvent(packageName: String, className: String,
+  @CheckResult
+  fun listenForForegroundEvents(): Observable<ForegroundEvent>
+
+  @CheckResult
+  fun processEvent(packageName: String, className: String,
       forcedRecheck: RecheckStatus): Single<PadLockEntry>
 
 }
