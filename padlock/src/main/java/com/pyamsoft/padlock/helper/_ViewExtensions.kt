@@ -38,9 +38,9 @@ fun SwipeRefreshLayout.refreshing(refreshing: Boolean) {
 }
 
 fun <M : Any> ModelAdapter<M, out ModelAbstractItem<M, *, *>>.retainAll(
-    items: Collection<*>): Boolean {
+    backing: MutableCollection<M>): Boolean {
   val old: MutableCollection<ModelAbstractItem<M, *, *>> = LinkedHashSet()
-  adapterItems.filterNotTo(old) { items.contains(it.model) }
+  adapterItems.filterNotTo(old) { backing.contains(it.model) }
 
   // Don't replace with stdlib operation, since we need the getAdapterPosition call
   // to happen on each new loop.
@@ -51,5 +51,7 @@ fun <M : Any> ModelAdapter<M, out ModelAbstractItem<M, *, *>>.retainAll(
       remove(index)
     }
   }
+
+  backing.clear()
   return old.isNotEmpty()
 }
