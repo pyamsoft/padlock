@@ -18,11 +18,10 @@
 
 package com.pyamsoft.padlock.service
 
-import android.accessibilityservice.AccessibilityService
+import android.app.Service
 import android.content.Intent
-import android.os.Build
+import android.os.IBinder
 import android.support.annotation.CheckResult
-import android.view.accessibility.AccessibilityEvent
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.base.db.PadLockEntry
@@ -30,18 +29,31 @@ import com.pyamsoft.padlock.lock.LockScreenActivity
 import timber.log.Timber
 import javax.inject.Inject
 
-class PadLockService : AccessibilityService(), LockServicePresenter.View {
+class PadLockService : Service(), LockServicePresenter.View {
+
+  override fun onBind(ignore: Intent?): IBinder? = null
 
   @field:Inject internal lateinit var presenter: LockServicePresenter
 
-  override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-    if (event == null) {
-      Timber.e("AccessibilityEvent is NULL")
-      return
-    }
+  override fun onCreate() {
+    super.onCreate()
+    Injector.obtain<PadLockComponent>(applicationContext).inject(this)
+    presenter.bind(this)
+    isRunning = true
+  }
 
-    val eventPackage = event.packageName
-    val eventClass = event.className
+  override fun onDestroy() {
+    super.onDestroy()
+    presenter.unbind()
+    isRunning = false
+  }
+
+  override fun onFinish() {
+    stopForeground(true)
+    stopSelf()
+  }
+
+  private fun onForegroundEvent(eventPackage: String?, eventClass: String?) {
     if (eventPackage != null && eventClass != null) {
       val pName = eventPackage.toString()
       val cName = eventClass.toString()
@@ -53,39 +65,8 @@ class PadLockService : AccessibilityService(), LockServicePresenter.View {
     }
   }
 
-  override fun onInterrupt() {
-    Timber.e("onInterrupt")
-  }
-
-  override fun onCreate() {
-    super.onCreate()
-    Injector.obtain<PadLockComponent>(applicationContext).inject(this)
-    presenter.bind(this)
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    presenter.unbind()
-  }
-
-  override fun onServiceConnected() {
-    super.onServiceConnected()
-    isRunning = true
-  }
-
-  override fun onFinish() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      disableSelf()
-    }
-  }
-
   override fun onRecheck(packageName: String, className: String) {
     presenter.processActiveApplicationIfMatching(packageName, className)
-  }
-
-  override fun onUnbind(intent: Intent): Boolean {
-    isRunning = false
-    return super.onUnbind(intent)
   }
 
   override fun onStartLockScreen(entry: PadLockEntry, realName: String) {
