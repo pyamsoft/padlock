@@ -62,7 +62,7 @@ import javax.inject.Singleton
     ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class,
     LockInfoSingletonModule::class, LockStateModule::class, LockListModule::class,
     LockScreenSingletonModule::class, LockEntrySingletonModule::class,
-    MasterPinModule::class))
+    MasterPinModule::class, UiProvider::class))
 interface PadLockComponent {
 
   fun inject(fragment: LockListFragment)

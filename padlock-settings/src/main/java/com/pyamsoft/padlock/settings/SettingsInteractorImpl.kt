@@ -40,13 +40,11 @@ import javax.inject.Singleton
     @param:Named("cache_lock_info") private val lockInfoInteractor: Cache,
     @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
     @param:Named("cache_app_icons") private val iconCache: Cache,
+    @param:Named("cache_list_state") private val listStateCache: Cache,
     @param:Named("cache_purge") private val purgeInteractor: Cache) : SettingsInteractor {
 
-  override fun isInstallListenerEnabled(): Single<Boolean> {
-    return Single.fromCallable {
-      installListenerPreferences.isInstallListenerEnabled()
-    }
-  }
+  override fun isInstallListenerEnabled(): Single<Boolean> =
+      Single.fromCallable { installListenerPreferences.isInstallListenerEnabled() }
 
   override fun clearDatabase(): Single<Boolean> {
     Timber.d("clear database")
@@ -57,6 +55,7 @@ import javax.inject.Singleton
           purgeInteractor.clearCache()
           lockEntryInteractor.clearCache()
           iconCache.clearCache()
+          listStateCache.clearCache()
         })
         .toSingleDefault(true)
   }

@@ -104,7 +104,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     setupSwipeRefresh()
     setupRecyclerView()
     filterListDelegate.onViewCreated(adapter)
-    lastPosition = ListStateUtil.restoreState(savedInstanceState)
+    lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
     presenter.bind(this)
   }
@@ -175,11 +175,16 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   override fun onStop() {
     super.onStop()
     appIcon = LoaderHelper.unload(appIcon)
+  }
+
+  override fun onPause() {
+    super.onPause()
     lastPosition = ListStateUtil.getCurrentPosition(binding.lockInfoRecycler)
+    ListStateUtil.saveState(TAG, null, binding.lockInfoRecycler)
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
-    ListStateUtil.saveState(outState, binding.lockInfoRecycler)
+    ListStateUtil.saveState(TAG, outState, binding.lockInfoRecycler)
     super.onSaveInstanceState(outState)
   }
 

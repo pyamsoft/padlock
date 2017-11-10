@@ -23,10 +23,12 @@ import android.support.annotation.CheckResult
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.RecyclerView.LayoutManager
+import com.pyamsoft.pydroid.data.Cache
 
-object ListStateUtil {
+object ListStateUtil : Cache {
 
   const private val KEY_CURRENT_POSITION: String = "key_current_position"
+  private val cache: MutableMap<String, Int> = LinkedHashMap()
 
   @JvmStatic
   @CheckResult
@@ -36,7 +38,11 @@ object ListStateUtil {
     } else {
       val layoutManager: LayoutManager? = recycler.layoutManager
       if (layoutManager is LinearLayoutManager) {
-        return layoutManager.findFirstCompletelyVisibleItemPosition()
+        var position: Int = layoutManager.findFirstCompletelyVisibleItemPosition()
+        if (position < 0) {
+          position = layoutManager.findFirstVisibleItemPosition()
+        }
+        return position
       } else {
         return 0
       }
@@ -45,13 +51,22 @@ object ListStateUtil {
 
   @JvmStatic
   @CheckResult
-  fun restoreState(savedInstanceState: Bundle?): Int =
-      savedInstanceState?.getInt(KEY_CURRENT_POSITION, 0) ?: 0
+  fun restoreState(tag: String, savedInstanceState: Bundle?): Int {
+    val position: Int = savedInstanceState?.getInt(KEY_CURRENT_POSITION, 0) ?: 0
+    if (position == 0) {
+      return cache[tag] ?: 0
+    } else {
+      return position
+    }
+  }
 
   @JvmStatic
-  fun saveState(outState: Bundle?, recycler: RecyclerView?) {
-    outState?.putInt(KEY_CURRENT_POSITION,
-        getCurrentPosition(recycler))
+  fun saveState(tag: String, outState: Bundle?, recycler: RecyclerView?) {
+    val position: Int = getCurrentPosition(recycler)
+    if (position > 0) {
+      outState?.putInt(KEY_CURRENT_POSITION, position)
+      cache[tag] = position
+    }
   }
 
   @JvmStatic
@@ -61,13 +76,16 @@ object ListStateUtil {
       if (lastPosition > 0) {
         recycler.adapter?.let {
           val size: Int = it.itemCount
-          recycler.scrollToPosition(
-              if (lastPosition > size) size - 1 else lastPosition)
+          recycler.scrollToPosition(if (lastPosition > size) size - 1 else lastPosition)
         }
       }
     }
 
     return 0
+  }
+
+  override fun clearCache() {
+    cache.clear()
   }
 }
 
