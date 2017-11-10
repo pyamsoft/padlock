@@ -91,7 +91,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     setupSwipeRefresh()
     setupFAB()
 
-    lastPosition = ListStateUtil.restoreState(savedInstanceState)
+    lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
     presenter.bind(this)
 
@@ -110,13 +110,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     presenter.setFABStateFromPreference()
   }
 
-  override fun onStop() {
-    super.onStop()
-    lastPosition = ListStateUtil.getCurrentPosition(binding.applistRecyclerview)
-  }
-
   override fun onSaveInstanceState(outState: Bundle) {
-    ListStateUtil.saveState(outState, binding.applistRecyclerview)
+    ListStateUtil.saveState(TAG, outState, binding.applistRecyclerview)
     super.onSaveInstanceState(outState)
   }
 
@@ -130,6 +125,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   override fun onPause() {
     super.onPause()
     AnimUtil.popHide(binding.applistFab, 300, 400)
+    lastPosition = ListStateUtil.getCurrentPosition(binding.applistRecyclerview)
+    ListStateUtil.saveState(TAG, null, binding.applistRecyclerview)
   }
 
   private fun setupSwipeRefresh() {

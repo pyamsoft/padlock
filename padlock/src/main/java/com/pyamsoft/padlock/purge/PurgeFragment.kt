@@ -93,7 +93,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     super.onViewCreated(view, savedInstanceState)
     setupRecyclerView()
     setupSwipeRefresh()
-    lastPosition = ListStateUtil.restoreState(savedInstanceState)
+    lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
     presenter.bind(this)
   }
@@ -166,13 +166,14 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     Toasty.makeText(context!!, "Error retrieving old application list", Toasty.LENGTH_SHORT).show()
   }
 
-  override fun onStop() {
-    super.onStop()
+  override fun onPause() {
+    super.onPause()
     lastPosition = ListStateUtil.getCurrentPosition(binding.purgeList)
+    ListStateUtil.saveState(TAG, null, binding.purgeList)
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
-    ListStateUtil.saveState(outState, binding.purgeList)
+    ListStateUtil.saveState(TAG, outState, binding.purgeList)
     super.onSaveInstanceState(outState)
   }
 

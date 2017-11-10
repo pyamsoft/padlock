@@ -29,6 +29,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
+import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.sec.TamperActivity
@@ -126,6 +127,9 @@ class MainActivity : TamperActivity(), MainPresenter.View {
   override fun onDestroy() {
     super.onDestroy()
     binding.unbind()
+    if (!isChangingConfigurations) {
+      ListStateUtil.clearCache()
+    }
   }
 
   override fun onBackPressed() {
