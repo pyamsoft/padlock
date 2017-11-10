@@ -28,6 +28,9 @@
       android:name="android.permission.PACKAGE_USAGE_STATS"
       tools:ignore="ProtectedPermissions"/>
 
+  <!-- To start the service on boot-->
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
   <application
       android:name=".PadLock"
       android:allowBackup="true"
@@ -82,6 +85,15 @@
     <service
         android:name=".service.RecheckService"
         android:exported="false"/>
+
+    <!-- Receive boot completed, only active when PadLockService is on -->
+    <receiver
+        android:name=".boot.BootReceiver"
+        android:enabled="false">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED"/>
+      </intent-filter>
+    </receiver>
 
   </application>
 

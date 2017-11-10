@@ -19,12 +19,16 @@
 package com.pyamsoft.padlock.service
 
 import android.app.Service
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.IBinder
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.base.db.PadLockEntry
+import com.pyamsoft.padlock.boot.BootReceiver
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import timber.log.Timber
 import javax.inject.Inject
@@ -40,6 +44,7 @@ class PadLockService : Service(), LockServicePresenter.View {
     Injector.obtain<PadLockComponent>(applicationContext).inject(this)
     presenter.bind(this)
     isRunning = true
+    updateBootEnabledState()
   }
 
   override fun onDestroy() {
@@ -51,6 +56,38 @@ class PadLockService : Service(), LockServicePresenter.View {
   override fun onFinish() {
     stopForeground(true)
     stopSelf()
+
+    // Update boot state here since this function is called by the app only, not the system
+    updateBootEnabledState()
+  }
+
+  override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    Timber.d("Service onStartCommand")
+    return Service.START_STICKY
+  }
+
+  override fun onRecheck(packageName: String, className: String) {
+    presenter.processActiveApplicationIfMatching(packageName, className)
+  }
+
+  override fun onStartLockScreen(entry: PadLockEntry, realName: String) {
+    Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
+        entry.activityName(), realName)
+    LockScreenActivity.start(this, entry, realName)
+  }
+
+  private fun updateBootEnabledState() {
+    val flag: Int
+    if (isRunning) {
+      flag = PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+    } else {
+      flag = PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+    }
+
+    application.let {
+      val component = ComponentName(it, BootReceiver::class.java)
+      it.packageManager.setComponentEnabledSetting(component, flag, PackageManager.DONT_KILL_APP)
+    }
   }
 
   private fun onForegroundEvent(eventPackage: String?, eventClass: String?) {
@@ -65,20 +102,18 @@ class PadLockService : Service(), LockServicePresenter.View {
     }
   }
 
-  override fun onRecheck(packageName: String, className: String) {
-    presenter.processActiveApplicationIfMatching(packageName, className)
-  }
-
-  override fun onStartLockScreen(entry: PadLockEntry, realName: String) {
-    Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
-        entry.activityName(), realName)
-    LockScreenActivity.start(this, entry, realName)
-  }
-
   companion object {
 
     var isRunning: Boolean = false
       @CheckResult get
       private set
+
+    @JvmStatic
+    fun start(context: Context) {
+      context.applicationContext.let {
+        val service = Intent(it, PadLockService::class.java)
+        it.startService(service)
+      }
+    }
   }
 }
