@@ -16,7 +16,7 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.uicommon
+package com.pyamsoft.padlock.helper
 
 import android.os.Bundle
 import android.support.annotation.CheckResult
@@ -50,7 +50,8 @@ object ListStateUtil {
 
   @JvmStatic
   fun saveState(outState: Bundle?, recycler: RecyclerView?) {
-    outState?.putInt(KEY_CURRENT_POSITION, getCurrentPosition(recycler))
+    outState?.putInt(KEY_CURRENT_POSITION,
+        getCurrentPosition(recycler))
   }
 
   @JvmStatic

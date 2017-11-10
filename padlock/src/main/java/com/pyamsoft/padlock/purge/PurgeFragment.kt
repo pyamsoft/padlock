@@ -36,7 +36,7 @@ import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.uicommon.CanaryFragment
-import com.pyamsoft.padlock.uicommon.ListStateUtil
+import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil

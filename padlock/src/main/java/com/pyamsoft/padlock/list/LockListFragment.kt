@@ -42,7 +42,7 @@ import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.uicommon.CanaryFragment
-import com.pyamsoft.padlock.uicommon.ListStateUtil
+import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
 import com.pyamsoft.pydroid.design.util.FABUtil
 import com.pyamsoft.pydroid.loader.ImageLoader
