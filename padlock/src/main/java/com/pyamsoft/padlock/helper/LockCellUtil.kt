@@ -16,7 +16,7 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.uicommon
+package com.pyamsoft.padlock.helper
 
 import android.support.annotation.CheckResult
 import com.andrognito.patternlockview.PatternLockView
