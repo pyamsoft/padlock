@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.sec.TamperActivity
@@ -159,6 +160,9 @@ class MainActivity : TamperActivity(), MainPresenter.View {
   override fun onPostResume() {
     super.onPostResume()
     AnimUtil.animateActionBarToolbar(binding.toolbar)
+
+    // Try to start service, will not if we do not have permission
+    PadLockService.start(this)
   }
 }
 
