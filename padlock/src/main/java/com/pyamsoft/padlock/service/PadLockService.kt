@@ -18,18 +18,30 @@
 
 package com.pyamsoft.padlock.service
 
+import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
+import android.app.usage.UsageStatsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.IBinder
 import android.support.annotation.CheckResult
+import android.support.annotation.RequiresApi
+import android.support.v4.app.NotificationCompat
+import android.support.v4.app.NotificationManagerCompat
+import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.boot.BootReceiver
 import com.pyamsoft.padlock.lock.LockScreenActivity
+import com.pyamsoft.padlock.main.MainActivity
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -38,13 +50,26 @@ class PadLockService : Service(), LockServicePresenter.View {
   override fun onBind(ignore: Intent?): IBinder? = null
 
   @field:Inject internal lateinit var presenter: LockServicePresenter
+  private lateinit var statsManager: UsageStatsManager
 
   override fun onCreate() {
     super.onCreate()
+
+    if (ContextCompat.checkSelfPermission(applicationContext,
+        Manifest.permission.PACKAGE_USAGE_STATS) != PackageManager.PERMISSION_GRANTED) {
+      Timber.e("We do not have usage stats permission, killing service")
+      stopSelf()
+      return
+    }
+
     Injector.obtain<PadLockComponent>(applicationContext).inject(this)
     presenter.bind(this)
-    isRunning = true
+
+    statsManager = application.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
     updateBootEnabledState()
+
+    startInForeground()
+    isRunning = true
   }
 
   override fun onDestroy() {
@@ -74,6 +99,52 @@ class PadLockService : Service(), LockServicePresenter.View {
     Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
         entry.activityName(), realName)
     LockScreenActivity.start(this, entry, realName)
+  }
+
+  private fun startInForeground() {
+    val id = 1001
+    val requestCode = 1004
+
+    val notificationChannelId = "padlock_foreground"
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      setupNotificationChannel(notificationChannelId)
+    }
+
+    val launchMain = Intent(applicationContext, MainActivity::class.java).apply {
+      flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    }
+
+    val pe = PendingIntent.getActivity(applicationContext, requestCode, launchMain,
+        PendingIntent.FLAG_UPDATE_CURRENT)
+    val n = NotificationCompat.Builder(applicationContext, notificationChannelId).apply {
+      setContentIntent(pe)
+      setSmallIcon(R.mipmap.ic_launcher)
+      setOngoing(true)
+      setWhen(0)
+      setNumber(0)
+      setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+      priority = NotificationCompat.PRIORITY_MIN
+      color = ContextCompat.getColor(applicationContext, R.color.blue500)
+      setContentTitle(getString(R.string.app_name)).setContentText("PadLock Service is running")
+    }.build()
+    NotificationManagerCompat.from(applicationContext).notify(id, n)
+  }
+
+  @RequiresApi(Build.VERSION_CODES.O) private fun setupNotificationChannel(
+      notificationChannelId: String) {
+    val name = "PadLock Service"
+    val description = "Notification related to the PadLock service"
+    val importance = NotificationManager.IMPORTANCE_MIN
+    val notificationChannel = NotificationChannel(notificationChannelId, name, importance)
+    notificationChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+    notificationChannel.description = description
+    notificationChannel.enableLights(false)
+    notificationChannel.enableVibration(false)
+
+    Timber.d("Create notification channel with id: %s", notificationChannelId)
+    val notificationManager: NotificationManager = applicationContext.getSystemService(
+        Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.createNotificationChannel(notificationChannel)
   }
 
   private fun updateBootEnabledState() {
@@ -110,9 +181,18 @@ class PadLockService : Service(), LockServicePresenter.View {
 
     @JvmStatic
     fun start(context: Context) {
-      context.applicationContext.let {
-        val service = Intent(it, PadLockService::class.java)
-        it.startService(service)
+      val appContext = context.applicationContext
+      if (ContextCompat.checkSelfPermission(appContext,
+          Manifest.permission.PACKAGE_USAGE_STATS) != PackageManager.PERMISSION_GRANTED) {
+        Timber.e("We do not have usage stats permission, do not start service")
+        return
+      }
+
+      val service = Intent(appContext, PadLockService::class.java)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        appContext.startForegroundService(service)
+      } else {
+        appContext.startService(service)
       }
     }
   }
