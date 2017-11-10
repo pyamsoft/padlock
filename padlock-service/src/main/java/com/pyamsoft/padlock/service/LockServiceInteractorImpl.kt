@@ -21,6 +21,9 @@ package com.pyamsoft.padlock.service
 import android.app.Activity
 import android.app.IntentService
 import android.app.KeyguardManager
+import android.app.usage.UsageEvents
+import android.app.usage.UsageEvents.Event
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.support.annotation.CheckResult
@@ -30,11 +33,16 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.service.RecheckStatus.FORCE
+import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Maybe
 import io.reactivex.MaybeTransformer
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.SingleTransformer
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -57,7 +65,8 @@ import javax.inject.Singleton
   private var activePackageName = ""
   private var activeClassName = ""
   private val lockScreenPassed: MutableMap<String, Boolean> = HashMap()
-
+  private val usageManager: UsageStatsManager = appContext.getSystemService(
+      Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
   override fun reset() {
     Timber.i("Reset name state")
@@ -66,6 +75,56 @@ import javax.inject.Singleton
     activeClassName = ""
     activePackageName = ""
     lockScreenPassed.clear()
+  }
+
+  override fun listenForForegroundEvents(): Observable<ForegroundEvent> {
+    return Observable.interval(LISTEN_INTERVAL, MILLISECONDS).map {
+      val now: Long = System.currentTimeMillis()
+      val beginTime = now - THIRTY_SECONDS_MILLIS
+      val endTime = now + TEN_SECONDS_MILLIS
+      return@map usageManager.queryEvents(beginTime, endTime)
+    }.map {
+      val foregroundEvent: Optional<ForegroundEvent>
+      val event: UsageEvents.Event = Event()
+
+      // We have usage events
+      if (it.hasNextEvent()) {
+        it.getNextEvent(event)
+        Timber.d(
+            "Usage Event: ${event.packageName} ${event.className} ${parseType(event.eventType)}")
+        while (it.hasNextEvent()) {
+          it.getNextEvent(event)
+          Timber.d(
+              "Usage Event: ${event.packageName} ${event.className} ${parseType(event.eventType)}")
+        }
+
+        Timber.d(
+            "Final Event: ${event.packageName} ${event.className} ${parseType(event.eventType)}")
+        if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+          Timber.d(
+              "Foreground Event: ${event.packageName} ${event.className} ${parseType(
+                  event.eventType)}")
+          foregroundEvent = ForegroundEvent(event.packageName ?: "",
+              event.className ?: "").asOptional()
+        } else {
+          foregroundEvent = Optional.asOptional(null)
+        }
+      } else {
+        foregroundEvent = Optional.asOptional(null)
+      }
+      return@map foregroundEvent
+    }.filter { it.get() != null }.map { it.get() }
+  }
+
+  @CheckResult
+  private fun parseType(type: Int): String = when (type) {
+    UsageEvents.Event.MOVE_TO_FOREGROUND -> "MOVE_TO_FOREGROUND"
+    UsageEvents.Event.MOVE_TO_BACKGROUND -> "MOVE_TO_BACKGROUND"
+    UsageEvents.Event.CONFIGURATION_CHANGE -> "CONFIGURATION_CHANGE"
+    UsageEvents.Event.SHORTCUT_INVOCATION -> "SHORTCUT_INVOCATION"
+    UsageEvents.Event.USER_INTERACTION -> "USER_INTERACTION"
+    UsageEvents.Event.NONE -> "NONE"
+    else -> "INVALID"
   }
 
   override fun isActiveMatching(packageName: String, className: String): Single<Boolean> {
@@ -184,7 +243,6 @@ import javax.inject.Singleton
     }
   }
 
-
   @CheckResult private fun isWindowFromLockScreen(windowPackage: String,
       windowActivity: String): Boolean {
     val lockScreenPackage: String = appContext.packageName
@@ -267,5 +325,11 @@ import javax.inject.Singleton
 
       return@map windowHasChanged || lockPassed.not()
     }.compose(getEntry(packageName, className))
+  }
+
+  companion object {
+    private const val LISTEN_INTERVAL = 200L
+    private val THIRTY_SECONDS_MILLIS = TimeUnit.SECONDS.toMillis(30L)
+    private val TEN_SECONDS_MILLIS = TimeUnit.SECONDS.toMillis(10L)
   }
 }

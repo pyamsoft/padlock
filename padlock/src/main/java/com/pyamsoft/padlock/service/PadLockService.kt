@@ -37,6 +37,7 @@ import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.boot.BootReceiver
 import com.pyamsoft.padlock.lock.LockScreenActivity
