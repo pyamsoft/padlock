@@ -39,7 +39,7 @@ buildscript {
 
   ext {
 
-    minSdk = 19
+    minSdk = 22
     maxSdk = 27
 
     supportLib = "27.0.0"
