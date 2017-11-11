@@ -29,6 +29,8 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.lock.helper.LockHelper
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor
+import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.pydroid.helper.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Completable
 import io.reactivex.Maybe
@@ -62,7 +64,7 @@ import javax.inject.Singleton
             Timber.d("Check entry is not locked: %d", lockUntilTime)
             if (System.currentTimeMillis() < lockUntilTime) {
               Timber.e("Entry is still locked. Fail unlock")
-              return@map null.asOptional()
+              return@map Optional.asOptional(null)
             }
 
             if (lockCode == null) {
@@ -73,12 +75,11 @@ import javax.inject.Singleton
               return@map lockCode.asOptional()
             }
           }.flatMap innerFlat@ {
-            val value = it.get()
-            if (value == null) {
+            if (it is Present) {
+              return@innerFlat lockHelper.checkSubmissionAttempt(currentAttempt, it.value)
+            } else {
               Timber.e("Cannot submit against PIN which is NULL")
               return@innerFlat Single.just(false)
-            } else {
-              return@innerFlat lockHelper.checkSubmissionAttempt(currentAttempt, value)
             }
           }
         }
@@ -151,11 +152,10 @@ import javax.inject.Singleton
 
   override fun getHint(): Single<String> {
     return masterPinInteractor.getHint().map {
-      val value = it.get()
-      if (value == null) {
-        return@map ""
+      if (it is Present) {
+        return@map it.value
       } else {
-        return@map value
+        return@map ""
       }
     }
   }

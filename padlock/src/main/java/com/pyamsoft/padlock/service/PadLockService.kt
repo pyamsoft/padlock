@@ -18,7 +18,6 @@
 
 package com.pyamsoft.padlock.service
 
-import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -50,12 +49,12 @@ class PadLockService : Service(), LockServicePresenter.View {
   override fun onBind(ignore: Intent?): IBinder? = null
 
   @field:Inject internal lateinit var presenter: LockServicePresenter
+  private var screenListener: ScreenEventListener? = null
 
   override fun onCreate() {
     super.onCreate()
 
-    if (ContextCompat.checkSelfPermission(applicationContext,
-        Manifest.permission.PACKAGE_USAGE_STATS) != PackageManager.PERMISSION_GRANTED) {
+    if (UsagePermissionChecker.missingUsageStatsPermission(applicationContext)) {
       Timber.e("We do not have usage stats permission, killing service")
       stopSelf()
       return
@@ -63,7 +62,9 @@ class PadLockService : Service(), LockServicePresenter.View {
 
     Injector.obtain<PadLockComponent>(applicationContext).inject(this)
     presenter.bind(this)
-    updateBootEnabledState()
+
+    screenListener = ScreenEventListener(applicationContext, presenter)
+    screenListener?.register()
 
     startInForeground()
     isRunning = true
@@ -72,15 +73,15 @@ class PadLockService : Service(), LockServicePresenter.View {
   override fun onDestroy() {
     super.onDestroy()
     presenter.unbind()
+    screenListener?.unregister()
+    screenListener = null
     isRunning = false
+
+    stopForeground(true)
   }
 
   override fun onFinish() {
-    stopForeground(true)
     stopSelf()
-
-    // Update boot state here since this function is called by the app only, not the system
-    updateBootEnabledState()
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -115,7 +116,7 @@ class PadLockService : Service(), LockServicePresenter.View {
         PendingIntent.FLAG_UPDATE_CURRENT)
     val n = NotificationCompat.Builder(applicationContext, notificationChannelId).apply {
       setContentIntent(pe)
-      setSmallIcon(R.mipmap.ic_launcher)
+      setSmallIcon(R.drawable.ic_notification_lock)
       setOngoing(true)
       setWhen(0)
       setNumber(0)
@@ -144,20 +145,6 @@ class PadLockService : Service(), LockServicePresenter.View {
     notificationManager.createNotificationChannel(notificationChannel)
   }
 
-  private fun updateBootEnabledState() {
-    val flag: Int
-    if (isRunning) {
-      flag = PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-    } else {
-      flag = PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-    }
-
-    application.let {
-      val component = ComponentName(it, BootReceiver::class.java)
-      it.packageManager.setComponentEnabledSetting(component, flag, PackageManager.DONT_KILL_APP)
-    }
-  }
-
   companion object {
 
     var isRunning: Boolean = false
@@ -167,8 +154,7 @@ class PadLockService : Service(), LockServicePresenter.View {
     @JvmStatic
     fun start(context: Context) {
       val appContext = context.applicationContext
-      if (ContextCompat.checkSelfPermission(appContext,
-          Manifest.permission.PACKAGE_USAGE_STATS) != PackageManager.PERMISSION_GRANTED) {
+      if (UsagePermissionChecker.missingUsageStatsPermission(context)) {
         Timber.e("We do not have usage stats permission, do not start service")
         return
       }

@@ -40,8 +40,9 @@ class LockServicePresenter @Inject internal constructor(
     @Named("main") mainScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
     ioScheduler,
-    mainScheduler) {
+    mainScheduler), ForegroundEventListener {
 
+  private var foregroundDisposable: Disposable = null.clear()
   private var matchingDisposable: Disposable = null.clear()
   private var entryDisposable: Disposable = null.clear()
 
@@ -52,7 +53,6 @@ class LockServicePresenter @Inject internal constructor(
   override fun onBind(v: View) {
     super.onBind(v)
     registerOnBus(v)
-    listenForForegroundEvents(v)
   }
 
   override fun onUnbind() {
@@ -62,28 +62,32 @@ class LockServicePresenter @Inject internal constructor(
 
     matchingDisposable = matchingDisposable.clear()
     entryDisposable = entryDisposable.clear()
+    unregisterForegroundEventListener()
   }
 
-  private fun listenForForegroundEvents(v: ForegroundEventStreamCallback) {
-    dispose {
-      interactor.listenForForegroundEvents()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .onErrorReturn {
-            Timber.e(it, "Error while listening to foreground events")
-            return@onErrorReturn ForegroundEvent.EMPTY
+  override fun registerForegroundEventListener() {
+    foregroundDisposable = foregroundDisposable.clear()
+    foregroundDisposable = interactor.listenForForegroundEvents()
+        .subscribeOn(ioScheduler)
+        .observeOn(mainThreadScheduler)
+        .onErrorReturn {
+          Timber.e(it, "Error while listening to foreground events")
+          return@onErrorReturn ForegroundEvent.EMPTY
+        }
+        .doAfterTerminate { view?.onFinish() }
+        .subscribe({
+          if (ForegroundEvent.isEmpty(it)) {
+            Timber.w("Ignore empty foreground entry event")
+          } else {
+            processEvent(it.packageName, it.className, NOT_FORCE)
           }
-          .doAfterTerminate { v.onFinish() }
-          .subscribe({
-            if (ForegroundEvent.isEmpty(it)) {
-              Timber.w("Ignore empty foreground entry event")
-            } else {
-              processEvent(it.packageName, it.className, NOT_FORCE)
-            }
-          },
-              { Timber.e(it, "Error while listening to foreground event, killing stream") },
-              { Timber.d("Foreground event stream completed") })
-    }
+        },
+            { Timber.e(it, "Error while listening to foreground event, killing stream") },
+            { Timber.d("Foreground event stream completed") })
+  }
+
+  override fun unregisterForegroundEventListener() {
+    foregroundDisposable = foregroundDisposable.clear()
   }
 
   private fun registerOnBus(v: BusCallback) {

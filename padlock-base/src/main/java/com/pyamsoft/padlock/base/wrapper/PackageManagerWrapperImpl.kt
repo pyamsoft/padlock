@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.base.ext.isSystemApplication
 import com.pyamsoft.padlock.base.preference.LockListPreferences
 import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager.ApplicationItem
 import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.pydroid.helper.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -183,11 +184,10 @@ import javax.inject.Singleton
         throw Exceptions.propagate(e)
       }
     }.flatMap {
-      val info = it.get()
-      if (info == null) {
-        return@flatMap Single.just("")
+      if (it is Present) {
+        return@flatMap loadPackageLabel(it.value)
       } else {
-        return@flatMap loadPackageLabel(info)
+        return@flatMap Single.just("")
       }
     }
   }

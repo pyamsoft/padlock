@@ -33,7 +33,9 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.service.RecheckStatus.FORCE
+import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.pydroid.helper.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Maybe
 import io.reactivex.MaybeTransformer
@@ -55,6 +57,7 @@ import javax.inject.Singleton
     private val padLockDBQuery: PadLockDBQuery,
     @param:Named("lockscreen") private val lockScreenActivityClass: Class<out Activity>,
     @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
+    private val serviceFinishBus: EventBus<ServiceFinishEvent>,
     private val stateInteractor: LockServiceStateInteractor) : LockServiceInteractor {
 
   private val appContext = context.applicationContext
@@ -79,33 +82,36 @@ import javax.inject.Singleton
 
   override fun listenForForegroundEvents(): Observable<ForegroundEvent> {
     return Observable.interval(LISTEN_INTERVAL, MILLISECONDS).map {
-      val now: Long = System.currentTimeMillis()
-      val beginTime = now - THIRTY_SECONDS_MILLIS
-      val endTime = now + TEN_SECONDS_MILLIS
-      return@map usageManager.queryEvents(beginTime, endTime)
+      if (UsagePermissionChecker.missingUsageStatsPermission(appContext)) {
+        Timber.e("We are missing permission to continue, stop listening for events")
+        serviceFinishBus.publish(ServiceFinishEvent)
+        return@map Optional.asOptional(null)
+      } else {
+        val now: Long = System.currentTimeMillis()
+        val beginTime = now - TEN_SECONDS_MILLIS
+        val endTime = now + TEN_SECONDS_MILLIS
+        return@map usageManager.queryEvents(beginTime, endTime).asOptional()
+      }
     }.map {
       val foregroundEvent: Optional<ForegroundEvent>
       val event: UsageEvents.Event = Event()
+      if (it is Present) {
+        // We have usage events
+        val events = it.value
+        if (events.hasNextEvent()) {
+          events.getNextEvent(event)
+          while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+          }
 
-      // We have usage events
-      if (it.hasNextEvent()) {
-        it.getNextEvent(event)
-        Timber.d(
-            "Usage Event: ${event.packageName} ${event.className} ${parseType(event.eventType)}")
-        while (it.hasNextEvent()) {
-          it.getNextEvent(event)
           Timber.d(
-              "Usage Event: ${event.packageName} ${event.className} ${parseType(event.eventType)}")
-        }
-
-        Timber.d(
-            "Final Event: ${event.packageName} ${event.className} ${parseType(event.eventType)}")
-        if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-          Timber.d(
-              "Foreground Event: ${event.packageName} ${event.className} ${parseType(
-                  event.eventType)}")
-          foregroundEvent = ForegroundEvent(event.packageName ?: "",
-              event.className ?: "").asOptional()
+              "Final Event: ${event.packageName} ${event.className} ${parseType(event.eventType)}")
+          if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+            foregroundEvent = ForegroundEvent(event.packageName ?: "",
+                event.className ?: "").asOptional()
+          } else {
+            foregroundEvent = Optional.asOptional(null)
+          }
         } else {
           foregroundEvent = Optional.asOptional(null)
         }
@@ -113,7 +119,7 @@ import javax.inject.Singleton
         foregroundEvent = Optional.asOptional(null)
       }
       return@map foregroundEvent
-    }.filter { it.get() != null }.map { it.get() }
+    }.filter { it is Present }.map { it as Present }.map { it.value }
   }
 
   @CheckResult
@@ -328,8 +334,7 @@ import javax.inject.Singleton
   }
 
   companion object {
-    private const val LISTEN_INTERVAL = 200L
-    private val THIRTY_SECONDS_MILLIS = TimeUnit.SECONDS.toMillis(30L)
+    private const val LISTEN_INTERVAL = 300L
     private val TEN_SECONDS_MILLIS = TimeUnit.SECONDS.toMillis(10L)
   }
 }
