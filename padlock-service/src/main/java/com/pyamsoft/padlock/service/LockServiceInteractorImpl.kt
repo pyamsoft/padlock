@@ -37,9 +37,9 @@ import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.helper.Optional
 import com.pyamsoft.pydroid.helper.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
+import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.MaybeTransformer
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.SingleTransformer
 import timber.log.Timber
@@ -80,8 +80,8 @@ import javax.inject.Singleton
     lockScreenPassed.clear()
   }
 
-  override fun listenForForegroundEvents(): Observable<ForegroundEvent> {
-    return Observable.interval(LISTEN_INTERVAL, MILLISECONDS).map {
+  override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
+    return Flowable.interval(LISTEN_INTERVAL, MILLISECONDS).map {
       if (UsagePermissionChecker.missingUsageStatsPermission(appContext)) {
         Timber.e("We are missing permission to continue, stop listening for events")
         serviceFinishBus.publish(ServiceFinishEvent)
@@ -92,34 +92,36 @@ import javax.inject.Singleton
         val endTime = now + TEN_SECONDS_MILLIS
         return@map usageManager.queryEvents(beginTime, endTime).asOptional()
       }
-    }.map {
-      val foregroundEvent: Optional<ForegroundEvent>
-      val event: UsageEvents.Event = Event()
-      if (it is Present) {
-        // We have usage events
-        val events = it.value
-        if (events.hasNextEvent()) {
-          events.getNextEvent(event)
-          while (events.hasNextEvent()) {
-            events.getNextEvent(event)
-          }
+    }.onBackpressureDrop()
+        .map {
+          val foregroundEvent: Optional<ForegroundEvent>
+          val event: UsageEvents.Event = Event()
+          if (it is Present) {
+            // We have usage events
+            val events = it.value
+            if (events.hasNextEvent()) {
+              events.getNextEvent(event)
+              while (events.hasNextEvent()) {
+                events.getNextEvent(event)
+              }
 
-          Timber.d(
-              "Final Event: ${event.packageName} ${event.className} ${parseType(event.eventType)}")
-          if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-            foregroundEvent = ForegroundEvent(event.packageName ?: "",
-                event.className ?: "").asOptional()
+              Timber.d(
+                  "Final Event: ${event.packageName} ${event.className} ${parseType(
+                      event.eventType)}")
+              if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                foregroundEvent = ForegroundEvent(event.packageName ?: "",
+                    event.className ?: "").asOptional()
+              } else {
+                foregroundEvent = Optional.asOptional(null)
+              }
+            } else {
+              foregroundEvent = Optional.asOptional(null)
+            }
           } else {
             foregroundEvent = Optional.asOptional(null)
           }
-        } else {
-          foregroundEvent = Optional.asOptional(null)
-        }
-      } else {
-        foregroundEvent = Optional.asOptional(null)
-      }
-      return@map foregroundEvent
-    }.filter { it is Present }.map { it as Present }.map { it.value }
+          return@map foregroundEvent
+        }.filter { it is Present }.map { it as Present }.map { it.value }
   }
 
   @CheckResult
