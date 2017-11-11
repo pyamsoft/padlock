@@ -23,10 +23,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
 import android.support.annotation.CheckResult
@@ -38,7 +36,6 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.db.PadLockEntry
-import com.pyamsoft.padlock.boot.BootReceiver
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.main.MainActivity
 import timber.log.Timber
@@ -165,6 +162,13 @@ class PadLockService : Service(), LockServicePresenter.View {
       } else {
         appContext.startService(service)
       }
+    }
+
+    @JvmStatic
+    fun stop(context: Context) {
+      val appContext = context.applicationContext
+      val service = Intent(appContext, PadLockService::class.java)
+      appContext.stopService(service)
     }
   }
 }

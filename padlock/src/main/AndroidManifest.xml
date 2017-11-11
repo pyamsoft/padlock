@@ -88,8 +88,8 @@
 
     <!-- Receive boot completed, only active when PadLockService is on -->
     <receiver
-        android:name=".boot.BootReceiver"
-        android:enabled="false">
+        android:name=".receiver.BootReceiver"
+        android:enabled="true">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED"/>
       </intent-filter>
