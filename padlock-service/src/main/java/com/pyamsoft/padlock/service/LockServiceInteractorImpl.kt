@@ -70,6 +70,7 @@ import javax.inject.Singleton
   private val lockScreenPassed: MutableMap<String, Boolean> = HashMap()
   private val usageManager: UsageStatsManager = appContext.getSystemService(
       Context.USAGE_STATS_SERVICE) as UsageStatsManager
+  private var lastForegroundEvent = ForegroundEvent.EMPTY
 
   override fun reset() {
     Timber.i("Reset name state")
@@ -78,6 +79,7 @@ import javax.inject.Singleton
     activeClassName = ""
     activePackageName = ""
     lockScreenPassed.clear()
+    lastForegroundEvent = ForegroundEvent.EMPTY
   }
 
   override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
@@ -104,10 +106,6 @@ import javax.inject.Singleton
               while (events.hasNextEvent()) {
                 events.getNextEvent(event)
               }
-
-              Timber.d(
-                  "Final Event: ${event.packageName} ${event.className} ${parseType(
-                      event.eventType)}")
               if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
                 foregroundEvent = ForegroundEvent(event.packageName ?: "",
                     event.className ?: "").asOptional()
@@ -122,17 +120,7 @@ import javax.inject.Singleton
           }
           return@map foregroundEvent
         }.filter { it is Present }.map { it as Present }.map { it.value }
-  }
-
-  @CheckResult
-  private fun parseType(type: Int): String = when (type) {
-    UsageEvents.Event.MOVE_TO_FOREGROUND -> "MOVE_TO_FOREGROUND"
-    UsageEvents.Event.MOVE_TO_BACKGROUND -> "MOVE_TO_BACKGROUND"
-    UsageEvents.Event.CONFIGURATION_CHANGE -> "CONFIGURATION_CHANGE"
-    UsageEvents.Event.SHORTCUT_INVOCATION -> "SHORTCUT_INVOCATION"
-    UsageEvents.Event.USER_INTERACTION -> "USER_INTERACTION"
-    UsageEvents.Event.NONE -> "NONE"
-    else -> "INVALID"
+        .filter { it != lastForegroundEvent }.doOnNext { lastForegroundEvent = it }
   }
 
   override fun isActiveMatching(packageName: String, className: String): Single<Boolean> {

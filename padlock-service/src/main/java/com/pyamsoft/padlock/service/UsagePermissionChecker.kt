@@ -25,7 +25,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.support.annotation.CheckResult
 import android.support.v4.content.ContextCompat
-import timber.log.Timber
 
 object UsagePermissionChecker {
 
@@ -37,8 +36,6 @@ object UsagePermissionChecker {
         Context.APP_OPS_SERVICE) as AppOpsManager
     val mode: Int = appOpsService.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
         android.os.Process.myUid(), appContext.packageName)
-    Timber.d("AppOps mode: ${parseMode(mode)}")
-
     val missingPermission: Boolean
     if (mode == AppOpsManager.MODE_DEFAULT) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -53,15 +50,5 @@ object UsagePermissionChecker {
       missingPermission = (mode != AppOpsManager.MODE_ALLOWED)
     }
     return missingPermission
-  }
-
-  @JvmStatic
-  @CheckResult
-  private fun parseMode(mode: Int): String = when (mode) {
-    AppOpsManager.MODE_DEFAULT -> "MODE_DEFAULT"
-    AppOpsManager.MODE_ALLOWED -> "MODE_ALLOWED"
-    AppOpsManager.MODE_ERRORED -> "MODE_ERRORED"
-    AppOpsManager.MODE_IGNORED -> "MODE_IGNORED"
-    else -> "INVALID"
   }
 }
