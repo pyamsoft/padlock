@@ -93,12 +93,12 @@ import javax.inject.Singleton
   }
 
   @CheckResult private fun queueRecheckJob(
-      packageName: String, activityName: String, recheckTime: Long): Completable {
+      packageName: String, realName: String, recheckTime: Long): Completable {
     return Completable.fromAction {
       // Cancel any old recheck job for the class, but not the package
       val intent = Intent(appContext, recheckServiceClass)
       intent.putExtra(Recheck.EXTRA_PACKAGE_NAME, packageName)
-      intent.putExtra(Recheck.EXTRA_CLASS_NAME, activityName)
+      intent.putExtra(Recheck.EXTRA_CLASS_NAME, realName)
       jobSchedulerCompat.cancel(intent)
 
       // Queue up a new recheck job
@@ -181,7 +181,11 @@ import javax.inject.Singleton
       } else {
         whitelistObservable = Completable.complete()
         ignoreObservable = ignoreEntryForTime(ignoreMinutesInMillis, packageName, activityName)
-        recheckObservable = queueRecheckJob(packageName, activityName, ignoreMinutesInMillis)
+        if (ignoreTime > 0) {
+          recheckObservable = queueRecheckJob(packageName, realName, ignoreMinutesInMillis)
+        } else {
+          recheckObservable = Completable.complete()
+        }
       }
 
       return@defer ignoreObservable.andThen(recheckObservable).andThen(whitelistObservable)

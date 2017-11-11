@@ -47,6 +47,7 @@ class PadLockService : Service(), LockServicePresenter.View {
 
   @field:Inject internal lateinit var presenter: LockServicePresenter
   private var screenListener: ScreenEventListener? = null
+  private lateinit var notificationManager: NotificationManagerCompat
 
   override fun onCreate() {
     super.onCreate()
@@ -60,21 +61,27 @@ class PadLockService : Service(), LockServicePresenter.View {
     Injector.obtain<PadLockComponent>(applicationContext).inject(this)
     presenter.bind(this)
 
+    notificationManager = NotificationManagerCompat.from(applicationContext)
+
     screenListener = ScreenEventListener(applicationContext, presenter)
     screenListener?.register()
 
     startInForeground()
     isRunning = true
+
+    presenter.registerForegroundEventListener()
   }
 
   override fun onDestroy() {
     super.onDestroy()
+    presenter.unregisterForegroundEventListener()
     presenter.unbind()
     screenListener?.unregister()
     screenListener = null
     isRunning = false
 
     stopForeground(true)
+    notificationManager.cancel(NOTIFICATION_ID)
   }
 
   override fun onFinish() {
@@ -97,7 +104,6 @@ class PadLockService : Service(), LockServicePresenter.View {
   }
 
   private fun startInForeground() {
-    val id = 1001
     val requestCode = 1004
 
     val notificationChannelId = "padlock_foreground"
@@ -122,7 +128,7 @@ class PadLockService : Service(), LockServicePresenter.View {
       color = ContextCompat.getColor(applicationContext, R.color.blue500)
       setContentTitle(getString(R.string.app_name)).setContentText("PadLock Service is running")
     }.build()
-    NotificationManagerCompat.from(applicationContext).notify(id, n)
+    notificationManager.notify(NOTIFICATION_ID, n)
   }
 
   @RequiresApi(Build.VERSION_CODES.O) private fun setupNotificationChannel(
@@ -143,6 +149,8 @@ class PadLockService : Service(), LockServicePresenter.View {
   }
 
   companion object {
+
+    const val NOTIFICATION_ID = 1001
 
     var isRunning: Boolean = false
       @CheckResult get
