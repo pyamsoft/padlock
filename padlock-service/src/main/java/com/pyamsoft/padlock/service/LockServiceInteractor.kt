@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.service
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockEntry
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 
@@ -35,7 +36,7 @@ internal interface LockServiceInteractor {
   fun isActiveMatching(packageName: String, className: String): Single<Boolean>
 
   @CheckResult
-  fun listenForForegroundEvents(): Observable<ForegroundEvent>
+  fun listenForForegroundEvents(): Flowable<ForegroundEvent>
 
   @CheckResult
   fun processEvent(packageName: String, className: String,
