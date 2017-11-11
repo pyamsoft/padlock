@@ -22,6 +22,7 @@ import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.lock.helper.LockHelper
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor
 import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.pydroid.helper.Optional.Present
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
@@ -34,16 +35,15 @@ import javax.inject.Singleton
   @CheckResult private fun getMasterPin(): Single<Optional<String>> =
       masterPinInteractor.getMasterPin()
 
-  override fun hasMasterPin(): Single<Boolean> = getMasterPin().map { it.get() != null }
+  override fun hasMasterPin(): Single<Boolean> = getMasterPin().map { it is Present }
 
   override fun submitPin(currentAttempt: String, reEntryAttempt: String,
       hint: String): Single<PinEntryEvent> {
     return getMasterPin().flatMap {
-      val value = it.get()
-      if (value == null) {
-        return@flatMap createPin(currentAttempt, reEntryAttempt, hint)
+      if (it is Present) {
+        return@flatMap clearPin(it.value, currentAttempt)
       } else {
-        return@flatMap clearPin(value, currentAttempt)
+        return@flatMap createPin(currentAttempt, reEntryAttempt, hint)
       }
     }
   }

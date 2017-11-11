@@ -18,15 +18,11 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor
-import com.pyamsoft.pydroid.helper.Optional.Present
-import io.reactivex.Single
-import javax.inject.Inject
-import javax.inject.Singleton
+interface ForegroundEventListener {
 
-@Singleton internal class LockServiceStateInteractorImpl @Inject internal constructor(
-    private val pinInteractor: MasterPinInteractor) : LockServiceStateInteractor {
+  fun registerForegroundEventListener()
 
-  override fun isServiceEnabled(): Single<Boolean> = pinInteractor.getMasterPin().map { it is Present }
+  fun unregisterForegroundEventListener()
 
 }
+
