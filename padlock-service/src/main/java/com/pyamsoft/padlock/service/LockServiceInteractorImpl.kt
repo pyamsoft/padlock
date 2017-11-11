@@ -73,13 +73,19 @@ import javax.inject.Singleton
   private var lastForegroundEvent = ForegroundEvent.EMPTY
 
   override fun reset() {
+    resetState()
+
+    // Also reset last foreground
+    lastForegroundEvent = ForegroundEvent.EMPTY
+  }
+
+  private fun resetState() {
     Timber.i("Reset name state")
     lastPackageName = ""
     lastClassName = ""
     activeClassName = ""
     activePackageName = ""
     lockScreenPassed.clear()
-    lastForegroundEvent = ForegroundEvent.EMPTY
   }
 
   override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
@@ -207,7 +213,7 @@ import javax.inject.Singleton
         .filter {
           if (it.not()) {
             Timber.e("Service is not user enabled, ignore event")
-            reset()
+            resetState()
           }
           return@filter it
         }.doOnSuccess {
