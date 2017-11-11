@@ -22,12 +22,12 @@ import android.app.Activity
 import android.content.Intent
 import android.provider.Settings
 
-object AccessibilityRequestDelegate {
+object UsageAccessRequestDelegate {
 
-  private val INTENT: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+  private val INTENT: Intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
 
   @JvmStatic
-  fun launchAccessibilityIntent(activity: Activity) {
+  fun launchUsageAccessActivity(activity: Activity) {
     activity.startActivity(INTENT)
   }
 

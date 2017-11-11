@@ -22,7 +22,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.uicommon.AccessibilityRequestDelegate
+import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.presenter.Presenter
 
@@ -35,7 +35,7 @@ class AccessibilityRequestDialog : CanaryDialog() {
       return AlertDialog.Builder(it).setTitle("Enable PadLock AccessibilityService")
           .setMessage(R.string.explain_accessibility_service)
           .setPositiveButton("Let's Go") { _, _ ->
-            AccessibilityRequestDelegate.launchAccessibilityIntent(it)
+            UsageAccessRequestDelegate.launchUsageAccessActivity(it)
             dismiss()
           }
           .setNegativeButton("No Thanks") { _, _ -> dismiss() }
