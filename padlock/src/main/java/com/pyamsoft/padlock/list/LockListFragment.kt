@@ -221,7 +221,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         DialogUtil.guaranteeSingleDialogFragment(activity,
             PinEntryDialog.newInstance(context!!.packageName), PinEntryDialog.TAG)
       } else {
-        DialogUtil.guaranteeSingleDialogFragment(activity, AccessibilityRequestDialog(),
+        DialogUtil.guaranteeSingleDialogFragment(activity, UsageAccessRequestDialog(),
             "accessibility")
       }
     }

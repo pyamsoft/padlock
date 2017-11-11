@@ -27,14 +27,10 @@
   <string name="exclude_entry">Exclude Entry</string>
   <string name="info_for_nerds">Info for Nerds</string>
   <string name="explain_accessibility_service">
-    PadLock requires a special Accessibility Service to secure your device.
+    PadLock requires Usage Access to secure your device.
     \n\nThis service is used to monitor for the applications that you want to be locked. When PadLock notices that you have launched an application that you want to lock, it will secure the application with a custom lock screen.
-    \n\nPlease select the \'PadLock\' Accessibility Service from the Settings menu and enable the service.
+    \n\nPlease select \'PadLock\' from the Usage Access menu and select \'Permit usage access\'.
   </string>
-  <string name="accessibility_description">PadLock needs this service to monitor which apps launch
-    on your device.
-    \n\nIt will not capture any personal data.\nIt does not connect to the Internet.
-    \nIt will only watch the apps you launch and lock the ones you request.</string>
   <string name="getting_started">PadLock will not be activated until you set a PIN code.</string>
   <string name="getting_started_desc">Click the button to get started.</string>
   <string name="lock_code_hint">Enter Lock Code</string>

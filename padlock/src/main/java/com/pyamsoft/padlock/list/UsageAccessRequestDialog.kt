@@ -26,13 +26,13 @@ import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.presenter.Presenter
 
-class AccessibilityRequestDialog : CanaryDialog() {
+class UsageAccessRequestDialog : CanaryDialog() {
 
   override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     activity!!.let {
-      return AlertDialog.Builder(it).setTitle("Enable PadLock AccessibilityService")
+      return AlertDialog.Builder(it).setTitle("Enable PadLock Usage Access")
           .setMessage(R.string.explain_accessibility_service)
           .setPositiveButton("Let's Go") { _, _ ->
             UsageAccessRequestDelegate.launchUsageAccessActivity(it)
