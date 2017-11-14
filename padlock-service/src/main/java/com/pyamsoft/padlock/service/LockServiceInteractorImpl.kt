@@ -330,7 +330,7 @@ import javax.inject.Singleton
   }
 
   companion object {
-    private const val LISTEN_INTERVAL = 300L
+    private const val LISTEN_INTERVAL = 250L
     private val TEN_SECONDS_MILLIS = TimeUnit.SECONDS.toMillis(10L)
   }
 }
