@@ -18,13 +18,18 @@
 
 package com.pyamsoft.padlock
 
+import android.app.AppOpsManager
+import android.app.AppOpsManager.OnOpChangedListener
 import android.app.Application
+import android.content.Context
 import android.support.annotation.CheckResult
 import android.support.v4.app.Fragment
 import com.pyamsoft.padlock.base.PadLockProvider
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.main.MainActivity
+import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
+import com.pyamsoft.padlock.service.UsagePermissionChecker
 import com.pyamsoft.padlock.settings.SettingsPreferenceFragment
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.CanaryFragment
@@ -34,6 +39,7 @@ import com.pyamsoft.pydroid.loader.LoaderModule
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
+import timber.log.Timber
 
 class PadLock : Application() {
 
@@ -74,6 +80,29 @@ class PadLock : Application() {
     } else {
       receiver.unregister()
     }
+
+    listenForAppOps()
+  }
+
+  private fun listenForAppOps() {
+    val listener = OnOpChangedListener { op, packageName ->
+      Timber.d("Op: $op changed for package name: $packageName")
+      if (UsagePermissionChecker.missingUsageStatsPermission(applicationContext)) {
+        Timber.d("Ops permission lost, stop service")
+        PadLockService.stop(applicationContext)
+      } else {
+        Timber.d("Ops permission gained, start service")
+        PadLockService.start(applicationContext)
+      }
+    }
+
+    val appOpsManager: AppOpsManager = applicationContext.getSystemService(
+        Context.APP_OPS_SERVICE) as AppOpsManager
+
+    // Listen for as long as the application is alive
+    Timber.d("Start watching app ops: ${AppOpsManager.OPSTR_GET_USAGE_STATS}")
+    appOpsManager.startWatchingMode(AppOpsManager.OPSTR_GET_USAGE_STATS,
+        applicationContext.packageName, listener)
   }
 
   private fun buildDagger(): PadLockComponent {
@@ -114,7 +143,8 @@ class PadLock : Application() {
 
     @JvmStatic
     @CheckResult
-    fun getRefWatcher(preferenceFragment: SettingsPreferenceFragment): RefWatcher = getRefWatcherInternal(
+    fun getRefWatcher(
+        preferenceFragment: SettingsPreferenceFragment): RefWatcher = getRefWatcherInternal(
         preferenceFragment)
 
     @JvmStatic
