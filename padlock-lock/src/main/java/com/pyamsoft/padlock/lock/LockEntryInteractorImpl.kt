@@ -64,7 +64,7 @@ import javax.inject.Singleton
             Timber.d("Check entry is not locked: %d", lockUntilTime)
             if (System.currentTimeMillis() < lockUntilTime) {
               Timber.e("Entry is still locked. Fail unlock")
-              return@map Optional.asOptional(null)
+              return@map Optional.ofNullable(null)
             }
 
             if (lockCode == null) {

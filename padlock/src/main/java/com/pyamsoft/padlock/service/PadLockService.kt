@@ -112,7 +112,7 @@ class PadLockService : Service(), LockServicePresenter.View {
     }
 
     val launchMain = Intent(applicationContext, MainActivity::class.java).apply {
-      flags = Intent.FLAG_ACTIVITY_NEW_TASK
+      flags = Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK
     }
 
     val pe = PendingIntent.getActivity(applicationContext, requestCode, launchMain,

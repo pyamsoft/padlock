@@ -93,7 +93,7 @@ import javax.inject.Singleton
       if (UsagePermissionChecker.missingUsageStatsPermission(appContext)) {
         Timber.e("We are missing permission to continue, stop listening for events")
         serviceFinishBus.publish(ServiceFinishEvent)
-        return@map Optional.asOptional(null)
+        return@map Optional.ofNullable(null)
       } else {
         val now: Long = System.currentTimeMillis()
         val beginTime = now - TEN_SECONDS_MILLIS
@@ -116,13 +116,13 @@ import javax.inject.Singleton
                 foregroundEvent = ForegroundEvent(event.packageName ?: "",
                     event.className ?: "").asOptional()
               } else {
-                foregroundEvent = Optional.asOptional(null)
+                foregroundEvent = Optional.ofNullable(null)
               }
             } else {
-              foregroundEvent = Optional.asOptional(null)
+              foregroundEvent = Optional.ofNullable(null)
             }
           } else {
-            foregroundEvent = Optional.asOptional(null)
+            foregroundEvent = Optional.ofNullable(null)
           }
           return@map foregroundEvent
         }.filter { it is Present }.map { it as Present }.map { it.value }

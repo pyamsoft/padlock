@@ -334,7 +334,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     @JvmStatic
     fun start(context: Context, entry: PadLockEntry, realName: String) {
       val intent = Intent(context.applicationContext, LockScreenActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_MULTIPLE_TASK and Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS and Intent.FLAG_ACTIVITY_CLEAR_TASK
         putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName())
         putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName())
         putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode())
