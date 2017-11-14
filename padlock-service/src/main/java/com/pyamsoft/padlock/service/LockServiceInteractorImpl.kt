@@ -74,6 +74,7 @@ import javax.inject.Singleton
 
   override fun reset() {
     resetState()
+    Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED
 
     // Also reset last foreground
     lastForegroundEvent = ForegroundEvent.EMPTY
@@ -89,44 +90,43 @@ import javax.inject.Singleton
   }
 
   override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
-    return Flowable.interval(LISTEN_INTERVAL, MILLISECONDS).map {
-      if (UsagePermissionChecker.missingUsageStatsPermission(appContext)) {
-        Timber.e("We are missing permission to continue, stop listening for events")
-        serviceFinishBus.publish(ServiceFinishEvent)
-        return@map Optional.ofNullable(null)
-      } else {
+    if (UsagePermissionChecker.missingUsageStatsPermission(appContext)) {
+      Timber.w("Missing usage permission, return empty source")
+      return Flowable.empty()
+    } else {
+      return Flowable.interval(LISTEN_INTERVAL, MILLISECONDS).map {
         val now: Long = System.currentTimeMillis()
         val beginTime = now - TEN_SECONDS_MILLIS
         val endTime = now + TEN_SECONDS_MILLIS
         return@map usageManager.queryEvents(beginTime, endTime).asOptional()
-      }
-    }.onBackpressureDrop()
-        .map {
-          val foregroundEvent: Optional<ForegroundEvent>
-          val event: UsageEvents.Event = Event()
-          if (it is Present) {
-            // We have usage events
-            val events = it.value
-            if (events.hasNextEvent()) {
-              events.getNextEvent(event)
-              while (events.hasNextEvent()) {
+      }.onBackpressureDrop()
+          .map {
+            val foregroundEvent: Optional<ForegroundEvent>
+            val event: UsageEvents.Event = Event()
+            if (it is Present) {
+              // We have usage events
+              val events = it.value
+              if (events.hasNextEvent()) {
                 events.getNextEvent(event)
-              }
-              if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                foregroundEvent = ForegroundEvent(event.packageName ?: "",
-                    event.className ?: "").asOptional()
+                while (events.hasNextEvent()) {
+                  events.getNextEvent(event)
+                }
+                if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                  foregroundEvent = ForegroundEvent(event.packageName ?: "",
+                      event.className ?: "").asOptional()
+                } else {
+                  foregroundEvent = Optional.ofNullable(null)
+                }
               } else {
                 foregroundEvent = Optional.ofNullable(null)
               }
             } else {
               foregroundEvent = Optional.ofNullable(null)
             }
-          } else {
-            foregroundEvent = Optional.ofNullable(null)
-          }
-          return@map foregroundEvent
-        }.filter { it is Present }.map { it as Present }.map { it.value }
-        .filter { it != lastForegroundEvent }.doOnNext { lastForegroundEvent = it }
+            return@map foregroundEvent
+          }.filter { it is Present }.map { it as Present }.map { it.value }
+          .filter { it != lastForegroundEvent }.doOnNext { lastForegroundEvent = it }
+    }
   }
 
   override fun isActiveMatching(packageName: String, className: String): Single<Boolean> {

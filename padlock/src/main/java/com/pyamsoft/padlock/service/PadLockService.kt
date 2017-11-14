@@ -52,12 +52,6 @@ class PadLockService : Service(), LockServicePresenter.View {
   override fun onCreate() {
     super.onCreate()
 
-    if (UsagePermissionChecker.missingUsageStatsPermission(applicationContext)) {
-      Timber.e("We do not have usage stats permission, killing service")
-      stopSelf()
-      return
-    }
-
     Injector.obtain<PadLockComponent>(applicationContext).inject(this)
     presenter.bind(this)
 
@@ -68,8 +62,6 @@ class PadLockService : Service(), LockServicePresenter.View {
 
     startInForeground()
     isRunning = true
-
-    presenter.registerForegroundEventListener()
   }
 
   override fun onDestroy() {
@@ -90,6 +82,13 @@ class PadLockService : Service(), LockServicePresenter.View {
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     Timber.d("Service onStartCommand")
+    if (UsagePermissionChecker.missingUsageStatsPermission(applicationContext)) {
+      Timber.e("We do not have usage stats permission, don't poll")
+      presenter.unregisterForegroundEventListener()
+    } else {
+      Timber.d("We have usage stats permission, poll events")
+      presenter.registerForegroundEventListener()
+    }
     return Service.START_STICKY
   }
 
@@ -159,24 +158,12 @@ class PadLockService : Service(), LockServicePresenter.View {
     @JvmStatic
     fun start(context: Context) {
       val appContext = context.applicationContext
-      if (UsagePermissionChecker.missingUsageStatsPermission(context)) {
-        Timber.e("We do not have usage stats permission, do not start service")
-        return
-      }
-
       val service = Intent(appContext, PadLockService::class.java)
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         appContext.startForegroundService(service)
       } else {
         appContext.startService(service)
       }
-    }
-
-    @JvmStatic
-    fun stop(context: Context) {
-      val appContext = context.applicationContext
-      val service = Intent(appContext, PadLockService::class.java)
-      appContext.stopService(service)
     }
   }
 }

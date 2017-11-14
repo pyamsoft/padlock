@@ -22,7 +22,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.pyamsoft.padlock.service.PadLockService
-import com.pyamsoft.padlock.service.UsagePermissionChecker
 import timber.log.Timber
 
 class BootReceiver : BroadcastReceiver() {
@@ -32,11 +31,7 @@ class BootReceiver : BroadcastReceiver() {
       if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
         if (context != null) {
           Timber.d("Boot event received, start PadLockService")
-          if (UsagePermissionChecker.missingUsageStatsPermission(context)) {
-            PadLockService.stop(context)
-          } else {
-            PadLockService.start(context)
-          }
+          PadLockService.start(context)
         }
       }
     }

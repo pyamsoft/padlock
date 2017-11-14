@@ -82,14 +82,15 @@ class PadLock : Application() {
     }
 
     listenForAppOps()
+
+    PadLockService.start(this)
   }
 
   private fun listenForAppOps() {
     val listener = OnOpChangedListener { op, packageName ->
       Timber.d("Op: $op changed for package name: $packageName")
       if (UsagePermissionChecker.missingUsageStatsPermission(applicationContext)) {
-        Timber.d("Ops permission lost, stop service")
-        PadLockService.stop(applicationContext)
+        Timber.w("Ops permission lost.")
       } else {
         Timber.d("Ops permission gained, start service")
         PadLockService.start(applicationContext)
