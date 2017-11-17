@@ -25,10 +25,10 @@ import dagger.Module
 @Module
 abstract class SettingsModule {
 
-  @Binds
-  internal abstract fun provideConfirmBus(bus: ConfirmEventBus): EventBus<ConfirmEvent>
+    @Binds
+    internal abstract fun provideConfirmBus(bus: ConfirmEventBus): EventBus<ConfirmEvent>
 
-  @Binds
-  internal abstract fun provideInteractor(impl: SettingsInteractorImpl): SettingsInteractor
+    @Binds
+    internal abstract fun provideInteractor(impl: SettingsInteractorImpl): SettingsInteractor
 }
 

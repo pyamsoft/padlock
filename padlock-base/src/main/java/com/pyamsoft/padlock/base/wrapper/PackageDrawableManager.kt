@@ -24,6 +24,6 @@ import io.reactivex.Single
 
 interface PackageDrawableManager {
 
-  @CheckResult
-  fun loadDrawableForPackageOrDefault(packageName: String): Single<Drawable>
+    @CheckResult
+    fun loadDrawableForPackageOrDefault(packageName: String): Single<Drawable>
 }

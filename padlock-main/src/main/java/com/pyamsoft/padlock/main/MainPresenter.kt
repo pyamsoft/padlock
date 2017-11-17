@@ -26,39 +26,39 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class MainPresenter @Inject internal constructor(private val interactor: MainInteractor,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(
-    computationScheduler,
-    ioScheduler, mainScheduler) {
+        @Named("computation") computationScheduler: Scheduler,
+        @Named("io") ioScheduler: Scheduler,
+        @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(
+        computationScheduler,
+        ioScheduler, mainScheduler) {
 
-  override fun onBind(v: View) {
-    super.onBind(v)
-    showOnboardingOrDefault(v)
-  }
-
-  private fun showOnboardingOrDefault(v: MainCallback) {
-    dispose {
-      interactor.isOnboardingComplete()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            if (it) {
-              v.onShowDefaultPage()
-            } else {
-              v.onShowOnboarding()
-            }
-          }, { Timber.e(it, "onError") })
+    override fun onBind(v: View) {
+        super.onBind(v)
+        showOnboardingOrDefault(v)
     }
-  }
 
-  interface View : MainCallback
+    private fun showOnboardingOrDefault(v: MainCallback) {
+        dispose {
+            interactor.isOnboardingComplete()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({
+                        if (it) {
+                            v.onShowDefaultPage()
+                        } else {
+                            v.onShowOnboarding()
+                        }
+                    }, { Timber.e(it, "onError") })
+        }
+    }
 
-  interface MainCallback {
+    interface View : MainCallback
 
-    fun onShowDefaultPage()
+    interface MainCallback {
 
-    fun onShowOnboarding()
+        fun onShowDefaultPage()
 
-  }
+        fun onShowOnboarding()
+
+    }
 }

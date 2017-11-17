@@ -30,49 +30,49 @@ import javax.inject.Inject
 
 class ConfirmationDialog : CanaryDialog() {
 
-  @field:Inject internal lateinit var publisher: SettingsPublisher
-  private lateinit var type: ConfirmEvent
+    @field:Inject internal lateinit var publisher: SettingsPublisher
+    private lateinit var type: ConfirmEvent
 
-  override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
+    override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    arguments?.let {
-      type = ConfirmEvent.valueOf(it.getString(WHICH, ConfirmEvent.DATABASE.name))
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            type = ConfirmEvent.valueOf(it.getString(WHICH, ConfirmEvent.DATABASE.name))
+        }
+
+        Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
     }
 
-    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
-  }
-
-  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    return AlertDialog.Builder(activity!!).setMessage(if (type === ConfirmEvent.DATABASE)
-      """Really clear entire database?
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return AlertDialog.Builder(activity!!).setMessage(if (type === ConfirmEvent.DATABASE)
+            """Really clear entire database?
         |
         |You will have to re-configure all locked applications again""".trimMargin()
-    else
-      """Really clear all application settings?
+        else
+            """Really clear all application settings?
         |
         |You will have to manually restart the Accessibility Service component of PadLock""".trimMargin())
-        .setPositiveButton("Yes") { _, _ ->
-          publisher.publish(type)
-          dismiss()
-        }
-        .setNegativeButton("No") { _, _ -> dismiss() }
-        .create()
-  }
-
-  companion object {
-
-    const private val WHICH = "which_type"
-
-    @CheckResult
-    @JvmStatic
-    fun newInstance(type: ConfirmEvent): ConfirmationDialog {
-      return ConfirmationDialog().apply {
-        arguments = Bundle().apply {
-          putString(WHICH, type.name)
-        }
-      }
+                .setPositiveButton("Yes") { _, _ ->
+                    publisher.publish(type)
+                    dismiss()
+                }
+                .setNegativeButton("No") { _, _ -> dismiss() }
+                .create()
     }
-  }
+
+    companion object {
+
+        const private val WHICH = "which_type"
+
+        @CheckResult
+        @JvmStatic
+        fun newInstance(type: ConfirmEvent): ConfirmationDialog {
+            return ConfirmationDialog().apply {
+                arguments = Bundle().apply {
+                    putString(WHICH, type.name)
+                }
+            }
+        }
+    }
 }

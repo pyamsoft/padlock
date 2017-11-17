@@ -29,24 +29,24 @@ import javax.inject.Singleton
 
 @Singleton internal class SHA256LockHelper @Inject internal constructor() : LockHelper {
 
-  private val messageDigest: MessageDigest
+    private val messageDigest: MessageDigest
 
-  init {
-    try {
-      messageDigest = MessageDigest.getInstance("SHA-256")
-    } catch (e: NoSuchAlgorithmException) {
-      throw RuntimeException("Could not create SHA-256 Digest", e)
+    init {
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256")
+        } catch (e: NoSuchAlgorithmException) {
+            throw RuntimeException("Could not create SHA-256 Digest", e)
+        }
+
     }
 
-  }
+    override fun checkSubmissionAttempt(attempt: String, encodedPin: String): Single<Boolean> =
+            encode(attempt).map { it == encodedPin }
 
-  override fun checkSubmissionAttempt(attempt: String, encodedPin: String): Single<Boolean> =
-      encode(attempt).map { it == encodedPin }
-
-  override fun encode(attempt: String): Single<String> {
-    return Completable.fromAction({ messageDigest.reset() })
-        .andThen(Single.fromCallable {
-          messageDigest.digest(attempt.toByteArray(Charset.defaultCharset()))
-        }).map { Base64.encodeToString(it, Base64.DEFAULT).trim() }
-  }
+    override fun encode(attempt: String): Single<String> {
+        return Completable.fromAction({ messageDigest.reset() })
+                .andThen(Single.fromCallable {
+                    messageDigest.digest(attempt.toByteArray(Charset.defaultCharset()))
+                }).map { Base64.encodeToString(it, Base64.DEFAULT).trim() }
+    }
 }

@@ -26,13 +26,13 @@ import javax.inject.Singleton
 
 @Singleton internal class ConfirmEventBus @Inject internal constructor() : EventBus<ConfirmEvent> {
 
-  private val bus: EventBus<ConfirmEvent> = RxBus.create()
+    private val bus: EventBus<ConfirmEvent> = RxBus.create()
 
-  override fun listen(): Observable<ConfirmEvent> = bus.listen()
+    override fun listen(): Observable<ConfirmEvent> = bus.listen()
 
-  override fun publish(event: ConfirmEvent) {
-    bus.publish(event)
-  }
+    override fun publish(event: ConfirmEvent) {
+        bus.publish(event)
+    }
 
 }
 

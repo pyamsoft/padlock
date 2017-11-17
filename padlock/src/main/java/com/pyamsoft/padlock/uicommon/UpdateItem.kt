@@ -22,7 +22,7 @@ import android.support.annotation.CheckResult
 
 interface UpdateItem<in T : Any> {
 
-  @CheckResult
-  fun updateModel(model: T): Boolean
+    @CheckResult
+    fun updateModel(model: T): Boolean
 
 }

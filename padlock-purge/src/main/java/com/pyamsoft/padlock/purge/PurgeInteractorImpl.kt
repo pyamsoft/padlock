@@ -32,58 +32,56 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class PurgeInteractorImpl @Inject internal constructor(
-    private val applicationManager: PackageApplicationManager,
-    private val deleteDb: PadLockDBDelete,
-    private val queryDb: PadLockDBQuery) : PurgeInteractor {
+        private val applicationManager: PackageApplicationManager,
+        private val deleteDb: PadLockDBDelete,
+        private val queryDb: PadLockDBQuery) : PurgeInteractor {
 
-  override fun populateList(forceRefresh: Boolean): Observable<String> {
-    return fetchFreshData().flatMapObservable {
-      Observable.fromIterable(it)
-    }.sorted { obj, str -> obj.compareTo(str, ignoreCase = true) }
-  }
+    override fun populateList(forceRefresh: Boolean): Observable<String> {
+        return fetchFreshData().flatMapObservable {
+            Observable.fromIterable(it)
+        }.sorted { obj, str -> obj.compareTo(str, ignoreCase = true) }
+    }
 
+    @CheckResult
+    private fun getAllEntries(): Single<List<PadLockEntry.AllEntries>> = queryDb.queryAll()
 
-  @CheckResult
-  private fun getAllEntries(): Single<List<PadLockEntry.AllEntries>> = queryDb.queryAll()
+    @CheckResult
+    private fun getActiveApplications(): Single<List<String>> = applicationManager.getActiveApplications()
+            .flatMapObservable { Observable.fromIterable(it) }
+            .map { it.packageName }
+            .toSortedList()
 
-  @CheckResult
-  private fun getActiveApplications(): Single<List<String>> = applicationManager.getActiveApplications()
-      .flatMapObservable { Observable.fromIterable(it) }
-      .map { it.packageName }
-      .toSortedList()
+    @CheckResult private fun fetchFreshData(): Single<List<String>> {
+        return getAllEntries().zipWith(getActiveApplications(),
+                BiFunction { allEntries, packageNames ->
+                    val mutableAllEntries = allEntries.toMutableList()
+                    if (mutableAllEntries.isEmpty()) {
+                        Timber.e("Database does not have any AppEntry items")
+                        return@BiFunction emptyList()
+                    }
 
+                    // Loop through all the package names that we are aware of on the device
+                    val foundLocations: MutableSet<PadLockEntry.AllEntries> = HashSet()
+                    for (packageName in packageNames) {
+                        foundLocations.clear()
 
-  @CheckResult private fun fetchFreshData(): Single<List<String>> {
-    return getAllEntries().zipWith(getActiveApplications(),
-        BiFunction { allEntries, packageNames ->
-          val mutableAllEntries = allEntries.toMutableList()
-          if (mutableAllEntries.isEmpty()) {
-            Timber.e("Database does not have any AppEntry items")
-            return@BiFunction emptyList()
-          }
+                        // Filter out the list to only the package names, add them to foundLocations
+                        mutableAllEntries.filterTo(foundLocations) {
+                            // If an entry is found in the database remove it
+                            it.packageName() == packageName
+                        }
 
-          // Loop through all the package names that we are aware of on the device
-          val foundLocations: MutableSet<PadLockEntry.AllEntries> = HashSet()
-          for (packageName in packageNames) {
-            foundLocations.clear()
+                        // Remove all found locations from list
+                        mutableAllEntries.removeAll(foundLocations)
+                    }
 
-            // Filter out the list to only the package names, add them to foundLocations
-            mutableAllEntries.filterTo(foundLocations) {
-              // If an entry is found in the database remove it
-              it.packageName() == packageName
-            }
+                    // The remaining entries in the database are stale
+                    val stalePackageNames: MutableList<String> = ArrayList()
+                    mutableAllEntries.mapTo(stalePackageNames) { it.packageName() }
+                    return@BiFunction stalePackageNames
+                })
+    }
 
-            // Remove all found locations from list
-            mutableAllEntries.removeAll(foundLocations)
-          }
-
-          // The remaining entries in the database are stale
-          val stalePackageNames: MutableList<String> = ArrayList()
-          mutableAllEntries.mapTo(stalePackageNames) { it.packageName() }
-          return@BiFunction stalePackageNames
-        })
-  }
-
-  override fun deleteEntry(packageName: String): Single<String> =
-      deleteDb.deleteWithPackageName(packageName).andThen(Single.just(packageName))
+    override fun deleteEntry(packageName: String): Single<String> =
+            deleteDb.deleteWithPackageName(packageName).andThen(Single.just(packageName))
 }

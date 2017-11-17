@@ -36,184 +36,184 @@ import javax.inject.Inject
 
 class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
-  @field:Inject internal lateinit var presenter: PinEntryPresenter
-  private lateinit var binding: FragmentPinEntryPatternBinding
-  private val cellPattern: MutableList<PatternLockView.Dot> = ArrayList()
-  private val repeatCellPattern: MutableList<PatternLockView.Dot> = ArrayList()
-  private var nextButtonOnClickRunnable: (() -> Boolean) = { false }
-  private var patternText = ""
-  private var listener: PatternLockViewListener? = null
-  private var repeatPattern = false
+    @field:Inject internal lateinit var presenter: PinEntryPresenter
+    private lateinit var binding: FragmentPinEntryPatternBinding
+    private val cellPattern: MutableList<PatternLockView.Dot> = ArrayList()
+    private val repeatCellPattern: MutableList<PatternLockView.Dot> = ArrayList()
+    private var nextButtonOnClickRunnable: (() -> Boolean) = { false }
+    private var patternText = ""
+    private var listener: PatternLockViewListener? = null
+    private var repeatPattern = false
 
-  override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
+    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
 
-    if (savedInstanceState == null) {
-      repeatPattern = false
-      patternText = ""
-    } else {
-      repeatPattern = savedInstanceState.getBoolean(REPEAT_CELL_PATTERN, false)
-      patternText = savedInstanceState.getString(PATTERN_TEXT, "")
-    }
-  }
-
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-      savedInstanceState: Bundle?): View? {
-    binding = FragmentPinEntryPatternBinding.inflate(inflater, container, false)
-    return binding.root
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    if (listener != null) {
-      binding.patternLock.removePatternLockListener(listener)
-      listener = null
-    }
-    binding.unbind()
-  }
-
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
-    listener = object : PatternLockViewListener {
-
-      private fun clearPattern() {
-        if (repeatPattern) {
-          repeatCellPattern.clear()
+        if (savedInstanceState == null) {
+            repeatPattern = false
+            patternText = ""
         } else {
-          cellPattern.clear()
+            repeatPattern = savedInstanceState.getBoolean(REPEAT_CELL_PATTERN, false)
+            patternText = savedInstanceState.getString(PATTERN_TEXT, "")
         }
-      }
-
-      override fun onStarted() {
-        binding.patternLock.setViewMode(PatternLockView.PatternViewMode.CORRECT)
-        clearPattern()
-      }
-
-      override fun onProgress(list: List<PatternLockView.Dot>) {
-
-      }
-
-      override fun onComplete(list: List<PatternLockView.Dot>) {
-        if (!repeatPattern) {
-          if (list.size < MINIMUM_PATTERN_LENGTH) {
-            binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
-          }
-        }
-
-        Timber.d("onPatternDetected")
-        val cellList: MutableList<PatternLockView.Dot> = if (repeatPattern) {
-          // Assign to cellList
-          repeatCellPattern
-        } else {
-          // Assign to cellList
-          cellPattern
-        }
-
-        cellList.clear()
-        cellList.addAll(list)
-      }
-
-      override fun onCleared() {
-        clearPattern()
-      }
     }
 
-    binding.patternLock.isTactileFeedbackEnabled = false
-    binding.patternLock.addPatternLockListener(listener)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?): View? {
+        binding = FragmentPinEntryPatternBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-    presenter.bind(this)
-  }
-
-  override fun onSaveInstanceState(outState: Bundle) {
-    outState.putBoolean(REPEAT_CELL_PATTERN, repeatPattern)
-    outState.putString(PATTERN_TEXT, patternText)
-    super.onSaveInstanceState(outState)
-  }
-
-  override fun onStart() {
-    super.onStart()
-
-    // Pattern gets visually screwed up in multiwindow mode, clear it
-    binding.patternLock.clearPattern()
-  }
-
-  override fun onMasterPinMissing() {
-    nextButtonOnClickRunnable = runnable@ {
-      if (repeatPattern) {
-        Timber.d("Submit repeat attempt")
-        // Submit
-        val repeatText = LockCellUtil.cellPatternToString(repeatCellPattern)
-        submitPin(repeatText)
-        // No follow up acton
-        return@runnable false
-      } else {
-        // process and show next
-        if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
-          Timber.d("Pattern is not long enough")
-          binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
-          return@runnable false
-        } else {
-          Timber.d("Submit initial attempt")
-          patternText = LockCellUtil.cellPatternToString(cellPattern)
-          repeatPattern = true
-          binding.patternLock.clearPattern()
-          return@runnable false
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (listener != null) {
+            binding.patternLock.removePatternLockListener(listener)
+            listener = null
         }
-      }
+        binding.unbind()
     }
-  }
 
-  override fun onMasterPinPresent() {
-    nextButtonOnClickRunnable = runnable@ {
-      patternText = LockCellUtil.cellPatternToString(cellPattern)
-      binding.patternLock.clearPattern()
-      submitPin("")
-      return@runnable false
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        listener = object : PatternLockViewListener {
+
+            private fun clearPattern() {
+                if (repeatPattern) {
+                    repeatCellPattern.clear()
+                } else {
+                    cellPattern.clear()
+                }
+            }
+
+            override fun onStarted() {
+                binding.patternLock.setViewMode(PatternLockView.PatternViewMode.CORRECT)
+                clearPattern()
+            }
+
+            override fun onProgress(list: List<PatternLockView.Dot>) {
+
+            }
+
+            override fun onComplete(list: List<PatternLockView.Dot>) {
+                if (!repeatPattern) {
+                    if (list.size < MINIMUM_PATTERN_LENGTH) {
+                        binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
+                    }
+                }
+
+                Timber.d("onPatternDetected")
+                val cellList: MutableList<PatternLockView.Dot> = if (repeatPattern) {
+                    // Assign to cellList
+                    repeatCellPattern
+                } else {
+                    // Assign to cellList
+                    cellPattern
+                }
+
+                cellList.clear()
+                cellList.addAll(list)
+            }
+
+            override fun onCleared() {
+                clearPattern()
+            }
+        }
+
+        binding.patternLock.isTactileFeedbackEnabled = false
+        binding.patternLock.addPatternLockListener(listener)
+
+        presenter.bind(this)
     }
-  }
 
-  fun onNextButtonPressed() {
-    Timber.d("Next button pressed, store pattern for re-entry")
-    nextButtonOnClickRunnable()
-  }
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(REPEAT_CELL_PATTERN, repeatPattern)
+        outState.putString(PATTERN_TEXT, patternText)
+        super.onSaveInstanceState(outState)
+    }
 
-  override fun onPinSubmitCreateSuccess() {
-    presenter.publish(CreatePinEvent(true))
-  }
+    override fun onStart() {
+        super.onStart()
 
-  override fun onPinSubmitCreateFailure() {
-    presenter.publish(CreatePinEvent(false))
-  }
+        // Pattern gets visually screwed up in multiwindow mode, clear it
+        binding.patternLock.clearPattern()
+    }
 
-  override fun onPinSubmitClearSuccess() {
-    presenter.publish(ClearPinEvent(true))
-  }
+    override fun onMasterPinMissing() {
+        nextButtonOnClickRunnable = runnable@ {
+            if (repeatPattern) {
+                Timber.d("Submit repeat attempt")
+                // Submit
+                val repeatText = LockCellUtil.cellPatternToString(repeatCellPattern)
+                submitPin(repeatText)
+                // No follow up acton
+                return@runnable false
+            } else {
+                // process and show next
+                if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
+                    Timber.d("Pattern is not long enough")
+                    binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
+                    return@runnable false
+                } else {
+                    Timber.d("Submit initial attempt")
+                    patternText = LockCellUtil.cellPatternToString(cellPattern)
+                    repeatPattern = true
+                    binding.patternLock.clearPattern()
+                    return@runnable false
+                }
+            }
+        }
+    }
 
-  override fun onPinSubmitClearFailure() {
-    presenter.publish(ClearPinEvent(false))
-  }
+    override fun onMasterPinPresent() {
+        nextButtonOnClickRunnable = runnable@ {
+            patternText = LockCellUtil.cellPatternToString(cellPattern)
+            binding.patternLock.clearPattern()
+            submitPin("")
+            return@runnable false
+        }
+    }
 
-  override fun onPinSubmitError(throwable: Throwable) {
-    Toasty.makeText(context!!, throwable.message.toString(), Toasty.LENGTH_SHORT).show()
-  }
+    fun onNextButtonPressed() {
+        Timber.d("Next button pressed, store pattern for re-entry")
+        nextButtonOnClickRunnable()
+    }
 
-  override fun onPinSubmitComplete() {
-    dismissParent()
-  }
+    override fun onPinSubmitCreateSuccess() {
+        presenter.publish(CreatePinEvent(true))
+    }
 
-  private fun submitPin(repeatText: String) {
-    // Hint is blank for PIN code
-    presenter.submit(patternText, repeatText, "")
-  }
+    override fun onPinSubmitCreateFailure() {
+        presenter.publish(CreatePinEvent(false))
+    }
 
-  companion object {
+    override fun onPinSubmitClearSuccess() {
+        presenter.publish(ClearPinEvent(true))
+    }
 
-    const internal val TAG = "PinEntryPatternFragment"
-    const private val REPEAT_CELL_PATTERN = "repeat_cell_pattern"
-    const private val PATTERN_TEXT = "pattern_text"
-    @JvmField internal var MINIMUM_PATTERN_LENGTH = 4
-  }
+    override fun onPinSubmitClearFailure() {
+        presenter.publish(ClearPinEvent(false))
+    }
+
+    override fun onPinSubmitError(throwable: Throwable) {
+        Toasty.makeText(context!!, throwable.message.toString(), Toasty.LENGTH_SHORT).show()
+    }
+
+    override fun onPinSubmitComplete() {
+        dismissParent()
+    }
+
+    private fun submitPin(repeatText: String) {
+        // Hint is blank for PIN code
+        presenter.submit(patternText, repeatText, "")
+    }
+
+    companion object {
+
+        const internal val TAG = "PinEntryPatternFragment"
+        const private val REPEAT_CELL_PATTERN = "repeat_cell_pattern"
+        const private val PATTERN_TEXT = "pattern_text"
+        @JvmField internal var MINIMUM_PATTERN_LENGTH = 4
+    }
 }

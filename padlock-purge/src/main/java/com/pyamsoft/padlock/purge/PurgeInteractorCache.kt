@@ -27,42 +27,43 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class PurgeInteractorCache @Inject internal constructor(
-    @param:Named("interactor_purge") private val impl: PurgeInteractor) : PurgeInteractor, Cache {
+        @param:Named("interactor_purge") private val impl: PurgeInteractor) : PurgeInteractor,
+        Cache {
 
-  private var cachedList: Observable<String>? = null
-  private var lastAccessListTime: Long = 0L
+    private var cachedList: Observable<String>? = null
+    private var lastAccessListTime: Long = 0L
 
-  override fun clearCache() {
-    cachedList = null
-  }
-
-  override fun populateList(forceRefresh: Boolean): Observable<String> {
-    return Observable.defer {
-      val cache = cachedList
-      val list: Observable<String>
-      val currentTime = System.currentTimeMillis()
-      if (forceRefresh || cache == null || lastAccessListTime + FIVE_MINUTES_MILLIS < currentTime) {
-        list = impl.populateList(true).cache()
-        cachedList = list
-        lastAccessListTime = currentTime
-      } else {
-        list = cache
-      }
-      return@defer list
-    }.doOnError { clearCache() }
-  }
-
-  override fun deleteEntry(packageName: String): Single<String> {
-    return impl.deleteEntry(packageName).doOnSuccess {
-      val obj: Observable<String>? = cachedList
-      if (obj != null) {
-        cachedList = obj.filter { it != packageName }.doOnError { clearCache() }
-      }
+    override fun clearCache() {
+        cachedList = null
     }
-  }
 
-  companion object {
+    override fun populateList(forceRefresh: Boolean): Observable<String> {
+        return Observable.defer {
+            val cache = cachedList
+            val list: Observable<String>
+            val currentTime = System.currentTimeMillis()
+            if (forceRefresh || cache == null || lastAccessListTime + FIVE_MINUTES_MILLIS < currentTime) {
+                list = impl.populateList(true).cache()
+                cachedList = list
+                lastAccessListTime = currentTime
+            } else {
+                list = cache
+            }
+            return@defer list
+        }.doOnError { clearCache() }
+    }
 
-    private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
-  }
+    override fun deleteEntry(packageName: String): Single<String> {
+        return impl.deleteEntry(packageName).doOnSuccess {
+            val obj: Observable<String>? = cachedList
+            if (obj != null) {
+                cachedList = obj.filter { it != packageName }.doOnError { clearCache() }
+            }
+        }
+    }
+
+    companion object {
+
+        private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
+    }
 }

@@ -24,15 +24,17 @@ import com.pyamsoft.padlock.model.AppEntry
 import io.reactivex.Observable
 import io.reactivex.Single
 
-
 internal interface LockListInteractor : LockStateModifyInteractor {
 
-  @CheckResult fun populateList(force: Boolean): Observable<AppEntry>
+    @CheckResult
+    fun populateList(force: Boolean): Observable<AppEntry>
 
-  @CheckResult fun hasShownOnBoarding(): Single<Boolean>
+    @CheckResult
+    fun hasShownOnBoarding(): Single<Boolean>
 
-  @CheckResult fun isSystemVisible(): Single<Boolean>
+    @CheckResult
+    fun isSystemVisible(): Single<Boolean>
 
-  fun setSystemVisible(visible: Boolean)
+    fun setSystemVisible(visible: Boolean)
 }
 

@@ -29,63 +29,63 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class PinEntryInteractorImpl @Inject internal constructor(
-    private val lockHelper: LockHelper,
-    private val masterPinInteractor: MasterPinInteractor) : PinEntryInteractor {
+        private val lockHelper: LockHelper,
+        private val masterPinInteractor: MasterPinInteractor) : PinEntryInteractor {
 
-  @CheckResult private fun getMasterPin(): Single<Optional<String>> =
-      masterPinInteractor.getMasterPin()
+    @CheckResult private fun getMasterPin(): Single<Optional<String>> =
+            masterPinInteractor.getMasterPin()
 
-  override fun hasMasterPin(): Single<Boolean> = getMasterPin().map { it is Present }
+    override fun hasMasterPin(): Single<Boolean> = getMasterPin().map { it is Present }
 
-  override fun submitPin(currentAttempt: String, reEntryAttempt: String,
-      hint: String): Single<PinEntryEvent> {
-    return getMasterPin().flatMap {
-      if (it is Present) {
-        return@flatMap clearPin(it.value, currentAttempt)
-      } else {
-        return@flatMap createPin(currentAttempt, reEntryAttempt, hint)
-      }
-    }
-  }
-
-  @CheckResult private fun clearPin(
-      masterPin: String, attempt: String): Single<PinEntryEvent> {
-    return lockHelper.checkSubmissionAttempt(attempt, masterPin).map {
-      if (it) {
-        Timber.d("Clear master item")
-        masterPinInteractor.setMasterPin(null)
-        masterPinInteractor.setHint(null)
-      } else {
-        Timber.d("Failed to clear master item")
-      }
-
-      return@map PinEntryEvent.Clear(it)
-    }
-  }
-
-  @CheckResult private fun createPin(
-      attempt: String, reentry: String, hint: String): Single<PinEntryEvent> {
-    return Single.defer {
-      Timber.d("No existing master item, attempt to create a new one")
-      if (attempt == reentry) {
-        return@defer lockHelper.encode(attempt)
-      } else {
-        return@defer Single.just("")
-      }
-    }.map {
-      val success = it.isNotBlank()
-      if (success) {
-        Timber.d("Entry and Re-Entry match, create")
-        masterPinInteractor.setMasterPin(it)
-
-        if (hint.isNotEmpty()) {
-          Timber.d("User provided hint, save it")
-          masterPinInteractor.setHint(hint)
+    override fun submitPin(currentAttempt: String, reEntryAttempt: String,
+            hint: String): Single<PinEntryEvent> {
+        return getMasterPin().flatMap {
+            if (it is Present) {
+                return@flatMap clearPin(it.value, currentAttempt)
+            } else {
+                return@flatMap createPin(currentAttempt, reEntryAttempt, hint)
+            }
         }
-      } else {
-        Timber.e("Entry and re-entry do not match")
-      }
-      return@map PinEntryEvent.Create(success)
     }
-  }
+
+    @CheckResult private fun clearPin(
+            masterPin: String, attempt: String): Single<PinEntryEvent> {
+        return lockHelper.checkSubmissionAttempt(attempt, masterPin).map {
+            if (it) {
+                Timber.d("Clear master item")
+                masterPinInteractor.setMasterPin(null)
+                masterPinInteractor.setHint(null)
+            } else {
+                Timber.d("Failed to clear master item")
+            }
+
+            return@map PinEntryEvent.Clear(it)
+        }
+    }
+
+    @CheckResult private fun createPin(
+            attempt: String, reentry: String, hint: String): Single<PinEntryEvent> {
+        return Single.defer {
+            Timber.d("No existing master item, attempt to create a new one")
+            if (attempt == reentry) {
+                return@defer lockHelper.encode(attempt)
+            } else {
+                return@defer Single.just("")
+            }
+        }.map {
+            val success = it.isNotBlank()
+            if (success) {
+                Timber.d("Entry and Re-Entry match, create")
+                masterPinInteractor.setMasterPin(it)
+
+                if (hint.isNotEmpty()) {
+                    Timber.d("User provided hint, save it")
+                    masterPinInteractor.setHint(hint)
+                }
+            } else {
+                Timber.e("Entry and re-entry do not match")
+            }
+            return@map PinEntryEvent.Create(success)
+        }
+    }
 }

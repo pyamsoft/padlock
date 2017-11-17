@@ -26,13 +26,13 @@ import javax.inject.Singleton
 
 @Singleton internal class LockPassBus @Inject internal constructor() : EventBus<LockPassEvent> {
 
-  private val bus: EventBus<LockPassEvent> = RxBus.create()
+    private val bus: EventBus<LockPassEvent> = RxBus.create()
 
-  override fun listen(): Observable<LockPassEvent> = bus.listen()
+    override fun listen(): Observable<LockPassEvent> = bus.listen()
 
-  override fun publish(event: LockPassEvent) {
-    bus.publish(event)
-  }
+    override fun publish(event: LockPassEvent) {
+        bus.publish(event)
+    }
 
 }
 

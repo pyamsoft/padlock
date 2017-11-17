@@ -24,10 +24,10 @@ import io.reactivex.Single
 
 interface PackageLabelManager {
 
-  @CheckResult
-  fun loadPackageLabel(info: ApplicationItem): Single<String> =
-      loadPackageLabel(info.packageName)
+    @CheckResult
+    fun loadPackageLabel(info: ApplicationItem): Single<String> =
+            loadPackageLabel(info.packageName)
 
-  @CheckResult
-  fun loadPackageLabel(packageName: String): Single<String>
+    @CheckResult
+    fun loadPackageLabel(packageName: String): Single<String>
 }

@@ -29,22 +29,22 @@ import javax.inject.Inject
 
 class PurgeAllDialog : CanaryDialog() {
 
-  @field:Inject internal lateinit var purgePublisher: PurgePublisher
+    @field:Inject internal lateinit var purgePublisher: PurgePublisher
 
-  override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
+    override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
-  }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
+    }
 
-  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    return AlertDialog.Builder(activity!!).setMessage("Really delete all old entries?")
-        .setPositiveButton("Delete") { _, _ ->
-          purgePublisher.publish(PurgeAllEvent)
-          dismiss()
-        }
-        .setNegativeButton("Cancel") { _, _ -> dismiss() }
-        .create()
-  }
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return AlertDialog.Builder(activity!!).setMessage("Really delete all old entries?")
+                .setPositiveButton("Delete") { _, _ ->
+                    purgePublisher.publish(PurgeAllEvent)
+                    dismiss()
+                }
+                .setNegativeButton("Cancel") { _, _ -> dismiss() }
+                .create()
+    }
 }

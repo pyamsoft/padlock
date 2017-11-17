@@ -26,46 +26,46 @@ import com.pyamsoft.padlock.databinding.AdapterItemPurgeBinding
 import com.pyamsoft.padlock.uicommon.UpdateItem
 
 internal class PurgeItem internal constructor(
-    packageName: String) : ModelAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
-    packageName), UpdateItem<String> {
+        packageName: String) : ModelAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
+        packageName), UpdateItem<String> {
 
-  private var viewHolder: ViewHolder? = null
+    private var viewHolder: ViewHolder? = null
 
-  override fun getType(): Int = R.id.adapter_purge
+    override fun getType(): Int = R.id.adapter_purge
 
-  override fun getLayoutRes(): Int = R.layout.adapter_item_purge
+    override fun getLayoutRes(): Int = R.layout.adapter_item_purge
 
-  override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
+    override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
 
-  override fun updateModel(model: String): Boolean {
-    withModel(model)
-    bindViewHolder()
-    return false
-  }
-
-  private fun bindViewHolder() {
-    viewHolder?.apply {
-      binding.itemPurgeName.text = model
+    override fun updateModel(model: String): Boolean {
+        withModel(model)
+        bindViewHolder()
+        return false
     }
-  }
 
-  override fun unbindView(holder: ViewHolder) {
-    super.unbindView(holder)
-    viewHolder = null
-    holder.apply {
-      binding.itemPurgeName.text = null
+    private fun bindViewHolder() {
+        viewHolder?.apply {
+            binding.itemPurgeName.text = model
+        }
     }
-  }
 
-  override fun bindView(holder: ViewHolder, payloads: List<Any>) {
-    super.bindView(holder, payloads)
-    viewHolder = holder
-    bindViewHolder()
-  }
+    override fun unbindView(holder: ViewHolder) {
+        super.unbindView(holder)
+        viewHolder = null
+        holder.apply {
+            binding.itemPurgeName.text = null
+        }
+    }
 
-  internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    override fun bindView(holder: ViewHolder, payloads: List<Any>) {
+        super.bindView(holder, payloads)
+        viewHolder = holder
+        bindViewHolder()
+    }
 
-    internal val binding: AdapterItemPurgeBinding = AdapterItemPurgeBinding.bind(itemView)
+    internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-  }
+        internal val binding: AdapterItemPurgeBinding = AdapterItemPurgeBinding.bind(itemView)
+
+    }
 }

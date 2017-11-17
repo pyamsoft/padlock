@@ -28,34 +28,34 @@ import javax.inject.Inject
 
 class RecheckService : IntentService(RecheckService::class.java.name) {
 
-  @field:Inject internal lateinit var recheckBus: RecheckPublisher
+    @field:Inject internal lateinit var recheckBus: RecheckPublisher
 
-  override fun onCreate() {
-    super.onCreate()
-    Injector.obtain<PadLockComponent>(applicationContext).inject(this)
-  }
-
-  override fun onHandleIntent(intent: Intent?) {
-    if (intent == null) {
-      Timber.e("Intent is NULL")
-      return
+    override fun onCreate() {
+        super.onCreate()
+        Injector.obtain<PadLockComponent>(applicationContext).inject(this)
     }
 
-    if (!intent.hasExtra(Recheck.EXTRA_PACKAGE_NAME)) {
-      Timber.e("No package name passed")
-      return
-    }
+    override fun onHandleIntent(intent: Intent?) {
+        if (intent == null) {
+            Timber.e("Intent is NULL")
+            return
+        }
 
-    if (!intent.hasExtra(Recheck.EXTRA_CLASS_NAME)) {
-      Timber.e("No class name passed")
-      return
-    }
+        if (!intent.hasExtra(Recheck.EXTRA_PACKAGE_NAME)) {
+            Timber.e("No package name passed")
+            return
+        }
 
-    val packageName = intent.getStringExtra(Recheck.EXTRA_PACKAGE_NAME)
-    val className = intent.getStringExtra(Recheck.EXTRA_CLASS_NAME)
-    if (packageName.isNotEmpty() && className.isNotEmpty()) {
-      Timber.d("Recheck was requested for: %s, %s", packageName, className)
-      recheckBus.publish(RecheckEvent(packageName, className))
+        if (!intent.hasExtra(Recheck.EXTRA_CLASS_NAME)) {
+            Timber.e("No class name passed")
+            return
+        }
+
+        val packageName = intent.getStringExtra(Recheck.EXTRA_PACKAGE_NAME)
+        val className = intent.getStringExtra(Recheck.EXTRA_CLASS_NAME)
+        if (packageName.isNotEmpty() && className.isNotEmpty()) {
+            Timber.d("Recheck was requested for: %s, %s", packageName, className)
+            recheckBus.publish(RecheckEvent(packageName, className))
+        }
     }
-  }
 }

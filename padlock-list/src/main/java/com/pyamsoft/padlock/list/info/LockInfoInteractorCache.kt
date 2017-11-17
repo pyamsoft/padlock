@@ -30,89 +30,91 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockInfoInteractorCache @Inject internal constructor(
-    @param:Named(
-        "interactor_lock_info") private val impl: LockInfoInteractor) : LockInfoInteractor, Cache, LockInfoUpdater {
+        @param:Named(
+                "interactor_lock_info") private val impl: LockInfoInteractor) : LockInfoInteractor,
+        Cache, LockInfoUpdater {
 
-  private var infoCache: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>> = HashMap()
+    private var infoCache: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>> = HashMap()
 
-  override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
-      packageName: String, activityName: String, code: String?,
-      system: Boolean): Single<LockState> {
-    return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
-        code, system)
-        .doOnSuccess {
-          val obj: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>>? = infoCache
-          if (obj != null) {
-            val cached: Observable<ActivityEntry>? = obj[packageName]?.first
-            if (cached != null) {
-              obj.put(packageName, Pair(cached.map {
-                if (it.packageName == packageName && it.name == activityName) {
-                  return@map ActivityEntry(name = it.name, packageName = it.packageName,
-                      lockState = newLockState)
-                } else {
-                  return@map it
-                }
-              }, System.currentTimeMillis()))
-            }
-          }
-        }.doOnError { infoCache.remove(packageName) }
-  }
-
-  override fun update(packageName: String, activityName: String,
-      lockState: LockState): Completable {
-    return Completable.fromAction {
-      val obj: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>>? = infoCache
-      if (obj != null) {
-        val pair: Pair<Observable<ActivityEntry>?, Long>? = obj[packageName]
-        val cached: Observable<ActivityEntry>? = pair?.first
-        val time: Long = pair?.second ?: 0
-        if (cached != null && time > 0) {
-          obj.put(packageName, Pair(cached.map {
-            if (it.packageName == packageName && it.name == activityName) {
-              return@map ActivityEntry(name = it.name, packageName = it.packageName,
-                  lockState = lockState)
-            } else {
-              return@map it
-            }
-          }, time))
-        }
-      }
+    override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
+            packageName: String, activityName: String, code: String?,
+            system: Boolean): Single<LockState> {
+        return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
+                code, system)
+                .doOnSuccess {
+                    val obj: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>>? = infoCache
+                    if (obj != null) {
+                        val cached: Observable<ActivityEntry>? = obj[packageName]?.first
+                        if (cached != null) {
+                            obj.put(packageName, Pair(cached.map {
+                                if (it.packageName == packageName && it.name == activityName) {
+                                    return@map ActivityEntry(name = it.name,
+                                            packageName = it.packageName,
+                                            lockState = newLockState)
+                                } else {
+                                    return@map it
+                                }
+                            }, System.currentTimeMillis()))
+                        }
+                    }
+                }.doOnError { infoCache.remove(packageName) }
     }
-  }
 
-  override fun clearCache() {
-    infoCache.clear()
-  }
+    override fun update(packageName: String, activityName: String,
+            lockState: LockState): Completable {
+        return Completable.fromAction {
+            val obj: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>>? = infoCache
+            if (obj != null) {
+                val pair: Pair<Observable<ActivityEntry>?, Long>? = obj[packageName]
+                val cached: Observable<ActivityEntry>? = pair?.first
+                val time: Long = pair?.second ?: 0
+                if (cached != null && time > 0) {
+                    obj.put(packageName, Pair(cached.map {
+                        if (it.packageName == packageName && it.name == activityName) {
+                            return@map ActivityEntry(name = it.name, packageName = it.packageName,
+                                    lockState = lockState)
+                        } else {
+                            return@map it
+                        }
+                    }, time))
+                }
+            }
+        }
+    }
 
-  override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
+    override fun clearCache() {
+        infoCache.clear()
+    }
 
-  override fun populateList(packageName: String, force: Boolean): Observable<ActivityEntry> {
-    return Observable.defer {
-      val currentTime = System.currentTimeMillis()
-      val list: Observable<ActivityEntry>
-      val cachedPair = infoCache[packageName]
-      val cache: Observable<ActivityEntry>?
-      val cachedTime: Long
-      if (cachedPair == null) {
-        cache = null
-        cachedTime = 0L
-      } else {
-        cache = cachedPair.first
-        cachedTime = cachedPair.second
-      }
-      if (force || cache == null || cachedTime + FIVE_MINUTES_MILLIS < currentTime) {
-        list = impl.populateList(packageName, true).cache()
-        infoCache.put(packageName, Pair(list, currentTime))
-      } else {
-        list = cache
-      }
-      return@defer list
-    }.doOnError { infoCache.remove(packageName) }
-  }
+    override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
 
-  companion object {
+    override fun populateList(packageName: String, force: Boolean): Observable<ActivityEntry> {
+        return Observable.defer {
+            val currentTime = System.currentTimeMillis()
+            val list: Observable<ActivityEntry>
+            val cachedPair = infoCache[packageName]
+            val cache: Observable<ActivityEntry>?
+            val cachedTime: Long
+            if (cachedPair == null) {
+                cache = null
+                cachedTime = 0L
+            } else {
+                cache = cachedPair.first
+                cachedTime = cachedPair.second
+            }
+            if (force || cache == null || cachedTime + FIVE_MINUTES_MILLIS < currentTime) {
+                list = impl.populateList(packageName, true).cache()
+                infoCache.put(packageName, Pair(list, currentTime))
+            } else {
+                list = cache
+            }
+            return@defer list
+        }.doOnError { infoCache.remove(packageName) }
+    }
 
-    private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
-  }
+    companion object {
+
+        private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
+    }
 }
 

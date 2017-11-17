@@ -23,8 +23,8 @@ import javax.inject.Inject
 
 class SettingsPublisher @Inject internal constructor(private val bus: EventBus<ConfirmEvent>) {
 
-  fun publish(event: ConfirmEvent) {
-    bus.publish(event)
-  }
+    fun publish(event: ConfirmEvent) {
+        bus.publish(event)
+    }
 }
 

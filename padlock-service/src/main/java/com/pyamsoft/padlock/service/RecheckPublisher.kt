@@ -23,8 +23,8 @@ import javax.inject.Inject
 
 class RecheckPublisher @Inject internal constructor(private val bus: EventBus<RecheckEvent>) {
 
-  fun publish(event: RecheckEvent) {
-    bus.publish(event)
-  }
+    fun publish(event: RecheckEvent) {
+        bus.publish(event)
+    }
 }
 

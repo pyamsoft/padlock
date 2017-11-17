@@ -20,13 +20,13 @@ package com.pyamsoft.padlock.list
 
 sealed class LockListEvent {
 
-  data class Modify(val packageName: String, val code: String?, val isSystem: Boolean,
-      val isChecked: Boolean) : LockListEvent()
+    data class Modify(val packageName: String, val code: String?, val isSystem: Boolean,
+            val isChecked: Boolean) : LockListEvent()
 
-  sealed class Callback : LockListEvent() {
+    sealed class Callback : LockListEvent() {
 
-    data class Created(val packageName: String) : Callback()
-    data class Deleted(val packageName: String) : Callback()
-    data class Error(val throwable: Throwable) : Callback()
-  }
+        data class Created(val packageName: String) : Callback()
+        data class Deleted(val packageName: String) : Callback()
+        data class Error(val throwable: Throwable) : Callback()
+    }
 }

@@ -24,15 +24,16 @@ import io.reactivex.Observable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class ServiceFinishBus @Inject internal constructor() : EventBus<ServiceFinishEvent> {
+@Singleton internal class ServiceFinishBus @Inject internal constructor() :
+        EventBus<ServiceFinishEvent> {
 
-  private val bus: EventBus<ServiceFinishEvent> = RxBus.create()
+    private val bus: EventBus<ServiceFinishEvent> = RxBus.create()
 
-  override fun listen(): Observable<ServiceFinishEvent> = bus.listen()
+    override fun listen(): Observable<ServiceFinishEvent> = bus.listen()
 
-  override fun publish(event: ServiceFinishEvent) {
-    bus.publish(event)
-  }
+    override fun publish(event: ServiceFinishEvent) {
+        bus.publish(event)
+    }
 
 }
 

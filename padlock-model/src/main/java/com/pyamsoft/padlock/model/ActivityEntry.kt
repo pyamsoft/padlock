@@ -20,5 +20,5 @@ package com.pyamsoft.padlock.model
 
 data class ActivityEntry(val name: String, val packageName: String, val lockState: LockState) {
 
-  val id: String = "$packageName|$name"
+    val id: String = "$packageName|$name"
 }

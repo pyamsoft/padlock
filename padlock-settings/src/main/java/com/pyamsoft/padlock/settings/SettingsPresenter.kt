@@ -32,118 +32,118 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class SettingsPresenter @Inject internal constructor(
-    private val interactor: SettingsInteractor,
-    private val bus: EventBus<ConfirmEvent>,
-    private val serviceFinishBus: EventBus<ServiceFinishEvent>,
-    private val clearPinBus: EventBus<ClearPinEvent>,
-    private val receiver: ApplicationInstallReceiver,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
-    ioScheduler, mainScheduler) {
+        private val interactor: SettingsInteractor,
+        private val bus: EventBus<ConfirmEvent>,
+        private val serviceFinishBus: EventBus<ServiceFinishEvent>,
+        private val clearPinBus: EventBus<ClearPinEvent>,
+        private val receiver: ApplicationInstallReceiver,
+        @Named("computation") computationScheduler: Scheduler,
+        @Named("main") mainScheduler: Scheduler,
+        @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
+        ioScheduler, mainScheduler) {
 
-  override fun onBind(v: View) {
-    super.onBind(v)
-    registerOnBus(v)
-    registerOnClearBus(v)
-  }
-
-  private fun registerOnBus(v: ClearCallback) {
-    dispose {
-      bus.listen().flatMapSingle { type ->
-        when (type) {
-          DATABASE -> interactor.clearDatabase()
-          ALL -> interactor.clearAll()
-        }.map { type }
-      }.subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-          .subscribe({
-            when (it) {
-              DATABASE -> v.onClearDatabase()
-              ALL -> v.onClearAll()
-              else -> throw IllegalArgumentException("Invalid enum: $it")
-            }
-          }, {
-            Timber.e(it, "onError clear bus")
-          })
+    override fun onBind(v: View) {
+        super.onBind(v)
+        registerOnBus(v)
+        registerOnClearBus(v)
     }
-  }
 
-  private fun registerOnClearBus(v: MasterPinClearCallback) {
-    dispose {
-      clearPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-          .subscribe({
-            if (it.success) {
-              v.onMasterPinClearSuccess()
-            } else {
-              v.onMasterPinClearFailure()
-            }
-          }, {
-            Timber.e(it, "error clear pin bus")
-          })
+    private fun registerOnBus(v: ClearCallback) {
+        dispose {
+            bus.listen().flatMapSingle { type ->
+                when (type) {
+                    DATABASE -> interactor.clearDatabase()
+                    ALL -> interactor.clearAll()
+                }.map { type }
+            }.subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+                    .subscribe({
+                        when (it) {
+                            DATABASE -> v.onClearDatabase()
+                            ALL -> v.onClearAll()
+                            else -> throw IllegalArgumentException("Invalid enum: $it")
+                        }
+                    }, {
+                        Timber.e(it, "onError clear bus")
+                    })
+        }
     }
-  }
 
-  fun publishFinish() {
-    serviceFinishBus.publish(ServiceFinishEvent)
-  }
-
-  fun setApplicationInstallReceiverState() {
-    dispose {
-      interactor.isInstallListenerEnabled()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            if (it) {
-              receiver.register()
-            } else {
-              receiver.unregister()
-            }
-          }, { Timber.e(it, "onError setApplicationInstallReceiverState") })
+    private fun registerOnClearBus(v: MasterPinClearCallback) {
+        dispose {
+            clearPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+                    .subscribe({
+                        if (it.success) {
+                            v.onMasterPinClearSuccess()
+                        } else {
+                            v.onMasterPinClearFailure()
+                        }
+                    }, {
+                        Timber.e(it, "error clear pin bus")
+                    })
+        }
     }
-  }
 
-  fun checkLockType(value: String) {
-    dispose {
-      interactor.hasExistingMasterPassword()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            if (it) {
-              view?.onLockTypeChangePrevented()
-            } else {
-              view?.onLockTypeChangeAccepted(value)
-            }
-          }, {
-            Timber.e(it, "on error lock type change")
-            view?.onLockTypeChangeError(it)
-          })
+    fun publishFinish() {
+        serviceFinishBus.publish(ServiceFinishEvent)
     }
-  }
 
-  interface View : ClearCallback, LockTypeChangeCallback, MasterPinClearCallback
+    fun setApplicationInstallReceiverState() {
+        dispose {
+            interactor.isInstallListenerEnabled()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({
+                        if (it) {
+                            receiver.register()
+                        } else {
+                            receiver.unregister()
+                        }
+                    }, { Timber.e(it, "onError setApplicationInstallReceiverState") })
+        }
+    }
 
-  interface LockTypeChangeCallback {
+    fun checkLockType(value: String) {
+        dispose {
+            interactor.hasExistingMasterPassword()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({
+                        if (it) {
+                            view?.onLockTypeChangePrevented()
+                        } else {
+                            view?.onLockTypeChangeAccepted(value)
+                        }
+                    }, {
+                        Timber.e(it, "on error lock type change")
+                        view?.onLockTypeChangeError(it)
+                    })
+        }
+    }
 
-    fun onLockTypeChangePrevented()
+    interface View : ClearCallback, LockTypeChangeCallback, MasterPinClearCallback
 
-    fun onLockTypeChangeAccepted(value: String)
+    interface LockTypeChangeCallback {
 
-    fun onLockTypeChangeError(throwable: Throwable)
+        fun onLockTypeChangePrevented()
 
-  }
+        fun onLockTypeChangeAccepted(value: String)
 
-  interface MasterPinClearCallback {
+        fun onLockTypeChangeError(throwable: Throwable)
 
-    fun onMasterPinClearSuccess()
+    }
 
-    fun onMasterPinClearFailure()
+    interface MasterPinClearCallback {
 
-  }
+        fun onMasterPinClearSuccess()
 
-  interface ClearCallback {
+        fun onMasterPinClearFailure()
 
-    fun onClearDatabase()
+    }
 
-    fun onClearAll()
-  }
+    interface ClearCallback {
+
+        fun onClearDatabase()
+
+        fun onClearAll()
+    }
 }

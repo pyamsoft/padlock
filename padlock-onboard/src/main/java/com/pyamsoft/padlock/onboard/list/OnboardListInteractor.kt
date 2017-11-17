@@ -23,9 +23,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class OnboardListInteractor @Inject internal constructor(
-    private val preferences: OnboardingPreferences) {
+        private val preferences: OnboardingPreferences) {
 
-  fun completeOnboarding() {
-    preferences.setListOnBoard()
-  }
+    fun completeOnboarding() {
+        preferences.setListOnBoard()
+    }
 }

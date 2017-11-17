@@ -23,6 +23,6 @@ import dagger.Module
 
 @Module abstract class LockModule {
 
-  @Binds internal abstract fun provideLockHelper(impl: SHA256LockHelper): LockHelper
+    @Binds internal abstract fun provideLockHelper(impl: SHA256LockHelper): LockHelper
 }
 

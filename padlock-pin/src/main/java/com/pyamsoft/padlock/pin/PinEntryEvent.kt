@@ -20,9 +20,9 @@ package com.pyamsoft.padlock.pin
 
 sealed class PinEntryEvent {
 
-  data class Create(val complete: Boolean) : PinEntryEvent()
+    data class Create(val complete: Boolean) : PinEntryEvent()
 
-  data class Clear(val complete: Boolean) : PinEntryEvent()
+    data class Clear(val complete: Boolean) : PinEntryEvent()
 
 }
 

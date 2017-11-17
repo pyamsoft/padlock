@@ -24,17 +24,18 @@ import dagger.Module
 
 @Module abstract class ServiceModule {
 
-  @Binds
-  internal abstract fun provideServiceInteractor(
-      impl: LockServiceInteractorImpl): LockServiceInteractor
+    @Binds
+    internal abstract fun provideServiceInteractor(
+            impl: LockServiceInteractorImpl): LockServiceInteractor
 
-  @Binds internal abstract fun provideServiceStateInteractor(
-      impl: LockServiceStateInteractorImpl): LockServiceStateInteractor
+    @Binds internal abstract fun provideServiceStateInteractor(
+            impl: LockServiceStateInteractorImpl): LockServiceStateInteractor
 
-  @Binds
-  internal abstract fun provideRecheckBus(bus: RecheckEventBus): EventBus<RecheckEvent>
+    @Binds
+    internal abstract fun provideRecheckBus(bus: RecheckEventBus): EventBus<RecheckEvent>
 
-  @Binds
-  internal abstract fun provideServiceFinishBus(bus: ServiceFinishBus): EventBus<ServiceFinishEvent>
+    @Binds
+    internal abstract fun provideServiceFinishBus(
+            bus: ServiceFinishBus): EventBus<ServiceFinishEvent>
 }
 

@@ -42,127 +42,127 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : TamperActivity(), MainPresenter.View {
 
-  @Inject internal lateinit var presenter: MainPresenter
-  private lateinit var binding: ActivityMainBinding
+    @Inject internal lateinit var presenter: MainPresenter
+    private lateinit var binding: ActivityMainBinding
 
-  override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
+    override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
 
-  override val safePackageName: String = "com.pyamsoft.padlock"
+    override val safePackageName: String = "com.pyamsoft.padlock"
 
-  override val versionName: String = BuildConfig.VERSION_NAME
+    override val versionName: String = BuildConfig.VERSION_NAME
 
-  override val applicationIcon: Int = R.mipmap.ic_launcher
+    override val applicationIcon: Int = R.mipmap.ic_launcher
 
-  override val applicationName: String by lazy(NONE) { getString(R.string.app_name) }
+    override val applicationName: String by lazy(NONE) { getString(R.string.app_name) }
 
-  override fun provideBoundPresenters(): List<Presenter<*>> =
-      listOf(presenter) + super.provideBoundPresenters()
+    override fun provideBoundPresenters(): List<Presenter<*>> =
+            listOf(presenter) + super.provideBoundPresenters()
 
-  override val changeLogLines: Array<String>
-    get() = arrayOf(
-        "FEATURE: Show indicator on main list if an application has whitelisted (never locked) or blacklisted (always locked) screens",
-        "FEATURE: Show on the info dialog which screens are whitelisted or blacklisted",
-        "BUGFIX: Explain blacklisting and whitelisting",
-        "BUGFIX: Faster list fetching, do not clear static items"
-    )
+    override val changeLogLines: Array<String>
+        get() = arrayOf(
+                "FEATURE: Show indicator on main list if an application has whitelisted (never locked) or blacklisted (always locked) screens",
+                "FEATURE: Show on the info dialog which screens are whitelisted or blacklisted",
+                "BUGFIX: Explain blacklisting and whitelisting",
+                "BUGFIX: Faster list fetching, do not clear static items"
+        )
 
-  public override fun onCreate(savedInstanceState: Bundle?) {
-    setTheme(R.style.Theme_PadLock_Light)
-    super.onCreate(savedInstanceState)
-    binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-    PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Theme_PadLock_Light)
+        super.onCreate(savedInstanceState)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
-    Injector.obtain<PadLockComponent>(applicationContext).inject(this)
+        Injector.obtain<PadLockComponent>(applicationContext).inject(this)
 
-    setAppBarState()
+        setAppBarState()
 
-    presenter.bind(this)
-  }
-
-  override fun onShowDefaultPage() {
-    // Set normal navigation
-    val fm = supportFragmentManager
-    // Un hide the action bar in case it was hidden
-    val actionBar = supportActionBar
-    if (actionBar != null) {
-      if (!actionBar.isShowing) {
-        actionBar.show()
-      }
+        presenter.bind(this)
     }
 
-    if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
-        AboutLibrariesFragment.TAG) == null) {
-      Timber.d("Load default page")
-      fm.beginTransaction()
-          .replace(R.id.fragment_container, MainFragment(), MainFragment.TAG)
-          .commit()
-    } else {
-      Timber.w("Default page or About libraries was already loaded")
+    override fun onShowDefaultPage() {
+        // Set normal navigation
+        val fm = supportFragmentManager
+        // Un hide the action bar in case it was hidden
+        val actionBar = supportActionBar
+        if (actionBar != null) {
+            if (!actionBar.isShowing) {
+                actionBar.show()
+            }
+        }
+
+        if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
+                AboutLibrariesFragment.TAG) == null) {
+            Timber.d("Load default page")
+            fm.beginTransaction()
+                    .replace(R.id.fragment_container, MainFragment(), MainFragment.TAG)
+                    .commit()
+        } else {
+            Timber.w("Default page or About libraries was already loaded")
+        }
     }
-  }
 
-  override fun onShowOnboarding() {
-    // TODO for now this is duplicated
-    onShowDefaultPage()
-  }
-
-  override fun onNewIntent(intent: Intent?) {
-    super.onNewIntent(intent)
-    setIntent(intent)
-  }
-
-  override fun onPause() {
-    super.onPause()
-    if (isFinishing || isChangingConfigurations) {
-      Timber.d(
-          "Even though a leak is reported, this should dismiss the window, and clear the leak")
-      binding.toolbar.menu.close()
-      binding.toolbar.dismissPopupMenus()
+    override fun onShowOnboarding() {
+        // TODO for now this is duplicated
+        onShowDefaultPage()
     }
-  }
 
-  private fun setAppBarState() {
-    setSupportActionBar(binding.toolbar)
-    binding.toolbar.title = getString(R.string.app_name)
-    ViewCompat.setElevation(binding.toolbar, AppUtil.convertToDP(this, 4f))
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    binding.unbind()
-    if (!isChangingConfigurations) {
-      ListStateUtil.clearCache()
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
-  }
 
-  override fun onBackPressed() {
-    val fragmentManager = supportFragmentManager
-    val backStackCount = fragmentManager.backStackEntryCount
-    if (backStackCount > 0) {
-      fragmentManager.popBackStackImmediate()
-    } else {
-      super.onBackPressed()
+    override fun onPause() {
+        super.onPause()
+        if (isFinishing || isChangingConfigurations) {
+            Timber.d(
+                    "Even though a leak is reported, this should dismiss the window, and clear the leak")
+            binding.toolbar.menu.close()
+            binding.toolbar.dismissPopupMenus()
+        }
     }
-  }
 
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    val handled: Boolean
-    when (item.itemId) {
-      android.R.id.home -> {
-        handled = true
-        onBackPressed()
-      }
-      else -> handled = false
+    private fun setAppBarState() {
+        setSupportActionBar(binding.toolbar)
+        binding.toolbar.title = getString(R.string.app_name)
+        ViewCompat.setElevation(binding.toolbar, AppUtil.convertToDP(this, 4f))
     }
-    return handled
-  }
 
-  override fun onPostResume() {
-    super.onPostResume()
-    AnimUtil.animateActionBarToolbar(binding.toolbar)
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.unbind()
+        if (!isChangingConfigurations) {
+            ListStateUtil.clearCache()
+        }
+    }
 
-    // Try to start service, will not if we do not have permission
-    PadLockService.start(this)
-  }
+    override fun onBackPressed() {
+        val fragmentManager = supportFragmentManager
+        val backStackCount = fragmentManager.backStackEntryCount
+        if (backStackCount > 0) {
+            fragmentManager.popBackStackImmediate()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val handled: Boolean
+        when (item.itemId) {
+            android.R.id.home -> {
+                handled = true
+                onBackPressed()
+            }
+            else -> handled = false
+        }
+        return handled
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        AnimUtil.animateActionBarToolbar(binding.toolbar)
+
+        // Try to start service, will not if we do not have permission
+        PadLockService.start(this)
+    }
 }
 

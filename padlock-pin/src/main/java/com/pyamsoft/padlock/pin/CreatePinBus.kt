@@ -26,13 +26,13 @@ import javax.inject.Singleton
 
 @Singleton internal class CreatePinBus @Inject internal constructor() : EventBus<CreatePinEvent> {
 
-  private val bus: EventBus<CreatePinEvent> = RxBus.create()
+    private val bus: EventBus<CreatePinEvent> = RxBus.create()
 
-  override fun listen(): Observable<CreatePinEvent> = bus.listen()
+    override fun listen(): Observable<CreatePinEvent> = bus.listen()
 
-  override fun publish(event: CreatePinEvent) {
-    bus.publish(event)
-  }
+    override fun publish(event: CreatePinEvent) {
+        bus.publish(event)
+    }
 
 }
 

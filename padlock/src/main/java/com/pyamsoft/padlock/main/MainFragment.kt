@@ -31,81 +31,80 @@ import com.pyamsoft.padlock.databinding.FragmentMainBinding
 import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.settings.SettingsFragment
-import com.pyamsoft.padlock.settings.SettingsPreferenceFragment
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.presenter.Presenter
 import timber.log.Timber
 
 class MainFragment : CanaryFragment() {
 
-  override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
+    override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
-  private lateinit var binding: FragmentMainBinding
+    private lateinit var binding: FragmentMainBinding
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-      savedInstanceState: Bundle?): View? {
-    binding = FragmentMainBinding.inflate(inflater, container, false)
-    return binding.root
-  }
-
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
-    setupBottomNavigation()
-
-    if (childFragmentManager.findFragmentById(R.id.main_view_container) == null) {
-      Timber.d("Load default Tab: List")
-      binding.bottomTabs.menu.performIdentifierAction(R.id.menu_locklist, 0)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?): View? {
+        binding = FragmentMainBinding.inflate(inflater, container, false)
+        return binding.root
     }
-  }
 
-  private fun setupBottomNavigation() {
-    binding.bottomTabs.setOnNavigationItemSelectedListener(
-        object : BottomNavigationView.OnNavigationItemSelectedListener {
-          override fun onNavigationItemSelected(item: MenuItem): Boolean {
-            val handled: Boolean = when (item.itemId) {
-              R.id.menu_locklist -> replaceFragment(LockListFragment(),
-                  LockListFragment.TAG)
-              R.id.menu_settings -> replaceFragment(SettingsFragment(),
-                  SettingsFragment.TAG)
-              R.id.menu_purge -> replaceFragment(PurgeFragment(), PurgeFragment.TAG)
-              else -> false
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupBottomNavigation()
 
-            if (handled) {
-              item.isChecked = !item.isChecked
-            }
+        if (childFragmentManager.findFragmentById(R.id.main_view_container) == null) {
+            Timber.d("Load default Tab: List")
+            binding.bottomTabs.menu.performIdentifierAction(R.id.menu_locklist, 0)
+        }
+    }
 
-            return handled
-          }
+    private fun setupBottomNavigation() {
+        binding.bottomTabs.setOnNavigationItemSelectedListener(
+                object : BottomNavigationView.OnNavigationItemSelectedListener {
+                    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+                        val handled: Boolean = when (item.itemId) {
+                            R.id.menu_locklist -> replaceFragment(LockListFragment(),
+                                    LockListFragment.TAG)
+                            R.id.menu_settings -> replaceFragment(SettingsFragment(),
+                                    SettingsFragment.TAG)
+                            R.id.menu_purge -> replaceFragment(PurgeFragment(), PurgeFragment.TAG)
+                            else -> false
+                        }
 
-          @CheckResult
-          private fun replaceFragment(fragment: Fragment, tag: String): Boolean {
-            val fragmentManager = childFragmentManager
-            return if (fragmentManager.findFragmentByTag(tag) == null) {
-              fragmentManager.beginTransaction()
-                  .replace(R.id.main_view_container, fragment, tag)
-                  .commit()
-              true
-            } else {
-              false
-            }
-          }
-        })
-  }
+                        if (handled) {
+                            item.isChecked = !item.isChecked
+                        }
 
-  override fun onResume() {
-    super.onResume()
-    setActionBarUpEnabled(false)
-  }
+                        return handled
+                    }
 
-  override fun onDestroyView() {
-    super.onDestroyView()
-    binding.unbind()
-  }
+                    @CheckResult
+                    private fun replaceFragment(fragment: Fragment, tag: String): Boolean {
+                        val fragmentManager = childFragmentManager
+                        return if (fragmentManager.findFragmentByTag(tag) == null) {
+                            fragmentManager.beginTransaction()
+                                    .replace(R.id.main_view_container, fragment, tag)
+                                    .commit()
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                })
+    }
 
-  companion object {
+    override fun onResume() {
+        super.onResume()
+        setActionBarUpEnabled(false)
+    }
 
-    const val TAG = "MainFragment"
-  }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.unbind()
+    }
+
+    companion object {
+
+        const val TAG = "MainFragment"
+    }
 }
 

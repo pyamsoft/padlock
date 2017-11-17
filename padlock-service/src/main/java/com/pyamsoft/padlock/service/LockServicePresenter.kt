@@ -32,139 +32,142 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockServicePresenter @Inject internal constructor(
-    private val lockPassBus: EventBus<LockPassEvent>,
-    private val serviceFinishBus: EventBus<ServiceFinishEvent>,
-    private val recheckEventBus: EventBus<RecheckEvent>,
-    private val interactor: LockServiceInteractor,
-    @Named("computation") compScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
-    ioScheduler,
-    mainScheduler), ForegroundEventListener {
+        private val lockPassBus: EventBus<LockPassEvent>,
+        private val serviceFinishBus: EventBus<ServiceFinishEvent>,
+        private val recheckEventBus: EventBus<RecheckEvent>,
+        private val interactor: LockServiceInteractor,
+        @Named("computation") compScheduler: Scheduler,
+        @Named("main") mainScheduler: Scheduler,
+        @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
+        ioScheduler,
+        mainScheduler), ForegroundEventListener {
 
-  private var foregroundDisposable: Disposable = null.clear()
-  private var matchingDisposable: Disposable = null.clear()
-  private var entryDisposable: Disposable = null.clear()
+    private var foregroundDisposable: Disposable = null.clear()
+    private var matchingDisposable: Disposable = null.clear()
+    private var entryDisposable: Disposable = null.clear()
 
-  init {
-    interactor.reset()
-  }
+    init {
+        interactor.reset()
+    }
 
-  override fun onBind(v: View) {
-    super.onBind(v)
-    registerOnBus(v)
-  }
+    override fun onBind(v: View) {
+        super.onBind(v)
+        registerOnBus(v)
+    }
 
-  override fun onUnbind() {
-    super.onUnbind()
-    interactor.cleanup()
-    interactor.reset()
+    override fun onUnbind() {
+        super.onUnbind()
+        interactor.cleanup()
+        interactor.reset()
 
-    matchingDisposable = matchingDisposable.clear()
-    entryDisposable = entryDisposable.clear()
-    unregisterForegroundEventListener()
-  }
+        matchingDisposable = matchingDisposable.clear()
+        entryDisposable = entryDisposable.clear()
+        unregisterForegroundEventListener()
+    }
 
-  override fun registerForegroundEventListener() {
-    foregroundDisposable = foregroundDisposable.clear()
-    foregroundDisposable = interactor.listenForForegroundEvents()
-        .subscribeOn(ioScheduler)
-        .observeOn(mainThreadScheduler)
-        .onErrorReturn {
-          Timber.e(it, "Error while listening to foreground events")
-          return@onErrorReturn ForegroundEvent.EMPTY
+    override fun registerForegroundEventListener() {
+        foregroundDisposable = foregroundDisposable.clear()
+        foregroundDisposable = interactor.listenForForegroundEvents()
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .onErrorReturn {
+                    Timber.e(it, "Error while listening to foreground events")
+                    return@onErrorReturn ForegroundEvent.EMPTY
+                }
+                .doAfterTerminate { view?.onFinish() }
+                .subscribe({
+                    if (ForegroundEvent.isEmpty(it)) {
+                        Timber.w("Ignore empty foreground entry event")
+                    } else {
+                        processEvent(it.packageName, it.className, NOT_FORCE)
+                    }
+                },
+                        {
+                            Timber.e(it,
+                                    "Error while listening to foreground event, killing stream")
+                        },
+                        { Timber.d("Foreground event stream completed") })
+    }
+
+    override fun unregisterForegroundEventListener() {
+        foregroundDisposable = foregroundDisposable.clear()
+    }
+
+    private fun registerOnBus(v: BusCallback) {
+        dispose {
+            serviceFinishBus.listen()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({
+                        v.onFinish()
+                    }, { Timber.e(it, "onError service finish bus") })
         }
-        .doAfterTerminate { view?.onFinish() }
-        .subscribe({
-          if (ForegroundEvent.isEmpty(it)) {
-            Timber.w("Ignore empty foreground entry event")
-          } else {
-            processEvent(it.packageName, it.className, NOT_FORCE)
-          }
-        },
-            { Timber.e(it, "Error while listening to foreground event, killing stream") },
-            { Timber.d("Foreground event stream completed") })
-  }
 
-  override fun unregisterForegroundEventListener() {
-    foregroundDisposable = foregroundDisposable.clear()
-  }
+        dispose {
+            lockPassBus.listen()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({
+                        interactor.setLockScreenPassed(it.packageName, it.className, true)
+                    }, { Timber.e(it, "onError lock passed bus") })
+        }
 
-  private fun registerOnBus(v: BusCallback) {
-    dispose {
-      serviceFinishBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            v.onFinish()
-          }, { Timber.e(it, "onError service finish bus") })
+        dispose {
+            recheckEventBus.listen()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({
+                        v.onRecheck(it.packageName, it.className)
+                    }, { Timber.e(it, "onError recheck event bus") })
+        }
     }
 
-    dispose {
-      lockPassBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            interactor.setLockScreenPassed(it.packageName, it.className, true)
-          }, { Timber.e(it, "onError lock passed bus") })
+    fun processActiveApplicationIfMatching(packageName: String, className: String) {
+        matchingDisposable = matchingDisposable.clear()
+        matchingDisposable = interactor.isActiveMatching(packageName, className)
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({
+                    if (it) {
+                        processEvent(packageName, className, RecheckStatus.FORCE)
+                    }
+                }, { Timber.e(it, "onError processActiveApplicationIfMatching") })
     }
 
-    dispose {
-      recheckEventBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            v.onRecheck(it.packageName, it.className)
-          }, { Timber.e(it, "onError recheck event bus") })
+    private fun processEvent(packageName: String, className: String, forcedRecheck: RecheckStatus) {
+        entryDisposable = entryDisposable.clear()
+        entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({
+                    if (PadLockEntry.isEmpty(it)) {
+                        Timber.w("PadLockEntry is EMPTY, ignore")
+                    } else {
+                        view?.onStartLockScreen(it, className)
+                    }
+                }, {
+                    if (it is NoSuchElementException) {
+                        Timber.w("PadLock not locking: $packageName, $className")
+                    } else {
+                        Timber.e(it, "Error getting PadLockEntry for LockScreen")
+                    }
+                })
     }
-  }
 
-  fun processActiveApplicationIfMatching(packageName: String, className: String) {
-    matchingDisposable = matchingDisposable.clear()
-    matchingDisposable = interactor.isActiveMatching(packageName, className)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainThreadScheduler)
-        .subscribe({
-          if (it) {
-            processEvent(packageName, className, RecheckStatus.FORCE)
-          }
-        }, { Timber.e(it, "onError processActiveApplicationIfMatching") })
-  }
+    interface View : ForegroundEventStreamCallback, BusCallback, LockScreenCallback
 
-  private fun processEvent(packageName: String, className: String, forcedRecheck: RecheckStatus) {
-    entryDisposable = entryDisposable.clear()
-    entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainThreadScheduler)
-        .subscribe({
-          if (PadLockEntry.isEmpty(it)) {
-            Timber.w("PadLockEntry is EMPTY, ignore")
-          } else {
-            view?.onStartLockScreen(it, className)
-          }
-        }, {
-          if (it is NoSuchElementException) {
-            Timber.w("PadLock not locking: $packageName, $className")
-          } else {
-            Timber.e(it, "Error getting PadLockEntry for LockScreen")
-          }
-        })
-  }
+    interface ForegroundEventStreamCallback {
 
-  interface View : ForegroundEventStreamCallback, BusCallback, LockScreenCallback
+        fun onFinish()
+    }
 
-  interface ForegroundEventStreamCallback {
+    interface LockScreenCallback {
 
-    fun onFinish()
-  }
+        fun onStartLockScreen(entry: PadLockEntry, realName: String)
+    }
 
-  interface LockScreenCallback {
+    interface BusCallback : ForegroundEventStreamCallback {
 
-    fun onStartLockScreen(entry: PadLockEntry, realName: String)
-  }
-
-  interface BusCallback : ForegroundEventStreamCallback {
-
-    fun onRecheck(packageName: String, className: String)
-  }
+        fun onRecheck(packageName: String, className: String)
+    }
 }
