@@ -36,85 +36,85 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockListItem internal constructor(internal var activity: FragmentActivity,
-    entry: AppEntry) : ModelAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(
-    entry), FilterableItem<LockListItem, LockListItem.ViewHolder>, UpdateItem<AppEntry> {
+        entry: AppEntry) : ModelAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(
+        entry), FilterableItem<LockListItem, LockListItem.ViewHolder>, UpdateItem<AppEntry> {
 
-  private val loaderMap = LoaderMap()
-  private var viewHolder: ViewHolder? = null
+    private val loaderMap = LoaderMap()
+    private var viewHolder: ViewHolder? = null
 
-  override fun getType(): Int = R.id.adapter_lock_item
+    override fun getType(): Int = R.id.adapter_lock_item
 
-  override fun getLayoutRes(): Int = R.layout.adapter_item_locklist
+    override fun getLayoutRes(): Int = R.layout.adapter_item_locklist
 
-  override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
+    override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
 
-  override fun filterAgainst(query: String): Boolean {
-    val name = model.name.toLowerCase().trim { it <= ' ' }
-    Timber.d("Filter predicate: '%s' against %s", query, name)
-    return name.startsWith(query)
-  }
-
-  override fun updateModel(model: AppEntry): Boolean {
-    withModel(model)
-    bindViewHolder()
-    return false
-  }
-
-  private fun bindViewHolder() {
-    viewHolder?.apply {
-      binding.lockListTitle.text = model.name
-      binding.lockListToggle.setOnCheckedChangeListener(null)
-      binding.lockListToggle.isChecked = model.locked
-
-      binding.lockListWhite.visibility = if (model.whitelisted > 0) View.VISIBLE else View.INVISIBLE
-      binding.lockListLocked.visibility = if (model.hardLocked > 0) View.VISIBLE else View.INVISIBLE
-
-      val whitelistIcon = imageLoader.fromResource(R.drawable.ic_whitelisted).into(
-          binding.lockListWhite)
-      loaderMap.put("whitelist", whitelistIcon)
-
-      val blacklistIcon = imageLoader.fromResource(R.drawable.ic_hardlocked).into(
-          binding.lockListLocked)
-      loaderMap.put("blacklist", blacklistIcon)
-
-      val appIcon = appIconLoader.forPackageName(model.packageName).into(binding.lockListIcon)
-      loaderMap.put("locked", appIcon)
-
-      binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
-        buttonView.isChecked = isChecked.not()
-        Timber.d("Modify the database entry: ${model.packageName} $isChecked")
-        publisher.modifyDatabaseEntry(isChecked, model.packageName, null, model.system)
-      }
-    }
-  }
-
-  override fun bindView(holder: ViewHolder, payloads: List<Any>) {
-    super.bindView(holder, payloads)
-    viewHolder = holder
-    bindViewHolder()
-  }
-
-  override fun unbindView(holder: ViewHolder) {
-    super.unbindView(holder)
-    viewHolder = null
-    holder.apply {
-      binding.lockListTitle.text = null
-      binding.lockListIcon.setImageDrawable(null)
-      binding.lockListToggle.setOnCheckedChangeListener(null)
-    }
-    loaderMap.clear()
-  }
-
-  class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-    internal val binding: AdapterItemLocklistBinding = DataBindingUtil.bind(itemView)
-    @Inject internal lateinit var publisher: LockListItemPublisher
-    @Inject internal lateinit var appIconLoader: AppIconLoader
-    @Inject internal lateinit var imageLoader: ImageLoader
-
-    init {
-      Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)
+    override fun filterAgainst(query: String): Boolean {
+        val name = model.name.toLowerCase().trim { it <= ' ' }
+        Timber.d("Filter predicate: '%s' against %s", query, name)
+        return name.startsWith(query)
     }
 
-  }
+    override fun updateModel(model: AppEntry): Boolean {
+        withModel(model)
+        bindViewHolder()
+        return false
+    }
+
+    private fun bindViewHolder() {
+        viewHolder?.apply {
+            binding.lockListTitle.text = model.name
+            binding.lockListToggle.setOnCheckedChangeListener(null)
+            binding.lockListToggle.isChecked = model.locked
+
+            binding.lockListWhite.visibility = if (model.whitelisted > 0) View.VISIBLE else View.INVISIBLE
+            binding.lockListLocked.visibility = if (model.hardLocked > 0) View.VISIBLE else View.INVISIBLE
+
+            val whitelistIcon = imageLoader.fromResource(R.drawable.ic_whitelisted).into(
+                    binding.lockListWhite)
+            loaderMap.put("whitelist", whitelistIcon)
+
+            val blacklistIcon = imageLoader.fromResource(R.drawable.ic_hardlocked).into(
+                    binding.lockListLocked)
+            loaderMap.put("blacklist", blacklistIcon)
+
+            val appIcon = appIconLoader.forPackageName(model.packageName).into(binding.lockListIcon)
+            loaderMap.put("locked", appIcon)
+
+            binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
+                buttonView.isChecked = isChecked.not()
+                Timber.d("Modify the database entry: ${model.packageName} $isChecked")
+                publisher.modifyDatabaseEntry(isChecked, model.packageName, null, model.system)
+            }
+        }
+    }
+
+    override fun bindView(holder: ViewHolder, payloads: List<Any>) {
+        super.bindView(holder, payloads)
+        viewHolder = holder
+        bindViewHolder()
+    }
+
+    override fun unbindView(holder: ViewHolder) {
+        super.unbindView(holder)
+        viewHolder = null
+        holder.apply {
+            binding.lockListTitle.text = null
+            binding.lockListIcon.setImageDrawable(null)
+            binding.lockListToggle.setOnCheckedChangeListener(null)
+        }
+        loaderMap.clear()
+    }
+
+    class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+        internal val binding: AdapterItemLocklistBinding = DataBindingUtil.bind(itemView)
+        @Inject internal lateinit var publisher: LockListItemPublisher
+        @Inject internal lateinit var appIconLoader: AppIconLoader
+        @Inject internal lateinit var imageLoader: ImageLoader
+
+        init {
+            Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)
+        }
+
+    }
 }

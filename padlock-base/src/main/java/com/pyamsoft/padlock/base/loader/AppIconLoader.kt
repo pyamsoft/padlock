@@ -32,17 +32,18 @@ import javax.inject.Singleton
 @JvmSuppressWildcards
 @Singleton
 class AppIconLoader @Inject internal constructor(
-    private val appIconImageCache: ImageCache<String, Drawable>,
-    @param:Named("main") private val mainScheduler: Scheduler,
-    @param:Named("io") private val ioScheduler: Scheduler,
-    private val packageDrawableManager: PackageDrawableManager) : Cache {
+        private val appIconImageCache: ImageCache<String, Drawable>,
+        @param:Named("main") private val mainScheduler: Scheduler,
+        @param:Named("io") private val ioScheduler: Scheduler,
+        private val packageDrawableManager: PackageDrawableManager) : Cache {
 
-  override fun clearCache() {
-    appIconImageCache.clearCache()
-  }
+    override fun clearCache() {
+        appIconImageCache.clearCache()
+    }
 
-  @CheckResult
-  fun forPackageName(packageName: String): GenericLoader<Drawable> =
-      AppIconImageLoader(packageName, appIconImageCache, packageDrawableManager, mainScheduler,
-          ioScheduler)
+    @CheckResult
+    fun forPackageName(packageName: String): GenericLoader<Drawable> =
+            AppIconImageLoader(packageName, appIconImageCache, packageDrawableManager,
+                    mainScheduler,
+                    ioScheduler)
 }

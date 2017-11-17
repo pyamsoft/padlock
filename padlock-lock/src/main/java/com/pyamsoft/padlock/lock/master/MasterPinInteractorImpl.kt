@@ -26,27 +26,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class MasterPinInteractorImpl @Inject internal constructor(
-    private val preferences: MasterPinPreferences) : MasterPinInteractor {
+        private val preferences: MasterPinPreferences) : MasterPinInteractor {
 
-  override fun getMasterPin(): Single<Optional<String>> =
-      Single.fromCallable { preferences.getMasterPassword().asOptional() }
+    override fun getMasterPin(): Single<Optional<String>> =
+            Single.fromCallable { preferences.getMasterPassword().asOptional() }
 
-  override fun setMasterPin(pin: String?) {
-    if (pin == null) {
-      preferences.clearMasterPassword()
-    } else {
-      preferences.setMasterPassword(pin)
+    override fun setMasterPin(pin: String?) {
+        if (pin == null) {
+            preferences.clearMasterPassword()
+        } else {
+            preferences.setMasterPassword(pin)
+        }
     }
-  }
 
-  override fun getHint(): Single<Optional<String>> =
-      Single.fromCallable { preferences.getHint().asOptional() }
+    override fun getHint(): Single<Optional<String>> =
+            Single.fromCallable { preferences.getHint().asOptional() }
 
-  override fun setHint(hint: String?) {
-    if (hint == null) {
-      preferences.clearHint()
-    } else {
-      preferences.setHint(hint)
+    override fun setHint(hint: String?) {
+        if (hint == null) {
+            preferences.clearHint()
+        } else {
+            preferences.setHint(hint)
+        }
     }
-  }
 }

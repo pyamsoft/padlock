@@ -33,45 +33,45 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class SettingsInteractorImpl @Inject internal constructor(
-    private val deleteDb: PadLockDBDelete,
-    private val masterPinPreference: MasterPinPreferences,
-    private val preferences: ClearPreferences,
-    private val installListenerPreferences: InstallListenerPreferences,
-    @param:Named("cache_lock_list") private val lockListInteractor: Cache,
-    @param:Named("cache_lock_info") private val lockInfoInteractor: Cache,
-    @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
-    @param:Named("cache_app_icons") private val iconCache: Cache,
-    @param:Named("cache_list_state") private val listStateCache: Cache,
-    @param:Named("cache_purge") private val purgeInteractor: Cache) : SettingsInteractor {
+        private val deleteDb: PadLockDBDelete,
+        private val masterPinPreference: MasterPinPreferences,
+        private val preferences: ClearPreferences,
+        private val installListenerPreferences: InstallListenerPreferences,
+        @param:Named("cache_lock_list") private val lockListInteractor: Cache,
+        @param:Named("cache_lock_info") private val lockInfoInteractor: Cache,
+        @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
+        @param:Named("cache_app_icons") private val iconCache: Cache,
+        @param:Named("cache_list_state") private val listStateCache: Cache,
+        @param:Named("cache_purge") private val purgeInteractor: Cache) : SettingsInteractor {
 
-  override fun isInstallListenerEnabled(): Single<Boolean> =
-      Single.fromCallable { installListenerPreferences.isInstallListenerEnabled() }
+    override fun isInstallListenerEnabled(): Single<Boolean> =
+            Single.fromCallable { installListenerPreferences.isInstallListenerEnabled() }
 
-  override fun clearDatabase(): Single<Boolean> {
-    Timber.d("clear database")
-    return deleteDb.deleteAll()
-        .andThen(Completable.fromAction {
-          lockListInteractor.clearCache()
-          lockInfoInteractor.clearCache()
-          purgeInteractor.clearCache()
-          lockEntryInteractor.clearCache()
-          iconCache.clearCache()
-          listStateCache.clearCache()
-        })
-        .toSingleDefault(true)
-  }
-
-  override fun clearAll(): Single<Boolean> {
-    // We map here to make sure the clear all is complete before stream continues
-    return clearDatabase().map {
-      Timber.d("Clear all preferences")
-      preferences.clearAll()
-      return@map true
+    override fun clearDatabase(): Single<Boolean> {
+        Timber.d("clear database")
+        return deleteDb.deleteAll()
+                .andThen(Completable.fromAction {
+                    lockListInteractor.clearCache()
+                    lockInfoInteractor.clearCache()
+                    purgeInteractor.clearCache()
+                    lockEntryInteractor.clearCache()
+                    iconCache.clearCache()
+                    listStateCache.clearCache()
+                })
+                .toSingleDefault(true)
     }
-  }
 
-  override fun hasExistingMasterPassword(): Single<Boolean> {
-    return Single.fromCallable { masterPinPreference.getMasterPassword().asOptional() }
-        .map { it is Present }
-  }
+    override fun clearAll(): Single<Boolean> {
+        // We map here to make sure the clear all is complete before stream continues
+        return clearDatabase().map {
+            Timber.d("Clear all preferences")
+            preferences.clearAll()
+            return@map true
+        }
+    }
+
+    override fun hasExistingMasterPassword(): Single<Boolean> {
+        return Single.fromCallable { masterPinPreference.getMasterPassword().asOptional() }
+                .map { it is Present }
+    }
 }

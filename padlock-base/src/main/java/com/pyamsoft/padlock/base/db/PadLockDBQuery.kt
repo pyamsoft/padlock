@@ -23,24 +23,24 @@ import io.reactivex.Single
 
 interface PadLockDBQuery {
 
-  /**
-   * Get either the package with specific name of the PACKAGE entry
+    /**
+     * Get either the package with specific name of the PACKAGE entry
 
-   * SQLite only has bindings so we must make do
-   * ?1 package name
-   * ?2 the PadLock PACKAGE_TAG, see model.PadLockEntry
-   * ?3 the specific activity name
-   * ?4 the PadLock PACKAGE_TAG, see model.PadLockEntry
-   * ?5 the specific activity name
-   */
-  @CheckResult
-  fun queryWithPackageActivityNameDefault(
-      packageName: String, activityName: String): Single<PadLockEntry>
+     * SQLite only has bindings so we must make do
+     * ?1 package name
+     * ?2 the PadLock PACKAGE_TAG, see model.PadLockEntry
+     * ?3 the specific activity name
+     * ?4 the PadLock PACKAGE_TAG, see model.PadLockEntry
+     * ?5 the specific activity name
+     */
+    @CheckResult
+    fun queryWithPackageActivityNameDefault(
+            packageName: String, activityName: String): Single<PadLockEntry>
 
-  @CheckResult
-  fun queryWithPackageName(
-      packageName: String): Single<List<PadLockEntry.WithPackageName>>
+    @CheckResult
+    fun queryWithPackageName(
+            packageName: String): Single<List<PadLockEntry.WithPackageName>>
 
-  @CheckResult
-  fun queryAll(): Single<List<PadLockEntry.AllEntries>>
+    @CheckResult
+    fun queryAll(): Single<List<PadLockEntry.AllEntries>>
 }

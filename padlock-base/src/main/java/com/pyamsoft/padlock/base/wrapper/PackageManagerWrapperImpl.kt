@@ -29,7 +29,6 @@ import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.ext.isSystemApplication
 import com.pyamsoft.padlock.base.preference.LockListPreferences
 import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager.ApplicationItem
-import com.pyamsoft.pydroid.helper.Optional
 import com.pyamsoft.pydroid.helper.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Observable
@@ -45,179 +44,182 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class PackageManagerWrapperImpl @Inject internal constructor(
-    context: Context,
-    private val listPreferences: LockListPreferences) : PackageActivityManager, PackageApplicationManager, PackageLabelManager, PackageDrawableManager {
+        context: Context,
+        private val listPreferences: LockListPreferences) : PackageActivityManager,
+        PackageApplicationManager, PackageLabelManager, PackageDrawableManager {
 
-  private val packageManager: PackageManager = context.applicationContext.packageManager
+    private val packageManager: PackageManager = context.applicationContext.packageManager
 
-  override fun loadDrawableForPackageOrDefault(packageName: String): Single<Drawable> {
-    return Single.fromCallable {
-      val image: Drawable
-      image = try {
-        // Assign
-        packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager)
-      } catch (e: PackageManager.NameNotFoundException) {
-        Timber.e(e, "PackageManager error")
-        // Assign
-        packageManager.defaultActivityIcon
-      }
-      return@fromCallable image
-    }
-  }
-
-  override fun getActivityListForPackage(packageName: String): Single<List<String>> {
-    return Single.fromCallable<List<String>> {
-      val activityEntries: MutableList<String> = ArrayList()
-      try {
-        val packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
-        packageInfo.activities?.mapTo(activityEntries) { it.name }
-      } catch (e: Exception) {
-        Timber.e(e, "PackageManager error, return what we have for %s", packageName)
-      }
-      return@fromCallable activityEntries
-    }
-  }
-
-  @CheckResult
-  private fun getInstalledApplications(): Observable<ApplicationItem> {
-    return Single.fromCallable {
-      val process: Process
-      var caughtPermissionDenial = false
-      val packageNames: MutableList<String> = ArrayList()
-      try {
-        // The adb shell command pm list packages returns a list of packages in the following format:
-        //
-        // package:<package name>
-        //
-        // but it is not a victim of BinderTransaction failures so it will be able to better handle
-        // large sets of applications.
-        val command: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-          // Android N moves package list command to a different, same format, faster command
-
-          // Assign
-          "cmd package list packages"
-        } else {
-          // Assign
-          "pm list packages"
-        }
-        process = Runtime.getRuntime().exec(command)
-        BufferedReader(
-            InputStreamReader(process.inputStream, StandardCharsets.UTF_8)).use {
-          var line: String? = it.readLine()
-          while (line != null && line.isNotBlank()) {
-            if (line.startsWith("Permission Denial")) {
-              Timber.e("Command resulted in permission denial")
-              caughtPermissionDenial = true
-              break
+    override fun loadDrawableForPackageOrDefault(packageName: String): Single<Drawable> {
+        return Single.fromCallable {
+            val image: Drawable
+            image = try {
+                // Assign
+                packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager)
+            } catch (e: PackageManager.NameNotFoundException) {
+                Timber.e(e, "PackageManager error")
+                // Assign
+                packageManager.defaultActivityIcon
             }
-            packageNames.add(line)
-            line = it.readLine()
-          }
+            return@fromCallable image
         }
+    }
 
-        if (caughtPermissionDenial) {
-          throw IllegalStateException("Error running command: $command, throw and bail")
+    override fun getActivityListForPackage(packageName: String): Single<List<String>> {
+        return Single.fromCallable<List<String>> {
+            val activityEntries: MutableList<String> = ArrayList()
+            try {
+                val packageInfo = packageManager.getPackageInfo(packageName,
+                        PackageManager.GET_ACTIVITIES)
+                packageInfo.activities?.mapTo(activityEntries) { it.name }
+            } catch (e: Exception) {
+                Timber.e(e, "PackageManager error, return what we have for %s", packageName)
+            }
+            return@fromCallable activityEntries
         }
+    }
 
-        // Will always be 0
-      } catch (e: IOException) {
-        Timber.e(e, "Error running shell command, return what we have")
-      }
+    @CheckResult
+    private fun getInstalledApplications(): Observable<ApplicationItem> {
+        return Single.fromCallable {
+            val process: Process
+            var caughtPermissionDenial = false
+            val packageNames: MutableList<String> = ArrayList()
+            try {
+                // The adb shell command pm list packages returns a list of packages in the following format:
+                //
+                // package:<package name>
+                //
+                // but it is not a victim of BinderTransaction failures so it will be able to better handle
+                // large sets of applications.
+                val command: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    // Android N moves package list command to a different, same format, faster command
 
-      return@fromCallable packageNames
-    }.flatMapObservable { Observable.fromIterable(it) }.map {
-      it.replaceFirst("^package:".toRegex(), "")
-    }.flatMapSingle { getApplicationInfo(it) }.filter { it.isEmpty().not() }
-  }
+                    // Assign
+                    "cmd package list packages"
+                } else {
+                    // Assign
+                    "pm list packages"
+                }
+                process = Runtime.getRuntime().exec(command)
+                BufferedReader(
+                        InputStreamReader(process.inputStream, StandardCharsets.UTF_8)).use {
+                    var line: String? = it.readLine()
+                    while (line != null && line.isNotBlank()) {
+                        if (line.startsWith("Permission Denial")) {
+                            Timber.e("Command resulted in permission denial")
+                            caughtPermissionDenial = true
+                            break
+                        }
+                        packageNames.add(line)
+                        line = it.readLine()
+                    }
+                }
 
-  override fun getActiveApplications(): Single<List<ApplicationItem>> {
-    return getInstalledApplications().flatMap<ApplicationItem> {
-      if (!it.enabled) {
-        Timber.i("Application %s is disabled", it.packageName)
-        return@flatMap Observable.empty()
-      }
+                if (caughtPermissionDenial) {
+                    throw IllegalStateException("Error running command: $command, throw and bail")
+                }
 
-      if (it.system && !listPreferences.isSystemVisible()) {
-        Timber.i("Hide system application: %s", it.packageName)
-        return@flatMap Observable.empty()
-      }
+                // Will always be 0
+            } catch (e: IOException) {
+                Timber.e(e, "Error running shell command, return what we have")
+            }
 
-      if (ANDROID_PACKAGE == it.packageName) {
-        Timber.i("Application %s is Android", it.packageName)
-        return@flatMap Observable.empty()
-      }
+            return@fromCallable packageNames
+        }.flatMapObservable { Observable.fromIterable(it) }.map {
+            it.replaceFirst("^package:".toRegex(), "")
+        }.flatMapSingle { getApplicationInfo(it) }.filter { it.isEmpty().not() }
+    }
 
-      if (ANDROID_SYSTEM_UI_PACKAGE == it.packageName) {
-        Timber.i("Application %s is System UI", it.packageName)
-        return@flatMap Observable.empty()
-      }
+    override fun getActiveApplications(): Single<List<ApplicationItem>> {
+        return getInstalledApplications().flatMap<ApplicationItem> {
+            if (!it.enabled) {
+                Timber.i("Application %s is disabled", it.packageName)
+                return@flatMap Observable.empty()
+            }
 
-      Timber.d("Successfully processed application: %s", it.packageName)
-      return@flatMap Observable.just(it)
-    }.toList()
-  }
+            if (it.system && !listPreferences.isSystemVisible()) {
+                Timber.i("Hide system application: %s", it.packageName)
+                return@flatMap Observable.empty()
+            }
 
-  override fun getApplicationInfo(packageName: String): Single<ApplicationItem> {
-    return Single.defer {
-      try {
-        val info: ApplicationInfo? = packageManager.getApplicationInfo(packageName, 0)
-        if (info == null) {
-          return@defer Single.just(ApplicationItem.EMPTY)
-        } else {
-          return@defer Single.just(
-              ApplicationItem(info.packageName, info.isSystemApplication(), info.enabled))
+            if (ANDROID_PACKAGE == it.packageName) {
+                Timber.i("Application %s is Android", it.packageName)
+                return@flatMap Observable.empty()
+            }
+
+            if (ANDROID_SYSTEM_UI_PACKAGE == it.packageName) {
+                Timber.i("Application %s is System UI", it.packageName)
+                return@flatMap Observable.empty()
+            }
+
+            Timber.d("Successfully processed application: %s", it.packageName)
+            return@flatMap Observable.just(it)
+        }.toList()
+    }
+
+    override fun getApplicationInfo(packageName: String): Single<ApplicationItem> {
+        return Single.defer {
+            try {
+                val info: ApplicationInfo? = packageManager.getApplicationInfo(packageName, 0)
+                if (info == null) {
+                    return@defer Single.just(ApplicationItem.EMPTY)
+                } else {
+                    return@defer Single.just(
+                            ApplicationItem(info.packageName, info.isSystemApplication(),
+                                    info.enabled))
+                }
+            } catch (e: PackageManager.NameNotFoundException) {
+                Timber.e(e, "onError getApplicationInfo: '$packageName'")
+                return@defer Single.just(ApplicationItem.EMPTY)
+            }
         }
-      } catch (e: PackageManager.NameNotFoundException) {
-        Timber.e(e, "onError getApplicationInfo: '$packageName'")
-        return@defer Single.just(ApplicationItem.EMPTY)
-      }
     }
-  }
 
-  override fun loadPackageLabel(packageName: String): Single<String> {
-    return Single.defer {
-      try {
-        return@defer Single.just(
-            packageManager.getApplicationInfo(packageName, 0).asOptional())
-      } catch (e: PackageManager.NameNotFoundException) {
-        Timber.e(e, "onError loadPackageLabel: '$packageName'")
-        throw Exceptions.propagate(e)
-      }
-    }.flatMap {
-      if (it is Present) {
-        return@flatMap loadPackageLabel(it.value)
-      } else {
-        return@flatMap Single.just("")
-      }
+    override fun loadPackageLabel(packageName: String): Single<String> {
+        return Single.defer {
+            try {
+                return@defer Single.just(
+                        packageManager.getApplicationInfo(packageName, 0).asOptional())
+            } catch (e: PackageManager.NameNotFoundException) {
+                Timber.e(e, "onError loadPackageLabel: '$packageName'")
+                throw Exceptions.propagate(e)
+            }
+        }.flatMap {
+            if (it is Present) {
+                return@flatMap loadPackageLabel(it.value)
+            } else {
+                return@flatMap Single.just("")
+            }
+        }
     }
-  }
 
-  @CheckResult
-  private fun loadPackageLabel(info: ApplicationInfo): Single<String> = Single.fromCallable {
-    info.loadLabel(packageManager)?.toString() ?: ""
-  }
-
-  override fun isValidActivity(packageName: String, activityName: String): Single<Boolean> {
-    return Single.defer {
-      if (packageName.isEmpty() || activityName.isEmpty()) {
-        return@defer Single.just(false)
-      }
-
-      val componentName = ComponentName(packageName, activityName)
-      try {
-        val info: ActivityInfo? = packageManager.getActivityInfo(componentName, 0)
-        return@defer Single.just(info != null)
-      } catch (e: PackageManager.NameNotFoundException) {
-        // We intentionally leave out the throwable in the call to Timber or logs get too noisy
-        Timber.e("Could not get ActivityInfo for: '$packageName', '$activityName'")
-        return@defer Single.just(false)
-      }
+    @CheckResult
+    private fun loadPackageLabel(info: ApplicationInfo): Single<String> = Single.fromCallable {
+        info.loadLabel(packageManager)?.toString() ?: ""
     }
-  }
 
-  companion object {
-    const val ANDROID_SYSTEM_UI_PACKAGE: String = "com.android.systemui"
-    const val ANDROID_PACKAGE: String = "android"
-  }
+    override fun isValidActivity(packageName: String, activityName: String): Single<Boolean> {
+        return Single.defer {
+            if (packageName.isEmpty() || activityName.isEmpty()) {
+                return@defer Single.just(false)
+            }
+
+            val componentName = ComponentName(packageName, activityName)
+            try {
+                val info: ActivityInfo? = packageManager.getActivityInfo(componentName, 0)
+                return@defer Single.just(info != null)
+            } catch (e: PackageManager.NameNotFoundException) {
+                // We intentionally leave out the throwable in the call to Timber or logs get too noisy
+                Timber.e("Could not get ActivityInfo for: '$packageName', '$activityName'")
+                return@defer Single.just(false)
+            }
+        }
+    }
+
+    companion object {
+        const val ANDROID_SYSTEM_UI_PACKAGE: String = "com.android.systemui"
+        const val ANDROID_PACKAGE: String = "android"
+    }
 
 }

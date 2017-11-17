@@ -25,11 +25,11 @@ import dagger.Module
 @Module
 abstract class LockScreenSingletonModule {
 
-  @Binds
-  internal abstract fun provideCloseBus(bus: CloseOldBus): EventBus<CloseOldEvent>
+    @Binds
+    internal abstract fun provideCloseBus(bus: CloseOldBus): EventBus<CloseOldEvent>
 
-  @Binds
-  internal abstract fun provideInteractor(impl: LockScreenInteractorImpl): LockScreenInteractor
+    @Binds
+    internal abstract fun provideInteractor(impl: LockScreenInteractorImpl): LockScreenInteractor
 
 }
 

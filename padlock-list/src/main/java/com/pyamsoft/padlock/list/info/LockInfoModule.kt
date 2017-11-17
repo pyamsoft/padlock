@@ -25,8 +25,8 @@ import javax.inject.Named
 @Module
 class LockInfoModule(private val packageName: String) {
 
-  @Provides
-  @Named("package_name")
-  internal fun providePackageName(): String = packageName
+    @Provides
+    @Named("package_name")
+    internal fun providePackageName(): String = packageName
 }
 

@@ -27,83 +27,84 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class PurgePresenter @Inject internal constructor(private val interactor: PurgeInteractor,
-    private val purgeBus: EventBus<PurgeEvent>,
-    private val purgeAllBus: EventBus<PurgeAllEvent>, @Named(
-        "computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler, @Named(
-        "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
-    ioScheduler, mainScheduler) {
+        private val purgeBus: EventBus<PurgeEvent>,
+        private val purgeAllBus: EventBus<PurgeAllEvent>, @Named(
+                "computation") computationScheduler: Scheduler, @Named(
+                "io") ioScheduler: Scheduler, @Named(
+                "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
+        ioScheduler, mainScheduler) {
 
-  override fun onBind(v: View) {
-    super.onBind(v)
-    registerOnBus(v)
-  }
-
-  private fun registerOnBus(v: BusCallback) {
-    dispose {
-      purgeBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({ v.onPurge(it.packageName) }, {
-            Timber.e(it, "onError purge single")
-          })
+    override fun onBind(v: View) {
+        super.onBind(v)
+        registerOnBus(v)
     }
 
-    dispose {
-      purgeAllBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({ v.onPurgeAll() }, {
-            Timber.e(it, "onError purge all")
-          })
+    private fun registerOnBus(v: BusCallback) {
+        dispose {
+            purgeBus.listen()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({ v.onPurge(it.packageName) }, {
+                        Timber.e(it, "onError purge single")
+                    })
+        }
+
+        dispose {
+            purgeAllBus.listen()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({ v.onPurgeAll() }, {
+                        Timber.e(it, "onError purge all")
+                    })
+        }
     }
-  }
 
-  fun retrieveStaleApplications(force: Boolean) {
-    dispose {
-      interactor.populateList(force)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .doOnSubscribe { view?.onRetrieveBegin() }
-          .doAfterTerminate { view?.onRetrieveComplete() }
-          .subscribe({ view?.onRetrievedStale(it) }, {
-            Timber.e(it, "onError retrieveStaleApplications")
-            view?.onRetrieveError(it)
-          })
+    fun retrieveStaleApplications(force: Boolean) {
+        dispose {
+            interactor.populateList(force)
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .doOnSubscribe { view?.onRetrieveBegin() }
+                    .doAfterTerminate { view?.onRetrieveComplete() }
+                    .subscribe({ view?.onRetrievedStale(it) }, {
+                        Timber.e(it, "onError retrieveStaleApplications")
+                        view?.onRetrieveError(it)
+                    })
+        }
     }
-  }
 
-  fun deleteStale(packageName: String) {
-    dispose {
-      interactor.deleteEntry(packageName)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({ view?.onDeleted(it) }
-              , { Timber.e(it, "onError deleteStale") })
+    fun deleteStale(packageName: String) {
+        dispose {
+            interactor.deleteEntry(packageName)
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({ view?.onDeleted(it) }
+                            , { Timber.e(it, "onError deleteStale") })
+        }
     }
-  }
 
-  interface View : BusCallback, DeleteCallback, RetrieveCallback
+    interface View : BusCallback, DeleteCallback, RetrieveCallback
 
-  interface RetrieveCallback {
+    interface RetrieveCallback {
 
-    fun onRetrieveBegin()
+        fun onRetrieveBegin()
 
-    fun onRetrieveComplete()
+        fun onRetrieveComplete()
 
-    fun onRetrievedStale(packageName: String)
+        fun onRetrievedStale(packageName: String)
 
-    fun onRetrieveError(throwable: Throwable)
-  }
+        fun onRetrieveError(throwable: Throwable)
+    }
 
-  interface DeleteCallback {
+    interface DeleteCallback {
 
-    fun onDeleted(packageName: String)
-  }
+        fun onDeleted(packageName: String)
+    }
 
-  interface BusCallback {
+    interface BusCallback {
 
-    fun onPurge(packageName: String)
+        fun onPurge(packageName: String)
 
-    fun onPurgeAll()
-  }
+        fun onPurgeAll()
+    }
 }

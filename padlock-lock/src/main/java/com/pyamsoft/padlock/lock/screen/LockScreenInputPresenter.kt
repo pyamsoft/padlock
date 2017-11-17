@@ -28,39 +28,39 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockScreenInputPresenter @Inject internal constructor(
-    private val interactor: LockScreenInteractor,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
-    ioScheduler, mainScheduler) {
+        private val interactor: LockScreenInteractor,
+        @Named("computation") computationScheduler: Scheduler,
+        @Named("main") mainScheduler: Scheduler,
+        @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
+        ioScheduler, mainScheduler) {
 
-  override fun onBind(v: View) {
-    super.onBind(v)
-    initializeLockScreenType(v)
-  }
-
-  private fun initializeLockScreenType(v: TypeCallback) {
-    dispose {
-      interactor.getLockScreenType()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            when (it) {
-              TYPE_PATTERN -> v.onTypePattern()
-              TYPE_TEXT -> v.onTypeText()
-              else -> throw IllegalArgumentException("Invalid enum: $it")
-            }
-          }, {
-            Timber.e(it, "Error initializing lock screen type")
-          })
+    override fun onBind(v: View) {
+        super.onBind(v)
+        initializeLockScreenType(v)
     }
-  }
 
-  interface View : TypeCallback
+    private fun initializeLockScreenType(v: TypeCallback) {
+        dispose {
+            interactor.getLockScreenType()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({
+                        when (it) {
+                            TYPE_PATTERN -> v.onTypePattern()
+                            TYPE_TEXT -> v.onTypeText()
+                            else -> throw IllegalArgumentException("Invalid enum: $it")
+                        }
+                    }, {
+                        Timber.e(it, "Error initializing lock screen type")
+                    })
+        }
+    }
 
-  interface TypeCallback {
+    interface View : TypeCallback
 
-    fun onTypePattern()
-    fun onTypeText()
-  }
+    interface TypeCallback {
+
+        fun onTypePattern()
+        fun onTypeText()
+    }
 }

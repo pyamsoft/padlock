@@ -26,13 +26,13 @@ import javax.inject.Singleton
 
 @Singleton internal class PurgeBus @Inject internal constructor() : EventBus<PurgeEvent> {
 
-  private val bus: EventBus<PurgeEvent> = RxBus.create()
+    private val bus: EventBus<PurgeEvent> = RxBus.create()
 
-  override fun listen(): Observable<PurgeEvent> = bus.listen()
+    override fun listen(): Observable<PurgeEvent> = bus.listen()
 
-  override fun publish(event: PurgeEvent) {
-    bus.publish(event)
-  }
+    override fun publish(event: PurgeEvent) {
+        bus.publish(event)
+    }
 
 }
 

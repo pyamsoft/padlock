@@ -27,19 +27,19 @@ import javax.inject.Named
 @Module
 abstract class LockEntrySingletonModule {
 
-  @Binds
-  internal abstract fun provideLockPassBus(bus: LockPassBus): EventBus<LockPassEvent>
+    @Binds
+    internal abstract fun provideLockPassBus(bus: LockPassBus): EventBus<LockPassEvent>
 
-  @Binds
-  internal abstract fun provideInteractorCache(
-      impl: LockEntryInteractorCache): LockEntryInteractor
+    @Binds
+    internal abstract fun provideInteractorCache(
+            impl: LockEntryInteractorCache): LockEntryInteractor
 
-  @Binds
-  @Named("interactor_lock_entry")
-  internal abstract fun provideInteractor(impl: LockEntryInteractorImpl): LockEntryInteractor
+    @Binds
+    @Named("interactor_lock_entry")
+    internal abstract fun provideInteractor(impl: LockEntryInteractorImpl): LockEntryInteractor
 
-  @Binds
-  @Named("cache_lock_entry")
-  internal abstract fun provideCache(impl: LockEntryInteractorCache): Cache
+    @Binds
+    @Named("cache_lock_entry")
+    internal abstract fun provideCache(impl: LockEntryInteractorCache): Cache
 }
 

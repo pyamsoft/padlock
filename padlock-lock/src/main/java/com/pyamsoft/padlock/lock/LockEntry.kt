@@ -19,4 +19,4 @@
 package com.pyamsoft.padlock.lock
 
 internal data class LockEntry internal constructor(val packageName: String,
-    val activityName: String)
+        val activityName: String)

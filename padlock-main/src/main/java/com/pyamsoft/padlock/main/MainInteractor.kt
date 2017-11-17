@@ -23,6 +23,7 @@ import io.reactivex.Single
 
 internal interface MainInteractor {
 
-  @CheckResult fun isOnboardingComplete(): Single<Boolean>
+    @CheckResult
+    fun isOnboardingComplete(): Single<Boolean>
 
 }

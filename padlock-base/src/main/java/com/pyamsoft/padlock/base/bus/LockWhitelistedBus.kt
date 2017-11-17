@@ -24,14 +24,15 @@ import io.reactivex.Observable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class LockWhitelistedBus @Inject internal constructor() : EventBus<LockWhitelistedEvent> {
+@Singleton internal class LockWhitelistedBus @Inject internal constructor() :
+        EventBus<LockWhitelistedEvent> {
 
-  private val bus: EventBus<LockWhitelistedEvent> = RxBus.create()
+    private val bus: EventBus<LockWhitelistedEvent> = RxBus.create()
 
-  override fun listen(): Observable<LockWhitelistedEvent> = bus.listen()
+    override fun listen(): Observable<LockWhitelistedEvent> = bus.listen()
 
-  override fun publish(event: LockWhitelistedEvent) {
-    bus.publish(event)
-  }
+    override fun publish(event: LockWhitelistedEvent) {
+        bus.publish(event)
+    }
 
 }

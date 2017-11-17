@@ -23,23 +23,23 @@ import io.reactivex.Single
 
 interface PackageApplicationManager {
 
-  @CheckResult
-  fun getActiveApplications(): Single<List<ApplicationItem>>
-
-  @CheckResult
-  fun getApplicationInfo(packageName: String): Single<ApplicationItem>
-
-  data class ApplicationItem(val packageName: String, val system: Boolean, val enabled: Boolean) {
+    @CheckResult
+    fun getActiveApplications(): Single<List<ApplicationItem>>
 
     @CheckResult
-    fun isEmpty(): Boolean = packageName.isEmpty()
+    fun getApplicationInfo(packageName: String): Single<ApplicationItem>
 
-    companion object {
+    data class ApplicationItem(val packageName: String, val system: Boolean, val enabled: Boolean) {
 
-      @JvmField
-      val EMPTY = ApplicationItem("", false, false)
+        @CheckResult
+        fun isEmpty(): Boolean = packageName.isEmpty()
+
+        companion object {
+
+            @JvmField
+            val EMPTY = ApplicationItem("", false, false)
+
+        }
 
     }
-
-  }
 }

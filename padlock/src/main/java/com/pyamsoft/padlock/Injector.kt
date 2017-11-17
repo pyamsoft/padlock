@@ -24,15 +24,15 @@ import android.support.annotation.CheckResult
 
 object Injector {
 
-  const internal val name: String = "com.pyamsoft.padlock.INJECTOR"
+    const internal val name: String = "com.pyamsoft.padlock.INJECTOR"
 
-  @JvmStatic
-  @CheckResult
-  @SuppressLint("WrongConstant")
-  fun <T : Any> obtain(context: Context): T {
-    val service: Any? = context.getSystemService(name)
+    @JvmStatic
+    @CheckResult
+    @SuppressLint("WrongConstant")
+    fun <T : Any> obtain(context: Context): T {
+        val service: Any? = context.getSystemService(name)
 
-    @Suppress("UNCHECKED_CAST")
-    return service as T
-  }
+        @Suppress("UNCHECKED_CAST")
+        return service as T
+    }
 }

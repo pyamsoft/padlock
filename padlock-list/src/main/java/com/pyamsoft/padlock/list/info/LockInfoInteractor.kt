@@ -26,8 +26,10 @@ import io.reactivex.Single
 
 internal interface LockInfoInteractor : LockStateModifyInteractor {
 
-  @CheckResult fun hasShownOnBoarding(): Single<Boolean>
+    @CheckResult
+    fun hasShownOnBoarding(): Single<Boolean>
 
-  @CheckResult fun populateList(packageName: String, force: Boolean): Observable<ActivityEntry>
+    @CheckResult
+    fun populateList(packageName: String, force: Boolean): Observable<ActivityEntry>
 }
 

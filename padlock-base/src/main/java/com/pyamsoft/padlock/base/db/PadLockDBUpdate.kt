@@ -23,16 +23,16 @@ import io.reactivex.Completable
 
 interface PadLockDBUpdate {
 
-  @CheckResult
-  fun updateLockTime(lockUntilTime: Long, packageName: String,
-      activityName: String): Completable
+    @CheckResult
+    fun updateLockTime(lockUntilTime: Long, packageName: String,
+            activityName: String): Completable
 
-  @CheckResult
-  fun updateIgnoreTime(ignoreUntilTime: Long, packageName: String,
-      activityName: String): Completable
+    @CheckResult
+    fun updateIgnoreTime(ignoreUntilTime: Long, packageName: String,
+            activityName: String): Completable
 
-  @CheckResult
-  fun updateWhitelist(whitelist: Boolean, packageName: String,
-      activityName: String): Completable
+    @CheckResult
+    fun updateWhitelist(whitelist: Boolean, packageName: String,
+            activityName: String): Completable
 
 }

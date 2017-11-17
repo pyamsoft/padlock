@@ -29,86 +29,86 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class PinEntryPresenter @Inject internal constructor(private val interactor: PinEntryInteractor,
-    private val createPinBus: EventBus<CreatePinEvent>,
-    private val clearPinBus: EventBus<ClearPinEvent>,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
-    ioScheduler, mainScheduler) {
+        private val createPinBus: EventBus<CreatePinEvent>,
+        private val clearPinBus: EventBus<ClearPinEvent>,
+        @Named("computation") computationScheduler: Scheduler,
+        @Named("io") ioScheduler: Scheduler,
+        @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
+        ioScheduler, mainScheduler) {
 
-  override fun onBind(v: View) {
-    super.onBind(v)
-    checkMasterPinPresent(v)
-  }
-
-  private fun checkMasterPinPresent(v: MasterPinCallback) {
-    Timber.d("Check master pin present")
-    dispose {
-      interactor.hasMasterPin()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            if (it) {
-              v.onMasterPinPresent()
-            } else {
-              v.onMasterPinMissing()
-            }
-          }, { Timber.e(it, "onError checkMasterPinPresent") })
+    override fun onBind(v: View) {
+        super.onBind(v)
+        checkMasterPinPresent(v)
     }
-  }
 
-  fun publish(event: CreatePinEvent) {
-    createPinBus.publish(event)
-  }
-
-  fun publish(event: ClearPinEvent) {
-    clearPinBus.publish(event)
-  }
-
-  fun submit(currentAttempt: String, reEntryAttempt: String, hint: String) {
-    dispose {
-      interactor.submitPin(currentAttempt, reEntryAttempt, hint)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .doAfterTerminate { view?.onPinSubmitComplete() }
-          .subscribe({
-            when (it) {
-              is Create -> {
-                if (it.complete) {
-                  view?.onPinSubmitCreateSuccess()
-                } else {
-                  view?.onPinSubmitCreateFailure()
-                }
-              }
-              is Clear -> {
-                if (it.complete) {
-                  view?.onPinSubmitClearSuccess()
-                } else {
-                  view?.onPinSubmitClearFailure()
-                }
-              }
-            }
-          }, {
-            Timber.e(it, "attemptPinSubmission onError")
-            view?.onPinSubmitError(it)
-          })
+    private fun checkMasterPinPresent(v: MasterPinCallback) {
+        Timber.d("Check master pin present")
+        dispose {
+            interactor.hasMasterPin()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({
+                        if (it) {
+                            v.onMasterPinPresent()
+                        } else {
+                            v.onMasterPinMissing()
+                        }
+                    }, { Timber.e(it, "onError checkMasterPinPresent") })
+        }
     }
-  }
 
-  interface View : MasterPinCallback, SubmitCallback
+    fun publish(event: CreatePinEvent) {
+        createPinBus.publish(event)
+    }
 
-  interface SubmitCallback {
-    fun onPinSubmitCreateSuccess()
-    fun onPinSubmitCreateFailure()
-    fun onPinSubmitClearSuccess()
-    fun onPinSubmitClearFailure()
-    fun onPinSubmitError(throwable: Throwable)
-    fun onPinSubmitComplete()
-  }
+    fun publish(event: ClearPinEvent) {
+        clearPinBus.publish(event)
+    }
 
-  interface MasterPinCallback {
-    fun onMasterPinMissing()
-    fun onMasterPinPresent()
-  }
+    fun submit(currentAttempt: String, reEntryAttempt: String, hint: String) {
+        dispose {
+            interactor.submitPin(currentAttempt, reEntryAttempt, hint)
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .doAfterTerminate { view?.onPinSubmitComplete() }
+                    .subscribe({
+                        when (it) {
+                            is Create -> {
+                                if (it.complete) {
+                                    view?.onPinSubmitCreateSuccess()
+                                } else {
+                                    view?.onPinSubmitCreateFailure()
+                                }
+                            }
+                            is Clear -> {
+                                if (it.complete) {
+                                    view?.onPinSubmitClearSuccess()
+                                } else {
+                                    view?.onPinSubmitClearFailure()
+                                }
+                            }
+                        }
+                    }, {
+                        Timber.e(it, "attemptPinSubmission onError")
+                        view?.onPinSubmitError(it)
+                    })
+        }
+    }
+
+    interface View : MasterPinCallback, SubmitCallback
+
+    interface SubmitCallback {
+        fun onPinSubmitCreateSuccess()
+        fun onPinSubmitCreateFailure()
+        fun onPinSubmitClearSuccess()
+        fun onPinSubmitClearFailure()
+        fun onPinSubmitError(throwable: Throwable)
+        fun onPinSubmitComplete()
+    }
+
+    interface MasterPinCallback {
+        fun onMasterPinMissing()
+        fun onMasterPinPresent()
+    }
 
 }

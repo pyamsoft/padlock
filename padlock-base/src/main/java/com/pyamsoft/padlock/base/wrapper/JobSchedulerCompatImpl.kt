@@ -26,21 +26,21 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class JobSchedulerCompatImpl @Inject internal constructor(
-    context: Context) : JobSchedulerCompat {
+        context: Context) : JobSchedulerCompat {
 
-  private val appContext: Context = context.applicationContext
-  private val alarmManager: AlarmManager = context.applicationContext.getSystemService(
-      Context.ALARM_SERVICE) as AlarmManager
+    private val appContext: Context = context.applicationContext
+    private val alarmManager: AlarmManager = context.applicationContext.getSystemService(
+            Context.ALARM_SERVICE) as AlarmManager
 
-  override fun cancel(intent: Intent) {
-    val pendingIntent = PendingIntent.getService(appContext, 0, intent,
-        PendingIntent.FLAG_UPDATE_CURRENT)
-    alarmManager.cancel(pendingIntent)
-    pendingIntent.cancel()
-  }
+    override fun cancel(intent: Intent) {
+        val pendingIntent = PendingIntent.getService(appContext, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT)
+        alarmManager.cancel(pendingIntent)
+        pendingIntent.cancel()
+    }
 
-  override fun queue(intent: Intent, triggerTime: Long) {
-    alarmManager.set(AlarmManager.RTC, triggerTime,
-        PendingIntent.getService(appContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
-  }
+    override fun queue(intent: Intent, triggerTime: Long) {
+        alarmManager.set(AlarmManager.RTC, triggerTime,
+                PendingIntent.getService(appContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
+    }
 }

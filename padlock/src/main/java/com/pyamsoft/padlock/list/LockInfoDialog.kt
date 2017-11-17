@@ -35,6 +35,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.loader.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
+import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.list.info.LockInfoEvent
@@ -47,7 +48,6 @@ import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
@@ -59,295 +59,296 @@ import javax.inject.Inject
 
 class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
-  @field:Inject internal lateinit var appIconLoader: AppIconLoader
-  @field:Inject internal lateinit var presenter: LockInfoPresenter
-  private lateinit var adapter: ModelAdapter<ActivityEntry, LockInfoItem>
-  private lateinit var binding: DialogLockInfoBinding
-  private lateinit var appPackageName: String
-  private lateinit var appName: String
-  private lateinit var filterListDelegate: FilterListDelegate
-  private var appIsSystem: Boolean = false
-  private var dividerDecoration: DividerItemDecoration? = null
-  private var appIcon = LoaderHelper.empty()
-  private var lastPosition: Int = 0
-  private val backingSet: MutableCollection<ActivityEntry> = LinkedHashSet()
+    @field:Inject internal lateinit var appIconLoader: AppIconLoader
+    @field:Inject internal lateinit var presenter: LockInfoPresenter
+    private lateinit var adapter: ModelAdapter<ActivityEntry, LockInfoItem>
+    private lateinit var binding: DialogLockInfoBinding
+    private lateinit var appPackageName: String
+    private lateinit var appName: String
+    private lateinit var filterListDelegate: FilterListDelegate
+    private var appIsSystem: Boolean = false
+    private var dividerDecoration: DividerItemDecoration? = null
+    private var appIcon = LoaderHelper.empty()
+    private var lastPosition: Int = 0
+    private val backingSet: MutableCollection<ActivityEntry> = LinkedHashSet()
 
-  override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
+    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    arguments?.let {
-      appPackageName = it.getString(ARG_APP_PACKAGE_NAME, null)
-      appName = it.getString(ARG_APP_NAME, null)
-      appIsSystem = it.getBoolean(ARG_APP_SYSTEM, false)
-    }
-
-    Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockInfoComponent(
-        LockInfoModule(appPackageName)).inject(this)
-  }
-
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-      savedInstanceState: Bundle?): View? {
-    filterListDelegate = FilterListDelegate()
-    adapter = ModelAdapter { LockInfoItem(it, appIsSystem) }
-    binding = DialogLockInfoBinding.inflate(inflater, container, false)
-    return binding.root
-  }
-
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
-    setupToolbar()
-    binding.apply {
-      lockInfoPackageName.text = appPackageName
-      lockInfoSystem.text = if (appIsSystem) "YES" else "NO"
-    }
-    setupSwipeRefresh()
-    setupRecyclerView()
-    filterListDelegate.onViewCreated(adapter)
-    lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
-
-    presenter.bind(this)
-  }
-
-  private fun setupToolbar() {
-    binding.apply {
-      lockInfoToolbar.title = appName
-      lockInfoToolbar.setNavigationOnClickListener { dismiss() }
-      lockInfoToolbar.inflateMenu(R.menu.search_menu)
-    }
-    ViewCompat.setElevation(binding.lockInfoToolbar,
-        AppUtil.convertToDP(binding.lockInfoToolbar.context, 4f))
-    filterListDelegate.onPrepareOptionsMenu(binding.lockInfoToolbar.menu, adapter)
-  }
-
-  private fun setupSwipeRefresh() {
-    binding.apply {
-      lockInfoSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
-          R.color.blue700, R.color.amber500)
-      lockInfoSwipeRefresh.setOnRefreshListener {
-        Timber.d("onRefresh")
-        presenter.populateList(true)
-      }
-    }
-  }
-
-  private fun setupRecyclerView() {
-    dividerDecoration = DividerItemDecoration(activity, DividerItemDecoration.VERTICAL)
-
-    binding.apply {
-      lockInfoRecycler.layoutManager = LinearLayoutManager(context).apply {
-        isItemPrefetchEnabled = true
-        initialPrefetchItemCount = 3
-      }
-      lockInfoRecycler.clipToPadding = false
-      lockInfoRecycler.setHasFixedSize(false)
-      lockInfoRecycler.addItemDecoration(dividerDecoration)
-      lockInfoRecycler.adapter = FastAdapter.with<LockInfoItem, ModelAdapter<ActivityEntry, LockInfoItem>>(
-          adapter)
-
-      lockInfoEmpty.visibility = View.GONE
-      lockInfoRecycler.visibility = View.VISIBLE
-    }
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    filterListDelegate.onDestroyView()
-    binding.apply {
-      lockInfoRecycler.removeItemDecoration(dividerDecoration)
-      lockInfoRecycler.setOnDebouncedClickListener(null)
-      lockInfoRecycler.layoutManager = null
-      lockInfoRecycler.adapter = null
-      unbind()
-    }
-
-    adapter.clear()
-    backingSet.clear()
-  }
-
-  override fun onStart() {
-    super.onStart()
-    appIcon = LoaderHelper.unload(appIcon)
-    appIcon = appIconLoader.forPackageName(appPackageName).into(binding.lockInfoIcon)
-    presenter.populateList(false)
-  }
-
-  override fun onStop() {
-    super.onStop()
-    appIcon = LoaderHelper.unload(appIcon)
-  }
-
-  override fun onPause() {
-    super.onPause()
-    lastPosition = ListStateUtil.getCurrentPosition(binding.lockInfoRecycler)
-    ListStateUtil.saveState(TAG, null, binding.lockInfoRecycler)
-  }
-
-  override fun onSaveInstanceState(outState: Bundle) {
-    ListStateUtil.saveState(TAG, outState, binding.lockInfoRecycler)
-    super.onSaveInstanceState(outState)
-  }
-
-  override fun onResume() {
-    super.onResume()
-    // The dialog is super small for some reason. We have to set the size manually, in onResume
-    val window = dialog.window
-    window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-        WindowManager.LayoutParams.WRAP_CONTENT)
-  }
-
-  private fun modifyList(id: String, state: LockState) {
-    for (i in adapter.adapterItems.indices) {
-      val item: LockInfoItem = adapter.getAdapterItem(i)
-      val entry: ActivityEntry = item.model
-      if (id == entry.id) {
-        if (item.updateModel(
-            ActivityEntry(name = entry.name, packageName = entry.packageName, lockState = state))) {
-          adapter.fastAdapter.notifyAdapterItemChanged(i)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            appPackageName = it.getString(ARG_APP_PACKAGE_NAME, null)
+            appName = it.getString(ARG_APP_NAME, null)
+            appIsSystem = it.getBoolean(ARG_APP_SYSTEM, false)
         }
-        presenter.update(entry.name, entry.packageName, state)
-        break
-      }
-    }
-  }
 
-  private fun setRefreshing(refresh: Boolean) {
-    binding.lockInfoSwipeRefresh.refreshing(refresh)
-    filterListDelegate.setEnabled(!refresh)
-  }
-
-  override fun onListPopulateBegin() {
-    setRefreshing(true)
-    backingSet.clear()
-  }
-
-  override fun onListPopulated() {
-    adapter.retainAll(backingSet)
-    if (adapter.adapterItemCount > 0) {
-      binding.apply {
-        lockInfoEmpty.visibility = View.GONE
-        lockInfoRecycler.visibility = View.VISIBLE
-      }
-
-      Timber.d("Refresh finished")
-      presenter.showOnBoarding()
-
-      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
-    } else {
-      binding.apply {
-        lockInfoRecycler.visibility = View.GONE
-        lockInfoEmpty.visibility = View.VISIBLE
-      }
-      Toasty.makeText(binding.lockInfoToolbar.context,
-          "Error while loading list. Please try again.",
-          Toast.LENGTH_SHORT).show()
+        Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockInfoComponent(
+                LockInfoModule(appPackageName)).inject(this)
     }
 
-    setRefreshing(false)
-  }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?): View? {
+        filterListDelegate = FilterListDelegate()
+        adapter = ModelAdapter { LockInfoItem(it, appIsSystem) }
+        binding = DialogLockInfoBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-  override fun onEntryAddedToList(entry: ActivityEntry) {
-    backingSet.add(entry)
-
-    var update = false
-    for (index in adapter.adapterItems.indices) {
-      val item: LockInfoItem = adapter.adapterItems[index]
-      if (item.model.id == entry.id) {
-        update = true
-        publishLockStateUpdates(item.model, entry)
-        if (item.updateModel(entry)) {
-          adapter.fastAdapter.notifyAdapterItemChanged(index)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupToolbar()
+        binding.apply {
+            lockInfoPackageName.text = appPackageName
+            lockInfoSystem.text = if (appIsSystem) "YES" else "NO"
         }
-        break
-      }
+        setupSwipeRefresh()
+        setupRecyclerView()
+        filterListDelegate.onViewCreated(adapter)
+        lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
+
+        presenter.bind(this)
     }
 
-    if (!update) {
-      binding.apply {
-        lockInfoEmpty.visibility = View.GONE
-        lockInfoRecycler.visibility = View.VISIBLE
-      }
-
-      var added = false
-      for (index in adapter.adapterItems.indices) {
-        val item: LockInfoItem = adapter.adapterItems[index]
-        // The entry should go before this one
-        if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
-          added = true
-          adapter.add(index, entry)
-          break
+    private fun setupToolbar() {
+        binding.apply {
+            lockInfoToolbar.title = appName
+            lockInfoToolbar.setNavigationOnClickListener { dismiss() }
+            lockInfoToolbar.inflateMenu(R.menu.search_menu)
         }
-      }
-
-      if (!added) {
-        // add at the end of the list
-        adapter.add(entry)
-      }
+        ViewCompat.setElevation(binding.lockInfoToolbar,
+                AppUtil.convertToDP(binding.lockInfoToolbar.context, 4f))
+        filterListDelegate.onPrepareOptionsMenu(binding.lockInfoToolbar.menu, adapter)
     }
-  }
 
-  private fun publishLockStateUpdates(model: ActivityEntry, entry: ActivityEntry) {
-    val oldState: LockState = model.lockState
-    val newState: LockState = entry.lockState
-    if (oldState != newState) {
-      Timber.d("Lock state changed for ${entry.packageName} ${entry.name}")
-      when (newState) {
-        DEFAULT -> presenter.publish(
-            LockInfoEvent.Callback.Deleted(entry.id, entry.packageName, oldState))
-        LOCKED -> presenter.publish(
-            LockInfoEvent.Callback.Created(entry.id, entry.packageName, oldState))
-        WHITELISTED -> presenter.publish(
-            LockInfoEvent.Callback.Whitelisted(entry.id, entry.packageName, oldState))
-        else -> Timber.e("Invalid lock state, do not publish: $newState")
-      }
-    }
-  }
-
-  override fun onListPopulateError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
-  }
-
-  override fun onOnboardingComplete() {
-    Timber.d("Show onboarding")
-  }
-
-  override fun onShowOnboarding() {
-    Timber.d("Onboarding complete")
-  }
-
-  override fun onModifyEntryCreated(id: String) {
-    modifyList(id, LOCKED)
-  }
-
-  override fun onModifyEntryDeleted(id: String) {
-    modifyList(id, DEFAULT)
-  }
-
-  override fun onModifyEntryWhitelisted(id: String) {
-    modifyList(id, WHITELISTED)
-  }
-
-  override fun onModifyEntryError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
-  }
-
-  companion object {
-
-    const internal val TAG = "LockInfoDialog"
-    const private val ARG_APP_PACKAGE_NAME = "app_packagename"
-    const private val ARG_APP_NAME = "app_name"
-    const private val ARG_APP_SYSTEM = "app_system"
-
-    @CheckResult
-    @JvmStatic
-    fun newInstance(appEntry: AppEntry): LockInfoDialog {
-      return LockInfoDialog().apply {
-        arguments = Bundle().apply {
-          putString(ARG_APP_PACKAGE_NAME, appEntry.packageName)
-          putString(ARG_APP_NAME, appEntry.name)
-          putBoolean(ARG_APP_SYSTEM, appEntry.system)
+    private fun setupSwipeRefresh() {
+        binding.apply {
+            lockInfoSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
+                    R.color.blue700, R.color.amber500)
+            lockInfoSwipeRefresh.setOnRefreshListener {
+                Timber.d("onRefresh")
+                presenter.populateList(true)
+            }
         }
-      }
     }
-  }
+
+    private fun setupRecyclerView() {
+        dividerDecoration = DividerItemDecoration(activity, DividerItemDecoration.VERTICAL)
+
+        binding.apply {
+            lockInfoRecycler.layoutManager = LinearLayoutManager(context).apply {
+                isItemPrefetchEnabled = true
+                initialPrefetchItemCount = 3
+            }
+            lockInfoRecycler.clipToPadding = false
+            lockInfoRecycler.setHasFixedSize(false)
+            lockInfoRecycler.addItemDecoration(dividerDecoration)
+            lockInfoRecycler.adapter = FastAdapter.with<LockInfoItem, ModelAdapter<ActivityEntry, LockInfoItem>>(
+                    adapter)
+
+            lockInfoEmpty.visibility = View.GONE
+            lockInfoRecycler.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        filterListDelegate.onDestroyView()
+        binding.apply {
+            lockInfoRecycler.removeItemDecoration(dividerDecoration)
+            lockInfoRecycler.setOnDebouncedClickListener(null)
+            lockInfoRecycler.layoutManager = null
+            lockInfoRecycler.adapter = null
+            unbind()
+        }
+
+        adapter.clear()
+        backingSet.clear()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        appIcon = LoaderHelper.unload(appIcon)
+        appIcon = appIconLoader.forPackageName(appPackageName).into(binding.lockInfoIcon)
+        presenter.populateList(false)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        appIcon = LoaderHelper.unload(appIcon)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        lastPosition = ListStateUtil.getCurrentPosition(binding.lockInfoRecycler)
+        ListStateUtil.saveState(TAG, null, binding.lockInfoRecycler)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        ListStateUtil.saveState(TAG, outState, binding.lockInfoRecycler)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // The dialog is super small for some reason. We have to set the size manually, in onResume
+        val window = dialog.window
+        window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT)
+    }
+
+    private fun modifyList(id: String, state: LockState) {
+        for (i in adapter.adapterItems.indices) {
+            val item: LockInfoItem = adapter.getAdapterItem(i)
+            val entry: ActivityEntry = item.model
+            if (id == entry.id) {
+                if (item.updateModel(
+                        ActivityEntry(name = entry.name, packageName = entry.packageName,
+                                lockState = state))) {
+                    adapter.fastAdapter.notifyAdapterItemChanged(i)
+                }
+                presenter.update(entry.name, entry.packageName, state)
+                break
+            }
+        }
+    }
+
+    private fun setRefreshing(refresh: Boolean) {
+        binding.lockInfoSwipeRefresh.refreshing(refresh)
+        filterListDelegate.setEnabled(!refresh)
+    }
+
+    override fun onListPopulateBegin() {
+        setRefreshing(true)
+        backingSet.clear()
+    }
+
+    override fun onListPopulated() {
+        adapter.retainAll(backingSet)
+        if (adapter.adapterItemCount > 0) {
+            binding.apply {
+                lockInfoEmpty.visibility = View.GONE
+                lockInfoRecycler.visibility = View.VISIBLE
+            }
+
+            Timber.d("Refresh finished")
+            presenter.showOnBoarding()
+
+            lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
+        } else {
+            binding.apply {
+                lockInfoRecycler.visibility = View.GONE
+                lockInfoEmpty.visibility = View.VISIBLE
+            }
+            Toasty.makeText(binding.lockInfoToolbar.context,
+                    "Error while loading list. Please try again.",
+                    Toast.LENGTH_SHORT).show()
+        }
+
+        setRefreshing(false)
+    }
+
+    override fun onEntryAddedToList(entry: ActivityEntry) {
+        backingSet.add(entry)
+
+        var update = false
+        for (index in adapter.adapterItems.indices) {
+            val item: LockInfoItem = adapter.adapterItems[index]
+            if (item.model.id == entry.id) {
+                update = true
+                publishLockStateUpdates(item.model, entry)
+                if (item.updateModel(entry)) {
+                    adapter.fastAdapter.notifyAdapterItemChanged(index)
+                }
+                break
+            }
+        }
+
+        if (!update) {
+            binding.apply {
+                lockInfoEmpty.visibility = View.GONE
+                lockInfoRecycler.visibility = View.VISIBLE
+            }
+
+            var added = false
+            for (index in adapter.adapterItems.indices) {
+                val item: LockInfoItem = adapter.adapterItems[index]
+                // The entry should go before this one
+                if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
+                    added = true
+                    adapter.add(index, entry)
+                    break
+                }
+            }
+
+            if (!added) {
+                // add at the end of the list
+                adapter.add(entry)
+            }
+        }
+    }
+
+    private fun publishLockStateUpdates(model: ActivityEntry, entry: ActivityEntry) {
+        val oldState: LockState = model.lockState
+        val newState: LockState = entry.lockState
+        if (oldState != newState) {
+            Timber.d("Lock state changed for ${entry.packageName} ${entry.name}")
+            when (newState) {
+                DEFAULT -> presenter.publish(
+                        LockInfoEvent.Callback.Deleted(entry.id, entry.packageName, oldState))
+                LOCKED -> presenter.publish(
+                        LockInfoEvent.Callback.Created(entry.id, entry.packageName, oldState))
+                WHITELISTED -> presenter.publish(
+                        LockInfoEvent.Callback.Whitelisted(entry.id, entry.packageName, oldState))
+                else -> Timber.e("Invalid lock state, do not publish: $newState")
+            }
+        }
+    }
+
+    override fun onListPopulateError(throwable: Throwable) {
+        DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
+    }
+
+    override fun onOnboardingComplete() {
+        Timber.d("Show onboarding")
+    }
+
+    override fun onShowOnboarding() {
+        Timber.d("Onboarding complete")
+    }
+
+    override fun onModifyEntryCreated(id: String) {
+        modifyList(id, LOCKED)
+    }
+
+    override fun onModifyEntryDeleted(id: String) {
+        modifyList(id, DEFAULT)
+    }
+
+    override fun onModifyEntryWhitelisted(id: String) {
+        modifyList(id, WHITELISTED)
+    }
+
+    override fun onModifyEntryError(throwable: Throwable) {
+        DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
+    }
+
+    companion object {
+
+        const internal val TAG = "LockInfoDialog"
+        const private val ARG_APP_PACKAGE_NAME = "app_packagename"
+        const private val ARG_APP_NAME = "app_name"
+        const private val ARG_APP_SYSTEM = "app_system"
+
+        @CheckResult
+        @JvmStatic
+        fun newInstance(appEntry: AppEntry): LockInfoDialog {
+            return LockInfoDialog().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_APP_PACKAGE_NAME, appEntry.packageName)
+                    putString(ARG_APP_NAME, appEntry.name)
+                    putBoolean(ARG_APP_SYSTEM, appEntry.system)
+                }
+            }
+        }
+    }
 }

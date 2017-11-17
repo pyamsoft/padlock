@@ -23,6 +23,7 @@ import io.reactivex.Single
 
 interface LockServiceStateInteractor {
 
-  @CheckResult fun isServiceEnabled(): Single<Boolean>
+    @CheckResult
+    fun isServiceEnabled(): Single<Boolean>
 
 }

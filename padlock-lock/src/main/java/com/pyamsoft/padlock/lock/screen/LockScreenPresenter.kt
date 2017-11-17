@@ -27,83 +27,84 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockScreenPresenter @Inject internal constructor(
-    private val lockScreenInputPresenter: LockScreenInputPresenter, @param:Named(
-        "package_name") private val packageName: String,
-    @param:Named("activity_name") private val activityName: String,
-    private val bus: EventBus<CloseOldEvent>,
-    private val interactor: LockScreenInteractor, @Named(
-        "computation") computationScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler, @Named(
-        "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(
-    computationScheduler, ioScheduler, mainScheduler) {
+        private val lockScreenInputPresenter: LockScreenInputPresenter, @param:Named(
+                "package_name") private val packageName: String,
+        @param:Named("activity_name") private val activityName: String,
+        private val bus: EventBus<CloseOldEvent>,
+        private val interactor: LockScreenInteractor, @Named(
+                "computation") computationScheduler: Scheduler,
+        @Named("io") ioScheduler: Scheduler, @Named(
+                "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(
+        computationScheduler, ioScheduler, mainScheduler) {
 
-  override fun onBind(v: View) {
-    super.onBind(v)
-    lockScreenInputPresenter.bind(v)
-    loadDisplayNameFromPackage(v)
-    closeOldAndAwaitSignal(v)
-  }
-
-  override fun onUnbind() {
-    super.onUnbind()
-    lockScreenInputPresenter.unbind()
-  }
-
-  private fun loadDisplayNameFromPackage(v: NameCallback) {
-    dispose {
-      interactor.getDisplayName(packageName)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({ v.setDisplayName(it) }, {
-            Timber.e(it, "Error loading display name from package")
-            v.setDisplayName("")
-          })
+    override fun onBind(v: View) {
+        super.onBind(v)
+        lockScreenInputPresenter.bind(v)
+        loadDisplayNameFromPackage(v)
+        closeOldAndAwaitSignal(v)
     }
-  }
 
-  private fun closeOldAndAwaitSignal(v: OldCallback) {
-    // Send bus event first before we register or we may catch our own event.
-    bus.publish(CloseOldEvent(packageName, activityName))
-
-    dispose {
-      bus.listen()
-          .filter { it.packageName == packageName && it.activityName == activityName }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            Timber.w("Received a close old event: %s %s", it.packageName, it.activityName)
-            v.onCloseOldReceived()
-          }, {
-            Timber.e(it, "Error bus close old")
-          })
+    override fun onUnbind() {
+        super.onUnbind()
+        lockScreenInputPresenter.unbind()
     }
-  }
 
-  fun createWithDefaultIgnoreTime() {
-    dispose {
-      interactor.getDefaultIgnoreTime()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({ view?.onInitializeWithIgnoreTime(it) }, {
-            Timber.e(it, "onError createWithDefaultIgnoreTime")
-          })
+    private fun loadDisplayNameFromPackage(v: NameCallback) {
+        dispose {
+            interactor.getDisplayName(packageName)
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({ v.setDisplayName(it) }, {
+                        Timber.e(it, "Error loading display name from package")
+                        v.setDisplayName("")
+                    })
+        }
     }
-  }
 
-  interface View : NameCallback, OldCallback, IgnoreTimeCallback, LockScreenInputPresenter.View
+    private fun closeOldAndAwaitSignal(v: OldCallback) {
+        // Send bus event first before we register or we may catch our own event.
+        bus.publish(CloseOldEvent(packageName, activityName))
 
-  interface IgnoreTimeCallback {
+        dispose {
+            bus.listen()
+                    .filter { it.packageName == packageName && it.activityName == activityName }
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({
+                        Timber.w("Received a close old event: %s %s", it.packageName,
+                                it.activityName)
+                        v.onCloseOldReceived()
+                    }, {
+                        Timber.e(it, "Error bus close old")
+                    })
+        }
+    }
 
-    fun onInitializeWithIgnoreTime(time: Long)
-  }
+    fun createWithDefaultIgnoreTime() {
+        dispose {
+            interactor.getDefaultIgnoreTime()
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({ view?.onInitializeWithIgnoreTime(it) }, {
+                        Timber.e(it, "onError createWithDefaultIgnoreTime")
+                    })
+        }
+    }
 
-  interface NameCallback {
+    interface View : NameCallback, OldCallback, IgnoreTimeCallback, LockScreenInputPresenter.View
 
-    fun setDisplayName(name: String)
-  }
+    interface IgnoreTimeCallback {
 
-  interface OldCallback {
+        fun onInitializeWithIgnoreTime(time: Long)
+    }
 
-    fun onCloseOldReceived()
-  }
+    interface NameCallback {
+
+        fun setDisplayName(name: String)
+    }
+
+    interface OldCallback {
+
+        fun onCloseOldReceived()
+    }
 }

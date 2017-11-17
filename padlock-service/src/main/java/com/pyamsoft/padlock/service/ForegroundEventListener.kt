@@ -20,9 +20,9 @@ package com.pyamsoft.padlock.service
 
 interface ForegroundEventListener {
 
-  fun registerForegroundEventListener()
+    fun registerForegroundEventListener()
 
-  fun unregisterForegroundEventListener()
+    fun unregisterForegroundEventListener()
 
 }
 

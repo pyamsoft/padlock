@@ -21,25 +21,24 @@ package com.pyamsoft.padlock.service
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import io.reactivex.Flowable
-import io.reactivex.Observable
 import io.reactivex.Single
 
 internal interface LockServiceInteractor {
 
-  fun cleanup()
+    fun cleanup()
 
-  fun reset()
+    fun reset()
 
-  fun setLockScreenPassed(packageName: String, className: String, passed: Boolean)
+    fun setLockScreenPassed(packageName: String, className: String, passed: Boolean)
 
-  @CheckResult
-  fun isActiveMatching(packageName: String, className: String): Single<Boolean>
+    @CheckResult
+    fun isActiveMatching(packageName: String, className: String): Single<Boolean>
 
-  @CheckResult
-  fun listenForForegroundEvents(): Flowable<ForegroundEvent>
+    @CheckResult
+    fun listenForForegroundEvents(): Flowable<ForegroundEvent>
 
-  @CheckResult
-  fun processEvent(packageName: String, className: String,
-      forcedRecheck: RecheckStatus): Single<PadLockEntry>
+    @CheckResult
+    fun processEvent(packageName: String, className: String,
+            forcedRecheck: RecheckStatus): Single<PadLockEntry>
 
 }

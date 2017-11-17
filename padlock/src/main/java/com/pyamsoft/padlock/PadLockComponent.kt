@@ -51,59 +51,59 @@ import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.service.ServiceModule
 import com.pyamsoft.padlock.settings.ConfirmationDialog
-import com.pyamsoft.padlock.settings.SettingsPreferenceFragment
 import com.pyamsoft.padlock.settings.SettingsModule
+import com.pyamsoft.padlock.settings.SettingsPreferenceFragment
 import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
 @Component(modules = arrayOf(PadLockProvider::class, PadLockModule::class,
-    LockModule::class, PinModule::class,
-    ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class,
-    LockInfoSingletonModule::class, LockStateModule::class, LockListModule::class,
-    LockScreenSingletonModule::class, LockEntrySingletonModule::class,
-    MasterPinModule::class, UiProvider::class))
+        LockModule::class, PinModule::class,
+        ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class,
+        LockInfoSingletonModule::class, LockStateModule::class, LockListModule::class,
+        LockScreenSingletonModule::class, LockEntrySingletonModule::class,
+        MasterPinModule::class, UiProvider::class))
 interface PadLockComponent {
 
-  fun inject(fragment: LockListFragment)
+    fun inject(fragment: LockListFragment)
 
-  fun inject(mainActivity: MainActivity)
+    fun inject(mainActivity: MainActivity)
 
-  fun inject(fragment: PinEntryTextFragment)
+    fun inject(fragment: PinEntryTextFragment)
 
-  fun inject(pinEntryDialog: PinEntryDialog)
+    fun inject(pinEntryDialog: PinEntryDialog)
 
-  fun inject(pinEntryPatternFragment: PinEntryPatternFragment)
+    fun inject(pinEntryPatternFragment: PinEntryPatternFragment)
 
-  fun inject(purgeFragment: PurgeFragment)
+    fun inject(purgeFragment: PurgeFragment)
 
-  fun inject(padLockService: PadLockService)
+    fun inject(padLockService: PadLockService)
 
-  fun inject(settingsPreferenceFragment: SettingsPreferenceFragment)
+    fun inject(settingsPreferenceFragment: SettingsPreferenceFragment)
 
-  fun inject(recheckService: RecheckService)
+    fun inject(recheckService: RecheckService)
 
-  fun inject(purgeAllDialog: PurgeAllDialog)
+    fun inject(purgeAllDialog: PurgeAllDialog)
 
-  fun inject(purgeSingleItemDialog: PurgeSingleItemDialog)
+    fun inject(purgeSingleItemDialog: PurgeSingleItemDialog)
 
-  fun inject(confirmationDialog: ConfirmationDialog)
+    fun inject(confirmationDialog: ConfirmationDialog)
 
-  fun inject(viewHolder: LockInfoItem.ViewHolder)
+    fun inject(viewHolder: LockInfoItem.ViewHolder)
 
-  fun inject(viewHolder: LockListItem.ViewHolder)
+    fun inject(viewHolder: LockListItem.ViewHolder)
 
-  // To be used directly by PadLockSingleInitProvider
-  @CheckResult
-  fun provideInstallListenerPreferences(): InstallListenerPreferences
+    // To be used directly by PadLockSingleInitProvider
+    @CheckResult
+    fun provideInstallListenerPreferences(): InstallListenerPreferences
 
-  // To be used directly by PadLockSingleInitProvider
-  @CheckResult
-  fun provideApplicationInstallReceiver(): ApplicationInstallReceiver
+    // To be used directly by PadLockSingleInitProvider
+    @CheckResult
+    fun provideApplicationInstallReceiver(): ApplicationInstallReceiver
 
-  @CheckResult
-  fun plusLockInfoComponent(module: LockInfoModule): LockInfoComponent
+    @CheckResult
+    fun plusLockInfoComponent(module: LockInfoModule): LockInfoComponent
 
-  @CheckResult
-  fun plusLockScreenComponent(entryModule: LockEntryModule): LockScreenComponent
+    @CheckResult
+    fun plusLockScreenComponent(entryModule: LockEntryModule): LockScreenComponent
 }

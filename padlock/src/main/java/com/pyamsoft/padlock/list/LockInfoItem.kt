@@ -38,112 +38,114 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockInfoItem internal constructor(entry: ActivityEntry,
-    private val system: Boolean) : ModelAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
-    entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder>, UpdateItem<ActivityEntry> {
+        private val system: Boolean) :
+        ModelAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
+                entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder>,
+        UpdateItem<ActivityEntry> {
 
-  private var viewHolder: ViewHolder? = null
+    private var viewHolder: ViewHolder? = null
 
-  override fun getType(): Int = R.id.adapter_lock_info
+    override fun getType(): Int = R.id.adapter_lock_info
 
-  override fun getLayoutRes(): Int = R.layout.adapter_item_lockinfo
+    override fun getLayoutRes(): Int = R.layout.adapter_item_lockinfo
 
-  override fun updateModel(model: ActivityEntry): Boolean {
-    withModel(model)
-    bindViewHolder()
-    return false
-  }
-
-  private fun bindViewHolder() {
-    viewHolder?.apply {
-      // Remove any old binds
-      val lockedButton: RadioButton = when (model.lockState) {
-        DEFAULT -> binding.lockInfoRadioDefault
-        WHITELISTED -> binding.lockInfoRadioWhite
-        LOCKED -> binding.lockInfoRadioBlack
-        else -> throw IllegalStateException("Illegal enum state")
-      }
-      binding.apply {
-        lockInfoRadioBlack.setOnCheckedChangeListener(null)
-        lockInfoRadioWhite.setOnCheckedChangeListener(null)
-        lockInfoRadioDefault.setOnCheckedChangeListener(null)
-      }
-      lockedButton.isChecked = true
-
-      val entryName = model.name
-      var activityName = entryName
-      if (entryName.startsWith(model.packageName)) {
-        val strippedPackageName = entryName.replace(model.packageName, "")
-        if (strippedPackageName[0] == '.') {
-          activityName = strippedPackageName
-        }
-      }
-      binding.lockInfoActivity.text = activityName
-
-      binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener { radioGroup, _ ->
-        val id = radioGroup.checkedRadioButtonId
-        Timber.d("Checked radio id: %d", id)
-        if (id == 0) {
-          Timber.e("No radiobutton is checked, set to default")
-          binding.lockInfoRadioDefault.isChecked = true
-        }
-      }
-
-      binding.lockInfoRadioDefault.setOnCheckedChangeListener { _, isChecked ->
-        if (isChecked) {
-          processModifyDatabaseEntry(this, DEFAULT)
-        }
-      }
-      binding.lockInfoRadioWhite.setOnCheckedChangeListener { _, isChecked ->
-        if (isChecked) {
-          processModifyDatabaseEntry(this, WHITELISTED)
-        }
-      }
-      binding.lockInfoRadioBlack.setOnCheckedChangeListener { _, isChecked ->
-        if (isChecked) {
-          processModifyDatabaseEntry(this, LOCKED)
-        }
-      }
+    override fun updateModel(model: ActivityEntry): Boolean {
+        withModel(model)
+        bindViewHolder()
+        return false
     }
-  }
 
-  override fun bindView(holder: ViewHolder, payloads: List<Any>) {
-    super.bindView(holder, payloads)
-    viewHolder = holder
-    bindViewHolder()
+    private fun bindViewHolder() {
+        viewHolder?.apply {
+            // Remove any old binds
+            val lockedButton: RadioButton = when (model.lockState) {
+                DEFAULT -> binding.lockInfoRadioDefault
+                WHITELISTED -> binding.lockInfoRadioWhite
+                LOCKED -> binding.lockInfoRadioBlack
+                else -> throw IllegalStateException("Illegal enum state")
+            }
+            binding.apply {
+                lockInfoRadioBlack.setOnCheckedChangeListener(null)
+                lockInfoRadioWhite.setOnCheckedChangeListener(null)
+                lockInfoRadioDefault.setOnCheckedChangeListener(null)
+            }
+            lockedButton.isChecked = true
 
-  }
+            val entryName = model.name
+            var activityName = entryName
+            if (entryName.startsWith(model.packageName)) {
+                val strippedPackageName = entryName.replace(model.packageName, "")
+                if (strippedPackageName[0] == '.') {
+                    activityName = strippedPackageName
+                }
+            }
+            binding.lockInfoActivity.text = activityName
 
-  private fun processModifyDatabaseEntry(holder: ViewHolder, newLockState: LockState) {
-    holder.publisher.publish(model, newLockState, null, system)
-  }
+            binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener { radioGroup, _ ->
+                val id = radioGroup.checkedRadioButtonId
+                Timber.d("Checked radio id: %d", id)
+                if (id == 0) {
+                    Timber.e("No radiobutton is checked, set to default")
+                    binding.lockInfoRadioDefault.isChecked = true
+                }
+            }
 
-  override fun unbindView(holder: ViewHolder) {
-    super.unbindView(holder)
-    viewHolder = null
-    holder.apply {
-      binding.lockInfoActivity.text = null
-      binding.lockInfoRadioBlack.setOnCheckedChangeListener(null)
-      binding.lockInfoRadioWhite.setOnCheckedChangeListener(null)
-      binding.lockInfoRadioDefault.setOnCheckedChangeListener(null)
-      binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener(null)
+            binding.lockInfoRadioDefault.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    processModifyDatabaseEntry(this, DEFAULT)
+                }
+            }
+            binding.lockInfoRadioWhite.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    processModifyDatabaseEntry(this, WHITELISTED)
+                }
+            }
+            binding.lockInfoRadioBlack.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    processModifyDatabaseEntry(this, LOCKED)
+                }
+            }
+        }
     }
-  }
 
-  override fun filterAgainst(query: String): Boolean {
-    val name = model.name.toLowerCase().trim { it <= ' ' }
-    Timber.d("Filter predicate: '%s' against %s", query, name)
-    return name.contains(query)
-  }
+    override fun bindView(holder: ViewHolder, payloads: List<Any>) {
+        super.bindView(holder, payloads)
+        viewHolder = holder
+        bindViewHolder()
 
-  override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
-
-  class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-    internal val binding: AdapterItemLockinfoBinding = DataBindingUtil.bind(itemView)
-    @Inject internal lateinit var publisher: LockInfoItemPublisher
-
-    init {
-      Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)
     }
-  }
+
+    private fun processModifyDatabaseEntry(holder: ViewHolder, newLockState: LockState) {
+        holder.publisher.publish(model, newLockState, null, system)
+    }
+
+    override fun unbindView(holder: ViewHolder) {
+        super.unbindView(holder)
+        viewHolder = null
+        holder.apply {
+            binding.lockInfoActivity.text = null
+            binding.lockInfoRadioBlack.setOnCheckedChangeListener(null)
+            binding.lockInfoRadioWhite.setOnCheckedChangeListener(null)
+            binding.lockInfoRadioDefault.setOnCheckedChangeListener(null)
+            binding.lockInfoTristateRadiogroup.setOnCheckedChangeListener(null)
+        }
+    }
+
+    override fun filterAgainst(query: String): Boolean {
+        val name = model.name.toLowerCase().trim { it <= ' ' }
+        Timber.d("Filter predicate: '%s' against %s", query, name)
+        return name.contains(query)
+    }
+
+    override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
+
+    class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+        internal val binding: AdapterItemLockinfoBinding = DataBindingUtil.bind(itemView)
+        @Inject internal lateinit var publisher: LockInfoItemPublisher
+
+        init {
+            Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)
+        }
+    }
 }

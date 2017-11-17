@@ -23,9 +23,11 @@ import io.reactivex.Single
 
 internal interface PinEntryInteractor {
 
-  @CheckResult fun hasMasterPin(): Single<Boolean>
+    @CheckResult
+    fun hasMasterPin(): Single<Boolean>
 
-  @CheckResult fun submitPin(currentAttempt: String, reEntryAttempt: String,
-      hint: String): Single<PinEntryEvent>
+    @CheckResult
+    fun submitPin(currentAttempt: String, reEntryAttempt: String,
+            hint: String): Single<PinEntryEvent>
 
 }
