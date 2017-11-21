@@ -22,7 +22,7 @@ buildscript {
 
   ext {
     kotlin_version = '1.1.60'
-    plugin_version = '3.0.0'
+    plugin_version = '3.0.1'
   }
 
   repositories {
