@@ -53,7 +53,8 @@
         android:label="@string/app_name"
         android:launchMode="singleTask"
         android:noHistory="false"
-        android:theme="@style/Theme.PadLock.Light.Splash">
+        android:theme="@style/Theme.PadLock.Light.Splash"
+        android:windowSoftInputMode="adjustResize">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
@@ -63,16 +64,18 @@
     <!-- Lock Screen Activity -->
     <activity
         android:name=".lock.LockScreenActivity"
+        android:autoRemoveFromRecents="true"
         android:excludeFromRecents="true"
         android:exported="false"
         android:launchMode="singleTop"
-        android:noHistory="true">
+        android:noHistory="true"
+        android:windowSoftInputMode="adjustResize">
 
       <!-- Sets a default width/height for the lock screen when in freeform mode -->
       <!--suppress AndroidElementNotAllowed -->
       <layout
-          android:defaultHeight="250dp"
-          android:defaultWidth="250dp"
+          android:defaultHeight="300dp"
+          android:defaultWidth="300dp"
           tools:ignore="UnusedAttribute"/>
 
     </activity>
