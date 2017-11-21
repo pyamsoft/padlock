@@ -33,7 +33,6 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.service.RecheckStatus.FORCE
-import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.helper.Optional
 import com.pyamsoft.pydroid.helper.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
@@ -57,7 +56,6 @@ import javax.inject.Singleton
         private val padLockDBQuery: PadLockDBQuery,
         @param:Named("lockscreen") private val lockScreenActivityClass: Class<out Activity>,
         @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
-        private val serviceFinishBus: EventBus<ServiceFinishEvent>,
         private val stateInteractor: LockServiceStateInteractor) : LockServiceInteractor {
 
     private val appContext = context.applicationContext
@@ -125,7 +123,13 @@ import javax.inject.Singleton
                         }
                         return@map foregroundEvent
                     }.filter { it is Present }.map { it as Present }.map { it.value }
-                    .filter { it != lastForegroundEvent }.doOnNext { lastForegroundEvent = it }
+                    .filter {
+                        val classNameMatch = (it.className == lockScreenActivityClass.name)
+                        val packageNameMatch = (it.packageName == appContext.packageName)
+                        return@filter !(classNameMatch && packageNameMatch)
+                    }
+                    .filter { it != lastForegroundEvent }
+                    .doOnNext { lastForegroundEvent = it }
         }
     }
 
