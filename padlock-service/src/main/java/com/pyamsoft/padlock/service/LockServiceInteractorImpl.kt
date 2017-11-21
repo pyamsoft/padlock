@@ -99,7 +99,6 @@ import javax.inject.Singleton
                 return@map usageManager.queryEvents(beginTime, endTime).asOptional()
             }.onBackpressureDrop()
                     .map {
-                        val foregroundEvent: Optional<ForegroundEvent>
                         val event: UsageEvents.Event = Event()
                         if (it is Present) {
                             // We have usage events
@@ -109,19 +108,15 @@ import javax.inject.Singleton
                                 while (events.hasNextEvent()) {
                                     events.getNextEvent(event)
                                 }
+
                                 if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                                    foregroundEvent = ForegroundEvent(event.packageName ?: "",
+                                    return@map ForegroundEvent(event.packageName ?: "",
                                             event.className ?: "").asOptional()
-                                } else {
-                                    foregroundEvent = Optional.ofNullable(null)
                                 }
-                            } else {
-                                foregroundEvent = Optional.ofNullable(null)
                             }
-                        } else {
-                            foregroundEvent = Optional.ofNullable(null)
                         }
-                        return@map foregroundEvent
+
+                        return@map Optional.ofNullable(null)
                     }.filter { it is Present }.map { it as Present }.map { it.value }
                     .filter {
                         val classNameMatch = (it.className == lockScreenActivityClass.name)
@@ -171,7 +166,8 @@ import javax.inject.Singleton
             windowActivity: String): MaybeTransformer<Boolean, PadLockEntry> {
         return MaybeTransformer {
             it.flatMap {
-                Timber.d("Get list of locked classes with package: %s, class: %s", windowPackage,
+                Timber.d("Get list of locked classes with package: %s, class: %s",
+                        windowPackage,
                         windowActivity)
                 setLockScreenPassed(windowPackage, windowActivity, false)
                 return@flatMap padLockDBQuery.queryWithPackageActivityNameDefault(windowPackage,
