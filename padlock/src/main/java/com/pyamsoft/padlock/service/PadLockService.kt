@@ -27,7 +27,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
-import android.support.annotation.CheckResult
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
@@ -46,32 +45,19 @@ class PadLockService : Service(), LockServicePresenter.View {
     override fun onBind(ignore: Intent?): IBinder? = null
 
     @field:Inject internal lateinit var presenter: LockServicePresenter
-    private var screenListener: ScreenEventListener? = null
     private lateinit var notificationManager: NotificationManagerCompat
 
     override fun onCreate() {
         super.onCreate()
-
         Injector.obtain<PadLockComponent>(applicationContext).inject(this)
-        presenter.bind(this)
-
         notificationManager = NotificationManagerCompat.from(applicationContext)
-
-        screenListener = ScreenEventListener(applicationContext, presenter)
-        screenListener?.register()
-
+        presenter.bind(this)
         startInForeground()
-        isRunning = true
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.unregisterForegroundEventListener()
         presenter.unbind()
-        screenListener?.unregister()
-        screenListener = null
-        isRunning = false
-
         stopForeground(true)
         notificationManager.cancel(NOTIFICATION_ID)
     }
@@ -82,13 +68,6 @@ class PadLockService : Service(), LockServicePresenter.View {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Timber.d("Service onStartCommand")
-        if (UsagePermissionChecker.missingUsageStatsPermission(applicationContext)) {
-            Timber.e("We do not have usage stats permission, don't poll")
-            presenter.unregisterForegroundEventListener()
-        } else {
-            Timber.d("We have usage stats permission, poll events")
-            presenter.registerForegroundEventListener()
-        }
         return Service.START_STICKY
     }
 
@@ -151,10 +130,6 @@ class PadLockService : Service(), LockServicePresenter.View {
     companion object {
 
         const val NOTIFICATION_ID = 1001
-
-        var isRunning: Boolean = false
-            @CheckResult get
-            private set
 
         @JvmStatic
         fun start(context: Context) {

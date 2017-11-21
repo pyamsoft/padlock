@@ -41,7 +41,7 @@ import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
-import com.pyamsoft.padlock.service.PadLockService
+import com.pyamsoft.padlock.service.UsagePermissionChecker
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
 import com.pyamsoft.pydroid.design.util.FABUtil
@@ -217,12 +217,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     private fun setupFAB() {
         binding.applistFab.setOnDebouncedClickListener {
-            if (PadLockService.isRunning) {
-                DialogUtil.guaranteeSingleDialogFragment(activity,
-                        PinEntryDialog.newInstance(context!!.packageName), PinEntryDialog.TAG)
-            } else {
+            if (UsagePermissionChecker.missingUsageStatsPermission(binding.applistFab.context)) {
                 DialogUtil.guaranteeSingleDialogFragment(activity, UsageAccessRequestDialog(),
                         "accessibility")
+            } else {
+                DialogUtil.guaranteeSingleDialogFragment(activity,
+                        PinEntryDialog.newInstance(binding.applistFab.context.packageName),
+                        PinEntryDialog.TAG)
             }
         }
         FABUtil.setupFABBehavior(binding.applistFab, HideScrollFABBehavior(24))
