@@ -88,44 +88,39 @@ import javax.inject.Singleton
     }
 
     override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
-        if (UsagePermissionChecker.missingUsageStatsPermission(appContext)) {
-            Timber.w("Missing usage permission, return empty source")
-            return Flowable.empty()
-        } else {
-            return Flowable.interval(LISTEN_INTERVAL, MILLISECONDS).map {
-                val now: Long = System.currentTimeMillis()
-                val beginTime = now - TEN_SECONDS_MILLIS
-                val endTime = now + TEN_SECONDS_MILLIS
-                return@map usageManager.queryEvents(beginTime, endTime).asOptional()
-            }.onBackpressureDrop()
-                    .map {
-                        val event: UsageEvents.Event = Event()
-                        if (it is Present) {
-                            // We have usage events
-                            val events = it.value
-                            if (events.hasNextEvent()) {
+        return Flowable.interval(LISTEN_INTERVAL, MILLISECONDS).map {
+            val now: Long = System.currentTimeMillis()
+            val beginTime = now - TEN_SECONDS_MILLIS
+            val endTime = now + TEN_SECONDS_MILLIS
+            return@map usageManager.queryEvents(beginTime, endTime).asOptional()
+        }.onBackpressureDrop()
+                .map {
+                    val event: UsageEvents.Event = Event()
+                    if (it is Present) {
+                        // We have usage events
+                        val events = it.value
+                        if (events.hasNextEvent()) {
+                            events.getNextEvent(event)
+                            while (events.hasNextEvent()) {
                                 events.getNextEvent(event)
-                                while (events.hasNextEvent()) {
-                                    events.getNextEvent(event)
-                                }
+                            }
 
-                                if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                                    return@map ForegroundEvent(event.packageName ?: "",
-                                            event.className ?: "").asOptional()
-                                }
+                            if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                                return@map ForegroundEvent(event.packageName ?: "",
+                                        event.className ?: "").asOptional()
                             }
                         }
-
-                        return@map Optional.ofNullable(null)
-                    }.filter { it is Present }.map { it as Present }.map { it.value }
-                    .filter {
-                        val classNameMatch = (it.className == lockScreenActivityClass.name)
-                        val packageNameMatch = (it.packageName == appContext.packageName)
-                        return@filter !(classNameMatch && packageNameMatch)
                     }
-                    .filter { it != lastForegroundEvent }
-                    .doOnNext { lastForegroundEvent = it }
-        }
+
+                    return@map Optional.ofNullable(null)
+                }.filter { it is Present }.map { it as Present }.map { it.value }
+                .filter {
+                    val classNameMatch = (it.className == lockScreenActivityClass.name)
+                    val packageNameMatch = (it.packageName == appContext.packageName)
+                    return@filter !(classNameMatch && packageNameMatch)
+                }
+                .filter { it != lastForegroundEvent }
+                .doOnNext { lastForegroundEvent = it }
     }
 
     override fun isActiveMatching(packageName: String, className: String): Single<Boolean> {
