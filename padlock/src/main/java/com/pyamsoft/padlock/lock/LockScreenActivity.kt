@@ -349,7 +349,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                 putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName)
 
                 // Always set flags
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 
                 // If we are not locking PadLock, do a little differently
                 if (entry.packageName() != context.applicationContext.packageName) {
