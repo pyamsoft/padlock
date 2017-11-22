@@ -31,7 +31,6 @@ import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.base.R
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
@@ -67,7 +66,16 @@ import javax.inject.Singleton
     private val filter: IntentFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
     private val pendingIntent: PendingIntent
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
-    private var notificationId: Int = 0
+    private var notificationId: Int = NOTIFICATION_ID_START
+        get() {
+            if (field == NOTIFICATION_ID_MAX) {
+                field = NOTIFICATION_ID_START
+            } else {
+                field += 1
+            }
+
+            return field
+        }
     private var registered: Boolean = false
 
     init {
@@ -90,7 +98,7 @@ import javax.inject.Singleton
             notificationChannelId: String) {
         val name = "App Lock Suggestions"
         val description = "Suggestions to secure newly installed applications with PadLock"
-        val importance = NotificationManagerCompat.IMPORTANCE_MIN
+        val importance = NotificationManager.IMPORTANCE_MIN
         val notificationChannel = NotificationChannel(notificationChannelId, name, importance)
         notificationChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         notificationChannel.description = description
@@ -135,17 +143,16 @@ import javax.inject.Singleton
     private fun onNewPackageInstalled(packageName: String,
             name: String) {
         Timber.i("Package Added: %s", packageName)
-        val notification1 = NotificationCompat.Builder(appContext,
-                notificationChannelId).setContentTitle(
-                "Lock New Application")
-                .setSmallIcon(R.drawable.ic_notification_lock)
-                .setColor(ContextCompat.getColor(appContext, R.color.blue500))
-                .setContentText("Click to lock the newly installed application: " + name)
-                .setContentIntent(pendingIntent)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setAutoCancel(true)
-                .build()
-        notificationManager.notify(notificationId++, notification1)
+        val builder = NotificationCompat.Builder(appContext, notificationChannelId).apply {
+            setContentTitle("Lock New Application")
+            setSmallIcon(R.drawable.ic_lock_notification)
+            setContentText("Click to lock the newly installed application: " + name)
+            setContentIntent(pendingIntent)
+            setAutoCancel(true)
+            color = ContextCompat.getColor(appContext, R.color.blue500)
+            priority = NotificationCompat.PRIORITY_LOW
+        }
+        notificationManager.notify(notificationId++, builder.build())
     }
 
     override fun register() {
@@ -161,5 +168,10 @@ import javax.inject.Singleton
             registered = false
             compositeDisposable.clear()
         }
+    }
+
+    companion object {
+        const val NOTIFICATION_ID_START = 2000
+        const val NOTIFICATION_ID_MAX = 10000
     }
 }
