@@ -23,23 +23,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
-  <LinearLayout
+  <RelativeLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:orientation="vertical"
       >
-
-    <FrameLayout
-        android:id="@+id/main_view_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottom_tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:background="?attr/colorPrimary"
         app:elevation="8dp"
         app:itemIconTint="@drawable/bottom_nav_state"
@@ -47,6 +40,21 @@
         app:menu="@menu/navigation_menu"
         />
 
-  </LinearLayout>
+    <FrameLayout
+        android:id="@+id/main_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_tabs"
+        android:layout_alignParentTop="true"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_above="@id/bottom_tabs"
+        android:background="@drawable/shadow_scrim_up"
+        />
+
+  </RelativeLayout>
 
 </layout>
