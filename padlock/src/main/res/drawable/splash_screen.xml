@@ -21,12 +21,11 @@
 
   <item android:drawable="@color/material_light_background"/>
 
-  <item
-      android:gravity="center"
-      android:height="160dp"
-      android:width="160dp">
+  <item android:gravity="center">
 
-    <bitmap android:src="@mipmap/ic_launcher"/>
+    <bitmap
+        android:src="@drawable/splash_icon"
+        android:tileMode="disabled"/>
 
   </item>
 
