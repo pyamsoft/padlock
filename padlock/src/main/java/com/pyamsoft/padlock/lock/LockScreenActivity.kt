@@ -351,7 +351,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
                 // If we are not locking PadLock, do a little differently
                 if (entry.packageName() != context.applicationContext.packageName) {
-                    flags = flags or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                    flags = flags or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 }
             }
 
