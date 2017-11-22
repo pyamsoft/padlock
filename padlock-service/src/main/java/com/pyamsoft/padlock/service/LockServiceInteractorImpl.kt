@@ -101,8 +101,12 @@ import javax.inject.Singleton
                         val events = it.value
                         if (events.hasNextEvent()) {
                             events.getNextEvent(event)
+                            Timber.d(
+                                    "Event is ${event.packageName} ${event.className} ${if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) "foreground" else "other"}")
                             while (events.hasNextEvent()) {
                                 events.getNextEvent(event)
+                                Timber.d(
+                                        "Event is ${event.packageName} ${event.className} ${if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) "foreground" else "other"}")
                             }
 
                             if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
