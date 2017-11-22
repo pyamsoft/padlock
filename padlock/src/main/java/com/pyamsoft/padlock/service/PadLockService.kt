@@ -95,19 +95,19 @@ class PadLockService : Service(), LockServicePresenter.View {
 
         val pe = PendingIntent.getActivity(applicationContext, requestCode, launchMain,
                 PendingIntent.FLAG_UPDATE_CURRENT)
-        val n = NotificationCompat.Builder(applicationContext, notificationChannelId).apply {
+        val builder = NotificationCompat.Builder(applicationContext, notificationChannelId).apply {
             setContentIntent(pe)
-            setSmallIcon(R.drawable.ic_notification_lock)
+            setSmallIcon(R.drawable.ic_padlock_notification)
             setOngoing(true)
             setWhen(0)
             setNumber(0)
             setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            setContentTitle(getString(R.string.app_name))
+            setContentText("PadLock Service is running")
             priority = NotificationCompat.PRIORITY_MIN
             color = ContextCompat.getColor(applicationContext, R.color.blue500)
-            setContentTitle(getString(R.string.app_name)).setContentText(
-                    "PadLock Service is running")
-        }.build()
-        startForeground(NOTIFICATION_ID, n)
+        }
+        startForeground(NOTIFICATION_ID, builder.build())
     }
 
     @RequiresApi(Build.VERSION_CODES.O) private fun setupNotificationChannel(
