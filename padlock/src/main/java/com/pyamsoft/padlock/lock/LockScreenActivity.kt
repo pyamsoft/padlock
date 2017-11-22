@@ -349,6 +349,8 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                 putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName)
 
                 // Always set flags
+                // Always launches a new screen
+                // Launches screen as a 'document' placing it into its own stack
                 flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 
                 // If we are not locking PadLock, do a little differently
