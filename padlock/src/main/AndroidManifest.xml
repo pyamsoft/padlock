@@ -64,11 +64,8 @@
     <!-- Lock Screen Activity -->
     <activity
         android:name=".lock.LockScreenActivity"
-        android:autoRemoveFromRecents="true"
-        android:excludeFromRecents="true"
         android:exported="false"
         android:launchMode="singleTop"
-        android:noHistory="true"
         android:windowSoftInputMode="adjustResize">
 
       <!-- Sets a default width/height for the lock screen when in freeform mode -->
