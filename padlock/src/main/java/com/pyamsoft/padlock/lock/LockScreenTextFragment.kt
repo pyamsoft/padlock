@@ -54,6 +54,8 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
     @CheckResult private fun getCurrentAttempt(): String = editText?.text?.toString() ?: ""
 
+    override fun providePresenter(): LockEntryPresenter = presenter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockScreenComponent(
@@ -182,11 +184,6 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     override fun onSubmitError(throwable: Throwable) {
         clearDisplay()
         DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "unlock_error")
-    }
-
-    override fun onPostUnlocked() {
-        presenter.passLockScreen()
-        activity!!.finish()
     }
 
     override fun onUnlockError(throwable: Throwable) {

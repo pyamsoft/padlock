@@ -49,6 +49,8 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
                 LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
     }
 
+    override fun providePresenter(): LockEntryPresenter = presenter
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
         binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
@@ -103,12 +105,6 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
 
     override fun onSubmitError(throwable: Throwable) {
         DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "submit_error")
-    }
-
-    override fun onPostUnlocked() {
-        Timber.d("POST Unlock Finished!")
-        presenter.passLockScreen()
-        activity!!.finish()
     }
 
     override fun onUnlockError(throwable: Throwable) {

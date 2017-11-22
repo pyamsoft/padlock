@@ -24,6 +24,7 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.annotation.CallSuper
 import android.support.annotation.CheckResult
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
@@ -151,6 +152,8 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
             lockedSystem = it.getBoolean(ENTRY_IS_SYSTEM, false)
         }
 
+        Timber.d("onCreate Lock screen: $lockedPackageName $lockedActivityName $lockedRealName")
+
         // Reload options
         invalidateOptionsMenu()
     }
@@ -176,7 +179,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
     override fun onCloseOldReceived() {
         Timber.w("Close event received for this LockScreen: %s", this)
-        finish()
+        ActivityCompat.finishAffinity(this)
     }
 
     private fun pushFragment(pushFragment: Fragment, tag: String) {
@@ -339,12 +342,17 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         @JvmStatic
         fun start(context: Context, entry: PadLockEntry, realName: String) {
             val intent = Intent(context.applicationContext, LockScreenActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                 putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName())
                 putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName())
                 putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode())
                 putExtra(LockScreenActivity.ENTRY_IS_SYSTEM, entry.systemApplication())
                 putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName)
+
+                // If we are not locking PadLock, do a little differently
+                if (entry.packageName() != context.applicationContext.packageName) {
+                    flags = flags or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
+                }
             }
 
             if (entry.whitelist()) {
