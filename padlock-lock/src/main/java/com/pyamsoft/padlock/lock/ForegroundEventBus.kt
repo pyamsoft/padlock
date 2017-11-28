@@ -19,30 +19,21 @@
 package com.pyamsoft.padlock.lock
 
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.data.Cache
-import dagger.Binds
-import dagger.Module
-import javax.inject.Named
+import com.pyamsoft.pydroid.bus.RxBus
+import io.reactivex.Observable
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@Module
-abstract class LockEntrySingletonModule {
+@Singleton internal class ForegroundEventBus @Inject internal constructor() :
+        EventBus<ForegroundEvent> {
 
-    @Binds
-    internal abstract fun provideLockPassBus(bus: LockPassBus): EventBus<LockPassEvent>
+    private val bus: EventBus<ForegroundEvent> = RxBus.create()
 
-    @Binds
-    internal abstract fun provideInteractorCache(
-            impl: LockEntryInteractorCache): LockEntryInteractor
+    override fun listen(): Observable<ForegroundEvent> = bus.listen()
 
-    @Binds
-    @Named("interactor_lock_entry")
-    internal abstract fun provideInteractor(impl: LockEntryInteractorImpl): LockEntryInteractor
+    override fun publish(event: ForegroundEvent) {
+        bus.publish(event)
+    }
 
-    @Binds
-    @Named("cache_lock_entry")
-    internal abstract fun provideCache(impl: LockEntryInteractorCache): Cache
-
-    @Binds
-    internal abstract fun provideForegroundBus(bus: ForegroundEventBus): EventBus<ForegroundEvent>
 }
 
