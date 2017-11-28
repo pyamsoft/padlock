@@ -81,7 +81,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
     init {
         home.addCategory(Intent.CATEGORY_HOME)
-        home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
     }
 
     @CheckResult
@@ -126,6 +126,9 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         Injector.obtain<PadLockComponent>(applicationContext).plusLockScreenComponent(
                 LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
 
+        appIcon = LoaderHelper.unload(appIcon)
+        appIcon = appIconLoader.forPackageName(lockedPackageName).into(binding.lockImage)
+
         presenter.bind(this)
     }
 
@@ -155,15 +158,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         Timber.d("onCreate Lock screen: $lockedPackageName $lockedActivityName $lockedRealName")
 
         // Reload options
-        invalidateOptionsMenu()
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        appIcon = LoaderHelper.unload(appIcon)
-        appIcon = appIconLoader.forPackageName(lockedPackageName).into(binding.lockImage)
-
         invalidateOptionsMenu()
     }
 
@@ -208,7 +202,10 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
     override fun onStop() {
         super.onStop()
-        appIcon = LoaderHelper.unload(appIcon)
+        if (!isFinishing) {
+            Timber.i("Lock Screen is Stopped, call finish()")
+            finish()
+        }
     }
 
     override fun onPause() {
@@ -229,6 +226,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     @CallSuper override fun onDestroy() {
         super.onDestroy()
         Timber.d("Clear currently locked")
+        appIcon = LoaderHelper.unload(appIcon)
         binding.unbind()
     }
 
