@@ -170,26 +170,32 @@ import javax.inject.Singleton
             activityName: String, realName: String, lockCode: String?,
             isSystem: Boolean, whitelist: Boolean, ignoreTime: Long): Completable {
         return Completable.defer {
-            val ignoreMinutesInMillis = TimeUnit.MINUTES.toMillis(ignoreTime)
+            val ignoreMillis = TimeUnit.MINUTES.toMillis(ignoreTime)
             val whitelistObservable: Completable
             val ignoreObservable: Completable
             val recheckObservable: Completable
 
+            // Whitelist
             if (whitelist) {
                 whitelistObservable = whitelistEntry(packageName, activityName, realName, lockCode,
                         isSystem)
-                ignoreObservable = Completable.complete()
-                recheckObservable = Completable.complete()
             } else {
                 whitelistObservable = Completable.complete()
-                ignoreObservable = ignoreEntryForTime(ignoreMinutesInMillis, packageName,
-                        activityName)
-                if (ignoreTime > 0) {
-                    recheckObservable = queueRecheckJob(packageName, realName,
-                            ignoreMinutesInMillis)
-                } else {
+            }
+
+            // If time > 0, mark as ignored
+            if (ignoreTime > 0) {
+                ignoreObservable = ignoreEntryForTime(ignoreMillis, packageName, activityName)
+
+                // If we are not whitelisting
+                if (whitelist) {
                     recheckObservable = Completable.complete()
+                } else {
+                    recheckObservable = queueRecheckJob(packageName, realName, ignoreMillis)
                 }
+            } else {
+                ignoreObservable = Completable.complete()
+                recheckObservable = Completable.complete()
             }
 
             return@defer ignoreObservable.andThen(recheckObservable).andThen(whitelistObservable)
