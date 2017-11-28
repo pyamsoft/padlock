@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.service
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.db.PadLockEntry
+import com.pyamsoft.padlock.lock.ForegroundEvent
 import io.reactivex.Flowable
 import io.reactivex.Single
 
@@ -28,6 +29,8 @@ internal interface LockServiceInteractor {
     fun cleanup()
 
     fun reset()
+
+    fun clearMatchingForegroundEvent(event: ForegroundEvent)
 
     fun setLockScreenPassed(packageName: String, className: String, passed: Boolean)
 

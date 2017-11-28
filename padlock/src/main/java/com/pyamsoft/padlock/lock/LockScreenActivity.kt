@@ -225,7 +225,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
     @CallSuper override fun onDestroy() {
         super.onDestroy()
-        Timber.d("Clear currently locked")
         appIcon = LoaderHelper.unload(appIcon)
         binding.unbind()
     }
@@ -234,6 +233,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         super.finish()
         overridePendingTransition(0, 0)
         Timber.d("Finish called, either from Us or from Outside")
+        presenter.clearMatchingForegroundEvent()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {

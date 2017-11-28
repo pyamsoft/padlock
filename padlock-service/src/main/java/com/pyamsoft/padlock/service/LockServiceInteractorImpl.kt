@@ -32,6 +32,7 @@ import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
+import com.pyamsoft.padlock.lock.ForegroundEvent
 import com.pyamsoft.padlock.service.RecheckStatus.FORCE
 import com.pyamsoft.pydroid.helper.Optional
 import com.pyamsoft.pydroid.helper.Optional.Present
@@ -78,6 +79,14 @@ import javax.inject.Singleton
         lastForegroundEvent = ForegroundEvent.EMPTY
     }
 
+    override fun clearMatchingForegroundEvent(event: ForegroundEvent) {
+        Timber.d("Received foreground event: $event")
+        if (lastForegroundEvent.packageName == event.packageName) {
+            Timber.d("LockScreen reported last foreground event was cleared.")
+            lastForegroundEvent = ForegroundEvent.EMPTY
+        }
+    }
+
     private fun resetState() {
         Timber.i("Reset name state")
         lastPackageName = ""
@@ -106,7 +115,8 @@ import javax.inject.Singleton
                             }
 
                             if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                                return@map ForegroundEvent(event.packageName ?: "",
+                                return@map ForegroundEvent(
+                                        event.packageName ?: "",
                                         event.className ?: "").asOptional()
                             }
                         }

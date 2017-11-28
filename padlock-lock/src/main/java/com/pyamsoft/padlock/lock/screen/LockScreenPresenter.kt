@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.lock.screen
 
+import com.pyamsoft.padlock.lock.ForegroundEvent
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -27,6 +28,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockScreenPresenter @Inject internal constructor(
+        private val foregroundEventBus: EventBus<ForegroundEvent>,
         private val lockScreenInputPresenter: LockScreenInputPresenter, @param:Named(
                 "package_name") private val packageName: String,
         @param:Named("activity_name") private val activityName: String,
@@ -47,6 +49,11 @@ class LockScreenPresenter @Inject internal constructor(
     override fun onUnbind() {
         super.onUnbind()
         lockScreenInputPresenter.unbind()
+    }
+
+    fun clearMatchingForegroundEvent() {
+        Timber.d("Publish foreground clear event for $packageName, $activityName")
+        foregroundEventBus.publish(ForegroundEvent(packageName, activityName))
     }
 
     private fun loadDisplayNameFromPackage(v: NameCallback) {

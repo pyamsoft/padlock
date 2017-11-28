@@ -16,15 +16,15 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.lock
 
 import android.support.annotation.CheckResult
 
-internal data class ForegroundEvent(val packageName: String, val className: String) {
+data class ForegroundEvent(val packageName: String, val className: String) {
 
     companion object {
 
-        @JvmField internal val EMPTY = ForegroundEvent("", "")
+        @JvmField val EMPTY = ForegroundEvent("", "")
 
         @JvmStatic
         @CheckResult
