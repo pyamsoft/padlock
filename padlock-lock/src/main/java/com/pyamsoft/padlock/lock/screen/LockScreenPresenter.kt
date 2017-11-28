@@ -32,6 +32,7 @@ class LockScreenPresenter @Inject internal constructor(
         private val lockScreenInputPresenter: LockScreenInputPresenter, @param:Named(
                 "package_name") private val packageName: String,
         @param:Named("activity_name") private val activityName: String,
+        @param:Named("real_name") private val realName: String,
         private val bus: EventBus<CloseOldEvent>,
         private val interactor: LockScreenInteractor, @Named(
                 "computation") computationScheduler: Scheduler,
@@ -52,8 +53,8 @@ class LockScreenPresenter @Inject internal constructor(
     }
 
     fun clearMatchingForegroundEvent() {
-        Timber.d("Publish foreground clear event for $packageName, $activityName")
-        foregroundEventBus.publish(ForegroundEvent(packageName, activityName))
+        Timber.d("Publish foreground clear event for $packageName, $realName")
+        foregroundEventBus.publish(ForegroundEvent(packageName, realName))
     }
 
     private fun loadDisplayNameFromPackage(v: NameCallback) {
