@@ -81,7 +81,7 @@ import javax.inject.Singleton
 
     override fun clearMatchingForegroundEvent(event: ForegroundEvent) {
         Timber.d("Received foreground event: $event")
-        if (lastForegroundEvent.packageName == event.packageName) {
+        if (lastForegroundEvent == event) {
             Timber.d("LockScreen reported last foreground event was cleared.")
             lastForegroundEvent = ForegroundEvent.EMPTY
         }
