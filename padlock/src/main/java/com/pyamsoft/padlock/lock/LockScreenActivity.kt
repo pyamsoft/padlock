@@ -22,7 +22,6 @@ import android.content.Context
 import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
-import android.os.Handler
 import android.support.annotation.CallSuper
 import android.support.annotation.CheckResult
 import android.support.v4.app.ActivityCompat
@@ -145,7 +144,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                 R.array.ignore_time_entries)
         ignoreTimes = LongArray(stringIgnoreTimes.size)
         for (i in stringIgnoreTimes.indices) {
-            ignoreTimes[i] = java.lang.Long.parseLong(stringIgnoreTimes[i])
+            ignoreTimes[i] = stringIgnoreTimes[i].toLong()
         }
     }
 
@@ -323,17 +322,11 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         const val ENTRY_IS_SYSTEM = "is_system"
 
         /**
-         * If we do not delay the lock screen launch slightly, it will sometimes Launch screens
-         * but never call onCreate, so when the user backs out of the task, and they think they've
-         * hit the end, the system will actually show the original lock screen
-         */
-        const private val LOCK_START_DELAY = 300L
-
-        /**
          * Starts a LockScreenActivity instance
          */
         @JvmStatic
-        fun start(handler: Handler, context: Context, entry: PadLockEntry, realName: String) {
+        fun start(context: Context, entry: PadLockEntry, realName: String) {
+            val notPadLock = (entry.packageName() != context.applicationContext.packageName)
             val intent = Intent(context.applicationContext, LockScreenActivity::class.java).apply {
                 putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName())
                 putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName())
@@ -343,14 +336,12 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
                 // Launch into new task
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
-
-                // Allow infinitely many instances
+                addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                 addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
 
                 // If we are not locking PadLock, do a little differently
-                if (entry.packageName() != context.applicationContext.packageName) {
+                if (notPadLock) {
                     addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                    addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 }
             }
@@ -359,12 +350,9 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                 throw RuntimeException("Cannot launch LockScreen for whitelisted applications")
             }
 
-            handler.removeCallbacksAndMessages(null)
-            handler.postDelayed({
-                Timber.d(
-                        "Start lock activity for entry: ${entry.packageName()} ${entry.activityName()} (real $realName)")
-                context.applicationContext.startActivity(intent)
-            }, LOCK_START_DELAY)
+            Timber.d(
+                    "Start lock activity for entry: ${entry.packageName()} ${entry.activityName()} (real $realName)")
+            context.applicationContext.startActivity(intent)
         }
     }
 }
