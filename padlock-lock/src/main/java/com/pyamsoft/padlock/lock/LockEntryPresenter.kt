@@ -19,17 +19,16 @@
 package com.pyamsoft.padlock.lock
 
 import com.pyamsoft.padlock.lock.LockEntryPresenter.View
-import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<LockPassEvent>,
-        @param:Named("package_name") private val packageName: String, @param:Named(
-                "activity_name") private val activityName: String, @param:Named(
-                "real_name") private val realName: String,
+class LockEntryPresenter @Inject internal constructor(@param:Named(
+        "package_name") private val packageName: String, @param:Named(
+        "activity_name") private val activityName: String, @param:Named(
+        "real_name") private val realName: String,
         private val interactor: LockEntryInteractor,
         @Named("computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler,
         @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
@@ -43,10 +42,6 @@ class LockEntryPresenter @Inject internal constructor(private val bus: EventBus<
                     .subscribe({ view?.onDisplayHint(it) },
                             { Timber.e(it, "onError displayLockedHint") })
         }
-    }
-
-    fun passLockScreen() {
-        bus.publish(LockPassEvent(packageName, activityName))
     }
 
     fun submit(lockCode: String?, currentAttempt: String) {

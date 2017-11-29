@@ -18,4 +18,18 @@
 
 package com.pyamsoft.padlock.lock
 
-data class LockPassEvent(val packageName: String, val className: String)
+import android.support.annotation.CheckResult
+
+interface LockScreenPassed {
+
+    fun pass(packageName: String, className: String)
+
+    fun lock(packageName: String, className: String)
+
+    @CheckResult
+    fun isPassed(packageName: String, className: String): Boolean
+
+    fun reset()
+
+}
+

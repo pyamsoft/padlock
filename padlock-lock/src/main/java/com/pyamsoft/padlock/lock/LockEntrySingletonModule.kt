@@ -28,7 +28,7 @@ import javax.inject.Named
 abstract class LockEntrySingletonModule {
 
     @Binds
-    internal abstract fun provideLockPassBus(bus: LockPassBus): EventBus<LockPassEvent>
+    internal abstract fun provideLockScreenPassed(impl: LockScreenPassedImpl): LockScreenPassed
 
     @Binds
     internal abstract fun provideInteractorCache(

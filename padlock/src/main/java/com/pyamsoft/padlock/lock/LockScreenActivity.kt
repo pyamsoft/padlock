@@ -161,7 +161,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         invalidateOptionsMenu()
     }
 
-    override fun setDisplayName(name: String) {
+    override fun onSetDisplayName(name: String) {
         binding.toolbar.title = name
         val bar = supportActionBar
         if (bar != null) {
@@ -207,6 +207,16 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
             binding.toolbar.menu.close()
             binding.toolbar.dismissPopupMenus()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.finishUnlocked()
+    }
+
+    override fun onAlreadyUnlocked() {
+        Timber.i("Service reports already unlocked: $lockedPackageName, $lockedRealName. Finish")
+        finish()
     }
 
     override fun onBackPressed() {

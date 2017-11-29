@@ -22,7 +22,6 @@ import android.os.Bundle
 import android.support.annotation.CallSuper
 import android.support.annotation.CheckResult
 import android.support.design.widget.Snackbar
-import android.support.v4.app.ActivityCompat
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_ACTIVITY_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_IS_SYSTEM
@@ -74,20 +73,8 @@ abstract class LockScreenBaseFragment protected constructor() : CanaryFragment()
 
     final override fun onPostUnlocked() {
         Timber.d("POST Unlock Finished!")
-        providePresenter().passLockScreen()
-        activity?.let {
-            // If we are PadLock
-            if (lockedPackageName == it.application.packageName) {
-                // Finish normally
-                it.finish()
-            } else {
-                // Else finish affinity
-                ActivityCompat.finishAffinity(it)
-            }
-        }
+        activity!!.finish()
     }
-
-    @CheckResult protected abstract fun providePresenter(): LockEntryPresenter
 
     companion object {
 

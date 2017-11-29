@@ -32,4 +32,7 @@ internal interface LockScreenInteractor {
 
     @CheckResult
     fun getDisplayName(packageName: String): Single<String>
+
+    @CheckResult
+    fun isLockScreenPassed(packageName: String, className: String): Single<Boolean>
 }

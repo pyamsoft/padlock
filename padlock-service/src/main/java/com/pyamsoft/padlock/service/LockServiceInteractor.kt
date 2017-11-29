@@ -32,8 +32,6 @@ internal interface LockServiceInteractor {
 
     fun clearMatchingForegroundEvent(event: ForegroundEvent)
 
-    fun setLockScreenPassed(packageName: String, className: String, passed: Boolean)
-
     @CheckResult
     fun isActiveMatching(packageName: String, className: String): Single<Boolean>
 

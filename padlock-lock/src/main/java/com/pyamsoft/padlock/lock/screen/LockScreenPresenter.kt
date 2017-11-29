@@ -57,14 +57,30 @@ class LockScreenPresenter @Inject internal constructor(
         foregroundEventBus.publish(ForegroundEvent(packageName, realName))
     }
 
+    fun finishUnlocked() {
+        dispose {
+            interactor.isLockScreenPassed(packageName, activityName)
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({
+                        if (it) {
+                            view?.onAlreadyUnlocked()
+                        } else {
+                        }
+                    }, {
+                        Timber.e(it, "Error getting unlocked status")
+                    })
+        }
+    }
+
     private fun loadDisplayNameFromPackage(v: NameCallback) {
         dispose {
             interactor.getDisplayName(packageName)
                     .subscribeOn(ioScheduler)
                     .observeOn(mainThreadScheduler)
-                    .subscribe({ v.setDisplayName(it) }, {
+                    .subscribe({ v.onSetDisplayName(it) }, {
                         Timber.e(it, "Error loading display name from package")
-                        v.setDisplayName("")
+                        v.onSetDisplayName("")
                     })
         }
     }
@@ -99,16 +115,22 @@ class LockScreenPresenter @Inject internal constructor(
         }
     }
 
-    interface View : NameCallback, OldCallback, IgnoreTimeCallback, LockScreenInputPresenter.View
+    interface View : NameCallback, OldCallback, IgnoreTimeCallback, UnlockedCallback,
+            LockScreenInputPresenter.View
 
     interface IgnoreTimeCallback {
 
         fun onInitializeWithIgnoreTime(time: Long)
     }
 
+    interface UnlockedCallback {
+
+        fun onAlreadyUnlocked()
+    }
+
     interface NameCallback {
 
-        fun setDisplayName(name: String)
+        fun onSetDisplayName(name: String)
     }
 
     interface OldCallback {
