@@ -29,7 +29,6 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.loader.AppIconLoader
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.model.AppEntry
-import com.pyamsoft.padlock.uicommon.UpdateItem
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderMap
 import timber.log.Timber
@@ -37,10 +36,9 @@ import javax.inject.Inject
 
 class LockListItem internal constructor(internal var activity: FragmentActivity,
         entry: AppEntry) : ModelAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(
-        entry), FilterableItem<LockListItem, LockListItem.ViewHolder>, UpdateItem<AppEntry> {
+        entry), FilterableItem<LockListItem, LockListItem.ViewHolder> {
 
     private val loaderMap = LoaderMap()
-    private var viewHolder: ViewHolder? = null
 
     override fun getType(): Int = R.id.adapter_lock_item
 
@@ -54,14 +52,9 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
         return name.startsWith(query)
     }
 
-    override fun updateModel(model: AppEntry): Boolean {
-        withModel(model)
-        bindViewHolder()
-        return false
-    }
-
-    private fun bindViewHolder() {
-        viewHolder?.apply {
+    override fun bindView(holder: ViewHolder, payloads: List<Any>) {
+        super.bindView(holder, payloads)
+        holder.apply {
             binding.lockListTitle.text = model.name
             binding.lockListToggle.setOnCheckedChangeListener(null)
             binding.lockListToggle.isChecked = model.locked
@@ -88,15 +81,8 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
         }
     }
 
-    override fun bindView(holder: ViewHolder, payloads: List<Any>) {
-        super.bindView(holder, payloads)
-        viewHolder = holder
-        bindViewHolder()
-    }
-
     override fun unbindView(holder: ViewHolder) {
         super.unbindView(holder)
-        viewHolder = null
         holder.apply {
             binding.lockListTitle.text = null
             binding.lockListIcon.setImageDrawable(null)

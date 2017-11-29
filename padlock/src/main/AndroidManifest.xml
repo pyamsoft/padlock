@@ -65,6 +65,7 @@
     <activity
         android:name=".lock.LockScreenActivity"
         android:exported="false"
+        android:taskAffinity=""
         android:windowSoftInputMode="adjustResize">
 
       <!-- Sets a default width/height for the lock screen when in freeform mode -->

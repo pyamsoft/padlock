@@ -33,30 +33,21 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
-import com.pyamsoft.padlock.uicommon.UpdateItem
 import timber.log.Timber
 import javax.inject.Inject
 
 class LockInfoItem internal constructor(entry: ActivityEntry,
         private val system: Boolean) :
         ModelAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
-                entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder>,
-        UpdateItem<ActivityEntry> {
-
-    private var viewHolder: ViewHolder? = null
+                entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
     override fun getType(): Int = R.id.adapter_lock_info
 
     override fun getLayoutRes(): Int = R.layout.adapter_item_lockinfo
 
-    override fun updateModel(model: ActivityEntry): Boolean {
-        withModel(model)
-        bindViewHolder()
-        return false
-    }
-
-    private fun bindViewHolder() {
-        viewHolder?.apply {
+    override fun bindView(holder: ViewHolder, payloads: List<Any>) {
+        super.bindView(holder, payloads)
+        holder.apply {
             // Remove any old binds
             val lockedButton: RadioButton = when (model.lockState) {
                 DEFAULT -> binding.lockInfoRadioDefault
@@ -108,20 +99,12 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
         }
     }
 
-    override fun bindView(holder: ViewHolder, payloads: List<Any>) {
-        super.bindView(holder, payloads)
-        viewHolder = holder
-        bindViewHolder()
-
-    }
-
     private fun processModifyDatabaseEntry(holder: ViewHolder, newLockState: LockState) {
         holder.publisher.publish(model, newLockState, null, system)
     }
 
     override fun unbindView(holder: ViewHolder) {
         super.unbindView(holder)
-        viewHolder = null
         holder.apply {
             binding.lockInfoActivity.text = null
             binding.lockInfoRadioBlack.setOnCheckedChangeListener(null)

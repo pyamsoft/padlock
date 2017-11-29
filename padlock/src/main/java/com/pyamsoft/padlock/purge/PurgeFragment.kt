@@ -126,39 +126,25 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     override fun onRetrievedStale(packageName: String) {
         backingSet.add(packageName)
 
-        var update = false
+        binding.apply {
+            purgeEmpty.visibility = View.GONE
+            purgeList.visibility = View.VISIBLE
+        }
+
+        var added = false
         for (index in adapter.adapterItems.indices) {
             val item: PurgeItem = adapter.adapterItems[index]
-            if (item.model == packageName) {
-                update = true
-                if (item.updateModel(packageName)) {
-                    adapter.fastAdapter.notifyAdapterItemChanged(index)
-                }
+            // The entry should go before this one
+            if (packageName.compareTo(item.model, ignoreCase = true) < 0) {
+                added = true
+                adapter.add(index, packageName)
                 break
             }
         }
 
-        if (!update) {
-            binding.apply {
-                purgeEmpty.visibility = View.GONE
-                purgeList.visibility = View.VISIBLE
-            }
-
-            var added = false
-            for (index in adapter.adapterItems.indices) {
-                val item: PurgeItem = adapter.adapterItems[index]
-                // The entry should go before this one
-                if (packageName.compareTo(item.model, ignoreCase = true) < 0) {
-                    added = true
-                    adapter.add(index, packageName)
-                    break
-                }
-            }
-
-            if (!added) {
-                // add at the end of the list
-                adapter.add(packageName)
-            }
+        if (!added) {
+            // add at the end of the list
+            adapter.add(packageName)
         }
     }
 

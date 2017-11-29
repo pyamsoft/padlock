@@ -201,11 +201,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             val item: LockInfoItem = adapter.getAdapterItem(i)
             val entry: ActivityEntry = item.model
             if (id == entry.id) {
-                if (item.updateModel(
-                        ActivityEntry(name = entry.name, packageName = entry.packageName,
-                                lockState = state))) {
-                    adapter.fastAdapter.notifyAdapterItemChanged(i)
-                }
+                adapter.set(i, ActivityEntry(name = entry.name, packageName = entry.packageName,
+                        lockState = state))
                 presenter.update(entry.name, entry.packageName, state)
                 break
             }
@@ -255,11 +252,11 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             val item: LockInfoItem = adapter.adapterItems[index]
             if (item.model.id == entry.id) {
                 update = true
-                publishLockStateUpdates(item.model, entry)
-                if (item.updateModel(entry)) {
-                    adapter.fastAdapter.notifyAdapterItemChanged(index)
+                if (item.model != entry) {
+                    publishLockStateUpdates(item.model, entry)
+                    adapter.set(index, entry)
+                    break
                 }
-                break
             }
         }
 

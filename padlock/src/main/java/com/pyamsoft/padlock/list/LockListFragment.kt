@@ -288,13 +288,10 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
                     else -> entry.hardLocked - 1
                 })
 
-                if (item.updateModel(
-                        AppEntry(name = entry.name, packageName = entry.packageName,
-                                system = entry.system,
-                                locked = newLocked, whitelisted = newWhitelisted,
-                                hardLocked = newHardLocked))) {
-                    adapter.fastAdapter.notifyAdapterItemChanged(i)
-                }
+                adapter.set(i, AppEntry(name = entry.name, packageName = entry.packageName,
+                        system = entry.system,
+                        locked = newLocked, whitelisted = newWhitelisted,
+                        hardLocked = newHardLocked))
 
                 // Update cache with the whitelist numbers so that a soft refresh will not change visual
                 presenter.updateCache(packageName, newWhitelisted, newHardLocked)
@@ -393,10 +390,10 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
             val item: LockListItem = adapter.adapterItems[index]
             if (item.model.packageName == entry.packageName) {
                 update = true
-                if (item.updateModel(entry)) {
-                    adapter.fastAdapter.notifyAdapterItemChanged(index)
+                if (item.model != entry) {
+                    adapter.set(index, entry)
+                    break
                 }
-                break
             }
         }
 
