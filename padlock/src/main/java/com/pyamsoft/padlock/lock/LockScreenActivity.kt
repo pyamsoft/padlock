@@ -129,6 +129,8 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         appIcon = LoaderHelper.unload(appIcon)
         appIcon = appIconLoader.forPackageName(lockedPackageName).into(binding.lockImage)
 
+        Timber.d("onCreate LockScreenActivity for $lockedPackageName $lockedRealName")
+
         presenter.bind(this)
     }
 
@@ -155,18 +157,14 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
             lockedSystem = it.getBoolean(ENTRY_IS_SYSTEM, false)
         }
 
-        Timber.d("onCreate Lock screen: $lockedPackageName $lockedActivityName $lockedRealName")
-
         // Reload options
         invalidateOptionsMenu()
     }
 
     override fun setDisplayName(name: String) {
-        Timber.d("Set toolbar name %s", name)
         binding.toolbar.title = name
         val bar = supportActionBar
         if (bar != null) {
-            Timber.d("Set actionbar name %s", name)
             bar.title = name
         }
     }
@@ -200,14 +198,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                         lockedRealName, lockedSystem), LockScreenTextFragment.TAG)
     }
 
-    override fun onStop() {
-        super.onStop()
-        if (!isFinishing) {
-            Timber.i("Lock Screen is Stopped, call finish()")
-            finish()
-        }
-    }
-
     override fun onPause() {
         super.onPause()
         if (isFinishing || isChangingConfigurations) {
@@ -219,7 +209,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     }
 
     override fun onBackPressed() {
-        Timber.d("onBackPressed")
         applicationContext.startActivity(home)
     }
 
@@ -227,6 +216,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         super.onDestroy()
         appIcon = LoaderHelper.unload(appIcon)
         binding.unbind()
+        Timber.d("onDestroy LockScreenActivity for $lockedPackageName $lockedRealName")
     }
 
     override fun finish() {
@@ -237,7 +227,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        Timber.d("onRestoreInstanceState")
         ignorePeriod = savedInstanceState.getLong(KEY_IGNORE_TIME, -1)
         excludeEntry = savedInstanceState.getBoolean(KEY_EXCLUDE, false)
         val lockScreenText: Fragment? = supportFragmentManager.findFragmentByTag(
@@ -257,7 +246,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        Timber.d("onCreateOptionsMenu")
         menu.let {
             menuInflater.inflate(R.menu.lockscreen_menu, it)
             menuIgnoreNone = it.findItem(R.id.menu_ignore_none)
@@ -308,7 +296,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Timber.d("onOptionsItemSelected")
         val itemId = item.itemId
         when (itemId) {
             R.id.menu_exclude -> item.isChecked = !item.isChecked
@@ -346,14 +333,16 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                 putExtra(LockScreenActivity.ENTRY_IS_SYSTEM, entry.systemApplication())
                 putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName)
 
-                // Always set flags
-                // Always launches a new screen
-                // Launches screen as a 'document' placing it into its own stack
-                flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                // Launch into new task
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+
+                // Allow infinitely many instances
+                addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
 
                 // If we are not locking PadLock, do a little differently
                 if (entry.packageName() != context.applicationContext.packageName) {
-                    flags = flags or Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                    addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                    addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                 }
             }
 
