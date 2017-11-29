@@ -257,8 +257,8 @@ import javax.inject.Singleton
             windowActivity: String): Boolean {
         val lockScreenPackage: String = appContext.packageName
         val lockScreenActivity: String = lockScreenActivityClass.name
-        Timber.d("Check if window is lock screen (%s %s)", lockScreenPackage,
-                lockScreenActivity)
+        Timber.d(
+                "Check if window ($windowPackage $windowActivity) is lock screen ($lockScreenPackage $lockScreenActivity)")
 
         val isPackage = (windowPackage == lockScreenPackage)
         return isPackage && (windowActivity == lockScreenActivity)

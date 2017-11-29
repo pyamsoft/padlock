@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
+import android.os.Handler
 import android.support.annotation.CallSuper
 import android.support.annotation.CheckResult
 import android.support.v4.app.ActivityCompat
@@ -200,6 +201,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
     override fun onPause() {
         super.onPause()
+        Timber.d("Pausing LockScreen $lockedPackageName $lockedRealName")
         if (isFinishing || isChangingConfigurations) {
             Timber.d(
                     "Even though a leak is reported, this should dismiss the window, and clear the leak")
@@ -321,11 +323,17 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         const val ENTRY_IS_SYSTEM = "is_system"
 
         /**
+         * If we do not delay the lock screen launch slightly, it will sometimes Launch screens
+         * but never call onCreate, so when the user backs out of the task, and they think they've
+         * hit the end, the system will actually show the original lock screen
+         */
+        const private val LOCK_START_DELAY = 300L
+
+        /**
          * Starts a LockScreenActivity instance
          */
-
         @JvmStatic
-        fun start(context: Context, entry: PadLockEntry, realName: String) {
+        fun start(handler: Handler, context: Context, entry: PadLockEntry, realName: String) {
             val intent = Intent(context.applicationContext, LockScreenActivity::class.java).apply {
                 putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName())
                 putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName())
@@ -343,6 +351,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                 if (entry.packageName() != context.applicationContext.packageName) {
                     addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
                     addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 }
             }
 
@@ -350,7 +359,12 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                 throw RuntimeException("Cannot launch LockScreen for whitelisted applications")
             }
 
-            context.applicationContext.startActivity(intent)
+            handler.removeCallbacksAndMessages(null)
+            handler.postDelayed({
+                Timber.d(
+                        "Start lock activity for entry: ${entry.packageName()} ${entry.activityName()} (real $realName)")
+                context.applicationContext.startActivity(intent)
+            }, LOCK_START_DELAY)
         }
     }
 }
