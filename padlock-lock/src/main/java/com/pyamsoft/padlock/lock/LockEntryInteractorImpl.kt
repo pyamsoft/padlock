@@ -42,6 +42,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockEntryInteractorImpl @Inject internal constructor(
+        private val lockScreenPassed: LockScreenPassed,
         private val appContext: Context,
         private val lockHelper: LockHelper,
         private val preferences: LockScreenPreferences,
@@ -201,6 +202,9 @@ import javax.inject.Singleton
             return@defer ignoreObservable.andThen(recheckObservable).andThen(whitelistObservable)
         }.andThen(Completable.fromAction {
             failCount[getFailId(packageName, activityName)] = 0
+        }).andThen(Completable.fromAction {
+            Timber.d("Mark lock screen passed: $packageName $activityName")
+            lockScreenPassed.pass(packageName, activityName)
         })
     }
 

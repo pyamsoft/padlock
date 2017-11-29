@@ -18,20 +18,33 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.bus.RxBus
-import io.reactivex.Observable
+import android.support.annotation.CheckResult
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class LockPassBus @Inject internal constructor() : EventBus<LockPassEvent> {
+@Singleton internal class LockScreenPassedImpl @Inject internal constructor() : LockScreenPassed {
 
-    private val bus: EventBus<LockPassEvent> = RxBus.create()
+    private val map: MutableMap<String, Boolean> = LinkedHashMap()
 
-    override fun listen(): Observable<LockPassEvent> = bus.listen()
+    override fun reset() {
+        map.clear()
+    }
 
-    override fun publish(event: LockPassEvent) {
-        bus.publish(event)
+    @CheckResult
+    private fun createKey(packageName: String, className: String): String = packageName + className
+
+    override fun pass(packageName: String, className: String) {
+        map.put(createKey(packageName, className), true)
+    }
+
+    override fun lock(packageName: String, className: String) {
+        map.put(createKey(packageName, className), false)
+    }
+
+    override fun isPassed(packageName: String, className: String): Boolean {
+        Timber.d("Is Lock Screen passed $packageName $className")
+        return map[createKey(packageName, className)] ?: false
     }
 
 }

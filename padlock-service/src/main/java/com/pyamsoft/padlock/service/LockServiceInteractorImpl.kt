@@ -33,6 +33,7 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.lock.ForegroundEvent
+import com.pyamsoft.padlock.lock.LockScreenPassed
 import com.pyamsoft.padlock.service.RecheckStatus.FORCE
 import com.pyamsoft.pydroid.helper.Optional
 import com.pyamsoft.pydroid.helper.Optional.Present
@@ -51,6 +52,7 @@ import javax.inject.Singleton
 
 @Singleton internal class LockServiceInteractorImpl @Inject internal constructor(
         context: Context,
+        private val lockScreenPassed: LockScreenPassed,
         private val preferences: LockScreenPreferences,
         private val jobSchedulerCompat: JobSchedulerCompat,
         private val packageActivityManager: PackageActivityManager,
@@ -66,7 +68,6 @@ import javax.inject.Singleton
     private var lastClassName = ""
     private var activePackageName = ""
     private var activeClassName = ""
-    private val lockScreenPassed: MutableMap<String, Boolean> = HashMap()
     private val usageManager: UsageStatsManager = appContext.getSystemService(
             Context.USAGE_STATS_SERVICE) as UsageStatsManager
     private var lastForegroundEvent = ForegroundEvent.EMPTY
@@ -92,7 +93,7 @@ import javax.inject.Singleton
         lastClassName = ""
         activeClassName = ""
         activePackageName = ""
-        lockScreenPassed.clear()
+        lockScreenPassed.reset()
     }
 
     override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
@@ -144,11 +145,6 @@ import javax.inject.Singleton
         }
     }
 
-    override fun setLockScreenPassed(packageName: String, className: String, passed: Boolean) {
-        Timber.d("Set lockScreenPassed: %s, %s, [%s]", packageName, className, passed)
-        lockScreenPassed.put(packageName + className, passed)
-    }
-
     override fun cleanup() {
         Timber.d("Cleanup LockService")
         val intent = Intent(appContext, recheckServiceClass)
@@ -166,17 +162,14 @@ import javax.inject.Singleton
     @CheckResult private fun isOnlyLockOnPackageChange(): Boolean =
             preferences.isLockOnPackageChange()
 
-    @CheckResult private fun prepareLockScreen(windowPackage: String,
-            windowActivity: String): MaybeTransformer<Boolean, PadLockEntry> {
+    @CheckResult private fun prepareLockScreen(packageName: String,
+            activityName: String): MaybeTransformer<Boolean, PadLockEntry> {
         return MaybeTransformer {
             it.flatMap {
-                Timber.d("Get list of locked classes with package: %s, class: %s",
-                        windowPackage, windowActivity)
-                return@flatMap padLockDBQuery.queryWithPackageActivityNameDefault(windowPackage,
-                        windowActivity).filter { !PadLockEntry.isEmpty(it) }
-                        .doOnSuccess {
-                            setLockScreenPassed(windowPackage, windowActivity, false)
-                        }
+                Timber.d("Get list of locked classes with package: %s, class: %s", packageName,
+                        activityName)
+                return@flatMap padLockDBQuery.queryWithPackageActivityNameDefault(packageName,
+                        activityName).filter { !PadLockEntry.isEmpty(it) }
             }
         }
     }
@@ -197,6 +190,20 @@ import javax.inject.Singleton
 
                 Timber.d("Filter out whitelisted packages")
                 return@filter !it.whitelist()
+            }.map {
+                // If we have previously passed lock screen and nothing has changed
+                // Only relevant for users with ignore time == 0
+                val havePassed = lockScreenPassed.isPassed(it.packageName(), it.activityName())
+                Timber.d(
+                        "Lock lockScreenPassed: ${it.packageName()} ${it.activityName()}")
+                lockScreenPassed.lock(it.packageName(), it.activityName())
+                if (havePassed) {
+                    Timber.i(
+                            "Passed once before earlier, ignore just this once: ${it.packageName()} ${it.activityName()}")
+                    return@map PadLockEntry.EMPTY
+                } else {
+                    return@map it
+                }
             }
         }
     }
@@ -326,16 +333,8 @@ import javax.inject.Singleton
                 windowHasChanged = true
             }
 
-            // If we have previously passed lock screen and nothing has changed
-            // Only relevant for users with ignore time == 0
-            var lockPassed: Boolean? = lockScreenPassed[packageName + className]
-            if (lockPassed == null) {
-                Timber.w("No lock map entry exists for: %s, %s", packageName, className)
-                Timber.w("default to False")
-                lockPassed = false
-            }
-
-            return@map windowHasChanged || !lockPassed
+            Timber.d("Process success: $windowHasChanged")
+            return@map windowHasChanged
         }.compose(getEntry(packageName, className))
     }
 

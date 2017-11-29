@@ -20,7 +20,6 @@ package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.lock.ForegroundEvent
-import com.pyamsoft.padlock.lock.LockPassEvent
 import com.pyamsoft.padlock.service.LockServicePresenter.View
 import com.pyamsoft.padlock.service.RecheckStatus.NOT_FORCE
 import com.pyamsoft.pydroid.bus.EventBus
@@ -34,7 +33,6 @@ import javax.inject.Named
 
 class LockServicePresenter @Inject internal constructor(
         private val foregroundEventBus: EventBus<ForegroundEvent>,
-        private val lockPassBus: EventBus<LockPassEvent>,
         private val serviceFinishBus: EventBus<ServiceFinishEvent>,
         private val recheckEventBus: EventBus<RecheckEvent>,
         private val interactor: LockServiceInteractor,
@@ -106,15 +104,6 @@ class LockServicePresenter @Inject internal constructor(
                     .subscribe({
                         v.onFinish()
                     }, { Timber.e(it, "onError service finish bus") })
-        }
-
-        dispose {
-            lockPassBus.listen()
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({
-                        interactor.setLockScreenPassed(it.packageName, it.className, true)
-                    }, { Timber.e(it, "onError lock passed bus") })
         }
 
         dispose {

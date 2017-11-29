@@ -49,8 +49,6 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
                 LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
     }
 
-    override fun providePresenter(): LockEntryPresenter = presenter
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
         binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)

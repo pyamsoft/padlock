@@ -54,8 +54,6 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
     @CheckResult private fun getCurrentAttempt(): String = editText?.text?.toString() ?: ""
 
-    override fun providePresenter(): LockEntryPresenter = presenter
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockScreenComponent(
