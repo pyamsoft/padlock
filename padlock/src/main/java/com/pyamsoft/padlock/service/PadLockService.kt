@@ -26,7 +26,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
@@ -46,10 +48,12 @@ class PadLockService : Service(), LockServicePresenter.View {
 
     @field:Inject internal lateinit var presenter: LockServicePresenter
     private lateinit var notificationManager: NotificationManagerCompat
+    private lateinit var handler: Handler
 
     override fun onCreate() {
         super.onCreate()
         Injector.obtain<PadLockComponent>(applicationContext).inject(this)
+        handler = Handler(Looper.getMainLooper())
         notificationManager = NotificationManagerCompat.from(applicationContext)
         presenter.bind(this)
         startInForeground()
@@ -60,6 +64,7 @@ class PadLockService : Service(), LockServicePresenter.View {
         presenter.unbind()
         stopForeground(true)
         notificationManager.cancel(NOTIFICATION_ID)
+        handler.removeCallbacksAndMessages(null)
     }
 
     override fun onFinish() {
@@ -76,9 +81,7 @@ class PadLockService : Service(), LockServicePresenter.View {
     }
 
     override fun onStartLockScreen(entry: PadLockEntry, realName: String) {
-        Timber.d("Start lock activity for entry: %s %s (real %s)", entry.packageName(),
-                entry.activityName(), realName)
-        LockScreenActivity.start(this, entry, realName)
+        LockScreenActivity.start(handler, this, entry, realName)
     }
 
     private fun startInForeground() {
