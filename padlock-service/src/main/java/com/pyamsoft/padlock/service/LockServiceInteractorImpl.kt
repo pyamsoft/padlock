@@ -73,7 +73,6 @@ import javax.inject.Singleton
 
     override fun reset() {
         resetState()
-        Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED
 
         // Also reset last foreground
         lastForegroundEvent = ForegroundEvent.EMPTY
@@ -172,11 +171,12 @@ import javax.inject.Singleton
         return MaybeTransformer {
             it.flatMap {
                 Timber.d("Get list of locked classes with package: %s, class: %s",
-                        windowPackage,
-                        windowActivity)
-                setLockScreenPassed(windowPackage, windowActivity, false)
+                        windowPackage, windowActivity)
                 return@flatMap padLockDBQuery.queryWithPackageActivityNameDefault(windowPackage,
-                        windowActivity).filter { PadLockEntry.isEmpty(it).not() }
+                        windowActivity).filter { !PadLockEntry.isEmpty(it) }
+                        .doOnSuccess {
+                            setLockScreenPassed(windowPackage, windowActivity, false)
+                        }
             }
         }
     }
@@ -196,7 +196,7 @@ import javax.inject.Singleton
                 }
 
                 Timber.d("Filter out whitelisted packages")
-                return@filter it.whitelist().not()
+                return@filter !it.whitelist()
             }
         }
     }
@@ -218,7 +218,7 @@ import javax.inject.Singleton
     @CheckResult private fun isServiceEnabled(): Maybe<Boolean> {
         return stateInteractor.isServiceEnabled()
                 .filter {
-                    if (it.not()) {
+                    if (!it) {
                         Timber.e("Service is not user enabled, ignore event")
                         resetState()
                     }
@@ -236,12 +236,12 @@ import javax.inject.Singleton
         return MaybeTransformer {
             it.isEmpty.filter {
                 Timber.d("Filter if empty: $it")
-                return@filter it.not()
+                return@filter !it
             }.flatMap {
                 Timber.d("Check event from activity: %s %s", packageName, className)
                 return@flatMap packageActivityManager.isValidActivity(packageName,
                         className).filter {
-                    if (it.not()) {
+                    if (!it) {
                         Timber.w("Event not caused by activity.")
                         Timber.w("P: %s, C: %s", packageName, className)
                         Timber.w("Ignore")
@@ -274,7 +274,7 @@ import javax.inject.Singleton
                     Timber.w("P: %s, C: %s", packageName, className)
                     Timber.w("Ignore")
                 }
-                return@filter restrict.not()
+                return@filter !restrict
             }.filter {
                 val isLockScreen: Boolean = isWindowFromLockScreen(packageName, className)
                 if (isLockScreen) {
@@ -282,7 +282,7 @@ import javax.inject.Singleton
                     Timber.w("P: %s, C: %s", packageName, className)
                     Timber.w("Ignore")
                 }
-                return@filter isLockScreen.not()
+                return@filter !isLockScreen
             }
         }
     }
@@ -301,7 +301,7 @@ import javax.inject.Singleton
             val packageChanged: Boolean = hasNameChanged(packageName, lastPackageName)
             val classChanged: Boolean = hasNameChanged(className, lastClassName)
             val lockOnPackageChanged: Boolean = isOnlyLockOnPackageChange()
-            if (it.not()) {
+            if (!it) {
                 Timber.e("Failed to pass window checking")
                 return@map false
             }
@@ -326,6 +326,8 @@ import javax.inject.Singleton
                 windowHasChanged = true
             }
 
+            // If we have previously passed lock screen and nothing has changed
+            // Only relevant for users with ignore time == 0
             var lockPassed: Boolean? = lockScreenPassed[packageName + className]
             if (lockPassed == null) {
                 Timber.w("No lock map entry exists for: %s, %s", packageName, className)
@@ -333,12 +335,12 @@ import javax.inject.Singleton
                 lockPassed = false
             }
 
-            return@map windowHasChanged || lockPassed.not()
+            return@map windowHasChanged || !lockPassed
         }.compose(getEntry(packageName, className))
     }
 
     companion object {
-        private const val LISTEN_INTERVAL = 250L
+        private const val LISTEN_INTERVAL = 300L
         private val TEN_SECONDS_MILLIS = TimeUnit.SECONDS.toMillis(10L)
     }
 }
