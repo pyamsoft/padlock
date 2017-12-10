@@ -255,8 +255,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
                 if (item.model != entry) {
                     publishLockStateUpdates(item.model, entry)
                     adapter.set(index, entry)
-                    break
                 }
+                break
             }
         }
 
