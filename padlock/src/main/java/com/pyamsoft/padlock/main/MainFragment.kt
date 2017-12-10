@@ -26,6 +26,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import com.pyamsoft.backstack.BackStack
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentMainBinding
 import com.pyamsoft.padlock.list.LockListFragment
@@ -40,9 +41,11 @@ class MainFragment : CanaryFragment() {
     override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
     private lateinit var binding: FragmentMainBinding
+    private lateinit var backstack: BackStack
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
+        backstack = BackStack.create(this, R.id.main_view_container)
         binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -81,9 +84,7 @@ class MainFragment : CanaryFragment() {
                     private fun replaceFragment(fragment: Fragment, tag: String): Boolean {
                         val fragmentManager = childFragmentManager
                         return if (fragmentManager.findFragmentByTag(tag) == null) {
-                            fragmentManager.beginTransaction()
-                                    .replace(R.id.main_view_container, fragment, tag)
-                                    .commit()
+                            backstack.set(tag) { fragment }
                             true
                         } else {
                             false
@@ -101,6 +102,8 @@ class MainFragment : CanaryFragment() {
         super.onDestroyView()
         binding.unbind()
     }
+
+    override fun handleBackPress(): Boolean = backstack.back()
 
     companion object {
 

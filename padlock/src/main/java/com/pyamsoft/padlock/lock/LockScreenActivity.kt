@@ -31,6 +31,7 @@ import android.support.v7.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
+import com.pyamsoft.backstack.BackStack
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -74,6 +75,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     private var menuIgnoreFourtyFive: MenuItem? = null
     private var menuIgnoreSixty: MenuItem? = null
     internal var menuExclude: MenuItem? = null
+    private lateinit var backstack: BackStack
 
     override val shouldConfirmBackPress: Boolean = false
 
@@ -116,6 +118,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         overridePendingTransition(0, 0)
         super.onCreate(savedInstanceState)
 
+        backstack = BackStack.create(this, R.id.lock_screen_container)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_lock)
         PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
@@ -178,9 +181,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         val fragmentManager = supportFragmentManager
         val fragment = fragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
         if (fragment == null) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.lock_screen_container, pushFragment, tag)
-                    .commit()
+            backstack.set(tag) { pushFragment }
         }
     }
 
@@ -220,7 +221,9 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     }
 
     override fun onBackPressed() {
-        applicationContext.startActivity(home)
+        if (!backstack.back()) {
+            applicationContext.startActivity(home)
+        }
     }
 
     @CallSuper override fun onDestroy() {
