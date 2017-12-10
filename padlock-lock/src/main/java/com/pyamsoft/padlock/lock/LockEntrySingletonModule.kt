@@ -28,9 +28,6 @@ import javax.inject.Named
 abstract class LockEntrySingletonModule {
 
     @Binds
-    internal abstract fun provideLockScreenPassed(impl: LockScreenPassedImpl): LockScreenPassed
-
-    @Binds
     internal abstract fun provideInteractorCache(
             impl: LockEntryInteractorCache): LockEntryInteractor
 

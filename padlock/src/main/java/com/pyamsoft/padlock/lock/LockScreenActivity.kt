@@ -211,16 +211,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         presenter.clearMatchingForegroundEvent()
     }
 
-    override fun onResume() {
-        super.onResume()
-        presenter.finishUnlocked()
-    }
-
-    override fun onAlreadyUnlocked() {
-        Timber.i("Service reports already unlocked: $lockedPackageName, $lockedRealName. Finish")
-        finish()
-    }
-
     override fun onBackPressed() {
         if (!backstack.back()) {
             applicationContext.startActivity(home)
