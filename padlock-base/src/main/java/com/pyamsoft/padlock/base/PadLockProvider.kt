@@ -36,7 +36,6 @@ import javax.inject.Named
 class PadLockProvider(private val pyDroidModule: PYDroidModule,
         private val loaderModule: LoaderModule,
         private val mainActivityClass: Class<out Activity>,
-        private val lockScreenActivityClass: Class<out Activity>,
         private val recheckServiceClass: Class<out IntentService>) {
 
     private val appIconCache: ImageCache<String, Drawable> = AppIconImageCache()
@@ -49,12 +48,6 @@ class PadLockProvider(private val pyDroidModule: PYDroidModule,
             "main_activity")
     internal fun provideMainActivityClass(): Class<out Activity> =
             mainActivityClass
-
-    @Provides
-    @Named(
-            "lockscreen")
-    internal fun provideLockScreenActivityClas(): Class<out Activity> =
-            lockScreenActivityClass
 
     @Provides
     @Named(

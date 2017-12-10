@@ -26,6 +26,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.base.Excludes
 import com.pyamsoft.padlock.base.ext.isSystemApplication
 import com.pyamsoft.padlock.base.preference.LockListPreferences
 import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager.ApplicationItem
@@ -143,13 +144,8 @@ import javax.inject.Singleton
                 return@flatMap Observable.empty()
             }
 
-            if (ANDROID_PACKAGE == it.packageName) {
-                Timber.i("Application %s is Android", it.packageName)
-                return@flatMap Observable.empty()
-            }
-
-            if (ANDROID_SYSTEM_UI_PACKAGE == it.packageName) {
-                Timber.i("Application %s is System UI", it.packageName)
+            if (Excludes.isPackageExcluded(it.packageName)) {
+                Timber.i("Application %s is excluded", it.packageName)
                 return@flatMap Observable.empty()
             }
 
@@ -216,10 +212,4 @@ import javax.inject.Singleton
             }
         }
     }
-
-    companion object {
-        const val ANDROID_SYSTEM_UI_PACKAGE: String = "com.android.systemui"
-        const val ANDROID_PACKAGE: String = "android"
-    }
-
 }

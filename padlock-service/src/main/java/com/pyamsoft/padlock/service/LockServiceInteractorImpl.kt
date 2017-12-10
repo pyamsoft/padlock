@@ -18,7 +18,6 @@
 
 package com.pyamsoft.padlock.service
 
-import android.app.Activity
 import android.app.IntentService
 import android.app.KeyguardManager
 import android.app.usage.UsageEvents
@@ -27,6 +26,7 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.base.Excludes
 import com.pyamsoft.padlock.base.db.PadLockDBQuery
 import com.pyamsoft.padlock.base.db.PadLockEntry
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences
@@ -57,7 +57,6 @@ import javax.inject.Singleton
         private val jobSchedulerCompat: JobSchedulerCompat,
         private val packageActivityManager: PackageActivityManager,
         private val padLockDBQuery: PadLockDBQuery,
-        @param:Named("lockscreen") private val lockScreenActivityClass: Class<out Activity>,
         @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
         private val stateInteractor: LockServiceStateInteractor) : LockServiceInteractor {
 
@@ -124,11 +123,9 @@ import javax.inject.Singleton
 
                     return@map Optional.ofNullable(null)
                 }.filter { it is Present }.map { it as Present }.map { it.value }
-                .filter {
-                    val classNameMatch = (it.className == lockScreenActivityClass.name)
-                    val packageNameMatch = (it.packageName == appContext.packageName)
-                    return@filter !(classNameMatch && packageNameMatch)
-                }
+                .filter { !Excludes.isLockScreen(it.packageName, it.className) }
+                .filter { !Excludes.isPackageExcluded(it.packageName) }
+                .filter { !Excludes.isClassExcluded(it.className) }
                 .filter { it != lastForegroundEvent }
                 .doOnNext { lastForegroundEvent = it }
     }
@@ -260,17 +257,6 @@ import javax.inject.Singleton
         }
     }
 
-    @CheckResult private fun isWindowFromLockScreen(windowPackage: String,
-            windowActivity: String): Boolean {
-        val lockScreenPackage: String = appContext.packageName
-        val lockScreenActivity: String = lockScreenActivityClass.name
-        Timber.d(
-                "Check if window ($windowPackage $windowActivity) is lock screen ($lockScreenPackage $lockScreenActivity)")
-
-        val isPackage = (windowPackage == lockScreenPackage)
-        return isPackage && (windowActivity == lockScreenActivity)
-    }
-
     @CheckResult private fun isEventRestricted(packageName: String,
             className: String): MaybeTransformer<Boolean, Boolean> {
         return MaybeTransformer {
@@ -283,7 +269,7 @@ import javax.inject.Singleton
                 }
                 return@filter !restrict
             }.filter {
-                val isLockScreen: Boolean = isWindowFromLockScreen(packageName, className)
+                val isLockScreen: Boolean = Excludes.isLockScreen(packageName, className)
                 if (isLockScreen) {
                     Timber.w("Event is caused by lock screen")
                     Timber.w("P: %s, C: %s", packageName, className)
@@ -325,7 +311,9 @@ import javax.inject.Singleton
 
             var windowHasChanged: Boolean = classChanged
             if (lockOnPackageChanged) {
-                windowHasChanged = windowHasChanged && packageChanged
+                if (appContext.packageName != lastPackageName) {
+                    windowHasChanged = windowHasChanged && packageChanged
+                }
             }
 
             if (forcedRecheck === FORCE) {

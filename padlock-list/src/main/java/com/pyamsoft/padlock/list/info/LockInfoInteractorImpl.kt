@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.list.info
 
 import android.app.Activity
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.base.Excludes
 import com.pyamsoft.padlock.base.db.PadLockDBQuery
 import com.pyamsoft.padlock.base.db.PadLockDBUpdate
 import com.pyamsoft.padlock.base.db.PadLockEntry
@@ -46,9 +47,7 @@ import javax.inject.Singleton
         private val packageActivityManager: PackageActivityManager,
         private val preferences: OnboardingPreferences,
         private val updateDb: PadLockDBUpdate,
-        private val modifyInteractor: LockStateModifyInteractor,
-        @param:Named(
-                "lockscreen") private val lockScreenClass: Class<out Activity>) :
+        private val modifyInteractor: LockStateModifyInteractor) :
         LockInfoInteractor {
 
     override fun hasShownOnBoarding(): Single<Boolean> {
@@ -63,7 +62,7 @@ import javax.inject.Singleton
     @CheckResult private fun getPackageActivities(name: String): Single<List<String>> {
         return packageActivityManager.getActivityListForPackage(name)
                 .flatMapObservable { Observable.fromIterable(it) }
-                .filter { it.equals(lockScreenClass.name, ignoreCase = true).not() }
+                .filter { !Excludes.isClassExcluded(it) }
                 .toList()
     }
 
