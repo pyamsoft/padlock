@@ -20,7 +20,7 @@
 <resources>
 
   <string name="ignore_time_key">ignore_time</string>
-  <string name="ignore_time_default">0</string>
+  <string name="ignore_time_default">1</string>
 
   <string name="timeout_time_key">timeout_time</string>
   <string name="timeout_time_default">0</string>

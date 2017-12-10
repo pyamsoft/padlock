@@ -63,8 +63,6 @@ import javax.inject.Singleton
     private val appContext = context.applicationContext
     private val keyguardManager = appContext.getSystemService(
             Context.KEYGUARD_SERVICE) as KeyguardManager
-    private var lastPackageName = ""
-    private var lastClassName = ""
     private var activePackageName = ""
     private var activeClassName = ""
     private val usageManager: UsageStatsManager = appContext.getSystemService(
@@ -88,8 +86,6 @@ import javax.inject.Singleton
 
     private fun resetState() {
         Timber.i("Reset name state")
-        lastPackageName = ""
-        lastClassName = ""
         activeClassName = ""
         activePackageName = ""
         lockScreenPassed.reset()
@@ -151,17 +147,6 @@ import javax.inject.Singleton
         jobSchedulerCompat.cancel(intent)
     }
 
-    /**
-     * If the screen has changed, update the last package.
-     * This will prevent the lock screen from opening twice when the same
-     * app opens multiple activities for example.
-     */
-    @CheckResult private fun hasNameChanged(name: String,
-            oldName: String): Boolean = name != oldName
-
-    @CheckResult private fun isOnlyLockOnPackageChange(): Boolean =
-            preferences.isLockOnPackageChange()
-
     @CheckResult private fun prepareLockScreen(packageName: String,
             activityName: String): MaybeTransformer<Boolean, PadLockEntry> {
         return MaybeTransformer {
@@ -197,6 +182,7 @@ import javax.inject.Singleton
                 Timber.d(
                         "Lock lockScreenPassed: ${it.packageName()} ${it.activityName()}")
                 lockScreenPassed.lock(it.packageName(), it.activityName())
+
                 if (havePassed) {
                     Timber.i(
                             "Passed once before earlier, ignore just this once: ${it.packageName()} ${it.activityName()}")
@@ -294,39 +280,21 @@ import javax.inject.Singleton
                 }.toSingle(false)
 
         return windowEventObservable.map {
-            val packageChanged: Boolean = hasNameChanged(packageName, lastPackageName)
-            val classChanged: Boolean = hasNameChanged(className, lastClassName)
-            val lockOnPackageChanged: Boolean = isOnlyLockOnPackageChange()
             if (!it) {
                 Timber.e("Failed to pass window checking")
                 return@map false
             }
 
-            if (packageChanged) {
-                Timber.d("Last Package: %s - New Package: %s", lastPackageName, packageName)
-                lastPackageName = packageName
-            }
-
-            if (classChanged) {
-                Timber.d("Last Class: %s - New Class: %s", lastClassName, className)
-                lastClassName = className
-            }
-
-            var windowHasChanged: Boolean = classChanged
-            if (lockOnPackageChanged) {
-                if (appContext.packageName != lastPackageName) {
-                    windowHasChanged = windowHasChanged && packageChanged
-                }
-            }
-
             if (forcedRecheck === FORCE) {
                 Timber.d("Pass filter via forced recheck")
-                windowHasChanged = true
             }
 
-            Timber.d("Process success: $windowHasChanged")
-            return@map windowHasChanged
+            return@map true
         }.compose(getEntry(packageName, className))
+                .doOnSuccess {
+                    activePackageName = ""
+                    activeClassName = ""
+                }
     }
 
     companion object {

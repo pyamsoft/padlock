@@ -35,12 +35,6 @@
           android:checkableBehavior="single">
 
         <item
-            android:id="@+id/menu_ignore_none"
-            android:checked="false"
-            android:title="@string/do_not_ignore"
-            app:showAsAction="never"/>
-
-        <item
             android:id="@+id/menu_ignore_one"
             android:checked="false"
             android:title="@string/ignore_for_1_minute"

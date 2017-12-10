@@ -21,8 +21,7 @@ package com.pyamsoft.padlock.base.preference
 import android.content.Context
 import android.content.SharedPreferences
 import android.support.v7.preference.PreferenceManager
-import com.pyamsoft.padlock.base.R.bool
-import com.pyamsoft.padlock.base.R.string
+import com.pyamsoft.padlock.base.R
 import com.pyamsoft.padlock.model.LockScreenType
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -46,24 +45,21 @@ import javax.inject.Singleton
 
     init {
         val appContext = context.applicationContext
-        val res = appContext.resources
-
         this.preferences = PreferenceManager.getDefaultSharedPreferences(appContext)
-        ignoreTimeKey = res.getString(string.ignore_time_key)
-        ignoreTimeDefault = res.getString(string.ignore_time_default)
-        timeoutTimeKey = res.getString(string.timeout_time_key)
-        timeoutTimeDefault = res.getString(string.timeout_time_default)
-        lockPackageChangeKey = res.getString(string.lock_package_change_key)
-        lockPackageChangeDefault = res.getBoolean(
-                bool.lock_package_change_default)
-        installListener = res.getString(string.install_listener_key)
-        installListenerDefault = res.getBoolean(
-                bool.install_listener_default)
-        ignoreKeyguard = res.getString(string.ignore_keyguard_key)
-        ignoreKeyguardDefault = res.getBoolean(bool.ignore_keyguard_default)
-        lockScreenType = res.getString(string.lock_screen_type_key)
-        lockScreenTypeDefault = res.getString(
-                string.lock_screen_type_default)
+
+        val res = appContext.resources
+        ignoreTimeKey = res.getString(R.string.ignore_time_key)
+        ignoreTimeDefault = res.getString(R.string.ignore_time_default)
+        timeoutTimeKey = res.getString(R.string.timeout_time_key)
+        timeoutTimeDefault = res.getString(R.string.timeout_time_default)
+        lockPackageChangeKey = res.getString(R.string.lock_package_change_key)
+        lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default)
+        installListener = res.getString(R.string.install_listener_key)
+        installListenerDefault = res.getBoolean(R.bool.install_listener_default)
+        ignoreKeyguard = res.getString(R.string.ignore_keyguard_key)
+        ignoreKeyguardDefault = res.getBoolean(R.bool.ignore_keyguard_default)
+        lockScreenType = res.getString(R.string.lock_screen_type_key)
+        lockScreenTypeDefault = res.getString(R.string.lock_screen_type_default)
     }
 
     override fun getCurrentLockType(): LockScreenType =
