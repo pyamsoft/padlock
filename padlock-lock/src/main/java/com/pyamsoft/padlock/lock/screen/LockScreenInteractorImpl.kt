@@ -20,14 +20,12 @@ package com.pyamsoft.padlock.lock.screen
 
 import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
-import com.pyamsoft.padlock.lock.LockScreenPassed
 import com.pyamsoft.padlock.model.LockScreenType
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class LockScreenInteractorImpl @Inject internal constructor(
-        private val lockScreenPassed: LockScreenPassed,
         private val labelManager: PackageLabelManager,
         private val preferences: LockScreenPreferences) : LockScreenInteractor {
 
@@ -39,7 +37,4 @@ import javax.inject.Singleton
 
     override fun getDisplayName(packageName: String): Single<String> =
             labelManager.loadPackageLabel(packageName)
-
-    override fun isLockScreenPassed(packageName: String, className: String): Single<Boolean> =
-            Single.fromCallable { lockScreenPassed.isPassed(packageName, className) }
 }

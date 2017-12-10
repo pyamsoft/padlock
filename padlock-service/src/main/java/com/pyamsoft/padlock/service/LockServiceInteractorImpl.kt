@@ -33,7 +33,6 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.lock.ForegroundEvent
-import com.pyamsoft.padlock.lock.LockScreenPassed
 import com.pyamsoft.padlock.service.RecheckStatus.FORCE
 import com.pyamsoft.pydroid.helper.Optional
 import com.pyamsoft.pydroid.helper.Optional.Present
@@ -52,7 +51,6 @@ import javax.inject.Singleton
 
 @Singleton internal class LockServiceInteractorImpl @Inject internal constructor(
         context: Context,
-        private val lockScreenPassed: LockScreenPassed,
         private val preferences: LockScreenPreferences,
         private val jobSchedulerCompat: JobSchedulerCompat,
         private val packageActivityManager: PackageActivityManager,
@@ -88,7 +86,6 @@ import javax.inject.Singleton
         Timber.i("Reset name state")
         activeClassName = ""
         activePackageName = ""
-        lockScreenPassed.reset()
     }
 
     /**
@@ -175,21 +172,6 @@ import javax.inject.Singleton
 
                 Timber.d("Filter out whitelisted packages")
                 return@filter !it.whitelist()
-            }.map {
-                // If we have previously passed lock screen and nothing has changed
-                // Only relevant for users with ignore time == 0
-                val havePassed = lockScreenPassed.isPassed(it.packageName(), it.activityName())
-                Timber.d(
-                        "Lock lockScreenPassed: ${it.packageName()} ${it.activityName()}")
-                lockScreenPassed.lock(it.packageName(), it.activityName())
-
-                if (havePassed) {
-                    Timber.i(
-                            "Passed once before earlier, ignore just this once: ${it.packageName()} ${it.activityName()}")
-                    return@map PadLockEntry.EMPTY
-                } else {
-                    return@map it
-                }
             }
         }
     }
@@ -257,14 +239,6 @@ import javax.inject.Singleton
                     Timber.w("Ignore")
                 }
                 return@filter !restrict
-            }.filter {
-                val isLockScreen: Boolean = Excludes.isLockScreen(packageName, className)
-                if (isLockScreen) {
-                    Timber.w("Event is caused by lock screen")
-                    Timber.w("P: %s, C: %s", packageName, className)
-                    Timber.w("Ignore")
-                }
-                return@filter !isLockScreen
             }
         }
     }
@@ -291,10 +265,6 @@ import javax.inject.Singleton
 
             return@map true
         }.compose(getEntry(packageName, className))
-                .doOnSuccess {
-                    activePackageName = ""
-                    activeClassName = ""
-                }
     }
 
     companion object {
