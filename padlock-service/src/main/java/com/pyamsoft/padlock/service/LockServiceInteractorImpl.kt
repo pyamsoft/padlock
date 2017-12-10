@@ -95,6 +95,9 @@ import javax.inject.Singleton
         lockScreenPassed.reset()
     }
 
+    /**
+     * Take care to avoid any calls to logging methods as it will run every 200 ms and flood
+     */
     override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
         return Flowable.interval(LISTEN_INTERVAL, MILLISECONDS).map {
             val now: Long = System.currentTimeMillis()
