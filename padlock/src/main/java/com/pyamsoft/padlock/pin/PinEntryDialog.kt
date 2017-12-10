@@ -25,6 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import com.pyamsoft.backstack.BackStack
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -46,6 +47,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     private lateinit var binding: DialogPinEntryBinding
     private lateinit var packageName: String
     private var appIcon = LoaderHelper.empty()
+    private lateinit var backstack: BackStack
 
     override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
@@ -69,6 +71,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
+        backstack = BackStack.create(this, R.id.pin_entry_dialog_container)
         binding = DialogPinEntryBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -79,9 +82,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         val fragment = fragmentManager.findFragmentByTag(tag)
         return if (fragment == null) {
             Timber.d("Push new pin fragment: $tag")
-            childFragmentManager.beginTransaction()
-                    .replace(R.id.pin_entry_dialog_container, pushFragment, tag)
-                    .commit()
+            backstack.set(tag) { pushFragment }
             // Return
             true
         } else {
