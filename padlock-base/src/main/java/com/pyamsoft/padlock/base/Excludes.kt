@@ -42,6 +42,7 @@ object Excludes {
     @JvmStatic
     fun isClassExcluded(name: String): Boolean = checkExclusion(CLASSES, name)
 
+    @JvmStatic
     private fun checkExclusion(list: List<String>, name: String): Boolean {
         val check = name.trim().toLowerCase()
         return list.contains(check)
