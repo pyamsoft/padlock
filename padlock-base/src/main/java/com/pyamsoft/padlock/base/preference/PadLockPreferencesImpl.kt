@@ -34,12 +34,10 @@ import javax.inject.Singleton
     private val ignoreTimeDefault: String
     private val timeoutTimeKey: String
     private val timeoutTimeDefault: String
-    private val lockPackageChangeKey: String
     private val installListener: String
     private val ignoreKeyguard: String
     private val lockScreenType: String
     private val lockScreenTypeDefault: String
-    private val lockPackageChangeDefault: Boolean
     private val installListenerDefault: Boolean
     private val ignoreKeyguardDefault: Boolean
 
@@ -52,8 +50,6 @@ import javax.inject.Singleton
         ignoreTimeDefault = res.getString(R.string.ignore_time_default)
         timeoutTimeKey = res.getString(R.string.timeout_time_key)
         timeoutTimeDefault = res.getString(R.string.timeout_time_default)
-        lockPackageChangeKey = res.getString(R.string.lock_package_change_key)
-        lockPackageChangeDefault = res.getBoolean(R.bool.lock_package_change_default)
         installListener = res.getString(R.string.install_listener_key)
         installListenerDefault = res.getBoolean(R.bool.install_listener_default)
         ignoreKeyguard = res.getString(R.string.ignore_keyguard_key)
@@ -92,9 +88,6 @@ import javax.inject.Singleton
 
     override fun getTimeoutPeriod(): Long =
             preferences.getString(timeoutTimeKey, timeoutTimeDefault).toLong()
-
-    override fun isLockOnPackageChange(): Boolean =
-            preferences.getBoolean(lockPackageChangeKey, lockPackageChangeDefault)
 
     override fun isSystemVisible(): Boolean = preferences.getBoolean(
             IS_SYSTEM, false)
