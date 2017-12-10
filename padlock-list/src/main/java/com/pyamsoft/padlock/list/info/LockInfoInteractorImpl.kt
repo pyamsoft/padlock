@@ -18,9 +18,7 @@
 
 package com.pyamsoft.padlock.list.info
 
-import android.app.Activity
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.Excludes
 import com.pyamsoft.padlock.base.db.PadLockDBQuery
 import com.pyamsoft.padlock.base.db.PadLockDBUpdate
 import com.pyamsoft.padlock.base.db.PadLockEntry
@@ -39,7 +37,6 @@ import java.util.ArrayList
 import java.util.Collections
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class LockInfoInteractorImpl @Inject internal constructor(
@@ -59,12 +56,8 @@ import javax.inject.Singleton
             name: String): Single<List<PadLockEntry.WithPackageName>> = queryDb.queryWithPackageName(
             name)
 
-    @CheckResult private fun getPackageActivities(name: String): Single<List<String>> {
-        return packageActivityManager.getActivityListForPackage(name)
-                .flatMapObservable { Observable.fromIterable(it) }
-                .filter { !Excludes.isClassExcluded(it) }
-                .toList()
-    }
+    @CheckResult private fun getPackageActivities(name: String): Single<List<String>> =
+            packageActivityManager.getActivityListForPackage(name)
 
     @CheckResult private fun findMatchingEntry(
             lockEntries: MutableList<PadLockEntry.WithPackageName>,

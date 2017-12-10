@@ -77,7 +77,12 @@ import javax.inject.Singleton
                 Timber.e(e, "PackageManager error, return what we have for %s", packageName)
             }
             return@fromCallable activityEntries
-        }
+        }.flatMapObservable { Observable.fromIterable(it) }
+                .filter { !Excludes.isLockScreen(packageName, it) }
+                .filter { !Excludes.isPackageExcluded(packageName) }
+                .filter { !Excludes.isClassExcluded(it) }
+                .toSortedList()
+
     }
 
     @CheckResult
