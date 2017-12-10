@@ -56,7 +56,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     private lateinit var lockedActivityName: String
     private lateinit var lockedPackageName: String
     private lateinit var binding: ActivityLockBinding
-    private lateinit var ignoreTimes: LongArray
+    private lateinit var ignoreTimes: MutableList<Long>
     private lateinit var lockedRealName: String
     private var lockedSystem: Boolean = false
     private var ignorePeriod: Long = -1
@@ -65,7 +65,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     private var lockedCode: String? = null
 
     // These can potentially be unassigned in onSaveInstanceState, mark them nullable
-    private var menuIgnoreNone: MenuItem? = null
     private var menuIgnoreOne: MenuItem? = null
     private var menuIgnoreFive: MenuItem? = null
     private var menuIgnoreTen: MenuItem? = null
@@ -94,7 +93,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         var index: Int
         try {
             index = when {
-                menuIgnoreNone.isChecked() -> 0
                 menuIgnoreOne.isChecked() -> 1
                 menuIgnoreFive.isChecked() -> 2
                 menuIgnoreTen.isChecked() -> 3
@@ -103,11 +101,11 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                 menuIgnoreThirty.isChecked() -> 6
                 menuIgnoreFourtyFive.isChecked() -> 7
                 menuIgnoreSixty.isChecked() -> 8
-                else -> 0
+                else -> 1
             }
         } catch (e: NullPointerException) {
-            Timber.w("NULL menu item, default to 0")
-            index = 0
+            Timber.w("NULL menu item, default to 1")
+            index = 1
         }
 
         return ignoreTimes[index]
@@ -145,9 +143,9 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     private fun populateIgnoreTimes() {
         val stringIgnoreTimes = applicationContext.resources.getStringArray(
                 R.array.ignore_time_entries)
-        ignoreTimes = LongArray(stringIgnoreTimes.size)
+        ignoreTimes = ArrayList(stringIgnoreTimes.size)
         for (i in stringIgnoreTimes.indices) {
-            ignoreTimes[i] = stringIgnoreTimes[i].toLong()
+            ignoreTimes.add(stringIgnoreTimes[i].toLong())
         }
     }
 
@@ -208,6 +206,9 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
             binding.toolbar.menu.close()
             binding.toolbar.dismissPopupMenus()
         }
+
+        // We have left the foreground, clear event
+        presenter.clearMatchingForegroundEvent()
     }
 
     override fun onResume() {
@@ -237,7 +238,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         super.finish()
         overridePendingTransition(0, 0)
         Timber.d("Finish called, either from Us or from Outside")
-        presenter.clearMatchingForegroundEvent()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -262,7 +262,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menu.let {
             menuInflater.inflate(R.menu.lockscreen_menu, it)
-            menuIgnoreNone = it.findItem(R.id.menu_ignore_none)
             menuIgnoreOne = it.findItem(R.id.menu_ignore_one)
             menuIgnoreFive = it.findItem(R.id.menu_ignore_five)
             menuIgnoreTen = it.findItem(R.id.menu_ignore_ten)
@@ -293,18 +292,17 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         }
 
         when (apply) {
-            ignoreTimes[0] -> menuIgnoreNone.setChecked(true)
-            ignoreTimes[1] -> menuIgnoreOne.setChecked(true)
-            ignoreTimes[2] -> menuIgnoreFive.setChecked(true)
-            ignoreTimes[3] -> menuIgnoreTen.setChecked(true)
-            ignoreTimes[4] -> menuIgnoreFifteen.setChecked(true)
-            ignoreTimes[5] -> menuIgnoreTwenty.setChecked(true)
-            ignoreTimes[6] -> menuIgnoreThirty.setChecked(true)
-            ignoreTimes[7] -> menuIgnoreFourtyFive.setChecked(true)
-            ignoreTimes[8] -> menuIgnoreSixty.setChecked(true)
+            ignoreTimes[0] -> menuIgnoreOne.setChecked(true)
+            ignoreTimes[1] -> menuIgnoreFive.setChecked(true)
+            ignoreTimes[2] -> menuIgnoreTen.setChecked(true)
+            ignoreTimes[3] -> menuIgnoreFifteen.setChecked(true)
+            ignoreTimes[4] -> menuIgnoreTwenty.setChecked(true)
+            ignoreTimes[5] -> menuIgnoreThirty.setChecked(true)
+            ignoreTimes[6] -> menuIgnoreFourtyFive.setChecked(true)
+            ignoreTimes[7] -> menuIgnoreSixty.setChecked(true)
             else -> {
                 Timber.e("No valid ignore time, initialize to None")
-                menuIgnoreNone.setChecked(true)
+                menuIgnoreOne.setChecked(true)
             }
         }
     }

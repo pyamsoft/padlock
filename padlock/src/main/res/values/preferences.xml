@@ -20,7 +20,6 @@
 <resources>
 
   <string-array name="ignore_time">
-    <item name="time_none">@string/do_not_ignore</item>
     <item name="time_one">@string/ignore_for_1_minute</item>
     <item name="time_five">@string/ignore_for_5_minutes</item>
     <item name="time_ten">@string/ignore_for_10_minutes</item>
@@ -32,7 +31,6 @@
   </string-array>
 
   <string-array name="ignore_time_entries">
-    <item name="time_none">0</item>
     <item name="time_one">1</item>
     <item name="time_five">5</item>
     <item name="time_ten">10</item>
@@ -43,7 +41,6 @@
     <item name="time_sixty">60</item>
   </string-array>
 
-  <string name="do_not_ignore">Always Re-Lock</string>
   <string name="ignore_for_1_minute">Re-Lock after 1 Minute</string>
   <string name="ignore_for_5_minutes">Re-Lock after 5 Minutes</string>
   <string name="ignore_for_10_minutes">Re-Lock after 10 Minutes</string>
