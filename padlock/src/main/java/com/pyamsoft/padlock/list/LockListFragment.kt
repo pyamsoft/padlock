@@ -392,8 +392,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
                 update = true
                 if (item.model != entry) {
                     adapter.set(index, entry)
-                    break
                 }
+                break
             }
         }
 
