@@ -50,13 +50,6 @@
         android:title="@string/lock_screen_type_title"/>
 
     <CheckBoxPreference
-        android:defaultValue="@bool/lock_package_change_default"
-        android:key="@string/lock_package_change_key"
-        android:summaryOff="@string/lock_package_change_summary_unchecked"
-        android:summaryOn="@string/lock_package_change_summary_checked"
-        android:title="@string/lock_package_change_title"/>
-
-    <CheckBoxPreference
         android:defaultValue="@bool/install_listener_default"
         android:key="@string/install_listener_key"
         android:summaryOff="@string/install_listener_summary_unchecked"

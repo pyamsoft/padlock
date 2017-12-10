@@ -34,7 +34,4 @@ interface LockScreenPreferences {
 
     @CheckResult
     fun getTimeoutPeriod(): Long
-
-    @CheckResult
-    fun isLockOnPackageChange(): Boolean
 }
