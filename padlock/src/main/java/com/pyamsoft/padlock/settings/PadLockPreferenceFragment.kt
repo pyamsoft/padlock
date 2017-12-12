@@ -31,23 +31,20 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.pydroid.presenter.Presenter
-import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
-import com.pyamsoft.pydroid.ui.app.fragment.ActionBarSettingsPreferenceFragment
+import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.helper.Toasty
-import com.pyamsoft.pydroid.ui.util.ActionBarUtil
 import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 import javax.inject.Inject
 
-class SettingsPreferenceFragment : ActionBarSettingsPreferenceFragment(), SettingsPresenter.View {
+class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresenter.View {
 
     @field:Inject internal lateinit var presenter: SettingsPresenter
     private lateinit var lockType: ListPreference
 
     override fun provideBoundPresenters(): List<Presenter<*>> =
             listOf(presenter) + super.provideBoundPresenters()
-
-    override val isLastOnBackStack: AboutLibrariesFragment.BackStackState = AboutLibrariesFragment.BackStackState.LAST
 
     override val preferenceXmlResId: Int = R.xml.preferences
 
@@ -59,11 +56,6 @@ class SettingsPreferenceFragment : ActionBarSettingsPreferenceFragment(), Settin
     override fun onClearAllClicked() {
         DialogUtil.guaranteeSingleDialogFragment(activity,
                 ConfirmationDialog.newInstance(ConfirmEvent.ALL), "confirm_dialog")
-    }
-
-    override fun onLicenseItemClicked() {
-        ActionBarUtil.setActionBarUpEnabled(activity!!, true)
-        super.onLicenseItemClicked()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -148,8 +140,10 @@ class SettingsPreferenceFragment : ActionBarSettingsPreferenceFragment(), Settin
 
     override fun onResume() {
         super.onResume()
-        setActionBarUpEnabled(false)
-        setActionBarTitle(R.string.app_name)
+        toolbarActivity.withToolbar {
+            it.setTitle(R.string.app_name)
+            it.setUpEnabled(false)
+        }
     }
 
     override fun onDestroy() {
@@ -159,6 +153,6 @@ class SettingsPreferenceFragment : ActionBarSettingsPreferenceFragment(), Settin
 
     companion object {
 
-        const val TAG = "SettingsPreferenceFragment"
+        const val TAG = "PadLockPreferenceFragment"
     }
 }

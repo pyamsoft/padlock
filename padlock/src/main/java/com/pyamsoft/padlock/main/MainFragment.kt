@@ -34,6 +34,7 @@ import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.settings.SettingsFragment
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 
 class MainFragment : CanaryFragment() {
@@ -95,7 +96,10 @@ class MainFragment : CanaryFragment() {
 
     override fun onResume() {
         super.onResume()
-        setActionBarUpEnabled(false)
+        toolbarActivity.withToolbar {
+            it.setTitle(R.string.app_name)
+            it.setUpEnabled(false)
+        }
     }
 
     override fun onDestroyView() {
@@ -103,7 +107,7 @@ class MainFragment : CanaryFragment() {
         binding.unbind()
     }
 
-    override fun handleBackPress(): Boolean = backstack.back()
+    override fun onBackPressed(): Boolean = backstack.back()
 
     companion object {
 

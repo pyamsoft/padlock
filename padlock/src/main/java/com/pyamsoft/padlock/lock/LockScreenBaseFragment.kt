@@ -29,6 +29,7 @@ import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_PACKAGE_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_REAL_NAME
 import com.pyamsoft.padlock.uicommon.CanaryFragment
+import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 
 abstract class LockScreenBaseFragment protected constructor() : CanaryFragment(),
@@ -74,6 +75,11 @@ abstract class LockScreenBaseFragment protected constructor() : CanaryFragment()
     final override fun onPostUnlocked() {
         Timber.d("POST Unlock Finished!")
         activity!!.finish()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        toolbarActivity.withToolbar { it.setUpEnabled(false) }
     }
 
     companion object {
