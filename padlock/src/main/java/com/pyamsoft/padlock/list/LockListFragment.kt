@@ -24,7 +24,6 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -52,6 +51,7 @@ import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.AnimUtil
 import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -72,7 +72,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
         Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
     }
 
@@ -90,6 +89,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         setupRecyclerView()
         setupSwipeRefresh()
         setupFAB()
+        setupToolbarMenu()
 
         lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
@@ -101,6 +101,35 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
             Timber.d("Launched from notification, clear list")
             presenter.forceClearCache()
+        }
+    }
+
+    private fun setupToolbarMenu() {
+        toolbarActivity.withToolbar {
+            it.inflateMenu(R.menu.locklist_menu)
+            it.inflateMenu(R.menu.search_menu)
+
+            it.menu.apply {
+                setupDisplaySystemVisibleItem(this)
+                filterListDelegate.onPrepareOptionsMenu(this, adapter)
+            }
+
+            it.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.menu_is_system -> {
+                        if (!binding.applistSwipeRefresh.isRefreshing) {
+                            Timber.d("List is not refreshing. Allow change of system preference")
+                            presenter.setSystemVisibility(!it.isChecked)
+                            presenter.populateList(true)
+                        }
+                        return@setOnMenuItemClickListener true
+                    }
+                    else -> {
+                        Timber.w("Unhandled menu item clicked: ${it.itemId}")
+                        return@setOnMenuItemClickListener false
+                    }
+                }
+            }
         }
     }
 
@@ -117,8 +146,11 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     override fun onResume() {
         super.onResume()
-        setActionBarUpEnabled(false)
-        setActionBarTitle(R.string.app_name)
+        toolbarActivity.withToolbar {
+            it.setTitle(R.string.app_name)
+            it.setUpEnabled(false)
+        }
+
         AnimUtil.popShow(binding.applistFab, 300, 400)
     }
 
@@ -167,20 +199,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.apply {
-            inflate(R.menu.locklist_menu, menu)
-            inflate(R.menu.search_menu, menu)
-        }
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-        setupDisplaySystemVisibleItem(menu)
-        filterListDelegate.onPrepareOptionsMenu(menu, adapter)
-    }
-
     private fun setupDisplaySystemVisibleItem(menu: Menu) {
         displaySystemItem = menu.findItem(R.id.menu_is_system)
         presenter.setSystemVisibilityFromPreference()
@@ -201,23 +219,20 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         }
         adapter.clear()
         backingSet.clear()
-    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menu_is_system -> if (!binding.applistSwipeRefresh.isRefreshing) {
-                Timber.d("List is not refreshing. Allow change of system preference")
-                presenter.setSystemVisibility(!item.isChecked)
-                presenter.populateList(true)
+        toolbarActivity.withToolbar {
+            it.menu.apply {
+                removeGroup(R.id.menu_group_list_system)
+                removeGroup(R.id.menu_group_list_search)
             }
-            else -> Timber.w("Item selected: %d, do nothing", item.itemId)
+            it.setOnMenuItemClickListener(null)
         }
-        return super.onOptionsItemSelected(item)
     }
 
     private fun setupFAB() {
         binding.applistFab.setOnDebouncedClickListener {
-            if (UsagePermissionChecker.missingUsageStatsPermission(binding.applistFab.context)) {
+            if (UsagePermissionChecker.missingUsageStatsPermission(
+                    binding.applistFab.context)) {
                 DialogUtil.guaranteeSingleDialogFragment(activity, UsageAccessRequestDialog(),
                         "accessibility")
             } else {
@@ -302,7 +317,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     override fun onModifyEntryCreated(packageName: String) {
         Timber.d("Created entry for $packageName")
-        refreshList(packageName = packageName, locked = true, whitelisted = null, hardlocked = null)
+        refreshList(packageName = packageName, locked = true, whitelisted = null,
+                hardlocked = null)
     }
 
     override fun onModifyEntryDeleted(packageName: String) {
@@ -329,7 +345,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     override fun onModifySubEntryToWhitelistedFromDefault(packageName: String) {
         Timber.d("Whitelisted from default subentry for $packageName")
-        refreshList(packageName = packageName, locked = null, whitelisted = true, hardlocked = null)
+        refreshList(packageName = packageName, locked = null, whitelisted = true,
+                hardlocked = null)
     }
 
     override fun onModifySubEntryToWhitelistedFromHardlocked(packageName: String) {
@@ -340,7 +357,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     override fun onModifySubEntryToHardlockedFromDefault(packageName: String) {
         Timber.d("Hardlocked from default subentry for $packageName")
-        refreshList(packageName = packageName, locked = null, whitelisted = null, hardlocked = true)
+        refreshList(packageName = packageName, locked = null, whitelisted = null,
+                hardlocked = true)
     }
 
     override fun onModifySubEntryToHardlockedFromWhitelisted(packageName: String) {
@@ -429,7 +447,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
             Timber.d("We have refreshed")
             presenter.showOnBoarding()
 
-            lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
+            lastPosition = ListStateUtil.restorePosition(lastPosition,
+                    binding.applistRecyclerview)
         } else {
             binding.applistRecyclerview.visibility = View.GONE
             binding.applistEmpty.visibility = View.VISIBLE

@@ -23,7 +23,6 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
-import android.view.MenuItem
 import com.pyamsoft.backstack.BackStack
 import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
@@ -34,6 +33,7 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
+import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.sec.TamperActivity
 import com.pyamsoft.pydroid.ui.util.AnimUtil
 import com.pyamsoft.pydroid.util.AppUtil
@@ -78,7 +78,7 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
         Injector.obtain<PadLockComponent>(applicationContext).inject(this)
 
-        setAppBarState()
+        setupToolbar()
 
         presenter.bind(this)
     }
@@ -123,10 +123,16 @@ class MainActivity : TamperActivity(), MainPresenter.View {
         }
     }
 
-    private fun setAppBarState() {
-        setSupportActionBar(binding.toolbar)
-        binding.toolbar.title = getString(R.string.app_name)
-        ViewCompat.setElevation(binding.toolbar, AppUtil.convertToDP(this, 4f))
+    private fun setupToolbar() {
+        binding.toolbar.apply {
+            setToolbar(this)
+            setTitle(R.string.app_name)
+            ViewCompat.setElevation(this, AppUtil.convertToDP(context, 4f))
+
+            setNavigationOnClickListener(DebouncedOnClickListener.create {
+                onBackPressed()
+            })
+        }
     }
 
     override fun onDestroy() {
@@ -141,18 +147,6 @@ class MainActivity : TamperActivity(), MainPresenter.View {
         if (!backstack.back()) {
             super.onBackPressed()
         }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val handled: Boolean
-        when (item.itemId) {
-            android.R.id.home -> {
-                handled = true
-                onBackPressed()
-            }
-            else -> handled = false
-        }
-        return handled
     }
 
     override fun onPostResume() {

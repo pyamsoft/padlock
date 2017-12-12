@@ -40,6 +40,7 @@ import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -181,8 +182,10 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
     override fun onResume() {
         super.onResume()
-        setActionBarUpEnabled(false)
-        setActionBarTitle(R.string.app_name)
+        toolbarActivity.withToolbar {
+            it.setTitle(R.string.app_name)
+            it.setUpEnabled(false)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {

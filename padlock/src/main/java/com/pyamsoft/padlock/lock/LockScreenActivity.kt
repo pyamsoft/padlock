@@ -28,7 +28,6 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
-import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
 import com.pyamsoft.backstack.BackStack
@@ -44,6 +43,7 @@ import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.app.activity.DisposableActivity
+import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
@@ -75,8 +75,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     private var menuIgnoreSixty: MenuItem? = null
     internal var menuExclude: MenuItem? = null
     private lateinit var backstack: BackStack
-
-    override val shouldConfirmBackPress: Boolean = false
 
     override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
@@ -122,7 +120,7 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
         populateIgnoreTimes()
         getValuesFromBundle()
-        setupActionBar()
+        setupToolbar()
 
         Injector.obtain<PadLockComponent>(applicationContext).plusLockScreenComponent(
                 LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
@@ -135,9 +133,48 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         presenter.bind(this)
     }
 
-    private fun setupActionBar() {
-        setSupportActionBar(binding.toolbar)
-        ViewCompat.setElevation(binding.toolbar, 0f)
+    private fun setupToolbar() {
+        val self = this
+        binding.toolbar.apply {
+            setToolbar(this)
+            ViewCompat.setElevation(this, 0f)
+
+            setNavigationOnClickListener(DebouncedOnClickListener.create { onBackPressed() })
+
+            inflateMenu(R.menu.lockscreen_menu)
+            menu.let {
+                menuIgnoreOne = it.findItem(R.id.menu_ignore_one)
+                menuIgnoreFive = it.findItem(R.id.menu_ignore_five)
+                menuIgnoreTen = it.findItem(R.id.menu_ignore_ten)
+                menuIgnoreFifteen = it.findItem(R.id.menu_ignore_fifteen)
+                menuIgnoreTwenty = it.findItem(R.id.menu_ignore_twenty)
+                menuIgnoreThirty = it.findItem(R.id.menu_ignore_thirty)
+                menuIgnoreFourtyFive = it.findItem(R.id.menu_ignore_fourtyfive)
+                menuIgnoreSixty = it.findItem(R.id.menu_ignore_sixty)
+                menuExclude = it.findItem(R.id.menu_exclude)
+            }
+
+            menuExclude.setChecked(excludeEntry)
+            presenter.createWithDefaultIgnoreTime()
+
+            setOnMenuItemClickListener {
+                val itemId = it.itemId
+                when (itemId) {
+                    R.id.menu_exclude -> it.isChecked = !it.isChecked
+                    R.id.menu_lockscreen_info -> {
+                        DialogUtil.guaranteeSingleDialogFragment(self,
+                                LockedStatDialog.newInstance(binding.toolbar.title.toString(),
+                                        lockedPackageName,
+                                        lockedActivityName, lockedRealName, lockedSystem,
+                                        binding.lockImage.drawable),
+                                "info_dialog")
+                    }
+                    else -> it.isChecked = true
+
+                }
+                return@setOnMenuItemClickListener true
+            }
+        }
     }
 
     private fun populateIgnoreTimes() {
@@ -249,28 +286,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         super.onSaveInstanceState(outState)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu.let {
-            menuInflater.inflate(R.menu.lockscreen_menu, it)
-            menuIgnoreOne = it.findItem(R.id.menu_ignore_one)
-            menuIgnoreFive = it.findItem(R.id.menu_ignore_five)
-            menuIgnoreTen = it.findItem(R.id.menu_ignore_ten)
-            menuIgnoreFifteen = it.findItem(R.id.menu_ignore_fifteen)
-            menuIgnoreTwenty = it.findItem(R.id.menu_ignore_twenty)
-            menuIgnoreThirty = it.findItem(R.id.menu_ignore_thirty)
-            menuIgnoreFourtyFive = it.findItem(R.id.menu_ignore_fourtyfive)
-            menuIgnoreSixty = it.findItem(R.id.menu_ignore_sixty)
-            menuExclude = it.findItem(R.id.menu_exclude)
-        }
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menuExclude.setChecked(excludeEntry)
-        presenter.createWithDefaultIgnoreTime()
-        return super.onPrepareOptionsMenu(menu)
-    }
-
     override fun onInitializeWithIgnoreTime(time: Long) {
         val apply: Long
         if (ignorePeriod == -1L) {
@@ -295,21 +310,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                 menuIgnoreOne.setChecked(true)
             }
         }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val itemId = item.itemId
-        when (itemId) {
-            R.id.menu_exclude -> item.isChecked = !item.isChecked
-            R.id.menu_lockscreen_info -> DialogUtil.guaranteeSingleDialogFragment(this,
-                    LockedStatDialog.newInstance(binding.toolbar.title.toString(),
-                            lockedPackageName,
-                            lockedActivityName, lockedRealName, lockedSystem,
-                            binding.lockImage.drawable),
-                    "info_dialog")
-            else -> item.isChecked = true
-        }
-        return true
     }
 
     companion object {

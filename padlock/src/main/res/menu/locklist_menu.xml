@@ -24,10 +24,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
 
-  <item
-      android:id="@+id/menu_is_system"
-      android:checkable="true"
-      android:title="@string/show_system_applications"
-      app:showAsAction="never"/>
+  <group android:id="@+id/menu_group_list_system">
+
+    <item
+        android:id="@+id/menu_is_system"
+        android:checkable="true"
+        android:title="@string/show_system_applications"
+        app:showAsAction="never"/>
+
+  </group>
+
 
 </menu>
