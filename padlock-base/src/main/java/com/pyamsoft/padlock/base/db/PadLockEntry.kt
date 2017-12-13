@@ -31,12 +31,12 @@ import com.squareup.sqldelight.SqlDelightStatement
 
     @AutoValue abstract class WithPackageName : PadLockEntryModel.With_package_nameModel
 
-    class InsertManager internal constructor(openHelper: SQLiteOpenHelper) {
+    internal class InsertManager internal constructor(openHelper: SQLiteOpenHelper) {
 
         private val insertEntry = PadLockEntryModel.Insert_entry(openHelper.writableDatabase)
 
         @CheckResult
-        fun executeProgram(padLockEntry: PadLockEntry): Long {
+        internal fun executeProgram(padLockEntry: PadLockEntry): Long {
             insertEntry.bind(padLockEntry.packageName(), padLockEntry.activityName(),
                     padLockEntry.lockCode(), padLockEntry.lockUntilTime(),
                     padLockEntry.ignoreUntilTime(),
@@ -45,62 +45,62 @@ import com.squareup.sqldelight.SqlDelightStatement
         }
     }
 
-    class DeletePackageManager internal constructor(openHelper: SQLiteOpenHelper) {
+    internal class DeletePackageManager internal constructor(openHelper: SQLiteOpenHelper) {
 
         private val deletePackage = PadLockEntryModel.Delete_with_package_name(
                 openHelper.writableDatabase)
 
         @CheckResult
-        fun executeProgram(packageName: String): Int {
+        internal fun executeProgram(packageName: String): Int {
             deletePackage.bind(packageName)
             return deletePackage.program.executeUpdateDelete()
         }
     }
 
-    class DeletePackageActivityManager internal constructor(openHelper: SQLiteOpenHelper) {
+    internal class DeletePackageActivityManager internal constructor(openHelper: SQLiteOpenHelper) {
 
         private val deletePackageActivity = PadLockEntryModel.Delete_with_package_activity_name(
                 openHelper.writableDatabase)
 
         @CheckResult
-        fun executeProgram(packageName: String, activityName: String): Int {
+        internal fun executeProgram(packageName: String, activityName: String): Int {
             deletePackageActivity.bind(packageName, activityName)
             return deletePackageActivity.program.executeUpdateDelete()
         }
     }
 
-    class UpdateLockTimeManager internal constructor(openHelper: SQLiteOpenHelper) {
+    internal class UpdateLockTimeManager internal constructor(openHelper: SQLiteOpenHelper) {
 
         private val updateLockUntilTime = PadLockEntryModel.Update_lock_until_time(
                 openHelper.writableDatabase)
 
         @CheckResult
-        fun executeProgram(time: Long, packageName: String,
+        internal fun executeProgram(time: Long, packageName: String,
                 activityName: String): Int {
             updateLockUntilTime.bind(time, packageName, activityName)
             return updateLockUntilTime.program.executeUpdateDelete()
         }
     }
 
-    class UpdateIgnoreTimeManager internal constructor(openHelper: SQLiteOpenHelper) {
+    internal class UpdateIgnoreTimeManager internal constructor(openHelper: SQLiteOpenHelper) {
 
         private val updateIgnoreUntilTime = PadLockEntryModel.Update_ignore_until_time(
                 openHelper.writableDatabase)
 
         @CheckResult
-        fun executeProgram(time: Long, packageName: String,
+        internal fun executeProgram(time: Long, packageName: String,
                 activityName: String): Int {
             updateIgnoreUntilTime.bind(time, packageName, activityName)
             return updateIgnoreUntilTime.program.executeUpdateDelete()
         }
     }
 
-    class UpdateWhitelistManager internal constructor(openHelper: SQLiteOpenHelper) {
+    internal class UpdateWhitelistManager internal constructor(openHelper: SQLiteOpenHelper) {
         private val updateWhitelist = PadLockEntryModel.Update_whitelist(
                 openHelper.writableDatabase)
 
         @CheckResult
-        fun executeProgram(whitelist: Boolean, packageName: String,
+        internal fun executeProgram(whitelist: Boolean, packageName: String,
                 activityName: String): Int {
             updateWhitelist.bind(whitelist, packageName, activityName)
             return updateWhitelist.program.executeUpdateDelete()
@@ -117,15 +117,10 @@ import com.squareup.sqldelight.SqlDelightStatement
         const internal val ACTIVITY_EMPTY = "EMPTY"
 
         private var insertManager: InsertManager? = null
-
         private var deletePackageManager: DeletePackageManager? = null
-
         private var deletePackageActivityManager: DeletePackageActivityManager? = null
-
         private var updateLockTimeManager: UpdateLockTimeManager? = null
-
         private var updateIgnoreTimeManager: UpdateIgnoreTimeManager? = null
-
         private var updateWhitelistManager: UpdateWhitelistManager? = null
 
         val EMPTY: PadLockEntry by lazy {
