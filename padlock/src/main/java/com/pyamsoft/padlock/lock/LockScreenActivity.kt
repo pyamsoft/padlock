@@ -113,24 +113,28 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         setTheme(R.style.Theme_PadLock_Light_Lock)
         overridePendingTransition(0, 0)
         super.onCreate(savedInstanceState)
-
         backstack = BackStack.create(this, R.id.lock_screen_container)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_lock)
-        PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
-        populateIgnoreTimes()
-        getValuesFromBundle()
-        setupToolbar()
-
+        preInjectOnCreate()
         Injector.obtain<PadLockComponent>(applicationContext).plusLockScreenComponent(
                 LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
-
-        appIcon = LoaderHelper.unload(appIcon)
-        appIcon = appIconLoader.forPackageName(lockedPackageName).into(binding.lockImage)
-
-        Timber.d("onCreate LockScreenActivity for $lockedPackageName $lockedRealName")
+        postInjectOnCreate()
 
         presenter.bind(this)
+    }
+
+    private fun preInjectOnCreate() {
+        PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
+        getValuesFromBundle()
+    }
+
+    private fun postInjectOnCreate() {
+        appIcon = LoaderHelper.unload(appIcon)
+        appIcon = appIconLoader.forPackageName(lockedPackageName).into(binding.lockImage)
+        populateIgnoreTimes()
+        setupToolbar()
+        Timber.d("onCreate LockScreenActivity for $lockedPackageName $lockedRealName")
     }
 
     private fun setupToolbar() {
