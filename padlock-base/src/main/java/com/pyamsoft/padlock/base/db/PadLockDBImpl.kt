@@ -35,8 +35,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton internal class PadLockDBImpl @Inject internal constructor(context: Context,
-        @param:Named(
-                "io") private val scheduler: Scheduler) : PadLockDBInsert, PadLockDBUpdate,
+        @param:Named("io") private val scheduler: Scheduler) : PadLockDBInsert, PadLockDBUpdate,
         PadLockDBQuery, PadLockDBDelete {
 
     private var briteDatabase: BriteDatabase? = null
@@ -73,9 +72,7 @@ import javax.inject.Singleton
             Timber.d("Delete result: %d", deleteResult)
             return@fromCallable entry
         }.flatMapCompletable {
-            Completable.fromCallable {
-                PadLockEntry.insertEntry(openHelper).executeProgram(it)
-            }
+            Completable.fromAction { PadLockEntry.insertEntry(openHelper).executeProgram(it) }
         }
     }
 
@@ -178,9 +175,9 @@ import javax.inject.Singleton
     @CheckResult override fun deleteAll(): Completable {
         return Completable.fromAction {
             Timber.i("DB: DELETE ALL")
-            val db = openDatabase()
-            db.execute(PadLockEntryModel.DELETE_ALL)
-            db.close()
+            openDatabase().use {
+                it.execute(PadLockEntryModel.DELETE_ALL)
+            }
         }.andThen(Completable.fromAction { openHelper.deleteDatabase() })
                 .andThen(Completable.fromAction { briteDatabase = null })
                 .andThen(Completable.fromAction { PadLockEntry.reset() })
