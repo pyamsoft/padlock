@@ -91,15 +91,15 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         var index: Int
         try {
             index = when {
-                menuIgnoreOne.isChecked() -> 1
-                menuIgnoreFive.isChecked() -> 2
-                menuIgnoreTen.isChecked() -> 3
-                menuIgnoreFifteen.isChecked() -> 4
-                menuIgnoreTwenty.isChecked() -> 5
-                menuIgnoreThirty.isChecked() -> 6
-                menuIgnoreFourtyFive.isChecked() -> 7
-                menuIgnoreSixty.isChecked() -> 8
-                else -> 1
+                menuIgnoreOne.isChecked() -> 0
+                menuIgnoreFive.isChecked() -> 1
+                menuIgnoreTen.isChecked() -> 2
+                menuIgnoreFifteen.isChecked() -> 3
+                menuIgnoreTwenty.isChecked() -> 4
+                menuIgnoreThirty.isChecked() -> 5
+                menuIgnoreFourtyFive.isChecked() -> 6
+                menuIgnoreSixty.isChecked() -> 7
+                else -> 0
             }
         } catch (e: NullPointerException) {
             Timber.w("NULL menu item, default to 1")
