@@ -158,7 +158,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     companion object {
 
         const val TAG = "PinEntryDialog"
-        const private val ENTRY_PACKAGE_NAME = "entry_packagename"
+        private const val ENTRY_PACKAGE_NAME = "entry_packagename"
 
         @JvmStatic
         @CheckResult

@@ -211,9 +211,9 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
     companion object {
 
-        const internal val TAG = "PinEntryPatternFragment"
-        const private val REPEAT_CELL_PATTERN = "repeat_cell_pattern"
-        const private val PATTERN_TEXT = "pattern_text"
+        internal const val TAG = "PinEntryPatternFragment"
+        private const val REPEAT_CELL_PATTERN = "repeat_cell_pattern"
+        private const val PATTERN_TEXT = "pattern_text"
         @JvmField internal var MINIMUM_PATTERN_LENGTH = 4
     }
 }

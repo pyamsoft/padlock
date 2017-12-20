@@ -113,8 +113,8 @@ import com.squareup.sqldelight.SqlDelightStatement
          * The activity name of the PACKAGE entry in the database
          */
         const val PACKAGE_ACTIVITY_NAME = "PACKAGE"
-        const internal val PACKAGE_EMPTY = "EMPTY"
-        const internal val ACTIVITY_EMPTY = "EMPTY"
+        internal const val PACKAGE_EMPTY = "EMPTY"
+        internal const val ACTIVITY_EMPTY = "EMPTY"
 
         private var insertManager: InsertManager? = null
         private var deletePackageManager: DeletePackageManager? = null

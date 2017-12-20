@@ -224,10 +224,10 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
     companion object {
 
-        const internal val TAG = "PinEntryTextFragment"
-        const private val CODE_DISPLAY = "CODE_DISPLAY"
-        const private val CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY"
-        const private val HINT_DISPLAY = "HINT_DISPLAY"
+        internal const val TAG = "PinEntryTextFragment"
+        private const val CODE_DISPLAY = "CODE_DISPLAY"
+        private const val CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY"
+        private const val HINT_DISPLAY = "HINT_DISPLAY"
     }
 }
 

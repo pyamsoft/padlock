@@ -318,8 +318,8 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
 
     companion object {
 
-        const private val KEY_IGNORE_TIME = "key_ignore_time"
-        const private val KEY_EXCLUDE = "key_exclude"
+        private const val KEY_IGNORE_TIME = "key_ignore_time"
+        private const val KEY_EXCLUDE = "key_exclude"
         const val ENTRY_PACKAGE_NAME = "entry_packagename"
         const val ENTRY_ACTIVITY_NAME = "entry_activityname"
         const val ENTRY_REAL_NAME = "real_name"

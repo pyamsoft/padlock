@@ -57,7 +57,7 @@ class PurgeSingleItemDialog : CanaryDialog() {
 
     companion object {
 
-        const private val PACKAGE = "package_name"
+        private const val PACKAGE = "package_name"
 
         @CheckResult
         @JvmStatic

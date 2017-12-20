@@ -87,12 +87,12 @@ class LockedStatDialog : CanaryDialog() {
 
     companion object {
 
-        const private val PKG_NAME = "pkgname"
-        const private val ACT_NAME = "actname"
-        const private val REAL_NAME = "realname"
-        const private val SYSTEM = "system"
-        const private val LABEL = "label"
-        const private val IMAGE = "image"
+        private const val PKG_NAME = "pkgname"
+        private const val ACT_NAME = "actname"
+        private const val REAL_NAME = "realname"
+        private const val SYSTEM = "system"
+        private const val LABEL = "label"
+        private const val IMAGE = "image"
 
         @CheckResult
         @JvmStatic

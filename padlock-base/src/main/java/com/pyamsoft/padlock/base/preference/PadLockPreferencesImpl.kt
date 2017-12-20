@@ -137,11 +137,11 @@ import javax.inject.Singleton
 
     companion object {
 
-        const private val IS_SYSTEM = "is_system"
-        const private val MASTER_PASSWORD = "master_password"
-        const private val HINT = "hint"
-        const private val AGREED = "agreed"
-        const private val LOCK_LIST_ONBOARD = "list_onboard"
-        const private val LOCK_DIALOG_ONBOARD = "dialog_onboard"
+        private const val IS_SYSTEM = "is_system"
+        private const val MASTER_PASSWORD = "master_password"
+        private const val HINT = "hint"
+        private const val AGREED = "agreed"
+        private const val LOCK_LIST_ONBOARD = "list_onboard"
+        private const val LOCK_DIALOG_ONBOARD = "dialog_onboard"
     }
 }

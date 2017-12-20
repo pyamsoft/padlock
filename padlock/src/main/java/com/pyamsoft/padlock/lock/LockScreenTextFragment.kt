@@ -209,8 +209,8 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
     companion object {
 
-        const internal val TAG = "LockScreenTextFragment"
-        const private val CODE_DISPLAY = "CODE_DISPLAY"
+        internal const val TAG = "LockScreenTextFragment"
+        private const val CODE_DISPLAY = "CODE_DISPLAY"
 
         @JvmStatic
         @CheckResult

@@ -27,7 +27,7 @@ import com.pyamsoft.pydroid.data.Cache
 
 object ListStateUtil : Cache {
 
-    const private val KEY_CURRENT_POSITION: String = "key_current_position"
+    private const val KEY_CURRENT_POSITION: String = "key_current_position"
     private val cache: MutableMap<String, Int> = LinkedHashMap()
 
     @JvmStatic

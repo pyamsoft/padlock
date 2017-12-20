@@ -37,7 +37,6 @@ import javax.inject.Singleton
         } catch (e: NoSuchAlgorithmException) {
             throw RuntimeException("Could not create SHA-256 Digest", e)
         }
-
     }
 
     override fun checkSubmissionAttempt(attempt: String, encodedPin: String): Single<Boolean> =
