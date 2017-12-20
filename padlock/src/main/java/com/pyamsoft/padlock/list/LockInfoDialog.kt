@@ -51,6 +51,7 @@ import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
+import com.pyamsoft.pydroid.ui.helper.postWith
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.util.AppUtil
@@ -220,41 +221,44 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     }
 
     override fun onListPopulated() {
-        adapter.retainAll(backingSet)
-        if (adapter.adapterItemCount > 0) {
-            binding.apply {
-                lockInfoEmpty.visibility = View.GONE
-                lockInfoRecycler.visibility = View.VISIBLE
-            }
+        binding.lockInfoRecycler.postWith {
+            if (view != null) {
+                adapter.retainAll(backingSet)
+                if (adapter.adapterItemCount > 0) {
+                    binding.lockInfoEmpty.visibility = View.GONE
+                    it.visibility = View.VISIBLE
 
-            Timber.d("Refresh finished")
-            presenter.showOnBoarding()
+                    Timber.d("Refresh finished")
+                    presenter.showOnBoarding()
 
-            lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
-        } else {
-            binding.apply {
-                lockInfoRecycler.visibility = View.GONE
-                lockInfoEmpty.visibility = View.VISIBLE
+                    lastPosition = ListStateUtil.restorePosition(lastPosition, it)
+                } else {
+                    it.visibility = View.GONE
+                    binding.lockInfoEmpty.visibility = View.VISIBLE
+                    Toasty.makeText(it.context,
+                            "Error while loading list. Please try again.",
+                            Toast.LENGTH_SHORT).show()
+                }
+
+                setRefreshing(false)
             }
-            Toasty.makeText(binding.lockInfoToolbar.context,
-                    "Error while loading list. Please try again.",
-                    Toast.LENGTH_SHORT).show()
         }
-
-        setRefreshing(false)
     }
 
     override fun onEntryAddedToList(entry: ActivityEntry) {
         backingSet.add(entry)
 
         var update = false
-        for (index in adapter.adapterItems.indices) {
-            val item: LockInfoItem = adapter.adapterItems[index]
+        for ((index, item) in adapter.adapterItems.withIndex()) {
             if (item.model.id == entry.id) {
                 update = true
                 if (item.model != entry) {
                     publishLockStateUpdates(item.model, entry)
-                    adapter.set(index, entry)
+                    binding.lockInfoRecycler.postWith {
+                        if (view != null) {
+                            adapter.set(index, entry)
+                        }
+                    }
                 }
                 break
             }
@@ -267,19 +271,26 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             }
 
             var added = false
-            for (index in adapter.adapterItems.indices) {
-                val item: LockInfoItem = adapter.adapterItems[index]
+            for ((index, item) in adapter.adapterItems.withIndex()) {
                 // The entry should go before this one
                 if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
                     added = true
-                    adapter.add(index, entry)
+                    binding.lockInfoRecycler.postWith {
+                        if (view != null) {
+                            adapter.add(index, entry)
+                        }
+                    }
                     break
                 }
             }
 
             if (!added) {
                 // add at the end of the list
-                adapter.add(entry)
+                binding.lockInfoRecycler.postWith {
+                    if (view != null) {
+                        adapter.add(entry)
+                    }
+                }
             }
         }
     }

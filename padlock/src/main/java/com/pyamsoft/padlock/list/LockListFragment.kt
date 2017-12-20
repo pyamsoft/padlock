@@ -48,6 +48,7 @@ import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
+import com.pyamsoft.pydroid.ui.helper.postWith
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.AnimUtil
 import com.pyamsoft.pydroid.ui.util.DialogUtil
@@ -285,7 +286,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         }
     }
 
-    private fun refreshList(packageName: String, locked: Boolean? = null,
+    private fun refreshListEntry(packageName: String, locked: Boolean? = null,
             whitelisted: Boolean? = null, hardlocked: Boolean? = null) {
         for (i in adapter.adapterItems.indices) {
             val item: LockListItem = adapter.getAdapterItem(i)
@@ -317,13 +318,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     override fun onModifyEntryCreated(packageName: String) {
         Timber.d("Created entry for $packageName")
-        refreshList(packageName = packageName, locked = true, whitelisted = null,
+        refreshListEntry(packageName = packageName, locked = true, whitelisted = null,
                 hardlocked = null)
     }
 
     override fun onModifyEntryDeleted(packageName: String) {
         Timber.d("Deleted entry for $packageName")
-        refreshList(packageName = packageName, locked = false, whitelisted = null,
+        refreshListEntry(packageName = packageName, locked = false, whitelisted = null,
                 hardlocked = null)
     }
 
@@ -333,37 +334,37 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     override fun onModifySubEntryToDefaultFromWhitelisted(packageName: String) {
         Timber.d("Defaulted from whitelist subentry for $packageName")
-        refreshList(packageName = packageName, locked = null, whitelisted = false,
+        refreshListEntry(packageName = packageName, locked = null, whitelisted = false,
                 hardlocked = null)
     }
 
     override fun onModifySubEntryToDefaultFromHardlocked(packageName: String) {
         Timber.d("Defaulted from hardlock subentry for $packageName")
-        refreshList(packageName = packageName, locked = null, whitelisted = null,
+        refreshListEntry(packageName = packageName, locked = null, whitelisted = null,
                 hardlocked = false)
     }
 
     override fun onModifySubEntryToWhitelistedFromDefault(packageName: String) {
         Timber.d("Whitelisted from default subentry for $packageName")
-        refreshList(packageName = packageName, locked = null, whitelisted = true,
+        refreshListEntry(packageName = packageName, locked = null, whitelisted = true,
                 hardlocked = null)
     }
 
     override fun onModifySubEntryToWhitelistedFromHardlocked(packageName: String) {
         Timber.d("Whitelisted from hardlock subentry for $packageName")
-        refreshList(packageName = packageName, locked = null, whitelisted = true,
+        refreshListEntry(packageName = packageName, locked = null, whitelisted = true,
                 hardlocked = false)
     }
 
     override fun onModifySubEntryToHardlockedFromDefault(packageName: String) {
         Timber.d("Hardlocked from default subentry for $packageName")
-        refreshList(packageName = packageName, locked = null, whitelisted = null,
+        refreshListEntry(packageName = packageName, locked = null, whitelisted = null,
                 hardlocked = true)
     }
 
     override fun onModifySubEntryToHardlockedFromWhitelisted(packageName: String) {
         Timber.d("Hardlocked from whitelisted subentry for $packageName")
-        refreshList(packageName = packageName, locked = null, whitelisted = false,
+        refreshListEntry(packageName = packageName, locked = null, whitelisted = false,
                 hardlocked = true)
     }
 
@@ -404,12 +405,15 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         backingSet.add(entry)
 
         var update = false
-        for (index in adapter.adapterItems.indices) {
-            val item: LockListItem = adapter.adapterItems[index]
+        for ((index, item) in adapter.adapterItems.withIndex()) {
             if (item.model.packageName == entry.packageName) {
                 update = true
                 if (item.model != entry) {
-                    adapter.set(index, entry)
+                    binding.applistRecyclerview.postWith {
+                        if (view != null) {
+                            adapter.set(index, entry)
+                        }
+                    }
                 }
                 break
             }
@@ -422,41 +426,51 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
             }
 
             var added = false
-            for (index in adapter.adapterItems.indices) {
-                val item: LockListItem = adapter.adapterItems[index]
+            for ((index, item) in adapter.adapterItems.withIndex()) {
                 // The entry should go before this one
                 if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
                     added = true
-                    adapter.add(index, entry)
+                    binding.applistRecyclerview.postWith {
+                        if (view != null) {
+                            adapter.add(index, entry)
+                        }
+                    }
                     break
                 }
             }
 
             if (!added) {
                 // add at the end of the list
-                adapter.add(entry)
+                binding.applistRecyclerview.postWith {
+                    if (view != null) {
+                        adapter.add(entry)
+                    }
+                }
             }
         }
     }
 
     override fun onListPopulated() {
-        adapter.retainAll(backingSet)
-        if (adapter.adapterItemCount > 0) {
-            binding.applistEmpty.visibility = View.GONE
-            binding.applistRecyclerview.visibility = View.VISIBLE
-            Timber.d("We have refreshed")
-            presenter.showOnBoarding()
+        binding.applistRecyclerview.postWith {
+            if (view != null) {
+                adapter.retainAll(backingSet)
+                if (adapter.adapterItemCount > 0) {
+                    binding.applistEmpty.visibility = View.GONE
+                    it.visibility = View.VISIBLE
+                    Timber.d("We have refreshed")
+                    presenter.showOnBoarding()
 
-            lastPosition = ListStateUtil.restorePosition(lastPosition,
-                    binding.applistRecyclerview)
-        } else {
-            binding.applistRecyclerview.visibility = View.GONE
-            binding.applistEmpty.visibility = View.VISIBLE
-            Toasty.makeText(context!!, "Error while loading list. Please try again.",
-                    Toast.LENGTH_SHORT).show()
+                    lastPosition = ListStateUtil.restorePosition(lastPosition, it)
+                } else {
+                    it.visibility = View.GONE
+                    binding.applistEmpty.visibility = View.VISIBLE
+                    Toasty.makeText(it.context, "Error while loading list. Please try again.",
+                            Toast.LENGTH_SHORT).show()
+                }
+
+                setRefreshing(false)
+            }
         }
-
-        setRefreshing(false)
     }
 
     override fun onListPopulateError(throwable: Throwable) {

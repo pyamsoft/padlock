@@ -39,6 +39,7 @@ import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
+import com.pyamsoft.pydroid.ui.helper.postWith
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
@@ -118,23 +119,30 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     }
 
     override fun onRetrieveComplete() {
-        adapter.retainAll(backingSet)
-        lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
-        decideListState()
-        binding.purgeSwipeRefresh.refreshing(false)
+        binding.purgeList.postWith {
+            if (view != null) {
+                adapter.retainAll(backingSet)
+                lastPosition = ListStateUtil.restorePosition(lastPosition, it)
+                decideListState()
+                binding.purgeSwipeRefresh.refreshing(false)
+            }
+        }
     }
 
     override fun onRetrievedStale(packageName: String) {
         backingSet.add(packageName)
 
         var update = false
-        for (index in adapter.adapterItems.indices) {
-            val item: PurgeItem = adapter.adapterItems[index]
+        for ((index, item) in adapter.adapterItems.withIndex()) {
             if (item.model == packageName) {
                 update = true
                 // Won't happen ever right now, keep in case the model gets more complex in future
                 if (item.model != packageName) {
-                    adapter.set(index, packageName)
+                    binding.purgeList.postWith {
+                        if (view != null) {
+                            adapter.set(index, packageName)
+                        }
+                    }
                 }
                 break
             }
@@ -147,19 +155,26 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
             }
 
             var added = false
-            for (index in adapter.adapterItems.indices) {
-                val item: PurgeItem = adapter.adapterItems[index]
+            for ((index, item) in adapter.adapterItems.withIndex()) {
                 // The entry should go before this one
                 if (packageName.compareTo(item.model, ignoreCase = true) < 0) {
                     added = true
-                    adapter.add(index, packageName)
+                    binding.purgeList.postWith {
+                        if (view != null) {
+                            adapter.add(index, packageName)
+                        }
+                    }
                     break
                 }
             }
 
             if (!added) {
                 // add at the end of the list
-                adapter.add(packageName)
+                binding.purgeList.postWith {
+                    if (view != null) {
+                        adapter.add(packageName)
+                    }
+                }
             }
         }
     }
