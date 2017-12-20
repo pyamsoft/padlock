@@ -63,7 +63,7 @@ class ConfirmationDialog : CanaryDialog() {
 
     companion object {
 
-        const private val WHICH = "which_type"
+        private const val WHICH = "which_type"
 
         @CheckResult
         @JvmStatic

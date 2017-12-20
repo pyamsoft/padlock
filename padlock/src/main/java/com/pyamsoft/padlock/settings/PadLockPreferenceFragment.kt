@@ -71,7 +71,6 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
         val installListener = findPreference(getString(R.string.install_listener_key))
         lockType = findPreference(getString(R.string.lock_screen_type_key)) as ListPreference
 
-
         clearDb.setOnPreferenceClickListener {
             Timber.d("Clear DB onClick")
             DialogUtil.guaranteeSingleDialogFragment(activity,

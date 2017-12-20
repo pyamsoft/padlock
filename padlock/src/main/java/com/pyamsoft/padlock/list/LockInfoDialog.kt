@@ -331,10 +331,10 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
     companion object {
 
-        const internal val TAG = "LockInfoDialog"
-        const private val ARG_APP_PACKAGE_NAME = "app_packagename"
-        const private val ARG_APP_NAME = "app_name"
-        const private val ARG_APP_SYSTEM = "app_system"
+        internal const val TAG = "LockInfoDialog"
+        private const val ARG_APP_PACKAGE_NAME = "app_packagename"
+        private const val ARG_APP_NAME = "app_name"
+        private const val ARG_APP_SYSTEM = "app_system"
 
         @CheckResult
         @JvmStatic

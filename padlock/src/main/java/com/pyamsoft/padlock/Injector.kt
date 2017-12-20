@@ -24,7 +24,7 @@ import android.support.annotation.CheckResult
 
 object Injector {
 
-    const internal val name: String = "com.pyamsoft.padlock.INJECTOR"
+    internal const val name: String = "com.pyamsoft.padlock.INJECTOR"
 
     @JvmStatic
     @CheckResult
