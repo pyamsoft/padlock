@@ -32,21 +32,21 @@ class MainPresenter @Inject internal constructor(private val interactor: MainInt
         computationScheduler,
         ioScheduler, mainScheduler) {
 
-    override fun onBind(v: View) {
-        super.onBind(v)
-        showOnboardingOrDefault(v)
+    override fun onCreate() {
+        super.onCreate()
+        showOnboardingOrDefault()
     }
 
-    private fun showOnboardingOrDefault(v: MainCallback) {
+    private fun showOnboardingOrDefault() {
         dispose {
             interactor.isOnboardingComplete()
                     .subscribeOn(ioScheduler)
                     .observeOn(mainThreadScheduler)
                     .subscribe({
                         if (it) {
-                            v.onShowDefaultPage()
+                            view?.onShowDefaultPage()
                         } else {
-                            v.onShowOnboarding()
+                            view?.onShowOnboarding()
                         }
                     }, { Timber.e(it, "onError") })
         }

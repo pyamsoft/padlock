@@ -35,7 +35,6 @@ import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
 import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
@@ -49,8 +48,6 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     private var editText: EditText? = null
     @Inject internal lateinit var presenter: LockEntryPresenter
     @Inject internal lateinit var imageLoader: ImageLoader
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
     @CheckResult private fun getCurrentAttempt(): String = editText?.text?.toString() ?: ""
 
@@ -85,7 +82,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
         // Hide hint to begin with
         binding.lockDisplayHint.visibility = View.GONE
 
-        presenter.bind(this)
+        presenter.bind(viewLifecycle, this)
     }
 
     fun onRestoreInstanceState(savedInstanceState: Bundle) {

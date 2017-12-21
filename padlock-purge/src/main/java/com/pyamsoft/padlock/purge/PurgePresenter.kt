@@ -34,17 +34,22 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
                 "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
         ioScheduler, mainScheduler) {
 
-    override fun onBind(v: View) {
-        super.onBind(v)
-        registerOnBus(v)
+    override fun onCreate() {
+        super.onCreate()
+        registerOnBus()
     }
 
-    private fun registerOnBus(v: BusCallback) {
+    override fun onStart() {
+        super.onStart()
+        retrieveStaleApplications(false)
+    }
+
+    private fun registerOnBus() {
         dispose {
             purgeBus.listen()
                     .subscribeOn(ioScheduler)
                     .observeOn(mainThreadScheduler)
-                    .subscribe({ v.onPurge(it.packageName) }, {
+                    .subscribe({ view?.onPurge(it.packageName) }, {
                         Timber.e(it, "onError purge single")
                     })
         }
@@ -53,7 +58,7 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
             purgeAllBus.listen()
                     .subscribeOn(ioScheduler)
                     .observeOn(mainThreadScheduler)
-                    .subscribe({ v.onPurgeAll() }, {
+                    .subscribe({ view?.onPurgeAll() }, {
                         Timber.e(it, "onError purge all")
                     })
         }

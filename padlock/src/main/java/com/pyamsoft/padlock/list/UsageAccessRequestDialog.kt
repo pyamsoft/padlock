@@ -24,11 +24,8 @@ import android.support.v7.app.AlertDialog
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
-import com.pyamsoft.pydroid.presenter.Presenter
 
 class UsageAccessRequestDialog : CanaryDialog() {
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         activity!!.let {

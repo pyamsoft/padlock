@@ -16,23 +16,25 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.lock.screen
+package com.pyamsoft.padlock.lifecycle
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.model.LockScreenType
-import io.reactivex.Single
+import android.arch.lifecycle.Lifecycle.Event.ON_CREATE
+import android.arch.lifecycle.Lifecycle.Event.ON_DESTROY
+import android.arch.lifecycle.Lifecycle.Event.ON_PAUSE
+import android.arch.lifecycle.Lifecycle.Event.ON_RESUME
+import android.arch.lifecycle.Lifecycle.Event.ON_START
+import android.arch.lifecycle.Lifecycle.Event.ON_STOP
+import android.arch.lifecycle.LifecycleRegistry
 
-internal interface LockScreenInteractor {
-
-    @CheckResult
-    fun getLockScreenType(): Single<LockScreenType>
-
-    @CheckResult
-    fun getDefaultIgnoreTime(): Single<Long>
-
-    @CheckResult
-    fun getDisplayName(packageName: String): Single<String>
-
-    @CheckResult
-    fun isAlreadyUnlocked(packageName: String, activityName: String): Single<Boolean>
+fun LifecycleRegistry.fakeBind() {
+    handleLifecycleEvent(ON_CREATE)
+    handleLifecycleEvent(ON_START)
+    handleLifecycleEvent(ON_RESUME)
 }
+
+fun LifecycleRegistry.fakeRelease() {
+    handleLifecycleEvent(ON_PAUSE)
+    handleLifecycleEvent(ON_STOP)
+    handleLifecycleEvent(ON_DESTROY)
+}
+

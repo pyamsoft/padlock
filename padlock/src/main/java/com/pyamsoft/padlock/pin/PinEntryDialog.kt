@@ -34,7 +34,6 @@ import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.LoaderHelper
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.util.DrawableUtil
 import timber.log.Timber
@@ -48,8 +47,6 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     private lateinit var packageName: String
     private var appIcon = LoaderHelper.empty()
     private lateinit var backstack: BackStack
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,7 +95,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         // Start hidden
         binding.pinNextButtonLayout.visibility = View.GONE
 
-        presenter.bind(this)
+        presenter.bind(viewLifecycle, this)
     }
 
     override fun onStart() {

@@ -30,7 +30,6 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.LockCellUtil
 import com.pyamsoft.padlock.list.ErrorDialog
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
@@ -40,8 +39,6 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
     private lateinit var binding: FragmentLockScreenPatternBinding
     @field:Inject internal lateinit var presenter: LockEntryPresenter
     private var listener: PatternLockViewListener? = null
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +82,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
         binding.patternLock.isTactileFeedbackEnabled = false
         binding.patternLock.addPatternLockListener(listener)
 
-        presenter.bind(this)
+        presenter.bind(viewLifecycle, this)
     }
 
     override fun onSubmitSuccess() {

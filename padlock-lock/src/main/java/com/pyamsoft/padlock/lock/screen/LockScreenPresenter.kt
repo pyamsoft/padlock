@@ -28,8 +28,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockScreenPresenter @Inject internal constructor(
-        private val foregroundEventBus: EventBus<ForegroundEvent>,
-        private val lockScreenInputPresenter: LockScreenInputPresenter, @param:Named(
+        private val foregroundEventBus: EventBus<ForegroundEvent>, @param:Named(
                 "package_name") private val packageName: String,
         @param:Named("activity_name") private val activityName: String,
         @param:Named("real_name") private val realName: String,
@@ -40,36 +39,56 @@ class LockScreenPresenter @Inject internal constructor(
                 "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(
         computationScheduler, ioScheduler, mainScheduler) {
 
-    override fun onBind(v: View) {
-        super.onBind(v)
-        lockScreenInputPresenter.bind(v)
-        loadDisplayNameFromPackage(v)
-        closeOldAndAwaitSignal(v)
+    override fun onCreate() {
+        super.onCreate()
+        loadDisplayNameFromPackage()
+        closeOldAndAwaitSignal()
     }
 
-    override fun onUnbind() {
-        super.onUnbind()
-        lockScreenInputPresenter.unbind()
+    override fun onPause() {
+        super.onPause()
+        clearMatchingForegroundEvent()
     }
 
-    fun clearMatchingForegroundEvent() {
-        Timber.d("Publish foreground clear event for $packageName, $realName")
-        foregroundEventBus.publish(ForegroundEvent(packageName, realName))
+    override fun onResume() {
+        super.onResume()
+        checkIfAlreadyUnlocked()
     }
 
-    private fun loadDisplayNameFromPackage(v: NameCallback) {
+    private fun checkIfAlreadyUnlocked() {
+        Timber.d("Check if $packageName $activityName already unlocked")
         dispose {
-            interactor.getDisplayName(packageName)
+            interactor.isAlreadyUnlocked(packageName, activityName)
                     .subscribeOn(ioScheduler)
                     .observeOn(mainThreadScheduler)
-                    .subscribe({ v.onSetDisplayName(it) }, {
-                        Timber.e(it, "Error loading display name from package")
-                        v.onSetDisplayName("")
+                    .subscribe({
+                        if (it) {
+                            view?.onAlreadyUnlocked()
+                        }
+                    }, {
+                        Timber.e(it, "Error checking already unlocked state")
                     })
         }
     }
 
-    private fun closeOldAndAwaitSignal(v: OldCallback) {
+    private fun clearMatchingForegroundEvent() {
+        Timber.d("Publish foreground clear event for $packageName, $realName")
+        foregroundEventBus.publish(ForegroundEvent(packageName, realName))
+    }
+
+    private fun loadDisplayNameFromPackage() {
+        dispose {
+            interactor.getDisplayName(packageName)
+                    .subscribeOn(ioScheduler)
+                    .observeOn(mainThreadScheduler)
+                    .subscribe({ view?.onSetDisplayName(it) }, {
+                        Timber.e(it, "Error loading display name from package")
+                        view?.onSetDisplayName("")
+                    })
+        }
+    }
+
+    private fun closeOldAndAwaitSignal() {
         // Send bus event first before we register or we may catch our own event.
         bus.publish(CloseOldEvent(packageName, activityName))
 
@@ -81,7 +100,7 @@ class LockScreenPresenter @Inject internal constructor(
                     .subscribe({
                         Timber.w("Received a close old event: %s %s", it.packageName,
                                 it.activityName)
-                        v.onCloseOldReceived()
+                        view?.onCloseOldReceived()
                     }, {
                         Timber.e(it, "Error bus close old")
                     })
@@ -99,7 +118,7 @@ class LockScreenPresenter @Inject internal constructor(
         }
     }
 
-    interface View : NameCallback, OldCallback, IgnoreTimeCallback, LockScreenInputPresenter.View
+    interface View : NameCallback, OldCallback, IgnoreTimeCallback, AlreadyUnlockedCallback
 
     interface IgnoreTimeCallback {
 
@@ -114,5 +133,10 @@ class LockScreenPresenter @Inject internal constructor(
     interface OldCallback {
 
         fun onCloseOldReceived()
+    }
+
+    interface AlreadyUnlockedCallback {
+
+        fun onAlreadyUnlocked()
     }
 }

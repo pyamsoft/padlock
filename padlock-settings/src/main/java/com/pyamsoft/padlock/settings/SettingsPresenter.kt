@@ -42,13 +42,13 @@ class SettingsPresenter @Inject internal constructor(
         @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
         ioScheduler, mainScheduler) {
 
-    override fun onBind(v: View) {
-        super.onBind(v)
-        registerOnBus(v)
-        registerOnClearBus(v)
+    override fun onCreate() {
+        super.onCreate()
+        registerOnBus()
+        registerOnClearBus()
     }
 
-    private fun registerOnBus(v: ClearCallback) {
+    private fun registerOnBus() {
         dispose {
             bus.listen().flatMapSingle { type ->
                 when (type) {
@@ -58,8 +58,11 @@ class SettingsPresenter @Inject internal constructor(
             }.subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
                     .subscribe({
                         when (it) {
-                            DATABASE -> v.onClearDatabase()
-                            ALL -> v.onClearAll()
+                            DATABASE -> view?.onClearDatabase()
+                            ALL -> {
+                                publishFinish()
+                                view?.onClearAll()
+                            }
                             else -> throw IllegalArgumentException("Invalid enum: $it")
                         }
                     }, {
@@ -68,14 +71,14 @@ class SettingsPresenter @Inject internal constructor(
         }
     }
 
-    private fun registerOnClearBus(v: MasterPinClearCallback) {
+    private fun registerOnClearBus() {
         dispose {
             clearPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
                     .subscribe({
                         if (it.success) {
-                            v.onMasterPinClearSuccess()
+                            view?.onMasterPinClearSuccess()
                         } else {
-                            v.onMasterPinClearFailure()
+                            view?.onMasterPinClearFailure()
                         }
                     }, {
                         Timber.e(it, "error clear pin bus")
@@ -83,7 +86,7 @@ class SettingsPresenter @Inject internal constructor(
         }
     }
 
-    fun publishFinish() {
+    private fun publishFinish() {
         serviceFinishBus.publish(ServiceFinishEvent)
     }
 

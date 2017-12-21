@@ -46,7 +46,6 @@ import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
 import com.pyamsoft.pydroid.design.util.FABUtil
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.postWith
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
@@ -68,8 +67,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     private var lastPosition: Int = 0
     private var displaySystemItem: MenuItem? = null
     private val backingSet: MutableCollection<AppEntry> = LinkedHashSet()
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,7 +91,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
         lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
-        presenter.bind(this)
+        presenter.bind(viewLifecycle, this)
 
         val intent = activity!!.intent
         if (intent.hasExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)) {
@@ -132,12 +129,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
                 }
             }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        presenter.populateList(false)
-        presenter.setFABStateFromPreference()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

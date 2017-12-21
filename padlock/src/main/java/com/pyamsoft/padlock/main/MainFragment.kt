@@ -33,13 +33,10 @@ import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.settings.SettingsFragment
 import com.pyamsoft.padlock.uicommon.CanaryFragment
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 
 class MainFragment : CanaryFragment() {
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
     private lateinit var binding: FragmentMainBinding
     private lateinit var backstack: BackStack

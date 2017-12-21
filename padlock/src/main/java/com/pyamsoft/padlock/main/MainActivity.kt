@@ -31,7 +31,6 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.PadLockService
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.sec.TamperActivity
@@ -56,9 +55,6 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
     override val applicationName: String by lazy(NONE) { getString(R.string.app_name) }
 
-    override fun provideBoundPresenters(): List<Presenter<*>> =
-            listOf(presenter) + super.provideBoundPresenters()
-
     override val changeLogLines: Array<String>
         get() = arrayOf(
                 "FEATURE: Show indicator on main list if an application has whitelisted (never locked) or blacklisted (always locked) screens",
@@ -80,7 +76,7 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
         setupToolbar()
 
-        presenter.bind(this)
+        presenter.bind(this, this)
     }
 
     override fun onShowDefaultPage() {

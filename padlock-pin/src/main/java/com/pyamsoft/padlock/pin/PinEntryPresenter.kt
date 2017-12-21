@@ -36,12 +36,12 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
         @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
         ioScheduler, mainScheduler) {
 
-    override fun onBind(v: View) {
-        super.onBind(v)
-        checkMasterPinPresent(v)
+    override fun onCreate() {
+        super.onCreate()
+        checkMasterPinPresent()
     }
 
-    private fun checkMasterPinPresent(v: MasterPinCallback) {
+    private fun checkMasterPinPresent() {
         Timber.d("Check master pin present")
         dispose {
             interactor.hasMasterPin()
@@ -49,19 +49,19 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
                     .observeOn(mainThreadScheduler)
                     .subscribe({
                         if (it) {
-                            v.onMasterPinPresent()
+                            view?.onMasterPinPresent()
                         } else {
-                            v.onMasterPinMissing()
+                            view?.onMasterPinMissing()
                         }
                     }, { Timber.e(it, "onError checkMasterPinPresent") })
         }
     }
 
-    fun publish(event: CreatePinEvent) {
+    private fun publish(event: CreatePinEvent) {
         createPinBus.publish(event)
     }
 
-    fun publish(event: ClearPinEvent) {
+    private fun publish(event: ClearPinEvent) {
         clearPinBus.publish(event)
     }
 
@@ -75,15 +75,19 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
                         when (it) {
                             is Create -> {
                                 if (it.complete) {
+                                    publish(CreatePinEvent(true))
                                     view?.onPinSubmitCreateSuccess()
                                 } else {
+                                    publish(CreatePinEvent(false))
                                     view?.onPinSubmitCreateFailure()
                                 }
                             }
                             is Clear -> {
                                 if (it.complete) {
+                                    publish(ClearPinEvent(true))
                                     view?.onPinSubmitClearSuccess()
                                 } else {
+                                    publish(ClearPinEvent(false))
                                     view?.onPinSubmitClearFailure()
                                 }
                             }

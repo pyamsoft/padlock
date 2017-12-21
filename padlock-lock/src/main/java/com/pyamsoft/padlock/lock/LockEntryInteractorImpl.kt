@@ -29,6 +29,7 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.lock.helper.LockHelper
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor
+import com.pyamsoft.padlock.lock.passed.LockPassed
 import com.pyamsoft.pydroid.helper.Optional
 import com.pyamsoft.pydroid.helper.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
@@ -43,6 +44,7 @@ import javax.inject.Singleton
 
 @Singleton internal class LockEntryInteractorImpl @Inject internal constructor(
         private val appContext: Context,
+        private val lockPassed: LockPassed,
         private val lockHelper: LockHelper,
         private val preferences: LockScreenPreferences,
         private val jobSchedulerCompat: JobSchedulerCompat,
@@ -199,7 +201,11 @@ import javax.inject.Singleton
             }
 
             return@defer ignoreObservable.andThen(recheckObservable).andThen(whitelistObservable)
-        }.andThen(Completable.fromAction { failCount[getFailId(packageName, activityName)] = 0 })
+        }.andThen(Completable.fromAction {
+            failCount[getFailId(packageName, activityName)] = 0
+        }).andThen(Completable.fromAction {
+            lockPassed.add(packageName, activityName)
+        })
     }
 
     @CheckResult private fun getFailId(packageName: String, activityName: String): String =

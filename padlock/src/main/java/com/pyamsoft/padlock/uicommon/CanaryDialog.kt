@@ -20,9 +20,9 @@ package com.pyamsoft.padlock.uicommon
 
 import android.support.annotation.CallSuper
 import com.pyamsoft.padlock.PadLock
-import com.pyamsoft.pydroid.ui.app.fragment.DisposableDialogFragment
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 
-abstract class CanaryDialog : DisposableDialogFragment() {
+abstract class CanaryDialog : ToolbarDialog() {
 
     @CallSuper
     override fun onDestroy() {

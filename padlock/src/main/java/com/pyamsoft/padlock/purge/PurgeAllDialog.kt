@@ -24,14 +24,11 @@ import android.support.v7.app.AlertDialog
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.presenter.Presenter
 import javax.inject.Inject
 
 class PurgeAllDialog : CanaryDialog() {
 
     @field:Inject internal lateinit var purgePublisher: PurgePublisher
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

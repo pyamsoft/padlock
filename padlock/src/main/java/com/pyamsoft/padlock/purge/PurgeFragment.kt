@@ -37,7 +37,6 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.uicommon.CanaryFragment
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.postWith
 import com.pyamsoft.pydroid.ui.util.DialogUtil
@@ -64,8 +63,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
             }
         }
     }
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +94,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
         setupSwipeRefresh()
         lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
-        presenter.bind(this)
+        presenter.bind(viewLifecycle, this)
     }
 
     private fun setupSwipeRefresh() {
@@ -106,11 +103,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
                     R.color.blue700, R.color.amber500)
             purgeSwipeRefresh.setOnRefreshListener { presenter.retrieveStaleApplications(true) }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        presenter.retrieveStaleApplications(false)
     }
 
     override fun onRetrieveBegin() {
