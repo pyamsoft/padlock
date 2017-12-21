@@ -55,12 +55,18 @@ class LockListPresenter @Inject internal constructor(
         ioScheduler,
         mainScheduler) {
 
-    override fun onBind(v: View) {
-        super.onBind(v)
-        registerOnCreateBus(v)
-        registerOnClearBus(v)
-        registerOnModifyBus(v, v)
+    override fun onCreate() {
+        super.onCreate()
+        registerOnCreateBus()
+        registerOnClearBus()
+        registerOnModifyBus()
         registerOnWhitelistedBus()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        populateList(false)
+        setFABStateFromPreference()
     }
 
     private fun registerOnWhitelistedBus() {
@@ -73,8 +79,7 @@ class LockListPresenter @Inject internal constructor(
         }
     }
 
-    private fun registerOnModifyBus(modifyCallback: LockModifyCallback,
-            subModifyCallback: LockSubModifyCallback) {
+    private fun registerOnModifyBus() {
         dispose {
             lockListBus.listen()
                     .filter { it is LockListEvent.Modify }
@@ -94,14 +99,14 @@ class LockListPresenter @Inject internal constructor(
                     .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
                     .subscribe({
                         when (it) {
-                            is LockListEvent.Callback.Created -> modifyCallback.onModifyEntryCreated(
+                            is LockListEvent.Callback.Created -> view?.onModifyEntryCreated(
                                     it.packageName)
-                            is LockListEvent.Callback.Deleted -> modifyCallback.onModifyEntryDeleted(
+                            is LockListEvent.Callback.Deleted -> view?.onModifyEntryDeleted(
                                     it.packageName)
                         }
                     }, {
                         Timber.e(it, "Error listening to lock info bus")
-                        modifyCallback.onModifyEntryError(it)
+                        view?.onModifyEntryError(it)
                     })
         }
 
@@ -110,57 +115,56 @@ class LockListPresenter @Inject internal constructor(
                     .filter { it is LockInfoEvent.Callback }
                     .map { it as LockInfoEvent.Callback }
                     .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-                    .subscribe({ processLockInfoCallback(it, subModifyCallback) }, {
+                    .subscribe({ processLockInfoCallback(it) }, {
                         Timber.e(it, "Error listening to lock info bus")
-                        subModifyCallback.onModifySubEntryError(it)
+                        view?.onModifySubEntryError(it)
                     })
         }
 
         dispose {
             lockInfoChangeBus.listen()
                     .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-                    .subscribe({ processLockInfoCallback(it, subModifyCallback) }, {
+                    .subscribe({ processLockInfoCallback(it) }, {
                         Timber.e(it, "Error listening to lock info change bus")
-                        subModifyCallback.onModifySubEntryError(it)
+                        view?.onModifySubEntryError(it)
                     })
         }
     }
 
-    private fun processLockInfoCallback(event: LockInfoEvent.Callback,
-            subModifyCallback: LockSubModifyCallback) {
+    private fun processLockInfoCallback(event: LockInfoEvent.Callback) {
         when (event) {
             is LockInfoEvent.Callback.Created -> {
                 if (event.oldState == DEFAULT) {
-                    subModifyCallback.onModifySubEntryToHardlockedFromDefault(event.packageName)
+                    view?.onModifySubEntryToHardlockedFromDefault(event.packageName)
                 } else if (event.oldState == WHITELISTED) {
-                    subModifyCallback.onModifySubEntryToHardlockedFromWhitelisted(event.packageName)
+                    view?.onModifySubEntryToHardlockedFromWhitelisted(event.packageName)
                 }
             }
             is LockInfoEvent.Callback.Deleted -> {
                 if (event.oldState == WHITELISTED) {
-                    subModifyCallback.onModifySubEntryToDefaultFromWhitelisted(event.packageName)
+                    view?.onModifySubEntryToDefaultFromWhitelisted(event.packageName)
                 } else if (event.oldState == LOCKED) {
-                    subModifyCallback.onModifySubEntryToDefaultFromHardlocked(event.packageName)
+                    view?.onModifySubEntryToDefaultFromHardlocked(event.packageName)
                 }
             }
             is LockInfoEvent.Callback.Whitelisted -> {
                 if (event.oldState == LOCKED) {
-                    subModifyCallback.onModifySubEntryToWhitelistedFromHardlocked(event.packageName)
+                    view?.onModifySubEntryToWhitelistedFromHardlocked(event.packageName)
                 } else if (event.oldState == DEFAULT) {
-                    subModifyCallback.onModifySubEntryToWhitelistedFromDefault(event.packageName)
+                    view?.onModifySubEntryToWhitelistedFromDefault(event.packageName)
                 }
             }
         }
     }
 
-    private fun registerOnClearBus(v: MasterPinClearCallback) {
+    private fun registerOnClearBus() {
         dispose {
             clearPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
                     .subscribe({
                         if (it.success) {
-                            v.onMasterPinClearSuccess()
+                            view?.onMasterPinClearSuccess()
                         } else {
-                            v.onMasterPinClearFailure()
+                            view?.onMasterPinClearFailure()
                         }
                     }, {
                         Timber.e(it, "error create pin bus")
@@ -168,14 +172,14 @@ class LockListPresenter @Inject internal constructor(
         }
     }
 
-    private fun registerOnCreateBus(v: MasterPinCreateCallback) {
+    private fun registerOnCreateBus() {
         dispose {
             createPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
                     .subscribe({
                         if (it.success) {
-                            v.onMasterPinCreateSuccess()
+                            view?.onMasterPinCreateSuccess()
                         } else {
-                            v.onMasterPinCreateFailure()
+                            view?.onMasterPinCreateFailure()
                         }
                     }, {
                         Timber.e(it, "error create pin bus")
@@ -216,7 +220,7 @@ class LockListPresenter @Inject internal constructor(
         }
     }
 
-    fun setFABStateFromPreference() {
+    private fun setFABStateFromPreference() {
         dispose {
             stateInteractor.isServiceEnabled()
                     .subscribeOn(ioScheduler)

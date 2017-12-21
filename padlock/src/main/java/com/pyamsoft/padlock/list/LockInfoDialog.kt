@@ -49,7 +49,6 @@ import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.LoaderHelper
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.postWith
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
@@ -72,8 +71,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     private var appIcon = LoaderHelper.empty()
     private var lastPosition: Int = 0
     private val backingSet: MutableCollection<ActivityEntry> = LinkedHashSet()
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,7 +104,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         filterListDelegate.onViewCreated(adapter)
         lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
-        presenter.bind(this)
+        presenter.bind(viewLifecycle, this)
     }
 
     private fun setupToolbar() {
@@ -170,7 +167,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         super.onStart()
         appIcon = LoaderHelper.unload(appIcon)
         appIcon = appIconLoader.forPackageName(appPackageName).into(binding.lockInfoIcon)
-        presenter.populateList(false)
     }
 
     override fun onStop() {

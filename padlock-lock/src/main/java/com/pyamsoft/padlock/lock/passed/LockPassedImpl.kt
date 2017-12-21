@@ -16,23 +16,25 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.lock.screen
+package com.pyamsoft.padlock.lock.passed
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.model.LockScreenType
-import io.reactivex.Single
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal interface LockScreenInteractor {
+@Singleton internal class LockPassedImpl @Inject internal constructor() : LockPassed {
 
-    @CheckResult
-    fun getLockScreenType(): Single<LockScreenType>
+    private val passedSet: MutableCollection<String> = LinkedHashSet()
 
-    @CheckResult
-    fun getDefaultIgnoreTime(): Single<Long>
+    override fun add(packageName: String, activityName: String) {
+        passedSet.add("$packageName$activityName")
+    }
 
-    @CheckResult
-    fun getDisplayName(packageName: String): Single<String>
+    override fun remove(packageName: String, activityName: String) {
+        passedSet.remove("$packageName$activityName")
+    }
 
-    @CheckResult
-    fun isAlreadyUnlocked(packageName: String, activityName: String): Single<Boolean>
+    override fun check(packageName: String, activityName: String): Boolean =
+            passedSet.contains("$packageName$activityName")
+
 }
+

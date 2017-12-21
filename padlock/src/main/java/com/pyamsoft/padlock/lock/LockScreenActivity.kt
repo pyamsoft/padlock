@@ -24,7 +24,6 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.annotation.CallSuper
 import android.support.annotation.CheckResult
-import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
@@ -39,19 +38,20 @@ import com.pyamsoft.padlock.base.loader.AppIconLoader
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
+import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
 import com.pyamsoft.pydroid.loader.LoaderHelper
-import com.pyamsoft.pydroid.presenter.Presenter
-import com.pyamsoft.pydroid.ui.app.activity.DisposableActivity
+import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
+class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenInputPresenter.View {
 
     private val home: Intent = Intent(Intent.ACTION_MAIN)
     @field:Inject internal lateinit var presenter: LockScreenPresenter
+    @field:Inject internal lateinit var inputPresenter: LockScreenInputPresenter
     @field:Inject internal lateinit var appIconLoader: AppIconLoader
     private lateinit var lockedActivityName: String
     private lateinit var lockedPackageName: String
@@ -75,8 +75,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
     private var menuIgnoreSixty: MenuItem? = null
     internal var menuExclude: MenuItem? = null
     private lateinit var backstack: BackStack
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
     init {
         home.addCategory(Intent.CATEGORY_HOME)
@@ -121,7 +119,8 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
                 LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
         postInjectOnCreate()
 
-        presenter.bind(this)
+        presenter.bind(this, this)
+        inputPresenter.bind(this, this)
     }
 
     private fun preInjectOnCreate() {
@@ -211,9 +210,15 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
         }
     }
 
+    override fun onAlreadyUnlocked() {
+        Timber.d(
+                "This entry $lockedPackageName $lockedActivityName is already unlocked, finish Lock Screen")
+        finish()
+    }
+
     override fun onCloseOldReceived() {
         Timber.w("Close event received for this LockScreen: %s", this)
-        ActivityCompat.finishAffinity(this)
+        finish()
     }
 
     private fun pushFragment(pushFragment: Fragment, tag: String) {
@@ -247,9 +252,6 @@ class LockScreenActivity : DisposableActivity(), LockScreenPresenter.View {
             binding.toolbar.menu.close()
             binding.toolbar.dismissPopupMenus()
         }
-
-        // We have left the foreground, clear event
-        presenter.clearMatchingForegroundEvent()
     }
 
     override fun onBackPressed() {

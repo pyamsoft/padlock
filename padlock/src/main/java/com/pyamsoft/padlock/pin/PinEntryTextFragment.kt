@@ -34,7 +34,6 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import timber.log.Timber
@@ -50,8 +49,6 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     private var pinEntryText: EditText? = null
     private var pinHintText: EditText? = null
     private var goTask = LoaderHelper.empty()
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,7 +97,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
             onRestoreInstanceState(savedInstanceState)
         }
 
-        presenter.bind(this)
+        presenter.bind(viewLifecycle, this)
     }
 
     private fun setupSubmissionView(view: EditText) {
@@ -122,19 +119,19 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     }
 
     override fun onPinSubmitCreateSuccess() {
-        presenter.publish(CreatePinEvent(true))
+        Timber.d("Create success")
     }
 
     override fun onPinSubmitCreateFailure() {
-        presenter.publish(CreatePinEvent(false))
+        Timber.d("Create failure")
     }
 
     override fun onPinSubmitClearSuccess() {
-        presenter.publish(ClearPinEvent(true))
+        Timber.d("Clear success")
     }
 
     override fun onPinSubmitClearFailure() {
-        presenter.publish(ClearPinEvent(false))
+        Timber.d("Clear failure")
     }
 
     override fun onPinSubmitError(throwable: Throwable) {

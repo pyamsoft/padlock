@@ -18,6 +18,8 @@
 
 package com.pyamsoft.padlock.lock
 
+import com.pyamsoft.padlock.lock.passed.LockPassed
+import com.pyamsoft.padlock.lock.passed.LockPassedImpl
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
 import dagger.Binds
@@ -41,5 +43,8 @@ abstract class LockEntrySingletonModule {
 
     @Binds
     internal abstract fun provideForegroundBus(bus: ForegroundEventBus): EventBus<ForegroundEvent>
+
+    @Binds
+    internal abstract fun provideLockPassed(impl: LockPassedImpl): LockPassed
 }
 

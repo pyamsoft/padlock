@@ -23,6 +23,9 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.LifecycleRegistry
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -35,14 +38,22 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.db.PadLockEntry
+import com.pyamsoft.padlock.lifecycle.fakeBind
+import com.pyamsoft.padlock.lifecycle.fakeRelease
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.main.MainActivity
 import timber.log.Timber
 import javax.inject.Inject
 
-class PadLockService : Service(), LockServicePresenter.View {
+class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
 
-    override fun onBind(ignore: Intent?): IBinder? = null
+    private val lifecycle = LifecycleRegistry(this)
+
+    override fun getLifecycle(): Lifecycle = lifecycle
+
+    override fun onBind(ignore: Intent?): IBinder? {
+        throw AssertionError("Service is not bound")
+    }
 
     @field:Inject internal lateinit var presenter: LockServicePresenter
     private lateinit var notificationManager: NotificationManagerCompat
@@ -51,15 +62,16 @@ class PadLockService : Service(), LockServicePresenter.View {
         super.onCreate()
         Injector.obtain<PadLockComponent>(applicationContext).inject(this)
         notificationManager = NotificationManagerCompat.from(applicationContext)
-        presenter.bind(this)
+        presenter.bind(this, this)
         startInForeground()
+        lifecycle.fakeBind()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.unbind()
         stopForeground(true)
         notificationManager.cancel(NOTIFICATION_ID)
+        lifecycle.fakeRelease()
     }
 
     override fun onFinish() {

@@ -34,20 +34,20 @@ class LockScreenInputPresenter @Inject internal constructor(
         @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
         ioScheduler, mainScheduler) {
 
-    override fun onBind(v: View) {
-        super.onBind(v)
-        initializeLockScreenType(v)
+    override fun onCreate() {
+        super.onCreate()
+        initializeLockScreenType()
     }
 
-    private fun initializeLockScreenType(v: TypeCallback) {
+    private fun initializeLockScreenType() {
         dispose {
             interactor.getLockScreenType()
                     .subscribeOn(ioScheduler)
                     .observeOn(mainThreadScheduler)
                     .subscribe({
                         when (it) {
-                            TYPE_PATTERN -> v.onTypePattern()
-                            TYPE_TEXT -> v.onTypeText()
+                            TYPE_PATTERN -> view?.onTypePattern()
+                            TYPE_TEXT -> view?.onTypeText()
                             else -> throw IllegalArgumentException("Invalid enum: $it")
                         }
                     }, {

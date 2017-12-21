@@ -18,13 +18,10 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.app.fragment.AppSettingsFragment
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 
 class SettingsFragment : AppSettingsFragment() {
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = emptyList()
 
     override fun provideSettingsFragment(): SettingsPreferenceFragment = PadLockPreferenceFragment()
 

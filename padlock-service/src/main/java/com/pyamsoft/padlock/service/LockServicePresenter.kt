@@ -48,14 +48,14 @@ class LockServicePresenter @Inject internal constructor(
         interactor.reset()
     }
 
-    override fun onBind(v: View) {
-        super.onBind(v)
-        registerOnBus(v)
+    override fun onCreate() {
+        super.onCreate()
+        registerOnBus()
         registerForegroundEventListener()
     }
 
-    override fun onUnbind() {
-        super.onUnbind()
+    override fun onDestroy() {
+        super.onDestroy()
         interactor.cleanup()
         interactor.reset()
 
@@ -96,13 +96,13 @@ class LockServicePresenter @Inject internal constructor(
         }
     }
 
-    private fun registerOnBus(v: BusCallback) {
+    private fun registerOnBus() {
         dispose {
             serviceFinishBus.listen()
                     .subscribeOn(ioScheduler)
                     .observeOn(mainThreadScheduler)
                     .subscribe({
-                        v.onFinish()
+                        view?.onFinish()
                     }, { Timber.e(it, "onError service finish bus") })
         }
 
@@ -111,7 +111,7 @@ class LockServicePresenter @Inject internal constructor(
                     .subscribeOn(ioScheduler)
                     .observeOn(mainThreadScheduler)
                     .subscribe({
-                        v.onRecheck(it.packageName, it.className)
+                        view?.onRecheck(it.packageName, it.className)
                     }, { Timber.e(it, "onError recheck event bus") })
         }
     }

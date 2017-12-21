@@ -30,7 +30,6 @@ import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.PinEntryDialog
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil
@@ -42,9 +41,6 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
 
     @field:Inject internal lateinit var presenter: SettingsPresenter
     private lateinit var lockType: ListPreference
-
-    override fun provideBoundPresenters(): List<Presenter<*>> =
-            listOf(presenter) + super.provideBoundPresenters()
 
     override val preferenceXmlResId: Int = R.xml.preferences
 
@@ -61,8 +57,6 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
-
-        presenter.bind(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -92,6 +86,8 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
                     "Always return false here, the callback will decide if we can set value properly")
             return@setOnPreferenceChangeListener false
         }
+
+        presenter.bind(viewLifecycle, this)
     }
 
     override fun onLockTypeChangeAccepted(value: String) {
@@ -131,7 +127,6 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
 
     override fun onClearAll() {
         Timber.d("Everything is cleared, kill self")
-        presenter.publishFinish()
         val activityManager = activity!!.applicationContext
                 .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         activityManager.clearApplicationUserData()

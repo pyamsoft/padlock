@@ -44,10 +44,15 @@ class LockInfoPresenter @Inject internal constructor(
                 "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
         ioScheduler, mainScheduler) {
 
-    override fun onBind(v: View) {
-        super.onBind(v)
-        registerOnModifyBus(v)
+    override fun onCreate() {
+        super.onCreate()
+        registerOnModifyBus()
         registerOnWhitelistedBus()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        populateList(false)
     }
 
     private fun registerOnWhitelistedBus() {
@@ -61,7 +66,7 @@ class LockInfoPresenter @Inject internal constructor(
         }
     }
 
-    private fun registerOnModifyBus(v: LockModifyCallback) {
+    private fun registerOnModifyBus() {
         dispose {
             bus.listen()
                     .filter { it is LockInfoEvent.Modify }
@@ -79,13 +84,13 @@ class LockInfoPresenter @Inject internal constructor(
                     .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
                     .subscribe({
                         when (it) {
-                            is Created -> v.onModifyEntryCreated(it.id)
-                            is Deleted -> v.onModifyEntryDeleted(it.id)
-                            is Whitelisted -> v.onModifyEntryWhitelisted(it.id)
+                            is Created -> view?.onModifyEntryCreated(it.id)
+                            is Deleted -> view?.onModifyEntryDeleted(it.id)
+                            is Whitelisted -> view?.onModifyEntryWhitelisted(it.id)
                         }
                     }, {
                         Timber.e(it, "Error listening to lock info bus")
-                        v.onModifyEntryError(it)
+                        view?.onModifyEntryError(it)
                     })
         }
     }

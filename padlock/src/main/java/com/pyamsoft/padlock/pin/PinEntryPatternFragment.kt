@@ -28,7 +28,6 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding
 import com.pyamsoft.padlock.helper.LockCellUtil
-import com.pyamsoft.pydroid.presenter.Presenter
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import timber.log.Timber
 import java.util.ArrayList
@@ -44,8 +43,6 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     private var patternText = ""
     private var listener: PatternLockViewListener? = null
     private var repeatPattern = false
-
-    override fun provideBoundPresenters(): List<Presenter<*>> = listOf(presenter)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,7 +121,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         binding.patternLock.isTactileFeedbackEnabled = false
         binding.patternLock.addPatternLockListener(listener)
 
-        presenter.bind(this)
+        presenter.bind(viewLifecycle, this)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -181,19 +178,19 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     }
 
     override fun onPinSubmitCreateSuccess() {
-        presenter.publish(CreatePinEvent(true))
+        Timber.d("Create success")
     }
 
     override fun onPinSubmitCreateFailure() {
-        presenter.publish(CreatePinEvent(false))
+        Timber.d("Create failure")
     }
 
     override fun onPinSubmitClearSuccess() {
-        presenter.publish(ClearPinEvent(true))
+        Timber.d("Clear success")
     }
 
     override fun onPinSubmitClearFailure() {
-        presenter.publish(ClearPinEvent(false))
+        Timber.d("Clear failure")
     }
 
     override fun onPinSubmitError(throwable: Throwable) {

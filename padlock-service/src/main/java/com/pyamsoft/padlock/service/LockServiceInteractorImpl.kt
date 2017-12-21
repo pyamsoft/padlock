@@ -33,6 +33,7 @@ import com.pyamsoft.padlock.base.preference.LockScreenPreferences
 import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.lock.ForegroundEvent
+import com.pyamsoft.padlock.lock.passed.LockPassed
 import com.pyamsoft.padlock.service.RecheckStatus.FORCE
 import com.pyamsoft.pydroid.helper.Optional
 import com.pyamsoft.pydroid.helper.Optional.Present
@@ -51,6 +52,7 @@ import javax.inject.Singleton
 
 @Singleton internal class LockServiceInteractorImpl @Inject internal constructor(
         context: Context,
+        private val lockPassed: LockPassed,
         private val preferences: LockScreenPreferences,
         private val jobSchedulerCompat: JobSchedulerCompat,
         private val packageActivityManager: PackageActivityManager,
@@ -264,7 +266,11 @@ import javax.inject.Singleton
             }
 
             return@map true
-        }.compose(getEntry(packageName, className))
+        }.compose(getEntry(packageName, className)).doOnSuccess {
+            if (!PadLockEntry.isEmpty(it)) {
+                lockPassed.remove(it.packageName(), it.activityName())
+            }
+        }
     }
 
     companion object {
