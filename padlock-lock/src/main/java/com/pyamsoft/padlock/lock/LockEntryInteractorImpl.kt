@@ -106,7 +106,9 @@ import javax.inject.Singleton
             jobSchedulerCompat.cancel(intent)
 
             // Queue up a new recheck job
-            jobSchedulerCompat.queue(intent, System.currentTimeMillis() + recheckTime)
+            // Since alarms are inexact, buffer by an extra minute
+            jobSchedulerCompat.queue(intent,
+                    System.currentTimeMillis() + recheckTime + ONE_MINUTE_MILLIS)
         }
     }
 
@@ -213,6 +215,7 @@ import javax.inject.Singleton
 
     companion object {
         const val DEFAULT_MAX_FAIL_COUNT: Int = 2
+        private val ONE_MINUTE_MILLIS = TimeUnit.MINUTES.toMillis(1L)
     }
 }
 
