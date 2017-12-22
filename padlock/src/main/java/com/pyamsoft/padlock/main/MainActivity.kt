@@ -57,6 +57,7 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
     override val changeLogLines: Array<String>
         get() = arrayOf(
+                "CHANGE: Remove the zero seconds timeout option as it caused too much confusion",
                 "FEATURE: Show indicator on main list if an application has whitelisted (never locked) or blacklisted (always locked) screens",
                 "FEATURE: Show on the info dialog which screens are whitelisted or blacklisted",
                 "BUGFIX: Explain blacklisting and whitelisting",
