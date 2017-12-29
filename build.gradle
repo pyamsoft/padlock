@@ -50,11 +50,11 @@ buildscript {
     firebase = "11.8.0"
     leakCanary = "1.5.4"
     pydroid = "15.0.0"
-    autoValue = "1.5.2"
+    autoValue = "1.5.3"
     sqlbrite = "2.0.0"
-    dagger = "2.13"
+    dagger = "2.14.1"
     patternLock = "1.0.0"
-    fastAdapter = "3.0.4"
+    fastAdapter = "3.0.5"
     ktlint = "2.3.0"
   }
 
@@ -83,6 +83,11 @@ buildscript {
 subprojects {
   apply plugin: "org.jlleitschuh.gradle.ktlint"
   apply plugin: "com.github.ben-manes.versions"
+
+  ktlint {
+    version = "0.14.0"
+    android = true
+  }
 }
 
 allprojects {
