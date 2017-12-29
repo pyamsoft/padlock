@@ -261,6 +261,7 @@ class LockListPresenter @Inject internal constructor(
 
     fun setSystemVisibility(visible: Boolean) {
         lockListInteractor.setSystemVisible(visible)
+        view?.onSystemVisibilityChanged(visible)
     }
 
     fun showOnBoarding() {

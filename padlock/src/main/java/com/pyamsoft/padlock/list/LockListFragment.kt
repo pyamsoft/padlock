@@ -47,7 +47,6 @@ import com.pyamsoft.pydroid.design.util.FABUtil
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.ui.helper.Toasty
-import com.pyamsoft.pydroid.ui.helper.postWith
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.AnimUtil
 import com.pyamsoft.pydroid.ui.util.DialogUtil
@@ -400,11 +399,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
             if (item.model.packageName == entry.packageName) {
                 update = true
                 if (item.model != entry) {
-                    binding.applistRecyclerview.postWith {
-                        if (view != null) {
-                            adapter.set(index, entry)
-                        }
-                    }
+                    adapter.set(index, entry)
                 }
                 break
             }
@@ -421,47 +416,36 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
                 // The entry should go before this one
                 if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
                     added = true
-                    binding.applistRecyclerview.postWith {
-                        if (view != null) {
-                            adapter.add(index, entry)
-                        }
-                    }
+                    adapter.add(index, entry)
                     break
                 }
             }
 
             if (!added) {
                 // add at the end of the list
-                binding.applistRecyclerview.postWith {
-                    if (view != null) {
-                        adapter.add(entry)
-                    }
-                }
+                adapter.add(entry)
             }
         }
     }
 
     override fun onListPopulated() {
-        binding.applistRecyclerview.postWith {
-            if (view != null) {
-                adapter.retainAll(backingSet)
-                if (adapter.adapterItemCount > 0) {
-                    binding.applistEmpty.visibility = View.GONE
-                    it.visibility = View.VISIBLE
-                    Timber.d("We have refreshed")
-                    presenter.showOnBoarding()
+        adapter.retainAll(backingSet)
+        if (adapter.adapterItemCount > 0) {
+            binding.applistEmpty.visibility = View.GONE
+            binding.applistRecyclerview.visibility = View.VISIBLE
+            Timber.d("We have refreshed")
+            presenter.showOnBoarding()
 
-                    lastPosition = ListStateUtil.restorePosition(lastPosition, it)
-                } else {
-                    it.visibility = View.GONE
-                    binding.applistEmpty.visibility = View.VISIBLE
-                    Toasty.makeText(it.context, "Error while loading list. Please try again.",
-                            Toast.LENGTH_SHORT).show()
-                }
-
-                setRefreshing(false)
-            }
+            lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
+        } else {
+            binding.applistRecyclerview.visibility = View.GONE
+            binding.applistEmpty.visibility = View.VISIBLE
+            Toasty.makeText(binding.applistRecyclerview.context,
+                    "Error while loading list. Please try again.",
+                    Toast.LENGTH_SHORT).show()
         }
+
+        setRefreshing(false)
     }
 
     override fun onListPopulateError(throwable: Throwable) {
