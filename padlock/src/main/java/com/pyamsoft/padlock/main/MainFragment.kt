@@ -112,4 +112,3 @@ class MainFragment : CanaryFragment() {
         const val TAG = "MainFragment"
     }
 }
-

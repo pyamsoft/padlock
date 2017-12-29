@@ -41,5 +41,4 @@ internal interface LockServiceInteractor {
     @CheckResult
     fun processEvent(packageName: String, className: String,
             forcedRecheck: RecheckStatus): Single<PadLockEntry>
-
 }

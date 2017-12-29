@@ -140,4 +140,3 @@ import javax.inject.Singleton
             internal val locked: Boolean, internal val whitelist: Int,
             internal val hardLocked: Int)
 }
-

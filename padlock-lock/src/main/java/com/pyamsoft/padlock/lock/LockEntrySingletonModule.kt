@@ -47,4 +47,3 @@ abstract class LockEntrySingletonModule {
     @Binds
     internal abstract fun provideLockPassed(impl: LockPassedImpl): LockPassed
 }
-

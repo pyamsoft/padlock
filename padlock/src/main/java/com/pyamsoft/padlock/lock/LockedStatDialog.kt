@@ -30,7 +30,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.pyamsoft.padlock.databinding.DialogLockStatBinding
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.presenter.Presenter
 
 class LockedStatDialog : CanaryDialog() {
 

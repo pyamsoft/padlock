@@ -227,4 +227,3 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         private const val HINT_DISPLAY = "HINT_DISPLAY"
     }
 }
-

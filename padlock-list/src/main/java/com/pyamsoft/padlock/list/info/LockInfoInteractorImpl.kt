@@ -168,7 +168,6 @@ import javax.inject.Singleton
 
                     return@BiFunction activityEntries
                 })
-
     }
 
     override fun populateList(packageName: String, force: Boolean): Observable<ActivityEntry> {
@@ -235,4 +234,3 @@ import javax.inject.Singleton
                 .toSingleDefault(if (whitelist) LockState.WHITELISTED else LockState.LOCKED)
     }
 }
-

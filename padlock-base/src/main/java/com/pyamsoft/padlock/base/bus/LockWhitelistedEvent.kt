@@ -19,4 +19,3 @@
 package com.pyamsoft.padlock.base.bus
 
 data class LockWhitelistedEvent(val packageName: String, val activityName: String)
-

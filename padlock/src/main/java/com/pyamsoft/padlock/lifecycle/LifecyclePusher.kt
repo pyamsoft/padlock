@@ -37,4 +37,3 @@ fun LifecycleRegistry.fakeRelease() {
     handleLifecycleEvent(ON_STOP)
     handleLifecycleEvent(ON_DESTROY)
 }
-

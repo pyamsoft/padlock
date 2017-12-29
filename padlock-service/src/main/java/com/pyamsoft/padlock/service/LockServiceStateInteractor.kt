@@ -25,5 +25,4 @@ interface LockServiceStateInteractor {
 
     @CheckResult
     fun isServiceEnabled(): Single<Boolean>
-
 }

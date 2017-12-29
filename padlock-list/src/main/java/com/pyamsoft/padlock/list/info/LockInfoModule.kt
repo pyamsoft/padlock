@@ -29,4 +29,3 @@ class LockInfoModule(private val packageName: String) {
     @Named("package_name")
     internal fun providePackageName(): String = packageName
 }
-

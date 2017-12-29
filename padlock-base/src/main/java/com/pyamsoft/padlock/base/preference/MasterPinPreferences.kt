@@ -35,5 +35,4 @@ interface MasterPinPreferences {
     fun setMasterPassword(pw: String)
 
     fun clearMasterPassword()
-
 }

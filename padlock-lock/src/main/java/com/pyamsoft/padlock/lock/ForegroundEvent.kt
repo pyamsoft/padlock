@@ -32,4 +32,3 @@ data class ForegroundEvent(val packageName: String, val className: String) {
                 event.packageName == EMPTY.packageName || event.className == EMPTY.className
     }
 }
-

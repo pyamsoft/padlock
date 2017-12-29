@@ -27,4 +27,3 @@ class SettingsPublisher @Inject internal constructor(private val bus: EventBus<C
         bus.publish(event)
     }
 }
-

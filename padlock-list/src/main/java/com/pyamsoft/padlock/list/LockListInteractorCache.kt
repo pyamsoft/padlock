@@ -116,4 +116,3 @@ import javax.inject.Singleton
         private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
     }
 }
-

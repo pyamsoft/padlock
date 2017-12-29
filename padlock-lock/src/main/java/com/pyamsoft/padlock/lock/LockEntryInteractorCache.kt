@@ -64,6 +64,4 @@ import javax.inject.Singleton
             }
 
     override fun clearFailCount() = impl.clearFailCount()
-
 }
-

@@ -90,7 +90,6 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
             }
 
             override fun onProgress(list: List<PatternLockView.Dot>) {
-
             }
 
             override fun onComplete(list: List<PatternLockView.Dot>) {

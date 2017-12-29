@@ -32,4 +32,3 @@ internal interface LockInfoInteractor : LockStateModifyInteractor {
     @CheckResult
     fun populateList(packageName: String, force: Boolean): Observable<ActivityEntry>
 }
-

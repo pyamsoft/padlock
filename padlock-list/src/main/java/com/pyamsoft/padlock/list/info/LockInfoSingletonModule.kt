@@ -46,4 +46,3 @@ abstract class LockInfoSingletonModule {
     @Binds
     internal abstract fun provideUpdater(cache: LockInfoInteractorCache): LockInfoUpdater
 }
-

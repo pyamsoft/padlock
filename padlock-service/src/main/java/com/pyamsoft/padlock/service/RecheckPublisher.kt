@@ -27,4 +27,3 @@ class RecheckPublisher @Inject internal constructor(private val bus: EventBus<Re
         bus.publish(event)
     }
 }
-

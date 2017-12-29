@@ -41,4 +41,3 @@ internal interface LockEntryInteractor {
 
     fun clearFailCount()
 }
-

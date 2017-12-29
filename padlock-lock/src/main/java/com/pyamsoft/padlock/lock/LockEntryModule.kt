@@ -35,4 +35,3 @@ class LockEntryModule(private val packageName: String, private val activityName:
     @Provides
     @Named("real_name") internal fun provideRealName(): String = realName
 }
-

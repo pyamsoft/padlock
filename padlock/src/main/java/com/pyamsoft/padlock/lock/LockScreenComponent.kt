@@ -29,4 +29,3 @@ interface LockScreenComponent {
 
     fun inject(fragment: LockScreenTextFragment)
 }
-

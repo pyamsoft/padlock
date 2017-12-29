@@ -34,5 +34,4 @@ import javax.inject.Singleton
     override fun publish(event: LockWhitelistedEvent) {
         bus.publish(event)
     }
-
 }

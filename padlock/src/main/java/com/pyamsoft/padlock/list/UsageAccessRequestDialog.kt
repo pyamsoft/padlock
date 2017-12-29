@@ -39,5 +39,4 @@ class UsageAccessRequestDialog : CanaryDialog() {
                     .create()
         }
     }
-
 }

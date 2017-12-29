@@ -43,4 +43,3 @@ abstract class LockListModule {
     @Binds
     internal abstract fun provideUpdater(cache: LockListInteractorCache): LockListUpdater
 }
-
