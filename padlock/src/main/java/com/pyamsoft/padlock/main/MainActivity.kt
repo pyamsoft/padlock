@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
 import com.pyamsoft.backstack.BackStack
+import com.pyamsoft.backstack.BackStacks
 import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
@@ -69,7 +70,7 @@ class MainActivity : TamperActivity(), MainPresenter.View {
     public override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_PadLock_Light)
         super.onCreate(savedInstanceState)
-        backstack = BackStack.create(this, R.id.fragment_container)
+        backstack = BackStacks.create(this, R.id.fragment_container)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 

@@ -26,6 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import com.pyamsoft.backstack.BackStack
+import com.pyamsoft.backstack.BackStacks
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -68,7 +69,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
-        backstack = BackStack.create(this, R.id.pin_entry_dialog_container)
+        backstack = BackStacks.create(this, viewLifecycle, R.id.pin_entry_dialog_container)
         binding = DialogPinEntryBinding.inflate(inflater, container, false)
         return binding.root
     }

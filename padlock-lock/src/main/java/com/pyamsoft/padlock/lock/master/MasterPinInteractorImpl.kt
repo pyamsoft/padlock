@@ -19,7 +19,7 @@
 package com.pyamsoft.padlock.lock.master
 
 import com.pyamsoft.padlock.base.preference.MasterPinPreferences
-import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.pydroid.data.Optional
 import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Single
 import javax.inject.Inject

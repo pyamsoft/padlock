@@ -30,8 +30,8 @@ import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
 import com.pyamsoft.padlock.lock.helper.LockHelper
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor
 import com.pyamsoft.padlock.lock.passed.LockPassed
-import com.pyamsoft.pydroid.helper.Optional
-import com.pyamsoft.pydroid.helper.Optional.Present
+import com.pyamsoft.pydroid.data.Optional
+import com.pyamsoft.pydroid.data.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Completable
 import io.reactivex.Maybe

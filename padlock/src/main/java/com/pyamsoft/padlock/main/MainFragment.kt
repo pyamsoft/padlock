@@ -27,6 +27,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import com.pyamsoft.backstack.BackStack
+import com.pyamsoft.backstack.BackStacks
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentMainBinding
 import com.pyamsoft.padlock.list.LockListFragment
@@ -43,7 +44,7 @@ class MainFragment : CanaryFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
-        backstack = BackStack.create(this, R.id.main_view_container)
+        backstack = BackStacks.create(this, viewLifecycle, R.id.main_view_container)
         binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
     }

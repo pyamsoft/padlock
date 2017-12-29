@@ -35,8 +35,8 @@ import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
 import com.pyamsoft.padlock.lock.ForegroundEvent
 import com.pyamsoft.padlock.lock.passed.LockPassed
 import com.pyamsoft.padlock.service.RecheckStatus.FORCE
-import com.pyamsoft.pydroid.helper.Optional
-import com.pyamsoft.pydroid.helper.Optional.Present
+import com.pyamsoft.pydroid.data.Optional
+import com.pyamsoft.pydroid.data.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Flowable
 import io.reactivex.Maybe

@@ -30,6 +30,7 @@ import android.support.v7.preference.PreferenceManager
 import android.view.MenuItem
 import android.view.ViewGroup
 import com.pyamsoft.backstack.BackStack
+import com.pyamsoft.backstack.BackStacks
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -111,7 +112,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         setTheme(R.style.Theme_PadLock_Light_Lock)
         overridePendingTransition(0, 0)
         super.onCreate(savedInstanceState)
-        backstack = BackStack.create(this, R.id.lock_screen_container)
+        backstack = BackStacks.create(this, R.id.lock_screen_container)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_lock)
 
         preInjectOnCreate()

@@ -60,6 +60,9 @@ dependencies {
   kapt "com.google.dagger:dagger-compiler:$dagger"
 
   // PYDroid
+  api("com.github.pyamsoft.pydroid:pydroid-base:$pydroid@aar") {
+    transitive = true
+  }
   api("com.github.pyamsoft.pydroid:pydroid-loader:$pydroid@aar") {
     transitive = true
   }

@@ -30,7 +30,7 @@ import com.pyamsoft.padlock.base.Excludes
 import com.pyamsoft.padlock.base.ext.isSystemApplication
 import com.pyamsoft.padlock.base.preference.LockListPreferences
 import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager.ApplicationItem
-import com.pyamsoft.pydroid.helper.Optional.Present
+import com.pyamsoft.pydroid.data.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
 import io.reactivex.Observable
 import io.reactivex.Single

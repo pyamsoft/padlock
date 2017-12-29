@@ -21,8 +21,8 @@ package com.pyamsoft.padlock.pin
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.lock.helper.LockHelper
 import com.pyamsoft.padlock.lock.master.MasterPinInteractor
-import com.pyamsoft.pydroid.helper.Optional
-import com.pyamsoft.pydroid.helper.Optional.Present
+import com.pyamsoft.pydroid.data.Optional
+import com.pyamsoft.pydroid.data.Optional.Present
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject

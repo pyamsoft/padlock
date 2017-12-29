@@ -35,7 +35,6 @@ import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.base.R
 import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
 import com.pyamsoft.pydroid.data.Cache
-import com.pyamsoft.pydroid.helper.add
 import com.pyamsoft.pydroid.helper.enforceIo
 import com.pyamsoft.pydroid.helper.enforceMainThread
 import io.reactivex.Scheduler
@@ -119,25 +118,23 @@ import javax.inject.Singleton
         val data = intent.data
         val packageName = data.schemeSpecificPart
 
-        compositeDisposable.add {
-            packageManagerWrapper.loadPackageLabel(packageName)
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({
-                        if (isNew) {
-                            purgeCache.clearCache()
-                            listCache.clearCache()
-                            infoCache.clearCache()
-                            iconCache.clearCache()
-                            onNewPackageInstalled(packageName, it)
-                        } else {
-                            Timber.d("Package updated: %s", packageName)
-                        }
-                    }, {
-                        Timber.e(it, "onError launching notification for package: %s",
-                                packageName)
-                    })
-        }
+        compositeDisposable.add(packageManagerWrapper.loadPackageLabel(packageName)
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({
+                    if (isNew) {
+                        purgeCache.clearCache()
+                        listCache.clearCache()
+                        infoCache.clearCache()
+                        iconCache.clearCache()
+                        onNewPackageInstalled(packageName, it)
+                    } else {
+                        Timber.d("Package updated: %s", packageName)
+                    }
+                }, {
+                    Timber.e(it, "onError launching notification for package: %s",
+                            packageName)
+                }))
     }
 
     private fun onNewPackageInstalled(packageName: String,

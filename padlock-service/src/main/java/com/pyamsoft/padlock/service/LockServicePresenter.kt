@@ -27,6 +27,7 @@ import com.pyamsoft.pydroid.helper.clear
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.Disposables
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
@@ -41,8 +42,8 @@ class LockServicePresenter @Inject internal constructor(
         @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
         ioScheduler, mainScheduler) {
 
-    private var matchingDisposable: Disposable = null.clear()
-    private var entryDisposable: Disposable = null.clear()
+    private var matchingDisposable: Disposable = Disposables.empty()
+    private var entryDisposable: Disposable = Disposables.empty()
 
     init {
         interactor.reset()
