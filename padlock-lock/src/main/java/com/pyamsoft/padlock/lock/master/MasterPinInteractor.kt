@@ -19,7 +19,7 @@
 package com.pyamsoft.padlock.lock.master
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.pydroid.helper.Optional
+import com.pyamsoft.pydroid.data.Optional
 import io.reactivex.Single
 
 interface MasterPinInteractor {

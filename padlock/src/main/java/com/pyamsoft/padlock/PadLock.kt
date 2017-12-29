@@ -28,8 +28,8 @@ import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.settings.PadLockPreferenceFragment
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.CanaryFragment
-import com.pyamsoft.pydroid.PYDroidModule
-import com.pyamsoft.pydroid.about.Licenses
+import com.pyamsoft.pydroid.base.PYDroidModule
+import com.pyamsoft.pydroid.base.about.Licenses
 import com.pyamsoft.pydroid.loader.LoaderModule
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
