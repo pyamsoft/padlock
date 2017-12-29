@@ -50,7 +50,6 @@ import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.ui.helper.Toasty
-import com.pyamsoft.pydroid.ui.helper.postWith
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.util.AppUtil
@@ -217,28 +216,24 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     }
 
     override fun onListPopulated() {
-        binding.lockInfoRecycler.postWith {
-            if (view != null) {
-                adapter.retainAll(backingSet)
-                if (adapter.adapterItemCount > 0) {
-                    binding.lockInfoEmpty.visibility = View.GONE
-                    it.visibility = View.VISIBLE
+        adapter.retainAll(backingSet)
+        if (adapter.adapterItemCount > 0) {
+            binding.lockInfoEmpty.visibility = View.GONE
+            binding.lockInfoRecycler.visibility = View.VISIBLE
 
-                    Timber.d("Refresh finished")
-                    presenter.showOnBoarding()
+            Timber.d("Refresh finished")
+            presenter.showOnBoarding()
 
-                    lastPosition = ListStateUtil.restorePosition(lastPosition, it)
-                } else {
-                    it.visibility = View.GONE
-                    binding.lockInfoEmpty.visibility = View.VISIBLE
-                    Toasty.makeText(it.context,
-                            "Error while loading list. Please try again.",
-                            Toast.LENGTH_SHORT).show()
-                }
-
-                setRefreshing(false)
-            }
+            lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
+        } else {
+            binding.lockInfoRecycler.visibility = View.GONE
+            binding.lockInfoEmpty.visibility = View.VISIBLE
+            Toasty.makeText(binding.lockInfoRecycler.context,
+                    "Error while loading list. Please try again.",
+                    Toast.LENGTH_SHORT).show()
         }
+
+        setRefreshing(false)
     }
 
     override fun onEntryAddedToList(entry: ActivityEntry) {
@@ -250,11 +245,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
                 update = true
                 if (item.model != entry) {
                     publishLockStateUpdates(item.model, entry)
-                    binding.lockInfoRecycler.postWith {
-                        if (view != null) {
-                            adapter.set(index, entry)
-                        }
-                    }
+                    adapter.set(index, entry)
                 }
                 break
             }
@@ -271,22 +262,14 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
                 // The entry should go before this one
                 if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
                     added = true
-                    binding.lockInfoRecycler.postWith {
-                        if (view != null) {
-                            adapter.add(index, entry)
-                        }
-                    }
+                    adapter.add(index, entry)
                     break
                 }
             }
 
             if (!added) {
                 // add at the end of the list
-                binding.lockInfoRecycler.postWith {
-                    if (view != null) {
-                        adapter.add(entry)
-                    }
-                }
+                adapter.add(entry)
             }
         }
     }

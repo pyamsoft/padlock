@@ -23,7 +23,6 @@ import android.support.v4.widget.SwipeRefreshLayout
 import android.view.MenuItem
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.mikepenz.fastadapter.items.ModelAbstractItem
-import com.pyamsoft.pydroid.ui.helper.postWith
 
 @CheckResult
 fun MenuItem?.isChecked(): Boolean = this != null && isChecked
@@ -35,7 +34,7 @@ fun MenuItem?.setChecked(checked: Boolean) {
 }
 
 fun SwipeRefreshLayout.refreshing(refreshing: Boolean) {
-    postWith { it.isRefreshing = refreshing }
+    post { isRefreshing = refreshing }
 }
 
 fun <M : Any> ModelAdapter<M, out ModelAbstractItem<M, *, *>>.retainAll(
