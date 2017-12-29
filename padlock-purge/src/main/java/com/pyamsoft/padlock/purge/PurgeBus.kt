@@ -33,6 +33,4 @@ import javax.inject.Singleton
     override fun publish(event: PurgeEvent) {
         bus.publish(event)
     }
-
 }
-

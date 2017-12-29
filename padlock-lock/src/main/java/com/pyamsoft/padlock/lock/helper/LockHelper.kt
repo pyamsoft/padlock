@@ -28,5 +28,4 @@ interface LockHelper {
 
     @CheckResult
     fun encode(attempt: String): Single<String>
-
 }

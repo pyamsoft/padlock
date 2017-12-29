@@ -30,6 +30,4 @@ abstract class LockScreenSingletonModule {
 
     @Binds
     internal abstract fun provideInteractor(impl: LockScreenInteractorImpl): LockScreenInteractor
-
 }
-

@@ -56,4 +56,3 @@ sealed class LockInfoEvent {
         data class Error(val throwable: Throwable, val packageName: String) : Callback()
     }
 }
-

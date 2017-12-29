@@ -27,4 +27,3 @@ abstract class MasterPinModule {
     @Binds
     internal abstract fun provideMasterPin(impl: MasterPinInteractorImpl): MasterPinInteractor
 }
-

@@ -188,7 +188,6 @@ class LockInfoPresenter @Inject internal constructor(
         fun onEntryAddedToList(entry: ActivityEntry)
 
         fun onListPopulateError(throwable: Throwable)
-
     }
 
     interface OnboardingCallback {

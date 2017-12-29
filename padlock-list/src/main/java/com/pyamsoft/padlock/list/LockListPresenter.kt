@@ -311,7 +311,6 @@ class LockListPresenter @Inject internal constructor(
         fun onModifyEntryDeleted(packageName: String)
 
         fun onModifyEntryError(throwable: Throwable)
-
     }
 
     interface LockSubModifyCallback {
@@ -329,7 +328,6 @@ class LockListPresenter @Inject internal constructor(
         fun onModifySubEntryToHardlockedFromWhitelisted(packageName: String)
 
         fun onModifySubEntryError(throwable: Throwable)
-
     }
 
     interface MasterPinCreateCallback {
@@ -337,7 +335,6 @@ class LockListPresenter @Inject internal constructor(
         fun onMasterPinCreateSuccess()
 
         fun onMasterPinCreateFailure()
-
     }
 
     interface MasterPinClearCallback {
@@ -345,7 +342,6 @@ class LockListPresenter @Inject internal constructor(
         fun onMasterPinClearSuccess()
 
         fun onMasterPinClearFailure()
-
     }
 
     interface FABStateCallback {

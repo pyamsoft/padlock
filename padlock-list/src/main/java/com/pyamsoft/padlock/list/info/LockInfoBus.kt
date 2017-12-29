@@ -33,6 +33,4 @@ import javax.inject.Singleton
     override fun publish(event: LockInfoEvent) {
         bus.publish(event)
     }
-
 }
-

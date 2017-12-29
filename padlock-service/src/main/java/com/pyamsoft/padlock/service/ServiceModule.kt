@@ -38,4 +38,3 @@ import dagger.Module
     internal abstract fun provideServiceFinishBus(
             bus: ServiceFinishBus): EventBus<ServiceFinishEvent>
 }
-

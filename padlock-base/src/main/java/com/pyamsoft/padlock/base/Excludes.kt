@@ -56,4 +56,3 @@ object Excludes {
                 && classCheck == "com.pyamsoft.padlock.lock.lockscreenactivity")
     }
 }
-

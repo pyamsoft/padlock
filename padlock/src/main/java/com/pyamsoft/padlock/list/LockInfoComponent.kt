@@ -26,4 +26,3 @@ interface LockInfoComponent {
 
     fun inject(dialog: LockInfoDialog)
 }
-

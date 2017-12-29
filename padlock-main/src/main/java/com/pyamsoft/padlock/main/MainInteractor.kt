@@ -25,5 +25,4 @@ internal interface MainInteractor {
 
     @CheckResult
     fun isOnboardingComplete(): Single<Boolean>
-
 }

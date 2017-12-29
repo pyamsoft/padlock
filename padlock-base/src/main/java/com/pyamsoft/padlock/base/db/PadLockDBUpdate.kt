@@ -34,5 +34,4 @@ interface PadLockDBUpdate {
     @CheckResult
     fun updateWhitelist(whitelist: Boolean, packageName: String,
             activityName: String): Completable
-
 }

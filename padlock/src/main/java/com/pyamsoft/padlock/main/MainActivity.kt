@@ -155,4 +155,3 @@ class MainActivity : TamperActivity(), MainPresenter.View {
         PadLockService.start(this)
     }
 }
-

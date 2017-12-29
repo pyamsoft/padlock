@@ -44,4 +44,3 @@ abstract class PurgeModule {
     @Named("cache_purge")
     internal abstract fun provideCache(impl: PurgeInteractorCache): Cache
 }
-

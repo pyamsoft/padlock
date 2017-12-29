@@ -34,6 +34,4 @@ import javax.inject.Singleton
     override fun publish(event: ForegroundEvent) {
         bus.publish(event)
     }
-
 }
-

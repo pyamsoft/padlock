@@ -29,4 +29,3 @@ interface LockPassed {
     @CheckResult
     fun check(packageName: String, activityName: String): Boolean
 }
-

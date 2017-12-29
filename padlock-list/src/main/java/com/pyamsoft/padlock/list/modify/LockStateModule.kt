@@ -26,4 +26,3 @@ import dagger.Module
     @Binds internal abstract fun provideInteractor(
             impl: LockStateModifyInteractorImpl): LockStateModifyInteractor
 }
-

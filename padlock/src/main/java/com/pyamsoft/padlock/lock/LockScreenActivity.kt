@@ -174,7 +174,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
                                 "info_dialog")
                     }
                     else -> it.isChecked = true
-
                 }
                 return@setOnMenuItemClickListener true
             }

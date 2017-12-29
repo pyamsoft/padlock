@@ -30,5 +30,4 @@ object UsageAccessRequestDelegate {
     fun launchUsageAccessActivity(activity: Activity) {
         activity.startActivity(INTENT)
     }
-
 }

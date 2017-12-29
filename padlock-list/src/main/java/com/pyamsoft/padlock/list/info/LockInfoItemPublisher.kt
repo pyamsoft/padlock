@@ -28,5 +28,4 @@ class LockInfoItemPublisher @Inject internal constructor(private val bus: EventB
     fun publish(entry: ActivityEntry, newState: LockState, code: String?, system: Boolean) {
         bus.publish(LockInfoEvent.Modify.from(entry, newState, code, system))
     }
-
 }

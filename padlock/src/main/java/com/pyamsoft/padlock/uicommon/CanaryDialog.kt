@@ -30,4 +30,3 @@ abstract class CanaryDialog : ToolbarDialog() {
         PadLock.getRefWatcher(this).watch(this)
     }
 }
-

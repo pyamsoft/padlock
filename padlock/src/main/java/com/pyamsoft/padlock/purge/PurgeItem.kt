@@ -51,6 +51,5 @@ internal class PurgeItem internal constructor(
     internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         internal val binding: AdapterItemPurgeBinding = AdapterItemPurgeBinding.bind(itemView)
-
     }
 }

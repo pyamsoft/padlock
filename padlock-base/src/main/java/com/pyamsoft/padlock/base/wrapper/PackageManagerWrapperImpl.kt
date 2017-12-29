@@ -82,7 +82,6 @@ import javax.inject.Singleton
                 .filter { !Excludes.isPackageExcluded(packageName) }
                 .filter { !Excludes.isClassExcluded(it) }
                 .toSortedList()
-
     }
 
     @CheckResult

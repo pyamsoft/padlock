@@ -116,7 +116,6 @@ class LockEntryPresenter @Inject internal constructor(@param:Named(
         fun onLocked()
 
         fun onLockedError(throwable: Throwable)
-
     }
 
     interface HintCallback {

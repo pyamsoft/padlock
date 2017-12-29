@@ -125,5 +125,4 @@ abstract class PadLockModule {
     @Binds
     @Named("cache_app_icons")
     internal abstract fun provideIconImageCache(cache: AppIconImageCache): Cache
-
 }

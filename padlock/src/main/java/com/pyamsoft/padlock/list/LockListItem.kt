@@ -101,6 +101,5 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
         init {
             Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)
         }
-
     }
 }

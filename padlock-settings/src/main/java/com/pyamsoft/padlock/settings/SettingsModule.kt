@@ -31,4 +31,3 @@ abstract class SettingsModule {
     @Binds
     internal abstract fun provideInteractor(impl: SettingsInteractorImpl): SettingsInteractor
 }
-

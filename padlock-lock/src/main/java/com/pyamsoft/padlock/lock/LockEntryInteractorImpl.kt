@@ -87,7 +87,6 @@ import javax.inject.Singleton
                         }
                     }
                 }
-
     }
 
     @CheckResult private fun whitelistEntry(packageName: String, activityName: String,
@@ -218,4 +217,3 @@ import javax.inject.Singleton
         private val ONE_MINUTE_MILLIS = TimeUnit.MINUTES.toMillis(1L)
     }
 }
-

@@ -70,5 +70,4 @@ class PadLockProvider(private val pyDroidModule: PYDroidModule,
 
     @Provides
     internal fun provideImageLoader(): ImageLoader = loaderModule.provideImageLoader()
-
 }

@@ -24,4 +24,3 @@ interface LockListUpdater {
 
     fun update(packageName: String, whitelisted: Int, hardLocked: Int): Completable
 }
-

@@ -28,5 +28,4 @@ import javax.inject.Singleton
         private val pinInteractor: MasterPinInteractor) : LockServiceStateInteractor {
 
     override fun isServiceEnabled(): Single<Boolean> = pinInteractor.getMasterPin().map { it is Present }
-
 }

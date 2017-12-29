@@ -59,6 +59,5 @@ class MainPresenter @Inject internal constructor(private val interactor: MainInt
         fun onShowDefaultPage()
 
         fun onShowOnboarding()
-
     }
 }

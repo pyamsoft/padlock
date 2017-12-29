@@ -37,4 +37,3 @@ internal interface LockListInteractor : LockStateModifyInteractor {
 
     fun setSystemVisible(visible: Boolean)
 }
-

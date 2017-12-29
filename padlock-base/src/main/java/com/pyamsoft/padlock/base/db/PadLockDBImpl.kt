@@ -274,6 +274,4 @@ import javax.inject.Singleton
                     PadLockEntryModel.IGNOREUNTILTIME, PadLockEntryModel.SYSTEMAPPLICATION)
         }
     }
-
 }
-

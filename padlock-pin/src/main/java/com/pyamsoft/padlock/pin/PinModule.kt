@@ -33,6 +33,4 @@ abstract class PinModule {
 
     @Binds
     internal abstract fun provideInteractor(impl: PinEntryInteractorImpl): PinEntryInteractor
-
 }
-

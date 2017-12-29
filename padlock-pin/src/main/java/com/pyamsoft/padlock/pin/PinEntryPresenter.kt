@@ -114,5 +114,4 @@ class PinEntryPresenter @Inject internal constructor(private val interactor: Pin
         fun onMasterPinMissing()
         fun onMasterPinPresent()
     }
-
 }

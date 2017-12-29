@@ -35,6 +35,4 @@ import javax.inject.Singleton
 
     override fun check(packageName: String, activityName: String): Boolean =
             passedSet.contains("$packageName$activityName")
-
 }
-

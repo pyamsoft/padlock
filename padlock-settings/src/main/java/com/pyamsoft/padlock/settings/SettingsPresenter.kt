@@ -132,7 +132,6 @@ class SettingsPresenter @Inject internal constructor(
         fun onLockTypeChangeAccepted(value: String)
 
         fun onLockTypeChangeError(throwable: Throwable)
-
     }
 
     interface MasterPinClearCallback {
@@ -140,7 +139,6 @@ class SettingsPresenter @Inject internal constructor(
         fun onMasterPinClearSuccess()
 
         fun onMasterPinClearFailure()
-
     }
 
     interface ClearCallback {

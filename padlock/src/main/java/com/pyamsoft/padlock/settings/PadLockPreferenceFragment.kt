@@ -93,7 +93,6 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
     override fun onLockTypeChangeAccepted(value: String) {
         Timber.d("Change accepted, set value: %s", value)
         lockType.value = value
-
     }
 
     override fun onLockTypeChangePrevented() {

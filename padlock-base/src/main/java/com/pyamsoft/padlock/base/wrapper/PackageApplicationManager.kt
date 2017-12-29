@@ -38,8 +38,6 @@ interface PackageApplicationManager {
 
             @JvmField
             val EMPTY = ApplicationItem("", false, false)
-
         }
-
     }
 }

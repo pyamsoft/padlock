@@ -30,4 +30,3 @@ abstract class CanaryFragment : ToolbarFragment() {
         PadLock.getRefWatcher(this).watch(this)
     }
 }
-
