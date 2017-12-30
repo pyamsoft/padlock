@@ -24,10 +24,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
 
-  <item
-      android:id="@+id/menu_purge_all"
-      android:icon="@drawable/ic_delete_24dp"
-      android:title="@string/purge_all"
-      app:showAsAction="ifRoom"/>
+  <group android:id="@+id/menu_group_purge_all">
+
+    <item
+        android:id="@+id/menu_purge_all"
+        android:icon="@drawable/ic_delete_24dp"
+        android:title="@string/purge_all"
+        app:showAsAction="ifRoom"/>
+
+  </group>
+
 
 </menu>

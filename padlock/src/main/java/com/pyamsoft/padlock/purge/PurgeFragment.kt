@@ -22,9 +22,6 @@ import android.os.Bundle
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import com.mikepenz.fastadapter.FastAdapter
@@ -65,7 +62,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
         Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
     }
 
@@ -85,15 +81,43 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
         }
         adapter.clear()
         backingSet.clear()
+
+        toolbarActivity.withToolbar {
+            it.menu.apply {
+                removeGroup(R.id.menu_group_purge_all)
+            }
+            it.setOnMenuItemClickListener(null)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         setupSwipeRefresh()
+        setupToolbarMenu()
         lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
         presenter.bind(viewLifecycle, this)
+    }
+
+    private fun setupToolbarMenu() {
+        toolbarActivity.withToolbar {
+            it.inflateMenu(R.menu.purge_old_menu)
+
+            it.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.menu_purge_all -> {
+                        DialogUtil.guaranteeSingleDialogFragment(activity, PurgeAllDialog(),
+                                "purge_all")
+                        return@setOnMenuItemClickListener true
+                    }
+                    else -> {
+                        Timber.w("Unhandled menu item clicked: ${it.itemId}")
+                        return@setOnMenuItemClickListener false
+                    }
+                }
+            }
+        }
     }
 
     private fun setupSwipeRefresh() {
@@ -176,26 +200,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
             it.setTitle(R.string.app_name)
             it.setUpEnabled(false)
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.purge_old_menu, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val handled: Boolean = when (item.itemId) {
-            R.id.menu_purge_all -> {
-                DialogUtil.guaranteeSingleDialogFragment(activity, PurgeAllDialog(), "purge_all")
-                true
-            }
-            else -> {
-                Timber.d("Not handled: ${item.itemId}")
-                false
-            }
-        }
-
-        return handled || super.onOptionsItemSelected(item)
     }
 
     private fun setupRecyclerView() {
