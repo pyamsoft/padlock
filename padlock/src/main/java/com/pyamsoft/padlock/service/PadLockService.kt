@@ -35,6 +35,8 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLock
+import com.pyamsoft.padlock.PadLock.Companion
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.db.PadLockEntry
@@ -72,6 +74,7 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
         stopForeground(true)
         notificationManager.cancel(NOTIFICATION_ID)
         lifecycle.fakeRelease()
+        PadLock.getRefWatcher(this).watch(this)
     }
 
     override fun onFinish() {

@@ -21,6 +21,7 @@ package com.pyamsoft.padlock.service
 import android.app.IntentService
 import android.content.Intent
 import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.lock.Recheck
 import timber.log.Timber
@@ -33,6 +34,11 @@ class RecheckService : IntentService(RecheckService::class.java.name) {
     override fun onCreate() {
         super.onCreate()
         Injector.obtain<PadLockComponent>(applicationContext).inject(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        PadLock.getRefWatcher(this).watch(this)
     }
 
     override fun onHandleIntent(intent: Intent?) {
