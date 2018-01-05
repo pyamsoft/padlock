@@ -19,8 +19,8 @@
 package com.pyamsoft.padlock
 
 import android.app.Application
+import android.app.Service
 import android.support.annotation.CheckResult
-import android.support.v4.app.Fragment
 import com.pyamsoft.padlock.base.PadLockProvider
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockService
@@ -107,22 +107,27 @@ class PadLock : Application() {
 
         @JvmStatic
         @CheckResult
-        fun getRefWatcher(fragment: CanaryFragment): RefWatcher = getRefWatcherInternal(fragment)
+        fun getRefWatcher(fragment: CanaryFragment): RefWatcher = getRefWatcherInternal(
+                fragment.activity!!.application)
 
         @CheckResult
         @JvmStatic
-        fun getRefWatcher(fragment: CanaryDialog): RefWatcher = getRefWatcherInternal(fragment)
+        fun getRefWatcher(fragment: CanaryDialog): RefWatcher = getRefWatcherInternal(
+                fragment.activity!!.application)
 
         @JvmStatic
         @CheckResult
         fun getRefWatcher(
                 preferenceFragment: PadLockPreferenceFragment): RefWatcher = getRefWatcherInternal(
-                preferenceFragment)
+                preferenceFragment.activity!!.application)
 
         @JvmStatic
         @CheckResult
-        private fun getRefWatcherInternal(fragment: Fragment): RefWatcher {
-            val application = fragment.activity!!.application
+        fun getRefWatcher(service: Service): RefWatcher = getRefWatcherInternal(service.application)
+
+        @JvmStatic
+        @CheckResult
+        private fun getRefWatcherInternal(application: Application): RefWatcher {
             if (application is PadLock) {
                 return application.refWatcher
             } else {
