@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.list.modify
 
+import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import dagger.Binds
 import dagger.Module
 

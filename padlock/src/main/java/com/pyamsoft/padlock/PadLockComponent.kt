@@ -21,8 +21,8 @@ package com.pyamsoft.padlock
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.base.PadLockModule
 import com.pyamsoft.padlock.base.PadLockProvider
-import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
-import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
+import com.pyamsoft.padlock.api.InstallListenerPreferences
+import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.LockInfoItem
 import com.pyamsoft.padlock.list.LockListFragment

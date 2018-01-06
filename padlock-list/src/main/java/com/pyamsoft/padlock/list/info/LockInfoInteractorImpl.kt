@@ -19,13 +19,14 @@
 package com.pyamsoft.padlock.list.info
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDBQuery
-import com.pyamsoft.padlock.base.db.PadLockDBUpdate
-import com.pyamsoft.padlock.base.db.PadLockEntry
-import com.pyamsoft.padlock.base.db.PadLockEntry.WithPackageName
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences
-import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
-import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
+import com.pyamsoft.padlock.api.LockInfoInteractor
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDBUpdate
+import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.PadLockEntry.WithPackageName
+import com.pyamsoft.padlock.api.OnboardingPreferences
+import com.pyamsoft.padlock.api.PackageActivityManager
+import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.WHITELISTED

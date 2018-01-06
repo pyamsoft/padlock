@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.model.PurgeAllEvent
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import javax.inject.Inject
 

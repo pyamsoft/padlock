@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.lock
 
+import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.bus.RxBus
 import io.reactivex.Observable

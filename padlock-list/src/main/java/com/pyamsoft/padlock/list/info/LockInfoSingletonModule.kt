@@ -18,6 +18,8 @@
 
 package com.pyamsoft.padlock.list.info
 
+import com.pyamsoft.padlock.api.LockInfoInteractor
+import com.pyamsoft.padlock.api.LockInfoUpdater
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
 import dagger.Binds

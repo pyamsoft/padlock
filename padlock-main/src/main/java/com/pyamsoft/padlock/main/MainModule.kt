@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.main
 
+import com.pyamsoft.padlock.api.MainInteractor
 import dagger.Binds
 import dagger.Module
 

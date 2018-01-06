@@ -26,15 +26,18 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.Excludes
-import com.pyamsoft.padlock.base.db.PadLockDBQuery
-import com.pyamsoft.padlock.base.db.PadLockEntry
-import com.pyamsoft.padlock.base.preference.LockScreenPreferences
-import com.pyamsoft.padlock.base.wrapper.JobSchedulerCompat
-import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
-import com.pyamsoft.padlock.lock.ForegroundEvent
-import com.pyamsoft.padlock.lock.passed.LockPassed
-import com.pyamsoft.padlock.service.RecheckStatus.FORCE
+import com.pyamsoft.padlock.api.Excludes
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.api.LockScreenPreferences
+import com.pyamsoft.padlock.api.JobSchedulerCompat
+import com.pyamsoft.padlock.api.PackageActivityManager
+import com.pyamsoft.padlock.model.ForegroundEvent
+import com.pyamsoft.padlock.api.LockPassed
+import com.pyamsoft.padlock.api.LockServiceInteractor
+import com.pyamsoft.padlock.api.LockServiceStateInteractor
+import com.pyamsoft.padlock.model.RecheckStatus
+import com.pyamsoft.padlock.model.RecheckStatus.FORCE
 import com.pyamsoft.pydroid.data.Optional
 import com.pyamsoft.pydroid.data.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
@@ -58,7 +61,8 @@ import javax.inject.Singleton
         private val packageActivityManager: PackageActivityManager,
         private val padLockDBQuery: PadLockDBQuery,
         @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
-        private val stateInteractor: LockServiceStateInteractor) : LockServiceInteractor {
+        private val stateInteractor: LockServiceStateInteractor) :
+        LockServiceInteractor {
 
     private val appContext = context.applicationContext
     private val keyguardManager = appContext.getSystemService(
@@ -183,7 +187,8 @@ import javax.inject.Singleton
         return SingleTransformer {
             it.filter { it }
                     .compose(prepareLockScreen(packageName, activityName))
-                    .compose(filterOutInvalidEntries()).toSingle(PadLockEntry.EMPTY)
+                    .compose(filterOutInvalidEntries()).toSingle(
+                    PadLockEntry.EMPTY)
         }
     }
 

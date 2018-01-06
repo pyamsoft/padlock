@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.purge
 
+import com.pyamsoft.padlock.model.PurgeEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.bus.RxBus
 import io.reactivex.Observable

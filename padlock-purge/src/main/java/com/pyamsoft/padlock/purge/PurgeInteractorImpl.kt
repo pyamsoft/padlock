@@ -19,10 +19,11 @@
 package com.pyamsoft.padlock.purge
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDBDelete
-import com.pyamsoft.padlock.base.db.PadLockDBQuery
-import com.pyamsoft.padlock.base.db.PadLockEntry
-import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager
+import com.pyamsoft.padlock.api.PadLockDBDelete
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.api.PackageApplicationManager
+import com.pyamsoft.padlock.api.PurgeInteractor
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction

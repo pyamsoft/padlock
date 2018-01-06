@@ -23,7 +23,8 @@ import android.content.Intent
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.padlock.lock.Recheck
+import com.pyamsoft.padlock.model.Recheck
+import com.pyamsoft.padlock.model.RecheckEvent
 import timber.log.Timber
 import javax.inject.Inject
 

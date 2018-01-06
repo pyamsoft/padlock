@@ -18,6 +18,8 @@
 
 package com.pyamsoft.padlock.settings
 
+import com.pyamsoft.padlock.api.SettingsInteractor
+import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import dagger.Binds
 import dagger.Module

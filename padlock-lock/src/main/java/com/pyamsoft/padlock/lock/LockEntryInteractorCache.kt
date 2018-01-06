@@ -18,7 +18,8 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.padlock.base.bus.LockWhitelistedEvent
+import com.pyamsoft.padlock.api.LockEntryInteractor
+import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Completable
@@ -59,7 +60,8 @@ import javax.inject.Singleton
                     lockListCache.clearCache()
                     lockInfoCache.clearCache()
                     lockWhitelistedBus.publish(
-                            LockWhitelistedEvent(packageName, activityName))
+                            LockWhitelistedEvent(packageName,
+                                    activityName))
                 }
             }
 

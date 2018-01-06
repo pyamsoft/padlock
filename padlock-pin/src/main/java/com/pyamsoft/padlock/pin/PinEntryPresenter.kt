@@ -18,8 +18,11 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.pin.PinEntryEvent.Clear
-import com.pyamsoft.padlock.pin.PinEntryEvent.Create
+import com.pyamsoft.padlock.api.PinEntryInteractor
+import com.pyamsoft.padlock.model.ClearPinEvent
+import com.pyamsoft.padlock.model.CreatePinEvent
+import com.pyamsoft.padlock.model.PinEntryEvent.Clear
+import com.pyamsoft.padlock.model.PinEntryEvent.Create
 import com.pyamsoft.padlock.pin.PinEntryPresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
