@@ -34,8 +34,8 @@ import com.pyamsoft.backstack.BackStacks
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.base.db.PadLockEntry
-import com.pyamsoft.padlock.base.loader.AppIconLoader
+import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked

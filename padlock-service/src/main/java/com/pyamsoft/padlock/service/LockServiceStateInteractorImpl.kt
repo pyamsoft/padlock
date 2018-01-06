@@ -18,14 +18,16 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor
+import com.pyamsoft.padlock.api.LockServiceStateInteractor
+import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.pydroid.data.Optional.Present
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class LockServiceStateInteractorImpl @Inject internal constructor(
-        private val pinInteractor: MasterPinInteractor) : LockServiceStateInteractor {
+        private val pinInteractor: MasterPinInteractor) :
+        LockServiceStateInteractor {
 
     override fun isServiceEnabled(): Single<Boolean> = pinInteractor.getMasterPin().map { it is Present }
 }

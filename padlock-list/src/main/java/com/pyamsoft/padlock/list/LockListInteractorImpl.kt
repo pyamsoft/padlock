@@ -19,16 +19,17 @@
 package com.pyamsoft.padlock.list
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDBQuery
-import com.pyamsoft.padlock.base.db.PadLockEntry
-import com.pyamsoft.padlock.base.db.PadLockEntry.AllEntries
-import com.pyamsoft.padlock.base.preference.LockListPreferences
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences
-import com.pyamsoft.padlock.base.wrapper.PackageActivityManager
-import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager
-import com.pyamsoft.padlock.base.wrapper.PackageApplicationManager.ApplicationItem
-import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
-import com.pyamsoft.padlock.list.modify.LockStateModifyInteractor
+import com.pyamsoft.padlock.api.LockListInteractor
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.PadLockEntry.AllEntries
+import com.pyamsoft.padlock.api.LockListPreferences
+import com.pyamsoft.padlock.api.OnboardingPreferences
+import com.pyamsoft.padlock.api.PackageActivityManager
+import com.pyamsoft.padlock.api.PackageApplicationManager
+import com.pyamsoft.padlock.api.PackageApplicationManager.ApplicationItem
+import com.pyamsoft.padlock.api.PackageLabelManager
+import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import io.reactivex.Observable
@@ -46,7 +47,8 @@ import javax.inject.Singleton
         private val activityManager: PackageActivityManager,
         private val onboardingPreferences: OnboardingPreferences,
         private val modifyInteractor: LockStateModifyInteractor,
-        private val preferences: LockListPreferences) : LockListInteractor {
+        private val preferences: LockListPreferences) :
+        LockListInteractor {
 
     override fun isSystemVisible(): Single<Boolean> =
             Single.fromCallable { preferences.isSystemVisible() }

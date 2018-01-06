@@ -19,8 +19,9 @@
 package com.pyamsoft.padlock.list.modify
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.db.PadLockDBDelete
-import com.pyamsoft.padlock.base.db.PadLockDBInsert
+import com.pyamsoft.padlock.api.LockStateModifyInteractor
+import com.pyamsoft.padlock.api.PadLockDBDelete
+import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.NONE
@@ -32,7 +33,8 @@ import javax.inject.Singleton
 
 @Singleton internal class LockStateModifyInteractorImpl @Inject internal constructor(
         private val insertDb: PadLockDBInsert,
-        private val deleteDb: PadLockDBDelete) : LockStateModifyInteractor {
+        private val deleteDb: PadLockDBDelete) :
+        LockStateModifyInteractor {
 
     @CheckResult private fun createNewEntry(
             packageName: String, activityName: String, code: String?,

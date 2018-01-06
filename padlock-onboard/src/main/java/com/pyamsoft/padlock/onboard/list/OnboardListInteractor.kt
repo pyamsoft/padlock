@@ -18,7 +18,7 @@
 
 package com.pyamsoft.padlock.onboard.list
 
-import com.pyamsoft.padlock.base.preference.OnboardingPreferences
+import com.pyamsoft.padlock.api.OnboardingPreferences
 import javax.inject.Inject
 import javax.inject.Singleton
 

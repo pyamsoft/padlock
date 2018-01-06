@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.lock.master
 
+import com.pyamsoft.padlock.api.MasterPinInteractor
 import dagger.Binds
 import dagger.Module
 

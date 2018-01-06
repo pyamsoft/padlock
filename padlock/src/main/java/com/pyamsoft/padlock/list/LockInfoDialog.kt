@@ -33,7 +33,7 @@ import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.base.loader.AppIconLoader
+import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.refreshing

@@ -18,10 +18,11 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.base.db.PadLockDBDelete
-import com.pyamsoft.padlock.base.preference.ClearPreferences
-import com.pyamsoft.padlock.base.preference.InstallListenerPreferences
-import com.pyamsoft.padlock.base.preference.MasterPinPreferences
+import com.pyamsoft.padlock.api.PadLockDBDelete
+import com.pyamsoft.padlock.api.ClearPreferences
+import com.pyamsoft.padlock.api.InstallListenerPreferences
+import com.pyamsoft.padlock.api.MasterPinPreferences
+import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.data.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
@@ -42,7 +43,8 @@ import javax.inject.Singleton
         @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
         @param:Named("cache_app_icons") private val iconCache: Cache,
         @param:Named("cache_list_state") private val listStateCache: Cache,
-        @param:Named("cache_purge") private val purgeInteractor: Cache) : SettingsInteractor {
+        @param:Named("cache_purge") private val purgeInteractor: Cache) :
+        SettingsInteractor {
 
     override fun isInstallListenerEnabled(): Single<Boolean> =
             Single.fromCallable { installListenerPreferences.isInstallListenerEnabled() }

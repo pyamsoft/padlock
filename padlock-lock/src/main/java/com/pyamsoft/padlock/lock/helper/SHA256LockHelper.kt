@@ -19,6 +19,7 @@
 package com.pyamsoft.padlock.lock.helper
 
 import android.util.Base64
+import com.pyamsoft.padlock.api.LockHelper
 import io.reactivex.Completable
 import io.reactivex.Single
 import java.nio.charset.Charset
@@ -27,7 +28,8 @@ import java.security.NoSuchAlgorithmException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class SHA256LockHelper @Inject internal constructor() : LockHelper {
+@Singleton internal class SHA256LockHelper @Inject internal constructor() :
+        LockHelper {
 
     private val messageDigest: MessageDigest
 

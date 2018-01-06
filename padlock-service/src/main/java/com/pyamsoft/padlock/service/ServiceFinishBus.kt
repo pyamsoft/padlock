@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.service
 
+import com.pyamsoft.padlock.model.ServiceFinishEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.bus.RxBus
 import io.reactivex.Observable

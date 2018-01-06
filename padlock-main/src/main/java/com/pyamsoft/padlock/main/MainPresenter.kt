@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.main
 
+import com.pyamsoft.padlock.api.MainInteractor
 import com.pyamsoft.padlock.main.MainPresenter.View
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler

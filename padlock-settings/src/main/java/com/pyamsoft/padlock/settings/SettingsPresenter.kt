@@ -18,11 +18,13 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.base.receiver.ApplicationInstallReceiver
-import com.pyamsoft.padlock.pin.ClearPinEvent
-import com.pyamsoft.padlock.service.ServiceFinishEvent
-import com.pyamsoft.padlock.settings.ConfirmEvent.ALL
-import com.pyamsoft.padlock.settings.ConfirmEvent.DATABASE
+import com.pyamsoft.padlock.api.ApplicationInstallReceiver
+import com.pyamsoft.padlock.api.SettingsInteractor
+import com.pyamsoft.padlock.model.ClearPinEvent
+import com.pyamsoft.padlock.model.ConfirmEvent
+import com.pyamsoft.padlock.model.ServiceFinishEvent
+import com.pyamsoft.padlock.model.ConfirmEvent.ALL
+import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
 import com.pyamsoft.padlock.settings.SettingsPresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter

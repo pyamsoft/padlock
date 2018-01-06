@@ -18,6 +18,10 @@
 
 package com.pyamsoft.padlock.service
 
+import com.pyamsoft.padlock.api.LockServiceInteractor
+import com.pyamsoft.padlock.api.LockServiceStateInteractor
+import com.pyamsoft.padlock.model.RecheckEvent
+import com.pyamsoft.padlock.model.ServiceFinishEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import dagger.Binds
 import dagger.Module

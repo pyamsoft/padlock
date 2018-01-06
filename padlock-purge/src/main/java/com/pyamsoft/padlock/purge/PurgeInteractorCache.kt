@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.purge
 
+import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.pydroid.data.Cache
 import io.reactivex.Observable
 import io.reactivex.Single

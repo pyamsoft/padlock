@@ -18,9 +18,10 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-import com.pyamsoft.padlock.base.preference.LockScreenPreferences
-import com.pyamsoft.padlock.base.wrapper.PackageLabelManager
-import com.pyamsoft.padlock.lock.passed.LockPassed
+import com.pyamsoft.padlock.api.LockScreenPreferences
+import com.pyamsoft.padlock.api.PackageLabelManager
+import com.pyamsoft.padlock.api.LockPassed
+import com.pyamsoft.padlock.api.LockScreenInteractor
 import com.pyamsoft.padlock.model.LockScreenType
 import io.reactivex.Single
 import javax.inject.Inject
@@ -29,7 +30,8 @@ import javax.inject.Singleton
 @Singleton internal class LockScreenInteractorImpl @Inject internal constructor(
         private val lockPassed: LockPassed,
         private val labelManager: PackageLabelManager,
-        private val preferences: LockScreenPreferences) : LockScreenInteractor {
+        private val preferences: LockScreenPreferences) :
+        LockScreenInteractor {
 
     override fun getLockScreenType(): Single<LockScreenType> =
             Single.fromCallable { preferences.getCurrentLockType() }

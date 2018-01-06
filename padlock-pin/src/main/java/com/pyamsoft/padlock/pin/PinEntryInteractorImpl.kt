@@ -19,8 +19,10 @@
 package com.pyamsoft.padlock.pin
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.lock.helper.LockHelper
-import com.pyamsoft.padlock.lock.master.MasterPinInteractor
+import com.pyamsoft.padlock.api.LockHelper
+import com.pyamsoft.padlock.api.MasterPinInteractor
+import com.pyamsoft.padlock.api.PinEntryInteractor
+import com.pyamsoft.padlock.model.PinEntryEvent
 import com.pyamsoft.pydroid.data.Optional
 import com.pyamsoft.pydroid.data.Optional.Present
 import io.reactivex.Single
@@ -30,7 +32,8 @@ import javax.inject.Singleton
 
 @Singleton internal class PinEntryInteractorImpl @Inject internal constructor(
         private val lockHelper: LockHelper,
-        private val masterPinInteractor: MasterPinInteractor) : PinEntryInteractor {
+        private val masterPinInteractor: MasterPinInteractor) :
+        PinEntryInteractor {
 
     @CheckResult private fun getMasterPin(): Single<Optional<String>> =
             masterPinInteractor.getMasterPin()
