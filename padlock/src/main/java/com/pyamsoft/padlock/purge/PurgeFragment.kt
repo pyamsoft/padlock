@@ -212,7 +212,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
                 initialPrefetchItemCount = 3
             }
             purgeList.clipToPadding = false
-            purgeList.setHasFixedSize(false)
+            purgeList.setHasFixedSize(true)
             purgeList.addItemDecoration(decoration)
             purgeList.adapter = FastAdapter.with<PurgeItem, ModelAdapter<String, PurgeItem>>(
                     adapter)
