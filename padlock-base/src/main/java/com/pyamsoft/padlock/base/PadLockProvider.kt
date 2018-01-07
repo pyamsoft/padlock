@@ -22,7 +22,7 @@ import android.app.Activity
 import android.app.IntentService
 import android.content.Context
 import android.graphics.drawable.Drawable
-import com.pyamsoft.pydroid.base.PYDroidModule
+import com.pyamsoft.pydroid.PYDroidModule
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderModule
 import com.pyamsoft.pydroid.loader.cache.ImageCache

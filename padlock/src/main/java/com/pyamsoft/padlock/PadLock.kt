@@ -28,9 +28,11 @@ import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.settings.PadLockPreferenceFragment
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.CanaryFragment
-import com.pyamsoft.pydroid.base.PYDroidModule
+import com.pyamsoft.pydroid.PYDroidModule
+import com.pyamsoft.pydroid.PYDroidModuleImpl
 import com.pyamsoft.pydroid.base.about.Licenses
 import com.pyamsoft.pydroid.loader.LoaderModule
+import com.pyamsoft.pydroid.loader.LoaderModuleImpl
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
@@ -54,8 +56,8 @@ class PadLock : Application() {
             RefWatcher.DISABLED
         }
 
-        pydroidModule = PYDroidModule(this, BuildConfig.DEBUG)
-        loaderModule = LoaderModule(this)
+        pydroidModule = PYDroidModuleImpl(this, BuildConfig.DEBUG)
+        loaderModule = LoaderModuleImpl(pydroidModule)
         PYDroid.init(pydroidModule, loaderModule)
         Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
         Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight")
