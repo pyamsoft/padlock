@@ -25,8 +25,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import com.pyamsoft.backstack.BackStack
-import com.pyamsoft.backstack.BackStacks
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -34,7 +32,6 @@ import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.util.DrawableUtil
 import timber.log.Timber
@@ -46,8 +43,6 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     @field:Inject internal lateinit var appIconLoader: AppIconLoader
     private lateinit var binding: DialogPinEntryBinding
     private lateinit var packageName: String
-    private var appIcon = LoaderHelper.empty()
-    private lateinit var backstack: BackStack
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +64,6 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
-        backstack = BackStacks.create(this, viewLifecycle, R.id.pin_entry_dialog_container)
         binding = DialogPinEntryBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -80,7 +74,8 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         val fragment = fragmentManager.findFragmentByTag(tag)
         return if (fragment == null) {
             Timber.d("Push new pin fragment: $tag")
-            backstack.set(tag) { pushFragment }
+            fragmentManager.beginTransaction().add(R.id.pin_entry_dialog_container, pushFragment,
+                    tag).commit()
             // Return
             true
         } else {
@@ -101,8 +96,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
     override fun onStart() {
         super.onStart()
-        appIcon = LoaderHelper.unload(appIcon)
-        appIcon = appIconLoader.forPackageName(packageName).into(binding.pinImage)
+        appIconLoader.forPackageName(packageName).into(binding.pinImage).bind(viewLifecycle)
     }
 
     override fun onTypePattern() {
@@ -126,11 +120,6 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         if (pushIfNotPresent(PinEntryTextFragment(), PinEntryTextFragment.TAG)) {
             binding.pinNextButtonLayout.visibility = View.GONE
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        appIcon = LoaderHelper.unload(appIcon)
     }
 
     private fun setupToolbar() {

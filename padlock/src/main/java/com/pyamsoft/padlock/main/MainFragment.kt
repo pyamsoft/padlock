@@ -26,8 +26,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import com.pyamsoft.backstack.BackStack
-import com.pyamsoft.backstack.BackStacks
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentMainBinding
 import com.pyamsoft.padlock.list.LockListFragment
@@ -40,11 +38,9 @@ import timber.log.Timber
 class MainFragment : CanaryFragment() {
 
     private lateinit var binding: FragmentMainBinding
-    private lateinit var backstack: BackStack
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
-        backstack = BackStacks.create(this, viewLifecycle, R.id.main_view_container)
         binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -81,12 +77,30 @@ class MainFragment : CanaryFragment() {
 
                     @CheckResult
                     private fun replaceFragment(fragment: Fragment, tag: String): Boolean {
+                        val containerId = R.id.main_view_container
                         val fragmentManager = childFragmentManager
-                        return if (fragmentManager.findFragmentByTag(tag) == null) {
-                            backstack.set(tag) { fragment }
-                            true
+
+                        val currentFragment: Fragment? = fragmentManager.findFragmentById(
+                                containerId)
+                        // Do nothing on same fragment
+                        if (currentFragment != null && currentFragment.tag == tag) {
+                            return false
                         } else {
-                            false
+                            fragmentManager.beginTransaction().apply {
+                                // Detach current fragment if exists
+                                if (currentFragment != null) {
+                                    detach(currentFragment)
+                                }
+
+                                // Add or re-attach nextFragment
+                                val nextFragment: Fragment? = fragmentManager.findFragmentByTag(tag)
+                                if (nextFragment == null) {
+                                    add(containerId, fragment, tag)
+                                } else {
+                                    attach(nextFragment)
+                                }
+                            }.commit()
+                            return true
                         }
                     }
                 })
@@ -104,8 +118,6 @@ class MainFragment : CanaryFragment() {
         super.onDestroyView()
         binding.unbind()
     }
-
-    override fun onBackPressed(): Boolean = backstack.back()
 
     companion object {
 

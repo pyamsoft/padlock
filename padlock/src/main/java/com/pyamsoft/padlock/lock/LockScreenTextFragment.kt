@@ -34,7 +34,6 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
 import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.pydroid.loader.ImageLoader
-import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import timber.log.Timber
@@ -44,7 +43,6 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
     private lateinit var imm: InputMethodManager
     private lateinit var binding: FragmentLockScreenTextBinding
-    private var arrowGoTask = LoaderHelper.empty()
     private var editText: EditText? = null
     @Inject internal lateinit var presenter: LockEntryPresenter
     @Inject internal lateinit var imageLoader: ImageLoader
@@ -65,7 +63,6 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
     override fun onDestroyView() {
         super.onDestroyView()
-        arrowGoTask = LoaderHelper.unload(arrowGoTask)
         activity?.let {
             imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)
         }
@@ -127,10 +124,8 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
             }
         }
 
-        arrowGoTask = LoaderHelper.unload(arrowGoTask)
-        arrowGoTask = imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
-                .tint(R.color.orangeA200)
-                .into(binding.lockImageGo)
+        imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp).tint(R.color.orangeA200)
+                .into(binding.lockImageGo).bind(viewLifecycle)
     }
 
     private fun setupTextInput() {

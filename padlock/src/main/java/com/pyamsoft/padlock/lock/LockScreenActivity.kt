@@ -29,19 +29,16 @@ import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
 import android.view.MenuItem
 import android.view.ViewGroup
-import com.pyamsoft.backstack.BackStack
-import com.pyamsoft.backstack.BackStacks
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
-import com.pyamsoft.pydroid.loader.LoaderHelper
+import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
@@ -62,7 +59,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
     private var lockedSystem: Boolean = false
     private var ignorePeriod: Long = -1
     private var excludeEntry: Boolean = false
-    private var appIcon = LoaderHelper.empty()
     private var lockedCode: String? = null
 
     // These can potentially be unassigned in onSaveInstanceState, mark them nullable
@@ -75,7 +71,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
     private var menuIgnoreFourtyFive: MenuItem? = null
     private var menuIgnoreSixty: MenuItem? = null
     internal var menuExclude: MenuItem? = null
-    private lateinit var backstack: BackStack
 
     init {
         home.addCategory(Intent.CATEGORY_HOME)
@@ -112,7 +107,6 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         setTheme(R.style.Theme_PadLock_Light_Lock)
         overridePendingTransition(0, 0)
         super.onCreate(savedInstanceState)
-        backstack = BackStacks.create(this, R.id.lock_screen_container)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_lock)
 
         preInjectOnCreate()
@@ -130,8 +124,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
     }
 
     private fun postInjectOnCreate() {
-        appIcon = LoaderHelper.unload(appIcon)
-        appIcon = appIconLoader.forPackageName(lockedPackageName).into(binding.lockImage)
+        appIconLoader.forPackageName(lockedPackageName).into(binding.lockImage).bind(this)
         populateIgnoreTimes()
         setupToolbar()
         Timber.d("onCreate LockScreenActivity for $lockedPackageName $lockedRealName")
@@ -225,7 +218,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         val fragmentManager = supportFragmentManager
         val fragment = fragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
         if (fragment == null) {
-            backstack.set(tag) { pushFragment }
+            fragmentManager.beginTransaction().add(R.id.lock_screen_container, pushFragment, tag)
+                    .commit()
         }
     }
 
@@ -255,14 +249,11 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
     }
 
     override fun onBackPressed() {
-        if (!backstack.back()) {
-            applicationContext.startActivity(home)
-        }
+        applicationContext.startActivity(home)
     }
 
     @CallSuper override fun onDestroy() {
         super.onDestroy()
-        appIcon = LoaderHelper.unload(appIcon)
         binding.unbind()
         Timber.d("onDestroy LockScreenActivity for $lockedPackageName $lockedRealName")
     }

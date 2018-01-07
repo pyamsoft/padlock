@@ -45,7 +45,6 @@ import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
 import com.pyamsoft.pydroid.design.util.FABUtil
 import com.pyamsoft.pydroid.loader.ImageLoader
-import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.AnimUtil
@@ -61,7 +60,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     private lateinit var adapter: ModelAdapter<AppEntry, LockListItem>
     private lateinit var binding: FragmentLockListBinding
     private lateinit var filterListDelegate: FilterListDelegate
-    private var fabIconTask = LoaderHelper.empty()
     private var dividerDecoration: DividerItemDecoration? = null
     private var lastPosition: Int = 0
     private var displaySystemItem: MenuItem? = null
@@ -198,7 +196,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     override fun onDestroyView() {
         super.onDestroyView()
         filterListDelegate.onDestroyView()
-        fabIconTask = LoaderHelper.unload(fabIconTask)
         binding.apply {
             applistRecyclerview.removeItemDecoration(dividerDecoration)
             applistRecyclerview.setOnDebouncedClickListener(null)
@@ -363,15 +360,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     }
 
     override fun onFABEnabled() {
-        fabIconTask = LoaderHelper.unload(fabIconTask)
-        fabIconTask = imageLoader.fromResource(R.drawable.ic_lock_outline_24dp)
-                .into(binding.applistFab)
+        imageLoader.fromResource(R.drawable.ic_lock_outline_24dp).into(binding.applistFab)
+                .bind(viewLifecycle)
     }
 
     override fun onFABDisabled() {
-        fabIconTask = LoaderHelper.unload(fabIconTask)
-        fabIconTask = imageLoader.fromResource(R.drawable.ic_lock_open_24dp)
-                .into(binding.applistFab)
+        imageLoader.fromResource(R.drawable.ic_lock_open_24dp).into(binding.applistFab)
+                .bind(viewLifecycle)
     }
 
     override fun onSystemVisibilityChanged(visible: Boolean) {

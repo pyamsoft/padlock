@@ -48,7 +48,6 @@ import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
@@ -67,7 +66,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     private lateinit var filterListDelegate: FilterListDelegate
     private var appIsSystem: Boolean = false
     private var dividerDecoration: DividerItemDecoration? = null
-    private var appIcon = LoaderHelper.empty()
     private var lastPosition: Int = 0
     private val backingSet: MutableCollection<ActivityEntry> = LinkedHashSet()
 
@@ -164,13 +162,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
     override fun onStart() {
         super.onStart()
-        appIcon = LoaderHelper.unload(appIcon)
-        appIcon = appIconLoader.forPackageName(appPackageName).into(binding.lockInfoIcon)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        appIcon = LoaderHelper.unload(appIcon)
+        appIconLoader.forPackageName(appPackageName).into(binding.lockInfoIcon).bind(viewLifecycle)
     }
 
     override fun onPause() {

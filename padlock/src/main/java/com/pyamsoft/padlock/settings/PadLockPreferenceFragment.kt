@@ -22,6 +22,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v4.app.Fragment
 import android.support.v7.preference.ListPreference
 import android.view.View
 import android.widget.Toast
@@ -29,6 +30,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.main.MainFragment
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
@@ -49,6 +51,9 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
 
     override val applicationName: String
         get() = getString(R.string.app_name)
+
+    override val aboutReplaceFragment: Fragment?
+        get() = activity?.supportFragmentManager?.findFragmentByTag(MainFragment.TAG)
 
     override fun onClearAllClicked() {
         DialogUtil.guaranteeSingleDialogFragment(activity,

@@ -33,7 +33,6 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
 import com.pyamsoft.pydroid.loader.ImageLoader
-import com.pyamsoft.pydroid.loader.LoaderHelper
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import timber.log.Timber
@@ -48,7 +47,6 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     private var pinReentryText: EditText? = null
     private var pinEntryText: EditText? = null
     private var pinHintText: EditText? = null
-    private var goTask = LoaderHelper.empty()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +61,6 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        goTask = LoaderHelper.unload(goTask)
         activity?.let {
             imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)
         }
@@ -172,10 +169,8 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         // Force keyboard focus
         pinEntryText?.requestFocus()
 
-        goTask = LoaderHelper.unload(goTask)
-        goTask = imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
-                .tint(R.color.orangeA200)
-                .into(binding.pinImageGo)
+        imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp).tint(R.color.orangeA200)
+                .into(binding.pinImageGo).bind(viewLifecycle)
     }
 
     private fun onRestoreInstanceState(savedInstanceState: Bundle) {

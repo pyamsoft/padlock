@@ -23,8 +23,6 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
-import com.pyamsoft.backstack.BackStack
-import com.pyamsoft.backstack.BackStacks
 import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
@@ -65,12 +63,9 @@ class MainActivity : TamperActivity(), MainPresenter.View {
                 "BUGFIX: Faster list fetching, do not clear static items"
         )
 
-    private lateinit var backstack: BackStack
-
     public override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_PadLock_Light)
         super.onCreate(savedInstanceState)
-        backstack = BackStacks.create(this, R.id.fragment_container)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
@@ -95,7 +90,8 @@ class MainActivity : TamperActivity(), MainPresenter.View {
         if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
                 AboutLibrariesFragment.TAG) == null) {
             Timber.d("Load default page")
-            backstack.set(MainFragment.TAG) { MainFragment() }
+            fm.beginTransaction().add(R.id.fragment_container, MainFragment(), MainFragment.TAG)
+                    .commit()
         } else {
             Timber.w("Default page or About libraries was already loaded")
         }
@@ -138,12 +134,6 @@ class MainActivity : TamperActivity(), MainPresenter.View {
         binding.unbind()
         if (!isChangingConfigurations) {
             ListStateUtil.clearCache()
-        }
-    }
-
-    override fun onBackPressed() {
-        if (!backstack.back()) {
-            super.onBackPressed()
         }
     }
 
