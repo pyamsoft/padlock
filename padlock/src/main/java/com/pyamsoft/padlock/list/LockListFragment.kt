@@ -170,7 +170,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
         binding.apply {
             applistRecyclerview.clipToPadding = false
-            applistRecyclerview.setHasFixedSize(false)
+            applistRecyclerview.setHasFixedSize(true)
             applistRecyclerview.addItemDecoration(dividerDecoration)
             applistRecyclerview.adapter = FastAdapter.with<LockListItem, ModelAdapter<AppEntry, LockListItem>>(
                     adapter)

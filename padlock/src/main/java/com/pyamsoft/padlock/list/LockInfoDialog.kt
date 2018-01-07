@@ -135,7 +135,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
                 initialPrefetchItemCount = 3
             }
             lockInfoRecycler.clipToPadding = false
-            lockInfoRecycler.setHasFixedSize(false)
+            lockInfoRecycler.setHasFixedSize(true)
             lockInfoRecycler.addItemDecoration(dividerDecoration)
             lockInfoRecycler.adapter = FastAdapter.with<LockInfoItem, ModelAdapter<ActivityEntry, LockInfoItem>>(
                     adapter)
