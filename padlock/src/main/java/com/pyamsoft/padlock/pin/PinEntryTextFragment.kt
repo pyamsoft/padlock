@@ -30,18 +30,14 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
-import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.helper.Toasty
-import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import timber.log.Timber
 import javax.inject.Inject
 
 class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
     @field:Inject internal lateinit var presenter: PinEntryPresenter
-    @field:Inject internal lateinit var imageLoader: ImageLoader
     private lateinit var imm: InputMethodManager
     private lateinit var binding: FragmentPinEntryTextBinding
     private var pinReentryText: EditText? = null
@@ -81,14 +77,6 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
         clearDisplay()
         setupGoArrow()
-
-        binding.pinImageGo.setOnDebouncedClickListener {
-            submitPin()
-            activity?.let {
-                imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0,
-                        0)
-            }
-        }
 
         if (savedInstanceState != null) {
             onRestoreInstanceState(savedInstanceState)
@@ -172,9 +160,6 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     private fun setupGoArrow() {
         // Force keyboard focus
         pinEntryText?.requestFocus()
-
-        imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp).tint(R.color.orangeA200)
-                .into(binding.pinImageGo).bind(viewLifecycle)
     }
 
     private fun onRestoreInstanceState(savedInstanceState: Bundle) {
