@@ -17,29 +17,15 @@
   ~     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
   -->
 
-<layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
-
-  <android.support.constraint.ConstraintLayout
+<layout>
+  <com.andrognito.patternlockview.PatternLockView
       xmlns:android="http://schemas.android.com/apk/res/android"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      >
-
-    <com.andrognito.patternlockview.PatternLockView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/pattern_lock"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:aspectRatio="square"
-        app:aspectRatioEnabled="true"
-        app:correctStateColor="?attr/colorAccent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-
-  </android.support.constraint.ConstraintLayout>
-
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      android:id="@+id/pattern_lock"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:aspectRatio="square"
+      app:aspectRatioEnabled="true"
+      app:correctStateColor="?attr/colorAccent"
+      />
 </layout>

@@ -23,38 +23,45 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
-  <RelativeLayout
+  <android.support.constraint.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       >
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottom_tabs"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:background="?attr/colorPrimary"
         app:elevation="8dp"
         app:itemIconTint="@drawable/bottom_nav_state"
         app:itemTextColor="@drawable/bottom_nav_state"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/view"
+        app:layout_constraintStart_toStartOf="@+id/view"
         app:menu="@menu/navigation_menu"
         />
 
     <FrameLayout
         android:id="@+id/main_view_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/bottom_tabs"
-        android:layout_alignParentTop="true"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_tabs"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <View
-        android:layout_width="match_parent"
+        android:id="@+id/view"
+        android:layout_width="0dp"
         android:layout_height="4dp"
-        android:layout_above="@id/bottom_tabs"
         android:background="@drawable/shadow_scrim_up"
+        app:layout_constraintBottom_toTopOf="@id/bottom_tabs"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         />
 
-  </RelativeLayout>
+  </android.support.constraint.ConstraintLayout>
 
 </layout>

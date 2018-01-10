@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.pin
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -26,7 +27,7 @@ import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.padlock.databinding.FragmentPinEntryPatternBinding
+import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.LockCellUtil
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import timber.log.Timber
@@ -36,7 +37,7 @@ import javax.inject.Inject
 class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
     @field:Inject internal lateinit var presenter: PinEntryPresenter
-    private lateinit var binding: FragmentPinEntryPatternBinding
+    private lateinit var binding: FragmentLockScreenPatternBinding
     private val cellPattern: MutableList<PatternLockView.Dot> = ArrayList()
     private val repeatCellPattern: MutableList<PatternLockView.Dot> = ArrayList()
     private var nextButtonOnClickRunnable: (() -> Boolean) = { false }
@@ -59,7 +60,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
-        binding = FragmentPinEntryPatternBinding.inflate(inflater, container, false)
+        binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -74,6 +75,8 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupLockView()
+
         listener = object : PatternLockViewListener {
 
             private fun clearPattern() {
@@ -121,6 +124,11 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         binding.patternLock.addPatternLockListener(listener)
 
         presenter.bind(viewLifecycle, this)
+    }
+
+    private fun setupLockView() {
+        // Set the dots to be black so we can see them
+        binding.patternLock.normalStateColor = Color.BLACK
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
