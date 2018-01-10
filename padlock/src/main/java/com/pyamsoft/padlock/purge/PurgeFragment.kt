@@ -190,7 +190,9 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        ListStateUtil.saveState(TAG, outState, binding.purgeList)
+        if (this::binding.isInitialized) {
+            ListStateUtil.saveState(TAG, outState, binding.purgeList)
+        }
         super.onSaveInstanceState(outState)
     }
 
