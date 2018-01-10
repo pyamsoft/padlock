@@ -19,135 +19,130 @@
 
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
-  <LinearLayout
+  <android.support.constraint.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:orientation="vertical"
+      android:padding="16dp"
       >
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/stat_image"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:contentDescription="@string/blank"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/stat_display_name"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        >
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stat_image"
+        />
 
-      <ImageView
-          android:id="@+id/stat_image"
-          android:layout_width="48dp"
-          android:layout_height="48dp"
-          android:contentDescription="@string/blank"
-          />
 
-      <TextView
-          android:id="@+id/stat_display_name"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:gravity="center"
-          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-          />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/stat_title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:orientation="vertical"
-        >
+        android:layout_marginTop="16dp"
+        android:text="@string/stat_real_name"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stat_display_name"
+        />
 
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:layout_marginEnd="8dp"
-          android:text="@string/stat_real_name"
-          android:textAppearance="@style/TextAppearance.AppCompat.Small"
-          />
-
-      <TextView
-          android:id="@+id/stat_real_name"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-          />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/stat_real_name"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:orientation="vertical"
-        >
+        android:layout_marginTop="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stat_title"
+        />
 
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:layout_marginEnd="8dp"
-          android:text="@string/stat_package_name"
-          android:textAppearance="@style/TextAppearance.AppCompat.Small"
-          />
 
-      <TextView
-          android:id="@+id/stat_package_name"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-          />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/stat_package_title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:orientation="vertical"
-        >
+        android:layout_marginTop="16dp"
+        android:text="@string/stat_package_name"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stat_real_name"
+        />
 
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:layout_marginEnd="8dp"
-          android:text="@string/stat_locked_by"
-          android:textAppearance="@style/TextAppearance.AppCompat.Small"
-          />
-
-      <TextView
-          android:id="@+id/stat_locked_by"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-          />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/stat_package_name"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:orientation="vertical"
-        >
+        android:layout_marginTop="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stat_package_title"
+        />
 
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:layout_marginEnd="8dp"
-          android:text="@string/stat_system"
-          android:textAppearance="@style/TextAppearance.AppCompat.Small"
-          />
 
-      <TextView
-          android:id="@+id/stat_system"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-          />
+    <TextView
+        android:id="@+id/stat_locked_by_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/stat_locked_by"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stat_package_name"
+        />
 
-    </LinearLayout>
+    <TextView
+        android:id="@+id/stat_locked_by"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stat_locked_by_title"
+        />
 
-  </LinearLayout>
+
+    <TextView
+        android:id="@+id/stat_system_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/stat_system"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stat_locked_by"
+        />
+
+    <TextView
+        android:id="@+id/stat_system"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stat_system_title"
+        />
+
+
+  </android.support.constraint.ConstraintLayout>
 
 </layout>
