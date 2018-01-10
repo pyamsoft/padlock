@@ -18,24 +18,30 @@
   ~     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
   -->
 
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    >
-
-  <LinearLayout
+<layout>
+  <android.support.constraint.ConstraintLayout
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
       android:layout_width="match_parent"
-      android:layout_height="56dp"
-      android:padding="8dp"
+      android:layout_height="wrap_content"
+      android:minHeight="56dp"
       >
 
     <TextView
         android:id="@+id/item_purge_name"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
         android:gravity="center_vertical"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
-  </LinearLayout>
-
+  </android.support.constraint.ConstraintLayout>
 </layout>
