@@ -92,8 +92,6 @@ dependencies {
     transitive = true
   }
 
-  implementation "com.android.support.constraint:constraint-layout:$constraintLayout"
-
   // Leak Canary
   debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanary"
   releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanary"
