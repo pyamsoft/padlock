@@ -181,7 +181,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         // The dialog is super small for some reason. We have to set the size manually, in onResume
         val window = dialog.window
         window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.WRAP_CONTENT)
+                WindowManager.LayoutParams.MATCH_PARENT)
     }
 
     private fun modifyList(id: String, state: LockState) {

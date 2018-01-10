@@ -18,143 +18,144 @@
   ~     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
   -->
 
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    >
-
-  <LinearLayout
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+  <android.support.constraint.ConstraintLayout
+      xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:orientation="vertical"
       >
 
     <android.support.v7.widget.Toolbar
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/lock_info_toolbar"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/lock_info_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/blank"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_toolbar"
+        />
+
+    <TextView
+        android:id="@+id/lock_info_package_label"
+        android:layout_width="66dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="16dp"
+        android:text="@string/package_name"
+        app:layout_constraintStart_toEndOf="@+id/lock_info_icon"
+        app:layout_constraintTop_toTopOf="@+id/lock_info_icon"
+        />
+
+    <TextView
+        android:id="@+id/lock_info_package_name"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="16dp"
-        android:paddingTop="16dp"
-        >
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:gravity="end"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/lock_info_package_label"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_toolbar"
+        />
 
-      <ImageView
-          android:id="@+id/lock_info_icon"
-          android:layout_width="40dp"
-          android:layout_height="40dp"
-          android:layout_alignParentStart="true"
-          android:layout_marginEnd="16dp"
-          android:contentDescription="@string/blank"
-          />
-
-      <TextView
-          android:id="@+id/lock_info_package_label"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginEnd="8dp"
-          android:layout_toEndOf="@id/lock_info_icon"
-          android:text="@string/package_name"
-          />
-
-      <TextView
-          android:id="@+id/lock_info_package_name"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_alignParentEnd="true"
-          android:layout_toEndOf="@id/lock_info_package_label"
-          android:ellipsize="marquee"
-          android:gravity="end"
-          android:marqueeRepeatLimit="marquee_forever"
-          android:textAppearance="@style/TextAppearance.AppCompat.Small"
-          android:textColor="@android:color/black"
-          android:singleLine="true"
-          />
-
-      <TextView
-          android:id="@+id/lock_info_system_label"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_below="@id/lock_info_package_label"
-          android:layout_marginEnd="8dp"
-          android:layout_toEndOf="@id/lock_info_icon"
-          android:text="@string/system"
-          />
-
-      <TextView
-          android:id="@+id/lock_info_system"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_alignEnd="@id/lock_info_package_name"
-          android:layout_alignParentEnd="true"
-          android:layout_below="@id/lock_info_package_name"
-          android:layout_toEndOf="@id/lock_info_system_label"
-          android:ellipsize="marquee"
-          android:gravity="end"
-          android:marqueeRepeatLimit="marquee_forever"
-          android:singleLine="true"
-          android:textAppearance="@style/TextAppearance.AppCompat.Small"
-          android:textColor="@android:color/black"
-          />
-
-    </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/lock_info_system_label"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="8dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="16dp"
-        >
+        android:text="@string/system"
+        app:layout_constraintEnd_toEndOf="@+id/lock_info_package_label"
+        app:layout_constraintStart_toStartOf="@+id/lock_info_package_label"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name"
+        />
 
-      <RadioButton
-          xmlns:app="http://schemas.android.com/apk/res-auto"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:checked="true"
-          android:clickable="false"
-          android:text="@string/lock_info_default_explain"
-          android:textAppearance="@style/TextAppearance.AppCompat.Small"
-          />
+    <TextView
+        android:id="@+id/lock_info_system"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:gravity="end"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/lock_info_system_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/lock_info_system_label"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name"
+        />
 
-      <RadioButton
-          xmlns:app="http://schemas.android.com/apk/res-auto"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:checked="true"
-          android:clickable="false"
-          android:text="@string/lock_info_whitelist_explain"
-          android:textAppearance="@style/TextAppearance.AppCompat.Small"
-          app:buttonTint="@color/green500"
-          />
+    <RadioButton
+        android:id="@+id/lock_info_example_default"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:checked="true"
+        android:clickable="false"
+        android:text="@string/lock_info_default_explain"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_icon"
+        />
 
-      <RadioButton
-          xmlns:app="http://schemas.android.com/apk/res-auto"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:checked="true"
-          android:clickable="false"
-          android:text="@string/lock_info_blacklist_explain"
-          android:textAppearance="@style/TextAppearance.AppCompat.Small"
-          app:buttonTint="@color/red500"
-          />
+    <RadioButton
+        android:id="@+id/lock_info_example_whitelist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:checked="true"
+        android:clickable="false"
+        android:text="@string/lock_info_whitelist_explain"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:buttonTint="@color/green500"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_example_default"
+        />
 
-    </LinearLayout>
+    <RadioButton
+        android:id="@+id/lock_info_example_blacklist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:checked="true"
+        android:clickable="false"
+        android:text="@string/lock_info_blacklist_explain"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:buttonTint="@color/red500"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_example_whitelist"
+        />
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/lock_info_swipe_refresh"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_example_blacklist"
         >
 
       <FrameLayout
@@ -162,21 +163,21 @@
           android:layout_height="match_parent"
           >
 
-        <TextView
-            android:id="@+id/lock_info_empty"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="@string/no_lockable_activities"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:visibility="gone"
-            />
-
         <android.support.v7.widget.RecyclerView
             android:id="@+id/lock_info_recycler"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            />
+
+        <TextView
+            android:id="@+id/lock_info_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="@string/no_lockable_activities"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:visibility="gone"
             />
 
@@ -184,6 +185,14 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
-  </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:background="@drawable/dropshadow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lock_info_toolbar"
+        />
 
+  </android.support.constraint.ConstraintLayout>
 </layout>
