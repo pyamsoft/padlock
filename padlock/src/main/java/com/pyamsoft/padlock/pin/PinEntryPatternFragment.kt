@@ -149,6 +149,8 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
                 // process and show next
                 if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
                     Timber.d("Pattern is not long enough")
+                    Toasty.makeText(binding.patternLock.context, "Pattern is not long enough",
+                            Toasty.LENGTH_SHORT).show()
                     binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
                     return@runnable false
                 } else {
@@ -156,6 +158,8 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
                     patternText = LockCellUtil.cellPatternToString(cellPattern)
                     repeatPattern = true
                     binding.patternLock.clearPattern()
+                    Toasty.makeText(binding.patternLock.context, "Please confirm pattern",
+                            Toasty.LENGTH_SHORT).show()
                     return@runnable false
                 }
             }
