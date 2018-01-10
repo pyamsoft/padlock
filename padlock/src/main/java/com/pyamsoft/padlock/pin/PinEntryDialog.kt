@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.support.annotation.CheckResult
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -60,8 +61,11 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         super.onResume()
         // The dialog is super small for some reason. We have to set the size manually, in onResume
         val window = dialog.window
-        window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT)
+        window?.apply {
+            setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT)
+            setGravity(Gravity.CENTER)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
