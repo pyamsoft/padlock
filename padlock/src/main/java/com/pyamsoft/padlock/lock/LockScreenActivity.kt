@@ -78,7 +78,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
     }
 
     @CheckResult
-    internal fun getRootView(): ViewGroup = binding.activityLockScreen
+    internal fun getRootView(): ViewGroup = binding.lockScreenRoot
 
     @CheckResult
     internal fun getIgnoreTimeFromSelectedIndex(): Long {
