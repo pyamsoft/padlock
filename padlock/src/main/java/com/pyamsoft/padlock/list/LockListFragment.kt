@@ -129,7 +129,10 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        ListStateUtil.saveState(TAG, outState, binding.applistRecyclerview)
+        // Can sometimes be uninitialized
+        if (this::binding.isInitialized) {
+            ListStateUtil.saveState(TAG, outState, binding.applistRecyclerview)
+        }
         super.onSaveInstanceState(outState)
     }
 

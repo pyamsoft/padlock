@@ -95,7 +95,7 @@ class MainFragment : CanaryFragment() {
                                 // Add or re-attach nextFragment
                                 val nextFragment: Fragment? = fragmentManager.findFragmentByTag(tag)
                                 if (nextFragment == null) {
-                                    add(containerId, fragment, tag)
+                                    replace(containerId, fragment, tag)
                                 } else {
                                     attach(nextFragment)
                                 }
