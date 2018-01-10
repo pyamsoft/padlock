@@ -55,7 +55,6 @@ buildscript {
     dagger = "2.14.1"
     patternLock = "1.0.0"
     fastAdapter = "3.0.5"
-    constraintLayout = "1.0.2"
     ktlint = "2.3.0"
   }
 
