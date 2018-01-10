@@ -165,6 +165,10 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         }
     }
 
+    override fun onSubmitPressed() {
+        submitPin()
+    }
+
     private fun setupGoArrow() {
         // Force keyboard focus
         pinEntryText?.requestFocus()

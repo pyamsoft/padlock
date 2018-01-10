@@ -32,4 +32,6 @@ abstract class PinEntryBaseFragment : CanaryFragment() {
             throw ClassCastException("Fragment is not PinEntryDialog")
         }
     }
+
+    abstract fun onSubmitPressed()
 }

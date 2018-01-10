@@ -171,7 +171,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         }
     }
 
-    fun onNextButtonPressed() {
+    override fun onSubmitPressed() {
         Timber.d("Next button pressed, store pattern for re-entry")
         nextButtonOnClickRunnable()
     }

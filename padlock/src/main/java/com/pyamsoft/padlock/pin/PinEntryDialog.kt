@@ -18,10 +18,13 @@
 
 package com.pyamsoft.padlock.pin
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.annotation.CheckResult
+import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -32,7 +35,6 @@ import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.util.DrawableUtil
 import timber.log.Timber
 import javax.inject.Inject
@@ -59,7 +61,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         // The dialog is super small for some reason. We have to set the size manually, in onResume
         val window = dialog.window
         window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.WRAP_CONTENT)
+                WindowManager.LayoutParams.MATCH_PARENT)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -68,28 +70,19 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         return binding.root
     }
 
-    @CheckResult private fun pushIfNotPresent(pushFragment: PinEntryBaseFragment,
-            tag: String): Boolean {
+    private fun pushIfNotPresent(pushFragment: PinEntryBaseFragment, tag: String) {
         val fragmentManager = childFragmentManager
         val fragment = fragmentManager.findFragmentByTag(tag)
-        return if (fragment == null) {
+        if (fragment == null) {
             Timber.d("Push new pin fragment: $tag")
             fragmentManager.beginTransaction().add(R.id.pin_entry_dialog_container, pushFragment,
                     tag).commit()
-            // Return
-            true
-        } else {
-            // Return
-            false
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupToolbar()
-
-        // Start hidden
-        binding.pinNextButtonLayout.visibility = View.GONE
 
         presenter.bind(viewLifecycle, this)
     }
@@ -102,24 +95,12 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     override fun onTypePattern() {
         // Push text as child fragment
         Timber.d("Type Pattern")
-        if (pushIfNotPresent(PinEntryPatternFragment(), PinEntryPatternFragment.TAG)) {
-            binding.pinNextButtonLayout.visibility = View.VISIBLE
-            binding.pinNextButton.setOnDebouncedClickListener {
-                val fragmentManager = childFragmentManager
-                val fragment = fragmentManager.findFragmentByTag(PinEntryPatternFragment.TAG)
-                if (fragment is PinEntryPatternFragment) {
-                    fragment.onNextButtonPressed()
-                    binding.pinNextButton.text = "Submit"
-                }
-            }
-        }
+        pushIfNotPresent(PinEntryPatternFragment(), PinEntryPatternFragment.TAG)
     }
 
     override fun onTypeText() {
         Timber.d("Type Text")
-        if (pushIfNotPresent(PinEntryTextFragment(), PinEntryTextFragment.TAG)) {
-            binding.pinNextButtonLayout.visibility = View.GONE
-        }
+        pushIfNotPresent(PinEntryTextFragment(), PinEntryTextFragment.TAG)
     }
 
     private fun setupToolbar() {
@@ -127,12 +108,43 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         binding.apply {
             pinEntryToolbar.title = "PIN"
             pinEntryToolbar.setNavigationOnClickListener { dismiss() }
-        }
-        var icon = binding.pinEntryToolbar.navigationIcon
-        if (icon != null) {
-            icon = DrawableUtil.tintDrawableFromColor(icon,
-                    ContextCompat.getColor(context!!, android.R.color.black))
-            binding.pinEntryToolbar.navigationIcon = icon
+
+            // Set up icon as black
+            var icon: Drawable? = pinEntryToolbar.navigationIcon
+            if (icon != null) {
+                icon = DrawableUtil.tintDrawableFromColor(icon,
+                        ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black))
+                pinEntryToolbar.navigationIcon = icon
+            }
+
+            // Inflate menu
+            pinEntryToolbar.inflateMenu(R.menu.pin_menu)
+
+            // Make icon black
+            val pinItem: MenuItem? = pinEntryToolbar.menu.findItem(R.id.menu_submit_pin)
+            if (pinItem != null) {
+                var pinIcon: Drawable? = pinItem.icon
+                if (pinIcon != null) {
+                    pinIcon = DrawableUtil.tintDrawableFromColor(pinIcon,
+                            ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black))
+                    pinItem.icon = pinIcon
+                }
+            }
+
+            pinEntryToolbar.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.menu_submit_pin -> {
+                        val fragmentManager = childFragmentManager
+                        val fragment: Fragment? = fragmentManager.findFragmentById(
+                                R.id.pin_entry_dialog_container)
+                        if (fragment is PinEntryBaseFragment) {
+                            fragment.onSubmitPressed()
+                            return@setOnMenuItemClickListener true
+                        }
+                    }
+                }
+                return@setOnMenuItemClickListener false
+            }
         }
     }
 

@@ -83,4 +83,5 @@
   <string name="lock_info_whitelist_explain">Whitelisted - Never locked</string>
   <string name="lock_info_default_explain">Default - Locking based on main switch</string>
   <string name="lock_info_blacklist_explain">Blacklisted - Always locked</string>
+  <string name="submit_pin">Submit PIN</string>
 </resources>
