@@ -23,6 +23,7 @@ import android.support.annotation.CheckResult
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -134,7 +135,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
                 isItemPrefetchEnabled = true
                 initialPrefetchItemCount = 3
             }
-            lockInfoRecycler.clipToPadding = false
             lockInfoRecycler.setHasFixedSize(true)
             lockInfoRecycler.addItemDecoration(dividerDecoration)
             lockInfoRecycler.adapter = FastAdapter.with<LockInfoItem, ModelAdapter<ActivityEntry, LockInfoItem>>(
@@ -180,8 +180,11 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         super.onResume()
         // The dialog is super small for some reason. We have to set the size manually, in onResume
         val window = dialog.window
-        window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT)
+        window?.apply {
+            setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT)
+            setGravity(Gravity.CENTER)
+        }
     }
 
     private fun modifyList(id: String, state: LockState) {
