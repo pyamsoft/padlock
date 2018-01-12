@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PackageDrawableManager
 import com.pyamsoft.padlock.api.PackageLabelManager
+import com.pyamsoft.padlock.base.db.PadLockDBImpl
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.loader.cache.ImageCache

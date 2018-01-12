@@ -16,33 +16,24 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.base.db
 
 import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
 import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
-@AutoValue abstract class PadLockEntry : PadLockEntryModel {
+internal class CreateManager internal constructor() {
 
-    companion object {
-
-        /**
-         * The activity name of the PACKAGE entry in the database
-         */
-        const val PACKAGE_ACTIVITY_NAME = "PACKAGE"
-        const val PACKAGE_EMPTY = "EMPTY"
-        const val ACTIVITY_EMPTY = "EMPTY"
-
-        @JvmStatic
-        @CheckResult
-        fun isEmpty(entry: PadLockEntryModel): Boolean = (PACKAGE_EMPTY == entry.packageName()
-                && ACTIVITY_EMPTY == entry.activityName())
-
-        val EMPTY: PadLockEntryModel by lazy {
-            AutoValue_PadLockEntry(PadLockEntry.PACKAGE_EMPTY, PadLockEntry.ACTIVITY_EMPTY, null,
-                    0, 0, false, false)
+    @CheckResult
+    fun create(packageName: String, activityName: String,
+            lockCode: String?, lockUntilTime: Long, ignoreUntilTime: Long, isSystem: Boolean,
+            whitelist: Boolean): PadLockEntryModel {
+        val entry = PadLockSqlEntry.FACTORY.creator.create(packageName, activityName, lockCode,
+                lockUntilTime, ignoreUntilTime, isSystem, whitelist)
+        if (PadLockEntry.isEmpty(entry)) {
+            throw RuntimeException("Cannot create EMPTY entry")
         }
 
+        return entry
     }
 }

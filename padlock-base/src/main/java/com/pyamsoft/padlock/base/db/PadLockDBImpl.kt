@@ -16,7 +16,7 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.base
+package com.pyamsoft.padlock.base.db
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -27,8 +27,9 @@ import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PadLockDBUpdate
-import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.model.db.PadLockEntryModel.AllEntriesModel
+import com.pyamsoft.padlock.model.db.PadLockEntryModel.WithPackageNameModel
 import com.squareup.sqlbrite2.BriteDatabase
 import com.squareup.sqlbrite2.SqlBrite
 import io.reactivex.Completable
@@ -44,129 +45,95 @@ import javax.inject.Singleton
         PadLockDBUpdate,
         PadLockDBQuery, PadLockDBDelete {
 
-    private var briteDatabase: BriteDatabase? = null
-    private val openHelper: PadLockOpenHelper
+    private val briteDatabase: BriteDatabase
+    private val queryManager: QueryManager
+    private val createManager: CreateManager
+    private val insertManager: InsertManager
+    private val deleteManager: DeleteManager
+    private val updateManager: UpdateManager
 
     init {
-        openHelper = PadLockOpenHelper(context)
-    }
-
-    @CheckResult private fun openDatabase(): BriteDatabase {
-        if (briteDatabase == null) {
-            briteDatabase = SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler)
-        }
-
-        return briteDatabase!!
+        val openHelper = PadLockOpenHelper(context)
+        briteDatabase = SqlBrite.Builder().build().wrapDatabaseHelper(openHelper, scheduler)
+        queryManager = QueryManager(briteDatabase)
+        createManager = CreateManager()
+        insertManager = InsertManager(openHelper, briteDatabase)
+        deleteManager = DeleteManager(openHelper, briteDatabase)
+        updateManager = UpdateManager(openHelper, briteDatabase)
     }
 
     @CheckResult private fun deleteWithPackageActivityNameUnguarded(packageName: String,
-            activityName: String): Int =
-            PadLockEntry.deletePackageActivity(openHelper).executeProgram(packageName, activityName)
+            activityName: String): Long = deleteManager.deleteWithPackageActivity(packageName,
+            activityName)
 
     @CheckResult override fun insert(packageName: String, activityName: String,
             lockCode: String?, lockUntilTime: Long, ignoreUntilTime: Long, isSystem: Boolean,
             whitelist: Boolean): Completable {
         return Single.fromCallable {
-            val entry = PadLockEntry.create(packageName, activityName, lockCode, lockUntilTime,
-                    ignoreUntilTime,
-                    isSystem, whitelist)
-            if (PadLockEntry.isEmpty(entry)) {
-                throw RuntimeException("Cannot insert EMPTY entry")
-            }
+            val entry = createManager.create(packageName, activityName, lockCode, lockUntilTime,
+                    ignoreUntilTime, isSystem, whitelist)
             Timber.i("DB: INSERT")
             val deleteResult = deleteWithPackageActivityNameUnguarded(packageName, activityName)
             Timber.d("Delete result: %d", deleteResult)
-            return@fromCallable entry
-        }.flatMapCompletable {
-            Completable.fromAction { PadLockEntry.insertEntry(openHelper).executeProgram(it) }
-        }
+            return@fromCallable insertManager.insert(entry)
+        }.toCompletable()
     }
 
-    override fun updateIgnoreTime(ignoreUntilTime: Long, packageName: String,
-            activityName: String): Completable {
+    override fun updateIgnoreTime(packageName: String, activityName: String,
+            ignoreUntilTime: Long): Completable {
         return Completable.fromCallable {
-            if (PadLockEntry.PACKAGE_EMPTY == packageName || PadLockEntry.ACTIVITY_EMPTY == activityName) {
-                throw RuntimeException("Cannot update EMPTY entry")
-            }
             Timber.i("DB: UPDATE IGNORE")
-            return@fromCallable PadLockEntry.updateIgnoreTime(openHelper)
-                    .executeProgram(ignoreUntilTime, packageName, activityName)
+            return@fromCallable updateManager.updateIgnoreTime(packageName, activityName,
+                    ignoreUntilTime)
         }
     }
 
-    override fun updateLockTime(lockUntilTime: Long, packageName: String,
-            activityName: String): Completable {
+    override fun updateLockTime(packageName: String, activityName: String,
+            lockUntilTime: Long): Completable {
         return Completable.fromCallable {
-            if (PadLockEntry.PACKAGE_EMPTY == packageName || PadLockEntry.ACTIVITY_EMPTY == activityName) {
-                throw RuntimeException("Cannot update EMPTY entry")
-            }
             Timber.i("DB: UPDATE LOCK")
-            return@fromCallable PadLockEntry.updateLockTime(openHelper)
-                    .executeProgram(lockUntilTime, packageName, activityName)
+            return@fromCallable updateManager.updateLockTime(packageName, activityName,
+                    lockUntilTime)
         }
     }
 
-    override fun updateWhitelist(whitelist: Boolean, packageName: String,
-            activityName: String): Completable {
+    override fun updateWhitelist(packageName: String, activityName: String,
+            whitelist: Boolean): Completable {
         return Completable.fromCallable {
-            if (PadLockEntry.PACKAGE_EMPTY == packageName || PadLockEntry.ACTIVITY_EMPTY == activityName) {
-                throw RuntimeException("Cannot update EMPTY entry")
-            }
             Timber.i("DB: UPDATE WHITELIST")
-            return@fromCallable PadLockEntry.updateWhitelist(openHelper)
-                    .executeProgram(whitelist, packageName, activityName)
+            return@fromCallable updateManager.updateWhitelist(packageName, activityName, whitelist)
         }
     }
 
     /**
      * Get either the package with specific name of the PACKAGE entry
-
+     *
      * SQLite only has bindings so we must make do
      * ?1 package name
      * ?2 the PadLock PACKAGE_TAG, see model.PadLockEntry
      * ?3 the specific activity name
-     * ?4 the PadLock PACKAGE_TAG, see model.PadLockEntry
-     * ?5 the specific activity name
      */
     @CheckResult override fun queryWithPackageActivityNameDefault(packageName: String,
-            activityName: String): Single<PadLockEntry> {
-        return Single.defer {
-            Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT")
-            val statement = PadLockEntry.withPackageActivityNameDefault(packageName, activityName)
-            return@defer openDatabase().createQuery(statement.tables, statement.statement,
-                    *statement.args)
-                    .mapToOne { PadLockEntry.WITH_PACKAGE_ACTIVITY_NAME_DEFAULT_MAPPER.map(it) }
-                    .first(PadLockEntry.EMPTY)
-        }
+            activityName: String): Single<PadLockEntryModel> {
+        Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT")
+        return queryManager.queryWithPackageActivityNameDefault(packageName, activityName)
     }
 
     @CheckResult override fun queryWithPackageName(
-            packageName: String): Single<List<PadLockEntry.WithPackageName>> {
-        return Single.defer {
-            Timber.i("DB: QUERY PACKAGE")
-            val statement = PadLockEntry.withPackageName(packageName)
-            return@defer openDatabase().createQuery(statement.tables, statement.statement,
-                    *statement.args)
-                    .mapToList { PadLockEntry.WITH_PACKAGE_NAME_MAPPER.map(it) }
-                    .first(emptyList())
-        }
+            packageName: String): Single<List<WithPackageNameModel>> {
+        Timber.i("DB: QUERY PACKAGE")
+        return queryManager.queryWithPackageName(packageName)
     }
 
-    @CheckResult override fun queryAll(): Single<List<PadLockEntry.AllEntries>> {
-        return Single.defer {
-            Timber.i("DB: QUERY ALL")
-            val statement = PadLockEntry.queryAll()
-            return@defer openDatabase().createQuery(statement.tables, statement.statement,
-                    *statement.args)
-                    .mapToList { PadLockEntry.ALL_ENTRIES_MAPPER.map(it) }
-                    .first(emptyList())
-        }
+    @CheckResult override fun queryAll(): Single<List<AllEntriesModel>> {
+        Timber.i("DB: QUERY ALL")
+        return queryManager.queryAll()
     }
 
     @CheckResult override fun deleteWithPackageName(packageName: String): Completable {
         return Completable.fromCallable {
             Timber.i("DB: DELETE PACKAGE")
-            return@fromCallable PadLockEntry.deletePackage(openHelper).executeProgram(packageName)
+            return@fromCallable deleteManager.deleteWithPackage(packageName)
         }
     }
 
@@ -181,25 +148,14 @@ import javax.inject.Singleton
     @CheckResult override fun deleteAll(): Completable {
         return Completable.fromAction {
             Timber.i("DB: DELETE ALL")
-            openDatabase().use {
-                it.execute(PadLockEntryModel.DELETE_ALL)
-            }
-        }.andThen(Completable.fromAction { openHelper.deleteDatabase() })
-                .andThen(Completable.fromAction { briteDatabase = null })
-                .andThen(Completable.fromAction { PadLockEntry.reset() })
+            deleteManager.deleteAll()
+        }
     }
 
     private class PadLockOpenHelper internal constructor(context: Context) : SQLiteOpenHelper(
             context.applicationContext,
             DB_NAME, null,
             DATABASE_VERSION) {
-
-        private val appContext: Context = context.applicationContext
-
-        internal fun deleteDatabase() {
-            appContext.deleteDatabase(
-                    DB_NAME)
-        }
 
         override fun onCreate(sqLiteDatabase: SQLiteDatabase) {
             Timber.d("onCreate")

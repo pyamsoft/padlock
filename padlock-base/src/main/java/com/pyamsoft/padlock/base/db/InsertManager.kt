@@ -16,33 +16,31 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.base.db
 
+import android.database.sqlite.SQLiteOpenHelper
 import android.support.annotation.CheckResult
-import com.google.auto.value.AutoValue
 import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.model.db.PadLockEntryModel.InsertEntry
+import com.squareup.sqlbrite2.BriteDatabase
 
-@AutoValue abstract class PadLockEntry : PadLockEntryModel {
+internal class InsertManager internal constructor(openHelper: SQLiteOpenHelper,
+        private val briteDatabase: BriteDatabase) {
 
-    companion object {
+    private val insertEntry by lazy {
+        InsertEntry(openHelper.writableDatabase)
+    }
 
-        /**
-         * The activity name of the PACKAGE entry in the database
-         */
-        const val PACKAGE_ACTIVITY_NAME = "PACKAGE"
-        const val PACKAGE_EMPTY = "EMPTY"
-        const val ACTIVITY_EMPTY = "EMPTY"
-
-        @JvmStatic
-        @CheckResult
-        fun isEmpty(entry: PadLockEntryModel): Boolean = (PACKAGE_EMPTY == entry.packageName()
-                && ACTIVITY_EMPTY == entry.activityName())
-
-        val EMPTY: PadLockEntryModel by lazy {
-            AutoValue_PadLockEntry(PadLockEntry.PACKAGE_EMPTY, PadLockEntry.ACTIVITY_EMPTY, null,
-                    0, 0, false, false)
+    @CheckResult
+    internal fun insert(entry: PadLockEntryModel): Long {
+        if (PadLockEntry.isEmpty(entry)) {
+            throw RuntimeException("Cannot insert EMPTY entry")
         }
 
+        return briteDatabase.bindAndExecute(insertEntry) {
+            bind(entry.packageName(), entry.activityName(), entry.lockCode(), entry.lockUntilTime(),
+                    entry.ignoreUntilTime(), entry.systemApplication(), entry.whitelist())
+        }
     }
 }
