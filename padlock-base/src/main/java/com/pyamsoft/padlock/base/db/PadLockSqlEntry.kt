@@ -21,11 +21,11 @@ package com.pyamsoft.padlock.base.db
 import com.google.auto.value.AutoValue
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
-@AutoValue abstract class PadLockSqlEntry : PadLockEntryModel {
+@AutoValue internal abstract class PadLockSqlEntry : PadLockEntryModel {
 
-    @AutoValue abstract class AllEntries : PadLockEntryModel.AllEntriesModel
+    @AutoValue internal abstract class AllEntries : PadLockEntryModel.AllEntriesModel
 
-    @AutoValue abstract class WithPackageName : PadLockEntryModel.WithPackageNameModel
+    @AutoValue internal abstract class WithPackageName : PadLockEntryModel.WithPackageNameModel
 
     companion object {
 
