@@ -27,17 +27,18 @@ import android.content.Context
 import android.content.Intent
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.Excludes
-import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.model.PadLockEntry
-import com.pyamsoft.padlock.api.LockScreenPreferences
 import com.pyamsoft.padlock.api.JobSchedulerCompat
-import com.pyamsoft.padlock.api.PackageActivityManager
-import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.api.LockPassed
+import com.pyamsoft.padlock.api.LockScreenPreferences
 import com.pyamsoft.padlock.api.LockServiceInteractor
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
+import com.pyamsoft.padlock.api.PackageActivityManager
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.model.ForegroundEvent
+import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.RecheckStatus
 import com.pyamsoft.padlock.model.RecheckStatus.FORCE
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.data.Optional
 import com.pyamsoft.pydroid.data.Optional.Present
 import com.pyamsoft.pydroid.helper.asOptional
@@ -151,7 +152,7 @@ import javax.inject.Singleton
     }
 
     @CheckResult private fun prepareLockScreen(packageName: String,
-            activityName: String): MaybeTransformer<Boolean, PadLockEntry> {
+            activityName: String): MaybeTransformer<Boolean, PadLockEntryModel> {
         return MaybeTransformer {
             it.flatMap {
                 Timber.d("Get list of locked classes with package: %s, class: %s", packageName,
@@ -162,7 +163,7 @@ import javax.inject.Singleton
         }
     }
 
-    @CheckResult private fun filterOutInvalidEntries(): MaybeTransformer<PadLockEntry, PadLockEntry> {
+    @CheckResult private fun filterOutInvalidEntries(): MaybeTransformer<PadLockEntryModel, PadLockEntryModel> {
         return MaybeTransformer {
             it.filter {
                 val ignoreUntilTime: Long = it.ignoreUntilTime()
@@ -183,7 +184,7 @@ import javax.inject.Singleton
     }
 
     @CheckResult private fun getEntry(packageName: String,
-            activityName: String): SingleTransformer<Boolean, PadLockEntry> {
+            activityName: String): SingleTransformer<Boolean, PadLockEntryModel> {
         return SingleTransformer {
             it.filter { it }
                     .compose(prepareLockScreen(packageName, activityName))
@@ -251,7 +252,7 @@ import javax.inject.Singleton
     }
 
     override fun processEvent(packageName: String, className: String,
-            forcedRecheck: RecheckStatus): Single<PadLockEntry> {
+            forcedRecheck: RecheckStatus): Single<PadLockEntryModel> {
         val windowEventObservable: Single<Boolean> = isServiceEnabled().compose(
                 isEventFromActivity(packageName, className)).compose(
                 isEventRestricted(packageName, className))

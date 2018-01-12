@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.model.RecheckStatus
 import com.pyamsoft.padlock.service.LockServicePresenter.View
 import com.pyamsoft.padlock.model.RecheckStatus.NOT_FORCE
 import com.pyamsoft.padlock.model.ServiceFinishEvent
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.helper.clear
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -162,7 +163,7 @@ class LockServicePresenter @Inject internal constructor(
 
     interface LockScreenCallback {
 
-        fun onStartLockScreen(entry: PadLockEntry, realName: String)
+        fun onStartLockScreen(entry: PadLockEntryModel, realName: String)
     }
 
     interface BusCallback : ForegroundEventStreamCallback {

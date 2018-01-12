@@ -24,6 +24,7 @@ import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PurgeInteractor
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -44,7 +45,7 @@ import javax.inject.Singleton
     }
 
     @CheckResult
-    private fun getAllEntries(): Single<List<PadLockEntry.AllEntries>> = queryDb.queryAll()
+    private fun getAllEntries(): Single<List<PadLockEntryModel.AllEntriesModel>> = queryDb.queryAll()
 
     @CheckResult
     private fun getActiveApplications(): Single<List<String>> = applicationManager.getActiveApplications()
@@ -62,7 +63,7 @@ import javax.inject.Singleton
                     }
 
                     // Loop through all the package names that we are aware of on the device
-                    val foundLocations: MutableSet<PadLockEntry.AllEntries> = HashSet()
+                    val foundLocations: MutableSet<PadLockEntryModel.AllEntriesModel> = HashSet()
                     for (packageName in packageNames) {
                         foundLocations.clear()
 

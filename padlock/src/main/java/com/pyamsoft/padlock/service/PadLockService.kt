@@ -43,6 +43,7 @@ import com.pyamsoft.padlock.lifecycle.fakeBind
 import com.pyamsoft.padlock.lifecycle.fakeRelease
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.main.MainActivity
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -89,7 +90,7 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
         presenter.processActiveApplicationIfMatching(packageName, className)
     }
 
-    override fun onStartLockScreen(entry: PadLockEntry, realName: String) {
+    override fun onStartLockScreen(entry: PadLockEntryModel, realName: String) {
         LockScreenActivity.start(this, entry, realName)
     }
 

@@ -20,8 +20,8 @@ package com.pyamsoft.padlock.api
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.RecheckStatus
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import io.reactivex.Flowable
 import io.reactivex.Single
 
@@ -41,5 +41,5 @@ interface LockServiceInteractor {
 
     @CheckResult
     fun processEvent(packageName: String, className: String,
-            forcedRecheck: RecheckStatus): Single<PadLockEntry>
+            forcedRecheck: RecheckStatus): Single<PadLockEntryModel>
 }

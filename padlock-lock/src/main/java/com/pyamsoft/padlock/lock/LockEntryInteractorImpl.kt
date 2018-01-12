@@ -121,7 +121,7 @@ import javax.inject.Singleton
                     ignoreMinutesInMillis)
 
             // Add an extra second here to artificially de-bounce quick requests, like those commonly in multi window mode
-            return@defer dbUpdate.updateIgnoreTime(newIgnoreTime + 1000L, packageName, activityName)
+            return@defer dbUpdate.updateIgnoreTime(packageName, activityName, newIgnoreTime + 1000L)
         }
     }
 
@@ -152,7 +152,7 @@ import javax.inject.Singleton
             Timber.d("Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
                     timeOutMinutesInMillis)
 
-            return@defer dbUpdate.updateLockTime(newLockUntilTime, packageName, activityName)
+            return@defer dbUpdate.updateLockTime(packageName, activityName, newLockUntilTime)
                     .andThen(Maybe.just(newLockUntilTime))
         }
     }

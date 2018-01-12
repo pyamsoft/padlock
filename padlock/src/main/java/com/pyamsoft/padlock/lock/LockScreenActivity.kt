@@ -39,6 +39,7 @@ import com.pyamsoft.padlock.helper.setChecked
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
 import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
@@ -323,7 +324,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
          * Starts a LockScreenActivity instance
          */
         @JvmStatic
-        fun start(context: Context, entry: PadLockEntry, realName: String) {
+        fun start(context: Context, entry: PadLockEntryModel, realName: String) {
             val notPadLock = (entry.packageName() != context.applicationContext.packageName)
             val intent = Intent(context.applicationContext, LockScreenActivity::class.java).apply {
                 putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName())

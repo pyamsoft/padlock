@@ -20,16 +20,15 @@ package com.pyamsoft.padlock.list.info
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockInfoInteractor
-import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.api.PadLockDBUpdate
-import com.pyamsoft.padlock.model.PadLockEntry
-import com.pyamsoft.padlock.model.PadLockEntry.WithPackageName
+import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.OnboardingPreferences
 import com.pyamsoft.padlock.api.PackageActivityManager
-import com.pyamsoft.padlock.api.LockStateModifyInteractor
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
+import com.pyamsoft.padlock.model.db.PadLockEntryModel.WithPackageNameModel
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -54,15 +53,14 @@ import javax.inject.Singleton
     }
 
     @CheckResult private fun getLockedActivityEntries(
-            name: String): Single<List<PadLockEntry.WithPackageName>> = queryDb.queryWithPackageName(
+            name: String): Single<List<WithPackageNameModel>> = queryDb.queryWithPackageName(
             name)
 
     @CheckResult private fun getPackageActivities(name: String): Single<List<String>> =
             packageActivityManager.getActivityListForPackage(name)
 
-    @CheckResult private fun findMatchingEntry(
-            lockEntries: MutableList<PadLockEntry.WithPackageName>,
-            activityName: String): PadLockEntry.WithPackageName? {
+    @CheckResult private fun findMatchingEntry(lockEntries: MutableList<WithPackageNameModel>,
+            activityName: String): WithPackageNameModel? {
         if (lockEntries.isEmpty()) {
             return null
         }
@@ -74,7 +72,7 @@ import javax.inject.Singleton
         // Compare to pivot
         var start: Int
         var end: Int
-        var foundEntry: PadLockEntry.WithPackageName? = null
+        var foundEntry: WithPackageNameModel? = null
         when {
             pivotPoint.activityName() == activityName -> {
                 // We are the pivot
@@ -114,14 +112,14 @@ import javax.inject.Singleton
     }
 
     @CheckResult private fun findActivityEntry(packageName: String, activityNames: List<String>,
-            padLockEntries: MutableList<PadLockEntry.WithPackageName>, index: Int): ActivityEntry {
+            padLockEntries: MutableList<WithPackageNameModel>, index: Int): ActivityEntry {
         val activityName = activityNames[index]
         val foundEntry = findMatchingEntry(padLockEntries, activityName)
         return createActivityEntry(packageName, activityName, foundEntry)
     }
 
     @CheckResult private fun createActivityEntry(packageName: String, name: String,
-            foundEntry: PadLockEntry.WithPackageName?): ActivityEntry {
+            foundEntry: WithPackageNameModel?): ActivityEntry {
         val state: LockState = if (foundEntry == null) {
             LockState.DEFAULT
         } else {
@@ -145,7 +143,7 @@ import javax.inject.Singleton
                     }
 
                     val activityEntries: MutableList<ActivityEntry> = ArrayList()
-                    val mutablePadLockEntries: MutableList<WithPackageName> = ArrayList(
+                    val mutablePadLockEntries: MutableList<WithPackageNameModel> = ArrayList(
                             padLockEntries)
 
                     var start = 0
@@ -231,7 +229,7 @@ import javax.inject.Singleton
     @CheckResult private fun updateExistingEntry(
             packageName: String, activityName: String, whitelist: Boolean): Single<LockState> {
         Timber.d("Entry already exists for: %s %s, update it", packageName, activityName)
-        return updateDb.updateWhitelist(whitelist, packageName, activityName)
+        return updateDb.updateWhitelist(packageName, activityName, whitelist)
                 .toSingleDefault(if (whitelist) LockState.WHITELISTED else LockState.LOCKED)
     }
 }

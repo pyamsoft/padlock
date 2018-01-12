@@ -20,18 +20,18 @@ package com.pyamsoft.padlock.list
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockListInteractor
-import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.model.PadLockEntry
-import com.pyamsoft.padlock.model.PadLockEntry.AllEntries
 import com.pyamsoft.padlock.api.LockListPreferences
+import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.OnboardingPreferences
 import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PackageApplicationManager.ApplicationItem
 import com.pyamsoft.padlock.api.PackageLabelManager
-import com.pyamsoft.padlock.api.LockStateModifyInteractor
+import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.db.PadLockEntryModel.AllEntriesModel
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -50,8 +50,7 @@ import javax.inject.Singleton
         private val preferences: LockListPreferences) :
         LockListInteractor {
 
-    override fun isSystemVisible(): Single<Boolean> =
-            Single.fromCallable { preferences.isSystemVisible() }
+    override fun isSystemVisible(): Single<Boolean> = Single.fromCallable { preferences.isSystemVisible() }
 
     override fun setSystemVisible(visible: Boolean) {
         preferences.setSystemVisible(visible)
@@ -59,16 +58,16 @@ import javax.inject.Singleton
 
     override fun populateList(force: Boolean): Observable<AppEntry> {
         return getValidPackageNames().zipWith(getAppEntryList(),
-                BiFunction<List<String>, List<PadLockEntry.AllEntries>, List<LockTuple>> { packageNames, padLockEntries ->
+                BiFunction<List<String>, List<AllEntriesModel>, List<LockTuple>> { packageNames, padLockEntries ->
                     val lockTuples: MutableList<LockTuple> = ArrayList()
-                    val copyEntries: MutableList<PadLockEntry.AllEntries> = ArrayList(
+                    val copyEntries: MutableList<AllEntriesModel> = ArrayList(
                             padLockEntries)
                     val copyNames: List<String> = ArrayList(packageNames)
                     for (packageName in copyNames) {
                         var locked = false
                         var whitelist = 0
                         var hardLocked = 0
-                        val removeEntries = HashSet<AllEntries>()
+                        val removeEntries = HashSet<AllEntriesModel>()
                         for (entry in copyEntries) {
                             if (entry.packageName() == packageName) {
                                 removeEntries.add(entry)
@@ -125,8 +124,7 @@ import javax.inject.Singleton
         }.filter { it.isNotBlank() }.toList()
     }
 
-    @CheckResult private fun getAppEntryList(): Single<List<PadLockEntry.AllEntries>> =
-            queryDb.queryAll()
+    @CheckResult private fun getAppEntryList(): Single<List<AllEntriesModel>> = queryDb.queryAll()
 
     override fun hasShownOnBoarding(): Single<Boolean> =
             Single.fromCallable { onboardingPreferences.isListOnBoard() }

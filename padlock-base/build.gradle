@@ -31,6 +31,13 @@ android {
     targetSdkVersion rootProject.ext.maxSdk
 
     resConfigs "en"
+
+    javaCompileOptions {
+      annotationProcessorOptions {
+        // Fix kapt
+        includeCompileClasspath = true
+      }
+    }
   }
 
   compileOptions {
@@ -42,6 +49,10 @@ android {
 dependencies {
   // SQLBrite
   implementation "com.squareup.sqlbrite2:sqlbrite:$sqlbrite"
+
+  // Auto value
+  compileOnly "com.google.auto.value:auto-value:$autoValue"
+  kapt "com.google.auto.value:auto-value:$autoValue"
 
   // Dagger
   kapt "com.google.dagger:dagger-compiler:$dagger"

@@ -16,32 +16,25 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.base.db
 
-import android.support.annotation.CheckResult
 import com.google.auto.value.AutoValue
-import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
-@AutoValue abstract class PadLockEntry : PadLockEntryModel {
+@AutoValue abstract class PadLockSqlEntry : PadLockEntryModel {
+
+    @AutoValue abstract class AllEntries : PadLockEntryModel.AllEntriesModel
+
+    @AutoValue abstract class WithPackageName : PadLockEntryModel.WithPackageNameModel
 
     companion object {
 
-        /**
-         * The activity name of the PACKAGE entry in the database
-         */
-        const val PACKAGE_ACTIVITY_NAME = "PACKAGE"
-        const val PACKAGE_EMPTY = "EMPTY"
-        const val ACTIVITY_EMPTY = "EMPTY"
-
-        @JvmStatic
-        @CheckResult
-        fun isEmpty(entry: PadLockEntryModel): Boolean = (PACKAGE_EMPTY == entry.packageName()
-                && ACTIVITY_EMPTY == entry.activityName())
-
-        val EMPTY: PadLockEntryModel by lazy {
-            AutoValue_PadLockEntry(PadLockEntry.PACKAGE_EMPTY, PadLockEntry.ACTIVITY_EMPTY, null,
-                    0, 0, false, false)
+        internal val FACTORY: PadLockEntryModel.Factory<PadLockSqlEntry> by lazy<PadLockEntryModel.Factory<PadLockSqlEntry>> {
+            PadLockEntryModel.Factory { packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication, whitelist ->
+                AutoValue_PadLockSqlEntry(packageName, activityName, lockCode, lockUntilTime,
+                        ignoreUntilTime,
+                        systemApplication, whitelist)
+            }
         }
 
     }
