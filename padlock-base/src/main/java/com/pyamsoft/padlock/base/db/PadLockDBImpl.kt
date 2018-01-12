@@ -42,8 +42,7 @@ import javax.inject.Singleton
 
 @Singleton internal class PadLockDBImpl @Inject internal constructor(context: Context,
         @param:Named("io") private val scheduler: Scheduler) : PadLockDBInsert,
-        PadLockDBUpdate,
-        PadLockDBQuery, PadLockDBDelete {
+        PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
 
     private val briteDatabase: BriteDatabase
     private val queryManager: QueryManager
@@ -105,14 +104,6 @@ import javax.inject.Singleton
         }
     }
 
-    /**
-     * Get either the package with specific name of the PACKAGE entry
-     *
-     * SQLite only has bindings so we must make do
-     * ?1 package name
-     * ?2 the PadLock PACKAGE_TAG, see model.PadLockEntry
-     * ?3 the specific activity name
-     */
     @CheckResult override fun queryWithPackageActivityNameDefault(packageName: String,
             activityName: String): Single<PadLockEntryModel> {
         Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT")
