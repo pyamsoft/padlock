@@ -54,7 +54,5 @@ internal class DeleteManager internal constructor(openHelper: SQLiteOpenHelper,
         }
     }
 
-    internal fun deleteAll() {
-        briteDatabase.execute(deleteAll)
-    }
+    internal fun deleteAll(): Long = briteDatabase.bindAndExecute(deleteAll) {}
 }

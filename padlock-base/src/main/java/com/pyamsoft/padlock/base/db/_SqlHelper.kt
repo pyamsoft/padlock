@@ -30,12 +30,6 @@ import com.squareup.sqldelight.SqlDelightStatement
 internal fun BriteDatabase.createQuery(query: SqlDelightStatement) = createQuery(query.tables,
         query.statement, *query.args)
 
-internal fun <T : SqlDelightCompiledStatement> BriteDatabase.execute(statement: T) {
-    synchronized(statement) {
-        execute(statement.table, statement.program)
-    }
-}
-
 @CheckResult
 internal inline fun <T : SqlDelightCompiledStatement> BriteDatabase.bindAndExecute(
         statement: T, bind: T.() -> Unit): Long {

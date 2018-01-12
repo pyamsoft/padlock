@@ -134,30 +134,27 @@ import javax.inject.Singleton
 
     @CheckResult private fun fetchData(fetchName: String): Single<MutableList<ActivityEntry>> {
         return getPackageActivities(fetchName).zipWith(getLockedActivityEntries(fetchName),
-                BiFunction { activityNames, padLockEntries ->
+                BiFunction { activities, entries ->
                     // Sort here to avoid stream break
                     // If the list is empty, the old flatMap call can hang, causing a list loading error
                     // Sort here where we are guaranteed a list of some kind
-                    Collections.sort(padLockEntries) { o1, o2 ->
+                    val sortedList: MutableList<WithPackageNameModel> = ArrayList(entries)
+                    Collections.sort(sortedList) { o1, o2 ->
                         o1.activityName().compareTo(o2.activityName(), ignoreCase = true)
                     }
 
                     val activityEntries: MutableList<ActivityEntry> = ArrayList()
-                    val mutablePadLockEntries: MutableList<WithPackageNameModel> = ArrayList(
-                            padLockEntries)
 
                     var start = 0
-                    var end = activityNames.size - 1
+                    var end = activities.size - 1
 
                     while (start <= end) {
                         // Find entry to compare against
-                        val entry1 = findActivityEntry(fetchName, activityNames,
-                                mutablePadLockEntries, start)
+                        val entry1 = findActivityEntry(fetchName, activities, sortedList, start)
                         activityEntries.add(entry1)
 
                         if (start != end) {
-                            val entry2 = findActivityEntry(fetchName, activityNames,
-                                    mutablePadLockEntries, end)
+                            val entry2 = findActivityEntry(fetchName, activities, sortedList, end)
                             activityEntries.add(entry2)
                         }
 
