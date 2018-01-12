@@ -22,26 +22,29 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.JobSchedulerCompat
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton internal class JobSchedulerCompatImpl @Inject internal constructor(
-        context: Context) : JobSchedulerCompat {
+        private val context: Context) : JobSchedulerCompat {
 
-    private val appContext: Context = context.applicationContext
-    private val alarmManager: AlarmManager = context.applicationContext.getSystemService(
+    private val alarmManager: AlarmManager = context.getSystemService(
             Context.ALARM_SERVICE) as AlarmManager
 
+    @CheckResult
+    private fun Intent.toPending(): PendingIntent = PendingIntent.getService(context, 0, this, 0)
+
     override fun cancel(intent: Intent) {
-        val pendingIntent = PendingIntent.getService(appContext, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT)
-        alarmManager.cancel(pendingIntent)
-        pendingIntent.cancel()
+        intent.toPending().apply {
+            alarmManager.cancel(this)
+            cancel()
+        }
     }
 
     override fun queue(intent: Intent, triggerTime: Long) {
-        alarmManager.set(AlarmManager.RTC, triggerTime,
-                PendingIntent.getService(appContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
+        cancel(intent)
+        alarmManager.set(AlarmManager.RTC, triggerTime, intent.toPending())
     }
 }
