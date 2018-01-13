@@ -110,6 +110,19 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             lockInfoToolbar.title = appName
             lockInfoToolbar.setNavigationOnClickListener { dismiss() }
             lockInfoToolbar.inflateMenu(R.menu.search_menu)
+            lockInfoToolbar.inflateMenu(R.menu.lockinfo_menu)
+
+            lockInfoToolbar.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.menu_explain_lock_type -> {
+                        DialogUtil.guaranteeSingleDialogFragment(activity!!,
+                                LockInfoExplanationDialog(),
+                                LockInfoExplanationDialog.TAG)
+                        return@setOnMenuItemClickListener true
+                    }
+                    else -> return@setOnMenuItemClickListener false
+                }
+            }
         }
         ViewCompat.setElevation(binding.lockInfoToolbar,
                 AppUtil.convertToDP(binding.lockInfoToolbar.context, 4f))

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~     Copyright (C) 2017 Peter Kenji Yamanaka
   ~
@@ -17,8 +18,19 @@
   ~     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
   -->
 
-<resources>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="AppCompatResource">
 
-  <color name="lock_info_dark_background">#ffdedede</color>
+  <group android:id="@+id/menu_group_lock_info_explain">
 
-</resources>
+    <item
+        android:id="@+id/menu_explain_lock_type"
+        android:title="@string/lock_type_explanation"
+        app:showAsAction="never"/>
+
+  </group>
+
+</menu>
