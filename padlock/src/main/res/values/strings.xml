@@ -84,4 +84,5 @@
   <string name="lock_info_default_explain">Default - Locking based on main switch</string>
   <string name="lock_info_blacklist_explain">Blacklisted - Always locked</string>
   <string name="submit_pin">Submit PIN</string>
+  <string name="lock_type_explanation">Lock Type Explanation</string>
 </resources>

@@ -38,6 +38,17 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         />
 
+    <!-- Dark grey background, put it here so it shows up behind info on old Android -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/lock_info_dark_background"
+        app:layout_constraintBottom_toTopOf="@id/lock_info_swipe_refresh"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lock_info_toolbar"
+        />
+
     <ImageView
         android:id="@+id/lock_info_icon"
         android:layout_width="40dp"
@@ -51,8 +62,8 @@
 
     <TextView
         android:id="@+id/lock_info_package_label"
-        android:layout_width="66dp"
-        android:layout_height="22dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:text="@string/package_name"
         app:layout_constraintStart_toEndOf="@+id/lock_info_icon"
@@ -99,64 +110,16 @@
         app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name"
         />
 
-    <RadioButton
-        android:id="@+id/lock_info_example_default"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:checked="true"
-        android:clickable="false"
-        android:text="@string/lock_info_default_explain"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lock_info_icon"
-        />
-
-    <RadioButton
-        android:id="@+id/lock_info_example_whitelist"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:checked="true"
-        android:clickable="false"
-        android:text="@string/lock_info_whitelist_explain"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        app:buttonTint="@color/green500"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lock_info_example_default"
-        />
-
-    <RadioButton
-        android:id="@+id/lock_info_example_blacklist"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:checked="true"
-        android:clickable="false"
-        android:text="@string/lock_info_blacklist_explain"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        app:buttonTint="@color/red500"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lock_info_example_whitelist"
-        />
-
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/lock_info_swipe_refresh"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="wrap"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lock_info_example_blacklist"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_system_label"
         >
 
       <FrameLayout
