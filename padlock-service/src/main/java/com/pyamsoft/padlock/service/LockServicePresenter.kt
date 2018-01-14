@@ -28,7 +28,7 @@ import com.pyamsoft.padlock.model.RecheckStatus.NOT_FORCE
 import com.pyamsoft.padlock.model.ServiceFinishEvent
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.helper.clear
+import com.pyamsoft.pydroid.ktext.clear
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable

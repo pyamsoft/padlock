@@ -18,6 +18,7 @@
 
 package com.pyamsoft.padlock.api
 
+import android.content.pm.ApplicationInfo
 import android.support.annotation.CheckResult
 import io.reactivex.Single
 
@@ -39,6 +40,14 @@ interface PackageApplicationManager {
             @JvmField
             val EMPTY = ApplicationItem("",
                     false, false)
+
+            @CheckResult
+            @JvmStatic
+            fun fromInfo(info: ApplicationInfo): ApplicationItem =
+                    ApplicationItem(info.packageName, info.system(), info.enabled)
+
+            @CheckResult
+            private fun ApplicationInfo.system(): Boolean = flags and ApplicationInfo.FLAG_SYSTEM != 0
         }
     }
 }
