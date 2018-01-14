@@ -22,19 +22,19 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.api.PadLockDBInsert
-import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.api.PadLockDBUpdate
-import com.pyamsoft.padlock.api.LockScreenPreferences
 import com.pyamsoft.padlock.api.JobSchedulerCompat
 import com.pyamsoft.padlock.api.LockEntryInteractor
 import com.pyamsoft.padlock.api.LockHelper
-import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.LockPassed
+import com.pyamsoft.padlock.api.LockScreenPreferences
+import com.pyamsoft.padlock.api.MasterPinInteractor
+import com.pyamsoft.padlock.api.PadLockDBInsert
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.Recheck
-import com.pyamsoft.pydroid.data.Optional
-import com.pyamsoft.pydroid.data.Optional.Present
-import com.pyamsoft.pydroid.helper.asOptional
+import com.pyamsoft.pydroid.optional.Optional.Present
+import com.pyamsoft.pydroid.optional.Optionals
+import com.pyamsoft.pydroid.optional.asOptional
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -64,31 +64,26 @@ import javax.inject.Singleton
         return dbQuery.queryWithPackageActivityNameDefault(packageName, activityName)
                 .flatMap {
                     val lockUntilTime = it.lockUntilTime()
-                    masterPinInteractor.getMasterPin().map {
+                    return@flatMap masterPinInteractor.getMasterPin().map {
                         Timber.d("Attempt unlock: %s %s", packageName, activityName)
                         Timber.d("Check entry is not locked: %d", lockUntilTime)
                         if (System.currentTimeMillis() < lockUntilTime) {
                             Timber.e("Entry is still locked. Fail unlock")
-                            return@map Optional.ofNullable(null)
+                            return@map Optionals.ofNullable(null)
                         }
 
-                        if (lockCode == null) {
-                            Timber.d("No app specific code, use Master PIN")
-                            return@map it
-                        } else {
-                            Timber.d("App specific code present, compare attempt")
-                            return@map lockCode.asOptional()
-                        }
-                    }.flatMap innerFlat@ {
-                        if (it is Present) {
-                            return@innerFlat lockHelper.checkSubmissionAttempt(currentAttempt,
-                                    it.value)
-                        } else {
-                            Timber.e("Cannot submit against PIN which is NULL")
-                            return@innerFlat Single.just(false)
+                        return@map when (lockCode) {
+                            null -> it
+                            else -> lockCode.asOptional()
                         }
                     }
-                }
+                }.flatMap {
+            return@flatMap when (it) {
+                is Present -> lockHelper.checkSubmissionAttempt(currentAttempt,
+                        it.value)
+                else -> Single.just(false)
+            }
+        }
     }
 
     @CheckResult private fun whitelistEntry(packageName: String, activityName: String,
@@ -159,10 +154,9 @@ import javax.inject.Singleton
 
     override fun getHint(): Single<String> {
         return masterPinInteractor.getHint().map {
-            if (it is Present) {
-                return@map it.value
-            } else {
-                return@map ""
+            return@map when (it) {
+                is Present -> it.value
+                else -> ""
             }
         }
     }

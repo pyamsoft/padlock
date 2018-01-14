@@ -39,9 +39,9 @@ import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.RecheckStatus
 import com.pyamsoft.padlock.model.RecheckStatus.FORCE
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.pydroid.data.Optional
-import com.pyamsoft.pydroid.data.Optional.Present
-import com.pyamsoft.pydroid.helper.asOptional
+import com.pyamsoft.pydroid.optional.Optional.Present
+import com.pyamsoft.pydroid.optional.Optionals
+import com.pyamsoft.pydroid.optional.asOptional
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.MaybeTransformer
@@ -124,7 +124,7 @@ import javax.inject.Singleton
                         }
                     }
 
-                    return@map Optional.ofNullable(null)
+                    return@map Optionals.ofNullable(null)
                 }.filter { it is Present }.map { it as Present }.map { it.value }
                 .filter { !Excludes.isLockScreen(it.packageName, it.className) }
                 .filter { !Excludes.isPackageExcluded(it.packageName) }

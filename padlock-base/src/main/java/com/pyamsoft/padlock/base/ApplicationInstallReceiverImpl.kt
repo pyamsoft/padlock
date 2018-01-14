@@ -35,8 +35,8 @@ import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.PackageLabelManager
 import com.pyamsoft.pydroid.data.Cache
-import com.pyamsoft.pydroid.helper.enforceIo
-import com.pyamsoft.pydroid.helper.enforceMainThread
+import com.pyamsoft.pydroid.ktext.enforceIo
+import com.pyamsoft.pydroid.ktext.enforceMainThread
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import timber.log.Timber

@@ -23,8 +23,8 @@ import com.pyamsoft.padlock.api.LockHelper
 import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.PinEntryInteractor
 import com.pyamsoft.padlock.model.PinEntryEvent
-import com.pyamsoft.pydroid.data.Optional
-import com.pyamsoft.pydroid.data.Optional.Present
+import com.pyamsoft.pydroid.optional.Optional
+import com.pyamsoft.pydroid.optional.Optional.Present
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
@@ -43,10 +43,9 @@ import javax.inject.Singleton
     override fun submitPin(currentAttempt: String, reEntryAttempt: String,
             hint: String): Single<PinEntryEvent> {
         return getMasterPin().flatMap {
-            if (it is Present) {
-                return@flatMap clearPin(it.value, currentAttempt)
-            } else {
-                return@flatMap createPin(currentAttempt, reEntryAttempt, hint)
+            return@flatMap when (it) {
+                is Present -> clearPin(it.value, currentAttempt)
+                else -> createPin(currentAttempt, reEntryAttempt, hint)
             }
         }
     }
@@ -70,10 +69,9 @@ import javax.inject.Singleton
             attempt: String, reentry: String, hint: String): Single<PinEntryEvent> {
         return Single.defer {
             Timber.d("No existing master item, attempt to create a new one")
-            if (attempt == reentry) {
-                return@defer lockHelper.encode(attempt)
-            } else {
-                return@defer Single.just("")
+            return@defer when (attempt) {
+                reentry -> lockHelper.encode(attempt)
+                else -> Single.just("")
             }
         }.map {
             val success = it.isNotBlank()

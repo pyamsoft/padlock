@@ -18,14 +18,14 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.ClearPreferences
 import com.pyamsoft.padlock.api.InstallListenerPreferences
 import com.pyamsoft.padlock.api.MasterPinPreferences
+import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.pydroid.data.Cache
-import com.pyamsoft.pydroid.data.Optional.Present
-import com.pyamsoft.pydroid.helper.asOptional
+import com.pyamsoft.pydroid.optional.Optional.Present
+import com.pyamsoft.pydroid.optional.asOptional
 import io.reactivex.Completable
 import io.reactivex.Single
 import timber.log.Timber

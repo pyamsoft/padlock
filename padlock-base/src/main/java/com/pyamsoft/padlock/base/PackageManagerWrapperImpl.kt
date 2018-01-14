@@ -27,14 +27,14 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.Excludes
+import com.pyamsoft.padlock.api.LockListPreferences
 import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PackageApplicationManager
-import com.pyamsoft.padlock.api.LockListPreferences
 import com.pyamsoft.padlock.api.PackageApplicationManager.ApplicationItem
 import com.pyamsoft.padlock.api.PackageDrawableManager
 import com.pyamsoft.padlock.api.PackageLabelManager
-import com.pyamsoft.pydroid.data.Optional.Present
-import com.pyamsoft.pydroid.helper.asOptional
+import com.pyamsoft.pydroid.optional.Optional.Present
+import com.pyamsoft.pydroid.optional.asOptional
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.exceptions.Exceptions
@@ -72,7 +72,7 @@ import javax.inject.Singleton
     }
 
     override fun getActivityListForPackage(packageName: String): Single<List<String>> {
-        return Single.fromCallable<List<String>> {
+        return Single.fromCallable {
             val activityEntries: MutableList<String> = ArrayList()
             try {
                 val packageInfo = packageManager.getPackageInfo(packageName,
@@ -138,28 +138,29 @@ import javax.inject.Singleton
             return@fromCallable packageNames
         }.flatMapObservable { Observable.fromIterable(it) }.map {
             it.replaceFirst("^package:".toRegex(), "")
-        }.flatMapSingle { getApplicationInfo(it) }.filter { it.isEmpty().not() }
+        }.flatMapSingle { getApplicationInfo(it) }.filter { !it.isEmpty() }
     }
 
     override fun getActiveApplications(): Single<List<ApplicationItem>> {
-        return getInstalledApplications().flatMap<ApplicationItem> {
-            if (!it.enabled) {
-                Timber.i("Application %s is disabled", it.packageName)
-                return@flatMap Observable.empty()
+        return getInstalledApplications().flatMap {
+            return@flatMap when {
+                !it.enabled -> {
+                    Timber.i("Application %s is disabled", it.packageName)
+                    Observable.empty()
+                }
+                it.system && !listPreferences.isSystemVisible() -> {
+                    Timber.i("Hide system application: %s", it.packageName)
+                    Observable.empty()
+                }
+                Excludes.isPackageExcluded(it.packageName) -> {
+                    Timber.i("Application %s is excluded", it.packageName)
+                    Observable.empty()
+                }
+                else -> {
+                    Timber.d("Successfully processed application: %s", it.packageName)
+                    Observable.just(it)
+                }
             }
-
-            if (it.system && !listPreferences.isSystemVisible()) {
-                Timber.i("Hide system application: %s", it.packageName)
-                return@flatMap Observable.empty()
-            }
-
-            if (Excludes.isPackageExcluded(it.packageName)) {
-                Timber.i("Application %s is excluded", it.packageName)
-                return@flatMap Observable.empty()
-            }
-
-            Timber.d("Successfully processed application: %s", it.packageName)
-            return@flatMap Observable.just(it)
         }.toList()
     }
 
@@ -167,12 +168,9 @@ import javax.inject.Singleton
         return Single.defer {
             try {
                 val info: ApplicationInfo? = packageManager.getApplicationInfo(packageName, 0)
-                if (info == null) {
-                    return@defer Single.just(ApplicationItem.EMPTY)
-                } else {
-                    return@defer Single.just(
-                            ApplicationItem(info.packageName, info.isSystemApplication(),
-                                    info.enabled))
+                return@defer when (info) {
+                    null -> Single.just(ApplicationItem.EMPTY)
+                    else -> Single.just(ApplicationItem.fromInfo(info))
                 }
             } catch (e: PackageManager.NameNotFoundException) {
                 Timber.e(e, "onError getApplicationInfo: '$packageName'")
@@ -191,10 +189,9 @@ import javax.inject.Singleton
                 throw Exceptions.propagate(e)
             }
         }.flatMap {
-            if (it is Present) {
-                return@flatMap loadPackageLabel(it.value)
-            } else {
-                return@flatMap Single.just("")
+            return@flatMap when (it) {
+                is Present -> loadPackageLabel(it.value)
+                else -> Single.just("")
             }
         }
     }
