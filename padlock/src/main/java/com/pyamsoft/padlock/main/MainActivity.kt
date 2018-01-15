@@ -56,11 +56,8 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
     override val changeLogLines: Array<String>
         get() = arrayOf(
-                "CHANGE: Remove the zero seconds timeout option as it caused too much confusion",
-                "FEATURE: Show indicator on main list if an application has whitelisted (never locked) or blacklisted (always locked) screens",
-                "FEATURE: Show on the info dialog which screens are whitelisted or blacklisted",
-                "BUGFIX: Explain blacklisting and whitelisting",
-                "BUGFIX: Faster list fetching, do not clear static items"
+                "CHANGE: Better support for views while in Multi-Window mode",
+                "BUGFIX: Fix a memory leak when switching between views very quickly"
         )
 
     public override fun onCreate(savedInstanceState: Bundle?) {
