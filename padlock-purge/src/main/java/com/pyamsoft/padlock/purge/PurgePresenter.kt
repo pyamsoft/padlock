@@ -18,9 +18,9 @@
 
 package com.pyamsoft.padlock.purge
 
+import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.PurgeAllEvent
 import com.pyamsoft.padlock.model.PurgeEvent
-import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.purge.PurgePresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -29,13 +29,20 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-class PurgePresenter @Inject internal constructor(private val interactor: PurgeInteractor,
-        private val purgeBus: EventBus<PurgeEvent>,
-        private val purgeAllBus: EventBus<PurgeAllEvent>, @Named(
-                "computation") computationScheduler: Scheduler, @Named(
-                "io") ioScheduler: Scheduler, @Named(
-                "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
-        ioScheduler, mainScheduler) {
+class PurgePresenter @Inject internal constructor(
+    private val interactor: PurgeInteractor,
+    private val purgeBus: EventBus<PurgeEvent>,
+    private val purgeAllBus: EventBus<PurgeAllEvent>, @Named(
+        "computation"
+    ) computationScheduler: Scheduler, @Named(
+        "io"
+    ) ioScheduler: Scheduler, @Named(
+        "main"
+    ) mainScheduler: Scheduler
+) : SchedulerPresenter<View>(
+    computationScheduler,
+    ioScheduler, mainScheduler
+) {
 
     override fun onCreate() {
         super.onCreate()
@@ -50,44 +57,44 @@ class PurgePresenter @Inject internal constructor(private val interactor: PurgeI
     private fun registerOnBus() {
         dispose {
             purgeBus.listen()
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({ view?.onPurge(it.packageName) }, {
-                        Timber.e(it, "onError purge single")
-                    })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({ view?.onPurge(it.packageName) }, {
+                    Timber.e(it, "onError purge single")
+                })
         }
 
         dispose {
             purgeAllBus.listen()
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({ view?.onPurgeAll() }, {
-                        Timber.e(it, "onError purge all")
-                    })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({ view?.onPurgeAll() }, {
+                    Timber.e(it, "onError purge all")
+                })
         }
     }
 
     fun retrieveStaleApplications(force: Boolean) {
         dispose {
             interactor.populateList(force)
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .doOnSubscribe { view?.onRetrieveBegin() }
-                    .doAfterTerminate { view?.onRetrieveComplete() }
-                    .subscribe({ view?.onRetrievedStale(it) }, {
-                        Timber.e(it, "onError retrieveStaleApplications")
-                        view?.onRetrieveError(it)
-                    })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .doOnSubscribe { view?.onRetrieveBegin() }
+                .doAfterTerminate { view?.onRetrieveComplete() }
+                .subscribe({ view?.onRetrievedStale(it) }, {
+                    Timber.e(it, "onError retrieveStaleApplications")
+                    view?.onRetrieveError(it)
+                })
         }
     }
 
     fun deleteStale(packageName: String) {
         dispose {
             interactor.deleteEntry(packageName)
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({ view?.onDeleted(it) }
-                            , { Timber.e(it, "onError deleteStale") })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({ view?.onDeleted(it) }
+                    , { Timber.e(it, "onError deleteStale") })
         }
     }
 

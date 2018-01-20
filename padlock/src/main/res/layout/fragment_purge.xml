@@ -18,39 +18,33 @@
   ~     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
   -->
 
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <android.support.v4.widget.SwipeRefreshLayout
-      android:id="@+id/purge_swipe_refresh"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      >
-
-    <FrameLayout
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/purge_swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="wrap_content">
 
-      <TextView
-          android:id="@+id/purge_empty"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_gravity="center"
-          android:gravity="center"
-          android:text="@string/purge_all_clean"
-          android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-          android:visibility="gone"
-          />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-      <android.support.v7.widget.RecyclerView
-          android:id="@+id/purge_list"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          />
+            <TextView
+                android:id="@+id/purge_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="@string/purge_all_clean"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:visibility="gone" />
 
-    </FrameLayout>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/purge_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-  </android.support.v4.widget.SwipeRefreshLayout>
+        </FrameLayout>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 </layout>

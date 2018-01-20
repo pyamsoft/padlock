@@ -26,19 +26,24 @@ import com.pyamsoft.pydroid.bus.EventBus
 import dagger.Binds
 import dagger.Module
 
-@Module abstract class ServiceModule {
+@Module
+abstract class ServiceModule {
 
     @Binds
     internal abstract fun provideServiceInteractor(
-            impl: LockServiceInteractorImpl): LockServiceInteractor
+        impl: LockServiceInteractorImpl
+    ): LockServiceInteractor
 
-    @Binds internal abstract fun provideServiceStateInteractor(
-            impl: LockServiceStateInteractorImpl): LockServiceStateInteractor
+    @Binds
+    internal abstract fun provideServiceStateInteractor(
+        impl: LockServiceStateInteractorImpl
+    ): LockServiceStateInteractor
 
     @Binds
     internal abstract fun provideRecheckBus(bus: RecheckEventBus): EventBus<RecheckEvent>
 
     @Binds
     internal abstract fun provideServiceFinishBus(
-            bus: ServiceFinishBus): EventBus<ServiceFinishEvent>
+        bus: ServiceFinishBus
+    ): EventBus<ServiceFinishEvent>
 }

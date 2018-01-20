@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~     Copyright (C) 2017 Peter Kenji Yamanaka
   ~
   ~     This program is free software; you can redistribute it and/or modify
@@ -19,90 +18,90 @@
 
 <resources>
 
-  <string-array name="ignore_time">
-    <item name="time_one">@string/ignore_for_1_minute</item>
-    <item name="time_five">@string/ignore_for_5_minutes</item>
-    <item name="time_ten">@string/ignore_for_10_minutes</item>
-    <item name="time_fifteen">@string/ignore_for_15_minutes</item>
-    <item name="time_twenty">@string/ignore_for_20_minutes</item>
-    <item name="time_thirty">@string/ignore_for_30_minutes</item>
-    <item name="time_fourtyfive">@string/ignore_for_45_minutes</item>
-    <item name="time_sixty">@string/ignore_for_60_minutes</item>
-  </string-array>
+    <string-array name="ignore_time">
+        <item name="time_one">@string/ignore_for_1_minute</item>
+        <item name="time_five">@string/ignore_for_5_minutes</item>
+        <item name="time_ten">@string/ignore_for_10_minutes</item>
+        <item name="time_fifteen">@string/ignore_for_15_minutes</item>
+        <item name="time_twenty">@string/ignore_for_20_minutes</item>
+        <item name="time_thirty">@string/ignore_for_30_minutes</item>
+        <item name="time_fourtyfive">@string/ignore_for_45_minutes</item>
+        <item name="time_sixty">@string/ignore_for_60_minutes</item>
+    </string-array>
 
-  <string-array name="ignore_time_entries">
-    <item name="time_one">1</item>
-    <item name="time_five">5</item>
-    <item name="time_ten">10</item>
-    <item name="time_fifteen">15</item>
-    <item name="time_twenty">20</item>
-    <item name="time_thirty">30</item>
-    <item name="time_fourtyfive">45</item>
-    <item name="time_sixty">60</item>
-  </string-array>
+    <string-array name="ignore_time_entries">
+        <item name="time_one">1</item>
+        <item name="time_five">5</item>
+        <item name="time_ten">10</item>
+        <item name="time_fifteen">15</item>
+        <item name="time_twenty">20</item>
+        <item name="time_thirty">30</item>
+        <item name="time_fourtyfive">45</item>
+        <item name="time_sixty">60</item>
+    </string-array>
 
-  <string name="ignore_for_1_minute">Re-Lock after 1 Minute</string>
-  <string name="ignore_for_5_minutes">Re-Lock after 5 Minutes</string>
-  <string name="ignore_for_10_minutes">Re-Lock after 10 Minutes</string>
-  <string name="ignore_for_15_minutes">Re-Lock after 15 Minutes</string>
-  <string name="ignore_for_20_minutes">Re-Lock after 20 Minutes</string>
-  <string name="ignore_for_30_minutes">Re-Lock after 30 Minutes</string>
-  <string name="ignore_for_45_minutes">Re-Lock after 45 Minutes</string>
-  <string name="ignore_for_60_minutes">Re-Lock after 1 Hour</string>
+    <string name="ignore_for_1_minute">Re-Lock after 1 Minute</string>
+    <string name="ignore_for_5_minutes">Re-Lock after 5 Minutes</string>
+    <string name="ignore_for_10_minutes">Re-Lock after 10 Minutes</string>
+    <string name="ignore_for_15_minutes">Re-Lock after 15 Minutes</string>
+    <string name="ignore_for_20_minutes">Re-Lock after 20 Minutes</string>
+    <string name="ignore_for_30_minutes">Re-Lock after 30 Minutes</string>
+    <string name="ignore_for_45_minutes">Re-Lock after 45 Minutes</string>
+    <string name="ignore_for_60_minutes">Re-Lock after 1 Hour</string>
 
-  <string name="ignore_time_title">Re-Lock Applications</string>
-  <string name="ignore_time_summary">Re-lock applications after initial unlocking</string>
+    <string name="ignore_time_title">Re-Lock Applications</string>
+    <string name="ignore_time_summary">Re-lock applications after initial unlocking</string>
 
-  <string-array name="timeout_time">
-    <item name="time_none">Do Not Timeout</item>
-    <item name="time_one">Timeout For 1 Minute</item>
-    <item name="time_five">Timeout For 5 Minutes</item>
-    <item name="time_ten">Timeout For 10 Minutes</item>
-    <item name="time_fifteen">Timeout For 15 Minutes</item>
-    <item name="time_twenty">Timeout For 20 Minutes</item>
-    <item name="time_thirty">Timeout For 30 Minutes</item>
-    <item name="time_fourtyfive">Timeout For 45 Minutes</item>
-    <item name="time_sixty">Timeout For 1 Hour</item>
-  </string-array>
+    <string-array name="timeout_time">
+        <item name="time_none">Do Not Timeout</item>
+        <item name="time_one">Timeout For 1 Minute</item>
+        <item name="time_five">Timeout For 5 Minutes</item>
+        <item name="time_ten">Timeout For 10 Minutes</item>
+        <item name="time_fifteen">Timeout For 15 Minutes</item>
+        <item name="time_twenty">Timeout For 20 Minutes</item>
+        <item name="time_thirty">Timeout For 30 Minutes</item>
+        <item name="time_fourtyfive">Timeout For 45 Minutes</item>
+        <item name="time_sixty">Timeout For 1 Hour</item>
+    </string-array>
 
-  <string-array name="timeout_time_entries">
-    <item name="time_none">0</item>
-    <item name="time_one">1</item>
-    <item name="time_five">5</item>
-    <item name="time_ten">10</item>
-    <item name="time_fifteen">15</item>
-    <item name="time_twenty">20</item>
-    <item name="time_thirty">30</item>
-    <item name="time_fourtyfive">45</item>
-    <item name="time_sixty">60</item>
-  </string-array>
+    <string-array name="timeout_time_entries">
+        <item name="time_none">0</item>
+        <item name="time_one">1</item>
+        <item name="time_five">5</item>
+        <item name="time_ten">10</item>
+        <item name="time_fifteen">15</item>
+        <item name="time_twenty">20</item>
+        <item name="time_thirty">30</item>
+        <item name="time_fourtyfive">45</item>
+        <item name="time_sixty">60</item>
+    </string-array>
 
-  <string name="timeout_time_title">Timeout Times</string>
-  <string name="timeout_time_summary">Set the timeout length after too many failed unlock attempts</string>
+    <string name="timeout_time_title">Timeout Times</string>
+    <string name="timeout_time_summary">Set the timeout length after too many failed unlock attempts</string>
 
-  <string name="install_listener_title">Notify on New Install</string>
-  <string name="install_listener_summary_checked">Show suggestions to lock newly installed applications</string>
-  <string name="install_listener_summary_unchecked">Do not show suggestions to lock newly installed applications</string>
+    <string name="install_listener_title">Notify on New Install</string>
+    <string name="install_listener_summary_checked">Show suggestions to lock newly installed applications</string>
+    <string name="install_listener_summary_unchecked">Do not show suggestions to lock newly installed applications</string>
 
-  <string name="ignore_keyguard_title">Ignore while Device Locked</string>
-  <string name="ignore_keyguard_summary_checked">Do not lock applications when device is locked</string>
-  <string name="ignore_keyguard_summary_unchecked">Lock applications even when device is locked</string>
+    <string name="ignore_keyguard_title">Ignore while Device Locked</string>
+    <string name="ignore_keyguard_summary_checked">Do not lock applications when device is locked</string>
+    <string name="ignore_keyguard_summary_unchecked">Lock applications even when device is locked</string>
 
-  <string name="clear_db_key">clear_db</string>
-  <string name="clear_db_title">Reset Database</string>
-  <string name="clear_db_summary">Reset the locked applications database</string>
+    <string name="clear_db_key">clear_db</string>
+    <string name="clear_db_title">Reset Database</string>
+    <string name="clear_db_summary">Reset the locked applications database</string>
 
-  <string name="lock_screen_type_title">Lock Screen Type</string>
-  <string name="lock_screen_type_summary">Type of password to lock with (pattern, pin)</string>
+    <string name="lock_screen_type_title">Lock Screen Type</string>
+    <string name="lock_screen_type_summary">Type of password to lock with (pattern, pin)</string>
 
-  <string-array name="lock_screen_type_names">
-    <item name="type_text">PIN Password</item>
-    <item name="type_pattern">Pattern Password</item>
-  </string-array>
+    <string-array name="lock_screen_type_names">
+        <item name="type_text">PIN Password</item>
+        <item name="type_pattern">Pattern Password</item>
+    </string-array>
 
-  <string-array name="lock_screen_type_values">
-    <item name="type_text">TYPE_TEXT</item>
-    <item name="type_pattern">TYPE_PATTERN</item>
-  </string-array>
+    <string-array name="lock_screen_type_values">
+        <item name="type_text">TYPE_TEXT</item>
+        <item name="type_pattern">TYPE_PATTERN</item>
+    </string-array>
 
 </resources>

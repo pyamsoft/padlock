@@ -26,21 +26,24 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class OnboardAcceptTermsPresenter @Inject internal constructor(
-        private val interactor: OnboardAcceptTermsInteractor,
-        @Named("computation") compScheduler: Scheduler,
-        @Named("io") ioScheduler: Scheduler,
-        @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
-        ioScheduler,
-        mainScheduler) {
+    private val interactor: OnboardAcceptTermsInteractor,
+    @Named("computation") compScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler
+) : SchedulerPresenter<View>(
+    compScheduler,
+    ioScheduler,
+    mainScheduler
+) {
 
     fun acceptUsageTerms() {
         dispose {
             interactor.agreeToTerms()
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({ view?.onUsageTermsAccepted() }, {
-                        Timber.e(it, "onError")
-                    })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({ view?.onUsageTermsAccepted() }, {
+                    Timber.e(it, "onError")
+                })
         }
     }
 

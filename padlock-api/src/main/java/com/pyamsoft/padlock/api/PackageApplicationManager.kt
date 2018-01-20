@@ -38,13 +38,15 @@ interface PackageApplicationManager {
         companion object {
 
             @JvmField
-            val EMPTY = ApplicationItem("",
-                    false, false)
+            val EMPTY = ApplicationItem(
+                "",
+                false, false
+            )
 
             @CheckResult
             @JvmStatic
             fun fromInfo(info: ApplicationInfo): ApplicationItem =
-                    ApplicationItem(info.packageName, info.system(), info.enabled)
+                ApplicationItem(info.packageName, info.system(), info.enabled)
 
             @CheckResult
             private fun ApplicationInfo.system(): Boolean = flags and ApplicationInfo.FLAG_SYSTEM != 0

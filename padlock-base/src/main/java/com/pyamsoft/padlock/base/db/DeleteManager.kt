@@ -25,8 +25,10 @@ import com.pyamsoft.padlock.model.db.PadLockEntryModel.DeleteWithPackageActivity
 import com.pyamsoft.padlock.model.db.PadLockEntryModel.DeleteWithPackageName
 import com.squareup.sqlbrite2.BriteDatabase
 
-internal class DeleteManager internal constructor(openHelper: SQLiteOpenHelper,
-        private val briteDatabase: BriteDatabase) {
+internal class DeleteManager internal constructor(
+    openHelper: SQLiteOpenHelper,
+    private val briteDatabase: BriteDatabase
+) {
 
     private val deleteWithPackage by lazy {
         DeleteWithPackageName(openHelper.writableDatabase)

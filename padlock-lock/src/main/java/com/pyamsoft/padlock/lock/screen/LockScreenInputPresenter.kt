@@ -29,11 +29,14 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockScreenInputPresenter @Inject internal constructor(
-        private val interactor: LockScreenInteractor,
-        @Named("computation") computationScheduler: Scheduler,
-        @Named("main") mainScheduler: Scheduler,
-        @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
-        ioScheduler, mainScheduler) {
+    private val interactor: LockScreenInteractor,
+    @Named("computation") computationScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler
+) : SchedulerPresenter<View>(
+    computationScheduler,
+    ioScheduler, mainScheduler
+) {
 
     override fun onCreate() {
         super.onCreate()
@@ -43,17 +46,17 @@ class LockScreenInputPresenter @Inject internal constructor(
     private fun initializeLockScreenType() {
         dispose {
             interactor.getLockScreenType()
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({
-                        when (it) {
-                            TYPE_PATTERN -> view?.onTypePattern()
-                            TYPE_TEXT -> view?.onTypeText()
-                            else -> throw IllegalArgumentException("Invalid enum: $it")
-                        }
-                    }, {
-                        Timber.e(it, "Error initializing lock screen type")
-                    })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({
+                    when (it) {
+                        TYPE_PATTERN -> view?.onTypePattern()
+                        TYPE_TEXT -> view?.onTypeText()
+                        else -> throw IllegalArgumentException("Invalid enum: $it")
+                    }
+                }, {
+                    Timber.e(it, "Error initializing lock screen type")
+                })
         }
     }
 

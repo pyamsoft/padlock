@@ -25,8 +25,10 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemPurgeBinding
 
 internal class PurgeItem internal constructor(
-        packageName: String) : ModelAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
-        packageName) {
+    packageName: String
+) : ModelAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
+    packageName
+) {
 
     override fun getType(): Int = R.id.adapter_purge
 

@@ -22,8 +22,9 @@ import com.pyamsoft.padlock.api.LockPassed
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class LockPassedImpl @Inject internal constructor() :
-        LockPassed {
+@Singleton
+internal class LockPassedImpl @Inject internal constructor() :
+    LockPassed {
 
     private val passedSet: MutableCollection<String> = LinkedHashSet()
 
@@ -36,5 +37,5 @@ import javax.inject.Singleton
     }
 
     override fun check(packageName: String, activityName: String): Boolean =
-            passedSet.contains("$packageName$activityName")
+        passedSet.contains("$packageName$activityName")
 }

@@ -30,13 +30,13 @@ class UsageAccessRequestDialog : CanaryDialog() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         activity!!.let {
             return AlertDialog.Builder(it).setTitle("Enable PadLock Usage Access")
-                    .setMessage(R.string.explain_accessibility_service)
-                    .setPositiveButton("Let's Go") { _, _ ->
-                        UsageAccessRequestDelegate.launchUsageAccessActivity(it)
-                        dismiss()
-                    }
-                    .setNegativeButton("No Thanks") { _, _ -> dismiss() }
-                    .create()
+                .setMessage(R.string.explain_accessibility_service)
+                .setPositiveButton("Let's Go") { _, _ ->
+                    UsageAccessRequestDelegate.launchUsageAccessActivity(it)
+                    dismiss()
+                }
+                .setNegativeButton("No Thanks") { _, _ -> dismiss() }
+                .create()
         }
     }
 }

@@ -28,6 +28,8 @@ interface PinEntryInteractor {
     fun hasMasterPin(): Single<Boolean>
 
     @CheckResult
-    fun submitPin(currentAttempt: String, reEntryAttempt: String,
-            hint: String): Single<PinEntryEvent>
+    fun submitPin(
+        currentAttempt: String, reEntryAttempt: String,
+        hint: String
+    ): Single<PinEntryEvent>
 }

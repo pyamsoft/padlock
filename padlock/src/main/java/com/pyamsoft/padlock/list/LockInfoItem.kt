@@ -36,10 +36,13 @@ import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockInfoItem internal constructor(entry: ActivityEntry,
-        private val system: Boolean) :
-        ModelAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
-                entry), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> {
+class LockInfoItem internal constructor(
+    entry: ActivityEntry,
+    private val system: Boolean
+) :
+    ModelAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
+        entry
+    ), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> {
 
     override fun getType(): Int = R.id.adapter_lock_info
 
@@ -119,7 +122,8 @@ class LockInfoItem internal constructor(entry: ActivityEntry,
     class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         internal val binding: AdapterItemLockinfoBinding = DataBindingUtil.bind(itemView)
-        @Inject internal lateinit var publisher: LockInfoItemPublisher
+        @Inject
+        internal lateinit var publisher: LockInfoItemPublisher
 
         init {
             Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)

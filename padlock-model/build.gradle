@@ -24,37 +24,37 @@ apply plugin: "com.getkeepsafe.dexcount"
 
 //noinspection GroovyMissingReturnStatement
 android {
-  compileSdkVersion rootProject.ext.maxSdk
+    compileSdkVersion rootProject.ext.maxSdk
 
-  //noinspection GroovyMissingReturnStatement
-  defaultConfig {
-    minSdkVersion rootProject.ext.minSdk
-    targetSdkVersion rootProject.ext.maxSdk
+    //noinspection GroovyMissingReturnStatement
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdk
+        targetSdkVersion rootProject.ext.maxSdk
 
-    resConfigs "en"
+        resConfigs "en"
 
-    javaCompileOptions {
-      annotationProcessorOptions {
-        // Fix kapt
-        includeCompileClasspath = true
-      }
+        javaCompileOptions {
+            annotationProcessorOptions {
+                // Fix kapt
+                includeCompileClasspath = true
+            }
+        }
     }
-  }
 
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
-  }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
 
 dependencies {
-  // Annotations
-  api "com.android.support:support-annotations:$supportLib"
+    // Annotations
+    api "com.android.support:support-annotations:$supportLib"
 
-  // Auto value
-  compileOnly "com.google.auto.value:auto-value:$autoValue"
-  kapt "com.google.auto.value:auto-value:$autoValue"
+    // Auto value
+    compileOnly "com.google.auto.value:auto-value:$autoValue"
+    kapt "com.google.auto.value:auto-value:$autoValue"
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 

@@ -28,8 +28,9 @@ import java.security.NoSuchAlgorithmException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class SHA256LockHelper @Inject internal constructor() :
-        LockHelper {
+@Singleton
+internal class SHA256LockHelper @Inject internal constructor() :
+    LockHelper {
 
     private val messageDigest: MessageDigest
 
@@ -42,12 +43,12 @@ import javax.inject.Singleton
     }
 
     override fun checkSubmissionAttempt(attempt: String, encodedPin: String): Single<Boolean> =
-            encode(attempt).map { it == encodedPin }
+        encode(attempt).map { it == encodedPin }
 
     override fun encode(attempt: String): Single<String> {
         return Completable.fromAction({ messageDigest.reset() })
-                .andThen(Single.fromCallable {
-                    messageDigest.digest(attempt.toByteArray(Charset.defaultCharset()))
-                }).map { Base64.encodeToString(it, Base64.DEFAULT).trim() }
+            .andThen(Single.fromCallable {
+                messageDigest.digest(attempt.toByteArray(Charset.defaultCharset()))
+            }).map { Base64.encodeToString(it, Base64.DEFAULT).trim() }
     }
 }

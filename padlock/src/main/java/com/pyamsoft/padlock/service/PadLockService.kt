@@ -38,7 +38,6 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.lifecycle.fakeBind
 import com.pyamsoft.padlock.lifecycle.fakeRelease
 import com.pyamsoft.padlock.lock.LockScreenActivity
@@ -57,7 +56,8 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
         throw AssertionError("Service is not bound")
     }
 
-    @field:Inject internal lateinit var presenter: LockServicePresenter
+    @field:Inject
+    internal lateinit var presenter: LockServicePresenter
     private lateinit var notificationManager: NotificationManagerCompat
 
     override fun onCreate() {
@@ -106,8 +106,10 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
-        val pe = PendingIntent.getActivity(applicationContext, requestCode, launchMain,
-                PendingIntent.FLAG_UPDATE_CURRENT)
+        val pe = PendingIntent.getActivity(
+            applicationContext, requestCode, launchMain,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
         val builder = NotificationCompat.Builder(applicationContext, notificationChannelId).apply {
             setContentIntent(pe)
             setSmallIcon(R.drawable.ic_padlock_notification)
@@ -123,8 +125,10 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
         startForeground(NOTIFICATION_ID, builder.build())
     }
 
-    @RequiresApi(Build.VERSION_CODES.O) private fun setupNotificationChannel(
-            notificationChannelId: String) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun setupNotificationChannel(
+        notificationChannelId: String
+    ) {
         val name = "PadLock Service"
         val description = "Notification related to the PadLock service"
         val importance = NotificationManager.IMPORTANCE_MIN
@@ -136,7 +140,8 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
 
         Timber.d("Create notification channel with id: %s", notificationChannelId)
         val notificationManager: NotificationManager = applicationContext.getSystemService(
-                Context.NOTIFICATION_SERVICE) as NotificationManager
+            Context.NOTIFICATION_SERVICE
+        ) as NotificationManager
         notificationManager.createNotificationChannel(notificationChannel)
     }
 

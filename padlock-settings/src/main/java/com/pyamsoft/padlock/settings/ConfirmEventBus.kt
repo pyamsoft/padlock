@@ -25,7 +25,8 @@ import io.reactivex.Observable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class ConfirmEventBus @Inject internal constructor() : EventBus<ConfirmEvent> {
+@Singleton
+internal class ConfirmEventBus @Inject internal constructor() : EventBus<ConfirmEvent> {
 
     private val bus: EventBus<ConfirmEvent> = RxBus.create()
 

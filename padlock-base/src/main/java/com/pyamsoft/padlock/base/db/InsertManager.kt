@@ -25,8 +25,10 @@ import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel.InsertEntry
 import com.squareup.sqlbrite2.BriteDatabase
 
-internal class InsertManager internal constructor(openHelper: SQLiteOpenHelper,
-        private val briteDatabase: BriteDatabase) {
+internal class InsertManager internal constructor(
+    openHelper: SQLiteOpenHelper,
+    private val briteDatabase: BriteDatabase
+) {
 
     private val insertEntry by lazy {
         InsertEntry(openHelper.writableDatabase)
@@ -39,8 +41,10 @@ internal class InsertManager internal constructor(openHelper: SQLiteOpenHelper,
         }
 
         return briteDatabase.bindAndExecute(insertEntry) {
-            bind(entry.packageName(), entry.activityName(), entry.lockCode(), entry.lockUntilTime(),
-                    entry.ignoreUntilTime(), entry.systemApplication(), entry.whitelist())
+            bind(
+                entry.packageName(), entry.activityName(), entry.lockCode(), entry.lockUntilTime(),
+                entry.ignoreUntilTime(), entry.systemApplication(), entry.whitelist()
+            )
         }
     }
 }

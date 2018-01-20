@@ -24,9 +24,11 @@ import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class MainInteractorImpl @Inject internal constructor(
-        private val preferences: OnboardingPreferences) : MainInteractor {
+@Singleton
+internal class MainInteractorImpl @Inject internal constructor(
+    private val preferences: OnboardingPreferences
+) : MainInteractor {
 
     override fun isOnboardingComplete(): Single<Boolean> =
-            Single.fromCallable { preferences.hasAgreed() }
+        Single.fromCallable { preferences.hasAgreed() }
 }

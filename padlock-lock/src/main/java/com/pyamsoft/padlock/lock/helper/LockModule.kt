@@ -22,7 +22,9 @@ import com.pyamsoft.padlock.api.LockHelper
 import dagger.Binds
 import dagger.Module
 
-@Module abstract class LockModule {
+@Module
+abstract class LockModule {
 
-    @Binds internal abstract fun provideLockHelper(impl: SHA256LockHelper): LockHelper
+    @Binds
+    internal abstract fun provideLockHelper(impl: SHA256LockHelper): LockHelper
 }

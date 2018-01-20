@@ -38,7 +38,6 @@ import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
-import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
@@ -49,9 +48,12 @@ import javax.inject.Inject
 class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenInputPresenter.View {
 
     private val home: Intent = Intent(Intent.ACTION_MAIN)
-    @field:Inject internal lateinit var presenter: LockScreenPresenter
-    @field:Inject internal lateinit var inputPresenter: LockScreenInputPresenter
-    @field:Inject internal lateinit var appIconLoader: AppIconLoader
+    @field:Inject
+    internal lateinit var presenter: LockScreenPresenter
+    @field:Inject
+    internal lateinit var inputPresenter: LockScreenInputPresenter
+    @field:Inject
+    internal lateinit var appIconLoader: AppIconLoader
     private lateinit var lockedActivityName: String
     private lateinit var lockedPackageName: String
     private lateinit var binding: ActivityLockBinding
@@ -104,7 +106,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         return ignoreTimes[index]
     }
 
-    @CallSuper public override fun onCreate(savedInstanceState: Bundle?) {
+    @CallSuper
+    public override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_PadLock_Light_Lock)
         overridePendingTransition(0, 0)
         super.onCreate(savedInstanceState)
@@ -112,7 +115,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
 
         preInjectOnCreate()
         Injector.obtain<PadLockComponent>(applicationContext).plusLockScreenComponent(
-                LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
+            LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)
+        ).inject(this)
         postInjectOnCreate()
 
         presenter.bind(this, this)
@@ -160,12 +164,16 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
                 when (itemId) {
                     R.id.menu_exclude -> it.isChecked = !it.isChecked
                     R.id.menu_lockscreen_info -> {
-                        DialogUtil.guaranteeSingleDialogFragment(self,
-                                LockedStatDialog.newInstance(binding.toolbar.title.toString(),
-                                        lockedPackageName,
-                                        lockedActivityName, lockedRealName, lockedSystem,
-                                        binding.lockImage.drawable),
-                                "info_dialog")
+                        DialogUtil.guaranteeSingleDialogFragment(
+                            self,
+                            LockedStatDialog.newInstance(
+                                binding.toolbar.title.toString(),
+                                lockedPackageName,
+                                lockedActivityName, lockedRealName, lockedSystem,
+                                binding.lockImage.drawable
+                            ),
+                            "info_dialog"
+                        )
                     }
                     else -> it.isChecked = true
                 }
@@ -176,7 +184,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
 
     private fun populateIgnoreTimes() {
         val stringIgnoreTimes = applicationContext.resources.getStringArray(
-                R.array.ignore_time_entries)
+            R.array.ignore_time_entries
+        )
         ignoreTimes = ArrayList(stringIgnoreTimes.size)
         for (i in stringIgnoreTimes.indices) {
             ignoreTimes.add(stringIgnoreTimes[i].toLong())
@@ -206,7 +215,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
 
     override fun onAlreadyUnlocked() {
         Timber.d(
-                "This entry $lockedPackageName $lockedActivityName is already unlocked, finish Lock Screen")
+            "This entry $lockedPackageName $lockedActivityName is already unlocked, finish Lock Screen"
+        )
         finish()
     }
 
@@ -220,22 +230,28 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         val fragment = fragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
         if (fragment == null) {
             fragmentManager.beginTransaction().add(R.id.lock_screen_container, pushFragment, tag)
-                    .commit()
+                .commit()
         }
     }
 
     override fun onTypePattern() {
         pushFragment(
-                LockScreenPatternFragment.newInstance(lockedPackageName, lockedActivityName,
-                        lockedCode,
-                        lockedRealName, lockedSystem), LockScreenPatternFragment.TAG)
+            LockScreenPatternFragment.newInstance(
+                lockedPackageName, lockedActivityName,
+                lockedCode,
+                lockedRealName, lockedSystem
+            ), LockScreenPatternFragment.TAG
+        )
     }
 
     override fun onTypeText() {
         pushFragment(
-                LockScreenTextFragment.newInstance(lockedPackageName, lockedActivityName,
-                        lockedCode,
-                        lockedRealName, lockedSystem), LockScreenTextFragment.TAG)
+            LockScreenTextFragment.newInstance(
+                lockedPackageName, lockedActivityName,
+                lockedCode,
+                lockedRealName, lockedSystem
+            ), LockScreenTextFragment.TAG
+        )
     }
 
     override fun onPause() {
@@ -243,7 +259,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         Timber.d("Pausing LockScreen $lockedPackageName $lockedRealName")
         if (isFinishing || isChangingConfigurations) {
             Timber.d(
-                    "Even though a leak is reported, this should dismiss the window, and clear the leak")
+                "Even though a leak is reported, this should dismiss the window, and clear the leak"
+            )
             binding.toolbar.menu.close()
             binding.toolbar.dismissPopupMenus()
         }
@@ -253,7 +270,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         applicationContext.startActivity(home)
     }
 
-    @CallSuper override fun onDestroy() {
+    @CallSuper
+    override fun onDestroy() {
         super.onDestroy()
         binding.unbind()
         Timber.d("onDestroy LockScreenActivity for $lockedPackageName $lockedRealName")
@@ -269,7 +287,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         ignorePeriod = savedInstanceState.getLong(KEY_IGNORE_TIME, -1)
         excludeEntry = savedInstanceState.getBoolean(KEY_EXCLUDE, false)
         val lockScreenText: Fragment? = supportFragmentManager.findFragmentByTag(
-                LockScreenTextFragment.TAG)
+            LockScreenTextFragment.TAG
+        )
         if (lockScreenText is LockScreenTextFragment) {
             lockScreenText.onRestoreInstanceState(savedInstanceState)
         }
@@ -350,7 +369,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
             }
 
             Timber.d(
-                    "Start lock activity for entry: ${entry.packageName()} ${entry.activityName()} (real $realName)")
+                "Start lock activity for entry: ${entry.packageName()} ${entry.activityName()} (real $realName)"
+            )
             context.applicationContext.startActivity(intent)
         }
     }

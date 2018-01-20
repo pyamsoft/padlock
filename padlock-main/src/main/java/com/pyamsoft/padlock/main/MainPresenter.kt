@@ -26,12 +26,15 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-class MainPresenter @Inject internal constructor(private val interactor: MainInteractor,
-        @Named("computation") computationScheduler: Scheduler,
-        @Named("io") ioScheduler: Scheduler,
-        @Named("main") mainScheduler: Scheduler) : SchedulerPresenter<View>(
-        computationScheduler,
-        ioScheduler, mainScheduler) {
+class MainPresenter @Inject internal constructor(
+    private val interactor: MainInteractor,
+    @Named("computation") computationScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler
+) : SchedulerPresenter<View>(
+    computationScheduler,
+    ioScheduler, mainScheduler
+) {
 
     override fun onCreate() {
         super.onCreate()
@@ -41,15 +44,15 @@ class MainPresenter @Inject internal constructor(private val interactor: MainInt
     private fun showOnboardingOrDefault() {
         dispose {
             interactor.isOnboardingComplete()
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({
-                        if (it) {
-                            view?.onShowDefaultPage()
-                        } else {
-                            view?.onShowOnboarding()
-                        }
-                    }, { Timber.e(it, "onError") })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({
+                    if (it) {
+                        view?.onShowDefaultPage()
+                    } else {
+                        view?.onShowOnboarding()
+                    }
+                }, { Timber.e(it, "onError") })
         }
     }
 

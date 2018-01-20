@@ -30,7 +30,8 @@ import javax.inject.Inject
 
 class ConfirmationDialog : CanaryDialog() {
 
-    @field:Inject internal lateinit var publisher: SettingsPublisher
+    @field:Inject
+    internal lateinit var publisher: SettingsPublisher
     private lateinit var type: ConfirmEvent
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,20 +44,22 @@ class ConfirmationDialog : CanaryDialog() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(activity!!).setMessage(if (type === ConfirmEvent.DATABASE)
-            """Really clear entire database?
+        return AlertDialog.Builder(activity!!).setMessage(
+            if (type === ConfirmEvent.DATABASE)
+                """Really clear entire database?
         |
         |You will have to re-configure all locked applications again""".trimMargin()
-        else
-            """Really clear all application settings?
+            else
+                """Really clear all application settings?
         |
-        |You will have to manually restart the Accessibility Service component of PadLock""".trimMargin())
-                .setPositiveButton("Yes") { _, _ ->
-                    publisher.publish(type)
-                    dismiss()
-                }
-                .setNegativeButton("No") { _, _ -> dismiss() }
-                .create()
+        |You will have to manually restart the Accessibility Service component of PadLock""".trimMargin()
+        )
+            .setPositiveButton("Yes") { _, _ ->
+                publisher.publish(type)
+                dismiss()
+            }
+            .setNegativeButton("No") { _, _ -> dismiss() }
+            .create()
     }
 
     companion object {

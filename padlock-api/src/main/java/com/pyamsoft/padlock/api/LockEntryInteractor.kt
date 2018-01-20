@@ -26,8 +26,10 @@ import io.reactivex.Single
 interface LockEntryInteractor {
 
     @CheckResult
-    fun submitPin(packageName: String, activityName: String, lockCode: String?,
-            currentAttempt: String): Single<Boolean>
+    fun submitPin(
+        packageName: String, activityName: String, lockCode: String?,
+        currentAttempt: String
+    ): Single<Boolean>
 
     @CheckResult
     fun lockEntryOnFail(packageName: String, activityName: String): Maybe<Long>
@@ -36,8 +38,10 @@ interface LockEntryInteractor {
     fun getHint(): Single<String>
 
     @CheckResult
-    fun postUnlock(packageName: String, activityName: String, realName: String,
-            lockCode: String?, isSystem: Boolean, whitelist: Boolean, ignoreTime: Long): Completable
+    fun postUnlock(
+        packageName: String, activityName: String, realName: String,
+        lockCode: String?, isSystem: Boolean, whitelist: Boolean, ignoreTime: Long
+    ): Completable
 
     fun clearFailCount()
 }

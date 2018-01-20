@@ -19,67 +19,61 @@
   -->
 
 <layout>
-  <android.support.constraint.ConstraintLayout
-      xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:minHeight="48dp"
-      android:padding="4dp"
-      >
 
-    <RadioGroup
-        android:id="@+id/lock_info_radio_group"
-        android:layout_width="wrap_content"
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingBottom="4dp"
-        android:paddingEnd="12dp"
-        android:paddingStart="4dp"
-        android:paddingTop="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        >
+        android:minHeight="48dp"
+        android:padding="4dp">
 
-      <RadioButton
-          android:id="@+id/lock_info_radio_default"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          />
+        <RadioGroup
+            android:id="@+id/lock_info_radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="4dp"
+            android:paddingEnd="12dp"
+            android:paddingStart="4dp"
+            android:paddingTop="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-      <RadioButton
-          android:id="@+id/lock_info_radio_white"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          app:buttonTint="@color/state_list_whitelisted"
-          />
+            <RadioButton
+                android:id="@+id/lock_info_radio_default"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
-      <RadioButton
-          android:id="@+id/lock_info_radio_black"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          app:buttonTint="@color/state_list_hardlocked"
-          />
+            <RadioButton
+                android:id="@+id/lock_info_radio_white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:buttonTint="@color/state_list_whitelisted" />
 
-    </RadioGroup>
+            <RadioButton
+                android:id="@+id/lock_info_radio_black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:buttonTint="@color/state_list_hardlocked" />
 
-    <TextView
-        android:id="@+id/lock_info_activity"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:clickable="false"
-        android:focusable="false"
-        android:gravity="start|center_vertical"
-        android:longClickable="false"
-        android:paddingEnd="4dp"
-        android:paddingStart="12dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/lock_info_radio_group"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        </RadioGroup>
 
-  </android.support.constraint.ConstraintLayout>
+        <TextView
+            android:id="@+id/lock_info_activity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"
+            android:gravity="start|center_vertical"
+            android:longClickable="false"
+            android:paddingEnd="4dp"
+            android:paddingStart="12dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/lock_info_radio_group"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
 </layout>

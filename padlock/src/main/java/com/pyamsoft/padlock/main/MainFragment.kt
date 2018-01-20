@@ -39,8 +39,10 @@ class MainFragment : CanaryFragment() {
 
     private lateinit var binding: FragmentMainBinding
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -57,53 +59,58 @@ class MainFragment : CanaryFragment() {
 
     private fun setupBottomNavigation() {
         binding.bottomTabs.setOnNavigationItemSelectedListener(
-                object : BottomNavigationView.OnNavigationItemSelectedListener {
-                    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-                        val handled: Boolean = when (item.itemId) {
-                            R.id.menu_locklist -> replaceFragment(LockListFragment(),
-                                    LockListFragment.TAG)
-                            R.id.menu_settings -> replaceFragment(SettingsFragment(),
-                                    SettingsFragment.TAG)
-                            R.id.menu_purge -> replaceFragment(PurgeFragment(), PurgeFragment.TAG)
-                            else -> false
-                        }
-
-                        if (handled) {
-                            item.isChecked = !item.isChecked
-                        }
-
-                        return handled
+            object : BottomNavigationView.OnNavigationItemSelectedListener {
+                override fun onNavigationItemSelected(item: MenuItem): Boolean {
+                    val handled: Boolean = when (item.itemId) {
+                        R.id.menu_locklist -> replaceFragment(
+                            LockListFragment(),
+                            LockListFragment.TAG
+                        )
+                        R.id.menu_settings -> replaceFragment(
+                            SettingsFragment(),
+                            SettingsFragment.TAG
+                        )
+                        R.id.menu_purge -> replaceFragment(PurgeFragment(), PurgeFragment.TAG)
+                        else -> false
                     }
 
-                    @CheckResult
-                    private fun replaceFragment(fragment: Fragment, tag: String): Boolean {
-                        val containerId = R.id.main_view_container
-                        val fragmentManager = childFragmentManager
-
-                        val currentFragment: Fragment? = fragmentManager.findFragmentById(
-                                containerId)
-                        // Do nothing on same fragment
-                        if (currentFragment != null && currentFragment.tag == tag) {
-                            return false
-                        } else {
-                            fragmentManager.beginTransaction().apply {
-                                // Detach current fragment if exists
-                                if (currentFragment != null) {
-                                    detach(currentFragment)
-                                }
-
-                                // Add or re-attach nextFragment
-                                val nextFragment: Fragment? = fragmentManager.findFragmentByTag(tag)
-                                if (nextFragment == null) {
-                                    replace(containerId, fragment, tag)
-                                } else {
-                                    attach(nextFragment)
-                                }
-                            }.commit()
-                            return true
-                        }
+                    if (handled) {
+                        item.isChecked = !item.isChecked
                     }
-                })
+
+                    return handled
+                }
+
+                @CheckResult
+                private fun replaceFragment(fragment: Fragment, tag: String): Boolean {
+                    val containerId = R.id.main_view_container
+                    val fragmentManager = childFragmentManager
+
+                    val currentFragment: Fragment? = fragmentManager.findFragmentById(
+                        containerId
+                    )
+                    // Do nothing on same fragment
+                    if (currentFragment != null && currentFragment.tag == tag) {
+                        return false
+                    } else {
+                        fragmentManager.beginTransaction().apply {
+                            // Detach current fragment if exists
+                            if (currentFragment != null) {
+                                detach(currentFragment)
+                            }
+
+                            // Add or re-attach nextFragment
+                            val nextFragment: Fragment? = fragmentManager.findFragmentByTag(tag)
+                            if (nextFragment == null) {
+                                replace(containerId, fragment, tag)
+                            } else {
+                                attach(nextFragment)
+                            }
+                        }.commit()
+                        return true
+                    }
+                }
+            })
     }
 
     override fun onResume() {

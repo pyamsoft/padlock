@@ -23,107 +23,106 @@ apply plugin: "com.getkeepsafe.dexcount"
 
 //noinspection GroovyMissingReturnStatement
 android {
-  compileSdkVersion rootProject.ext.maxSdk
+    compileSdkVersion rootProject.ext.maxSdk
 
-  defaultConfig {
-    applicationId "com.pyamsoft.padlock"
-    minSdkVersion rootProject.ext.minSdk
-    targetSdkVersion rootProject.ext.maxSdk
-    versionCode 92
-    versionName "2.4.2"
+    defaultConfig {
+        applicationId "com.pyamsoft.padlock"
+        minSdkVersion rootProject.ext.minSdk
+        targetSdkVersion rootProject.ext.maxSdk
+        versionCode 92
+        versionName "2.4.2"
 
-    // For vector drawables
-    vectorDrawables.useSupportLibrary = true
+        // For vector drawables
+        vectorDrawables.useSupportLibrary = true
 
-    resConfigs "en"
-  }
-
-  packagingOptions {
-    exclude 'META-INF/rxjava.properties'
-  }
-
-  dataBinding {
-    enabled true
-  }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
-  }
-
-  signingConfigs {
-    release {
-      //noinspection GroovyAssignabilityCheck
-      storeFile new File(RELEASE_STORE_FILE)
-
-      //noinspection GroovyAssignabilityCheck
-      keyAlias RELEASE_KEY_ALIAS
-
-      //noinspection GroovyAssignabilityCheck
-      keyPassword RELEASE_KEY_PASSWD
-
-      //noinspection GroovyAssignabilityCheck
-      storePassword RELEASE_STORE_PASSWD
-    }
-  }
-
-  buildTypes {
-    release {
-      //noinspection GroovyAssignabilityCheck
-      signingConfig signingConfigs.release
-      minifyEnabled true
-      shrinkResources true
-      proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),
-          "proguard-rules.pro"
+        resConfigs "en"
     }
 
-    debug {
-      versionNameSuffix "-dev"
+    packagingOptions {
+        exclude 'META-INF/rxjava.properties'
     }
-  }
+
+    dataBinding {
+        enabled true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    signingConfigs {
+        release {
+            //noinspection GroovyAssignabilityCheck
+            storeFile new File(RELEASE_STORE_FILE)
+
+            //noinspection GroovyAssignabilityCheck
+            keyAlias RELEASE_KEY_ALIAS
+
+            //noinspection GroovyAssignabilityCheck
+            keyPassword RELEASE_KEY_PASSWD
+
+            //noinspection GroovyAssignabilityCheck
+            storePassword RELEASE_STORE_PASSWD
+        }
+    }
+
+    buildTypes {
+        release {
+            //noinspection GroovyAssignabilityCheck
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+        }
+
+        debug {
+            versionNameSuffix "-dev"
+        }
+    }
 }
 
 dependencies {
 
-  // Databinding
-  kapt "com.android.databinding:compiler:$plugin_version"
+    // Databinding
+    kapt "com.android.databinding:compiler:$plugin_version"
 
-  implementation("com.mikepenz:fastadapter:$fastAdapter@aar") {
-    transitive = true
-  }
+    implementation("com.mikepenz:fastadapter:$fastAdapter@aar") {
+        transitive = true
+    }
 
-  // Leak Canary
-  debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanary"
-  releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanary"
-  testImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanary"
+    // Leak Canary
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanary"
+    releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanary"
+    testImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanary"
 
-  // Dagger
-  kapt "com.google.dagger:dagger-compiler:$dagger"
+    // Dagger
+    kapt "com.google.dagger:dagger-compiler:$dagger"
 
-  // Firebase Crash
-  implementation "com.google.firebase:firebase-crash:$firebase"
+    // Firebase Crash
+    implementation "com.google.firebase:firebase-crash:$firebase"
 
-  // Pattern Lock
-  implementation "com.andrognito.patternlockview:patternlockview:$patternLock"
+    // Pattern Lock
+    implementation "com.andrognito.patternlockview:patternlockview:$patternLock"
 
-  // PYDroid
-  implementation("com.github.pyamsoft.pydroid:pydroid-ui:$pydroid@aar") {
-    transitive = true
-  }
-  implementation("com.github.pyamsoft.pydroid:pydroid-design:$pydroid@aar") {
-    transitive = true
-  }
+    // PYDroid
+    implementation("com.github.pyamsoft.pydroid:pydroid-ui:$pydroid@aar") {
+        transitive = true
+    }
+    implementation("com.github.pyamsoft.pydroid:pydroid-design:$pydroid@aar") {
+        transitive = true
+    }
 
-  implementation project(":padlock-base")
-  implementation project(":padlock-list")
-  implementation project(":padlock-lock")
-  implementation project(":padlock-main")
-  implementation project(":padlock-onboard")
-  implementation project(":padlock-pin")
-  implementation project(":padlock-purge")
-  implementation project(":padlock-service")
-  implementation project(":padlock-settings")
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation project(":padlock-base")
+    implementation project(":padlock-list")
+    implementation project(":padlock-lock")
+    implementation project(":padlock-main")
+    implementation project(":padlock-onboard")
+    implementation project(":padlock-pin")
+    implementation project(":padlock-purge")
+    implementation project(":padlock-service")
+    implementation project(":padlock-settings")
 }
 
 // AdView

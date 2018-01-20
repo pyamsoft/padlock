@@ -35,8 +35,10 @@ interface PadLockDBQuery {
      * ?3 the specific activity name
      */
     @CheckResult
-    fun queryWithPackageActivityNameDefault(packageName: String,
-            activityName: String): Single<PadLockEntryModel>
+    fun queryWithPackageActivityNameDefault(
+        packageName: String,
+        activityName: String
+    ): Single<PadLockEntryModel>
 
     @CheckResult
     fun queryWithPackageName(packageName: String): Single<List<WithPackageNameModel>>

@@ -25,7 +25,8 @@ import io.reactivex.Observable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class CreatePinBus @Inject internal constructor() : EventBus<CreatePinEvent> {
+@Singleton
+internal class CreatePinBus @Inject internal constructor() : EventBus<CreatePinEvent> {
 
     private val bus: EventBus<CreatePinEvent> = RxBus.create()
 

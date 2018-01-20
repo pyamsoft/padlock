@@ -40,15 +40,17 @@ import java.util.HashSet
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class LockListInteractorImpl @Inject internal constructor(
-        private val queryDb: PadLockDBQuery,
-        private val applicationManager: PackageApplicationManager,
-        private val labelManager: PackageLabelManager,
-        private val activityManager: PackageActivityManager,
-        private val onboardingPreferences: OnboardingPreferences,
-        private val modifyInteractor: LockStateModifyInteractor,
-        private val preferences: LockListPreferences) :
-        LockListInteractor {
+@Singleton
+internal class LockListInteractorImpl @Inject internal constructor(
+    private val queryDb: PadLockDBQuery,
+    private val applicationManager: PackageApplicationManager,
+    private val labelManager: PackageLabelManager,
+    private val activityManager: PackageActivityManager,
+    private val onboardingPreferences: OnboardingPreferences,
+    private val modifyInteractor: LockStateModifyInteractor,
+    private val preferences: LockListPreferences
+) :
+    LockListInteractor {
 
     override fun isSystemVisible(): Single<Boolean> = Single.fromCallable { preferences.isSystemVisible() }
 
@@ -58,60 +60,68 @@ import javax.inject.Singleton
 
     override fun populateList(force: Boolean): Observable<AppEntry> {
         return getValidPackageNames().zipWith(getAppEntryList(),
-                BiFunction<List<String>, List<AllEntriesModel>, List<LockTuple>> { packageNames, padLockEntries ->
-                    val lockTuples: MutableList<LockTuple> = ArrayList()
-                    val copyEntries: MutableList<AllEntriesModel> = ArrayList(
-                            padLockEntries)
-                    val copyNames: List<String> = ArrayList(packageNames)
-                    for (packageName in copyNames) {
-                        var locked = false
-                        var whitelist = 0
-                        var hardLocked = 0
-                        val removeEntries = HashSet<AllEntriesModel>()
-                        for (entry in copyEntries) {
-                            if (entry.packageName() == packageName) {
-                                removeEntries.add(entry)
-                                when {
-                                    entry.activityName() == PadLockEntry.PACKAGE_ACTIVITY_NAME -> locked = true
-                                    entry.whitelist() -> ++whitelist
-                                    else -> ++hardLocked
-                                }
+            BiFunction<List<String>, List<AllEntriesModel>, List<LockTuple>> { packageNames, padLockEntries ->
+                val lockTuples: MutableList<LockTuple> = ArrayList()
+                val copyEntries: MutableList<AllEntriesModel> = ArrayList(
+                    padLockEntries
+                )
+                val copyNames: List<String> = ArrayList(packageNames)
+                for (packageName in copyNames) {
+                    var locked = false
+                    var whitelist = 0
+                    var hardLocked = 0
+                    val removeEntries = HashSet<AllEntriesModel>()
+                    for (entry in copyEntries) {
+                        if (entry.packageName() == packageName) {
+                            removeEntries.add(entry)
+                            when {
+                                entry.activityName() == PadLockEntry.PACKAGE_ACTIVITY_NAME -> locked = true
+                                entry.whitelist() -> ++whitelist
+                                else -> ++hardLocked
                             }
                         }
-                        copyEntries.removeAll(removeEntries)
-                        lockTuples.add(LockTuple(packageName, locked, whitelist, hardLocked))
                     }
-                    return@BiFunction lockTuples
-                }).flatMapObservable { Observable.fromIterable(it) }
-                .flatMapSingle { createFromPackageInfo(it) }
-                .toSortedList { o1, o2 ->
-                    o1.name.compareTo(o2.name, ignoreCase = true)
-                }.flatMapObservable { Observable.fromIterable(it) }
-    }
-
-    @CheckResult private fun createFromPackageInfo(tuple: LockTuple): Single<AppEntry> {
-        return applicationManager.getApplicationInfo(tuple.packageName)
-                .flatMap { item ->
-                    labelManager.loadPackageLabel(item)
-                            .map {
-                                AppEntry(name = it, packageName = item.packageName,
-                                        system = item.system,
-                                        locked = tuple.locked, whitelisted = tuple.whitelist,
-                                        hardLocked = tuple.hardLocked)
-                            }
+                    copyEntries.removeAll(removeEntries)
+                    lockTuples.add(LockTuple(packageName, locked, whitelist, hardLocked))
                 }
+                return@BiFunction lockTuples
+            }).flatMapObservable { Observable.fromIterable(it) }
+            .flatMapSingle { createFromPackageInfo(it) }
+            .toSortedList { o1, o2 ->
+                o1.name.compareTo(o2.name, ignoreCase = true)
+            }.flatMapObservable { Observable.fromIterable(it) }
     }
 
-    @CheckResult private fun getActiveApplications(): Observable<ApplicationItem> =
-            applicationManager.getActiveApplications().flatMapObservable {
-                Observable.fromIterable(it)
+    @CheckResult
+    private fun createFromPackageInfo(tuple: LockTuple): Single<AppEntry> {
+        return applicationManager.getApplicationInfo(tuple.packageName)
+            .flatMap { item ->
+                labelManager.loadPackageLabel(item)
+                    .map {
+                        AppEntry(
+                            name = it, packageName = item.packageName,
+                            system = item.system,
+                            locked = tuple.locked, whitelisted = tuple.whitelist,
+                            hardLocked = tuple.hardLocked
+                        )
+                    }
             }
+    }
 
-    @CheckResult private fun getActivityListForApplication(
-            item: ApplicationItem): Single<List<String>> =
-            activityManager.getActivityListForPackage(item.packageName)
+    @CheckResult
+    private fun getActiveApplications(): Observable<ApplicationItem> =
+        applicationManager.getActiveApplications().flatMapObservable {
+            Observable.fromIterable(it)
+        }
 
-    @CheckResult private fun getValidPackageNames(): Single<List<String>> {
+    @CheckResult
+    private fun getActivityListForApplication(
+        item: ApplicationItem
+    ): Single<List<String>> =
+        activityManager.getActivityListForPackage(item.packageName)
+
+    @CheckResult
+    private fun getValidPackageNames(): Single<List<String>> {
         return getActiveApplications().flatMapSingle { item ->
             getActivityListForApplication(item).map {
                 if (it.isEmpty()) {
@@ -124,19 +134,26 @@ import javax.inject.Singleton
         }.filter { it.isNotBlank() }.toList()
     }
 
-    @CheckResult private fun getAppEntryList(): Single<List<AllEntriesModel>> = queryDb.queryAll()
+    @CheckResult
+    private fun getAppEntryList(): Single<List<AllEntriesModel>> = queryDb.queryAll()
 
     override fun hasShownOnBoarding(): Single<Boolean> =
-            Single.fromCallable { onboardingPreferences.isListOnBoard() }
+        Single.fromCallable { onboardingPreferences.isListOnBoard() }
 
-    override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
-            packageName: String, activityName: String, code: String?,
-            system: Boolean): Single<LockState> {
-        return modifyInteractor.modifySingleDatabaseEntry(oldLockState, newLockState, packageName,
-                activityName, code, system)
+    override fun modifySingleDatabaseEntry(
+        oldLockState: LockState, newLockState: LockState,
+        packageName: String, activityName: String, code: String?,
+        system: Boolean
+    ): Single<LockState> {
+        return modifyInteractor.modifySingleDatabaseEntry(
+            oldLockState, newLockState, packageName,
+            activityName, code, system
+        )
     }
 
-    private data class LockTuple internal constructor(internal val packageName: String,
-            internal val locked: Boolean, internal val whitelist: Int,
-            internal val hardLocked: Int)
+    private data class LockTuple internal constructor(
+        internal val packageName: String,
+        internal val locked: Boolean, internal val whitelist: Int,
+        internal val hardLocked: Int
+    )
 }

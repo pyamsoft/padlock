@@ -40,6 +40,8 @@ interface LockServiceInteractor {
     fun listenForForegroundEvents(): Flowable<ForegroundEvent>
 
     @CheckResult
-    fun processEvent(packageName: String, className: String,
-            forcedRecheck: RecheckStatus): Single<PadLockEntryModel>
+    fun processEvent(
+        packageName: String, className: String,
+        forcedRecheck: RecheckStatus
+    ): Single<PadLockEntryModel>
 }

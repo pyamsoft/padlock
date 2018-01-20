@@ -21,19 +21,24 @@ package com.pyamsoft.padlock.base.db
 import com.google.auto.value.AutoValue
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
-@AutoValue internal abstract class PadLockSqlEntry : PadLockEntryModel {
+@AutoValue
+internal abstract class PadLockSqlEntry : PadLockEntryModel {
 
-    @AutoValue internal abstract class AllEntries : PadLockEntryModel.AllEntriesModel
+    @AutoValue
+    internal abstract class AllEntries : PadLockEntryModel.AllEntriesModel
 
-    @AutoValue internal abstract class WithPackageName : PadLockEntryModel.WithPackageNameModel
+    @AutoValue
+    internal abstract class WithPackageName : PadLockEntryModel.WithPackageNameModel
 
     companion object {
 
         internal val FACTORY: PadLockEntryModel.Factory<PadLockSqlEntry> by lazy<PadLockEntryModel.Factory<PadLockSqlEntry>> {
             PadLockEntryModel.Factory { packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication, whitelist ->
-                AutoValue_PadLockSqlEntry(packageName, activityName, lockCode, lockUntilTime,
-                        ignoreUntilTime,
-                        systemApplication, whitelist)
+                AutoValue_PadLockSqlEntry(
+                    packageName, activityName, lockCode, lockUntilTime,
+                    ignoreUntilTime,
+                    systemApplication, whitelist
+                )
             }
         }
 

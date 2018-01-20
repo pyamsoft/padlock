@@ -23,15 +23,20 @@ import dagger.Provides
 import javax.inject.Named
 
 @Module
-class LockEntryModule(private val packageName: String, private val activityName: String,
-        private val realName: String) {
+class LockEntryModule(
+    private val packageName: String, private val activityName: String,
+    private val realName: String
+) {
 
     @Provides
-    @Named("package_name") internal fun providePackageName(): String = packageName
+    @Named("package_name")
+    internal fun providePackageName(): String = packageName
 
     @Provides
-    @Named("activity_name") internal fun provideActivityName(): String = activityName
+    @Named("activity_name")
+    internal fun provideActivityName(): String = activityName
 
     @Provides
-    @Named("real_name") internal fun provideRealName(): String = realName
+    @Named("real_name")
+    internal fun provideRealName(): String = realName
 }

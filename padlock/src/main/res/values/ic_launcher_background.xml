@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~     Copyright (C) 2017 Peter Kenji Yamanaka
   ~
   ~     This program is free software; you can redistribute it and/or modify
@@ -17,5 +16,5 @@
   ~     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
   -->
 <resources>
-  <color name="ic_launcher_background">@color/blue500</color>
+    <color name="ic_launcher_background">@color/blue500</color>
 </resources>

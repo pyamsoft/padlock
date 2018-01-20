@@ -57,13 +57,15 @@ class LockedStatDialog : CanaryDialog() {
         binding = DialogLockStatBinding.inflate(LayoutInflater.from(activity), null, false)
 
         return AlertDialog.Builder(activity!!).setView(binding.root)
-                .setPositiveButton("Okay") { dialogInterface, _ -> dialogInterface.dismiss() }
-                .setCancelable(true)
-                .create()
+            .setPositiveButton("Okay") { dialogInterface, _ -> dialogInterface.dismiss() }
+            .setCancelable(true)
+            .create()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View? = binding.root
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? = binding.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -93,9 +95,11 @@ class LockedStatDialog : CanaryDialog() {
 
         @CheckResult
         @JvmStatic
-        fun newInstance(displayedLabel: String,
-                packageName: String, activityName: String, realName: String,
-                system: Boolean, drawable: Drawable): LockedStatDialog {
+        fun newInstance(
+            displayedLabel: String,
+            packageName: String, activityName: String, realName: String,
+            system: Boolean, drawable: Drawable
+        ): LockedStatDialog {
             return LockedStatDialog().apply {
                 arguments = Bundle().apply {
                     putString(LABEL, displayedLabel)

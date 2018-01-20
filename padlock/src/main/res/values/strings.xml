@@ -19,70 +19,70 @@
   -->
 
 <resources>
-  <string name="app_name">PadLock</string>
-  <string name="ignore">Re-Lock</string>
-  <string name="forgot_passcode">Forgot Passcode</string>
-  <string name="package_name">Package:</string>
-  <string name="system">System:</string>
-  <string name="exclude_entry">Exclude Entry</string>
-  <string name="info_for_nerds">Info for Nerds</string>
-  <string name="explain_accessibility_service">
+    <string name="app_name">PadLock</string>
+    <string name="ignore">Re-Lock</string>
+    <string name="forgot_passcode">Forgot Passcode</string>
+    <string name="package_name">Package:</string>
+    <string name="system">System:</string>
+    <string name="exclude_entry">Exclude Entry</string>
+    <string name="info_for_nerds">Info for Nerds</string>
+    <string name="explain_accessibility_service">
     PadLock requires Usage Access to secure your device.
     \n\nThis service is used to monitor for the applications that you want to be locked. When PadLock notices that you have launched an application that you want to lock, it will secure the application with a custom lock screen.
     \n\nPlease select \'PadLock\' from the Usage Access menu and select \'Permit usage access\'.
   </string>
-  <string name="getting_started">PadLock will not be activated until you set a PIN code.</string>
-  <string name="getting_started_desc">Click the button to get started.</string>
-  <string name="lock_code_hint">Enter Lock Code</string>
-  <string name="reenter_lock_code_hint">Re-Enter Lock Code</string>
-  <string name="optional_lock_code_hint">Optional Lock Code Hint</string>
-  <string name="show_system_applications">Show System Applications</string>
-  <string name="settings">Settings</string>
-  <string name="stat_package_name">Package Name:</string>
-  <string name="stat_real_name">Name:</string>
-  <string name="stat_locked_by">Locked by Entry:</string>
-  <string name="stat_system">Is System Application:</string>
-  <string name="onboard_title_locklist">Lock Entire Groups</string>
-  <string name="onboard_desc_locklist">Locks applications based on the app that they were installed with</string>
-  <string name="onboard_title_info_lock_default">Default Lock State</string>
-  <string name="onboard_desc_info_lock_default">Locking is controlled by package. If the package is locked (from the list) this activity will lock too</string>
-  <string name="onboard_title_info_lock_white">Whitelisted Lock State</string>
-  <string name="onboard_desc_info_lock_white">Locking, even by package is ignored. This activity will never be locked</string>
-  <string name="onboard_title_info_lock_black">Blacklisted Lock State</string>
-  <string name="onboard_desc_info_lock_black">Always lock this activity, even if the package is not locked</string>
-  <string name="purge_all">Purge All</string>
-  <string name="locklist">List</string>
-  <string name="clean_up_old">Purge</string>
-  <string name="search">Search</string>
-  <string name="continue_onboard">Continue</string>
-  <string name="enable_service">Enable Service</string>
-  <string name="onboard_get_started">This is a lightweight application which will improve your device\'s security by protecting your applications from prying eyes. Lock applications with a special password to keep your device safe and secure.
+    <string name="getting_started">PadLock will not be activated until you set a PIN code.</string>
+    <string name="getting_started_desc">Click the button to get started.</string>
+    <string name="lock_code_hint">Enter Lock Code</string>
+    <string name="reenter_lock_code_hint">Re-Enter Lock Code</string>
+    <string name="optional_lock_code_hint">Optional Lock Code Hint</string>
+    <string name="show_system_applications">Show System Applications</string>
+    <string name="settings">Settings</string>
+    <string name="stat_package_name">Package Name:</string>
+    <string name="stat_real_name">Name:</string>
+    <string name="stat_locked_by">Locked by Entry:</string>
+    <string name="stat_system">Is System Application:</string>
+    <string name="onboard_title_locklist">Lock Entire Groups</string>
+    <string name="onboard_desc_locklist">Locks applications based on the app that they were installed with</string>
+    <string name="onboard_title_info_lock_default">Default Lock State</string>
+    <string name="onboard_desc_info_lock_default">Locking is controlled by package. If the package is locked (from the list) this activity will lock too</string>
+    <string name="onboard_title_info_lock_white">Whitelisted Lock State</string>
+    <string name="onboard_desc_info_lock_white">Locking, even by package is ignored. This activity will never be locked</string>
+    <string name="onboard_title_info_lock_black">Blacklisted Lock State</string>
+    <string name="onboard_desc_info_lock_black">Always lock this activity, even if the package is not locked</string>
+    <string name="purge_all">Purge All</string>
+    <string name="locklist">List</string>
+    <string name="clean_up_old">Purge</string>
+    <string name="search">Search</string>
+    <string name="continue_onboard">Continue</string>
+    <string name="enable_service">Enable Service</string>
+    <string name="onboard_get_started">This is a lightweight application which will improve your device\'s security by protecting your applications from prying eyes. Lock applications with a special password to keep your device safe and secure.
     \n\nPadLock is free to use, and entirely open source! You can view the source online at:
     \n\nhttps://github.com/pyamsoft/padlock
     \n\nGet ready for a safer device!</string>
-  <string name="lets_get_started">Let\'s Get Started!</string>
-  <string name="service_enabled">PadLock service is enabled, awesome!</string>
-  <string name="please_enable_service">Please enable the PadLock service to continue</string>
-  <string name="cancel">Cancel</string>
-  <string name="accept_terms">Accept Terms</string>
-  <string name="terms_of_usage">One last thing is the terms of usage. You must read this!
+    <string name="lets_get_started">Let\'s Get Started!</string>
+    <string name="service_enabled">PadLock service is enabled, awesome!</string>
+    <string name="please_enable_service">Please enable the PadLock service to continue</string>
+    <string name="cancel">Cancel</string>
+    <string name="accept_terms">Accept Terms</string>
+    <string name="terms_of_usage">One last thing is the terms of usage. You must read this!
     \n\nBecause PadLock can lock your applications, you may experience difficulty using your device if you forget the password that you use to unlock secured applications.
     \n\nThis password is stored locally on your device and is never transmitted or used in any other way. You are the sole individual who would know what your password is.
     \n\nBy using PadLock, you assume the responsibility of remembering your password for the applications you choose to protect. By continuing, you agree that forgetting the password used to lock your applications may result in certain functions of your device becoming inaccessible, and that pyamsoft will not be held liable for any reason.
   </string>
-  <string name="next_page">Next Page</string>
-  <string name="onboard_create_pin_msg">Get started by first creating a special PIN to secure applications. All applications that are selected to be locked will be secured with this PIN, and will require it to unlock applications in the future.
+    <string name="next_page">Next Page</string>
+    <string name="onboard_create_pin_msg">Get started by first creating a special PIN to secure applications. All applications that are selected to be locked will be secured with this PIN, and will require it to unlock applications in the future.
     \n\nMake a strong PIN that is easy to remember, but please know that there are no requirements for your PIN.</string>
-  <string name="onboard_show_lockinfo_msg">Select an entry on the list to view detailed information about which parts of the application are locked.
+    <string name="onboard_show_lockinfo_msg">Select an entry on the list to view detailed information about which parts of the application are locked.
   \n\nYou can set more specific options for locking applications in this detail dialog.</string>
-  <string name="onboard_lock_package_msg">Toggle the switches into the ON state to lock an entire application. This will cause PadLock to secure the requested application.
+    <string name="onboard_lock_package_msg">Toggle the switches into the ON state to lock an entire application. This will cause PadLock to secure the requested application.
   \n\nIn this mode, unlocking a single screen in an application will unlock the entire application for that session.</string>
-  <string name="purge_all_clean">No old locked items, all clean!</string>
-  <string name="no_lockable_activities">No lockable Activities found, nothing to do here!</string>
-  <string name="no_applications_found">No Applications found, go install some applications!</string>
-  <string name="lock_info_whitelist_explain">Whitelisted - Never locked</string>
-  <string name="lock_info_default_explain">Default - Locking based on main switch</string>
-  <string name="lock_info_blacklist_explain">Blacklisted - Always locked</string>
-  <string name="submit_pin">Submit PIN</string>
-  <string name="lock_type_explanation">Lock Type Explanation</string>
+    <string name="purge_all_clean">No old locked items, all clean!</string>
+    <string name="no_lockable_activities">No lockable Activities found, nothing to do here!</string>
+    <string name="no_applications_found">No Applications found, go install some applications!</string>
+    <string name="lock_info_whitelist_explain">Whitelisted - Never locked</string>
+    <string name="lock_info_default_explain">Default - Locking based on main switch</string>
+    <string name="lock_info_blacklist_explain">Blacklisted - Always locked</string>
+    <string name="submit_pin">Submit PIN</string>
+    <string name="lock_type_explanation">Lock Type Explanation</string>
 </resources>

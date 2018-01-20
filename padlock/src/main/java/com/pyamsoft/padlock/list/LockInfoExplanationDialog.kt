@@ -33,8 +33,10 @@ class LockInfoExplanationDialog : CanaryDialog() {
 
     private lateinit var binding: DialogInfoLocktypeExplainBinding
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = DialogInfoLocktypeExplainBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -59,8 +61,10 @@ class LockInfoExplanationDialog : CanaryDialog() {
         // The dialog is super small for some reason. We have to set the size manually, in onResume
         val window = dialog.window
         window?.apply {
-            setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT)
+            setLayout(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
             setGravity(Gravity.CENTER)
         }
     }

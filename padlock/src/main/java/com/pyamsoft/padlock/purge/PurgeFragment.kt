@@ -41,7 +41,8 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class PurgeFragment : CanaryFragment(), PurgePresenter.View {
-    @Inject internal lateinit var presenter: PurgePresenter
+    @Inject
+    internal lateinit var presenter: PurgePresenter
     private lateinit var adapter: ModelAdapter<String, PurgeItem>
     private lateinit var binding: FragmentPurgeBinding
     private lateinit var decoration: DividerItemDecoration
@@ -65,8 +66,10 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
         Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = FragmentPurgeBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -107,8 +110,10 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
             it.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.menu_purge_all -> {
-                        DialogUtil.guaranteeSingleDialogFragment(activity, PurgeAllDialog(),
-                                "purge_all")
+                        DialogUtil.guaranteeSingleDialogFragment(
+                            activity, PurgeAllDialog(),
+                            "purge_all"
+                        )
                         return@setOnMenuItemClickListener true
                     }
                     else -> {
@@ -122,8 +127,10 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
     private fun setupSwipeRefresh() {
         binding.apply {
-            purgeSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
-                    R.color.blue700, R.color.amber500)
+            purgeSwipeRefresh.setColorSchemeResources(
+                R.color.blue500, R.color.amber700,
+                R.color.blue700, R.color.amber500
+            )
             purgeSwipeRefresh.setOnRefreshListener { presenter.retrieveStaleApplications(true) }
         }
     }
@@ -179,8 +186,10 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     }
 
     override fun onRetrieveError(throwable: Throwable) {
-        Toasty.makeText(context!!, "Error retrieving old application list",
-                Toasty.LENGTH_SHORT).show()
+        Toasty.makeText(
+            context!!, "Error retrieving old application list",
+            Toasty.LENGTH_SHORT
+        ).show()
     }
 
     override fun onPause() {
@@ -216,7 +225,8 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
             purgeList.setHasFixedSize(true)
             purgeList.addItemDecoration(decoration)
             purgeList.adapter = FastAdapter.with<PurgeItem, ModelAdapter<String, PurgeItem>>(
-                    adapter)
+                adapter
+            )
 
             adapter.fastAdapter.apply {
                 withSelectable(true)
@@ -231,11 +241,15 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
         }
     }
 
-    private fun handleDeleteRequest(position: Int,
-            packageName: String) {
+    private fun handleDeleteRequest(
+        position: Int,
+        packageName: String
+    ) {
         Timber.d("Handle delete request for %s at %d", packageName, position)
-        DialogUtil.guaranteeSingleDialogFragment(activity,
-                PurgeSingleItemDialog.newInstance(packageName), "purge_single")
+        DialogUtil.guaranteeSingleDialogFragment(
+            activity,
+            PurgeSingleItemDialog.newInstance(packageName), "purge_single"
+        )
     }
 
     override fun onPurge(packageName: String) {

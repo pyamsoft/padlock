@@ -18,83 +18,82 @@
   ~     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
   -->
 
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.pyamsoft.padlock">
 
-  <!-- For usage stats to detect foreground -->
-  <uses-permission
-      android:name="android.permission.PACKAGE_USAGE_STATS"
-      tools:ignore="ProtectedPermissions"/>
+    <!-- For usage stats to detect foreground -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
 
-  <!-- To start the service on boot-->
-  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- To start the service on boot-->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-  <application
-      android:name=".PadLock"
-      android:allowBackup="true"
-      android:fullBackupContent="@xml/backup_config"
-      android:icon="@mipmap/ic_launcher"
-      android:label="@string/app_name"
-      android:roundIcon="@mipmap/ic_launcher"
-      android:theme="@style/Theme.PadLock.Light">
-
-    <!-- Support super wide screen -->
-    <meta-data
-        android:name="android.max_aspect"
-        android:value="2.1"/>
-
-    <!-- Main Activity -->
-    <activity
-        android:name=".main.MainActivity"
-        android:excludeFromRecents="false"
-        android:exported="true"
+    <application
+        android:name=".PadLock"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_config"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:launchMode="singleTask"
-        android:noHistory="false"
-        android:theme="@style/Theme.PadLock.Light.Splash"
-        android:windowSoftInputMode="adjustResize">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-        <category android:name="android.intent.category.LAUNCHER"/>
-      </intent-filter>
-    </activity>
+        android:roundIcon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.PadLock.Light">
 
-    <!-- Lock Screen Activity -->
-    <activity
-        android:name=".lock.LockScreenActivity"
-        android:exported="false"
-        android:taskAffinity=""
-        android:windowSoftInputMode="adjustResize">
+        <!-- Support super wide screen -->
+        <meta-data
+            android:name="android.max_aspect"
+            android:value="2.1" />
 
-      <!-- Sets a default width/height for the lock screen when in freeform mode -->
-      <!--suppress AndroidElementNotAllowed -->
-      <layout
-          android:defaultHeight="300dp"
-          android:defaultWidth="300dp"
-          tools:ignore="UnusedAttribute"/>
+        <!-- Main Activity -->
+        <activity
+            android:name=".main.MainActivity"
+            android:excludeFromRecents="false"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:noHistory="false"
+            android:theme="@style/Theme.PadLock.Light.Splash"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
-    </activity>
+        <!-- Lock Screen Activity -->
+        <activity
+            android:name=".lock.LockScreenActivity"
+            android:exported="false"
+            android:taskAffinity=""
+            android:windowSoftInputMode="adjustResize">
 
-    <!-- Locking Service -->
-    <service
-        android:name=".service.PadLockService"
-        android:exported="false"/>
+            <!-- Sets a default width/height for the lock screen when in freeform mode -->
+            <!--suppress AndroidElementNotAllowed -->
+            <layout
+                android:defaultHeight="300dp"
+                android:defaultWidth="300dp"
+                tools:ignore="UnusedAttribute" />
 
-    <service
-        android:name=".service.RecheckService"
-        android:exported="false"/>
+        </activity>
 
-    <!-- Receive boot completed, only active when PadLockService is on -->
-    <receiver
-        android:name=".receiver.BootReceiver"
-        android:enabled="true">
-      <intent-filter>
-        <action android:name="android.intent.action.BOOT_COMPLETED"/>
-      </intent-filter>
-    </receiver>
+        <!-- Locking Service -->
+        <service
+            android:name=".service.PadLockService"
+            android:exported="false" />
 
-  </application>
+        <service
+            android:name=".service.RecheckService"
+            android:exported="false" />
+
+        <!-- Receive boot completed, only active when PadLockService is on -->
+        <receiver
+            android:name=".receiver.BootReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
 
 </manifest>

@@ -25,7 +25,8 @@ import io.reactivex.Observable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class ClearPinBus @Inject internal constructor() : EventBus<ClearPinEvent> {
+@Singleton
+internal class ClearPinBus @Inject internal constructor() : EventBus<ClearPinEvent> {
 
     private val bus: EventBus<ClearPinEvent> = RxBus.create()
 

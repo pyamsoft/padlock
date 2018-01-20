@@ -22,8 +22,11 @@ import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import dagger.Binds
 import dagger.Module
 
-@Module abstract class LockStateModule {
+@Module
+abstract class LockStateModule {
 
-    @Binds internal abstract fun provideInteractor(
-            impl: LockStateModifyInteractorImpl): LockStateModifyInteractor
+    @Binds
+    internal abstract fun provideInteractor(
+        impl: LockStateModifyInteractorImpl
+    ): LockStateModifyInteractor
 }

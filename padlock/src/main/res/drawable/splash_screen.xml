@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~     Copyright (C) 2017 Peter Kenji Yamanaka
   ~
   ~     This program is free software; you can redistribute it and/or modify
@@ -19,14 +18,14 @@
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <item android:drawable="@color/material_light_background"/>
+    <item android:drawable="@color/material_light_background" />
 
-  <item android:gravity="center">
+    <item android:gravity="center">
 
-    <bitmap
-        android:src="@drawable/splash_icon"
-        android:tileMode="disabled"/>
+        <bitmap
+            android:src="@drawable/splash_icon"
+            android:tileMode="disabled" />
 
-  </item>
+    </item>
 
 </layer-list>

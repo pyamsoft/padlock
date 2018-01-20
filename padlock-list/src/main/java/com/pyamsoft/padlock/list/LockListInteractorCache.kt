@@ -32,11 +32,14 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton internal class LockListInteractorCache @Inject internal constructor(
-        @param:Named("cache_purge") private val purgeCache: Cache,
-        @param:Named(
-                "interactor_lock_list") private val impl: LockListInteractor) : LockListInteractor,
-        Cache, LockListUpdater {
+@Singleton
+internal class LockListInteractorCache @Inject internal constructor(
+    @param:Named("cache_purge") private val purgeCache: Cache,
+    @param:Named(
+        "interactor_lock_list"
+    ) private val impl: LockListInteractor
+) : LockListInteractor,
+    Cache, LockListUpdater {
 
     private var appCache: Observable<AppEntry>? = null
     private var lastAccessCache: Long = 0L
@@ -66,27 +69,33 @@ import javax.inject.Singleton
         }.doOnError { clearCache() }
     }
 
-    override fun modifySingleDatabaseEntry(oldLockState: LockState, newLockState: LockState,
-            packageName: String, activityName: String, code: String?,
-            system: Boolean): Single<LockState> {
-        return impl.modifySingleDatabaseEntry(oldLockState, newLockState, packageName, activityName,
-                code, system)
-                .doOnSuccess {
-                    val obj: Observable<AppEntry>? = appCache
-                    if (obj != null) {
-                        appCache = obj.map {
-                            if (it.packageName == packageName) {
-                                // Update this with the new thing
-                                return@map AppEntry(name = it.name, packageName = it.packageName,
-                                        locked = newLockState == LOCKED, system = it.system,
-                                        whitelisted = it.whitelisted, hardLocked = it.hardLocked)
-                            } else {
-                                // Pass the original through
-                                return@map it
-                            }
+    override fun modifySingleDatabaseEntry(
+        oldLockState: LockState, newLockState: LockState,
+        packageName: String, activityName: String, code: String?,
+        system: Boolean
+    ): Single<LockState> {
+        return impl.modifySingleDatabaseEntry(
+            oldLockState, newLockState, packageName, activityName,
+            code, system
+        )
+            .doOnSuccess {
+                val obj: Observable<AppEntry>? = appCache
+                if (obj != null) {
+                    appCache = obj.map {
+                        if (it.packageName == packageName) {
+                            // Update this with the new thing
+                            return@map AppEntry(
+                                name = it.name, packageName = it.packageName,
+                                locked = newLockState == LOCKED, system = it.system,
+                                whitelisted = it.whitelisted, hardLocked = it.hardLocked
+                            )
+                        } else {
+                            // Pass the original through
+                            return@map it
                         }
                     }
-                }.doOnError { clearCache() }
+                }
+            }.doOnError { clearCache() }
     }
 
     override fun update(packageName: String, whitelisted: Int, hardLocked: Int): Completable {
@@ -95,10 +104,12 @@ import javax.inject.Singleton
             if (obj != null) {
                 appCache = obj.map {
                     if (it.packageName == packageName) {
-                        return@map AppEntry(name = it.name, packageName = it.packageName,
-                                locked = it.locked,
-                                system = it.system, whitelisted = whitelisted,
-                                hardLocked = hardLocked)
+                        return@map AppEntry(
+                            name = it.name, packageName = it.packageName,
+                            locked = it.locked,
+                            system = it.system, whitelisted = whitelisted,
+                            hardLocked = hardLocked
+                        )
                     } else {
                         // Pass the original through
                         return@map it

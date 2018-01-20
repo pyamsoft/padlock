@@ -24,7 +24,8 @@ import io.reactivex.Observable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class LockInfoBus @Inject internal constructor() : EventBus<LockInfoEvent> {
+@Singleton
+internal class LockInfoBus @Inject internal constructor() : EventBus<LockInfoEvent> {
 
     private val bus: EventBus<LockInfoEvent> = RxBus.create()
 

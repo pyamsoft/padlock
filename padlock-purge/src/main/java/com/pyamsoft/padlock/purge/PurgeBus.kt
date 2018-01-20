@@ -25,7 +25,8 @@ import io.reactivex.Observable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class PurgeBus @Inject internal constructor() : EventBus<PurgeEvent> {
+@Singleton
+internal class PurgeBus @Inject internal constructor() : EventBus<PurgeEvent> {
 
     private val bus: EventBus<PurgeEvent> = RxBus.create()
 
