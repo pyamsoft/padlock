@@ -19,10 +19,10 @@
 package com.pyamsoft.padlock
 
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.api.ApplicationInstallReceiver
+import com.pyamsoft.padlock.api.InstallListenerPreferences
 import com.pyamsoft.padlock.base.PadLockModule
 import com.pyamsoft.padlock.base.PadLockProvider
-import com.pyamsoft.padlock.api.InstallListenerPreferences
-import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.LockInfoItem
 import com.pyamsoft.padlock.list.LockListFragment
@@ -51,18 +51,22 @@ import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.service.ServiceModule
 import com.pyamsoft.padlock.settings.ConfirmationDialog
-import com.pyamsoft.padlock.settings.SettingsModule
 import com.pyamsoft.padlock.settings.PadLockPreferenceFragment
+import com.pyamsoft.padlock.settings.SettingsModule
 import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = arrayOf(PadLockProvider::class, PadLockModule::class,
+@Component(
+    modules = arrayOf(
+        PadLockProvider::class, PadLockModule::class,
         LockModule::class, PinModule::class,
         ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class,
         LockInfoSingletonModule::class, LockStateModule::class, LockListModule::class,
         LockScreenSingletonModule::class, LockEntrySingletonModule::class,
-        MasterPinModule::class, UiProvider::class))
+        MasterPinModule::class, UiProvider::class
+    )
+)
 interface PadLockComponent {
 
     fun inject(fragment: LockListFragment)

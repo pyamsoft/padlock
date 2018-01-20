@@ -19,144 +19,131 @@
   -->
 
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
-  <android.support.constraint.ConstraintLayout
-      xmlns:android="http://schemas.android.com/apk/res/android"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      >
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/lock_info_toolbar"
-        android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        />
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <!-- Dark grey background, put it here so it shows up behind info on old Android -->
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/lock_info_dark_background"
-        app:layout_constraintBottom_toTopOf="@id/lock_info_swipe_refresh"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/lock_info_toolbar"
-        />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/lock_info_toolbar"
+            android:layout_width="0dp"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <ImageView
-        android:id="@+id/lock_info_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:contentDescription="@string/blank"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lock_info_toolbar"
-        />
+        <!-- Dark grey background, put it here so it shows up behind info on old Android -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/lock_info_dark_background"
+            app:layout_constraintBottom_toTopOf="@id/lock_info_swipe_refresh"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lock_info_toolbar" />
 
-    <TextView
-        android:id="@+id/lock_info_package_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="@string/package_name"
-        app:layout_constraintStart_toEndOf="@+id/lock_info_icon"
-        app:layout_constraintTop_toTopOf="@+id/lock_info_icon"
-        />
-
-    <TextView
-        android:id="@+id/lock_info_package_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:gravity="end"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        android:textColor="@android:color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/lock_info_package_label"
-        app:layout_constraintTop_toBottomOf="@+id/lock_info_toolbar"
-        />
-
-    <TextView
-        android:id="@+id/lock_info_system_label"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/system"
-        app:layout_constraintEnd_toEndOf="@+id/lock_info_package_label"
-        app:layout_constraintStart_toStartOf="@+id/lock_info_package_label"
-        app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name"
-        />
-
-    <TextView
-        android:id="@+id/lock_info_system"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:gravity="end"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        android:textColor="@android:color/black"
-        app:layout_constraintBottom_toBottomOf="@+id/lock_info_system_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/lock_info_system_label"
-        app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name"
-        />
-
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/lock_info_swipe_refresh"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_default="wrap"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lock_info_system_label"
-        >
-
-      <FrameLayout
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          >
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/lock_info_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+        <ImageView
+            android:id="@+id/lock_info_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:contentDescription="@string/blank"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lock_info_toolbar" />
 
         <TextView
-            android:id="@+id/lock_info_empty"
+            android:id="@+id/lock_info_package_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/package_name"
+            app:layout_constraintStart_toEndOf="@+id/lock_info_icon"
+            app:layout_constraintTop_toTopOf="@+id/lock_info_icon" />
+
+        <TextView
+            android:id="@+id/lock_info_package_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:gravity="end"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@android:color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/lock_info_package_label"
+            app:layout_constraintTop_toBottomOf="@+id/lock_info_toolbar" />
+
+        <TextView
+            android:id="@+id/lock_info_system_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/system"
+            app:layout_constraintEnd_toEndOf="@+id/lock_info_package_label"
+            app:layout_constraintStart_toStartOf="@+id/lock_info_package_label"
+            app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name" />
+
+        <TextView
+            android:id="@+id/lock_info_system"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:gravity="end"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@android:color/black"
+            app:layout_constraintBottom_toBottomOf="@+id/lock_info_system_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/lock_info_system_label"
+            app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name" />
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/lock_info_swipe_refresh"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_default="wrap"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lock_info_system_label">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/lock_info_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/lock_info_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="@string/no_lockable_activities"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:visibility="gone" />
+
+            </FrameLayout>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+        <View
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:padding="16dp"
-            android:text="@string/no_lockable_activities"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:visibility="gone"
-            />
+            android:layout_height="4dp"
+            android:background="@drawable/dropshadow"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lock_info_toolbar" />
 
-      </FrameLayout>
-
-    </android.support.v4.widget.SwipeRefreshLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:background="@drawable/dropshadow"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/lock_info_toolbar"
-        />
-
-  </android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
 </layout>

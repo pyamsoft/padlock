@@ -27,11 +27,14 @@ import com.pyamsoft.padlock.api.JobSchedulerCompat
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class JobSchedulerCompatImpl @Inject internal constructor(
-        private val context: Context) : JobSchedulerCompat {
+@Singleton
+internal class JobSchedulerCompatImpl @Inject internal constructor(
+    private val context: Context
+) : JobSchedulerCompat {
 
     private val alarmManager: AlarmManager = context.getSystemService(
-            Context.ALARM_SERVICE) as AlarmManager
+        Context.ALARM_SERVICE
+    ) as AlarmManager
 
     @CheckResult
     private fun Intent.toPending(): PendingIntent = PendingIntent.getService(context, 0, this, 0)

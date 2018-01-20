@@ -36,7 +36,8 @@ import javax.inject.Inject
 
 class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
-    @field:Inject internal lateinit var presenter: PinEntryPresenter
+    @field:Inject
+    internal lateinit var presenter: PinEntryPresenter
     private lateinit var binding: FragmentLockScreenPatternBinding
     private val cellPattern: MutableList<PatternLockView.Dot> = ArrayList()
     private val repeatCellPattern: MutableList<PatternLockView.Dot> = ArrayList()
@@ -58,8 +59,10 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -157,8 +160,10 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
                 // process and show next
                 if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
                     Timber.d("Pattern is not long enough")
-                    Toasty.makeText(binding.patternLock.context, "Pattern is not long enough",
-                            Toasty.LENGTH_SHORT).show()
+                    Toasty.makeText(
+                        binding.patternLock.context, "Pattern is not long enough",
+                        Toasty.LENGTH_SHORT
+                    ).show()
                     binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
                     return@runnable false
                 } else {
@@ -166,8 +171,10 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
                     patternText = LockCellUtil.cellPatternToString(cellPattern)
                     repeatPattern = true
                     binding.patternLock.clearPattern()
-                    Toasty.makeText(binding.patternLock.context, "Please confirm pattern",
-                            Toasty.LENGTH_SHORT).show()
+                    Toasty.makeText(
+                        binding.patternLock.context, "Please confirm pattern",
+                        Toasty.LENGTH_SHORT
+                    ).show()
                     return@runnable false
                 }
             }
@@ -222,6 +229,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         internal const val TAG = "PinEntryPatternFragment"
         private const val REPEAT_CELL_PATTERN = "repeat_cell_pattern"
         private const val PATTERN_TEXT = "pattern_text"
-        @JvmField internal var MINIMUM_PATTERN_LENGTH = 4
+        @JvmField
+        internal var MINIMUM_PATTERN_LENGTH = 4
     }
 }

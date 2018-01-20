@@ -40,9 +40,12 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton internal class PadLockDBImpl @Inject internal constructor(context: Context,
-        @param:Named("io") private val scheduler: Scheduler) : PadLockDBInsert,
-        PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
+@Singleton
+internal class PadLockDBImpl @Inject internal constructor(
+    context: Context,
+    @param:Named("io") private val scheduler: Scheduler
+) : PadLockDBInsert,
+    PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
 
     private val briteDatabase: BriteDatabase
     private val queryManager: QueryManager
@@ -61,16 +64,26 @@ import javax.inject.Singleton
         updateManager = UpdateManager(openHelper, briteDatabase)
     }
 
-    @CheckResult private fun deleteWithPackageActivityNameUnguarded(packageName: String,
-            activityName: String): Long = deleteManager.deleteWithPackageActivity(packageName,
-            activityName)
+    @CheckResult
+    private fun deleteWithPackageActivityNameUnguarded(
+        packageName: String,
+        activityName: String
+    ): Long = deleteManager.deleteWithPackageActivity(
+        packageName,
+        activityName
+    )
 
-    @CheckResult override fun insert(packageName: String, activityName: String,
-            lockCode: String?, lockUntilTime: Long, ignoreUntilTime: Long, isSystem: Boolean,
-            whitelist: Boolean): Completable {
+    @CheckResult
+    override fun insert(
+        packageName: String, activityName: String,
+        lockCode: String?, lockUntilTime: Long, ignoreUntilTime: Long, isSystem: Boolean,
+        whitelist: Boolean
+    ): Completable {
         return Single.fromCallable {
-            val entry = createManager.create(packageName, activityName, lockCode, lockUntilTime,
-                    ignoreUntilTime, isSystem, whitelist)
+            val entry = createManager.create(
+                packageName, activityName, lockCode, lockUntilTime,
+                ignoreUntilTime, isSystem, whitelist
+            )
             Timber.i("DB: INSERT")
             val deleteResult = deleteWithPackageActivityNameUnguarded(packageName, activityName)
             Timber.d("Delete result: %d", deleteResult)
@@ -78,65 +91,86 @@ import javax.inject.Singleton
         }.toCompletable()
     }
 
-    override fun updateIgnoreTime(packageName: String, activityName: String,
-            ignoreUntilTime: Long): Completable {
+    override fun updateIgnoreTime(
+        packageName: String, activityName: String,
+        ignoreUntilTime: Long
+    ): Completable {
         return Completable.fromCallable {
             Timber.i("DB: UPDATE IGNORE")
-            return@fromCallable updateManager.updateIgnoreTime(packageName, activityName,
-                    ignoreUntilTime)
+            return@fromCallable updateManager.updateIgnoreTime(
+                packageName, activityName,
+                ignoreUntilTime
+            )
         }
     }
 
-    override fun updateLockTime(packageName: String, activityName: String,
-            lockUntilTime: Long): Completable {
+    override fun updateLockTime(
+        packageName: String, activityName: String,
+        lockUntilTime: Long
+    ): Completable {
         return Completable.fromCallable {
             Timber.i("DB: UPDATE LOCK")
-            return@fromCallable updateManager.updateLockTime(packageName, activityName,
-                    lockUntilTime)
+            return@fromCallable updateManager.updateLockTime(
+                packageName, activityName,
+                lockUntilTime
+            )
         }
     }
 
-    override fun updateWhitelist(packageName: String, activityName: String,
-            whitelist: Boolean): Completable {
+    override fun updateWhitelist(
+        packageName: String, activityName: String,
+        whitelist: Boolean
+    ): Completable {
         return Completable.fromCallable {
             Timber.i("DB: UPDATE WHITELIST")
             return@fromCallable updateManager.updateWhitelist(packageName, activityName, whitelist)
         }
     }
 
-    @CheckResult override fun queryWithPackageActivityNameDefault(packageName: String,
-            activityName: String): Single<PadLockEntryModel> {
+    @CheckResult
+    override fun queryWithPackageActivityNameDefault(
+        packageName: String,
+        activityName: String
+    ): Single<PadLockEntryModel> {
         Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT")
         return queryManager.queryWithPackageActivityNameDefault(packageName, activityName)
     }
 
-    @CheckResult override fun queryWithPackageName(
-            packageName: String): Single<List<WithPackageNameModel>> {
+    @CheckResult
+    override fun queryWithPackageName(
+        packageName: String
+    ): Single<List<WithPackageNameModel>> {
         Timber.i("DB: QUERY PACKAGE")
         return queryManager.queryWithPackageName(packageName)
     }
 
-    @CheckResult override fun queryAll(): Single<List<AllEntriesModel>> {
+    @CheckResult
+    override fun queryAll(): Single<List<AllEntriesModel>> {
         Timber.i("DB: QUERY ALL")
         return queryManager.queryAll()
     }
 
-    @CheckResult override fun deleteWithPackageName(packageName: String): Completable {
+    @CheckResult
+    override fun deleteWithPackageName(packageName: String): Completable {
         return Completable.fromCallable {
             Timber.i("DB: DELETE PACKAGE")
             return@fromCallable deleteManager.deleteWithPackage(packageName)
         }
     }
 
-    @CheckResult override fun deleteWithPackageActivityName(packageName: String,
-            activityName: String): Completable {
+    @CheckResult
+    override fun deleteWithPackageActivityName(
+        packageName: String,
+        activityName: String
+    ): Completable {
         return Completable.fromCallable {
             Timber.i("DB: DELETE PACKAGE ACTIVITY")
             return@fromCallable deleteWithPackageActivityNameUnguarded(packageName, activityName)
         }
     }
 
-    @CheckResult override fun deleteAll(): Completable {
+    @CheckResult
+    override fun deleteAll(): Completable {
         return Completable.fromAction {
             Timber.i("DB: DELETE ALL")
             deleteManager.deleteAll()
@@ -144,9 +178,10 @@ import javax.inject.Singleton
     }
 
     private class PadLockOpenHelper internal constructor(context: Context) : SQLiteOpenHelper(
-            context.applicationContext,
-            DB_NAME, null,
-            DATABASE_VERSION) {
+        context.applicationContext,
+        DB_NAME, null,
+        DATABASE_VERSION
+    ) {
 
         override fun onCreate(sqLiteDatabase: SQLiteDatabase) {
             Timber.d("onCreate")
@@ -175,7 +210,8 @@ import javax.inject.Singleton
 
         private fun upgradeVersion3To4(sqLiteDatabase: SQLiteDatabase) {
             Timber.d("Upgrading from Version 2 to 3 adds whitelist column")
-            val alterWithWhitelist = "ALTER TABLE ${PadLockEntryModel.TABLE_NAME} ADD COLUMN ${PadLockEntryModel.WHITELIST} INTEGER NOT NULL DEFAULT 0"
+            val alterWithWhitelist =
+                "ALTER TABLE ${PadLockEntryModel.TABLE_NAME} ADD COLUMN ${PadLockEntryModel.WHITELIST} INTEGER NOT NULL DEFAULT 0"
             Timber.d("EXEC SQL: %s", alterWithWhitelist)
             sqLiteDatabase.execSQL(alterWithWhitelist)
         }
@@ -196,8 +232,10 @@ import javax.inject.Singleton
 
             // Remove the columns we don't want anymore from the table's list of columns
             Timber.d("Gather a list of the remaining columns")
-            val columnsSeparated = TextUtils.join(",",
-                    UPGRADE_1_TO_2_TABLE_COLUMNS)
+            val columnsSeparated = TextUtils.join(
+                ",",
+                UPGRADE_1_TO_2_TABLE_COLUMNS
+            )
             Timber.d("Column separated: %s", columnsSeparated)
 
             val tableName = PadLockEntryModel.TABLE_NAME
@@ -225,10 +263,12 @@ import javax.inject.Singleton
             private const val DB_NAME = "padlock_db"
             private const val DATABASE_VERSION = 4
 
-            private val UPGRADE_1_TO_2_TABLE_COLUMNS = arrayOf(PadLockEntryModel.PACKAGENAME,
-                    PadLockEntryModel.ACTIVITYNAME, PadLockEntryModel.LOCKCODE,
-                    PadLockEntryModel.LOCKUNTILTIME,
-                    PadLockEntryModel.IGNOREUNTILTIME, PadLockEntryModel.SYSTEMAPPLICATION)
+            private val UPGRADE_1_TO_2_TABLE_COLUMNS = arrayOf(
+                PadLockEntryModel.PACKAGENAME,
+                PadLockEntryModel.ACTIVITYNAME, PadLockEntryModel.LOCKCODE,
+                PadLockEntryModel.LOCKUNTILTIME,
+                PadLockEntryModel.IGNOREUNTILTIME, PadLockEntryModel.SYSTEMAPPLICATION
+            )
         }
     }
 }

@@ -58,8 +58,10 @@ import javax.inject.Inject
 
 class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
-    @field:Inject internal lateinit var appIconLoader: AppIconLoader
-    @field:Inject internal lateinit var presenter: LockInfoPresenter
+    @field:Inject
+    internal lateinit var appIconLoader: AppIconLoader
+    @field:Inject
+    internal lateinit var presenter: LockInfoPresenter
     private lateinit var adapter: ModelAdapter<ActivityEntry, LockInfoItem>
     private lateinit var binding: DialogLockInfoBinding
     private lateinit var appPackageName: String
@@ -79,11 +81,14 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         }
 
         Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockInfoComponent(
-                LockInfoModule(appPackageName)).inject(this)
+            LockInfoModule(appPackageName)
+        ).inject(this)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         filterListDelegate = FilterListDelegate()
         adapter = ModelAdapter { LockInfoItem(it, appIsSystem) }
         binding = DialogLockInfoBinding.inflate(inflater, container, false)
@@ -115,24 +120,30 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             lockInfoToolbar.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.menu_explain_lock_type -> {
-                        DialogUtil.guaranteeSingleDialogFragment(activity!!,
-                                LockInfoExplanationDialog(),
-                                LockInfoExplanationDialog.TAG)
+                        DialogUtil.guaranteeSingleDialogFragment(
+                            activity!!,
+                            LockInfoExplanationDialog(),
+                            LockInfoExplanationDialog.TAG
+                        )
                         return@setOnMenuItemClickListener true
                     }
                     else -> return@setOnMenuItemClickListener false
                 }
             }
         }
-        ViewCompat.setElevation(binding.lockInfoToolbar,
-                AppUtil.convertToDP(binding.lockInfoToolbar.context, 4f))
+        ViewCompat.setElevation(
+            binding.lockInfoToolbar,
+            AppUtil.convertToDP(binding.lockInfoToolbar.context, 4f)
+        )
         filterListDelegate.onPrepareOptionsMenu(binding.lockInfoToolbar.menu, adapter)
     }
 
     private fun setupSwipeRefresh() {
         binding.apply {
-            lockInfoSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.amber700,
-                    R.color.blue700, R.color.amber500)
+            lockInfoSwipeRefresh.setColorSchemeResources(
+                R.color.blue500, R.color.amber700,
+                R.color.blue700, R.color.amber500
+            )
             lockInfoSwipeRefresh.setOnRefreshListener {
                 Timber.d("onRefresh")
                 presenter.populateList(true)
@@ -151,7 +162,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             lockInfoRecycler.setHasFixedSize(true)
             lockInfoRecycler.addItemDecoration(dividerDecoration)
             lockInfoRecycler.adapter = FastAdapter.with<LockInfoItem, ModelAdapter<ActivityEntry, LockInfoItem>>(
-                    adapter)
+                adapter
+            )
 
             lockInfoEmpty.visibility = View.GONE
             lockInfoRecycler.visibility = View.VISIBLE
@@ -194,8 +206,10 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         // The dialog is super small for some reason. We have to set the size manually, in onResume
         val window = dialog.window
         window?.apply {
-            setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT)
+            setLayout(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
             setGravity(Gravity.CENTER)
         }
     }
@@ -205,8 +219,12 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             val item: LockInfoItem = adapter.getAdapterItem(i)
             val entry: ActivityEntry = item.model
             if (id == entry.id) {
-                adapter.set(i, ActivityEntry(name = entry.name, packageName = entry.packageName,
-                        lockState = state))
+                adapter.set(
+                    i, ActivityEntry(
+                        name = entry.name, packageName = entry.packageName,
+                        lockState = state
+                    )
+                )
                 presenter.update(entry.name, entry.packageName, state)
                 break
             }
@@ -236,9 +254,11 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         } else {
             binding.lockInfoRecycler.visibility = View.GONE
             binding.lockInfoEmpty.visibility = View.VISIBLE
-            Toasty.makeText(binding.lockInfoRecycler.context,
-                    "Error while loading list. Please try again.",
-                    Toast.LENGTH_SHORT).show()
+            Toasty.makeText(
+                binding.lockInfoRecycler.context,
+                "Error while loading list. Please try again.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
         setRefreshing(false)
@@ -289,11 +309,14 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             Timber.d("Lock state changed for ${entry.packageName} ${entry.name}")
             when (newState) {
                 DEFAULT -> presenter.publish(
-                        LockInfoEvent.Callback.Deleted(entry.id, entry.packageName, oldState))
+                    LockInfoEvent.Callback.Deleted(entry.id, entry.packageName, oldState)
+                )
                 LOCKED -> presenter.publish(
-                        LockInfoEvent.Callback.Created(entry.id, entry.packageName, oldState))
+                    LockInfoEvent.Callback.Created(entry.id, entry.packageName, oldState)
+                )
                 WHITELISTED -> presenter.publish(
-                        LockInfoEvent.Callback.Whitelisted(entry.id, entry.packageName, oldState))
+                    LockInfoEvent.Callback.Whitelisted(entry.id, entry.packageName, oldState)
+                )
                 else -> Timber.e("Invalid lock state, do not publish: $newState")
             }
         }

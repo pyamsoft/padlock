@@ -25,9 +25,11 @@ import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class LockServiceStateInteractorImpl @Inject internal constructor(
-        private val pinInteractor: MasterPinInteractor) :
-        LockServiceStateInteractor {
+@Singleton
+internal class LockServiceStateInteractorImpl @Inject internal constructor(
+    private val pinInteractor: MasterPinInteractor
+) :
+    LockServiceStateInteractor {
 
     override fun isServiceEnabled(): Single<Boolean> = pinInteractor.getMasterPin().map { it is Present }
 }

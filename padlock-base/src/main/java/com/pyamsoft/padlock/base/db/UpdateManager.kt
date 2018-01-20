@@ -26,8 +26,10 @@ import com.pyamsoft.padlock.model.db.PadLockEntryModel.UpdateLockUntilTime
 import com.pyamsoft.padlock.model.db.PadLockEntryModel.UpdateWhitelist
 import com.squareup.sqlbrite2.BriteDatabase
 
-internal class UpdateManager internal constructor(openHelper: SQLiteOpenHelper,
-        private val briteDatabase: BriteDatabase) {
+internal class UpdateManager internal constructor(
+    openHelper: SQLiteOpenHelper,
+    private val briteDatabase: BriteDatabase
+) {
 
     private val updateWhitelist by lazy {
         UpdateWhitelist(openHelper.writableDatabase)
@@ -42,8 +44,10 @@ internal class UpdateManager internal constructor(openHelper: SQLiteOpenHelper,
     }
 
     @CheckResult
-    internal fun updateWhitelist(packageName: String, activityName: String,
-            whitelist: Boolean): Long {
+    internal fun updateWhitelist(
+        packageName: String, activityName: String,
+        whitelist: Boolean
+    ): Long {
         if (PadLockEntry.PACKAGE_EMPTY == packageName || PadLockEntry.ACTIVITY_EMPTY == activityName) {
             throw RuntimeException("Cannot update whitelist EMPTY entry")
         }
@@ -54,8 +58,10 @@ internal class UpdateManager internal constructor(openHelper: SQLiteOpenHelper,
     }
 
     @CheckResult
-    internal fun updateIgnoreTime(packageName: String, activityName: String,
-            ignoreTime: Long): Long {
+    internal fun updateIgnoreTime(
+        packageName: String, activityName: String,
+        ignoreTime: Long
+    ): Long {
         if (PadLockEntry.PACKAGE_EMPTY == packageName || PadLockEntry.ACTIVITY_EMPTY == activityName) {
             throw RuntimeException("Cannot update ignore time EMPTY entry")
         }
@@ -66,8 +72,10 @@ internal class UpdateManager internal constructor(openHelper: SQLiteOpenHelper,
     }
 
     @CheckResult
-    internal fun updateLockTime(packageName: String, activityName: String,
-            lockTime: Long): Long {
+    internal fun updateLockTime(
+        packageName: String, activityName: String,
+        lockTime: Long
+    ): Long {
         if (PadLockEntry.PACKAGE_EMPTY == packageName || PadLockEntry.ACTIVITY_EMPTY == activityName) {
             throw RuntimeException("Cannot update lock time EMPTY entry")
         }

@@ -44,19 +44,25 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     private lateinit var imm: InputMethodManager
     private lateinit var binding: FragmentLockScreenTextBinding
     private var editText: EditText? = null
-    @Inject internal lateinit var presenter: LockEntryPresenter
-    @Inject internal lateinit var imageLoader: ImageLoader
+    @Inject
+    internal lateinit var presenter: LockEntryPresenter
+    @Inject
+    internal lateinit var imageLoader: ImageLoader
 
-    @CheckResult private fun getCurrentAttempt(): String = editText?.text?.toString() ?: ""
+    @CheckResult
+    private fun getCurrentAttempt(): String = editText?.text?.toString() ?: ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockScreenComponent(
-                LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
+            LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)
+        ).inject(this)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = FragmentLockScreenTextBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -102,7 +108,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     private fun setupInputManager() {
         // Force the keyboard
         imm = activity!!.applicationContext
-                .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
     }
 
@@ -119,13 +125,15 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
         editText?.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,
-                        InputMethodManager.HIDE_IMPLICIT_ONLY)
+                imm.toggleSoftInput(
+                    InputMethodManager.SHOW_FORCED,
+                    InputMethodManager.HIDE_IMPLICIT_ONLY
+                )
             }
         }
 
         imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp).tint(R.color.orangeA200)
-                .into(binding.lockImageGo).bind(viewLifecycle)
+            .into(binding.lockImageGo).bind(viewLifecycle)
     }
 
     private fun setupTextInput() {
@@ -178,8 +186,10 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
     override fun onUnlockError(throwable: Throwable) {
         clearDisplay()
-        DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(),
-                "lock_error")
+        DialogUtil.guaranteeSingleDialogFragment(
+            activity, ErrorDialog(),
+            "lock_error"
+        )
     }
 
     override fun onLocked() {
@@ -206,13 +216,17 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
         @JvmStatic
         @CheckResult
-        fun newInstance(lockedPackageName: String,
-                lockedActivityName: String, lockedCode: String?,
-                lockedRealName: String, lockedSystem: Boolean): LockScreenTextFragment {
+        fun newInstance(
+            lockedPackageName: String,
+            lockedActivityName: String, lockedCode: String?,
+            lockedRealName: String, lockedSystem: Boolean
+        ): LockScreenTextFragment {
             val fragment = LockScreenTextFragment()
-            fragment.arguments = LockScreenBaseFragment.buildBundle(lockedPackageName,
-                    lockedActivityName,
-                    lockedCode, lockedRealName, lockedSystem)
+            fragment.arguments = LockScreenBaseFragment.buildBundle(
+                lockedPackageName,
+                lockedActivityName,
+                lockedCode, lockedRealName, lockedSystem
+            )
             return fragment
         }
     }

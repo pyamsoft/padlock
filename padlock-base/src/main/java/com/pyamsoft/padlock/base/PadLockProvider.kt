@@ -32,10 +32,12 @@ import io.reactivex.Scheduler
 import javax.inject.Named
 
 @Module
-class PadLockProvider(private val pyDroidModule: PYDroidModule,
-        private val loaderModule: LoaderModule,
-        private val mainActivityClass: Class<out Activity>,
-        private val recheckServiceClass: Class<out IntentService>) {
+class PadLockProvider(
+    private val pyDroidModule: PYDroidModule,
+    private val loaderModule: LoaderModule,
+    private val mainActivityClass: Class<out Activity>,
+    private val recheckServiceClass: Class<out IntentService>
+) {
 
     private val appIconCache: ImageCache<String, Drawable> = AppIconImageCache()
 
@@ -44,19 +46,22 @@ class PadLockProvider(private val pyDroidModule: PYDroidModule,
 
     @Provides
     @Named(
-            "main_activity")
+        "main_activity"
+    )
     internal fun provideMainActivityClass(): Class<out Activity> =
-            mainActivityClass
+        mainActivityClass
 
     @Provides
     @Named(
-            "recheck")
+        "recheck"
+    )
     internal fun provideRecheckServiceClass(): Class<out IntentService> =
-            recheckServiceClass
+        recheckServiceClass
 
     @Provides
     @Named(
-            "computation")
+        "computation"
+    )
     internal fun provideComputationScheduler(): Scheduler = pyDroidModule.provideComputationScheduler()
 
     @Provides

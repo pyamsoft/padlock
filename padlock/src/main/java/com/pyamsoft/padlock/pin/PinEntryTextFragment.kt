@@ -37,7 +37,8 @@ import javax.inject.Inject
 
 class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
-    @field:Inject internal lateinit var presenter: PinEntryPresenter
+    @field:Inject
+    internal lateinit var presenter: PinEntryPresenter
     private lateinit var imm: InputMethodManager
     private lateinit var binding: FragmentPinEntryTextBinding
     private var pinReentryText: EditText? = null
@@ -49,8 +50,10 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = FragmentPinEntryTextBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -72,7 +75,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
         // Force the keyboard
         imm = context!!.applicationContext
-                .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
 
         clearDisplay()
@@ -197,11 +200,14 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         pinHintText?.setText("")
     }
 
-    @CheckResult private fun getCurrentAttempt(): String = pinEntryText?.text?.toString() ?: ""
+    @CheckResult
+    private fun getCurrentAttempt(): String = pinEntryText?.text?.toString() ?: ""
 
-    @CheckResult private fun getCurrentReentry(): String = pinReentryText?.text?.toString() ?: ""
+    @CheckResult
+    private fun getCurrentReentry(): String = pinReentryText?.text?.toString() ?: ""
 
-    @CheckResult private fun getCurrentHint(): String = pinHintText?.text?.toString() ?: ""
+    @CheckResult
+    private fun getCurrentHint(): String = pinHintText?.text?.toString() ?: ""
 
     companion object {
 

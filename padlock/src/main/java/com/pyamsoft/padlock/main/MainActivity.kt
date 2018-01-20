@@ -41,7 +41,8 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : TamperActivity(), MainPresenter.View {
 
-    @Inject internal lateinit var presenter: MainPresenter
+    @Inject
+    internal lateinit var presenter: MainPresenter
     private lateinit var binding: ActivityMainBinding
 
     override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
@@ -56,8 +57,8 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
     override val changeLogLines: Array<String>
         get() = arrayOf(
-                "CHANGE: Better support for views while in Multi-Window mode",
-                "BUGFIX: Fix a memory leak when switching between views very quickly"
+            "CHANGE: Better support for views while in Multi-Window mode",
+            "BUGFIX: Fix a memory leak when switching between views very quickly"
         )
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,10 +86,11 @@ class MainActivity : TamperActivity(), MainPresenter.View {
         }
 
         if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
-                AboutLibrariesFragment.TAG) == null) {
+                AboutLibrariesFragment.TAG
+            ) == null) {
             Timber.d("Load default page")
             fm.beginTransaction().add(R.id.fragment_container, MainFragment(), MainFragment.TAG)
-                    .commit()
+                .commit()
         } else {
             Timber.w("Default page or About libraries was already loaded")
         }
@@ -108,7 +110,8 @@ class MainActivity : TamperActivity(), MainPresenter.View {
         super.onPause()
         if (isFinishing || isChangingConfigurations) {
             Timber.d(
-                    "Even though a leak is reported, this should dismiss the window, and clear the leak")
+                "Even though a leak is reported, this should dismiss the window, and clear the leak"
+            )
             binding.toolbar.menu.close()
             binding.toolbar.dismissPopupMenus()
         }

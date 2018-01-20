@@ -24,11 +24,12 @@ data class ForegroundEvent(val packageName: String, val className: String) {
 
     companion object {
 
-        @JvmField val EMPTY = ForegroundEvent("", "")
+        @JvmField
+        val EMPTY = ForegroundEvent("", "")
 
         @JvmStatic
         @CheckResult
         fun isEmpty(event: ForegroundEvent): Boolean =
-                event.packageName == EMPTY.packageName || event.className == EMPTY.className
+            event.packageName == EMPTY.packageName || event.className == EMPTY.className
     }
 }

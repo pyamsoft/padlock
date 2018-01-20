@@ -24,7 +24,8 @@ import io.reactivex.Observable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class CloseOldBus @Inject internal constructor() : EventBus<CloseOldEvent> {
+@Singleton
+internal class CloseOldBus @Inject internal constructor() : EventBus<CloseOldEvent> {
 
     private val bus: EventBus<CloseOldEvent> = RxBus.create()
 

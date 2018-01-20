@@ -29,7 +29,8 @@ import javax.inject.Inject
 
 class PurgeAllDialog : CanaryDialog() {
 
-    @field:Inject internal lateinit var purgePublisher: PurgePublisher
+    @field:Inject
+    internal lateinit var purgePublisher: PurgePublisher
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,11 +39,11 @@ class PurgeAllDialog : CanaryDialog() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return AlertDialog.Builder(activity!!).setMessage("Really delete all old entries?")
-                .setPositiveButton("Delete") { _, _ ->
-                    purgePublisher.publish(PurgeAllEvent)
-                    dismiss()
-                }
-                .setNegativeButton("Cancel") { _, _ -> dismiss() }
-                .create()
+            .setPositiveButton("Delete") { _, _ ->
+                purgePublisher.publish(PurgeAllEvent)
+                dismiss()
+            }
+            .setNegativeButton("Cancel") { _, _ -> dismiss() }
+            .create()
     }
 }

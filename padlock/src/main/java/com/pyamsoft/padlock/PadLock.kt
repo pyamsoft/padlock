@@ -62,11 +62,15 @@ class PadLock : Application() {
         Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
         Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight")
         Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
-        Licenses.create("FastAdapter", "https://github.com/mikepenz/fastadapter",
-                "licenses/fastadapter")
+        Licenses.create(
+            "FastAdapter", "https://github.com/mikepenz/fastadapter",
+            "licenses/fastadapter"
+        )
         Licenses.create("Firebase", "https://firebase.google.com", "licenses/firebase")
-        Licenses.create("PatternLockView", "https://github.com/aritraroy/PatternLockView",
-                "licenses/patternlock")
+        Licenses.create(
+            "PatternLockView", "https://github.com/aritraroy/PatternLockView",
+            "licenses/patternlock"
+        )
 
         val dagger = Injector.obtain<PadLockComponent>(applicationContext)
         val receiver = dagger.provideApplicationInstallReceiver()
@@ -81,8 +85,10 @@ class PadLock : Application() {
     }
 
     private fun buildDagger(): PadLockComponent {
-        val provider = PadLockProvider(pydroidModule, loaderModule, MainActivity::class.java,
-                RecheckService::class.java)
+        val provider = PadLockProvider(
+            pydroidModule, loaderModule, MainActivity::class.java,
+            RecheckService::class.java
+        )
         return DaggerPadLockComponent.builder().padLockProvider(provider).build()
     }
 
@@ -110,18 +116,22 @@ class PadLock : Application() {
         @JvmStatic
         @CheckResult
         fun getRefWatcher(fragment: CanaryFragment): RefWatcher = getRefWatcherInternal(
-                fragment.activity!!.application)
+            fragment.activity!!.application
+        )
 
         @CheckResult
         @JvmStatic
         fun getRefWatcher(fragment: CanaryDialog): RefWatcher = getRefWatcherInternal(
-                fragment.activity!!.application)
+            fragment.activity!!.application
+        )
 
         @JvmStatic
         @CheckResult
         fun getRefWatcher(
-                preferenceFragment: PadLockPreferenceFragment): RefWatcher = getRefWatcherInternal(
-                preferenceFragment.activity!!.application)
+            preferenceFragment: PadLockPreferenceFragment
+        ): RefWatcher = getRefWatcherInternal(
+            preferenceFragment.activity!!.application
+        )
 
         @JvmStatic
         @CheckResult

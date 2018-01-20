@@ -25,8 +25,9 @@ import io.reactivex.Observable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class ForegroundEventBus @Inject internal constructor() :
-        EventBus<ForegroundEvent> {
+@Singleton
+internal class ForegroundEventBus @Inject internal constructor() :
+    EventBus<ForegroundEvent> {
 
     private val bus: EventBus<ForegroundEvent> = RxBus.create()
 

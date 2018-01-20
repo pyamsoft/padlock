@@ -37,17 +37,21 @@ import javax.inject.Inject
 class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.View {
 
     private lateinit var binding: FragmentLockScreenPatternBinding
-    @field:Inject internal lateinit var presenter: LockEntryPresenter
+    @field:Inject
+    internal lateinit var presenter: LockEntryPresenter
     private var listener: PatternLockViewListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockScreenComponent(
-                LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)).inject(this)
+            LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)
+        ).inject(this)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -129,13 +133,17 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
 
         @JvmStatic
         @CheckResult
-        fun newInstance(lockedPackageName: String,
-                lockedActivityName: String, lockedCode: String?,
-                lockedRealName: String, lockedSystem: Boolean): LockScreenPatternFragment {
+        fun newInstance(
+            lockedPackageName: String,
+            lockedActivityName: String, lockedCode: String?,
+            lockedRealName: String, lockedSystem: Boolean
+        ): LockScreenPatternFragment {
             val fragment = LockScreenPatternFragment()
-            fragment.arguments = LockScreenBaseFragment.buildBundle(lockedPackageName,
-                    lockedActivityName,
-                    lockedCode, lockedRealName, lockedSystem)
+            fragment.arguments = LockScreenBaseFragment.buildBundle(
+                lockedPackageName,
+                lockedActivityName,
+                lockedCode, lockedRealName, lockedSystem
+            )
             return fragment
         }
     }

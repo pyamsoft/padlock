@@ -19,7 +19,6 @@
 package com.pyamsoft.padlock.api
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.AppEntry
 import io.reactivex.Observable
 import io.reactivex.Single

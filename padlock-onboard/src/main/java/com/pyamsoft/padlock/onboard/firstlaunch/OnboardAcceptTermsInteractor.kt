@@ -24,8 +24,10 @@ import io.reactivex.Completable
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class OnboardAcceptTermsInteractor @Inject internal constructor(
-        private val preferences: OnboardingPreferences) {
+@Singleton
+internal class OnboardAcceptTermsInteractor @Inject internal constructor(
+    private val preferences: OnboardingPreferences
+) {
 
     @CheckResult
     fun agreeToTerms(): Completable = Completable.fromAction({ preferences.setAgreed() })

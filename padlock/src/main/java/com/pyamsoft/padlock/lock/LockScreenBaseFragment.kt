@@ -33,7 +33,7 @@ import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 
 abstract class LockScreenBaseFragment protected constructor() : CanaryFragment(),
-        LockEntryPresenter.View {
+    LockEntryPresenter.View {
 
     protected lateinit var lockedActivityName: String
     protected lateinit var lockedPackageName: String
@@ -60,7 +60,8 @@ abstract class LockScreenBaseFragment protected constructor() : CanaryFragment()
             return (activity as? LockScreenActivity)?.getIgnoreTimeFromSelectedIndex() ?: 0
         }
 
-    @CallSuper override fun onCreate(savedInstanceState: Bundle?) {
+    @CallSuper
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
@@ -86,8 +87,10 @@ abstract class LockScreenBaseFragment protected constructor() : CanaryFragment()
 
         @JvmStatic
         @CheckResult
-        internal fun buildBundle(lockedPackageName: String, lockedActivityName: String,
-                lockedCode: String?, lockedRealName: String, lockedSystem: Boolean): Bundle {
+        internal fun buildBundle(
+            lockedPackageName: String, lockedActivityName: String,
+            lockedCode: String?, lockedRealName: String, lockedSystem: Boolean
+        ): Bundle {
             val args = Bundle()
             args.putString(ENTRY_PACKAGE_NAME, lockedPackageName)
             args.putString(ENTRY_ACTIVITY_NAME, lockedActivityName)

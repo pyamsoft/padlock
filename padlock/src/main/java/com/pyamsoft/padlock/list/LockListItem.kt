@@ -38,9 +38,12 @@ import com.pyamsoft.pydroid.loader.ImageLoader
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockListItem internal constructor(internal var activity: FragmentActivity,
-        entry: AppEntry) : ModelAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(
-        entry), FilterableItem<LockListItem, LockListItem.ViewHolder> {
+class LockListItem internal constructor(
+    internal var activity: FragmentActivity,
+    entry: AppEntry
+) : ModelAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(
+    entry
+), FilterableItem<LockListItem, LockListItem.ViewHolder> {
 
     override fun getType(): Int = R.id.adapter_lock_item
 
@@ -67,12 +70,12 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
 
             imageLoader.apply {
                 fromResource(R.drawable.ic_whitelisted).into(binding.lockListWhite)
-                        .bind(holder)
+                    .bind(holder)
                 fromResource(R.drawable.ic_hardlocked).into(binding.lockListLocked)
-                        .bind(holder)
+                    .bind(holder)
             }
             appIconLoader.forPackageName(model.packageName).into(binding.lockListIcon)
-                    .bind(holder)
+                .bind(holder)
 
             binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
                 buttonView.isChecked = isChecked.not()
@@ -97,12 +100,15 @@ class LockListItem internal constructor(internal var activity: FragmentActivity,
     }
 
     class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView),
-            LifecycleOwner {
+        LifecycleOwner {
 
         internal val binding: AdapterItemLocklistBinding = DataBindingUtil.bind(itemView)
-        @Inject internal lateinit var publisher: LockListItemPublisher
-        @Inject internal lateinit var appIconLoader: AppIconLoader
-        @Inject internal lateinit var imageLoader: ImageLoader
+        @Inject
+        internal lateinit var publisher: LockListItemPublisher
+        @Inject
+        internal lateinit var appIconLoader: AppIconLoader
+        @Inject
+        internal lateinit var imageLoader: ImageLoader
         private val lifecycle = LifecycleRegistry(this)
 
         init {

@@ -22,8 +22,10 @@ import com.pyamsoft.padlock.api.OnboardingPreferences
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class OnboardListInteractor @Inject internal constructor(
-        private val preferences: OnboardingPreferences) {
+@Singleton
+internal class OnboardListInteractor @Inject internal constructor(
+    private val preferences: OnboardingPreferences
+) {
 
     fun completeOnboarding() {
         preferences.setListOnBoard()

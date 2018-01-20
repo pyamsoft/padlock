@@ -22,9 +22,9 @@ import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.model.ClearPinEvent
 import com.pyamsoft.padlock.model.ConfirmEvent
-import com.pyamsoft.padlock.model.ServiceFinishEvent
 import com.pyamsoft.padlock.model.ConfirmEvent.ALL
 import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
+import com.pyamsoft.padlock.model.ServiceFinishEvent
 import com.pyamsoft.padlock.settings.SettingsPresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -34,15 +34,18 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class SettingsPresenter @Inject internal constructor(
-        private val interactor: SettingsInteractor,
-        private val bus: EventBus<ConfirmEvent>,
-        private val serviceFinishBus: EventBus<ServiceFinishEvent>,
-        private val clearPinBus: EventBus<ClearPinEvent>,
-        private val receiver: ApplicationInstallReceiver,
-        @Named("computation") computationScheduler: Scheduler,
-        @Named("main") mainScheduler: Scheduler,
-        @Named("io") ioScheduler: Scheduler) : SchedulerPresenter<View>(computationScheduler,
-        ioScheduler, mainScheduler) {
+    private val interactor: SettingsInteractor,
+    private val bus: EventBus<ConfirmEvent>,
+    private val serviceFinishBus: EventBus<ServiceFinishEvent>,
+    private val clearPinBus: EventBus<ClearPinEvent>,
+    private val receiver: ApplicationInstallReceiver,
+    @Named("computation") computationScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler
+) : SchedulerPresenter<View>(
+    computationScheduler,
+    ioScheduler, mainScheduler
+) {
 
     override fun onCreate() {
         super.onCreate()
@@ -58,33 +61,33 @@ class SettingsPresenter @Inject internal constructor(
                     ALL -> interactor.clearAll()
                 }.map { type }
             }.subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-                    .subscribe({
-                        when (it) {
-                            DATABASE -> view?.onClearDatabase()
-                            ALL -> {
-                                publishFinish()
-                                view?.onClearAll()
-                            }
-                            else -> throw IllegalArgumentException("Invalid enum: $it")
+                .subscribe({
+                    when (it) {
+                        DATABASE -> view?.onClearDatabase()
+                        ALL -> {
+                            publishFinish()
+                            view?.onClearAll()
                         }
-                    }, {
-                        Timber.e(it, "onError clear bus")
-                    })
+                        else -> throw IllegalArgumentException("Invalid enum: $it")
+                    }
+                }, {
+                    Timber.e(it, "onError clear bus")
+                })
         }
     }
 
     private fun registerOnClearBus() {
         dispose {
             clearPinBus.listen().subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-                    .subscribe({
-                        if (it.success) {
-                            view?.onMasterPinClearSuccess()
-                        } else {
-                            view?.onMasterPinClearFailure()
-                        }
-                    }, {
-                        Timber.e(it, "error clear pin bus")
-                    })
+                .subscribe({
+                    if (it.success) {
+                        view?.onMasterPinClearSuccess()
+                    } else {
+                        view?.onMasterPinClearFailure()
+                    }
+                }, {
+                    Timber.e(it, "error clear pin bus")
+                })
         }
     }
 
@@ -95,33 +98,33 @@ class SettingsPresenter @Inject internal constructor(
     fun setApplicationInstallReceiverState() {
         dispose {
             interactor.isInstallListenerEnabled()
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({
-                        if (it) {
-                            receiver.register()
-                        } else {
-                            receiver.unregister()
-                        }
-                    }, { Timber.e(it, "onError setApplicationInstallReceiverState") })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({
+                    if (it) {
+                        receiver.register()
+                    } else {
+                        receiver.unregister()
+                    }
+                }, { Timber.e(it, "onError setApplicationInstallReceiverState") })
         }
     }
 
     fun checkLockType(value: String) {
         dispose {
             interactor.hasExistingMasterPassword()
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({
-                        if (it) {
-                            view?.onLockTypeChangePrevented()
-                        } else {
-                            view?.onLockTypeChangeAccepted(value)
-                        }
-                    }, {
-                        Timber.e(it, "on error lock type change")
-                        view?.onLockTypeChangeError(it)
-                    })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({
+                    if (it) {
+                        view?.onLockTypeChangePrevented()
+                    } else {
+                        view?.onLockTypeChangeAccepted(value)
+                    }
+                }, {
+                    Timber.e(it, "on error lock type change")
+                    view?.onLockTypeChangeError(it)
+                })
         }
     }
 

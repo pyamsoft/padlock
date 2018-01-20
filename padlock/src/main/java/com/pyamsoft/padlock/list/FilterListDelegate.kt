@@ -72,7 +72,8 @@ internal class FilterListDelegate {
     }
 
     private fun setSearchViewOnQueryTextListener(
-            listAdapter: ModelAdapter<*, out FilterableItem<*, *>>) {
+        listAdapter: ModelAdapter<*, out FilterableItem<*, *>>
+    ) {
         Timber.d("Set Search View listeners")
         searchView?.setOnQueryTextListener(getOnQueryTextListener(listAdapter))
         searchView?.setOnCloseListener {
@@ -81,8 +82,10 @@ internal class FilterListDelegate {
         }
     }
 
-    @CheckResult private fun getOnQueryTextListener(
-            listAdapter: ModelAdapter<*, out FilterableItem<*, *>>): SearchView.OnQueryTextListener {
+    @CheckResult
+    private fun getOnQueryTextListener(
+        listAdapter: ModelAdapter<*, out FilterableItem<*, *>>
+    ): SearchView.OnQueryTextListener {
         return object : SearchView.OnQueryTextListener {
 
             override fun onQueryTextChange(newText: String): Boolean {

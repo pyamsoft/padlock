@@ -20,10 +20,10 @@ package com.pyamsoft.padlock.model
 
 import android.support.annotation.CheckResult
 import com.google.auto.value.AutoValue
-import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
-@AutoValue abstract class PadLockEntry : PadLockEntryModel {
+@AutoValue
+abstract class PadLockEntry : PadLockEntryModel {
 
     companion object {
 
@@ -40,8 +40,10 @@ import com.pyamsoft.padlock.model.db.PadLockEntryModel
                 && ACTIVITY_EMPTY == entry.activityName())
 
         val EMPTY: PadLockEntryModel by lazy {
-            AutoValue_PadLockEntry(PadLockEntry.PACKAGE_EMPTY, PadLockEntry.ACTIVITY_EMPTY, null,
-                    0, 0, false, false)
+            AutoValue_PadLockEntry(
+                PadLockEntry.PACKAGE_EMPTY, PadLockEntry.ACTIVITY_EMPTY, null,
+                0, 0, false, false
+            )
         }
 
     }

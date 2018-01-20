@@ -31,13 +31,15 @@ import com.pyamsoft.padlock.model.LockScreenType
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class PadLockPreferencesImpl @Inject internal constructor(
-        context: Context) : MasterPinPreferences,
-        ClearPreferences,
-        InstallListenerPreferences,
-        LockListPreferences,
-        LockScreenPreferences,
-        OnboardingPreferences {
+@Singleton
+internal class PadLockPreferencesImpl @Inject internal constructor(
+    context: Context
+) : MasterPinPreferences,
+    ClearPreferences,
+    InstallListenerPreferences,
+    LockListPreferences,
+    LockScreenPreferences,
+    OnboardingPreferences {
     private val preferences: SharedPreferences
     private val ignoreTimeKey: String
     private val ignoreTimeDefault: String
@@ -68,76 +70,90 @@ import javax.inject.Singleton
     }
 
     override fun getCurrentLockType(): LockScreenType =
-            LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault))
+        LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault))
 
     override fun isIgnoreInKeyguard(): Boolean =
-            preferences.getBoolean(ignoreKeyguard, ignoreKeyguardDefault)
+        preferences.getBoolean(ignoreKeyguard, ignoreKeyguardDefault)
 
     override fun isInstallListenerEnabled(): Boolean =
-            preferences.getBoolean(installListener, installListenerDefault)
+        preferences.getBoolean(installListener, installListenerDefault)
 
     override fun getHint(): String? = preferences.getString(
-            HINT, null)
+        HINT, null
+    )
 
     override fun setHint(hint: String) {
         preferences.edit().putString(
-                HINT, hint).apply()
+            HINT, hint
+        ).apply()
     }
 
     override fun clearHint() {
         preferences.edit().remove(
-                HINT).apply()
+            HINT
+        ).apply()
     }
 
     override fun isInfoDialogOnBoard(): Boolean = preferences.getBoolean(
-            LOCK_DIALOG_ONBOARD, false)
+        LOCK_DIALOG_ONBOARD, false
+    )
 
     override fun getDefaultIgnoreTime(): Long =
-            preferences.getString(ignoreTimeKey, ignoreTimeDefault).toLong()
+        preferences.getString(ignoreTimeKey, ignoreTimeDefault).toLong()
 
     override fun getTimeoutPeriod(): Long =
-            preferences.getString(timeoutTimeKey, timeoutTimeDefault).toLong()
+        preferences.getString(timeoutTimeKey, timeoutTimeDefault).toLong()
 
     override fun isSystemVisible(): Boolean = preferences.getBoolean(
-            IS_SYSTEM, false)
+        IS_SYSTEM, false
+    )
 
     override fun setSystemVisible(visible: Boolean) {
         preferences.edit().putBoolean(
-                IS_SYSTEM, visible).apply()
+            IS_SYSTEM, visible
+        ).apply()
     }
 
     override fun getMasterPassword(): String? = preferences.getString(
-            MASTER_PASSWORD, null)
+        MASTER_PASSWORD, null
+    )
 
     override fun setMasterPassword(pw: String) {
         preferences.edit().putString(
-                MASTER_PASSWORD, pw).apply()
+            MASTER_PASSWORD, pw
+        ).apply()
     }
 
     override fun clearMasterPassword() {
         preferences.edit().remove(
-                MASTER_PASSWORD).apply()
+            MASTER_PASSWORD
+        ).apply()
     }
 
     override fun hasAgreed(): Boolean = preferences.getBoolean(
-            AGREED, false)
+        AGREED, false
+    )
 
     override fun setAgreed() {
         preferences.edit().putBoolean(
-                AGREED, true).apply()
+            AGREED, true
+        ).apply()
     }
 
     override fun isListOnBoard(): Boolean = preferences.getBoolean(
-            LOCK_LIST_ONBOARD, false)
+        LOCK_LIST_ONBOARD, false
+    )
 
     override fun setListOnBoard() {
         preferences.edit().putBoolean(
-                LOCK_LIST_ONBOARD, true).apply()
+            LOCK_LIST_ONBOARD, true
+        ).apply()
     }
 
     override fun setInfoDialogOnBoard() {
         preferences.edit().putBoolean(
-                LOCK_DIALOG_ONBOARD, true).apply()
+            LOCK_DIALOG_ONBOARD, true
+        ).apply()
     }
 
     override fun clearAll() {

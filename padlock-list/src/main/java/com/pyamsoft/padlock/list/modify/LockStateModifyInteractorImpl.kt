@@ -31,29 +31,38 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class LockStateModifyInteractorImpl @Inject internal constructor(
-        private val insertDb: PadLockDBInsert,
-        private val deleteDb: PadLockDBDelete) :
-        LockStateModifyInteractor {
+@Singleton
+internal class LockStateModifyInteractorImpl @Inject internal constructor(
+    private val insertDb: PadLockDBInsert,
+    private val deleteDb: PadLockDBDelete
+) :
+    LockStateModifyInteractor {
 
-    @CheckResult private fun createNewEntry(
-            packageName: String, activityName: String, code: String?,
-            system: Boolean, whitelist: Boolean): Single<LockState> {
+    @CheckResult
+    private fun createNewEntry(
+        packageName: String, activityName: String, code: String?,
+        system: Boolean, whitelist: Boolean
+    ): Single<LockState> {
         Timber.d("Empty entry, create a new entry for: %s %s", packageName, activityName)
         return insertDb.insert(packageName, activityName, code, 0, 0, system, whitelist)
-                .toSingleDefault(if (whitelist) LockState.WHITELISTED else LockState.LOCKED)
+            .toSingleDefault(if (whitelist) LockState.WHITELISTED else LockState.LOCKED)
     }
 
-    @CheckResult private fun deleteEntry(
-            packageName: String, activityName: String): Single<LockState> {
+    @CheckResult
+    private fun deleteEntry(
+        packageName: String, activityName: String
+    ): Single<LockState> {
         Timber.d("Entry already exists for: %s %s, delete it", packageName, activityName)
         return deleteDb.deleteWithPackageActivityName(packageName, activityName)
-                .toSingleDefault(LockState.DEFAULT)
+            .toSingleDefault(LockState.DEFAULT)
     }
 
-    @CheckResult private fun whitelistEntry(oldLockState: LockState, packageName: String,
-            activityName: String,
-            code: String?, system: Boolean): Single<LockState> {
+    @CheckResult
+    private fun whitelistEntry(
+        oldLockState: LockState, packageName: String,
+        activityName: String,
+        code: String?, system: Boolean
+    ): Single<LockState> {
         return Single.defer<LockState> {
             if (oldLockState === WHITELISTED) {
                 // Update existing entry
@@ -66,9 +75,12 @@ import javax.inject.Singleton
         }
     }
 
-    @CheckResult private fun forceLockEntry(oldLockState: LockState, packageName: String,
-            activityName: String,
-            code: String?, system: Boolean): Single<LockState> {
+    @CheckResult
+    private fun forceLockEntry(
+        oldLockState: LockState, packageName: String,
+        activityName: String,
+        code: String?, system: Boolean
+    ): Single<LockState> {
         return Single.defer<LockState> {
             if (oldLockState === LOCKED) {
                 // Update existing entry
@@ -81,9 +93,12 @@ import javax.inject.Singleton
         }
     }
 
-    @CheckResult private fun addNewEntry(oldLockState: LockState, packageName: String,
-            activityName: String,
-            code: String?, system: Boolean): Single<LockState> {
+    @CheckResult
+    private fun addNewEntry(
+        oldLockState: LockState, packageName: String,
+        activityName: String,
+        code: String?, system: Boolean
+    ): Single<LockState> {
         return Single.defer<LockState> {
             if (oldLockState === LockState.DEFAULT) {
                 Timber.d("Add new entry")
@@ -95,13 +110,19 @@ import javax.inject.Singleton
         }
     }
 
-    override fun modifySingleDatabaseEntry(oldLockState: LockState,
-            newLockState: LockState, packageName: String, activityName: String,
-            code: String?, system: Boolean): Single<LockState> = when {
-        newLockState === LockState.WHITELISTED -> whitelistEntry(oldLockState, packageName,
-                activityName, code, system)
-        newLockState === LockState.LOCKED -> forceLockEntry(oldLockState, packageName, activityName,
-                code, system)
+    override fun modifySingleDatabaseEntry(
+        oldLockState: LockState,
+        newLockState: LockState, packageName: String, activityName: String,
+        code: String?, system: Boolean
+    ): Single<LockState> = when {
+        newLockState === LockState.WHITELISTED -> whitelistEntry(
+            oldLockState, packageName,
+            activityName, code, system
+        )
+        newLockState === LockState.LOCKED -> forceLockEntry(
+            oldLockState, packageName, activityName,
+            code, system
+        )
         else -> addNewEntry(oldLockState, packageName, activityName, code, system)
     }
 }

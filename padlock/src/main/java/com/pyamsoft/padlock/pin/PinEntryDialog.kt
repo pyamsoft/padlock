@@ -42,8 +42,10 @@ import javax.inject.Inject
 
 class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
-    @field:Inject internal lateinit var presenter: LockScreenInputPresenter
-    @field:Inject internal lateinit var appIconLoader: AppIconLoader
+    @field:Inject
+    internal lateinit var presenter: LockScreenInputPresenter
+    @field:Inject
+    internal lateinit var appIconLoader: AppIconLoader
     private lateinit var binding: DialogPinEntryBinding
     private lateinit var packageName: String
 
@@ -62,14 +64,18 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         // The dialog is super small for some reason. We have to set the size manually, in onResume
         val window = dialog.window
         window?.apply {
-            setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT)
+            setLayout(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
             setGravity(Gravity.CENTER)
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = DialogPinEntryBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -79,8 +85,10 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         val fragment = fragmentManager.findFragmentByTag(tag)
         if (fragment == null) {
             Timber.d("Push new pin fragment: $tag")
-            fragmentManager.beginTransaction().add(R.id.pin_entry_dialog_container, pushFragment,
-                    tag).commit()
+            fragmentManager.beginTransaction().add(
+                R.id.pin_entry_dialog_container, pushFragment,
+                tag
+            ).commit()
         }
     }
 
@@ -116,8 +124,10 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
             // Set up icon as black
             var icon: Drawable? = pinEntryToolbar.navigationIcon
             if (icon != null) {
-                icon = DrawableUtil.tintDrawableFromColor(icon,
-                        ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black))
+                icon = DrawableUtil.tintDrawableFromColor(
+                    icon,
+                    ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black)
+                )
                 pinEntryToolbar.navigationIcon = icon
             }
 
@@ -129,8 +139,10 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
             if (pinItem != null) {
                 var pinIcon: Drawable? = pinItem.icon
                 if (pinIcon != null) {
-                    pinIcon = DrawableUtil.tintDrawableFromColor(pinIcon,
-                            ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black))
+                    pinIcon = DrawableUtil.tintDrawableFromColor(
+                        pinIcon,
+                        ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black)
+                    )
                     pinItem.icon = pinIcon
                 }
             }
@@ -140,7 +152,8 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
                     R.id.menu_submit_pin -> {
                         val fragmentManager = childFragmentManager
                         val fragment: Fragment? = fragmentManager.findFragmentById(
-                                R.id.pin_entry_dialog_container)
+                            R.id.pin_entry_dialog_container
+                        )
                         if (fragment is PinEntryBaseFragment) {
                             fragment.onSubmitPressed()
                             return@setOnMenuItemClickListener true

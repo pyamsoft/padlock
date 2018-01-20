@@ -19,24 +19,24 @@
 package com.pyamsoft.padlock.base
 
 import android.graphics.drawable.Drawable
-import com.pyamsoft.padlock.model.LockWhitelistedEvent
-import com.pyamsoft.padlock.api.PadLockDBDelete
-import com.pyamsoft.padlock.api.PadLockDBInsert
-import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.api.PadLockDBUpdate
+import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.ClearPreferences
 import com.pyamsoft.padlock.api.InstallListenerPreferences
+import com.pyamsoft.padlock.api.JobSchedulerCompat
 import com.pyamsoft.padlock.api.LockListPreferences
 import com.pyamsoft.padlock.api.LockScreenPreferences
 import com.pyamsoft.padlock.api.MasterPinPreferences
 import com.pyamsoft.padlock.api.OnboardingPreferences
-import com.pyamsoft.padlock.api.ApplicationInstallReceiver
-import com.pyamsoft.padlock.api.JobSchedulerCompat
 import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PackageDrawableManager
 import com.pyamsoft.padlock.api.PackageLabelManager
+import com.pyamsoft.padlock.api.PadLockDBDelete
+import com.pyamsoft.padlock.api.PadLockDBInsert
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.base.db.PadLockDBImpl
+import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.loader.cache.ImageCache
@@ -49,55 +49,68 @@ abstract class PadLockModule {
 
     @Binds
     internal abstract fun provideLockWhitelisted(
-            bus: LockWhitelistedBus): EventBus<LockWhitelistedEvent>
+        bus: LockWhitelistedBus
+    ): EventBus<LockWhitelistedEvent>
 
     @Binds
     internal abstract fun provideApplicationInstallReceiver(
-            impl: ApplicationInstallReceiverImpl): ApplicationInstallReceiver
+        impl: ApplicationInstallReceiverImpl
+    ): ApplicationInstallReceiver
 
     @Binds
     internal abstract fun provideMasterPinPreference(
-            impl: PadLockPreferencesImpl): MasterPinPreferences
+        impl: PadLockPreferencesImpl
+    ): MasterPinPreferences
 
     @Binds
     internal abstract fun provideClearPreferences(
-            impl: PadLockPreferencesImpl): ClearPreferences
+        impl: PadLockPreferencesImpl
+    ): ClearPreferences
 
     @Binds
     internal abstract fun provideInstallListenerPreferences(
-            impl: PadLockPreferencesImpl): InstallListenerPreferences
+        impl: PadLockPreferencesImpl
+    ): InstallListenerPreferences
 
     @Binds
     internal abstract fun provideLockListPreferences(
-            impl: PadLockPreferencesImpl): LockListPreferences
+        impl: PadLockPreferencesImpl
+    ): LockListPreferences
 
     @Binds
     internal abstract fun provideLockScreenPreferences(
-            impl: PadLockPreferencesImpl): LockScreenPreferences
+        impl: PadLockPreferencesImpl
+    ): LockScreenPreferences
 
     @Binds
     internal abstract fun provideOnboardingPreferences(
-            impl: PadLockPreferencesImpl): OnboardingPreferences
+        impl: PadLockPreferencesImpl
+    ): OnboardingPreferences
 
     @Binds
     internal abstract fun providePackageActivityManager(
-            impl: PackageManagerWrapperImpl): PackageActivityManager
+        impl: PackageManagerWrapperImpl
+    ): PackageActivityManager
 
     @Binds
     internal abstract fun providePackageLabelManager(
-            impl: PackageManagerWrapperImpl): PackageLabelManager
+        impl: PackageManagerWrapperImpl
+    ): PackageLabelManager
 
     @Binds
     internal abstract fun providePackageApplicationManager(
-            impl: PackageManagerWrapperImpl): PackageApplicationManager
+        impl: PackageManagerWrapperImpl
+    ): PackageApplicationManager
 
     @Binds
     internal abstract fun providePackageDrawableManager(
-            impl: PackageManagerWrapperImpl): PackageDrawableManager
+        impl: PackageManagerWrapperImpl
+    ): PackageDrawableManager
 
     @Binds
     internal abstract fun provideJobSchedulerCompat(
-            impl: JobSchedulerCompatImpl): JobSchedulerCompat
+        impl: JobSchedulerCompatImpl
+    ): JobSchedulerCompat
 
     @Binds
     internal abstract fun providePadLockInsert(impl: PadLockDBImpl): PadLockDBInsert
@@ -114,7 +127,8 @@ abstract class PadLockModule {
     @JvmSuppressWildcards
     @Binds
     internal abstract fun provideAppIconImageCache(
-            cache: AppIconImageCache): ImageCache<String, Drawable>
+        cache: AppIconImageCache
+    ): ImageCache<String, Drawable>
 
     @Binds
     @Named("cache_app_icons")

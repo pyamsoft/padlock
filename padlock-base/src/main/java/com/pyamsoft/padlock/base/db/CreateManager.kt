@@ -25,11 +25,15 @@ import com.pyamsoft.padlock.model.db.PadLockEntryModel
 internal class CreateManager internal constructor() {
 
     @CheckResult
-    fun create(packageName: String, activityName: String,
-            lockCode: String?, lockUntilTime: Long, ignoreUntilTime: Long, isSystem: Boolean,
-            whitelist: Boolean): PadLockEntryModel {
-        val entry = PadLockSqlEntry.FACTORY.creator.create(packageName, activityName, lockCode,
-                lockUntilTime, ignoreUntilTime, isSystem, whitelist)
+    fun create(
+        packageName: String, activityName: String,
+        lockCode: String?, lockUntilTime: Long, ignoreUntilTime: Long, isSystem: Boolean,
+        whitelist: Boolean
+    ): PadLockEntryModel {
+        val entry = PadLockSqlEntry.FACTORY.creator.create(
+            packageName, activityName, lockCode,
+            lockUntilTime, ignoreUntilTime, isSystem, whitelist
+        )
         if (PadLockEntry.isEmpty(entry)) {
             throw RuntimeException("Cannot create EMPTY entry")
         }

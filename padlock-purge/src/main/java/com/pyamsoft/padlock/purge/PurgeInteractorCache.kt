@@ -27,9 +27,11 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton internal class PurgeInteractorCache @Inject internal constructor(
-        @param:Named("interactor_purge") private val impl: PurgeInteractor) : PurgeInteractor,
-        Cache {
+@Singleton
+internal class PurgeInteractorCache @Inject internal constructor(
+    @param:Named("interactor_purge") private val impl: PurgeInteractor
+) : PurgeInteractor,
+    Cache {
 
     private var cachedList: Observable<String>? = null
     private var lastAccessListTime: Long = 0L

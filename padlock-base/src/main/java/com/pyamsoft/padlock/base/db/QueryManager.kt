@@ -46,30 +46,38 @@ internal class QueryManager internal constructor(private val briteDatabase: Brit
         }
     }
 
-    @CheckResult internal fun queryWithPackageActivityNameDefault(packageName: String,
-            activityName: String): Single<PadLockEntryModel> {
-        val statement = PadLockSqlEntry.FACTORY.withPackageActivityNameDefault(packageName,
-                PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName)
+    @CheckResult
+    internal fun queryWithPackageActivityNameDefault(
+        packageName: String,
+        activityName: String
+    ): Single<PadLockEntryModel> {
+        val statement = PadLockSqlEntry.FACTORY.withPackageActivityNameDefault(
+            packageName,
+            PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName
+        )
         return briteDatabase.createQuery(statement)
-                .mapToOne { withPackageActivityNameDefaultMapper.map(it) }
-                .first(PadLockEntry.EMPTY)
+            .mapToOne { withPackageActivityNameDefaultMapper.map(it) }
+            .first(PadLockEntry.EMPTY)
     }
 
-    @CheckResult internal fun queryWithPackageName(
-            packageName: String): Single<List<WithPackageNameModel>> {
+    @CheckResult
+    internal fun queryWithPackageName(
+        packageName: String
+    ): Single<List<WithPackageNameModel>> {
         val statement = PadLockSqlEntry.FACTORY.withPackageName(packageName)
         return briteDatabase.createQuery(statement)
-                .mapToList { withPackageNameMapper.map(it) }
-                .first(emptyList())
-                .map { Collections.unmodifiableList(it) }
+            .mapToList { withPackageNameMapper.map(it) }
+            .first(emptyList())
+            .map { Collections.unmodifiableList(it) }
     }
 
-    @CheckResult internal fun queryAll(): Single<List<AllEntriesModel>> {
+    @CheckResult
+    internal fun queryAll(): Single<List<AllEntriesModel>> {
         val statement = PadLockSqlEntry.FACTORY.allEntries()
         return briteDatabase.createQuery(statement)
-                .mapToList { allEntriesMapper.map(it) }
-                .first(emptyList())
-                .map { Collections.unmodifiableList(it) }
+            .mapToList { allEntriesMapper.map(it) }
+            .first(emptyList())
+            .map { Collections.unmodifiableList(it) }
     }
 }
 

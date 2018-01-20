@@ -29,10 +29,13 @@ import javax.inject.Named
 @Module
 abstract class LockInfoSingletonModule {
 
-    @Binds internal abstract fun provideBus(bus: LockInfoBus): EventBus<LockInfoEvent>
+    @Binds
+    internal abstract fun provideBus(bus: LockInfoBus): EventBus<LockInfoEvent>
 
-    @Binds internal abstract fun provideChangeBus(
-            bus: LockInfoChangeBus): EventBus<LockInfoEvent.Callback>
+    @Binds
+    internal abstract fun provideChangeBus(
+        bus: LockInfoChangeBus
+    ): EventBus<LockInfoEvent.Callback>
 
     @Binds
     internal abstract fun provideInteractorCache(impl: LockInfoInteractorCache): LockInfoInteractor

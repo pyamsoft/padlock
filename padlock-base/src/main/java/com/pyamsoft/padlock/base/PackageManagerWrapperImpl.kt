@@ -47,12 +47,14 @@ import java.util.ArrayList
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton internal class PackageManagerWrapperImpl @Inject internal constructor(
-        context: Context,
-        private val listPreferences: LockListPreferences) : PackageActivityManager,
-        PackageApplicationManager,
-        PackageLabelManager,
-        PackageDrawableManager {
+@Singleton
+internal class PackageManagerWrapperImpl @Inject internal constructor(
+    context: Context,
+    private val listPreferences: LockListPreferences
+) : PackageActivityManager,
+    PackageApplicationManager,
+    PackageLabelManager,
+    PackageDrawableManager {
 
     private val packageManager: PackageManager = context.applicationContext.packageManager
 
@@ -75,18 +77,20 @@ import javax.inject.Singleton
         return Single.fromCallable {
             val activityEntries: MutableList<String> = ArrayList()
             try {
-                val packageInfo = packageManager.getPackageInfo(packageName,
-                        PackageManager.GET_ACTIVITIES)
+                val packageInfo = packageManager.getPackageInfo(
+                    packageName,
+                    PackageManager.GET_ACTIVITIES
+                )
                 packageInfo.activities?.mapTo(activityEntries) { it.name }
             } catch (e: Exception) {
                 Timber.e(e, "PackageManager error, return what we have for %s", packageName)
             }
             return@fromCallable activityEntries
         }.flatMapObservable { Observable.fromIterable(it) }
-                .filter { !Excludes.isLockScreen(packageName, it) }
-                .filter { !Excludes.isPackageExcluded(packageName) }
-                .filter { !Excludes.isClassExcluded(it) }
-                .toSortedList()
+            .filter { !Excludes.isLockScreen(packageName, it) }
+            .filter { !Excludes.isPackageExcluded(packageName) }
+            .filter { !Excludes.isClassExcluded(it) }
+            .toSortedList()
     }
 
     @CheckResult
@@ -113,7 +117,8 @@ import javax.inject.Singleton
                 }
                 process = Runtime.getRuntime().exec(command)
                 BufferedReader(
-                        InputStreamReader(process.inputStream, StandardCharsets.UTF_8)).use {
+                    InputStreamReader(process.inputStream, StandardCharsets.UTF_8)
+                ).use {
                     var line: String? = it.readLine()
                     while (line != null && line.isNotBlank()) {
                         if (line.startsWith("Permission Denial")) {
@@ -183,17 +188,18 @@ import javax.inject.Singleton
         return Single.defer {
             try {
                 return@defer Single.just(
-                        packageManager.getApplicationInfo(packageName, 0).asOptional())
+                    packageManager.getApplicationInfo(packageName, 0).asOptional()
+                )
             } catch (e: PackageManager.NameNotFoundException) {
                 Timber.e(e, "onError loadPackageLabel: '$packageName'")
                 throw Exceptions.propagate(e)
             }
         }.flatMap {
-            return@flatMap when (it) {
-                is Present -> loadPackageLabel(it.value)
-                else -> Single.just("")
+                return@flatMap when (it) {
+                    is Present -> loadPackageLabel(it.value)
+                    else -> Single.just("")
+                }
             }
-        }
     }
 
     @CheckResult

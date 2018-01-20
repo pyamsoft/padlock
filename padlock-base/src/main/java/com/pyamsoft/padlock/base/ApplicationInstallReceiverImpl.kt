@@ -44,21 +44,27 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton internal class ApplicationInstallReceiverImpl @Inject internal constructor(
-        private val appContext: Context,
-        private val packageManagerWrapper: PackageLabelManager,
-        @param:Named("io") private val ioScheduler: Scheduler,
-        @param:Named("main") private val mainThreadScheduler: Scheduler,
-        @Named("main_activity") mainActivityClass: Class<out Activity>,
-        @param:Named(
-                "cache_purge") private val purgeCache: Cache,
-        @param:Named(
-                "cache_app_icons") private val iconCache: Cache,
-        @param:Named(
-                "cache_lock_list") private val listCache: Cache,
-        @param:Named(
-                "cache_lock_info") private val infoCache: Cache) : BroadcastReceiver(),
-        ApplicationInstallReceiver {
+@Singleton
+internal class ApplicationInstallReceiverImpl @Inject internal constructor(
+    private val appContext: Context,
+    private val packageManagerWrapper: PackageLabelManager,
+    @param:Named("io") private val ioScheduler: Scheduler,
+    @param:Named("main") private val mainThreadScheduler: Scheduler,
+    @Named("main_activity") mainActivityClass: Class<out Activity>,
+    @param:Named(
+        "cache_purge"
+    ) private val purgeCache: Cache,
+    @param:Named(
+        "cache_app_icons"
+    ) private val iconCache: Cache,
+    @param:Named(
+        "cache_lock_list"
+    ) private val listCache: Cache,
+    @param:Named(
+        "cache_lock_info"
+    ) private val infoCache: Cache
+) : BroadcastReceiver(),
+    ApplicationInstallReceiver {
 
     private val notificationChannelId: String = "padlock_new_apps"
     private val notificationManager: NotificationManager
@@ -83,7 +89,8 @@ import javax.inject.Singleton
         intent.putExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST, true)
         pendingIntent = PendingIntent.getActivity(appContext, 421, intent, 0)
         notificationManager = appContext.getSystemService(
-                Context.NOTIFICATION_SERVICE) as NotificationManager
+            Context.NOTIFICATION_SERVICE
+        ) as NotificationManager
 
         ioScheduler.enforceIo()
         mainThreadScheduler.enforceMainThread()
@@ -93,8 +100,10 @@ import javax.inject.Singleton
         }
     }
 
-    @RequiresApi(VERSION_CODES.O) private fun setupNotificationChannel(
-            notificationChannelId: String) {
+    @RequiresApi(VERSION_CODES.O)
+    private fun setupNotificationChannel(
+        notificationChannelId: String
+    ) {
         val name = "App Lock Suggestions"
         val description = "Suggestions to secure newly installed applications with PadLock"
         val importance = NotificationManager.IMPORTANCE_MIN
@@ -119,26 +128,31 @@ import javax.inject.Singleton
         val packageName = data.schemeSpecificPart
 
         compositeDisposable.add(packageManagerWrapper.loadPackageLabel(packageName)
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({
-                    if (isNew) {
-                        purgeCache.clearCache()
-                        listCache.clearCache()
-                        infoCache.clearCache()
-                        iconCache.clearCache()
-                        onNewPackageInstalled(packageName, it)
-                    } else {
-                        Timber.d("Package updated: %s", packageName)
-                    }
-                }, {
-                    Timber.e(it, "onError launching notification for package: %s",
-                            packageName)
-                }))
+            .subscribeOn(ioScheduler)
+            .observeOn(mainThreadScheduler)
+            .subscribe({
+                if (isNew) {
+                    purgeCache.clearCache()
+                    listCache.clearCache()
+                    infoCache.clearCache()
+                    iconCache.clearCache()
+                    onNewPackageInstalled(packageName, it)
+                } else {
+                    Timber.d("Package updated: %s", packageName)
+                }
+            }, {
+                Timber.e(
+                    it, "onError launching notification for package: %s",
+                    packageName
+                )
+            })
+        )
     }
 
-    private fun onNewPackageInstalled(packageName: String,
-            name: String) {
+    private fun onNewPackageInstalled(
+        packageName: String,
+        name: String
+    ) {
         Timber.i("Package Added: %s", packageName)
         val builder = NotificationCompat.Builder(appContext, notificationChannelId).apply {
             setContentTitle("Lock New Application")

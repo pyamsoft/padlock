@@ -38,7 +38,8 @@ fun SwipeRefreshLayout.refreshing(refreshing: Boolean) {
 }
 
 fun <M : Any> ModelAdapter<M, out ModelAbstractItem<M, *, *>>.retainAll(
-        backing: MutableCollection<M>): Boolean {
+    backing: MutableCollection<M>
+): Boolean {
     val old: MutableCollection<ModelAbstractItem<M, *, *>> = LinkedHashSet()
     adapterItems.filterNotTo(old) { backing.contains(it.model) }
 

@@ -54,24 +54,28 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton internal class LockServiceInteractorImpl @Inject internal constructor(
-        context: Context,
-        private val lockPassed: LockPassed,
-        private val preferences: LockScreenPreferences,
-        private val jobSchedulerCompat: JobSchedulerCompat,
-        private val packageActivityManager: PackageActivityManager,
-        private val padLockDBQuery: PadLockDBQuery,
-        @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
-        private val stateInteractor: LockServiceStateInteractor) :
-        LockServiceInteractor {
+@Singleton
+internal class LockServiceInteractorImpl @Inject internal constructor(
+    context: Context,
+    private val lockPassed: LockPassed,
+    private val preferences: LockScreenPreferences,
+    private val jobSchedulerCompat: JobSchedulerCompat,
+    private val packageActivityManager: PackageActivityManager,
+    private val padLockDBQuery: PadLockDBQuery,
+    @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
+    private val stateInteractor: LockServiceStateInteractor
+) :
+    LockServiceInteractor {
 
     private val appContext = context.applicationContext
     private val keyguardManager = appContext.getSystemService(
-            Context.KEYGUARD_SERVICE) as KeyguardManager
+        Context.KEYGUARD_SERVICE
+    ) as KeyguardManager
     private var activePackageName = ""
     private var activeClassName = ""
     private val usageManager: UsageStatsManager = appContext.getSystemService(
-            Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        Context.USAGE_STATS_SERVICE
+    ) as UsageStatsManager
     private var lastForegroundEvent = ForegroundEvent.EMPTY
 
     override fun reset() {
@@ -105,38 +109,41 @@ import javax.inject.Singleton
             val endTime = now + TEN_SECONDS_MILLIS
             return@map usageManager.queryEvents(beginTime, endTime).asOptional()
         }.onBackpressureDrop()
-                .map {
-                    val event: UsageEvents.Event = Event()
-                    if (it is Present) {
-                        // We have usage events
-                        val events = it.value
-                        if (events.hasNextEvent()) {
+            .map {
+                val event: UsageEvents.Event = Event()
+                if (it is Present) {
+                    // We have usage events
+                    val events = it.value
+                    if (events.hasNextEvent()) {
+                        events.getNextEvent(event)
+                        while (events.hasNextEvent()) {
                             events.getNextEvent(event)
-                            while (events.hasNextEvent()) {
-                                events.getNextEvent(event)
-                            }
+                        }
 
-                            if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                                return@map ForegroundEvent(
-                                        event.packageName ?: "",
-                                        event.className ?: "").asOptional()
-                            }
+                        if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                            return@map ForegroundEvent(
+                                event.packageName ?: "",
+                                event.className ?: ""
+                            ).asOptional()
                         }
                     }
+                }
 
-                    return@map Optionals.ofNullable(null)
-                }.filter { it is Present }.map { it as Present }.map { it.value }
-                .filter { !Excludes.isLockScreen(it.packageName, it.className) }
-                .filter { !Excludes.isPackageExcluded(it.packageName) }
-                .filter { !Excludes.isClassExcluded(it.className) }
-                .filter { it != lastForegroundEvent }
-                .doOnNext { lastForegroundEvent = it }
+                return@map Optionals.ofNullable(null)
+            }.filter { it is Present }.map { it as Present }.map { it.value }
+            .filter { !Excludes.isLockScreen(it.packageName, it.className) }
+            .filter { !Excludes.isPackageExcluded(it.packageName) }
+            .filter { !Excludes.isClassExcluded(it.className) }
+            .filter { it != lastForegroundEvent }
+            .doOnNext { lastForegroundEvent = it }
     }
 
     override fun isActiveMatching(packageName: String, className: String): Single<Boolean> {
         return Single.fromCallable {
-            Timber.d("Check against current window values: %s, %s", activePackageName,
-                    activeClassName)
+            Timber.d(
+                "Check against current window values: %s, %s", activePackageName,
+                activeClassName
+            )
             // We can replace the actual passed classname with the stored classname because:
             // either it is equal to the passed name or the passed name is PACKAGE
             // which will respond to any class name
@@ -151,19 +158,27 @@ import javax.inject.Singleton
         jobSchedulerCompat.cancel(intent)
     }
 
-    @CheckResult private fun prepareLockScreen(packageName: String,
-            activityName: String): MaybeTransformer<Boolean, PadLockEntryModel> {
+    @CheckResult
+    private fun prepareLockScreen(
+        packageName: String,
+        activityName: String
+    ): MaybeTransformer<Boolean, PadLockEntryModel> {
         return MaybeTransformer {
             it.flatMap {
-                Timber.d("Get list of locked classes with package: %s, class: %s", packageName,
-                        activityName)
-                return@flatMap padLockDBQuery.queryWithPackageActivityNameDefault(packageName,
-                        activityName).filter { !PadLockEntry.isEmpty(it) }
+                Timber.d(
+                    "Get list of locked classes with package: %s, class: %s", packageName,
+                    activityName
+                )
+                return@flatMap padLockDBQuery.queryWithPackageActivityNameDefault(
+                    packageName,
+                    activityName
+                ).filter { !PadLockEntry.isEmpty(it) }
             }
         }
     }
 
-    @CheckResult private fun filterOutInvalidEntries(): MaybeTransformer<PadLockEntryModel, PadLockEntryModel> {
+    @CheckResult
+    private fun filterOutInvalidEntries(): MaybeTransformer<PadLockEntryModel, PadLockEntryModel> {
         return MaybeTransformer {
             it.filter {
                 val ignoreUntilTime: Long = it.ignoreUntilTime()
@@ -172,72 +187,87 @@ import javax.inject.Singleton
                 Timber.d("Current time: %d", currentTime)
                 return@filter currentTime >= ignoreUntilTime
             }.filter {
-                if (PadLockEntry.PACKAGE_ACTIVITY_NAME == it.activityName() && it.whitelist()) {
-                    throw RuntimeException(
-                            "PACKAGE entry for package: ${it.packageName()} cannot be whitelisted")
-                }
+                    if (PadLockEntry.PACKAGE_ACTIVITY_NAME == it.activityName() && it.whitelist()) {
+                        throw RuntimeException(
+                            "PACKAGE entry for package: ${it.packageName()} cannot be whitelisted"
+                        )
+                    }
 
-                Timber.d("Filter out whitelisted packages")
-                return@filter !it.whitelist()
-            }
+                    Timber.d("Filter out whitelisted packages")
+                    return@filter !it.whitelist()
+                }
         }
     }
 
-    @CheckResult private fun getEntry(packageName: String,
-            activityName: String): SingleTransformer<Boolean, PadLockEntryModel> {
+    @CheckResult
+    private fun getEntry(
+        packageName: String,
+        activityName: String
+    ): SingleTransformer<Boolean, PadLockEntryModel> {
         return SingleTransformer {
             it.filter { it }
-                    .compose(prepareLockScreen(packageName, activityName))
-                    .compose(filterOutInvalidEntries()).toSingle(
-                    PadLockEntry.EMPTY)
+                .compose(prepareLockScreen(packageName, activityName))
+                .compose(filterOutInvalidEntries()).toSingle(
+                PadLockEntry.EMPTY
+            )
         }
     }
 
-    @CheckResult private fun isDeviceLocked(): Boolean {
+    @CheckResult
+    private fun isDeviceLocked(): Boolean {
         return keyguardManager.inKeyguardRestrictedInputMode()
                 || keyguardManager.isKeyguardLocked
     }
 
-    @CheckResult private fun isServiceEnabled(): Maybe<Boolean> {
+    @CheckResult
+    private fun isServiceEnabled(): Maybe<Boolean> {
         return stateInteractor.isServiceEnabled()
-                .filter {
-                    if (!it) {
-                        Timber.e("Service is not user enabled, ignore event")
-                        resetState()
-                    }
-                    return@filter it
-                }.doOnSuccess {
-            if (isDeviceLocked()) {
-                Timber.w("Device is locked, reset last")
-                reset()
+            .filter {
+                if (!it) {
+                    Timber.e("Service is not user enabled, ignore event")
+                    resetState()
+                }
+                return@filter it
+            }.doOnSuccess {
+                if (isDeviceLocked()) {
+                    Timber.w("Device is locked, reset last")
+                    reset()
+                }
             }
-        }
     }
 
-    @CheckResult private fun isEventFromActivity(packageName: String,
-            className: String): MaybeTransformer<Boolean, Boolean> {
+    @CheckResult
+    private fun isEventFromActivity(
+        packageName: String,
+        className: String
+    ): MaybeTransformer<Boolean, Boolean> {
         return MaybeTransformer {
             it.isEmpty.filter {
                 Timber.d("Filter if empty: $it")
                 return@filter !it
             }.flatMap {
-                Timber.d("Check event from activity: %s %s", packageName, className)
-                return@flatMap packageActivityManager.isValidActivity(packageName,
-                        className).filter {
-                    if (!it) {
-                        Timber.w("Event not caused by activity.")
-                        Timber.w("P: %s, C: %s", packageName, className)
-                        Timber.w("Ignore")
-                    }
+                    Timber.d("Check event from activity: %s %s", packageName, className)
+                    return@flatMap packageActivityManager.isValidActivity(
+                        packageName,
+                        className
+                    ).filter {
+                        if (!it) {
+                            Timber.w("Event not caused by activity.")
+                            Timber.w("P: %s, C: %s", packageName, className)
+                            Timber.w("Ignore")
+                        }
 
-                    return@filter it
+                        return@filter it
+                    }
                 }
-            }
         }
     }
 
-    @CheckResult private fun isEventRestricted(packageName: String,
-            className: String): MaybeTransformer<Boolean, Boolean> {
+    @CheckResult
+    private fun isEventRestricted(
+        packageName: String,
+        className: String
+    ): MaybeTransformer<Boolean, Boolean> {
         return MaybeTransformer {
             it.filter {
                 val restrict: Boolean = preferences.isIgnoreInKeyguard() && isDeviceLocked()
@@ -251,15 +281,19 @@ import javax.inject.Singleton
         }
     }
 
-    override fun processEvent(packageName: String, className: String,
-            forcedRecheck: RecheckStatus): Single<PadLockEntryModel> {
+    override fun processEvent(
+        packageName: String, className: String,
+        forcedRecheck: RecheckStatus
+    ): Single<PadLockEntryModel> {
         val windowEventObservable: Single<Boolean> = isServiceEnabled().compose(
-                isEventFromActivity(packageName, className)).compose(
-                isEventRestricted(packageName, className))
-                .doOnSuccess {
-                    activePackageName = packageName
-                    activeClassName = className
-                }.toSingle(false)
+            isEventFromActivity(packageName, className)
+        ).compose(
+            isEventRestricted(packageName, className)
+        )
+            .doOnSuccess {
+                activePackageName = packageName
+                activeClassName = className
+            }.toSingle(false)
 
         return windowEventObservable.map {
             if (!it) {

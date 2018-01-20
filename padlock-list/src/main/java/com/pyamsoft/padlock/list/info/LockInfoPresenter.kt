@@ -20,7 +20,6 @@ package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockInfoUpdater
-import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Created
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Deleted
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Error
@@ -28,6 +27,7 @@ import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Whitelisted
 import com.pyamsoft.padlock.list.info.LockInfoPresenter.View
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
@@ -36,15 +36,20 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockInfoPresenter @Inject internal constructor(
-        private val changeBus: EventBus<LockInfoEvent.Callback>,
-        private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
-        private val bus: EventBus<LockInfoEvent>, @param:Named(
-                "package_name") private val packageName: String,
-        private val lockInfoUpdater: LockInfoUpdater,
-        private val interactor: LockInfoInteractor, @Named("computation") compScheduler: Scheduler,
-        @Named("io") ioScheduler: Scheduler, @Named(
-                "main") mainScheduler: Scheduler) : SchedulerPresenter<View>(compScheduler,
-        ioScheduler, mainScheduler) {
+    private val changeBus: EventBus<LockInfoEvent.Callback>,
+    private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
+    private val bus: EventBus<LockInfoEvent>, @param:Named(
+        "package_name"
+    ) private val packageName: String,
+    private val lockInfoUpdater: LockInfoUpdater,
+    private val interactor: LockInfoInteractor, @Named("computation") compScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler, @Named(
+        "main"
+    ) mainScheduler: Scheduler
+) : SchedulerPresenter<View>(
+    compScheduler,
+    ioScheduler, mainScheduler
+) {
 
     override fun onCreate() {
         super.onCreate()
@@ -60,107 +65,112 @@ class LockInfoPresenter @Inject internal constructor(
     private fun registerOnWhitelistedBus() {
         dispose {
             lockWhitelistedBus.listen()
-                    .filter { it.packageName == packageName }
-                    .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-                    .subscribe({ populateList(true) }, {
-                        Timber.e(it, "Error listening to lock whitelist bus")
-                    })
+                .filter { it.packageName == packageName }
+                .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+                .subscribe({ populateList(true) }, {
+                    Timber.e(it, "Error listening to lock whitelist bus")
+                })
         }
     }
 
     private fun registerOnModifyBus() {
         dispose {
             bus.listen()
-                    .filter { it is LockInfoEvent.Modify }
-                    .map { it as LockInfoEvent.Modify }
-                    .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-                    .subscribe({ modifyDatabaseEntry(it) }, {
-                        Timber.e(it, "Error listening to lock info bus")
-                    })
+                .filter { it is LockInfoEvent.Modify }
+                .map { it as LockInfoEvent.Modify }
+                .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+                .subscribe({ modifyDatabaseEntry(it) }, {
+                    Timber.e(it, "Error listening to lock info bus")
+                })
         }
 
         dispose {
             bus.listen()
-                    .filter { it is LockInfoEvent.Callback }
-                    .map { it as LockInfoEvent.Callback }
-                    .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
-                    .subscribe({
-                        when (it) {
-                            is Created -> view?.onModifyEntryCreated(it.id)
-                            is Deleted -> view?.onModifyEntryDeleted(it.id)
-                            is Whitelisted -> view?.onModifyEntryWhitelisted(it.id)
-                        }
-                    }, {
-                        Timber.e(it, "Error listening to lock info bus")
-                        view?.onModifyEntryError(it)
-                    })
+                .filter { it is LockInfoEvent.Callback }
+                .map { it as LockInfoEvent.Callback }
+                .subscribeOn(ioScheduler).observeOn(mainThreadScheduler)
+                .subscribe({
+                    when (it) {
+                        is Created -> view?.onModifyEntryCreated(it.id)
+                        is Deleted -> view?.onModifyEntryDeleted(it.id)
+                        is Whitelisted -> view?.onModifyEntryWhitelisted(it.id)
+                    }
+                }, {
+                    Timber.e(it, "Error listening to lock info bus")
+                    view?.onModifyEntryError(it)
+                })
         }
     }
 
     private fun modifyDatabaseEntry(event: LockInfoEvent.Modify) {
         dispose {
-            interactor.modifySingleDatabaseEntry(event.oldState, event.newState,
-                    event.packageName,
-                    event.name, event.code, event.system)
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({
-                        val id: String = event.id
-                        when (it) {
-                            LockState.LOCKED -> bus.publish(
-                                    Created(id, event.packageName, event.oldState))
-                            LockState.DEFAULT -> bus.publish(
-                                    Deleted(id, event.packageName, event.oldState))
-                            LockState.WHITELISTED -> bus.publish(
-                                    Whitelisted(id, event.packageName, event.oldState))
-                            else -> throw IllegalStateException("Unsupported lock state: $it")
-                        }
-                    }, {
-                        Timber.e(it, "onError modifyDatabaseEntry")
-                        bus.publish(Error(it, event.packageName))
-                    })
+            interactor.modifySingleDatabaseEntry(
+                event.oldState, event.newState,
+                event.packageName,
+                event.name, event.code, event.system
+            )
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({
+                    val id: String = event.id
+                    when (it) {
+                        LockState.LOCKED -> bus.publish(
+                            Created(id, event.packageName, event.oldState)
+                        )
+                        LockState.DEFAULT -> bus.publish(
+                            Deleted(id, event.packageName, event.oldState)
+                        )
+                        LockState.WHITELISTED -> bus.publish(
+                            Whitelisted(id, event.packageName, event.oldState)
+                        )
+                        else -> throw IllegalStateException("Unsupported lock state: $it")
+                    }
+                }, {
+                    Timber.e(it, "onError modifyDatabaseEntry")
+                    bus.publish(Error(it, event.packageName))
+                })
         }
     }
 
     fun update(packageName: String, activityName: String, lockState: LockState) {
         dispose {
             lockInfoUpdater.update(packageName, activityName, lockState)
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({
-                        Timber.d("Updated $packageName $activityName -- state: $lockState")
-                    }, {
-                        Timber.e(it, "Error updating cache for $packageName $activityName")
-                    })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({
+                    Timber.d("Updated $packageName $activityName -- state: $lockState")
+                }, {
+                    Timber.e(it, "Error updating cache for $packageName $activityName")
+                })
         }
     }
 
     fun populateList(forceRefresh: Boolean) {
         dispose {
             interactor.populateList(packageName, forceRefresh)
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .doAfterTerminate { view?.onListPopulated() }
-                    .doOnSubscribe { view?.onListPopulateBegin() }
-                    .subscribe({ view?.onEntryAddedToList(it) }, {
-                        Timber.e(it, "LockInfoPresenterImpl populateList onError")
-                        view?.onListPopulateError(it)
-                    })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .doAfterTerminate { view?.onListPopulated() }
+                .doOnSubscribe { view?.onListPopulateBegin() }
+                .subscribe({ view?.onEntryAddedToList(it) }, {
+                    Timber.e(it, "LockInfoPresenterImpl populateList onError")
+                    view?.onListPopulateError(it)
+                })
         }
     }
 
     fun showOnBoarding() {
         dispose {
             interactor.hasShownOnBoarding()
-                    .subscribeOn(ioScheduler)
-                    .observeOn(mainThreadScheduler)
-                    .subscribe({
-                        if (it) {
-                            view?.onOnboardingComplete()
-                        } else {
-                            view?.onShowOnboarding()
-                        }
-                    }, { Timber.e(it, "onError") })
+                .subscribeOn(ioScheduler)
+                .observeOn(mainThreadScheduler)
+                .subscribe({
+                    if (it) {
+                        view?.onOnboardingComplete()
+                    } else {
+                        view?.onShowOnboarding()
+                    }
+                }, { Timber.e(it, "onError") })
         }
     }
 

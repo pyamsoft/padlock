@@ -29,7 +29,8 @@ import javax.inject.Named
 @Module
 abstract class LockListModule {
 
-    @Binds internal abstract fun provideBus(bus: LockListBus): EventBus<LockListEvent>
+    @Binds
+    internal abstract fun provideBus(bus: LockListBus): EventBus<LockListEvent>
 
     @Binds
     internal abstract fun provideInteractorCache(impl: LockListInteractorCache): LockListInteractor

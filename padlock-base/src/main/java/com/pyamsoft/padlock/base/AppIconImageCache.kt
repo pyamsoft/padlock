@@ -25,8 +25,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @JvmSuppressWildcards
-@Singleton internal class AppIconImageCache @Inject internal constructor() :
-        ImageCache<String, Drawable> {
+@Singleton
+internal class AppIconImageCache @Inject internal constructor() :
+    ImageCache<String, Drawable> {
 
     private val cache: MutableMap<String, Drawable> = LinkedHashMap()
 
