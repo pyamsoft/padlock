@@ -21,7 +21,7 @@
 buildscript {
 
     ext {
-        kotlin_version = '1.2.20'
+        kotlin_version = '1.2.21'
         plugin_version = '3.0.1'
     }
 
@@ -49,13 +49,13 @@ buildscript {
         supportLib = "27.0.2"
         firebase = "11.8.0"
         leakCanary = "1.5.4"
-        pydroid = "15.4.1"
+        pydroid = "15.4.2"
         autoValue = "1.5.3"
         sqlbrite = "2.0.0"
         dagger = "2.14.1"
         patternLock = "1.0.0"
-        fastAdapter = "3.0.5"
-        ktlint = "2.3.0"
+        fastAdapter = "3.2.0"
+        ktlint = "3.0.0"
     }
 
     dependencies {
