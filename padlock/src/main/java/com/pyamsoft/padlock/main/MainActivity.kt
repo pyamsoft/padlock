@@ -23,8 +23,10 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
+import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.PadLockService

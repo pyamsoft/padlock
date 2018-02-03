@@ -27,6 +27,7 @@ import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PadLockDBUpdate
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite2.BriteDatabase
 import com.squareup.sqlbrite2.SqlBrite
 import io.reactivex.Completable
@@ -146,13 +147,13 @@ internal class PadLockDBImpl @Inject internal constructor(
   @CheckResult
   override fun queryWithPackageName(
       packageName: String
-  ): Single<List<WithPackageNameModel>> {
+  ): Single<List<PadLockEntryModel.WithPackageNameModel>> {
     Timber.i("DB: QUERY PACKAGE")
     return queryManager.queryWithPackageName(packageName)
   }
 
   @CheckResult
-  override fun queryAll(): Single<List<AllEntriesModel>> {
+  override fun queryAll(): Single<List<PadLockEntryModel.AllEntriesModel>> {
     Timber.i("DB: QUERY ALL")
     return queryManager.queryAll()
   }

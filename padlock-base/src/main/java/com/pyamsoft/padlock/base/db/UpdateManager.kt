@@ -21,6 +21,7 @@ package com.pyamsoft.padlock.base.db
 import android.database.sqlite.SQLiteOpenHelper
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite2.BriteDatabase
 
 internal class UpdateManager internal constructor(
@@ -29,15 +30,15 @@ internal class UpdateManager internal constructor(
 ) {
 
   private val updateWhitelist by lazy {
-    UpdateWhitelist(openHelper.writableDatabase)
+    PadLockEntryModel.UpdateWhitelist(openHelper.writableDatabase)
   }
 
   private val updateIgnoreTime by lazy {
-    UpdateIgnoreUntilTime(openHelper.writableDatabase)
+    PadLockEntryModel.UpdateIgnoreUntilTime(openHelper.writableDatabase)
   }
 
   private val updateHardLocked by lazy {
-    UpdateLockUntilTime(openHelper.writableDatabase)
+    PadLockEntryModel.UpdateLockUntilTime(openHelper.writableDatabase)
   }
 
   @CheckResult

@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.base.db
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite2.BriteDatabase
 import com.squareup.sqldelight.RowMapper
 import io.reactivex.Single
@@ -31,13 +32,13 @@ internal class QueryManager internal constructor(private val briteDatabase: Brit
     PadLockSqlEntry.FACTORY.withPackageActivityNameDefaultMapper()
   }
 
-  private val allEntriesMapper: RowMapper<out AllEntriesModel> by lazy {
+  private val allEntriesMapper: RowMapper<out PadLockEntryModel.AllEntriesModel> by lazy {
     PadLockSqlEntry.FACTORY.allEntriesMapper { packageName, activityName, whitelist ->
       AutoValue_PadLockSqlEntry_AllEntries(packageName, activityName, whitelist)
     }
   }
 
-  private val withPackageNameMapper: RowMapper<out WithPackageNameModel> by lazy {
+  private val withPackageNameMapper: RowMapper<out PadLockEntryModel.WithPackageNameModel> by lazy {
     PadLockSqlEntry.FACTORY.withPackageNameMapper { activityName, whitelist ->
       AutoValue_PadLockSqlEntry_WithPackageName(activityName, whitelist)
     }
@@ -60,7 +61,7 @@ internal class QueryManager internal constructor(private val briteDatabase: Brit
   @CheckResult
   internal fun queryWithPackageName(
       packageName: String
-  ): Single<List<WithPackageNameModel>> {
+  ): Single<List<PadLockEntryModel.WithPackageNameModel>> {
     val statement = PadLockSqlEntry.FACTORY.withPackageName(packageName)
     return briteDatabase.createQuery(statement)
         .mapToList { withPackageNameMapper.map(it) }
@@ -69,7 +70,7 @@ internal class QueryManager internal constructor(private val briteDatabase: Brit
   }
 
   @CheckResult
-  internal fun queryAll(): Single<List<AllEntriesModel>> {
+  internal fun queryAll(): Single<List<PadLockEntryModel.AllEntriesModel>> {
     val statement = PadLockSqlEntry.FACTORY.allEntries()
     return briteDatabase.createQuery(statement)
         .mapToList { allEntriesMapper.map(it) }

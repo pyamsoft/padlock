@@ -23,6 +23,7 @@ import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PurgeInteractor
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction

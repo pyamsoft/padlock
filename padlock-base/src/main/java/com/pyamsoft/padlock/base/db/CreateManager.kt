@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.base.db
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
 internal class CreateManager internal constructor() {
 

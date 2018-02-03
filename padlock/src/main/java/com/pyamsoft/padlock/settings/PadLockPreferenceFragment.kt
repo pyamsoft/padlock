@@ -29,6 +29,7 @@ import android.widget.Toast
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.main.MainFragment
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinEntryDialog

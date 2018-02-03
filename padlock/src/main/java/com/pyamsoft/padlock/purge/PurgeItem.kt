@@ -21,6 +21,7 @@ package com.pyamsoft.padlock.purge
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.mikepenz.fastadapter.items.ModelAbstractItem
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemPurgeBinding
 
 internal class PurgeItem internal constructor(

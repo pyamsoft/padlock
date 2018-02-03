@@ -26,6 +26,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentMainBinding
 import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.purge.PurgeFragment
