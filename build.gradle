@@ -54,7 +54,7 @@ buildscript {
         sqlbrite = "2.0.0"
         dagger = "2.14.1"
         patternLock = "1.0.0"
-        fastAdapter = "3.2.0"
+        fastAdapter = "3.2.2"
         ktlint = "3.0.0"
     }
 
