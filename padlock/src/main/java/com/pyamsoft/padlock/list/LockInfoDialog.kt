@@ -29,6 +29,7 @@ import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
@@ -40,7 +41,6 @@ import com.pyamsoft.padlock.list.info.LockInfoPresenter
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
-import com.pyamsoft.padlock.model.LockState.*
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
@@ -317,13 +317,13 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     if (oldState != newState) {
       Timber.d("Lock state changed for ${entry.packageName} ${entry.name}")
       when (newState) {
-        DEFAULT -> presenter.publish(
+        LockState.DEFAULT -> presenter.publish(
             LockInfoEvent.Callback.Deleted(entry.id, entry.packageName, oldState)
         )
-        LOCKED -> presenter.publish(
+        LockState.LOCKED -> presenter.publish(
             LockInfoEvent.Callback.Created(entry.id, entry.packageName, oldState)
         )
-        WHITELISTED -> presenter.publish(
+        LockState.WHITELISTED -> presenter.publish(
             LockInfoEvent.Callback.Whitelisted(entry.id, entry.packageName, oldState)
         )
         else -> Timber.e("Invalid lock state, do not publish: $newState")
@@ -344,15 +344,15 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   override fun onModifyEntryCreated(id: String) {
-    modifyList(id, LOCKED)
+    modifyList(id, LockState.LOCKED)
   }
 
   override fun onModifyEntryDeleted(id: String) {
-    modifyList(id, DEFAULT)
+    modifyList(id, LockState.DEFAULT)
   }
 
   override fun onModifyEntryWhitelisted(id: String) {
-    modifyList(id, WHITELISTED)
+    modifyList(id, LockState.WHITELISTED)
   }
 
   override fun onModifyEntryError(throwable: Throwable) {

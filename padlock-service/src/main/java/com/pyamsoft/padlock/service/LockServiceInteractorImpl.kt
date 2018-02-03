@@ -31,6 +31,7 @@ import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.RecheckStatus
 import com.pyamsoft.padlock.model.RecheckStatus.FORCE
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.optional.Optional.Present
 import com.pyamsoft.pydroid.optional.Optionals
 import com.pyamsoft.pydroid.optional.asOptional

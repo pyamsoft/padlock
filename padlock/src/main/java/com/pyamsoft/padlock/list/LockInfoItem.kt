@@ -25,11 +25,11 @@ import android.widget.RadioButton
 import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding
 import com.pyamsoft.padlock.list.info.LockInfoItemPublisher
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
-import com.pyamsoft.padlock.model.LockState.*
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -54,9 +54,9 @@ class LockInfoItem internal constructor(
       binding.apply {
         // Remove any old binds
         val lockedButton: RadioButton = when (model.lockState) {
-          DEFAULT -> lockInfoRadioDefault
-          WHITELISTED -> lockInfoRadioWhite
-          LOCKED -> lockInfoRadioBlack
+          LockState.DEFAULT -> lockInfoRadioDefault
+          LockState.WHITELISTED -> lockInfoRadioWhite
+          LockState.LOCKED -> lockInfoRadioBlack
           else -> throw IllegalStateException("Illegal enum state")
         }
         lockInfoRadioBlack.setOnCheckedChangeListener(null)
@@ -77,17 +77,17 @@ class LockInfoItem internal constructor(
 
         lockInfoRadioDefault.setOnCheckedChangeListener { _, isChecked ->
           if (isChecked) {
-            processModifyDatabaseEntry(holder, DEFAULT)
+            processModifyDatabaseEntry(holder, LockState.DEFAULT)
           }
         }
         lockInfoRadioWhite.setOnCheckedChangeListener { _, isChecked ->
           if (isChecked) {
-            processModifyDatabaseEntry(holder, WHITELISTED)
+            processModifyDatabaseEntry(holder, LockState.WHITELISTED)
           }
         }
         lockInfoRadioBlack.setOnCheckedChangeListener { _, isChecked ->
           if (isChecked) {
-            processModifyDatabaseEntry(holder, LOCKED)
+            processModifyDatabaseEntry(holder, LockState.LOCKED)
           }
         }
       }

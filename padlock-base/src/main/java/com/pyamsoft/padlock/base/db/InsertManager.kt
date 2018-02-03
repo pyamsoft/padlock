@@ -21,6 +21,7 @@ package com.pyamsoft.padlock.base.db
 import android.database.sqlite.SQLiteOpenHelper
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite2.BriteDatabase
 
 internal class InsertManager internal constructor(
@@ -29,7 +30,7 @@ internal class InsertManager internal constructor(
 ) {
 
   private val insertEntry by lazy {
-    InsertEntry(openHelper.writableDatabase)
+    PadLockEntryModel.InsertEntry(openHelper.writableDatabase)
   }
 
   @CheckResult

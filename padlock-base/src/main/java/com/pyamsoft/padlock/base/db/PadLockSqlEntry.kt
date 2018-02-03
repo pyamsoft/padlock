@@ -19,6 +19,7 @@
 package com.pyamsoft.padlock.base.db
 
 import com.google.auto.value.AutoValue
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
 @AutoValue
 internal abstract class PadLockSqlEntry : PadLockEntryModel {

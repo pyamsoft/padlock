@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
 import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.pydroid.loader.ImageLoader

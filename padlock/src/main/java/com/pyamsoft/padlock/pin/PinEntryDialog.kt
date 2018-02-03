@@ -26,6 +26,7 @@ import android.support.v4.content.ContextCompat
 import android.view.*
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter

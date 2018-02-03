@@ -21,6 +21,7 @@ package com.pyamsoft.padlock.service
 import com.pyamsoft.padlock.api.LockServiceInteractor
 import com.pyamsoft.padlock.model.*
 import com.pyamsoft.padlock.model.RecheckStatus.NOT_FORCE
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.service.LockServicePresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.ktext.clear

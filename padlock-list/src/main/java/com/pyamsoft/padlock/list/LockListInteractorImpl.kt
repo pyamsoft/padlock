@@ -24,11 +24,11 @@ import com.pyamsoft.padlock.api.PackageApplicationManager.ApplicationItem
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import timber.log.Timber
-import java.util.HashSet
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,9 +52,9 @@ internal class LockListInteractorImpl @Inject internal constructor(
 
   override fun populateList(force: Boolean): Observable<AppEntry> {
     return getValidPackageNames().zipWith(getAppEntryList(),
-        BiFunction<List<String>, List<AllEntriesModel>, List<LockTuple>> { packageNames, padLockEntries ->
+        BiFunction<List<String>, List<PadLockEntryModel.AllEntriesModel>, List<LockTuple>> { packageNames, padLockEntries ->
           val lockTuples: MutableList<LockTuple> = ArrayList()
-          val copyEntries: MutableList<AllEntriesModel> = ArrayList(
+          val copyEntries: MutableList<PadLockEntryModel.AllEntriesModel> = ArrayList(
               padLockEntries
           )
           val copyNames: List<String> = ArrayList(packageNames)
@@ -62,7 +62,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
             var locked = false
             var whitelist = 0
             var hardLocked = 0
-            val removeEntries = HashSet<AllEntriesModel>()
+            val removeEntries: MutableSet<PadLockEntryModel.AllEntriesModel> = LinkedHashSet()
             for (entry in copyEntries) {
               if (entry.packageName() == packageName) {
                 removeEntries.add(entry)
@@ -131,7 +131,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getAppEntryList(): Single<List<AllEntriesModel>> = queryDb.queryAll()
+  private fun getAppEntryList(): Single<List<PadLockEntryModel.AllEntriesModel>> = queryDb.queryAll()
 
   override fun hasShownOnBoarding(): Single<Boolean> =
       Single.fromCallable { onboardingPreferences.isListOnBoard() }

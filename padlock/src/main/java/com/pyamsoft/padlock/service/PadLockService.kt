@@ -33,10 +33,12 @@ import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.lifecycle.fakeBind
 import com.pyamsoft.padlock.lifecycle.fakeRelease
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.main.MainActivity
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import timber.log.Timber
 import javax.inject.Inject
 

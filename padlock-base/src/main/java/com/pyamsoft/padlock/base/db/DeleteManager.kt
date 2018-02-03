@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.base.db
 
 import android.database.sqlite.SQLiteOpenHelper
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite2.BriteDatabase
 
 internal class DeleteManager internal constructor(
@@ -28,15 +29,15 @@ internal class DeleteManager internal constructor(
 ) {
 
   private val deleteWithPackage by lazy {
-    DeleteWithPackageName(openHelper.writableDatabase)
+    PadLockEntryModel.DeleteWithPackageName(openHelper.writableDatabase)
   }
 
   private val deleteWithPackageActivity by lazy {
-    DeleteWithPackageActivityName(openHelper.writableDatabase)
+    PadLockEntryModel.DeleteWithPackageActivityName(openHelper.writableDatabase)
   }
 
   private val deleteAll by lazy {
-    DeleteAll(openHelper.writableDatabase)
+    PadLockEntryModel.DeleteAll(openHelper.writableDatabase)
   }
 
   @CheckResult

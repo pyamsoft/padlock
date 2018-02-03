@@ -19,6 +19,7 @@
 package com.pyamsoft.padlock.api
 
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import io.reactivex.Single
 
 interface PadLockDBQuery {
@@ -38,8 +39,8 @@ interface PadLockDBQuery {
   ): Single<PadLockEntryModel>
 
   @CheckResult
-  fun queryWithPackageName(packageName: String): Single<List<WithPackageNameModel>>
+  fun queryWithPackageName(packageName: String): Single<List<PadLockEntryModel.WithPackageNameModel>>
 
   @CheckResult
-  fun queryAll(): Single<List<AllEntriesModel>>
+  fun queryAll(): Single<List<PadLockEntryModel.AllEntriesModel>>
 }

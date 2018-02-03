@@ -23,6 +23,7 @@ import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.MenuItem
 import com.mikepenz.fastadapter.adapters.ModelAdapter
+import com.pyamsoft.padlock.R
 import timber.log.Timber
 
 internal class FilterListDelegate {
