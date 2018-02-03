@@ -16,12 +16,13 @@
  *     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-include ':padlock', ':padlock-model', ':padlock-base', ':padlock-pin', ':padlock-onboard', ':padlock-api',
-    ':padlock-settings',
-    ':padlock-purge',
-    ':padlock-main',
-    ':padlock-service',
-    ':padlock-lock',
-    ':padlock-list'
+include ':padlock', ':padlock-model', ':padlock-base', ':padlock-pin', ':padlock-onboard',
+        ':padlock-api',
+        ':padlock-settings',
+        ':padlock-purge',
+        ':padlock-main',
+        ':padlock-service',
+        ':padlock-lock',
+        ':padlock-list'
 
 

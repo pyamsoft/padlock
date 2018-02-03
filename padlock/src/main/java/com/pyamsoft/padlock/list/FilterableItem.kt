@@ -24,6 +24,6 @@ import com.mikepenz.fastadapter.IItem
 
 internal interface FilterableItem<T, VH : RecyclerView.ViewHolder> : IItem<T, VH> {
 
-    @CheckResult
-    fun filterAgainst(query: String): Boolean
+  @CheckResult
+  fun filterAgainst(query: String): Boolean
 }

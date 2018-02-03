@@ -23,11 +23,12 @@ import com.andrognito.patternlockview.PatternLockView
 
 object LockCellUtil {
 
-    @JvmStatic
-    @CheckResult
-    fun cellPatternToString(cells: List<PatternLockView.Dot>): String {
-        val builder = StringBuilder(cells.size)
-        cells.map { "${it.row}${it.column}" }.forEach { builder.append(it) }
-        return builder.toString()
-    }
+  @JvmStatic
+  @CheckResult
+  fun cellPatternToString(cells: List<PatternLockView.Dot>): String {
+    val builder = StringBuilder(cells.size)
+    cells.map { "${it.row}${it.column}" }
+        .forEach { builder.append(it) }
+    return builder.toString()
+  }
 }

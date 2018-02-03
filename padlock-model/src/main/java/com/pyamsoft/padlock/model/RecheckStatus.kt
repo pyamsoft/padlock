@@ -19,5 +19,6 @@
 package com.pyamsoft.padlock.model
 
 enum class RecheckStatus {
-    FORCE, NOT_FORCE
+  FORCE,
+  NOT_FORCE
 }

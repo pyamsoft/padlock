@@ -41,91 +41,101 @@ internal class LockListInteractorCache @Inject internal constructor(
 ) : LockListInteractor,
     Cache, LockListUpdater {
 
-    private var appCache: Observable<AppEntry>? = null
-    private var lastAccessCache: Long = 0L
+  private var appCache: Observable<AppEntry>? = null
+  private var lastAccessCache: Long = 0L
 
-    override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
+  override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
 
-    override fun isSystemVisible(): Single<Boolean> = impl.isSystemVisible()
+  override fun isSystemVisible(): Single<Boolean> = impl.isSystemVisible()
 
-    override fun setSystemVisible(visible: Boolean) {
-        impl.setSystemVisible(visible)
+  override fun setSystemVisible(visible: Boolean) {
+    impl.setSystemVisible(visible)
+  }
+
+  override fun populateList(force: Boolean): Observable<AppEntry> {
+    return Observable.defer {
+      val cache = appCache
+      val currentTime = System.currentTimeMillis()
+      val list: Observable<AppEntry>
+      if (force || cache == null || lastAccessCache + FIVE_MINUTES_MILLIS < currentTime) {
+        list = impl.populateList(true)
+            .cache()
+        appCache = list
+        lastAccessCache = currentTime
+      } else {
+        list = cache
+      }
+
+      return@defer list
     }
+        .doOnError { clearCache() }
+  }
 
-    override fun populateList(force: Boolean): Observable<AppEntry> {
-        return Observable.defer {
-            val cache = appCache
-            val currentTime = System.currentTimeMillis()
-            val list: Observable<AppEntry>
-            if (force || cache == null || lastAccessCache + FIVE_MINUTES_MILLIS < currentTime) {
-                list = impl.populateList(true).cache()
-                appCache = list
-                lastAccessCache = currentTime
-            } else {
-                list = cache
+  override fun modifySingleDatabaseEntry(
+      oldLockState: LockState,
+      newLockState: LockState,
+      packageName: String,
+      activityName: String,
+      code: String?,
+      system: Boolean
+  ): Single<LockState> {
+    return impl.modifySingleDatabaseEntry(
+        oldLockState, newLockState, packageName, activityName,
+        code, system
+    )
+        .doOnSuccess {
+          val obj: Observable<AppEntry>? = appCache
+          if (obj != null) {
+            appCache = obj.map {
+              if (it.packageName == packageName) {
+                // Update this with the new thing
+                return@map AppEntry(
+                    name = it.name, packageName = it.packageName,
+                    locked = newLockState == LOCKED, system = it.system,
+                    whitelisted = it.whitelisted, hardLocked = it.hardLocked
+                )
+              } else {
+                // Pass the original through
+                return@map it
+              }
             }
-
-            return@defer list
-        }.doOnError { clearCache() }
-    }
-
-    override fun modifySingleDatabaseEntry(
-        oldLockState: LockState, newLockState: LockState,
-        packageName: String, activityName: String, code: String?,
-        system: Boolean
-    ): Single<LockState> {
-        return impl.modifySingleDatabaseEntry(
-            oldLockState, newLockState, packageName, activityName,
-            code, system
-        )
-            .doOnSuccess {
-                val obj: Observable<AppEntry>? = appCache
-                if (obj != null) {
-                    appCache = obj.map {
-                        if (it.packageName == packageName) {
-                            // Update this with the new thing
-                            return@map AppEntry(
-                                name = it.name, packageName = it.packageName,
-                                locked = newLockState == LOCKED, system = it.system,
-                                whitelisted = it.whitelisted, hardLocked = it.hardLocked
-                            )
-                        } else {
-                            // Pass the original through
-                            return@map it
-                        }
-                    }
-                }
-            }.doOnError { clearCache() }
-    }
-
-    override fun update(packageName: String, whitelisted: Int, hardLocked: Int): Completable {
-        return Completable.fromAction {
-            val obj: Observable<AppEntry>? = appCache
-            if (obj != null) {
-                appCache = obj.map {
-                    if (it.packageName == packageName) {
-                        return@map AppEntry(
-                            name = it.name, packageName = it.packageName,
-                            locked = it.locked,
-                            system = it.system, whitelisted = whitelisted,
-                            hardLocked = hardLocked
-                        )
-                    } else {
-                        // Pass the original through
-                        return@map it
-                    }
-                }
-            }
+          }
         }
-    }
+        .doOnError { clearCache() }
+  }
 
-    override fun clearCache() {
-        appCache = null
-        purgeCache.clearCache()
+  override fun update(
+      packageName: String,
+      whitelisted: Int,
+      hardLocked: Int
+  ): Completable {
+    return Completable.fromAction {
+      val obj: Observable<AppEntry>? = appCache
+      if (obj != null) {
+        appCache = obj.map {
+          if (it.packageName == packageName) {
+            return@map AppEntry(
+                name = it.name, packageName = it.packageName,
+                locked = it.locked,
+                system = it.system, whitelisted = whitelisted,
+                hardLocked = hardLocked
+            )
+          } else {
+            // Pass the original through
+            return@map it
+          }
+        }
+      }
     }
+  }
 
-    companion object {
+  override fun clearCache() {
+    appCache = null
+    purgeCache.clearCache()
+  }
 
-        private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
-    }
+  companion object {
+
+    private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
+  }
 }

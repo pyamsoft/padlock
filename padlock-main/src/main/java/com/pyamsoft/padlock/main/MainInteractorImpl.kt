@@ -29,6 +29,6 @@ internal class MainInteractorImpl @Inject internal constructor(
     private val preferences: OnboardingPreferences
 ) : MainInteractor {
 
-    override fun isOnboardingComplete(): Single<Boolean> =
-        Single.fromCallable { preferences.hasAgreed() }
+  override fun isOnboardingComplete(): Single<Boolean> =
+      Single.fromCallable { preferences.hasAgreed() }
 }

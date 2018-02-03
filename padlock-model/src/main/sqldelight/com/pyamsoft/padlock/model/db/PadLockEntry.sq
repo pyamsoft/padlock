@@ -10,6 +10,7 @@ CREATE TABLE padlock_entry (
   whitelist INTEGER AS Boolean NOT NULL
 
 
+
 );
 
 -- Get all entries in the table

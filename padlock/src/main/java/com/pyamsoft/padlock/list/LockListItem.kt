@@ -28,7 +28,6 @@ import android.view.View
 import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.lifecycle.fakeBind
@@ -45,85 +44,91 @@ class LockListItem internal constructor(
     entry
 ), FilterableItem<LockListItem, LockListItem.ViewHolder> {
 
-    override fun getType(): Int = R.id.adapter_lock_item
+  override fun getType(): Int = R.id.adapter_lock_item
 
-    override fun getLayoutRes(): Int = R.layout.adapter_item_locklist
+  override fun getLayoutRes(): Int = R.layout.adapter_item_locklist
 
-    override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
+  override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
 
-    override fun filterAgainst(query: String): Boolean {
-        val name = model.name.toLowerCase().trim { it <= ' ' }
-        Timber.d("Filter predicate: '%s' against %s", query, name)
-        return name.startsWith(query)
+  override fun filterAgainst(query: String): Boolean {
+    val name = model.name.toLowerCase()
+        .trim { it <= ' ' }
+    Timber.d("Filter predicate: '%s' against %s", query, name)
+    return name.startsWith(query)
+  }
+
+  override fun bindView(
+      holder: ViewHolder,
+      payloads: List<Any>
+  ) {
+    super.bindView(holder, payloads)
+    holder.apply {
+      binding.apply {
+        lockListTitle.text = model.name
+        lockListToggle.setOnCheckedChangeListener(null)
+        lockListToggle.isChecked = model.locked
+        lockListWhite.visibility = if (model.whitelisted > 0) View.VISIBLE else View.INVISIBLE
+        lockListLocked.visibility = if (model.hardLocked > 0) View.VISIBLE else View.INVISIBLE
+      }
+
+      imageLoader.apply {
+        fromResource(R.drawable.ic_whitelisted).into(binding.lockListWhite)
+            .bind(holder)
+        fromResource(R.drawable.ic_hardlocked).into(binding.lockListLocked)
+            .bind(holder)
+      }
+      appIconLoader.forPackageName(model.packageName)
+          .into(binding.lockListIcon)
+          .bind(holder)
+
+      binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
+        buttonView.isChecked = isChecked.not()
+        Timber.d("Modify the database entry: ${model.packageName} $isChecked")
+        publisher.modifyDatabaseEntry(isChecked, model.packageName, null, model.system)
+      }
+
+      bind()
+    }
+  }
+
+  override fun unbindView(holder: ViewHolder) {
+    super.unbindView(holder)
+    holder.apply {
+      binding.apply {
+        lockListTitle.text = null
+        lockListIcon.setImageDrawable(null)
+        lockListToggle.setOnCheckedChangeListener(null)
+      }
+      unbind()
+    }
+  }
+
+  class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView),
+      LifecycleOwner {
+
+    internal val binding: AdapterItemLocklistBinding = DataBindingUtil.bind(itemView)
+    @Inject
+    internal lateinit var publisher: LockListItemPublisher
+    @Inject
+    internal lateinit var appIconLoader: AppIconLoader
+    @Inject
+    internal lateinit var imageLoader: ImageLoader
+    private val lifecycle = LifecycleRegistry(this)
+
+    init {
+      Injector.obtain<PadLockComponent>(itemView.context.applicationContext)
+          .inject(this)
     }
 
-    override fun bindView(holder: ViewHolder, payloads: List<Any>) {
-        super.bindView(holder, payloads)
-        holder.apply {
-            binding.apply {
-                lockListTitle.text = model.name
-                lockListToggle.setOnCheckedChangeListener(null)
-                lockListToggle.isChecked = model.locked
-                lockListWhite.visibility = if (model.whitelisted > 0) View.VISIBLE else View.INVISIBLE
-                lockListLocked.visibility = if (model.hardLocked > 0) View.VISIBLE else View.INVISIBLE
-            }
+    override fun getLifecycle(): Lifecycle = lifecycle
 
-            imageLoader.apply {
-                fromResource(R.drawable.ic_whitelisted).into(binding.lockListWhite)
-                    .bind(holder)
-                fromResource(R.drawable.ic_hardlocked).into(binding.lockListLocked)
-                    .bind(holder)
-            }
-            appIconLoader.forPackageName(model.packageName).into(binding.lockListIcon)
-                .bind(holder)
-
-            binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
-                buttonView.isChecked = isChecked.not()
-                Timber.d("Modify the database entry: ${model.packageName} $isChecked")
-                publisher.modifyDatabaseEntry(isChecked, model.packageName, null, model.system)
-            }
-
-            bind()
-        }
+    fun bind() {
+      lifecycle.fakeBind()
     }
 
-    override fun unbindView(holder: ViewHolder) {
-        super.unbindView(holder)
-        holder.apply {
-            binding.apply {
-                lockListTitle.text = null
-                lockListIcon.setImageDrawable(null)
-                lockListToggle.setOnCheckedChangeListener(null)
-            }
-            unbind()
-        }
+    fun unbind() {
+      lifecycle.fakeRelease()
     }
 
-    class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView),
-        LifecycleOwner {
-
-        internal val binding: AdapterItemLocklistBinding = DataBindingUtil.bind(itemView)
-        @Inject
-        internal lateinit var publisher: LockListItemPublisher
-        @Inject
-        internal lateinit var appIconLoader: AppIconLoader
-        @Inject
-        internal lateinit var imageLoader: ImageLoader
-        private val lifecycle = LifecycleRegistry(this)
-
-        init {
-            Injector.obtain<PadLockComponent>(itemView.context.applicationContext).inject(this)
-        }
-
-        override fun getLifecycle(): Lifecycle = lifecycle
-
-        fun bind() {
-            lifecycle.fakeBind()
-        }
-
-        fun unbind() {
-            lifecycle.fakeRelease()
-        }
-
-    }
+  }
 }

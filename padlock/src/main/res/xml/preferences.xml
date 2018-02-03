@@ -18,54 +18,54 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="Service Settings">
+  <PreferenceCategory android:title="Service Settings">
 
-        <ListPreference
-            android:defaultValue="@string/ignore_time_default"
-            android:dialogTitle="@string/ignore_time_title"
-            android:entries="@array/ignore_time"
-            android:entryValues="@array/ignore_time_entries"
-            android:key="@string/ignore_time_key"
-            android:summary="@string/ignore_time_summary"
-            android:title="@string/ignore_time_title" />
+    <ListPreference
+        android:defaultValue="@string/ignore_time_default"
+        android:dialogTitle="@string/ignore_time_title"
+        android:entries="@array/ignore_time"
+        android:entryValues="@array/ignore_time_entries"
+        android:key="@string/ignore_time_key"
+        android:summary="@string/ignore_time_summary"
+        android:title="@string/ignore_time_title"/>
 
-        <ListPreference
-            android:defaultValue="@string/timeout_time_default"
-            android:dialogTitle="@string/timeout_time_title"
-            android:entries="@array/timeout_time"
-            android:entryValues="@array/timeout_time_entries"
-            android:key="@string/timeout_time_key"
-            android:summary="@string/timeout_time_summary"
-            android:title="@string/timeout_time_title" />
+    <ListPreference
+        android:defaultValue="@string/timeout_time_default"
+        android:dialogTitle="@string/timeout_time_title"
+        android:entries="@array/timeout_time"
+        android:entryValues="@array/timeout_time_entries"
+        android:key="@string/timeout_time_key"
+        android:summary="@string/timeout_time_summary"
+        android:title="@string/timeout_time_title"/>
 
-        <ListPreference
-            android:defaultValue="@string/lock_screen_type_default"
-            android:dialogTitle="@string/lock_screen_type_title"
-            android:entries="@array/lock_screen_type_names"
-            android:entryValues="@array/lock_screen_type_values"
-            android:key="@string/lock_screen_type_key"
-            android:summary="@string/lock_screen_type_summary"
-            android:title="@string/lock_screen_type_title" />
+    <ListPreference
+        android:defaultValue="@string/lock_screen_type_default"
+        android:dialogTitle="@string/lock_screen_type_title"
+        android:entries="@array/lock_screen_type_names"
+        android:entryValues="@array/lock_screen_type_values"
+        android:key="@string/lock_screen_type_key"
+        android:summary="@string/lock_screen_type_summary"
+        android:title="@string/lock_screen_type_title"/>
 
-        <CheckBoxPreference
-            android:defaultValue="@bool/install_listener_default"
-            android:key="@string/install_listener_key"
-            android:summaryOff="@string/install_listener_summary_unchecked"
-            android:summaryOn="@string/install_listener_summary_checked"
-            android:title="@string/install_listener_title" />
+    <CheckBoxPreference
+        android:defaultValue="@bool/install_listener_default"
+        android:key="@string/install_listener_key"
+        android:summaryOff="@string/install_listener_summary_unchecked"
+        android:summaryOn="@string/install_listener_summary_checked"
+        android:title="@string/install_listener_title"/>
 
-        <CheckBoxPreference
-            android:defaultValue="@bool/ignore_keyguard_default"
-            android:key="@string/ignore_keyguard_key"
-            android:summaryOff="@string/ignore_keyguard_summary_unchecked"
-            android:summaryOn="@string/ignore_keyguard_summary_checked"
-            android:title="@string/ignore_keyguard_title" />
+    <CheckBoxPreference
+        android:defaultValue="@bool/ignore_keyguard_default"
+        android:key="@string/ignore_keyguard_key"
+        android:summaryOff="@string/ignore_keyguard_summary_unchecked"
+        android:summaryOn="@string/ignore_keyguard_summary_checked"
+        android:title="@string/ignore_keyguard_title"/>
 
-        <Preference
-            android:key="@string/clear_db_key"
-            android:summary="@string/clear_db_summary"
-            android:title="@string/clear_db_title" />
+    <Preference
+        android:key="@string/clear_db_key"
+        android:summary="@string/clear_db_summary"
+        android:title="@string/clear_db_title"/>
 
-    </PreferenceCategory>
+  </PreferenceCategory>
 
 </PreferenceScreen>

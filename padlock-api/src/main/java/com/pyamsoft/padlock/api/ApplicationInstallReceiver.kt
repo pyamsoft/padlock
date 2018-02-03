@@ -20,12 +20,12 @@ package com.pyamsoft.padlock.api
 
 interface ApplicationInstallReceiver {
 
-    companion object {
+  companion object {
 
-        const val FORCE_REFRESH_LIST = "force_refresh_list"
-    }
+    const val FORCE_REFRESH_LIST = "force_refresh_list"
+  }
 
-    fun register()
+  fun register()
 
-    fun unregister()
+  fun unregister()
 }

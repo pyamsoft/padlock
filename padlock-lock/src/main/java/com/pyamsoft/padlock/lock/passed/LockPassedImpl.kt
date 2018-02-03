@@ -26,16 +26,25 @@ import javax.inject.Singleton
 internal class LockPassedImpl @Inject internal constructor() :
     LockPassed {
 
-    private val passedSet: MutableCollection<String> = LinkedHashSet()
+  private val passedSet: MutableCollection<String> = LinkedHashSet()
 
-    override fun add(packageName: String, activityName: String) {
-        passedSet.add("$packageName$activityName")
-    }
+  override fun add(
+      packageName: String,
+      activityName: String
+  ) {
+    passedSet.add("$packageName$activityName")
+  }
 
-    override fun remove(packageName: String, activityName: String) {
-        passedSet.remove("$packageName$activityName")
-    }
+  override fun remove(
+      packageName: String,
+      activityName: String
+  ) {
+    passedSet.remove("$packageName$activityName")
+  }
 
-    override fun check(packageName: String, activityName: String): Boolean =
-        passedSet.contains("$packageName$activityName")
+  override fun check(
+      packageName: String,
+      activityName: String
+  ): Boolean =
+      passedSet.contains("$packageName$activityName")
 }

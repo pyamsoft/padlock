@@ -29,11 +29,11 @@ import javax.inject.Singleton
 internal class ForegroundEventBus @Inject internal constructor() :
     EventBus<ForegroundEvent> {
 
-    private val bus: EventBus<ForegroundEvent> = RxBus.create()
+  private val bus: EventBus<ForegroundEvent> = RxBus.create()
 
-    override fun listen(): Observable<ForegroundEvent> = bus.listen()
+  override fun listen(): Observable<ForegroundEvent> = bus.listen()
 
-    override fun publish(event: ForegroundEvent) {
-        bus.publish(event)
-    }
+  override fun publish(event: ForegroundEvent) {
+    bus.publish(event)
+  }
 }

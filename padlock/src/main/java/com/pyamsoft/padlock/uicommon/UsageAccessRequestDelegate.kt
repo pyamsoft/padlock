@@ -24,10 +24,10 @@ import android.provider.Settings
 
 object UsageAccessRequestDelegate {
 
-    private val INTENT: Intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+  private val INTENT: Intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
 
-    @JvmStatic
-    fun launchUsageAccessActivity(activity: Activity) {
-        activity.startActivity(INTENT)
-    }
+  @JvmStatic
+  fun launchUsageAccessActivity(activity: Activity) {
+    activity.startActivity(INTENT)
+  }
 }

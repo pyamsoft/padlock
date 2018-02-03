@@ -28,31 +28,31 @@ import com.mikepenz.fastadapter.items.ModelAbstractItem
 fun MenuItem?.isChecked(): Boolean = this != null && isChecked
 
 fun MenuItem?.setChecked(checked: Boolean) {
-    if (this != null) {
-        isChecked = checked
-    }
+  if (this != null) {
+    isChecked = checked
+  }
 }
 
 fun SwipeRefreshLayout.refreshing(refreshing: Boolean) {
-    post { isRefreshing = refreshing }
+  post { isRefreshing = refreshing }
 }
 
 fun <M : Any> ModelAdapter<M, out ModelAbstractItem<M, *, *>>.retainAll(
     backing: MutableCollection<M>
 ): Boolean {
-    val old: MutableCollection<ModelAbstractItem<M, *, *>> = LinkedHashSet()
-    adapterItems.filterNotTo(old) { backing.contains(it.model) }
+  val old: MutableCollection<ModelAbstractItem<M, *, *>> = LinkedHashSet()
+  adapterItems.filterNotTo(old) { backing.contains(it.model) }
 
-    // Don't replace with stdlib operation, since we need the getAdapterPosition call
-    // to happen on each new loop.
-    @Suppress("LoopToCallChain")
-    for (item in old) {
-        val index = getAdapterPosition(item.identifier)
-        if (index >= 0) {
-            remove(index)
-        }
+  // Don't replace with stdlib operation, since we need the getAdapterPosition call
+  // to happen on each new loop.
+  @Suppress("LoopToCallChain")
+  for (item in old) {
+    val index = getAdapterPosition(item.identifier)
+    if (index >= 0) {
+      remove(index)
     }
+  }
 
-    backing.clear()
-    return old.isNotEmpty()
+  backing.clear()
+  return old.isNotEmpty()
 }

@@ -20,90 +20,90 @@
 
 buildscript {
 
-    ext {
-        kotlin_version = '1.2.21'
-        plugin_version = '3.0.1'
+  ext {
+    kotlin_version = '1.2.21'
+    plugin_version = '3.0.1'
+  }
+
+  repositories {
+    jcenter()
+    google()
+
+    maven {
+      url "https://plugins.gradle.org/m2/"
     }
 
-    repositories {
-        jcenter()
-        google()
-
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-
-        maven {
-            url 'https://maven.google.com'
-        }
-        maven {
-            url 'https://jitpack.io'
-        }
+    maven {
+      url 'https://maven.google.com'
     }
-
-    ext {
-
-        minSdk = 22
-        maxSdk = 27
-
-        supportLib = "27.0.2"
-        firebase = "11.8.0"
-        leakCanary = "1.5.4"
-        pydroid = "15.4.2"
-        autoValue = "1.5.3"
-        sqlbrite = "2.0.0"
-        dagger = "2.14.1"
-        patternLock = "1.0.0"
-        fastAdapter = "3.2.2"
-        ktlint = "3.0.0"
+    maven {
+      url 'https://jitpack.io'
     }
+  }
 
-    dependencies {
-        classpath "com.android.tools.build:gradle:$plugin_version"
+  ext {
 
-        // Dex count
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.1'
+    minSdk = 22
+    maxSdk = 27
 
-        // Gradle version checker
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
+    supportLib = "27.0.2"
+    firebase = "11.8.0"
+    leakCanary = "1.5.4"
+    pydroid = "15.4.2"
+    autoValue = "1.5.3"
+    sqlbrite = "2.0.0"
+    dagger = "2.14.1"
+    patternLock = "1.0.0"
+    fastAdapter = "3.2.2"
+    ktlint = "3.0.0"
+  }
 
-        // Google services
-        classpath 'com.google.gms:google-services:3.1.2'
+  dependencies {
+    classpath "com.android.tools.build:gradle:$plugin_version"
 
-        // SQLDelight
-        classpath "com.squareup.sqldelight:gradle-plugin:0.6.1"
+    // Dex count
+    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.1'
 
-        // Kotlin
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    // Gradle version checker
+    classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
 
-        classpath "gradle.plugin.org.jlleitschuh.gradle:ktlint-gradle:$ktlint"
-    }
+    // Google services
+    classpath 'com.google.gms:google-services:3.1.2'
+
+    // SQLDelight
+    classpath "com.squareup.sqldelight:gradle-plugin:0.6.1"
+
+    // Kotlin
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+    classpath "gradle.plugin.org.jlleitschuh.gradle:ktlint-gradle:$ktlint"
+  }
 }
 
 subprojects {
-    apply plugin: "org.jlleitschuh.gradle.ktlint"
-    apply plugin: "com.github.ben-manes.versions"
+  apply plugin: "org.jlleitschuh.gradle.ktlint"
+  apply plugin: "com.github.ben-manes.versions"
 
-    ktlint {
-        version = "0.15.0"
-        android = true
-    }
+  ktlint {
+    version = "0.15.0"
+    android = true
+  }
 }
 
 allprojects {
-    repositories {
-        jcenter()
-        google()
+  repositories {
+    jcenter()
+    google()
 
-        maven {
-            url 'https://maven.google.com'
-        }
-        maven {
-            url 'https://jitpack.io'
-        }
+    maven {
+      url 'https://maven.google.com'
     }
+    maven {
+      url 'https://jitpack.io'
+    }
+  }
 }
 
 task clean(type: Delete) {
-    delete rootProject.buildDir
+  delete rootProject.buildDir
 }

@@ -24,9 +24,9 @@ import io.reactivex.Single
 
 interface PurgeInteractor {
 
-    @CheckResult
-    fun populateList(forceRefresh: Boolean): Observable<String>
+  @CheckResult
+  fun populateList(forceRefresh: Boolean): Observable<String>
 
-    @CheckResult
-    fun deleteEntry(packageName: String): Single<String>
+  @CheckResult
+  fun deleteEntry(packageName: String): Single<String>
 }

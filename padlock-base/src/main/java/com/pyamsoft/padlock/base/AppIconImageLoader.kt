@@ -44,55 +44,58 @@ internal class AppIconImageLoader internal constructor(
     private val ioScheduler: Scheduler
 ) : GenericLoader<Drawable>() {
 
-    @CheckResult
-    private fun String.toKey(): ImageCacheKey<String> = ImageCacheKey(this)
+  @CheckResult
+  private fun String.toKey(): ImageCacheKey<String> = ImageCacheKey(this)
 
-    init {
-        if (packageName.isEmpty()) {
-            throw IllegalArgumentException("AppIconLoader packageName must be non-empty")
-        }
-
-        mainScheduler.enforceMainThread()
-        ioScheduler.enforceIo()
+  init {
+    if (packageName.isEmpty()) {
+      throw IllegalArgumentException("AppIconLoader packageName must be non-empty")
     }
 
-    override fun into(imageView: ImageView): Loaded = into(
-        DrawableImageTarget.forImageView(imageView)
+    mainScheduler.enforceMainThread()
+    ioScheduler.enforceIo()
+  }
+
+  override fun into(imageView: ImageView): Loaded = into(
+      DrawableImageTarget.forImageView(imageView)
+  )
+
+  override fun into(target: Target<Drawable>): Loaded = load(target, packageName)
+
+  @CheckResult
+  private fun load(
+      target: Target<Drawable>,
+      packageName: String
+  ): Loaded {
+    return RxLoaded(loadCached(packageName)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainScheduler)
+        .doOnSubscribe { startAction?.invoke() }
+        .subscribe({
+          target.loadImage(it)
+          completeAction?.invoke(it)
+        }, {
+          Timber.e(it, "Error loading Drawable AppIconLoader for: %s", packageName)
+          errorAction?.invoke(it)
+        })
     )
+  }
 
-    override fun into(target: Target<Drawable>): Loaded = load(target, packageName)
-
-    @CheckResult
-    private fun load(target: Target<Drawable>, packageName: String): Loaded {
-        return RxLoaded(loadCached(packageName)
-            .subscribeOn(ioScheduler)
-            .observeOn(mainScheduler)
-            .doOnSubscribe { startAction?.invoke() }
-            .subscribe({
-                target.loadImage(it)
-                completeAction?.invoke(it)
-            }, {
-                Timber.e(it, "Error loading Drawable AppIconLoader for: %s", packageName)
-                errorAction?.invoke(it)
-            })
-        )
+  @CheckResult
+  private fun loadCached(packageName: String): Single<Drawable> {
+    val key: ImageCacheKey<String> = packageName.toKey()
+    val cached: Drawable? = appIconImageCache.retrieve(key)
+    if (cached == null) {
+      val result = loadFresh(packageName)
+      return result.doOnSuccess {
+        appIconImageCache.cache(key, it)
+      }
+    } else {
+      return Single.just(cached)
     }
+  }
 
-    @CheckResult
-    private fun loadCached(packageName: String): Single<Drawable> {
-        val key: ImageCacheKey<String> = packageName.toKey()
-        val cached: Drawable? = appIconImageCache.retrieve(key)
-        if (cached == null) {
-            val result = loadFresh(packageName)
-            return result.doOnSuccess {
-                appIconImageCache.cache(key, it)
-            }
-        } else {
-            return Single.just(cached)
-        }
-    }
-
-    @CheckResult
-    private fun loadFresh(packageName: String): Single<Drawable> =
-        packageDrawableManager.loadDrawableForPackageOrDefault(packageName)
+  @CheckResult
+  private fun loadFresh(packageName: String): Single<Drawable> =
+      packageDrawableManager.loadDrawableForPackageOrDefault(packageName)
 }

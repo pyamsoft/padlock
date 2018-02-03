@@ -21,8 +21,6 @@ package com.pyamsoft.padlock.base.db
 import android.database.sqlite.SQLiteOpenHelper
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.PadLockEntry
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.db.PadLockEntryModel.InsertEntry
 import com.squareup.sqlbrite2.BriteDatabase
 
 internal class InsertManager internal constructor(
@@ -30,21 +28,21 @@ internal class InsertManager internal constructor(
     private val briteDatabase: BriteDatabase
 ) {
 
-    private val insertEntry by lazy {
-        InsertEntry(openHelper.writableDatabase)
+  private val insertEntry by lazy {
+    InsertEntry(openHelper.writableDatabase)
+  }
+
+  @CheckResult
+  internal fun insert(entry: PadLockEntryModel): Long {
+    if (PadLockEntry.isEmpty(entry)) {
+      throw RuntimeException("Cannot insert EMPTY entry")
     }
 
-    @CheckResult
-    internal fun insert(entry: PadLockEntryModel): Long {
-        if (PadLockEntry.isEmpty(entry)) {
-            throw RuntimeException("Cannot insert EMPTY entry")
-        }
-
-        return briteDatabase.bindAndExecute(insertEntry) {
-            bind(
-                entry.packageName(), entry.activityName(), entry.lockCode(), entry.lockUntilTime(),
-                entry.ignoreUntilTime(), entry.systemApplication(), entry.whitelist()
-            )
-        }
+    return briteDatabase.bindAndExecute(insertEntry) {
+      bind(
+          entry.packageName(), entry.activityName(), entry.lockCode(), entry.lockUntilTime(),
+          entry.ignoreUntilTime(), entry.systemApplication(), entry.whitelist()
+      )
     }
+  }
 }

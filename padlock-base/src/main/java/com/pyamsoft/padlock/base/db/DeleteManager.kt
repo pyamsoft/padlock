@@ -20,9 +20,6 @@ package com.pyamsoft.padlock.base.db
 
 import android.database.sqlite.SQLiteOpenHelper
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.model.db.PadLockEntryModel.DeleteAll
-import com.pyamsoft.padlock.model.db.PadLockEntryModel.DeleteWithPackageActivityName
-import com.pyamsoft.padlock.model.db.PadLockEntryModel.DeleteWithPackageName
 import com.squareup.sqlbrite2.BriteDatabase
 
 internal class DeleteManager internal constructor(
@@ -30,31 +27,34 @@ internal class DeleteManager internal constructor(
     private val briteDatabase: BriteDatabase
 ) {
 
-    private val deleteWithPackage by lazy {
-        DeleteWithPackageName(openHelper.writableDatabase)
-    }
+  private val deleteWithPackage by lazy {
+    DeleteWithPackageName(openHelper.writableDatabase)
+  }
 
-    private val deleteWithPackageActivity by lazy {
-        DeleteWithPackageActivityName(openHelper.writableDatabase)
-    }
+  private val deleteWithPackageActivity by lazy {
+    DeleteWithPackageActivityName(openHelper.writableDatabase)
+  }
 
-    private val deleteAll by lazy {
-        DeleteAll(openHelper.writableDatabase)
-    }
+  private val deleteAll by lazy {
+    DeleteAll(openHelper.writableDatabase)
+  }
 
-    @CheckResult
-    internal fun deleteWithPackage(packageName: String): Long {
-        return briteDatabase.bindAndExecute(deleteWithPackage) {
-            bind(packageName)
-        }
+  @CheckResult
+  internal fun deleteWithPackage(packageName: String): Long {
+    return briteDatabase.bindAndExecute(deleteWithPackage) {
+      bind(packageName)
     }
+  }
 
-    @CheckResult
-    internal fun deleteWithPackageActivity(packageName: String, activityName: String): Long {
-        return briteDatabase.bindAndExecute(deleteWithPackageActivity) {
-            bind(packageName, activityName)
-        }
+  @CheckResult
+  internal fun deleteWithPackageActivity(
+      packageName: String,
+      activityName: String
+  ): Long {
+    return briteDatabase.bindAndExecute(deleteWithPackageActivity) {
+      bind(packageName, activityName)
     }
+  }
 
-    internal fun deleteAll(): Long = briteDatabase.bindAndExecute(deleteAll) {}
+  internal fun deleteAll(): Long = briteDatabase.bindAndExecute(deleteAll) {}
 }

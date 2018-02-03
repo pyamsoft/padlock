@@ -23,5 +23,9 @@ import io.reactivex.Completable
 
 interface LockInfoUpdater {
 
-    fun update(packageName: String, activityName: String, lockState: LockState): Completable
+  fun update(
+      packageName: String,
+      activityName: String,
+      lockState: LockState
+  ): Completable
 }

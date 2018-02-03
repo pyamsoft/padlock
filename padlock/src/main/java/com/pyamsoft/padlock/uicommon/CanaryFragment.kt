@@ -24,9 +24,10 @@ import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 
 abstract class CanaryFragment : ToolbarFragment() {
 
-    @CallSuper
-    override fun onDestroy() {
-        super.onDestroy()
-        PadLock.getRefWatcher(this).watch(this)
-    }
+  @CallSuper
+  override fun onDestroy() {
+    super.onDestroy()
+    PadLock.getRefWatcher(this)
+        .watch(this)
+  }
 }

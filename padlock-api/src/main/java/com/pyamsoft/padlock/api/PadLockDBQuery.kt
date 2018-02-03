@@ -19,30 +19,27 @@
 package com.pyamsoft.padlock.api
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.db.PadLockEntryModel.AllEntriesModel
-import com.pyamsoft.padlock.model.db.PadLockEntryModel.WithPackageNameModel
 import io.reactivex.Single
 
 interface PadLockDBQuery {
 
-    /**
-     * Get either the package with specific name of the PACKAGE entry
-     *
-     * SQLite only has bindings so we must make do
-     * ?1 package name
-     * ?2 the PadLock PACKAGE_TAG, see model.PadLockEntry
-     * ?3 the specific activity name
-     */
-    @CheckResult
-    fun queryWithPackageActivityNameDefault(
-        packageName: String,
-        activityName: String
-    ): Single<PadLockEntryModel>
+  /**
+   * Get either the package with specific name of the PACKAGE entry
+   *
+   * SQLite only has bindings so we must make do
+   * ?1 package name
+   * ?2 the PadLock PACKAGE_TAG, see model.PadLockEntry
+   * ?3 the specific activity name
+   */
+  @CheckResult
+  fun queryWithPackageActivityNameDefault(
+      packageName: String,
+      activityName: String
+  ): Single<PadLockEntryModel>
 
-    @CheckResult
-    fun queryWithPackageName(packageName: String): Single<List<WithPackageNameModel>>
+  @CheckResult
+  fun queryWithPackageName(packageName: String): Single<List<WithPackageNameModel>>
 
-    @CheckResult
-    fun queryAll(): Single<List<AllEntriesModel>>
+  @CheckResult
+  fun queryAll(): Single<List<AllEntriesModel>>
 }

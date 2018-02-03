@@ -23,15 +23,15 @@ import io.reactivex.Single
 
 interface SettingsInteractor {
 
-    @CheckResult
-    fun isInstallListenerEnabled(): Single<Boolean>
+  @CheckResult
+  fun isInstallListenerEnabled(): Single<Boolean>
 
-    @CheckResult
-    fun clearDatabase(): Single<Boolean>
+  @CheckResult
+  fun clearDatabase(): Single<Boolean>
 
-    @CheckResult
-    fun clearAll(): Single<Boolean>
+  @CheckResult
+  fun clearAll(): Single<Boolean>
 
-    @CheckResult
-    fun hasExistingMasterPassword(): Single<Boolean>
+  @CheckResult
+  fun hasExistingMasterPassword(): Single<Boolean>
 }

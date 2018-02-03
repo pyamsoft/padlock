@@ -24,13 +24,13 @@ import io.reactivex.Single
 
 interface MasterPinInteractor {
 
-    @CheckResult
-    fun getMasterPin(): Single<Optional<String>>
+  @CheckResult
+  fun getMasterPin(): Single<Optional<String>>
 
-    fun setMasterPin(pin: String?)
+  fun setMasterPin(pin: String?)
 
-    @CheckResult
-    fun getHint(): Single<Optional<String>>
+  @CheckResult
+  fun getHint(): Single<Optional<String>>
 
-    fun setHint(hint: String?)
+  fun setHint(hint: String?)
 }

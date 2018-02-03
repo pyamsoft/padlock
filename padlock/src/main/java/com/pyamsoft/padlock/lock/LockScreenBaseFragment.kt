@@ -35,69 +35,73 @@ import timber.log.Timber
 abstract class LockScreenBaseFragment protected constructor() : CanaryFragment(),
     LockEntryPresenter.View {
 
-    protected lateinit var lockedActivityName: String
-    protected lateinit var lockedPackageName: String
-    protected var lockedCode: String? = null
-    protected lateinit var lockedRealName: String
-    protected var isLockedSystem: Boolean = false
+  protected lateinit var lockedActivityName: String
+  protected lateinit var lockedPackageName: String
+  protected var lockedCode: String? = null
+  protected lateinit var lockedRealName: String
+  protected var isLockedSystem: Boolean = false
 
-    internal fun showSnackbarWithText(text: String) {
-        val activity = activity
-        if (activity is LockScreenActivity) {
-            Snackbar.make(activity.getRootView(), text, Snackbar.LENGTH_SHORT).show()
-        }
+  internal fun showSnackbarWithText(text: String) {
+    val activity = activity
+    if (activity is LockScreenActivity) {
+      Snackbar.make(activity.getRootView(), text, Snackbar.LENGTH_SHORT)
+          .show()
+    }
+  }
+
+  internal val isExcluded: Boolean
+    @CheckResult get() {
+      val activity = activity
+      return activity is LockScreenActivity && activity.menuExclude.isChecked()
     }
 
-    internal val isExcluded: Boolean
-        @CheckResult get() {
-            val activity = activity
-            return activity is LockScreenActivity && activity.menuExclude.isChecked()
-        }
-
-    internal val selectedIgnoreTime: Long
-        @CheckResult get() {
-            val activity = activity
-            return (activity as? LockScreenActivity)?.getIgnoreTimeFromSelectedIndex() ?: 0
-        }
-
-    @CallSuper
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        arguments?.let {
-            lockedPackageName = it.getString(ENTRY_PACKAGE_NAME)
-            lockedActivityName = it.getString(ENTRY_ACTIVITY_NAME)
-            lockedRealName = it.getString(ENTRY_REAL_NAME)
-            lockedCode = it.getString(ENTRY_LOCK_CODE)
-            isLockedSystem = it.getBoolean(ENTRY_IS_SYSTEM, false)
-        }
+  internal val selectedIgnoreTime: Long
+    @CheckResult get() {
+      val activity = activity
+      return (activity as? LockScreenActivity)?.getIgnoreTimeFromSelectedIndex() ?: 0
     }
 
-    final override fun onPostUnlocked() {
-        Timber.d("POST Unlock Finished!")
-        activity!!.finish()
-    }
+  @CallSuper
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
 
-    override fun onResume() {
-        super.onResume()
-        toolbarActivity.withToolbar { it.setUpEnabled(false) }
+    arguments?.let {
+      lockedPackageName = it.getString(ENTRY_PACKAGE_NAME)
+      lockedActivityName = it.getString(ENTRY_ACTIVITY_NAME)
+      lockedRealName = it.getString(ENTRY_REAL_NAME)
+      lockedCode = it.getString(ENTRY_LOCK_CODE)
+      isLockedSystem = it.getBoolean(ENTRY_IS_SYSTEM, false)
     }
+  }
 
-    companion object {
+  final override fun onPostUnlocked() {
+    Timber.d("POST Unlock Finished!")
+    activity!!.finish()
+  }
 
-        @JvmStatic
-        @CheckResult
-        internal fun buildBundle(
-            lockedPackageName: String, lockedActivityName: String,
-            lockedCode: String?, lockedRealName: String, lockedSystem: Boolean
-        ): Bundle {
-            val args = Bundle()
-            args.putString(ENTRY_PACKAGE_NAME, lockedPackageName)
-            args.putString(ENTRY_ACTIVITY_NAME, lockedActivityName)
-            args.putString(ENTRY_LOCK_CODE, lockedCode)
-            args.putString(ENTRY_REAL_NAME, lockedRealName)
-            args.putBoolean(ENTRY_IS_SYSTEM, lockedSystem)
-            return args
-        }
+  override fun onResume() {
+    super.onResume()
+    toolbarActivity.withToolbar { it.setUpEnabled(false) }
+  }
+
+  companion object {
+
+    @JvmStatic
+    @CheckResult
+    internal fun buildBundle(
+        lockedPackageName: String,
+        lockedActivityName: String,
+        lockedCode: String?,
+        lockedRealName: String,
+        lockedSystem: Boolean
+    ): Bundle {
+      val args = Bundle()
+      args.putString(ENTRY_PACKAGE_NAME, lockedPackageName)
+      args.putString(ENTRY_ACTIVITY_NAME, lockedActivityName)
+      args.putString(ENTRY_LOCK_CODE, lockedCode)
+      args.putString(ENTRY_REAL_NAME, lockedRealName)
+      args.putBoolean(ENTRY_IS_SYSTEM, lockedSystem)
+      return args
     }
+  }
 }

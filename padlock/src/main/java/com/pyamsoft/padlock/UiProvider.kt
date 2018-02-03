@@ -28,9 +28,9 @@ import javax.inject.Named
 @Module
 object UiProvider {
 
-    @Provides
-    @JvmStatic
-    @CheckResult
-    @Named("cache_list_state")
-    fun provideListStateCache(): Cache = ListStateUtil
+  @Provides
+  @JvmStatic
+  @CheckResult
+  @Named("cache_list_state")
+  fun provideListStateCache(): Cache = ListStateUtil
 }

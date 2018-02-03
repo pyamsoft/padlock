@@ -39,39 +39,39 @@ class PadLockProvider(
     private val recheckServiceClass: Class<out IntentService>
 ) {
 
-    private val appIconCache: ImageCache<String, Drawable> = AppIconImageCache()
+  private val appIconCache: ImageCache<String, Drawable> = AppIconImageCache()
 
-    @Provides
-    internal fun provideContext(): Context = pyDroidModule.provideContext()
+  @Provides
+  internal fun provideContext(): Context = pyDroidModule.provideContext()
 
-    @Provides
-    @Named(
-        "main_activity"
-    )
-    internal fun provideMainActivityClass(): Class<out Activity> =
-        mainActivityClass
+  @Provides
+  @Named(
+      "main_activity"
+  )
+  internal fun provideMainActivityClass(): Class<out Activity> =
+      mainActivityClass
 
-    @Provides
-    @Named(
-        "recheck"
-    )
-    internal fun provideRecheckServiceClass(): Class<out IntentService> =
-        recheckServiceClass
+  @Provides
+  @Named(
+      "recheck"
+  )
+  internal fun provideRecheckServiceClass(): Class<out IntentService> =
+      recheckServiceClass
 
-    @Provides
-    @Named(
-        "computation"
-    )
-    internal fun provideComputationScheduler(): Scheduler = pyDroidModule.provideComputationScheduler()
+  @Provides
+  @Named(
+      "computation"
+  )
+  internal fun provideComputationScheduler(): Scheduler = pyDroidModule.provideComputationScheduler()
 
-    @Provides
-    @Named("io")
-    internal fun provideIOScheduler(): Scheduler = pyDroidModule.provideIoScheduler()
+  @Provides
+  @Named("io")
+  internal fun provideIOScheduler(): Scheduler = pyDroidModule.provideIoScheduler()
 
-    @Provides
-    @Named("main")
-    internal fun provideMainScheduler(): Scheduler = pyDroidModule.provideMainThreadScheduler()
+  @Provides
+  @Named("main")
+  internal fun provideMainScheduler(): Scheduler = pyDroidModule.provideMainThreadScheduler()
 
-    @Provides
-    internal fun provideImageLoader(): ImageLoader = loaderModule.provideImageLoader()
+  @Provides
+  internal fun provideImageLoader(): ImageLoader = loaderModule.provideImageLoader()
 }

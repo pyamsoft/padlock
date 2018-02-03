@@ -36,32 +36,32 @@ class MainPresenter @Inject internal constructor(
     ioScheduler, mainScheduler
 ) {
 
-    override fun onCreate() {
-        super.onCreate()
-        showOnboardingOrDefault()
+  override fun onCreate() {
+    super.onCreate()
+    showOnboardingOrDefault()
+  }
+
+  private fun showOnboardingOrDefault() {
+    dispose {
+      interactor.isOnboardingComplete()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            if (it) {
+              view?.onShowDefaultPage()
+            } else {
+              view?.onShowOnboarding()
+            }
+          }, { Timber.e(it, "onError") })
     }
+  }
 
-    private fun showOnboardingOrDefault() {
-        dispose {
-            interactor.isOnboardingComplete()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({
-                    if (it) {
-                        view?.onShowDefaultPage()
-                    } else {
-                        view?.onShowOnboarding()
-                    }
-                }, { Timber.e(it, "onError") })
-        }
-    }
+  interface View : MainCallback
 
-    interface View : MainCallback
+  interface MainCallback {
 
-    interface MainCallback {
+    fun onShowDefaultPage()
 
-        fun onShowDefaultPage()
-
-        fun onShowOnboarding()
-    }
+    fun onShowOnboarding()
+  }
 }

@@ -27,64 +27,74 @@ import com.pyamsoft.pydroid.data.Cache
 
 object ListStateUtil : Cache {
 
-    private const val KEY_CURRENT_POSITION: String = "key_current_position"
-    private val cache: MutableMap<String, Int> = LinkedHashMap()
+  private const val KEY_CURRENT_POSITION: String = "key_current_position"
+  private val cache: MutableMap<String, Int> = LinkedHashMap()
 
-    @JvmStatic
-    @CheckResult
-    fun getCurrentPosition(recycler: RecyclerView?): Int {
-        if (recycler == null) {
-            return 0
-        } else {
-            val layoutManager: LayoutManager? = recycler.layoutManager
-            if (layoutManager is LinearLayoutManager) {
-                var position: Int = layoutManager.findFirstCompletelyVisibleItemPosition()
-                if (position < 0) {
-                    position = layoutManager.findFirstVisibleItemPosition()
-                }
-                return position
-            } else {
-                return 0
-            }
+  @JvmStatic
+  @CheckResult
+  fun getCurrentPosition(recycler: RecyclerView?): Int {
+    if (recycler == null) {
+      return 0
+    } else {
+      val layoutManager: LayoutManager? = recycler.layoutManager
+      if (layoutManager is LinearLayoutManager) {
+        var position: Int = layoutManager.findFirstCompletelyVisibleItemPosition()
+        if (position < 0) {
+          position = layoutManager.findFirstVisibleItemPosition()
         }
-    }
-
-    @JvmStatic
-    @CheckResult
-    fun restoreState(tag: String, savedInstanceState: Bundle?): Int {
-        val position: Int = savedInstanceState?.getInt(KEY_CURRENT_POSITION, 0) ?: 0
-        if (position == 0) {
-            return cache[tag] ?: 0
-        } else {
-            return position
-        }
-    }
-
-    @JvmStatic
-    fun saveState(tag: String, outState: Bundle?, recycler: RecyclerView?) {
-        val position: Int = getCurrentPosition(recycler)
-        if (position > 0) {
-            outState?.putInt(KEY_CURRENT_POSITION, position)
-            cache[tag] = position
-        }
-    }
-
-    @JvmStatic
-    @CheckResult
-    fun restorePosition(lastPosition: Int, recycler: RecyclerView?): Int {
-        if (recycler != null) {
-            if (lastPosition > 0) {
-                recycler.adapter?.let {
-                    val size: Int = it.itemCount
-                    recycler.scrollToPosition(if (lastPosition > size) size - 1 else lastPosition)
-                }
-            }
-        }
-
+        return position
+      } else {
         return 0
+      }
+    }
+  }
+
+  @JvmStatic
+  @CheckResult
+  fun restoreState(
+      tag: String,
+      savedInstanceState: Bundle?
+  ): Int {
+    val position: Int = savedInstanceState?.getInt(KEY_CURRENT_POSITION, 0) ?: 0
+    if (position == 0) {
+      return cache[tag] ?: 0
+    } else {
+      return position
+    }
+  }
+
+  @JvmStatic
+  fun saveState(
+      tag: String,
+      outState: Bundle?,
+      recycler: RecyclerView?
+  ) {
+    val position: Int = getCurrentPosition(recycler)
+    if (position > 0) {
+      outState?.putInt(KEY_CURRENT_POSITION, position)
+      cache[tag] = position
+    }
+  }
+
+  @JvmStatic
+  @CheckResult
+  fun restorePosition(
+      lastPosition: Int,
+      recycler: RecyclerView?
+  ): Int {
+    if (recycler != null) {
+      if (lastPosition > 0) {
+        recycler.adapter?.let {
+          val size: Int = it.itemCount
+          recycler.scrollToPosition(if (lastPosition > size) size - 1 else lastPosition)
+        }
+      }
     }
 
-    override fun clearCache() {
-        cache.clear()
-    }
+    return 0
+  }
+
+  override fun clearCache() {
+    cache.clear()
+  }
 }

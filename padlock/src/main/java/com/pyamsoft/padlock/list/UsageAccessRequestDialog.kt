@@ -21,22 +21,22 @@ package com.pyamsoft.padlock.list
 import android.app.Dialog
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
 
 class UsageAccessRequestDialog : CanaryDialog() {
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        activity!!.let {
-            return AlertDialog.Builder(it).setTitle("Enable PadLock Usage Access")
-                .setMessage(R.string.explain_accessibility_service)
-                .setPositiveButton("Let's Go") { _, _ ->
-                    UsageAccessRequestDelegate.launchUsageAccessActivity(it)
-                    dismiss()
-                }
-                .setNegativeButton("No Thanks") { _, _ -> dismiss() }
-                .create()
-        }
+  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    activity!!.let {
+      return AlertDialog.Builder(it)
+          .setTitle("Enable PadLock Usage Access")
+          .setMessage(R.string.explain_accessibility_service)
+          .setPositiveButton("Let's Go") { _, _ ->
+            UsageAccessRequestDelegate.launchUsageAccessActivity(it)
+            dismiss()
+          }
+          .setNegativeButton("No Thanks") { _, _ -> dismiss() }
+          .create()
     }
+  }
 }

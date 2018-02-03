@@ -21,27 +21,30 @@ package com.pyamsoft.padlock.api
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.RecheckStatus
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import io.reactivex.Flowable
 import io.reactivex.Single
 
 interface LockServiceInteractor {
 
-    fun cleanup()
+  fun cleanup()
 
-    fun reset()
+  fun reset()
 
-    fun clearMatchingForegroundEvent(event: ForegroundEvent)
+  fun clearMatchingForegroundEvent(event: ForegroundEvent)
 
-    @CheckResult
-    fun isActiveMatching(packageName: String, className: String): Single<Boolean>
+  @CheckResult
+  fun isActiveMatching(
+      packageName: String,
+      className: String
+  ): Single<Boolean>
 
-    @CheckResult
-    fun listenForForegroundEvents(): Flowable<ForegroundEvent>
+  @CheckResult
+  fun listenForForegroundEvents(): Flowable<ForegroundEvent>
 
-    @CheckResult
-    fun processEvent(
-        packageName: String, className: String,
-        forcedRecheck: RecheckStatus
-    ): Single<PadLockEntryModel>
+  @CheckResult
+  fun processEvent(
+      packageName: String,
+      className: String,
+      forcedRecheck: RecheckStatus
+  ): Single<PadLockEntryModel>
 }

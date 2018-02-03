@@ -38,16 +38,16 @@ class AppIconLoader @Inject internal constructor(
     private val packageDrawableManager: PackageDrawableManager
 ) : Cache {
 
-    override fun clearCache() {
-        appIconImageCache.clearCache()
-    }
+  override fun clearCache() {
+    appIconImageCache.clearCache()
+  }
 
-    @CheckResult
-    fun forPackageName(packageName: String): GenericLoader<Drawable> =
-        AppIconImageLoader(
-            packageName, appIconImageCache,
-            packageDrawableManager,
-            mainScheduler,
-            ioScheduler
-        )
+  @CheckResult
+  fun forPackageName(packageName: String): GenericLoader<Drawable> =
+      AppIconImageLoader(
+          packageName, appIconImageCache,
+          packageDrawableManager,
+          mainScheduler,
+          ioScheduler
+      )
 }

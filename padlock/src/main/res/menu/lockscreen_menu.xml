@@ -23,84 +23,84 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
 
-    <item
-        android:icon="@drawable/ic_schedule_24dp"
-        android:title="@string/ignore"
-        app:showAsAction="ifRoom">
+  <item
+      android:icon="@drawable/ic_schedule_24dp"
+      android:title="@string/ignore"
+      app:showAsAction="ifRoom">
 
-        <menu>
+    <menu>
 
-            <group android:checkableBehavior="single">
+      <group android:checkableBehavior="single">
 
-                <item
-                    android:id="@+id/menu_ignore_one"
-                    android:checked="false"
-                    android:title="@string/ignore_for_1_minute"
-                    app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_ignore_one"
+            android:checked="false"
+            android:title="@string/ignore_for_1_minute"
+            app:showAsAction="never"/>
 
-                <item
-                    android:id="@+id/menu_ignore_five"
-                    android:checked="false"
-                    android:title="@string/ignore_for_5_minutes"
-                    app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_ignore_five"
+            android:checked="false"
+            android:title="@string/ignore_for_5_minutes"
+            app:showAsAction="never"/>
 
-                <item
-                    android:id="@+id/menu_ignore_ten"
-                    android:checked="false"
-                    android:title="@string/ignore_for_10_minutes"
-                    app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_ignore_ten"
+            android:checked="false"
+            android:title="@string/ignore_for_10_minutes"
+            app:showAsAction="never"/>
 
-                <item
-                    android:id="@+id/menu_ignore_fifteen"
-                    android:checked="false"
-                    android:title="@string/ignore_for_15_minutes"
-                    app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_ignore_fifteen"
+            android:checked="false"
+            android:title="@string/ignore_for_15_minutes"
+            app:showAsAction="never"/>
 
-                <item
-                    android:id="@+id/menu_ignore_twenty"
-                    android:checked="false"
-                    android:title="@string/ignore_for_20_minutes"
-                    app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_ignore_twenty"
+            android:checked="false"
+            android:title="@string/ignore_for_20_minutes"
+            app:showAsAction="never"/>
 
-                <item
-                    android:id="@+id/menu_ignore_thirty"
-                    android:checked="false"
-                    android:title="@string/ignore_for_30_minutes"
-                    app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_ignore_thirty"
+            android:checked="false"
+            android:title="@string/ignore_for_30_minutes"
+            app:showAsAction="never"/>
 
-                <item
-                    android:id="@+id/menu_ignore_fourtyfive"
-                    android:checked="false"
-                    android:title="@string/ignore_for_45_minutes"
-                    app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_ignore_fourtyfive"
+            android:checked="false"
+            android:title="@string/ignore_for_45_minutes"
+            app:showAsAction="never"/>
 
-                <item
-                    android:id="@+id/menu_ignore_sixty"
-                    android:checked="false"
-                    android:title="@string/ignore_for_60_minutes"
-                    app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_ignore_sixty"
+            android:checked="false"
+            android:title="@string/ignore_for_60_minutes"
+            app:showAsAction="never"/>
 
-            </group>
+      </group>
 
-            <group android:checkableBehavior="all">
+      <group android:checkableBehavior="all">
 
-                <item
-                    android:id="@+id/menu_exclude"
-                    android:checked="false"
-                    android:title="@string/exclude_entry"
-                    app:showAsAction="never" />
+        <item
+            android:id="@+id/menu_exclude"
+            android:checked="false"
+            android:title="@string/exclude_entry"
+            app:showAsAction="never"/>
 
-            </group>
+      </group>
 
-        </menu>
+    </menu>
 
-    </item>
+  </item>
 
-    <item
-        android:id="@+id/menu_lockscreen_info"
-        android:icon="@drawable/ic_info_24dp"
-        android:title="@string/info_for_nerds"
-        app:showAsAction="never" />
+  <item
+      android:id="@+id/menu_lockscreen_info"
+      android:icon="@drawable/ic_info_24dp"
+      android:title="@string/info_for_nerds"
+      app:showAsAction="never"/>
 
 
 </menu>

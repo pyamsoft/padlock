@@ -18,4 +18,7 @@
 
 package com.pyamsoft.padlock.model
 
-data class LockWhitelistedEvent(val packageName: String, val activityName: String)
+data class LockWhitelistedEvent(
+    val packageName: String,
+    val activityName: String
+)

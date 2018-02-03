@@ -28,11 +28,11 @@ import javax.inject.Singleton
 internal class LockInfoChangeBus @Inject internal constructor() :
     EventBus<LockInfoEvent.Callback> {
 
-    private val bus: EventBus<LockInfoEvent.Callback> = RxBus.create()
+  private val bus: EventBus<LockInfoEvent.Callback> = RxBus.create()
 
-    override fun listen(): Observable<LockInfoEvent.Callback> = bus.listen()
+  override fun listen(): Observable<LockInfoEvent.Callback> = bus.listen()
 
-    override fun publish(event: LockInfoEvent.Callback) {
-        bus.publish(event)
-    }
+  override fun publish(event: LockInfoEvent.Callback) {
+    bus.publish(event)
+  }
 }

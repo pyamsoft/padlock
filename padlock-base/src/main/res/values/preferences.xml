@@ -18,18 +18,18 @@
 
 <resources>
 
-    <string name="ignore_time_key">ignore_time_nonzero</string>
-    <string name="ignore_time_default">1</string>
+  <string name="ignore_time_key">ignore_time_nonzero</string>
+  <string name="ignore_time_default">1</string>
 
-    <string name="timeout_time_key">timeout_time</string>
-    <string name="timeout_time_default">0</string>
+  <string name="timeout_time_key">timeout_time</string>
+  <string name="timeout_time_default">0</string>
 
-    <string name="install_listener_key">install_listener</string>
-    <bool name="install_listener_default">true</bool>
+  <string name="install_listener_key">install_listener</string>
+  <bool name="install_listener_default">true</bool>
 
-    <string name="ignore_keyguard_key">ignore_keyguard</string>
-    <bool name="ignore_keyguard_default">true</bool>
+  <string name="ignore_keyguard_key">ignore_keyguard</string>
+  <bool name="ignore_keyguard_default">true</bool>
 
-    <string name="lock_screen_type_key">lock_screen_type</string>
-    <string name="lock_screen_type_default">TYPE_TEXT</string>
+  <string name="lock_screen_type_key">lock_screen_type</string>
+  <string name="lock_screen_type_default">TYPE_TEXT</string>
 </resources>

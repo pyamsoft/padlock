@@ -25,6 +25,6 @@ import dagger.Module
 @Module
 abstract class MainModule {
 
-    @Binds
-    internal abstract fun provideMainInteractor(impl: MainInteractorImpl): MainInteractor
+  @Binds
+  internal abstract fun provideMainInteractor(impl: MainInteractorImpl): MainInteractor
 }

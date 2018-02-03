@@ -23,15 +23,15 @@ import com.pyamsoft.padlock.uicommon.CanaryFragment
 
 abstract class PinEntryBaseFragment : CanaryFragment() {
 
-    fun dismissParent() {
-        val fragmentManager: FragmentManager? = parentFragment?.fragmentManager
-        val pinFragment = fragmentManager?.findFragmentByTag(PinEntryDialog.TAG)
-        if (pinFragment is PinEntryDialog) {
-            pinFragment.dismiss()
-        } else {
-            throw ClassCastException("Fragment is not PinEntryDialog")
-        }
+  fun dismissParent() {
+    val fragmentManager: FragmentManager? = parentFragment?.fragmentManager
+    val pinFragment = fragmentManager?.findFragmentByTag(PinEntryDialog.TAG)
+    if (pinFragment is PinEntryDialog) {
+      pinFragment.dismiss()
+    } else {
+      throw ClassCastException("Fragment is not PinEntryDialog")
     }
+  }
 
-    abstract fun onSubmitPressed()
+  abstract fun onSubmitPressed()
 }

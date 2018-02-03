@@ -19,11 +19,7 @@
 package com.pyamsoft.padlock.list
 
 import android.os.Bundle
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import com.pyamsoft.padlock.databinding.DialogInfoLocktypeExplainBinding
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
@@ -31,46 +27,50 @@ import com.pyamsoft.pydroid.ui.util.setUpEnabled
 
 class LockInfoExplanationDialog : CanaryDialog() {
 
-    private lateinit var binding: DialogInfoLocktypeExplainBinding
+  private lateinit var binding: DialogInfoLocktypeExplainBinding
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = DialogInfoLocktypeExplainBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+  override fun onCreateView(
+      inflater: LayoutInflater,
+      container: ViewGroup?,
+      savedInstanceState: Bundle?
+  ): View? {
+    binding = DialogInfoLocktypeExplainBinding.inflate(inflater, container, false)
+    return binding.root
+  }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.apply {
-            lockInfoExplainToolbar.setUpEnabled(true)
-            lockInfoExplainToolbar.setNavigationOnClickListener(DebouncedOnClickListener.create {
-                dismiss()
-            })
-        }
+  override fun onViewCreated(
+      view: View,
+      savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
+    binding.apply {
+      lockInfoExplainToolbar.setUpEnabled(true)
+      lockInfoExplainToolbar.setNavigationOnClickListener(DebouncedOnClickListener.create {
+        dismiss()
+      })
     }
+  }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding.unbind()
-    }
+  override fun onDestroyView() {
+    super.onDestroyView()
+    binding.unbind()
+  }
 
-    override fun onResume() {
-        super.onResume()
-        // The dialog is super small for some reason. We have to set the size manually, in onResume
-        val window = dialog.window
-        window?.apply {
-            setLayout(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.WRAP_CONTENT
-            )
-            setGravity(Gravity.CENTER)
-        }
+  override fun onResume() {
+    super.onResume()
+    // The dialog is super small for some reason. We have to set the size manually, in onResume
+    val window = dialog.window
+    window?.apply {
+      setLayout(
+          WindowManager.LayoutParams.MATCH_PARENT,
+          WindowManager.LayoutParams.WRAP_CONTENT
+      )
+      setGravity(Gravity.CENTER)
     }
+  }
 
-    companion object {
-        const val TAG = "LockInfoExplainationDialog"
-    }
+  companion object {
+    const val TAG = "LockInfoExplainationDialog"
+  }
 }
 

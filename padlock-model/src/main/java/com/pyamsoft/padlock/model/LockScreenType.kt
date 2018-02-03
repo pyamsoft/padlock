@@ -19,5 +19,6 @@
 package com.pyamsoft.padlock.model
 
 enum class LockScreenType {
-    TYPE_PATTERN, TYPE_TEXT
+  TYPE_PATTERN,
+  TYPE_TEXT
 }

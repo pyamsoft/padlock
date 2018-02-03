@@ -23,15 +23,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
 
-    <group android:id="@+id/menu_group_list_system">
+  <group android:id="@+id/menu_group_list_system">
 
-        <item
-            android:id="@+id/menu_is_system"
-            android:checkable="true"
-            android:title="@string/show_system_applications"
-            app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_is_system"
+        android:checkable="true"
+        android:title="@string/show_system_applications"
+        app:showAsAction="never"/>
 
-    </group>
+  </group>
 
 
 </menu>

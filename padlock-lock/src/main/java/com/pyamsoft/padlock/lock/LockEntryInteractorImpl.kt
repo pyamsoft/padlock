@@ -22,15 +22,7 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.api.JobSchedulerCompat
-import com.pyamsoft.padlock.api.LockEntryInteractor
-import com.pyamsoft.padlock.api.LockHelper
-import com.pyamsoft.padlock.api.LockPassed
-import com.pyamsoft.padlock.api.LockScreenPreferences
-import com.pyamsoft.padlock.api.MasterPinInteractor
-import com.pyamsoft.padlock.api.PadLockDBInsert
-import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.api.PadLockDBUpdate
+import com.pyamsoft.padlock.api.*
 import com.pyamsoft.padlock.model.Recheck
 import com.pyamsoft.pydroid.optional.Optional.Present
 import com.pyamsoft.pydroid.optional.Optionals
@@ -51,7 +43,8 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     private val lockHelper: LockHelper,
     private val preferences: LockScreenPreferences,
     private val jobSchedulerCompat: JobSchedulerCompat,
-    private val masterPinInteractor: MasterPinInteractor, private val dbInsert: PadLockDBInsert,
+    private val masterPinInteractor: MasterPinInteractor,
+    private val dbInsert: PadLockDBInsert,
     private val dbUpdate: PadLockDBUpdate,
     private val dbQuery: PadLockDBQuery,
     @param:Named(
@@ -60,183 +53,215 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
 ) :
     LockEntryInteractor {
 
-    private val failCount: MutableMap<String, Int> = HashMap()
+  private val failCount: MutableMap<String, Int> = HashMap()
 
-    override fun submitPin(
-        packageName: String, activityName: String, lockCode: String?,
-        currentAttempt: String
-    ): Single<Boolean> {
-        return dbQuery.queryWithPackageActivityNameDefault(packageName, activityName)
-            .flatMap {
-                val lockUntilTime = it.lockUntilTime()
-                return@flatMap masterPinInteractor.getMasterPin().map {
-                    Timber.d("Attempt unlock: %s %s", packageName, activityName)
-                    Timber.d("Check entry is not locked: %d", lockUntilTime)
-                    if (System.currentTimeMillis() < lockUntilTime) {
-                        Timber.e("Entry is still locked. Fail unlock")
-                        return@map Optionals.ofNullable(null)
-                    }
-
-                    return@map when (lockCode) {
-                        null -> it
-                        else -> lockCode.asOptional()
-                    }
+  override fun submitPin(
+      packageName: String,
+      activityName: String,
+      lockCode: String?,
+      currentAttempt: String
+  ): Single<Boolean> {
+    return dbQuery.queryWithPackageActivityNameDefault(packageName, activityName)
+        .flatMap {
+          val lockUntilTime = it.lockUntilTime()
+          return@flatMap masterPinInteractor.getMasterPin()
+              .map {
+                Timber.d("Attempt unlock: %s %s", packageName, activityName)
+                Timber.d("Check entry is not locked: %d", lockUntilTime)
+                if (System.currentTimeMillis() < lockUntilTime) {
+                  Timber.e("Entry is still locked. Fail unlock")
+                  return@map Optionals.ofNullable(null)
                 }
-            }.flatMap {
-                return@flatMap when (it) {
-                    is Present -> lockHelper.checkSubmissionAttempt(
-                        currentAttempt,
-                        it.value
-                    )
-                    else -> Single.just(false)
+
+                return@map when (lockCode) {
+                  null -> it
+                  else -> lockCode.asOptional()
                 }
-            }
-    }
-
-    @CheckResult
-    private fun whitelistEntry(
-        packageName: String, activityName: String,
-        realName: String, lockCode: String?, isSystem: Boolean
-    ): Completable {
-        Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName)
-        return dbInsert.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
-    }
-
-    @CheckResult
-    private fun queueRecheckJob(
-        packageName: String, realName: String, recheckTime: Long
-    ): Completable {
-        return Completable.fromAction {
-            // Cancel any old recheck job for the class, but not the package
-            val intent = Intent(appContext, recheckServiceClass)
-            intent.putExtra(Recheck.EXTRA_PACKAGE_NAME, packageName)
-            intent.putExtra(Recheck.EXTRA_CLASS_NAME, realName)
-            jobSchedulerCompat.cancel(intent)
-
-            // Queue up a new recheck job
-            // Since alarms are inexact, buffer by an extra minute
-            jobSchedulerCompat.queue(
-                intent,
-                System.currentTimeMillis() + recheckTime + ONE_MINUTE_MILLIS
+              }
+        }
+        .flatMap {
+          return@flatMap when (it) {
+            is Present -> lockHelper.checkSubmissionAttempt(
+                currentAttempt,
+                it.value
             )
+            else -> Single.just(false)
+          }
         }
+  }
+
+  @CheckResult
+  private fun whitelistEntry(
+      packageName: String,
+      activityName: String,
+      realName: String,
+      lockCode: String?,
+      isSystem: Boolean
+  ): Completable {
+    Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName)
+    return dbInsert.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
+  }
+
+  @CheckResult
+  private fun queueRecheckJob(
+      packageName: String,
+      realName: String,
+      recheckTime: Long
+  ): Completable {
+    return Completable.fromAction {
+      // Cancel any old recheck job for the class, but not the package
+      val intent = Intent(appContext, recheckServiceClass)
+      intent.putExtra(Recheck.EXTRA_PACKAGE_NAME, packageName)
+      intent.putExtra(Recheck.EXTRA_CLASS_NAME, realName)
+      jobSchedulerCompat.cancel(intent)
+
+      // Queue up a new recheck job
+      // Since alarms are inexact, buffer by an extra minute
+      jobSchedulerCompat.queue(
+          intent,
+          System.currentTimeMillis() + recheckTime + ONE_MINUTE_MILLIS
+      )
     }
+  }
 
-    @CheckResult
-    private fun ignoreEntryForTime(
-        ignoreMinutesInMillis: Long, packageName: String, activityName: String
-    ): Completable {
-        return Completable.defer {
-            val newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis
-            Timber.d(
-                "Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
-                ignoreMinutesInMillis
-            )
+  @CheckResult
+  private fun ignoreEntryForTime(
+      ignoreMinutesInMillis: Long,
+      packageName: String,
+      activityName: String
+  ): Completable {
+    return Completable.defer {
+      val newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis
+      Timber.d(
+          "Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
+          ignoreMinutesInMillis
+      )
 
-            // Add an extra second here to artificially de-bounce quick requests, like those commonly in multi window mode
-            return@defer dbUpdate.updateIgnoreTime(packageName, activityName, newIgnoreTime + 1000L)
+      // Add an extra second here to artificially de-bounce quick requests, like those commonly in multi window mode
+      return@defer dbUpdate.updateIgnoreTime(packageName, activityName, newIgnoreTime + 1000L)
+    }
+  }
+
+  override fun lockEntryOnFail(
+      packageName: String,
+      activityName: String
+  ): Maybe<Long> {
+    return Single.fromCallable {
+      val failId: String = getFailId(packageName, activityName)
+      val newFailCount: Int = failCount.getOrPut(failId, { 0 }) + 1
+      failCount[failId] = newFailCount
+      return@fromCallable newFailCount
+    }
+        .filter { it > DEFAULT_MAX_FAIL_COUNT }
+        .flatMap { getTimeoutPeriodMinutesInMillis() }
+        .filter { it > 0 }
+        .flatMap { lockEntry(it, packageName, activityName) }
+  }
+
+  @CheckResult
+  private fun getTimeoutPeriodMinutesInMillis(): Maybe<Long> {
+    return Maybe.fromCallable { preferences.getTimeoutPeriod() }
+        .map {
+          TimeUnit.MINUTES.toMillis(it)
         }
-    }
-
-    override fun lockEntryOnFail(packageName: String, activityName: String): Maybe<Long> {
-        return Single.fromCallable {
-            val failId: String = getFailId(packageName, activityName)
-            val newFailCount: Int = failCount.getOrPut(failId, { 0 }) + 1
-            failCount[failId] = newFailCount
-            return@fromCallable newFailCount
-        }.filter { it > DEFAULT_MAX_FAIL_COUNT }.flatMap { getTimeoutPeriodMinutesInMillis() }
-            .filter { it > 0 }.flatMap { lockEntry(it, packageName, activityName) }
-    }
-
-    @CheckResult
-    private fun getTimeoutPeriodMinutesInMillis(): Maybe<Long> {
-        return Maybe.fromCallable { preferences.getTimeoutPeriod() }.map {
-            TimeUnit.MINUTES.toMillis(it)
-        }.doOnSuccess {
-                Timber.d("Current timeout period: $it")
-            }
-    }
-
-    @CheckResult
-    private fun lockEntry(
-        timeOutMinutesInMillis: Long, packageName: String, activityName: String
-    ): Maybe<Long> {
-        return Maybe.defer {
-            val currentTime = System.currentTimeMillis()
-            val newLockUntilTime = currentTime + timeOutMinutesInMillis
-            Timber.d(
-                "Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
-                timeOutMinutesInMillis
-            )
-
-            return@defer dbUpdate.updateLockTime(packageName, activityName, newLockUntilTime)
-                .andThen(Maybe.just(newLockUntilTime))
+        .doOnSuccess {
+          Timber.d("Current timeout period: $it")
         }
-    }
+  }
 
-    override fun getHint(): Single<String> {
-        return masterPinInteractor.getHint().map {
-            return@map when (it) {
-                is Present -> it.value
-                else -> ""
-            }
+  @CheckResult
+  private fun lockEntry(
+      timeOutMinutesInMillis: Long,
+      packageName: String,
+      activityName: String
+  ): Maybe<Long> {
+    return Maybe.defer {
+      val currentTime = System.currentTimeMillis()
+      val newLockUntilTime = currentTime + timeOutMinutesInMillis
+      Timber.d(
+          "Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
+          timeOutMinutesInMillis
+      )
+
+      return@defer dbUpdate.updateLockTime(packageName, activityName, newLockUntilTime)
+          .andThen(Maybe.just(newLockUntilTime))
+    }
+  }
+
+  override fun getHint(): Single<String> {
+    return masterPinInteractor.getHint()
+        .map {
+          return@map when (it) {
+            is Present -> it.value
+            else -> ""
+          }
         }
+  }
+
+  override fun clearFailCount() {
+    failCount.clear()
+  }
+
+  override fun postUnlock(
+      packageName: String,
+      activityName: String,
+      realName: String,
+      lockCode: String?,
+      isSystem: Boolean,
+      whitelist: Boolean,
+      ignoreTime: Long
+  ): Completable {
+    return Completable.defer {
+      val ignoreMillis = TimeUnit.MINUTES.toMillis(ignoreTime)
+      val whitelistObservable: Completable
+      val ignoreObservable: Completable
+      val recheckObservable: Completable
+
+      // Whitelist
+      if (whitelist) {
+        whitelistObservable = whitelistEntry(
+            packageName, activityName, realName, lockCode,
+            isSystem
+        )
+      } else {
+        whitelistObservable = Completable.complete()
+      }
+
+      // If time > 0, mark as ignored
+      if (ignoreTime > 0) {
+        ignoreObservable = ignoreEntryForTime(ignoreMillis, packageName, activityName)
+
+        // If we are not whitelisting
+        if (whitelist) {
+          recheckObservable = Completable.complete()
+        } else {
+          recheckObservable = queueRecheckJob(packageName, realName, ignoreMillis)
+        }
+      } else {
+        ignoreObservable = Completable.complete()
+        recheckObservable = Completable.complete()
+      }
+
+      return@defer ignoreObservable.andThen(recheckObservable)
+          .andThen(whitelistObservable)
     }
-
-    override fun clearFailCount() {
-        failCount.clear()
-    }
-
-    override fun postUnlock(
-        packageName: String,
-        activityName: String, realName: String, lockCode: String?,
-        isSystem: Boolean, whitelist: Boolean, ignoreTime: Long
-    ): Completable {
-        return Completable.defer {
-            val ignoreMillis = TimeUnit.MINUTES.toMillis(ignoreTime)
-            val whitelistObservable: Completable
-            val ignoreObservable: Completable
-            val recheckObservable: Completable
-
-            // Whitelist
-            if (whitelist) {
-                whitelistObservable = whitelistEntry(
-                    packageName, activityName, realName, lockCode,
-                    isSystem
-                )
-            } else {
-                whitelistObservable = Completable.complete()
-            }
-
-            // If time > 0, mark as ignored
-            if (ignoreTime > 0) {
-                ignoreObservable = ignoreEntryForTime(ignoreMillis, packageName, activityName)
-
-                // If we are not whitelisting
-                if (whitelist) {
-                    recheckObservable = Completable.complete()
-                } else {
-                    recheckObservable = queueRecheckJob(packageName, realName, ignoreMillis)
-                }
-            } else {
-                ignoreObservable = Completable.complete()
-                recheckObservable = Completable.complete()
-            }
-
-            return@defer ignoreObservable.andThen(recheckObservable).andThen(whitelistObservable)
-        }.andThen(Completable.fromAction {
-                failCount[getFailId(packageName, activityName)] = 0
-            }).andThen(Completable.fromAction {
-            lockPassed.add(packageName, activityName)
+        .andThen(Completable.fromAction {
+          failCount[getFailId(packageName, activityName)] = 0
         })
-    }
+        .andThen(Completable.fromAction {
+          lockPassed.add(packageName, activityName)
+        })
+  }
 
-    @CheckResult
-    private fun getFailId(packageName: String, activityName: String): String =
-        "$packageName|$activityName"
+  @CheckResult
+  private fun getFailId(
+      packageName: String,
+      activityName: String
+  ): String =
+      "$packageName|$activityName"
 
-    companion object {
-        const val DEFAULT_MAX_FAIL_COUNT: Int = 2
-        private val ONE_MINUTE_MILLIS = TimeUnit.MINUTES.toMillis(1L)
-    }
+  companion object {
+    const val DEFAULT_MAX_FAIL_COUNT: Int = 2
+    private val ONE_MINUTE_MILLIS = TimeUnit.MINUTES.toMillis(1L)
+  }
 }

@@ -22,10 +22,19 @@ import android.support.annotation.CheckResult
 
 interface LockPassed {
 
-    fun add(packageName: String, activityName: String)
+  fun add(
+      packageName: String,
+      activityName: String
+  )
 
-    fun remove(packageName: String, activityName: String)
+  fun remove(
+      packageName: String,
+      activityName: String
+  )
 
-    @CheckResult
-    fun check(packageName: String, activityName: String): Boolean
+  @CheckResult
+  fun check(
+      packageName: String,
+      activityName: String
+  ): Boolean
 }

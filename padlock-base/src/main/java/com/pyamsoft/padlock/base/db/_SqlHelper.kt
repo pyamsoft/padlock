@@ -21,9 +21,7 @@ package com.pyamsoft.padlock.base.db
 import android.support.annotation.CheckResult
 import com.squareup.sqlbrite2.BriteDatabase
 import com.squareup.sqldelight.SqlDelightCompiledStatement
-import com.squareup.sqldelight.SqlDelightCompiledStatement.Delete
-import com.squareup.sqldelight.SqlDelightCompiledStatement.Insert
-import com.squareup.sqldelight.SqlDelightCompiledStatement.Update
+import com.squareup.sqldelight.SqlDelightCompiledStatement.*
 import com.squareup.sqldelight.SqlDelightStatement
 
 @CheckResult
@@ -34,15 +32,16 @@ internal fun BriteDatabase.createQuery(query: SqlDelightStatement) = createQuery
 
 @CheckResult
 internal inline fun <T : SqlDelightCompiledStatement> BriteDatabase.bindAndExecute(
-    statement: T, bind: T.() -> Unit
+    statement: T,
+    bind: T.() -> Unit
 ): Long {
-    synchronized(statement) {
-        statement.bind()
-        when (statement) {
-            is Insert -> return executeInsert(statement.table, statement.program)
-            is Update -> return executeUpdateDelete(statement.table, statement.program).toLong()
-            is Delete -> return executeUpdateDelete(statement.table, statement.program).toLong()
-            else -> throw IllegalStateException("Do not call execute() on query statements")
-        }
+  synchronized(statement) {
+    statement.bind()
+    when (statement) {
+      is Insert -> return executeInsert(statement.table, statement.program)
+      is Update -> return executeUpdateDelete(statement.table, statement.program).toLong()
+      is Delete -> return executeUpdateDelete(statement.table, statement.program).toLong()
+      else -> throw IllegalStateException("Do not call execute() on query statements")
     }
+  }
 }

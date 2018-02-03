@@ -17,64 +17,65 @@
   -->
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="16dp">
+  <android.support.constraint.ConstraintLayout
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:paddingBottom="16dp">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/lock_info_explain_toolbar"
-            android:layout_width="0dp"
-            android:layout_height="?attr/actionBarSize"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:title="@string/lock_type_explanation" />
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/lock_info_explain_toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/lock_type_explanation"/>
 
-        <RadioButton
-            android:id="@+id/lock_info_example_default"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:checked="true"
-            android:clickable="false"
-            android:text="@string/lock_info_default_explain"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/lock_info_explain_toolbar" />
+    <RadioButton
+        android:id="@+id/lock_info_example_default"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:checked="true"
+        android:clickable="false"
+        android:text="@string/lock_info_default_explain"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lock_info_explain_toolbar"/>
 
-        <RadioButton
-            android:id="@+id/lock_info_example_whitelist"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:checked="true"
-            android:clickable="false"
-            android:text="@string/lock_info_whitelist_explain"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            app:buttonTint="@color/green500"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/lock_info_example_default" />
+    <RadioButton
+        android:id="@+id/lock_info_example_whitelist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:checked="true"
+        android:clickable="false"
+        android:text="@string/lock_info_whitelist_explain"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:buttonTint="@color/green500"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_example_default"/>
 
-        <RadioButton
-            android:id="@+id/lock_info_example_blacklist"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:checked="true"
-            android:clickable="false"
-            android:text="@string/lock_info_blacklist_explain"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            app:buttonTint="@color/red500"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/lock_info_example_whitelist" />
+    <RadioButton
+        android:id="@+id/lock_info_example_blacklist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:checked="true"
+        android:clickable="false"
+        android:text="@string/lock_info_blacklist_explain"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:buttonTint="@color/red500"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lock_info_example_whitelist"/>
 
-    </android.support.constraint.ConstraintLayout>
+  </android.support.constraint.ConstraintLayout>
 </layout>

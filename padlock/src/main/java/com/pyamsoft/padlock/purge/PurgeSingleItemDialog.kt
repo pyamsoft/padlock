@@ -30,43 +30,45 @@ import javax.inject.Inject
 
 class PurgeSingleItemDialog : CanaryDialog() {
 
-    @field:Inject
-    internal lateinit var purgePublisher: PurgePublisher
-    private lateinit var packageName: String
+  @field:Inject
+  internal lateinit var purgePublisher: PurgePublisher
+  private lateinit var packageName: String
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            packageName = it.getString(PACKAGE, "")
-        }
-
-        Injector.obtain<PadLockComponent>(context!!.applicationContext).inject(this)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    arguments?.let {
+      packageName = it.getString(PACKAGE, "")
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(activity!!).setMessage(
+    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+        .inject(this)
+  }
+
+  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    return AlertDialog.Builder(activity!!)
+        .setMessage(
             "Really delete old entry for $packageName?"
         )
-            .setPositiveButton("Delete") { _, _ ->
-                purgePublisher.publish(PurgeEvent(packageName))
-                dismiss()
-            }
-            .setNegativeButton("Cancel") { _, _ -> dismiss() }
-            .create()
-    }
-
-    companion object {
-
-        private const val PACKAGE = "package_name"
-
-        @CheckResult
-        @JvmStatic
-        fun newInstance(packageName: String): PurgeSingleItemDialog {
-            return PurgeSingleItemDialog().apply {
-                arguments = Bundle().apply {
-                    putString(PACKAGE, packageName)
-                }
-            }
+        .setPositiveButton("Delete") { _, _ ->
+          purgePublisher.publish(PurgeEvent(packageName))
+          dismiss()
         }
+        .setNegativeButton("Cancel") { _, _ -> dismiss() }
+        .create()
+  }
+
+  companion object {
+
+    private const val PACKAGE = "package_name"
+
+    @CheckResult
+    @JvmStatic
+    fun newInstance(packageName: String): PurgeSingleItemDialog {
+      return PurgeSingleItemDialog().apply {
+        arguments = Bundle().apply {
+          putString(PACKAGE, packageName)
+        }
+      }
     }
+  }
 }

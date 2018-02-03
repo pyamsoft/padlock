@@ -23,10 +23,8 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
-import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.PadLockService
@@ -41,107 +39,109 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : TamperActivity(), MainPresenter.View {
 
-    @Inject
-    internal lateinit var presenter: MainPresenter
-    private lateinit var binding: ActivityMainBinding
+  @Inject
+  internal lateinit var presenter: MainPresenter
+  private lateinit var binding: ActivityMainBinding
 
-    override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
+  override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
 
-    override val safePackageName: String = "com.pyamsoft.padlock"
+  override val safePackageName: String = "com.pyamsoft.padlock"
 
-    override val versionName: String = BuildConfig.VERSION_NAME
+  override val versionName: String = BuildConfig.VERSION_NAME
 
-    override val applicationIcon: Int = R.mipmap.ic_launcher
+  override val applicationIcon: Int = R.mipmap.ic_launcher
 
-    override val applicationName: String by lazy(NONE) { getString(R.string.app_name) }
+  override val applicationName: String by lazy(NONE) { getString(R.string.app_name) }
 
-    override val changeLogLines: Array<String>
-        get() = arrayOf(
-            "CHANGE: Better support for views while in Multi-Window mode",
-            "BUGFIX: Fix a memory leak when switching between views very quickly"
-        )
+  override val changeLogLines: Array<String>
+    get() = arrayOf(
+        "CHANGE: Better support for views while in Multi-Window mode",
+        "BUGFIX: Fix a memory leak when switching between views very quickly"
+    )
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.Theme_PadLock_Light)
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
+  public override fun onCreate(savedInstanceState: Bundle?) {
+    setTheme(R.style.Theme_PadLock_Light)
+    super.onCreate(savedInstanceState)
+    binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+    PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
-        Injector.obtain<PadLockComponent>(applicationContext).inject(this)
+    Injector.obtain<PadLockComponent>(applicationContext)
+        .inject(this)
 
-        setupToolbar()
+    setupToolbar()
 
-        presenter.bind(this, this)
+    presenter.bind(this, this)
+  }
+
+  override fun onShowDefaultPage() {
+    // Set normal navigation
+    val fm = supportFragmentManager
+    // Un hide the action bar in case it was hidden
+    val actionBar = supportActionBar
+    if (actionBar != null) {
+      if (!actionBar.isShowing) {
+        actionBar.show()
+      }
     }
 
-    override fun onShowDefaultPage() {
-        // Set normal navigation
-        val fm = supportFragmentManager
-        // Un hide the action bar in case it was hidden
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            if (!actionBar.isShowing) {
-                actionBar.show()
-            }
-        }
-
-        if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
-                AboutLibrariesFragment.TAG
-            ) == null) {
-            Timber.d("Load default page")
-            fm.beginTransaction().add(R.id.fragment_container, MainFragment(), MainFragment.TAG)
-                .commit()
-        } else {
-            Timber.w("Default page or About libraries was already loaded")
-        }
+    if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
+            AboutLibrariesFragment.TAG
+        ) == null) {
+      Timber.d("Load default page")
+      fm.beginTransaction()
+          .add(R.id.fragment_container, MainFragment(), MainFragment.TAG)
+          .commit()
+    } else {
+      Timber.w("Default page or About libraries was already loaded")
     }
+  }
 
-    override fun onShowOnboarding() {
-        // TODO for now this is duplicated
-        onShowDefaultPage()
+  override fun onShowOnboarding() {
+    // TODO for now this is duplicated
+    onShowDefaultPage()
+  }
+
+  override fun onNewIntent(intent: Intent?) {
+    super.onNewIntent(intent)
+    setIntent(intent)
+  }
+
+  override fun onPause() {
+    super.onPause()
+    if (isFinishing || isChangingConfigurations) {
+      Timber.d(
+          "Even though a leak is reported, this should dismiss the window, and clear the leak"
+      )
+      binding.toolbar.menu.close()
+      binding.toolbar.dismissPopupMenus()
     }
+  }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        setIntent(intent)
+  private fun setupToolbar() {
+    binding.toolbar.apply {
+      setToolbar(this)
+      setTitle(R.string.app_name)
+      ViewCompat.setElevation(this, AppUtil.convertToDP(context, 4f))
+
+      setNavigationOnClickListener(DebouncedOnClickListener.create {
+        onBackPressed()
+      })
     }
+  }
 
-    override fun onPause() {
-        super.onPause()
-        if (isFinishing || isChangingConfigurations) {
-            Timber.d(
-                "Even though a leak is reported, this should dismiss the window, and clear the leak"
-            )
-            binding.toolbar.menu.close()
-            binding.toolbar.dismissPopupMenus()
-        }
+  override fun onDestroy() {
+    super.onDestroy()
+    binding.unbind()
+    if (!isChangingConfigurations) {
+      ListStateUtil.clearCache()
     }
+  }
 
-    private fun setupToolbar() {
-        binding.toolbar.apply {
-            setToolbar(this)
-            setTitle(R.string.app_name)
-            ViewCompat.setElevation(this, AppUtil.convertToDP(context, 4f))
+  override fun onPostResume() {
+    super.onPostResume()
+    AnimUtil.animateActionBarToolbar(binding.toolbar)
 
-            setNavigationOnClickListener(DebouncedOnClickListener.create {
-                onBackPressed()
-            })
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.unbind()
-        if (!isChangingConfigurations) {
-            ListStateUtil.clearCache()
-        }
-    }
-
-    override fun onPostResume() {
-        super.onPostResume()
-        AnimUtil.animateActionBarToolbar(binding.toolbar)
-
-        // Try to start service, will not if we do not have permission
-        PadLockService.start(this)
-    }
+    // Try to start service, will not if we do not have permission
+    PadLockService.start(this)
+  }
 }

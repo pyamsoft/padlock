@@ -24,15 +24,18 @@ import io.reactivex.Single
 
 interface LockScreenInteractor {
 
-    @CheckResult
-    fun getLockScreenType(): Single<LockScreenType>
+  @CheckResult
+  fun getLockScreenType(): Single<LockScreenType>
 
-    @CheckResult
-    fun getDefaultIgnoreTime(): Single<Long>
+  @CheckResult
+  fun getDefaultIgnoreTime(): Single<Long>
 
-    @CheckResult
-    fun getDisplayName(packageName: String): Single<String>
+  @CheckResult
+  fun getDisplayName(packageName: String): Single<String>
 
-    @CheckResult
-    fun isAlreadyUnlocked(packageName: String, activityName: String): Single<Boolean>
+  @CheckResult
+  fun isAlreadyUnlocked(
+      packageName: String,
+      activityName: String
+  ): Single<Boolean>
 }

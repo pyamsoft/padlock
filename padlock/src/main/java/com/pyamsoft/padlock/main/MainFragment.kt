@@ -26,7 +26,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentMainBinding
 import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.purge.PurgeFragment
@@ -37,97 +36,106 @@ import timber.log.Timber
 
 class MainFragment : CanaryFragment() {
 
-    private lateinit var binding: FragmentMainBinding
+  private lateinit var binding: FragmentMainBinding
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentMainBinding.inflate(inflater, container, false)
-        return binding.root
+  override fun onCreateView(
+      inflater: LayoutInflater,
+      container: ViewGroup?,
+      savedInstanceState: Bundle?
+  ): View? {
+    binding = FragmentMainBinding.inflate(inflater, container, false)
+    return binding.root
+  }
+
+  override fun onViewCreated(
+      view: View,
+      savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
+    setupBottomNavigation()
+
+    if (childFragmentManager.findFragmentById(R.id.main_view_container) == null) {
+      Timber.d("Load default Tab: List")
+      binding.bottomTabs.menu.performIdentifierAction(R.id.menu_locklist, 0)
     }
+  }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupBottomNavigation()
+  private fun setupBottomNavigation() {
+    binding.bottomTabs.setOnNavigationItemSelectedListener(
+        object : BottomNavigationView.OnNavigationItemSelectedListener {
+          override fun onNavigationItemSelected(item: MenuItem): Boolean {
+            val handled: Boolean = when (item.itemId) {
+              R.id.menu_locklist -> replaceFragment(
+                  LockListFragment(),
+                  LockListFragment.TAG
+              )
+              R.id.menu_settings -> replaceFragment(
+                  SettingsFragment(),
+                  SettingsFragment.TAG
+              )
+              R.id.menu_purge -> replaceFragment(PurgeFragment(), PurgeFragment.TAG)
+              else -> false
+            }
 
-        if (childFragmentManager.findFragmentById(R.id.main_view_container) == null) {
-            Timber.d("Load default Tab: List")
-            binding.bottomTabs.menu.performIdentifierAction(R.id.menu_locklist, 0)
-        }
-    }
+            if (handled) {
+              item.isChecked = !item.isChecked
+            }
 
-    private fun setupBottomNavigation() {
-        binding.bottomTabs.setOnNavigationItemSelectedListener(
-            object : BottomNavigationView.OnNavigationItemSelectedListener {
-                override fun onNavigationItemSelected(item: MenuItem): Boolean {
-                    val handled: Boolean = when (item.itemId) {
-                        R.id.menu_locklist -> replaceFragment(
-                            LockListFragment(),
-                            LockListFragment.TAG
-                        )
-                        R.id.menu_settings -> replaceFragment(
-                            SettingsFragment(),
-                            SettingsFragment.TAG
-                        )
-                        R.id.menu_purge -> replaceFragment(PurgeFragment(), PurgeFragment.TAG)
-                        else -> false
+            return handled
+          }
+
+          @CheckResult
+          private fun replaceFragment(
+              fragment: Fragment,
+              tag: String
+          ): Boolean {
+            val containerId = R.id.main_view_container
+            val fragmentManager = childFragmentManager
+
+            val currentFragment: Fragment? = fragmentManager.findFragmentById(
+                containerId
+            )
+            // Do nothing on same fragment
+            if (currentFragment != null && currentFragment.tag == tag) {
+              return false
+            } else {
+              fragmentManager.beginTransaction()
+                  .apply {
+                    // Detach current fragment if exists
+                    if (currentFragment != null) {
+                      detach(currentFragment)
                     }
 
-                    if (handled) {
-                        item.isChecked = !item.isChecked
-                    }
-
-                    return handled
-                }
-
-                @CheckResult
-                private fun replaceFragment(fragment: Fragment, tag: String): Boolean {
-                    val containerId = R.id.main_view_container
-                    val fragmentManager = childFragmentManager
-
-                    val currentFragment: Fragment? = fragmentManager.findFragmentById(
-                        containerId
-                    )
-                    // Do nothing on same fragment
-                    if (currentFragment != null && currentFragment.tag == tag) {
-                        return false
+                    // Add or re-attach nextFragment
+                    val nextFragment: Fragment? = fragmentManager.findFragmentByTag(tag)
+                    if (nextFragment == null) {
+                      replace(containerId, fragment, tag)
                     } else {
-                        fragmentManager.beginTransaction().apply {
-                            // Detach current fragment if exists
-                            if (currentFragment != null) {
-                                detach(currentFragment)
-                            }
-
-                            // Add or re-attach nextFragment
-                            val nextFragment: Fragment? = fragmentManager.findFragmentByTag(tag)
-                            if (nextFragment == null) {
-                                replace(containerId, fragment, tag)
-                            } else {
-                                attach(nextFragment)
-                            }
-                        }.commit()
-                        return true
+                      attach(nextFragment)
                     }
-                }
-            })
-    }
+                  }
+                  .commit()
+              return true
+            }
+          }
+        })
+  }
 
-    override fun onResume() {
-        super.onResume()
-        toolbarActivity.withToolbar {
-            it.setTitle(R.string.app_name)
-            it.setUpEnabled(false)
-        }
+  override fun onResume() {
+    super.onResume()
+    toolbarActivity.withToolbar {
+      it.setTitle(R.string.app_name)
+      it.setUpEnabled(false)
     }
+  }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding.unbind()
-    }
+  override fun onDestroyView() {
+    super.onDestroyView()
+    binding.unbind()
+  }
 
-    companion object {
+  companion object {
 
-        const val TAG = "MainFragment"
-    }
+    const val TAG = "MainFragment"
+  }
 }

@@ -27,11 +27,11 @@ import javax.inject.Singleton
 @Singleton
 internal class LockListBus @Inject internal constructor() : EventBus<LockListEvent> {
 
-    private val bus: EventBus<LockListEvent> = RxBus.create()
+  private val bus: EventBus<LockListEvent> = RxBus.create()
 
-    override fun listen(): Observable<LockListEvent> = bus.listen()
+  override fun listen(): Observable<LockListEvent> = bus.listen()
 
-    override fun publish(event: LockListEvent) {
-        bus.publish(event)
-    }
+  override fun publish(event: LockListEvent) {
+    bus.publish(event)
+  }
 }
