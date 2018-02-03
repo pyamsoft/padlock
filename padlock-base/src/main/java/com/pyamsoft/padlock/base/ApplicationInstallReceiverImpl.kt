@@ -18,11 +18,7 @@
 
 package com.pyamsoft.padlock.base
 
-import android.app.Activity
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -66,123 +62,128 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
 ) : BroadcastReceiver(),
     ApplicationInstallReceiver {
 
-    private val notificationChannelId: String = "padlock_new_apps"
-    private val notificationManager: NotificationManager
-    private val filter: IntentFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
-    private val pendingIntent: PendingIntent
-    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
-    private var notificationId: Int = NOTIFICATION_ID_START
-        get() {
-            if (field == NOTIFICATION_ID_MAX) {
-                field = NOTIFICATION_ID_START
-            } else {
-                field += 1
-            }
+  private val notificationChannelId: String = "padlock_new_apps"
+  private val notificationManager: NotificationManager
+  private val filter: IntentFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
+  private val pendingIntent: PendingIntent
+  private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+  private var notificationId: Int = NOTIFICATION_ID_START
+    get() {
+      if (field == NOTIFICATION_ID_MAX) {
+        field = NOTIFICATION_ID_START
+      } else {
+        field += 1
+      }
 
-            return field
-        }
-    private var registered: Boolean = false
+      return field
+    }
+  private var registered: Boolean = false
 
-    init {
-        filter.addDataScheme("package")
-        val intent = Intent(appContext, mainActivityClass)
-        intent.putExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST, true)
-        pendingIntent = PendingIntent.getActivity(appContext, 421, intent, 0)
-        notificationManager = appContext.getSystemService(
-            Context.NOTIFICATION_SERVICE
-        ) as NotificationManager
+  init {
+    filter.addDataScheme("package")
+    val intent = Intent(appContext, mainActivityClass)
+    intent.putExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST, true)
+    pendingIntent = PendingIntent.getActivity(appContext, 421, intent, 0)
+    notificationManager = appContext.getSystemService(
+        Context.NOTIFICATION_SERVICE
+    ) as NotificationManager
 
-        ioScheduler.enforceIo()
-        mainThreadScheduler.enforceMainThread()
+    ioScheduler.enforceIo()
+    mainThreadScheduler.enforceMainThread()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            setupNotificationChannel(notificationChannelId)
-        }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      setupNotificationChannel(notificationChannelId)
+    }
+  }
+
+  @RequiresApi(VERSION_CODES.O)
+  private fun setupNotificationChannel(
+      notificationChannelId: String
+  ) {
+    val name = "App Lock Suggestions"
+    val description = "Suggestions to secure newly installed applications with PadLock"
+    val importance = NotificationManager.IMPORTANCE_MIN
+    val notificationChannel = NotificationChannel(notificationChannelId, name, importance)
+    notificationChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+    notificationChannel.description = description
+    notificationChannel.enableLights(false)
+    notificationChannel.enableVibration(false)
+
+    Timber.d("Create notification channel with id: %s", notificationChannelId)
+    notificationManager.createNotificationChannel(notificationChannel)
+  }
+
+  override fun onReceive(
+      context: Context,
+      intent: Intent?
+  ) {
+    if (intent == null) {
+      Timber.e("NULL Intent")
+      return
     }
 
-    @RequiresApi(VERSION_CODES.O)
-    private fun setupNotificationChannel(
-        notificationChannelId: String
-    ) {
-        val name = "App Lock Suggestions"
-        val description = "Suggestions to secure newly installed applications with PadLock"
-        val importance = NotificationManager.IMPORTANCE_MIN
-        val notificationChannel = NotificationChannel(notificationChannelId, name, importance)
-        notificationChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-        notificationChannel.description = description
-        notificationChannel.enableLights(false)
-        notificationChannel.enableVibration(false)
+    val isNew = !intent.hasExtra(Intent.EXTRA_REPLACING)
+    val data = intent.data
+    val packageName = data.schemeSpecificPart
 
-        Timber.d("Create notification channel with id: %s", notificationChannelId)
-        notificationManager.createNotificationChannel(notificationChannel)
-    }
-
-    override fun onReceive(context: Context, intent: Intent?) {
-        if (intent == null) {
-            Timber.e("NULL Intent")
-            return
-        }
-
-        val isNew = !intent.hasExtra(Intent.EXTRA_REPLACING)
-        val data = intent.data
-        val packageName = data.schemeSpecificPart
-
-        compositeDisposable.add(packageManagerWrapper.loadPackageLabel(packageName)
+    compositeDisposable.add(
+        packageManagerWrapper.loadPackageLabel(packageName)
             .subscribeOn(ioScheduler)
             .observeOn(mainThreadScheduler)
             .subscribe({
-                if (isNew) {
-                    purgeCache.clearCache()
-                    listCache.clearCache()
-                    infoCache.clearCache()
-                    iconCache.clearCache()
-                    onNewPackageInstalled(packageName, it)
-                } else {
-                    Timber.d("Package updated: %s", packageName)
-                }
+              if (isNew) {
+                purgeCache.clearCache()
+                listCache.clearCache()
+                infoCache.clearCache()
+                iconCache.clearCache()
+                onNewPackageInstalled(packageName, it)
+              } else {
+                Timber.d("Package updated: %s", packageName)
+              }
             }, {
-                Timber.e(
-                    it, "onError launching notification for package: %s",
-                    packageName
-                )
+              Timber.e(
+                  it, "onError launching notification for package: %s",
+                  packageName
+              )
             })
-        )
-    }
+    )
+  }
 
-    private fun onNewPackageInstalled(
-        packageName: String,
-        name: String
-    ) {
-        Timber.i("Package Added: %s", packageName)
-        val builder = NotificationCompat.Builder(appContext, notificationChannelId).apply {
-            setContentTitle("Lock New Application")
-            setSmallIcon(R.drawable.ic_lock_notification)
-            setContentText("Click to lock the newly installed application: " + name)
-            setContentIntent(pendingIntent)
-            setAutoCancel(true)
-            color = ContextCompat.getColor(appContext, R.color.blue500)
-            priority = NotificationCompat.PRIORITY_LOW
+  private fun onNewPackageInstalled(
+      packageName: String,
+      name: String
+  ) {
+    Timber.i("Package Added: %s", packageName)
+    val builder = NotificationCompat.Builder(appContext, notificationChannelId)
+        .apply {
+          setContentTitle("Lock New Application")
+          setSmallIcon(R.drawable.ic_lock_notification)
+          setContentText("Click to lock the newly installed application: " + name)
+          setContentIntent(pendingIntent)
+          setAutoCancel(true)
+          color = ContextCompat.getColor(appContext, R.color.blue500)
+          priority = NotificationCompat.PRIORITY_LOW
         }
-        notificationManager.notify(notificationId++, builder.build())
-    }
+    notificationManager.notify(notificationId++, builder.build())
+  }
 
-    override fun register() {
-        if (!registered) {
-            appContext.registerReceiver(this, filter)
-            registered = true
-        }
+  override fun register() {
+    if (!registered) {
+      appContext.registerReceiver(this, filter)
+      registered = true
     }
+  }
 
-    override fun unregister() {
-        if (registered) {
-            appContext.unregisterReceiver(this)
-            registered = false
-            compositeDisposable.clear()
-        }
+  override fun unregister() {
+    if (registered) {
+      appContext.unregisterReceiver(this)
+      registered = false
+      compositeDisposable.clear()
     }
+  }
 
-    companion object {
-        const val NOTIFICATION_ID_START = 2000
-        const val NOTIFICATION_ID_MAX = 10000
-    }
+  companion object {
+    const val NOTIFICATION_ID_START = 2000
+    const val NOTIFICATION_ID_MAX = 10000
+  }
 }

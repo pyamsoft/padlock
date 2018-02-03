@@ -25,18 +25,19 @@ import com.pyamsoft.padlock.uicommon.CanaryDialog
 
 class ErrorDialog : CanaryDialog() {
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(activity!!).setTitle("ERROR")
-            .setMessage(
-                """An unrecoverable error has occurred when attempting an operation.
+  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    return AlertDialog.Builder(activity!!)
+        .setTitle("ERROR")
+        .setMessage(
+            """An unrecoverable error has occurred when attempting an operation.
               |
               |Please close and re-open PadLock""".trimMargin()
-            )
-            .setPositiveButton("Okay") { _, _ ->
-                dismiss()
-                activity?.finish()
-            }
-            .setCancelable(false)
-            .create()
-    }
+        )
+        .setPositiveButton("Okay") { _, _ ->
+          dismiss()
+          activity?.finish()
+        }
+        .setCancelable(false)
+        .create()
+  }
 }

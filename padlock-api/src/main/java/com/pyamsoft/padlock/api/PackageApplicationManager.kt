@@ -24,32 +24,36 @@ import io.reactivex.Single
 
 interface PackageApplicationManager {
 
-    @CheckResult
-    fun getActiveApplications(): Single<List<ApplicationItem>>
+  @CheckResult
+  fun getActiveApplications(): Single<List<ApplicationItem>>
+
+  @CheckResult
+  fun getApplicationInfo(packageName: String): Single<ApplicationItem>
+
+  data class ApplicationItem(
+      val packageName: String,
+      val system: Boolean,
+      val enabled: Boolean
+  ) {
 
     @CheckResult
-    fun getApplicationInfo(packageName: String): Single<ApplicationItem>
+    fun isEmpty(): Boolean = packageName.isEmpty()
 
-    data class ApplicationItem(val packageName: String, val system: Boolean, val enabled: Boolean) {
+    companion object {
 
-        @CheckResult
-        fun isEmpty(): Boolean = packageName.isEmpty()
+      @JvmField
+      val EMPTY = ApplicationItem(
+          "",
+          false, false
+      )
 
-        companion object {
+      @CheckResult
+      @JvmStatic
+      fun fromInfo(info: ApplicationInfo): ApplicationItem =
+          ApplicationItem(info.packageName, info.system(), info.enabled)
 
-            @JvmField
-            val EMPTY = ApplicationItem(
-                "",
-                false, false
-            )
-
-            @CheckResult
-            @JvmStatic
-            fun fromInfo(info: ApplicationInfo): ApplicationItem =
-                ApplicationItem(info.packageName, info.system(), info.enabled)
-
-            @CheckResult
-            private fun ApplicationInfo.system(): Boolean = flags and ApplicationInfo.FLAG_SYSTEM != 0
-        }
+      @CheckResult
+      private fun ApplicationInfo.system(): Boolean = flags and ApplicationInfo.FLAG_SYSTEM != 0
     }
+  }
 }

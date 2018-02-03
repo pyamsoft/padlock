@@ -28,12 +28,12 @@ import dagger.Module
 @Module
 abstract class PinModule {
 
-    @Binds
-    internal abstract fun provideClearBus(bus: ClearPinBus): EventBus<ClearPinEvent>
+  @Binds
+  internal abstract fun provideClearBus(bus: ClearPinBus): EventBus<ClearPinEvent>
 
-    @Binds
-    internal abstract fun provideCreateBus(bus: CreatePinBus): EventBus<CreatePinEvent>
+  @Binds
+  internal abstract fun provideCreateBus(bus: CreatePinBus): EventBus<CreatePinEvent>
 
-    @Binds
-    internal abstract fun provideInteractor(impl: PinEntryInteractorImpl): PinEntryInteractor
+  @Binds
+  internal abstract fun provideInteractor(impl: PinEntryInteractorImpl): PinEntryInteractor
 }

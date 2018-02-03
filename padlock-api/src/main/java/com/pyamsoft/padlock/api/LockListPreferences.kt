@@ -22,8 +22,8 @@ import android.support.annotation.CheckResult
 
 interface LockListPreferences {
 
-    @CheckResult
-    fun isSystemVisible(): Boolean
+  @CheckResult
+  fun isSystemVisible(): Boolean
 
-    fun setSystemVisible(visible: Boolean)
+  fun setSystemVisible(visible: Boolean)
 }

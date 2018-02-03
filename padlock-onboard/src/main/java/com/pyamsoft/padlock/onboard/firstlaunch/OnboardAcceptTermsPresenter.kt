@@ -36,21 +36,21 @@ class OnboardAcceptTermsPresenter @Inject internal constructor(
     mainScheduler
 ) {
 
-    fun acceptUsageTerms() {
-        dispose {
-            interactor.agreeToTerms()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({ view?.onUsageTermsAccepted() }, {
-                    Timber.e(it, "onError")
-                })
-        }
+  fun acceptUsageTerms() {
+    dispose {
+      interactor.agreeToTerms()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ view?.onUsageTermsAccepted() }, {
+            Timber.e(it, "onError")
+          })
     }
+  }
 
-    interface View : UsageTermsCallback
+  interface View : UsageTermsCallback
 
-    interface UsageTermsCallback {
+  interface UsageTermsCallback {
 
-        fun onUsageTermsAccepted()
-    }
+    fun onUsageTermsAccepted()
+  }
 }

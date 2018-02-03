@@ -28,11 +28,11 @@ import javax.inject.Singleton
 @Singleton
 internal class RecheckEventBus @Inject internal constructor() : EventBus<RecheckEvent> {
 
-    private val bus: EventBus<RecheckEvent> = RxBus.create()
+  private val bus: EventBus<RecheckEvent> = RxBus.create()
 
-    override fun listen(): Observable<RecheckEvent> = bus.listen()
+  override fun listen(): Observable<RecheckEvent> = bus.listen()
 
-    override fun publish(event: RecheckEvent) {
-        bus.publish(event)
-    }
+  override fun publish(event: RecheckEvent) {
+    bus.publish(event)
+  }
 }

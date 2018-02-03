@@ -44,82 +44,82 @@ class PurgePresenter @Inject internal constructor(
     ioScheduler, mainScheduler
 ) {
 
-    override fun onCreate() {
-        super.onCreate()
-        registerOnBus()
+  override fun onCreate() {
+    super.onCreate()
+    registerOnBus()
+  }
+
+  override fun onStart() {
+    super.onStart()
+    retrieveStaleApplications(false)
+  }
+
+  private fun registerOnBus() {
+    dispose {
+      purgeBus.listen()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ view?.onPurge(it.packageName) }, {
+            Timber.e(it, "onError purge single")
+          })
     }
 
-    override fun onStart() {
-        super.onStart()
-        retrieveStaleApplications(false)
+    dispose {
+      purgeAllBus.listen()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ view?.onPurgeAll() }, {
+            Timber.e(it, "onError purge all")
+          })
     }
+  }
 
-    private fun registerOnBus() {
-        dispose {
-            purgeBus.listen()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({ view?.onPurge(it.packageName) }, {
-                    Timber.e(it, "onError purge single")
-                })
-        }
-
-        dispose {
-            purgeAllBus.listen()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({ view?.onPurgeAll() }, {
-                    Timber.e(it, "onError purge all")
-                })
-        }
+  fun retrieveStaleApplications(force: Boolean) {
+    dispose {
+      interactor.populateList(force)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .doOnSubscribe { view?.onRetrieveBegin() }
+          .doAfterTerminate { view?.onRetrieveComplete() }
+          .subscribe({ view?.onRetrievedStale(it) }, {
+            Timber.e(it, "onError retrieveStaleApplications")
+            view?.onRetrieveError(it)
+          })
     }
+  }
 
-    fun retrieveStaleApplications(force: Boolean) {
-        dispose {
-            interactor.populateList(force)
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .doOnSubscribe { view?.onRetrieveBegin() }
-                .doAfterTerminate { view?.onRetrieveComplete() }
-                .subscribe({ view?.onRetrievedStale(it) }, {
-                    Timber.e(it, "onError retrieveStaleApplications")
-                    view?.onRetrieveError(it)
-                })
-        }
+  fun deleteStale(packageName: String) {
+    dispose {
+      interactor.deleteEntry(packageName)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ view?.onDeleted(it) }
+              , { Timber.e(it, "onError deleteStale") })
     }
+  }
 
-    fun deleteStale(packageName: String) {
-        dispose {
-            interactor.deleteEntry(packageName)
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({ view?.onDeleted(it) }
-                    , { Timber.e(it, "onError deleteStale") })
-        }
-    }
+  interface View : BusCallback, DeleteCallback, RetrieveCallback
 
-    interface View : BusCallback, DeleteCallback, RetrieveCallback
+  interface RetrieveCallback {
 
-    interface RetrieveCallback {
+    fun onRetrieveBegin()
 
-        fun onRetrieveBegin()
+    fun onRetrieveComplete()
 
-        fun onRetrieveComplete()
+    fun onRetrievedStale(packageName: String)
 
-        fun onRetrievedStale(packageName: String)
+    fun onRetrieveError(throwable: Throwable)
+  }
 
-        fun onRetrieveError(throwable: Throwable)
-    }
+  interface DeleteCallback {
 
-    interface DeleteCallback {
+    fun onDeleted(packageName: String)
+  }
 
-        fun onDeleted(packageName: String)
-    }
+  interface BusCallback {
 
-    interface BusCallback {
+    fun onPurge(packageName: String)
 
-        fun onPurge(packageName: String)
-
-        fun onPurgeAll()
-    }
+    fun onPurgeAll()
+  }
 }

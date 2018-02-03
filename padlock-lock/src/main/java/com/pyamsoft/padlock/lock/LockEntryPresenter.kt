@@ -42,94 +42,102 @@ class LockEntryPresenter @Inject internal constructor(
     ioScheduler, mainScheduler
 ) {
 
-    fun displayLockedHint() {
-        dispose {
-            interactor.getHint()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({ view?.onDisplayHint(it) },
-                    { Timber.e(it, "onError displayLockedHint") })
-        }
+  fun displayLockedHint() {
+    dispose {
+      interactor.getHint()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ view?.onDisplayHint(it) },
+              { Timber.e(it, "onError displayLockedHint") })
     }
+  }
 
-    fun submit(lockCode: String?, currentAttempt: String) {
-        dispose {
-            interactor.submitPin(packageName, activityName, lockCode, currentAttempt)
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({
-                    Timber.d("Received unlock entry result")
-                    if (it) {
-                        view?.onSubmitSuccess()
-                    } else {
-                        view?.onSubmitFailure()
-                    }
-                }, {
-                    Timber.e(it, "unlockEntry onError")
-                    view?.onSubmitError(it)
-                })
-        }
+  fun submit(
+      lockCode: String?,
+      currentAttempt: String
+  ) {
+    dispose {
+      interactor.submitPin(packageName, activityName, lockCode, currentAttempt)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            Timber.d("Received unlock entry result")
+            if (it) {
+              view?.onSubmitSuccess()
+            } else {
+              view?.onSubmitFailure()
+            }
+          }, {
+            Timber.e(it, "unlockEntry onError")
+            view?.onSubmitError(it)
+          })
     }
+  }
 
-    fun lockEntry() {
-        dispose {
-            interactor.lockEntryOnFail(packageName, activityName)
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({
-                    if (System.currentTimeMillis() < it) {
-                        Timber.w("Lock em up")
-                        view?.onLocked()
-                    }
-                }, {
-                    Timber.e(it, "lockEntry onError")
-                    view?.onLockedError(it)
-                })
-        }
+  fun lockEntry() {
+    dispose {
+      interactor.lockEntryOnFail(packageName, activityName)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            if (System.currentTimeMillis() < it) {
+              Timber.w("Lock em up")
+              view?.onLocked()
+            }
+          }, {
+            Timber.e(it, "lockEntry onError")
+            view?.onLockedError(it)
+          })
     }
+  }
 
-    fun postUnlock(lockCode: String?, isSystem: Boolean, shouldExclude: Boolean, ignoreTime: Long) {
-        dispose {
-            interactor.postUnlock(
-                packageName, activityName, realName, lockCode, isSystem,
-                shouldExclude, ignoreTime
-            )
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({
-                    Timber.d("onPostUnlock complete")
-                    view?.onPostUnlocked()
-                }, {
-                    Timber.e(it, "Error postunlock")
-                    view?.onUnlockError(it)
-                })
-        }
+  fun postUnlock(
+      lockCode: String?,
+      isSystem: Boolean,
+      shouldExclude: Boolean,
+      ignoreTime: Long
+  ) {
+    dispose {
+      interactor.postUnlock(
+          packageName, activityName, realName, lockCode, isSystem,
+          shouldExclude, ignoreTime
+      )
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            Timber.d("onPostUnlock complete")
+            view?.onPostUnlocked()
+          }, {
+            Timber.e(it, "Error postunlock")
+            view?.onUnlockError(it)
+          })
     }
+  }
 
-    interface View : HintCallback, LockCallack, PostUnlockCallback, SubmitCallback
+  interface View : HintCallback, LockCallack, PostUnlockCallback, SubmitCallback
 
-    interface SubmitCallback {
-        fun onSubmitSuccess()
-        fun onSubmitFailure()
-        fun onSubmitError(throwable: Throwable)
-    }
+  interface SubmitCallback {
+    fun onSubmitSuccess()
+    fun onSubmitFailure()
+    fun onSubmitError(throwable: Throwable)
+  }
 
-    interface PostUnlockCallback {
+  interface PostUnlockCallback {
 
-        fun onPostUnlocked()
+    fun onPostUnlocked()
 
-        fun onUnlockError(throwable: Throwable)
-    }
+    fun onUnlockError(throwable: Throwable)
+  }
 
-    interface LockCallack {
+  interface LockCallack {
 
-        fun onLocked()
+    fun onLocked()
 
-        fun onLockedError(throwable: Throwable)
-    }
+    fun onLockedError(throwable: Throwable)
+  }
 
-    interface HintCallback {
+  interface HintCallback {
 
-        fun onDisplayHint(hint: String)
-    }
+    fun onDisplayHint(hint: String)
+  }
 }

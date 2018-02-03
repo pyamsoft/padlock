@@ -22,7 +22,10 @@ import android.content.Intent
 
 interface JobSchedulerCompat {
 
-    fun cancel(intent: Intent)
+  fun cancel(intent: Intent)
 
-    fun queue(intent: Intent, triggerTime: Long)
+  fun queue(
+      intent: Intent,
+      triggerTime: Long
+  )
 }

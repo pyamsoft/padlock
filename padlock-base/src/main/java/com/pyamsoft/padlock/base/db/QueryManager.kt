@@ -20,9 +20,6 @@ package com.pyamsoft.padlock.base.db
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.PadLockEntry
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.db.PadLockEntryModel.AllEntriesModel
-import com.pyamsoft.padlock.model.db.PadLockEntryModel.WithPackageNameModel
 import com.squareup.sqlbrite2.BriteDatabase
 import com.squareup.sqldelight.RowMapper
 import io.reactivex.Single
@@ -30,54 +27,54 @@ import java.util.Collections
 
 internal class QueryManager internal constructor(private val briteDatabase: BriteDatabase) {
 
-    private val withPackageActivityNameDefaultMapper: RowMapper<out PadLockEntryModel> by lazy {
-        PadLockSqlEntry.FACTORY.withPackageActivityNameDefaultMapper()
-    }
+  private val withPackageActivityNameDefaultMapper: RowMapper<out PadLockEntryModel> by lazy {
+    PadLockSqlEntry.FACTORY.withPackageActivityNameDefaultMapper()
+  }
 
-    private val allEntriesMapper: RowMapper<out AllEntriesModel> by lazy {
-        PadLockSqlEntry.FACTORY.allEntriesMapper { packageName, activityName, whitelist ->
-            AutoValue_PadLockSqlEntry_AllEntries(packageName, activityName, whitelist)
-        }
+  private val allEntriesMapper: RowMapper<out AllEntriesModel> by lazy {
+    PadLockSqlEntry.FACTORY.allEntriesMapper { packageName, activityName, whitelist ->
+      AutoValue_PadLockSqlEntry_AllEntries(packageName, activityName, whitelist)
     }
+  }
 
-    private val withPackageNameMapper: RowMapper<out WithPackageNameModel> by lazy {
-        PadLockSqlEntry.FACTORY.withPackageNameMapper { activityName, whitelist ->
-            AutoValue_PadLockSqlEntry_WithPackageName(activityName, whitelist)
-        }
+  private val withPackageNameMapper: RowMapper<out WithPackageNameModel> by lazy {
+    PadLockSqlEntry.FACTORY.withPackageNameMapper { activityName, whitelist ->
+      AutoValue_PadLockSqlEntry_WithPackageName(activityName, whitelist)
     }
+  }
 
-    @CheckResult
-    internal fun queryWithPackageActivityNameDefault(
-        packageName: String,
-        activityName: String
-    ): Single<PadLockEntryModel> {
-        val statement = PadLockSqlEntry.FACTORY.withPackageActivityNameDefault(
-            packageName,
-            PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName
-        )
-        return briteDatabase.createQuery(statement)
-            .mapToOne { withPackageActivityNameDefaultMapper.map(it) }
-            .first(PadLockEntry.EMPTY)
-    }
+  @CheckResult
+  internal fun queryWithPackageActivityNameDefault(
+      packageName: String,
+      activityName: String
+  ): Single<PadLockEntryModel> {
+    val statement = PadLockSqlEntry.FACTORY.withPackageActivityNameDefault(
+        packageName,
+        PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName
+    )
+    return briteDatabase.createQuery(statement)
+        .mapToOne { withPackageActivityNameDefaultMapper.map(it) }
+        .first(PadLockEntry.EMPTY)
+  }
 
-    @CheckResult
-    internal fun queryWithPackageName(
-        packageName: String
-    ): Single<List<WithPackageNameModel>> {
-        val statement = PadLockSqlEntry.FACTORY.withPackageName(packageName)
-        return briteDatabase.createQuery(statement)
-            .mapToList { withPackageNameMapper.map(it) }
-            .first(emptyList())
-            .map { Collections.unmodifiableList(it) }
-    }
+  @CheckResult
+  internal fun queryWithPackageName(
+      packageName: String
+  ): Single<List<WithPackageNameModel>> {
+    val statement = PadLockSqlEntry.FACTORY.withPackageName(packageName)
+    return briteDatabase.createQuery(statement)
+        .mapToList { withPackageNameMapper.map(it) }
+        .first(emptyList())
+        .map { Collections.unmodifiableList(it) }
+  }
 
-    @CheckResult
-    internal fun queryAll(): Single<List<AllEntriesModel>> {
-        val statement = PadLockSqlEntry.FACTORY.allEntries()
-        return briteDatabase.createQuery(statement)
-            .mapToList { allEntriesMapper.map(it) }
-            .first(emptyList())
-            .map { Collections.unmodifiableList(it) }
-    }
+  @CheckResult
+  internal fun queryAll(): Single<List<AllEntriesModel>> {
+    val statement = PadLockSqlEntry.FACTORY.allEntries()
+    return briteDatabase.createQuery(statement)
+        .mapToList { allEntriesMapper.map(it) }
+        .first(emptyList())
+        .map { Collections.unmodifiableList(it) }
+  }
 }
 

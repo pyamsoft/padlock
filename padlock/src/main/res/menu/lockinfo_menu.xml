@@ -23,13 +23,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
 
-    <group android:id="@+id/menu_group_lock_info_explain">
+  <group android:id="@+id/menu_group_lock_info_explain">
 
-        <item
-            android:id="@+id/menu_explain_lock_type"
-            android:title="@string/lock_type_explanation"
-            app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_explain_lock_type"
+        android:title="@string/lock_type_explanation"
+        app:showAsAction="never"/>
 
-    </group>
+  </group>
 
 </menu>

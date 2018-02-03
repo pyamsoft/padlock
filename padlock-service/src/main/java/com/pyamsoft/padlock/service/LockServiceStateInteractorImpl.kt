@@ -31,5 +31,5 @@ internal class LockServiceStateInteractorImpl @Inject internal constructor(
 ) :
     LockServiceStateInteractor {
 
-    override fun isServiceEnabled(): Single<Boolean> = pinInteractor.getMasterPin().map { it is Present }
+  override fun isServiceEnabled(): Single<Boolean> = pinInteractor.getMasterPin().map { it is Present }
 }

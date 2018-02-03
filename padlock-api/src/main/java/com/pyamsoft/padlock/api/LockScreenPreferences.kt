@@ -23,15 +23,15 @@ import com.pyamsoft.padlock.model.LockScreenType
 
 interface LockScreenPreferences {
 
-    @CheckResult
-    fun getCurrentLockType(): LockScreenType
+  @CheckResult
+  fun getCurrentLockType(): LockScreenType
 
-    @CheckResult
-    fun isIgnoreInKeyguard(): Boolean
+  @CheckResult
+  fun isIgnoreInKeyguard(): Boolean
 
-    @CheckResult
-    fun getDefaultIgnoreTime(): Long
+  @CheckResult
+  fun getDefaultIgnoreTime(): Long
 
-    @CheckResult
-    fun getTimeoutPeriod(): Long
+  @CheckResult
+  fun getTimeoutPeriod(): Long
 }

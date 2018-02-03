@@ -18,11 +18,7 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.api.ClearPreferences
-import com.pyamsoft.padlock.api.InstallListenerPreferences
-import com.pyamsoft.padlock.api.MasterPinPreferences
-import com.pyamsoft.padlock.api.PadLockDBDelete
-import com.pyamsoft.padlock.api.SettingsInteractor
+import com.pyamsoft.padlock.api.*
 import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.optional.Optional.Present
 import com.pyamsoft.pydroid.optional.asOptional
@@ -48,34 +44,37 @@ internal class SettingsInteractorImpl @Inject internal constructor(
 ) :
     SettingsInteractor {
 
-    override fun isInstallListenerEnabled(): Single<Boolean> =
-        Single.fromCallable { installListenerPreferences.isInstallListenerEnabled() }
+  override fun isInstallListenerEnabled(): Single<Boolean> =
+      Single.fromCallable { installListenerPreferences.isInstallListenerEnabled() }
 
-    override fun clearDatabase(): Single<Boolean> {
-        Timber.d("clear database")
-        return deleteDb.deleteAll()
-            .andThen(Completable.fromAction {
-                lockListInteractor.clearCache()
-                lockInfoInteractor.clearCache()
-                purgeInteractor.clearCache()
-                lockEntryInteractor.clearCache()
-                iconCache.clearCache()
-                listStateCache.clearCache()
-            })
-            .toSingleDefault(true)
-    }
+  override fun clearDatabase(): Single<Boolean> {
+    Timber.d("clear database")
+    return deleteDb.deleteAll()
+        .andThen(Completable.fromAction {
+          lockListInteractor.clearCache()
+          lockInfoInteractor.clearCache()
+          purgeInteractor.clearCache()
+          lockEntryInteractor.clearCache()
+          iconCache.clearCache()
+          listStateCache.clearCache()
+        })
+        .toSingleDefault(true)
+  }
 
-    override fun clearAll(): Single<Boolean> {
-        // We map here to make sure the clear all is complete before stream continues
-        return clearDatabase().map {
-            Timber.d("Clear all preferences")
-            preferences.clearAll()
-            return@map true
-        }
+  override fun clearAll(): Single<Boolean> {
+    // We map here to make sure the clear all is complete before stream continues
+    return clearDatabase().map {
+      Timber.d("Clear all preferences")
+      preferences.clearAll()
+      return@map true
     }
+  }
 
-    override fun hasExistingMasterPassword(): Single<Boolean> {
-        return Single.fromCallable { masterPinPreference.getMasterPassword().asOptional() }
-            .map { it is Present }
+  override fun hasExistingMasterPassword(): Single<Boolean> {
+    return Single.fromCallable {
+      masterPinPreference.getMasterPassword()
+          .asOptional()
     }
+        .map { it is Present }
+  }
 }

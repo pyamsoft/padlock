@@ -29,6 +29,6 @@ internal class OnboardAcceptTermsInteractor @Inject internal constructor(
     private val preferences: OnboardingPreferences
 ) {
 
-    @CheckResult
-    fun agreeToTerms(): Completable = Completable.fromAction({ preferences.setAgreed() })
+  @CheckResult
+  fun agreeToTerms(): Completable = Completable.fromAction({ preferences.setAgreed() })
 }

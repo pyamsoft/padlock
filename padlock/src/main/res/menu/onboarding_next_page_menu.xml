@@ -18,10 +18,10 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/onboarding_next_page"
-        android:icon="@drawable/ic_arrow_forward_24dp"
-        android:title="@string/next_page"
-        app:showAsAction="always" />
+  <item xmlns:app="http://schemas.android.com/apk/res-auto"
+      android:id="@+id/onboarding_next_page"
+      android:icon="@drawable/ic_arrow_forward_24dp"
+      android:title="@string/next_page"
+      app:showAsAction="always"/>
 
 </menu>

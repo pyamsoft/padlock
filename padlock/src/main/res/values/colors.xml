@@ -18,6 +18,6 @@
 
 <resources>
 
-    <color name="lock_info_dark_background">#ffdedede</color>
+  <color name="lock_info_dark_background">#ffdedede</color>
 
 </resources>

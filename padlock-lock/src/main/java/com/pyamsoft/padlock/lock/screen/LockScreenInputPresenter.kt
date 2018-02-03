@@ -38,33 +38,33 @@ class LockScreenInputPresenter @Inject internal constructor(
     ioScheduler, mainScheduler
 ) {
 
-    override fun onCreate() {
-        super.onCreate()
-        initializeLockScreenType()
+  override fun onCreate() {
+    super.onCreate()
+    initializeLockScreenType()
+  }
+
+  private fun initializeLockScreenType() {
+    dispose {
+      interactor.getLockScreenType()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            when (it) {
+              TYPE_PATTERN -> view?.onTypePattern()
+              TYPE_TEXT -> view?.onTypeText()
+              else -> throw IllegalArgumentException("Invalid enum: $it")
+            }
+          }, {
+            Timber.e(it, "Error initializing lock screen type")
+          })
     }
+  }
 
-    private fun initializeLockScreenType() {
-        dispose {
-            interactor.getLockScreenType()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({
-                    when (it) {
-                        TYPE_PATTERN -> view?.onTypePattern()
-                        TYPE_TEXT -> view?.onTypeText()
-                        else -> throw IllegalArgumentException("Invalid enum: $it")
-                    }
-                }, {
-                    Timber.e(it, "Error initializing lock screen type")
-                })
-        }
-    }
+  interface View : TypeCallback
 
-    interface View : TypeCallback
+  interface TypeCallback {
 
-    interface TypeCallback {
-
-        fun onTypePattern()
-        fun onTypeText()
-    }
+    fun onTypePattern()
+    fun onTypeText()
+  }
 }

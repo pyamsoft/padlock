@@ -24,5 +24,5 @@ import dagger.Subcomponent
 @Subcomponent(modules = arrayOf(LockInfoModule::class))
 interface LockInfoComponent {
 
-    fun inject(dialog: LockInfoDialog)
+  fun inject(dialog: LockInfoDialog)
 }

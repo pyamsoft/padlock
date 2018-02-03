@@ -20,6 +20,6 @@ package com.pyamsoft.padlock.model
 
 object Recheck {
 
-    const val EXTRA_PACKAGE_NAME = "extra_package_name"
-    const val EXTRA_CLASS_NAME = "extra_class_name"
+  const val EXTRA_PACKAGE_NAME = "extra_package_name"
+  const val EXTRA_CLASS_NAME = "extra_class_name"
 }

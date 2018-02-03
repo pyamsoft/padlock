@@ -20,16 +20,19 @@ package com.pyamsoft.padlock.model
 
 import android.support.annotation.CheckResult
 
-data class ForegroundEvent(val packageName: String, val className: String) {
+data class ForegroundEvent(
+    val packageName: String,
+    val className: String
+) {
 
-    companion object {
+  companion object {
 
-        @JvmField
-        val EMPTY = ForegroundEvent("", "")
+    @JvmField
+    val EMPTY = ForegroundEvent("", "")
 
-        @JvmStatic
-        @CheckResult
-        fun isEmpty(event: ForegroundEvent): Boolean =
-            event.packageName == EMPTY.packageName || event.className == EMPTY.className
-    }
+    @JvmStatic
+    @CheckResult
+    fun isEmpty(event: ForegroundEvent): Boolean =
+        event.packageName == EMPTY.packageName || event.className == EMPTY.className
+  }
 }

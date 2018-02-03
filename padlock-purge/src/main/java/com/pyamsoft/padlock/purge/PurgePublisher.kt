@@ -30,11 +30,11 @@ class PurgePublisher @Inject internal constructor(
     private val allBus: EventBus<PurgeAllEvent>
 ) {
 
-    fun publish(event: PurgeEvent) {
-        bus.publish(event)
-    }
+  fun publish(event: PurgeEvent) {
+    bus.publish(event)
+  }
 
-    fun publish(event: PurgeAllEvent) {
-        allBus.publish(event)
-    }
+  fun publish(event: PurgeAllEvent) {
+    allBus.publish(event)
+  }
 }

@@ -29,15 +29,18 @@ import javax.inject.Singleton
 internal class AppIconImageCache @Inject internal constructor() :
     ImageCache<String, Drawable> {
 
-    private val cache: MutableMap<String, Drawable> = LinkedHashMap()
+  private val cache: MutableMap<String, Drawable> = LinkedHashMap()
 
-    override fun clearCache() {
-        cache.clear()
-    }
+  override fun clearCache() {
+    cache.clear()
+  }
 
-    override fun cache(key: ImageCacheKey<String>, entry: Drawable) {
-        cache.put(key.data, entry)
-    }
+  override fun cache(
+      key: ImageCacheKey<String>,
+      entry: Drawable
+  ) {
+    cache.put(key.data, entry)
+  }
 
-    override fun retrieve(key: ImageCacheKey<String>): Drawable? = cache[key.data]
+  override fun retrieve(key: ImageCacheKey<String>): Drawable? = cache[key.data]
 }

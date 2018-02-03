@@ -23,11 +23,11 @@ import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 
 class SettingsFragment : AppSettingsFragment() {
 
-    override fun provideSettingsFragment(): SettingsPreferenceFragment = PadLockPreferenceFragment()
+  override fun provideSettingsFragment(): SettingsPreferenceFragment = PadLockPreferenceFragment()
 
-    override fun provideSettingsTag(): String = PadLockPreferenceFragment.TAG
+  override fun provideSettingsTag(): String = PadLockPreferenceFragment.TAG
 
-    companion object {
-        const val TAG = "SettingsFragment"
-    }
+  companion object {
+    const val TAG = "SettingsFragment"
+  }
 }

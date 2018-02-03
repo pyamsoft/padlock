@@ -23,15 +23,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
 
-    <group android:id="@+id/menu_group_pin_entry">
+  <group android:id="@+id/menu_group_pin_entry">
 
-        <item
-            android:id="@+id/menu_submit_pin"
-            android:checkable="true"
-            android:icon="@drawable/ic_check_24dp"
-            android:title="@string/submit_pin"
-            app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_submit_pin"
+        android:checkable="true"
+        android:icon="@drawable/ic_check_24dp"
+        android:title="@string/submit_pin"
+        app:showAsAction="ifRoom"/>
 
-    </group>
+  </group>
 
 </menu>

@@ -39,112 +39,114 @@ import com.squareup.leakcanary.RefWatcher
 
 class PadLock : Application() {
 
-    private lateinit var refWatcher: RefWatcher
-    private var component: PadLockComponent? = null
-    private lateinit var pydroidModule: PYDroidModule
-    private lateinit var loaderModule: LoaderModule
+  private lateinit var refWatcher: RefWatcher
+  private var component: PadLockComponent? = null
+  private lateinit var pydroidModule: PYDroidModule
+  private lateinit var loaderModule: LoaderModule
 
-    override fun onCreate() {
-        super.onCreate()
-        if (LeakCanary.isInAnalyzerProcess(this)) {
-            return
-        }
-
-        refWatcher = if (BuildConfig.DEBUG) {
-            LeakCanary.install(this)
-        } else {
-            RefWatcher.DISABLED
-        }
-
-        pydroidModule = PYDroidModuleImpl(this, BuildConfig.DEBUG)
-        loaderModule = LoaderModuleImpl(pydroidModule)
-        PYDroid.init(pydroidModule, loaderModule)
-        Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
-        Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight")
-        Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
-        Licenses.create(
-            "FastAdapter", "https://github.com/mikepenz/fastadapter",
-            "licenses/fastadapter"
-        )
-        Licenses.create("Firebase", "https://firebase.google.com", "licenses/firebase")
-        Licenses.create(
-            "PatternLockView", "https://github.com/aritraroy/PatternLockView",
-            "licenses/patternlock"
-        )
-
-        val dagger = Injector.obtain<PadLockComponent>(applicationContext)
-        val receiver = dagger.provideApplicationInstallReceiver()
-        val preferences = dagger.provideInstallListenerPreferences()
-        if (preferences.isInstallListenerEnabled()) {
-            receiver.register()
-        } else {
-            receiver.unregister()
-        }
-
-        PadLockService.start(this)
+  override fun onCreate() {
+    super.onCreate()
+    if (LeakCanary.isInAnalyzerProcess(this)) {
+      return
     }
 
-    private fun buildDagger(): PadLockComponent {
-        val provider = PadLockProvider(
-            pydroidModule, loaderModule, MainActivity::class.java,
-            RecheckService::class.java
-        )
-        return DaggerPadLockComponent.builder().padLockProvider(provider).build()
+    refWatcher = if (BuildConfig.DEBUG) {
+      LeakCanary.install(this)
+    } else {
+      RefWatcher.DISABLED
     }
 
-    override fun getSystemService(name: String?): Any {
-        return if (Injector.name == name) {
-            val graph: PadLockComponent
-            val dagger = component
-            if (dagger == null) {
-                graph = buildDagger()
-                component = graph
-            } else {
-                graph = dagger
-            }
+    pydroidModule = PYDroidModuleImpl(this, BuildConfig.DEBUG)
+    loaderModule = LoaderModuleImpl(pydroidModule)
+    PYDroid.init(pydroidModule, loaderModule)
+    Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
+    Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight")
+    Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
+    Licenses.create(
+        "FastAdapter", "https://github.com/mikepenz/fastadapter",
+        "licenses/fastadapter"
+    )
+    Licenses.create("Firebase", "https://firebase.google.com", "licenses/firebase")
+    Licenses.create(
+        "PatternLockView", "https://github.com/aritraroy/PatternLockView",
+        "licenses/patternlock"
+    )
 
-            // Return
-            graph
-        } else {
-            // Return
-            super.getSystemService(name)
-        }
+    val dagger = Injector.obtain<PadLockComponent>(applicationContext)
+    val receiver = dagger.provideApplicationInstallReceiver()
+    val preferences = dagger.provideInstallListenerPreferences()
+    if (preferences.isInstallListenerEnabled()) {
+      receiver.register()
+    } else {
+      receiver.unregister()
     }
 
-    companion object {
+    PadLockService.start(this)
+  }
 
-        @JvmStatic
-        @CheckResult
-        fun getRefWatcher(fragment: CanaryFragment): RefWatcher = getRefWatcherInternal(
-            fragment.activity!!.application
-        )
+  private fun buildDagger(): PadLockComponent {
+    val provider = PadLockProvider(
+        pydroidModule, loaderModule, MainActivity::class.java,
+        RecheckService::class.java
+    )
+    return DaggerPadLockComponent.builder()
+        .padLockProvider(provider)
+        .build()
+  }
 
-        @CheckResult
-        @JvmStatic
-        fun getRefWatcher(fragment: CanaryDialog): RefWatcher = getRefWatcherInternal(
-            fragment.activity!!.application
-        )
+  override fun getSystemService(name: String?): Any {
+    return if (Injector.name == name) {
+      val graph: PadLockComponent
+      val dagger = component
+      if (dagger == null) {
+        graph = buildDagger()
+        component = graph
+      } else {
+        graph = dagger
+      }
 
-        @JvmStatic
-        @CheckResult
-        fun getRefWatcher(
-            preferenceFragment: PadLockPreferenceFragment
-        ): RefWatcher = getRefWatcherInternal(
-            preferenceFragment.activity!!.application
-        )
-
-        @JvmStatic
-        @CheckResult
-        fun getRefWatcher(service: Service): RefWatcher = getRefWatcherInternal(service.application)
-
-        @JvmStatic
-        @CheckResult
-        private fun getRefWatcherInternal(application: Application): RefWatcher {
-            if (application is PadLock) {
-                return application.refWatcher
-            } else {
-                throw IllegalStateException("Application is not PadLock")
-            }
-        }
+      // Return
+      graph
+    } else {
+      // Return
+      super.getSystemService(name)
     }
+  }
+
+  companion object {
+
+    @JvmStatic
+    @CheckResult
+    fun getRefWatcher(fragment: CanaryFragment): RefWatcher = getRefWatcherInternal(
+        fragment.activity!!.application
+    )
+
+    @CheckResult
+    @JvmStatic
+    fun getRefWatcher(fragment: CanaryDialog): RefWatcher = getRefWatcherInternal(
+        fragment.activity!!.application
+    )
+
+    @JvmStatic
+    @CheckResult
+    fun getRefWatcher(
+        preferenceFragment: PadLockPreferenceFragment
+    ): RefWatcher = getRefWatcherInternal(
+        preferenceFragment.activity!!.application
+    )
+
+    @JvmStatic
+    @CheckResult
+    fun getRefWatcher(service: Service): RefWatcher = getRefWatcherInternal(service.application)
+
+    @JvmStatic
+    @CheckResult
+    private fun getRefWatcherInternal(application: Application): RefWatcher {
+      if (application is PadLock) {
+        return application.refWatcher
+      } else {
+        throw IllegalStateException("Application is not PadLock")
+      }
+    }
+  }
 }

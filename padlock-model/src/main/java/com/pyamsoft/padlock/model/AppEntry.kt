@@ -19,6 +19,10 @@
 package com.pyamsoft.padlock.model
 
 data class AppEntry(
-    val name: String, val packageName: String, val system: Boolean,
-    val locked: Boolean, val whitelisted: Int, val hardLocked: Int
+    val name: String,
+    val packageName: String,
+    val system: Boolean,
+    val locked: Boolean,
+    val whitelisted: Int,
+    val hardLocked: Int
 )

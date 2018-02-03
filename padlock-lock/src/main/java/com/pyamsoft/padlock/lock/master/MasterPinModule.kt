@@ -25,6 +25,6 @@ import dagger.Module
 @Module
 abstract class MasterPinModule {
 
-    @Binds
-    internal abstract fun provideMasterPin(impl: MasterPinInteractorImpl): MasterPinInteractor
+  @Binds
+  internal abstract fun provideMasterPin(impl: MasterPinInteractorImpl): MasterPinInteractor
 }

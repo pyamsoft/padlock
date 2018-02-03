@@ -24,9 +24,10 @@ import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 
 abstract class CanaryDialog : ToolbarDialog() {
 
-    @CallSuper
-    override fun onDestroy() {
-        super.onDestroy()
-        PadLock.getRefWatcher(this).watch(this)
-    }
+  @CallSuper
+  override fun onDestroy() {
+    super.onDestroy()
+    PadLock.getRefWatcher(this)
+        .watch(this)
+  }
 }

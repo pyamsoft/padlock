@@ -23,9 +23,12 @@ import io.reactivex.Single
 
 interface PackageActivityManager {
 
-    @CheckResult
-    fun getActivityListForPackage(packageName: String): Single<List<String>>
+  @CheckResult
+  fun getActivityListForPackage(packageName: String): Single<List<String>>
 
-    @CheckResult
-    fun isValidActivity(packageName: String, activityName: String): Single<Boolean>
+  @CheckResult
+  fun isValidActivity(
+      packageName: String,
+      activityName: String
+  ): Single<Boolean>
 }

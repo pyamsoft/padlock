@@ -23,48 +23,48 @@ apply plugin: "com.getkeepsafe.dexcount"
 
 //noinspection GroovyMissingReturnStatement
 android {
-    compileSdkVersion rootProject.ext.maxSdk
+  compileSdkVersion rootProject.ext.maxSdk
 
-    //noinspection GroovyMissingReturnStatement
-    defaultConfig {
-        minSdkVersion rootProject.ext.minSdk
-        targetSdkVersion rootProject.ext.maxSdk
+  //noinspection GroovyMissingReturnStatement
+  defaultConfig {
+    minSdkVersion rootProject.ext.minSdk
+    targetSdkVersion rootProject.ext.maxSdk
 
-        resConfigs "en"
+    resConfigs "en"
 
-        javaCompileOptions {
-            annotationProcessorOptions {
-                // Fix kapt
-                includeCompileClasspath = true
-            }
-        }
+    javaCompileOptions {
+      annotationProcessorOptions {
+        // Fix kapt
+        includeCompileClasspath = true
+      }
     }
+  }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+  }
 }
 
 dependencies {
-    // SQLBrite
-    implementation "com.squareup.sqlbrite2:sqlbrite:$sqlbrite"
+  // SQLBrite
+  implementation "com.squareup.sqlbrite2:sqlbrite:$sqlbrite"
 
-    // Auto value
-    compileOnly "com.google.auto.value:auto-value:$autoValue"
-    kapt "com.google.auto.value:auto-value:$autoValue"
+  // Auto value
+  compileOnly "com.google.auto.value:auto-value:$autoValue"
+  kapt "com.google.auto.value:auto-value:$autoValue"
 
-    // Dagger
-    kapt "com.google.dagger:dagger-compiler:$dagger"
+  // Dagger
+  kapt "com.google.dagger:dagger-compiler:$dagger"
 
-    // PYDroid
-    api("com.github.pyamsoft.pydroid:pydroid-base:$pydroid@aar") {
-        transitive = true
-    }
-    api("com.github.pyamsoft.pydroid:pydroid-loader:$pydroid@aar") {
-        transitive = true
-    }
+  // PYDroid
+  api("com.github.pyamsoft.pydroid:pydroid-base:$pydroid@aar") {
+    transitive = true
+  }
+  api("com.github.pyamsoft.pydroid:pydroid-loader:$pydroid@aar") {
+    transitive = true
+  }
 
-    api project(":padlock-api")
+  api project(":padlock-api")
 }
 

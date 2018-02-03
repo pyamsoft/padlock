@@ -23,9 +23,9 @@ import dagger.Subcomponent
 @Subcomponent(modules = arrayOf(LockEntryModule::class))
 interface LockScreenComponent {
 
-    fun inject(activity: LockScreenActivity)
+  fun inject(activity: LockScreenActivity)
 
-    fun inject(fragment: LockScreenPatternFragment)
+  fun inject(fragment: LockScreenPatternFragment)
 
-    fun inject(fragment: LockScreenTextFragment)
+  fun inject(fragment: LockScreenTextFragment)
 }

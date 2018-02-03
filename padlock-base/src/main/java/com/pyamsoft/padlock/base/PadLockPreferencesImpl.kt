@@ -21,12 +21,7 @@ package com.pyamsoft.padlock.base
 import android.content.Context
 import android.content.SharedPreferences
 import android.support.v7.preference.PreferenceManager
-import com.pyamsoft.padlock.api.ClearPreferences
-import com.pyamsoft.padlock.api.InstallListenerPreferences
-import com.pyamsoft.padlock.api.LockListPreferences
-import com.pyamsoft.padlock.api.LockScreenPreferences
-import com.pyamsoft.padlock.api.MasterPinPreferences
-import com.pyamsoft.padlock.api.OnboardingPreferences
+import com.pyamsoft.padlock.api.*
 import com.pyamsoft.padlock.model.LockScreenType
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,133 +35,151 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     LockListPreferences,
     LockScreenPreferences,
     OnboardingPreferences {
-    private val preferences: SharedPreferences
-    private val ignoreTimeKey: String
-    private val ignoreTimeDefault: String
-    private val timeoutTimeKey: String
-    private val timeoutTimeDefault: String
-    private val installListener: String
-    private val ignoreKeyguard: String
-    private val lockScreenType: String
-    private val lockScreenTypeDefault: String
-    private val installListenerDefault: Boolean
-    private val ignoreKeyguardDefault: Boolean
+  private val preferences: SharedPreferences
+  private val ignoreTimeKey: String
+  private val ignoreTimeDefault: String
+  private val timeoutTimeKey: String
+  private val timeoutTimeDefault: String
+  private val installListener: String
+  private val ignoreKeyguard: String
+  private val lockScreenType: String
+  private val lockScreenTypeDefault: String
+  private val installListenerDefault: Boolean
+  private val ignoreKeyguardDefault: Boolean
 
-    init {
-        val appContext = context.applicationContext
-        this.preferences = PreferenceManager.getDefaultSharedPreferences(appContext)
+  init {
+    val appContext = context.applicationContext
+    this.preferences = PreferenceManager.getDefaultSharedPreferences(appContext)
 
-        val res = appContext.resources
-        ignoreTimeKey = res.getString(R.string.ignore_time_key)
-        ignoreTimeDefault = res.getString(R.string.ignore_time_default)
-        timeoutTimeKey = res.getString(R.string.timeout_time_key)
-        timeoutTimeDefault = res.getString(R.string.timeout_time_default)
-        installListener = res.getString(R.string.install_listener_key)
-        installListenerDefault = res.getBoolean(R.bool.install_listener_default)
-        ignoreKeyguard = res.getString(R.string.ignore_keyguard_key)
-        ignoreKeyguardDefault = res.getBoolean(R.bool.ignore_keyguard_default)
-        lockScreenType = res.getString(R.string.lock_screen_type_key)
-        lockScreenTypeDefault = res.getString(R.string.lock_screen_type_default)
-    }
+    val res = appContext.resources
+    ignoreTimeKey = res.getString(R.string.ignore_time_key)
+    ignoreTimeDefault = res.getString(R.string.ignore_time_default)
+    timeoutTimeKey = res.getString(R.string.timeout_time_key)
+    timeoutTimeDefault = res.getString(R.string.timeout_time_default)
+    installListener = res.getString(R.string.install_listener_key)
+    installListenerDefault = res.getBoolean(R.bool.install_listener_default)
+    ignoreKeyguard = res.getString(R.string.ignore_keyguard_key)
+    ignoreKeyguardDefault = res.getBoolean(R.bool.ignore_keyguard_default)
+    lockScreenType = res.getString(R.string.lock_screen_type_key)
+    lockScreenTypeDefault = res.getString(R.string.lock_screen_type_default)
+  }
 
-    override fun getCurrentLockType(): LockScreenType =
-        LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault))
+  override fun getCurrentLockType(): LockScreenType =
+      LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault))
 
-    override fun isIgnoreInKeyguard(): Boolean =
-        preferences.getBoolean(ignoreKeyguard, ignoreKeyguardDefault)
+  override fun isIgnoreInKeyguard(): Boolean =
+      preferences.getBoolean(ignoreKeyguard, ignoreKeyguardDefault)
 
-    override fun isInstallListenerEnabled(): Boolean =
-        preferences.getBoolean(installListener, installListenerDefault)
+  override fun isInstallListenerEnabled(): Boolean =
+      preferences.getBoolean(installListener, installListenerDefault)
 
-    override fun getHint(): String? = preferences.getString(
-        HINT, null
-    )
+  override fun getHint(): String? = preferences.getString(
+      HINT, null
+  )
 
-    override fun setHint(hint: String) {
-        preferences.edit().putString(
+  override fun setHint(hint: String) {
+    preferences.edit()
+        .putString(
             HINT, hint
-        ).apply()
-    }
+        )
+        .apply()
+  }
 
-    override fun clearHint() {
-        preferences.edit().remove(
+  override fun clearHint() {
+    preferences.edit()
+        .remove(
             HINT
-        ).apply()
-    }
+        )
+        .apply()
+  }
 
-    override fun isInfoDialogOnBoard(): Boolean = preferences.getBoolean(
-        LOCK_DIALOG_ONBOARD, false
-    )
+  override fun isInfoDialogOnBoard(): Boolean = preferences.getBoolean(
+      LOCK_DIALOG_ONBOARD, false
+  )
 
-    override fun getDefaultIgnoreTime(): Long =
-        preferences.getString(ignoreTimeKey, ignoreTimeDefault).toLong()
+  override fun getDefaultIgnoreTime(): Long =
+      preferences.getString(ignoreTimeKey, ignoreTimeDefault).toLong()
 
-    override fun getTimeoutPeriod(): Long =
-        preferences.getString(timeoutTimeKey, timeoutTimeDefault).toLong()
+  override fun getTimeoutPeriod(): Long =
+      preferences.getString(timeoutTimeKey, timeoutTimeDefault).toLong()
 
-    override fun isSystemVisible(): Boolean = preferences.getBoolean(
-        IS_SYSTEM, false
-    )
+  override fun isSystemVisible(): Boolean = preferences.getBoolean(
+      IS_SYSTEM, false
+  )
 
-    override fun setSystemVisible(visible: Boolean) {
-        preferences.edit().putBoolean(
+  override fun setSystemVisible(visible: Boolean) {
+    preferences.edit()
+        .putBoolean(
             IS_SYSTEM, visible
-        ).apply()
-    }
+        )
+        .apply()
+  }
 
-    override fun getMasterPassword(): String? = preferences.getString(
-        MASTER_PASSWORD, null
-    )
+  override fun getMasterPassword(): String? = preferences.getString(
+      MASTER_PASSWORD, null
+  )
 
-    override fun setMasterPassword(pw: String) {
-        preferences.edit().putString(
+  override fun setMasterPassword(pw: String) {
+    preferences.edit()
+        .putString(
             MASTER_PASSWORD, pw
-        ).apply()
-    }
+        )
+        .apply()
+  }
 
-    override fun clearMasterPassword() {
-        preferences.edit().remove(
+  override fun clearMasterPassword() {
+    preferences.edit()
+        .remove(
             MASTER_PASSWORD
-        ).apply()
-    }
+        )
+        .apply()
+  }
 
-    override fun hasAgreed(): Boolean = preferences.getBoolean(
-        AGREED, false
-    )
+  override fun hasAgreed(): Boolean = preferences.getBoolean(
+      AGREED, false
+  )
 
-    override fun setAgreed() {
-        preferences.edit().putBoolean(
+  override fun setAgreed() {
+    preferences.edit()
+        .putBoolean(
             AGREED, true
-        ).apply()
-    }
+        )
+        .apply()
+  }
 
-    override fun isListOnBoard(): Boolean = preferences.getBoolean(
-        LOCK_LIST_ONBOARD, false
-    )
+  override fun isListOnBoard(): Boolean = preferences.getBoolean(
+      LOCK_LIST_ONBOARD, false
+  )
 
-    override fun setListOnBoard() {
-        preferences.edit().putBoolean(
+  override fun setListOnBoard() {
+    preferences.edit()
+        .putBoolean(
             LOCK_LIST_ONBOARD, true
-        ).apply()
-    }
+        )
+        .apply()
+  }
 
-    override fun setInfoDialogOnBoard() {
-        preferences.edit().putBoolean(
+  override fun setInfoDialogOnBoard() {
+    preferences.edit()
+        .putBoolean(
             LOCK_DIALOG_ONBOARD, true
-        ).apply()
-    }
+        )
+        .apply()
+  }
 
-    override fun clearAll() {
-        preferences.edit().clear().apply()
-    }
+  override fun clearAll() {
+    preferences.edit()
+        .clear()
+        .apply()
+  }
 
-    companion object {
+  companion object {
 
-        private const val IS_SYSTEM = "is_system"
-        private const val MASTER_PASSWORD = "master_password"
-        private const val HINT = "hint"
-        private const val AGREED = "agreed"
-        private const val LOCK_LIST_ONBOARD = "list_onboard"
-        private const val LOCK_DIALOG_ONBOARD = "dialog_onboard"
-    }
+    private const val IS_SYSTEM = "is_system"
+    private const val MASTER_PASSWORD = "master_password"
+    private const val HINT = "hint"
+    private const val AGREED = "agreed"
+    private const val LOCK_LIST_ONBOARD = "list_onboard"
+    private const val LOCK_DIALOG_ONBOARD = "dialog_onboard"
+  }
 }

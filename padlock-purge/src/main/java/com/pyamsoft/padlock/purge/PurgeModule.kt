@@ -30,20 +30,20 @@ import javax.inject.Named
 @Module
 abstract class PurgeModule {
 
-    @Binds
-    internal abstract fun providePurgeBus(bus: PurgeBus): EventBus<PurgeEvent>
+  @Binds
+  internal abstract fun providePurgeBus(bus: PurgeBus): EventBus<PurgeEvent>
 
-    @Binds
-    internal abstract fun providePurgeAllBus(bus: PurgeAllBus): EventBus<PurgeAllEvent>
+  @Binds
+  internal abstract fun providePurgeAllBus(bus: PurgeAllBus): EventBus<PurgeAllEvent>
 
-    @Binds
-    internal abstract fun providePurgeInteractorCache(impl: PurgeInteractorCache): PurgeInteractor
+  @Binds
+  internal abstract fun providePurgeInteractorCache(impl: PurgeInteractorCache): PurgeInteractor
 
-    @Binds
-    @Named("interactor_purge")
-    internal abstract fun providePurgeInteractor(impl: PurgeInteractorImpl): PurgeInteractor
+  @Binds
+  @Named("interactor_purge")
+  internal abstract fun providePurgeInteractor(impl: PurgeInteractorImpl): PurgeInteractor
 
-    @Binds
-    @Named("cache_purge")
-    internal abstract fun provideCache(impl: PurgeInteractorCache): Cache
+  @Binds
+  @Named("cache_purge")
+  internal abstract fun provideCache(impl: PurgeInteractorCache): Cache
 }

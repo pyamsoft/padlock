@@ -32,22 +32,26 @@ internal class JobSchedulerCompatImpl @Inject internal constructor(
     private val context: Context
 ) : JobSchedulerCompat {
 
-    private val alarmManager: AlarmManager = context.getSystemService(
-        Context.ALARM_SERVICE
-    ) as AlarmManager
+  private val alarmManager: AlarmManager = context.getSystemService(
+      Context.ALARM_SERVICE
+  ) as AlarmManager
 
-    @CheckResult
-    private fun Intent.toPending(): PendingIntent = PendingIntent.getService(context, 0, this, 0)
+  @CheckResult
+  private fun Intent.toPending(): PendingIntent = PendingIntent.getService(context, 0, this, 0)
 
-    override fun cancel(intent: Intent) {
-        intent.toPending().apply {
-            alarmManager.cancel(this)
-            cancel()
+  override fun cancel(intent: Intent) {
+    intent.toPending()
+        .apply {
+          alarmManager.cancel(this)
+          cancel()
         }
-    }
+  }
 
-    override fun queue(intent: Intent, triggerTime: Long) {
-        cancel(intent)
-        alarmManager.set(AlarmManager.RTC, triggerTime, intent.toPending())
-    }
+  override fun queue(
+      intent: Intent,
+      triggerTime: Long
+  ) {
+    cancel(intent)
+    alarmManager.set(AlarmManager.RTC, triggerTime, intent.toPending())
+  }
 }

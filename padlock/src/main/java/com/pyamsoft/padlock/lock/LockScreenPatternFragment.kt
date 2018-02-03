@@ -36,115 +36,123 @@ import javax.inject.Inject
 
 class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.View {
 
-    private lateinit var binding: FragmentLockScreenPatternBinding
-    @field:Inject
-    internal lateinit var presenter: LockEntryPresenter
-    private var listener: PatternLockViewListener? = null
+  private lateinit var binding: FragmentLockScreenPatternBinding
+  @field:Inject
+  internal lateinit var presenter: LockEntryPresenter
+  private var listener: PatternLockViewListener? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Injector.obtain<PadLockComponent>(context!!.applicationContext).plusLockScreenComponent(
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+        .plusLockScreenComponent(
             LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)
-        ).inject(this)
+        )
+        .inject(this)
+  }
+
+  override fun onCreateView(
+      inflater: LayoutInflater,
+      container: ViewGroup?,
+      savedInstanceState: Bundle?
+  ): View? {
+    binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
+    return binding.root
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    if (listener != null) {
+      binding.patternLock.removePatternLockListener(listener)
+      listener = null
     }
+    binding.unbind()
+  }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+  override fun onViewCreated(
+      view: View,
+      savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
+    listener = object : PatternLockViewListener {
+      override fun onStarted() {
+      }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        if (listener != null) {
-            binding.patternLock.removePatternLockListener(listener)
-            listener = null
-        }
-        binding.unbind()
-    }
+      override fun onProgress(list: List<PatternLockView.Dot>) {
+      }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        listener = object : PatternLockViewListener {
-            override fun onStarted() {
-            }
-
-            override fun onProgress(list: List<PatternLockView.Dot>) {
-            }
-
-            override fun onComplete(list: List<PatternLockView.Dot>) {
-                presenter.submit(lockedCode, LockCellUtil.cellPatternToString(list))
-                binding.patternLock.clearPattern()
-            }
-
-            override fun onCleared() {
-            }
-        }
-
-        binding.patternLock.isTactileFeedbackEnabled = false
-        binding.patternLock.addPatternLockListener(listener)
-
-        presenter.bind(viewLifecycle, this)
-    }
-
-    override fun onSubmitSuccess() {
-        Timber.d("Unlocked!")
-        presenter.postUnlock(lockedCode, isLockedSystem, isExcluded, selectedIgnoreTime)
-    }
-
-    override fun onSubmitFailure() {
-        Timber.e("Failed to unlock")
-        showSnackbarWithText("Error: Invalid PIN")
-
-        // Once fail count is tripped once, continue to update it every time following until time elapses
-        presenter.lockEntry()
-    }
-
-    override fun onSubmitError(throwable: Throwable) {
-        DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "submit_error")
-    }
-
-    override fun onUnlockError(throwable: Throwable) {
-        DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "unlock_error")
-    }
-
-    override fun onLocked() {
-        showSnackbarWithText("This entry is temporarily locked")
-    }
-
-    override fun onLockedError(throwable: Throwable) {
-        DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "locked_error")
-    }
-
-    override fun onDisplayHint(hint: String) {
-        // No hints for pattern fragment
-    }
-
-    override fun onStart() {
-        super.onStart()
+      override fun onComplete(list: List<PatternLockView.Dot>) {
+        presenter.submit(lockedCode, LockCellUtil.cellPatternToString(list))
         binding.patternLock.clearPattern()
+      }
+
+      override fun onCleared() {
+      }
     }
 
-    companion object {
+    binding.patternLock.isTactileFeedbackEnabled = false
+    binding.patternLock.addPatternLockListener(listener)
 
-        const val TAG = "LockScreenPatternFragment"
+    presenter.bind(viewLifecycle, this)
+  }
 
-        @JvmStatic
-        @CheckResult
-        fun newInstance(
-            lockedPackageName: String,
-            lockedActivityName: String, lockedCode: String?,
-            lockedRealName: String, lockedSystem: Boolean
-        ): LockScreenPatternFragment {
-            val fragment = LockScreenPatternFragment()
-            fragment.arguments = LockScreenBaseFragment.buildBundle(
-                lockedPackageName,
-                lockedActivityName,
-                lockedCode, lockedRealName, lockedSystem
-            )
-            return fragment
-        }
+  override fun onSubmitSuccess() {
+    Timber.d("Unlocked!")
+    presenter.postUnlock(lockedCode, isLockedSystem, isExcluded, selectedIgnoreTime)
+  }
+
+  override fun onSubmitFailure() {
+    Timber.e("Failed to unlock")
+    showSnackbarWithText("Error: Invalid PIN")
+
+    // Once fail count is tripped once, continue to update it every time following until time elapses
+    presenter.lockEntry()
+  }
+
+  override fun onSubmitError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "submit_error")
+  }
+
+  override fun onUnlockError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "unlock_error")
+  }
+
+  override fun onLocked() {
+    showSnackbarWithText("This entry is temporarily locked")
+  }
+
+  override fun onLockedError(throwable: Throwable) {
+    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "locked_error")
+  }
+
+  override fun onDisplayHint(hint: String) {
+    // No hints for pattern fragment
+  }
+
+  override fun onStart() {
+    super.onStart()
+    binding.patternLock.clearPattern()
+  }
+
+  companion object {
+
+    const val TAG = "LockScreenPatternFragment"
+
+    @JvmStatic
+    @CheckResult
+    fun newInstance(
+        lockedPackageName: String,
+        lockedActivityName: String,
+        lockedCode: String?,
+        lockedRealName: String,
+        lockedSystem: Boolean
+    ): LockScreenPatternFragment {
+      val fragment = LockScreenPatternFragment()
+      fragment.arguments = LockScreenBaseFragment.buildBundle(
+          lockedPackageName,
+          lockedActivityName,
+          lockedCode, lockedRealName, lockedSystem
+      )
+      return fragment
     }
+  }
 }

@@ -18,4 +18,7 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-data class CloseOldEvent internal constructor(val packageName: String, val activityName: String)
+data class CloseOldEvent internal constructor(
+    val packageName: String,
+    val activityName: String
+)

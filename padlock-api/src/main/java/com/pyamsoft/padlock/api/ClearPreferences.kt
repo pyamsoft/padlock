@@ -20,5 +20,5 @@ package com.pyamsoft.padlock.api
 
 interface ClearPreferences {
 
-    fun clearAll()
+  fun clearAll()
 }

@@ -25,14 +25,14 @@ import io.reactivex.Single
 
 interface LockListInteractor : LockStateModifyInteractor {
 
-    @CheckResult
-    fun populateList(force: Boolean): Observable<AppEntry>
+  @CheckResult
+  fun populateList(force: Boolean): Observable<AppEntry>
 
-    @CheckResult
-    fun hasShownOnBoarding(): Single<Boolean>
+  @CheckResult
+  fun hasShownOnBoarding(): Single<Boolean>
 
-    @CheckResult
-    fun isSystemVisible(): Single<Boolean>
+  @CheckResult
+  fun isSystemVisible(): Single<Boolean>
 
-    fun setSystemVisible(visible: Boolean)
+  fun setSystemVisible(visible: Boolean)
 }

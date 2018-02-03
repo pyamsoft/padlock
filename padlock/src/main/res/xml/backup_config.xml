@@ -18,11 +18,11 @@
 
 <full-backup-content>
 
-    <exclude
-        domain="sharedpref"
-        path="com.pyamsoft.padlock_preferences.xml" />
-    <exclude
-        domain="database"
-        path="padlock_db" />
+  <exclude
+      domain="sharedpref"
+      path="com.pyamsoft.padlock_preferences.xml"/>
+  <exclude
+      domain="database"
+      path="padlock_db"/>
 
 </full-backup-content>

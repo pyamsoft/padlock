@@ -23,16 +23,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource">
 
-    <group android:id="@+id/menu_group_list_search">
+  <group android:id="@+id/menu_group_list_search">
 
-        <item
-            android:id="@+id/menu_search"
-            android:icon="@drawable/ic_search_24dp"
-            android:title="@string/search"
-            app:actionViewClass="android.support.v7.widget.SearchView"
-            app:showAsAction="ifRoom|collapseActionView" />
+    <item
+        android:id="@+id/menu_search"
+        android:icon="@drawable/ic_search_24dp"
+        android:title="@string/search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView"/>
 
-    </group>
+  </group>
 
 
 </menu>

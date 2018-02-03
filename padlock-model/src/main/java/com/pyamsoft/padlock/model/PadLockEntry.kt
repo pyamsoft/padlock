@@ -20,31 +20,30 @@ package com.pyamsoft.padlock.model
 
 import android.support.annotation.CheckResult
 import com.google.auto.value.AutoValue
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
 @AutoValue
 abstract class PadLockEntry : PadLockEntryModel {
 
-    companion object {
+  companion object {
 
-        /**
-         * The activity name of the PACKAGE entry in the database
-         */
-        const val PACKAGE_ACTIVITY_NAME = "PACKAGE"
-        const val PACKAGE_EMPTY = "EMPTY"
-        const val ACTIVITY_EMPTY = "EMPTY"
+    /**
+     * The activity name of the PACKAGE entry in the database
+     */
+    const val PACKAGE_ACTIVITY_NAME = "PACKAGE"
+    const val PACKAGE_EMPTY = "EMPTY"
+    const val ACTIVITY_EMPTY = "EMPTY"
 
-        @JvmStatic
-        @CheckResult
-        fun isEmpty(entry: PadLockEntryModel): Boolean = (PACKAGE_EMPTY == entry.packageName()
-                && ACTIVITY_EMPTY == entry.activityName())
+    @JvmStatic
+    @CheckResult
+    fun isEmpty(entry: PadLockEntryModel): Boolean = (PACKAGE_EMPTY == entry.packageName()
+        && ACTIVITY_EMPTY == entry.activityName())
 
-        val EMPTY: PadLockEntryModel by lazy {
-            AutoValue_PadLockEntry(
-                PadLockEntry.PACKAGE_EMPTY, PadLockEntry.ACTIVITY_EMPTY, null,
-                0, 0, false, false
-            )
-        }
-
+    val EMPTY: PadLockEntryModel by lazy {
+      AutoValue_PadLockEntry(
+          PadLockEntry.PACKAGE_EMPTY, PadLockEntry.ACTIVITY_EMPTY, null,
+          0, 0, false, false
+      )
     }
+
+  }
 }

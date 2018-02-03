@@ -19,5 +19,6 @@
 package com.pyamsoft.padlock.model
 
 enum class ConfirmEvent {
-    DATABASE, ALL
+  DATABASE,
+  ALL
 }

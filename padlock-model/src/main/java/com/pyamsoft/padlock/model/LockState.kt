@@ -19,5 +19,8 @@
 package com.pyamsoft.padlock.model
 
 enum class LockState {
-    NONE, DEFAULT, WHITELISTED, LOCKED
+  NONE,
+  DEFAULT,
+  WHITELISTED,
+  LOCKED
 }

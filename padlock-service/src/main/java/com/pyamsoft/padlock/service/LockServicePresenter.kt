@@ -19,13 +19,8 @@
 package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.api.LockServiceInteractor
-import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.padlock.model.PadLockEntry
-import com.pyamsoft.padlock.model.RecheckEvent
-import com.pyamsoft.padlock.model.RecheckStatus
+import com.pyamsoft.padlock.model.*
 import com.pyamsoft.padlock.model.RecheckStatus.NOT_FORCE
-import com.pyamsoft.padlock.model.ServiceFinishEvent
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.service.LockServicePresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.ktext.clear
@@ -50,129 +45,142 @@ class LockServicePresenter @Inject internal constructor(
     ioScheduler, mainScheduler
 ) {
 
-    private var matchingDisposable: Disposable = Disposables.empty()
-    private var entryDisposable: Disposable = Disposables.empty()
+  private var matchingDisposable: Disposable = Disposables.empty()
+  private var entryDisposable: Disposable = Disposables.empty()
 
-    init {
-        interactor.reset()
+  init {
+    interactor.reset()
+  }
+
+  override fun onCreate() {
+    super.onCreate()
+    registerOnBus()
+    registerForegroundEventListener()
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    interactor.cleanup()
+    interactor.reset()
+
+    matchingDisposable = matchingDisposable.clear()
+    entryDisposable = entryDisposable.clear()
+  }
+
+  private fun registerForegroundEventListener() {
+    dispose {
+      foregroundEventBus.listen()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ interactor.clearMatchingForegroundEvent(it) }, {
+            Timber.e(it, "Error listening for foreground event clears")
+          })
+    }
+    dispose {
+      interactor.listenForForegroundEvents()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .onErrorReturn {
+            Timber.e(it, "Error while listening to foreground events")
+            return@onErrorReturn ForegroundEvent.EMPTY
+          }
+          .doAfterTerminate { view?.onFinish() }
+          .subscribe({
+            if (ForegroundEvent.isEmpty(it)) {
+              Timber.w("Ignore empty foreground entry event")
+            } else {
+              processEvent(it.packageName, it.className, NOT_FORCE)
+            }
+          },
+              {
+                Timber.e(
+                    it,
+                    "Error while listening to foreground event, killing stream"
+                )
+              },
+              { Timber.d("Foreground event stream completed") })
+    }
+  }
+
+  private fun registerOnBus() {
+    dispose {
+      serviceFinishBus.listen()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            view?.onFinish()
+          }, { Timber.e(it, "onError service finish bus") })
     }
 
-    override fun onCreate() {
-        super.onCreate()
-        registerOnBus()
-        registerForegroundEventListener()
+    dispose {
+      recheckEventBus.listen()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            view?.onRecheck(it.packageName, it.className)
+          }, { Timber.e(it, "onError recheck event bus") })
     }
+  }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        interactor.cleanup()
-        interactor.reset()
+  fun processActiveApplicationIfMatching(
+      packageName: String,
+      className: String
+  ) {
+    matchingDisposable = matchingDisposable.clear()
+    matchingDisposable = interactor.isActiveMatching(packageName, className)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainThreadScheduler)
+        .subscribe({
+          if (it) {
+            processEvent(packageName, className, RecheckStatus.FORCE)
+          }
+        }, { Timber.e(it, "onError processActiveApplicationIfMatching") })
+  }
 
-        matchingDisposable = matchingDisposable.clear()
-        entryDisposable = entryDisposable.clear()
-    }
+  private fun processEvent(
+      packageName: String,
+      className: String,
+      forcedRecheck: RecheckStatus
+  ) {
+    entryDisposable = entryDisposable.clear()
+    entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainThreadScheduler)
+        .subscribe({
+          if (PadLockEntry.isEmpty(it)) {
+            Timber.w("PadLockEntry is EMPTY, ignore")
+          } else {
+            view?.onStartLockScreen(it, className)
+          }
+        }, {
+          if (it is NoSuchElementException) {
+            Timber.w("PadLock not locking: $packageName, $className")
+          } else {
+            Timber.e(it, "Error getting PadLockEntry for LockScreen")
+          }
+        })
+  }
 
-    private fun registerForegroundEventListener() {
-        dispose {
-            foregroundEventBus.listen()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({ interactor.clearMatchingForegroundEvent(it) }, {
-                    Timber.e(it, "Error listening for foreground event clears")
-                })
-        }
-        dispose {
-            interactor.listenForForegroundEvents()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .onErrorReturn {
-                    Timber.e(it, "Error while listening to foreground events")
-                    return@onErrorReturn ForegroundEvent.EMPTY
-                }
-                .doAfterTerminate { view?.onFinish() }
-                .subscribe({
-                    if (ForegroundEvent.isEmpty(it)) {
-                        Timber.w("Ignore empty foreground entry event")
-                    } else {
-                        processEvent(it.packageName, it.className, NOT_FORCE)
-                    }
-                },
-                    {
-                        Timber.e(
-                            it,
-                            "Error while listening to foreground event, killing stream"
-                        )
-                    },
-                    { Timber.d("Foreground event stream completed") })
-        }
-    }
+  interface View : ForegroundEventStreamCallback, BusCallback, LockScreenCallback
 
-    private fun registerOnBus() {
-        dispose {
-            serviceFinishBus.listen()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({
-                    view?.onFinish()
-                }, { Timber.e(it, "onError service finish bus") })
-        }
+  interface ForegroundEventStreamCallback {
 
-        dispose {
-            recheckEventBus.listen()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({
-                    view?.onRecheck(it.packageName, it.className)
-                }, { Timber.e(it, "onError recheck event bus") })
-        }
-    }
+    fun onFinish()
+  }
 
-    fun processActiveApplicationIfMatching(packageName: String, className: String) {
-        matchingDisposable = matchingDisposable.clear()
-        matchingDisposable = interactor.isActiveMatching(packageName, className)
-            .subscribeOn(ioScheduler)
-            .observeOn(mainThreadScheduler)
-            .subscribe({
-                if (it) {
-                    processEvent(packageName, className, RecheckStatus.FORCE)
-                }
-            }, { Timber.e(it, "onError processActiveApplicationIfMatching") })
-    }
+  interface LockScreenCallback {
 
-    private fun processEvent(packageName: String, className: String, forcedRecheck: RecheckStatus) {
-        entryDisposable = entryDisposable.clear()
-        entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
-            .subscribeOn(ioScheduler)
-            .observeOn(mainThreadScheduler)
-            .subscribe({
-                if (PadLockEntry.isEmpty(it)) {
-                    Timber.w("PadLockEntry is EMPTY, ignore")
-                } else {
-                    view?.onStartLockScreen(it, className)
-                }
-            }, {
-                if (it is NoSuchElementException) {
-                    Timber.w("PadLock not locking: $packageName, $className")
-                } else {
-                    Timber.e(it, "Error getting PadLockEntry for LockScreen")
-                }
-            })
-    }
+    fun onStartLockScreen(
+        entry: PadLockEntryModel,
+        realName: String
+    )
+  }
 
-    interface View : ForegroundEventStreamCallback, BusCallback, LockScreenCallback
+  interface BusCallback : ForegroundEventStreamCallback {
 
-    interface ForegroundEventStreamCallback {
-
-        fun onFinish()
-    }
-
-    interface LockScreenCallback {
-
-        fun onStartLockScreen(entry: PadLockEntryModel, realName: String)
-    }
-
-    interface BusCallback : ForegroundEventStreamCallback {
-
-        fun onRecheck(packageName: String, className: String)
-    }
+    fun onRecheck(
+        packageName: String,
+        className: String
+    )
+  }
 }

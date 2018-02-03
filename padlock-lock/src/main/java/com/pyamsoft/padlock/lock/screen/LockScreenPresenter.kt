@@ -45,108 +45,108 @@ class LockScreenPresenter @Inject internal constructor(
     computationScheduler, ioScheduler, mainScheduler
 ) {
 
-    override fun onCreate() {
-        super.onCreate()
-        loadDisplayNameFromPackage()
-        closeOldAndAwaitSignal()
+  override fun onCreate() {
+    super.onCreate()
+    loadDisplayNameFromPackage()
+    closeOldAndAwaitSignal()
+  }
+
+  override fun onPause() {
+    super.onPause()
+    clearMatchingForegroundEvent()
+  }
+
+  override fun onResume() {
+    super.onResume()
+    checkIfAlreadyUnlocked()
+  }
+
+  private fun checkIfAlreadyUnlocked() {
+    Timber.d("Check if $packageName $activityName already unlocked")
+    dispose {
+      interactor.isAlreadyUnlocked(packageName, activityName)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            if (it) {
+              view?.onAlreadyUnlocked()
+            }
+          }, {
+            Timber.e(it, "Error checking already unlocked state")
+          })
     }
+  }
 
-    override fun onPause() {
-        super.onPause()
-        clearMatchingForegroundEvent()
+  private fun clearMatchingForegroundEvent() {
+    Timber.d("Publish foreground clear event for $packageName, $realName")
+    foregroundEventBus.publish(
+        ForegroundEvent(packageName, realName)
+    )
+  }
+
+  private fun loadDisplayNameFromPackage() {
+    dispose {
+      interactor.getDisplayName(packageName)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ view?.onSetDisplayName(it) }, {
+            Timber.e(it, "Error loading display name from package")
+            view?.onSetDisplayName("")
+          })
     }
+  }
 
-    override fun onResume() {
-        super.onResume()
-        checkIfAlreadyUnlocked()
+  private fun closeOldAndAwaitSignal() {
+    // Send bus event first before we register or we may catch our own event.
+    bus.publish(CloseOldEvent(packageName, activityName))
+
+    dispose {
+      bus.listen()
+          .filter { it.packageName == packageName && it.activityName == activityName }
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({
+            Timber.w(
+                "Received a close old event: %s %s", it.packageName,
+                it.activityName
+            )
+            view?.onCloseOldReceived()
+          }, {
+            Timber.e(it, "Error bus close old")
+          })
     }
+  }
 
-    private fun checkIfAlreadyUnlocked() {
-        Timber.d("Check if $packageName $activityName already unlocked")
-        dispose {
-            interactor.isAlreadyUnlocked(packageName, activityName)
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({
-                    if (it) {
-                        view?.onAlreadyUnlocked()
-                    }
-                }, {
-                    Timber.e(it, "Error checking already unlocked state")
-                })
-        }
+  fun createWithDefaultIgnoreTime() {
+    dispose {
+      interactor.getDefaultIgnoreTime()
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ view?.onInitializeWithIgnoreTime(it) }, {
+            Timber.e(it, "onError createWithDefaultIgnoreTime")
+          })
     }
+  }
 
-    private fun clearMatchingForegroundEvent() {
-        Timber.d("Publish foreground clear event for $packageName, $realName")
-        foregroundEventBus.publish(
-            ForegroundEvent(packageName, realName)
-        )
-    }
+  interface View : NameCallback, OldCallback, IgnoreTimeCallback, AlreadyUnlockedCallback
 
-    private fun loadDisplayNameFromPackage() {
-        dispose {
-            interactor.getDisplayName(packageName)
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({ view?.onSetDisplayName(it) }, {
-                    Timber.e(it, "Error loading display name from package")
-                    view?.onSetDisplayName("")
-                })
-        }
-    }
+  interface IgnoreTimeCallback {
 
-    private fun closeOldAndAwaitSignal() {
-        // Send bus event first before we register or we may catch our own event.
-        bus.publish(CloseOldEvent(packageName, activityName))
+    fun onInitializeWithIgnoreTime(time: Long)
+  }
 
-        dispose {
-            bus.listen()
-                .filter { it.packageName == packageName && it.activityName == activityName }
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({
-                    Timber.w(
-                        "Received a close old event: %s %s", it.packageName,
-                        it.activityName
-                    )
-                    view?.onCloseOldReceived()
-                }, {
-                    Timber.e(it, "Error bus close old")
-                })
-        }
-    }
+  interface NameCallback {
 
-    fun createWithDefaultIgnoreTime() {
-        dispose {
-            interactor.getDefaultIgnoreTime()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainThreadScheduler)
-                .subscribe({ view?.onInitializeWithIgnoreTime(it) }, {
-                    Timber.e(it, "onError createWithDefaultIgnoreTime")
-                })
-        }
-    }
+    fun onSetDisplayName(name: String)
+  }
 
-    interface View : NameCallback, OldCallback, IgnoreTimeCallback, AlreadyUnlockedCallback
+  interface OldCallback {
 
-    interface IgnoreTimeCallback {
+    fun onCloseOldReceived()
+  }
 
-        fun onInitializeWithIgnoreTime(time: Long)
-    }
+  interface AlreadyUnlockedCallback {
 
-    interface NameCallback {
-
-        fun onSetDisplayName(name: String)
-    }
-
-    interface OldCallback {
-
-        fun onCloseOldReceived()
-    }
-
-    interface AlreadyUnlockedCallback {
-
-        fun onAlreadyUnlocked()
-    }
+    fun onAlreadyUnlocked()
+  }
 }
