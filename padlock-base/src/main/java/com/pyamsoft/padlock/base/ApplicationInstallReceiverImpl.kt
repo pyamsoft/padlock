@@ -47,20 +47,11 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
     @param:Named("io") private val ioScheduler: Scheduler,
     @param:Named("main") private val mainThreadScheduler: Scheduler,
     @Named("main_activity") mainActivityClass: Class<out Activity>,
-    @param:Named(
-        "cache_purge"
-    ) private val purgeCache: Cache,
-    @param:Named(
-        "cache_app_icons"
-    ) private val iconCache: Cache,
-    @param:Named(
-        "cache_lock_list"
-    ) private val listCache: Cache,
-    @param:Named(
-        "cache_lock_info"
-    ) private val infoCache: Cache
-) : BroadcastReceiver(),
-    ApplicationInstallReceiver {
+    @param:Named("cache_purge") private val purgeCache: Cache,
+    @param:Named("cache_app_icons") private val iconCache: Cache,
+    @param:Named("cache_lock_list") private val listCache: Cache,
+    @param:Named("cache_lock_info") private val infoCache: Cache
+) : BroadcastReceiver(), ApplicationInstallReceiver {
 
   private val notificationManager: NotificationManager
   private val filter: IntentFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
