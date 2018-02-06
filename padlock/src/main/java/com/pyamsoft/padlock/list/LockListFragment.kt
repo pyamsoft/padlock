@@ -97,6 +97,29 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
           applistFab.show()
         }
       }
+
+      // Load is done
+      if (!it) {
+        adapter.retainAll(backingSet)
+        if (adapter.adapterItemCount > 0) {
+          showRecycler()
+          Timber.d("We have refreshed")
+          presenter.showOnBoarding()
+
+          lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
+        } else {
+          binding.apply {
+            applistRecyclerview.visibility = View.GONE
+            applistEmpty.visibility = View.VISIBLE
+          }
+          Toasty.makeText(
+              binding.applistRecyclerview.context,
+              "Error while loading list. Please try again.",
+              Toast.LENGTH_SHORT
+          )
+              .show()
+        }
+      }
     }
     adapter = ModelAdapter { LockListItem(activity!!, it) }
     filterListDelegate = FilterListDelegate()
@@ -485,26 +508,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onListPopulated() {
-    adapter.retainAll(backingSet)
-    if (adapter.adapterItemCount > 0) {
-      showRecycler()
-      Timber.d("We have refreshed")
-      presenter.showOnBoarding()
-
-      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
-    } else {
-      binding.apply {
-        applistRecyclerview.visibility = View.GONE
-        applistEmpty.visibility = View.VISIBLE
-      }
-      Toasty.makeText(
-          binding.applistRecyclerview.context,
-          "Error while loading list. Please try again.",
-          Toast.LENGTH_SHORT
-      )
-          .show()
-    }
-
     refreshLatch.refreshing = false
   }
 

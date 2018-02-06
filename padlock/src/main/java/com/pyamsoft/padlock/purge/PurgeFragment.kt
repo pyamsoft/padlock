@@ -103,6 +103,13 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     super.onViewCreated(view, savedInstanceState)
     refreshLatch = RefreshLatch.create(viewLifecycle) {
       binding.purgeSwipeRefresh.refreshing(it)
+
+      // Load complete
+      if (!it) {
+        adapter.retainAll(backingSet)
+        lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
+        decideListState()
+      }
     }
     setupRecyclerView()
     setupSwipeRefresh()
@@ -153,9 +160,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onRetrieveComplete() {
-    adapter.retainAll(backingSet)
-    lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
-    decideListState()
     refreshLatch.refreshing = false
   }
 

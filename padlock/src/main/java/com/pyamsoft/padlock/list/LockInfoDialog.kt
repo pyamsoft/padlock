@@ -100,6 +100,29 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       Timber.d("Posting refresh latch: $it")
       binding.lockInfoSwipeRefresh.refreshing(it)
       filterListDelegate.setEnabled(!it)
+
+      // Load is done
+      if (!it) {
+        adapter.retainAll(backingSet)
+        if (adapter.adapterItemCount > 0) {
+          showRecycler()
+          Timber.d("Refresh finished")
+          presenter.showOnBoarding()
+
+          lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
+        } else {
+          binding.apply {
+            lockInfoRecycler.visibility = View.GONE
+            lockInfoEmpty.visibility = View.VISIBLE
+          }
+          Toasty.makeText(
+              binding.lockInfoRecycler.context,
+              "Error while loading list. Please try again.",
+              Toast.LENGTH_SHORT
+          )
+              .show()
+        }
+      }
     }
     filterListDelegate = FilterListDelegate()
     adapter = ModelAdapter { LockInfoItem(it, appIsSystem) }
@@ -258,26 +281,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   override fun onListPopulated() {
-    adapter.retainAll(backingSet)
-    if (adapter.adapterItemCount > 0) {
-      showRecycler()
-      Timber.d("Refresh finished")
-      presenter.showOnBoarding()
-
-      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
-    } else {
-      binding.apply {
-        lockInfoRecycler.visibility = View.GONE
-        lockInfoEmpty.visibility = View.VISIBLE
-      }
-      Toasty.makeText(
-          binding.lockInfoRecycler.context,
-          "Error while loading list. Please try again.",
-          Toast.LENGTH_SHORT
-      )
-          .show()
-    }
-
     refreshLatch.refreshing = false
   }
 
