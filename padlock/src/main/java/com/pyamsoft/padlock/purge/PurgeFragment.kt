@@ -37,6 +37,7 @@ import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
+import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -48,12 +49,12 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   private lateinit var decoration: DividerItemDecoration
   private var lastPosition: Int = 0
   private val backingSet: MutableCollection<String> = LinkedHashSet()
+  private lateinit var refreshLatch: RefreshLatch
 
   private fun decideListState() {
     binding.apply {
       if (adapter.adapterItemCount > 0) {
-        purgeEmpty.visibility = View.GONE
-        purgeList.visibility = View.VISIBLE
+        showRecycler()
       } else {
         purgeList.visibility = View.GONE
         purgeEmpty.visibility = View.VISIBLE
@@ -100,6 +101,9 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
       savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
+    refreshLatch = RefreshLatch.create(viewLifecycle) {
+      binding.purgeSwipeRefresh.refreshing(it)
+    }
     setupRecyclerView()
     setupSwipeRefresh()
     setupToolbarMenu()
@@ -136,20 +140,23 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
           R.color.blue500, R.color.amber700,
           R.color.blue700, R.color.amber500
       )
-      purgeSwipeRefresh.setOnRefreshListener { presenter.retrieveStaleApplications(true) }
+      purgeSwipeRefresh.setOnRefreshListener {
+        refreshLatch.forceRefresh()
+        presenter.retrieveStaleApplications(true)
+      }
     }
   }
 
   override fun onRetrieveBegin() {
-    binding.purgeSwipeRefresh.refreshing(true)
     backingSet.clear()
+    refreshLatch.refreshing = true
   }
 
   override fun onRetrieveComplete() {
     adapter.retainAll(backingSet)
     lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
     decideListState()
-    binding.purgeSwipeRefresh.refreshing(false)
+    refreshLatch.refreshing = false
   }
 
   override fun onRetrievedStale(packageName: String) {
@@ -168,10 +175,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     }
 
     if (!update) {
-      binding.apply {
-        purgeEmpty.visibility = View.GONE
-        purgeList.visibility = View.VISIBLE
-      }
+      showRecycler()
 
       var added = false
       for ((index, item) in adapter.adapterItems.withIndex()) {
@@ -242,6 +246,13 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
         }
       }
 
+      // Set up initial state
+      showRecycler()
+    }
+  }
+
+  private fun showRecycler() {
+    binding.apply {
       purgeEmpty.visibility = View.GONE
       purgeList.visibility = View.VISIBLE
     }
