@@ -45,6 +45,7 @@ import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.AppUtil
 import timber.log.Timber
 import javax.inject.Inject
@@ -64,6 +65,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   private var dividerDecoration: DividerItemDecoration? = null
   private var lastPosition: Int = 0
   private val backingSet: MutableCollection<ActivityEntry> = LinkedHashSet()
+  private lateinit var refreshLatch: RefreshLatch
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -85,8 +87,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       container: ViewGroup?,
       savedInstanceState: Bundle?
   ): View? {
-    filterListDelegate = FilterListDelegate()
-    adapter = ModelAdapter { LockInfoItem(it, appIsSystem) }
     binding = DialogLockInfoBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -96,6 +96,13 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
+    refreshLatch = RefreshLatch.create(viewLifecycle) {
+      Timber.d("Posting refresh latch: $it")
+      binding.lockInfoSwipeRefresh.isRefreshing = it
+      filterListDelegate.setEnabled(!it)
+    }
+    filterListDelegate = FilterListDelegate()
+    adapter = ModelAdapter { LockInfoItem(it, appIsSystem) }
     setupToolbar()
     binding.apply {
       lockInfoPackageName.text = appPackageName
@@ -145,6 +152,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       )
       lockInfoSwipeRefresh.setOnRefreshListener {
         Timber.d("onRefresh")
+        refreshLatch.forceRefresh()
         presenter.populateList(true)
       }
     }
@@ -165,6 +173,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
               adapter
           )
 
+      // Set initial view state
       lockInfoEmpty.visibility = View.GONE
       lockInfoRecycler.visibility = View.VISIBLE
     }
@@ -236,29 +245,31 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     }
   }
 
-  private fun setRefreshing(refresh: Boolean) {
-    binding.lockInfoSwipeRefresh.refreshing(refresh)
-    filterListDelegate.setEnabled(!refresh)
+  private fun showRecycler() {
+    binding.apply {
+      lockInfoEmpty.visibility = View.GONE
+      lockInfoRecycler.visibility = View.VISIBLE
+    }
   }
 
   override fun onListPopulateBegin() {
-    setRefreshing(true)
+    refreshLatch.refreshing = true
     backingSet.clear()
   }
 
   override fun onListPopulated() {
     adapter.retainAll(backingSet)
     if (adapter.adapterItemCount > 0) {
-      binding.lockInfoEmpty.visibility = View.GONE
-      binding.lockInfoRecycler.visibility = View.VISIBLE
-
+      showRecycler()
       Timber.d("Refresh finished")
       presenter.showOnBoarding()
 
       lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
     } else {
-      binding.lockInfoRecycler.visibility = View.GONE
-      binding.lockInfoEmpty.visibility = View.VISIBLE
+      binding.apply {
+        lockInfoRecycler.visibility = View.GONE
+        lockInfoEmpty.visibility = View.VISIBLE
+      }
       Toasty.makeText(
           binding.lockInfoRecycler.context,
           "Error while loading list. Please try again.",
@@ -267,7 +278,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
           .show()
     }
 
-    setRefreshing(false)
+    refreshLatch.refreshing = false
   }
 
   override fun onEntryAddedToList(entry: ActivityEntry) {
@@ -286,10 +297,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     }
 
     if (!update) {
-      binding.apply {
-        lockInfoEmpty.visibility = View.GONE
-        lockInfoRecycler.visibility = View.VISIBLE
-      }
+      showRecycler()
 
       var added = false
       for ((index, item) in adapter.adapterItems.withIndex()) {

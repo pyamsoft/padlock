@@ -46,6 +46,7 @@ import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.AnimUtil
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
+import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -62,6 +63,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   private var lastPosition: Int = 0
   private var displaySystemItem: MenuItem? = null
   private val backingSet: MutableCollection<AppEntry> = LinkedHashSet()
+  private lateinit var refreshLatch: RefreshLatch
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -74,8 +76,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       container: ViewGroup?,
       savedInstanceState: Bundle?
   ): View? {
-    filterListDelegate = FilterListDelegate()
-    adapter = ModelAdapter { LockListItem(activity!!, it) }
     binding = FragmentLockListBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -85,6 +85,21 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
+    refreshLatch = RefreshLatch.create(viewLifecycle) {
+      activity?.invalidateOptionsMenu()
+      filterListDelegate.setEnabled(!it)
+      binding.apply {
+        applistSwipeRefresh.refreshing(it)
+
+        if (it) {
+          applistFab.hide()
+        } else {
+          applistFab.show()
+        }
+      }
+    }
+    adapter = ModelAdapter { LockListItem(activity!!, it) }
+    filterListDelegate = FilterListDelegate()
     filterListDelegate.onViewCreated(adapter)
     setupRecyclerView()
     setupSwipeRefresh()
@@ -166,6 +181,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       )
       applistSwipeRefresh.setOnRefreshListener {
         Timber.d("onRefresh")
+        refreshLatch.forceRefresh()
         presenter.populateList(true)
       }
     }
@@ -194,6 +210,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         }
       }
 
+      // First load should show the spinner
       applistEmpty.visibility = View.GONE
       applistRecyclerview.visibility = View.VISIBLE
     }
@@ -281,18 +298,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   override fun onMasterPinClearFailure() {
     Toasty.makeText(context!!, "Error: Invalid PIN", Toast.LENGTH_SHORT)
         .show()
-  }
-
-  private fun setRefreshing(refresh: Boolean) {
-    binding.applistSwipeRefresh.refreshing(refresh)
-    activity?.invalidateOptionsMenu()
-    filterListDelegate.setEnabled(!refresh)
-
-    if (refresh) {
-      binding.applistFab.hide()
-    } else {
-      binding.applistFab.show()
-    }
   }
 
   private fun refreshListEntry(
@@ -434,7 +439,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onListPopulateBegin() {
-    setRefreshing(true)
+    refreshLatch.refreshing = true
     backingSet.clear()
   }
 
@@ -453,10 +458,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     }
 
     if (!update) {
-      binding.apply {
-        applistEmpty.visibility = View.GONE
-        applistRecyclerview.visibility = View.VISIBLE
-      }
+      showRecycler()
 
       var added = false
       for ((index, item) in adapter.adapterItems.withIndex()) {
@@ -475,18 +477,26 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     }
   }
 
+  private fun showRecycler() {
+    binding.apply {
+      applistRecyclerview.visibility = View.VISIBLE
+      applistEmpty.visibility = View.GONE
+    }
+  }
+
   override fun onListPopulated() {
     adapter.retainAll(backingSet)
     if (adapter.adapterItemCount > 0) {
-      binding.applistEmpty.visibility = View.GONE
-      binding.applistRecyclerview.visibility = View.VISIBLE
+      showRecycler()
       Timber.d("We have refreshed")
       presenter.showOnBoarding()
 
       lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
     } else {
-      binding.applistRecyclerview.visibility = View.GONE
-      binding.applistEmpty.visibility = View.VISIBLE
+      binding.apply {
+        applistRecyclerview.visibility = View.GONE
+        applistEmpty.visibility = View.VISIBLE
+      }
       Toasty.makeText(
           binding.applistRecyclerview.context,
           "Error while loading list. Please try again.",
@@ -495,7 +505,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
           .show()
     }
 
-    setRefreshing(false)
+    refreshLatch.refreshing = false
   }
 
   override fun onListPopulateError(throwable: Throwable) {
