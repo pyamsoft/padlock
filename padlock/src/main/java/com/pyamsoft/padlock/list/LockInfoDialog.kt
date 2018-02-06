@@ -98,7 +98,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     super.onViewCreated(view, savedInstanceState)
     refreshLatch = RefreshLatch.create(viewLifecycle) {
       Timber.d("Posting refresh latch: $it")
-      binding.lockInfoSwipeRefresh.isRefreshing = it
+      binding.lockInfoSwipeRefresh.refreshing(it)
       filterListDelegate.setEnabled(!it)
     }
     filterListDelegate = FilterListDelegate()
