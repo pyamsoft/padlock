@@ -55,8 +55,7 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
   override val changeLogLines: Array<String>
     get() = arrayOf(
-        "CHANGE: Better support for views while in Multi-Window mode",
-        "BUGFIX: Fix a memory leak when switching between views very quickly"
+        "BUGFIX: Smoother loading animations"
     )
 
   public override fun onCreate(savedInstanceState: Bundle?) {
