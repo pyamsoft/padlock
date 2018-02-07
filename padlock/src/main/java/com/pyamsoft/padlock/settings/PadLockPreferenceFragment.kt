@@ -34,9 +34,9 @@ import com.pyamsoft.padlock.main.MainFragment
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
-import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
+import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
 import javax.inject.Inject
 

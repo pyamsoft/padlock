@@ -31,7 +31,7 @@ import android.widget.EditText
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
-import com.pyamsoft.pydroid.ui.helper.Toasty
+import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
 import javax.inject.Inject
 

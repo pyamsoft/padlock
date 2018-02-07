@@ -42,11 +42,11 @@ import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.ui.helper.Toasty
 import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.AppUtil
+import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
 import javax.inject.Inject
 
