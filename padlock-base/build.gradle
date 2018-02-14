@@ -49,7 +49,7 @@ dependencies {
   implementation "com.android.support:preference-v7:$supportLib"
 
   // SQLBrite
-  implementation "com.squareup.sqlbrite2:sqlbrite:$sqlbrite"
+  implementation "com.squareup.sqlbrite3:sqlbrite:$sqlbrite"
 
   // Auto value
   compileOnly "com.google.auto.value:auto-value:$autoValue"
