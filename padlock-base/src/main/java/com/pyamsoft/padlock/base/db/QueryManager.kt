@@ -50,11 +50,7 @@ internal class QueryManager internal constructor(
     val query = factory.withPackageActivityNameDefault(
         packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName
     )
-
-    // TODO: This is duplicating parameters, but no easier function exists that I know of at the time
-    return briteDatabase.createQuery(
-        query.tables, query.sql, packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName
-    )
+    return briteDatabase.createQuery(query.tables, query)
         .mapToOne { withPackageActivityNameDefaultMapper.map(it) }
         .first(PadLockEntry.EMPTY)
   }
@@ -64,9 +60,7 @@ internal class QueryManager internal constructor(
       packageName: String
   ): Single<List<PadLockEntryModel.WithPackageNameModel>> {
     val statement = factory.withPackageName(packageName)
-
-    // TODO: This is duplicating parameters, but no easier function exists that I know of at the time
-    return briteDatabase.createQuery(statement.tables, statement.sql, packageName)
+    return briteDatabase.createQuery(statement.tables, statement)
         .mapToList { withPackageNameMapper.map(it) }
         .first(emptyList())
         .map { Collections.unmodifiableList(it) }
@@ -75,7 +69,7 @@ internal class QueryManager internal constructor(
   @CheckResult
   internal fun queryAll(): Single<List<PadLockEntryModel.AllEntriesModel>> {
     val statement = factory.allEntries()
-    return briteDatabase.createQuery(statement.tables, statement.sql)
+    return briteDatabase.createQuery(statement.tables, statement)
         .mapToList { allEntriesMapper.map(it) }
         .first(emptyList())
         .map { Collections.unmodifiableList(it) }
