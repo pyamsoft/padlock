@@ -39,10 +39,8 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PadLockDBImpl @Inject internal constructor(
-    context: Context,
-    @param:Named("io") private val scheduler: Scheduler
-) : PadLockDBInsert,
-    PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
+    context: Context, @param:Named("io") private val scheduler: Scheduler
+) : PadLockDBInsert, PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
 
   private val briteDatabase: BriteDatabase
   private val queryManager: QueryManager
