@@ -50,6 +50,8 @@ dependencies {
 
   // SQLBrite
   implementation "com.squareup.sqlbrite3:sqlbrite:$sqlbrite"
+  implementation "android.arch.persistence:db:$sqlite"
+  implementation "android.arch.persistence:db-framework:$sqlite"
 
   // Auto value
   compileOnly "com.google.auto.value:auto-value:$autoValue"

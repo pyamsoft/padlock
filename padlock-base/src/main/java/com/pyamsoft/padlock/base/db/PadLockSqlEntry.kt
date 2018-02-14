@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.base.db
 
+import android.support.annotation.CheckResult
 import com.google.auto.value.AutoValue
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
@@ -30,15 +31,15 @@ internal abstract class PadLockSqlEntry : PadLockEntryModel {
 
   companion object {
 
-    internal val FACTORY: PadLockEntryModel.Factory<PadLockSqlEntry> by lazy<PadLockEntryModel.Factory<PadLockSqlEntry>> {
-      PadLockEntryModel.Factory { packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication, whitelist ->
-        AutoValue_PadLockSqlEntry(
-            packageName, activityName, lockCode, lockUntilTime,
-            ignoreUntilTime,
+    @CheckResult
+    internal fun createFactory(): PadLockEntryModel.Factory<PadLockSqlEntry> {
+      return PadLockEntryModel.Factory { packageName, activityName, lockCode, lockUntilTime,
+          ignoreUntilTime, systemApplication, whitelist ->
+        return@Factory AutoValue_PadLockSqlEntry(
+            packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime,
             systemApplication, whitelist
         )
       }
     }
-
   }
 }

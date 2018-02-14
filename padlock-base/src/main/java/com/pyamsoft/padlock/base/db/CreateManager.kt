@@ -20,7 +20,7 @@ import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
-internal class CreateManager internal constructor() {
+internal class CreateManager internal constructor(private val factory: PadLockEntryModel.Factory<*>) {
 
   @CheckResult
   fun create(
@@ -32,7 +32,7 @@ internal class CreateManager internal constructor() {
       isSystem: Boolean,
       whitelist: Boolean
   ): PadLockEntryModel {
-    val entry = PadLockSqlEntry.FACTORY.creator.create(
+    val entry = factory.creator.create(
         packageName, activityName, lockCode,
         lockUntilTime, ignoreUntilTime, isSystem, whitelist
     )

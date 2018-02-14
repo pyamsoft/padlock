@@ -16,20 +16,14 @@
 
 package com.pyamsoft.padlock.base.db
 
-import android.database.sqlite.SQLiteOpenHelper
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.squareup.sqlbrite2.BriteDatabase
+import com.squareup.sqlbrite3.BriteDatabase
 
-internal class InsertManager internal constructor(
-    openHelper: SQLiteOpenHelper,
-    private val briteDatabase: BriteDatabase
-) {
+internal class InsertManager internal constructor(briteDatabase: BriteDatabase) {
 
-  private val insertEntry by lazy {
-    PadLockEntryModel.InsertEntry(openHelper.writableDatabase)
-  }
+  private val insertEntry = PadLockEntryModel.InsertEntry(briteDatabase.writableDatabase)
 
   @CheckResult
   internal fun insert(entry: PadLockEntryModel): Long {
@@ -37,11 +31,13 @@ internal class InsertManager internal constructor(
       throw RuntimeException("Cannot insert EMPTY entry")
     }
 
-    return briteDatabase.bindAndExecute(insertEntry) {
+    return insertEntry.run {
+      clearBindings()
       bind(
           entry.packageName(), entry.activityName(), entry.lockCode(), entry.lockUntilTime(),
           entry.ignoreUntilTime(), entry.systemApplication(), entry.whitelist()
       )
+      executeInsert()
     }
   }
 }

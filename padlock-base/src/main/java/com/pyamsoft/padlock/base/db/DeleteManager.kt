@@ -16,44 +16,35 @@
 
 package com.pyamsoft.padlock.base.db
 
-import android.database.sqlite.SQLiteOpenHelper
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.squareup.sqlbrite2.BriteDatabase
+import com.squareup.sqlbrite3.BriteDatabase
 
-internal class DeleteManager internal constructor(
-    openHelper: SQLiteOpenHelper,
-    private val briteDatabase: BriteDatabase
-) {
+internal class DeleteManager internal constructor(briteDatabase: BriteDatabase) {
 
-  private val deleteWithPackage by lazy {
-    PadLockEntryModel.DeleteWithPackageName(openHelper.writableDatabase)
-  }
-
-  private val deleteWithPackageActivity by lazy {
-    PadLockEntryModel.DeleteWithPackageActivityName(openHelper.writableDatabase)
-  }
-
-  private val deleteAll by lazy {
-    PadLockEntryModel.DeleteAll(openHelper.writableDatabase)
-  }
+  private val deleteWithPackage =
+      PadLockEntryModel.DeleteWithPackageName(briteDatabase.writableDatabase)
+  private val deleteWithPackageActivity =
+      PadLockEntryModel.DeleteWithPackageActivityName(briteDatabase.writableDatabase)
+  private val deleteAll = PadLockEntryModel.DeleteAll(briteDatabase.writableDatabase)
 
   @CheckResult
-  internal fun deleteWithPackage(packageName: String): Long {
-    return briteDatabase.bindAndExecute(deleteWithPackage) {
-      bind(packageName)
-    }
+  internal fun deleteWithPackage(packageName: String): Int = deleteWithPackage.run {
+    clearBindings()
+    bind(packageName)
+    return executeUpdateDelete()
   }
 
   @CheckResult
   internal fun deleteWithPackageActivity(
       packageName: String,
       activityName: String
-  ): Long {
-    return briteDatabase.bindAndExecute(deleteWithPackageActivity) {
-      bind(packageName, activityName)
-    }
+  ): Int = deleteWithPackageActivity.run {
+    clearBindings()
+    bind(packageName, activityName)
+    return executeUpdateDelete()
   }
 
-  internal fun deleteAll(): Long = briteDatabase.bindAndExecute(deleteAll) {}
+  @CheckResult
+  internal fun deleteAll(): Int = deleteAll.executeUpdateDelete()
 }
