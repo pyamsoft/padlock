@@ -42,7 +42,6 @@ internal class PadLockDBImpl @Inject internal constructor(
     context: Context, @param:Named("io") private val scheduler: Scheduler
 ) : PadLockDBInsert, PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
 
-  private val briteDatabase: BriteDatabase
   private val queryManager: QueryManager
   private val createManager: CreateManager
   private val insertManager: InsertManager
@@ -61,7 +60,7 @@ internal class PadLockDBImpl @Inject internal constructor(
             .callback(PadLockOpenHelper())
             .name(DB_NAME)
             .build()
-    briteDatabase = sqlBrite.wrapDatabaseHelper(
+    val briteDatabase = sqlBrite.wrapDatabaseHelper(
         FrameworkSQLiteOpenHelperFactory().create(dbConfiguration), scheduler
     )
 
