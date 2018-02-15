@@ -1,5 +1,4 @@
 -- Create the table for PadLockEntry objects
-
 CREATE TABLE padlock_entry (
   packageName TEXT NOT NULL,
   activityName TEXT NOT NULL,
@@ -8,48 +7,32 @@ CREATE TABLE padlock_entry (
   ignoreUntilTime INTEGER NOT NULL,
   systemApplication INTEGER AS Boolean NOT NULL,
   whitelist INTEGER AS Boolean NOT NULL
-
-
-
 );
 
 -- Get all entries in the table
-
 allEntries:
 SELECT packageName, activityName, whitelist
 FROM padlock_entry;
 
 -- Get all entries with the package name
-
 withPackageName:
 SELECT activityName, whitelist
 FROM padlock_entry
 WHERE packageName = ?;
 
 -- Get all entries with the package name and activity name
-
 --withPackageActivityName:
-
 --SELECT packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication
-
 --FROM padlock_entry
-
 --WHERE packageName = ?
-
 --AND activityName = ?
-
 --LIMIT 1;
 
--- Get either the package with specific name of the PACKAGE entry
-
+-- Get either the package with specific name or the PACKAGE entry
 -- SQLite only has bindings so we must make do
-
 -- ?1 package name
-
 -- ?2 the PadLock PACKAGE_TAG, see model.PadLockEntry
-
 -- ?3 the specific activity name
-
 withPackageActivityNameDefault:
 SELECT *
 FROM padlock_entry
@@ -99,57 +82,33 @@ WHERE packageName = ?
 AND activityName = ?;
 
 -- Get the lock code for an entry
-
---with_lock_code:
-
+--withLockCode:
 --SELECT lockCode
-
 --FROM padlock_entry
-
 --WHERE packageName = ?
-
 --AND activityName = ?
-
 --LIMIT 1;
 
 -- Get whether the entry is from a system application
-
---is_system_application:
-
+--isSystemApplication:
 --SELECT systemApplication
-
 --FROM padlock_entry
-
 --WHERE packageName = ?
-
 --AND activityName = ?
-
 --LIMIT 1;
 
 -- Get time to be locked until
-
---get_lock_until_time:
-
+--getLockUntilTime:
 --SELECT lockUntilTime
-
 --FROM padlock_entry
-
 --WHERE packageName = ?
-
 --AND activityName = ?
-
 --LIMIT 1;
 
 -- Get time to be ignored until
-
---get_ignore_until_time:
-
+--getIgnoreUntilTime:
 --SELECT ignoreUntilTime
-
 --FROM padlock_entry
-
 --WHERE packageName = ?
-
 --AND activityName = ?
-
 --LIMIT 1;
