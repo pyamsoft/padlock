@@ -37,12 +37,9 @@ abstract class PadLockEntry : PadLockEntryModel {
     fun isEmpty(entry: PadLockEntryModel): Boolean = (PACKAGE_EMPTY == entry.packageName()
         && ACTIVITY_EMPTY == entry.activityName())
 
-    val EMPTY: PadLockEntryModel by lazy {
-      AutoValue_PadLockEntry(
-          PadLockEntry.PACKAGE_EMPTY, PadLockEntry.ACTIVITY_EMPTY, null,
-          0, 0, false, false
-      )
-    }
+    @JvmField
+    val EMPTY: PadLockEntryModel =
+        AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false)
 
   }
 }
