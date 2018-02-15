@@ -53,7 +53,7 @@ buildscript {
     sqlite = "1.0.0"
     dagger = "2.14.1"
     patternLock = "1.0.0"
-    fastAdapter = "3.2.2"
+    fastAdapter = "3.2.4"
     ktlint = "3.0.0"
   }
 
