@@ -29,9 +29,9 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.uicommon.CanaryFragment
+import com.pyamsoft.pydroid.design.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch

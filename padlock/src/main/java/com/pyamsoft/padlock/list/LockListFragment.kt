@@ -30,13 +30,13 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.UsagePermissionChecker
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
+import com.pyamsoft.pydroid.design.util.refreshing
 import com.pyamsoft.pydroid.design.util.withBehavior
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.util.*

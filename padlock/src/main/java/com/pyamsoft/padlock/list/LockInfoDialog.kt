@@ -31,7 +31,6 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.list.info.LockInfoModule
@@ -40,6 +39,7 @@ import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.pydroid.design.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
