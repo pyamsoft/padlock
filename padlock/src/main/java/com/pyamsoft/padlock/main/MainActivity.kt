@@ -29,6 +29,8 @@ import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
+import com.pyamsoft.pydroid.ui.rating.ChangeLogBuilder
+import com.pyamsoft.pydroid.ui.rating.buildChangeLog
 import com.pyamsoft.pydroid.ui.sec.TamperActivity
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.animateMenu
@@ -53,10 +55,10 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
   override val applicationName: String by lazy(NONE) { getString(R.string.app_name) }
 
-  override val changeLogLines: Array<String>
-    get() = arrayOf(
-        "BUGFIX: Smoother loading animations"
-    )
+  override val changeLogLines: ChangeLogBuilder
+    get() = buildChangeLog {
+      bugfix("Smoother loading animations")
+    }
 
   public override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.Theme_PadLock_Light)
