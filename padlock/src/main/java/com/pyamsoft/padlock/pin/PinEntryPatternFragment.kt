@@ -26,7 +26,7 @@ import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
-import com.pyamsoft.padlock.helper.LockCellUtil
+import com.pyamsoft.padlock.helper.cellPatternToString
 import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
 import java.util.ArrayList
@@ -155,7 +155,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
       if (repeatPattern) {
         Timber.d("Submit repeat attempt")
         // Submit
-        val repeatText = LockCellUtil.cellPatternToString(repeatCellPattern)
+        val repeatText = cellPatternToString(repeatCellPattern)
         submitPin(repeatText)
         // No follow up acton
         return@runnable false
@@ -171,7 +171,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
           return@runnable false
         } else {
           Timber.d("Submit initial attempt")
-          patternText = LockCellUtil.cellPatternToString(cellPattern)
+          patternText = cellPatternToString(cellPattern)
           repeatPattern = true
           binding.patternLock.clearPattern()
           Toasty.makeText(
@@ -186,7 +186,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   override fun onMasterPinPresent() {
     nextButtonOnClickRunnable = runnable@ {
-      patternText = LockCellUtil.cellPatternToString(cellPattern)
+      patternText = cellPatternToString(cellPattern)
       binding.patternLock.clearPattern()
       submitPin("")
       return@runnable false

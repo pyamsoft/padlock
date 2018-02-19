@@ -16,24 +16,8 @@
 
 package com.pyamsoft.padlock.helper
 
-import android.support.annotation.CheckResult
-import android.support.v4.widget.SwipeRefreshLayout
-import android.view.MenuItem
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.mikepenz.fastadapter.items.ModelAbstractItem
-
-@CheckResult
-fun MenuItem?.isChecked(): Boolean = this != null && isChecked
-
-fun MenuItem?.setChecked(checked: Boolean) {
-  if (this != null) {
-    isChecked = checked
-  }
-}
-
-fun SwipeRefreshLayout.refreshing(refreshing: Boolean) {
-  post { isRefreshing = refreshing }
-}
 
 fun <M : Any> ModelAdapter<M, out ModelAbstractItem<M, *, *>>.retainAll(
     backing: MutableCollection<M>
@@ -41,15 +25,10 @@ fun <M : Any> ModelAdapter<M, out ModelAbstractItem<M, *, *>>.retainAll(
   val old: MutableCollection<ModelAbstractItem<M, *, *>> = LinkedHashSet()
   adapterItems.filterNotTo(old) { backing.contains(it.model) }
 
-  // Don't replace with stdlib operation, since we need the getAdapterPosition call
-  // to happen on each new loop.
-  @Suppress("LoopToCallChain")
-  for (item in old) {
-    val index = getAdapterPosition(item.identifier)
-    if (index >= 0) {
-      remove(index)
-    }
-  }
+  old.asSequence()
+      .map { getAdapterPosition(it.identifier) }
+      .filter { it >= 0 }
+      .forEach { remove(it) }
 
   backing.clear()
   return old.isNotEmpty()

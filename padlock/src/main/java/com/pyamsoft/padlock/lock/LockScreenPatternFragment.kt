@@ -26,7 +26,7 @@ import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
-import com.pyamsoft.padlock.helper.LockCellUtil
+import com.pyamsoft.padlock.helper.cellPatternToString
 import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
@@ -79,7 +79,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
       }
 
       override fun onComplete(list: List<PatternLockView.Dot>) {
-        presenter.submit(lockedCode, LockCellUtil.cellPatternToString(list))
+        presenter.submit(lockedCode, cellPatternToString(list))
         binding.patternLock.clearPattern()
       }
 

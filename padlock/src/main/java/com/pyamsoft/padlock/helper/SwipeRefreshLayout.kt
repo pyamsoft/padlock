@@ -16,13 +16,8 @@
 
 package com.pyamsoft.padlock.helper
 
-import android.support.annotation.CheckResult
-import com.andrognito.patternlockview.PatternLockView
+import android.support.v4.widget.SwipeRefreshLayout
 
-@CheckResult
-fun cellPatternToString(cells: List<PatternLockView.Dot>): String {
-  val builder = StringBuilder(cells.size)
-  cells.map { "${it.row}${it.column}" }
-      .forEach { builder.append(it) }
-  return builder.toString()
+fun SwipeRefreshLayout.refreshing(refreshing: Boolean) {
+  post { isRefreshing = refreshing }
 }

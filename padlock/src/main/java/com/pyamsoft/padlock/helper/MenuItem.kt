@@ -17,12 +17,13 @@
 package com.pyamsoft.padlock.helper
 
 import android.support.annotation.CheckResult
-import com.andrognito.patternlockview.PatternLockView
+import android.view.MenuItem
 
 @CheckResult
-fun cellPatternToString(cells: List<PatternLockView.Dot>): String {
-  val builder = StringBuilder(cells.size)
-  cells.map { "${it.row}${it.column}" }
-      .forEach { builder.append(it) }
-  return builder.toString()
+fun MenuItem?.isChecked(): Boolean = this != null && isChecked
+
+fun MenuItem?.setChecked(checked: Boolean) {
+  if (this != null) {
+    isChecked = checked
+  }
 }
