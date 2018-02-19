@@ -29,21 +29,19 @@ object UsagePermissionChecker {
   @JvmStatic
   @CheckResult
   fun missingUsageStatsPermission(context: Context): Boolean {
-    val appContext = context.applicationContext
-    val appOpsService: AppOpsManager = appContext.getSystemService(
+    val appOpsService: AppOpsManager = context.getSystemService(
         Context.APP_OPS_SERVICE
     ) as AppOpsManager
     val mode: Int = appOpsService.checkOpNoThrow(
         AppOpsManager.OPSTR_GET_USAGE_STATS,
-        android.os.Process.myUid(), appContext.packageName
+        android.os.Process.myUid(), context.packageName
     )
     val missingPermission: Boolean
     if (mode == AppOpsManager.MODE_DEFAULT) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         // On some Marshmallow phones, the default return code means the permission may be controlled by the PM
         missingPermission = (ContextCompat.checkSelfPermission(
-            appContext,
-            Manifest.permission.PACKAGE_USAGE_STATS
+            context, Manifest.permission.PACKAGE_USAGE_STATS
         ) != PackageManager.PERMISSION_GRANTED)
       } else {
         // Otherwise, we listen to app ops manager

@@ -43,7 +43,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockServiceInteractorImpl @Inject internal constructor(
-    context: Context,
+    private val context: Context,
     private val lockPassed: LockPassed,
     private val preferences: LockScreenPreferences,
     private val jobSchedulerCompat: JobSchedulerCompat,
@@ -54,15 +54,12 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 ) :
     LockServiceInteractor {
 
-  private val appContext = context.applicationContext
-  private val keyguardManager = appContext.getSystemService(
-      Context.KEYGUARD_SERVICE
-  ) as KeyguardManager
+  private val keyguardManager =
+      context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
   private var activePackageName = ""
   private var activeClassName = ""
-  private val usageManager: UsageStatsManager = appContext.getSystemService(
-      Context.USAGE_STATS_SERVICE
-  ) as UsageStatsManager
+  private val usageManager: UsageStatsManager =
+      context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
   private var lastForegroundEvent = ForegroundEvent.EMPTY
 
   override fun reset() {
@@ -150,7 +147,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   override fun cleanup() {
     Timber.d("Cleanup LockService")
-    val intent = Intent(appContext, recheckServiceClass)
+    val intent = Intent(context, recheckServiceClass)
     jobSchedulerCompat.cancel(intent)
   }
 

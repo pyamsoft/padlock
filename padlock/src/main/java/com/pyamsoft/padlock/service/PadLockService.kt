@@ -141,9 +141,8 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
     }
 
     Timber.d("Create notification channel with id: %s", NOTIFICATION_CHANNEL_ID)
-    val notificationManager: NotificationManager = applicationContext.getSystemService(
-        Context.NOTIFICATION_SERVICE
-    ) as NotificationManager
+    val notificationManager: NotificationManager =
+        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.createNotificationChannel(notificationChannel)
   }
 

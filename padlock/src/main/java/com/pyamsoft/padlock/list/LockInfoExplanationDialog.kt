@@ -20,7 +20,7 @@ import android.os.Bundle
 import android.view.*
 import com.pyamsoft.padlock.databinding.DialogInfoLocktypeExplainBinding
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
+import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 
 class LockInfoExplanationDialog : CanaryDialog() {

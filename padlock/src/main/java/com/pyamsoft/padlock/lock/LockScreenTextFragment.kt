@@ -32,8 +32,8 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
 import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.pydroid.loader.ImageLoader
-import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
-import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
+import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -111,8 +111,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
   private fun setupInputManager() {
     // Force the keyboard
-    imm = activity!!.applicationContext
-        .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm = activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
   }
 
@@ -187,15 +186,12 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
   override fun onSubmitError(throwable: Throwable) {
     clearDisplay()
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "unlock_error")
+    ErrorDialog().show(activity, "lock_screen_text_error")
   }
 
   override fun onUnlockError(throwable: Throwable) {
     clearDisplay()
-    DialogUtil.guaranteeSingleDialogFragment(
-        activity, ErrorDialog(),
-        "lock_error"
-    )
+    ErrorDialog().show(activity, "lock_screen_text_error")
   }
 
   override fun onLocked() {
@@ -204,11 +200,11 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
   override fun onLockedError(throwable: Throwable) {
     clearDisplay()
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "lock_error")
+    ErrorDialog().show(activity, "lock_screen_text_error")
   }
 
   override fun onDisplayHint(hint: String) {
-    binding.lockDisplayHint.text = "Hint: %s".format(if (hint.isEmpty()) "NO HINT" else hint)
+    binding.lockDisplayHint.text = "Hint: ${if (hint.isEmpty()) "NO HINT" else hint}"
   }
 
   private fun clearDisplay() {

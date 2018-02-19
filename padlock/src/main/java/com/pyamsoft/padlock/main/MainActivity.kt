@@ -29,10 +29,10 @@ import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
-import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.sec.TamperActivity
-import com.pyamsoft.pydroid.ui.util.AnimUtil
-import com.pyamsoft.pydroid.util.AppUtil
+import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
+import com.pyamsoft.pydroid.ui.util.animateMenu
+import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
@@ -83,9 +83,7 @@ class MainActivity : TamperActivity(), MainPresenter.View {
       }
     }
 
-    if (fm.findFragmentByTag(MainFragment.TAG) == null && fm.findFragmentByTag(
-            AboutLibrariesFragment.TAG
-        ) == null) {
+    if (fm.findFragmentByTag(MainFragment.TAG) == null && !AboutLibrariesFragment.isPresent(this)) {
       Timber.d("Load default page")
       fm.beginTransaction()
           .add(R.id.fragment_container, MainFragment(), MainFragment.TAG)
@@ -120,8 +118,7 @@ class MainActivity : TamperActivity(), MainPresenter.View {
     binding.toolbar.apply {
       setToolbar(this)
       setTitle(R.string.app_name)
-      ViewCompat.setElevation(this, AppUtil.convertToDP(context, 4f))
-
+      ViewCompat.setElevation(this, 4f.toDp(context).toFloat())
       setNavigationOnClickListener(DebouncedOnClickListener.create {
         onBackPressed()
       })
@@ -138,7 +135,7 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
   override fun onPostResume() {
     super.onPostResume()
-    AnimUtil.animateActionBarToolbar(binding.toolbar)
+    binding.toolbar.animateMenu()
 
     // Try to start service, will not if we do not have permission
     PadLockService.start(this)

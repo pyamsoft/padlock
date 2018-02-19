@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.model.RecheckStatus.NOT_FORCE
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.service.LockServicePresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.ktext.clear
+import com.pyamsoft.pydroid.data.clear
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
@@ -90,14 +90,7 @@ class LockServicePresenter @Inject internal constructor(
             } else {
               processEvent(it.packageName, it.className, NOT_FORCE)
             }
-          },
-              {
-                Timber.e(
-                    it,
-                    "Error while listening to foreground event, killing stream"
-                )
-              },
-              { Timber.d("Foreground event stream completed") })
+          }, { Timber.e(it, "Error while listening to foreground event") })
     }
   }
 

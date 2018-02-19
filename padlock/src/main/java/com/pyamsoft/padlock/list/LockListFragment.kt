@@ -37,12 +37,9 @@ import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.UsagePermissionChecker
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
-import com.pyamsoft.pydroid.design.util.FABUtil
+import com.pyamsoft.pydroid.design.util.withBehavior
 import com.pyamsoft.pydroid.loader.ImageLoader
-import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
-import com.pyamsoft.pydroid.ui.util.AnimUtil
-import com.pyamsoft.pydroid.ui.util.DialogUtil
-import com.pyamsoft.pydroid.ui.util.setUpEnabled
+import com.pyamsoft.pydroid.ui.util.*
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
@@ -115,7 +112,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
               "Error while loading list. Please try again.",
               Toast.LENGTH_SHORT
           )
-              .show()
         }
       }
     }
@@ -184,12 +180,12 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       it.setUpEnabled(false)
     }
 
-    AnimUtil.popShow(binding.applistFab, 300, 400)
+    binding.applistFab.popShow()
   }
 
   override fun onPause() {
     super.onPause()
-    AnimUtil.popHide(binding.applistFab, 300, 400)
+    binding.applistFab.popHide()
     lastPosition = ListStateUtil.getCurrentPosition(binding.applistRecyclerview)
     ListStateUtil.saveState(TAG, null, binding.applistRecyclerview)
   }
@@ -267,30 +263,26 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   private fun setupFAB() {
-    binding.applistFab.setOnDebouncedClickListener {
-      if (UsagePermissionChecker.missingUsageStatsPermission(
-              binding.applistFab.context
-          )) {
-        DialogUtil.guaranteeSingleDialogFragment(
-            activity, UsageAccessRequestDialog(),
-            "accessibility"
-        )
-      } else {
-        DialogUtil.guaranteeSingleDialogFragment(
-            activity,
-            PinEntryDialog.newInstance(binding.applistFab.context.packageName),
-            PinEntryDialog.TAG
-        )
+    binding.apply {
+      applistFab.setOnDebouncedClickListener {
+        if (UsagePermissionChecker.missingUsageStatsPermission(
+                applistFab.context
+            )) {
+          UsageAccessRequestDialog().show(activity, "usage_access")
+        } else {
+          activity!!.let {
+            PinEntryDialog.newInstance(it.packageName)
+                .show(it, PinEntryDialog.TAG)
+          }
+        }
       }
+      applistFab.withBehavior(HideScrollFABBehavior(24))
     }
-    FABUtil.setupFABBehavior(binding.applistFab, HideScrollFABBehavior(24))
   }
 
   private fun displayLockInfoFragment(entry: AppEntry) {
-    DialogUtil.guaranteeSingleDialogFragment(
-        activity, LockInfoDialog.newInstance(entry),
-        LockInfoDialog.TAG
-    )
+    LockInfoDialog.newInstance(entry)
+        .show(activity, LockInfoDialog.TAG)
   }
 
   override fun onMasterPinCreateSuccess() {
@@ -304,7 +296,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   override fun onMasterPinCreateFailure() {
     Toasty.makeText(context!!, "Error: Mismatched PIN", Toast.LENGTH_SHORT)
-        .show()
   }
 
   override fun onMasterPinClearSuccess() {
@@ -318,7 +309,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   override fun onMasterPinClearFailure() {
     Toasty.makeText(context!!, "Error: Invalid PIN", Toast.LENGTH_SHORT)
-        .show()
   }
 
   private fun refreshListEntry(
@@ -380,7 +370,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onModifyEntryError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "list_error")
+    ErrorDialog().show(activity, "list_error")
   }
 
   override fun onModifySubEntryToDefaultFromWhitelisted(packageName: String) {
@@ -432,7 +422,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onModifySubEntryError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "list_error")
+    ErrorDialog().show(activity, "list_error")
   }
 
   override fun onFABEnabled() {
@@ -460,7 +450,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onListPopulateBegin() {
-    refreshLatch.refreshing = true
+    refreshLatch.isRefreshing = true
     backingSet.clear()
   }
 
@@ -506,11 +496,11 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onListPopulated() {
-    refreshLatch.refreshing = false
+    refreshLatch.isRefreshing = false
   }
 
   override fun onListPopulateError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "list_error")
+    ErrorDialog().show(activity, "list_error")
   }
 
   companion object {

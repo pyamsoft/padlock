@@ -40,11 +40,11 @@ import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.ui.helper.setOnDebouncedClickListener
-import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
+import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
-import com.pyamsoft.pydroid.util.AppUtil
 import com.pyamsoft.pydroid.util.Toasty
+import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -118,7 +118,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
               "Error while loading list. Please try again.",
               Toast.LENGTH_SHORT
           )
-              .show()
         }
       }
     }
@@ -147,21 +146,15 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       lockInfoToolbar.setOnMenuItemClickListener {
         when (it.itemId) {
           R.id.menu_explain_lock_type -> {
-            DialogUtil.guaranteeSingleDialogFragment(
-                activity!!,
-                LockInfoExplanationDialog(),
-                LockInfoExplanationDialog.TAG
-            )
+            LockInfoExplanationDialog().show(activity!!, LockInfoExplanationDialog.TAG)
             return@setOnMenuItemClickListener true
           }
           else -> return@setOnMenuItemClickListener false
         }
       }
+
+      ViewCompat.setElevation(lockInfoToolbar, 4f.toDp(lockInfoToolbar.context).toFloat())
     }
-    ViewCompat.setElevation(
-        binding.lockInfoToolbar,
-        AppUtil.convertToDP(binding.lockInfoToolbar.context, 4f)
-    )
     filterListDelegate.onPrepareOptionsMenu(binding.lockInfoToolbar.menu, adapter)
   }
 
@@ -254,12 +247,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       val item: LockInfoItem = adapter.getAdapterItem(i)
       val entry: ActivityEntry = item.model
       if (id == entry.id) {
-        adapter.set(
-            i, ActivityEntry(
-            name = entry.name, packageName = entry.packageName,
-            lockState = state
-        )
-        )
+        adapter.set(i, ActivityEntry(entry.name, entry.packageName, state))
         presenter.update(entry.name, entry.packageName, state)
         break
       }
@@ -274,12 +262,12 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   override fun onListPopulateBegin() {
-    refreshLatch.refreshing = true
+    refreshLatch.isRefreshing = true
     backingSet.clear()
   }
 
   override fun onListPopulated() {
-    refreshLatch.refreshing = false
+    refreshLatch.isRefreshing = false
   }
 
   override fun onEntryAddedToList(entry: ActivityEntry) {
@@ -341,7 +329,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   override fun onListPopulateError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
+    ErrorDialog().show(activity, "error")
   }
 
   override fun onOnboardingComplete() {
@@ -365,7 +353,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   override fun onModifyEntryError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "error")
+    ErrorDialog().show(activity, "error")
   }
 
   companion object {

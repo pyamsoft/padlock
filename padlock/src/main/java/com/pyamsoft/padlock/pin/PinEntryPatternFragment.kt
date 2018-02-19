@@ -167,7 +167,6 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
               binding.patternLock.context, "Pattern is not long enough",
               Toasty.LENGTH_SHORT
           )
-              .show()
           binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
           return@runnable false
         } else {
@@ -179,7 +178,6 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
               binding.patternLock.context, "Please confirm pattern",
               Toasty.LENGTH_SHORT
           )
-              .show()
           return@runnable false
         }
       }
@@ -218,7 +216,6 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   override fun onPinSubmitError(throwable: Throwable) {
     Toasty.makeText(context!!, throwable.message.toString(), Toasty.LENGTH_SHORT)
-        .show()
   }
 
   override fun onPinSubmitComplete() {

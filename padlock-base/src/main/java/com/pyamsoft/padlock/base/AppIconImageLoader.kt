@@ -20,8 +20,8 @@ import android.graphics.drawable.Drawable
 import android.support.annotation.CheckResult
 import android.widget.ImageView
 import com.pyamsoft.padlock.api.PackageDrawableManager
-import com.pyamsoft.pydroid.ktext.enforceIo
-import com.pyamsoft.pydroid.ktext.enforceMainThread
+import com.pyamsoft.pydroid.data.enforceIo
+import com.pyamsoft.pydroid.data.enforceMainThread
 import com.pyamsoft.pydroid.loader.GenericLoader
 import com.pyamsoft.pydroid.loader.cache.ImageCache
 import com.pyamsoft.pydroid.loader.cache.ImageCache.ImageCacheKey

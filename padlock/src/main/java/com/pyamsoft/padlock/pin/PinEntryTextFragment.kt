@@ -77,8 +77,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     pinHintText = binding.pinHint.editText!!
 
     // Force the keyboard
-    imm = context!!.applicationContext
-        .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
 
     clearDisplay()
@@ -127,7 +126,6 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   override fun onPinSubmitError(throwable: Throwable) {
     Toasty.makeText(context!!, throwable.message.toString(), Toasty.LENGTH_SHORT)
-        .show()
   }
 
   override fun onPinSubmitComplete() {

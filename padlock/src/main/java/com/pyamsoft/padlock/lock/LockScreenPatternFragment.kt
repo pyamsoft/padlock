@@ -28,7 +28,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.LockCellUtil
 import com.pyamsoft.padlock.list.ErrorDialog
-import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -107,11 +107,11 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
   }
 
   override fun onSubmitError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "submit_error")
+    ErrorDialog().show(activity, "lock_screen_pattern_error")
   }
 
   override fun onUnlockError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "unlock_error")
+    ErrorDialog().show(activity, "lock_screen_pattern_error")
   }
 
   override fun onLocked() {
@@ -119,7 +119,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
   }
 
   override fun onLockedError(throwable: Throwable) {
-    DialogUtil.guaranteeSingleDialogFragment(activity, ErrorDialog(), "locked_error")
+    ErrorDialog().show(activity, "lock_screen_pattern_error")
   }
 
   override fun onDisplayHint(hint: String) {

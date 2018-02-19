@@ -30,9 +30,8 @@ internal class JobSchedulerCompatImpl @Inject internal constructor(
     private val context: Context
 ) : JobSchedulerCompat {
 
-  private val alarmManager: AlarmManager = context.getSystemService(
-      Context.ALARM_SERVICE
-  ) as AlarmManager
+  private val alarmManager: AlarmManager =
+      context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
   @CheckResult
   private fun Intent.toPending(): PendingIntent = PendingIntent.getService(context, 0, this, 0)

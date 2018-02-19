@@ -32,8 +32,8 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.refreshing
 import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.uicommon.CanaryFragment
-import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
+import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
@@ -124,10 +124,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
       it.setOnMenuItemClickListener {
         when (it.itemId) {
           R.id.menu_purge_all -> {
-            DialogUtil.guaranteeSingleDialogFragment(
-                activity, PurgeAllDialog(),
-                "purge_all"
-            )
+            PurgeAllDialog().show(activity, "purge_all")
             return@setOnMenuItemClickListener true
           }
           else -> {
@@ -154,11 +151,11 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
   override fun onRetrieveBegin() {
     backingSet.clear()
-    refreshLatch.refreshing = true
+    refreshLatch.isRefreshing = true
   }
 
   override fun onRetrieveComplete() {
-    refreshLatch.refreshing = false
+    refreshLatch.isRefreshing = false
   }
 
   override fun onRetrievedStale(packageName: String) {
@@ -201,7 +198,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
         context!!, "Error retrieving old application list",
         Toasty.LENGTH_SHORT
     )
-        .show()
   }
 
   override fun onPause() {
@@ -265,10 +261,8 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
       packageName: String
   ) {
     Timber.d("Handle delete request for %s at %d", packageName, position)
-    DialogUtil.guaranteeSingleDialogFragment(
-        activity,
-        PurgeSingleItemDialog.newInstance(packageName), "purge_single"
-    )
+    PurgeSingleItemDialog.newInstance(packageName)
+        .show(activity, "purge_single")
   }
 
   override fun onPurge(packageName: String) {

@@ -20,7 +20,6 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.Snackbar
-import android.support.v4.app.Fragment
 import android.support.v7.preference.ListPreference
 import android.view.View
 import android.widget.Toast
@@ -28,12 +27,11 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.main.MainFragment
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
-import com.pyamsoft.pydroid.ui.util.DialogUtil
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
+import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
 import javax.inject.Inject
@@ -51,14 +49,9 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
   override val applicationName: String
     get() = getString(R.string.app_name)
 
-  override val aboutReplaceFragment: Fragment?
-    get() = activity?.supportFragmentManager?.findFragmentByTag(MainFragment.TAG)
-
   override fun onClearAllClicked() {
-    DialogUtil.guaranteeSingleDialogFragment(
-        activity,
-        ConfirmationDialog.newInstance(ConfirmEvent.ALL), "confirm_dialog"
-    )
+    ConfirmationDialog.newInstance(ConfirmEvent.ALL)
+        .show(activity, "confirm_dialog")
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,10 +71,8 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
 
     clearDb.setOnPreferenceClickListener {
       Timber.d("Clear DB onClick")
-      DialogUtil.guaranteeSingleDialogFragment(
-          activity,
-          ConfirmationDialog.newInstance(ConfirmEvent.DATABASE), "confirm_dialog"
-      )
+      ConfirmationDialog.newInstance(ConfirmEvent.DATABASE)
+          .show(activity, "confirm_dialog")
       return@setOnPreferenceClickListener true
     }
 
@@ -115,17 +106,13 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
           it, "Must clear Master Password before changing Lock Screen Type",
           Toasty.LENGTH_SHORT
       )
-          .show()
-      DialogUtil.guaranteeSingleDialogFragment(
-          activity,
-          PinEntryDialog.newInstance(it.packageName), PinEntryDialog.TAG
-      )
+      PinEntryDialog.newInstance(it.packageName)
+          .show(activity, PinEntryDialog.TAG)
     }
   }
 
   override fun onLockTypeChangeError(throwable: Throwable) {
     Toasty.makeText(context!!, "Error: ${throwable.message}", Toasty.LENGTH_SHORT)
-        .show()
   }
 
   override fun onClearDatabase() {
@@ -133,12 +120,10 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
         context!!, "Locked application database has been cleared",
         Toasty.LENGTH_SHORT
     )
-        .show()
   }
 
   override fun onMasterPinClearFailure() {
     Toasty.makeText(context!!, "Error: Invalid PIN", Toast.LENGTH_SHORT)
-        .show()
   }
 
   override fun onMasterPinClearSuccess() {
@@ -151,8 +136,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
 
   override fun onClearAll() {
     Timber.d("Everything is cleared, kill self")
-    val activityManager = activity!!.applicationContext
-        .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    val activityManager = activity?.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     activityManager.clearApplicationUserData()
   }
 

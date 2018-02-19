@@ -38,8 +38,8 @@ import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
-import com.pyamsoft.pydroid.ui.helper.DebouncedOnClickListener
-import com.pyamsoft.pydroid.ui.util.DialogUtil
+import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
+import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -166,16 +166,11 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         when (itemId) {
           R.id.menu_exclude -> it.isChecked = !it.isChecked
           R.id.menu_lockscreen_info -> {
-            DialogUtil.guaranteeSingleDialogFragment(
-                self,
-                LockedStatDialog.newInstance(
-                    binding.toolbar.title.toString(),
-                    lockedPackageName,
-                    lockedActivityName, lockedRealName, lockedSystem,
-                    binding.lockImage.drawable
-                ),
-                "info_dialog"
+            LockedStatDialog.newInstance(
+                binding.toolbar.title.toString(), lockedPackageName, lockedActivityName,
+                lockedRealName, lockedSystem, binding.lockImage.drawable
             )
+                .show(self, "info_dialog")
           }
           else -> it.isChecked = true
         }

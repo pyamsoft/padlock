@@ -29,8 +29,8 @@ import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.PackageLabelManager
 import com.pyamsoft.pydroid.data.Cache
-import com.pyamsoft.pydroid.ktext.enforceIo
-import com.pyamsoft.pydroid.ktext.enforceMainThread
+import com.pyamsoft.pydroid.data.enforceIo
+import com.pyamsoft.pydroid.data.enforceMainThread
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import timber.log.Timber
@@ -40,7 +40,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class ApplicationInstallReceiverImpl @Inject internal constructor(
-    private val appContext: Context,
+    private val context: Context,
     private val packageManagerWrapper: PackageLabelManager,
     @param:Named("io") private val ioScheduler: Scheduler,
     @param:Named("main") private val mainThreadScheduler: Scheduler,
@@ -59,13 +59,12 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
 
   init {
     filter.addDataScheme("package")
-    val intent = Intent(appContext, mainActivityClass).apply {
+    val intent = Intent(context, mainActivityClass).apply {
       putExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST, true)
     }
-    pendingIntent = PendingIntent.getActivity(appContext, NOTIFICATION_RC, intent, 0)
-    notificationManager = appContext.getSystemService(
-        Context.NOTIFICATION_SERVICE
-    ) as NotificationManager
+    pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_RC, intent, 0)
+    notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     ioScheduler.enforceIo()
     mainThreadScheduler.enforceMainThread()
@@ -132,14 +131,14 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
       name: String
   ) {
     Timber.i("Package Added: %s", packageName)
-    val builder = NotificationCompat.Builder(appContext, NOTIFICATION_CHANNEL_ID)
+    val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
         .apply {
           setContentTitle("Lock New Application")
           setSmallIcon(R.drawable.ic_lock_notification)
           setContentText("Click to lock the newly installed application: " + name)
           setContentIntent(pendingIntent)
           setAutoCancel(true)
-          color = ContextCompat.getColor(appContext, R.color.blue500)
+          color = ContextCompat.getColor(context, R.color.blue500)
           priority = NotificationCompat.PRIORITY_LOW
         }
     notificationManager.notify(notificationId++, builder.build())
@@ -147,14 +146,14 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
 
   override fun register() {
     if (!registered) {
-      appContext.registerReceiver(this, filter)
+      context.registerReceiver(this, filter)
       registered = true
     }
   }
 
   override fun unregister() {
     if (registered) {
-      appContext.unregisterReceiver(this)
+      context.unregisterReceiver(this)
       registered = false
       compositeDisposable.clear()
     }

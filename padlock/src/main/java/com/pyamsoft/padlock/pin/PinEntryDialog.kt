@@ -29,7 +29,7 @@ import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.util.DrawableUtil
+import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -129,10 +129,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
       // Set up icon as black
       var icon: Drawable? = pinEntryToolbar.navigationIcon
       if (icon != null) {
-        icon = DrawableUtil.tintDrawableFromColor(
-            icon,
-            ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black)
-        )
+        icon = icon.tintWith(ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black))
         pinEntryToolbar.navigationIcon = icon
       }
 
@@ -144,8 +141,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
       if (pinItem != null) {
         var pinIcon: Drawable? = pinItem.icon
         if (pinIcon != null) {
-          pinIcon = DrawableUtil.tintDrawableFromColor(
-              pinIcon,
+          pinIcon = pinIcon.tintWith(
               ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black)
           )
           pinItem.icon = pinIcon
