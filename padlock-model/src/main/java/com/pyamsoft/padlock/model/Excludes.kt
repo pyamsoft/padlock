@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlock.model
 
+import android.support.annotation.CheckResult
+
 object Excludes {
 
   private val PACKAGES: List<String> = listOf(
@@ -35,12 +37,15 @@ object Excludes {
   )
 
   @JvmStatic
+  @CheckResult
   fun isPackageExcluded(name: String): Boolean = checkExclusion(PACKAGES, name)
 
   @JvmStatic
+  @CheckResult
   fun isClassExcluded(name: String): Boolean = checkExclusion(CLASSES, name)
 
   @JvmStatic
+  @CheckResult
   private fun checkExclusion(
       list: List<String>,
       name: String
@@ -51,6 +56,7 @@ object Excludes {
   }
 
   @JvmStatic
+  @CheckResult
   fun isLockScreen(
       packageName: String,
       className: String
