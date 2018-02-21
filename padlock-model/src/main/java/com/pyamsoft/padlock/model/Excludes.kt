@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.model
 
 object Excludes {
 
@@ -35,14 +35,10 @@ object Excludes {
   )
 
   @JvmStatic
-  fun isPackageExcluded(name: String): Boolean = checkExclusion(
-      PACKAGES, name
-  )
+  fun isPackageExcluded(name: String): Boolean = checkExclusion(PACKAGES, name)
 
   @JvmStatic
-  fun isClassExcluded(name: String): Boolean = checkExclusion(
-      CLASSES, name
-  )
+  fun isClassExcluded(name: String): Boolean = checkExclusion(CLASSES, name)
 
   @JvmStatic
   private fun checkExclusion(

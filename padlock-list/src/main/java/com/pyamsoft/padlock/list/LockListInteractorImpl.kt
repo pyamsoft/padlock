@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.list
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.*
-import com.pyamsoft.padlock.api.PackageApplicationManager.ApplicationItem
+import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.PadLockEntry

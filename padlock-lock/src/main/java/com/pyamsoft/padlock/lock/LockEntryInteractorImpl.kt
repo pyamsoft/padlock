@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.lock
 
 import android.app.IntentService
 import android.content.Context
-import android.content.Intent
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.*
 import com.pyamsoft.padlock.model.Recheck
@@ -108,17 +107,16 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   ): Completable {
     return Completable.fromAction {
       // Cancel any old recheck job for the class, but not the package
-      val intent = Intent(appContext, recheckServiceClass)
-      intent.putExtra(Recheck.EXTRA_PACKAGE_NAME, packageName)
-      intent.putExtra(Recheck.EXTRA_CLASS_NAME, realName)
-      jobSchedulerCompat.cancel(intent)
+      val params: List<Pair<String, String>> = ArrayList<Pair<String, String>>().apply {
+        add(Recheck.EXTRA_PACKAGE_NAME to packageName)
+        add(Recheck.EXTRA_CLASS_NAME to realName)
+      }
+      jobSchedulerCompat.cancel(recheckServiceClass, params)
 
       // Queue up a new recheck job
       // Since alarms are inexact, buffer by an extra minute
-      jobSchedulerCompat.queue(
-          intent,
-          System.currentTimeMillis() + recheckTime + ONE_MINUTE_MILLIS
-      )
+      val triggerTime = System.currentTimeMillis() + recheckTime + ONE_MINUTE_MILLIS
+      jobSchedulerCompat.queue(recheckServiceClass, params, triggerTime)
     }
   }
 

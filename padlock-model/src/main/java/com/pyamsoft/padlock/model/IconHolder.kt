@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.model
 
-interface JobSchedulerCompat {
+data class IconHolder<out T : Any>(private val icon: T) {
 
-  fun cancel(
-      targetClass: Class<*>,
-      params: List<Pair<String, String>> = emptyList()
-  )
-
-  fun queue(
-      targetClass: Class<*>,
-      params: List<Pair<String, String>> = emptyList(),
-      triggerTime: Long
-  )
+  fun applyIcon(func: (T) -> Unit) {
+    func(icon)
+  }
 }
+

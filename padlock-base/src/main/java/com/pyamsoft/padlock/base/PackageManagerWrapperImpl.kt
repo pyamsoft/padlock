@@ -25,7 +25,9 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.*
-import com.pyamsoft.padlock.api.PackageApplicationManager.ApplicationItem
+import com.pyamsoft.padlock.model.ApplicationItem
+import com.pyamsoft.padlock.model.Excludes
+import com.pyamsoft.padlock.model.IconHolder
 import com.pyamsoft.pydroid.optional.Optional.Present
 import com.pyamsoft.pydroid.optional.asOptional
 import io.reactivex.Observable
@@ -47,11 +49,11 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 ) : PackageActivityManager,
     PackageApplicationManager,
     PackageLabelManager,
-    PackageDrawableManager {
+    PackageIconManager<Drawable> {
 
   private val packageManager: PackageManager = context.applicationContext.packageManager
 
-  override fun loadDrawableForPackageOrDefault(packageName: String): Single<Drawable> {
+  override fun loadIconForPackageOrDefault(packageName: String): Single<IconHolder<Drawable>> {
     return Single.fromCallable {
       val image: Drawable
       image = try {
@@ -63,7 +65,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
         // Assign
         packageManager.defaultActivityIcon
       }
-      return@fromCallable image
+      return@fromCallable IconHolder(image)
     }
   }
 
@@ -176,7 +178,11 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
         val info: ApplicationInfo? = packageManager.getApplicationInfo(packageName, 0)
         return@defer when (info) {
           null -> Single.just(ApplicationItem.EMPTY)
-          else -> Single.just(ApplicationItem.fromInfo(info))
+          else -> {
+            Single.just(
+                ApplicationItem.create(info.packageName, info.system(), info.enabled)
+            )
+          }
         }
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "onError getApplicationInfo: '$packageName'")
@@ -184,6 +190,9 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
       }
     }
   }
+
+  @CheckResult
+  private fun ApplicationInfo.system(): Boolean = flags and ApplicationInfo.FLAG_SYSTEM != 0
 
   override fun loadPackageLabel(packageName: String): Single<String> {
     return Single.defer {

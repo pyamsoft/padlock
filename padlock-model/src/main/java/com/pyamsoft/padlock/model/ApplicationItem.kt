@@ -14,18 +14,32 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.model
 
-interface JobSchedulerCompat {
+import android.support.annotation.CheckResult
 
-  fun cancel(
-      targetClass: Class<*>,
-      params: List<Pair<String, String>> = emptyList()
-  )
+data class ApplicationItem(
+    val packageName: String,
+    val system: Boolean,
+    val enabled: Boolean
+) {
 
-  fun queue(
-      targetClass: Class<*>,
-      params: List<Pair<String, String>> = emptyList(),
-      triggerTime: Long
-  )
+  @CheckResult
+  fun isEmpty(): Boolean = packageName.isEmpty()
+
+  companion object {
+
+    @JvmField
+    val EMPTY = ApplicationItem("", false, false)
+
+    @CheckResult
+    @JvmStatic
+    fun create(
+        packageName: String,
+        system: Boolean,
+        enabled: Boolean
+    ): ApplicationItem = ApplicationItem(
+        packageName, system, enabled
+    )
+  }
 }

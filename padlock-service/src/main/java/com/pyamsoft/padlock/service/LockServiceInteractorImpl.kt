@@ -25,6 +25,7 @@ import android.content.Context
 import android.content.Intent
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.*
+import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.RecheckStatus
@@ -147,8 +148,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   override fun cleanup() {
     Timber.d("Cleanup LockService")
-    val intent = Intent(context, recheckServiceClass)
-    jobSchedulerCompat.cancel(intent)
+    jobSchedulerCompat.cancel(recheckServiceClass)
   }
 
   @CheckResult

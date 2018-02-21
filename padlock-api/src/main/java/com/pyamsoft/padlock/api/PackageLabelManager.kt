@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.api
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.api.PackageApplicationManager.ApplicationItem
+import com.pyamsoft.padlock.model.ApplicationItem
 import io.reactivex.Single
 
 interface PackageLabelManager {

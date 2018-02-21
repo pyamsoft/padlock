@@ -19,7 +19,8 @@ package com.pyamsoft.padlock.base
 import android.graphics.drawable.Drawable
 import android.support.annotation.CheckResult
 import android.widget.ImageView
-import com.pyamsoft.padlock.api.PackageDrawableManager
+import com.pyamsoft.padlock.api.PackageIconManager
+import com.pyamsoft.padlock.model.IconHolder
 import com.pyamsoft.pydroid.data.enforceIo
 import com.pyamsoft.pydroid.data.enforceMainThread
 import com.pyamsoft.pydroid.loader.GenericLoader
@@ -37,7 +38,7 @@ import timber.log.Timber
 internal class AppIconImageLoader internal constructor(
     private val packageName: String,
     private val appIconImageCache: ImageCache<String, Drawable>,
-    private val packageDrawableManager: PackageDrawableManager,
+    private val packageIconManager: PackageIconManager<Drawable>,
     private val mainScheduler: Scheduler,
     private val ioScheduler: Scheduler
 ) : GenericLoader<Drawable>() {
@@ -69,9 +70,11 @@ internal class AppIconImageLoader internal constructor(
         .subscribeOn(ioScheduler)
         .observeOn(mainScheduler)
         .doOnSubscribe { startAction?.invoke() }
-        .subscribe({
-          target.loadImage(it)
-          completeAction?.invoke(it)
+        .subscribe({ holder ->
+          holder.applyIcon {
+            target.loadImage(it)
+            completeAction?.invoke(it)
+          }
         }, {
           Timber.e(it, "Error loading Drawable AppIconLoader for: %s", packageName)
           errorAction?.invoke(it)
@@ -80,20 +83,22 @@ internal class AppIconImageLoader internal constructor(
   }
 
   @CheckResult
-  private fun loadCached(packageName: String): Single<Drawable> {
+  private fun loadCached(packageName: String): Single<IconHolder<Drawable>> {
     val key: ImageCacheKey<String> = packageName.toKey()
     val cached: Drawable? = appIconImageCache.retrieve(key)
     if (cached == null) {
       val result = loadFresh(packageName)
-      return result.doOnSuccess {
-        appIconImageCache.cache(key, it)
+      return result.doOnSuccess { holder ->
+        holder.applyIcon {
+          appIconImageCache.cache(key, it)
+        }
       }
     } else {
-      return Single.just(cached)
+      return Single.just(IconHolder(cached))
     }
   }
 
   @CheckResult
-  private fun loadFresh(packageName: String): Single<Drawable> =
-      packageDrawableManager.loadDrawableForPackageOrDefault(packageName)
+  private fun loadFresh(packageName: String): Single<IconHolder<Drawable>> =
+      packageIconManager.loadIconForPackageOrDefault(packageName)
 }

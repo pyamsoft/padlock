@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.api
 
-import android.content.pm.ApplicationInfo
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.model.ApplicationItem
 import io.reactivex.Single
 
 interface PackageApplicationManager {
@@ -28,30 +28,4 @@ interface PackageApplicationManager {
   @CheckResult
   fun getApplicationInfo(packageName: String): Single<ApplicationItem>
 
-  data class ApplicationItem(
-      val packageName: String,
-      val system: Boolean,
-      val enabled: Boolean
-  ) {
-
-    @CheckResult
-    fun isEmpty(): Boolean = packageName.isEmpty()
-
-    companion object {
-
-      @JvmField
-      val EMPTY = ApplicationItem(
-          "",
-          false, false
-      )
-
-      @CheckResult
-      @JvmStatic
-      fun fromInfo(info: ApplicationInfo): ApplicationItem =
-          ApplicationItem(info.packageName, info.system(), info.enabled)
-
-      @CheckResult
-      private fun ApplicationInfo.system(): Boolean = flags and ApplicationInfo.FLAG_SYSTEM != 0
-    }
-  }
 }

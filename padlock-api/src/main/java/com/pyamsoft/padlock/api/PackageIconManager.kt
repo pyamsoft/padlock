@@ -16,12 +16,12 @@
 
 package com.pyamsoft.padlock.api
 
-import android.graphics.drawable.Drawable
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.model.IconHolder
 import io.reactivex.Single
 
-interface PackageDrawableManager {
+interface PackageIconManager<T : Any> {
 
   @CheckResult
-  fun loadDrawableForPackageOrDefault(packageName: String): Single<Drawable>
+  fun loadIconForPackageOrDefault(packageName: String): Single<IconHolder<T>>
 }

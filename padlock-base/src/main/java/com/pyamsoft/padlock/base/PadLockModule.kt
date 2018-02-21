@@ -86,9 +86,9 @@ abstract class PadLockModule {
   ): PackageApplicationManager
 
   @Binds
-  internal abstract fun providePackageDrawableManager(
+  internal abstract fun providePackageIconWrapper(
       impl: PackageManagerWrapperImpl
-  ): PackageDrawableManager
+  ): PackageIconManager<Drawable>
 
   @Binds
   internal abstract fun provideJobSchedulerCompat(

@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.base
 
 import android.graphics.drawable.Drawable
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.api.PackageDrawableManager
+import com.pyamsoft.padlock.api.PackageIconManager
 import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.loader.GenericLoader
 import com.pyamsoft.pydroid.loader.cache.ImageCache
@@ -33,7 +33,7 @@ class AppIconLoader @Inject internal constructor(
     private val appIconImageCache: ImageCache<String, Drawable>,
     @param:Named("main") private val mainScheduler: Scheduler,
     @param:Named("io") private val ioScheduler: Scheduler,
-    private val packageDrawableManager: PackageDrawableManager
+    private val packageIconManager: PackageIconManager<Drawable>
 ) : Cache {
 
   override fun clearCache() {
@@ -44,7 +44,7 @@ class AppIconLoader @Inject internal constructor(
   fun forPackageName(packageName: String): GenericLoader<Drawable> =
       AppIconImageLoader(
           packageName, appIconImageCache,
-          packageDrawableManager,
+          packageIconManager,
           mainScheduler,
           ioScheduler
       )
