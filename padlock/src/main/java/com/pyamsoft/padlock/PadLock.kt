@@ -19,7 +19,6 @@ package com.pyamsoft.padlock
 import android.app.Application
 import android.app.Service
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.base.PadLockProvider
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
@@ -27,7 +26,7 @@ import com.pyamsoft.padlock.settings.PadLockPreferenceFragment
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.PYDroidModule
-import com.pyamsoft.pydroid.PYDroidModuleImpl
+import com.pyamsoft.pydroid.base.PYDroidModuleImpl
 import com.pyamsoft.pydroid.base.about.Licenses
 import com.pyamsoft.pydroid.loader.LoaderModule
 import com.pyamsoft.pydroid.loader.LoaderModuleImpl
@@ -39,7 +38,7 @@ class PadLock : Application() {
 
   private lateinit var refWatcher: RefWatcher
   private var component: PadLockComponent? = null
-  private lateinit var pydroidModule: PYDroidModule
+  private lateinit var pydroidModule: PYDroidModule<PadLock>
   private lateinit var loaderModule: LoaderModule
 
   override fun onCreate() {

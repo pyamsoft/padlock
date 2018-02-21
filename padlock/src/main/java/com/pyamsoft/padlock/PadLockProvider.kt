@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base
+package com.pyamsoft.padlock
 
 import android.app.Activity
 import android.app.IntentService
 import android.content.Context
-import android.graphics.drawable.Drawable
 import com.pyamsoft.pydroid.PYDroidModule
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderModule
-import com.pyamsoft.pydroid.loader.cache.ImageCache
 import dagger.Module
 import dagger.Provides
 import io.reactivex.Scheduler
@@ -31,35 +29,28 @@ import javax.inject.Named
 
 @Module
 class PadLockProvider(
-    private val pyDroidModule: PYDroidModule,
+    private val pyDroidModule: PYDroidModule<PadLock>,
     private val loaderModule: LoaderModule,
     private val mainActivityClass: Class<out Activity>,
     private val recheckServiceClass: Class<out IntentService>
 ) {
 
-  private val appIconCache: ImageCache<String, Drawable> = AppIconImageCache()
+  @Provides
+  internal fun provideApplication(): PadLock = pyDroidModule.provideApplication()
 
   @Provides
-  internal fun provideContext(): Context = pyDroidModule.provideContext()
+  internal fun provideContext(): Context = provideApplication()
 
   @Provides
-  @Named(
-      "main_activity"
-  )
-  internal fun provideMainActivityClass(): Class<out Activity> =
-      mainActivityClass
+  @Named("main_activity")
+  internal fun provideMainActivityClass(): Class<out Activity> = mainActivityClass
 
   @Provides
-  @Named(
-      "recheck"
-  )
-  internal fun provideRecheckServiceClass(): Class<out IntentService> =
-      recheckServiceClass
+  @Named("recheck")
+  internal fun provideRecheckServiceClass(): Class<out IntentService> = recheckServiceClass
 
   @Provides
-  @Named(
-      "computation"
-  )
+  @Named("computation")
   internal fun provideComputationScheduler(): Scheduler = pyDroidModule.provideComputationScheduler()
 
   @Provides

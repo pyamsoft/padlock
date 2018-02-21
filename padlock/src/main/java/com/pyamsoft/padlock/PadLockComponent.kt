@@ -20,7 +20,6 @@ import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.InstallListenerPreferences
 import com.pyamsoft.padlock.base.PadLockModule
-import com.pyamsoft.padlock.base.PadLockProvider
 import com.pyamsoft.padlock.list.*
 import com.pyamsoft.padlock.list.info.LockInfoModule
 import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
