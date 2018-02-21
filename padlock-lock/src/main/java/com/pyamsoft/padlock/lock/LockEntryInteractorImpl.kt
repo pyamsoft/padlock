@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.lock
 
 import android.app.IntentService
-import android.content.Context
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.*
 import com.pyamsoft.padlock.model.Recheck
@@ -35,7 +34,6 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockEntryInteractorImpl @Inject internal constructor(
-    private val appContext: Context,
     private val lockPassed: LockPassed,
     private val lockHelper: LockHelper,
     private val preferences: LockScreenPreferences,
@@ -44,9 +42,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     private val dbInsert: PadLockDBInsert,
     private val dbUpdate: PadLockDBUpdate,
     private val dbQuery: PadLockDBQuery,
-    @param:Named(
-        "recheck"
-    ) private val recheckServiceClass: Class<out IntentService>
+    @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>
 ) :
     LockEntryInteractor {
 
