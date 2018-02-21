@@ -17,12 +17,6 @@
 package com.pyamsoft.padlock.service
 
 import android.app.IntentService
-import android.app.KeyguardManager
-import android.app.usage.UsageEvents
-import android.app.usage.UsageEvents.Event
-import android.app.usage.UsageStatsManager
-import android.content.Context
-import android.content.Intent
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.*
 import com.pyamsoft.padlock.model.Excludes
@@ -44,7 +38,8 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockServiceInteractorImpl @Inject internal constructor(
-    private val context: Context,
+    private val usageEventProvider: UsageEventProvider,
+    private val deviceLockStateProvider: DeviceLockStateProvider,
     private val lockPassed: LockPassed,
     private val preferences: LockScreenPreferences,
     private val jobSchedulerCompat: JobSchedulerCompat,
@@ -55,12 +50,8 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 ) :
     LockServiceInteractor {
 
-  private val keyguardManager =
-      context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
   private var activePackageName = ""
   private var activeClassName = ""
-  private val usageManager: UsageStatsManager =
-      context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
   private var lastForegroundEvent = ForegroundEvent.EMPTY
 
   override fun reset() {
@@ -93,27 +84,14 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
           val now: Long = System.currentTimeMillis()
           val beginTime = now - TEN_SECONDS_MILLIS
           val endTime = now + TEN_SECONDS_MILLIS
-          return@map usageManager.queryEvents(beginTime, endTime)
+          return@map usageEventProvider.queryEvents(beginTime, endTime)
               .asOptional()
         }
         .onBackpressureDrop()
         .map {
-          val event: UsageEvents.Event = Event()
           if (it is Present) {
-            // We have usage events
-            val events = it.value
-            if (events.hasNextEvent()) {
-              events.getNextEvent(event)
-              while (events.hasNextEvent()) {
-                events.getNextEvent(event)
-              }
-
-              if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                return@map ForegroundEvent(
-                    event.packageName ?: "",
-                    event.className ?: ""
-                ).asOptional()
-              }
+            if (it.value.hasMoveToForegroundEvent()) {
+              return@map ForegroundEvent(it.value.packageName(), it.value.className()).asOptional()
             }
           }
 
@@ -210,10 +188,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   }
 
   @CheckResult
-  private fun isDeviceLocked(): Boolean {
-    return keyguardManager.inKeyguardRestrictedInputMode()
-        || keyguardManager.isKeyguardLocked
-  }
+  private fun isDeviceLocked(): Boolean = deviceLockStateProvider.isLocked()
 
   @CheckResult
   private fun isServiceEnabled(): Maybe<Boolean> {
