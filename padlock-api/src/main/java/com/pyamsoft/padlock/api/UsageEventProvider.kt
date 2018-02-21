@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.api
 
 import android.support.annotation.CheckResult
+import com.pyamsoft.padlock.model.ForegroundEvent
 
 interface UsageEventProvider {
 
@@ -29,12 +30,6 @@ interface UsageEventProvider {
   interface EventQueryResult {
 
     @CheckResult
-    fun hasMoveToForegroundEvent(): Boolean
-
-    @CheckResult
-    fun packageName(): String
-
-    @CheckResult
-    fun className(): String
+    fun createForegroundEvent(func: (String, String) -> ForegroundEvent): ForegroundEvent
   }
 }

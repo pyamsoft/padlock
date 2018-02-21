@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.service.device
 
 import android.Manifest
 import android.app.AppOpsManager

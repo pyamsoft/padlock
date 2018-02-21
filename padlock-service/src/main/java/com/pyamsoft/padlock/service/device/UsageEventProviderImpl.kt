@@ -20,6 +20,7 @@ import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import com.pyamsoft.padlock.api.UsageEventProvider
+import com.pyamsoft.padlock.model.ForegroundEvent
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,25 +51,13 @@ internal class UsageEventProviderImpl @Inject internal constructor(context: Cont
       }
     }
 
-    override fun hasMoveToForegroundEvent(): Boolean =
-        (event?.eventType ?: UsageEvents.Event.NONE) == UsageEvents.Event.MOVE_TO_FOREGROUND
-
-    override fun packageName(): String {
-      if (!hasMoveToForegroundEvent()) {
-        throw IllegalStateException("Result does not have an event, cannot get packageName")
+    override fun createForegroundEvent(func: (String, String) -> ForegroundEvent): ForegroundEvent {
+      if ((event?.eventType ?: UsageEvents.Event.NONE) == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+        return func(event?.packageName ?: "", event?.className ?: "")
       } else {
-        return event?.packageName ?: ""
+        return func("", "")
       }
     }
-
-    override fun className(): String {
-      if (!hasMoveToForegroundEvent()) {
-        throw IllegalStateException("Result does not have an event, cannot get className")
-      } else {
-        return event?.className ?: ""
-      }
-    }
-
   }
 }
 

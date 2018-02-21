@@ -33,7 +33,7 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.retainAll
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
-import com.pyamsoft.padlock.service.UsagePermissionChecker
+import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
 import com.pyamsoft.pydroid.design.util.refreshing

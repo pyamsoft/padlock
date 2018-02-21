@@ -90,9 +90,10 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
         .onBackpressureDrop()
         .map {
           if (it is Present) {
-            if (it.value.hasMoveToForegroundEvent()) {
-              return@map ForegroundEvent(it.value.packageName(), it.value.className()).asOptional()
+            return@map it.value.createForegroundEvent { packageName, className ->
+              ForegroundEvent(packageName, className)
             }
+                .asOptional()
           }
 
           return@map Optionals.ofNullable(null)
