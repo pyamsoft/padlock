@@ -36,10 +36,15 @@ import com.squareup.leakcanary.RefWatcher
 
 class PadLock : Application() {
 
+  private val component: PadLockComponent by lazy(LazyThreadSafetyMode.NONE) { buildDagger() }
+  private val pydroidModule: PYDroidModule<PadLock> by lazy(LazyThreadSafetyMode.NONE) {
+    PYDroidModuleImpl(this, BuildConfig.DEBUG)
+  }
+  private val loaderModule: LoaderModule by lazy(LazyThreadSafetyMode.NONE) {
+    LoaderModuleImpl(pydroidModule)
+  }
+
   private lateinit var refWatcher: RefWatcher
-  private var component: PadLockComponent? = null
-  private lateinit var pydroidModule: PYDroidModule<PadLock>
-  private lateinit var loaderModule: LoaderModule
 
   override fun onCreate() {
     super.onCreate()
@@ -47,14 +52,12 @@ class PadLock : Application() {
       return
     }
 
-    refWatcher = if (BuildConfig.DEBUG) {
-      LeakCanary.install(this)
+    if (BuildConfig.DEBUG) {
+      refWatcher = LeakCanary.install(this)
     } else {
-      RefWatcher.DISABLED
+      refWatcher = RefWatcher.DISABLED
     }
 
-    pydroidModule = PYDroidModuleImpl(this, BuildConfig.DEBUG)
-    loaderModule = LoaderModuleImpl(pydroidModule)
     PYDroid.init(pydroidModule, loaderModule)
     Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
     Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight")
@@ -92,21 +95,10 @@ class PadLock : Application() {
   }
 
   override fun getSystemService(name: String?): Any {
-    return if (Injector.name == name) {
-      val graph: PadLockComponent
-      val dagger = component
-      if (dagger == null) {
-        graph = buildDagger()
-        component = graph
-      } else {
-        graph = dagger
-      }
-
-      // Return
-      graph
+    if (Injector.name == name) {
+      return component
     } else {
-      // Return
-      super.getSystemService(name)
+      return super.getSystemService(name)
     }
   }
 
