@@ -60,6 +60,7 @@ class PadLockProvider(
   override fun provideImageLoader(): ImageLoader = loaderModule.provideImageLoader()
 
   @Provides
+  @Named("cache_image_loader")
   override fun provideImageLoaderCache(): Cache = loaderModule.provideImageLoaderCache()
 
   @Provides
