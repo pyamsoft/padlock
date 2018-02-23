@@ -37,7 +37,7 @@ import com.squareup.leakcanary.RefWatcher
 class PadLock : Application() {
 
   private val component: PadLockComponent by lazy(LazyThreadSafetyMode.NONE) { buildDagger() }
-  private val pydroidModule: PYDroidModule<PadLock> by lazy(LazyThreadSafetyMode.NONE) {
+  private val pydroidModule: PYDroidModule by lazy(LazyThreadSafetyMode.NONE) {
     PYDroidModuleImpl(this, BuildConfig.DEBUG)
   }
   private val loaderModule: LoaderModule by lazy(LazyThreadSafetyMode.NONE) {
@@ -72,7 +72,7 @@ class PadLock : Application() {
         "licenses/patternlock"
     )
 
-    val dagger = Injector.obtain<PadLockComponent>(applicationContext)
+    val dagger = Injector.obtain<PadLockComponent>(this)
     val receiver = dagger.provideApplicationInstallReceiver()
     val preferences = dagger.provideInstallListenerPreferences()
     if (preferences.isInstallListenerEnabled()) {

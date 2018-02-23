@@ -17,9 +17,12 @@
 package com.pyamsoft.padlock
 
 import android.app.Activity
+import android.app.Application
 import android.app.IntentService
 import android.content.Context
-import com.pyamsoft.pydroid.PYDroidModule
+import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.pydroid.ApplicationModule
+import com.pyamsoft.pydroid.data.Cache
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderModule
 import dagger.Module
@@ -29,38 +32,45 @@ import javax.inject.Named
 
 @Module
 class PadLockProvider(
-    private val pyDroidModule: PYDroidModule<PadLock>,
+    private val pyDroidModule: ApplicationModule,
     private val loaderModule: LoaderModule,
     private val mainActivityClass: Class<out Activity>,
     private val recheckServiceClass: Class<out IntentService>
-) {
+) : ApplicationModule, LoaderModule {
 
   @Provides
-  internal fun provideApplication(): PadLock = pyDroidModule.provideApplication()
+  override fun provideApplication(): Application = pyDroidModule.provideApplication()
 
   @Provides
-  internal fun provideContext(): Context = provideApplication()
-
-  @Provides
-  @Named("main_activity")
-  internal fun provideMainActivityClass(): Class<out Activity> = mainActivityClass
-
-  @Provides
-  @Named("recheck")
-  internal fun provideRecheckServiceClass(): Class<out IntentService> = recheckServiceClass
+  override fun provideContext(): Context = pyDroidModule.provideContext()
 
   @Provides
   @Named("computation")
-  internal fun provideComputationScheduler(): Scheduler = pyDroidModule.provideComputationScheduler()
+  override fun provideComputationScheduler(): Scheduler = pyDroidModule.provideComputationScheduler()
 
   @Provides
   @Named("io")
-  internal fun provideIOScheduler(): Scheduler = pyDroidModule.provideIoScheduler()
+  override fun provideIoScheduler(): Scheduler = pyDroidModule.provideIoScheduler()
 
   @Provides
   @Named("main")
-  internal fun provideMainScheduler(): Scheduler = pyDroidModule.provideMainThreadScheduler()
+  override fun provideMainThreadScheduler(): Scheduler = pyDroidModule.provideMainThreadScheduler()
 
   @Provides
-  internal fun provideImageLoader(): ImageLoader = loaderModule.provideImageLoader()
+  override fun provideImageLoader(): ImageLoader = loaderModule.provideImageLoader()
+
+  @Provides
+  override fun provideImageLoaderCache(): Cache = loaderModule.provideImageLoaderCache()
+
+  @Provides
+  @Named("cache_list_state")
+  fun provideListStateCache(): Cache = ListStateUtil
+
+  @Provides
+  @Named("main_activity")
+  fun provideMainActivityClass(): Class<out Activity> = mainActivityClass
+
+  @Provides
+  @Named("recheck")
+  fun provideRecheckServiceClass(): Class<out IntentService> = recheckServiceClass
 }
