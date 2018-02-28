@@ -16,10 +16,9 @@
 
 package com.pyamsoft.padlock.list
 
-import com.pyamsoft.padlock.list.info.LockInfoModule
 import dagger.Subcomponent
 
-@Subcomponent(modules = [LockInfoModule::class])
+@Subcomponent(modules = [LockInfoProvider::class])
 interface LockInfoComponent {
 
   fun inject(dialog: LockInfoDialog)

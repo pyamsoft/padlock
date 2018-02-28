@@ -21,8 +21,8 @@ import com.pyamsoft.padlock.api.LockInfoUpdater
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -37,7 +37,8 @@ internal class LockInfoInteractorCache @Inject internal constructor(
 ) : LockInfoInteractor,
     Cache, LockInfoUpdater {
 
-  private var infoCache: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>> = HashMap()
+  private var infoCache: MutableMap<String, Pair<Single<MutableList<ActivityEntry>>?, Long>> =
+      HashMap()
 
   override fun modifySingleDatabaseEntry(
       oldLockState: LockState,
@@ -52,21 +53,22 @@ internal class LockInfoInteractorCache @Inject internal constructor(
         code, system
     )
         .doOnSuccess {
-          val obj: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>>? = infoCache
+          val obj: MutableMap<String, Pair<Single<MutableList<ActivityEntry>>?, Long>>? = infoCache
           if (obj != null) {
-            val cached: Observable<ActivityEntry>? = obj[packageName]?.first
+            val cached: Single<MutableList<ActivityEntry>>? = obj[packageName]?.first
             if (cached != null) {
-              obj.put(packageName, Pair(cached.map {
-                if (it.packageName == packageName && it.name == activityName) {
-                  return@map ActivityEntry(
-                      name = it.name,
-                      packageName = it.packageName,
-                      lockState = newLockState
-                  )
-                } else {
-                  return@map it
+              obj[packageName] = Pair(cached.doOnSuccess {
+                for ((index, entry) in it.withIndex()) {
+                  if (entry.packageName == packageName && entry.name == activityName) {
+                    it[index] = ActivityEntry(
+                        name = entry.name,
+                        packageName = entry.packageName,
+                        lockState = newLockState
+                    )
+                    break
+                  }
                 }
-              }, System.currentTimeMillis()))
+              }, System.currentTimeMillis())
             }
           }
         }
@@ -79,22 +81,23 @@ internal class LockInfoInteractorCache @Inject internal constructor(
       lockState: LockState
   ): Completable {
     return Completable.fromAction {
-      val obj: MutableMap<String, Pair<Observable<ActivityEntry>?, Long>>? = infoCache
+      val obj: MutableMap<String, Pair<Single<MutableList<ActivityEntry>>?, Long>>? = infoCache
       if (obj != null) {
-        val pair: Pair<Observable<ActivityEntry>?, Long>? = obj[packageName]
-        val cached: Observable<ActivityEntry>? = pair?.first
+        val pair: Pair<Single<MutableList<ActivityEntry>>?, Long>? = obj[packageName]
+        val cached: Single<MutableList<ActivityEntry>>? = pair?.first
         val time: Long = pair?.second ?: 0
         if (cached != null && time > 0) {
-          obj.put(packageName, Pair(cached.map {
-            if (it.packageName == packageName && it.name == activityName) {
-              return@map ActivityEntry(
-                  name = it.name, packageName = it.packageName,
-                  lockState = lockState
-              )
-            } else {
-              return@map it
+          obj[packageName] = Pair(cached.doOnSuccess {
+            for ((index, entry) in it.withIndex()) {
+              if (entry.packageName == packageName && entry.name == activityName) {
+                it[index] = ActivityEntry(
+                    name = entry.name, packageName = entry.packageName,
+                    lockState = lockState
+                )
+                break
+              }
             }
-          }, time))
+          }, time)
         }
       }
     }
@@ -106,15 +109,15 @@ internal class LockInfoInteractorCache @Inject internal constructor(
 
   override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
 
-  override fun populateList(
+  override fun fetchActivityEntryList(
       packageName: String,
       force: Boolean
-  ): Observable<ActivityEntry> {
-    return Observable.defer {
+  ): Single<List<ActivityEntry>> {
+    return Single.defer {
       val currentTime = System.currentTimeMillis()
-      val list: Observable<ActivityEntry>
-      val cachedPair = infoCache[packageName]
-      val cache: Observable<ActivityEntry>?
+      val list: Single<List<ActivityEntry>>
+      val cachedPair: Pair<Single<MutableList<ActivityEntry>>?, Long>? = infoCache[packageName]
+      val cache: Single<MutableList<ActivityEntry>>?
       val cachedTime: Long
       if (cachedPair == null) {
         cache = null
@@ -124,16 +127,25 @@ internal class LockInfoInteractorCache @Inject internal constructor(
         cachedTime = cachedPair.second
       }
       if (force || cache == null || cachedTime + FIVE_MINUTES_MILLIS < currentTime) {
-        list = impl.populateList(packageName, true)
+        list = impl.fetchActivityEntryList(packageName, true)
             .cache()
-        infoCache.put(packageName, Pair(list, currentTime))
+        infoCache[packageName] = Pair(list.map { it.toMutableList() }, currentTime)
       } else {
-        list = cache
+        list = cache.map { it.toList() }
       }
       return@defer list
     }
         .doOnError { infoCache.remove(packageName) }
   }
+
+  override fun calculateListDiff(
+      packageName: String,
+      oldList: List<ActivityEntry>,
+      newList: List<ActivityEntry>
+  ): Single<ListDiffResult<ActivityEntry>> =
+      impl.calculateListDiff(packageName, oldList, newList).doOnError {
+        infoCache.remove(packageName)
+      }
 
   companion object {
 

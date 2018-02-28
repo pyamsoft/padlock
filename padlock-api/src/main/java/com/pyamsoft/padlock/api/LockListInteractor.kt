@@ -27,7 +27,10 @@ interface LockListInteractor : LockStateModifyInteractor {
   fun fetchAppEntryList(force: Boolean): Single<List<AppEntry>>
 
   @CheckResult
-  fun calculateListDiff(oldList: List<AppEntry>, newList: List<AppEntry>): Single<ListDiffResult<AppEntry>>
+  fun calculateListDiff(
+      oldList: List<AppEntry>,
+      newList: List<AppEntry>
+  ): Single<ListDiffResult<AppEntry>>
 
   @CheckResult
   fun hasShownOnBoarding(): Single<Boolean>

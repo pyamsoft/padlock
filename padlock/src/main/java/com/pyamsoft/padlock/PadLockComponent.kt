@@ -20,8 +20,13 @@ import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.InstallListenerPreferences
 import com.pyamsoft.padlock.base.PadLockModule
-import com.pyamsoft.padlock.list.*
-import com.pyamsoft.padlock.list.info.LockInfoModule
+import com.pyamsoft.padlock.list.LockInfoItem
+import com.pyamsoft.padlock.list.LockListItem
+import com.pyamsoft.padlock.list.LockListModule
+import com.pyamsoft.padlock.list.LockListProvider
+import com.pyamsoft.padlock.list.ListListComponent
+import com.pyamsoft.padlock.list.LockInfoProvider
+import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
 import com.pyamsoft.padlock.list.modify.LockStateModule
 import com.pyamsoft.padlock.lock.LockEntryModule
@@ -98,7 +103,7 @@ interface PadLockComponent {
   fun plusLockListComponent(module: LockListProvider): ListListComponent
 
   @CheckResult
-  fun plusLockInfoComponent(module: LockInfoModule): LockInfoComponent
+  fun plusLockInfoComponent(module: LockInfoProvider): LockInfoComponent
 
   @CheckResult
   fun plusLockScreenComponent(entryModule: LockEntryModule): LockScreenComponent

@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list.info
+package com.pyamsoft.padlock.list
 
+import com.pyamsoft.padlock.model.ActivityEntry
+import com.pyamsoft.pydroid.list.ListDiffProvider
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 
 @Module
-class LockInfoModule(private val packageName: String) {
+class LockInfoProvider(
+    private val packageName: String,
+    private val listDiffProvider: ListDiffProvider<List<ActivityEntry>>
+) {
 
   @Provides
   @Named("package_name")
   internal fun providePackageName(): String = packageName
+
+  @Provides
+  fun provideData(): ListDiffProvider<List<ActivityEntry>> = listDiffProvider
+
 }
+

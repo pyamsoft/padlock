@@ -31,21 +31,23 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.retainAll
-import com.pyamsoft.padlock.list.info.LockInfoEvent
-import com.pyamsoft.padlock.list.info.LockInfoModule
+import com.pyamsoft.padlock.helper.NeverNotifyItemList
+import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.design.util.refreshing
+import com.pyamsoft.pydroid.list.ListDiffProvider
+import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.Toasty
 import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
+import java.util.Collections
 import javax.inject.Inject
 
 class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
@@ -62,7 +64,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   private var appIsSystem: Boolean = false
   private var dividerDecoration: DividerItemDecoration? = null
   private var lastPosition: Int = 0
-  private val backingSet: MutableCollection<ActivityEntry> = LinkedHashSet()
   private lateinit var refreshLatch: RefreshLatch
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +76,10 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusLockInfoComponent(
-            LockInfoModule(appPackageName)
+            LockInfoProvider(appPackageName, object : ListDiffProvider<List<ActivityEntry>> {
+              override fun data(): List<ActivityEntry> =
+                  Collections.unmodifiableList(adapter.models)
+            })
         )
         .inject(this)
   }
@@ -101,7 +105,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
       // Load is done
       if (!it) {
-        adapter.retainAll(backingSet)
         if (adapter.adapterItemCount > 0) {
           showRecycler()
           Timber.d("Refresh finished")
@@ -122,7 +125,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       }
     }
     filterListDelegate = FilterListDelegate()
-    adapter = ModelAdapter { LockInfoItem(it, appIsSystem) }
+    adapter = ModelAdapter(NeverNotifyItemList.create()) { LockInfoItem(it, appIsSystem) }
     setupToolbar()
     binding.apply {
       lockInfoPackageName.text = appPackageName
@@ -205,7 +208,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     }
 
     adapter.clear()
-    backingSet.clear()
   }
 
   override fun onStart() {
@@ -263,68 +265,17 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
   override fun onListPopulateBegin() {
     refreshLatch.isRefreshing = true
-    backingSet.clear()
   }
 
   override fun onListPopulated() {
     refreshLatch.isRefreshing = false
   }
 
-  override fun onEntryAddedToList(entry: ActivityEntry) {
-    backingSet.add(entry)
-
-    var update = false
-    for ((index, item) in adapter.adapterItems.withIndex()) {
-      if (item.model.id == entry.id) {
-        update = true
-        if (item.model != entry) {
-          publishLockStateUpdates(item.model, entry)
-          adapter.set(index, entry)
-        }
-        break
-      }
-    }
-
-    if (!update) {
-      showRecycler()
-
-      var added = false
-      for ((index, item) in adapter.adapterItems.withIndex()) {
-        // The entry should go before this one
-        if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
-          added = true
-          adapter.add(index, entry)
-          break
-        }
-      }
-
-      if (!added) {
-        // add at the end of the list
-        adapter.add(entry)
-      }
-    }
-  }
-
-  private fun publishLockStateUpdates(
-      model: ActivityEntry,
-      entry: ActivityEntry
-  ) {
-    val oldState: LockState = model.lockState
-    val newState: LockState = entry.lockState
-    if (oldState != newState) {
-      Timber.d("Lock state changed for ${entry.packageName} ${entry.name}")
-      when (newState) {
-        LockState.DEFAULT -> presenter.publish(
-            LockInfoEvent.Callback.Deleted(entry.id, entry.packageName, oldState)
-        )
-        LockState.LOCKED -> presenter.publish(
-            LockInfoEvent.Callback.Created(entry.id, entry.packageName, oldState)
-        )
-        LockState.WHITELISTED -> presenter.publish(
-            LockInfoEvent.Callback.Whitelisted(entry.id, entry.packageName, oldState)
-        )
-        else -> Timber.e("Invalid lock state, do not publish: $newState")
-      }
+  override fun onListLoaded(result: ListDiffResult<ActivityEntry>) {
+    result.ifEmpty { adapter.clear() }
+    result.withValues {
+      adapter.setNewList(it.list())
+      it.dispatch(adapter)
     }
   }
 

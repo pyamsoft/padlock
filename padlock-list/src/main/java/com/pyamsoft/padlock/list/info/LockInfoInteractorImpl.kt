@@ -17,11 +17,14 @@
 package com.pyamsoft.padlock.list.info
 
 import android.support.annotation.CheckResult
+import android.support.v7.util.DiffUtil
 import com.pyamsoft.padlock.api.*
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.pydroid.list.ListDiffResult
+import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -177,14 +180,14 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         })
   }
 
-  override fun populateList(
+  override fun fetchActivityEntryList(
       packageName: String,
       force: Boolean
-  ): Observable<ActivityEntry> {
+  ): Single<List<ActivityEntry>> {
     return fetchData(packageName).flatMapObservable {
       Observable.fromIterable(it)
     }
-        .sorted { activityEntry, activityEntry2 ->
+        .toSortedList { activityEntry, activityEntry2 ->
           // Package names are all the same
           val entry1Name: String = activityEntry.name
           val entry2Name: String = activityEntry2.name
@@ -206,15 +209,60 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
             }
           }
           if (activity1Package && activity2Package) {
-            return@sorted entry1Name.compareTo(entry2Name, ignoreCase = true)
+            return@toSortedList entry1Name.compareTo(entry2Name, ignoreCase = true)
           } else if (activity1Package) {
-            return@sorted -1
+            return@toSortedList -1
           } else if (activity2Package) {
-            return@sorted 1
+            return@toSortedList 1
           } else {
-            return@sorted entry1Name.compareTo(entry2Name, ignoreCase = true)
+            return@toSortedList entry1Name.compareTo(entry2Name, ignoreCase = true)
           }
         }
+  }
+
+  override fun calculateListDiff(
+      packageName: String,
+      oldList: List<ActivityEntry>,
+      newList: List<ActivityEntry>
+  ): Single<ListDiffResult<ActivityEntry>> {
+    return Single.fromCallable {
+      val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Boolean {
+          val oldItem: ActivityEntry = oldList[oldItemPosition]
+          val newItem: ActivityEntry = newList[newItemPosition]
+          return oldItem.packageName == newItem.packageName
+        }
+
+        override fun areContentsTheSame(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Boolean {
+          val oldItem: ActivityEntry = oldList[oldItemPosition]
+          val newItem: ActivityEntry = newList[newItemPosition]
+          return oldItem == newItem
+        }
+
+        override fun getChangePayload(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Any? {
+          // TODO: Construct specific change payload
+          Timber.w("TODO: Construct specific change payload")
+          return super.getChangePayload(oldItemPosition, newItemPosition)
+        }
+
+      }, true)
+
+      return@fromCallable ListDiffResultImpl(newList, result)
+    }
   }
 
   override fun modifySingleDatabaseEntry(
