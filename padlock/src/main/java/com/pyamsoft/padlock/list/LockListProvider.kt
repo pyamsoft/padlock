@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.list
 
-import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.AppEntry
-import com.pyamsoft.pydroid.list.ListDiffResult
-import io.reactivex.Single
+import com.pyamsoft.pydroid.list.ListDiffProvider
+import dagger.Module
+import dagger.Provides
 
-interface LockListInteractor : LockStateModifyInteractor {
+@Module
+class LockListProvider(private val listDiffProvider: ListDiffProvider<List<AppEntry>>) {
 
-  @CheckResult
-  fun fetchAppEntryList(force: Boolean): Single<List<AppEntry>>
+  @Provides
+  fun provideData(): ListDiffProvider<List<AppEntry>> = listDiffProvider
 
-  @CheckResult
-  fun calculateListDiff(oldList: List<AppEntry>, newList: List<AppEntry>): Single<ListDiffResult<AppEntry>>
-
-  @CheckResult
-  fun hasShownOnBoarding(): Single<Boolean>
-
-  @CheckResult
-  fun isSystemVisible(): Single<Boolean>
-
-  fun setSystemVisible(visible: Boolean)
 }
+

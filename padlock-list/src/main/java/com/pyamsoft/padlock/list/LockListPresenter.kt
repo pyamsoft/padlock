@@ -19,18 +19,20 @@ package com.pyamsoft.padlock.list
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockListUpdater
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
-import com.pyamsoft.padlock.list.LockListPresenter.View
 import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.model.*
 import com.pyamsoft.padlock.model.LockState.*
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.list.ListDiffProvider
+import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
+@JvmSuppressWildcards
 class LockListPresenter @Inject internal constructor(
     private val lockListInteractor: LockListInteractor,
     private val lockListUpdater: LockListUpdater,
@@ -42,10 +44,11 @@ class LockListPresenter @Inject internal constructor(
     private val clearPinBus: EventBus<ClearPinEvent>,
     private val createPinBus: EventBus<CreatePinEvent>,
     private val lockInfoChangeBus: EventBus<LockInfoEvent.Callback>,
+    private val listDiffProvider: ListDiffProvider<List<AppEntry>>,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler
-) : SchedulerPresenter<View>(
+) : SchedulerPresenter<LockListPresenter.View>(
     compScheduler,
     ioScheduler,
     mainScheduler
@@ -300,12 +303,13 @@ class LockListPresenter @Inject internal constructor(
 
   fun populateList(force: Boolean) {
     dispose {
-      lockListInteractor.populateList(force)
+      lockListInteractor.fetchAppEntryList(force)
+          .flatMap { lockListInteractor.calculateListDiff(listDiffProvider.data(), it) }
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .doAfterTerminate { view?.onListPopulated() }
           .doOnSubscribe { view?.onListPopulateBegin() }
-          .subscribe({ view?.onEntryAddedToList(it) }, {
+          .subscribe({ view?.onListLoaded(it) }, {
             Timber.e(it, "populateList onError")
             view?.onListPopulateError(it)
           })
@@ -386,7 +390,7 @@ class LockListPresenter @Inject internal constructor(
 
     fun onListPopulateBegin()
 
-    fun onEntryAddedToList(entry: AppEntry)
+    fun onListLoaded(result: ListDiffResult<AppEntry>)
 
     fun onListPopulated()
 

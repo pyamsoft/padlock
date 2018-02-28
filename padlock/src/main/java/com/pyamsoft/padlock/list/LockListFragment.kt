@@ -30,7 +30,8 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.retainAll
+import com.pyamsoft.padlock.helper.NeverNotifyItemList
+import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
@@ -38,11 +39,14 @@ import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
 import com.pyamsoft.pydroid.design.util.refreshing
 import com.pyamsoft.pydroid.design.util.withBehavior
+import com.pyamsoft.pydroid.list.ListDiffProvider
+import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.util.*
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
+import java.util.Collections
 import javax.inject.Inject
 
 class LockListFragment : CanaryFragment(), LockListPresenter.View {
@@ -54,15 +58,19 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   private lateinit var adapter: ModelAdapter<AppEntry, LockListItem>
   private lateinit var binding: FragmentLockListBinding
   private lateinit var filterListDelegate: FilterListDelegate
+  private lateinit var refreshLatch: RefreshLatch
   private var dividerDecoration: DividerItemDecoration? = null
   private var lastPosition: Int = 0
   private var displaySystemItem: MenuItem? = null
-  private val backingSet: MutableCollection<AppEntry> = LinkedHashSet()
-  private lateinit var refreshLatch: RefreshLatch
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusLockListComponent(LockListProvider(object : ListDiffProvider<List<AppEntry>> {
+
+          override fun data(): List<AppEntry> = Collections.unmodifiableList(adapter.models)
+
+        }))
         .inject(this)
   }
 
@@ -95,7 +103,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
       // Load is done
       if (!it) {
-        adapter.retainAll(backingSet)
         if (adapter.adapterItemCount > 0) {
           showRecycler()
           Timber.d("We have refreshed")
@@ -115,7 +122,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         }
       }
     }
-    adapter = ModelAdapter { LockListItem(requireActivity(), it) }
+    adapter = ModelAdapter(NeverNotifyItemList.create()) { LockListItem(requireActivity(), it) }
     filterListDelegate = FilterListDelegate()
     filterListDelegate.onViewCreated(adapter)
     setupRecyclerView()
@@ -251,7 +258,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       unbind()
     }
     adapter.clear()
-    backingSet.clear()
 
     toolbarActivity.withToolbar {
       it.menu.apply {
@@ -451,40 +457,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   override fun onListPopulateBegin() {
     refreshLatch.isRefreshing = true
-    backingSet.clear()
   }
 
-  override fun onEntryAddedToList(entry: AppEntry) {
-    backingSet.add(entry)
-
-    var update = false
-    for ((index, item) in adapter.adapterItems.withIndex()) {
-      if (item.model.packageName == entry.packageName) {
-        update = true
-        if (item.model != entry) {
-          adapter.set(index, entry)
-        }
-        break
-      }
-    }
-
-    if (!update) {
-      showRecycler()
-
-      var added = false
-      for ((index, item) in adapter.adapterItems.withIndex()) {
-        // The entry should go before this one
-        if (entry.name.compareTo(item.model.name, ignoreCase = true) < 0) {
-          added = true
-          adapter.add(index, entry)
-          break
-        }
-      }
-
-      if (!added) {
-        // add at the end of the list
-        adapter.add(entry)
-      }
+  override fun onListLoaded(result: ListDiffResult<AppEntry>) {
+    result.ifEmpty { adapter.clear() }
+    result.withValues {
+      adapter.setNewList(it.list())
+      it.dispatch(adapter)
     }
   }
 

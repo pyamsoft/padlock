@@ -60,8 +60,6 @@ import javax.inject.Singleton
 )
 interface PadLockComponent {
 
-  fun inject(fragment: LockListFragment)
-
   fun inject(mainActivity: MainActivity)
 
   fun inject(fragment: PinEntryTextFragment)
@@ -95,6 +93,9 @@ interface PadLockComponent {
   // To be used directly by PadLockSingleInitProvider
   @CheckResult
   fun provideApplicationInstallReceiver(): ApplicationInstallReceiver
+
+  @CheckResult
+  fun plusLockListComponent(module: LockListProvider): ListListComponent
 
   @CheckResult
   fun plusLockInfoComponent(module: LockInfoModule): LockInfoComponent

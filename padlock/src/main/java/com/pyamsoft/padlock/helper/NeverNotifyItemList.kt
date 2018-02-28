@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.helper
 
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.model.AppEntry
-import com.pyamsoft.pydroid.list.ListDiffResult
-import io.reactivex.Single
+import com.mikepenz.fastadapter.IItem
+import com.mikepenz.fastadapter.IItemList
+import com.mikepenz.fastadapter.utils.DefaultItemListImpl
 
-interface LockListInteractor : LockStateModifyInteractor {
+class NeverNotifyItemList<T : IItem<*, *>> private constructor() : DefaultItemListImpl<T>() {
 
-  @CheckResult
-  fun fetchAppEntryList(force: Boolean): Single<List<AppEntry>>
+  override fun setNewList(
+      items: MutableList<T>,
+      notify: Boolean
+  ) {
+    super.setNewList(items, false)
+  }
 
-  @CheckResult
-  fun calculateListDiff(oldList: List<AppEntry>, newList: List<AppEntry>): Single<ListDiffResult<AppEntry>>
+  companion object {
 
-  @CheckResult
-  fun hasShownOnBoarding(): Single<Boolean>
+    @JvmStatic
+    @CheckResult
+    fun <T : IItem<*, *>> create(): IItemList<T> = NeverNotifyItemList()
+  }
 
-  @CheckResult
-  fun isSystemVisible(): Single<Boolean>
-
-  fun setSystemVisible(visible: Boolean)
 }
+

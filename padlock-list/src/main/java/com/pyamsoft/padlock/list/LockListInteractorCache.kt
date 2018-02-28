@@ -22,8 +22,8 @@ import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -39,7 +39,7 @@ internal class LockListInteractorCache @Inject internal constructor(
 ) : LockListInteractor,
     Cache, LockListUpdater {
 
-  private var appCache: Observable<AppEntry>? = null
+  private var appCache: Single<MutableList<AppEntry>>? = null
   private var lastAccessCache: Long = 0L
 
   override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
@@ -50,18 +50,24 @@ internal class LockListInteractorCache @Inject internal constructor(
     impl.setSystemVisible(visible)
   }
 
-  override fun populateList(force: Boolean): Observable<AppEntry> {
-    return Observable.defer {
-      val cache = appCache
+  override fun calculateListDiff(
+      oldList: List<AppEntry>,
+      newList: List<AppEntry>
+  ): Single<ListDiffResult<AppEntry>> = impl.calculateListDiff(oldList, newList)
+      .doOnError { clearCache() }
+
+  override fun fetchAppEntryList(force: Boolean): Single<List<AppEntry>> {
+    return Single.defer {
+      val cache: Single<MutableList<AppEntry>>? = appCache
       val currentTime = System.currentTimeMillis()
-      val list: Observable<AppEntry>
+      val list: Single<List<AppEntry>>
       if (force || cache == null || lastAccessCache + FIVE_MINUTES_MILLIS < currentTime) {
-        list = impl.populateList(true)
+        list = impl.fetchAppEntryList(true)
             .cache()
-        appCache = list
+        appCache = list.map { it.toMutableList() }
         lastAccessCache = currentTime
       } else {
-        list = cache
+        list = cache.map { it.toList() }
       }
 
       return@defer list
@@ -82,19 +88,18 @@ internal class LockListInteractorCache @Inject internal constructor(
         code, system
     )
         .doOnSuccess {
-          val obj: Observable<AppEntry>? = appCache
+          val obj: Single<MutableList<AppEntry>>? = appCache
           if (obj != null) {
-            appCache = obj.map {
-              if (it.packageName == packageName) {
-                // Update this with the new thing
-                return@map AppEntry(
-                    name = it.name, packageName = it.packageName,
-                    locked = newLockState == LOCKED, system = it.system,
-                    whitelisted = it.whitelisted, hardLocked = it.hardLocked
-                )
-              } else {
-                // Pass the original through
-                return@map it
+            appCache = obj.doOnSuccess {
+              for ((index, entry) in it.withIndex()) {
+                if (entry.packageName == packageName) {
+                  it[index] = AppEntry(
+                      name = entry.name, packageName = entry.packageName,
+                      locked = newLockState == LOCKED, system = entry.system,
+                      whitelisted = entry.whitelisted, hardLocked = entry.hardLocked
+                  )
+                  break
+                }
               }
             }
           }
@@ -108,19 +113,18 @@ internal class LockListInteractorCache @Inject internal constructor(
       hardLocked: Int
   ): Completable {
     return Completable.fromAction {
-      val obj: Observable<AppEntry>? = appCache
+      val obj: Single<MutableList<AppEntry>>? = appCache
       if (obj != null) {
-        appCache = obj.map {
-          if (it.packageName == packageName) {
-            return@map AppEntry(
-                name = it.name, packageName = it.packageName,
-                locked = it.locked,
-                system = it.system, whitelisted = whitelisted,
-                hardLocked = hardLocked
-            )
-          } else {
-            // Pass the original through
-            return@map it
+        appCache = obj.doOnSuccess {
+          for ((index, entry) in it.withIndex()) {
+            if (entry.packageName == packageName) {
+              it[index] = AppEntry(
+                  name = entry.name, packageName = entry.packageName,
+                  locked = entry.locked, system = entry.system,
+                  whitelisted = whitelisted, hardLocked = hardLocked
+              )
+              break
+            }
           }
         }
       }

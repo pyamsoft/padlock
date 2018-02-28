@@ -17,12 +17,15 @@
 package com.pyamsoft.padlock.list
 
 import android.support.annotation.CheckResult
+import android.support.v7.util.DiffUtil
 import com.pyamsoft.padlock.api.*
-import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.pydroid.list.ListDiffResult
+import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -48,7 +51,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
     preferences.setSystemVisible(visible)
   }
 
-  override fun populateList(force: Boolean): Observable<AppEntry> {
+  override fun fetchAppEntryList(force: Boolean): Single<List<AppEntry>> {
     return getValidPackageNames().zipWith(getAppEntryList(),
         BiFunction<List<String>, List<PadLockEntryModel.AllEntriesModel>, List<LockTuple>> { packageNames, padLockEntries ->
           val lockTuples: MutableList<LockTuple> = ArrayList()
@@ -81,7 +84,50 @@ internal class LockListInteractorImpl @Inject internal constructor(
         .toSortedList { o1, o2 ->
           o1.name.compareTo(o2.name, ignoreCase = true)
         }
-        .flatMapObservable { Observable.fromIterable(it) }
+  }
+
+  override fun calculateListDiff(
+      oldList: List<AppEntry>,
+      newList: List<AppEntry>
+  ): Single<ListDiffResult<AppEntry>> {
+    return Single.fromCallable {
+      val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Boolean {
+          val oldItem: AppEntry = oldList[oldItemPosition]
+          val newItem: AppEntry = newList[newItemPosition]
+          return oldItem.packageName == newItem.packageName
+        }
+
+        override fun areContentsTheSame(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Boolean {
+          val oldItem: AppEntry = oldList[oldItemPosition]
+          val newItem: AppEntry = newList[newItemPosition]
+          return oldItem == newItem
+        }
+
+        override fun getChangePayload(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Any? {
+          // TODO: Construct specific change payload
+          Timber.w("TODO: Construct specific change payload")
+          return super.getChangePayload(oldItemPosition, newItemPosition)
+        }
+
+      }, true)
+
+      return@fromCallable ListDiffResultImpl(newList, result)
+    }
   }
 
   @CheckResult
