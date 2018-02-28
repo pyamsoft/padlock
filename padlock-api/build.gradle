@@ -58,6 +58,9 @@ dependencies {
   api("com.github.pyamsoft.pydroid:pydroid:$pydroid@aar") {
     transitive = true
   }
+  api("com.github.pyamsoft.pydroid:pydroid-list:$pydroid@aar") {
+    transitive = true
+  }
 
   api project(":padlock-model")
 }
