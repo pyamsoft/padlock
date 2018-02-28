@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.helper
+package com.pyamsoft.padlock.purge
 
-import com.mikepenz.fastadapter.adapters.ModelAdapter
-import com.mikepenz.fastadapter.items.ModelAbstractItem
+import dagger.Subcomponent
 
-fun <M : Any> ModelAdapter<M, out ModelAbstractItem<M, *, *>>.retainAll(
-    backing: MutableCollection<M>
-): Boolean {
-  val old: MutableCollection<ModelAbstractItem<M, *, *>> = LinkedHashSet()
-  adapterItems.filterNotTo(old) { backing.contains(it.model) }
+@Subcomponent(modules = [PurgeProvider::class])
+interface PurgeListComponent {
 
-  old.asSequence()
-      .map { getAdapterPosition(it.identifier) }
-      .filter { it >= 0 }
-      .forEach { remove(it) }
-
-  backing.clear()
-  return old.isNotEmpty()
+  fun inject(fragment: PurgeFragment)
 }
+

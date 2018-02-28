@@ -29,14 +29,18 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.retainAll
+import com.pyamsoft.padlock.helper.NeverNotifyItemList
+import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.design.util.refreshing
+import com.pyamsoft.pydroid.list.ListDiffProvider
+import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
+import java.util.Collections
 import javax.inject.Inject
 
 class PurgeFragment : CanaryFragment(), PurgePresenter.View {
@@ -45,9 +49,8 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   private lateinit var adapter: ModelAdapter<String, PurgeItem>
   private lateinit var binding: FragmentPurgeBinding
   private lateinit var decoration: DividerItemDecoration
-  private var lastPosition: Int = 0
-  private val backingSet: MutableCollection<String> = LinkedHashSet()
   private lateinit var refreshLatch: RefreshLatch
+  private var lastPosition: Int = 0
 
   private fun decideListState() {
     binding.apply {
@@ -63,6 +66,9 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusPurgeComponent(PurgeProvider(object : ListDiffProvider<List<String>> {
+          override fun data(): List<String> = Collections.unmodifiableList(adapter.models)
+        }))
         .inject(this)
   }
 
@@ -84,7 +90,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
       unbind()
     }
     adapter.clear()
-    backingSet.clear()
 
     toolbarActivity.withToolbar {
       it.menu.apply {
@@ -104,7 +109,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
       // Load complete
       if (!it) {
-        adapter.retainAll(backingSet)
         lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
         decideListState()
       }
@@ -150,7 +154,6 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onRetrieveBegin() {
-    backingSet.clear()
     refreshLatch.isRefreshing = true
   }
 
@@ -158,38 +161,11 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     refreshLatch.isRefreshing = false
   }
 
-  override fun onRetrievedStale(packageName: String) {
-    backingSet.add(packageName)
-
-    var update = false
-    for ((index, item) in adapter.adapterItems.withIndex()) {
-      if (item.model == packageName) {
-        update = true
-        // Won't happen ever right now, keep in case the model gets more complex in future
-        if (item.model != packageName) {
-          adapter.set(index, packageName)
-        }
-        break
-      }
-    }
-
-    if (!update) {
-      showRecycler()
-
-      var added = false
-      for ((index, item) in adapter.adapterItems.withIndex()) {
-        // The entry should go before this one
-        if (packageName.compareTo(item.model, ignoreCase = true) < 0) {
-          added = true
-          adapter.add(index, packageName)
-          break
-        }
-      }
-
-      if (!added) {
-        // add at the end of the list
-        adapter.add(packageName)
-      }
+  override fun onRetrievedList(result: ListDiffResult<String>) {
+    result.ifEmpty { adapter.clear() }
+    result.withValues {
+      adapter.setNewList(it.list())
+      it.dispatch(adapter)
     }
   }
 
@@ -224,7 +200,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   private fun setupRecyclerView() {
     decoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
 
-    adapter = ModelAdapter { PurgeItem(it) }
+    adapter = ModelAdapter(NeverNotifyItemList.create()) { PurgeItem(it) }
     binding.apply {
       purgeList.layoutManager = LinearLayoutManager(context).apply {
         isItemPrefetchEnabled = true

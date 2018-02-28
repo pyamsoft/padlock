@@ -61,10 +61,10 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   private lateinit var appPackageName: String
   private lateinit var appName: String
   private lateinit var filterListDelegate: FilterListDelegate
+  private lateinit var refreshLatch: RefreshLatch
   private var appIsSystem: Boolean = false
   private var dividerDecoration: DividerItemDecoration? = null
   private var lastPosition: Int = 0
-  private lateinit var refreshLatch: RefreshLatch
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

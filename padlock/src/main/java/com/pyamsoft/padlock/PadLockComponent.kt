@@ -20,13 +20,7 @@ import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.InstallListenerPreferences
 import com.pyamsoft.padlock.base.PadLockModule
-import com.pyamsoft.padlock.list.LockInfoItem
-import com.pyamsoft.padlock.list.LockListItem
-import com.pyamsoft.padlock.list.LockListModule
-import com.pyamsoft.padlock.list.LockListProvider
-import com.pyamsoft.padlock.list.ListListComponent
-import com.pyamsoft.padlock.list.LockInfoProvider
-import com.pyamsoft.padlock.list.LockInfoComponent
+import com.pyamsoft.padlock.list.*
 import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
 import com.pyamsoft.padlock.list.modify.LockStateModule
 import com.pyamsoft.padlock.lock.LockEntryModule
@@ -41,10 +35,7 @@ import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.pin.PinEntryPatternFragment
 import com.pyamsoft.padlock.pin.PinEntryTextFragment
 import com.pyamsoft.padlock.pin.PinModule
-import com.pyamsoft.padlock.purge.PurgeAllDialog
-import com.pyamsoft.padlock.purge.PurgeFragment
-import com.pyamsoft.padlock.purge.PurgeModule
-import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
+import com.pyamsoft.padlock.purge.*
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.service.ServiceModule
@@ -72,8 +63,6 @@ interface PadLockComponent {
   fun inject(pinEntryDialog: PinEntryDialog)
 
   fun inject(pinEntryPatternFragment: PinEntryPatternFragment)
-
-  fun inject(purgeFragment: PurgeFragment)
 
   fun inject(padLockService: PadLockService)
 
@@ -104,6 +93,9 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusLockInfoComponent(module: LockInfoProvider): LockInfoComponent
+
+  @CheckResult
+  fun plusPurgeComponent(module: PurgeProvider): PurgeListComponent
 
   @CheckResult
   fun plusLockScreenComponent(entryModule: LockEntryModule): LockScreenComponent

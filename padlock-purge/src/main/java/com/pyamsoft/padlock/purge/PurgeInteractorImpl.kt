@@ -17,11 +17,14 @@
 package com.pyamsoft.padlock.purge
 
 import android.support.annotation.CheckResult
+import android.support.v7.util.DiffUtil
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.pydroid.list.ListDiffResult
+import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -37,11 +40,49 @@ internal class PurgeInteractorImpl @Inject internal constructor(
     private val queryDb: PadLockDBQuery
 ) : PurgeInteractor {
 
-  override fun populateList(forceRefresh: Boolean): Observable<String> {
-    return fetchFreshData().flatMapObservable {
-      Observable.fromIterable(it)
+  override fun fetchStalePackageNames(forceRefresh: Boolean): Single<List<String>> {
+    return fetchFreshData().flatMapObservable { Observable.fromIterable(it) }
+        .toSortedList { obj, str -> obj.compareTo(str, ignoreCase = true) }
+  }
+
+  override fun calculateDiff(
+      oldList: List<String>,
+      newList: List<String>
+  ): Single<ListDiffResult<String>> {
+    return Single.fromCallable {
+      val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Boolean {
+          val oldItem: String = oldList[oldItemPosition]
+          val newItem: String = newList[newItemPosition]
+          return oldItem == newItem
+        }
+
+        override fun areContentsTheSame(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Boolean = areItemsTheSame(oldItemPosition, newItemPosition)
+
+        override fun getChangePayload(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Any? {
+          // TODO: Construct specific change payload
+          Timber.w("TODO: Construct specific change payload")
+          return super.getChangePayload(oldItemPosition, newItemPosition)
+        }
+
+      }, true)
+
+      return@fromCallable ListDiffResultImpl(newList, result)
     }
-        .sorted { obj, str -> obj.compareTo(str, ignoreCase = true) }
   }
 
   @CheckResult

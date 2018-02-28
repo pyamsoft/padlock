@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.purge
 
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.pydroid.data.Cache
-import io.reactivex.Observable
+import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Single
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -31,25 +31,31 @@ internal class PurgeInteractorCache @Inject internal constructor(
 ) : PurgeInteractor,
     Cache {
 
-  private var cachedList: Observable<String>? = null
+  private var cachedList: Single<MutableList<String>>? = null
   private var lastAccessListTime: Long = 0L
 
   override fun clearCache() {
     cachedList = null
   }
 
-  override fun populateList(forceRefresh: Boolean): Observable<String> {
-    return Observable.defer {
-      val cache = cachedList
-      val list: Observable<String>
+  override fun calculateDiff(
+      oldList: List<String>,
+      newList: List<String>
+  ): Single<ListDiffResult<String>> =
+      impl.calculateDiff(oldList, newList).doOnError { clearCache() }
+
+  override fun fetchStalePackageNames(forceRefresh: Boolean): Single<List<String>> {
+    return Single.defer {
+      val cache: Single<MutableList<String>>? = cachedList
+      val list: Single<List<String>>
       val currentTime = System.currentTimeMillis()
       if (forceRefresh || cache == null || lastAccessListTime + FIVE_MINUTES_MILLIS < currentTime) {
-        list = impl.populateList(true)
+        list = impl.fetchStalePackageNames(true)
             .cache()
-        cachedList = list
+        cachedList = list.map { it.toMutableList() }
         lastAccessListTime = currentTime
       } else {
-        list = cache
+        list = cache.map { it.toList() }
       }
       return@defer list
     }
@@ -59,9 +65,9 @@ internal class PurgeInteractorCache @Inject internal constructor(
   override fun deleteEntry(packageName: String): Single<String> {
     return impl.deleteEntry(packageName)
         .doOnSuccess {
-          val obj: Observable<String>? = cachedList
+          val obj: Single<MutableList<String>>? = cachedList
           if (obj != null) {
-            cachedList = obj.filter { it != packageName }
+            cachedList = obj.doOnSuccess { it.remove(packageName) }
                 .doOnError { clearCache() }
           }
         }

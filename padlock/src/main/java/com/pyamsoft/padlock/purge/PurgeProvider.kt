@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.purge
 
-import android.support.annotation.CheckResult
-import com.pyamsoft.pydroid.list.ListDiffResult
-import io.reactivex.Single
+import com.pyamsoft.pydroid.list.ListDiffProvider
+import dagger.Module
+import dagger.Provides
 
-interface PurgeInteractor {
+@Module
+class PurgeProvider(private val listDiffProvider: ListDiffProvider<List<String>>) {
 
-  @CheckResult
-  fun fetchStalePackageNames(forceRefresh: Boolean): Single<List<String>>
+  @Provides
+  fun provideData(): ListDiffProvider<List<String>> = listDiffProvider
 
-  @CheckResult
-  fun calculateDiff(
-      oldList: List<String>,
-      newList: List<String>
-  ): Single<ListDiffResult<String>>
-
-  @CheckResult
-  fun deleteEntry(packageName: String): Single<String>
 }
+

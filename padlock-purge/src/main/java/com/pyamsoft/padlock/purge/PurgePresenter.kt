@@ -21,22 +21,23 @@ import com.pyamsoft.padlock.model.PurgeAllEvent
 import com.pyamsoft.padlock.model.PurgeEvent
 import com.pyamsoft.padlock.purge.PurgePresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.list.ListDiffProvider
+import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
+@JvmSuppressWildcards
 class PurgePresenter @Inject internal constructor(
     private val interactor: PurgeInteractor,
     private val purgeBus: EventBus<PurgeEvent>,
-    private val purgeAllBus: EventBus<PurgeAllEvent>, @Named(
-        "computation"
-    ) computationScheduler: Scheduler, @Named(
-        "io"
-    ) ioScheduler: Scheduler, @Named(
-        "main"
-    ) mainScheduler: Scheduler
+    private val purgeAllBus: EventBus<PurgeAllEvent>,
+    private val listDiffProvider: ListDiffProvider<List<String>>,
+    @Named("computation") computationScheduler: Scheduler,
+    @Named("io") ioScheduler: Scheduler,
+    @Named("main") mainScheduler: Scheduler
 ) : SchedulerPresenter<View>(
     computationScheduler,
     ioScheduler, mainScheduler
@@ -74,12 +75,13 @@ class PurgePresenter @Inject internal constructor(
 
   fun retrieveStaleApplications(force: Boolean) {
     dispose {
-      interactor.populateList(force)
+      interactor.fetchStalePackageNames(force)
+          .flatMap { interactor.calculateDiff(listDiffProvider.data(), it) }
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
           .doOnSubscribe { view?.onRetrieveBegin() }
           .doAfterTerminate { view?.onRetrieveComplete() }
-          .subscribe({ view?.onRetrievedStale(it) }, {
+          .subscribe({ view?.onRetrievedList(it) }, {
             Timber.e(it, "onError retrieveStaleApplications")
             view?.onRetrieveError(it)
           })
@@ -104,7 +106,7 @@ class PurgePresenter @Inject internal constructor(
 
     fun onRetrieveComplete()
 
-    fun onRetrievedStale(packageName: String)
+    fun onRetrievedList(result: ListDiffResult<String>)
 
     fun onRetrieveError(throwable: Throwable)
   }
