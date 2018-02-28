@@ -74,7 +74,7 @@ abstract class LockScreenBaseFragment protected constructor() : CanaryFragment()
 
   final override fun onPostUnlocked() {
     Timber.d("POST Unlock Finished!")
-    activity!!.finish()
+    requireActivity().finish()
   }
 
   override fun onResume() {

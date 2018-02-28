@@ -62,7 +62,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
   }
 
@@ -115,7 +115,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         }
       }
     }
-    adapter = ModelAdapter { LockListItem(activity!!, it) }
+    adapter = ModelAdapter { LockListItem(requireActivity(), it) }
     filterListDelegate = FilterListDelegate()
     filterListDelegate.onViewCreated(adapter)
     setupRecyclerView()
@@ -127,7 +127,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     presenter.bind(viewLifecycle, this)
 
-    val intent = activity!!.intent
+    val intent = requireActivity().intent
     if (intent.hasExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)) {
       intent.removeExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)
 
@@ -270,7 +270,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
             )) {
           UsageAccessRequestDialog().show(activity, "usage_access")
         } else {
-          activity!!.let {
+          requireActivity().let {
             PinEntryDialog.newInstance(it.packageName)
                 .show(it, PinEntryDialog.TAG)
           }
@@ -295,7 +295,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinCreateFailure() {
-    Toasty.makeText(context!!, "Error: Mismatched PIN", Toast.LENGTH_SHORT)
+    Toasty.makeText(requireContext(), "Error: Mismatched PIN", Toast.LENGTH_SHORT)
   }
 
   override fun onMasterPinClearSuccess() {
@@ -308,7 +308,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinClearFailure() {
-    Toasty.makeText(context!!, "Error: Invalid PIN", Toast.LENGTH_SHORT)
+    Toasty.makeText(requireContext(), "Error: Invalid PIN", Toast.LENGTH_SHORT)
   }
 
   private fun refreshListEntry(

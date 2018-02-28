@@ -107,13 +107,13 @@ class PadLock : Application() {
     @JvmStatic
     @CheckResult
     fun getRefWatcher(fragment: CanaryFragment): RefWatcher = getRefWatcherInternal(
-        fragment.activity!!.application
+        fragment.requireActivity().application
     )
 
     @CheckResult
     @JvmStatic
     fun getRefWatcher(fragment: CanaryDialog): RefWatcher = getRefWatcherInternal(
-        fragment.activity!!.application
+        fragment.requireActivity().application
     )
 
     @JvmStatic
@@ -121,7 +121,7 @@ class PadLock : Application() {
     fun getRefWatcher(
         preferenceFragment: PadLockPreferenceFragment
     ): RefWatcher = getRefWatcherInternal(
-        preferenceFragment.activity!!.application
+        preferenceFragment.requireActivity().application
     )
 
     @JvmStatic

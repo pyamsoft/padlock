@@ -38,12 +38,12 @@ class ConfirmationDialog : CanaryDialog() {
       type = ConfirmEvent.valueOf(it.getString(WHICH, ConfirmEvent.DATABASE.name))
     }
 
-    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    return AlertDialog.Builder(activity!!)
+    return AlertDialog.Builder(requireActivity())
         .setMessage(
             if (type === ConfirmEvent.DATABASE)
               """Really clear entire database?

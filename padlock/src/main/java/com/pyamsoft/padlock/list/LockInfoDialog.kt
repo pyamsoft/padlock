@@ -73,7 +73,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       appIsSystem = it.getBoolean(ARG_APP_SYSTEM, false)
     }
 
-    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusLockInfoComponent(
             LockInfoModule(appPackageName)
         )
@@ -146,7 +146,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       lockInfoToolbar.setOnMenuItemClickListener {
         when (it.itemId) {
           R.id.menu_explain_lock_type -> {
-            LockInfoExplanationDialog().show(activity!!, LockInfoExplanationDialog.TAG)
+            LockInfoExplanationDialog().show(requireActivity(), LockInfoExplanationDialog.TAG)
             return@setOnMenuItemClickListener true
           }
           else -> return@setOnMenuItemClickListener false

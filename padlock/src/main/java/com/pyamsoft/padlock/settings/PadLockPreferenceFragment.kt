@@ -56,7 +56,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
   }
 
@@ -101,7 +101,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
   }
 
   override fun onLockTypeChangePrevented() {
-    context!!.let {
+    requireContext().let {
       Toasty.makeText(
           it, "Must clear Master Password before changing Lock Screen Type",
           Toasty.LENGTH_SHORT
@@ -112,18 +112,18 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
   }
 
   override fun onLockTypeChangeError(throwable: Throwable) {
-    Toasty.makeText(context!!, "Error: ${throwable.message}", Toasty.LENGTH_SHORT)
+    Toasty.makeText(requireContext(), "Error: ${throwable.message}", Toasty.LENGTH_SHORT)
   }
 
   override fun onClearDatabase() {
     Toasty.makeText(
-        context!!, "Locked application database has been cleared",
+        requireContext(), "Locked application database has been cleared",
         Toasty.LENGTH_SHORT
     )
   }
 
   override fun onMasterPinClearFailure() {
-    Toasty.makeText(context!!, "Error: Invalid PIN", Toast.LENGTH_SHORT)
+    Toasty.makeText(requireContext(), "Error: Invalid PIN", Toast.LENGTH_SHORT)
   }
 
   override fun onMasterPinClearSuccess() {

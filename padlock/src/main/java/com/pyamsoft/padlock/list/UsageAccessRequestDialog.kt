@@ -26,7 +26,7 @@ import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
 class UsageAccessRequestDialog : CanaryDialog() {
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    activity!!.let {
+    requireActivity().let {
       return AlertDialog.Builder(it)
           .setTitle("Enable PadLock Usage Access")
           .setMessage(R.string.explain_accessibility_service)

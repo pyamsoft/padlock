@@ -49,7 +49,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     }
     isCancelable = true
 
-    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
   }
 

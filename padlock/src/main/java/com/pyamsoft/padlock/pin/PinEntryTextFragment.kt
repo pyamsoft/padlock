@@ -45,7 +45,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
   }
 
@@ -77,7 +77,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     pinHintText = binding.pinHint.editText!!
 
     // Force the keyboard
-    imm = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
 
     clearDisplay()
@@ -125,7 +125,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onPinSubmitError(throwable: Throwable) {
-    Toasty.makeText(context!!, throwable.message.toString(), Toasty.LENGTH_SHORT)
+    Toasty.makeText(requireContext(), throwable.message.toString(), Toasty.LENGTH_SHORT)
   }
 
   override fun onPinSubmitComplete() {

@@ -54,7 +54,7 @@ class LockedStatDialog : CanaryDialog() {
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     binding = DialogLockStatBinding.inflate(LayoutInflater.from(activity), null, false)
 
-    return AlertDialog.Builder(activity!!)
+    return AlertDialog.Builder(requireActivity())
         .setView(binding.root)
         .setPositiveButton("Okay") { dialogInterface, _ -> dialogInterface.dismiss() }
         .setCancelable(true)

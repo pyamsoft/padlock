@@ -46,7 +46,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
 
     if (savedInstanceState == null) {
@@ -215,7 +215,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onPinSubmitError(throwable: Throwable) {
-    Toasty.makeText(context!!, throwable.message.toString(), Toasty.LENGTH_SHORT)
+    Toasty.makeText(requireContext(), throwable.message.toString(), Toasty.LENGTH_SHORT)
   }
 
   override fun onPinSubmitComplete() {

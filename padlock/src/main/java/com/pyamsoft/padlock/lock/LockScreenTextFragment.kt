@@ -52,7 +52,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusLockScreenComponent(
             LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)
         )
@@ -111,7 +111,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
   private fun setupInputManager() {
     // Force the keyboard
-    imm = activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
   }
 

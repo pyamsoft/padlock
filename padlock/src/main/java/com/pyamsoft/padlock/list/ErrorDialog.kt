@@ -24,7 +24,7 @@ import com.pyamsoft.padlock.uicommon.CanaryDialog
 class ErrorDialog : CanaryDialog() {
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    return AlertDialog.Builder(activity!!)
+    return AlertDialog.Builder(requireActivity())
         .setTitle("ERROR")
         .setMessage(
             """An unrecoverable error has occurred when attempting an operation.

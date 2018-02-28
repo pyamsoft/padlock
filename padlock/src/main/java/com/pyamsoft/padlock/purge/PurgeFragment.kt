@@ -62,7 +62,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
   }
 
@@ -195,7 +195,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
   override fun onRetrieveError(throwable: Throwable) {
     Toasty.makeText(
-        context!!, "Error retrieving old application list",
+        requireContext(), "Error retrieving old application list",
         Toasty.LENGTH_SHORT
     )
   }

@@ -41,7 +41,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(context!!.applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusLockScreenComponent(
             LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)
         )
