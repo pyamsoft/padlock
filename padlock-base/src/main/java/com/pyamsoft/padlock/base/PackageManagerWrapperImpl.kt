@@ -22,7 +22,6 @@ import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.*
 import com.pyamsoft.padlock.model.ApplicationItem
@@ -34,10 +33,6 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.exceptions.Exceptions
 import timber.log.Timber
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
 import java.util.ArrayList
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -92,58 +87,8 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 
   @CheckResult
   private fun getInstalledApplications(): Observable<ApplicationItem> {
-    return Single.fromCallable {
-      val process: Process
-      var caughtPermissionDenial = false
-      val packageNames: MutableList<String> = ArrayList()
-      try {
-        // The adb shell command pm list packages returns a list of packages in the following format:
-        //
-        // package:<package name>
-        //
-        // but it is not a victim of BinderTransaction failures so it will be able to better handle
-        // large sets of applications.
-        val command: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-          // Android N moves package list command to a different, same format, faster command
-
-          // Assign
-          "cmd package list packages"
-        } else {
-          // Assign
-          "pm list packages"
-        }
-        process = Runtime.getRuntime()
-            .exec(command)
-        BufferedReader(
-            InputStreamReader(process.inputStream, StandardCharsets.UTF_8)
-        ).use {
-          var line: String? = it.readLine()
-          while (line != null && line.isNotBlank()) {
-            if (line.startsWith("Permission Denial")) {
-              Timber.e("Command resulted in permission denial")
-              caughtPermissionDenial = true
-              break
-            }
-            packageNames.add(line)
-            line = it.readLine()
-          }
-        }
-
-        if (caughtPermissionDenial) {
-          throw IllegalStateException("Error running command: $command, throw and bail")
-        }
-
-        // Will always be 0
-      } catch (e: IOException) {
-        Timber.e(e, "Error running shell command, return what we have")
-      }
-
-      return@fromCallable packageNames
-    }
+    return Single.fromCallable { packageManager.getInstalledApplications(0) }
         .flatMapObservable { Observable.fromIterable(it) }
-        .map {
-          it.replaceFirst("^package:".toRegex(), "")
-        }
         .flatMapSingle { getApplicationInfo(it) }
         .filter { !it.isEmpty() }
   }
@@ -172,22 +117,26 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
         .toList()
   }
 
+  @CheckResult
+  private fun getApplicationInfo(info: ApplicationInfo?): Single<ApplicationItem> {
+    return Single.fromCallable {
+      when (info) {
+        null -> ApplicationItem.EMPTY
+        else -> ApplicationItem.create(info.packageName, info.system(), info.enabled)
+      }
+    }
+  }
+
   override fun getApplicationInfo(packageName: String): Single<ApplicationItem> {
     return Single.defer {
+      var info: ApplicationInfo?
       try {
-        val info: ApplicationInfo? = packageManager.getApplicationInfo(packageName, 0)
-        return@defer when (info) {
-          null -> Single.just(ApplicationItem.EMPTY)
-          else -> {
-            Single.just(
-                ApplicationItem.create(info.packageName, info.system(), info.enabled)
-            )
-          }
-        }
+        info = packageManager.getApplicationInfo(packageName, 0)
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "onError getApplicationInfo: '$packageName'")
-        return@defer Single.just(ApplicationItem.EMPTY)
+        info = null
       }
+      return@defer getApplicationInfo(info)
     }
   }
 
