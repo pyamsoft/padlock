@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.list.info
 
-import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockInfoUpdater
 import com.pyamsoft.padlock.model.ActivityEntry
@@ -52,18 +51,20 @@ internal class LockInfoInteractorCache @Inject internal constructor(
         code, system
     )
         .doOnSuccess {
-          infoCache.put(packageName, freshActivityEntryList(packageName).doOnSuccess {
-            for ((index, entry) in it.withIndex()) {
-              if (entry.packageName == packageName && entry.name == activityName) {
-                it[index] = ActivityEntry(
-                    name = entry.name,
-                    packageName = entry.packageName,
-                    lockState = newLockState
-                )
-                break
+          infoCache.updateIfAvailable(packageName) { single ->
+            single.doOnSuccess {
+              for ((index, entry) in it.withIndex()) {
+                if (entry.packageName == packageName && entry.name == activityName) {
+                  it[index] = ActivityEntry(
+                      name = entry.name,
+                      packageName = entry.packageName,
+                      lockState = newLockState
+                  )
+                  break
+                }
               }
             }
-          })
+          }
         }
         .doOnError { infoCache.remove(packageName) }
         .doAfterTerminate { cacheTimeout.queue() }
@@ -75,17 +76,19 @@ internal class LockInfoInteractorCache @Inject internal constructor(
       lockState: LockState
   ): Completable {
     return Completable.fromAction {
-      infoCache.put(packageName, freshActivityEntryList(packageName).doOnSuccess {
-        for ((index, entry) in it.withIndex()) {
-          if (entry.packageName == packageName && entry.name == activityName) {
-            it[index] = ActivityEntry(
-                name = entry.name, packageName = entry.packageName,
-                lockState = lockState
-            )
-            break
+      infoCache.updateIfAvailable(packageName) { single ->
+        single.doOnSuccess {
+          for ((index, entry) in it.withIndex()) {
+            if (entry.packageName == packageName && entry.name == activityName) {
+              it[index] = ActivityEntry(
+                  name = entry.name, packageName = entry.packageName,
+                  lockState = lockState
+              )
+              break
+            }
           }
         }
-      })
+      }
     }
         .doOnError { infoCache.remove(packageName) }
         .doAfterTerminate { cacheTimeout.queue() }
@@ -93,22 +96,20 @@ internal class LockInfoInteractorCache @Inject internal constructor(
 
   override fun clearCache() {
     infoCache.clearCache()
+    cacheTimeout.reset()
   }
 
   override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
-
-  @CheckResult
-  private fun freshActivityEntryList(packageName: String): Single<MutableList<ActivityEntry>> {
-    return impl.fetchActivityEntryList(true, packageName)
-        .map { it.toMutableList() }
-        .cache()
-  }
 
   override fun fetchActivityEntryList(
       force: Boolean,
       packageName: String
   ): Single<List<ActivityEntry>> {
-    return infoCache.getElseFresh(force, packageName) { freshActivityEntryList(packageName) }
+    return infoCache.getElseFresh(force, packageName) {
+      impl.fetchActivityEntryList(true, packageName)
+          .map { it.toMutableList() }
+          .cache()
+    }
         .map { it.toList() }
         .doOnError { infoCache.remove(packageName) }
         .doAfterTerminate { cacheTimeout.queue() }

@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.list
 
-import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockListUpdater
 import com.pyamsoft.padlock.model.AppEntry
@@ -55,17 +54,15 @@ internal class LockListInteractorCache @Inject internal constructor(
   ): Single<ListDiffResult<AppEntry>> = impl.calculateListDiff(oldList, newList)
       .doOnError { clearCache() }
 
-  @CheckResult
-  private fun freshAppEntryList(): Single<MutableList<AppEntry>> {
-    return impl.fetchAppEntryList(true)
-        .map { it.toMutableList() }
-        .cache()
-  }
-
   override fun fetchAppEntryList(force: Boolean): Single<List<AppEntry>> {
-    return appCache.getElseFresh(force) { freshAppEntryList() }
+    return appCache.getElseFresh(force) {
+      impl.fetchAppEntryList(true)
+          .map { it.toMutableList() }
+          .cache()
+    }
         .map { it.toList() }
         .doOnError { clearCache() }
+        .doAfterSuccess { cacheTimeout.queue() }
   }
 
   override fun modifySingleDatabaseEntry(
@@ -81,19 +78,20 @@ internal class LockListInteractorCache @Inject internal constructor(
         code, system
     )
         .doOnSuccess {
-          appCache.getElseFresh(false) { freshAppEntryList() }
-              .doOnSuccess {
-                for ((index, entry) in it.withIndex()) {
-                  if (entry.packageName == packageName) {
-                    it[index] = AppEntry(
-                        name = entry.name, packageName = entry.packageName,
-                        locked = newLockState == LOCKED, system = entry.system,
-                        whitelisted = entry.whitelisted, hardLocked = entry.hardLocked
-                    )
-                    break
-                  }
+          appCache.updateIfAvailable { single ->
+            single.doOnSuccess {
+              for ((index, entry) in it.withIndex()) {
+                if (entry.packageName == packageName) {
+                  it[index] = AppEntry(
+                      name = entry.name, packageName = entry.packageName,
+                      locked = newLockState == LOCKED, system = entry.system,
+                      whitelisted = entry.whitelisted, hardLocked = entry.hardLocked
+                  )
+                  break
                 }
               }
+            }
+          }
         }
         .doOnError { clearCache() }
   }
@@ -104,24 +102,26 @@ internal class LockListInteractorCache @Inject internal constructor(
       hardLocked: Int
   ): Completable {
     return Completable.fromAction {
-      appCache.getElseFresh(false) { freshAppEntryList() }
-          .doOnSuccess {
-            for ((index, entry) in it.withIndex()) {
-              if (entry.packageName == packageName) {
-                it[index] = AppEntry(
-                    name = entry.name, packageName = entry.packageName,
-                    locked = entry.locked, system = entry.system,
-                    whitelisted = whitelisted, hardLocked = hardLocked
-                )
-                break
-              }
+      appCache.updateIfAvailable { single ->
+        single.doOnSuccess {
+          for ((index, entry) in it.withIndex()) {
+            if (entry.packageName == packageName) {
+              it[index] = AppEntry(
+                  name = entry.name, packageName = entry.packageName,
+                  locked = entry.locked, system = entry.system,
+                  whitelisted = whitelisted, hardLocked = hardLocked
+              )
+              break
             }
           }
+        }
+      }
     }
   }
 
   override fun clearCache() {
     appCache.clearCache()
     purgeCache.clearCache()
+    cacheTimeout.reset()
   }
 }

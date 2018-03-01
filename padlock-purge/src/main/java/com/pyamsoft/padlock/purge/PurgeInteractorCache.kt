@@ -36,29 +36,24 @@ internal class PurgeInteractorCache @Inject internal constructor(
 
   override fun clearCache() {
     cachedList.clearCache()
+    cacheTimeout.reset()
   }
 
   override fun calculateDiff(
       oldList: List<String>,
       newList: List<String>
-  ): Single<ListDiffResult<String>> = impl.calculateDiff(
-      oldList, newList
-  ).doOnError { clearCache() }
+  ): Single<ListDiffResult<String>> = impl.calculateDiff(oldList, newList)
+      .doOnError { clearCache() }
 
   override fun fetchStalePackageNames(forceRefresh: Boolean): Single<List<String>> {
     return cachedList.getElseFresh(forceRefresh) {
       impl.fetchStalePackageNames(true)
           .cache()
     }
-        .doOnError {
-          clearCache()
-          cacheTimeout.reset()
-        }
+        .doOnError { clearCache() }
         .doOnSuccess { cacheTimeout.queue() }
   }
 
   override fun deleteEntry(packageName: String): Single<String> =
-      impl.deleteEntry(packageName)
-          .doAfterTerminate { clearCache() }
-          .doAfterTerminate { cacheTimeout.reset() }
+      impl.deleteEntry(packageName).doAfterTerminate { clearCache() }
 }
