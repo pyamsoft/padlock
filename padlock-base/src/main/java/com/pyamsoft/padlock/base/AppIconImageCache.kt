@@ -17,6 +17,8 @@
 package com.pyamsoft.padlock.base
 
 import android.graphics.drawable.Drawable
+import androidx.util.lruCache
+import com.pyamsoft.pydroid.cache.CacheTimeout
 import com.pyamsoft.pydroid.loader.cache.ImageCache
 import com.pyamsoft.pydroid.loader.cache.ImageCache.ImageCacheKey
 import javax.inject.Inject
@@ -27,18 +29,23 @@ import javax.inject.Singleton
 internal class AppIconImageCache @Inject internal constructor() :
     ImageCache<String, Drawable> {
 
-  private val cache: MutableMap<String, Drawable> = LinkedHashMap()
+  private val cacheTimeout = CacheTimeout(this)
+  private val cache = lruCache<String, Drawable>(8)
 
   override fun clearCache() {
-    cache.clear()
+    cache.evictAll()
+    cacheTimeout.reset()
   }
 
   override fun cache(
       key: ImageCacheKey<String>,
       entry: Drawable
   ) {
-    cache[key.data] = entry
+    cache.put(key.data, entry)
+    cacheTimeout.queue()
   }
 
-  override fun retrieve(key: ImageCacheKey<String>): Drawable? = cache[key.data]
+  override fun retrieve(key: ImageCacheKey<String>): Drawable? = cache[key.data].also {
+    cacheTimeout.queue()
+  }
 }
