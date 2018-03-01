@@ -66,7 +66,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusPurgeComponent(PurgeProvider(object : ListDiffProvider<List<String>> {
+        .plusPurgeComponent(PurgeProvider(object : ListDiffProvider<String> {
           override fun data(): List<String> = Collections.unmodifiableList(adapter.models)
         }))
         .inject(this)

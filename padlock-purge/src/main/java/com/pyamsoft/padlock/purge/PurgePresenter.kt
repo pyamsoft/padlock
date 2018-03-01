@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.purge
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.PurgeAllEvent
 import com.pyamsoft.padlock.model.PurgeEvent
-import com.pyamsoft.padlock.purge.PurgePresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
@@ -34,14 +33,11 @@ class PurgePresenter @Inject internal constructor(
     private val interactor: PurgeInteractor,
     private val purgeBus: EventBus<PurgeEvent>,
     private val purgeAllBus: EventBus<PurgeAllEvent>,
-    private val listDiffProvider: ListDiffProvider<List<String>>,
+    private val listDiffProvider: ListDiffProvider<String>,
     @Named("computation") computationScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler
-) : SchedulerPresenter<View>(
-    computationScheduler,
-    ioScheduler, mainScheduler
-) {
+) : SchedulerPresenter<PurgePresenter.View>(computationScheduler, ioScheduler, mainScheduler) {
 
   override fun onCreate() {
     super.onCreate()

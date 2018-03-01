@@ -49,8 +49,8 @@ import javax.inject.Singleton
 @Component(
     modules = [
       PadLockProvider::class, PadLockModule::class, LockModule::class, PinModule::class,
-      ServiceModule::class, PurgeModule::class, MainModule::class, SettingsModule::class,
-      LockInfoSingletonModule::class, LockStateModule::class, LockListModule::class,
+      ServiceModule::class, PurgeSingletonModule::class, MainModule::class, SettingsModule::class,
+      LockInfoSingletonModule::class, LockStateModule::class, LockListSingletonModule::class,
       LockScreenSingletonModule::class, LockEntrySingletonModule::class, MasterPinModule::class
     ]
 )

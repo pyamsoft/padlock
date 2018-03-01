@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.padlock.api.*
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.optional.Optional.Present
 import com.pyamsoft.pydroid.optional.asOptional
 import io.reactivex.Completable

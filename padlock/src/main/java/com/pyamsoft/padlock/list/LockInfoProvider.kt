@@ -25,7 +25,7 @@ import javax.inject.Named
 @Module
 class LockInfoProvider(
     private val packageName: String,
-    private val listDiffProvider: ListDiffProvider<List<ActivityEntry>>
+    private val listDiffProvider: ListDiffProvider<ActivityEntry>
 ) {
 
   @Provides
@@ -33,7 +33,7 @@ class LockInfoProvider(
   internal fun providePackageName(): String = packageName
 
   @Provides
-  fun provideData(): ListDiffProvider<List<ActivityEntry>> = listDiffProvider
+  fun provideData(): ListDiffProvider<ActivityEntry> = listDiffProvider
 
 }
 

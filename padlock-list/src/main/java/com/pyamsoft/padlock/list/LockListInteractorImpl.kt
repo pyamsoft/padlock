@@ -42,8 +42,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
     private val onboardingPreferences: OnboardingPreferences,
     private val modifyInteractor: LockStateModifyInteractor,
     private val preferences: LockListPreferences
-) :
-    LockListInteractor {
+) : LockListInteractor {
 
   override fun isSystemVisible(): Single<Boolean> = Single.fromCallable { preferences.isSystemVisible() }
 

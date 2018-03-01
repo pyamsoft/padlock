@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.base
 import android.graphics.drawable.Drawable
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.PackageIconManager
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.loader.GenericLoader
 import com.pyamsoft.pydroid.loader.cache.ImageCache
 import io.reactivex.Scheduler

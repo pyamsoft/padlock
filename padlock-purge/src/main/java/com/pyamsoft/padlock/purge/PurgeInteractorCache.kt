@@ -17,10 +17,11 @@
 package com.pyamsoft.padlock.purge
 
 import com.pyamsoft.padlock.api.PurgeInteractor
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
+import com.pyamsoft.pydroid.cache.CacheTimeout
+import com.pyamsoft.pydroid.cache.TimedEntry
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Single
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -28,53 +29,36 @@ import javax.inject.Singleton
 @Singleton
 internal class PurgeInteractorCache @Inject internal constructor(
     @param:Named("interactor_purge") private val impl: PurgeInteractor
-) : PurgeInteractor,
-    Cache {
+) : PurgeInteractor, Cache {
 
-  private var cachedList: Single<MutableList<String>>? = null
-  private var lastAccessListTime: Long = 0L
+  private val cacheTimeout = CacheTimeout(this)
+  private val cachedList = TimedEntry<Single<List<String>>>()
 
   override fun clearCache() {
-    cachedList = null
+    cachedList.clearCache()
   }
 
   override fun calculateDiff(
       oldList: List<String>,
       newList: List<String>
-  ): Single<ListDiffResult<String>> =
-      impl.calculateDiff(oldList, newList).doOnError { clearCache() }
+  ): Single<ListDiffResult<String>> = impl.calculateDiff(
+      oldList, newList
+  ).doOnError { clearCache() }
 
   override fun fetchStalePackageNames(forceRefresh: Boolean): Single<List<String>> {
-    return Single.defer {
-      val cache: Single<MutableList<String>>? = cachedList
-      val list: Single<List<String>>
-      val currentTime = System.currentTimeMillis()
-      if (forceRefresh || cache == null || lastAccessListTime + FIVE_MINUTES_MILLIS < currentTime) {
-        list = impl.fetchStalePackageNames(true)
-            .cache()
-        cachedList = list.map { it.toMutableList() }
-        lastAccessListTime = currentTime
-      } else {
-        list = cache.map { it.toList() }
-      }
-      return@defer list
+    return cachedList.getElseFresh(forceRefresh) {
+      impl.fetchStalePackageNames(true)
+          .cache()
     }
-        .doOnError { clearCache() }
-  }
-
-  override fun deleteEntry(packageName: String): Single<String> {
-    return impl.deleteEntry(packageName)
-        .doOnSuccess {
-          val obj: Single<MutableList<String>>? = cachedList
-          if (obj != null) {
-            cachedList = obj.doOnSuccess { it.remove(packageName) }
-                .doOnError { clearCache() }
-          }
+        .doOnError {
+          clearCache()
+          cacheTimeout.reset()
         }
+        .doOnSuccess { cacheTimeout.queue() }
   }
 
-  companion object {
-
-    private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
-  }
+  override fun deleteEntry(packageName: String): Single<String> =
+      impl.deleteEntry(packageName)
+          .doAfterTerminate { clearCache() }
+          .doAfterTerminate { cacheTimeout.reset() }
 }

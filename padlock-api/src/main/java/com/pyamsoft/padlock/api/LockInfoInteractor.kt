@@ -28,8 +28,8 @@ interface LockInfoInteractor : LockStateModifyInteractor {
 
   @CheckResult
   fun fetchActivityEntryList(
-      packageName: String,
-      force: Boolean
+      force: Boolean,
+      packageName: String
   ): Single<List<ActivityEntry>>
 
   @CheckResult

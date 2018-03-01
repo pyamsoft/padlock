@@ -21,7 +21,7 @@ import android.support.annotation.CheckResult
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.RecyclerView.LayoutManager
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
 
 object ListStateUtil : Cache {
 

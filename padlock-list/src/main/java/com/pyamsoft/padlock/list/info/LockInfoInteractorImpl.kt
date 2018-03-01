@@ -41,8 +41,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     private val preferences: OnboardingPreferences,
     private val updateDb: PadLockDBUpdate,
     private val modifyInteractor: LockStateModifyInteractor
-) :
-    LockInfoInteractor {
+) : LockInfoInteractor {
 
   override fun hasShownOnBoarding(): Single<Boolean> {
     return Single.fromCallable { preferences.isInfoDialogOnBoard() }
@@ -181,8 +180,8 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
   }
 
   override fun fetchActivityEntryList(
-      packageName: String,
-      force: Boolean
+      force: Boolean,
+      packageName: String
   ): Single<List<ActivityEntry>> {
     return fetchData(packageName).flatMapObservable {
       Observable.fromIterable(it)

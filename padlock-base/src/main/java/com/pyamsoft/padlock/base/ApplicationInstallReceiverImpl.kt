@@ -28,7 +28,7 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.PackageLabelManager
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.data.enforceIo
 import com.pyamsoft.pydroid.data.enforceMainThread
 import io.reactivex.Scheduler

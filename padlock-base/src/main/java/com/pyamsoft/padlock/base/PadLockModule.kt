@@ -21,7 +21,7 @@ import com.pyamsoft.padlock.api.*
 import com.pyamsoft.padlock.base.db.PadLockDBImpl
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.loader.cache.ImageCache
 import dagger.Binds
 import dagger.Module

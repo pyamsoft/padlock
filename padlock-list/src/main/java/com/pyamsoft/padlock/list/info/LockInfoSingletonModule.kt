@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.list.info
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockInfoUpdater
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
 import dagger.Binds
 import dagger.Module
 import javax.inject.Named

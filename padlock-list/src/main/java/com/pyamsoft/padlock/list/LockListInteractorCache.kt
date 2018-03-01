@@ -16,16 +16,18 @@
 
 package com.pyamsoft.padlock.list
 
+import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockListUpdater
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.LOCKED
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
+import com.pyamsoft.pydroid.cache.CacheTimeout
+import com.pyamsoft.pydroid.cache.TimedEntry
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
 import io.reactivex.Single
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -33,14 +35,11 @@ import javax.inject.Singleton
 @Singleton
 internal class LockListInteractorCache @Inject internal constructor(
     @param:Named("cache_purge") private val purgeCache: Cache,
-    @param:Named(
-        "interactor_lock_list"
-    ) private val impl: LockListInteractor
-) : LockListInteractor,
-    Cache, LockListUpdater {
+    @param:Named("interactor_lock_list") private val impl: LockListInteractor
+) : LockListInteractor, Cache, LockListUpdater {
 
-  private var appCache: Single<MutableList<AppEntry>>? = null
-  private var lastAccessCache: Long = 0L
+  private val cacheTimeout = CacheTimeout(this)
+  private val appCache = TimedEntry<Single<MutableList<AppEntry>>>()
 
   override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
 
@@ -56,22 +55,16 @@ internal class LockListInteractorCache @Inject internal constructor(
   ): Single<ListDiffResult<AppEntry>> = impl.calculateListDiff(oldList, newList)
       .doOnError { clearCache() }
 
-  override fun fetchAppEntryList(force: Boolean): Single<List<AppEntry>> {
-    return Single.defer {
-      val cache: Single<MutableList<AppEntry>>? = appCache
-      val currentTime = System.currentTimeMillis()
-      val list: Single<List<AppEntry>>
-      if (force || cache == null || lastAccessCache + FIVE_MINUTES_MILLIS < currentTime) {
-        list = impl.fetchAppEntryList(true)
-            .cache()
-        appCache = list.map { it.toMutableList() }
-        lastAccessCache = currentTime
-      } else {
-        list = cache.map { it.toList() }
-      }
+  @CheckResult
+  private fun freshAppEntryList(): Single<MutableList<AppEntry>> {
+    return impl.fetchAppEntryList(true)
+        .map { it.toMutableList() }
+        .cache()
+  }
 
-      return@defer list
-    }
+  override fun fetchAppEntryList(force: Boolean): Single<List<AppEntry>> {
+    return appCache.getElseFresh(force) { freshAppEntryList() }
+        .map { it.toList() }
         .doOnError { clearCache() }
   }
 
@@ -88,21 +81,19 @@ internal class LockListInteractorCache @Inject internal constructor(
         code, system
     )
         .doOnSuccess {
-          val obj: Single<MutableList<AppEntry>>? = appCache
-          if (obj != null) {
-            appCache = obj.doOnSuccess {
-              for ((index, entry) in it.withIndex()) {
-                if (entry.packageName == packageName) {
-                  it[index] = AppEntry(
-                      name = entry.name, packageName = entry.packageName,
-                      locked = newLockState == LOCKED, system = entry.system,
-                      whitelisted = entry.whitelisted, hardLocked = entry.hardLocked
-                  )
-                  break
+          appCache.getElseFresh(false) { freshAppEntryList() }
+              .doOnSuccess {
+                for ((index, entry) in it.withIndex()) {
+                  if (entry.packageName == packageName) {
+                    it[index] = AppEntry(
+                        name = entry.name, packageName = entry.packageName,
+                        locked = newLockState == LOCKED, system = entry.system,
+                        whitelisted = entry.whitelisted, hardLocked = entry.hardLocked
+                    )
+                    break
+                  }
                 }
               }
-            }
-          }
         }
         .doOnError { clearCache() }
   }
@@ -113,31 +104,24 @@ internal class LockListInteractorCache @Inject internal constructor(
       hardLocked: Int
   ): Completable {
     return Completable.fromAction {
-      val obj: Single<MutableList<AppEntry>>? = appCache
-      if (obj != null) {
-        appCache = obj.doOnSuccess {
-          for ((index, entry) in it.withIndex()) {
-            if (entry.packageName == packageName) {
-              it[index] = AppEntry(
-                  name = entry.name, packageName = entry.packageName,
-                  locked = entry.locked, system = entry.system,
-                  whitelisted = whitelisted, hardLocked = hardLocked
-              )
-              break
+      appCache.getElseFresh(false) { freshAppEntryList() }
+          .doOnSuccess {
+            for ((index, entry) in it.withIndex()) {
+              if (entry.packageName == packageName) {
+                it[index] = AppEntry(
+                    name = entry.name, packageName = entry.packageName,
+                    locked = entry.locked, system = entry.system,
+                    whitelisted = whitelisted, hardLocked = hardLocked
+                )
+                break
+              }
             }
           }
-        }
-      }
     }
   }
 
   override fun clearCache() {
-    appCache = null
+    appCache.clearCache()
     purgeCache.clearCache()
-  }
-
-  companion object {
-
-    private val FIVE_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(5L)
   }
 }

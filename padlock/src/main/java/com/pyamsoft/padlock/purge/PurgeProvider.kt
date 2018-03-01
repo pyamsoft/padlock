@@ -21,10 +21,10 @@ import dagger.Module
 import dagger.Provides
 
 @Module
-class PurgeProvider(private val listDiffProvider: ListDiffProvider<List<String>>) {
+class PurgeProvider(private val listDiffProvider: ListDiffProvider<String>) {
 
   @Provides
-  fun provideData(): ListDiffProvider<List<String>> = listDiffProvider
+  fun provideData(): ListDiffProvider<String> = listDiffProvider
 
 }
 

@@ -21,7 +21,7 @@ import com.pyamsoft.padlock.api.LockPassed
 import com.pyamsoft.padlock.lock.passed.LockPassedImpl
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
 import dagger.Binds
 import dagger.Module
 import javax.inject.Named

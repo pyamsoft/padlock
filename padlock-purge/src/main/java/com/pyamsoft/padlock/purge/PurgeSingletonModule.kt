@@ -14,33 +14,34 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.padlock.api.LockListInteractor
-import com.pyamsoft.padlock.api.LockListUpdater
+import com.pyamsoft.padlock.api.PurgeInteractor
+import com.pyamsoft.padlock.model.PurgeAllEvent
+import com.pyamsoft.padlock.model.PurgeEvent
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
 import dagger.Binds
 import dagger.Module
 import javax.inject.Named
 
 @Module
-abstract class LockListModule {
+abstract class PurgeSingletonModule {
 
   @Binds
-  internal abstract fun provideBus(bus: LockListBus): EventBus<LockListEvent>
+  internal abstract fun providePurgeBus(bus: PurgeBus): EventBus<PurgeEvent>
 
   @Binds
-  internal abstract fun provideInteractorCache(impl: LockListInteractorCache): LockListInteractor
+  internal abstract fun providePurgeAllBus(bus: PurgeAllBus): EventBus<PurgeAllEvent>
 
   @Binds
-  @Named("interactor_lock_list")
-  internal abstract fun provideInteractor(impl: LockListInteractorImpl): LockListInteractor
+  internal abstract fun providePurgeInteractorCache(impl: PurgeInteractorCache): PurgeInteractor
 
   @Binds
-  @Named("cache_lock_list")
-  internal abstract fun provideCache(cache: LockListInteractorCache): Cache
+  @Named("interactor_purge")
+  internal abstract fun providePurgeInteractor(impl: PurgeInteractorImpl): PurgeInteractor
 
   @Binds
-  internal abstract fun provideUpdater(cache: LockListInteractorCache): LockListUpdater
+  @Named("cache_purge")
+  internal abstract fun provideCache(impl: PurgeInteractorCache): Cache
 }

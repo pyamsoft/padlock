@@ -76,7 +76,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusLockInfoComponent(
-            LockInfoProvider(appPackageName, object : ListDiffProvider<List<ActivityEntry>> {
+            LockInfoProvider(appPackageName, object : ListDiffProvider<ActivityEntry> {
               override fun data(): List<ActivityEntry> =
                   Collections.unmodifiableList(adapter.models)
             })

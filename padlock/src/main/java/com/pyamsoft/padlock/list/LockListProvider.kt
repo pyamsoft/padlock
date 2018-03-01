@@ -22,10 +22,10 @@ import dagger.Module
 import dagger.Provides
 
 @Module
-class LockListProvider(private val listDiffProvider: ListDiffProvider<List<AppEntry>>) {
+class LockListProvider(private val listDiffProvider: ListDiffProvider<AppEntry>) {
 
   @Provides
-  fun provideData(): ListDiffProvider<List<AppEntry>> = listDiffProvider
+  fun provideData(): ListDiffProvider<AppEntry> = listDiffProvider
 
 }
 

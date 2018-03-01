@@ -23,7 +23,7 @@ import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.model.*
 import com.pyamsoft.padlock.model.LockState.*
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.data.Cache
+import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -44,15 +44,11 @@ class LockListPresenter @Inject internal constructor(
     private val clearPinBus: EventBus<ClearPinEvent>,
     private val createPinBus: EventBus<CreatePinEvent>,
     private val lockInfoChangeBus: EventBus<LockInfoEvent.Callback>,
-    private val listDiffProvider: ListDiffProvider<List<AppEntry>>,
+    private val listDiffProvider: ListDiffProvider<AppEntry>,
     @Named("computation") compScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler
-) : SchedulerPresenter<LockListPresenter.View>(
-    compScheduler,
-    ioScheduler,
-    mainScheduler
-) {
+) : SchedulerPresenter<LockListPresenter.View>(compScheduler, ioScheduler, mainScheduler) {
 
   override fun onCreate() {
     super.onCreate()

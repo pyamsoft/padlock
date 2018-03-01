@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.list.info
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockInfoUpdater
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.*
-import com.pyamsoft.padlock.list.info.LockInfoPresenter.View
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
@@ -36,19 +35,15 @@ import javax.inject.Named
 class LockInfoPresenter @Inject internal constructor(
     private val changeBus: EventBus<LockInfoEvent.Callback>,
     private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
-    private val bus: EventBus<LockInfoEvent>, @param:Named(
-        "package_name"
-    ) private val packageName: String,
+    private val bus: EventBus<LockInfoEvent>,
+    @param:Named("package_name") private val packageName: String,
     private val lockInfoUpdater: LockInfoUpdater,
     private val interactor: LockInfoInteractor,
-    private val listDiffProvider: ListDiffProvider<List<ActivityEntry>>,
+    private val listDiffProvider: ListDiffProvider<ActivityEntry>,
     @Named("computation") compScheduler: Scheduler,
     @Named("io") ioScheduler: Scheduler,
     @Named("main") mainScheduler: Scheduler
-) : SchedulerPresenter<View>(
-    compScheduler,
-    ioScheduler, mainScheduler
-) {
+) : SchedulerPresenter<LockInfoPresenter.View>(compScheduler, ioScheduler, mainScheduler) {
 
   override fun onCreate() {
     super.onCreate()
@@ -153,7 +148,7 @@ class LockInfoPresenter @Inject internal constructor(
 
   fun populateList(forceRefresh: Boolean) {
     dispose {
-      interactor.fetchActivityEntryList(packageName, forceRefresh)
+      interactor.fetchActivityEntryList(forceRefresh, packageName)
           .flatMap { interactor.calculateListDiff(packageName, listDiffProvider.data(), it) }
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)

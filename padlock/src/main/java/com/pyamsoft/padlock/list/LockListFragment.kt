@@ -66,7 +66,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusLockListComponent(LockListProvider(object : ListDiffProvider<List<AppEntry>> {
+        .plusLockListComponent(LockListProvider(object : ListDiffProvider<AppEntry> {
           override fun data(): List<AppEntry> = Collections.unmodifiableList(adapter.models)
         }))
         .inject(this)
