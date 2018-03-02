@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.api.LockInfoUpdater
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.cache.Cache
-import com.pyamsoft.pydroid.cache.CacheTimeout
 import com.pyamsoft.pydroid.cache.TimedMap
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
@@ -35,7 +34,6 @@ internal class LockInfoInteractorCache @Inject internal constructor(
     @param:Named("interactor_lock_info") private val impl: LockInfoInteractor
 ) : LockInfoInteractor, Cache, LockInfoUpdater {
 
-  private val cacheTimeout = CacheTimeout(this)
   private val infoCache = TimedMap<String, Single<MutableList<ActivityEntry>>>()
 
   override fun modifySingleDatabaseEntry(
@@ -67,7 +65,6 @@ internal class LockInfoInteractorCache @Inject internal constructor(
           }
         }
         .doOnError { infoCache.remove(packageName) }
-        .doAfterTerminate { cacheTimeout.queue() }
   }
 
   override fun update(
@@ -91,12 +88,10 @@ internal class LockInfoInteractorCache @Inject internal constructor(
       }
     }
         .doOnError { infoCache.remove(packageName) }
-        .doAfterTerminate { cacheTimeout.queue() }
   }
 
   override fun clearCache() {
     infoCache.clearCache()
-    cacheTimeout.reset()
   }
 
   override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
@@ -112,7 +107,6 @@ internal class LockInfoInteractorCache @Inject internal constructor(
     }
         .map { it.toList() }
         .doOnError { infoCache.remove(packageName) }
-        .doAfterTerminate { cacheTimeout.queue() }
   }
 
   override fun calculateListDiff(
@@ -122,6 +116,5 @@ internal class LockInfoInteractorCache @Inject internal constructor(
   ): Single<ListDiffResult<ActivityEntry>> =
       impl.calculateListDiff(packageName, oldList, newList)
           .doOnError { infoCache.remove(packageName) }
-          .doAfterTerminate { cacheTimeout.queue() }
 
 }

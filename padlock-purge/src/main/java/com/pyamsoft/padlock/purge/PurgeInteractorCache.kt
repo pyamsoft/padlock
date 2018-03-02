@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.purge
 
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.pydroid.cache.Cache
-import com.pyamsoft.pydroid.cache.CacheTimeout
 import com.pyamsoft.pydroid.cache.TimedEntry
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Single
@@ -31,12 +30,10 @@ internal class PurgeInteractorCache @Inject internal constructor(
     @param:Named("interactor_purge") private val impl: PurgeInteractor
 ) : PurgeInteractor, Cache {
 
-  private val cacheTimeout = CacheTimeout(this)
   private val cachedList = TimedEntry<Single<List<String>>>()
 
   override fun clearCache() {
     cachedList.clearCache()
-    cacheTimeout.reset()
   }
 
   override fun calculateDiff(
@@ -51,7 +48,6 @@ internal class PurgeInteractorCache @Inject internal constructor(
           .cache()
     }
         .doOnError { clearCache() }
-        .doOnSuccess { cacheTimeout.queue() }
   }
 
   override fun deleteEntry(packageName: String): Single<String> =

@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.pydroid.cache.Cache
-import com.pyamsoft.pydroid.cache.CacheTimeout
 import com.pyamsoft.pydroid.cache.TimedEntry
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
@@ -37,7 +36,6 @@ internal class LockListInteractorCache @Inject internal constructor(
     @param:Named("interactor_lock_list") private val impl: LockListInteractor
 ) : LockListInteractor, Cache, LockListUpdater {
 
-  private val cacheTimeout = CacheTimeout(this)
   private val appCache = TimedEntry<Single<MutableList<AppEntry>>>()
 
   override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
@@ -62,7 +60,6 @@ internal class LockListInteractorCache @Inject internal constructor(
     }
         .map { it.toList() }
         .doOnError { clearCache() }
-        .doAfterSuccess { cacheTimeout.queue() }
   }
 
   override fun modifySingleDatabaseEntry(
@@ -122,6 +119,5 @@ internal class LockListInteractorCache @Inject internal constructor(
   override fun clearCache() {
     appCache.clearCache()
     purgeCache.clearCache()
-    cacheTimeout.reset()
   }
 }
