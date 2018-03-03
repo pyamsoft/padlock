@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
+import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockListUpdater
 import com.pyamsoft.padlock.model.AppEntry
@@ -62,6 +63,26 @@ internal class LockListInteractorCache @Inject internal constructor(
         .doOnError { clearCache() }
   }
 
+  @CheckResult
+  private fun copyEntryWithState(
+      entry: AppEntry,
+      locked: Boolean = entry.locked,
+      whitelisted: Int = entry.whitelisted,
+      hardLocked: Int = entry.hardLocked
+  ): AppEntry = entry.copy(locked = locked, whitelisted = whitelisted, hardLocked = hardLocked)
+
+  private fun MutableList<AppEntry>.updateAppEntry(
+      packageName: String,
+      func: (AppEntry) -> AppEntry
+  ) {
+    for ((index, entry) in this.withIndex()) {
+      if (entry.packageName == packageName) {
+        this[index] = func(entry)
+        break
+      }
+    }
+  }
+
   override fun modifySingleDatabaseEntry(
       oldLockState: LockState,
       newLockState: LockState,
@@ -77,16 +98,7 @@ internal class LockListInteractorCache @Inject internal constructor(
         .doOnSuccess {
           appCache.updateIfAvailable { single ->
             single.doOnSuccess {
-              for ((index, entry) in it.withIndex()) {
-                if (entry.packageName == packageName) {
-                  it[index] = AppEntry(
-                      name = entry.name, packageName = entry.packageName,
-                      locked = newLockState == LOCKED, system = entry.system,
-                      whitelisted = entry.whitelisted, hardLocked = entry.hardLocked
-                  )
-                  break
-                }
-              }
+              it.updateAppEntry(packageName) { copyEntryWithState(it, newLockState == LOCKED) }
             }
           }
         }
@@ -101,19 +113,13 @@ internal class LockListInteractorCache @Inject internal constructor(
     return Completable.fromAction {
       appCache.updateIfAvailable { single ->
         single.doOnSuccess {
-          for ((index, entry) in it.withIndex()) {
-            if (entry.packageName == packageName) {
-              it[index] = AppEntry(
-                  name = entry.name, packageName = entry.packageName,
-                  locked = entry.locked, system = entry.system,
-                  whitelisted = whitelisted, hardLocked = hardLocked
-              )
-              break
-            }
+          it.updateAppEntry(packageName) {
+            copyEntryWithState(it, whitelisted = whitelisted, hardLocked = hardLocked)
           }
         }
       }
     }
+        .doOnError { clearCache() }
   }
 
   override fun clearCache() {

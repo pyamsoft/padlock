@@ -50,34 +50,71 @@ internal class LockListInteractorImpl @Inject internal constructor(
     preferences.setSystemVisible(visible)
   }
 
+  @CheckResult
+  private fun appEntryListZipper(): BiFunction<List<String>, List<PadLockEntryModel.AllEntriesModel>, List<LockTuple>> =
+      BiFunction { packageNames, entries -> compileLockedTupleList(packageNames, entries) }
+
+  @CheckResult
+  private fun createNewLockTuple(
+      packageName: String,
+      copyEntries: MutableList<PadLockEntryModel.AllEntriesModel>,
+      removeEntries: MutableSet<PadLockEntryModel.AllEntriesModel>
+  ): LockTuple {
+
+    // We clear out the removal list so it can be reused in a clean state
+    removeEntries.clear()
+
+    var locked = false
+    var whitelist = 0
+    var hardLocked = 0
+    for (entry in copyEntries) {
+      if (entry.packageName() == packageName) {
+        when {
+          entry.activityName() == PadLockEntry.PACKAGE_ACTIVITY_NAME -> locked = true
+          entry.whitelist() -> ++whitelist
+          else -> ++hardLocked
+        }
+
+        // Optimization for speed, trade off size
+        // Now that we have found (an consumed) this entry, it will never be used again
+        // we can remove it from the set for a smaller iteration loop.
+        removeEntries.add(entry)
+      }
+
+      // Once the packageName is greater than the one we are looking for, we have passed all
+      // possible entries for this package and can stop looping. We will never find another hit.
+      if (entry.packageName() > packageName) {
+        break
+      }
+    }
+
+    // Optimization for speed, trade off size
+    // These entries have been used and will never be used again, we can remove them for a smaller
+    // iteration loop
+    copyEntries.removeAll(removeEntries)
+
+    // We clear out the removal list so it can be reused in a clean state
+    removeEntries.clear()
+
+    return LockTuple(packageName, locked, whitelist, hardLocked)
+  }
+
+  @CheckResult
+  private fun compileLockedTupleList(
+      packageNames: List<String>,
+      entries: List<PadLockEntryModel.AllEntriesModel>
+  ): List<LockTuple> {
+    val copyEntries = ArrayList<PadLockEntryModel.AllEntriesModel>(entries)
+    copyEntries.sortWith(Comparator { o1, o2 ->
+      o1.packageName()
+          .compareTo(o2.packageName(), ignoreCase = true)
+    })
+    val removeEntries = LinkedHashSet<PadLockEntryModel.AllEntriesModel>()
+    return packageNames.map { createNewLockTuple(it, copyEntries, removeEntries) }
+  }
+
   override fun fetchAppEntryList(force: Boolean): Single<List<AppEntry>> {
-    return getValidPackageNames().zipWith(getAppEntryList(),
-        BiFunction<List<String>, List<PadLockEntryModel.AllEntriesModel>, List<LockTuple>> { packageNames, padLockEntries ->
-          val lockTuples: MutableList<LockTuple> = ArrayList()
-          val copyEntries: MutableList<PadLockEntryModel.AllEntriesModel> = ArrayList(
-              padLockEntries
-          )
-          val copyNames: List<String> = ArrayList(packageNames)
-          for (packageName in copyNames) {
-            var locked = false
-            var whitelist = 0
-            var hardLocked = 0
-            val removeEntries: MutableSet<PadLockEntryModel.AllEntriesModel> = LinkedHashSet()
-            for (entry in copyEntries) {
-              if (entry.packageName() == packageName) {
-                removeEntries.add(entry)
-                when {
-                  entry.activityName() == PadLockEntry.PACKAGE_ACTIVITY_NAME -> locked = true
-                  entry.whitelist() -> ++whitelist
-                  else -> ++hardLocked
-                }
-              }
-            }
-            copyEntries.removeAll(removeEntries)
-            lockTuples.add(LockTuple(packageName, locked, whitelist, hardLocked))
-          }
-          return@BiFunction lockTuples
-        })
+    return getValidPackageNames().zipWith(getAllEntries(), appEntryListZipper())
         .flatMapObservable { Observable.fromIterable(it) }
         .flatMapSingle { createFromPackageInfo(it) }
         .toSortedList { o1, o2 ->
@@ -174,7 +211,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getAppEntryList(): Single<List<PadLockEntryModel.AllEntriesModel>> = queryDb.queryAll()
+  private fun getAllEntries(): Single<List<PadLockEntryModel.AllEntriesModel>> = queryDb.queryAll()
 
   override fun hasShownOnBoarding(): Single<Boolean> =
       Single.fromCallable { onboardingPreferences.isListOnBoard() }

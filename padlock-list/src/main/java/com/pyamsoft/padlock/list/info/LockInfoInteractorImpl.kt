@@ -59,9 +59,10 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun findMatchingEntry(
-      lockEntries: MutableList<PadLockEntryModel.WithPackageNameModel>,
+      lockEntries: List<PadLockEntryModel.WithPackageNameModel>,
       activityName: String
   ): PadLockEntryModel.WithPackageNameModel? {
+    // Short circuit if empty
     if (lockEntries.isEmpty()) {
       return null
     }
@@ -104,23 +105,22 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         break
       }
     }
-
-    if (foundEntry != null) {
-      lockEntries.remove(foundEntry)
-    }
-
     return foundEntry
   }
 
   @CheckResult
   private fun findActivityEntry(
       packageName: String,
-      activityNames: List<String>,
-      padLockEntries: MutableList<PadLockEntryModel.WithPackageNameModel>,
-      index: Int
+      activityName: String,
+      padLockEntries: MutableList<PadLockEntryModel.WithPackageNameModel>
   ): ActivityEntry {
-    val activityName = activityNames[index]
     val foundEntry = findMatchingEntry(padLockEntries, activityName)
+
+    // Optimize for speed, trade off size
+    if (foundEntry != null) {
+      padLockEntries.remove(foundEntry)
+    }
+
     return createActivityEntry(packageName, activityName, foundEntry)
   }
 
@@ -130,93 +130,115 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
       name: String,
       foundEntry: PadLockEntryModel.WithPackageNameModel?
   ): ActivityEntry {
-    val state: LockState = if (foundEntry == null) {
-      LockState.DEFAULT
+    val state: LockState
+    if (foundEntry == null) {
+      state = LockState.DEFAULT
     } else {
       if (foundEntry.whitelist()) {
-        LockState.WHITELISTED
+        state = LockState.WHITELISTED
       } else {
-        LockState.LOCKED
+        state = LockState.LOCKED
       }
     }
-    return ActivityEntry(name = name, packageName = packageName, lockState = state)
+    return ActivityEntry(name, packageName, lockState = state)
   }
 
   @CheckResult
-  private fun fetchData(fetchName: String): Single<MutableList<ActivityEntry>> {
-    return getPackageActivities(fetchName).zipWith(getLockedActivityEntries(fetchName),
-        BiFunction { activities, entries ->
-          // Sort here to avoid stream break
-          // If the list is empty, the old flatMap call can hang, causing a list loading error
-          // Sort here where we are guaranteed a list of some kind
-          val sortedList: MutableList<PadLockEntryModel.WithPackageNameModel> = ArrayList(entries)
-          sortedList.sortWith(
-              Comparator { o1, o2 ->
-                o1.activityName()
-                    .compareTo(o2.activityName(), ignoreCase = true)
-              })
-
-          val activityEntries: MutableList<ActivityEntry> = ArrayList()
-
-          var start = 0
-          var end = activities.size - 1
-
-          while (start <= end) {
-            // Find entry to compare against
-            val entry1 = findActivityEntry(fetchName, activities, sortedList, start)
-            activityEntries.add(entry1)
-
-            if (start != end) {
-              val entry2 = findActivityEntry(fetchName, activities, sortedList, end)
-              activityEntries.add(entry2)
-            }
-
-            ++start
-            --end
-          }
-
-          return@BiFunction activityEntries
+  private fun createSortedActivityEntryList(
+      fetchName: String,
+      names: List<String>,
+      entries: List<PadLockEntryModel.WithPackageNameModel>
+  ): List<ActivityEntry> {
+    // Sort here to avoid stream break
+    // If the list is empty, the old flatMap call can hang, causing a list loading error
+    // Sort here where we are guaranteed a list of some kind
+    val sortedList: MutableList<PadLockEntryModel.WithPackageNameModel> = ArrayList(entries)
+    sortedList.sortWith(
+        Comparator { o1, o2 ->
+          o1.activityName()
+              .compareTo(o2.activityName(), ignoreCase = true)
         })
+
+    val activityEntries: MutableList<ActivityEntry> = ArrayList()
+
+    var start = 0
+    var end = names.size - 1
+
+    while (start <= end) {
+      // Find entry to compare against
+      val entry1 = findActivityEntry(fetchName, names[start], sortedList)
+      activityEntries.add(entry1)
+
+      if (start != end) {
+        val entry2 = findActivityEntry(fetchName, names[end], sortedList)
+        activityEntries.add(entry2)
+      }
+
+      ++start
+      --end
+    }
+
+    return activityEntries
+  }
+
+  @CheckResult
+  private fun activityListZipper(
+      fetchName: String
+  ): BiFunction<List<String>, List<PadLockEntryModel.WithPackageNameModel>, List<ActivityEntry>> =
+      BiFunction { names, entries -> createSortedActivityEntryList(fetchName, names, entries) }
+
+  @CheckResult
+  private fun fetchData(fetchName: String): Single<List<ActivityEntry>> {
+    return getPackageActivities(fetchName).zipWith(
+        getLockedActivityEntries(fetchName), activityListZipper(fetchName)
+    )
+  }
+
+  @CheckResult
+  private fun sortWithPackageNameOnTop(
+      packageName: String,
+      o1: ActivityEntry,
+      o2: ActivityEntry
+  ): Int {
+    // Package names are all the same
+    val entry1Name: String = o1.name
+    val entry2Name: String = o2.name
+
+    // Calculate if the starting X characters in the activity name is the exact package name
+    var activity1Package = false
+    if (entry1Name.startsWith(packageName)) {
+      val strippedPackageName = entry1Name.replace(packageName, "")
+      if (strippedPackageName[0] == '.') {
+        activity1Package = true
+      }
+    }
+
+    var activity2Package = false
+    if (entry2Name.startsWith(packageName)) {
+      val strippedPackageName = entry2Name.replace(packageName, "")
+      if (strippedPackageName[0] == '.') {
+        activity2Package = true
+      }
+    }
+
+    if (activity1Package && activity2Package) {
+      return entry1Name.compareTo(entry2Name, ignoreCase = true)
+    } else if (activity1Package) {
+      return -1
+    } else if (activity2Package) {
+      return 1
+    } else {
+      return entry1Name.compareTo(entry2Name, ignoreCase = true)
+    }
   }
 
   override fun fetchActivityEntryList(
       force: Boolean,
       packageName: String
   ): Single<List<ActivityEntry>> {
-    return fetchData(packageName).flatMapObservable {
-      Observable.fromIterable(it)
-    }
-        .toSortedList { activityEntry, activityEntry2 ->
-          // Package names are all the same
-          val entry1Name: String = activityEntry.name
-          val entry2Name: String = activityEntry2.name
-
-          // Calculate if the starting X characters in the activity name is the exact package name
-          var activity1Package = false
-          if (entry1Name.startsWith(packageName)) {
-            val strippedPackageName = entry1Name.replace(packageName, "")
-            if (strippedPackageName[0] == '.') {
-              activity1Package = true
-            }
-          }
-
-          var activity2Package = false
-          if (entry2Name.startsWith(packageName)) {
-            val strippedPackageName = entry2Name.replace(packageName, "")
-            if (strippedPackageName[0] == '.') {
-              activity2Package = true
-            }
-          }
-          if (activity1Package && activity2Package) {
-            return@toSortedList entry1Name.compareTo(entry2Name, ignoreCase = true)
-          } else if (activity1Package) {
-            return@toSortedList -1
-          } else if (activity2Package) {
-            return@toSortedList 1
-          } else {
-            return@toSortedList entry1Name.compareTo(entry2Name, ignoreCase = true)
-          }
-        }
+    return fetchData(packageName)
+        .flatMapObservable { Observable.fromIterable(it) }
+        .toSortedList { o1, o2 -> sortWithPackageNameOnTop(packageName, o1, o2) }
   }
 
   override fun calculateListDiff(
@@ -279,16 +301,11 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         .flatMap {
           if (it === LockState.NONE) {
             Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated")
-
-            // Assigned to resultState
             return@flatMap updateExistingEntry(
-                packageName, activityName,
-                newLockState === WHITELISTED
+                packageName, activityName, newLockState === WHITELISTED
             )
           } else {
             Timber.d("Entry handled, just pass through")
-
-            // Assigned to resultState
             return@flatMap Single.just(it)
           }
         }

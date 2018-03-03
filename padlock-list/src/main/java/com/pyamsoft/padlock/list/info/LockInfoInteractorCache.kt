@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list.info
 
+import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockInfoUpdater
 import com.pyamsoft.padlock.model.ActivityEntry
@@ -36,6 +37,25 @@ internal class LockInfoInteractorCache @Inject internal constructor(
 
   private val infoCache = TimedMap<String, Single<MutableList<ActivityEntry>>>()
 
+  @CheckResult
+  private fun copyEntryWithState(
+      entry: ActivityEntry,
+      lockState: LockState
+  ): ActivityEntry = entry.copy(lockState = lockState)
+
+  private fun MutableList<ActivityEntry>.updateActivityEntry(
+      name: String,
+      packageName: String,
+      newLockState: LockState
+  ) {
+    for ((index, entry) in this.withIndex()) {
+      if (entry.packageName == packageName && entry.name == name) {
+        this[index] = copyEntryWithState(entry, newLockState)
+        break
+      }
+    }
+  }
+
   override fun modifySingleDatabaseEntry(
       oldLockState: LockState,
       newLockState: LockState,
@@ -51,16 +71,7 @@ internal class LockInfoInteractorCache @Inject internal constructor(
         .doOnSuccess {
           infoCache.updateIfAvailable(packageName) { single ->
             single.doOnSuccess {
-              for ((index, entry) in it.withIndex()) {
-                if (entry.packageName == packageName && entry.name == activityName) {
-                  it[index] = ActivityEntry(
-                      name = entry.name,
-                      packageName = entry.packageName,
-                      lockState = newLockState
-                  )
-                  break
-                }
-              }
+              it.updateActivityEntry(activityName, packageName, newLockState)
             }
           }
         }
@@ -75,15 +86,7 @@ internal class LockInfoInteractorCache @Inject internal constructor(
     return Completable.fromAction {
       infoCache.updateIfAvailable(packageName) { single ->
         single.doOnSuccess {
-          for ((index, entry) in it.withIndex()) {
-            if (entry.packageName == packageName && entry.name == activityName) {
-              it[index] = ActivityEntry(
-                  name = entry.name, packageName = entry.packageName,
-                  lockState = lockState
-              )
-              break
-            }
-          }
+          it.updateActivityEntry(activityName, packageName, lockState)
         }
       }
     }
