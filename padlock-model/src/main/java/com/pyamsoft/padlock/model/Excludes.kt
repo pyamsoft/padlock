@@ -31,6 +31,9 @@ object Excludes {
       // Lock Screen, can't lock itself
       "com.pyamsoft.padlock.lock.lockscreenactivity",
 
+      // Android USB mode chooser dialog (Transparent Activity)
+      "com.android.settings.deviceinfo.usbmodechooseractivity",
+
       // Leak Canary
       "com.squareup.leakcanary.internal.displayleakactivity",
       "com.squareup.leakcanary.internal.requeststoragepermissionactivity"
