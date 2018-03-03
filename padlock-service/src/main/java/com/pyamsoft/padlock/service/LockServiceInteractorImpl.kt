@@ -47,8 +47,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     private val padLockDBQuery: PadLockDBQuery,
     @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
     private val stateInteractor: LockServiceStateInteractor
-) :
-    LockServiceInteractor {
+) : LockServiceInteractor {
 
   private var activePackageName = ""
   private var activeClassName = ""
@@ -182,9 +181,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
       it.filter { it }
           .compose(prepareLockScreen(packageName, activityName))
           .compose(filterOutInvalidEntries())
-          .toSingle(
-              PadLockEntry.EMPTY
-          )
+          .toSingle(PadLockEntry.EMPTY)
     }
   }
 
@@ -215,25 +212,24 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
       className: String
   ): MaybeTransformer<Boolean, Boolean> {
     return MaybeTransformer {
-      it.isEmpty.filter {
+      it.isEmpty.doOnSuccess {
         Timber.d("Filter if empty: $it")
-        return@filter !it
       }
+          .filter { !it }
           .flatMap {
             Timber.d("Check event from activity: %s %s", packageName, className)
             return@flatMap packageActivityManager.isValidActivity(
                 packageName,
                 className
             )
-                .filter {
+                .doOnSuccess {
                   if (!it) {
                     Timber.w("Event not caused by activity.")
                     Timber.w("P: %s, C: %s", packageName, className)
                     Timber.w("Ignore")
                   }
-
-                  return@filter it
                 }
+                .filter { it }
           }
     }
   }
@@ -261,12 +257,9 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
       className: String,
       forcedRecheck: RecheckStatus
   ): Single<PadLockEntryModel> {
-    val windowEventObservable: Single<Boolean> = isServiceEnabled().compose(
-        isEventFromActivity(packageName, className)
-    )
-        .compose(
-            isEventRestricted(packageName, className)
-        )
+    val windowEventObservable: Single<Boolean> = isServiceEnabled()
+        .compose(isEventFromActivity(packageName, className))
+        .compose(isEventRestricted(packageName, className))
         .doOnSuccess {
           activePackageName = packageName
           activeClassName = className
@@ -274,16 +267,16 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
         .toSingle(false)
 
     return windowEventObservable.map {
-      if (!it) {
+      if (!it && forcedRecheck !== FORCE) {
         Timber.e("Failed to pass window checking")
         return@map false
-      }
+      } else {
+        if (forcedRecheck === FORCE) {
+          Timber.d("Pass filter via forced recheck")
+        }
 
-      if (forcedRecheck === FORCE) {
-        Timber.d("Pass filter via forced recheck")
+        return@map true
       }
-
-      return@map true
     }
         .compose(getEntry(packageName, className))
         .doOnSuccess {
