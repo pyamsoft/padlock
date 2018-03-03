@@ -29,7 +29,6 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import timber.log.Timber
-import java.util.HashSet
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -98,14 +97,14 @@ internal class PurgeInteractorImpl @Inject internal constructor(
   private fun fetchFreshData(): Single<List<String>> {
     return getAllEntries().zipWith(getActiveApplications(),
         BiFunction { allEntries, packageNames ->
-          val mutableAllEntries = allEntries.toMutableList()
-          if (mutableAllEntries.isEmpty()) {
+          if (allEntries.isEmpty()) {
             Timber.e("Database does not have any AppEntry items")
             return@BiFunction emptyList()
           }
 
           // Loop through all the package names that we are aware of on the device
-          val foundLocations: MutableSet<PadLockEntryModel.AllEntriesModel> = HashSet()
+          val mutableAllEntries = allEntries.toMutableList()
+          val foundLocations = LinkedHashSet<PadLockEntryModel.AllEntriesModel>()
           for (packageName in packageNames) {
             foundLocations.clear()
 
@@ -120,7 +119,7 @@ internal class PurgeInteractorImpl @Inject internal constructor(
           }
 
           // The remaining entries in the database are stale
-          val stalePackageNames: MutableList<String> = ArrayList()
+          val stalePackageNames = ArrayList<String>()
           mutableAllEntries.mapTo(stalePackageNames) { it.packageName() }
           return@BiFunction stalePackageNames
         })
