@@ -180,9 +180,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
   }
 
   private fun populateIgnoreTimes() {
-    val stringIgnoreTimes = applicationContext.resources.getStringArray(
-        R.array.ignore_time_entries
-    )
+    val stringIgnoreTimes = resources.getStringArray(R.array.ignore_time_entries)
     ignoreTimes = ArrayList(stringIgnoreTimes.size)
     for (i in stringIgnoreTimes.indices) {
       ignoreTimes.add(stringIgnoreTimes[i].toLong())

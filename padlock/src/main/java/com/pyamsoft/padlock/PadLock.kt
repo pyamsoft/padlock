@@ -19,12 +19,10 @@ package com.pyamsoft.padlock
 import android.app.Application
 import android.app.Service
 import android.support.annotation.CheckResult
+import android.support.v4.app.Fragment
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
-import com.pyamsoft.padlock.settings.PadLockPreferenceFragment
-import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.PYDroidModule
 import com.pyamsoft.pydroid.base.PYDroidModuleImpl
 import com.pyamsoft.pydroid.base.about.Licenses
@@ -106,22 +104,8 @@ class PadLock : Application() {
 
     @JvmStatic
     @CheckResult
-    fun getRefWatcher(fragment: CanaryFragment): RefWatcher = getRefWatcherInternal(
+    fun getRefWatcher(fragment: Fragment): RefWatcher = getRefWatcherInternal(
         fragment.requireActivity().application
-    )
-
-    @CheckResult
-    @JvmStatic
-    fun getRefWatcher(fragment: CanaryDialog): RefWatcher = getRefWatcherInternal(
-        fragment.requireActivity().application
-    )
-
-    @JvmStatic
-    @CheckResult
-    fun getRefWatcher(
-        preferenceFragment: PadLockPreferenceFragment
-    ): RefWatcher = getRefWatcherInternal(
-        preferenceFragment.requireActivity().application
     )
 
     @JvmStatic
