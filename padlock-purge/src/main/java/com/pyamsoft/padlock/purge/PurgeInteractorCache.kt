@@ -27,7 +27,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PurgeInteractorCache @Inject internal constructor(
-    @param:Named("interactor_purge") private val impl: PurgeInteractor
+  @param:Named("interactor_purge") private val impl: PurgeInteractor
 ) : PurgeInteractor, Cache {
 
   private val cachedList = TimedEntry<Single<List<String>>>()
@@ -37,8 +37,8 @@ internal class PurgeInteractorCache @Inject internal constructor(
   }
 
   override fun calculateDiff(
-      oldList: List<String>,
-      newList: List<String>
+    oldList: List<String>,
+    newList: List<String>
   ): Single<ListDiffResult<String>> = impl.calculateDiff(oldList, newList)
       .doOnError { clearCache() }
 
@@ -51,5 +51,5 @@ internal class PurgeInteractorCache @Inject internal constructor(
   }
 
   override fun deleteEntry(packageName: String): Single<String> =
-      impl.deleteEntry(packageName).doAfterTerminate { clearCache() }
+    impl.deleteEntry(packageName).doAfterTerminate { clearCache() }
 }

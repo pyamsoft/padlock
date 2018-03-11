@@ -23,8 +23,8 @@ interface UsageEventProvider {
 
   @CheckResult
   fun queryEvents(
-      begin: Long,
-      end: Long
+    begin: Long,
+    end: Long
   ): EventQueryResult
 
   interface EventQueryResult {

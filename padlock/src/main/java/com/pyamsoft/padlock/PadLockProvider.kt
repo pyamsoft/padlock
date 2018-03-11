@@ -32,10 +32,10 @@ import javax.inject.Named
 
 @Module
 class PadLockProvider(
-    private val pyDroidModule: ApplicationModule,
-    private val loaderModule: LoaderModule,
-    private val mainActivityClass: Class<out Activity>,
-    private val recheckServiceClass: Class<out IntentService>
+  private val pyDroidModule: ApplicationModule,
+  private val loaderModule: LoaderModule,
+  private val mainActivityClass: Class<out Activity>,
+  private val recheckServiceClass: Class<out IntentService>
 ) : ApplicationModule, LoaderModule {
 
   @Provides
@@ -46,7 +46,8 @@ class PadLockProvider(
 
   @Provides
   @Named("computation")
-  override fun provideComputationScheduler(): Scheduler = pyDroidModule.provideComputationScheduler()
+  override fun provideComputationScheduler(): Scheduler =
+    pyDroidModule.provideComputationScheduler()
 
   @Provides
   @Named("io")

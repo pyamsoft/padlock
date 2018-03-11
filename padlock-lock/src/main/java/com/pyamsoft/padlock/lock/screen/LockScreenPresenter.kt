@@ -27,18 +27,18 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockScreenPresenter @Inject internal constructor(
-    private val foregroundEventBus: EventBus<ForegroundEvent>, @param:Named(
-        "package_name"
-    ) private val packageName: String,
-    @param:Named("activity_name") private val activityName: String,
-    @param:Named("real_name") private val realName: String,
-    private val bus: EventBus<CloseOldEvent>,
-    private val interactor: LockScreenInteractor, @Named(
-        "computation"
-    ) computationScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler, @Named(
-        "main"
-    ) mainScheduler: Scheduler
+  private val foregroundEventBus: EventBus<ForegroundEvent>, @param:Named(
+      "package_name"
+  ) private val packageName: String,
+  @param:Named("activity_name") private val activityName: String,
+  @param:Named("real_name") private val realName: String,
+  private val bus: EventBus<CloseOldEvent>,
+  private val interactor: LockScreenInteractor, @Named(
+      "computation"
+  ) computationScheduler: Scheduler,
+  @Named("io") ioScheduler: Scheduler, @Named(
+      "main"
+  ) mainScheduler: Scheduler
 ) : SchedulerPresenter<View>(
     computationScheduler, ioScheduler, mainScheduler
 ) {

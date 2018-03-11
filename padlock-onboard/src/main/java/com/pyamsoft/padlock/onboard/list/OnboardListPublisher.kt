@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.onboard.list
 import javax.inject.Inject
 
 class OnboardListPublisher @Inject internal constructor(
-    private val interactor: OnboardListInteractor
+  private val interactor: OnboardListInteractor
 ) {
 
   fun finishOnboarding() {

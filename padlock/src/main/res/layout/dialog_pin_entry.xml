@@ -17,11 +17,13 @@
   -->
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
 
   <android.support.constraint.ConstraintLayout
       android:layout_width="match_parent"
-      android:layout_height="match_parent">
+      android:layout_height="match_parent"
+      >
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/pin_entry_toolbar"
@@ -33,7 +35,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        />
 
 
     <ImageView
@@ -46,7 +49,8 @@
         android:contentDescription="@string/blank"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pin_entry_toolbar"/>
+        app:layout_constraintTop_toBottomOf="@+id/pin_entry_toolbar"
+        />
 
     <FrameLayout
         android:id="@+id/pin_entry_dialog_container"
@@ -58,7 +62,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="wrap"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pin_image"/>
+        app:layout_constraintTop_toBottomOf="@+id/pin_image"
+        />
 
   </android.support.constraint.ConstraintLayout>
 

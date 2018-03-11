@@ -15,12 +15,14 @@
   -->
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
 
   <android.support.constraint.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:padding="16dp">
+      android:padding="16dp"
+      >
 
     <ImageView
         android:id="@+id/stat_image"
@@ -29,7 +31,8 @@
         android:contentDescription="@string/blank"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
     <TextView
         android:id="@+id/stat_display_name"
@@ -40,7 +43,8 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stat_image"/>
+        app:layout_constraintTop_toBottomOf="@+id/stat_image"
+        />
 
 
     <TextView
@@ -51,7 +55,8 @@
         android:text="@string/stat_real_name"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stat_display_name"/>
+        app:layout_constraintTop_toBottomOf="@+id/stat_display_name"
+        />
 
     <TextView
         android:id="@+id/stat_real_name"
@@ -61,7 +66,8 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stat_title"/>
+        app:layout_constraintTop_toBottomOf="@+id/stat_title"
+        />
 
 
     <TextView
@@ -72,7 +78,8 @@
         android:text="@string/stat_package_name"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stat_real_name"/>
+        app:layout_constraintTop_toBottomOf="@+id/stat_real_name"
+        />
 
     <TextView
         android:id="@+id/stat_package_name"
@@ -82,7 +89,8 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stat_package_title"/>
+        app:layout_constraintTop_toBottomOf="@+id/stat_package_title"
+        />
 
 
     <TextView
@@ -93,7 +101,8 @@
         android:text="@string/stat_locked_by"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stat_package_name"/>
+        app:layout_constraintTop_toBottomOf="@+id/stat_package_name"
+        />
 
     <TextView
         android:id="@+id/stat_locked_by"
@@ -103,7 +112,8 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stat_locked_by_title"/>
+        app:layout_constraintTop_toBottomOf="@+id/stat_locked_by_title"
+        />
 
 
     <TextView
@@ -114,7 +124,8 @@
         android:text="@string/stat_system"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stat_locked_by"/>
+        app:layout_constraintTop_toBottomOf="@+id/stat_locked_by"
+        />
 
     <TextView
         android:id="@+id/stat_system"
@@ -124,7 +135,8 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/stat_system_title"/>
+        app:layout_constraintTop_toBottomOf="@+id/stat_system_title"
+        />
 
 
   </android.support.constraint.ConstraintLayout>

@@ -21,7 +21,9 @@ import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.model.LockState
-import com.pyamsoft.padlock.model.LockState.*
+import com.pyamsoft.padlock.model.LockState.LOCKED
+import com.pyamsoft.padlock.model.LockState.NONE
+import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
@@ -29,18 +31,18 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockStateModifyInteractorImpl @Inject internal constructor(
-    private val insertDb: PadLockDBInsert,
-    private val deleteDb: PadLockDBDelete
+  private val insertDb: PadLockDBInsert,
+  private val deleteDb: PadLockDBDelete
 ) :
     LockStateModifyInteractor {
 
   @CheckResult
   private fun createNewEntry(
-      packageName: String,
-      activityName: String,
-      code: String?,
-      system: Boolean,
-      whitelist: Boolean
+    packageName: String,
+    activityName: String,
+    code: String?,
+    system: Boolean,
+    whitelist: Boolean
   ): Single<LockState> {
     Timber.d("Empty entry, create a new entry for: %s %s", packageName, activityName)
     return insertDb.insert(packageName, activityName, code, 0, 0, system, whitelist)
@@ -49,8 +51,8 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun deleteEntry(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Single<LockState> {
     Timber.d("Entry already exists for: %s %s, delete it", packageName, activityName)
     return deleteDb.deleteWithPackageActivityName(packageName, activityName)
@@ -59,11 +61,11 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun whitelistEntry(
-      oldLockState: LockState,
-      packageName: String,
-      activityName: String,
-      code: String?,
-      system: Boolean
+    oldLockState: LockState,
+    packageName: String,
+    activityName: String,
+    code: String?,
+    system: Boolean
   ): Single<LockState> {
     return Single.defer<LockState> {
       if (oldLockState === WHITELISTED) {
@@ -79,11 +81,11 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun forceLockEntry(
-      oldLockState: LockState,
-      packageName: String,
-      activityName: String,
-      code: String?,
-      system: Boolean
+    oldLockState: LockState,
+    packageName: String,
+    activityName: String,
+    code: String?,
+    system: Boolean
   ): Single<LockState> {
     return Single.defer<LockState> {
       if (oldLockState === LOCKED) {
@@ -99,11 +101,11 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun addNewEntry(
-      oldLockState: LockState,
-      packageName: String,
-      activityName: String,
-      code: String?,
-      system: Boolean
+    oldLockState: LockState,
+    packageName: String,
+    activityName: String,
+    code: String?,
+    system: Boolean
   ): Single<LockState> {
     return Single.defer<LockState> {
       if (oldLockState === LockState.DEFAULT) {
@@ -117,12 +119,12 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
   }
 
   override fun modifySingleDatabaseEntry(
-      oldLockState: LockState,
-      newLockState: LockState,
-      packageName: String,
-      activityName: String,
-      code: String?,
-      system: Boolean
+    oldLockState: LockState,
+    newLockState: LockState,
+    packageName: String,
+    activityName: String,
+    code: String?,
+    system: Boolean
   ): Single<LockState> = when {
     newLockState === LockState.WHITELISTED -> whitelistEntry(
         oldLockState, packageName,

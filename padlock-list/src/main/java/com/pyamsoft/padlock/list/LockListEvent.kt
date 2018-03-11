@@ -19,10 +19,10 @@ package com.pyamsoft.padlock.list
 sealed class LockListEvent {
 
   data class Modify(
-      val packageName: String,
-      val code: String?,
-      val isSystem: Boolean,
-      val isChecked: Boolean
+    val packageName: String,
+    val code: String?,
+    val isSystem: Boolean,
+    val isChecked: Boolean
   ) : LockListEvent()
 
   sealed class Callback : LockListEvent() {

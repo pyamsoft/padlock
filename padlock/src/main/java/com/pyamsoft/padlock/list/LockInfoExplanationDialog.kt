@@ -17,7 +17,11 @@
 package com.pyamsoft.padlock.list
 
 import android.os.Bundle
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import com.pyamsoft.padlock.databinding.DialogInfoLocktypeExplainBinding
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
@@ -28,17 +32,17 @@ class LockInfoExplanationDialog : CanaryDialog() {
   private lateinit var binding: DialogInfoLocktypeExplainBinding
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? {
     binding = DialogInfoLocktypeExplainBinding.inflate(inflater, container, false)
     return binding.root
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     binding.apply {

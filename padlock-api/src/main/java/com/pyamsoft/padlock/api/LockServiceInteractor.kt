@@ -33,8 +33,8 @@ interface LockServiceInteractor {
 
   @CheckResult
   fun isActiveMatching(
-      packageName: String,
-      className: String
+    packageName: String,
+    className: String
   ): Single<Boolean>
 
   @CheckResult
@@ -42,8 +42,8 @@ interface LockServiceInteractor {
 
   @CheckResult
   fun processEvent(
-      packageName: String,
-      className: String,
-      forcedRecheck: RecheckStatus
+    packageName: String,
+    className: String,
+    forcedRecheck: RecheckStatus
   ): Single<PadLockEntryModel>
 }

@@ -32,21 +32,21 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockInfoInteractorCache @Inject internal constructor(
-    @param:Named("interactor_lock_info") private val impl: LockInfoInteractor
+  @param:Named("interactor_lock_info") private val impl: LockInfoInteractor
 ) : LockInfoInteractor, Cache, LockInfoUpdater {
 
   private val infoCache = TimedMap<String, Single<MutableList<ActivityEntry>>>()
 
   @CheckResult
   private fun copyEntryWithState(
-      entry: ActivityEntry,
-      lockState: LockState
+    entry: ActivityEntry,
+    lockState: LockState
   ): ActivityEntry = entry.copy(lockState = lockState)
 
   private fun MutableList<ActivityEntry>.updateActivityEntry(
-      name: String,
-      packageName: String,
-      newLockState: LockState
+    name: String,
+    packageName: String,
+    newLockState: LockState
   ) {
     for ((index, entry) in this.withIndex()) {
       if (entry.packageName == packageName && entry.name == name) {
@@ -57,12 +57,12 @@ internal class LockInfoInteractorCache @Inject internal constructor(
   }
 
   override fun modifySingleDatabaseEntry(
-      oldLockState: LockState,
-      newLockState: LockState,
-      packageName: String,
-      activityName: String,
-      code: String?,
-      system: Boolean
+    oldLockState: LockState,
+    newLockState: LockState,
+    packageName: String,
+    activityName: String,
+    code: String?,
+    system: Boolean
   ): Single<LockState> {
     return impl.modifySingleDatabaseEntry(
         oldLockState, newLockState, packageName, activityName,
@@ -79,9 +79,9 @@ internal class LockInfoInteractorCache @Inject internal constructor(
   }
 
   override fun update(
-      packageName: String,
-      activityName: String,
-      lockState: LockState
+    packageName: String,
+    activityName: String,
+    lockState: LockState
   ): Completable {
     return Completable.fromAction {
       infoCache.updateIfAvailable(packageName) { single ->
@@ -100,8 +100,8 @@ internal class LockInfoInteractorCache @Inject internal constructor(
   override fun hasShownOnBoarding(): Single<Boolean> = impl.hasShownOnBoarding()
 
   override fun fetchActivityEntryList(
-      force: Boolean,
-      packageName: String
+    force: Boolean,
+    packageName: String
   ): Single<List<ActivityEntry>> {
     return infoCache.getElseFresh(force, packageName) {
       impl.fetchActivityEntryList(true, packageName)
@@ -113,11 +113,11 @@ internal class LockInfoInteractorCache @Inject internal constructor(
   }
 
   override fun calculateListDiff(
-      packageName: String,
-      oldList: List<ActivityEntry>,
-      newList: List<ActivityEntry>
+    packageName: String,
+    oldList: List<ActivityEntry>,
+    newList: List<ActivityEntry>
   ): Single<ListDiffResult<ActivityEntry>> =
-      impl.calculateListDiff(packageName, oldList, newList)
-          .doOnError { infoCache.remove(packageName) }
+    impl.calculateListDiff(packageName, oldList, newList)
+        .doOnError { infoCache.remove(packageName) }
 
 }

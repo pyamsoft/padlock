@@ -17,8 +17,12 @@
 package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.api.LockServiceInteractor
-import com.pyamsoft.padlock.model.*
+import com.pyamsoft.padlock.model.ForegroundEvent
+import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.RecheckEvent
+import com.pyamsoft.padlock.model.RecheckStatus
 import com.pyamsoft.padlock.model.RecheckStatus.NOT_FORCE
+import com.pyamsoft.padlock.model.ServiceFinishEvent
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.service.LockServicePresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
@@ -32,13 +36,13 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockServicePresenter @Inject internal constructor(
-    private val foregroundEventBus: EventBus<ForegroundEvent>,
-    private val serviceFinishBus: EventBus<ServiceFinishEvent>,
-    private val recheckEventBus: EventBus<RecheckEvent>,
-    private val interactor: LockServiceInteractor,
-    @Named("computation") compScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler
+  private val foregroundEventBus: EventBus<ForegroundEvent>,
+  private val serviceFinishBus: EventBus<ServiceFinishEvent>,
+  private val recheckEventBus: EventBus<RecheckEvent>,
+  private val interactor: LockServiceInteractor,
+  @Named("computation") compScheduler: Scheduler,
+  @Named("main") mainScheduler: Scheduler,
+  @Named("io") ioScheduler: Scheduler
 ) : SchedulerPresenter<View>(
     compScheduler,
     ioScheduler, mainScheduler
@@ -115,8 +119,8 @@ class LockServicePresenter @Inject internal constructor(
   }
 
   fun processActiveApplicationIfMatching(
-      packageName: String,
-      className: String
+    packageName: String,
+    className: String
   ) {
     matchingDisposable = matchingDisposable.clear()
     matchingDisposable = interactor.isActiveMatching(packageName, className)
@@ -130,9 +134,9 @@ class LockServicePresenter @Inject internal constructor(
   }
 
   private fun processEvent(
-      packageName: String,
-      className: String,
-      forcedRecheck: RecheckStatus
+    packageName: String,
+    className: String,
+    forcedRecheck: RecheckStatus
   ) {
     entryDisposable = entryDisposable.clear()
     entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
@@ -163,16 +167,16 @@ class LockServicePresenter @Inject internal constructor(
   interface LockScreenCallback {
 
     fun onStartLockScreen(
-        entry: PadLockEntryModel,
-        realName: String
+      entry: PadLockEntryModel,
+      realName: String
     )
   }
 
   interface BusCallback : ForegroundEventStreamCallback {
 
     fun onRecheck(
-        packageName: String,
-        className: String
+      packageName: String,
+      className: String
     )
   }
 }

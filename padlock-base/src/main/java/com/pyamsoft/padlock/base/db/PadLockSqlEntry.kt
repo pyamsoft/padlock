@@ -34,7 +34,7 @@ internal abstract class PadLockSqlEntry : PadLockEntryModel {
     @CheckResult
     internal fun createFactory(): PadLockEntryModel.Factory<PadLockSqlEntry> {
       return PadLockEntryModel.Factory { packageName, activityName, lockCode, lockUntilTime,
-          ignoreUntilTime, systemApplication, whitelist ->
+        ignoreUntilTime, systemApplication, whitelist ->
         return@Factory AutoValue_PadLockSqlEntry(
             packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime,
             systemApplication, whitelist

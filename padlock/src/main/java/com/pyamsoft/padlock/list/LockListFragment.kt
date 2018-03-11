@@ -20,7 +20,11 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
@@ -42,7 +46,11 @@ import com.pyamsoft.pydroid.design.util.withBehavior
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.loader.ImageLoader
-import com.pyamsoft.pydroid.ui.util.*
+import com.pyamsoft.pydroid.ui.util.popHide
+import com.pyamsoft.pydroid.ui.util.popShow
+import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
+import com.pyamsoft.pydroid.ui.util.setUpEnabled
+import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
@@ -73,17 +81,17 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? {
     binding = FragmentLockListBinding.inflate(inflater, container, false)
     return binding.root
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     refreshLatch = RefreshLatch.create(viewLifecycle) {
@@ -271,7 +279,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       applistFab.setOnDebouncedClickListener {
         if (UsagePermissionChecker.missingUsageStatsPermission(
                 applistFab.context
-            )) {
+            )
+        ) {
           UsageAccessRequestDialog().show(activity, "usage_access")
         } else {
           requireActivity().let {
@@ -316,10 +325,10 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   private fun refreshListEntry(
-      packageName: String,
-      locked: Boolean? = null,
-      whitelisted: Boolean? = null,
-      hardlocked: Boolean? = null
+    packageName: String,
+    locked: Boolean? = null,
+    whitelisted: Boolean? = null,
+    hardlocked: Boolean? = null
   ) {
     for (i in adapter.adapterItems.indices) {
       val item: LockListItem = adapter.getAdapterItem(i)

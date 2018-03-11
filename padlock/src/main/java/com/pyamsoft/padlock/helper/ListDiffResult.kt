@@ -26,30 +26,30 @@ fun <T : Any> ListDiffResult.ListData<T>.dispatch(adapter: ModelAdapter<*, *>) {
     // If adapter.fastAdapter is null, the lifecycle is wrong.
 
     override fun onChanged(
-        position: Int,
-        count: Int,
-        payload: Any?
+      position: Int,
+      count: Int,
+      payload: Any?
     ) {
       adapter.fastAdapter!!.notifyItemRangeChanged(position, count, payload)
     }
 
     override fun onMoved(
-        fromPosition: Int,
-        toPosition: Int
+      fromPosition: Int,
+      toPosition: Int
     ) {
       adapter.fastAdapter!!.notifyAdapterItemMoved(fromPosition, toPosition)
     }
 
     override fun onInserted(
-        position: Int,
-        count: Int
+      position: Int,
+      count: Int
     ) {
       adapter.fastAdapter!!.notifyAdapterItemRangeInserted(position, count)
     }
 
     override fun onRemoved(
-        position: Int,
-        count: Int
+      position: Int,
+      count: Int
     ) {
       adapter.fastAdapter!!.notifyAdapterItemRangeRemoved(position, count)
     }

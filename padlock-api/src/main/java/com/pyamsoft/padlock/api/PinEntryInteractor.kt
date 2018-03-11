@@ -27,8 +27,8 @@ interface PinEntryInteractor {
 
   @CheckResult
   fun submitPin(
-      currentAttempt: String,
-      reEntryAttempt: String,
-      hint: String
+    currentAttempt: String,
+    reEntryAttempt: String,
+    hint: String
   ): Single<PinEntryEvent>
 }

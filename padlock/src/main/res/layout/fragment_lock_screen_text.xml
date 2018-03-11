@@ -20,7 +20,8 @@
       xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:padding="16dp">
+      android:padding="16dp"
+      >
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/lock_text"
@@ -34,7 +35,8 @@
         app:layout_constraintEnd_toStartOf="@+id/lock_image_go"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        >
 
       <android.support.design.widget.TextInputEditText
           android:layout_width="match_parent"
@@ -43,7 +45,8 @@
           android:imeOptions="actionGo"
           android:inputType="textPassword"
           android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-          android:textColor="@android:color/white"/>
+          android:textColor="@android:color/white"
+          />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -57,7 +60,8 @@
         android:textColor="@color/material_light_background"
         app:layout_constraintEnd_toEndOf="@+id/lock_text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lock_text"/>
+        app:layout_constraintTop_toBottomOf="@+id/lock_text"
+        />
 
     <ImageView
         android:id="@+id/lock_image_go"
@@ -68,7 +72,8 @@
         android:contentDescription="@string/blank"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
   </android.support.constraint.ConstraintLayout>
 </layout>

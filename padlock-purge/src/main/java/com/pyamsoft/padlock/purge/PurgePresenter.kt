@@ -30,13 +30,13 @@ import javax.inject.Named
 
 @JvmSuppressWildcards
 class PurgePresenter @Inject internal constructor(
-    private val interactor: PurgeInteractor,
-    private val purgeBus: EventBus<PurgeEvent>,
-    private val purgeAllBus: EventBus<PurgeAllEvent>,
-    private val listDiffProvider: ListDiffProvider<String>,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler
+  private val interactor: PurgeInteractor,
+  private val purgeBus: EventBus<PurgeEvent>,
+  private val purgeAllBus: EventBus<PurgeAllEvent>,
+  private val listDiffProvider: ListDiffProvider<String>,
+  @Named("computation") computationScheduler: Scheduler,
+  @Named("io") ioScheduler: Scheduler,
+  @Named("main") mainScheduler: Scheduler
 ) : SchedulerPresenter<PurgePresenter.View>(computationScheduler, ioScheduler, mainScheduler) {
 
   override fun onCreate() {

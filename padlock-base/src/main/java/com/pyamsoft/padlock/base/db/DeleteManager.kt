@@ -23,9 +23,9 @@ import com.squareup.sqlbrite3.BriteDatabase
 internal class DeleteManager internal constructor(briteDatabase: BriteDatabase) {
 
   private val deleteWithPackage =
-      PadLockEntryModel.DeleteWithPackageName(briteDatabase.writableDatabase)
+    PadLockEntryModel.DeleteWithPackageName(briteDatabase.writableDatabase)
   private val deleteWithPackageActivity =
-      PadLockEntryModel.DeleteWithPackageActivityName(briteDatabase.writableDatabase)
+    PadLockEntryModel.DeleteWithPackageActivityName(briteDatabase.writableDatabase)
   private val deleteAll = PadLockEntryModel.DeleteAll(briteDatabase.writableDatabase)
 
   @CheckResult
@@ -37,8 +37,8 @@ internal class DeleteManager internal constructor(briteDatabase: BriteDatabase) 
 
   @CheckResult
   internal fun deleteWithPackageActivity(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Int = deleteWithPackageActivity.run {
     clearBindings()
     bind(packageName, activityName)

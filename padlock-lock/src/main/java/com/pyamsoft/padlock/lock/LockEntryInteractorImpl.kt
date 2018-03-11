@@ -18,7 +18,15 @@ package com.pyamsoft.padlock.lock
 
 import android.app.IntentService
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.api.*
+import com.pyamsoft.padlock.api.JobSchedulerCompat
+import com.pyamsoft.padlock.api.LockEntryInteractor
+import com.pyamsoft.padlock.api.LockHelper
+import com.pyamsoft.padlock.api.LockPassed
+import com.pyamsoft.padlock.api.LockScreenPreferences
+import com.pyamsoft.padlock.api.MasterPinInteractor
+import com.pyamsoft.padlock.api.PadLockDBInsert
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.Recheck
 import com.pyamsoft.pydroid.optional.Optional.Present
 import com.pyamsoft.pydroid.optional.Optionals
@@ -34,25 +42,25 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockEntryInteractorImpl @Inject internal constructor(
-    private val lockPassed: LockPassed,
-    private val lockHelper: LockHelper,
-    private val preferences: LockScreenPreferences,
-    private val jobSchedulerCompat: JobSchedulerCompat,
-    private val masterPinInteractor: MasterPinInteractor,
-    private val dbInsert: PadLockDBInsert,
-    private val dbUpdate: PadLockDBUpdate,
-    private val dbQuery: PadLockDBQuery,
-    @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>
+  private val lockPassed: LockPassed,
+  private val lockHelper: LockHelper,
+  private val preferences: LockScreenPreferences,
+  private val jobSchedulerCompat: JobSchedulerCompat,
+  private val masterPinInteractor: MasterPinInteractor,
+  private val dbInsert: PadLockDBInsert,
+  private val dbUpdate: PadLockDBUpdate,
+  private val dbQuery: PadLockDBQuery,
+  @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>
 ) :
     LockEntryInteractor {
 
   private val failCount: MutableMap<String, Int> = HashMap()
 
   override fun submitPin(
-      packageName: String,
-      activityName: String,
-      lockCode: String?,
-      currentAttempt: String
+    packageName: String,
+    activityName: String,
+    lockCode: String?,
+    currentAttempt: String
   ): Single<Boolean> {
     return dbQuery.queryWithPackageActivityNameDefault(packageName, activityName)
         .flatMap {
@@ -85,11 +93,11 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun whitelistEntry(
-      packageName: String,
-      activityName: String,
-      realName: String,
-      lockCode: String?,
-      isSystem: Boolean
+    packageName: String,
+    activityName: String,
+    realName: String,
+    lockCode: String?,
+    isSystem: Boolean
   ): Completable {
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName)
     return dbInsert.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
@@ -97,9 +105,9 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun queueRecheckJob(
-      packageName: String,
-      realName: String,
-      recheckTime: Long
+    packageName: String,
+    realName: String,
+    recheckTime: Long
   ): Completable {
     return Completable.fromAction {
       // Cancel any old recheck job for the class, but not the package
@@ -118,9 +126,9 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun ignoreEntryForTime(
-      ignoreMinutesInMillis: Long,
-      packageName: String,
-      activityName: String
+    ignoreMinutesInMillis: Long,
+    packageName: String,
+    activityName: String
   ): Completable {
     return Completable.defer {
       val newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis
@@ -135,8 +143,8 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   }
 
   override fun lockEntryOnFail(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Maybe<Long> {
     return Single.fromCallable {
       val failId: String = getFailId(packageName, activityName)
@@ -163,9 +171,9 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun lockEntry(
-      timeOutMinutesInMillis: Long,
-      packageName: String,
-      activityName: String
+    timeOutMinutesInMillis: Long,
+    packageName: String,
+    activityName: String
   ): Maybe<Long> {
     return Maybe.defer {
       val currentTime = System.currentTimeMillis()
@@ -195,13 +203,13 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   }
 
   override fun postUnlock(
-      packageName: String,
-      activityName: String,
-      realName: String,
-      lockCode: String?,
-      isSystem: Boolean,
-      whitelist: Boolean,
-      ignoreTime: Long
+    packageName: String,
+    activityName: String,
+    realName: String,
+    lockCode: String?,
+    isSystem: Boolean,
+    whitelist: Boolean,
+    ignoreTime: Long
   ): Completable {
     return Completable.defer {
       val ignoreMillis = TimeUnit.MINUTES.toMillis(ignoreTime)
@@ -247,10 +255,10 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun getFailId(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): String =
-      "$packageName|$activityName"
+    "$packageName|$activityName"
 
   companion object {
     const val DEFAULT_MAX_FAIL_COUNT: Int = 2

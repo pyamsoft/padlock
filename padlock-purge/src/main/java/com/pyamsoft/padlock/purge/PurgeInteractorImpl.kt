@@ -34,9 +34,9 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PurgeInteractorImpl @Inject internal constructor(
-    private val applicationManager: PackageApplicationManager,
-    private val deleteDb: PadLockDBDelete,
-    private val queryDb: PadLockDBQuery
+  private val applicationManager: PackageApplicationManager,
+  private val deleteDb: PadLockDBDelete,
+  private val queryDb: PadLockDBQuery
 ) : PurgeInteractor {
 
   override fun fetchStalePackageNames(forceRefresh: Boolean): Single<List<String>> {
@@ -45,8 +45,8 @@ internal class PurgeInteractorImpl @Inject internal constructor(
   }
 
   override fun calculateDiff(
-      oldList: List<String>,
-      newList: List<String>
+    oldList: List<String>,
+    newList: List<String>
   ): Single<ListDiffResult<String>> {
     return Single.fromCallable {
       val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -56,8 +56,8 @@ internal class PurgeInteractorImpl @Inject internal constructor(
         override fun getNewListSize(): Int = newList.size
 
         override fun areItemsTheSame(
-            oldItemPosition: Int,
-            newItemPosition: Int
+          oldItemPosition: Int,
+          newItemPosition: Int
         ): Boolean {
           val oldItem: String = oldList[oldItemPosition]
           val newItem: String = newList[newItemPosition]
@@ -65,13 +65,13 @@ internal class PurgeInteractorImpl @Inject internal constructor(
         }
 
         override fun areContentsTheSame(
-            oldItemPosition: Int,
-            newItemPosition: Int
+          oldItemPosition: Int,
+          newItemPosition: Int
         ): Boolean = areItemsTheSame(oldItemPosition, newItemPosition)
 
         override fun getChangePayload(
-            oldItemPosition: Int,
-            newItemPosition: Int
+          oldItemPosition: Int,
+          newItemPosition: Int
         ): Any? {
           // TODO: Construct specific change payload
           Timber.w("TODO: Construct specific change payload")
@@ -88,10 +88,11 @@ internal class PurgeInteractorImpl @Inject internal constructor(
   private fun getAllEntries(): Single<List<PadLockEntryModel.AllEntriesModel>> = queryDb.queryAll()
 
   @CheckResult
-  private fun getActiveApplications(): Single<List<String>> = applicationManager.getActiveApplications()
-      .flatMapObservable { Observable.fromIterable(it) }
-      .map { it.packageName }
-      .toSortedList()
+  private fun getActiveApplications(): Single<List<String>> =
+    applicationManager.getActiveApplications()
+        .flatMapObservable { Observable.fromIterable(it) }
+        .map { it.packageName }
+        .toSortedList()
 
   @CheckResult
   private fun fetchFreshData(): Single<List<String>> {
@@ -126,5 +127,5 @@ internal class PurgeInteractorImpl @Inject internal constructor(
   }
 
   override fun deleteEntry(packageName: String): Single<String> =
-      deleteDb.deleteWithPackageName(packageName).andThen(Single.just(packageName))
+    deleteDb.deleteWithPackageName(packageName).andThen(Single.just(packageName))
 }

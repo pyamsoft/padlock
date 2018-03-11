@@ -24,7 +24,7 @@ interface PackageLabelManager {
 
   @CheckResult
   fun loadPackageLabel(info: ApplicationItem): Single<String> =
-      loadPackageLabel(info.packageName)
+    loadPackageLabel(info.packageName)
 
   @CheckResult
   fun loadPackageLabel(packageName: String): Single<String>

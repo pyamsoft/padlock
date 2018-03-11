@@ -16,7 +16,11 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.api.*
+import com.pyamsoft.padlock.api.ClearPreferences
+import com.pyamsoft.padlock.api.InstallListenerPreferences
+import com.pyamsoft.padlock.api.MasterPinPreferences
+import com.pyamsoft.padlock.api.PadLockDBDelete
+import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.optional.Optional.Present
 import com.pyamsoft.pydroid.optional.asOptional
@@ -29,21 +33,21 @@ import javax.inject.Singleton
 
 @Singleton
 internal class SettingsInteractorImpl @Inject internal constructor(
-    private val deleteDb: PadLockDBDelete,
-    private val masterPinPreference: MasterPinPreferences,
-    private val preferences: ClearPreferences,
-    private val installListenerPreferences: InstallListenerPreferences,
-    @param:Named("cache_lock_list") private val lockListInteractor: Cache,
-    @param:Named("cache_lock_info") private val lockInfoInteractor: Cache,
-    @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
-    @param:Named("cache_app_icons") private val iconCache: Cache,
-    @param:Named("cache_list_state") private val listStateCache: Cache,
-    @param:Named("cache_purge") private val purgeInteractor: Cache
+  private val deleteDb: PadLockDBDelete,
+  private val masterPinPreference: MasterPinPreferences,
+  private val preferences: ClearPreferences,
+  private val installListenerPreferences: InstallListenerPreferences,
+  @param:Named("cache_lock_list") private val lockListInteractor: Cache,
+  @param:Named("cache_lock_info") private val lockInfoInteractor: Cache,
+  @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
+  @param:Named("cache_app_icons") private val iconCache: Cache,
+  @param:Named("cache_list_state") private val listStateCache: Cache,
+  @param:Named("cache_purge") private val purgeInteractor: Cache
 ) :
     SettingsInteractor {
 
   override fun isInstallListenerEnabled(): Single<Boolean> =
-      Single.fromCallable { installListenerPreferences.isInstallListenerEnabled() }
+    Single.fromCallable { installListenerPreferences.isInstallListenerEnabled() }
 
   override fun clearDatabase(): Single<Boolean> {
     Timber.d("clear database")

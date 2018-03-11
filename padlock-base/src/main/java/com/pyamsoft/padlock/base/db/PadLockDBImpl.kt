@@ -27,7 +27,6 @@ import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.squareup.sqlbrite3.BriteDatabase
 import com.squareup.sqlbrite3.SqlBrite
 import io.reactivex.Completable
 import io.reactivex.Scheduler
@@ -39,7 +38,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PadLockDBImpl @Inject internal constructor(
-    context: Context, @param:Named("io") private val scheduler: Scheduler
+  context: Context, @param:Named("io") private val scheduler: Scheduler
 ) : PadLockDBInsert, PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
 
   private val queryManager: QueryManager
@@ -56,10 +55,10 @@ internal class PadLockDBImpl @Inject internal constructor(
         }
         .build()
     val dbConfiguration: SupportSQLiteOpenHelper.Configuration =
-        SupportSQLiteOpenHelper.Configuration.builder(context)
-            .callback(PadLockOpenHelper())
-            .name(DB_NAME)
-            .build()
+      SupportSQLiteOpenHelper.Configuration.builder(context)
+          .callback(PadLockOpenHelper())
+          .name(DB_NAME)
+          .build()
     val briteDatabase = sqlBrite.wrapDatabaseHelper(
         FrameworkSQLiteOpenHelperFactory().create(dbConfiguration), scheduler
     )
@@ -74,8 +73,8 @@ internal class PadLockDBImpl @Inject internal constructor(
 
   @CheckResult
   private fun deleteWithPackageActivityNameUnguarded(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Int = deleteManager.deleteWithPackageActivity(
       packageName,
       activityName
@@ -83,13 +82,13 @@ internal class PadLockDBImpl @Inject internal constructor(
 
   @CheckResult
   override fun insert(
-      packageName: String,
-      activityName: String,
-      lockCode: String?,
-      lockUntilTime: Long,
-      ignoreUntilTime: Long,
-      isSystem: Boolean,
-      whitelist: Boolean
+    packageName: String,
+    activityName: String,
+    lockCode: String?,
+    lockUntilTime: Long,
+    ignoreUntilTime: Long,
+    isSystem: Boolean,
+    whitelist: Boolean
   ): Completable {
     return Single.fromCallable {
       val entry = createManager.create(
@@ -105,9 +104,9 @@ internal class PadLockDBImpl @Inject internal constructor(
   }
 
   override fun updateIgnoreTime(
-      packageName: String,
-      activityName: String,
-      ignoreUntilTime: Long
+    packageName: String,
+    activityName: String,
+    ignoreUntilTime: Long
   ): Completable {
     return Completable.fromCallable {
       Timber.i("DB: UPDATE IGNORE")
@@ -119,9 +118,9 @@ internal class PadLockDBImpl @Inject internal constructor(
   }
 
   override fun updateLockTime(
-      packageName: String,
-      activityName: String,
-      lockUntilTime: Long
+    packageName: String,
+    activityName: String,
+    lockUntilTime: Long
   ): Completable {
     return Completable.fromCallable {
       Timber.i("DB: UPDATE LOCK")
@@ -133,9 +132,9 @@ internal class PadLockDBImpl @Inject internal constructor(
   }
 
   override fun updateWhitelist(
-      packageName: String,
-      activityName: String,
-      whitelist: Boolean
+    packageName: String,
+    activityName: String,
+    whitelist: Boolean
   ): Completable {
     return Completable.fromCallable {
       Timber.i("DB: UPDATE WHITELIST")
@@ -145,8 +144,8 @@ internal class PadLockDBImpl @Inject internal constructor(
 
   @CheckResult
   override fun queryWithPackageActivityNameDefault(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Single<PadLockEntryModel> {
     Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT")
     return queryManager.queryWithPackageActivityNameDefault(packageName, activityName)
@@ -154,7 +153,7 @@ internal class PadLockDBImpl @Inject internal constructor(
 
   @CheckResult
   override fun queryWithPackageName(
-      packageName: String
+    packageName: String
   ): Single<List<PadLockEntryModel.WithPackageNameModel>> {
     Timber.i("DB: QUERY PACKAGE")
     return queryManager.queryWithPackageName(packageName)
@@ -176,8 +175,8 @@ internal class PadLockDBImpl @Inject internal constructor(
 
   @CheckResult
   override fun deleteWithPackageActivityName(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Completable {
     return Completable.fromCallable {
       Timber.i("DB: DELETE PACKAGE ACTIVITY")
@@ -204,9 +203,9 @@ internal class PadLockDBImpl @Inject internal constructor(
     }
 
     override fun onUpgrade(
-        db: SupportSQLiteDatabase,
-        oldVersion: Int,
-        newVersion: Int
+      db: SupportSQLiteDatabase,
+      oldVersion: Int,
+      newVersion: Int
     ) {
       Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion)
       var currentVersion = oldVersion
@@ -229,7 +228,7 @@ internal class PadLockDBImpl @Inject internal constructor(
     private fun upgradeVersion3To4(db: SupportSQLiteDatabase) {
       Timber.d("Upgrading from Version 2 to 3 adds whitelist column")
       val alterWithWhitelist =
-          "ALTER TABLE $TABLE_NAME ADD COLUMN $WHITELIST INTEGER NOT NULL DEFAULT 0"
+        "ALTER TABLE $TABLE_NAME ADD COLUMN $WHITELIST INTEGER NOT NULL DEFAULT 0"
       Timber.d("EXEC SQL: %s", alterWithWhitelist)
       db.execSQL(alterWithWhitelist)
     }
@@ -260,7 +259,7 @@ internal class PadLockDBImpl @Inject internal constructor(
       val oldTable = tableName + "_old"
       val alterTable = "ALTER TABLE $tableName RENAME TO $oldTable"
       val insertIntoNewTable =
-          "INSERT INTO $tableName($columnsSeparated) SELECT $columnsSeparated FROM $oldTable"
+        "INSERT INTO $tableName($columnsSeparated) SELECT $columnsSeparated FROM $oldTable"
       val dropOldTable = "DROP TABLE $oldTable"
 
       // Move the existing table to an old table

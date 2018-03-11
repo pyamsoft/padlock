@@ -60,9 +60,9 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
   }
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? {
     binding = FragmentLockScreenTextBinding.inflate(inflater, container, false)
     return binding.root
@@ -77,8 +77,8 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     setupTextInput()
@@ -219,11 +219,11 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     @JvmStatic
     @CheckResult
     fun newInstance(
-        lockedPackageName: String,
-        lockedActivityName: String,
-        lockedCode: String?,
-        lockedRealName: String,
-        lockedSystem: Boolean
+      lockedPackageName: String,
+      lockedActivityName: String,
+      lockedCode: String?,
+      lockedRealName: String,
+      lockedSystem: Boolean
     ): LockScreenTextFragment {
       val fragment = LockScreenTextFragment()
       fragment.arguments = LockScreenBaseFragment.buildBundle(

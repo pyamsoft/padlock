@@ -18,7 +18,15 @@ package com.pyamsoft.padlock.service
 
 import android.app.IntentService
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.api.*
+import com.pyamsoft.padlock.api.DeviceLockStateProvider
+import com.pyamsoft.padlock.api.JobSchedulerCompat
+import com.pyamsoft.padlock.api.LockPassed
+import com.pyamsoft.padlock.api.LockScreenPreferences
+import com.pyamsoft.padlock.api.LockServiceInteractor
+import com.pyamsoft.padlock.api.LockServiceStateInteractor
+import com.pyamsoft.padlock.api.PackageActivityManager
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.PadLockEntry
@@ -28,7 +36,11 @@ import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.optional.Optional.Present
 import com.pyamsoft.pydroid.optional.Optionals
 import com.pyamsoft.pydroid.optional.asOptional
-import io.reactivex.*
+import io.reactivex.Flowable
+import io.reactivex.Maybe
+import io.reactivex.MaybeTransformer
+import io.reactivex.Single
+import io.reactivex.SingleTransformer
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -38,15 +50,15 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockServiceInteractorImpl @Inject internal constructor(
-    private val usageEventProvider: UsageEventProvider,
-    private val deviceLockStateProvider: DeviceLockStateProvider,
-    private val lockPassed: LockPassed,
-    private val preferences: LockScreenPreferences,
-    private val jobSchedulerCompat: JobSchedulerCompat,
-    private val packageActivityManager: PackageActivityManager,
-    private val padLockDBQuery: PadLockDBQuery,
-    @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
-    private val stateInteractor: LockServiceStateInteractor
+  private val usageEventProvider: UsageEventProvider,
+  private val deviceLockStateProvider: DeviceLockStateProvider,
+  private val lockPassed: LockPassed,
+  private val preferences: LockScreenPreferences,
+  private val jobSchedulerCompat: JobSchedulerCompat,
+  private val packageActivityManager: PackageActivityManager,
+  private val padLockDBQuery: PadLockDBQuery,
+  @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
+  private val stateInteractor: LockServiceStateInteractor
 ) : LockServiceInteractor {
 
   private var activePackageName = ""
@@ -108,8 +120,8 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   }
 
   override fun isActiveMatching(
-      packageName: String,
-      className: String
+    packageName: String,
+    className: String
   ): Single<Boolean> {
     return Single.fromCallable {
       Timber.d(
@@ -131,8 +143,8 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun prepareLockScreen(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): MaybeTransformer<Boolean, PadLockEntryModel> {
     return MaybeTransformer {
       it.flatMap {
@@ -174,8 +186,8 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun getEntry(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): SingleTransformer<Boolean, PadLockEntryModel> {
     return SingleTransformer {
       it.filter { it }
@@ -208,8 +220,8 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun isEventFromActivity(
-      packageName: String,
-      className: String
+    packageName: String,
+    className: String
   ): MaybeTransformer<Boolean, Boolean> {
     return MaybeTransformer {
       it.isEmpty.doOnSuccess {
@@ -236,8 +248,8 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun isEventRestricted(
-      packageName: String,
-      className: String
+    packageName: String,
+    className: String
   ): MaybeTransformer<Boolean, Boolean> {
     return MaybeTransformer {
       it.filter {
@@ -253,9 +265,9 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   }
 
   override fun processEvent(
-      packageName: String,
-      className: String,
-      forcedRecheck: RecheckStatus
+    packageName: String,
+    className: String,
+    forcedRecheck: RecheckStatus
   ): Single<PadLockEntryModel> {
     val windowEventObservable: Single<Boolean> = isServiceEnabled()
         .compose(isEventFromActivity(packageName, className))

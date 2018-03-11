@@ -32,8 +32,8 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockInfoItem internal constructor(
-    entry: ActivityEntry,
-    private val system: Boolean
+  entry: ActivityEntry,
+  private val system: Boolean
 ) :
     ModelAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
         entry
@@ -44,8 +44,8 @@ class LockInfoItem internal constructor(
   override fun getLayoutRes(): Int = R.layout.adapter_item_lockinfo
 
   override fun bindView(
-      holder: ViewHolder,
-      payloads: List<Any>
+    holder: ViewHolder,
+    payloads: List<Any>
   ) {
     super.bindView(holder, payloads)
     holder.apply {
@@ -93,8 +93,8 @@ class LockInfoItem internal constructor(
   }
 
   private fun processModifyDatabaseEntry(
-      holder: ViewHolder,
-      newLockState: LockState
+    holder: ViewHolder,
+    newLockState: LockState
   ) {
     holder.publisher.publish(model, newLockState, null, system)
   }

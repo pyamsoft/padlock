@@ -39,7 +39,7 @@ abstract class PadLockEntry : PadLockEntryModel {
 
     @JvmField
     val EMPTY: PadLockEntryModel =
-        AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false)
+      AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false)
 
   }
 }

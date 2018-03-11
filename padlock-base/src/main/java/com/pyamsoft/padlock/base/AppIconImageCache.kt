@@ -35,8 +35,8 @@ internal class AppIconImageCache @Inject internal constructor() :
   }
 
   override fun cache(
-      key: ImageCacheKey<String>,
-      entry: Drawable
+    key: ImageCacheKey<String>,
+    entry: Drawable
   ) {
     cache.put(key.data, entry)
   }

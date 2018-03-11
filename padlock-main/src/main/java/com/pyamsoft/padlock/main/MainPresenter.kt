@@ -25,10 +25,10 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class MainPresenter @Inject internal constructor(
-    private val interactor: MainInteractor,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler
+  private val interactor: MainInteractor,
+  @Named("computation") computationScheduler: Scheduler,
+  @Named("io") ioScheduler: Scheduler,
+  @Named("main") mainScheduler: Scheduler
 ) : SchedulerPresenter<View>(
     computationScheduler,
     ioScheduler, mainScheduler

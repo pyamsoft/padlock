@@ -61,8 +61,8 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     val clearDb = findPreference(getString(R.string.clear_db_key))

@@ -28,14 +28,14 @@ interface LockInfoInteractor : LockStateModifyInteractor {
 
   @CheckResult
   fun fetchActivityEntryList(
-      force: Boolean,
-      packageName: String
+    force: Boolean,
+    packageName: String
   ): Single<List<ActivityEntry>>
 
   @CheckResult
   fun calculateListDiff(
-      packageName: String,
-      oldList: List<ActivityEntry>,
-      newList: List<ActivityEntry>
+    packageName: String,
+    oldList: List<ActivityEntry>,
+    newList: List<ActivityEntry>
   ): Single<ListDiffResult<ActivityEntry>>
 }

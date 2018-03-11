@@ -26,7 +26,7 @@ interface PackageActivityManager {
 
   @CheckResult
   fun isValidActivity(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Single<Boolean>
 }

@@ -25,8 +25,8 @@ import timber.log.Timber
 class BootReceiver : BroadcastReceiver() {
 
   override fun onReceive(
-      context: Context?,
-      intent: Intent?
+    context: Context?,
+    intent: Intent?
   ) {
     if (intent != null) {
       if (Intent.ACTION_BOOT_COMPLETED == intent.action) {

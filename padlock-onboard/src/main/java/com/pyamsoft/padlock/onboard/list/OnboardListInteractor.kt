@@ -22,7 +22,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class OnboardListInteractor @Inject internal constructor(
-    private val preferences: OnboardingPreferences
+  private val preferences: OnboardingPreferences
 ) {
 
   fun completeOnboarding() {

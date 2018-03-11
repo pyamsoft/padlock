@@ -37,8 +37,8 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockListItem internal constructor(
-    internal var activity: FragmentActivity,
-    entry: AppEntry
+  internal var activity: FragmentActivity,
+  entry: AppEntry
 ) : ModelAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(
     entry
 ), FilterableItem<LockListItem, LockListItem.ViewHolder> {
@@ -57,8 +57,8 @@ class LockListItem internal constructor(
   }
 
   override fun bindView(
-      holder: ViewHolder,
-      payloads: List<Any>
+    holder: ViewHolder,
+    payloads: List<Any>
   ) {
     super.bindView(holder, payloads)
     holder.apply {

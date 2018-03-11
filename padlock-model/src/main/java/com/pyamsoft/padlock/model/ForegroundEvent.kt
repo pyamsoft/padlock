@@ -19,8 +19,8 @@ package com.pyamsoft.padlock.model
 import android.support.annotation.CheckResult
 
 data class ForegroundEvent(
-    val packageName: String,
-    val className: String
+  val packageName: String,
+  val className: String
 ) {
 
   companion object {
@@ -31,6 +31,6 @@ data class ForegroundEvent(
     @JvmStatic
     @CheckResult
     fun isEmpty(event: ForegroundEvent): Boolean =
-        event.packageName == EMPTY.packageName || event.className == EMPTY.className
+      event.packageName == EMPTY.packageName || event.className == EMPTY.className
   }
 }

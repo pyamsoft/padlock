@@ -25,16 +25,16 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockEntryPresenter @Inject internal constructor(
-    @param:Named(
-        "package_name"
-    ) private val packageName: String, @param:Named(
-        "activity_name"
-    ) private val activityName: String, @param:Named(
-        "real_name"
-    ) private val realName: String,
-    private val interactor: LockEntryInteractor,
-    @Named("computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler
+  @param:Named(
+      "package_name"
+  ) private val packageName: String, @param:Named(
+      "activity_name"
+  ) private val activityName: String, @param:Named(
+      "real_name"
+  ) private val realName: String,
+  private val interactor: LockEntryInteractor,
+  @Named("computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler,
+  @Named("main") mainScheduler: Scheduler
 ) : SchedulerPresenter<View>(
     computationScheduler,
     ioScheduler, mainScheduler
@@ -51,8 +51,8 @@ class LockEntryPresenter @Inject internal constructor(
   }
 
   fun submit(
-      lockCode: String?,
-      currentAttempt: String
+    lockCode: String?,
+    currentAttempt: String
   ) {
     dispose {
       interactor.submitPin(packageName, activityName, lockCode, currentAttempt)
@@ -90,10 +90,10 @@ class LockEntryPresenter @Inject internal constructor(
   }
 
   fun postUnlock(
-      lockCode: String?,
-      isSystem: Boolean,
-      shouldExclude: Boolean,
-      ignoreTime: Long
+    lockCode: String?,
+    isSystem: Boolean,
+    shouldExclude: Boolean,
+    ignoreTime: Long
   ) {
     dispose {
       interactor.postUnlock(

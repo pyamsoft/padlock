@@ -73,9 +73,9 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? {
     binding = FragmentPurgeBinding.inflate(inflater, container, false)
     return binding.root
@@ -100,8 +100,8 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     refreshLatch = RefreshLatch.create(viewLifecycle) {
@@ -233,8 +233,8 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   private fun handleDeleteRequest(
-      position: Int,
-      packageName: String
+    position: Int,
+    packageName: String
   ) {
     Timber.d("Handle delete request for %s at %d", packageName, position)
     PurgeSingleItemDialog.newInstance(packageName)

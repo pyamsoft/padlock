@@ -20,8 +20,15 @@ import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockListUpdater
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
 import com.pyamsoft.padlock.list.info.LockInfoEvent
-import com.pyamsoft.padlock.model.*
-import com.pyamsoft.padlock.model.LockState.*
+import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.model.ClearPinEvent
+import com.pyamsoft.padlock.model.CreatePinEvent
+import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.LockState.DEFAULT
+import com.pyamsoft.padlock.model.LockState.LOCKED
+import com.pyamsoft.padlock.model.LockState.WHITELISTED
+import com.pyamsoft.padlock.model.LockWhitelistedEvent
+import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.list.ListDiffProvider
@@ -34,20 +41,20 @@ import javax.inject.Named
 
 @JvmSuppressWildcards
 class LockListPresenter @Inject internal constructor(
-    private val lockListInteractor: LockListInteractor,
-    private val lockListUpdater: LockListUpdater,
-    @Named("cache_lock_list") private val cache: Cache,
-    private val stateInteractor: LockServiceStateInteractor,
-    private val lockListBus: EventBus<LockListEvent>,
-    private val lockInfoBus: EventBus<LockInfoEvent>,
-    private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
-    private val clearPinBus: EventBus<ClearPinEvent>,
-    private val createPinBus: EventBus<CreatePinEvent>,
-    private val lockInfoChangeBus: EventBus<LockInfoEvent.Callback>,
-    private val listDiffProvider: ListDiffProvider<AppEntry>,
-    @Named("computation") compScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler
+  private val lockListInteractor: LockListInteractor,
+  private val lockListUpdater: LockListUpdater,
+  @Named("cache_lock_list") private val cache: Cache,
+  private val stateInteractor: LockServiceStateInteractor,
+  private val lockListBus: EventBus<LockListEvent>,
+  private val lockInfoBus: EventBus<LockInfoEvent>,
+  private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
+  private val clearPinBus: EventBus<ClearPinEvent>,
+  private val createPinBus: EventBus<CreatePinEvent>,
+  private val lockInfoChangeBus: EventBus<LockInfoEvent.Callback>,
+  private val listDiffProvider: ListDiffProvider<AppEntry>,
+  @Named("computation") compScheduler: Scheduler,
+  @Named("main") mainScheduler: Scheduler,
+  @Named("io") ioScheduler: Scheduler
 ) : SchedulerPresenter<LockListPresenter.View>(compScheduler, ioScheduler, mainScheduler) {
 
   override fun onCreate() {
@@ -194,10 +201,10 @@ class LockListPresenter @Inject internal constructor(
   }
 
   private fun modifyDatabaseEntry(
-      isChecked: Boolean,
-      packageName: String,
-      code: String?,
-      system: Boolean
+    isChecked: Boolean,
+    packageName: String,
+    code: String?,
+    system: Boolean
   ) {
     dispose {
       // No whitelisting for modifications from the List
@@ -250,9 +257,9 @@ class LockListPresenter @Inject internal constructor(
   }
 
   fun updateCache(
-      packageName: String,
-      whitelisted: Int,
-      hardLocked: Int
+    packageName: String,
+    whitelisted: Int,
+    hardLocked: Int
   ) {
     dispose {
       lockListUpdater.update(packageName, whitelisted, hardLocked)

@@ -24,11 +24,11 @@ interface LockStateModifyInteractor {
 
   @CheckResult
   fun modifySingleDatabaseEntry(
-      oldLockState: LockState,
-      newLockState: LockState,
-      packageName: String,
-      activityName: String,
-      code: String?,
-      system: Boolean
+    oldLockState: LockState,
+    newLockState: LockState,
+    packageName: String,
+    activityName: String,
+    code: String?,
+    system: Boolean
   ): Single<LockState>
 }

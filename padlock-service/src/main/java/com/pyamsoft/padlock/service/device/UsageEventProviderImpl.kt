@@ -31,8 +31,8 @@ internal class UsageEventProviderImpl @Inject internal constructor(context: Cont
   private val usage = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
   override fun queryEvents(
-      begin: Long,
-      end: Long
+    begin: Long,
+    end: Long
   ): UsageEventProvider.EventQueryResult = EventQueryResultImpl(usage.queryEvents(begin, end))
 
   private data class EventQueryResultImpl(private val events: UsageEvents) : UsageEventProvider.EventQueryResult {

@@ -18,7 +18,10 @@ package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockInfoUpdater
-import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.*
+import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Created
+import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Deleted
+import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Error
+import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Whitelisted
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
@@ -33,16 +36,16 @@ import javax.inject.Named
 
 @JvmSuppressWildcards
 class LockInfoPresenter @Inject internal constructor(
-    private val changeBus: EventBus<LockInfoEvent.Callback>,
-    private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
-    private val bus: EventBus<LockInfoEvent>,
-    @param:Named("package_name") private val packageName: String,
-    private val lockInfoUpdater: LockInfoUpdater,
-    private val interactor: LockInfoInteractor,
-    private val listDiffProvider: ListDiffProvider<ActivityEntry>,
-    @Named("computation") compScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler
+  private val changeBus: EventBus<LockInfoEvent.Callback>,
+  private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
+  private val bus: EventBus<LockInfoEvent>,
+  @param:Named("package_name") private val packageName: String,
+  private val lockInfoUpdater: LockInfoUpdater,
+  private val interactor: LockInfoInteractor,
+  private val listDiffProvider: ListDiffProvider<ActivityEntry>,
+  @Named("computation") compScheduler: Scheduler,
+  @Named("io") ioScheduler: Scheduler,
+  @Named("main") mainScheduler: Scheduler
 ) : SchedulerPresenter<LockInfoPresenter.View>(compScheduler, ioScheduler, mainScheduler) {
 
   override fun onCreate() {
@@ -130,9 +133,9 @@ class LockInfoPresenter @Inject internal constructor(
   }
 
   fun update(
-      packageName: String,
-      activityName: String,
-      lockState: LockState
+    packageName: String,
+    activityName: String,
+    lockState: LockState
   ) {
     dispose {
       lockInfoUpdater.update(packageName, activityName, lockState)

@@ -50,9 +50,9 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? {
     binding = FragmentPinEntryTextBinding.inflate(inflater, container, false)
     return binding.root
@@ -67,8 +67,8 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     // Resolve TextInputLayout edit texts

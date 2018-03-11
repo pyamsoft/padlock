@@ -38,17 +38,17 @@ class MainFragment : CanaryFragment() {
   private lateinit var binding: FragmentMainBinding
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? {
     binding = FragmentMainBinding.inflate(inflater, container, false)
     return binding.root
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     setupBottomNavigation()
@@ -85,8 +85,8 @@ class MainFragment : CanaryFragment() {
 
           @CheckResult
           private fun replaceFragment(
-              fragment: Fragment,
-              tag: String
+            fragment: Fragment,
+            tag: String
           ): Boolean {
             val containerId = R.id.main_view_container
             val fragmentManager = childFragmentManager

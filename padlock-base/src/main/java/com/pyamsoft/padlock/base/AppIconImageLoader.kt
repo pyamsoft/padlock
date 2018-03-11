@@ -36,11 +36,11 @@ import timber.log.Timber
 
 @JvmSuppressWildcards
 internal class AppIconImageLoader internal constructor(
-    private val packageName: String,
-    private val appIconImageCache: ImageCache<String, Drawable>,
-    private val packageIconManager: PackageIconManager<Drawable>,
-    private val mainScheduler: Scheduler,
-    private val ioScheduler: Scheduler
+  private val packageName: String,
+  private val appIconImageCache: ImageCache<String, Drawable>,
+  private val packageIconManager: PackageIconManager<Drawable>,
+  private val mainScheduler: Scheduler,
+  private val ioScheduler: Scheduler
 ) : GenericLoader<Drawable>() {
 
   @CheckResult
@@ -63,8 +63,8 @@ internal class AppIconImageLoader internal constructor(
 
   @CheckResult
   private fun load(
-      target: Target<Drawable>,
-      packageName: String
+    target: Target<Drawable>,
+    packageName: String
   ): Loaded {
     return RxLoaded(loadCached(packageName)
         .subscribeOn(ioScheduler)
@@ -100,5 +100,5 @@ internal class AppIconImageLoader internal constructor(
 
   @CheckResult
   private fun loadFresh(packageName: String): Single<IconHolder<Drawable>> =
-      packageIconManager.loadIconForPackageOrDefault(packageName)
+    packageIconManager.loadIconForPackageOrDefault(packageName)
 }

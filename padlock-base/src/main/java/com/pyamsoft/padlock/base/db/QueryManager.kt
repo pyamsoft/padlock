@@ -25,27 +25,27 @@ import io.reactivex.Single
 import java.util.Collections
 
 internal class QueryManager internal constructor(
-    private val briteDatabase: BriteDatabase,
-    private val factory: PadLockEntryModel.Factory<*>
+  private val briteDatabase: BriteDatabase,
+  private val factory: PadLockEntryModel.Factory<*>
 ) {
 
   private val withPackageActivityNameDefaultMapper: RowMapper<out PadLockEntryModel> =
-      factory.withPackageActivityNameDefaultMapper()
+    factory.withPackageActivityNameDefaultMapper()
 
   private val allEntriesMapper: RowMapper<out PadLockEntryModel.AllEntriesModel> =
-      factory.allEntriesMapper { packageName, activityName, whitelist ->
-        AutoValue_PadLockSqlEntry_AllEntries(packageName, activityName, whitelist)
-      }
+    factory.allEntriesMapper { packageName, activityName, whitelist ->
+      AutoValue_PadLockSqlEntry_AllEntries(packageName, activityName, whitelist)
+    }
 
   private val withPackageNameMapper: RowMapper<out PadLockEntryModel.WithPackageNameModel> =
-      factory.withPackageNameMapper { activityName, whitelist ->
-        AutoValue_PadLockSqlEntry_WithPackageName(activityName, whitelist)
-      }
+    factory.withPackageNameMapper { activityName, whitelist ->
+      AutoValue_PadLockSqlEntry_WithPackageName(activityName, whitelist)
+    }
 
   @CheckResult
   internal fun queryWithPackageActivityNameDefault(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Single<PadLockEntryModel> {
     val query = factory.withPackageActivityNameDefault(
         packageName, PadLockEntry.PACKAGE_ACTIVITY_NAME, activityName
@@ -57,7 +57,7 @@ internal class QueryManager internal constructor(
 
   @CheckResult
   internal fun queryWithPackageName(
-      packageName: String
+    packageName: String
   ): Single<List<PadLockEntryModel.WithPackageNameModel>> {
     val statement = factory.withPackageName(packageName)
     return briteDatabase.createQuery(statement.tables, statement)

@@ -37,9 +37,9 @@ internal class UpdateManager internal constructor(briteDatabase: BriteDatabase) 
 
   @CheckResult
   internal fun updateWhitelist(
-      packageName: String,
-      activityName: String,
-      whitelist: Boolean
+    packageName: String,
+    activityName: String,
+    whitelist: Boolean
   ): Int {
     if (PadLockEntry.PACKAGE_EMPTY == packageName || PadLockEntry.ACTIVITY_EMPTY == activityName) {
       throw RuntimeException("Cannot update whitelist EMPTY entry")
@@ -54,9 +54,9 @@ internal class UpdateManager internal constructor(briteDatabase: BriteDatabase) 
 
   @CheckResult
   internal fun updateIgnoreTime(
-      packageName: String,
-      activityName: String,
-      ignoreTime: Long
+    packageName: String,
+    activityName: String,
+    ignoreTime: Long
   ): Int {
     if (PadLockEntry.PACKAGE_EMPTY == packageName || PadLockEntry.ACTIVITY_EMPTY == activityName) {
       throw RuntimeException("Cannot update ignore time EMPTY entry")
@@ -71,9 +71,9 @@ internal class UpdateManager internal constructor(briteDatabase: BriteDatabase) 
 
   @CheckResult
   internal fun updateLockTime(
-      packageName: String,
-      activityName: String,
-      lockTime: Long
+    packageName: String,
+    activityName: String,
+    lockTime: Long
   ): Int {
     if (PadLockEntry.PACKAGE_EMPTY == packageName || PadLockEntry.ACTIVITY_EMPTY == activityName) {
       throw RuntimeException("Cannot update lock time EMPTY entry")

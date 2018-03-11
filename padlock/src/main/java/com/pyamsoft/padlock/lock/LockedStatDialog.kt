@@ -62,14 +62,14 @@ class LockedStatDialog : CanaryDialog() {
   }
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? = binding.root
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     binding.apply {
@@ -99,12 +99,12 @@ class LockedStatDialog : CanaryDialog() {
     @CheckResult
     @JvmStatic
     fun newInstance(
-        displayedLabel: String,
-        packageName: String,
-        activityName: String,
-        realName: String,
-        system: Boolean,
-        drawable: Drawable
+      displayedLabel: String,
+      packageName: String,
+      activityName: String,
+      realName: String,
+      system: Boolean,
+      drawable: Drawable
     ): LockedStatDialog {
       return LockedStatDialog().apply {
         arguments = Bundle().apply {

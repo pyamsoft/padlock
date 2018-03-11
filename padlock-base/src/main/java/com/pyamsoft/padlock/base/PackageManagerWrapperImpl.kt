@@ -23,7 +23,11 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.support.annotation.CheckResult
-import com.pyamsoft.padlock.api.*
+import com.pyamsoft.padlock.api.LockListPreferences
+import com.pyamsoft.padlock.api.PackageActivityManager
+import com.pyamsoft.padlock.api.PackageApplicationManager
+import com.pyamsoft.padlock.api.PackageIconManager
+import com.pyamsoft.padlock.api.PackageLabelManager
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.IconHolder
@@ -39,8 +43,8 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PackageManagerWrapperImpl @Inject internal constructor(
-    context: Context,
-    private val listPreferences: LockListPreferences
+  context: Context,
+  private val listPreferences: LockListPreferences
 ) : PackageActivityManager,
     PackageApplicationManager,
     PackageLabelManager,
@@ -168,8 +172,8 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   }
 
   override fun isValidActivity(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Single<Boolean> {
     return Single.defer {
       if (packageName.isEmpty() || activityName.isEmpty()) {

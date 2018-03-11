@@ -23,13 +23,13 @@ import com.pyamsoft.padlock.model.LockState
 sealed class LockInfoEvent {
 
   data class Modify internal constructor(
-      val id: String,
-      val name: String,
-      val packageName: String,
-      val oldState: LockState,
-      val newState: LockState,
-      val code: String?,
-      val system: Boolean
+    val id: String,
+    val name: String,
+    val packageName: String,
+    val oldState: LockState,
+    val newState: LockState,
+    val code: String?,
+    val system: Boolean
   ) : LockInfoEvent() {
 
     companion object {
@@ -37,10 +37,10 @@ sealed class LockInfoEvent {
       @JvmStatic
       @CheckResult
       fun from(
-          entry: ActivityEntry,
-          newState: LockState,
-          code: String?,
-          system: Boolean
+        entry: ActivityEntry,
+        newState: LockState,
+        code: String?,
+        system: Boolean
       ): Modify {
         return Modify(
             id = entry.id, name = entry.name, packageName = entry.packageName,
@@ -54,26 +54,26 @@ sealed class LockInfoEvent {
   sealed class Callback : LockInfoEvent() {
 
     data class Created(
-        val id: String,
-        val packageName: String,
-        val oldState: LockState
+      val id: String,
+      val packageName: String,
+      val oldState: LockState
     ) : Callback()
 
     data class Deleted(
-        val id: String,
-        val packageName: String,
-        val oldState: LockState
+      val id: String,
+      val packageName: String,
+      val oldState: LockState
     ) : Callback()
 
     data class Whitelisted(
-        val id: String,
-        val packageName: String,
-        val oldState: LockState
+      val id: String,
+      val packageName: String,
+      val oldState: LockState
     ) : Callback()
 
     data class Error(
-        val throwable: Throwable,
-        val packageName: String
+      val throwable: Throwable,
+      val packageName: String
     ) : Callback()
   }
 }

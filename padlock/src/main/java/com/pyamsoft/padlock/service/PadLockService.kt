@@ -16,7 +16,11 @@
 
 package com.pyamsoft.padlock.service
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.LifecycleRegistry
@@ -77,24 +81,24 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
   }
 
   override fun onStartCommand(
-      intent: Intent?,
-      flags: Int,
-      startId: Int
+    intent: Intent?,
+    flags: Int,
+    startId: Int
   ): Int {
     Timber.d("Service onStartCommand")
     return Service.START_STICKY
   }
 
   override fun onRecheck(
-      packageName: String,
-      className: String
+    packageName: String,
+    className: String
   ) {
     presenter.processActiveApplicationIfMatching(packageName, className)
   }
 
   override fun onStartLockScreen(
-      entry: PadLockEntryModel,
-      realName: String
+    entry: PadLockEntryModel,
+    realName: String
   ) {
     LockScreenActivity.start(this, entry, realName)
   }
@@ -142,7 +146,7 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
 
     Timber.d("Create notification channel with id: %s", NOTIFICATION_CHANNEL_ID)
     val notificationManager: NotificationManager =
-        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.createNotificationChannel(notificationChannel)
   }
 

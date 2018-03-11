@@ -30,10 +30,10 @@ import javax.inject.Singleton
 @JvmSuppressWildcards
 @Singleton
 class AppIconLoader @Inject internal constructor(
-    private val appIconImageCache: ImageCache<String, Drawable>,
-    @param:Named("main") private val mainScheduler: Scheduler,
-    @param:Named("io") private val ioScheduler: Scheduler,
-    private val packageIconManager: PackageIconManager<Drawable>
+  private val appIconImageCache: ImageCache<String, Drawable>,
+  @param:Named("main") private val mainScheduler: Scheduler,
+  @param:Named("io") private val ioScheduler: Scheduler,
+  private val packageIconManager: PackageIconManager<Drawable>
 ) : Cache {
 
   override fun clearCache() {
@@ -42,10 +42,10 @@ class AppIconLoader @Inject internal constructor(
 
   @CheckResult
   fun forPackageName(packageName: String): GenericLoader<Drawable> =
-      AppIconImageLoader(
-          packageName, appIconImageCache,
-          packageIconManager,
-          mainScheduler,
-          ioScheduler
-      )
+    AppIconImageLoader(
+        packageName, appIconImageCache,
+        packageIconManager,
+        mainScheduler,
+        ioScheduler
+    )
 }

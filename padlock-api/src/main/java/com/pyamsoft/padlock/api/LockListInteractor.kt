@@ -28,8 +28,8 @@ interface LockListInteractor : LockStateModifyInteractor {
 
   @CheckResult
   fun calculateListDiff(
-      oldList: List<AppEntry>,
-      newList: List<AppEntry>
+    oldList: List<AppEntry>,
+    newList: List<AppEntry>
   ): Single<ListDiffResult<AppEntry>>
 
   @CheckResult

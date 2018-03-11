@@ -24,8 +24,8 @@ import com.mikepenz.fastadapter.utils.DefaultItemListImpl
 class NeverNotifyItemList<T : IItem<*, *>> private constructor() : DefaultItemListImpl<T>() {
 
   override fun setNewList(
-      items: MutableList<T>,
-      notify: Boolean
+    items: MutableList<T>,
+    notify: Boolean
   ) {
     super.setNewList(items, false)
   }

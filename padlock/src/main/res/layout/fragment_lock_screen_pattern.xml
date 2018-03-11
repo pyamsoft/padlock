@@ -19,7 +19,8 @@
   <android.support.constraint.ConstraintLayout
       xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="match_parent"
-      android:layout_height="match_parent">
+      android:layout_height="match_parent"
+      >
 
     <com.andrognito.patternlockview.PatternLockView
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -34,7 +35,8 @@
         app:layout_constraintHeight_default="wrap"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_default="wrap"/>
+        app:layout_constraintWidth_default="wrap"
+        />
 
   </android.support.constraint.ConstraintLayout>
 </layout>

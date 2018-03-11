@@ -17,6 +17,6 @@
 package com.pyamsoft.padlock.model
 
 data class RecheckEvent(
-    val packageName: String,
-    val className: String
+  val packageName: String,
+  val className: String
 )

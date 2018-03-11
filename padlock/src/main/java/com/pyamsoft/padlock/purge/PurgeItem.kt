@@ -23,7 +23,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemPurgeBinding
 
 internal class PurgeItem internal constructor(
-    packageName: String
+  packageName: String
 ) : ModelAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
     packageName
 ) {
@@ -42,8 +42,8 @@ internal class PurgeItem internal constructor(
   }
 
   override fun bindView(
-      holder: ViewHolder,
-      payloads: List<Any>
+    holder: ViewHolder,
+    payloads: List<Any>
   ) {
     super.bindView(holder, payloads)
     holder.apply {

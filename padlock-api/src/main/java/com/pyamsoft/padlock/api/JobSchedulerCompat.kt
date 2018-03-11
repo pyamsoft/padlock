@@ -19,13 +19,13 @@ package com.pyamsoft.padlock.api
 interface JobSchedulerCompat {
 
   fun cancel(
-      targetClass: Class<*>,
-      params: List<Pair<String, String>> = emptyList()
+    targetClass: Class<*>,
+    params: List<Pair<String, String>> = emptyList()
   )
 
   fun queue(
-      targetClass: Class<*>,
-      params: List<Pair<String, String>> = emptyList(),
-      triggerTime: Long
+    targetClass: Class<*>,
+    params: List<Pair<String, String>> = emptyList(),
+    triggerTime: Long
   )
 }

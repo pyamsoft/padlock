@@ -23,12 +23,12 @@ interface PadLockDBInsert {
 
   @CheckResult
   fun insert(
-      packageName: String,
-      activityName: String,
-      lockCode: String?,
-      lockUntilTime: Long,
-      ignoreUntilTime: Long,
-      isSystem: Boolean,
-      whitelist: Boolean
+    packageName: String,
+    activityName: String,
+    lockCode: String?,
+    lockUntilTime: Long,
+    ignoreUntilTime: Long,
+    isSystem: Boolean,
+    whitelist: Boolean
   ): Completable
 }

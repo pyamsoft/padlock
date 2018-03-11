@@ -27,8 +27,8 @@ interface PurgeInteractor {
 
   @CheckResult
   fun calculateDiff(
-      oldList: List<String>,
-      newList: List<String>
+    oldList: List<String>,
+    newList: List<String>
   ): Single<ListDiffResult<String>>
 
   @CheckResult

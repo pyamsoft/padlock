@@ -33,7 +33,7 @@ interface LockScreenInteractor {
 
   @CheckResult
   fun isAlreadyUnlocked(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Single<Boolean>
 }

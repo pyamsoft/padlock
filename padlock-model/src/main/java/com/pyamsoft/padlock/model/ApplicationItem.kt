@@ -19,9 +19,9 @@ package com.pyamsoft.padlock.model
 import android.support.annotation.CheckResult
 
 data class ApplicationItem(
-    val packageName: String,
-    val system: Boolean,
-    val enabled: Boolean
+  val packageName: String,
+  val system: Boolean,
+  val enabled: Boolean
 ) {
 
   @CheckResult
@@ -35,9 +35,9 @@ data class ApplicationItem(
     @CheckResult
     @JvmStatic
     fun create(
-        packageName: String,
-        system: Boolean,
-        enabled: Boolean
+      packageName: String,
+      system: Boolean,
+      enabled: Boolean
     ): ApplicationItem = ApplicationItem(
         packageName, system, enabled
     )

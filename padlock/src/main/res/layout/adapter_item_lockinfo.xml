@@ -24,7 +24,8 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:minHeight="48dp"
-      android:padding="4dp">
+      android:padding="4dp"
+      >
 
     <RadioGroup
         android:id="@+id/lock_info_radio_group"
@@ -37,24 +38,28 @@
         android:paddingTop="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        >
 
       <RadioButton
           android:id="@+id/lock_info_radio_default"
           android:layout_width="wrap_content"
-          android:layout_height="wrap_content"/>
+          android:layout_height="wrap_content"
+          />
 
       <RadioButton
           android:id="@+id/lock_info_radio_white"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          app:buttonTint="@color/state_list_whitelisted"/>
+          app:buttonTint="@color/state_list_whitelisted"
+          />
 
       <RadioButton
           android:id="@+id/lock_info_radio_black"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          app:buttonTint="@color/state_list_hardlocked"/>
+          app:buttonTint="@color/state_list_hardlocked"
+          />
 
     </RadioGroup>
 
@@ -72,7 +77,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/lock_info_radio_group"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
   </android.support.constraint.ConstraintLayout>
 </layout>

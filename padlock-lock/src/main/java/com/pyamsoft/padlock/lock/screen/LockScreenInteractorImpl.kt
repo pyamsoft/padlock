@@ -27,24 +27,24 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockScreenInteractorImpl @Inject internal constructor(
-    private val lockPassed: LockPassed,
-    private val labelManager: PackageLabelManager,
-    private val preferences: LockScreenPreferences
+  private val lockPassed: LockPassed,
+  private val labelManager: PackageLabelManager,
+  private val preferences: LockScreenPreferences
 ) :
     LockScreenInteractor {
 
   override fun getLockScreenType(): Single<LockScreenType> =
-      Single.fromCallable { preferences.getCurrentLockType() }
+    Single.fromCallable { preferences.getCurrentLockType() }
 
   override fun getDefaultIgnoreTime(): Single<Long> =
-      Single.fromCallable { preferences.getDefaultIgnoreTime() }
+    Single.fromCallable { preferences.getDefaultIgnoreTime() }
 
   override fun getDisplayName(packageName: String): Single<String> =
-      labelManager.loadPackageLabel(packageName)
+    labelManager.loadPackageLabel(packageName)
 
   override fun isAlreadyUnlocked(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Single<Boolean> =
-      Single.fromCallable { lockPassed.check(packageName, activityName) }
+    Single.fromCallable { lockPassed.check(packageName, activityName) }
 }

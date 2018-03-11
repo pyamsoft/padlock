@@ -21,8 +21,8 @@ import io.reactivex.Completable
 interface LockListUpdater {
 
   fun update(
-      packageName: String,
-      whitelisted: Int,
-      hardLocked: Int
+    packageName: String,
+    whitelisted: Int,
+    hardLocked: Int
   ): Completable
 }

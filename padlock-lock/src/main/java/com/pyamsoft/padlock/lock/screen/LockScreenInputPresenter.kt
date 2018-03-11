@@ -27,10 +27,10 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockScreenInputPresenter @Inject internal constructor(
-    private val interactor: LockScreenInteractor,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler
+  private val interactor: LockScreenInteractor,
+  @Named("computation") computationScheduler: Scheduler,
+  @Named("main") mainScheduler: Scheduler,
+  @Named("io") ioScheduler: Scheduler
 ) : SchedulerPresenter<View>(
     computationScheduler,
     ioScheduler, mainScheduler

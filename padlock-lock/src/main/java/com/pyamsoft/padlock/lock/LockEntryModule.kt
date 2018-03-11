@@ -22,9 +22,9 @@ import javax.inject.Named
 
 @Module
 class LockEntryModule(
-    private val packageName: String,
-    private val activityName: String,
-    private val realName: String
+  private val packageName: String,
+  private val activityName: String,
+  private val realName: String
 ) {
 
   @Provides

@@ -16,7 +16,12 @@
 
 package com.pyamsoft.padlock.lifecycle
 
-import android.arch.lifecycle.Lifecycle.Event.*
+import android.arch.lifecycle.Lifecycle.Event.ON_CREATE
+import android.arch.lifecycle.Lifecycle.Event.ON_DESTROY
+import android.arch.lifecycle.Lifecycle.Event.ON_PAUSE
+import android.arch.lifecycle.Lifecycle.Event.ON_RESUME
+import android.arch.lifecycle.Lifecycle.Event.ON_START
+import android.arch.lifecycle.Lifecycle.Event.ON_STOP
 import android.arch.lifecycle.LifecycleRegistry
 
 fun LifecycleRegistry.fakeBind() {

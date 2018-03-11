@@ -49,9 +49,9 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
   }
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? {
     binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
     return binding.root
@@ -67,8 +67,8 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     listener = object : PatternLockViewListener {
@@ -138,11 +138,11 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
     @JvmStatic
     @CheckResult
     fun newInstance(
-        lockedPackageName: String,
-        lockedActivityName: String,
-        lockedCode: String?,
-        lockedRealName: String,
-        lockedSystem: Boolean
+      lockedPackageName: String,
+      lockedActivityName: String,
+      lockedCode: String?,
+      lockedRealName: String,
+      lockedSystem: Boolean
     ): LockScreenPatternFragment {
       val fragment = LockScreenPatternFragment()
       fragment.arguments = LockScreenBaseFragment.buildBundle(

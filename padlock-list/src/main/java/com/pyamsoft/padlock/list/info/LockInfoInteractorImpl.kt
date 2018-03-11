@@ -18,7 +18,12 @@ package com.pyamsoft.padlock.list.info
 
 import android.support.annotation.CheckResult
 import android.support.v7.util.DiffUtil
-import com.pyamsoft.padlock.api.*
+import com.pyamsoft.padlock.api.LockInfoInteractor
+import com.pyamsoft.padlock.api.LockStateModifyInteractor
+import com.pyamsoft.padlock.api.OnboardingPreferences
+import com.pyamsoft.padlock.api.PackageActivityManager
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
@@ -36,11 +41,11 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockInfoInteractorImpl @Inject internal constructor(
-    private val queryDb: PadLockDBQuery,
-    private val packageActivityManager: PackageActivityManager,
-    private val preferences: OnboardingPreferences,
-    private val updateDb: PadLockDBUpdate,
-    private val modifyInteractor: LockStateModifyInteractor
+  private val queryDb: PadLockDBQuery,
+  private val packageActivityManager: PackageActivityManager,
+  private val preferences: OnboardingPreferences,
+  private val updateDb: PadLockDBUpdate,
+  private val modifyInteractor: LockStateModifyInteractor
 ) : LockInfoInteractor {
 
   override fun hasShownOnBoarding(): Single<Boolean> {
@@ -50,17 +55,17 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun getLockedActivityEntries(
-      name: String
+    name: String
   ): Single<List<PadLockEntryModel.WithPackageNameModel>> = queryDb.queryWithPackageName(name)
 
   @CheckResult
   private fun getPackageActivities(name: String): Single<List<String>> =
-      packageActivityManager.getActivityListForPackage(name)
+    packageActivityManager.getActivityListForPackage(name)
 
   @CheckResult
   private fun findMatchingEntry(
-      lockEntries: List<PadLockEntryModel.WithPackageNameModel>,
-      activityName: String
+    lockEntries: List<PadLockEntryModel.WithPackageNameModel>,
+    activityName: String
   ): PadLockEntryModel.WithPackageNameModel? {
     // Short circuit if empty
     if (lockEntries.isEmpty()) {
@@ -110,9 +115,9 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun findActivityEntry(
-      packageName: String,
-      activityName: String,
-      padLockEntries: MutableList<PadLockEntryModel.WithPackageNameModel>
+    packageName: String,
+    activityName: String,
+    padLockEntries: MutableList<PadLockEntryModel.WithPackageNameModel>
   ): ActivityEntry {
     val foundEntry = findMatchingEntry(padLockEntries, activityName)
 
@@ -126,9 +131,9 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun createActivityEntry(
-      packageName: String,
-      name: String,
-      foundEntry: PadLockEntryModel.WithPackageNameModel?
+    packageName: String,
+    name: String,
+    foundEntry: PadLockEntryModel.WithPackageNameModel?
   ): ActivityEntry {
     val state: LockState
     if (foundEntry == null) {
@@ -145,9 +150,9 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun createSortedActivityEntryList(
-      fetchName: String,
-      names: List<String>,
-      entries: List<PadLockEntryModel.WithPackageNameModel>
+    fetchName: String,
+    names: List<String>,
+    entries: List<PadLockEntryModel.WithPackageNameModel>
   ): List<ActivityEntry> {
     // Sort here to avoid stream break
     // If the list is empty, the old flatMap call can hang, causing a list loading error
@@ -183,9 +188,9 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun activityListZipper(
-      fetchName: String
+    fetchName: String
   ): BiFunction<List<String>, List<PadLockEntryModel.WithPackageNameModel>, List<ActivityEntry>> =
-      BiFunction { names, entries -> createSortedActivityEntryList(fetchName, names, entries) }
+    BiFunction { names, entries -> createSortedActivityEntryList(fetchName, names, entries) }
 
   @CheckResult
   private fun fetchData(fetchName: String): Single<List<ActivityEntry>> {
@@ -196,9 +201,9 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun sortWithPackageNameOnTop(
-      packageName: String,
-      o1: ActivityEntry,
-      o2: ActivityEntry
+    packageName: String,
+    o1: ActivityEntry,
+    o2: ActivityEntry
   ): Int {
     // Package names are all the same
     val entry1Name: String = o1.name
@@ -233,8 +238,8 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
   }
 
   override fun fetchActivityEntryList(
-      force: Boolean,
-      packageName: String
+    force: Boolean,
+    packageName: String
   ): Single<List<ActivityEntry>> {
     return fetchData(packageName)
         .flatMapObservable { Observable.fromIterable(it) }
@@ -242,9 +247,9 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
   }
 
   override fun calculateListDiff(
-      packageName: String,
-      oldList: List<ActivityEntry>,
-      newList: List<ActivityEntry>
+    packageName: String,
+    oldList: List<ActivityEntry>,
+    newList: List<ActivityEntry>
   ): Single<ListDiffResult<ActivityEntry>> {
     return Single.fromCallable {
       val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -254,8 +259,8 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         override fun getNewListSize(): Int = newList.size
 
         override fun areItemsTheSame(
-            oldItemPosition: Int,
-            newItemPosition: Int
+          oldItemPosition: Int,
+          newItemPosition: Int
         ): Boolean {
           val oldItem: ActivityEntry = oldList[oldItemPosition]
           val newItem: ActivityEntry = newList[newItemPosition]
@@ -263,8 +268,8 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         }
 
         override fun areContentsTheSame(
-            oldItemPosition: Int,
-            newItemPosition: Int
+          oldItemPosition: Int,
+          newItemPosition: Int
         ): Boolean {
           val oldItem: ActivityEntry = oldList[oldItemPosition]
           val newItem: ActivityEntry = newList[newItemPosition]
@@ -272,8 +277,8 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         }
 
         override fun getChangePayload(
-            oldItemPosition: Int,
-            newItemPosition: Int
+          oldItemPosition: Int,
+          newItemPosition: Int
         ): Any? {
           // TODO: Construct specific change payload
           Timber.w("TODO: Construct specific change payload")
@@ -287,12 +292,12 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
   }
 
   override fun modifySingleDatabaseEntry(
-      oldLockState: LockState,
-      newLockState: LockState,
-      packageName: String,
-      activityName: String,
-      code: String?,
-      system: Boolean
+    oldLockState: LockState,
+    newLockState: LockState,
+    packageName: String,
+    activityName: String,
+    code: String?,
+    system: Boolean
   ): Single<LockState> {
     return modifyInteractor.modifySingleDatabaseEntry(
         oldLockState, newLockState, packageName,
@@ -313,9 +318,9 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun updateExistingEntry(
-      packageName: String,
-      activityName: String,
-      whitelist: Boolean
+    packageName: String,
+    activityName: String,
+    whitelist: Boolean
   ): Single<LockState> {
     Timber.d("Entry already exists for: %s %s, update it", packageName, activityName)
     return updateDb.updateWhitelist(packageName, activityName, whitelist)

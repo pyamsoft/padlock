@@ -21,7 +21,12 @@ import android.os.Bundle
 import android.support.annotation.CheckResult
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -67,17 +72,17 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
   }
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? {
     binding = DialogPinEntryBinding.inflate(inflater, container, false)
     return binding.root
   }
 
   private fun pushIfNotPresent(
-      pushFragment: PinEntryBaseFragment,
-      tag: String
+    pushFragment: PinEntryBaseFragment,
+    tag: String
   ) {
     val fragmentManager = childFragmentManager
     val fragment = fragmentManager.findFragmentByTag(tag)
@@ -93,8 +98,8 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     setupToolbar()

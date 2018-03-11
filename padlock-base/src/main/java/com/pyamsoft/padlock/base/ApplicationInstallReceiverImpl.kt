@@ -16,7 +16,11 @@
 
 package com.pyamsoft.padlock.base
 
-import android.app.*
+import android.app.Activity
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -40,15 +44,15 @@ import javax.inject.Singleton
 
 @Singleton
 internal class ApplicationInstallReceiverImpl @Inject internal constructor(
-    private val context: Context,
-    private val packageManagerWrapper: PackageLabelManager,
-    @param:Named("io") private val ioScheduler: Scheduler,
-    @param:Named("main") private val mainThreadScheduler: Scheduler,
-    @Named("main_activity") mainActivityClass: Class<out Activity>,
-    @param:Named("cache_purge") private val purgeCache: Cache,
-    @param:Named("cache_app_icons") private val iconCache: Cache,
-    @param:Named("cache_lock_list") private val listCache: Cache,
-    @param:Named("cache_lock_info") private val infoCache: Cache
+  private val context: Context,
+  private val packageManagerWrapper: PackageLabelManager,
+  @param:Named("io") private val ioScheduler: Scheduler,
+  @param:Named("main") private val mainThreadScheduler: Scheduler,
+  @Named("main_activity") mainActivityClass: Class<out Activity>,
+  @param:Named("cache_purge") private val purgeCache: Cache,
+  @param:Named("cache_app_icons") private val iconCache: Cache,
+  @param:Named("cache_lock_list") private val listCache: Cache,
+  @param:Named("cache_lock_info") private val infoCache: Cache
 ) : BroadcastReceiver(), ApplicationInstallReceiver {
 
   private val notificationManager: NotificationManager
@@ -91,8 +95,8 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   }
 
   override fun onReceive(
-      context: Context,
-      intent: Intent?
+    context: Context,
+    intent: Intent?
   ) {
     if (intent == null) {
       Timber.e("NULL Intent")
@@ -127,8 +131,8 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   }
 
   private fun onNewPackageInstalled(
-      packageName: String,
-      name: String
+    packageName: String,
+    name: String
   ) {
     Timber.i("Package Added: %s", packageName)
     val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)

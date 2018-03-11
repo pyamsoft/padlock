@@ -24,10 +24,10 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class OnboardAcceptTermsPresenter @Inject internal constructor(
-    private val interactor: OnboardAcceptTermsInteractor,
-    @Named("computation") compScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler
+  private val interactor: OnboardAcceptTermsInteractor,
+  @Named("computation") compScheduler: Scheduler,
+  @Named("io") ioScheduler: Scheduler,
+  @Named("main") mainScheduler: Scheduler
 ) : SchedulerPresenter<View>(
     compScheduler,
     ioScheduler,

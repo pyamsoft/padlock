@@ -31,7 +31,7 @@ abstract class LockEntrySingletonModule {
 
   @Binds
   internal abstract fun provideInteractorCache(
-      impl: LockEntryInteractorCache
+    impl: LockEntryInteractorCache
   ): LockEntryInteractor
 
   @Binds

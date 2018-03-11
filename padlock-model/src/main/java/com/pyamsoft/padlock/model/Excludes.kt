@@ -50,8 +50,8 @@ object Excludes {
   @JvmStatic
   @CheckResult
   private fun checkExclusion(
-      list: List<String>,
-      name: String
+    list: List<String>,
+    name: String
   ): Boolean {
     val check = name.trim()
         .toLowerCase()
@@ -61,8 +61,8 @@ object Excludes {
   @JvmStatic
   @CheckResult
   fun isLockScreen(
-      packageName: String,
-      className: String
+    packageName: String,
+    className: String
   ): Boolean {
     val packageCheck = packageName.trim()
         .toLowerCase()

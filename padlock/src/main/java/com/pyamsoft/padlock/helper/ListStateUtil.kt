@@ -50,8 +50,8 @@ object ListStateUtil : Cache {
   @JvmStatic
   @CheckResult
   fun restoreState(
-      tag: String,
-      savedInstanceState: Bundle?
+    tag: String,
+    savedInstanceState: Bundle?
   ): Int {
     val position: Int = savedInstanceState?.getInt(KEY_CURRENT_POSITION, 0) ?: 0
     if (position == 0) {
@@ -63,9 +63,9 @@ object ListStateUtil : Cache {
 
   @JvmStatic
   fun saveState(
-      tag: String,
-      outState: Bundle?,
-      recycler: RecyclerView?
+    tag: String,
+    outState: Bundle?,
+    recycler: RecyclerView?
   ) {
     val position: Int = getCurrentPosition(recycler)
     if (position > 0) {
@@ -77,8 +77,8 @@ object ListStateUtil : Cache {
   @JvmStatic
   @CheckResult
   fun restorePosition(
-      lastPosition: Int,
-      recycler: RecyclerView?
+    lastPosition: Int,
+    recycler: RecyclerView?
   ): Int {
     if (recycler != null) {
       if (lastPosition > 0) {

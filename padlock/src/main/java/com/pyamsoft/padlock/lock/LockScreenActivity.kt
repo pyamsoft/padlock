@@ -221,8 +221,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
   }
 
   private fun pushFragment(
-      pushFragment: Fragment,
-      tag: String
+    pushFragment: Fragment,
+    tag: String
   ) {
     val fragmentManager = supportFragmentManager
     val fragment = fragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
@@ -343,9 +343,9 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
      */
     @JvmStatic
     fun start(
-        context: Context,
-        entry: PadLockEntryModel,
-        realName: String
+      context: Context,
+      entry: PadLockEntryModel,
+      realName: String
     ) {
       val notPadLock = (entry.packageName() != context.applicationContext.packageName)
       val intent = Intent(context.applicationContext, LockScreenActivity::class.java).apply {

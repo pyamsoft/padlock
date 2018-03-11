@@ -32,14 +32,14 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class SettingsPresenter @Inject internal constructor(
-    private val interactor: SettingsInteractor,
-    private val bus: EventBus<ConfirmEvent>,
-    private val serviceFinishBus: EventBus<ServiceFinishEvent>,
-    private val clearPinBus: EventBus<ClearPinEvent>,
-    private val receiver: ApplicationInstallReceiver,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler
+  private val interactor: SettingsInteractor,
+  private val bus: EventBus<ConfirmEvent>,
+  private val serviceFinishBus: EventBus<ServiceFinishEvent>,
+  private val clearPinBus: EventBus<ClearPinEvent>,
+  private val receiver: ApplicationInstallReceiver,
+  @Named("computation") computationScheduler: Scheduler,
+  @Named("main") mainScheduler: Scheduler,
+  @Named("io") ioScheduler: Scheduler
 ) : SchedulerPresenter<View>(
     computationScheduler,
     ioScheduler, mainScheduler

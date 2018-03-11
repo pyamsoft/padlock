@@ -25,16 +25,16 @@ interface LockEntryInteractor {
 
   @CheckResult
   fun submitPin(
-      packageName: String,
-      activityName: String,
-      lockCode: String?,
-      currentAttempt: String
+    packageName: String,
+    activityName: String,
+    lockCode: String?,
+    currentAttempt: String
   ): Single<Boolean>
 
   @CheckResult
   fun lockEntryOnFail(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Maybe<Long>
 
   @CheckResult
@@ -42,13 +42,13 @@ interface LockEntryInteractor {
 
   @CheckResult
   fun postUnlock(
-      packageName: String,
-      activityName: String,
-      realName: String,
-      lockCode: String?,
-      isSystem: Boolean,
-      whitelist: Boolean,
-      ignoreTime: Long
+    packageName: String,
+    activityName: String,
+    realName: String,
+    lockCode: String?,
+    isSystem: Boolean,
+    whitelist: Boolean,
+    ignoreTime: Long
   ): Completable
 
   fun clearFailCount()

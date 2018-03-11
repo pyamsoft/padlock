@@ -59,9 +59,9 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? {
     binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
     return binding.root
@@ -77,8 +77,8 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     setupLockView()
@@ -151,7 +151,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onMasterPinMissing() {
-    nextButtonOnClickRunnable = runnable@ {
+    nextButtonOnClickRunnable = runnable@{
       if (repeatPattern) {
         Timber.d("Submit repeat attempt")
         // Submit
@@ -185,7 +185,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onMasterPinPresent() {
-    nextButtonOnClickRunnable = runnable@ {
+    nextButtonOnClickRunnable = runnable@{
       patternText = cellPatternToString(cellPattern)
       binding.patternLock.clearPattern()
       submitPin("")

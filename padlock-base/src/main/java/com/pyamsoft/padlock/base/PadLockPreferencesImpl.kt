@@ -20,14 +20,19 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.support.v7.preference.PreferenceManager
 import androidx.content.edit
-import com.pyamsoft.padlock.api.*
+import com.pyamsoft.padlock.api.ClearPreferences
+import com.pyamsoft.padlock.api.InstallListenerPreferences
+import com.pyamsoft.padlock.api.LockListPreferences
+import com.pyamsoft.padlock.api.LockScreenPreferences
+import com.pyamsoft.padlock.api.MasterPinPreferences
+import com.pyamsoft.padlock.api.OnboardingPreferences
 import com.pyamsoft.padlock.model.LockScreenType
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class PadLockPreferencesImpl @Inject internal constructor(
-    context: Context
+  context: Context
 ) : MasterPinPreferences,
     ClearPreferences,
     InstallListenerPreferences,
@@ -46,7 +51,7 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
   private val installListenerDefault: Boolean
   private val ignoreKeyguardDefault: Boolean
   private val preferences: SharedPreferences =
-      PreferenceManager.getDefaultSharedPreferences(context)
+    PreferenceManager.getDefaultSharedPreferences(context)
 
   init {
     val res = context.resources
@@ -63,13 +68,13 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
   }
 
   override fun getCurrentLockType(): LockScreenType =
-      LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault))
+    LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault))
 
   override fun isIgnoreInKeyguard(): Boolean =
-      preferences.getBoolean(ignoreKeyguard, ignoreKeyguardDefault)
+    preferences.getBoolean(ignoreKeyguard, ignoreKeyguardDefault)
 
   override fun isInstallListenerEnabled(): Boolean =
-      preferences.getBoolean(installListener, installListenerDefault)
+    preferences.getBoolean(installListener, installListenerDefault)
 
   override fun getHint(): String? = preferences.getString(HINT, null)
 

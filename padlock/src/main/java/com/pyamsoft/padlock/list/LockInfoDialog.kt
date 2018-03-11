@@ -21,7 +21,11 @@ import android.support.annotation.CheckResult
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Toast
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
@@ -78,24 +82,24 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         .plusLockInfoComponent(
             LockInfoProvider(appPackageName, object : ListDiffProvider<ActivityEntry> {
               override fun data(): List<ActivityEntry> =
-                  Collections.unmodifiableList(adapter.models)
+                Collections.unmodifiableList(adapter.models)
             })
         )
         .inject(this)
   }
 
   override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
   ): View? {
     binding = DialogLockInfoBinding.inflate(inflater, container, false)
     return binding.root
   }
 
   override fun onViewCreated(
-      view: View,
-      savedInstanceState: Bundle?
+    view: View,
+    savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
     refreshLatch = RefreshLatch.create(viewLifecycle) {
@@ -242,8 +246,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   private fun modifyList(
-      id: String,
-      state: LockState
+    id: String,
+    state: LockState
   ) {
     for (i in adapter.adapterItems.indices) {
       val item: LockInfoItem = adapter.getAdapterItem(i)

@@ -27,22 +27,22 @@ internal class LockPassedImpl @Inject internal constructor() :
   private val passedSet: MutableCollection<String> = LinkedHashSet()
 
   override fun add(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ) {
     passedSet.add("$packageName$activityName")
   }
 
   override fun remove(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ) {
     passedSet.remove("$packageName$activityName")
   }
 
   override fun check(
-      packageName: String,
-      activityName: String
+    packageName: String,
+    activityName: String
   ): Boolean =
-      passedSet.contains("$packageName$activityName")
+    passedSet.contains("$packageName$activityName")
 }

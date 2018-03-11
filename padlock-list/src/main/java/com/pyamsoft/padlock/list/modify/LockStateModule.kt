@@ -25,6 +25,6 @@ abstract class LockStateModule {
 
   @Binds
   internal abstract fun provideInteractor(
-      impl: LockStateModifyInteractorImpl
+    impl: LockStateModifyInteractorImpl
   ): LockStateModifyInteractor
 }

@@ -30,12 +30,12 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class PinEntryPresenter @Inject internal constructor(
-    private val interactor: PinEntryInteractor,
-    private val createPinBus: EventBus<CreatePinEvent>,
-    private val clearPinBus: EventBus<ClearPinEvent>,
-    @Named("computation") computationScheduler: Scheduler,
-    @Named("io") ioScheduler: Scheduler,
-    @Named("main") mainScheduler: Scheduler
+  private val interactor: PinEntryInteractor,
+  private val createPinBus: EventBus<CreatePinEvent>,
+  private val clearPinBus: EventBus<ClearPinEvent>,
+  @Named("computation") computationScheduler: Scheduler,
+  @Named("io") ioScheduler: Scheduler,
+  @Named("main") mainScheduler: Scheduler
 ) : SchedulerPresenter<View>(
     computationScheduler,
     ioScheduler, mainScheduler
@@ -71,9 +71,9 @@ class PinEntryPresenter @Inject internal constructor(
   }
 
   fun submit(
-      currentAttempt: String,
-      reEntryAttempt: String,
-      hint: String
+    currentAttempt: String,
+    reEntryAttempt: String,
+    hint: String
   ) {
     dispose {
       interactor.submitPin(currentAttempt, reEntryAttempt, hint)

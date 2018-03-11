@@ -24,10 +24,10 @@ import javax.inject.Inject
 class LockInfoItemPublisher @Inject internal constructor(private val bus: EventBus<LockInfoEvent>) {
 
   fun publish(
-      entry: ActivityEntry,
-      newState: LockState,
-      code: String?,
-      system: Boolean
+    entry: ActivityEntry,
+    newState: LockState,
+    code: String?,
+    system: Boolean
   ) {
     bus.publish(LockInfoEvent.Modify.from(entry, newState, code, system))
   }

@@ -30,21 +30,21 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PinEntryInteractorImpl @Inject internal constructor(
-    private val lockHelper: LockHelper,
-    private val masterPinInteractor: MasterPinInteractor
+  private val lockHelper: LockHelper,
+  private val masterPinInteractor: MasterPinInteractor
 ) :
     PinEntryInteractor {
 
   @CheckResult
   private fun getMasterPin(): Single<Optional<String>> =
-      masterPinInteractor.getMasterPin()
+    masterPinInteractor.getMasterPin()
 
   override fun hasMasterPin(): Single<Boolean> = getMasterPin().map { it is Present }
 
   override fun submitPin(
-      currentAttempt: String,
-      reEntryAttempt: String,
-      hint: String
+    currentAttempt: String,
+    reEntryAttempt: String,
+    hint: String
   ): Single<PinEntryEvent> {
     return getMasterPin().flatMap {
       return@flatMap when (it) {
@@ -56,8 +56,8 @@ internal class PinEntryInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun clearPin(
-      masterPin: String,
-      attempt: String
+    masterPin: String,
+    attempt: String
   ): Single<PinEntryEvent> {
     return lockHelper.checkSubmissionAttempt(attempt, masterPin)
         .map {
@@ -75,9 +75,9 @@ internal class PinEntryInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun createPin(
-      attempt: String,
-      reentry: String,
-      hint: String
+    attempt: String,
+    reentry: String,
+    hint: String
   ): Single<PinEntryEvent> {
     return Single.defer {
       Timber.d("No existing master item, attempt to create a new one")

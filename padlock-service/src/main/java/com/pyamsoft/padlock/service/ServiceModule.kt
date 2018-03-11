@@ -33,12 +33,12 @@ abstract class ServiceModule {
 
   @Binds
   internal abstract fun provideServiceInteractor(
-      impl: LockServiceInteractorImpl
+    impl: LockServiceInteractorImpl
   ): LockServiceInteractor
 
   @Binds
   internal abstract fun provideServiceStateInteractor(
-      impl: LockServiceStateInteractorImpl
+    impl: LockServiceStateInteractorImpl
   ): LockServiceStateInteractor
 
   @Binds

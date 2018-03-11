@@ -24,8 +24,8 @@ import javax.inject.Named
 
 @Module
 class LockInfoProvider(
-    private val packageName: String,
-    private val listDiffProvider: ListDiffProvider<ActivityEntry>
+  private val packageName: String,
+  private val listDiffProvider: ListDiffProvider<ActivityEntry>
 ) {
 
   @Provides

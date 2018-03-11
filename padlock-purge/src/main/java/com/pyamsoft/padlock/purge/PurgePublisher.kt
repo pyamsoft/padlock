@@ -24,8 +24,8 @@ import javax.inject.Singleton
 
 @Singleton
 class PurgePublisher @Inject internal constructor(
-    private val bus: EventBus<PurgeEvent>,
-    private val allBus: EventBus<PurgeAllEvent>
+  private val bus: EventBus<PurgeEvent>,
+  private val allBus: EventBus<PurgeAllEvent>
 ) {
 
   fun publish(event: PurgeEvent) {

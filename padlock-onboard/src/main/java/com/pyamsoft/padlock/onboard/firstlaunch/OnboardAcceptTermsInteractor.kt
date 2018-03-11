@@ -24,7 +24,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class OnboardAcceptTermsInteractor @Inject internal constructor(
-    private val preferences: OnboardingPreferences
+  private val preferences: OnboardingPreferences
 ) {
 
   @CheckResult

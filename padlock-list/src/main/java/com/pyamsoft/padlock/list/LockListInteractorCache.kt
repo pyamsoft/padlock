@@ -33,8 +33,8 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockListInteractorCache @Inject internal constructor(
-    @param:Named("cache_purge") private val purgeCache: Cache,
-    @param:Named("interactor_lock_list") private val impl: LockListInteractor
+  @param:Named("cache_purge") private val purgeCache: Cache,
+  @param:Named("interactor_lock_list") private val impl: LockListInteractor
 ) : LockListInteractor, Cache, LockListUpdater {
 
   private val appCache = TimedEntry<Single<MutableList<AppEntry>>>()
@@ -48,8 +48,8 @@ internal class LockListInteractorCache @Inject internal constructor(
   }
 
   override fun calculateListDiff(
-      oldList: List<AppEntry>,
-      newList: List<AppEntry>
+    oldList: List<AppEntry>,
+    newList: List<AppEntry>
   ): Single<ListDiffResult<AppEntry>> = impl.calculateListDiff(oldList, newList)
       .doOnError { clearCache() }
 
@@ -65,15 +65,15 @@ internal class LockListInteractorCache @Inject internal constructor(
 
   @CheckResult
   private fun copyEntryWithState(
-      entry: AppEntry,
-      locked: Boolean = entry.locked,
-      whitelisted: Int = entry.whitelisted,
-      hardLocked: Int = entry.hardLocked
+    entry: AppEntry,
+    locked: Boolean = entry.locked,
+    whitelisted: Int = entry.whitelisted,
+    hardLocked: Int = entry.hardLocked
   ): AppEntry = entry.copy(locked = locked, whitelisted = whitelisted, hardLocked = hardLocked)
 
   private fun MutableList<AppEntry>.updateAppEntry(
-      packageName: String,
-      func: (AppEntry) -> AppEntry
+    packageName: String,
+    func: (AppEntry) -> AppEntry
   ) {
     for ((index, entry) in this.withIndex()) {
       if (entry.packageName == packageName) {
@@ -84,12 +84,12 @@ internal class LockListInteractorCache @Inject internal constructor(
   }
 
   override fun modifySingleDatabaseEntry(
-      oldLockState: LockState,
-      newLockState: LockState,
-      packageName: String,
-      activityName: String,
-      code: String?,
-      system: Boolean
+    oldLockState: LockState,
+    newLockState: LockState,
+    packageName: String,
+    activityName: String,
+    code: String?,
+    system: Boolean
   ): Single<LockState> {
     return impl.modifySingleDatabaseEntry(
         oldLockState, newLockState, packageName, activityName,
@@ -106,9 +106,9 @@ internal class LockListInteractorCache @Inject internal constructor(
   }
 
   override fun update(
-      packageName: String,
-      whitelisted: Int,
-      hardLocked: Int
+    packageName: String,
+    whitelisted: Int,
+    hardLocked: Int
   ): Completable {
     return Completable.fromAction {
       appCache.updateIfAvailable { single ->

@@ -24,13 +24,13 @@ internal class CreateManager internal constructor(private val factory: PadLockEn
 
   @CheckResult
   fun create(
-      packageName: String,
-      activityName: String,
-      lockCode: String?,
-      lockUntilTime: Long,
-      ignoreUntilTime: Long,
-      isSystem: Boolean,
-      whitelist: Boolean
+    packageName: String,
+    activityName: String,
+    lockCode: String?,
+    lockUntilTime: Long,
+    ignoreUntilTime: Long,
+    isSystem: Boolean,
+    whitelist: Boolean
   ): PadLockEntryModel {
     val entry = factory.creator.create(
         packageName, activityName, lockCode,

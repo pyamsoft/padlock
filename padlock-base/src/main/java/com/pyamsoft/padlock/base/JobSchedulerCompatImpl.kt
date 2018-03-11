@@ -27,19 +27,19 @@ import javax.inject.Singleton
 
 @Singleton
 internal class JobSchedulerCompatImpl @Inject internal constructor(
-    private val context: Context
+  private val context: Context
 ) : JobSchedulerCompat {
 
   private val alarmManager: AlarmManager =
-      context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
   @CheckResult
   private fun Intent.toPending(): PendingIntent = PendingIntent.getService(context, 0, this, 0)
 
   @CheckResult
   private fun createIntent(
-      targetClass: Class<*>,
-      params: List<Pair<String, String>>
+    targetClass: Class<*>,
+    params: List<Pair<String, String>>
   ): Intent {
     return Intent(context, targetClass).apply {
       for (pair in params) {
@@ -56,17 +56,17 @@ internal class JobSchedulerCompatImpl @Inject internal constructor(
   }
 
   override fun cancel(
-      targetClass: Class<*>,
-      params: List<Pair<String, String>>
+    targetClass: Class<*>,
+    params: List<Pair<String, String>>
   ) {
     val intent = createIntent(targetClass, params)
     cancel(intent.toPending())
   }
 
   override fun queue(
-      targetClass: Class<*>,
-      params: List<Pair<String, String>>,
-      triggerTime: Long
+    targetClass: Class<*>,
+    params: List<Pair<String, String>>,
+    triggerTime: Long
   ) {
     val pendingIntent = createIntent(targetClass, params).toPending()
     cancel(pendingIntent)

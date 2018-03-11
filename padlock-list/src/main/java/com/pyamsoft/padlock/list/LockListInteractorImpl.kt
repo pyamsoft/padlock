@@ -18,7 +18,14 @@ package com.pyamsoft.padlock.list
 
 import android.support.annotation.CheckResult
 import android.support.v7.util.DiffUtil
-import com.pyamsoft.padlock.api.*
+import com.pyamsoft.padlock.api.LockListInteractor
+import com.pyamsoft.padlock.api.LockListPreferences
+import com.pyamsoft.padlock.api.LockStateModifyInteractor
+import com.pyamsoft.padlock.api.OnboardingPreferences
+import com.pyamsoft.padlock.api.PackageActivityManager
+import com.pyamsoft.padlock.api.PackageApplicationManager
+import com.pyamsoft.padlock.api.PackageLabelManager
+import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.LockState
@@ -35,16 +42,17 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockListInteractorImpl @Inject internal constructor(
-    private val queryDb: PadLockDBQuery,
-    private val applicationManager: PackageApplicationManager,
-    private val labelManager: PackageLabelManager,
-    private val activityManager: PackageActivityManager,
-    private val onboardingPreferences: OnboardingPreferences,
-    private val modifyInteractor: LockStateModifyInteractor,
-    private val preferences: LockListPreferences
+  private val queryDb: PadLockDBQuery,
+  private val applicationManager: PackageApplicationManager,
+  private val labelManager: PackageLabelManager,
+  private val activityManager: PackageActivityManager,
+  private val onboardingPreferences: OnboardingPreferences,
+  private val modifyInteractor: LockStateModifyInteractor,
+  private val preferences: LockListPreferences
 ) : LockListInteractor {
 
-  override fun isSystemVisible(): Single<Boolean> = Single.fromCallable { preferences.isSystemVisible() }
+  override fun isSystemVisible(): Single<Boolean> =
+    Single.fromCallable { preferences.isSystemVisible() }
 
   override fun setSystemVisible(visible: Boolean) {
     preferences.setSystemVisible(visible)
@@ -52,13 +60,13 @@ internal class LockListInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun appEntryListZipper(): BiFunction<List<String>, List<PadLockEntryModel.AllEntriesModel>, List<LockTuple>> =
-      BiFunction { packageNames, entries -> compileLockedTupleList(packageNames, entries) }
+    BiFunction { packageNames, entries -> compileLockedTupleList(packageNames, entries) }
 
   @CheckResult
   private fun createNewLockTuple(
-      packageName: String,
-      copyEntries: MutableList<PadLockEntryModel.AllEntriesModel>,
-      removeEntries: MutableSet<PadLockEntryModel.AllEntriesModel>
+    packageName: String,
+    copyEntries: MutableList<PadLockEntryModel.AllEntriesModel>,
+    removeEntries: MutableSet<PadLockEntryModel.AllEntriesModel>
   ): LockTuple {
 
     // We clear out the removal list so it can be reused in a clean state
@@ -101,8 +109,8 @@ internal class LockListInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun compileLockedTupleList(
-      packageNames: List<String>,
-      entries: List<PadLockEntryModel.AllEntriesModel>
+    packageNames: List<String>,
+    entries: List<PadLockEntryModel.AllEntriesModel>
   ): List<LockTuple> {
     val copyEntries = ArrayList<PadLockEntryModel.AllEntriesModel>(entries)
     copyEntries.sortWith(Comparator { o1, o2 ->
@@ -123,8 +131,8 @@ internal class LockListInteractorImpl @Inject internal constructor(
   }
 
   override fun calculateListDiff(
-      oldList: List<AppEntry>,
-      newList: List<AppEntry>
+    oldList: List<AppEntry>,
+    newList: List<AppEntry>
   ): Single<ListDiffResult<AppEntry>> {
     return Single.fromCallable {
       val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -134,8 +142,8 @@ internal class LockListInteractorImpl @Inject internal constructor(
         override fun getNewListSize(): Int = newList.size
 
         override fun areItemsTheSame(
-            oldItemPosition: Int,
-            newItemPosition: Int
+          oldItemPosition: Int,
+          newItemPosition: Int
         ): Boolean {
           val oldItem: AppEntry = oldList[oldItemPosition]
           val newItem: AppEntry = newList[newItemPosition]
@@ -143,8 +151,8 @@ internal class LockListInteractorImpl @Inject internal constructor(
         }
 
         override fun areContentsTheSame(
-            oldItemPosition: Int,
-            newItemPosition: Int
+          oldItemPosition: Int,
+          newItemPosition: Int
         ): Boolean {
           val oldItem: AppEntry = oldList[oldItemPosition]
           val newItem: AppEntry = newList[newItemPosition]
@@ -152,8 +160,8 @@ internal class LockListInteractorImpl @Inject internal constructor(
         }
 
         override fun getChangePayload(
-            oldItemPosition: Int,
-            newItemPosition: Int
+          oldItemPosition: Int,
+          newItemPosition: Int
         ): Any? {
           // TODO: Construct specific change payload
           Timber.w("TODO: Construct specific change payload")
@@ -184,15 +192,15 @@ internal class LockListInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun getActiveApplications(): Observable<ApplicationItem> =
-      applicationManager.getActiveApplications().flatMapObservable {
-        Observable.fromIterable(it)
-      }
+    applicationManager.getActiveApplications().flatMapObservable {
+      Observable.fromIterable(it)
+    }
 
   @CheckResult
   private fun getActivityListForApplication(
-      item: ApplicationItem
+    item: ApplicationItem
   ): Single<List<String>> =
-      activityManager.getActivityListForPackage(item.packageName)
+    activityManager.getActivityListForPackage(item.packageName)
 
   @CheckResult
   private fun getValidPackageNames(): Single<List<String>> {
@@ -214,15 +222,15 @@ internal class LockListInteractorImpl @Inject internal constructor(
   private fun getAllEntries(): Single<List<PadLockEntryModel.AllEntriesModel>> = queryDb.queryAll()
 
   override fun hasShownOnBoarding(): Single<Boolean> =
-      Single.fromCallable { onboardingPreferences.isListOnBoard() }
+    Single.fromCallable { onboardingPreferences.isListOnBoard() }
 
   override fun modifySingleDatabaseEntry(
-      oldLockState: LockState,
-      newLockState: LockState,
-      packageName: String,
-      activityName: String,
-      code: String?,
-      system: Boolean
+    oldLockState: LockState,
+    newLockState: LockState,
+    packageName: String,
+    activityName: String,
+    code: String?,
+    system: Boolean
   ): Single<LockState> {
     return modifyInteractor.modifySingleDatabaseEntry(
         oldLockState, newLockState, packageName,
@@ -231,9 +239,9 @@ internal class LockListInteractorImpl @Inject internal constructor(
   }
 
   private data class LockTuple internal constructor(
-      internal val packageName: String,
-      internal val locked: Boolean,
-      internal val whitelist: Int,
-      internal val hardLocked: Int
+    internal val packageName: String,
+    internal val locked: Boolean,
+    internal val whitelist: Int,
+    internal val hardLocked: Int
   )
 }
