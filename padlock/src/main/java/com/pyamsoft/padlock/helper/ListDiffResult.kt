@@ -30,7 +30,7 @@ fun <T : Any> ListDiffResult.ListData<T>.dispatch(adapter: ModelAdapter<*, *>) {
       count: Int,
       payload: Any?
     ) {
-      adapter.fastAdapter!!.notifyItemRangeChanged(position, count, payload)
+      adapter.fastAdapter!!.notifyAdapterItemRangeChanged(position, count, payload)
     }
 
     override fun onMoved(
