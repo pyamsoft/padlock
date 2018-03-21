@@ -14,29 +14,20 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.list
 
-import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.AppEntry
-import com.pyamsoft.pydroid.list.ListDiffResult
-import io.reactivex.Single
+import com.pyamsoft.pydroid.cache.SingleRepository
+import com.pyamsoft.pydroid.cache.cacheSingle
+import dagger.Module
+import dagger.Provides
+import javax.inject.Named
 
-interface LockListInteractor : LockStateModifyInteractor {
+@Module
+object LockListSingletonProvider {
 
-  @CheckResult
-  fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>>
+  @Provides
+  @Named("repo_lock_list")
+  internal fun provideRepo(): SingleRepository<List<AppEntry>> = cacheSingle()
 
-  @CheckResult
-  fun calculateListDiff(
-    oldList: List<AppEntry>,
-    newList: List<AppEntry>
-  ): Single<ListDiffResult<AppEntry>>
-
-  @CheckResult
-  fun hasShownOnBoarding(): Single<Boolean>
-
-  @CheckResult
-  fun isSystemVisible(): Single<Boolean>
-
-  fun setSystemVisible(visible: Boolean)
 }

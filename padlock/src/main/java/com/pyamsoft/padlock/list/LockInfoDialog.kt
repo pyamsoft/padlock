@@ -29,6 +29,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
+import com.mikepenz.fastadapter.commons.utils.FastAdapterDiffUtil
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -36,7 +37,6 @@ import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.NeverNotifyItemList
-import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.AppEntry
@@ -254,7 +254,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       val entry: ActivityEntry = item.model
       if (id == entry.id) {
         adapter.set(i, ActivityEntry(entry.name, entry.packageName, state))
-        presenter.update(entry.name, entry.packageName, state)
         break
       }
     }
@@ -279,12 +278,12 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     result.ifEmpty { adapter.clear() }
     result.withValues {
       adapter.setNewList(it.list())
-      it.dispatch(adapter)
+      it.dispatch { FastAdapterDiffUtil.set(adapter, it) }
     }
   }
 
   override fun onListPopulateError(throwable: Throwable) {
-    ErrorDialog().show(activity, "error")
+    ErrorDialog().show(requireActivity(), "error")
   }
 
   override fun onOnboardingComplete() {
@@ -308,7 +307,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   override fun onModifyEntryError(throwable: Throwable) {
-    ErrorDialog().show(activity, "error")
+    ErrorDialog().show(requireActivity(), "error")
   }
 
   companion object {

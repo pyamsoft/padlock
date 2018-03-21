@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.padlock.model.LockState
-import io.reactivex.Completable
+import com.pyamsoft.pydroid.cache.SingleRepository
+import com.pyamsoft.pydroid.cache.cacheSingle
+import dagger.Module
+import dagger.Provides
+import javax.inject.Named
 
-interface LockInfoUpdater {
+@Module
+object PurgeSingletonProvider {
 
-  fun update(
-    packageName: String,
-    activityName: String,
-    lockState: LockState
-  ): Completable
+  @Provides
+  @Named("repo_purge")
+  internal fun provideRepo(): SingleRepository<List<String>> = cacheSingle()
 }

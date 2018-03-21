@@ -23,7 +23,7 @@ import io.reactivex.Single
 interface PurgeInteractor {
 
   @CheckResult
-  fun fetchStalePackageNames(forceRefresh: Boolean): Single<List<String>>
+  fun fetchStalePackageNames(bypass: Boolean): Single<List<String>>
 
   @CheckResult
   fun calculateDiff(

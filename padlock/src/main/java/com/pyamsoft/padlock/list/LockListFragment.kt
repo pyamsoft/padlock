@@ -28,6 +28,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
+import com.mikepenz.fastadapter.commons.utils.FastAdapterDiffUtil
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -35,7 +36,6 @@ import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.NeverNotifyItemList
-import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
@@ -281,7 +281,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
                 applistFab.context
             )
         ) {
-          UsageAccessRequestDialog().show(activity, "usage_access")
+          UsageAccessRequestDialog().show(requireActivity(), "usage_access")
         } else {
           requireActivity().let {
             PinEntryDialog.newInstance(it.packageName)
@@ -295,7 +295,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   private fun displayLockInfoFragment(entry: AppEntry) {
     LockInfoDialog.newInstance(entry)
-        .show(activity, LockInfoDialog.TAG)
+        .show(requireActivity(), LockInfoDialog.TAG)
   }
 
   override fun onMasterPinCreateSuccess() {
@@ -358,9 +358,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
             hardLocked = newHardLocked
         )
         )
-
-        // Update cache with the whitelist numbers so that a soft refresh will not change visual
-        presenter.updateCache(packageName, newWhitelisted, newHardLocked)
         break
       }
     }
@@ -383,7 +380,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onModifyEntryError(throwable: Throwable) {
-    ErrorDialog().show(activity, "list_error")
+    ErrorDialog().show(requireActivity(), "list_error")
   }
 
   override fun onModifySubEntryToDefaultFromWhitelisted(packageName: String) {
@@ -435,7 +432,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onModifySubEntryError(throwable: Throwable) {
-    ErrorDialog().show(activity, "list_error")
+    ErrorDialog().show(requireActivity(), "list_error")
   }
 
   override fun onFABEnabled() {
@@ -470,7 +467,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     result.ifEmpty { adapter.clear() }
     result.withValues {
       adapter.setNewList(it.list())
-      it.dispatch(adapter)
+      it.dispatch { FastAdapterDiffUtil.set(adapter, it) }
     }
   }
 
@@ -486,7 +483,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onListPopulateError(throwable: Throwable) {
-    ErrorDialog().show(activity, "list_error")
+    ErrorDialog().show(requireActivity(), "list_error")
   }
 
   companion object {

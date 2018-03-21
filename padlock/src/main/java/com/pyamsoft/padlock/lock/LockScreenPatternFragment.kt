@@ -107,11 +107,11 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
   }
 
   override fun onSubmitError(throwable: Throwable) {
-    ErrorDialog().show(activity, "lock_screen_pattern_error")
+    ErrorDialog().show(requireActivity(), "lock_screen_pattern_error")
   }
 
   override fun onUnlockError(throwable: Throwable) {
-    ErrorDialog().show(activity, "lock_screen_pattern_error")
+    ErrorDialog().show(requireActivity(), "lock_screen_pattern_error")
   }
 
   override fun onLocked() {
@@ -119,7 +119,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
   }
 
   override fun onLockedError(throwable: Throwable) {
-    ErrorDialog().show(activity, "lock_screen_pattern_error")
+    ErrorDialog().show(requireActivity(), "lock_screen_pattern_error")
   }
 
   override fun onDisplayHint(hint: String) {

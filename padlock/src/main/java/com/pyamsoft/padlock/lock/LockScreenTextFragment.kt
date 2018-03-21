@@ -186,12 +186,12 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
   override fun onSubmitError(throwable: Throwable) {
     clearDisplay()
-    ErrorDialog().show(activity, "lock_screen_text_error")
+    ErrorDialog().show(requireActivity(), "lock_screen_text_error")
   }
 
   override fun onUnlockError(throwable: Throwable) {
     clearDisplay()
-    ErrorDialog().show(activity, "lock_screen_text_error")
+    ErrorDialog().show(requireActivity(), "lock_screen_text_error")
   }
 
   override fun onLocked() {
@@ -200,7 +200,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
   override fun onLockedError(throwable: Throwable) {
     clearDisplay()
-    ErrorDialog().show(activity, "lock_screen_text_error")
+    ErrorDialog().show(requireActivity(), "lock_screen_text_error")
   }
 
   override fun onDisplayHint(hint: String) {

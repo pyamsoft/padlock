@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.padlock.api.LockInfoInteractor
-import com.pyamsoft.padlock.api.LockInfoUpdater
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.cache.Cache
 import dagger.Binds
@@ -36,16 +35,13 @@ abstract class LockInfoSingletonModule {
   ): EventBus<LockInfoEvent.Callback>
 
   @Binds
-  internal abstract fun provideInteractorCache(impl: LockInfoInteractorCache): LockInfoInteractor
-
-  @Binds
-  @Named("interactor_lock_info")
   internal abstract fun provideInteractor(impl: LockInfoInteractorImpl): LockInfoInteractor
 
   @Binds
   @Named("cache_lock_info")
-  internal abstract fun provideCache(cache: LockInfoInteractorCache): Cache
+  internal abstract fun provideCache(impl: LockInfoInteractorImpl): Cache
 
   @Binds
-  internal abstract fun provideUpdater(cache: LockInfoInteractorCache): LockInfoUpdater
+  @Named("interactor_lock_info")
+  internal abstract fun provideInteractorDb(impl: LockInfoInteractorDb): LockInfoInteractor
 }

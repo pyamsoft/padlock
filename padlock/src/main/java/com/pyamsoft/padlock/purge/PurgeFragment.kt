@@ -24,13 +24,13 @@ import android.view.View
 import android.view.ViewGroup
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
+import com.mikepenz.fastadapter.commons.utils.FastAdapterDiffUtil
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.NeverNotifyItemList
-import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.design.util.refreshing
 import com.pyamsoft.pydroid.list.ListDiffProvider
@@ -128,7 +128,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
       it.setOnMenuItemClickListener {
         when (it.itemId) {
           R.id.menu_purge_all -> {
-            PurgeAllDialog().show(activity, "purge_all")
+            PurgeAllDialog().show(requireActivity(), "purge_all")
             return@setOnMenuItemClickListener true
           }
           else -> {
@@ -165,7 +165,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     result.ifEmpty { adapter.clear() }
     result.withValues {
       adapter.setNewList(it.list())
-      it.dispatch(adapter)
+      it.dispatch { FastAdapterDiffUtil.set(adapter, it) }
     }
   }
 
@@ -238,7 +238,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   ) {
     Timber.d("Handle delete request for %s at %d", packageName, position)
     PurgeSingleItemDialog.newInstance(packageName)
-        .show(activity, "purge_single")
+        .show(requireActivity(), "purge_single")
   }
 
   override fun onPurge(packageName: String) {

@@ -51,7 +51,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
 
   override fun onClearAllClicked() {
     ConfirmationDialog.newInstance(ConfirmEvent.ALL)
-        .show(activity, "confirm_dialog")
+        .show(requireActivity(), "confirm_dialog")
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,7 +72,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
     clearDb.setOnPreferenceClickListener {
       Timber.d("Clear DB onClick")
       ConfirmationDialog.newInstance(ConfirmEvent.DATABASE)
-          .show(activity, "confirm_dialog")
+          .show(requireActivity(), "confirm_dialog")
       return@setOnPreferenceClickListener true
     }
 
@@ -107,7 +107,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
           Toasty.LENGTH_SHORT
       )
       PinEntryDialog.newInstance(it.packageName)
-          .show(activity, PinEntryDialog.TAG)
+          .show(requireActivity(), PinEntryDialog.TAG)
     }
   }
 

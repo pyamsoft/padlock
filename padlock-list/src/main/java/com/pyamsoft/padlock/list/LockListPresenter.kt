@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list
 
 import com.pyamsoft.padlock.api.LockListInteractor
-import com.pyamsoft.padlock.api.LockListUpdater
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
 import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.model.AppEntry
@@ -42,7 +41,6 @@ import javax.inject.Named
 @JvmSuppressWildcards
 class LockListPresenter @Inject internal constructor(
   private val lockListInteractor: LockListInteractor,
-  private val lockListUpdater: LockListUpdater,
   @Named("cache_lock_list") private val cache: Cache,
   private val stateInteractor: LockServiceStateInteractor,
   private val lockListBus: EventBus<LockListEvent>,
@@ -253,23 +251,6 @@ class LockListPresenter @Inject internal constructor(
               view?.onFABDisabled()
             }
           }, { Timber.e(it, "onError") })
-    }
-  }
-
-  fun updateCache(
-    packageName: String,
-    whitelisted: Int,
-    hardLocked: Int
-  ) {
-    dispose {
-      lockListUpdater.update(packageName, whitelisted, hardLocked)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
-          .subscribe({
-            Timber.d("Updated $packageName -- W: $whitelisted, H: $hardLocked")
-          }, {
-            Timber.e(it, "Error updating cache for $packageName")
-          })
     }
   }
 

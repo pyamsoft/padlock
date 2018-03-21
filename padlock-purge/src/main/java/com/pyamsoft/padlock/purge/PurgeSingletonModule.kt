@@ -35,13 +35,13 @@ abstract class PurgeSingletonModule {
   internal abstract fun providePurgeAllBus(bus: PurgeAllBus): EventBus<PurgeAllEvent>
 
   @Binds
-  internal abstract fun providePurgeInteractorCache(impl: PurgeInteractorCache): PurgeInteractor
-
-  @Binds
-  @Named("interactor_purge")
   internal abstract fun providePurgeInteractor(impl: PurgeInteractorImpl): PurgeInteractor
 
   @Binds
   @Named("cache_purge")
-  internal abstract fun provideCache(impl: PurgeInteractorCache): Cache
+  internal abstract fun providePurgeCache(impl: PurgeInteractorImpl): Cache
+
+  @Binds
+  @Named("interactor_purge")
+  internal abstract fun providePurgeInteractorDb(impl: PurgeInteractorDb): PurgeInteractor
 }

@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.list.info
 
-import io.reactivex.Completable
+import com.pyamsoft.padlock.model.ActivityEntry
+import com.pyamsoft.pydroid.cache.SingleRepositoryMap
+import com.pyamsoft.pydroid.cache.cacheSingleMap
+import dagger.Module
+import dagger.Provides
+import javax.inject.Named
 
-interface LockListUpdater {
+@JvmSuppressWildcards
+@Module
+object LockInfoSingletonProvider {
 
-  fun update(
-    packageName: String,
-    whitelisted: Int,
-    hardLocked: Int
-  ): Completable
+  @Provides
+  @Named("repo_lock_info")
+  internal fun provideRepo(): SingleRepositoryMap<String, List<ActivityEntry>> = cacheSingleMap()
+
 }
