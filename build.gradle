@@ -47,11 +47,11 @@ buildscript {
     supportLib = "27.1.0"
     firebase = "11.8.0"
     leakCanary = "1.5.4"
-    pydroid = "16.3.13"
+    pydroid = "16.4.0"
     autoValue = "1.5.3"
     sqlbrite = "3.1.1"
     sqlite = "1.0.0"
-    dagger = "2.14.1"
+    dagger = "2.15"
     patternLock = "1.0.0"
     fastAdapter = "3.2.4"
     ktlint = "3.0.0"
@@ -84,7 +84,7 @@ subprojects {
   apply plugin: "com.github.ben-manes.versions"
 
   ktlint {
-    version = "0.17.0"
+    version = "0.22.0"
     android = true
   }
 }

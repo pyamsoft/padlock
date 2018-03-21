@@ -86,9 +86,8 @@ dependencies {
   // Databinding
   kapt "com.android.databinding:compiler:$plugin_version"
 
-  implementation("com.mikepenz:fastadapter:$fastAdapter@aar") {
-    transitive = true
-  }
+  implementation "com.mikepenz:fastadapter:$fastAdapter@aar"
+  implementation "com.mikepenz:fastadapter-commons:$fastAdapter@aar"
 
   // Leak Canary
   debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanary"
