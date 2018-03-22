@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.padlock.model.ActivityEntry
-import com.pyamsoft.pydroid.cache.SingleRepositoryMap
-import com.pyamsoft.pydroid.cache.cacheSingleMap
+import com.pyamsoft.pydroid.cache.RepositoryMap
+import com.pyamsoft.pydroid.cache.newRepositoryMap
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -29,6 +29,6 @@ object LockInfoSingletonProvider {
 
   @Provides
   @Named("repo_lock_info")
-  internal fun provideRepo(): SingleRepositoryMap<String, List<ActivityEntry>> = cacheSingleMap()
+  internal fun provideRepo(): RepositoryMap<String, List<ActivityEntry>> = newRepositoryMap()
 
 }

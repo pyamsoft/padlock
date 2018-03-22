@@ -20,7 +20,7 @@ import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.cache.Cache
-import com.pyamsoft.pydroid.cache.SingleRepository
+import com.pyamsoft.pydroid.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -31,7 +31,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LockListInteractorImpl @Inject internal constructor(
   @param:Named("interactor_lock_list") private val db: LockListInteractor,
-  @param:Named("repo_lock_list") private val repoLockList: SingleRepository<List<AppEntry>>,
+  @param:Named("repo_lock_list") private val repoLockList: Repository<List<AppEntry>>,
   @param:Named("cache_purge") private val purgeCache: Cache
 ) : LockListInteractor, Cache {
 

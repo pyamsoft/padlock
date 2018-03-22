@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.pydroid.cache.SingleRepository
-import com.pyamsoft.pydroid.cache.cacheSingle
+import com.pyamsoft.pydroid.cache.Repository
+import com.pyamsoft.pydroid.cache.newRepository
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -27,5 +27,5 @@ object PurgeSingletonProvider {
 
   @Provides
   @Named("repo_purge")
-  internal fun provideRepo(): SingleRepository<List<String>> = cacheSingle()
+  internal fun provideRepo(): Repository<List<String>> = newRepository()
 }

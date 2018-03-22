@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.purge
 
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.pydroid.cache.Cache
-import com.pyamsoft.pydroid.cache.SingleRepository
+import com.pyamsoft.pydroid.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -29,7 +29,7 @@ import javax.inject.Singleton
 @Singleton
 internal class PurgeInteractorImpl @Inject internal constructor(
   @Named("interactor_purge") private val db: PurgeInteractor,
-  @Named("repo_purge") private val repoStale: SingleRepository<List<String>>
+  @Named("repo_purge") private val repoStale: Repository<List<String>>
 ) : PurgeInteractor, Cache {
 
   override fun clearCache() {
