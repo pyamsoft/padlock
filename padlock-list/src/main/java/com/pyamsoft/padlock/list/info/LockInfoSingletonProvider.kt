@@ -27,6 +27,7 @@ import javax.inject.Named
 @Module
 object LockInfoSingletonProvider {
 
+  @JvmStatic
   @Provides
   @Named("repo_lock_info")
   internal fun provideRepo(): RepositoryMap<String, List<ActivityEntry>> = newRepositoryMap()
