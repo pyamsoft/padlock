@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.cache.RepositoryMap
 import com.pyamsoft.pydroid.list.ListDiffResult
-import io.reactivex.Maybe
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Named
@@ -62,16 +61,8 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     bypass: Boolean,
     packageName: String
   ): Single<List<ActivityEntry>> {
-    return Single.defer {
-      Maybe.concat(
-          repoLockInfo.get(bypass, packageName),
-          db.fetchActivityEntryList(bypass, packageName).doOnSuccess {
-            repoLockInfo.set(packageName, it)
-          }.toMaybe()
-      )
-          .firstOrError()
-    }
-        .doAfterTerminate { repoLockInfo.remove(packageName) }
+    return repoLockInfo.get(bypass, packageName) { db.fetchActivityEntryList(true, packageName) }
+        .doOnError { repoLockInfo.remove(packageName) }
   }
 
   override fun calculateListDiff(

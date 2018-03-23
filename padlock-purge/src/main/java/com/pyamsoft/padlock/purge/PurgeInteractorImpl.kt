@@ -20,7 +20,6 @@ import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult
-import io.reactivex.Maybe
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Named
@@ -43,13 +42,7 @@ internal class PurgeInteractorImpl @Inject internal constructor(
       .doOnError { clearCache() }
 
   override fun fetchStalePackageNames(bypass: Boolean): Single<List<String>> {
-    return Single.defer {
-      Maybe.concat(
-          repoStale.get(bypass),
-          db.fetchStalePackageNames(bypass).doOnSuccess { repoStale.set(it) }.toMaybe()
-      )
-          .firstOrError()
-    }
+    return repoStale.get(bypass) { db.fetchStalePackageNames(true) }
         .doOnError { clearCache() }
   }
 

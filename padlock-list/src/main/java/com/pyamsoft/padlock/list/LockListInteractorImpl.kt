@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult
-import io.reactivex.Maybe
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Named
@@ -50,13 +49,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
       .doOnError { clearCache() }
 
   override fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>> {
-    return Single.defer {
-      Maybe.concat(
-          repoLockList.get(bypass),
-          db.fetchAppEntryList(bypass).doOnSuccess { repoLockList.set(it) }.toMaybe()
-      )
-          .firstOrError()
-    }
+    return repoLockList.get(bypass) { db.fetchAppEntryList(true) }
         .doOnError { clearCache() }
   }
 
