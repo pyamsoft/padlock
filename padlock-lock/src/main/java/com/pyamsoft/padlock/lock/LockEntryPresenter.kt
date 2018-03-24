@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.lock
 
 import com.pyamsoft.padlock.api.LockEntryInteractor
-import com.pyamsoft.padlock.lock.LockEntryPresenter.View
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
 import io.reactivex.Scheduler
 import timber.log.Timber
@@ -35,10 +34,7 @@ class LockEntryPresenter @Inject internal constructor(
   private val interactor: LockEntryInteractor,
   @Named("computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler,
   @Named("main") mainScheduler: Scheduler
-) : SchedulerPresenter<View>(
-    computationScheduler,
-    ioScheduler, mainScheduler
-) {
+) : SchedulerPresenter<LockEntryPresenter.View>(computationScheduler, ioScheduler, mainScheduler) {
 
   fun displayLockedHint() {
     dispose {

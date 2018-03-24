@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
+import android.arch.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
 import com.pyamsoft.padlock.list.info.LockInfoEvent
@@ -240,7 +241,7 @@ class LockListPresenter @Inject internal constructor(
   }
 
   private fun setFABStateFromPreference() {
-    dispose {
+    dispose(ON_STOP) {
       stateInteractor.isServiceEnabled()
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -286,7 +287,7 @@ class LockListPresenter @Inject internal constructor(
   }
 
   fun populateList(force: Boolean) {
-    dispose {
+    dispose(ON_STOP) {
       lockListInteractor.fetchAppEntryList(force)
           .flatMap { lockListInteractor.calculateListDiff(listDiffProvider.data(), it) }
           .subscribeOn(ioScheduler)

@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list.info
 
+import android.arch.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Created
 import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Deleted
@@ -131,7 +132,7 @@ class LockInfoPresenter @Inject internal constructor(
   }
 
   fun populateList(forceRefresh: Boolean) {
-    dispose {
+    dispose(ON_STOP) {
       interactor.fetchActivityEntryList(forceRefresh, packageName)
           .flatMap { interactor.calculateListDiff(packageName, listDiffProvider.data(), it) }
           .subscribeOn(ioScheduler)

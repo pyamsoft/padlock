@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.lock.screen
 
 import com.pyamsoft.padlock.api.LockScreenInteractor
-import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter.View
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -31,9 +30,8 @@ class LockScreenInputPresenter @Inject internal constructor(
   @Named("computation") computationScheduler: Scheduler,
   @Named("main") mainScheduler: Scheduler,
   @Named("io") ioScheduler: Scheduler
-) : SchedulerPresenter<View>(
-    computationScheduler,
-    ioScheduler, mainScheduler
+) : SchedulerPresenter<LockScreenInputPresenter.View>(
+    computationScheduler, ioScheduler, mainScheduler
 ) {
 
   override fun onCreate() {

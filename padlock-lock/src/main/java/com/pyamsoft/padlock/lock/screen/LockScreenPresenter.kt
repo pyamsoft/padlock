@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.lock.screen
 
+import android.arch.lifecycle.Lifecycle.Event.ON_PAUSE
 import com.pyamsoft.padlock.api.LockScreenInteractor
-import com.pyamsoft.padlock.lock.screen.LockScreenPresenter.View
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.presenter.SchedulerPresenter
@@ -39,9 +39,7 @@ class LockScreenPresenter @Inject internal constructor(
   @Named("io") ioScheduler: Scheduler, @Named(
       "main"
   ) mainScheduler: Scheduler
-) : SchedulerPresenter<View>(
-    computationScheduler, ioScheduler, mainScheduler
-) {
+) : SchedulerPresenter<LockScreenPresenter.View>(computationScheduler, ioScheduler, mainScheduler) {
 
   override fun onCreate() {
     super.onCreate()
@@ -61,7 +59,7 @@ class LockScreenPresenter @Inject internal constructor(
 
   private fun checkIfAlreadyUnlocked() {
     Timber.d("Check if $packageName $activityName already unlocked")
-    dispose {
+    dispose(ON_PAUSE) {
       interactor.isAlreadyUnlocked(packageName, activityName)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
@@ -77,9 +75,7 @@ class LockScreenPresenter @Inject internal constructor(
 
   private fun clearMatchingForegroundEvent() {
     Timber.d("Publish foreground clear event for $packageName, $realName")
-    foregroundEventBus.publish(
-        ForegroundEvent(packageName, realName)
-    )
+    foregroundEventBus.publish(ForegroundEvent(packageName, realName))
   }
 
   private fun loadDisplayNameFromPackage() {

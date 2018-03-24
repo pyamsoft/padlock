@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.purge
 
+import android.arch.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.PurgeAllEvent
 import com.pyamsoft.padlock.model.PurgeEvent
@@ -70,7 +71,7 @@ class PurgePresenter @Inject internal constructor(
   }
 
   fun retrieveStaleApplications(force: Boolean) {
-    dispose {
+    dispose(ON_STOP) {
       interactor.fetchStalePackageNames(force)
           .flatMap { interactor.calculateDiff(listDiffProvider.data(), it) }
           .subscribeOn(ioScheduler)
