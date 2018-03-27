@@ -104,12 +104,8 @@ dependencies {
   implementation "com.andrognito.patternlockview:patternlockview:$patternLock"
 
   // PYDroid
-  implementation("com.github.pyamsoft.pydroid:pydroid-ui:$pydroid@aar") {
-    transitive = true
-  }
-  implementation("com.github.pyamsoft.pydroid:pydroid-design:$pydroid@aar") {
-    transitive = true
-  }
+  implementation "com.github.pyamsoft.pydroid:pydroid-ui:$pydroid"
+  implementation "com.github.pyamsoft.pydroid:pydroid-design:$pydroid"
 
   implementation project(":padlock-base")
   implementation project(":padlock-list")
