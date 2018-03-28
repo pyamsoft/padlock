@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.list
 
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.pydroid.cache.Repository
-import com.pyamsoft.pydroid.cache.newRepository
+import com.pyamsoft.pydroid.cache.repository
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -29,6 +29,6 @@ object LockListSingletonProvider {
   @JvmStatic
   @Provides
   @Named("repo_lock_list")
-  internal fun provideRepo(): Repository<List<AppEntry>> = newRepository()
+  internal fun provideRepo(): Repository<List<AppEntry>> = repository()
 
 }

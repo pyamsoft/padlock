@@ -20,7 +20,7 @@ import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.cache.Cache
-import com.pyamsoft.pydroid.cache.RepositoryMap
+import com.pyamsoft.pydroid.cache.MutableRepositoryMap
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Single
 import javax.inject.Inject
@@ -33,7 +33,8 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
   @Named("interactor_lock_info") private val db: LockInfoInteractor,
   @Named(
       "repo_lock_info"
-  ) private val repoLockInfo: RepositoryMap<String, List<ActivityEntry>>
+  ) private val repoLockInfo: MutableRepositoryMap<String, List<ActivityEntry>>,
+  @Named("cache_lock_list") private val lockListCache: Cache
 ) : LockInfoInteractor, Cache {
 
   override fun modifySingleDatabaseEntry(
@@ -49,10 +50,12 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         code, system
     )
         .doAfterTerminate { repoLockInfo.remove(packageName) }
+        .doAfterTerminate { lockListCache.clearCache() }
   }
 
   override fun clearCache() {
     repoLockInfo.clearCache()
+    lockListCache.clearCache()
   }
 
   override fun hasShownOnBoarding(): Single<Boolean> = db.hasShownOnBoarding()

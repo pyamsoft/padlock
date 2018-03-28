@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.padlock.model.ActivityEntry
-import com.pyamsoft.pydroid.cache.RepositoryMap
-import com.pyamsoft.pydroid.cache.newRepositoryMap
+import com.pyamsoft.pydroid.cache.MutableRepositoryMap
+import com.pyamsoft.pydroid.cache.mutableRepositoryMap
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -30,6 +30,7 @@ object LockInfoSingletonProvider {
   @JvmStatic
   @Provides
   @Named("repo_lock_info")
-  internal fun provideRepo(): RepositoryMap<String, List<ActivityEntry>> = newRepositoryMap()
+  internal fun provideRepo(): MutableRepositoryMap<String, List<ActivityEntry>> =
+    mutableRepositoryMap()
 
 }
