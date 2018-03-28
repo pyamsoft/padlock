@@ -20,7 +20,7 @@ import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.cache.Cache
-import com.pyamsoft.pydroid.cache.MutableRepositoryMap
+import com.pyamsoft.pydroid.cache.RepositoryMap
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Single
 import javax.inject.Inject
@@ -33,7 +33,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
   @Named("interactor_lock_info") private val db: LockInfoInteractor,
   @Named(
       "repo_lock_info"
-  ) private val repoLockInfo: MutableRepositoryMap<String, List<ActivityEntry>>,
+  ) private val repoLockInfo: RepositoryMap<String, List<ActivityEntry>>,
   @Named("cache_lock_list") private val lockListCache: Cache
 ) : LockInfoInteractor, Cache {
 
@@ -49,7 +49,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         oldLockState, newLockState, packageName, activityName,
         code, system
     )
-        .doAfterTerminate { repoLockInfo.remove(packageName) }
+        .doAfterTerminate { repoLockInfo.clearKey(packageName) }
         .doAfterTerminate { lockListCache.clearCache() }
   }
 
@@ -65,7 +65,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     packageName: String
   ): Single<List<ActivityEntry>> {
     return repoLockInfo.get(bypass, packageName) { db.fetchActivityEntryList(true, packageName) }
-        .doOnError { repoLockInfo.remove(packageName) }
+        .doOnError { repoLockInfo.clearKey(packageName) }
   }
 
   override fun calculateListDiff(
@@ -74,6 +74,6 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     newList: List<ActivityEntry>
   ): Single<ListDiffResult<ActivityEntry>> =
     db.calculateListDiff(packageName, oldList, newList)
-        .doOnError { repoLockInfo.remove(packageName) }
+        .doOnError { repoLockInfo.clearKey(packageName) }
 
 }
