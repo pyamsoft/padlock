@@ -59,7 +59,7 @@ dependencies {
   implementation "android.arch.persistence:db-framework:$sqlite"
 
   // Auto value
-  compileOnly "com.google.auto.value:auto-value:$autoValue"
+  compileOnly "com.google.auto.value:auto-value-annotations:$autoValue"
   kapt "com.google.auto.value:auto-value:$autoValue"
 
   // Dagger
