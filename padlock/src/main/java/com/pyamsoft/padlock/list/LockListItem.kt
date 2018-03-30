@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.list
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.LifecycleRegistry
-import android.databinding.DataBindingUtil
 import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
 import android.view.View
@@ -105,12 +104,12 @@ class LockListItem internal constructor(
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView),
       LifecycleOwner {
 
-    internal val binding: AdapterItemLocklistBinding = DataBindingUtil.bind(itemView)
-    @Inject
+    internal val binding: AdapterItemLocklistBinding = AdapterItemLocklistBinding.bind(itemView)
+    @field:Inject
     internal lateinit var publisher: LockListItemPublisher
-    @Inject
+    @field:Inject
     internal lateinit var appIconLoader: AppIconLoader
-    @Inject
+    @field:Inject
     internal lateinit var imageLoader: ImageLoader
     private val lifecycle = LifecycleRegistry(this)
 

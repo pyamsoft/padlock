@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.list
 
-import android.databinding.DataBindingUtil
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.RadioButton
@@ -123,8 +122,8 @@ class LockInfoItem internal constructor(
 
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    internal val binding: AdapterItemLockinfoBinding = DataBindingUtil.bind(itemView)
-    @Inject
+    internal val binding: AdapterItemLockinfoBinding = AdapterItemLockinfoBinding.bind(itemView)
+    @field:Inject
     internal lateinit var publisher: LockInfoItemPublisher
 
     init {
