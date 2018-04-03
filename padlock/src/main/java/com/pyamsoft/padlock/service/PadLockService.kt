@@ -109,13 +109,10 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
     }
 
     val launchMain = Intent(applicationContext, MainActivity::class.java).apply {
-      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+      flags = Intent.FLAG_ACTIVITY_NEW_TASK
     }
 
-    val pe = PendingIntent.getActivity(
-        applicationContext, NOTIFICATION_RC, launchMain,
-        PendingIntent.FLAG_UPDATE_CURRENT
-    )
+    val pe = PendingIntent.getActivity(applicationContext, NOTIFICATION_RC, launchMain, 0)
     val builder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
         .apply {
           setContentIntent(pe)
@@ -136,12 +133,13 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
   private fun setupNotificationChannel() {
     val name = "PadLock Service"
     val desc = "Notification related to the PadLock service"
-    val importance = NotificationManager.IMPORTANCE_MIN
+    val importance = NotificationManager.IMPORTANCE_LOW
     val notificationChannel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {
       lockscreenVisibility = Notification.VISIBILITY_PUBLIC
       description = desc
       enableLights(false)
       enableVibration(false)
+      setShowBadge(false)
     }
 
     Timber.d("Create notification channel with id: %s", NOTIFICATION_CHANNEL_ID)

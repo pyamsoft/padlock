@@ -82,7 +82,7 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   private fun setupNotificationChannel() {
     val name = "App Lock Suggestions"
     val desc = "Suggestions to secure newly installed applications with PadLock"
-    val importance = NotificationManager.IMPORTANCE_MIN
+    val importance = NotificationManager.IMPORTANCE_DEFAULT
     val notificationChannel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {
       lockscreenVisibility = Notification.VISIBILITY_PUBLIC
       description = desc
