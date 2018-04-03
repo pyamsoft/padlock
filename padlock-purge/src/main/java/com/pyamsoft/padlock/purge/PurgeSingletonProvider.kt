@@ -25,8 +25,10 @@ import javax.inject.Named
 @Module
 object PurgeSingletonProvider {
 
+  private val repo = repository<List<String>>()
+
   @JvmStatic
   @Provides
   @Named("repo_purge")
-  internal fun provideRepo(): Repository<List<String>> = repository()
+  internal fun provideRepo(): Repository<List<String>> = repo
 }

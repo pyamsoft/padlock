@@ -27,10 +27,11 @@ import javax.inject.Named
 @Module
 object LockInfoSingletonProvider {
 
+  private val repo = repositoryMap<String, List<ActivityEntry>>()
+
   @JvmStatic
   @Provides
   @Named("repo_lock_info")
-  internal fun provideRepo(): RepositoryMap<String, List<ActivityEntry>> =
-    repositoryMap()
+  internal fun provideRepo(): RepositoryMap<String, List<ActivityEntry>> = repo
 
 }

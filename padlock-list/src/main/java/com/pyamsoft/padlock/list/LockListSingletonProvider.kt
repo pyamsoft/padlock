@@ -26,9 +26,11 @@ import javax.inject.Named
 @Module
 object LockListSingletonProvider {
 
+  private val repo = repository<List<AppEntry>>()
+
   @JvmStatic
   @Provides
   @Named("repo_lock_list")
-  internal fun provideRepo(): Repository<List<AppEntry>> = repository()
+  internal fun provideRepo(): Repository<List<AppEntry>> = repo
 
 }
