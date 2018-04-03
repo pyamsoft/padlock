@@ -139,7 +139,7 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
         .apply {
           setContentTitle("Lock New Application")
           setSmallIcon(R.drawable.ic_lock_notification)
-          setContentText("Click to lock the newly installed application: " + name)
+          setContentText("Click to lock the newly installed application: $name")
           setContentIntent(pendingIntent)
           setAutoCancel(true)
           color = ContextCompat.getColor(context, R.color.blue500)
