@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.service
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -114,17 +113,17 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
 
     val pe = PendingIntent.getActivity(applicationContext, NOTIFICATION_RC, launchMain, 0)
     val builder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
-        .apply {
-          setContentIntent(pe)
-          setSmallIcon(R.drawable.ic_padlock_notification)
-          setOngoing(true)
-          setWhen(0)
-          setNumber(0)
-          setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-          setContentTitle(getString(R.string.app_name))
-          setContentText("PadLock Service is running")
-          priority = NotificationCompat.PRIORITY_MIN
-          color = ContextCompat.getColor(applicationContext, R.color.blue500)
+        .also {
+          it.setContentIntent(pe)
+          it.setSmallIcon(R.drawable.ic_padlock_notification)
+          it.setOngoing(true)
+          it.setWhen(0)
+          it.setNumber(0)
+          it.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+          it.setContentTitle(getString(R.string.app_name))
+          it.setContentText("PadLock Service is running")
+          it.color = ContextCompat.getColor(applicationContext, R.color.blue500)
+          it.priority = NotificationCompat.PRIORITY_MIN
         }
     startForeground(NOTIFICATION_ID, builder.build())
   }
@@ -133,13 +132,14 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
   private fun setupNotificationChannel() {
     val name = "PadLock Service"
     val desc = "Notification related to the PadLock service"
-    val importance = NotificationManager.IMPORTANCE_LOW
-    val notificationChannel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {
-      lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-      description = desc
-      enableLights(false)
-      enableVibration(false)
-      setShowBadge(false)
+    val notificationChannel = NotificationChannel(
+        NOTIFICATION_CHANNEL_ID, name,
+        NotificationManager.IMPORTANCE_MIN
+    ).also {
+      it.description = desc
+      it.enableLights(false)
+      it.enableVibration(false)
+      it.setShowBadge(false)
     }
 
     Timber.d("Create notification channel with id: %s", NOTIFICATION_CHANNEL_ID)
