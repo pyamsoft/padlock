@@ -62,6 +62,7 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
     Injector.obtain<PadLockComponent>(applicationContext)
         .inject(this)
     presenter.bind(this, this)
+    notificationManager = NotificationManagerCompat.from(this)
     startInForeground()
     lifecycle.fakeBind()
   }
