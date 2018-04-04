@@ -88,13 +88,21 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
     val notificationChannel = NotificationChannel(
         NOTIFICATION_CHANNEL_ID, name,
         NotificationManager.IMPORTANCE_DEFAULT
-    ).also {
-      it.description = desc
-      it.enableLights(false)
-      it.enableVibration(false)
+    ).apply {
+      description = desc
+      enableLights(false)
+      enableVibration(false)
+      setShowBadge(true)
+      setSound(null, null)
+      importance = NotificationManager.IMPORTANCE_DEFAULT
     }
 
-    Timber.d("Create notification channel with id: %s", NOTIFICATION_CHANNEL_ID)
+    // Delete old unversioned channel
+    if (notificationManager.getNotificationChannel(OLD_CHANNEL_ID) != null) {
+      notificationManager.deleteNotificationChannel(OLD_CHANNEL_ID)
+    }
+
+    Timber.d("Create notification channel with id: %s", notificationChannel.id)
     notificationManager.createNotificationChannel(notificationChannel)
   }
 
@@ -140,14 +148,14 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   ) {
     Timber.i("Package Added: %s", packageName)
     val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-        .also {
-          it.setContentTitle("Lock New Application")
-          it.setSmallIcon(R.drawable.ic_lock_notification)
-          it.setContentText("Click to lock the newly installed application: $name")
-          it.setContentIntent(pendingIntent)
-          it.setAutoCancel(true)
-          it.priority = NotificationCompat.PRIORITY_LOW
-          it.color = ContextCompat.getColor(context, R.color.blue500)
+        .apply {
+          setContentTitle("Lock New Application")
+          setSmallIcon(R.drawable.ic_lock_notification)
+          setContentText("Click to lock the newly installed application: $name")
+          setContentIntent(pendingIntent)
+          setAutoCancel(true)
+          color = ContextCompat.getColor(context, R.color.blue500)
+          priority = NotificationCompat.PRIORITY_LOW
         }
     notificationManagerCompat.notify(notificationId++, builder.build())
   }
@@ -168,7 +176,8 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   }
 
   companion object {
-    private const val NOTIFICATION_CHANNEL_ID: String = "padlock_new_apps"
+    private const val OLD_CHANNEL_ID: String = "padlock_new_apps"
+    private const val NOTIFICATION_CHANNEL_ID: String = "padlock_new_apps_v1"
     private const val NOTIFICATION_RC = 421
     private const val NOTIFICATION_ID_START = 2000
     private const val NOTIFICATION_ID_MAX = 10000

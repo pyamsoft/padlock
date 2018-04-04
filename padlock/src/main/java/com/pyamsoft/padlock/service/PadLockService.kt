@@ -31,7 +31,6 @@ import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
-import androidx.content.systemService
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
@@ -117,17 +116,17 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
 
     val pe = PendingIntent.getActivity(applicationContext, NOTIFICATION_RC, launchMain, 0)
     val builder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
-        .also {
-          it.setContentIntent(pe)
-          it.setSmallIcon(R.drawable.ic_padlock_notification)
-          it.setOngoing(true)
-          it.setWhen(0)
-          it.setNumber(0)
-          it.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-          it.setContentTitle(getString(R.string.app_name))
-          it.setContentText("PadLock Service is running")
-          it.color = ContextCompat.getColor(applicationContext, R.color.blue500)
-          it.priority = NotificationCompat.PRIORITY_MIN
+        .apply {
+          setContentIntent(pe)
+          setSmallIcon(R.drawable.ic_padlock_notification)
+          setOngoing(true)
+          setWhen(0)
+          setNumber(0)
+          setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+          setContentTitle(getString(R.string.app_name))
+          setContentText("PadLock Service is running")
+          color = ContextCompat.getColor(applicationContext, R.color.blue500)
+          priority = NotificationCompat.PRIORITY_MIN
         }
     startForeground(NOTIFICATION_ID, builder.build())
   }
@@ -139,14 +138,21 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
     val notificationChannel = NotificationChannel(
         NOTIFICATION_CHANNEL_ID, name,
         NotificationManager.IMPORTANCE_MIN
-    ).also {
-      it.description = desc
-      it.enableLights(false)
-      it.enableVibration(false)
-      it.setShowBadge(false)
+    ).apply {
+      description = desc
+      enableLights(false)
+      enableVibration(false)
+      setShowBadge(false)
+      setSound(null, null)
+      importance = NotificationManager.IMPORTANCE_MIN
     }
 
-    Timber.d("Create notification channel with id: %s", NOTIFICATION_CHANNEL_ID)
+    // Delete old unversioned channel
+    if (notificationManager.getNotificationChannel(OLD_CHANNEL_ID) != null) {
+      notificationManager.deleteNotificationChannel(OLD_CHANNEL_ID)
+    }
+
+    Timber.d("Create notification channel with id: %s", notificationChannel.id)
     notificationManager.createNotificationChannel(notificationChannel)
   }
 
@@ -154,7 +160,8 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
 
     private const val NOTIFICATION_ID = 1001
     private const val NOTIFICATION_RC = 1004
-    private const val NOTIFICATION_CHANNEL_ID = "padlock_foreground"
+    private const val OLD_CHANNEL_ID = "padlock_foreground"
+    private const val NOTIFICATION_CHANNEL_ID = "padlock_foreground_v1"
 
     @JvmStatic
     fun start(context: Context) {
