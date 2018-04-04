@@ -31,6 +31,7 @@ import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
+import androidx.content.systemService
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
@@ -55,14 +56,16 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
 
   @field:Inject
   internal lateinit var presenter: LockServicePresenter
-  private lateinit var notificationManager: NotificationManagerCompat
+  private lateinit var notificationManagerCompat: NotificationManagerCompat
+  private lateinit var notificationManager: NotificationManager
 
   override fun onCreate() {
     super.onCreate()
     Injector.obtain<PadLockComponent>(applicationContext)
         .inject(this)
     presenter.bind(this, this)
-    notificationManager = NotificationManagerCompat.from(this)
+    notificationManagerCompat = NotificationManagerCompat.from(this)
+    notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     startInForeground()
     lifecycle.fakeBind()
   }
@@ -70,7 +73,7 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
   override fun onDestroy() {
     super.onDestroy()
     stopForeground(true)
-    notificationManager.cancel(NOTIFICATION_ID)
+    notificationManagerCompat.cancel(NOTIFICATION_ID)
     lifecycle.fakeRelease()
     PadLock.getRefWatcher(this)
         .watch(this)
@@ -144,8 +147,6 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
     }
 
     Timber.d("Create notification channel with id: %s", NOTIFICATION_CHANNEL_ID)
-    val notificationManager: NotificationManager =
-      getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.createNotificationChannel(notificationChannel)
   }
 

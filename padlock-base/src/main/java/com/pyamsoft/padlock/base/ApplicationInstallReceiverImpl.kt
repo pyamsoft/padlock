@@ -28,6 +28,7 @@ import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
+import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.PackageLabelManager
@@ -55,6 +56,7 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
 ) : BroadcastReceiver(), ApplicationInstallReceiver {
 
   private val notificationManager: NotificationManager
+  private val notificationManagerCompat: NotificationManagerCompat
   private val filter: IntentFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
   private val pendingIntent: PendingIntent
   private val compositeDisposable: CompositeDisposable = CompositeDisposable()
@@ -71,6 +73,8 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
 
     ioScheduler.enforceIo()
     mainThreadScheduler.enforceMainThread()
+
+    notificationManagerCompat = NotificationManagerCompat.from(context)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       setupNotificationChannel()
@@ -145,7 +149,7 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
           it.priority = NotificationCompat.PRIORITY_LOW
           it.color = ContextCompat.getColor(context, R.color.blue500)
         }
-    notificationManager.notify(notificationId++, builder.build())
+    notificationManagerCompat.notify(notificationId++, builder.build())
   }
 
   override fun register() {
