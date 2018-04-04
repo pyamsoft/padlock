@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.api
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.pydroid.list.ListDiffResult
+import io.reactivex.Completable
 import io.reactivex.Single
 
 interface PurgeInteractor {
@@ -32,5 +33,8 @@ interface PurgeInteractor {
   ): Single<ListDiffResult<String>>
 
   @CheckResult
-  fun deleteEntry(packageName: String): Single<String>
+  fun deleteEntry(packageName: String): Completable
+
+  @CheckResult
+  fun deleteEntries(packageNames: List<String>): Completable
 }

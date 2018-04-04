@@ -90,8 +90,18 @@ class PurgePresenter @Inject internal constructor(
       interactor.deleteEntry(packageName)
           .subscribeOn(ioScheduler)
           .observeOn(mainThreadScheduler)
-          .subscribe({ view?.onDeleted(it) }
+          .subscribe({ view?.onDeleted() }
               , { Timber.e(it, "onError deleteStale") })
+    }
+  }
+
+  fun deleteStale(packageNames: List<String>) {
+    dispose {
+      interactor.deleteEntries(packageNames)
+          .subscribeOn(ioScheduler)
+          .observeOn(mainThreadScheduler)
+          .subscribe({ view?.onDeleted() }
+              , { Timber.e(it, "onError deleteStale all") })
     }
   }
 
@@ -110,7 +120,7 @@ class PurgePresenter @Inject internal constructor(
 
   interface DeleteCallback {
 
-    fun onDeleted(packageName: String)
+    fun onDeleted()
   }
 
   interface BusCallback {

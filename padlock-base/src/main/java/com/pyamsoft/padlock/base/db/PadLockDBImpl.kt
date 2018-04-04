@@ -75,10 +75,7 @@ internal class PadLockDBImpl @Inject internal constructor(
   private fun deleteWithPackageActivityNameUnguarded(
     packageName: String,
     activityName: String
-  ): Int = deleteManager.deleteWithPackageActivity(
-      packageName,
-      activityName
-  )
+  ): Int = deleteManager.deleteWithPackageActivity(packageName, activityName)
 
   @CheckResult
   override fun insert(
@@ -91,11 +88,8 @@ internal class PadLockDBImpl @Inject internal constructor(
     whitelist: Boolean
   ): Completable {
     return Single.fromCallable {
-      val entry = createManager.create(
-          packageName, activityName, lockCode, lockUntilTime,
-          ignoreUntilTime, isSystem, whitelist
-      )
-      Timber.i("DB: INSERT")
+      val entry = createManager.create(packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, isSystem, whitelist)
+      Timber.i("DB: INSERT $packageName $activityName")
       val deleteResult = deleteWithPackageActivityNameUnguarded(packageName, activityName)
       Timber.d("Delete result: %d", deleteResult)
       return@fromCallable insertManager.insert(entry)
@@ -109,7 +103,7 @@ internal class PadLockDBImpl @Inject internal constructor(
     ignoreUntilTime: Long
   ): Completable {
     return Completable.fromCallable {
-      Timber.i("DB: UPDATE IGNORE")
+      Timber.i("DB: UPDATE IGNORE $packageName $activityName")
       return@fromCallable updateManager.updateIgnoreTime(
           packageName, activityName,
           ignoreUntilTime
@@ -123,7 +117,7 @@ internal class PadLockDBImpl @Inject internal constructor(
     lockUntilTime: Long
   ): Completable {
     return Completable.fromCallable {
-      Timber.i("DB: UPDATE LOCK")
+      Timber.i("DB: UPDATE LOCK $packageName $activityName")
       return@fromCallable updateManager.updateLockTime(
           packageName, activityName,
           lockUntilTime
@@ -137,7 +131,7 @@ internal class PadLockDBImpl @Inject internal constructor(
     whitelist: Boolean
   ): Completable {
     return Completable.fromCallable {
-      Timber.i("DB: UPDATE WHITELIST")
+      Timber.i("DB: UPDATE WHITELIST $packageName $activityName")
       return@fromCallable updateManager.updateWhitelist(packageName, activityName, whitelist)
     }
   }
@@ -147,7 +141,7 @@ internal class PadLockDBImpl @Inject internal constructor(
     packageName: String,
     activityName: String
   ): Single<PadLockEntryModel> {
-    Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT")
+    Timber.i("DB: QUERY PACKAGE ACTIVITY DEFAULT $packageName $activityName")
     return queryManager.queryWithPackageActivityNameDefault(packageName, activityName)
   }
 
@@ -155,7 +149,7 @@ internal class PadLockDBImpl @Inject internal constructor(
   override fun queryWithPackageName(
     packageName: String
   ): Single<List<PadLockEntryModel.WithPackageNameModel>> {
-    Timber.i("DB: QUERY PACKAGE")
+    Timber.i("DB: QUERY PACKAGE $packageName")
     return queryManager.queryWithPackageName(packageName)
   }
 
@@ -168,7 +162,7 @@ internal class PadLockDBImpl @Inject internal constructor(
   @CheckResult
   override fun deleteWithPackageName(packageName: String): Completable {
     return Completable.fromCallable {
-      Timber.i("DB: DELETE PACKAGE")
+      Timber.i("DB: DELETE PACKAGE $packageName")
       return@fromCallable deleteManager.deleteWithPackage(packageName)
     }
   }
@@ -179,7 +173,7 @@ internal class PadLockDBImpl @Inject internal constructor(
     activityName: String
   ): Completable {
     return Completable.fromCallable {
-      Timber.i("DB: DELETE PACKAGE ACTIVITY")
+      Timber.i("DB: DELETE PACKAGE ACTIVITY $packageName $activityName")
       return@fromCallable deleteWithPackageActivityNameUnguarded(packageName, activityName)
     }
   }

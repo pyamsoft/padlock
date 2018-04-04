@@ -25,6 +25,7 @@ import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.list.ListDiffResultImpl
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
@@ -126,6 +127,11 @@ internal class PurgeInteractorDb @Inject internal constructor(
         })
   }
 
-  override fun deleteEntry(packageName: String): Single<String> =
-    deleteDb.deleteWithPackageName(packageName).andThen(Single.just(packageName))
+  override fun deleteEntry(packageName: String): Completable =
+    deleteDb.deleteWithPackageName(packageName)
+
+  override fun deleteEntries(packageNames: List<String>): Completable {
+    return Observable.defer { Observable.fromIterable(packageNames) }
+        .flatMapCompletable { deleteEntry(it) }
+  }
 }

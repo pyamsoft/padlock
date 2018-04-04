@@ -17,9 +17,11 @@
 package com.pyamsoft.padlock.purge
 
 import com.pyamsoft.padlock.api.PurgeInteractor
+import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult
+import io.reactivex.Completable
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Named
@@ -28,11 +30,13 @@ import javax.inject.Singleton
 @Singleton
 internal class PurgeInteractorImpl @Inject internal constructor(
   @Named("interactor_purge") private val db: PurgeInteractor,
-  @Named("repo_purge") private val repoStale: Repository<List<String>>
+  @Named("repo_purge") private val repoStale: Repository<List<String>>,
+  @Named("repo_lock_list") private val repoLockList: Repository<List<AppEntry>>
 ) : PurgeInteractor, Cache {
 
   override fun clearCache() {
     repoStale.clearCache()
+    repoLockList.clearCache()
   }
 
   override fun calculateDiff(
@@ -46,6 +50,9 @@ internal class PurgeInteractorImpl @Inject internal constructor(
         .doOnError { clearCache() }
   }
 
-  override fun deleteEntry(packageName: String): Single<String> =
+  override fun deleteEntry(packageName: String): Completable =
     db.deleteEntry(packageName).doAfterTerminate { clearCache() }
+
+  override fun deleteEntries(packageNames: List<String>): Completable =
+    db.deleteEntries(packageNames).doAfterTerminate { clearCache() }
 }

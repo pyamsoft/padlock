@@ -246,40 +246,17 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     presenter.deleteStale(packageName)
   }
 
-  override fun onDeleted(packageName: String) {
-    val itemCount = adapter.fastAdapter.itemCount
-    if (itemCount == 0) {
-      Timber.e("Adapter is EMPTY")
-    } else {
-      var found = -1
-      for (i in 0 until itemCount) {
-        val item = adapter.getAdapterItem(i)
-        if (item.model == packageName) {
-          found = i
-          break
-        }
-      }
-
-      if (found != -1) {
-        Timber.d("Remove deleted item: %s", packageName)
-        adapter.remove(found)
-      }
-    }
-
-    decideListState()
-  }
-
   override fun onPurgeAll() {
     val itemCount = adapter.fastAdapter.itemCount
     if (itemCount == 0) {
       Timber.e("Adapter is EMPTY")
     } else {
-      for (item in adapter.adapterItems) {
-        onPurge(item.model)
-      }
+      presenter.deleteStale(adapter.models)
     }
+  }
 
-    decideListState()
+  override fun onDeleted() {
+    presenter.retrieveStaleApplications(true)
   }
 
   companion object {
