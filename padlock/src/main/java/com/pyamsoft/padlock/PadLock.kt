@@ -64,7 +64,6 @@ class PadLock : Application() {
         "FastAdapter", "https://github.com/mikepenz/fastadapter",
         "licenses/fastadapter"
     )
-    Licenses.create("Firebase", "https://firebase.google.com", "licenses/firebase")
     Licenses.create(
         "PatternLockView", "https://github.com/aritraroy/PatternLockView",
         "licenses/patternlock"

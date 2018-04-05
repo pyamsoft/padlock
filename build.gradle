@@ -45,7 +45,6 @@ buildscript {
     maxSdk = 27
 
     supportLib = "27.1.0"
-    firebase = "12.0.1"
     leakCanary = "1.5.4"
     pydroid = "16.5.3"
     autoValue = "1.6"
@@ -65,9 +64,6 @@ buildscript {
 
     // Gradle version checker
     classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
-
-    // Google services
-    classpath 'com.google.gms:google-services:3.2.0'
 
     // SQLDelight
     classpath "com.squareup.sqldelight:gradle-plugin:0.7.0"
