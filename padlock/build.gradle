@@ -102,7 +102,6 @@ dependencies {
 
   // PYDroid
   implementation "com.github.pyamsoft.pydroid:pydroid-ui:$pydroid"
-  implementation "com.github.pyamsoft.pydroid:pydroid-design:$pydroid"
 
   implementation project(":padlock-base")
   implementation project(":padlock-list")

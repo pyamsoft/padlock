@@ -32,7 +32,6 @@ import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
-import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -102,28 +101,22 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
 
   override fun onLockTypeChangePrevented() {
     requireContext().let {
-      Toasty.makeText(
-          it, "Must clear Master Password before changing Lock Screen Type",
-          Toasty.LENGTH_SHORT
-      )
+      // TODO error
       PinEntryDialog.newInstance(it.packageName)
           .show(requireActivity(), PinEntryDialog.TAG)
     }
   }
 
   override fun onLockTypeChangeError(throwable: Throwable) {
-    Toasty.makeText(requireContext(), "Error: ${throwable.message}", Toasty.LENGTH_SHORT)
+    // TODO error
   }
 
   override fun onClearDatabase() {
-    Toasty.makeText(
-        requireContext(), "Locked application database has been cleared",
-        Toasty.LENGTH_SHORT
-    )
+    // TODO error
   }
 
   override fun onMasterPinClearFailure() {
-    Toasty.makeText(requireContext(), "Error: Invalid PIN", Toast.LENGTH_SHORT)
+    // TODO error
   }
 
   override fun onMasterPinClearSuccess() {

@@ -27,7 +27,6 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
-import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
 import java.util.ArrayList
 import javax.inject.Inject
@@ -163,10 +162,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         // process and show next
         if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
           Timber.d("Pattern is not long enough")
-          Toasty.makeText(
-              binding.patternLock.context, "Pattern is not long enough",
-              Toasty.LENGTH_SHORT
-          )
+          // TODO error
           binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
           return@runnable false
         } else {
@@ -174,10 +170,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
           patternText = cellPatternToString(cellPattern)
           repeatPattern = true
           binding.patternLock.clearPattern()
-          Toasty.makeText(
-              binding.patternLock.context, "Please confirm pattern",
-              Toasty.LENGTH_SHORT
-          )
+          // TODO error
           return@runnable false
         }
       }
@@ -215,7 +208,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onPinSubmitError(throwable: Throwable) {
-    Toasty.makeText(requireContext(), throwable.message.toString(), Toasty.LENGTH_SHORT)
+    // TODO error
   }
 
   override fun onPinSubmitComplete() {

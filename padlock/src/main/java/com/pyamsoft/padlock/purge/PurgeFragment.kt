@@ -32,13 +32,12 @@ import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.NeverNotifyItemList
 import com.pyamsoft.padlock.uicommon.CanaryFragment
-import com.pyamsoft.pydroid.design.util.refreshing
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
+import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
-import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
 import java.util.Collections
 import javax.inject.Inject
@@ -170,10 +169,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onRetrieveError(throwable: Throwable) {
-    Toasty.makeText(
-        requireContext(), "Error retrieving old application list",
-        Toasty.LENGTH_SHORT
-    )
+    // TODO error
   }
 
   override fun onPause() {

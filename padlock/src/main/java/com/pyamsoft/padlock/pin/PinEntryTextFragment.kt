@@ -29,7 +29,6 @@ import android.widget.EditText
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
-import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -125,7 +124,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onPinSubmitError(throwable: Throwable) {
-    Toasty.makeText(requireContext(), throwable.message.toString(), Toasty.LENGTH_SHORT)
+    // TODO error
   }
 
   override fun onPinSubmitComplete() {

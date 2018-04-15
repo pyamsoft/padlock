@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.base
 
 import android.graphics.drawable.Drawable
-import androidx.util.lruCache
+import androidx.core.util.lruCache
 import com.pyamsoft.pydroid.loader.cache.ImageCache
 import com.pyamsoft.pydroid.loader.cache.ImageCache.ImageCacheKey
 import javax.inject.Inject

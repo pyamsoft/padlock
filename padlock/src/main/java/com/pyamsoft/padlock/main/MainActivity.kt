@@ -21,6 +21,7 @@ import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.PreferenceManager
+import android.view.View
 import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
@@ -37,7 +38,6 @@ import com.pyamsoft.pydroid.ui.util.animateMenu
 import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import javax.inject.Inject
-import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : TamperActivity(), MainPresenter.View {
 
@@ -53,14 +53,18 @@ class MainActivity : TamperActivity(), MainPresenter.View {
 
   override val applicationIcon: Int = R.mipmap.ic_launcher
 
-  override val applicationName: String by lazy(NONE) { getString(R.string.app_name) }
+  override val applicationName: String
+    get() = getString(R.string.app_name)
 
   override val changeLogLines: ChangeLogBuilder
     get() = buildChangeLog {
       bugfix("Smoother loading animations")
     }
 
-  public override fun onCreate(savedInstanceState: Bundle?) {
+  override val rootView: View
+    get() = binding.root
+
+  override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.Theme_PadLock_Light)
     super.onCreate(savedInstanceState)
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)

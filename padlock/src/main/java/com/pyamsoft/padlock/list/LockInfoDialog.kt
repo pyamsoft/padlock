@@ -42,13 +42,12 @@ import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.uicommon.CanaryDialog
-import com.pyamsoft.pydroid.design.util.refreshing
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
+import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
-import com.pyamsoft.pydroid.util.Toasty
 import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import java.util.Collections
@@ -120,11 +119,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             lockInfoRecycler.visibility = View.GONE
             lockInfoEmpty.visibility = View.VISIBLE
           }
-          Toasty.makeText(
-              binding.lockInfoRecycler.context,
-              "Error while loading list. Please try again.",
-              Toast.LENGTH_SHORT
-          )
+          // TODO error
         }
       }
     }

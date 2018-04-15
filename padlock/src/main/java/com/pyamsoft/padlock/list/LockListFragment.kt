@@ -40,19 +40,18 @@ import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.padlock.uicommon.CanaryFragment
-import com.pyamsoft.pydroid.design.fab.HideScrollFABBehavior
-import com.pyamsoft.pydroid.design.util.refreshing
-import com.pyamsoft.pydroid.design.util.withBehavior
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.util.popHide
 import com.pyamsoft.pydroid.ui.util.popShow
+import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
+import com.pyamsoft.pydroid.ui.util.withBehavior
+import com.pyamsoft.pydroid.ui.widget.HideScrollFABBehavior
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
-import com.pyamsoft.pydroid.util.Toasty
 import timber.log.Timber
 import java.util.Collections
 import javax.inject.Inject
@@ -120,11 +119,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
             applistRecyclerview.visibility = View.GONE
             applistEmpty.visibility = View.VISIBLE
           }
-          Toasty.makeText(
-              binding.applistRecyclerview.context,
-              "Error while loading list. Please try again.",
-              Toast.LENGTH_SHORT
-          )
+          // TODO error
         }
       }
     }
@@ -308,7 +303,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinCreateFailure() {
-    Toasty.makeText(requireContext(), "Error: Mismatched PIN", Toast.LENGTH_SHORT)
+    // TODO error
   }
 
   override fun onMasterPinClearSuccess() {
@@ -321,7 +316,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinClearFailure() {
-    Toasty.makeText(requireContext(), "Error: Invalid PIN", Toast.LENGTH_SHORT)
+    // TODO error
   }
 
   private fun refreshListEntry(
