@@ -19,10 +19,10 @@ package com.pyamsoft.padlock.settings
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Bundle
+import android.support.annotation.CheckResult
 import android.support.design.widget.Snackbar
 import android.support.v7.preference.ListPreference
 import android.view.View
-import android.widget.Toast
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
@@ -30,6 +30,9 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
+import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
+import com.pyamsoft.pydroid.ui.util.Snackbreak
+import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
@@ -99,32 +102,48 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
     lockType.value = value
   }
 
-  override fun onLockTypeChangePrevented() {
-    requireContext().let {
-      // TODO error
-      PinEntryDialog.newInstance(it.packageName)
-          .show(requireActivity(), PinEntryDialog.TAG)
+  @CheckResult
+  private fun requireView(): View {
+    val v = view
+    if (v == null) {
+      throw IllegalStateException("getView() is required and cannot be null.")
+    } else {
+      return v
     }
+  }
+
+  override fun onLockTypeChangePrevented() {
+    Snackbar.make(
+        requireView(),
+        "You must clear the current PIN before changing type",
+        Snackbar.LENGTH_LONG
+    )
+        .apply {
+          setAction("Okay", DebouncedOnClickListener.create {
+            PinEntryDialog.newInstance(requireContext().packageName)
+                .show(requireActivity(), PinEntryDialog.TAG)
+          })
+        }
+        .show()
   }
 
   override fun onLockTypeChangeError(throwable: Throwable) {
-    // TODO error
+    Snackbreak.short(requireActivity(), requireView(), ErrorDetail("", throwable.localizedMessage))
   }
 
   override fun onClearDatabase() {
-    // TODO error
+    Snackbar.make(requireView(), "Locked application database cleared", Snackbar.LENGTH_SHORT)
+        .show()
   }
 
   override fun onMasterPinClearFailure() {
-    // TODO error
+    Snackbar.make(requireView(), "Failed to clear master pin", Snackbar.LENGTH_SHORT)
+        .show()
   }
 
   override fun onMasterPinClearSuccess() {
-    val v = view
-    if (v != null) {
-      Snackbar.make(v, "You may now change lock type", Snackbar.LENGTH_SHORT)
-          .show()
-    }
+    Snackbar.make(requireView(), "You may now change lock type", Snackbar.LENGTH_SHORT)
+        .show()
   }
 
   override fun onClearAll() {

@@ -29,6 +29,8 @@ import android.widget.EditText
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
+import com.pyamsoft.pydroid.ui.util.Snackbreak
+import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -124,7 +126,10 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onPinSubmitError(throwable: Throwable) {
-    // TODO error
+    Snackbreak.short(
+        requireActivity(), binding.root,
+        ErrorDetail("PIN submission error", throwable.localizedMessage)
+    )
   }
 
   override fun onPinSubmitComplete() {

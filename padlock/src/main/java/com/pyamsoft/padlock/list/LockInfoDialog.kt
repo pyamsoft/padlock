@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.list
 
 import android.os.Bundle
 import android.support.annotation.CheckResult
+import android.support.design.widget.Snackbar
 import android.support.v4.view.ViewCompat
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
@@ -26,7 +27,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Toast
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.mikepenz.fastadapter.commons.utils.FastAdapterDiffUtil
@@ -119,7 +119,12 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             lockInfoRecycler.visibility = View.GONE
             lockInfoEmpty.visibility = View.VISIBLE
           }
-          // TODO error
+          Snackbar.make(
+              binding.root,
+              "Failed to load list for $appName",
+              Snackbar.LENGTH_SHORT
+          )
+              .show()
         }
       }
     }

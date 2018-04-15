@@ -25,7 +25,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.mikepenz.fastadapter.commons.utils.FastAdapterDiffUtil
@@ -119,7 +118,12 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
             applistRecyclerview.visibility = View.GONE
             applistEmpty.visibility = View.VISIBLE
           }
-          // TODO error
+          Snackbar.make(
+              binding.root,
+              "Failed to load application list",
+              Snackbar.LENGTH_SHORT
+          )
+              .show()
         }
       }
     }
@@ -303,7 +307,12 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinCreateFailure() {
-    // TODO error
+    Snackbar.make(
+        binding.root,
+        "Failed to create master pin",
+        Snackbar.LENGTH_SHORT
+    )
+        .show()
   }
 
   override fun onMasterPinClearSuccess() {
@@ -316,7 +325,12 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinClearFailure() {
-    // TODO error
+    Snackbar.make(
+        binding.root,
+        "Failed to clear master pin",
+        Snackbar.LENGTH_SHORT
+    )
+        .show()
   }
 
   private fun refreshListEntry(

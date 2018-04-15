@@ -34,6 +34,8 @@ import com.pyamsoft.padlock.helper.NeverNotifyItemList
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
+import com.pyamsoft.pydroid.ui.util.Snackbreak
+import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
@@ -169,7 +171,10 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onRetrieveError(throwable: Throwable) {
-    // TODO error
+    Snackbreak.short(
+        requireActivity(), binding.root,
+        ErrorDetail("Error getting outdated application list", throwable.localizedMessage)
+    )
   }
 
   override fun onPause() {

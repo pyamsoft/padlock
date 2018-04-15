@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.pin
 
 import android.graphics.Color
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,8 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
+import com.pyamsoft.pydroid.ui.util.Snackbreak
+import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import timber.log.Timber
 import java.util.ArrayList
 import javax.inject.Inject
@@ -162,7 +165,8 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         // process and show next
         if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
           Timber.d("Pattern is not long enough")
-          // TODO error
+          Snackbar.make(binding.root, "Pattern is not long enough", Snackbar.LENGTH_SHORT)
+              .show()
           binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
           return@runnable false
         } else {
@@ -170,7 +174,8 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
           patternText = cellPatternToString(cellPattern)
           repeatPattern = true
           binding.patternLock.clearPattern()
-          // TODO error
+          Snackbar.make(binding.root, "Please confirm pattern", Snackbar.LENGTH_SHORT)
+              .show()
           return@runnable false
         }
       }
@@ -208,7 +213,10 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
   }
 
   override fun onPinSubmitError(throwable: Throwable) {
-    // TODO error
+    Snackbreak.short(
+        requireActivity(), binding.root,
+        ErrorDetail("PIN submission error", throwable.localizedMessage)
+    )
   }
 
   override fun onPinSubmitComplete() {
