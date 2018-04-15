@@ -28,13 +28,6 @@ buildscript {
     google()
 
     maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-
-    maven {
-      url 'https://maven.google.com'
-    }
-    maven {
       url 'https://jitpack.io'
     }
   }
@@ -53,7 +46,6 @@ buildscript {
     dagger = "2.15"
     patternLock = "1.0.0"
     fastAdapter = "3.2.4"
-    ktlint = "3.2.0"
   }
 
   dependencies {
@@ -70,19 +62,11 @@ buildscript {
 
     // Kotlin
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
-    classpath "gradle.plugin.org.jlleitschuh.gradle:ktlint-gradle:$ktlint"
   }
 }
 
 subprojects {
-  apply plugin: "org.jlleitschuh.gradle.ktlint"
   apply plugin: "com.github.ben-manes.versions"
-
-  ktlint {
-    version = "0.20.0"
-    android = true
-  }
 }
 
 allprojects {
@@ -90,9 +74,6 @@ allprojects {
     jcenter()
     google()
 
-    maven {
-      url 'https://maven.google.com'
-    }
     maven {
       url 'https://jitpack.io'
     }
