@@ -62,7 +62,7 @@ class MainActivity : TamperActivity(), MainPresenter.View {
     }
 
   override val rootView: View
-    get() = binding.root
+    get() = binding.fragmentContainer
 
   override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.Theme_PadLock_Light)
