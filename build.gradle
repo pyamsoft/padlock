@@ -39,7 +39,7 @@ buildscript {
 
     supportLib = "27.1.1"
     leakCanary = "1.5.4"
-    pydroid = "16.6.2"
+    pydroid = "16.6.3"
     autoValue = "1.6"
     sqlbrite = "3.2.0"
     sqlite = "1.0.0"
