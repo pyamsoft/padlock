@@ -33,10 +33,9 @@ import android.support.v4.content.ContextCompat
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.PackageLabelManager
 import com.pyamsoft.pydroid.cache.Cache
-import com.pyamsoft.pydroid.data.enforceIo
-import com.pyamsoft.pydroid.data.enforceMainThread
-import io.reactivex.Scheduler
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
@@ -46,8 +45,6 @@ import javax.inject.Singleton
 internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   private val context: Context,
   private val packageManagerWrapper: PackageLabelManager,
-  @param:Named("io") private val ioScheduler: Scheduler,
-  @param:Named("main") private val mainThreadScheduler: Scheduler,
   @Named("main_activity") mainActivityClass: Class<out Activity>,
   @param:Named("cache_purge") private val purgeCache: Cache,
   @param:Named("cache_app_icons") private val iconCache: Cache,
@@ -70,10 +67,6 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
     pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_RC, intent, 0)
     notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-    ioScheduler.enforceIo()
-    mainThreadScheduler.enforceMainThread()
-
     notificationManagerCompat = NotificationManagerCompat.from(context)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -121,8 +114,8 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
 
     compositeDisposable.add(
         packageManagerWrapper.loadPackageLabel(packageName)
-            .subscribeOn(ioScheduler)
-            .observeOn(mainThreadScheduler)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
               if (isNew) {
                 purgeCache.clearCache()

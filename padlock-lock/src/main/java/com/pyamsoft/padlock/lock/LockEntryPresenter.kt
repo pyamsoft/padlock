@@ -17,30 +17,25 @@
 package com.pyamsoft.padlock.lock
 
 import com.pyamsoft.padlock.api.LockEntryInteractor
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
+import com.pyamsoft.pydroid.presenter.Presenter
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
 class LockEntryPresenter @Inject internal constructor(
-  @param:Named(
-      "package_name"
-  ) private val packageName: String, @param:Named(
-      "activity_name"
-  ) private val activityName: String, @param:Named(
-      "real_name"
-  ) private val realName: String,
   private val interactor: LockEntryInteractor,
-  @Named("computation") computationScheduler: Scheduler, @Named("io") ioScheduler: Scheduler,
-  @Named("main") mainScheduler: Scheduler
-) : SchedulerPresenter<LockEntryPresenter.View>(computationScheduler, ioScheduler, mainScheduler) {
+  @param:Named("package_name") private val packageName: String,
+  @param:Named("activity_name") private val activityName: String,
+  @param:Named("real_name") private val realName: String
+) : Presenter<LockEntryPresenter.View>() {
 
   fun displayLockedHint() {
     dispose {
       interactor.getHint()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ view?.onDisplayHint(it) },
               { Timber.e(it, "onError displayLockedHint") })
     }
@@ -52,8 +47,8 @@ class LockEntryPresenter @Inject internal constructor(
   ) {
     dispose {
       interactor.submitPin(packageName, activityName, lockCode, currentAttempt)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             Timber.d("Received unlock entry result")
             if (it) {
@@ -71,8 +66,8 @@ class LockEntryPresenter @Inject internal constructor(
   fun lockEntry() {
     dispose {
       interactor.lockEntryOnFail(packageName, activityName)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (System.currentTimeMillis() < it) {
               Timber.w("Lock em up")
@@ -96,8 +91,8 @@ class LockEntryPresenter @Inject internal constructor(
           packageName, activityName, realName, lockCode, isSystem,
           shouldExclude, ignoreTime
       )
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             Timber.d("onPostUnlock complete")
             view?.onPostUnlocked()

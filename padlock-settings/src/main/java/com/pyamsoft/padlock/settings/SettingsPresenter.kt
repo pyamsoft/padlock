@@ -23,27 +23,20 @@ import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.model.ConfirmEvent.ALL
 import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
 import com.pyamsoft.padlock.model.ServiceFinishEvent
-import com.pyamsoft.padlock.settings.SettingsPresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
+import com.pyamsoft.pydroid.presenter.Presenter
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 
 class SettingsPresenter @Inject internal constructor(
   private val interactor: SettingsInteractor,
   private val bus: EventBus<ConfirmEvent>,
   private val serviceFinishBus: EventBus<ServiceFinishEvent>,
   private val clearPinBus: EventBus<ClearPinEvent>,
-  private val receiver: ApplicationInstallReceiver,
-  @Named("computation") computationScheduler: Scheduler,
-  @Named("main") mainScheduler: Scheduler,
-  @Named("io") ioScheduler: Scheduler
-) : SchedulerPresenter<View>(
-    computationScheduler,
-    ioScheduler, mainScheduler
-) {
+  private val receiver: ApplicationInstallReceiver
+) : Presenter<SettingsPresenter.View>() {
 
   override fun onCreate() {
     super.onCreate()
@@ -60,8 +53,8 @@ class SettingsPresenter @Inject internal constructor(
               ALL -> interactor.clearAll()
             }.map { type }
           }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             when (it) {
               DATABASE -> view?.onClearDatabase()
@@ -80,8 +73,8 @@ class SettingsPresenter @Inject internal constructor(
   private fun registerOnClearBus() {
     dispose {
       clearPinBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it.success) {
               view?.onMasterPinClearSuccess()
@@ -101,8 +94,8 @@ class SettingsPresenter @Inject internal constructor(
   fun setApplicationInstallReceiverState() {
     dispose {
       interactor.isInstallListenerEnabled()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it) {
               receiver.register()
@@ -116,8 +109,8 @@ class SettingsPresenter @Inject internal constructor(
   fun checkLockType(value: String) {
     dispose {
       interactor.hasExistingMasterPassword()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it) {
               view?.onLockTypeChangePrevented()

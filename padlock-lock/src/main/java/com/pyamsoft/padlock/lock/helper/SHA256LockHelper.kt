@@ -27,8 +27,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class SHA256LockHelper @Inject internal constructor() :
-    LockHelper {
+internal class SHA256LockHelper @Inject internal constructor() : LockHelper {
 
   private val messageDigest: MessageDigest
 

@@ -17,22 +17,15 @@
 package com.pyamsoft.padlock.main
 
 import com.pyamsoft.padlock.api.MainInteractor
-import com.pyamsoft.padlock.main.MainPresenter.View
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
+import com.pyamsoft.pydroid.presenter.Presenter
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 
 class MainPresenter @Inject internal constructor(
-  private val interactor: MainInteractor,
-  @Named("computation") computationScheduler: Scheduler,
-  @Named("io") ioScheduler: Scheduler,
-  @Named("main") mainScheduler: Scheduler
-) : SchedulerPresenter<View>(
-    computationScheduler,
-    ioScheduler, mainScheduler
-) {
+  private val interactor: MainInteractor
+) : Presenter<MainPresenter.View>() {
 
   override fun onCreate() {
     super.onCreate()
@@ -42,8 +35,8 @@ class MainPresenter @Inject internal constructor(
   private fun showOnboardingOrDefault() {
     dispose {
       interactor.isOnboardingComplete()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it) {
               view?.onShowDefaultPage()

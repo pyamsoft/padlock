@@ -28,8 +28,9 @@ import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
+import com.pyamsoft.pydroid.presenter.Presenter
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
@@ -39,13 +40,10 @@ class LockInfoPresenter @Inject internal constructor(
   private val changeBus: EventBus<LockInfoEvent.Callback>,
   private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
   private val bus: EventBus<LockInfoEvent>,
-  @param:Named("package_name") private val packageName: String,
   private val interactor: LockInfoInteractor,
-  private val listDiffProvider: ListDiffProvider<ActivityEntry>,
-  @Named("computation") compScheduler: Scheduler,
-  @Named("io") ioScheduler: Scheduler,
-  @Named("main") mainScheduler: Scheduler
-) : SchedulerPresenter<LockInfoPresenter.View>(compScheduler, ioScheduler, mainScheduler) {
+  @param:Named("package_name") private val packageName: String,
+  private val listDiffProvider: ListDiffProvider<ActivityEntry>
+) : Presenter<LockInfoPresenter.View>() {
 
   override fun onCreate() {
     super.onCreate()
@@ -62,8 +60,8 @@ class LockInfoPresenter @Inject internal constructor(
     dispose {
       lockWhitelistedBus.listen()
           .filter { it.packageName == packageName }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ populateList(true) }, {
             Timber.e(it, "Error listening to lock whitelist bus")
           })
@@ -75,8 +73,8 @@ class LockInfoPresenter @Inject internal constructor(
       bus.listen()
           .filter { it is LockInfoEvent.Modify }
           .map { it as LockInfoEvent.Modify }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ modifyDatabaseEntry(it) }, {
             Timber.e(it, "Error listening to lock info bus")
           })
@@ -86,8 +84,8 @@ class LockInfoPresenter @Inject internal constructor(
       bus.listen()
           .filter { it is LockInfoEvent.Callback }
           .map { it as LockInfoEvent.Callback }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             when (it) {
               is Created -> view?.onModifyEntryCreated(it.id)
@@ -108,8 +106,8 @@ class LockInfoPresenter @Inject internal constructor(
           event.packageName,
           event.name, event.code, event.system
       )
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             val id: String = event.id
             when (it) {
@@ -135,8 +133,8 @@ class LockInfoPresenter @Inject internal constructor(
     dispose(ON_STOP) {
       interactor.fetchActivityEntryList(forceRefresh, packageName)
           .flatMap { interactor.calculateListDiff(packageName, listDiffProvider.data(), it) }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .doAfterTerminate { view?.onListPopulated() }
           .doOnSubscribe { view?.onListPopulateBegin() }
           .subscribe({ view?.onListLoaded(it) }, {
@@ -149,8 +147,8 @@ class LockInfoPresenter @Inject internal constructor(
   fun showOnBoarding() {
     dispose {
       interactor.hasShownOnBoarding()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it) {
               view?.onOnboardingComplete()

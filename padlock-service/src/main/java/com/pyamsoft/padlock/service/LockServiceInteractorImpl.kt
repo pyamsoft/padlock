@@ -33,8 +33,8 @@ import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.RecheckStatus
 import com.pyamsoft.padlock.model.RecheckStatus.FORCE
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.pydroid.optional.Optional
 import com.pyamsoft.pydroid.optional.Optional.Present
-import com.pyamsoft.pydroid.optional.Optionals
 import com.pyamsoft.pydroid.optional.asOptional
 import io.reactivex.Flowable
 import io.reactivex.Maybe
@@ -107,7 +107,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
                 .asOptional()
           }
 
-          return@map Optionals.ofNullable(null)
+          return@map Optional.ofNullable(null)
         }
         .filter { it is Present }
         .map { it as Present }

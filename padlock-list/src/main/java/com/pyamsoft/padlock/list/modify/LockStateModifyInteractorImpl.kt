@@ -33,8 +33,7 @@ import javax.inject.Singleton
 internal class LockStateModifyInteractorImpl @Inject internal constructor(
   private val insertDb: PadLockDBInsert,
   private val deleteDb: PadLockDBDelete
-) :
-    LockStateModifyInteractor {
+) : LockStateModifyInteractor {
 
   @CheckResult
   private fun createNewEntry(

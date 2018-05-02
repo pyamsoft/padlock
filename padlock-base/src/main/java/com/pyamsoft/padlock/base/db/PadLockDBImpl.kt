@@ -29,17 +29,17 @@ import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite3.SqlBrite
 import io.reactivex.Completable
-import io.reactivex.Scheduler
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
-internal class PadLockDBImpl @Inject internal constructor(
-  context: Context, @param:Named("io") private val scheduler: Scheduler
-) : PadLockDBInsert, PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
+internal class PadLockDBImpl @Inject internal constructor(context: Context) : PadLockDBInsert,
+    PadLockDBUpdate,
+    PadLockDBQuery,
+    PadLockDBDelete {
 
   private val queryManager: QueryManager
   private val createManager: CreateManager
@@ -60,7 +60,7 @@ internal class PadLockDBImpl @Inject internal constructor(
           .name(DB_NAME)
           .build()
     val briteDatabase = sqlBrite.wrapDatabaseHelper(
-        FrameworkSQLiteOpenHelperFactory().create(dbConfiguration), scheduler
+        FrameworkSQLiteOpenHelperFactory().create(dbConfiguration), Schedulers.computation()
     )
 
     val entryFactory: PadLockEntryModel.Factory<*> = PadLockSqlEntry.createFactory()
@@ -88,7 +88,9 @@ internal class PadLockDBImpl @Inject internal constructor(
     whitelist: Boolean
   ): Completable {
     return Single.fromCallable {
-      val entry = createManager.create(packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, isSystem, whitelist)
+      val entry = createManager.create(
+          packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, isSystem, whitelist
+      )
       Timber.i("DB: INSERT $packageName $activityName")
       val deleteResult = deleteWithPackageActivityNameUnguarded(packageName, activityName)
       Timber.d("Delete result: %d", deleteResult)

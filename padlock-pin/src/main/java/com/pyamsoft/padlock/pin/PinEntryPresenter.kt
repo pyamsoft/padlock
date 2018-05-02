@@ -21,25 +21,18 @@ import com.pyamsoft.padlock.model.ClearPinEvent
 import com.pyamsoft.padlock.model.CreatePinEvent
 import com.pyamsoft.padlock.model.PinEntryEvent.Clear
 import com.pyamsoft.padlock.model.PinEntryEvent.Create
-import com.pyamsoft.padlock.pin.PinEntryPresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
+import com.pyamsoft.pydroid.presenter.Presenter
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 
 class PinEntryPresenter @Inject internal constructor(
   private val interactor: PinEntryInteractor,
   private val createPinBus: EventBus<CreatePinEvent>,
-  private val clearPinBus: EventBus<ClearPinEvent>,
-  @Named("computation") computationScheduler: Scheduler,
-  @Named("io") ioScheduler: Scheduler,
-  @Named("main") mainScheduler: Scheduler
-) : SchedulerPresenter<View>(
-    computationScheduler,
-    ioScheduler, mainScheduler
-) {
+  private val clearPinBus: EventBus<ClearPinEvent>
+) : Presenter<PinEntryPresenter.View>() {
 
   override fun onCreate() {
     super.onCreate()
@@ -50,8 +43,8 @@ class PinEntryPresenter @Inject internal constructor(
     Timber.d("Check master pin present")
     dispose {
       interactor.hasMasterPin()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it) {
               view?.onMasterPinPresent()
@@ -77,8 +70,8 @@ class PinEntryPresenter @Inject internal constructor(
   ) {
     dispose {
       interactor.submitPin(currentAttempt, reEntryAttempt, hint)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .doAfterTerminate { view?.onPinSubmitComplete() }
           .subscribe({
             when (it) {

@@ -20,26 +20,21 @@ import android.arch.lifecycle.Lifecycle.Event.ON_PAUSE
 import com.pyamsoft.padlock.api.LockScreenInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
+import com.pyamsoft.pydroid.presenter.Presenter
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
 class LockScreenPresenter @Inject internal constructor(
-  private val foregroundEventBus: EventBus<ForegroundEvent>, @param:Named(
-      "package_name"
-  ) private val packageName: String,
-  @param:Named("activity_name") private val activityName: String,
-  @param:Named("real_name") private val realName: String,
+  private val foregroundEventBus: EventBus<ForegroundEvent>,
   private val bus: EventBus<CloseOldEvent>,
-  private val interactor: LockScreenInteractor, @Named(
-      "computation"
-  ) computationScheduler: Scheduler,
-  @Named("io") ioScheduler: Scheduler, @Named(
-      "main"
-  ) mainScheduler: Scheduler
-) : SchedulerPresenter<LockScreenPresenter.View>(computationScheduler, ioScheduler, mainScheduler) {
+  private val interactor: LockScreenInteractor,
+  @param:Named("package_name") private val packageName: String,
+  @param:Named("activity_name") private val activityName: String,
+  @param:Named("real_name") private val realName: String
+) : Presenter<LockScreenPresenter.View>() {
 
   override fun onCreate() {
     super.onCreate()
@@ -61,8 +56,8 @@ class LockScreenPresenter @Inject internal constructor(
     Timber.d("Check if $packageName $activityName already unlocked")
     dispose(ON_PAUSE) {
       interactor.isAlreadyUnlocked(packageName, activityName)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it) {
               view?.onAlreadyUnlocked()
@@ -81,8 +76,8 @@ class LockScreenPresenter @Inject internal constructor(
   private fun loadDisplayNameFromPackage() {
     dispose {
       interactor.getDisplayName(packageName)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ view?.onSetDisplayName(it) }, {
             Timber.e(it, "Error loading display name from package")
             view?.onSetDisplayName("")
@@ -97,8 +92,8 @@ class LockScreenPresenter @Inject internal constructor(
     dispose {
       bus.listen()
           .filter { it.packageName == packageName && it.activityName == activityName }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             Timber.w(
                 "Received a close old event: %s %s", it.packageName,
@@ -114,8 +109,8 @@ class LockScreenPresenter @Inject internal constructor(
   fun createWithDefaultIgnoreTime() {
     dispose {
       interactor.getDefaultIgnoreTime()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ view?.onInitializeWithIgnoreTime(it) }, {
             Timber.e(it, "onError createWithDefaultIgnoreTime")
           })

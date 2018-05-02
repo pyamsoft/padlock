@@ -38,8 +38,6 @@ data class ApplicationItem(
       packageName: String,
       system: Boolean,
       enabled: Boolean
-    ): ApplicationItem = ApplicationItem(
-        packageName, system, enabled
-    )
+    ): ApplicationItem = ApplicationItem(packageName, system, enabled)
   }
 }

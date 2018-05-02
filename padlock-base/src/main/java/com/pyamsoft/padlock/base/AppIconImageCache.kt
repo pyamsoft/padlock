@@ -25,8 +25,7 @@ import javax.inject.Singleton
 
 @JvmSuppressWildcards
 @Singleton
-internal class AppIconImageCache @Inject internal constructor() :
-    ImageCache<String, Drawable> {
+internal class AppIconImageCache @Inject internal constructor() : ImageCache<String, Drawable> {
 
   private val cache = lruCache<String, Drawable>(8)
 

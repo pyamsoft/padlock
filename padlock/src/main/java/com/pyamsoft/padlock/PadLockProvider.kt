@@ -20,59 +20,52 @@ import android.app.Activity
 import android.app.Application
 import android.app.IntentService
 import android.content.Context
+import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.pydroid.ApplicationModule
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderModule
 import dagger.Module
 import dagger.Provides
-import io.reactivex.Scheduler
 import javax.inject.Named
 
 @Module
 class PadLockProvider(
-  private val pyDroidModule: ApplicationModule,
+  private val application: Application,
   private val loaderModule: LoaderModule,
   private val mainActivityClass: Class<out Activity>,
   private val recheckServiceClass: Class<out IntentService>
-) : ApplicationModule, LoaderModule {
+) {
 
   @Provides
-  override fun provideApplication(): Application = pyDroidModule.provideApplication()
+  @CheckResult
+  fun provideApplication(): Application = application
 
   @Provides
-  override fun provideContext(): Context = pyDroidModule.provideContext()
+  @CheckResult
+  fun provideContext(): Context = provideApplication()
 
   @Provides
-  @Named("computation")
-  override fun provideComputationScheduler(): Scheduler =
-    pyDroidModule.provideComputationScheduler()
+  @CheckResult
+  fun provideImageLoader(): ImageLoader = loaderModule.provideImageLoader()
 
   @Provides
-  @Named("io")
-  override fun provideIoScheduler(): Scheduler = pyDroidModule.provideIoScheduler()
-
-  @Provides
-  @Named("main")
-  override fun provideMainThreadScheduler(): Scheduler = pyDroidModule.provideMainThreadScheduler()
-
-  @Provides
-  override fun provideImageLoader(): ImageLoader = loaderModule.provideImageLoader()
-
-  @Provides
+  @CheckResult
   @Named("cache_image_loader")
-  override fun provideImageLoaderCache(): Cache = loaderModule.provideImageLoaderCache()
+  fun provideImageLoaderCache(): Cache = loaderModule.provideImageLoaderCache()
 
   @Provides
+  @CheckResult
   @Named("cache_list_state")
   fun provideListStateCache(): Cache = ListStateUtil
 
   @Provides
+  @CheckResult
   @Named("main_activity")
   fun provideMainActivityClass(): Class<out Activity> = mainActivityClass
 
   @Provides
+  @CheckResult
   @Named("recheck")
   fun provideRecheckServiceClass(): Class<out IntentService> = recheckServiceClass
 }

@@ -28,8 +28,8 @@ import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.Recheck
+import com.pyamsoft.pydroid.optional.Optional
 import com.pyamsoft.pydroid.optional.Optional.Present
-import com.pyamsoft.pydroid.optional.Optionals
 import com.pyamsoft.pydroid.optional.asOptional
 import io.reactivex.Completable
 import io.reactivex.Maybe
@@ -51,8 +51,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   private val dbUpdate: PadLockDBUpdate,
   private val dbQuery: PadLockDBQuery,
   @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>
-) :
-    LockEntryInteractor {
+) : LockEntryInteractor {
 
   private val failCount: MutableMap<String, Int> = HashMap()
 
@@ -71,7 +70,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
                 Timber.d("Check entry is not locked: %d", lockUntilTime)
                 if (System.currentTimeMillis() < lockUntilTime) {
                   Timber.e("Entry is still locked. Fail unlock")
-                  return@map Optionals.ofNullable(null)
+                  return@map Optional.ofNullable(null)
                 }
 
                 return@map when (lockCode) {

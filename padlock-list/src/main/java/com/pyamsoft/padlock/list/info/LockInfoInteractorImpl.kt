@@ -31,9 +31,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LockInfoInteractorImpl @Inject internal constructor(
   @Named("interactor_lock_info") private val db: LockInfoInteractor,
-  @Named(
-      "repo_lock_info"
-  ) private val repoLockInfo: RepositoryMap<String, List<ActivityEntry>>,
+  @Named("repo_lock_info") private val repoLockInfo: RepositoryMap<String, List<ActivityEntry>>,
   @Named("cache_lock_list") private val lockListCache: Cache
 ) : LockInfoInteractor, Cache {
 

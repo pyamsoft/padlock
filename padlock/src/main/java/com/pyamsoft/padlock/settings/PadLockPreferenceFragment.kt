@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.settings
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Bundle
-import android.support.annotation.CheckResult
 import android.support.design.widget.Snackbar
 import android.support.v7.preference.ListPreference
 import android.view.View
@@ -100,16 +99,6 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
   override fun onLockTypeChangeAccepted(value: String) {
     Timber.d("Change accepted, set value: %s", value)
     lockType.value = value
-  }
-
-  @CheckResult
-  private fun requireView(): View {
-    val v = view
-    if (v == null) {
-      throw IllegalStateException("getView() is required and cannot be null.")
-    } else {
-      return v
-    }
   }
 
   override fun onLockTypeChangePrevented() {

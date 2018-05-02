@@ -19,20 +19,15 @@ package com.pyamsoft.padlock.lock.screen
 import com.pyamsoft.padlock.api.LockScreenInteractor
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
+import com.pyamsoft.pydroid.presenter.Presenter
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 
 class LockScreenInputPresenter @Inject internal constructor(
-  private val interactor: LockScreenInteractor,
-  @Named("computation") computationScheduler: Scheduler,
-  @Named("main") mainScheduler: Scheduler,
-  @Named("io") ioScheduler: Scheduler
-) : SchedulerPresenter<LockScreenInputPresenter.View>(
-    computationScheduler, ioScheduler, mainScheduler
-) {
+  private val interactor: LockScreenInteractor
+) : Presenter<LockScreenInputPresenter.View>() {
 
   override fun onCreate() {
     super.onCreate()
@@ -42,8 +37,8 @@ class LockScreenInputPresenter @Inject internal constructor(
   private fun initializeLockScreenType() {
     dispose {
       interactor.getLockScreenType()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             when (it) {
               TYPE_PATTERN -> view?.onTypePattern()

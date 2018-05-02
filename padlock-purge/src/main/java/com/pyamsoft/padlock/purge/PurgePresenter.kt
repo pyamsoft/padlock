@@ -23,22 +23,19 @@ import com.pyamsoft.padlock.model.PurgeEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
+import com.pyamsoft.pydroid.presenter.Presenter
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 
 @JvmSuppressWildcards
 class PurgePresenter @Inject internal constructor(
   private val interactor: PurgeInteractor,
   private val purgeBus: EventBus<PurgeEvent>,
   private val purgeAllBus: EventBus<PurgeAllEvent>,
-  private val listDiffProvider: ListDiffProvider<String>,
-  @Named("computation") computationScheduler: Scheduler,
-  @Named("io") ioScheduler: Scheduler,
-  @Named("main") mainScheduler: Scheduler
-) : SchedulerPresenter<PurgePresenter.View>(computationScheduler, ioScheduler, mainScheduler) {
+  private val listDiffProvider: ListDiffProvider<String>
+) : Presenter<PurgePresenter.View>() {
 
   override fun onCreate() {
     super.onCreate()
@@ -53,8 +50,8 @@ class PurgePresenter @Inject internal constructor(
   private fun registerOnBus() {
     dispose {
       purgeBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ view?.onPurge(it.packageName) }, {
             Timber.e(it, "onError purge single")
           })
@@ -62,8 +59,8 @@ class PurgePresenter @Inject internal constructor(
 
     dispose {
       purgeAllBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ view?.onPurgeAll() }, {
             Timber.e(it, "onError purge all")
           })
@@ -74,8 +71,8 @@ class PurgePresenter @Inject internal constructor(
     dispose(ON_STOP) {
       interactor.fetchStalePackageNames(force)
           .flatMap { interactor.calculateDiff(listDiffProvider.data(), it) }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .doOnSubscribe { view?.onRetrieveBegin() }
           .doAfterTerminate { view?.onRetrieveComplete() }
           .subscribe({ view?.onRetrievedList(it) }, {
@@ -88,8 +85,8 @@ class PurgePresenter @Inject internal constructor(
   fun deleteStale(packageName: String) {
     dispose {
       interactor.deleteEntry(packageName)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ view?.onDeleted() }
               , { Timber.e(it, "onError deleteStale") })
     }
@@ -98,8 +95,8 @@ class PurgePresenter @Inject internal constructor(
   fun deleteStale(packageNames: List<String>) {
     dispose {
       interactor.deleteEntries(packageNames)
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ view?.onDeleted() }
               , { Timber.e(it, "onError deleteStale all") })
     }

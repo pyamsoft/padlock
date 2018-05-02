@@ -21,8 +21,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class LockPassedImpl @Inject internal constructor() :
-    LockPassed {
+internal class LockPassedImpl @Inject internal constructor() : LockPassed {
 
   private val passedSet: MutableCollection<String> = LinkedHashSet()
 

@@ -32,8 +32,7 @@ import javax.inject.Singleton
 internal class PinEntryInteractorImpl @Inject internal constructor(
   private val lockHelper: LockHelper,
   private val masterPinInteractor: MasterPinInteractor
-) :
-    PinEntryInteractor {
+) : PinEntryInteractor {
 
   @CheckResult
   private fun getMasterPin(): Single<Optional<String>> =

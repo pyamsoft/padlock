@@ -33,8 +33,9 @@ import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
+import com.pyamsoft.pydroid.presenter.Presenter
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
@@ -50,11 +51,8 @@ class LockListPresenter @Inject internal constructor(
   private val clearPinBus: EventBus<ClearPinEvent>,
   private val createPinBus: EventBus<CreatePinEvent>,
   private val lockInfoChangeBus: EventBus<LockInfoEvent.Callback>,
-  private val listDiffProvider: ListDiffProvider<AppEntry>,
-  @Named("computation") compScheduler: Scheduler,
-  @Named("main") mainScheduler: Scheduler,
-  @Named("io") ioScheduler: Scheduler
-) : SchedulerPresenter<LockListPresenter.View>(compScheduler, ioScheduler, mainScheduler) {
+  private val listDiffProvider: ListDiffProvider<AppEntry>
+) : Presenter<LockListPresenter.View>() {
 
   override fun onCreate() {
     super.onCreate()
@@ -73,8 +71,8 @@ class LockListPresenter @Inject internal constructor(
   private fun registerOnWhitelistedBus() {
     dispose {
       lockWhitelistedBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ populateList(true) }, {
             Timber.e(it, "Error listening to lock whitelist bus")
           })
@@ -86,8 +84,8 @@ class LockListPresenter @Inject internal constructor(
       lockListBus.listen()
           .filter { it is LockListEvent.Modify }
           .map { it as LockListEvent.Modify }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             modifyDatabaseEntry(it.isChecked, it.packageName, it.code, it.isSystem)
           }, {
@@ -99,8 +97,8 @@ class LockListPresenter @Inject internal constructor(
       lockListBus.listen()
           .filter { it is LockListEvent.Callback }
           .map { it as LockListEvent.Callback }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             when (it) {
               is LockListEvent.Callback.Created -> view?.onModifyEntryCreated(
@@ -120,8 +118,8 @@ class LockListPresenter @Inject internal constructor(
       lockInfoBus.listen()
           .filter { it is LockInfoEvent.Callback }
           .map { it as LockInfoEvent.Callback }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ processLockInfoCallback(it) }, {
             Timber.e(it, "Error listening to lock info bus")
             view?.onModifySubEntryError(it)
@@ -130,8 +128,8 @@ class LockListPresenter @Inject internal constructor(
 
     dispose {
       lockInfoChangeBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ processLockInfoCallback(it) }, {
             Timber.e(it, "Error listening to lock info change bus")
             view?.onModifySubEntryError(it)
@@ -168,8 +166,8 @@ class LockListPresenter @Inject internal constructor(
   private fun registerOnClearBus() {
     dispose {
       clearPinBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it.success) {
               view?.onMasterPinClearSuccess()
@@ -185,8 +183,8 @@ class LockListPresenter @Inject internal constructor(
   private fun registerOnCreateBus() {
     dispose {
       createPinBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it.success) {
               view?.onMasterPinCreateSuccess()
@@ -221,8 +219,8 @@ class LockListPresenter @Inject internal constructor(
           oldState, newState, packageName,
           PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system
       )
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             when (it) {
               LockState.DEFAULT -> lockListBus.publish(
@@ -243,8 +241,8 @@ class LockListPresenter @Inject internal constructor(
   private fun setFABStateFromPreference() {
     dispose(ON_STOP) {
       stateInteractor.isServiceEnabled()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it) {
               view?.onFABEnabled()
@@ -258,8 +256,8 @@ class LockListPresenter @Inject internal constructor(
   fun setSystemVisibilityFromPreference() {
     dispose {
       lockListInteractor.isSystemVisible()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             view?.onSystemVisibilityChanged(it)
           }, { Timber.e(it, "onError") })
@@ -274,8 +272,8 @@ class LockListPresenter @Inject internal constructor(
   fun showOnBoarding() {
     dispose {
       lockListInteractor.hasShownOnBoarding()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it) {
               view?.onOnboardingComplete()
@@ -290,8 +288,8 @@ class LockListPresenter @Inject internal constructor(
     dispose(ON_STOP) {
       lockListInteractor.fetchAppEntryList(force)
           .flatMap { lockListInteractor.calculateListDiff(listDiffProvider.data(), it) }
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .doAfterTerminate { view?.onListPopulated() }
           .doOnSubscribe { view?.onListPopulateBegin() }
           .subscribe({ view?.onListLoaded(it) }, {

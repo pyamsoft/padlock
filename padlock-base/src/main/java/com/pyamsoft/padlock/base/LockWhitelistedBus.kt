@@ -24,8 +24,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class LockWhitelistedBus @Inject internal constructor() :
-    EventBus<LockWhitelistedEvent> {
+internal class LockWhitelistedBus @Inject internal constructor() : EventBus<LockWhitelistedEvent> {
 
   private val bus: EventBus<LockWhitelistedEvent> = RxBus.create()
 

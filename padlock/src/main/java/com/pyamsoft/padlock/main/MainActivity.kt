@@ -31,23 +31,21 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.rating.ChangeLogBuilder
+import com.pyamsoft.pydroid.ui.rating.RatingActivity
 import com.pyamsoft.pydroid.ui.rating.buildChangeLog
-import com.pyamsoft.pydroid.ui.sec.TamperActivity
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.animateMenu
 import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import javax.inject.Inject
 
-class MainActivity : TamperActivity(), MainPresenter.View {
+class MainActivity : RatingActivity(), MainPresenter.View {
 
   @Inject
   internal lateinit var presenter: MainPresenter
   private lateinit var binding: ActivityMainBinding
 
   override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
-
-  override val safePackageName: String = "com.pyamsoft.padlock"
 
   override val versionName: String = BuildConfig.VERSION_NAME
 
@@ -56,13 +54,13 @@ class MainActivity : TamperActivity(), MainPresenter.View {
   override val applicationName: String
     get() = getString(R.string.app_name)
 
+  override val rootView: View
+    get() = binding.fragmentContainer
+
   override val changeLogLines: ChangeLogBuilder
     get() = buildChangeLog {
       bugfix("Smoother loading animations")
     }
-
-  override val rootView: View
-    get() = binding.fragmentContainer
 
   override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.Theme_PadLock_Light)

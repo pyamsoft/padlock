@@ -32,11 +32,8 @@ internal class LockEntryInteractorCache @Inject internal constructor(
   private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
   @param:Named("cache_lock_list") private val lockListCache: Cache,
   @param:Named("cache_lock_info") private val lockInfoCache: Cache,
-  @param:Named(
-      "interactor_lock_entry"
-  ) private val impl: LockEntryInteractor
-) :
-    LockEntryInteractor, Cache {
+  @param:Named("interactor_lock_entry") private val impl: LockEntryInteractor
+) : LockEntryInteractor, Cache {
 
   override fun clearCache() {
     clearFailCount()

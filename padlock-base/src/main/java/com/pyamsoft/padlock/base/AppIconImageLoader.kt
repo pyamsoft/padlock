@@ -21,8 +21,6 @@ import android.support.annotation.CheckResult
 import android.widget.ImageView
 import com.pyamsoft.padlock.api.PackageIconManager
 import com.pyamsoft.padlock.model.IconHolder
-import com.pyamsoft.pydroid.data.enforceIo
-import com.pyamsoft.pydroid.data.enforceMainThread
 import com.pyamsoft.pydroid.loader.GenericLoader
 import com.pyamsoft.pydroid.loader.cache.ImageCache
 import com.pyamsoft.pydroid.loader.cache.ImageCache.ImageCacheKey
@@ -30,17 +28,16 @@ import com.pyamsoft.pydroid.loader.loaded.Loaded
 import com.pyamsoft.pydroid.loader.loaded.RxLoaded
 import com.pyamsoft.pydroid.loader.targets.DrawableImageTarget
 import com.pyamsoft.pydroid.loader.targets.Target
-import io.reactivex.Scheduler
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 
 @JvmSuppressWildcards
 internal class AppIconImageLoader internal constructor(
   private val packageName: String,
   private val appIconImageCache: ImageCache<String, Drawable>,
-  private val packageIconManager: PackageIconManager<Drawable>,
-  private val mainScheduler: Scheduler,
-  private val ioScheduler: Scheduler
+  private val packageIconManager: PackageIconManager<Drawable>
 ) : GenericLoader<Drawable>() {
 
   @CheckResult
@@ -50,9 +47,6 @@ internal class AppIconImageLoader internal constructor(
     if (packageName.isEmpty()) {
       throw IllegalArgumentException("AppIconLoader packageName must be non-empty")
     }
-
-    mainScheduler.enforceMainThread()
-    ioScheduler.enforceIo()
   }
 
   override fun into(imageView: ImageView): Loaded = into(
@@ -67,8 +61,8 @@ internal class AppIconImageLoader internal constructor(
     packageName: String
   ): Loaded {
     return RxLoaded(loadCached(packageName)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainScheduler)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .doOnSubscribe { startAction?.invoke() }
         .subscribe({ holder ->
           holder.applyIcon {

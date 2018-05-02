@@ -23,25 +23,16 @@ import android.support.v4.app.Fragment
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
-import com.pyamsoft.pydroid.PYDroidModule
-import com.pyamsoft.pydroid.base.PYDroidModuleImpl
-import com.pyamsoft.pydroid.base.about.Licenses
-import com.pyamsoft.pydroid.loader.LoaderModule
-import com.pyamsoft.pydroid.loader.LoaderModuleImpl
+import com.pyamsoft.pydroid.base.about.AboutLibraries
+import com.pyamsoft.pydroid.list.PYDroidListLicenses
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
 
-class PadLock : Application() {
+class PadLock : Application(), PYDroid.Instance {
 
-  private val component: PadLockComponent by lazy(LazyThreadSafetyMode.NONE) { buildDagger() }
-  private val pydroidModule: PYDroidModule by lazy(LazyThreadSafetyMode.NONE) {
-    PYDroidModuleImpl(this, BuildConfig.DEBUG)
-  }
-  private val loaderModule: LoaderModule by lazy(LazyThreadSafetyMode.NONE) {
-    LoaderModuleImpl(pydroidModule)
-  }
-
+  private var pyDroid: PYDroid? = null
+  private lateinit var component: PadLockComponent
   private lateinit var refWatcher: RefWatcher
 
   override fun onCreate() {
@@ -56,18 +47,25 @@ class PadLock : Application() {
       refWatcher = RefWatcher.DISABLED
     }
 
-    PYDroid.init(pydroidModule, loaderModule)
-    Licenses.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
-    Licenses.create("SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight")
-    Licenses.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
-    Licenses.create(
+    AboutLibraries.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
+    AboutLibraries.create(
+        "SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight"
+    )
+    AboutLibraries.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
+    AboutLibraries.create(
         "FastAdapter", "https://github.com/mikepenz/fastadapter",
         "licenses/fastadapter"
     )
-    Licenses.create(
+    AboutLibraries.create(
         "PatternLockView", "https://github.com/aritraroy/PatternLockView",
         "licenses/patternlock"
     )
+    AboutLibraries.create(
+        PYDroidListLicenses.Names.RECYCLERVIEW, PYDroidListLicenses.HomepageUrls.RECYCLERVIEW,
+        PYDroidListLicenses.LicenseLocations.RECYCLERVIEW
+    )
+
+    PYDroid.init(this, this, BuildConfig.DEBUG)
 
     val dagger = Injector.obtain<PadLockComponent>(this)
     val receiver = dagger.provideApplicationInstallReceiver()
@@ -81,14 +79,20 @@ class PadLock : Application() {
     PadLockService.start(this)
   }
 
-  private fun buildDagger(): PadLockComponent {
-    val provider = PadLockProvider(
-        pydroidModule, loaderModule, MainActivity::class.java,
-        RecheckService::class.java
-    )
-    return DaggerPadLockComponent.builder()
-        .padLockProvider(provider)
-        .build()
+  override fun getPydroid(): PYDroid? = pyDroid
+
+  override fun setPydroid(instance: PYDroid) {
+    pyDroid = instance.also {
+      val provider = PadLockProvider(
+          this,
+          it.modules().loaderModule(),
+          MainActivity::class.java,
+          RecheckService::class.java
+      )
+      component = DaggerPadLockComponent.builder()
+          .padLockProvider(provider)
+          .build()
+    }
   }
 
   override fun getSystemService(name: String?): Any {

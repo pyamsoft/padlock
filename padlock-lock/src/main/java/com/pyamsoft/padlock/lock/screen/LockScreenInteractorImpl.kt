@@ -30,8 +30,7 @@ internal class LockScreenInteractorImpl @Inject internal constructor(
   private val lockPassed: LockPassed,
   private val labelManager: PackageLabelManager,
   private val preferences: LockScreenPreferences
-) :
-    LockScreenInteractor {
+) : LockScreenInteractor {
 
   override fun getLockScreenType(): Single<LockScreenType> =
     Single.fromCallable { preferences.getCurrentLockType() }

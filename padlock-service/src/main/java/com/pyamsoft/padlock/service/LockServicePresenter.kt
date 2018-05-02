@@ -24,29 +24,21 @@ import com.pyamsoft.padlock.model.RecheckStatus
 import com.pyamsoft.padlock.model.RecheckStatus.NOT_FORCE
 import com.pyamsoft.padlock.model.ServiceFinishEvent
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.service.LockServicePresenter.View
 import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.data.clear
-import com.pyamsoft.pydroid.presenter.SchedulerPresenter
-import io.reactivex.Scheduler
+import com.pyamsoft.pydroid.presenter.Presenter
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.disposables.Disposables
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 
 class LockServicePresenter @Inject internal constructor(
   private val foregroundEventBus: EventBus<ForegroundEvent>,
   private val serviceFinishBus: EventBus<ServiceFinishEvent>,
   private val recheckEventBus: EventBus<RecheckEvent>,
-  private val interactor: LockServiceInteractor,
-  @Named("computation") compScheduler: Scheduler,
-  @Named("main") mainScheduler: Scheduler,
-  @Named("io") ioScheduler: Scheduler
-) : SchedulerPresenter<View>(
-    compScheduler,
-    ioScheduler, mainScheduler
-) {
+  private val interactor: LockServiceInteractor
+) : Presenter<LockServicePresenter.View>() {
 
   private var matchingDisposable: Disposable = Disposables.empty()
   private var entryDisposable: Disposable = Disposables.empty()
@@ -66,23 +58,23 @@ class LockServicePresenter @Inject internal constructor(
     interactor.cleanup()
     interactor.reset()
 
-    matchingDisposable = matchingDisposable.clear()
-    entryDisposable = entryDisposable.clear()
+    matchingDisposable.dispose()
+    entryDisposable.dispose()
   }
 
   private fun registerForegroundEventListener() {
     dispose {
       foregroundEventBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ interactor.clearMatchingForegroundEvent(it) }, {
             Timber.e(it, "Error listening for foreground event clears")
           })
     }
     dispose {
       interactor.listenForForegroundEvents()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .onErrorReturn {
             Timber.e(it, "Error while listening to foreground events")
             return@onErrorReturn ForegroundEvent.EMPTY
@@ -101,8 +93,8 @@ class LockServicePresenter @Inject internal constructor(
   private fun registerOnBus() {
     dispose {
       serviceFinishBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             view?.onFinish()
           }, { Timber.e(it, "onError service finish bus") })
@@ -110,8 +102,8 @@ class LockServicePresenter @Inject internal constructor(
 
     dispose {
       recheckEventBus.listen()
-          .subscribeOn(ioScheduler)
-          .observeOn(mainThreadScheduler)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             view?.onRecheck(it.packageName, it.className)
           }, { Timber.e(it, "onError recheck event bus") })
@@ -122,10 +114,10 @@ class LockServicePresenter @Inject internal constructor(
     packageName: String,
     className: String
   ) {
-    matchingDisposable = matchingDisposable.clear()
+    matchingDisposable.dispose()
     matchingDisposable = interactor.isActiveMatching(packageName, className)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainThreadScheduler)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe({
           if (it) {
             processEvent(packageName, className, RecheckStatus.FORCE)
@@ -138,10 +130,10 @@ class LockServicePresenter @Inject internal constructor(
     className: String,
     forcedRecheck: RecheckStatus
   ) {
-    entryDisposable = entryDisposable.clear()
+    entryDisposable.dispose()
     entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
-        .subscribeOn(ioScheduler)
-        .observeOn(mainThreadScheduler)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe({
           if (PadLockEntry.isEmpty(it)) {
             Timber.w("PadLockEntry is EMPTY, ignore")
