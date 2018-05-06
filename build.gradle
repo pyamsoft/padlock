@@ -45,7 +45,7 @@ buildscript {
     sqlite = "1.0.0"
     dagger = "2.15"
     patternLock = "1.0.0"
-    fastAdapter = "3.2.4"
+    fastAdapter = "3.2.5"
   }
 
   dependencies {
