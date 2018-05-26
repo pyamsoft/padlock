@@ -167,10 +167,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
   private fun setupSwipeRefresh() {
     binding.apply {
-      lockInfoSwipeRefresh.setColorSchemeResources(
-          R.color.blue500, R.color.amber700,
-          R.color.blue700, R.color.amber500
-      )
+      lockInfoSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.blue700)
       lockInfoSwipeRefresh.setOnRefreshListener {
         Timber.d("onRefresh")
         refreshLatch.forceRefresh()

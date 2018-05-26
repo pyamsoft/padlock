@@ -204,10 +204,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   private fun setupSwipeRefresh() {
     binding.apply {
-      applistSwipeRefresh.setColorSchemeResources(
-          R.color.blue500, R.color.amber700,
-          R.color.blue700, R.color.amber500
-      )
+      applistSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.blue700)
       applistSwipeRefresh.setOnRefreshListener {
         Timber.d("onRefresh")
         refreshLatch.forceRefresh()

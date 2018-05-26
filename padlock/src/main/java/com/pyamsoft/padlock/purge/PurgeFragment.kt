@@ -143,10 +143,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
   private fun setupSwipeRefresh() {
     binding.apply {
-      purgeSwipeRefresh.setColorSchemeResources(
-          R.color.blue500, R.color.amber700,
-          R.color.blue700, R.color.amber500
-      )
+      purgeSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.blue700)
       purgeSwipeRefresh.setOnRefreshListener {
         refreshLatch.forceRefresh()
         presenter.retrieveStaleApplications(true)

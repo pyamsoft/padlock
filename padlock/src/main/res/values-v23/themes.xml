@@ -18,27 +18,26 @@
 
 <resources>
 
-  <style name="Base.Theme.PadLock.Light" parent="@style/Theme.AppCompat.Light.NoActionBar">
-    <item name="colorPrimary">@color/blue500</item>
-    <item name="colorPrimaryDark">@color/blue700</item>
-    <item name="colorAccent">@color/blue500</item>
-    <item name="android:navigationBarColor">@color/blue700</item>
-  </style>
-
   <!-- Normal App Theme -->
   <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light">
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     <item name="android:windowBackground">@color/white</item>
+    <item name="android:statusBarColor">@color/white</item>
+    <item name="android:windowLightStatusBar">true</item>
   </style>
 
   <!-- Lock Screen Theme -->
   <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
     <item name="android:windowBackground">@color/blue700</item>
+    <item name="android:statusBarColor">@color/blue700</item>
+    <item name="android:windowLightStatusBar">false</item>
   </style>
 
   <!-- Splash screen -->
   <style name="Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock.Light">
     <item name="android:windowBackground">@drawable/splash_screen</item>
+    <item name="android:statusBarColor">@color/white</item>
+    <item name="android:windowLightStatusBar">true</item>
   </style>
 
 </resources>
