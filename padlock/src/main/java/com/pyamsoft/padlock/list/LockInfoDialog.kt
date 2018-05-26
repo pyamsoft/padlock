@@ -48,6 +48,7 @@ import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
+import com.pyamsoft.pydroid.util.tintWith
 import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import java.util.Collections
@@ -145,22 +146,33 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
   private fun setupToolbar() {
     binding.apply {
-      lockInfoToolbar.title = appName
-      lockInfoToolbar.setNavigationOnClickListener { dismiss() }
-      lockInfoToolbar.inflateMenu(R.menu.search_menu)
-      lockInfoToolbar.inflateMenu(R.menu.lockinfo_menu)
+      lockInfoToolbar.apply {
+        title = appName
+        setNavigationOnClickListener { dismiss() }
+        inflateMenu(R.menu.search_menu)
+        inflateMenu(R.menu.lockinfo_menu)
 
-      lockInfoToolbar.setOnMenuItemClickListener {
-        when (it.itemId) {
-          R.id.menu_explain_lock_type -> {
-            LockInfoExplanationDialog().show(requireActivity(), LockInfoExplanationDialog.TAG)
-            return@setOnMenuItemClickListener true
+        // Tint search icon white to match Toolbar
+        menu?.findItem(R.id.menu_search)
+            ?.also {
+              val icon = it.icon
+              if (icon != null) {
+                it.icon = icon.tintWith(context, R.color.white)
+              }
+            }
+
+        setOnMenuItemClickListener {
+          when (it.itemId) {
+            R.id.menu_explain_lock_type -> {
+              LockInfoExplanationDialog().show(requireActivity(), LockInfoExplanationDialog.TAG)
+              return@setOnMenuItemClickListener true
+            }
+            else -> return@setOnMenuItemClickListener false
           }
-          else -> return@setOnMenuItemClickListener false
         }
-      }
 
-      ViewCompat.setElevation(lockInfoToolbar, 4f.toDp(lockInfoToolbar.context).toFloat())
+        ViewCompat.setElevation(this, 4f.toDp(context).toFloat())
+      }
     }
     filterListDelegate.onPrepareOptionsMenu(binding.lockInfoToolbar.menu, adapter)
   }
