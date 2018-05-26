@@ -96,7 +96,6 @@
 
   <item
       android:id="@+id/menu_lockscreen_info"
-      android:icon="@drawable/ic_info_24dp"
       android:title="@string/info_for_nerds"
       app:showAsAction="never"/>
 

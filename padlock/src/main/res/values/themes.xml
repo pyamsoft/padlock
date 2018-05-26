@@ -34,6 +34,7 @@
   <!-- Lock Screen Theme -->
   <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
     <item name="android:windowBackground">@color/blue700</item>
+    <item name="colorAccent">@color/white</item>
   </style>
 
   <!-- Splash screen -->

@@ -136,7 +136,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     }
 
     imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
-        .tint(R.color.orangeA200)
+        .tint(R.color.white)
         .into(binding.lockImageGo)
         .bind(viewLifecycle)
   }
