@@ -17,15 +17,13 @@
 package com.pyamsoft.padlock.lock
 
 import android.app.Dialog
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.annotation.CheckResult
 import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogLockStatBinding
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 
@@ -52,7 +50,7 @@ class LockedStatDialog : CanaryDialog() {
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     binding = DialogLockStatBinding.inflate(LayoutInflater.from(activity), null, false)
 
-    return AlertDialog.Builder(requireActivity())
+    return AlertDialog.Builder(requireActivity(), R.style.Theme_PadLock_Light)
         .setView(binding.root)
         .setPositiveButton("Okay") { dialogInterface, _ -> dialogInterface.dismiss() }
         .setCancelable(true)
