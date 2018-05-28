@@ -168,7 +168,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
           R.id.menu_lockscreen_info -> {
             LockedStatDialog.newInstance(
                 binding.toolbar.title.toString(), lockedPackageName, lockedActivityName,
-                lockedRealName, lockedSystem, binding.lockImage.drawable
+                lockedRealName, lockedSystem
             )
                 .show(self, "info_dialog")
           }

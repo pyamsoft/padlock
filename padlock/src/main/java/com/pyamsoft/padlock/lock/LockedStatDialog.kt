@@ -35,7 +35,6 @@ class LockedStatDialog : CanaryDialog() {
   private lateinit var activityName: String
   private lateinit var packageName: String
   private lateinit var realName: String
-  private lateinit var image: Bitmap
   private lateinit var binding: DialogLockStatBinding
   private var system: Boolean = false
 
@@ -47,7 +46,6 @@ class LockedStatDialog : CanaryDialog() {
       activityName = it.getString(ACT_NAME)
       realName = it.getString(REAL_NAME)
       system = it.getBoolean(SYSTEM)
-      image = it.getParcelable(IMAGE)
     }
   }
 
@@ -73,7 +71,6 @@ class LockedStatDialog : CanaryDialog() {
   ) {
     super.onViewCreated(view, savedInstanceState)
     binding.apply {
-      statImage.setImageBitmap(image)
       statDisplayName.text = displayedLabel
       statPackageName.text = packageName
       statRealName.text = realName
@@ -94,7 +91,6 @@ class LockedStatDialog : CanaryDialog() {
     private const val REAL_NAME = "realname"
     private const val SYSTEM = "system"
     private const val LABEL = "label"
-    private const val IMAGE = "image"
 
     @CheckResult
     @JvmStatic
@@ -103,8 +99,7 @@ class LockedStatDialog : CanaryDialog() {
       packageName: String,
       activityName: String,
       realName: String,
-      system: Boolean,
-      drawable: Drawable
+      system: Boolean
     ): LockedStatDialog {
       return LockedStatDialog().apply {
         arguments = Bundle().apply {
@@ -113,10 +108,6 @@ class LockedStatDialog : CanaryDialog() {
           putString(ACT_NAME, activityName)
           putString(REAL_NAME, realName)
           putBoolean(SYSTEM, system)
-          if (drawable is BitmapDrawable) {
-            val bitmap = drawable.bitmap
-            putParcelable(IMAGE, bitmap)
-          }
         }
       }
     }
