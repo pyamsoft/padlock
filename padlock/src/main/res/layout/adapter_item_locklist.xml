@@ -60,6 +60,7 @@
         android:longClickable="false"
         android:singleLine="true"
         android:ellipsize="end"
+        android:textColor="@color/black"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/lock_list_white"

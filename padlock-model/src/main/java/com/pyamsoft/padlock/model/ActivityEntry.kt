@@ -23,4 +23,12 @@ data class ActivityEntry(
 ) {
 
   val id: String = "$packageName|$name"
+  val group: String
+  val activity: String
+
+  init {
+    val lastIndex = name.lastIndexOf('.')
+    group = name.substring(0..lastIndex)
+    activity = name.substring(lastIndex + 1)
+  }
 }
