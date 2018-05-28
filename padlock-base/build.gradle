@@ -50,9 +50,6 @@ android {
 }
 
 dependencies {
-  // Android Support
-  implementation "com.android.support:preference-v7:$supportLib"
-
   // SQLBrite
   implementation "com.squareup.sqlbrite3:sqlbrite:$sqlbrite"
   implementation "android.arch.persistence:db:$sqlite"
@@ -66,6 +63,7 @@ dependencies {
   kapt "com.google.dagger:dagger-compiler:$dagger"
 
   // PYDroid
+  api "com.github.pyamsoft.pydroid:pydroid-base:$pydroid"
   api "com.github.pyamsoft.pydroid:pydroid-loader:$pydroid"
 
   api project(":padlock-api")

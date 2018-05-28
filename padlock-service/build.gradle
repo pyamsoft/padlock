@@ -43,9 +43,6 @@ android {
 }
 
 dependencies {
-  // Compat
-  api "com.android.support:support-compat:$supportLib"
-
   kapt "com.google.dagger:dagger-compiler:$dagger"
 
   api project(":padlock-api")
