@@ -17,5 +17,6 @@
 <resources>
   <item name="adapter_lock_item" type="id"/>
   <item name="adapter_lock_info" type="id"/>
+  <item name="adapter_lock_group" type="id"/>
   <item name="adapter_purge" type="id"/>
 </resources>

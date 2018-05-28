@@ -33,6 +33,7 @@ import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
+import io.reactivex.observables.GroupedObservable
 import timber.log.Timber
 import java.util.ArrayList
 import java.util.concurrent.TimeUnit
@@ -118,7 +119,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     packageName: String,
     activityName: String,
     padLockEntries: MutableList<PadLockEntryModel.WithPackageNameModel>
-  ): ActivityEntry {
+  ): ActivityEntry.Item {
     val foundEntry = findMatchingEntry(padLockEntries, activityName)
 
     // Optimize for speed, trade off size
@@ -134,7 +135,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     packageName: String,
     name: String,
     foundEntry: PadLockEntryModel.WithPackageNameModel?
-  ): ActivityEntry {
+  ): ActivityEntry.Item {
     val state: LockState
     if (foundEntry == null) {
       state = LockState.DEFAULT
@@ -145,7 +146,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
         state = LockState.LOCKED
       }
     }
-    return ActivityEntry(name, packageName, lockState = state)
+    return ActivityEntry.Item(name, packageName, lockState = state)
   }
 
   @CheckResult
@@ -153,7 +154,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     fetchName: String,
     names: List<String>,
     entries: List<PadLockEntryModel.WithPackageNameModel>
-  ): List<ActivityEntry> {
+  ): List<ActivityEntry.Item> {
     // Sort here to avoid stream break
     // If the list is empty, the old flatMap call can hang, causing a list loading error
     // Sort here where we are guaranteed a list of some kind
@@ -164,7 +165,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
               .compareTo(o2.activityName(), ignoreCase = true)
         })
 
-    val activityEntries: MutableList<ActivityEntry> = ArrayList()
+    val activityEntries: MutableList<ActivityEntry.Item> = ArrayList()
 
     var start = 0
     var end = names.size - 1
@@ -189,52 +190,37 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   @CheckResult
   private fun activityListZipper(
     fetchName: String
-  ): BiFunction<List<String>, List<PadLockEntryModel.WithPackageNameModel>, List<ActivityEntry>> =
+  ): BiFunction<List<String>, List<PadLockEntryModel.WithPackageNameModel>, List<ActivityEntry.Item>> =
     BiFunction { names, entries -> createSortedActivityEntryList(fetchName, names, entries) }
 
   @CheckResult
-  private fun fetchData(fetchName: String): Single<List<ActivityEntry>> {
+  private fun fetchData(fetchName: String): Single<List<ActivityEntry.Item>> {
     return getPackageActivities(fetchName).zipWith(
         getLockedActivityEntries(fetchName), activityListZipper(fetchName)
     )
   }
 
   @CheckResult
-  private fun sortWithPackageNameOnTop(
-    packageName: String,
-    o1: ActivityEntry,
-    o2: ActivityEntry
+  private fun compareByGroup(
+    o1: GroupedObservable<String?, ActivityEntry.Item>,
+    o2: GroupedObservable<String?, ActivityEntry.Item>
   ): Int {
-    // Package names are all the same
-    val entry1Name: String = o1.name
-    val entry2Name: String = o2.name
-
-    // Calculate if the starting X characters in the activity name is the exact package name
-    var activity1Package = false
-    if (entry1Name.startsWith(packageName)) {
-      val strippedPackageName = entry1Name.replace(packageName, "")
-      if (strippedPackageName[0] == '.') {
-        activity1Package = true
-      }
-    }
-
-    var activity2Package = false
-    if (entry2Name.startsWith(packageName)) {
-      val strippedPackageName = entry2Name.replace(packageName, "")
-      if (strippedPackageName[0] == '.') {
-        activity2Package = true
-      }
-    }
-
-    if (activity1Package && activity2Package) {
-      return entry1Name.compareTo(entry2Name, ignoreCase = true)
-    } else if (activity1Package) {
-      return -1
-    } else if (activity2Package) {
+    if (o1.key == null && o2.key == null) {
+      return 0
+    } else if (o1.key == null) {
       return 1
     } else {
-      return entry1Name.compareTo(entry2Name, ignoreCase = true)
+      return -1
     }
+  }
+
+  @CheckResult
+  private fun sortWithinGroup(
+    item: GroupedObservable<String?, ActivityEntry.Item>
+  ): Observable<ActivityEntry> {
+    return item.sorted { o1, o2 -> o1.activity.compareTo(o2.activity, ignoreCase = true) }
+        .map { it as ActivityEntry }
+        .startWith(ActivityEntry.Group(item.key!!))
   }
 
   override fun fetchActivityEntryList(
@@ -243,7 +229,10 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   ): Single<List<ActivityEntry>> {
     return fetchData(packageName)
         .flatMapObservable { Observable.fromIterable(it) }
-        .toSortedList { o1, o2 -> sortWithPackageNameOnTop(packageName, o1, o2) }
+        .groupBy { it.group }
+        .sorted { o1, o2 -> compareByGroup(o1, o2) }
+        .concatMap { sortWithinGroup(it) }
+        .toList()
   }
 
   override fun calculateListDiff(
@@ -264,7 +253,13 @@ internal class LockInfoInteractorDb @Inject internal constructor(
         ): Boolean {
           val oldItem: ActivityEntry = oldList[oldItemPosition]
           val newItem: ActivityEntry = newList[newItemPosition]
-          return oldItem.packageName == newItem.packageName
+          if (oldItem is ActivityEntry.Item && newItem is ActivityEntry.Item) {
+            return oldItem.packageName == newItem.packageName
+          } else if (oldItem is ActivityEntry.Group && newItem is ActivityEntry.Group) {
+            return oldItem.name == newItem.name
+          } else {
+            return false
+          }
         }
 
         override fun areContentsTheSame(
@@ -273,7 +268,13 @@ internal class LockInfoInteractorDb @Inject internal constructor(
         ): Boolean {
           val oldItem: ActivityEntry = oldList[oldItemPosition]
           val newItem: ActivityEntry = newList[newItemPosition]
-          return oldItem == newItem
+          if (oldItem is ActivityEntry.Item && newItem is ActivityEntry.Item) {
+            return oldItem == newItem
+          } else if (oldItem is ActivityEntry.Group && newItem is ActivityEntry.Group) {
+            return oldItem == newItem
+          } else {
+            return false
+          }
         }
 
         override fun getChangePayload(

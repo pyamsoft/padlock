@@ -14,33 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.list
 
-sealed class ActivityEntry(name: String) {
+import android.support.v7.widget.RecyclerView
+import com.mikepenz.fastadapter.items.ModelAbstractItem
+import com.pyamsoft.padlock.model.ActivityEntry
 
-  val group: String
-
-  init {
-    val lastIndex = name.lastIndexOf('.')
-    group = name.substring(0 until lastIndex)
-  }
-
-  data class Group(val name: String) : ActivityEntry(name)
-
-  data class Item(
-    val name: String,
-    val packageName: String,
-    val lockState: LockState
-  ) : ActivityEntry(name) {
-
-    val id: String = "$packageName|$name"
-    val activity: String
-
-    init {
-      val lastIndex = name.lastIndexOf('.')
-      activity = name.substring(lastIndex + 1)
-    }
-  }
-
-}
-
+abstract class LockInfoBaseItem<
+    M : ActivityEntry,
+    I : LockInfoBaseItem<M, I, VH>,
+    VH : RecyclerView.ViewHolder>
+protected constructor(entry: M) : ModelAbstractItem<M, I, VH>(entry), FilterableItem<I, VH>

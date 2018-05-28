@@ -37,7 +37,7 @@ sealed class LockInfoEvent {
       @JvmStatic
       @CheckResult
       fun from(
-        entry: ActivityEntry,
+        entry: ActivityEntry.Item,
         newState: LockState,
         code: String?,
         system: Boolean

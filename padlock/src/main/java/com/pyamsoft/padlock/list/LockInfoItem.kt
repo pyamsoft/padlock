@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.list
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.RadioButton
-import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -31,12 +30,9 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockInfoItem internal constructor(
-  entry: ActivityEntry,
+  entry: ActivityEntry.Item,
   private val system: Boolean
-) :
-    ModelAbstractItem<ActivityEntry, LockInfoItem, LockInfoItem.ViewHolder>(
-        entry
-    ), FilterableItem<LockInfoItem, LockInfoItem.ViewHolder> {
+) : LockInfoBaseItem<ActivityEntry.Item, LockInfoItem, LockInfoItem.ViewHolder>(entry) {
 
   override fun getType(): Int = R.id.adapter_lock_info
 
@@ -61,7 +57,7 @@ class LockInfoItem internal constructor(
         lockInfoRadioDefault.setOnCheckedChangeListener(null)
         lockedButton.isChecked = true
 
-        lockInfoActivity.text = model.name
+        lockInfoActivity.text = model.activity
 
         lockInfoRadioGroup.setOnCheckedChangeListener { radioGroup, _ ->
           val id = radioGroup.checkedRadioButtonId

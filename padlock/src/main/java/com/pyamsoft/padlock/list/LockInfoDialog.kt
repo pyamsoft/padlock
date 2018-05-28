@@ -60,7 +60,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   internal lateinit var appIconLoader: AppIconLoader
   @field:Inject
   internal lateinit var presenter: LockInfoPresenter
-  private lateinit var adapter: ModelAdapter<ActivityEntry, LockInfoItem>
+  private lateinit var adapter: ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
   private lateinit var binding: DialogLockInfoBinding
   private lateinit var appPackageName: String
   private lateinit var appName: String
@@ -130,7 +130,12 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       }
     }
     filterListDelegate = FilterListDelegate()
-    adapter = ModelAdapter(NeverNotifyItemList.create()) { LockInfoItem(it, appIsSystem) }
+    adapter = ModelAdapter(NeverNotifyItemList.create()) {
+      return@ModelAdapter when (it) {
+        is ActivityEntry.Item -> LockInfoItem(it, appIsSystem)
+        is ActivityEntry.Group -> LockInfoGroup(it)
+      }
+    }
     setupToolbar()
     binding.apply {
       lockInfoPackageName.text = appPackageName
@@ -181,7 +186,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     binding.apply {
       lockInfoSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.blue700)
       lockInfoSwipeRefresh.setOnRefreshListener {
-        Timber.d("onRefresh")
         refreshLatch.forceRefresh()
         presenter.populateList(true)
       }
@@ -198,10 +202,10 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       }
       lockInfoRecycler.setHasFixedSize(true)
       lockInfoRecycler.addItemDecoration(dividerDecoration)
-      lockInfoRecycler.adapter =
-          FastAdapter.with<LockInfoItem, ModelAdapter<ActivityEntry, LockInfoItem>>(
-              adapter
-          )
+      lockInfoRecycler.adapter = FastAdapter.with<
+          LockInfoBaseItem<*, *, *>,
+          ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
+          >(adapter)
 
       // Set initial view state
       lockInfoEmpty.visibility = View.GONE
@@ -259,11 +263,13 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     state: LockState
   ) {
     for (i in adapter.adapterItems.indices) {
-      val item: LockInfoItem = adapter.getAdapterItem(i)
-      val entry: ActivityEntry = item.model
-      if (id == entry.id) {
-        adapter.set(i, ActivityEntry(entry.name, entry.packageName, state))
-        break
+      val item: LockInfoBaseItem<*, *, *> = adapter.getAdapterItem(i)
+      val entry: ActivityEntry = item.getModel()
+      if (entry is ActivityEntry.Item) {
+        if (id == entry.id) {
+          adapter.set(i, ActivityEntry.Item(entry.name, entry.packageName, state))
+          break
+        }
       }
     }
   }
