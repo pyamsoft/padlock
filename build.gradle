@@ -42,7 +42,7 @@ buildscript {
     autoValue = "1.6"
     sqlbrite = "3.2.0"
     sqlite = "1.0.0"
-    dagger = "2.15"
+    dagger = "2.16"
     patternLock = "1.0.0"
     fastAdapter = "3.2.5"
   }
