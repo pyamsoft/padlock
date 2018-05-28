@@ -23,6 +23,15 @@
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/blue500</item>
     <item name="android:navigationBarColor">@color/blue700</item>
+    <item name="dialogTheme">@style/Theme.PadLock.Dialog</item>
+    <item name="alertDialogTheme">@style/Theme.PadLock.Dialog</item>
+  </style>
+
+  <style name="Theme.PadLock.Dialog" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
+    <item name="colorPrimary">@color/blue500</item>
+    <item name="colorPrimaryDark">@color/blue700</item>
+    <item name="colorAccent">@color/blue500</item>
+    <item name="android:navigationBarColor">@color/blue700</item>
   </style>
 
   <!-- Normal App Theme -->
