@@ -91,7 +91,7 @@ internal class LockListInteractorDb @Inject internal constructor(
 
       // Once the packageName is greater than the one we are looking for, we have passed all
       // possible entries for this package and can stop looping. We will never find another hit.
-      if (entry.packageName() > packageName) {
+      if (entry.packageName().compareTo(packageName, ignoreCase = true) > 0) {
         break
       }
     }
@@ -113,10 +113,11 @@ internal class LockListInteractorDb @Inject internal constructor(
     entries: List<PadLockEntryModel.AllEntriesModel>
   ): List<LockTuple> {
     val copyEntries = ArrayList<PadLockEntryModel.AllEntriesModel>(entries)
-    copyEntries.sortWith(Comparator { o1, o2 ->
-      o1.packageName()
-          .compareTo(o2.packageName(), ignoreCase = true)
-    })
+    copyEntries.sortWith(
+        Comparator { o1, o2 ->
+          return@Comparator o1.packageName()
+              .compareTo(o2.packageName(), ignoreCase = true)
+        })
     val removeEntries = LinkedHashSet<PadLockEntryModel.AllEntriesModel>()
     return packageNames.map { createNewLockTuple(it, copyEntries, removeEntries) }
   }
@@ -205,14 +206,8 @@ internal class LockListInteractorDb @Inject internal constructor(
   @CheckResult
   private fun getValidPackageNames(): Single<List<String>> {
     return getActiveApplications().flatMapSingle { item ->
-      getActivityListForApplication(item).map {
-        if (it.isEmpty()) {
-          Timber.w("Entry: %s has no activities, hide it", item.packageName)
-          return@map ""
-        } else {
-          return@map item.packageName
-        }
-      }
+      return@flatMapSingle getActivityListForApplication(item)
+          .map { if (it.isEmpty()) "" else item.packageName }
     }
         .filter { it.isNotBlank() }
         .toList()

@@ -100,22 +100,10 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   override fun getActiveApplications(): Single<List<ApplicationItem>> {
     return getInstalledApplications().flatMap {
       return@flatMap when {
-        !it.enabled -> {
-          Timber.i("Application %s is disabled", it.packageName)
-          Observable.empty()
-        }
-        it.system && !listPreferences.isSystemVisible() -> {
-          Timber.i("Hide system application: %s", it.packageName)
-          Observable.empty()
-        }
-        Excludes.isPackageExcluded(it.packageName) -> {
-          Timber.i("Application %s is excluded", it.packageName)
-          Observable.empty()
-        }
-        else -> {
-          Timber.d("Successfully processed application: %s", it.packageName)
-          Observable.just(it)
-        }
+        !it.enabled -> Observable.empty()
+        it.system && !listPreferences.isSystemVisible() -> Observable.empty()
+        Excludes.isPackageExcluded(it.packageName) -> Observable.empty()
+        else -> Observable.just(it)
       }
     }
         .toList()
