@@ -21,7 +21,7 @@ import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite3.BriteDatabase
 
-internal class InsertManager internal constructor(briteDatabase: BriteDatabase) {
+internal class InsertManager internal constructor(private val briteDatabase: BriteDatabase) {
 
   private val insertEntry = PadLockEntryModel.InsertEntry(briteDatabase.writableDatabase)
 
@@ -37,7 +37,7 @@ internal class InsertManager internal constructor(briteDatabase: BriteDatabase) 
           entry.packageName(), entry.activityName(), entry.lockCode(), entry.lockUntilTime(),
           entry.ignoreUntilTime(), entry.systemApplication(), entry.whitelist()
       )
-      executeInsert()
+      return@run briteDatabase.executeInsert(table, this)
     }
   }
 }

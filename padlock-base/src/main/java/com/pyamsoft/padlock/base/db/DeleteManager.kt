@@ -20,7 +20,7 @@ import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite3.BriteDatabase
 
-internal class DeleteManager internal constructor(briteDatabase: BriteDatabase) {
+internal class DeleteManager internal constructor(private val briteDatabase: BriteDatabase) {
 
   private val deleteWithPackage =
     PadLockEntryModel.DeleteWithPackageName(briteDatabase.writableDatabase)
@@ -32,7 +32,7 @@ internal class DeleteManager internal constructor(briteDatabase: BriteDatabase) 
   internal fun deleteWithPackage(packageName: String): Int = deleteWithPackage.run {
     clearBindings()
     bind(packageName)
-    return executeUpdateDelete()
+    return@run briteDatabase.executeUpdateDelete(table, this)
   }
 
   @CheckResult
@@ -42,9 +42,11 @@ internal class DeleteManager internal constructor(briteDatabase: BriteDatabase) 
   ): Int = deleteWithPackageActivity.run {
     clearBindings()
     bind(packageName, activityName)
-    return executeUpdateDelete()
+    return@run briteDatabase.executeUpdateDelete(table, this)
   }
 
   @CheckResult
-  internal fun deleteAll(): Int = deleteAll.executeUpdateDelete()
+  internal fun deleteAll(): Int {
+    return deleteAll.run { briteDatabase.executeUpdateDelete(table, this) }
+  }
 }

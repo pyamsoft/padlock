@@ -21,7 +21,7 @@ import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite3.BriteDatabase
 
-internal class UpdateManager internal constructor(briteDatabase: BriteDatabase) {
+internal class UpdateManager internal constructor(private val briteDatabase: BriteDatabase) {
 
   private val updateWhitelist by lazy {
     PadLockEntryModel.UpdateWhitelist(briteDatabase.writableDatabase)
@@ -48,7 +48,7 @@ internal class UpdateManager internal constructor(briteDatabase: BriteDatabase) 
     return updateWhitelist.run {
       clearBindings()
       bind(whitelist, packageName, activityName)
-      executeUpdateDelete()
+      return@run briteDatabase.executeUpdateDelete(table, this)
     }
   }
 
@@ -65,7 +65,7 @@ internal class UpdateManager internal constructor(briteDatabase: BriteDatabase) 
     return updateIgnoreTime.run {
       clearBindings()
       bind(ignoreTime, packageName, activityName)
-      executeUpdateDelete()
+      return@run briteDatabase.executeUpdateDelete(table, this)
     }
   }
 
@@ -82,7 +82,7 @@ internal class UpdateManager internal constructor(briteDatabase: BriteDatabase) 
     return updateHardLocked.run {
       clearBindings()
       bind(lockTime, packageName, activityName)
-      executeUpdateDelete()
+      return@run briteDatabase.executeUpdateDelete(table, this)
     }
   }
 }
