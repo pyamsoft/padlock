@@ -287,10 +287,11 @@ class LockListPresenter @Inject internal constructor(
   fun populateList(force: Boolean) {
     dispose(ON_STOP) {
       lockListInteractor.fetchAppEntryList(force)
-          .flatMap { lockListInteractor.calculateListDiff(listDiffProvider.data(), it) }
+          .flatMapSingle { lockListInteractor.calculateListDiff(listDiffProvider.data(), it) }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .doAfterTerminate { view?.onListPopulated() }
+          .doAfterNext { view?.onListPopulated() }
+          .doOnError { view?.onListPopulated() }
           .doOnSubscribe { view?.onListPopulateBegin() }
           .subscribe({ view?.onListLoaded(it) }, {
             Timber.e(it, "populateList onError")

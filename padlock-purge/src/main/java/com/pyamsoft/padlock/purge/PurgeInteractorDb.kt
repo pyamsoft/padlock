@@ -86,7 +86,8 @@ internal class PurgeInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getAllEntries(): Single<List<PadLockEntryModel.AllEntriesModel>> = queryDb.queryAll()
+  private fun getAllEntries(): Single<List<PadLockEntryModel.AllEntriesModel>> =
+    queryDb.queryAll().single(emptyList())
 
   @CheckResult
   private fun getActiveApplications(): Single<List<String>> =
