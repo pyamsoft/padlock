@@ -58,6 +58,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
         .doOnNext { cache.put("list", it) }
         .to {
           if (cached == null || bypass) {
+            cache.evictAll()
             return@to it
           } else {
             return@to it.startWith(cached)
