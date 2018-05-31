@@ -19,14 +19,12 @@ package com.pyamsoft.padlock.list
 import android.arch.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
-import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.ClearPinEvent
 import com.pyamsoft.padlock.model.CreatePinEvent
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
-import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.pydroid.bus.EventBus
@@ -46,11 +44,9 @@ class LockListPresenter @Inject internal constructor(
   @Named("cache_lock_list") private val cache: Cache,
   private val stateInteractor: LockServiceStateInteractor,
   private val lockListBus: EventBus<LockListEvent>,
-  private val lockInfoBus: EventBus<LockInfoEvent>,
   private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
   private val clearPinBus: EventBus<ClearPinEvent>,
   private val createPinBus: EventBus<CreatePinEvent>,
-  private val lockInfoChangeBus: EventBus<LockInfoEvent.Callback>,
   private val listDiffProvider: ListDiffProvider<AppEntry>
 ) : Presenter<LockListPresenter.View>() {
 
@@ -91,75 +87,6 @@ class LockListPresenter @Inject internal constructor(
           }, {
             Timber.e(it, "Error listening to lock list bus")
           })
-    }
-
-    dispose {
-      lockListBus.listen()
-          .filter { it is LockListEvent.Callback }
-          .map { it as LockListEvent.Callback }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({
-            when (it) {
-              is LockListEvent.Callback.Created -> view?.onModifyEntryCreated(
-                  it.packageName
-              )
-              is LockListEvent.Callback.Deleted -> view?.onModifyEntryDeleted(
-                  it.packageName
-              )
-            }
-          }, {
-            Timber.e(it, "Error listening to lock info bus")
-            view?.onModifyEntryError(it)
-          })
-    }
-
-    dispose {
-      lockInfoBus.listen()
-          .filter { it is LockInfoEvent.Callback }
-          .map { it as LockInfoEvent.Callback }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({ processLockInfoCallback(it) }, {
-            Timber.e(it, "Error listening to lock info bus")
-            view?.onModifySubEntryError(it)
-          })
-    }
-
-    dispose {
-      lockInfoChangeBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({ processLockInfoCallback(it) }, {
-            Timber.e(it, "Error listening to lock info change bus")
-            view?.onModifySubEntryError(it)
-          })
-    }
-  }
-
-  private fun processLockInfoCallback(event: LockInfoEvent.Callback) {
-    when (event) {
-      is LockInfoEvent.Callback.Created -> {
-        if (event.oldState == DEFAULT) {
-          view?.onModifySubEntryToHardlockedFromDefault(event.packageName)
-        } else if (event.oldState == WHITELISTED) {
-          view?.onModifySubEntryToHardlockedFromWhitelisted(event.packageName)
-        }
-      }
-      is LockInfoEvent.Callback.Deleted -> {
-        if (event.oldState == WHITELISTED) {
-          view?.onModifySubEntryToDefaultFromWhitelisted(event.packageName)
-        } else if (event.oldState == LOCKED) {
-          view?.onModifySubEntryToDefaultFromHardlocked(event.packageName)
-        }
-      }
-      is LockInfoEvent.Callback.Whitelisted -> {
-        if (event.oldState == LOCKED) {
-          view?.onModifySubEntryToWhitelistedFromHardlocked(event.packageName)
-        } else if (event.oldState == DEFAULT) {
-          view?.onModifySubEntryToWhitelistedFromDefault(event.packageName)
-        }
-      }
     }
   }
 
@@ -219,21 +146,12 @@ class LockListPresenter @Inject internal constructor(
           oldState, newState, packageName,
           PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system
       )
+          .toCompletable()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({
-            when (it) {
-              LockState.DEFAULT -> lockListBus.publish(
-                  LockListEvent.Callback.Deleted(packageName)
-              )
-              LockState.LOCKED -> lockListBus.publish(
-                  LockListEvent.Callback.Created(packageName)
-              )
-              else -> throw RuntimeException("Whitelist/None results are not handled")
-            }
-          }, {
+          .subscribe({ Timber.d("Modify complete $packageName") }, {
             Timber.e(it, "onError modifyDatabaseEntry")
-            lockListBus.publish(LockListEvent.Callback.Error(it))
+            view?.onModifyEntryError(it)
           })
     }
   }
@@ -309,32 +227,11 @@ class LockListPresenter @Inject internal constructor(
 
   interface View : LockModifyCallback, MasterPinCreateCallback, MasterPinClearCallback,
       FABStateCallback, SystemVisibilityChangeCallback, OnboardingCallback,
-      ListPopulateCallback, LockSubModifyCallback
+      ListPopulateCallback
 
   interface LockModifyCallback {
 
-    fun onModifyEntryCreated(packageName: String)
-
-    fun onModifyEntryDeleted(packageName: String)
-
     fun onModifyEntryError(throwable: Throwable)
-  }
-
-  interface LockSubModifyCallback {
-
-    fun onModifySubEntryToDefaultFromWhitelisted(packageName: String)
-
-    fun onModifySubEntryToDefaultFromHardlocked(packageName: String)
-
-    fun onModifySubEntryToWhitelistedFromDefault(packageName: String)
-
-    fun onModifySubEntryToWhitelistedFromHardlocked(packageName: String)
-
-    fun onModifySubEntryToHardlockedFromDefault(packageName: String)
-
-    fun onModifySubEntryToHardlockedFromWhitelisted(packageName: String)
-
-    fun onModifySubEntryError(throwable: Throwable)
   }
 
   interface MasterPinCreateCallback {
