@@ -19,12 +19,13 @@ package com.pyamsoft.padlock.api
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.pydroid.list.ListDiffResult
+import io.reactivex.Observable
 import io.reactivex.Single
 
 interface LockListInteractor : LockStateModifyInteractor {
 
   @CheckResult
-  fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>>
+  fun fetchAppEntryList(bypass: Boolean): Observable<List<AppEntry>>
 
   @CheckResult
   fun calculateListDiff(

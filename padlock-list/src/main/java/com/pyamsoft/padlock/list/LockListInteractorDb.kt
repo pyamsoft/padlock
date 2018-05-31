@@ -35,7 +35,6 @@ import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.functions.BiFunction
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -57,10 +56,6 @@ internal class LockListInteractorDb @Inject internal constructor(
   override fun setSystemVisible(visible: Boolean) {
     preferences.setSystemVisible(visible)
   }
-
-  @CheckResult
-  private fun appEntryListZipper(): BiFunction<List<String>, List<PadLockEntryModel.AllEntriesModel>, List<LockTuple>> =
-    BiFunction { packageNames, entries -> compileLockedTupleList(packageNames, entries) }
 
   @CheckResult
   private fun createNewLockTuple(
@@ -122,13 +117,16 @@ internal class LockListInteractorDb @Inject internal constructor(
     return packageNames.map { createNewLockTuple(it, copyEntries, removeEntries) }
   }
 
-  override fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>> {
-    return getValidPackageNames().zipWith(getAllEntries(), appEntryListZipper())
-        .flatMapObservable { Observable.fromIterable(it) }
-        .flatMapSingle { createFromPackageInfo(it) }
-        .toSortedList { o1, o2 ->
-          o1.name.compareTo(o2.name, ignoreCase = true)
-        }
+  override fun fetchAppEntryList(bypass: Boolean): Observable<List<AppEntry>> {
+    return getAllEntries().flatMapSingle { entries ->
+      return@flatMapSingle getValidPackageNames()
+          .map { compileLockedTupleList(it, entries) }
+          .flatMapObservable { Observable.fromIterable(it) }
+          .flatMapSingle { createFromPackageInfo(it) }
+          .toSortedList { o1, o2 ->
+            o1.name.compareTo(o2.name, ignoreCase = true)
+          }
+    }
   }
 
   override fun calculateListDiff(
@@ -214,7 +212,8 @@ internal class LockListInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getAllEntries(): Single<List<PadLockEntryModel.AllEntriesModel>> = queryDb.queryAll()
+  private fun getAllEntries(): Observable<List<PadLockEntryModel.AllEntriesModel>> =
+    queryDb.queryAll()
 
   override fun hasShownOnBoarding(): Single<Boolean> =
     Single.fromCallable { onboardingPreferences.isListOnBoard() }

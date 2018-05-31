@@ -16,12 +16,14 @@
 
 package com.pyamsoft.padlock.list
 
+import androidx.core.util.lruCache
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult
+import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Named
@@ -33,6 +35,8 @@ internal class LockListInteractorImpl @Inject internal constructor(
   @param:Named("repo_lock_list") private val repoLockList: Repository<List<AppEntry>>,
   @param:Named("cache_purge") private val purgeCache: Cache
 ) : LockListInteractor, Cache {
+
+  private val cache = lruCache<String, List<AppEntry>>(10)
 
   override fun hasShownOnBoarding(): Single<Boolean> = db.hasShownOnBoarding()
 
@@ -48,8 +52,10 @@ internal class LockListInteractorImpl @Inject internal constructor(
   ): Single<ListDiffResult<AppEntry>> = db.calculateListDiff(oldList, newList)
       .doOnError { clearCache() }
 
-  override fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>> {
-    return repoLockList.get(bypass) { db.fetchAppEntryList(true) }
+  override fun fetchAppEntryList(bypass: Boolean): Observable<List<AppEntry>> {
+    return db.fetchAppEntryList(true)
+        .doOnNext { cache.put("list", it) }
+        .startWith(cache.get("list") ?: emptyList())
         .doOnError { clearCache() }
   }
 
@@ -71,5 +77,6 @@ internal class LockListInteractorImpl @Inject internal constructor(
   override fun clearCache() {
     repoLockList.clearCache()
     purgeCache.clearCache()
+    cache.evictAll()
   }
 }
