@@ -29,6 +29,7 @@ import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite3.SqlBrite
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -37,9 +38,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PadLockDBImpl @Inject internal constructor(context: Context) : PadLockDBInsert,
-    PadLockDBUpdate,
-    PadLockDBQuery,
-    PadLockDBDelete {
+    PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
 
   private val queryManager: QueryManager
   private val createManager: CreateManager
@@ -156,8 +155,7 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
   }
 
   @CheckResult
-  override fun queryAll(): Single<List<PadLockEntryModel.AllEntriesModel>> {
-    Timber.i("DB: QUERY ALL")
+  override fun queryAll(): Observable<List<PadLockEntryModel.AllEntriesModel>> {
     return queryManager.queryAll()
   }
 

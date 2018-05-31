@@ -21,6 +21,7 @@ import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite3.BriteDatabase
 import com.squareup.sqldelight.RowMapper
+import io.reactivex.Observable
 import io.reactivex.Single
 import java.util.Collections
 
@@ -67,11 +68,10 @@ internal class QueryManager internal constructor(
   }
 
   @CheckResult
-  internal fun queryAll(): Single<List<PadLockEntryModel.AllEntriesModel>> {
+  internal fun queryAll(): Observable<List<PadLockEntryModel.AllEntriesModel>> {
     val statement = factory.allEntries()
     return briteDatabase.createQuery(statement.tables, statement)
         .mapToList { allEntriesMapper.map(it) }
-        .first(emptyList())
         .map { Collections.unmodifiableList(it) }
   }
 }
