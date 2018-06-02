@@ -18,12 +18,7 @@ package com.pyamsoft.padlock.list.info
 
 import android.arch.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockInfoInteractor
-import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Created
-import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Deleted
-import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Error
-import com.pyamsoft.padlock.list.info.LockInfoEvent.Callback.Whitelisted
 import com.pyamsoft.padlock.model.ActivityEntry
-import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.pydroid.bus.EventBus
 import com.pyamsoft.pydroid.list.ListDiffProvider
@@ -79,24 +74,6 @@ class LockInfoPresenter @Inject internal constructor(
             Timber.e(it, "Error listening to lock info bus")
           })
     }
-
-    dispose {
-      bus.listen()
-          .filter { it is LockInfoEvent.Callback }
-          .map { it as LockInfoEvent.Callback }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({
-            when (it) {
-              is Created -> view?.onModifyEntryCreated(it.id)
-              is Deleted -> view?.onModifyEntryDeleted(it.id)
-              is Whitelisted -> view?.onModifyEntryWhitelisted(it.id)
-            }
-          }, {
-            Timber.e(it, "Error listening to lock info bus")
-            view?.onModifyEntryError(it)
-          })
-    }
   }
 
   private fun modifyDatabaseEntry(event: LockInfoEvent.Modify) {
@@ -108,23 +85,9 @@ class LockInfoPresenter @Inject internal constructor(
       )
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({
-            val id: String = event.id
-            when (it) {
-              LockState.LOCKED -> bus.publish(
-                  Created(id, event.packageName, event.oldState)
-              )
-              LockState.DEFAULT -> bus.publish(
-                  Deleted(id, event.packageName, event.oldState)
-              )
-              LockState.WHITELISTED -> bus.publish(
-                  Whitelisted(id, event.packageName, event.oldState)
-              )
-              else -> throw IllegalStateException("Unsupported lock state: $it")
-            }
-          }, {
+          .subscribe({ Timber.d("Modify completed") }, {
             Timber.e(it, "onError modifyDatabaseEntry")
-            bus.publish(Error(it, event.packageName))
+            view?.onModifyEntryError(it)
           })
     }
   }
@@ -132,10 +95,11 @@ class LockInfoPresenter @Inject internal constructor(
   fun populateList(forceRefresh: Boolean) {
     dispose(ON_STOP) {
       interactor.fetchActivityEntryList(forceRefresh, packageName)
-          .flatMap { interactor.calculateListDiff(packageName, listDiffProvider.data(), it) }
+          .flatMapSingle { interactor.calculateListDiff(packageName, listDiffProvider.data(), it) }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .doAfterTerminate { view?.onListPopulated() }
+          .doAfterNext { view?.onListPopulated() }
+          .doOnError { view?.onListPopulated() }
           .doOnSubscribe { view?.onListPopulateBegin() }
           .subscribe({ view?.onListLoaded(it) }, {
             Timber.e(it, "LockInfoPresenterImpl populateList onError")
@@ -166,12 +130,6 @@ class LockInfoPresenter @Inject internal constructor(
   interface View : LockModifyCallback, ListPopulateCallback, OnboardingCallback
 
   interface LockModifyCallback {
-
-    fun onModifyEntryCreated(id: String)
-
-    fun onModifyEntryDeleted(id: String)
-
-    fun onModifyEntryWhitelisted(id: String)
 
     fun onModifyEntryError(throwable: Throwable)
   }

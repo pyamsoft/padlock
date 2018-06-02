@@ -22,9 +22,8 @@ import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.LOCKED
-import com.pyamsoft.padlock.model.LockState.NONE
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
-import io.reactivex.Single
+import io.reactivex.Completable
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,20 +41,18 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     code: String?,
     system: Boolean,
     whitelist: Boolean
-  ): Single<LockState> {
+  ): Completable {
     Timber.d("Empty entry, create a new entry for: %s %s", packageName, activityName)
     return insertDb.insert(packageName, activityName, code, 0, 0, system, whitelist)
-        .toSingleDefault(if (whitelist) LockState.WHITELISTED else LockState.LOCKED)
   }
 
   @CheckResult
   private fun deleteEntry(
     packageName: String,
     activityName: String
-  ): Single<LockState> {
+  ): Completable {
     Timber.d("Entry already exists for: %s %s, delete it", packageName, activityName)
     return deleteDb.deleteWithPackageActivityName(packageName, activityName)
-        .toSingleDefault(LockState.DEFAULT)
   }
 
   @CheckResult
@@ -65,12 +62,11 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     activityName: String,
     code: String?,
     system: Boolean
-  ): Single<LockState> {
-    return Single.defer<LockState> {
+  ): Completable {
+    return Completable.defer {
       if (oldLockState === WHITELISTED) {
         // Update existing entry
-        Timber.d("Update existing entry to NONE")
-        return@defer Single.just(NONE)
+        throw RuntimeException("Can't whitelist, already whitelisted: $packageName $activityName")
       } else {
         Timber.d("Add new as whitelisted")
         return@defer createNewEntry(packageName, activityName, code, system, true)
@@ -85,12 +81,11 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     activityName: String,
     code: String?,
     system: Boolean
-  ): Single<LockState> {
-    return Single.defer<LockState> {
+  ): Completable {
+    return Completable.defer {
       if (oldLockState === LOCKED) {
         // Update existing entry
-        Timber.d("Update existing entry to NONE")
-        return@defer Single.just(NONE)
+        throw RuntimeException("Can't lock, already locked: $packageName $activityName")
       } else {
         Timber.d("Add new as force locked")
         return@defer createNewEntry(packageName, activityName, code, system, false)
@@ -105,13 +100,11 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     activityName: String,
     code: String?,
     system: Boolean
-  ): Single<LockState> {
-    return Single.defer<LockState> {
+  ): Completable {
+    return Completable.defer {
       if (oldLockState === LockState.DEFAULT) {
-        Timber.d("Add new entry")
         return@defer createNewEntry(packageName, activityName, code, system, false)
       } else {
-        Timber.d("Delete existing entry")
         return@defer deleteEntry(packageName, activityName)
       }
     }
@@ -124,7 +117,7 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     activityName: String,
     code: String?,
     system: Boolean
-  ): Single<LockState> = when {
+  ): Completable = when {
     newLockState === LockState.WHITELISTED -> whitelistEntry(
         oldLockState, packageName,
         activityName, code, system

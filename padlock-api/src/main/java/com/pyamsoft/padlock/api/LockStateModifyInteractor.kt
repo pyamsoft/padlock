@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.api
 
 import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.LockState
+import io.reactivex.Completable
 import io.reactivex.Single
 
 interface LockStateModifyInteractor {
@@ -30,5 +31,5 @@ interface LockStateModifyInteractor {
     activityName: String,
     code: String?,
     system: Boolean
-  ): Single<LockState>
+  ): Completable
 }

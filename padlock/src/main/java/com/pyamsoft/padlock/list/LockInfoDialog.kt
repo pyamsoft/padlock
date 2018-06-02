@@ -309,18 +309,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     Timber.d("Onboarding complete")
   }
 
-  override fun onModifyEntryCreated(id: String) {
-    modifyList(id, LockState.LOCKED)
-  }
-
-  override fun onModifyEntryDeleted(id: String) {
-    modifyList(id, LockState.DEFAULT)
-  }
-
-  override fun onModifyEntryWhitelisted(id: String) {
-    modifyList(id, LockState.WHITELISTED)
-  }
-
   override fun onModifyEntryError(throwable: Throwable) {
     ErrorDialog().show(requireActivity(), "error")
   }

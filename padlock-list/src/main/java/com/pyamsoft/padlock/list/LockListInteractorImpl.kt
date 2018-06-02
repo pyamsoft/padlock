@@ -23,6 +23,7 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
@@ -53,17 +54,8 @@ internal class LockListInteractorImpl @Inject internal constructor(
       .doOnError { clearCache() }
 
   override fun fetchAppEntryList(bypass: Boolean): Observable<List<AppEntry>> {
-    val cached = cache.get("list")
-    return db.fetchAppEntryList(true)
-        .doOnNext { cache.put("list", it) }
-        .to {
-          if (cached == null || bypass) {
-            cache.evictAll()
-            return@to it
-          } else {
-            return@to it.startWith(cached)
-          }
-        }
+    return Observable.fromCallable { cache.get("list") }
+        .concatWith(db.fetchAppEntryList(true).doOnNext { cache.put("list", it) })
         .doOnError { clearCache() }
   }
 
@@ -74,7 +66,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
     activityName: String,
     code: String?,
     system: Boolean
-  ): Single<LockState> {
+  ): Completable {
     return db.modifySingleDatabaseEntry(
         oldLockState, newLockState, packageName, activityName,
         code, system

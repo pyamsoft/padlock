@@ -146,7 +146,6 @@ class LockListPresenter @Inject internal constructor(
           oldState, newState, packageName,
           PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system
       )
-          .toCompletable()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ Timber.d("Modify complete $packageName") }, {

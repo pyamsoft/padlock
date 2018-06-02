@@ -33,6 +33,7 @@ import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.list.ListDiffResultImpl
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import timber.log.Timber
@@ -225,7 +226,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     activityName: String,
     code: String?,
     system: Boolean
-  ): Single<LockState> {
+  ): Completable {
     return modifyInteractor.modifySingleDatabaseEntry(
         oldLockState, newLockState, packageName,
         activityName, code, system

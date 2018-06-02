@@ -26,13 +26,12 @@ import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
-import com.pyamsoft.padlock.model.LockState.WHITELISTED
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.list.ListDiffResultImpl
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.functions.BiFunction
 import io.reactivex.observables.GroupedObservable
 import timber.log.Timber
 import java.util.ArrayList
@@ -45,7 +44,6 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   private val queryDb: PadLockDBQuery,
   private val packageActivityManager: PackageActivityManager,
   private val preferences: OnboardingPreferences,
-  private val updateDb: PadLockDBUpdate,
   private val modifyInteractor: LockStateModifyInteractor
 ) : LockInfoInteractor {
 
@@ -57,7 +55,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   @CheckResult
   private fun getLockedActivityEntries(
     name: String
-  ): Single<List<PadLockEntryModel.WithPackageNameModel>> = queryDb.queryWithPackageName(name)
+  ): Observable<List<PadLockEntryModel.WithPackageNameModel>> = queryDb.queryWithPackageName(name)
 
   @CheckResult
   private fun getPackageActivities(name: String): Single<List<String>> =
@@ -188,16 +186,15 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun activityListZipper(
-    fetchName: String
-  ): BiFunction<List<String>, List<PadLockEntryModel.WithPackageNameModel>, List<ActivityEntry.Item>> =
-    BiFunction { names, entries -> createSortedActivityEntryList(fetchName, names, entries) }
-
-  @CheckResult
-  private fun fetchData(fetchName: String): Single<List<ActivityEntry.Item>> {
-    return getPackageActivities(fetchName).zipWith(
-        getLockedActivityEntries(fetchName), activityListZipper(fetchName)
-    )
+  private fun fetchData(fetchName: String): Observable<List<ActivityEntry.Item>> {
+    return getLockedActivityEntries(fetchName).flatMapSingle { entries ->
+      return@flatMapSingle getPackageActivities(fetchName)
+          .map { createSortedActivityEntryList(fetchName, it, entries) }
+          .flatMapObservable { Observable.fromIterable(it) }
+          .toSortedList { o1, o2 ->
+            o1.name.compareTo(o2.name, ignoreCase = true)
+          }
+    }
   }
 
   @CheckResult
@@ -226,13 +223,14 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   override fun fetchActivityEntryList(
     bypass: Boolean,
     packageName: String
-  ): Single<List<ActivityEntry>> {
+  ): Observable<List<ActivityEntry>> {
     return fetchData(packageName)
-        .flatMapObservable { Observable.fromIterable(it) }
+        .flatMap { Observable.fromIterable(it) }
         .groupBy { it.group }
         .sorted { o1, o2 -> compareByGroup(o1, o2) }
         .concatMap { sortWithinGroup(it) }
         .toList()
+        .toObservable()
   }
 
   override fun calculateListDiff(
@@ -299,32 +297,10 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     activityName: String,
     code: String?,
     system: Boolean
-  ): Single<LockState> {
+  ): Completable {
     return modifyInteractor.modifySingleDatabaseEntry(
         oldLockState, newLockState, packageName,
         activityName, code, system
     )
-        .flatMap {
-          if (it === LockState.NONE) {
-            Timber.d("Not handled by modifySingleDatabaseEntry, entry must be updated")
-            return@flatMap updateExistingEntry(
-                packageName, activityName, newLockState === WHITELISTED
-            )
-          } else {
-            Timber.d("Entry handled, just pass through")
-            return@flatMap Single.just(it)
-          }
-        }
-  }
-
-  @CheckResult
-  private fun updateExistingEntry(
-    packageName: String,
-    activityName: String,
-    whitelist: Boolean
-  ): Single<LockState> {
-    Timber.d("Entry already exists for: %s %s, update it", packageName, activityName)
-    return updateDb.updateWhitelist(packageName, activityName, whitelist)
-        .toSingleDefault(if (whitelist) LockState.WHITELISTED else LockState.LOCKED)
   }
 }

@@ -59,11 +59,10 @@ internal class QueryManager internal constructor(
   @CheckResult
   internal fun queryWithPackageName(
     packageName: String
-  ): Single<List<PadLockEntryModel.WithPackageNameModel>> {
+  ): Observable<List<PadLockEntryModel.WithPackageNameModel>> {
     val statement = factory.withPackageName(packageName)
     return briteDatabase.createQuery(statement.tables, statement)
         .mapToList { withPackageNameMapper.map(it) }
-        .first(emptyList())
         .map { Collections.unmodifiableList(it) }
   }
 

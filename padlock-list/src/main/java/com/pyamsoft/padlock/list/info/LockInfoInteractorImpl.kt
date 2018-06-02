@@ -16,12 +16,15 @@
 
 package com.pyamsoft.padlock.list.info
 
+import androidx.core.util.lruCache
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.cache.RepositoryMap
 import com.pyamsoft.pydroid.list.ListDiffResult
+import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Named
@@ -35,6 +38,8 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
   @Named("cache_lock_list") private val lockListCache: Cache
 ) : LockInfoInteractor, Cache {
 
+  private val cache = lruCache<String, List<ActivityEntry>>(10)
+
   override fun modifySingleDatabaseEntry(
     oldLockState: LockState,
     newLockState: LockState,
@@ -42,7 +47,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     activityName: String,
     code: String?,
     system: Boolean
-  ): Single<LockState> {
+  ): Completable {
     return db.modifySingleDatabaseEntry(
         oldLockState, newLockState, packageName, activityName,
         code, system
@@ -61,9 +66,13 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
   override fun fetchActivityEntryList(
     bypass: Boolean,
     packageName: String
-  ): Single<List<ActivityEntry>> {
-    return repoLockInfo.get(bypass, packageName) { db.fetchActivityEntryList(true, packageName) }
-        .doOnError { repoLockInfo.clearKey(packageName) }
+  ): Observable<List<ActivityEntry>> {
+    return Observable.fromCallable { cache.get(packageName) }
+        .concatWith(
+            db.fetchActivityEntryList(true, packageName)
+                .doOnNext { cache.put(packageName, it) }
+        )
+        .doOnError { cache.remove(packageName) }
   }
 
   override fun calculateListDiff(

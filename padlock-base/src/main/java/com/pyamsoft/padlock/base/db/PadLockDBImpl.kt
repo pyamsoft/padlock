@@ -149,8 +149,7 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
   @CheckResult
   override fun queryWithPackageName(
     packageName: String
-  ): Single<List<PadLockEntryModel.WithPackageNameModel>> {
-    Timber.i("DB: QUERY PACKAGE $packageName")
+  ): Observable<List<PadLockEntryModel.WithPackageNameModel>> {
     return queryManager.queryWithPackageName(packageName)
   }
 

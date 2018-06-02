@@ -38,7 +38,7 @@ interface PadLockDBQuery {
   ): Single<PadLockEntryModel>
 
   @CheckResult
-  fun queryWithPackageName(packageName: String): Single<List<PadLockEntryModel.WithPackageNameModel>>
+  fun queryWithPackageName(packageName: String): Observable<List<PadLockEntryModel.WithPackageNameModel>>
 
   @CheckResult
   fun queryAll(): Observable<List<PadLockEntryModel.AllEntriesModel>>
