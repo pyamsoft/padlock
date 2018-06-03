@@ -67,7 +67,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     bypass: Boolean,
     packageName: String
   ): Observable<List<ActivityEntry>> {
-    return Observable.fromCallable { cache.get(packageName) }
+    return Observable.fromCallable { cache.get(packageName) ?: emptyList() }
         .concatWith(
             db.fetchActivityEntryList(true, packageName)
                 .doOnNext { cache.put(packageName, it) }

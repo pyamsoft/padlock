@@ -16,12 +16,14 @@
 
 package com.pyamsoft.padlock.purge
 
+import androidx.core.util.lruCache
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Named
@@ -34,6 +36,8 @@ internal class PurgeInteractorImpl @Inject internal constructor(
   @Named("repo_lock_list") private val repoLockList: Repository<List<AppEntry>>
 ) : PurgeInteractor, Cache {
 
+  private val cache = lruCache<String, List<String>>(10)
+
   override fun clearCache() {
     repoStale.clearCache()
     repoLockList.clearCache()
@@ -45,8 +49,9 @@ internal class PurgeInteractorImpl @Inject internal constructor(
   ): Single<ListDiffResult<String>> = db.calculateDiff(oldList, newList)
       .doOnError { clearCache() }
 
-  override fun fetchStalePackageNames(bypass: Boolean): Single<List<String>> {
-    return repoStale.get(bypass) { db.fetchStalePackageNames(true) }
+  override fun fetchStalePackageNames(bypass: Boolean): Observable<List<String>> {
+    return Observable.fromCallable { cache.get("list") ?: emptyList() }
+        .concatWith(db.fetchStalePackageNames(true).doOnNext { cache.put("list", it) })
         .doOnError { clearCache() }
   }
 

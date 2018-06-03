@@ -70,11 +70,12 @@ class PurgePresenter @Inject internal constructor(
   fun retrieveStaleApplications(force: Boolean) {
     dispose(ON_STOP) {
       interactor.fetchStalePackageNames(force)
-          .flatMap { interactor.calculateDiff(listDiffProvider.data(), it) }
+          .flatMapSingle { interactor.calculateDiff(listDiffProvider.data(), it) }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .doOnSubscribe { view?.onRetrieveBegin() }
-          .doAfterTerminate { view?.onRetrieveComplete() }
+          .doAfterNext { view?.onRetrieveComplete() }
+          .doOnError { view?.onRetrieveComplete() }
           .subscribe({ view?.onRetrievedList(it) }, {
             Timber.e(it, "onError retrieveStaleApplications")
             view?.onRetrieveError(it)
@@ -87,8 +88,9 @@ class PurgePresenter @Inject internal constructor(
       interactor.deleteEntry(packageName)
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({ view?.onDeleted() }
-              , { Timber.e(it, "onError deleteStale") })
+          .subscribe({ view?.onDeleted() }, {
+            Timber.e(it, "onError deleteStale")
+          })
     }
   }
 
@@ -97,8 +99,9 @@ class PurgePresenter @Inject internal constructor(
       interactor.deleteEntries(packageNames)
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({ view?.onDeleted() }
-              , { Timber.e(it, "onError deleteStale all") })
+          .subscribe({ view?.onDeleted() }, {
+            Timber.e(it, "onError deleteStale all")
+          })
     }
   }
 

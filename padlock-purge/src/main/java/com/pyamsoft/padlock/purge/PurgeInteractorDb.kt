@@ -28,7 +28,6 @@ import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.functions.BiFunction
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,9 +39,13 @@ internal class PurgeInteractorDb @Inject internal constructor(
   private val queryDb: PadLockDBQuery
 ) : PurgeInteractor {
 
-  override fun fetchStalePackageNames(bypass: Boolean): Single<List<String>> {
-    return fetchFreshData().flatMapObservable { Observable.fromIterable(it) }
-        .toSortedList { obj, str -> obj.compareTo(str, ignoreCase = true) }
+  override fun fetchStalePackageNames(bypass: Boolean): Observable<List<String>> {
+    return getAllEntries().flatMapSingle { entries ->
+      return@flatMapSingle getActiveApplications()
+          .map { c(entries, it) }
+          .flatMapObservable { Observable.fromIterable(it) }
+          .toSortedList { obj, str -> obj.compareTo(str, ignoreCase = true) }
+    }
   }
 
   override fun calculateDiff(
@@ -86,8 +89,8 @@ internal class PurgeInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getAllEntries(): Single<List<PadLockEntryModel.AllEntriesModel>> =
-    queryDb.queryAll().single(emptyList())
+  private fun getAllEntries(): Observable<List<PadLockEntryModel.AllEntriesModel>> =
+    queryDb.queryAll()
 
   @CheckResult
   private fun getActiveApplications(): Single<List<String>> =
@@ -97,35 +100,35 @@ internal class PurgeInteractorDb @Inject internal constructor(
         .toSortedList()
 
   @CheckResult
-  private fun fetchFreshData(): Single<List<String>> {
-    return getAllEntries().zipWith(getActiveApplications(),
-        BiFunction { allEntries, packageNames ->
-          if (allEntries.isEmpty()) {
-            Timber.e("Database does not have any AppEntry items")
-            return@BiFunction emptyList()
-          }
+  private fun c(
+    allEntries: List<PadLockEntryModel.AllEntriesModel>,
+    packageNames: List<String>
+  ): List<String> {
+    if (allEntries.isEmpty()) {
+      Timber.e("Database does not have any AppEntry items")
+      return emptyList()
+    }
 
-          // Loop through all the package names that we are aware of on the device
-          val mutableAllEntries = allEntries.toMutableList()
-          val foundLocations = LinkedHashSet<PadLockEntryModel.AllEntriesModel>()
-          for (packageName in packageNames) {
-            foundLocations.clear()
+    // Loop through all the package names that we are aware of on the device
+    val mutableAllEntries = allEntries.toMutableList()
+    val foundLocations = LinkedHashSet<PadLockEntryModel.AllEntriesModel>()
+    for (packageName in packageNames) {
+      foundLocations.clear()
 
-            // Filter out the list to only the package names, add them to foundLocations
-            mutableAllEntries.filterTo(foundLocations) {
-              // If an entry is found in the database remove it
-              it.packageName() == packageName
-            }
+      // Filter out the list to only the package names, add them to foundLocations
+      mutableAllEntries.filterTo(foundLocations) {
+        // If an entry is found in the database remove it
+        it.packageName() == packageName
+      }
 
-            // Remove all found locations from list
-            mutableAllEntries.removeAll(foundLocations)
-          }
+      // Remove all found locations from list
+      mutableAllEntries.removeAll(foundLocations)
+    }
 
-          // The remaining entries in the database are stale
-          val stalePackageNames = ArrayList<String>()
-          mutableAllEntries.mapTo(stalePackageNames) { it.packageName() }
-          return@BiFunction stalePackageNames
-        })
+    // The remaining entries in the database are stale
+    val stalePackageNames = ArrayList<String>()
+    mutableAllEntries.mapTo(stalePackageNames) { it.packageName() }
+    return stalePackageNames
   }
 
   override fun deleteEntry(packageName: String): Completable =

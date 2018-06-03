@@ -19,12 +19,13 @@ package com.pyamsoft.padlock.api
 import android.support.annotation.CheckResult
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 
 interface PurgeInteractor {
 
   @CheckResult
-  fun fetchStalePackageNames(bypass: Boolean): Single<List<String>>
+  fun fetchStalePackageNames(bypass: Boolean): Observable<List<String>>
 
   @CheckResult
   fun calculateDiff(
