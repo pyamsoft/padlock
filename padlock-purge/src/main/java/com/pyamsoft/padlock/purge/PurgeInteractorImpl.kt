@@ -50,7 +50,14 @@ internal class PurgeInteractorImpl @Inject internal constructor(
       .doOnError { clearCache() }
 
   override fun fetchStalePackageNames(bypass: Boolean): Observable<List<String>> {
-    return Observable.fromCallable { cache.get("list") ?: emptyList() }
+    return Observable.defer {
+      val data: List<String>? = cache.get("list")
+      if (data == null || data.isEmpty()) {
+        return@defer Observable.empty<List<String>>()
+      } else {
+        return@defer Observable.just(data)
+      }
+    }
         .concatWith(db.fetchStalePackageNames(true).doOnNext { cache.put("list", it) })
         .doOnError { clearCache() }
   }

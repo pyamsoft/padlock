@@ -54,7 +54,14 @@ internal class LockListInteractorImpl @Inject internal constructor(
       .doOnError { clearCache() }
 
   override fun fetchAppEntryList(bypass: Boolean): Observable<List<AppEntry>> {
-    return Observable.fromCallable { cache.get("list") ?: emptyList() }
+    return Observable.defer {
+      val data: List<AppEntry>? = cache.get("list")
+      if (data == null || data.isEmpty()) {
+        return@defer Observable.empty<List<AppEntry>>()
+      } else {
+        return@defer Observable.just(data)
+      }
+    }
         .concatWith(db.fetchAppEntryList(true).doOnNext { cache.put("list", it) })
         .doOnError { clearCache() }
   }
