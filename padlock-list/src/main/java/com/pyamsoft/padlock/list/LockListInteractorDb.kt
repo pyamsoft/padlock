@@ -219,7 +219,7 @@ internal class LockListInteractorDb @Inject internal constructor(
   override fun hasShownOnBoarding(): Single<Boolean> =
     Single.fromCallable { onboardingPreferences.isListOnBoard() }
 
-  override fun modifySingleDatabaseEntry(
+  override fun modifyEntry(
     oldLockState: LockState,
     newLockState: LockState,
     packageName: String,
@@ -227,7 +227,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     code: String?,
     system: Boolean
   ): Completable {
-    return modifyInteractor.modifySingleDatabaseEntry(
+    return modifyInteractor.modifyEntry(
         oldLockState, newLockState, packageName,
         activityName, code, system
     )

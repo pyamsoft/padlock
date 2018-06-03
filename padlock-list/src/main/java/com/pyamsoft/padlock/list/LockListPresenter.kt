@@ -78,8 +78,6 @@ class LockListPresenter @Inject internal constructor(
   private fun registerOnModifyBus() {
     dispose {
       lockListBus.listen()
-          .filter { it is LockListEvent.Modify }
-          .map { it as LockListEvent.Modify }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
@@ -142,14 +140,14 @@ class LockListPresenter @Inject internal constructor(
         newState = DEFAULT
       }
 
-      lockListInteractor.modifySingleDatabaseEntry(
+      lockListInteractor.modifyEntry(
           oldState, newState, packageName,
           PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system
       )
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ Timber.d("Modify complete $packageName") }, {
-            Timber.e(it, "onError modifyDatabaseEntry")
+            Timber.e(it, "onError modifyEntry")
             view?.onModifyEntryError(it)
           })
     }

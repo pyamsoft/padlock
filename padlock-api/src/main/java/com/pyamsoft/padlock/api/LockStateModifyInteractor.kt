@@ -24,7 +24,7 @@ import io.reactivex.Single
 interface LockStateModifyInteractor {
 
   @CheckResult
-  fun modifySingleDatabaseEntry(
+  fun modifyEntry(
     oldLockState: LockState,
     newLockState: LockState,
     packageName: String,

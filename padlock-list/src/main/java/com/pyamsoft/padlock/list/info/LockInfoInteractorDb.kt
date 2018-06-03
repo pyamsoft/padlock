@@ -23,7 +23,6 @@ import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.OnboardingPreferences
 import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
@@ -290,7 +289,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     }
   }
 
-  override fun modifySingleDatabaseEntry(
+  override fun modifyEntry(
     oldLockState: LockState,
     newLockState: LockState,
     packageName: String,
@@ -298,7 +297,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     code: String?,
     system: Boolean
   ): Completable {
-    return modifyInteractor.modifySingleDatabaseEntry(
+    return modifyInteractor.modifyEntry(
         oldLockState, newLockState, packageName,
         activityName, code, system
     )

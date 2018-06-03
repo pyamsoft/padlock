@@ -30,11 +30,6 @@ abstract class LockInfoSingletonModule {
   internal abstract fun provideBus(bus: LockInfoBus): EventBus<LockInfoEvent>
 
   @Binds
-  internal abstract fun provideChangeBus(
-    bus: LockInfoChangeBus
-  ): EventBus<LockInfoEvent.Callback>
-
-  @Binds
   internal abstract fun provideInteractor(impl: LockInfoInteractorImpl): LockInfoInteractor
 
   @Binds

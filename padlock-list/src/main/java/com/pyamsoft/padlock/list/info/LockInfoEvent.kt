@@ -20,60 +20,32 @@ import android.support.annotation.CheckResult
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 
-sealed class LockInfoEvent {
+data class LockInfoEvent internal constructor(
+  val id: String,
+  val name: String,
+  val packageName: String,
+  val oldState: LockState,
+  val newState: LockState,
+  val code: String?,
+  val system: Boolean
+) {
 
-  data class Modify internal constructor(
-    val id: String,
-    val name: String,
-    val packageName: String,
-    val oldState: LockState,
-    val newState: LockState,
-    val code: String?,
-    val system: Boolean
-  ) : LockInfoEvent() {
+  companion object {
 
-    companion object {
-
-      @JvmStatic
-      @CheckResult
-      fun from(
-        entry: ActivityEntry.Item,
-        newState: LockState,
-        code: String?,
-        system: Boolean
-      ): Modify {
-        return Modify(
-            id = entry.id, name = entry.name, packageName = entry.packageName,
-            oldState = entry.lockState, newState = newState, code = code,
-            system = system
-        )
-      }
+    @JvmStatic
+    @CheckResult
+    fun from(
+      entry: ActivityEntry.Item,
+      newState: LockState,
+      code: String?,
+      system: Boolean
+    ): LockInfoEvent {
+      return LockInfoEvent(
+          id = entry.id, name = entry.name, packageName = entry.packageName,
+          oldState = entry.lockState, newState = newState, code = code,
+          system = system
+      )
     }
   }
-
-  sealed class Callback : LockInfoEvent() {
-
-    data class Created(
-      val id: String,
-      val packageName: String,
-      val oldState: LockState
-    ) : Callback()
-
-    data class Deleted(
-      val id: String,
-      val packageName: String,
-      val oldState: LockState
-    ) : Callback()
-
-    data class Whitelisted(
-      val id: String,
-      val packageName: String,
-      val oldState: LockState
-    ) : Callback()
-
-    data class Error(
-      val throwable: Throwable,
-      val packageName: String
-    ) : Callback()
-  }
 }
+

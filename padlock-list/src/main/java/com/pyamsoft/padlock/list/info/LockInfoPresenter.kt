@@ -32,7 +32,6 @@ import javax.inject.Named
 
 @JvmSuppressWildcards
 class LockInfoPresenter @Inject internal constructor(
-  private val changeBus: EventBus<LockInfoEvent.Callback>,
   private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
   private val bus: EventBus<LockInfoEvent>,
   private val interactor: LockInfoInteractor,
@@ -66,8 +65,6 @@ class LockInfoPresenter @Inject internal constructor(
   private fun registerOnModifyBus() {
     dispose {
       bus.listen()
-          .filter { it is LockInfoEvent.Modify }
-          .map { it as LockInfoEvent.Modify }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ modifyDatabaseEntry(it) }, {
@@ -76,9 +73,9 @@ class LockInfoPresenter @Inject internal constructor(
     }
   }
 
-  private fun modifyDatabaseEntry(event: LockInfoEvent.Modify) {
+  private fun modifyDatabaseEntry(event: LockInfoEvent) {
     dispose {
-      interactor.modifySingleDatabaseEntry(
+      interactor.modifyEntry(
           event.oldState, event.newState,
           event.packageName,
           event.name, event.code, event.system
@@ -86,7 +83,7 @@ class LockInfoPresenter @Inject internal constructor(
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe({ Timber.d("Modify completed") }, {
-            Timber.e(it, "onError modifyDatabaseEntry")
+            Timber.e(it, "onError modifyEntry")
             view?.onModifyEntryError(it)
           })
     }
@@ -121,10 +118,6 @@ class LockInfoPresenter @Inject internal constructor(
             }
           }, { Timber.e(it, "onError") })
     }
-  }
-
-  fun publish(event: LockInfoEvent.Callback) {
-    changeBus.publish(event)
   }
 
   interface View : LockModifyCallback, ListPopulateCallback, OnboardingCallback

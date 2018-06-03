@@ -110,7 +110,7 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     }
   }
 
-  override fun modifySingleDatabaseEntry(
+  override fun modifyEntry(
     oldLockState: LockState,
     newLockState: LockState,
     packageName: String,

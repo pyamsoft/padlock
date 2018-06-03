@@ -21,12 +21,12 @@ import javax.inject.Inject
 
 class LockListItemPublisher @Inject internal constructor(private val bus: EventBus<LockListEvent>) {
 
-  fun modifyDatabaseEntry(
+  fun modifyEntry(
     isChecked: Boolean,
     packageName: String,
     code: String?,
     isSystem: Boolean
   ) {
-    bus.publish(LockListEvent.Modify(packageName, code, isSystem, isChecked))
+    bus.publish(LockListEvent(packageName, code, isSystem, isChecked))
   }
 }

@@ -59,7 +59,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
         .doOnError { clearCache() }
   }
 
-  override fun modifySingleDatabaseEntry(
+  override fun modifyEntry(
     oldLockState: LockState,
     newLockState: LockState,
     packageName: String,
@@ -67,7 +67,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
     code: String?,
     system: Boolean
   ): Completable {
-    return db.modifySingleDatabaseEntry(
+    return db.modifyEntry(
         oldLockState, newLockState, packageName, activityName,
         code, system
     )

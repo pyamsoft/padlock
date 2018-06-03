@@ -91,7 +91,7 @@ class LockInfoItem internal constructor(
     holder: ViewHolder,
     newLockState: LockState
   ) {
-    holder.publisher.publish(model, newLockState, null, system)
+    holder.publisher.modifyEntry(model, newLockState, null, system)
   }
 
   override fun unbindView(holder: ViewHolder) {

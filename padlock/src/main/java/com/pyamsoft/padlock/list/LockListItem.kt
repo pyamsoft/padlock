@@ -38,9 +38,8 @@ import javax.inject.Inject
 class LockListItem internal constructor(
   internal var activity: FragmentActivity,
   entry: AppEntry
-) : ModelAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(
-    entry
-), FilterableItem<LockListItem, LockListItem.ViewHolder> {
+) : ModelAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(entry),
+    FilterableItem<LockListItem, LockListItem.ViewHolder> {
 
   override fun getType(): Int = R.id.adapter_lock_item
 
@@ -82,7 +81,7 @@ class LockListItem internal constructor(
       binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
         buttonView.isChecked = isChecked.not()
         Timber.d("Modify the database entry: ${model.packageName} $isChecked")
-        publisher.modifyDatabaseEntry(isChecked, model.packageName, null, model.system)
+        publisher.modifyEntry(isChecked, model.packageName, null, model.system)
       }
 
       bind()

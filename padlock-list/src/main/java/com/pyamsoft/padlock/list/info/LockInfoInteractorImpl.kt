@@ -40,7 +40,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
 
   private val cache = lruCache<String, List<ActivityEntry>>(10)
 
-  override fun modifySingleDatabaseEntry(
+  override fun modifyEntry(
     oldLockState: LockState,
     newLockState: LockState,
     packageName: String,
@@ -48,7 +48,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     code: String?,
     system: Boolean
   ): Completable {
-    return db.modifySingleDatabaseEntry(
+    return db.modifyEntry(
         oldLockState, newLockState, packageName, activityName,
         code, system
     )
