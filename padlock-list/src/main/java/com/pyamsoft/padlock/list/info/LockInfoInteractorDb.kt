@@ -251,7 +251,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
           val oldItem: ActivityEntry = oldList[oldItemPosition]
           val newItem: ActivityEntry = newList[newItemPosition]
           if (oldItem is ActivityEntry.Item && newItem is ActivityEntry.Item) {
-            return oldItem.packageName == newItem.packageName
+            return oldItem.name == newItem.name
           } else if (oldItem is ActivityEntry.Group && newItem is ActivityEntry.Group) {
             return oldItem.name == newItem.name
           } else {
@@ -283,7 +283,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
           return super.getChangePayload(oldItemPosition, newItemPosition)
         }
 
-      }, true)
+      }, false)
 
       return@fromCallable ListDiffResultImpl(newList, result)
     }

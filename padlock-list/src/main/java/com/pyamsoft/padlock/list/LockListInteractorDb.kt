@@ -168,7 +168,7 @@ internal class LockListInteractorDb @Inject internal constructor(
           return super.getChangePayload(oldItemPosition, newItemPosition)
         }
 
-      }, true)
+      }, false)
 
       return@fromCallable ListDiffResultImpl(newList, result)
     }
