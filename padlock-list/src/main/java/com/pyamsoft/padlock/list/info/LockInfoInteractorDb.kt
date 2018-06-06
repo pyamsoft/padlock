@@ -223,13 +223,13 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     bypass: Boolean,
     packageName: String
   ): Observable<List<ActivityEntry>> {
-    return fetchData(packageName)
-        .flatMap { Observable.fromIterable(it) }
-        .groupBy { it.group }
-        .sorted { o1, o2 -> compareByGroup(o1, o2) }
-        .concatMap { sortWithinGroup(it) }
-        .toList()
-        .toObservable()
+    return fetchData(packageName).flatMapSingle {
+      return@flatMapSingle Observable.fromIterable(it)
+          .groupBy { it.group }
+          .sorted { o1, o2 -> compareByGroup(o1, o2) }
+          .concatMap { sortWithinGroup(it) }
+          .toList()
+    }
   }
 
   override fun calculateListDiff(
