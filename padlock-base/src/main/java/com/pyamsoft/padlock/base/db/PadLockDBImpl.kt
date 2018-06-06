@@ -59,7 +59,7 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
           .name(DB_NAME)
           .build()
     val briteDatabase = sqlBrite.wrapDatabaseHelper(
-        FrameworkSQLiteOpenHelperFactory().create(dbConfiguration), Schedulers.computation()
+        FrameworkSQLiteOpenHelperFactory().create(dbConfiguration), Schedulers.io()
     )
 
     val entryFactory: PadLockEntryModel.Factory<*> = PadLockSqlEntry.createFactory()
