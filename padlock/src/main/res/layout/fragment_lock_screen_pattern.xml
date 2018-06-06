@@ -30,12 +30,12 @@
         app:aspectRatio="square"
         app:aspectRatioEnabled="true"
         app:correctStateColor="?attr/colorAccent"
+        app:layout_constrainedHeight="true"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_default="wrap"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_default="wrap"
         />
 
   </android.support.constraint.ConstraintLayout>
