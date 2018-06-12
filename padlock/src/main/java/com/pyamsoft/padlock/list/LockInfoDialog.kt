@@ -44,6 +44,7 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
+import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.show
@@ -102,7 +103,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    refreshLatch = RefreshLatch.create(viewLifecycle) {
+    refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
       Timber.d("Posting refresh latch: $it")
       binding.lockInfoSwipeRefresh.refreshing(it)
       filterListDelegate.setEnabled(!it)
@@ -120,7 +121,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             lockInfoRecycler.visibility = View.GONE
             lockInfoEmpty.visibility = View.VISIBLE
           }
-          Snackbar.make(
+          Snackbreak.make(
               binding.root,
               "Failed to load list for $appName",
               Snackbar.LENGTH_SHORT
@@ -146,7 +147,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     filterListDelegate.onViewCreated(adapter)
     lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
-    presenter.bind(viewLifecycle, this)
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   private fun setupToolbar() {
@@ -232,7 +233,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     super.onStart()
     appIconLoader.forPackageName(appPackageName)
         .into(binding.lockInfoIcon)
-        .bind(viewLifecycle)
+        .bind(viewLifecycleOwner)
   }
 
   override fun onPause() {

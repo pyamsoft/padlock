@@ -18,12 +18,12 @@ package com.pyamsoft.padlock.pin
 
 import android.graphics.Color
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
+import com.google.android.material.snackbar.Snackbar
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
@@ -131,7 +131,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     binding.patternLock.isTactileFeedbackEnabled = false
     binding.patternLock.addPatternLockListener(listener)
 
-    presenter.bind(viewLifecycle, this)
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   private fun setupLockView() {
@@ -165,7 +165,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         // process and show next
         if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
           Timber.d("Pattern is not long enough")
-          com.google.android.material.snackbar.Snackbar.make(binding.root, "Pattern is not long enough", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
+          Snackbreak.make(binding.root, "Pattern is not long enough", Snackbar.LENGTH_SHORT)
               .show()
           binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
           return@runnable false
@@ -174,7 +174,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
           patternText = cellPatternToString(cellPattern)
           repeatPattern = true
           binding.patternLock.clearPattern()
-          com.google.android.material.snackbar.Snackbar.make(binding.root, "Please confirm pattern", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
+          Snackbreak.make(binding.root, "Please confirm pattern", Snackbar.LENGTH_SHORT)
               .show()
           return@runnable false
         }

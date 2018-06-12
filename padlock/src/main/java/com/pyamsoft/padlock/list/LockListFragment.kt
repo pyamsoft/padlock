@@ -42,6 +42,7 @@ import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.popHide
 import com.pyamsoft.pydroid.ui.util.popShow
 import com.pyamsoft.pydroid.ui.util.refreshing
@@ -92,7 +93,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    refreshLatch = RefreshLatch.create(viewLifecycle) {
+    refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
       activity?.invalidateOptionsMenu()
       filterListDelegate.setEnabled(!it)
       binding.apply {
@@ -118,7 +119,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
             applistRecyclerview.visibility = View.GONE
             applistEmpty.visibility = View.VISIBLE
           }
-          Snackbar.make(
+          Snackbreak.make(
               binding.root,
               "Failed to load application list",
               Snackbar.LENGTH_SHORT
@@ -137,7 +138,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
-    presenter.bind(viewLifecycle, this)
+    presenter.bind(viewLifecycleOwner, this)
 
     val intent = requireActivity().intent
     if (intent.hasExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)) {
@@ -301,16 +302,16 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     onFABEnabled()
     val v = view
     if (v != null) {
-      com.google.android.material.snackbar.Snackbar.make(v, "PadLock Enabled", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
+      Snackbreak.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT)
           .show()
     }
   }
 
   override fun onMasterPinCreateFailure() {
-    com.google.android.material.snackbar.Snackbar.make(
+    Snackbreak.make(
         binding.root,
         "Failed to create master pin",
-        com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
+        Snackbar.LENGTH_SHORT
     )
         .show()
   }
@@ -319,16 +320,16 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     onFABDisabled()
     val v = view
     if (v != null) {
-      com.google.android.material.snackbar.Snackbar.make(v, "PadLock Disabled", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
+      Snackbreak.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT)
           .show()
     }
   }
 
   override fun onMasterPinClearFailure() {
-    com.google.android.material.snackbar.Snackbar.make(
+    Snackbreak.make(
         binding.root,
         "Failed to clear master pin",
-        com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
+        Snackbar.LENGTH_SHORT
     )
         .show()
   }
@@ -340,13 +341,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   override fun onFABEnabled() {
     imageLoader.fromResource(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab)
-        .bind(viewLifecycle)
+        .bind(viewLifecycleOwner)
   }
 
   override fun onFABDisabled() {
     imageLoader.fromResource(R.drawable.ic_lock_open_24dp)
         .into(binding.applistFab)
-        .bind(viewLifecycle)
+        .bind(viewLifecycleOwner)
   }
 
   override fun onSystemVisibilityChanged(visible: Boolean) {

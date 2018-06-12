@@ -19,9 +19,9 @@ package com.pyamsoft.padlock.settings
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import androidx.preference.ListPreference
 import android.view.View
+import androidx.preference.ListPreference
+import com.google.android.material.snackbar.Snackbar
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
@@ -102,10 +102,10 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
   }
 
   override fun onLockTypeChangePrevented() {
-    com.google.android.material.snackbar.Snackbar.make(
+    Snackbreak.make(
         requireView(),
         "You must clear the current PIN before changing type",
-        com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+        Snackbar.LENGTH_LONG
     )
         .apply {
           setAction("Okay", DebouncedOnClickListener.create {
@@ -121,17 +121,17 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
   }
 
   override fun onClearDatabase() {
-    com.google.android.material.snackbar.Snackbar.make(requireView(), "Locked application database cleared", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
+    Snackbreak.make(requireView(), "Locked application database cleared", Snackbar.LENGTH_SHORT)
         .show()
   }
 
   override fun onMasterPinClearFailure() {
-    com.google.android.material.snackbar.Snackbar.make(requireView(), "Failed to clear master pin", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
+    Snackbreak.make(requireView(), "Failed to clear master pin", Snackbar.LENGTH_SHORT)
         .show()
   }
 
   override fun onMasterPinClearSuccess() {
-    com.google.android.material.snackbar.Snackbar.make(requireView(), "You may now change lock type", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
+    Snackbreak.make(requireView(), "You may now change lock type", Snackbar.LENGTH_SHORT)
         .show()
   }
 
