@@ -17,16 +17,16 @@
 package com.pyamsoft.padlock.list
 
 import android.os.Bundle
-import androidx.annotation.CheckResult
-import com.google.android.material.snackbar.Snackbar
-import androidx.core.view.ViewCompat
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.annotation.CheckResult
+import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.mikepenz.fastadapter.commons.utils.FastAdapterDiffUtil
@@ -194,16 +194,17 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   private fun setupRecyclerView() {
-    dividerDecoration = DividerItemDecoration(activity, DividerItemDecoration.VERTICAL)
 
     binding.apply {
       lockInfoRecycler.layoutManager = LinearLayoutManager(context)
           .apply {
-        isItemPrefetchEnabled = true
-        initialPrefetchItemCount = 3
-      }
+            isItemPrefetchEnabled = true
+            initialPrefetchItemCount = 3
+          }
       lockInfoRecycler.setHasFixedSize(true)
-      lockInfoRecycler.addItemDecoration(dividerDecoration)
+      dividerDecoration = DividerItemDecoration(activity, DividerItemDecoration.VERTICAL).also {
+        lockInfoRecycler.addItemDecoration(it)
+      }
       lockInfoRecycler.adapter = FastAdapter.with<
           LockInfoBaseItem<*, *, *>,
           ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
@@ -219,7 +220,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     super.onDestroyView()
     filterListDelegate.onDestroyView()
     binding.apply {
-      lockInfoRecycler.removeItemDecoration(dividerDecoration)
+      dividerDecoration?.also { lockInfoRecycler.removeItemDecoration(it) }
+      dividerDecoration = null
       lockInfoRecycler.setOnDebouncedClickListener(null)
       lockInfoRecycler.layoutManager = null
       lockInfoRecycler.adapter = null
