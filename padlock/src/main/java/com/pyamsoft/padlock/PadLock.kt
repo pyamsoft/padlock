@@ -18,8 +18,8 @@ package com.pyamsoft.padlock
 
 import android.app.Application
 import android.app.Service
-import android.support.annotation.CheckResult
-import android.support.v4.app.Fragment
+import androidx.annotation.CheckResult
+import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService

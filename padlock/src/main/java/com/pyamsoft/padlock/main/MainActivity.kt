@@ -17,10 +17,10 @@
 package com.pyamsoft.padlock.main
 
 import android.content.Intent
-import android.databinding.DataBindingUtil
+import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.v4.view.ViewCompat
-import android.support.v7.preference.PreferenceManager
+import androidx.core.view.ViewCompat
+import androidx.preference.PreferenceManager
 import android.view.View
 import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector

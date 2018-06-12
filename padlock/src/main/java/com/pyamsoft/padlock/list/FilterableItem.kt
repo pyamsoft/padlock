@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.list
 
-import android.support.annotation.CheckResult
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.CheckResult
+import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.IItem
 
 internal interface FilterableItem<T, VH : RecyclerView.ViewHolder> : IItem<T, VH> {

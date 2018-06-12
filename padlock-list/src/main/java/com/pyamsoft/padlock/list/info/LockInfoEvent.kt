@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.list.info
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 

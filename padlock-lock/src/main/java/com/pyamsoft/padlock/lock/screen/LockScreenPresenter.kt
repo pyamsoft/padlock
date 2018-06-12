@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-import android.arch.lifecycle.Lifecycle.Event.ON_PAUSE
+import androidx.lifecycle.Lifecycle.Event.ON_PAUSE
 import com.pyamsoft.padlock.api.LockScreenInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.bus.EventBus

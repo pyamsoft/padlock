@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.list
 
-import android.support.annotation.CheckResult
-import android.support.v7.widget.SearchView
+import androidx.annotation.CheckResult
+import androidx.appcompat.widget.SearchView
 import android.view.Menu
 import android.view.MenuItem
 import com.mikepenz.fastadapter.adapters.ModelAdapter

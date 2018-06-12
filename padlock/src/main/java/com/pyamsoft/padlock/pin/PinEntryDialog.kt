@@ -18,9 +18,9 @@ package com.pyamsoft.padlock.pin
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.support.annotation.CheckResult
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
+import androidx.annotation.CheckResult
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -157,7 +157,7 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
         when (it.itemId) {
           R.id.menu_submit_pin -> {
             val fragmentManager = childFragmentManager
-            val fragment: Fragment? = fragmentManager.findFragmentById(
+            val fragment: androidx.fragment.app.Fragment? = fragmentManager.findFragmentById(
                 R.id.pin_entry_dialog_container
             )
             if (fragment is PinEntryBaseFragment) {

@@ -28,8 +28,7 @@ internal class DeviceLockStateProviderImpl @Inject internal constructor(context:
 
   private val keyguard = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
 
-  override fun isLocked(): Boolean =
-    keyguard.inKeyguardRestrictedInputMode() || keyguard.isKeyguardLocked
+  override fun isLocked(): Boolean = keyguard.isKeyguardLocked
 
 }
 

@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.list.info
 
-import android.arch.lifecycle.Lifecycle.Event.ON_STOP
+import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockWhitelistedEvent

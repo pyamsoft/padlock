@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.list.info
 
-import android.support.annotation.CheckResult
-import android.support.v7.util.DiffUtil
+import androidx.annotation.CheckResult
+import androidx.recyclerview.widget.DiffUtil
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.OnboardingPreferences

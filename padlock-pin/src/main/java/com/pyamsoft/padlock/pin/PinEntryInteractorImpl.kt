@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.pin
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockHelper
 import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.PinEntryInteractor

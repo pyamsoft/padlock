@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.api
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.LockState
 import io.reactivex.Completable
 import io.reactivex.Single

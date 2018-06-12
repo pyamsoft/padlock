@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.helper
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.mikepenz.fastadapter.IItem
 import com.mikepenz.fastadapter.IItemList
 import com.mikepenz.fastadapter.utils.DefaultItemListImpl

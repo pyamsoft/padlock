@@ -18,13 +18,13 @@ package com.pyamsoft.padlock.lock
 
 import android.content.Context
 import android.content.Intent
-import android.databinding.DataBindingUtil
+import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.annotation.CallSuper
-import android.support.annotation.CheckResult
-import android.support.v4.app.Fragment
-import android.support.v4.view.ViewCompat
-import android.support.v7.preference.PreferenceManager
+import androidx.annotation.CallSuper
+import androidx.annotation.CheckResult
+import androidx.fragment.app.Fragment
+import androidx.core.view.ViewCompat
+import androidx.preference.PreferenceManager
 import android.view.MenuItem
 import android.view.ViewGroup
 import com.pyamsoft.padlock.Injector
@@ -285,9 +285,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
   override fun onRestoreInstanceState(savedInstanceState: Bundle) {
     ignorePeriod = savedInstanceState.getLong(KEY_IGNORE_TIME, -1)
     excludeEntry = savedInstanceState.getBoolean(KEY_EXCLUDE, false)
-    val lockScreenText: Fragment? = supportFragmentManager.findFragmentByTag(
-        LockScreenTextFragment.TAG
-    )
+    val lockScreenText: Fragment? = supportFragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
     if (lockScreenText is LockScreenTextFragment) {
       lockScreenText.onRestoreInstanceState(savedInstanceState)
     }

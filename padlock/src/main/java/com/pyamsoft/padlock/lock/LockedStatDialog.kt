@@ -18,8 +18,8 @@ package com.pyamsoft.padlock.lock
 
 import android.app.Dialog
 import android.os.Bundle
-import android.support.annotation.CheckResult
-import android.support.v7.app.AlertDialog
+import androidx.annotation.CheckResult
+import androidx.appcompat.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

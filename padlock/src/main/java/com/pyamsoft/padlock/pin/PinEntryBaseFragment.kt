@@ -16,13 +16,13 @@
 
 package com.pyamsoft.padlock.pin
 
-import android.support.v4.app.FragmentManager
+import androidx.fragment.app.FragmentManager
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 
 abstract class PinEntryBaseFragment : CanaryFragment() {
 
   fun dismissParent() {
-    val fragmentManager: FragmentManager? = parentFragment?.fragmentManager
+    val fragmentManager: androidx.fragment.app.FragmentManager? = parentFragment?.fragmentManager
     val pinFragment = fragmentManager?.findFragmentByTag(PinEntryDialog.TAG)
     if (pinFragment is PinEntryDialog) {
       pinFragment.dismiss()

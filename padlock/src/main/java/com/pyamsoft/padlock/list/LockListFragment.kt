@@ -17,9 +17,9 @@
 package com.pyamsoft.padlock.list
 
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -215,7 +215,10 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   private fun setupRecyclerView() {
     dividerDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
-    binding.applistRecyclerview.layoutManager = LinearLayoutManager(context).apply {
+    binding.applistRecyclerview.layoutManager = LinearLayoutManager(
+        context
+    )
+        .apply {
       isItemPrefetchEnabled = true
       initialPrefetchItemCount = 3
     }
@@ -298,16 +301,16 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     onFABEnabled()
     val v = view
     if (v != null) {
-      Snackbar.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT)
+      com.google.android.material.snackbar.Snackbar.make(v, "PadLock Enabled", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
           .show()
     }
   }
 
   override fun onMasterPinCreateFailure() {
-    Snackbar.make(
+    com.google.android.material.snackbar.Snackbar.make(
         binding.root,
         "Failed to create master pin",
-        Snackbar.LENGTH_SHORT
+        com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
     )
         .show()
   }
@@ -316,16 +319,16 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     onFABDisabled()
     val v = view
     if (v != null) {
-      Snackbar.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT)
+      com.google.android.material.snackbar.Snackbar.make(v, "PadLock Disabled", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
           .show()
     }
   }
 
   override fun onMasterPinClearFailure() {
-    Snackbar.make(
+    com.google.android.material.snackbar.Snackbar.make(
         binding.root,
         "Failed to clear master pin",
-        Snackbar.LENGTH_SHORT
+        com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
     )
         .show()
   }

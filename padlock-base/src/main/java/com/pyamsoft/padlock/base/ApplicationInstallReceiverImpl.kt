@@ -26,10 +26,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Build.VERSION_CODES
-import android.support.annotation.RequiresApi
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.content.ContextCompat
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.PackageLabelManager
 import com.pyamsoft.pydroid.cache.Cache

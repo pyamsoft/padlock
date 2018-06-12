@@ -18,6 +18,7 @@ apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 apply plugin: "kotlin-kapt"
 apply plugin: "com.getkeepsafe.dexcount"
+apply plugin: "com.squareup.sqldelight.android"
 
 //noinspection GroovyMissingReturnStatement
 android {
@@ -84,7 +85,7 @@ android {
 dependencies {
 
   // Databinding
-  kapt "com.android.databinding:compiler:$plugin_version"
+  kapt "androidx.databinding:databinding-compiler:$plugin_version"
 
   implementation "com.mikepenz:fastadapter:$fastAdapter@aar"
   implementation "com.mikepenz:fastadapter-commons:$fastAdapter@aar"

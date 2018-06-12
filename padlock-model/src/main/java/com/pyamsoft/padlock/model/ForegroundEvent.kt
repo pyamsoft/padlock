@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.model
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 
 data class ForegroundEvent(
   val packageName: String,

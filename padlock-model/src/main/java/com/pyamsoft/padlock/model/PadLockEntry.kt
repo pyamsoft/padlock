@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.model
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.google.auto.value.AutoValue
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 

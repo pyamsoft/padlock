@@ -20,7 +20,7 @@ import android.app.Activity
 import android.app.Application
 import android.app.IntentService
 import android.content.Context
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.pydroid.cache.Cache
 import com.pyamsoft.pydroid.loader.ImageLoader

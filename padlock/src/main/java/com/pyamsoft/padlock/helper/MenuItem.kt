@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.helper
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import android.view.MenuItem
 
 @CheckResult

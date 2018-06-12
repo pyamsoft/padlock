@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.lock
 
 import android.os.Bundle
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.base
 
 import android.graphics.drawable.Drawable
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import android.widget.ImageView
 import com.pyamsoft.padlock.api.PackageIconManager
 import com.pyamsoft.padlock.model.IconHolder

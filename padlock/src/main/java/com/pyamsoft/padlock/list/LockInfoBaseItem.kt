@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.model.ActivityEntry
 

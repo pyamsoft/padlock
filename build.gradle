@@ -20,7 +20,7 @@ buildscript {
 
   ext {
     kotlin_version = '1.2.41'
-    plugin_version = '3.1.2'
+    plugin_version = '3.2.0-alpha18'
   }
 
   repositories {
@@ -30,20 +30,25 @@ buildscript {
     maven {
       url 'https://jitpack.io'
     }
+
+    // TODO
+    // add sonatype repository
+    maven {
+      url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
   }
 
   ext {
 
     minSdk = 22
-    maxSdk = 27
+    maxSdk = 28
 
-    // Until Sqldelight updates
-    supportLib = "27.1.1"
     pydroid = "17.0.4"
     leakCanary = "1.5.4"
     autoValue = "1.6"
     sqlbrite = "3.2.0"
-    sqlite = "1.0.0"
+    sqldelight = "1.0.0-alpha3"
+    sqlite = "2.0.0-alpha1"
     dagger = "2.16"
     patternLock = "1.0.0"
     fastAdapter = "3.2.5"
@@ -59,7 +64,7 @@ buildscript {
     classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
 
     // SQLDelight
-    classpath "com.squareup.sqldelight:gradle-plugin:0.7.0"
+    classpath "com.squareup.sqldelight:android-gradle-plugin:$sqldelight"
 
     // Kotlin
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"

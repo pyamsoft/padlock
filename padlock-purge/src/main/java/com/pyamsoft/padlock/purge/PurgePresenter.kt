@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.purge
 
-import android.arch.lifecycle.Lifecycle.Event.ON_STOP
+import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.PurgeAllEvent
 import com.pyamsoft.padlock.model.PurgeEvent

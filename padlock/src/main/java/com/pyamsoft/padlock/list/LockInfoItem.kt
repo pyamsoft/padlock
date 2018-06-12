@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.widget.RadioButton
 import com.pyamsoft.padlock.Injector

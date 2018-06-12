@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.purge
 
-import android.support.annotation.CheckResult
-import android.support.v7.util.DiffUtil
+import androidx.annotation.CheckResult
+import androidx.recyclerview.widget.DiffUtil
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBQuery

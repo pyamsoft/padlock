@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.purge
 
 import android.os.Bundle
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,7 +49,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   internal lateinit var presenter: PurgePresenter
   private lateinit var adapter: ModelAdapter<String, PurgeItem>
   private lateinit var binding: FragmentPurgeBinding
-  private lateinit var decoration: DividerItemDecoration
+  private lateinit var decoration: androidx.recyclerview.widget.DividerItemDecoration
   private lateinit var refreshLatch: RefreshLatch
   private var lastPosition: Int = 0
 
@@ -196,11 +196,14 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   private fun setupRecyclerView() {
-    decoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
+    decoration = androidx.recyclerview.widget.DividerItemDecoration(
+        context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
+    )
 
     adapter = ModelAdapter(NeverNotifyItemList.create()) { PurgeItem(it) }
     binding.apply {
-      purgeList.layoutManager = LinearLayoutManager(context).apply {
+      purgeList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+          .apply {
         isItemPrefetchEnabled = true
         initialPrefetchItemCount = 3
       }

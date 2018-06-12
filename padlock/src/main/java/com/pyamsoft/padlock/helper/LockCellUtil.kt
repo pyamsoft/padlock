@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.helper
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.andrognito.patternlockview.PatternLockView
 
 @CheckResult

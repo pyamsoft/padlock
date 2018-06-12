@@ -19,8 +19,8 @@ package com.pyamsoft.padlock.settings
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v7.preference.ListPreference
+import com.google.android.material.snackbar.Snackbar
+import androidx.preference.ListPreference
 import android.view.View
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
@@ -102,10 +102,10 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
   }
 
   override fun onLockTypeChangePrevented() {
-    Snackbar.make(
+    com.google.android.material.snackbar.Snackbar.make(
         requireView(),
         "You must clear the current PIN before changing type",
-        Snackbar.LENGTH_LONG
+        com.google.android.material.snackbar.Snackbar.LENGTH_LONG
     )
         .apply {
           setAction("Okay", DebouncedOnClickListener.create {
@@ -121,17 +121,17 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
   }
 
   override fun onClearDatabase() {
-    Snackbar.make(requireView(), "Locked application database cleared", Snackbar.LENGTH_SHORT)
+    com.google.android.material.snackbar.Snackbar.make(requireView(), "Locked application database cleared", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
         .show()
   }
 
   override fun onMasterPinClearFailure() {
-    Snackbar.make(requireView(), "Failed to clear master pin", Snackbar.LENGTH_SHORT)
+    com.google.android.material.snackbar.Snackbar.make(requireView(), "Failed to clear master pin", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
         .show()
   }
 
   override fun onMasterPinClearSuccess() {
-    Snackbar.make(requireView(), "You may now change lock type", Snackbar.LENGTH_SHORT)
+    com.google.android.material.snackbar.Snackbar.make(requireView(), "You may now change lock type", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
         .show()
   }
 

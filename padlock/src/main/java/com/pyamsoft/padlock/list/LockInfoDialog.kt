@@ -17,11 +17,11 @@
 package com.pyamsoft.padlock.list
 
 import android.os.Bundle
-import android.support.annotation.CheckResult
-import android.support.design.widget.Snackbar
-import android.support.v4.view.ViewCompat
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
+import androidx.annotation.CheckResult
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -196,7 +196,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     dividerDecoration = DividerItemDecoration(activity, DividerItemDecoration.VERTICAL)
 
     binding.apply {
-      lockInfoRecycler.layoutManager = LinearLayoutManager(context).apply {
+      lockInfoRecycler.layoutManager = LinearLayoutManager(context)
+          .apply {
         isItemPrefetchEnabled = true
         initialPrefetchItemCount = 3
       }

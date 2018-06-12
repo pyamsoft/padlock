@@ -17,9 +17,9 @@
 package com.pyamsoft.padlock.main
 
 import android.os.Bundle
-import android.support.annotation.CheckResult
-import android.support.design.widget.BottomNavigationView
-import android.support.v4.app.Fragment
+import androidx.annotation.CheckResult
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -91,9 +91,7 @@ class MainFragment : CanaryFragment() {
             val containerId = R.id.main_view_container
             val fragmentManager = childFragmentManager
 
-            val currentFragment: Fragment? = fragmentManager.findFragmentById(
-                containerId
-            )
+            val currentFragment: Fragment? = fragmentManager.findFragmentById(containerId)
             // Do nothing on same fragment
             if (currentFragment != null && currentFragment.tag == tag) {
               return false

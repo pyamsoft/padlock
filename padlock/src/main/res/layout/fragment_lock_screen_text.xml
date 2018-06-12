@@ -16,14 +16,14 @@
 
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
-  <android.support.constraint.ConstraintLayout
+  <androidx.constraintlayout.ConstraintLayout
       xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:padding="16dp"
       >
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/lock_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
         app:layout_constraintTop_toTopOf="parent"
         >
 
-      <android.support.design.widget.TextInputEditText
+      <com.google.android.material.textfield.TextInputEditText
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:gravity="center_horizontal"
@@ -48,7 +48,7 @@
           android:textColor="@android:color/white"
           />
 
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:id="@+id/lock_display_hint"
@@ -75,5 +75,5 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-  </android.support.constraint.ConstraintLayout>
+  </androidx.constraintlayout.ConstraintLayout>
 </layout>

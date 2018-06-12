@@ -17,10 +17,10 @@
 package com.pyamsoft.padlock.helper
 
 import android.os.Bundle
-import android.support.annotation.CheckResult
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.RecyclerView.LayoutManager
+import androidx.annotation.CheckResult
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.pyamsoft.pydroid.cache.Cache
 
 object ListStateUtil : Cache {

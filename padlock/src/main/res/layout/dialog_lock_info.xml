@@ -18,13 +18,13 @@
 
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
-  <android.support.constraint.ConstraintLayout
+  <androidx.constraintlayout.ConstraintLayout
       xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       >
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/lock_info_toolbar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
@@ -109,7 +109,7 @@
         app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name"
         />
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/lock_info_swipe_refresh"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -126,7 +126,7 @@
           android:layout_height="match_parent"
           >
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/lock_info_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -146,7 +146,7 @@
 
       </FrameLayout>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <View
         android:layout_width="match_parent"
@@ -157,5 +157,5 @@
         app:layout_constraintTop_toBottomOf="@id/lock_info_toolbar"
         />
 
-  </android.support.constraint.ConstraintLayout>
+  </androidx.constraintlayout.ConstraintLayout>
 </layout>

@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.lock
 
 import android.app.IntentService
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.JobSchedulerCompat
 import com.pyamsoft.padlock.api.LockEntryInteractor
 import com.pyamsoft.padlock.api.LockHelper

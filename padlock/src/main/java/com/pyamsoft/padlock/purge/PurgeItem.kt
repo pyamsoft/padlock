@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.purge
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.R
@@ -51,7 +51,7 @@ internal class PurgeItem internal constructor(
     }
   }
 
-  internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+  internal class ViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
 
     internal val binding: AdapterItemPurgeBinding = AdapterItemPurgeBinding.bind(itemView)
   }

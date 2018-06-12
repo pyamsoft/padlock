@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.pin
 
 import android.content.Context
 import android.os.Bundle
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View

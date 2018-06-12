@@ -16,12 +16,11 @@
 
 package com.pyamsoft.padlock.base.db
 
-import android.arch.persistence.db.SupportSQLiteDatabase
-import android.arch.persistence.db.SupportSQLiteOpenHelper
-import android.arch.persistence.db.framework.FrameworkSQLiteOpenHelperFactory
 import android.content.Context
-import android.support.annotation.CheckResult
 import android.text.TextUtils
+import androidx.annotation.CheckResult
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.api.PadLockDBQuery
@@ -59,7 +58,39 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
           .name(DB_NAME)
           .build()
     val briteDatabase = sqlBrite.wrapDatabaseHelper(
-        FrameworkSQLiteOpenHelperFactory().create(dbConfiguration), Schedulers.io()
+//        FrameworkSQLiteOpenHelperFactory().create(dbConfiguration), Schedulers.io()
+        object : android.arch.persistence.db.SupportSQLiteOpenHelper {
+          override fun getDatabaseName(): String {
+            TODO(
+                "not implemented"
+            ) //To change body of created functions use File | Settings | File Templates.
+          }
+
+          override fun getWritableDatabase(): android.arch.persistence.db.SupportSQLiteDatabase {
+            TODO(
+                "not implemented"
+            ) //To change body of created functions use File | Settings | File Templates.
+          }
+
+          override fun getReadableDatabase(): android.arch.persistence.db.SupportSQLiteDatabase {
+            TODO(
+                "not implemented"
+            ) //To change body of created functions use File | Settings | File Templates.
+          }
+
+          override fun close() {
+            TODO(
+                "not implemented"
+            ) //To change body of created functions use File | Settings | File Templates.
+          }
+
+          override fun setWriteAheadLoggingEnabled(enabled: Boolean) {
+            TODO(
+                "not implemented"
+            ) //To change body of created functions use File | Settings | File Templates.
+          }
+
+        }, Schedulers.io()
     )
 
     val entryFactory: PadLockEntryModel.Factory<*> = PadLockSqlEntry.createFactory()

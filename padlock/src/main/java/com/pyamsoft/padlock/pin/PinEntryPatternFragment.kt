@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.pin
 
 import android.graphics.Color
 import android.os.Bundle
-import android.support.design.widget.Snackbar
+import com.google.android.material.snackbar.Snackbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -165,7 +165,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
         // process and show next
         if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
           Timber.d("Pattern is not long enough")
-          Snackbar.make(binding.root, "Pattern is not long enough", Snackbar.LENGTH_SHORT)
+          com.google.android.material.snackbar.Snackbar.make(binding.root, "Pattern is not long enough", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
               .show()
           binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
           return@runnable false
@@ -174,7 +174,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
           patternText = cellPatternToString(cellPattern)
           repeatPattern = true
           binding.patternLock.clearPattern()
-          Snackbar.make(binding.root, "Please confirm pattern", Snackbar.LENGTH_SHORT)
+          com.google.android.material.snackbar.Snackbar.make(binding.root, "Please confirm pattern", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
               .show()
           return@runnable false
         }

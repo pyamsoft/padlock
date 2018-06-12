@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.base.db
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.squareup.sqlbrite3.BriteDatabase
 
