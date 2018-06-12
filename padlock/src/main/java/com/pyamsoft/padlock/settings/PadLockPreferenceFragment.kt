@@ -93,7 +93,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
       return@setOnPreferenceChangeListener false
     }
 
-    presenter.bind(viewLifecycle, this)
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   override fun onLockTypeChangeAccepted(value: String) {

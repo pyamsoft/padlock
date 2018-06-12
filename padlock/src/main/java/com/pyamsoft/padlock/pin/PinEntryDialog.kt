@@ -104,14 +104,14 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
     super.onViewCreated(view, savedInstanceState)
     setupToolbar()
 
-    presenter.bind(viewLifecycle, this)
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   override fun onStart() {
     super.onStart()
     appIconLoader.forPackageName(packageName)
         .into(binding.pinImage)
-        .bind(viewLifecycle)
+        .bind(viewLifecycleOwner)
   }
 
   override fun onTypePattern() {

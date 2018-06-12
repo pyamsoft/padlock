@@ -89,7 +89,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     // Hide hint to begin with
     binding.lockDisplayHint.visibility = View.GONE
 
-    presenter.bind(viewLifecycle, this)
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -138,7 +138,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
         .tint(R.color.white)
         .into(binding.lockImageGo)
-        .bind(viewLifecycle)
+        .bind(viewLifecycleOwner)
   }
 
   private fun setupTextInput() {

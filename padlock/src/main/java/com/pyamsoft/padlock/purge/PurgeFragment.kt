@@ -105,7 +105,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    refreshLatch = RefreshLatch.create(viewLifecycle) {
+    refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
       binding.purgeSwipeRefresh.refreshing(it)
 
       // Load complete
@@ -119,7 +119,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     setupToolbarMenu()
     lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
-    presenter.bind(viewLifecycle, this)
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   private fun setupToolbarMenu() {

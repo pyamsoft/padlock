@@ -90,7 +90,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
     binding.patternLock.isTactileFeedbackEnabled = false
     binding.patternLock.addPatternLockListener(listener)
 
-    presenter.bind(viewLifecycle, this)
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   override fun onSubmitSuccess() {

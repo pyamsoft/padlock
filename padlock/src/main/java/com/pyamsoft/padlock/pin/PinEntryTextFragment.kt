@@ -88,7 +88,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
       onRestoreInstanceState(savedInstanceState)
     }
 
-    presenter.bind(viewLifecycle, this)
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   private fun setupSubmissionView(view: EditText) {
