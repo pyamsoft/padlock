@@ -55,6 +55,8 @@ dependencies {
   compileOnly "com.google.auto.value:auto-value-annotations:$autoValue"
   kapt "com.google.auto.value:auto-value:$autoValue"
 
+//  implementation "com.android.support:support-annotations:$supportLib"
+
   api "com.github.pyamsoft.pydroid:pydroid:$pydroid"
 
   api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
