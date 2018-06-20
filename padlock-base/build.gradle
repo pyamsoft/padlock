@@ -45,6 +45,9 @@ android {
 }
 
 dependencies {
+  // SQL
+  implementation "com.squareup.sqldelight:android-driver:$sqldelight"
+
   // SQLBrite
   implementation "com.squareup.sqlbrite3:sqlbrite:$sqlbrite"
   implementation "androidx.sqlite:sqlite:$sqlite"

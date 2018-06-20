@@ -47,7 +47,7 @@ buildscript {
     leakCanary = "1.5.4"
     autoValue = "1.6"
     sqlbrite = "3.2.0"
-    sqldelight = "1.0.0-alpha3"
+    sqldelight = "1.0.0-alpha4"
     sqlite = "2.0.0-alpha1"
     dagger = "2.16"
     patternLock = "1.0.0"
