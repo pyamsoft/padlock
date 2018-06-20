@@ -136,7 +136,7 @@ class LockServicePresenter @Inject internal constructor(
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe({
           if (PadLockDbModels.isEmpty(it)) {
-            Timber.w("PadLockEntry is EMPTY, ignore")
+            Timber.w("PadLockDbEntryImpl is EMPTY, ignore")
           } else {
             view?.onStartLockScreen(it, className)
           }
@@ -144,7 +144,7 @@ class LockServicePresenter @Inject internal constructor(
           if (it is NoSuchElementException) {
             Timber.w("PadLock not locking: $packageName, $className")
           } else {
-            Timber.e(it, "Error getting PadLockEntry for LockScreen")
+            Timber.e(it, "Error getting PadLockDbEntryImpl for LockScreen")
           }
         })
   }

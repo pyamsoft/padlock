@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.model.db
 
-import com.pyamsoft.padlock.model.db.AllEntriesModel
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.db.WithPackageNameModel
+import androidx.annotation.CheckResult
 
-internal data class PadLockEntry internal constructor(
+data class PadLockDbEntryImpl internal constructor(
   private val packageName: String,
   private val activityName: String,
   private val lockCode: String?,
@@ -58,38 +56,24 @@ internal data class PadLockEntry internal constructor(
     return lockUntilTime
   }
 
-  data class AllEntries internal constructor(
-    private val packageName: String,
-    private val activityName: String,
-    private val whitelist: Boolean
-  ) : AllEntriesModel {
+  companion object {
 
-    override fun packageName(): String {
-      return packageName
+    @CheckResult
+    @JvmStatic
+    fun create(
+      packageName: String,
+      activityName: String,
+      lockCode: String?,
+      whitelist: Boolean,
+      systemApplication: Boolean,
+      ignoreUntilTime: Long,
+      lockUntilTime: Long
+    ): PadLockEntryModel {
+      return PadLockDbEntryImpl(
+          packageName, activityName, lockCode, whitelist, systemApplication, ignoreUntilTime,
+          lockUntilTime
+      )
     }
-
-    override fun activityName(): String {
-      return activityName
-    }
-
-    override fun whitelist(): Boolean {
-      return whitelist
-    }
-
   }
 
-  data class A internal constructor(
-    private val activityName: String,
-    private val whitelist: Boolean
-  ) : WithPackageNameModel {
-
-    override fun activityName(): String {
-      return activityName
-    }
-
-    override fun whitelist(): Boolean {
-      return whitelist
-    }
-
-  }
 }

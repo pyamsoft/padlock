@@ -17,10 +17,10 @@
 package com.pyamsoft.padlock.db
 
 import android.content.Context
-import android.text.TextUtils
 import androidx.annotation.CheckResult
-import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import com.pyamsoft.padlock.QueryWrapper
 import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.api.PadLockDBQuery
@@ -28,9 +28,12 @@ import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.db.AllEntriesModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
+import com.squareup.sqldelight.android.SqlDelightDatabaseHelper
+import com.squareup.sqldelight.android.create
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,30 +43,25 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
     PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
 
   private val queryManager: QueryManager
-  private val createManager: CreateManager
   private val insertManager: InsertManager
   private val deleteManager: DeleteManager
   private val updateManager: UpdateManager
 
   init {
-    val dbConfiguration: SupportSQLiteOpenHelper.Configuration =
-      SupportSQLiteOpenHelper.Configuration.builder(context)
-          .callback(PadLockOpenHelper())
-          .name(DB_NAME)
-          .build()
-//    val entryFactory: PadLockEntryModel.Factory<*> = PadLockSqlEntry.createFactory()
-    queryManager = QueryManager()
-    createManager = CreateManager()
-    insertManager = InsertManager()
-    deleteManager = DeleteManager()
-    updateManager = UpdateManager()
+    val driver = QueryWrapper.create(context, DATABASE_NAME)
+    val database = QueryWrapper(driver)
+    val padLockEntrySqlQueries = database.padLockEntrySqlQueries
+    queryManager = QueryManager(padLockEntrySqlQueries) { Schedulers.io() }
+    deleteManager = DeleteManager(padLockEntrySqlQueries)
+    insertManager = InsertManager(padLockEntrySqlQueries)
+    updateManager = UpdateManager(padLockEntrySqlQueries)
   }
 
   @CheckResult
   private fun deleteWithPackageActivityNameUnguarded(
     packageName: String,
     activityName: String
-  ): Int = deleteManager.deleteWithPackageActivity(packageName, activityName)
+  ): Long = deleteManager.deleteWithPackageActivity(packageName, activityName)
 
   @CheckResult
   override fun insert(
@@ -76,15 +74,14 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
     whitelist: Boolean
   ): Completable {
     return Single.fromCallable {
-      val entry = createManager.create(
-          packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, isSystem, whitelist
-      )
       Timber.i("DB: INSERT $packageName $activityName")
       val deleteResult = deleteWithPackageActivityNameUnguarded(packageName, activityName)
       Timber.d("Delete result: %d", deleteResult)
-      return@fromCallable insertManager.insert(entry)
+      return@fromCallable insertManager.insert(
+          packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, isSystem, whitelist
+      )
     }
-        .toCompletable()
+        .ignoreElement()
   }
 
   override fun updateIgnoreTime(
@@ -174,117 +171,9 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
     }
   }
 
-  private class PadLockOpenHelper internal constructor() : SupportSQLiteOpenHelper.Callback(
-      DATABASE_VERSION
-  ) {
-
-    override fun onCreate(db: SupportSQLiteDatabase) {
-      Timber.d("onCreate")
-      Timber.d("EXEC SQL: %s", "")
-      db.execSQL("")
-    }
-
-    override fun onUpgrade(
-      db: SupportSQLiteDatabase,
-      oldVersion: Int,
-      newVersion: Int
-    ) {
-      Timber.d("onUpgrade from old version %d to new %d", oldVersion, newVersion)
-      var currentVersion = oldVersion
-      if (currentVersion == 1 && newVersion >= 2) {
-        upgradeVersion1To2(db)
-        ++currentVersion
-      }
-
-      if (currentVersion == 2 && newVersion >= 3) {
-        upgradeVersion2To3(db)
-        ++currentVersion
-      }
-
-      if (currentVersion == 3 && newVersion >= 4) {
-        upgradeVersion3To4(db)
-        ++currentVersion
-      }
-    }
-
-    private fun upgradeVersion3To4(db: SupportSQLiteDatabase) {
-      Timber.d("Upgrading from Version 2 to 3 adds whitelist column")
-      val alterWithWhitelist =
-        "ALTER TABLE $TABLE_NAME ADD COLUMN $WHITELIST INTEGER NOT NULL DEFAULT 0"
-      Timber.d("EXEC SQL: %s", alterWithWhitelist)
-      db.execSQL(alterWithWhitelist)
-    }
-
-    private fun upgradeVersion2To3(db: SupportSQLiteDatabase) {
-      Timber.d("Upgrading from Version 2 to 3 drops the whole table")
-
-      val dropOldTable = "DROP TABLE $TABLE_NAME"
-      Timber.d("EXEC SQL: %s", dropOldTable)
-      db.execSQL(dropOldTable)
-
-      // Creating the table again
-      onCreate(db)
-    }
-
-    private fun upgradeVersion1To2(db: SupportSQLiteDatabase) {
-      Timber.d("Upgrading from Version 1 to 2 drops the displayName column")
-
-      // Remove the columns we don't want anymore from the table's list of columns
-      Timber.d("Gather a list of the remaining columns")
-      val columnsSeparated = TextUtils.join(
-          ",",
-          UPGRADE_1_TO_2_TABLE_COLUMNS
-      )
-      Timber.d("Column separated: %s", columnsSeparated)
-
-      val tableName = TABLE_NAME
-      val oldTable = tableName + "_old"
-      val alterTable = "ALTER TABLE $tableName RENAME TO $oldTable"
-      val insertIntoNewTable =
-        "INSERT INTO $tableName($columnsSeparated) SELECT $columnsSeparated FROM $oldTable"
-      val dropOldTable = "DROP TABLE $oldTable"
-
-      // Move the existing table to an old table
-      Timber.d("EXEC SQL: %s", alterTable)
-      db.execSQL(alterTable)
-
-      onCreate(db)
-
-      // Populating the table with the data
-      Timber.d("EXEC SQL: %s", insertIntoNewTable)
-      db.execSQL(insertIntoNewTable)
-
-      Timber.d("EXEC SQL: %s", dropOldTable)
-      db.execSQL(dropOldTable)
-    }
-
-    companion object {
-
-      private const val DATABASE_VERSION = 4
-
-      // We redefine the table bits here because during migration the names may have changed
-      // Valid for DB version 4
-      private const val TABLE_NAME = "padlock_entry"
-      private const val PACKAGE_NAME = "packageName"
-      private const val ACTIVITY_NAME = "activityName"
-      private const val LOCK_CODE = "lockCode"
-      private const val LOCK_UNTIL_TIME = "lockUntilTime"
-      private const val IGNORE_UNTIL_TIME = "ignoreUntilTime"
-      private const val SYSTEM_APPLICATION = "systemApplication"
-      private const val WHITELIST = "whitelist"
-
-      private val UPGRADE_1_TO_2_TABLE_COLUMNS = arrayOf(
-          PACKAGE_NAME,
-          ACTIVITY_NAME,
-          LOCK_CODE,
-          LOCK_UNTIL_TIME,
-          IGNORE_UNTIL_TIME,
-          SYSTEM_APPLICATION
-      )
-    }
-  }
-
   companion object {
-    private const val DB_NAME = "padlock_db"
+
+    private const val DATABASE_NAME = "com.pyamsoft.padlock.PadLockEntrySql.db"
+    private const val OLD_DATABASE_NAME = "padlock_db"
   }
 }

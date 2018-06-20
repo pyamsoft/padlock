@@ -17,39 +17,23 @@
 package com.pyamsoft.padlock.db
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.model.db.PadLockDbModels
 
 internal class UpdateManager internal constructor(
-//  private val briteDatabase: BriteDatabase
+  private val queries: PadLockEntrySqlQueries
 ) {
-
-//  private val updateWhitelist by lazy {
-//    PadLockEntryModel.UpdateWhitelist(briteDatabase.writableDatabase)
-//  }
-//
-//  private val updateIgnoreTime by lazy {
-//    PadLockEntryModel.UpdateIgnoreUntilTime(briteDatabase.writableDatabase)
-//  }
-//
-//  private val updateHardLocked by lazy {
-//    PadLockEntryModel.UpdateLockUntilTime(briteDatabase.writableDatabase)
-//  }
 
   @CheckResult
   internal fun updateWhitelist(
     packageName: String,
     activityName: String,
     whitelist: Boolean
-  ): Int {
-    TODO()
-//    if (PadLockDbModels.PACKAGE_EMPTY == packageName || PadLockDbModels.ACTIVITY_EMPTY == activityName) {
-//      throw RuntimeException("Cannot update whitelist EMPTY entry")
-//    }
-//
-//    return updateWhitelist.run {
-//      clearBindings()
-//      bind(whitelist, packageName, activityName)
-//      return@run briteDatabase.executeUpdateDelete(table, this)
-//    }
+  ): Long {
+    if (PadLockDbModels.PACKAGE_EMPTY == packageName || PadLockDbModels.ACTIVITY_EMPTY == activityName) {
+      throw RuntimeException("Cannot update whitelist EMPTY entry")
+    }
+
+    return queries.updateWhitelist(whitelist, packageName, activityName)
   }
 
   @CheckResult
@@ -57,17 +41,12 @@ internal class UpdateManager internal constructor(
     packageName: String,
     activityName: String,
     ignoreTime: Long
-  ): Int {
-    TODO()
-//    if (PadLockDbModels.PACKAGE_EMPTY == packageName || PadLockDbModels.ACTIVITY_EMPTY == activityName) {
-//      throw RuntimeException("Cannot update ignore time EMPTY entry")
-//    }
-//
-//    return updateIgnoreTime.run {
-//      clearBindings()
-//      bind(ignoreTime, packageName, activityName)
-//      return@run briteDatabase.executeUpdateDelete(table, this)
-//    }
+  ): Long {
+    if (PadLockDbModels.PACKAGE_EMPTY == packageName || PadLockDbModels.ACTIVITY_EMPTY == activityName) {
+      throw RuntimeException("Cannot update ignore time EMPTY entry")
+    }
+
+    return queries.updateIgnoreUntilTime(ignoreTime, packageName, activityName)
   }
 
   @CheckResult
@@ -75,16 +54,11 @@ internal class UpdateManager internal constructor(
     packageName: String,
     activityName: String,
     lockTime: Long
-  ): Int {
-    TODO()
-//    if (PadLockDbModels.PACKAGE_EMPTY == packageName || PadLockDbModels.ACTIVITY_EMPTY == activityName) {
-//      throw RuntimeException("Cannot update lock time EMPTY entry")
-//    }
-//
-//    return updateHardLocked.run {
-//      clearBindings()
-//      bind(lockTime, packageName, activityName)
-//      return@run briteDatabase.executeUpdateDelete(table, this)
-//    }
+  ): Long {
+    if (PadLockDbModels.PACKAGE_EMPTY == packageName || PadLockDbModels.ACTIVITY_EMPTY == activityName) {
+      throw RuntimeException("Cannot update lock time EMPTY entry")
+    }
+
+    return queries.updateLockUntilTime(lockTime, packageName, activityName)
   }
 }

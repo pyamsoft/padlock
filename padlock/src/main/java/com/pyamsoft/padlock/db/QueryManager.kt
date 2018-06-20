@@ -17,62 +17,63 @@
 package com.pyamsoft.padlock.db
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.model.db.AllEntriesImpl
 import com.pyamsoft.padlock.model.db.AllEntriesModel
+import com.pyamsoft.padlock.model.db.PadLockDbEntryImpl
+import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.model.db.WithPackageNameImpl
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
+import com.squareup.sqldelight.runtime.rx.asObservable
+import com.squareup.sqldelight.runtime.rx.mapToList
+import com.squareup.sqldelight.runtime.rx.mapToOne
 import io.reactivex.Observable
+import io.reactivex.Scheduler
 import io.reactivex.Single
+import java.util.Collections
 
 internal class QueryManager internal constructor(
-//  private val briteDatabase: BriteDatabase,
-//  private val factory: PadLockEntryModel.Factory<*>
+  private val queries: PadLockEntrySqlQueries,
+  private val scheduler: () -> Scheduler
 ) {
-
-//  private val withPackageActivityNameDefaultMapper: RowMapper<out PadLockEntryModel> =
-//    factory.withPackageActivityNameDefaultMapper()
-//
-//  private val allEntriesMapper: RowMapper<out AllEntriesModel> =
-//    factory.allEntriesMapper { packageName, activityName, whitelist ->
-//      AutoValue_PadLockSqlEntry_AllEntries(packageName, activityName, whitelist)
-//    }
-//
-//  private val withPackageNameMapper: RowMapper<out WithPackageNameModel> =
-//    factory.withPackageNameMapper { activityName, whitelist ->
-//      AutoValue_PadLockSqlEntry_WithPackageName(activityName, whitelist)
-//    }
 
   @CheckResult
   internal fun queryWithPackageActivityNameDefault(
     packageName: String,
     activityName: String
   ): Single<PadLockEntryModel> {
-    TODO()
-//    val query = factory.withPackageActivityNameDefault(
-//        packageName, PadLockDbModels.PACKAGE_ACTIVITY_NAME, activityName
-//    )
-//    return briteDatabase.createQuery(query.tables, query)
-//        .mapToOne { withPackageActivityNameDefaultMapper.map(it) }
-//        .first(PadLockDbModels.EMPTY)
+    return queries.withPackageActivityNameDefault(
+        packageName, PadLockDbModels.PACKAGE_ACTIVITY_NAME, activityName
+    ) { pName, aName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication, whitelist ->
+      PadLockDbEntryImpl.create(
+          pName, aName, lockCode, whitelist, systemApplication, ignoreUntilTime, lockUntilTime
+      )
+    }
+        .asObservable(scheduler())
+        .mapToOne()
+        .first(PadLockDbModels.EMPTY)
   }
 
   @CheckResult
   internal fun queryWithPackageName(
     packageName: String
   ): Observable<List<WithPackageNameModel>> {
-    TODO()
-//    val statement = factory.withPackageName(packageName)
-//    return briteDatabase.createQuery(statement.tables, statement)
-//        .mapToList { withPackageNameMapper.map(it) }
-//        .map { Collections.unmodifiableList(it) }
+    return queries.withPackageName(packageName) { pName, whitelist ->
+      WithPackageNameImpl.create(pName, whitelist)
+    }
+        .asObservable(scheduler())
+        .mapToList()
+        .map { Collections.unmodifiableList(it) }
   }
 
   @CheckResult
   internal fun queryAll(): Observable<List<AllEntriesModel>> {
-    TODO()
-//    val statement = factory.allEntries()
-//    return briteDatabase.createQuery(statement.tables, statement)
-//        .mapToList { allEntriesMapper.map(it) }
-//        .map { Collections.unmodifiableList(it) }
+    return queries.allEntries { packageName, activityName, whitelist ->
+      AllEntriesImpl.create(packageName, activityName, whitelist)
+    }
+        .asObservable(scheduler())
+        .mapToList()
+        .map { Collections.unmodifiableList(it) }
   }
 }
 

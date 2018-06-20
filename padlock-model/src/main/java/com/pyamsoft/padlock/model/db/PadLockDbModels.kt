@@ -1,7 +1,6 @@
 package com.pyamsoft.padlock.model.db
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.PadLockEntry
 
 object PadLockDbModels {
 
@@ -19,6 +18,8 @@ object PadLockDbModels {
 
   @JvmField
   val EMPTY: PadLockEntryModel =
-    PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, false, false, 0, 0)
+    PadLockDbEntryImpl(
+        PACKAGE_EMPTY, ACTIVITY_EMPTY, null, false, false, 0, 0
+    )
 
 }

@@ -47,7 +47,6 @@ buildscript {
     pydroid = "18.0.0"
     leakCanary = "1.5.4"
     sqldelight = "1.0.0-alpha4"
-    sqlite = "2.0.0-alpha1"
     dagger = "2.16"
     patternLock = "1.0.0"
     fastAdapter = "3.2.5"

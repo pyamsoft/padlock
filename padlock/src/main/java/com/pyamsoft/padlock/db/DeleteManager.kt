@@ -19,41 +19,24 @@ package com.pyamsoft.padlock.db
 import androidx.annotation.CheckResult
 
 internal class DeleteManager internal constructor(
-//  private val briteDatabase: BriteDatabase
+  private val queries: PadLockEntrySqlQueries
 ) {
 
-//  private val deleteWithPackage =
-//    PadLockEntryModel.DeleteWithPackageName(briteDatabase.writableDatabase)
-//  private val deleteWithPackageActivity =
-//    PadLockEntryModel.DeleteWithPackageActivityName(briteDatabase.writableDatabase)
-//  private val deleteAll = PadLockEntryModel.DeleteAll(briteDatabase.writableDatabase)
-
   @CheckResult
-  internal fun deleteWithPackage(packageName: String): Int {
-    TODO()
-//    return deleteWithPackage.run {
-    //    clearBindings()
-//    bind(packageName)
-//    return@run briteDatabase.executeUpdateDelete(table, this)
-//    }
+  internal fun deleteWithPackage(packageName: String): Long {
+    return queries.deleteWithPackageName(packageName)
   }
 
   @CheckResult
   internal fun deleteWithPackageActivity(
     packageName: String,
     activityName: String
-  ): Int {
-    TODO()
-//    return deleteWithPackageActivity.run {
-//    clearBindings()
-//    bind(packageName, activityName)
-//    return@run briteDatabase.executeUpdateDelete(table, this)
-//    }
+  ): Long {
+    return queries.deleteWithPackageActivityName(packageName, activityName)
   }
 
   @CheckResult
-  internal fun deleteAll(): Int {
-    TODO()
-//    return deleteAll.run { briteDatabase.executeUpdateDelete(table, this) }
+  internal fun deleteAll(): Long {
+    return queries.deleteAll()
   }
 }

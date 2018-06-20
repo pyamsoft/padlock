@@ -1,5 +1,5 @@
--- Create the table for PadLockEntry objects
-CREATE TABLE padlock_entry (
+-- Create the table for PadLockDbEntryImpl objects
+CREATE TABLE PadLockEntrySql (
   packageName TEXT NOT NULL,
   activityName TEXT NOT NULL,
   lockCode TEXT,
@@ -12,12 +12,12 @@ CREATE TABLE padlock_entry (
 -- Get all entries in the table
 allEntries:
 SELECT packageName, activityName, whitelist
-FROM padlock_entry;
+FROM PadLockEntrySql;
 
 -- Get all entries with the package name
 withPackageName:
 SELECT activityName, whitelist
-FROM padlock_entry
+FROM PadLockEntrySql
 WHERE packageName = ?;
 
 -- Get all entries with the package name and activity name
@@ -35,7 +35,7 @@ WHERE packageName = ?;
 -- ?3 the specific activity name
 withPackageActivityNameDefault:
 SELECT *
-FROM padlock_entry
+FROM PadLockEntrySql
 WHERE packageName = ?1
 AND (activityName = ?2 OR activityName = ?3)
 ORDER BY
@@ -47,36 +47,36 @@ ASC
 LIMIT 1;
 
 deleteWithPackageName:
-DELETE FROM padlock_entry
+DELETE FROM PadLockEntrySql
 WHERE packageName = ?;
 
 deleteWithPackageActivityName:
-DELETE FROM padlock_entry
+DELETE FROM PadLockEntrySql
 WHERE packageName = ?
 AND activityName = ?;
 
 deleteAll:
-DELETE FROM padlock_entry
+DELETE FROM PadLockEntrySql
 WHERE 1 = 1;
 
 insertEntry:
-INSERT INTO padlock_entry(packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication, whitelist)
+INSERT INTO PadLockEntrySql(packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication, whitelist)
 VALUES (?, ?, ?, ?, ?, ?, ?);
 
 updateLockUntilTime:
-UPDATE padlock_entry
+UPDATE PadLockEntrySql
 SET lockUntilTime = ?
 WHERE packageName = ?
 AND activityName = ?;
 
 updateIgnoreUntilTime:
-UPDATE padlock_entry
+UPDATE PadLockEntrySql
 SET ignoreUntilTime = ?
 WHERE packageName = ?
 AND activityName = ?;
 
 updateWhitelist:
-UPDATE padlock_entry
+UPDATE PadLockEntrySql
 SET whitelist = ?
 WHERE packageName = ?
 AND activityName = ?;

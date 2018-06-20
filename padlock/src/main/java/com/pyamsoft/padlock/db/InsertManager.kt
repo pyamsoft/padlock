@@ -17,28 +17,28 @@
 package com.pyamsoft.padlock.db
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.model.db.PadLockDbModels
 
 internal class InsertManager internal constructor(
-//  private val briteDatabase: BriteDatabase
+  private val queries: PadLockEntrySqlQueries
 ) {
 
-//  private val insertEntry = PadLockEntryModel.InsertEntry(briteDatabase.writableDatabase)
-
   @CheckResult
-  internal fun insert(entry: PadLockEntryModel): Long {
-    TODO()
-//    if (PadLockDbModels.isEmpty(entry)) {
-//      throw RuntimeException("Cannot insert EMPTY entry")
-//    }
-//
-//    return insertEntry.run {
-//      clearBindings()
-//      bind(
-//          entry.packageName(), entry.activityName(), entry.lockCode(), entry.lockUntilTime(),
-//          entry.ignoreUntilTime(), entry.systemApplication(), entry.whitelist()
-//      )
-//      return@run briteDatabase.executeInsert(table, this)
-//    }
+  internal fun insert(
+    packageName: String,
+    activityName: String,
+    lockCode: String?,
+    lockUntilTime: Long,
+    ignoreUntilTime: Long,
+    isSystem: Boolean,
+    whitelist: Boolean
+  ): Long {
+    if (PadLockDbModels.PACKAGE_EMPTY == packageName || PadLockDbModels.ACTIVITY_EMPTY == activityName) {
+      throw RuntimeException("Cannot insert EMPTY entry")
+    }
+
+    return queries.insertEntry(
+        packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, isSystem, whitelist
+    )
   }
 }

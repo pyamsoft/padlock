@@ -45,13 +45,7 @@ android {
 }
 
 dependencies {
-  // SqlDelight
-  implementation "com.squareup.sqldelight:runtime-common:$sqldelight"
-  implementation "com.squareup.sqldelight:android-driver:$sqldelight"
-  implementation "com.squareup.sqldelight:rxjava2-extensions:$sqldelight"
-
   api "com.github.pyamsoft.pydroid:core:$pydroid"
-
   api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 

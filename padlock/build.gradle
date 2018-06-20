@@ -93,9 +93,8 @@ dependencies {
   // Databinding
   kapt "androidx.databinding:databinding-compiler:$plugin_version"
 
-  // SQL
-  implementation "androidx.sqlite:sqlite:$sqlite"
-  implementation "androidx.sqlite:sqlite-framework:$sqlite"
+  implementation "com.squareup.sqldelight:android-driver:${rootProject.ext.sqldelight}"
+  implementation "com.squareup.sqldelight:rxjava2-extensions:${rootProject.ext.sqldelight}"
 
   implementation "com.mikepenz:fastadapter:$fastAdapter@aar"
   implementation "com.mikepenz:fastadapter-commons:$fastAdapter@aar"
