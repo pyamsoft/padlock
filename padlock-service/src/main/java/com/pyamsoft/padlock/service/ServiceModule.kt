@@ -24,7 +24,7 @@ import com.pyamsoft.padlock.model.RecheckEvent
 import com.pyamsoft.padlock.model.ServiceFinishEvent
 import com.pyamsoft.padlock.service.device.DeviceLockStateProviderImpl
 import com.pyamsoft.padlock.service.device.UsageEventProviderImpl
-import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.EventBus
 import dagger.Binds
 import dagger.Module
 

@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock
 
-import com.pyamsoft.padlock.api.PinEntryInteractor
-import com.pyamsoft.padlock.model.ClearPinEvent
-import com.pyamsoft.padlock.model.CreatePinEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.padlock.api.PadLockDBDelete
+import com.pyamsoft.padlock.api.PadLockDBInsert
+import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDBUpdate
+import com.pyamsoft.padlock.db.PadLockDBImpl
 import dagger.Binds
 import dagger.Module
 
 @Module
-abstract class PinModule {
+abstract class PadLockModule {
 
   @Binds
-  internal abstract fun provideClearBus(bus: ClearPinBus): EventBus<ClearPinEvent>
+  internal abstract fun providePadLockInsert(impl: PadLockDBImpl): PadLockDBInsert
 
   @Binds
-  internal abstract fun provideCreateBus(bus: CreatePinBus): EventBus<CreatePinEvent>
+  internal abstract fun providePadLockQuery(impl: PadLockDBImpl): PadLockDBQuery
 
   @Binds
-  internal abstract fun provideInteractor(impl: PinEntryInteractorImpl): PinEntryInteractor
+  internal abstract fun providePadLockUpdate(impl: PadLockDBImpl): PadLockDBUpdate
+
+  @Binds
+  internal abstract fun providePadLockDelete(impl: PadLockDBImpl): PadLockDBDelete
+
 }

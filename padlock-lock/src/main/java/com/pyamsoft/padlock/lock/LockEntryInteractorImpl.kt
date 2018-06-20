@@ -28,9 +28,9 @@ import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PadLockDBUpdate
 import com.pyamsoft.padlock.model.Recheck
-import com.pyamsoft.pydroid.optional.Optional
-import com.pyamsoft.pydroid.optional.Optional.Present
-import com.pyamsoft.pydroid.optional.asOptional
+import com.pyamsoft.pydroid.core.optional.Optional
+import com.pyamsoft.pydroid.core.optional.Optional.Present
+import com.pyamsoft.pydroid.core.optional.asOptional
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single

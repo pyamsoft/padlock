@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.db
+package com.pyamsoft.padlock.db
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
-internal class CreateManager internal constructor(private val factory: PadLockEntryModel.Factory<*>) {
+internal class CreateManager internal constructor(
+//  private val factory: PadLockEntryModel.Factory<*>
+) {
 
   @CheckResult
   fun create(
@@ -32,14 +34,15 @@ internal class CreateManager internal constructor(private val factory: PadLockEn
     isSystem: Boolean,
     whitelist: Boolean
   ): PadLockEntryModel {
-    val entry = factory.creator.create(
-        packageName, activityName, lockCode,
-        lockUntilTime, ignoreUntilTime, isSystem, whitelist
-    )
-    if (PadLockEntry.isEmpty(entry)) {
-      throw RuntimeException("Cannot create EMPTY entry")
-    }
-
-    return entry
+    TODO()
+//    val entry = factory.creator.create(
+//        packageName, activityName, lockCode,
+//        lockUntilTime, ignoreUntilTime, isSystem, whitelist
+//    )
+//    if (PadLockDbModels.isEmpty(entry)) {
+//      throw RuntimeException("Cannot create EMPTY entry")
+//    }
+//
+//    return entry
   }
 }

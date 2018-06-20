@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.model.db.WithPackageNameModel
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Completable
@@ -54,7 +54,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   @CheckResult
   private fun getLockedActivityEntries(
     name: String
-  ): Observable<List<PadLockEntryModel.WithPackageNameModel>> = queryDb.queryWithPackageName(name)
+  ): Observable<List<WithPackageNameModel>> = queryDb.queryWithPackageName(name)
 
   @CheckResult
   private fun getPackageActivities(name: String): Single<List<String>> =
@@ -62,9 +62,9 @@ internal class LockInfoInteractorDb @Inject internal constructor(
 
   @CheckResult
   private fun findMatchingEntry(
-    lockEntries: List<PadLockEntryModel.WithPackageNameModel>,
+    lockEntries: List<WithPackageNameModel>,
     activityName: String
-  ): PadLockEntryModel.WithPackageNameModel? {
+  ): WithPackageNameModel? {
     // Short circuit if empty
     if (lockEntries.isEmpty()) {
       return null
@@ -77,7 +77,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     // Compare to pivot
     var start: Int
     var end: Int
-    var foundEntry: PadLockEntryModel.WithPackageNameModel? = null
+    var foundEntry: WithPackageNameModel? = null
     when {
       pivotPoint.activityName() == activityName -> {
         // We are the pivot
@@ -115,7 +115,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   private fun findActivityEntry(
     packageName: String,
     activityName: String,
-    padLockEntries: MutableList<PadLockEntryModel.WithPackageNameModel>
+    padLockEntries: MutableList<WithPackageNameModel>
   ): ActivityEntry.Item {
     val foundEntry = findMatchingEntry(padLockEntries, activityName)
 
@@ -131,7 +131,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   private fun createActivityEntry(
     packageName: String,
     name: String,
-    foundEntry: PadLockEntryModel.WithPackageNameModel?
+    foundEntry: WithPackageNameModel?
   ): ActivityEntry.Item {
     val state: LockState
     if (foundEntry == null) {
@@ -150,12 +150,12 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   private fun createSortedActivityEntryList(
     fetchName: String,
     names: List<String>,
-    entries: List<PadLockEntryModel.WithPackageNameModel>
+    entries: List<WithPackageNameModel>
   ): List<ActivityEntry.Item> {
     // Sort here to avoid stream break
     // If the list is empty, the old flatMap call can hang, causing a list loading error
     // Sort here where we are guaranteed a list of some kind
-    val sortedList: MutableList<PadLockEntryModel.WithPackageNameModel> = ArrayList(entries)
+    val sortedList: MutableList<WithPackageNameModel> = ArrayList(entries)
     sortedList.sortWith(
         Comparator { o1, o2 ->
           o1.activityName()

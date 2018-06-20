@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base.db
+package com.pyamsoft.padlock.db
 
 import android.content.Context
 import android.text.TextUtils
@@ -25,12 +25,12 @@ import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PadLockDBUpdate
+import com.pyamsoft.padlock.model.db.AllEntriesModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.squareup.sqlbrite3.SqlBrite
+import com.pyamsoft.padlock.model.db.WithPackageNameModel
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -46,59 +46,17 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
   private val updateManager: UpdateManager
 
   init {
-    val sqlBrite: SqlBrite = SqlBrite.Builder()
-        .logger {
-          Timber.tag("PadLockDB")
-              .d(it)
-        }
-        .build()
     val dbConfiguration: SupportSQLiteOpenHelper.Configuration =
       SupportSQLiteOpenHelper.Configuration.builder(context)
           .callback(PadLockOpenHelper())
           .name(DB_NAME)
           .build()
-    val briteDatabase = sqlBrite.wrapDatabaseHelper(
-//        FrameworkSQLiteOpenHelperFactory().create(dbConfiguration), Schedulers.io()
-        object : android.arch.persistence.db.SupportSQLiteOpenHelper {
-          override fun getDatabaseName(): String {
-            TODO(
-                "not implemented"
-            ) //To change body of created functions use File | Settings | File Templates.
-          }
-
-          override fun getWritableDatabase(): android.arch.persistence.db.SupportSQLiteDatabase {
-            TODO(
-                "not implemented"
-            ) //To change body of created functions use File | Settings | File Templates.
-          }
-
-          override fun getReadableDatabase(): android.arch.persistence.db.SupportSQLiteDatabase {
-            TODO(
-                "not implemented"
-            ) //To change body of created functions use File | Settings | File Templates.
-          }
-
-          override fun close() {
-            TODO(
-                "not implemented"
-            ) //To change body of created functions use File | Settings | File Templates.
-          }
-
-          override fun setWriteAheadLoggingEnabled(enabled: Boolean) {
-            TODO(
-                "not implemented"
-            ) //To change body of created functions use File | Settings | File Templates.
-          }
-
-        }, Schedulers.io()
-    )
-
-    val entryFactory: PadLockEntryModel.Factory<*> = PadLockSqlEntry.createFactory()
-    queryManager = QueryManager(briteDatabase, entryFactory)
-    createManager = CreateManager(entryFactory)
-    insertManager = InsertManager(briteDatabase)
-    deleteManager = DeleteManager(briteDatabase)
-    updateManager = UpdateManager(briteDatabase)
+//    val entryFactory: PadLockEntryModel.Factory<*> = PadLockSqlEntry.createFactory()
+    queryManager = QueryManager()
+    createManager = CreateManager()
+    insertManager = InsertManager()
+    deleteManager = DeleteManager()
+    updateManager = UpdateManager()
   }
 
   @CheckResult
@@ -180,12 +138,12 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
   @CheckResult
   override fun queryWithPackageName(
     packageName: String
-  ): Observable<List<PadLockEntryModel.WithPackageNameModel>> {
+  ): Observable<List<WithPackageNameModel>> {
     return queryManager.queryWithPackageName(packageName)
   }
 
   @CheckResult
-  override fun queryAll(): Observable<List<PadLockEntryModel.AllEntriesModel>> {
+  override fun queryAll(): Observable<List<AllEntriesModel>> {
     return queryManager.queryAll()
   }
 
@@ -222,8 +180,8 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
 
     override fun onCreate(db: SupportSQLiteDatabase) {
       Timber.d("onCreate")
-      Timber.d("EXEC SQL: %s", PadLockEntryModel.CREATE_TABLE)
-      db.execSQL(PadLockEntryModel.CREATE_TABLE)
+      Timber.d("EXEC SQL: %s", "")
+      db.execSQL("")
     }
 
     override fun onUpgrade(
@@ -316,7 +274,11 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
       private const val WHITELIST = "whitelist"
 
       private val UPGRADE_1_TO_2_TABLE_COLUMNS = arrayOf(
-          PACKAGE_NAME, ACTIVITY_NAME, LOCK_CODE, LOCK_UNTIL_TIME, IGNORE_UNTIL_TIME,
+          PACKAGE_NAME,
+          ACTIVITY_NAME,
+          LOCK_CODE,
+          LOCK_UNTIL_TIME,
+          IGNORE_UNTIL_TIME,
           SYSTEM_APPLICATION
       )
     }

@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.padlock.model.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
-import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.EventBus
 import javax.inject.Inject
 
 class LockInfoItemPublisher @Inject internal constructor(private val bus: EventBus<LockInfoEvent>) {

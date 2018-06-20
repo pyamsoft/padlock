@@ -23,7 +23,7 @@ import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
-import com.pyamsoft.pydroid.base.about.AboutLibraries
+import com.pyamsoft.pydroid.bootstrap.about.AboutLibraries
 import com.pyamsoft.pydroid.list.PYDroidListLicenses
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary

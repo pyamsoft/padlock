@@ -22,7 +22,7 @@ import android.app.IntentService
 import android.content.Context
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.pydroid.cache.Cache
+import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderModule
 import dagger.Module

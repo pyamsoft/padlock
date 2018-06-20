@@ -21,9 +21,9 @@ import com.pyamsoft.padlock.api.InstallListenerPreferences
 import com.pyamsoft.padlock.api.MasterPinPreferences
 import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.SettingsInteractor
-import com.pyamsoft.pydroid.cache.Cache
-import com.pyamsoft.pydroid.optional.Optional.Present
-import com.pyamsoft.pydroid.optional.asOptional
+import com.pyamsoft.pydroid.core.cache.Cache
+import com.pyamsoft.pydroid.core.optional.Optional.Present
+import com.pyamsoft.pydroid.core.optional.asOptional
 import io.reactivex.Completable
 import io.reactivex.Single
 import timber.log.Timber

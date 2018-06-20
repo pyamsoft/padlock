@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.lock
 
 import com.pyamsoft.padlock.api.LockEntryInteractor
-import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber

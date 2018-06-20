@@ -21,8 +21,8 @@ import com.pyamsoft.padlock.model.ClearPinEvent
 import com.pyamsoft.padlock.model.CreatePinEvent
 import com.pyamsoft.padlock.model.PinEntryEvent.Clear
 import com.pyamsoft.padlock.model.PinEntryEvent.Create
-import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber

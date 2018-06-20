@@ -24,8 +24,9 @@ buildscript {
   }
 
   repositories {
-    jcenter()
     google()
+    jcenter()
+    mavenLocal()
 
     maven {
       url 'https://jitpack.io'
@@ -43,10 +44,8 @@ buildscript {
     minSdk = 22
     maxSdk = 28
 
-    pydroid = "17.0.4"
+    pydroid = "18.0.0"
     leakCanary = "1.5.4"
-    autoValue = "1.6"
-    sqlbrite = "3.2.0"
     sqldelight = "1.0.0-alpha4"
     sqlite = "2.0.0-alpha1"
     dagger = "2.16"
@@ -77,8 +76,9 @@ subprojects {
 
 allprojects {
   repositories {
-    jcenter()
     google()
+    jcenter()
+    mavenLocal()
 
     maven {
       url 'https://jitpack.io'

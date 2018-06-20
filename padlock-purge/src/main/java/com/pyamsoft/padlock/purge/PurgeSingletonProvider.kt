@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.pydroid.cache.Repository
-import com.pyamsoft.pydroid.cache.repository
+import com.pyamsoft.pydroid.core.cache.Repository
+import com.pyamsoft.pydroid.core.cache.repository
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named

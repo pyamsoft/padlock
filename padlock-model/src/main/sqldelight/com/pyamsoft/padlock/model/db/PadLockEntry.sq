@@ -31,7 +31,7 @@ WHERE packageName = ?;
 -- Get either the package with specific name or the PACKAGE entry
 -- SQLite only has bindings so we must make do
 -- ?1 package name
--- ?2 the PadLock PACKAGE_TAG, see model.PadLockEntry
+-- ?2 the PadLock PACKAGE_TAG, see model.db.PadLockEntryModel
 -- ?3 the specific activity name
 withPackageActivityNameDefault:
 SELECT *

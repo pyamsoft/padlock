@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.model.RecheckEvent
-import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.bus.RxBus
+import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.RxBus
 import io.reactivex.Observable
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -29,8 +29,8 @@ import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.model.AppEntry
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.LockState
-import com.pyamsoft.padlock.model.PadLockEntry
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.model.db.AllEntriesModel
+import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Completable
@@ -61,8 +61,8 @@ internal class LockListInteractorDb @Inject internal constructor(
   @CheckResult
   private fun createNewLockTuple(
     packageName: String,
-    copyEntries: MutableList<PadLockEntryModel.AllEntriesModel>,
-    removeEntries: MutableSet<PadLockEntryModel.AllEntriesModel>
+    copyEntries: MutableList<AllEntriesModel>,
+    removeEntries: MutableSet<AllEntriesModel>
   ): LockTuple {
 
     // We clear out the removal list so it can be reused in a clean state
@@ -74,7 +74,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     for (entry in copyEntries) {
       if (entry.packageName() == packageName) {
         when {
-          entry.activityName() == PadLockEntry.PACKAGE_ACTIVITY_NAME -> locked = true
+          entry.activityName() == PadLockDbModels.PACKAGE_ACTIVITY_NAME -> locked = true
           entry.whitelist() -> ++whitelist
           else -> ++hardLocked
         }
@@ -106,15 +106,15 @@ internal class LockListInteractorDb @Inject internal constructor(
   @CheckResult
   private fun compileLockedTupleList(
     packageNames: List<String>,
-    entries: List<PadLockEntryModel.AllEntriesModel>
+    entries: List<AllEntriesModel>
   ): List<LockTuple> {
-    val copyEntries = ArrayList<PadLockEntryModel.AllEntriesModel>(entries)
+    val copyEntries = ArrayList<AllEntriesModel>(entries)
     copyEntries.sortWith(
         Comparator { o1, o2 ->
           return@Comparator o1.packageName()
               .compareTo(o2.packageName(), ignoreCase = true)
         })
-    val removeEntries = LinkedHashSet<PadLockEntryModel.AllEntriesModel>()
+    val removeEntries = LinkedHashSet<AllEntriesModel>()
     return packageNames.map { createNewLockTuple(it, copyEntries, removeEntries) }
   }
 
@@ -213,7 +213,7 @@ internal class LockListInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getAllEntries(): Observable<List<PadLockEntryModel.AllEntriesModel>> =
+  private fun getAllEntries(): Observable<List<AllEntriesModel>> =
     queryDb.queryAll()
 
   override fun hasShownOnBoarding(): Single<Boolean> =

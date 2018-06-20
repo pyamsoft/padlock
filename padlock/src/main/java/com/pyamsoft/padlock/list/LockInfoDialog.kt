@@ -68,7 +68,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   private lateinit var filterListDelegate: FilterListDelegate
   private lateinit var refreshLatch: RefreshLatch
   private var appIsSystem: Boolean = false
-  private var dividerDecoration: DividerItemDecoration? = null
   private var lastPosition: Int = 0
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -202,9 +201,9 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             initialPrefetchItemCount = 3
           }
       lockInfoRecycler.setHasFixedSize(true)
-      dividerDecoration = DividerItemDecoration(activity, DividerItemDecoration.VERTICAL).also {
-        lockInfoRecycler.addItemDecoration(it)
-      }
+      lockInfoRecycler.addItemDecoration(
+          DividerItemDecoration(activity, DividerItemDecoration.VERTICAL)
+      )
       lockInfoRecycler.adapter = FastAdapter.with<
           LockInfoBaseItem<*, *, *>,
           ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
@@ -220,8 +219,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     super.onDestroyView()
     filterListDelegate.onDestroyView()
     binding.apply {
-      dividerDecoration?.also { lockInfoRecycler.removeItemDecoration(it) }
-      dividerDecoration = null
       lockInfoRecycler.setOnDebouncedClickListener(null)
       lockInfoRecycler.layoutManager = null
       lockInfoRecycler.adapter = null
@@ -259,22 +256,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
           WindowManager.LayoutParams.WRAP_CONTENT
       )
       setGravity(Gravity.CENTER)
-    }
-  }
-
-  private fun modifyList(
-    id: String,
-    state: LockState
-  ) {
-    for (i in adapter.adapterItems.indices) {
-      val item: LockInfoBaseItem<*, *, *> = adapter.getAdapterItem(i)
-      val entry: ActivityEntry = item.getModel()
-      if (entry is ActivityEntry.Item) {
-        if (id == entry.id) {
-          adapter.set(i, ActivityEntry.Item(entry.name, entry.packageName, state))
-          break
-        }
-      }
     }
   }
 

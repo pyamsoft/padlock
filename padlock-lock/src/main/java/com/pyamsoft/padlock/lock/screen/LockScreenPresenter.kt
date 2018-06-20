@@ -19,8 +19,8 @@ package com.pyamsoft.padlock.lock.screen
 import androidx.lifecycle.Lifecycle.Event.ON_PAUSE
 import com.pyamsoft.padlock.api.LockScreenInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber

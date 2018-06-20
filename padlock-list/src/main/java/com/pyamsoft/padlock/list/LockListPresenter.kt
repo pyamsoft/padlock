@@ -26,12 +26,12 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
-import com.pyamsoft.padlock.model.PadLockEntry
-import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.cache.Cache
+import com.pyamsoft.padlock.model.db.PadLockDbModels
+import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.cache.Cache
+import com.pyamsoft.pydroid.core.presenter.Presenter
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
-import com.pyamsoft.pydroid.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -142,7 +142,7 @@ class LockListPresenter @Inject internal constructor(
 
       lockListInteractor.modifyEntry(
           oldState, newState, packageName,
-          PadLockEntry.PACKAGE_ACTIVITY_NAME, code, system
+          PadLockDbModels.PACKAGE_ACTIVITY_NAME, code, system
       )
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())

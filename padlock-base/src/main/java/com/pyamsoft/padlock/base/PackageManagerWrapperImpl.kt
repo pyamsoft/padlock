@@ -31,8 +31,8 @@ import com.pyamsoft.padlock.api.PackageLabelManager
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.IconHolder
-import com.pyamsoft.pydroid.optional.Optional.Present
-import com.pyamsoft.pydroid.optional.asOptional
+import com.pyamsoft.pydroid.core.optional.Optional.Present
+import com.pyamsoft.pydroid.core.optional.asOptional
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.exceptions.Exceptions

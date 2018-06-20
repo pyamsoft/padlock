@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
-import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.EventBus
 import javax.inject.Inject
 
 class LockListItemPublisher @Inject internal constructor(private val bus: EventBus<LockListEvent>) {

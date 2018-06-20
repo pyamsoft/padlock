@@ -14,15 +14,31 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.model.db
 
-import com.pyamsoft.padlock.model.RecheckEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
-import javax.inject.Inject
+import androidx.annotation.CheckResult
 
-class RecheckPublisher @Inject internal constructor(private val bus: EventBus<RecheckEvent>) {
+interface PadLockEntryModel {
 
-  fun publish(event: RecheckEvent) {
-    bus.publish(event)
-  }
+  @CheckResult
+  fun packageName(): String
+
+  @CheckResult
+  fun activityName(): String
+
+  @CheckResult
+  fun lockCode(): String?
+
+  @CheckResult
+  fun whitelist(): Boolean
+
+  @CheckResult
+  fun systemApplication(): Boolean
+
+  @CheckResult
+  fun ignoreUntilTime(): Long
+
+  @CheckResult
+  fun lockUntilTime(): Long
+
 }

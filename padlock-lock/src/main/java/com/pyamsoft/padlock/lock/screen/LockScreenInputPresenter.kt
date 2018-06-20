@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.lock.screen
 import com.pyamsoft.padlock.api.LockScreenInteractor
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
-import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber

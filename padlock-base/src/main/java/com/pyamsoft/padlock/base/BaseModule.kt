@@ -29,21 +29,16 @@ import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PackageIconManager
 import com.pyamsoft.padlock.api.PackageLabelManager
-import com.pyamsoft.padlock.api.PadLockDBDelete
-import com.pyamsoft.padlock.api.PadLockDBInsert
-import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.api.PadLockDBUpdate
-import com.pyamsoft.padlock.base.db.PadLockDBImpl
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
-import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.cache.Cache
+import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.loader.cache.ImageCache
 import dagger.Binds
 import dagger.Module
 import javax.inject.Named
 
 @Module
-abstract class PadLockModule {
+abstract class BaseModule {
 
   @Binds
   internal abstract fun provideLockWhitelisted(
@@ -109,18 +104,6 @@ abstract class PadLockModule {
   internal abstract fun provideJobSchedulerCompat(
     impl: JobSchedulerCompatImpl
   ): JobSchedulerCompat
-
-  @Binds
-  internal abstract fun providePadLockInsert(impl: PadLockDBImpl): PadLockDBInsert
-
-  @Binds
-  internal abstract fun providePadLockQuery(impl: PadLockDBImpl): PadLockDBQuery
-
-  @Binds
-  internal abstract fun providePadLockUpdate(impl: PadLockDBImpl): PadLockDBUpdate
-
-  @Binds
-  internal abstract fun providePadLockDelete(impl: PadLockDBImpl): PadLockDBDelete
 
   @JvmSuppressWildcards
   @Binds

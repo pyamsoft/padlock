@@ -16,30 +16,80 @@
 
 package com.pyamsoft.padlock.model
 
-import androidx.annotation.CheckResult
-import com.google.auto.value.AutoValue
+import com.pyamsoft.padlock.model.db.AllEntriesModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.model.db.WithPackageNameModel
 
-@AutoValue
-abstract class PadLockEntry : PadLockEntryModel {
+internal data class PadLockEntry internal constructor(
+  private val packageName: String,
+  private val activityName: String,
+  private val lockCode: String?,
+  private val whitelist: Boolean,
+  private val systemApplication: Boolean,
+  private val ignoreUntilTime: Long,
+  private val lockUntilTime: Long
+) : PadLockEntryModel {
 
-  companion object {
+  override fun packageName(): String {
+    return packageName
+  }
 
-    /**
-     * The activity name of the PACKAGE entry in the database
-     */
-    const val PACKAGE_ACTIVITY_NAME = "PACKAGE"
-    const val PACKAGE_EMPTY = "EMPTY"
-    const val ACTIVITY_EMPTY = "EMPTY"
+  override fun activityName(): String {
+    return activityName
+  }
 
-    @JvmStatic
-    @CheckResult
-    fun isEmpty(entry: PadLockEntryModel): Boolean = (PACKAGE_EMPTY == entry.packageName()
-        && ACTIVITY_EMPTY == entry.activityName())
+  override fun lockCode(): String? {
+    return lockCode
+  }
 
-    @JvmField
-    val EMPTY: PadLockEntryModel =
-      AutoValue_PadLockEntry(PACKAGE_EMPTY, ACTIVITY_EMPTY, null, 0, 0, false, false)
+  override fun whitelist(): Boolean {
+    return whitelist
+  }
+
+  override fun systemApplication(): Boolean {
+    return systemApplication
+  }
+
+  override fun ignoreUntilTime(): Long {
+    return ignoreUntilTime
+  }
+
+  override fun lockUntilTime(): Long {
+    return lockUntilTime
+  }
+
+  data class AllEntries internal constructor(
+    private val packageName: String,
+    private val activityName: String,
+    private val whitelist: Boolean
+  ) : AllEntriesModel {
+
+    override fun packageName(): String {
+      return packageName
+    }
+
+    override fun activityName(): String {
+      return activityName
+    }
+
+    override fun whitelist(): Boolean {
+      return whitelist
+    }
+
+  }
+
+  data class A internal constructor(
+    private val activityName: String,
+    private val whitelist: Boolean
+  ) : WithPackageNameModel {
+
+    override fun activityName(): String {
+      return activityName
+    }
+
+    override fun whitelist(): Boolean {
+      return whitelist
+    }
 
   }
 }

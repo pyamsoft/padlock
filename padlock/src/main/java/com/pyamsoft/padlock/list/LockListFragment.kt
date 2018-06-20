@@ -66,7 +66,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   private lateinit var binding: FragmentLockListBinding
   private lateinit var filterListDelegate: FilterListDelegate
   private lateinit var refreshLatch: RefreshLatch
-  private var dividerDecoration: DividerItemDecoration? = null
   private var lastPosition: Int = 0
   private var displaySystemItem: MenuItem? = null
 
@@ -215,7 +214,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   private fun setupRecyclerView() {
-    dividerDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
     binding.applistRecyclerview.layoutManager = LinearLayoutManager(
         context
     )
@@ -226,7 +224,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
     binding.apply {
       applistRecyclerview.setHasFixedSize(true)
-      applistRecyclerview.addItemDecoration(dividerDecoration)
+      applistRecyclerview.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
       applistRecyclerview.adapter =
           FastAdapter.with<LockListItem, ModelAdapter<AppEntry, LockListItem>>(
               adapter
@@ -255,7 +253,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     super.onDestroyView()
     filterListDelegate.onDestroyView()
     binding.apply {
-      applistRecyclerview.removeItemDecoration(dividerDecoration)
       applistRecyclerview.setOnDebouncedClickListener(null)
       applistRecyclerview.layoutManager = null
       applistRecyclerview.adapter = null

@@ -35,6 +35,13 @@ android {
     vectorDrawables.useSupportLibrary = true
 
     resConfigs "en"
+
+    javaCompileOptions {
+      annotationProcessorOptions {
+        // Fix kapt
+        includeCompileClasspath = true
+      }
+    }
   }
 
   packagingOptions {
@@ -86,6 +93,10 @@ dependencies {
   // Databinding
   kapt "androidx.databinding:databinding-compiler:$plugin_version"
 
+  // SQL
+  implementation "androidx.sqlite:sqlite:$sqlite"
+  implementation "androidx.sqlite:sqlite-framework:$sqlite"
+
   implementation "com.mikepenz:fastadapter:$fastAdapter@aar"
   implementation "com.mikepenz:fastadapter-commons:$fastAdapter@aar"
 
@@ -101,7 +112,7 @@ dependencies {
   implementation "com.andrognito.patternlockview:patternlockview:$patternLock"
 
   // PYDroid
-  implementation "com.github.pyamsoft.pydroid:pydroid-ui:$pydroid"
+  implementation "com.github.pyamsoft.pydroid:ui:$pydroid"
 
   implementation project(":padlock-base")
   implementation project(":padlock-list")

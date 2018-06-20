@@ -18,14 +18,14 @@ package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.api.LockServiceInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.padlock.model.PadLockEntry
 import com.pyamsoft.padlock.model.RecheckEvent
 import com.pyamsoft.padlock.model.RecheckStatus
 import com.pyamsoft.padlock.model.RecheckStatus.NOT_FORCE
 import com.pyamsoft.padlock.model.ServiceFinishEvent
+import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.disposables.Disposables
@@ -135,7 +135,7 @@ class LockServicePresenter @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe({
-          if (PadLockEntry.isEmpty(it)) {
+          if (PadLockDbModels.isEmpty(it)) {
             Timber.w("PadLockEntry is EMPTY, ignore")
           } else {
             view?.onStartLockScreen(it, className)

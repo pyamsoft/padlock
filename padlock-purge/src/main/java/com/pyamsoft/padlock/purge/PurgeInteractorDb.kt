@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PadLockDBDelete
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PurgeInteractor
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.model.db.AllEntriesModel
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Completable
@@ -89,7 +89,7 @@ internal class PurgeInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getAllEntries(): Observable<List<PadLockEntryModel.AllEntriesModel>> =
+  private fun getAllEntries(): Observable<List<AllEntriesModel>> =
     queryDb.queryAll()
 
   @CheckResult
@@ -101,7 +101,7 @@ internal class PurgeInteractorDb @Inject internal constructor(
 
   @CheckResult
   private fun c(
-    allEntries: List<PadLockEntryModel.AllEntriesModel>,
+    allEntries: List<AllEntriesModel>,
     packageNames: List<String>
   ): List<String> {
     if (allEntries.isEmpty()) {
@@ -111,7 +111,7 @@ internal class PurgeInteractorDb @Inject internal constructor(
 
     // Loop through all the package names that we are aware of on the device
     val mutableAllEntries = allEntries.toMutableList()
-    val foundLocations = LinkedHashSet<PadLockEntryModel.AllEntriesModel>()
+    val foundLocations = LinkedHashSet<AllEntriesModel>()
     for (packageName in packageNames) {
       foundLocations.clear()
 

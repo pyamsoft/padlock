@@ -23,8 +23,8 @@ import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.model.ConfirmEvent.ALL
 import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
 import com.pyamsoft.padlock.model.ServiceFinishEvent
-import com.pyamsoft.pydroid.bus.EventBus
-import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber

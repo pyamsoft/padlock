@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.onboard.firstlaunch
 
-import com.pyamsoft.pydroid.presenter.Presenter
+import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber

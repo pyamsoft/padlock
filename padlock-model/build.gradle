@@ -45,16 +45,12 @@ android {
 }
 
 dependencies {
-  // Auto value
-  compileOnly "com.google.auto.value:auto-value-annotations:$autoValue"
-  kapt "com.google.auto.value:auto-value:$autoValue"
-
   // SqlDelight
   implementation "com.squareup.sqldelight:runtime-common:$sqldelight"
   implementation "com.squareup.sqldelight:android-driver:$sqldelight"
   implementation "com.squareup.sqldelight:rxjava2-extensions:$sqldelight"
 
-  api "com.github.pyamsoft.pydroid:pydroid:$pydroid"
+  api "com.github.pyamsoft.pydroid:core:$pydroid"
 
   api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

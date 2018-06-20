@@ -20,8 +20,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.fragment.app.FragmentActivity
-import androidx.recyclerview.widget.RecyclerView
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
@@ -36,7 +36,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockListItem internal constructor(
-  internal var activity: androidx.fragment.app.FragmentActivity,
+  internal var activity: FragmentActivity,
   entry: AppEntry
 ) : ModelAbstractItem<AppEntry, LockListItem, LockListItem.ViewHolder>(entry),
     FilterableItem<LockListItem, LockListItem.ViewHolder> {
@@ -100,7 +100,7 @@ class LockListItem internal constructor(
     }
   }
 
-  class ViewHolder internal constructor(itemView: View) : ViewHolder(itemView),
+  class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView),
       LifecycleOwner {
 
     internal val binding: AdapterItemLocklistBinding = AdapterItemLocklistBinding.bind(itemView)

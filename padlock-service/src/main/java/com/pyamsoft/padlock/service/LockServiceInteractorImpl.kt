@@ -29,13 +29,13 @@ import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.padlock.model.PadLockEntry
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.RecheckStatus
 import com.pyamsoft.padlock.model.RecheckStatus.FORCE
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.pydroid.optional.Optional
-import com.pyamsoft.pydroid.optional.Optional.Present
-import com.pyamsoft.pydroid.optional.asOptional
+import com.pyamsoft.padlock.model.db.PadLockDbModels
+import com.pyamsoft.pydroid.core.optional.Optional
+import com.pyamsoft.pydroid.core.optional.Optional.Present
+import com.pyamsoft.pydroid.core.optional.asOptional
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.MaybeTransformer
@@ -132,7 +132,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
       // either it is equal to the passed name or the passed name is PACKAGE
       // which will respond to any class name
       return@fromCallable (activePackageName == packageName)
-          && (activeClassName == className || className == PadLockEntry.PACKAGE_ACTIVITY_NAME)
+          && (activeClassName == className || className == PadLockDbModels.PACKAGE_ACTIVITY_NAME)
     }
   }
 
@@ -156,7 +156,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
             packageName,
             activityName
         )
-            .filter { !PadLockEntry.isEmpty(it) }
+            .filter { !PadLockDbModels.isEmpty(it) }
       }
     }
   }
@@ -172,7 +172,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
         return@filter currentTime >= ignoreUntilTime
       }
           .filter {
-            if (PadLockEntry.PACKAGE_ACTIVITY_NAME == it.activityName() && it.whitelist()) {
+            if (PadLockDbModels.PACKAGE_ACTIVITY_NAME == it.activityName() && it.whitelist()) {
               throw RuntimeException(
                   "PACKAGE entry for package: ${it.packageName()} cannot be whitelisted"
               )
@@ -193,7 +193,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
       it.filter { it }
           .compose(prepareLockScreen(packageName, activityName))
           .compose(filterOutInvalidEntries())
-          .toSingle(PadLockEntry.EMPTY)
+          .toSingle(PadLockDbModels.EMPTY)
     }
   }
 
@@ -292,7 +292,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     }
         .compose(getEntry(packageName, className))
         .doOnSuccess {
-          if (!PadLockEntry.isEmpty(it)) {
+          if (!PadLockDbModels.isEmpty(it)) {
             lockPassed.remove(it.packageName(), it.activityName())
           }
         }

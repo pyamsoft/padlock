@@ -19,7 +19,7 @@ package com.pyamsoft.padlock
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.InstallListenerPreferences
-import com.pyamsoft.padlock.base.PadLockModule
+import com.pyamsoft.padlock.base.BaseModule
 import com.pyamsoft.padlock.list.ListListComponent
 import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.LockInfoItem
@@ -61,7 +61,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-      PadLockProvider::class, PadLockModule::class, LockModule::class, PinModule::class,
+      PadLockModule::class, PadLockProvider::class, BaseModule::class, LockModule::class, PinModule::class,
       ServiceModule::class, PurgeSingletonModule::class, PurgeSingletonProvider::class,
       MainModule::class, SettingsModule::class, LockInfoSingletonModule::class,
       LockInfoSingletonProvider::class, LockStateModule::class, LockListSingletonModule::class,

@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.padlock.model.ActivityEntry
-import com.pyamsoft.pydroid.cache.RepositoryMap
-import com.pyamsoft.pydroid.cache.repositoryMap
+import com.pyamsoft.pydroid.core.cache.RepositoryMap
+import com.pyamsoft.pydroid.core.cache.repositoryMap
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named

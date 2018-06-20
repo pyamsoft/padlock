@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.padlock.model.ConfirmEvent
-import com.pyamsoft.pydroid.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.EventBus
 import javax.inject.Inject
 
 class SettingsPublisher @Inject internal constructor(private val bus: EventBus<ConfirmEvent>) {
