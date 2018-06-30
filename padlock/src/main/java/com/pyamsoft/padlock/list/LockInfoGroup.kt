@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoGroupBinding
-import com.pyamsoft.padlock.model.ActivityEntry
+import com.pyamsoft.padlock.model.list.ActivityEntry
 
 class LockInfoGroup internal constructor(
   entry: ActivityEntry.Group

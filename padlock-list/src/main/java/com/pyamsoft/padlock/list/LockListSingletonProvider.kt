@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
-import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.core.cache.Repository
 import com.pyamsoft.pydroid.core.cache.repository
 import dagger.Module

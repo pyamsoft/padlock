@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.model.ClearPinEvent
+import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.RxBus
 import io.reactivex.Observable

@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.purge
 
 import androidx.core.util.lruCache
 import com.pyamsoft.padlock.api.PurgeInteractor
-import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult

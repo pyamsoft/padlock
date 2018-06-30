@@ -23,7 +23,7 @@ import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.OnboardingPreferences
 import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.model.ActivityEntry
+import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
 import com.pyamsoft.pydroid.list.ListDiffResult

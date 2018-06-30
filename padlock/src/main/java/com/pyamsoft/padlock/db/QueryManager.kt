@@ -17,12 +17,9 @@
 package com.pyamsoft.padlock.db
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.db.AllEntriesImpl
 import com.pyamsoft.padlock.model.db.AllEntriesModel
-import com.pyamsoft.padlock.model.db.PadLockDbEntryImpl
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.db.WithPackageNameImpl
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
 import com.squareup.sqldelight.runtime.rx.asObservable
 import com.squareup.sqldelight.runtime.rx.mapToList

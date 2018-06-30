@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.list.info
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.ActivityEntry
+import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 
 data class LockInfoEvent internal constructor(

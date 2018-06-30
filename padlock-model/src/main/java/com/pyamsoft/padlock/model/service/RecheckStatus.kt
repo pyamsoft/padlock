@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.model.service
 
-data class AppEntry(
-  val name: String,
-  val packageName: String,
-  val system: Boolean,
-  val locked: Boolean,
-  val whitelisted: Int,
-  val hardLocked: Int
-)
+enum class RecheckStatus {
+  FORCE,
+  NOT_FORCE
+}

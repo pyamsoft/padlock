@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.PinEntryEvent
+import com.pyamsoft.padlock.model.pin.PinEntryEvent
 import io.reactivex.Single
 
 interface PinEntryInteractor {

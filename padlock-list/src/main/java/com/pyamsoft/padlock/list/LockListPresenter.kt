@@ -19,9 +19,9 @@ package com.pyamsoft.padlock.list
 import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
-import com.pyamsoft.padlock.model.AppEntry
-import com.pyamsoft.padlock.model.ClearPinEvent
-import com.pyamsoft.padlock.model.CreatePinEvent
+import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.padlock.model.pin.ClearPinEvent
+import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED

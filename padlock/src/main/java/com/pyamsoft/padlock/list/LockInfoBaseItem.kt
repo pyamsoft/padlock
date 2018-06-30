@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.list
 
 import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.items.ModelAbstractItem
-import com.pyamsoft.padlock.model.ActivityEntry
+import com.pyamsoft.padlock.model.list.ActivityEntry
 
 abstract class LockInfoBaseItem<
     M : ActivityEntry,

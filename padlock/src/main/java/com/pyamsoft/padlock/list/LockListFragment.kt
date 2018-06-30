@@ -35,7 +35,7 @@ import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.NeverNotifyItemList
-import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.padlock.uicommon.CanaryFragment

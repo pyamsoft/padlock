@@ -20,7 +20,7 @@ import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockHelper
 import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.PinEntryInteractor
-import com.pyamsoft.padlock.model.PinEntryEvent
+import com.pyamsoft.padlock.model.pin.PinEntryEvent
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import io.reactivex.Single

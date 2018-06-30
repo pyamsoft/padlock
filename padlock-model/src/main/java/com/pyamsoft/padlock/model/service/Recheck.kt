@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.model.service
 
-data class CreatePinEvent(val success: Boolean)
+object Recheck {
+
+  const val EXTRA_PACKAGE_NAME = "extra_package_name"
+  const val EXTRA_CLASS_NAME = "extra_class_name"
+}

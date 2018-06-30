@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.model.service
 
-enum class RecheckStatus {
-  FORCE,
-  NOT_FORCE
-}
+object ServiceFinishEvent

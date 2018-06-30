@@ -22,7 +22,7 @@ import androidx.annotation.CheckResult
 import androidx.appcompat.app.AlertDialog
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.padlock.model.PurgeEvent
+import com.pyamsoft.padlock.model.purge.PurgeEvent
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import javax.inject.Inject
 

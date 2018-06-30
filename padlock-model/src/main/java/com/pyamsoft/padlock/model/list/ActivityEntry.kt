@@ -14,24 +14,35 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.list.info
+package com.pyamsoft.padlock.model.list
 
-import com.pyamsoft.padlock.model.list.ActivityEntry
-import com.pyamsoft.pydroid.core.cache.RepositoryMap
-import com.pyamsoft.pydroid.core.cache.repositoryMap
-import dagger.Module
-import dagger.Provides
-import javax.inject.Named
+import com.pyamsoft.padlock.model.LockState
 
-@JvmSuppressWildcards
-@Module
-object LockInfoSingletonProvider {
+sealed class ActivityEntry(name: String) {
 
-  private val repo = repositoryMap<String, List<ActivityEntry>>()
+  val group: String
 
-  @JvmStatic
-  @Provides
-  @Named("repo_lock_info")
-  internal fun provideRepo(): RepositoryMap<String, List<ActivityEntry>> = repo
+  init {
+    val lastIndex = name.lastIndexOf('.')
+    group = name.substring(0 until lastIndex)
+  }
+
+  data class Group(val name: String) : ActivityEntry(name)
+
+  data class Item(
+    val name: String,
+    val packageName: String,
+    val lockState: LockState
+  ) : ActivityEntry(name) {
+
+    val id: String = "$packageName|$name"
+    val activity: String
+
+    init {
+      val lastIndex = name.lastIndexOf('.')
+      activity = name.substring(lastIndex + 1)
+    }
+  }
 
 }
+

@@ -20,8 +20,8 @@ import com.pyamsoft.padlock.api.DeviceLockStateProvider
 import com.pyamsoft.padlock.api.LockServiceInteractor
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
 import com.pyamsoft.padlock.api.UsageEventProvider
-import com.pyamsoft.padlock.model.RecheckEvent
-import com.pyamsoft.padlock.model.ServiceFinishEvent
+import com.pyamsoft.padlock.model.service.RecheckEvent
+import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.padlock.service.device.DeviceLockStateProviderImpl
 import com.pyamsoft.padlock.service.device.UsageEventProviderImpl
 import com.pyamsoft.pydroid.core.bus.EventBus

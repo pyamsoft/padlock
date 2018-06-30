@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model.db
+package com.pyamsoft.padlock.db
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 
 data class PadLockDbEntryImpl internal constructor(
   private val packageName: String,

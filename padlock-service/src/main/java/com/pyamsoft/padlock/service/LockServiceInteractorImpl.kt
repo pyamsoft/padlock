@@ -30,8 +30,8 @@ import com.pyamsoft.padlock.api.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.RecheckStatus
-import com.pyamsoft.padlock.model.RecheckStatus.FORCE
+import com.pyamsoft.padlock.model.service.RecheckStatus
+import com.pyamsoft.padlock.model.service.RecheckStatus.FORCE
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present

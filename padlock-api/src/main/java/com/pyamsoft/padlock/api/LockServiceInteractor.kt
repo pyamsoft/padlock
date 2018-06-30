@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.padlock.model.RecheckStatus
+import com.pyamsoft.padlock.model.service.RecheckStatus
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import io.reactivex.Flowable
 import io.reactivex.Single

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.model.list
 
-data class ClearPinEvent(val success: Boolean)
+data class AppEntry(
+  val name: String,
+  val packageName: String,
+  val system: Boolean,
+  val locked: Boolean,
+  val whitelisted: Int,
+  val hardLocked: Int
+)

@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.list.info
 
-import com.pyamsoft.padlock.model.ActivityEntry
+import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.core.bus.EventBus
 import javax.inject.Inject

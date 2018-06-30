@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.model.pin
 
-data class RecheckEvent(
-  val packageName: String,
-  val className: String
-)
+sealed class PinEntryEvent {
+
+  data class Create(val complete: Boolean) : PinEntryEvent()
+
+  data class Clear(val complete: Boolean) : PinEntryEvent()
+}

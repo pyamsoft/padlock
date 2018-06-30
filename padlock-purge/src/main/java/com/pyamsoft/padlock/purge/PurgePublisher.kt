@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.padlock.model.PurgeAllEvent
-import com.pyamsoft.padlock.model.PurgeEvent
+import com.pyamsoft.padlock.model.purge.PurgeAllEvent
+import com.pyamsoft.padlock.model.purge.PurgeEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import javax.inject.Inject
 import javax.inject.Singleton

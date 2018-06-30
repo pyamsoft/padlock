@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.model.pin
 
-object PurgeAllEvent
+data class CreatePinEvent(val success: Boolean)

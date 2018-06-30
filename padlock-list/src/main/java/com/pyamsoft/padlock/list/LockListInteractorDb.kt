@@ -26,7 +26,7 @@ import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PackageLabelManager
 import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.db.AllEntriesModel

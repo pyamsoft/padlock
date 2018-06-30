@@ -17,9 +17,35 @@ object PadLockDbModels {
       && ACTIVITY_EMPTY == entry.activityName())
 
   @JvmField
-  val EMPTY: PadLockEntryModel =
-    PadLockDbEntryImpl(
-        PACKAGE_EMPTY, ACTIVITY_EMPTY, null, false, false, 0, 0
-    )
+  val EMPTY: PadLockEntryModel = object : PadLockEntryModel {
+    override fun packageName(): String {
+      return PACKAGE_EMPTY
+    }
+
+    override fun activityName(): String {
+      return ACTIVITY_EMPTY
+    }
+
+    override fun lockCode(): String? {
+      return null
+    }
+
+    override fun whitelist(): Boolean {
+      return false
+    }
+
+    override fun systemApplication(): Boolean {
+      return false
+    }
+
+    override fun ignoreUntilTime(): Long {
+      return 0
+    }
+
+    override fun lockUntilTime(): Long {
+      return 0
+    }
+
+  }
 
 }

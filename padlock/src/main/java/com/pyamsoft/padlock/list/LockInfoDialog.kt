@@ -38,9 +38,8 @@ import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.NeverNotifyItemList
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
-import com.pyamsoft.padlock.model.ActivityEntry
-import com.pyamsoft.padlock.model.AppEntry
-import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.list.ActivityEntry
+import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult

@@ -18,10 +18,10 @@ package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.api.LockServiceInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.padlock.model.RecheckEvent
-import com.pyamsoft.padlock.model.RecheckStatus
-import com.pyamsoft.padlock.model.RecheckStatus.NOT_FORCE
-import com.pyamsoft.padlock.model.ServiceFinishEvent
+import com.pyamsoft.padlock.model.service.RecheckEvent
+import com.pyamsoft.padlock.model.service.RecheckStatus
+import com.pyamsoft.padlock.model.service.RecheckStatus.NOT_FORCE
+import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.core.bus.EventBus

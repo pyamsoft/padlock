@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.ActivityEntry
+import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Observable
 import io.reactivex.Single

@@ -14,33 +14,6 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.model.purge
 
-sealed class ActivityEntry(name: String) {
-
-  val group: String
-
-  init {
-    val lastIndex = name.lastIndexOf('.')
-    group = name.substring(0 until lastIndex)
-  }
-
-  data class Group(val name: String) : ActivityEntry(name)
-
-  data class Item(
-    val name: String,
-    val packageName: String,
-    val lockState: LockState
-  ) : ActivityEntry(name) {
-
-    val id: String = "$packageName|$name"
-    val activity: String
-
-    init {
-      val lastIndex = name.lastIndexOf('.')
-      activity = name.substring(lastIndex + 1)
-    }
-  }
-
-}
-
+data class PurgeEvent(val packageName: String)

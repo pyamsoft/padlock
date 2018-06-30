@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.list
 
 import androidx.core.util.lruCache
 import com.pyamsoft.padlock.api.LockListInteractor
-import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.cache.Repository

@@ -1,11 +1,17 @@
-package com.pyamsoft.padlock.model.db
+package com.pyamsoft.padlock.db
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.model.db.AllEntriesModel
 
-data class WithPackageNameImpl internal constructor(
+data class AllEntriesImpl internal constructor(
+  private val packageName: String,
   private val activityName: String,
   private val whitelist: Boolean
-) : WithPackageNameModel {
+) : AllEntriesModel {
+
+  override fun packageName(): String {
+    return packageName
+  }
 
   override fun activityName(): String {
     return activityName
@@ -20,11 +26,11 @@ data class WithPackageNameImpl internal constructor(
     @JvmStatic
     @CheckResult
     fun create(
+      packageName: String,
       activityName: String,
       whitelist: Boolean
-    ): WithPackageNameModel {
-      return WithPackageNameImpl(activityName, whitelist)
+    ): AllEntriesModel {
+      return AllEntriesImpl(packageName, activityName, whitelist)
     }
-
   }
 }

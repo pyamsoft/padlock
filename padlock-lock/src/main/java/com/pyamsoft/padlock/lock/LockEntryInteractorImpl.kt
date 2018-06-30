@@ -27,7 +27,7 @@ import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.PadLockDBInsert
 import com.pyamsoft.padlock.api.PadLockDBQuery
 import com.pyamsoft.padlock.api.PadLockDBUpdate
-import com.pyamsoft.padlock.model.Recheck
+import com.pyamsoft.padlock.model.service.Recheck
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional

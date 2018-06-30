@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.model
+package com.pyamsoft.padlock.model.purge
 
-sealed class PinEntryEvent {
-
-  data class Create(val complete: Boolean) : PinEntryEvent()
-
-  data class Clear(val complete: Boolean) : PinEntryEvent()
-}
+object PurgeAllEvent

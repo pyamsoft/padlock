@@ -30,7 +30,7 @@ import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.lifecycle.fakeBind
 import com.pyamsoft.padlock.lifecycle.fakeRelease
-import com.pyamsoft.padlock.model.AppEntry
+import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.loader.ImageLoader
 import timber.log.Timber
 import javax.inject.Inject
