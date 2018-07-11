@@ -111,7 +111,7 @@ dependencies {
   implementation "com.andrognito.patternlockview:patternlockview:$patternLock"
 
   // PYDroid
-  implementation "com.github.pyamsoft.pydroid:ui:$pydroid"
+  implementation "com.pyamsoft.pydroid:ui:$pydroid"
 
   implementation project(":padlock-base")
   implementation project(":padlock-list")

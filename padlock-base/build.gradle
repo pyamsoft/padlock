@@ -49,8 +49,8 @@ dependencies {
   kapt "com.google.dagger:dagger-compiler:$dagger"
 
   // PYDroid
-  api "com.github.pyamsoft.pydroid:bootstrap:$pydroid"
-  api "com.github.pyamsoft.pydroid:loader:$pydroid"
+  api "com.pyamsoft.pydroid:bootstrap:$pydroid"
+  api "com.pyamsoft.pydroid:loader:$pydroid"
 
   api project(":padlock-api")
 }

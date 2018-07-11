@@ -28,10 +28,6 @@ buildscript {
     jcenter()
     mavenLocal()
 
-    maven {
-      url 'https://jitpack.io'
-    }
-
     // TODO
     // add sonatype repository
     maven {
@@ -78,10 +74,6 @@ allprojects {
     google()
     jcenter()
     mavenLocal()
-
-    maven {
-      url 'https://jitpack.io'
-    }
   }
 
   tasks.withType(JavaCompile) {
