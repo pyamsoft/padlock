@@ -16,11 +16,11 @@
 
 package com.pyamsoft.padlock
 
-import com.pyamsoft.padlock.api.PadLockDBDelete
-import com.pyamsoft.padlock.api.PadLockDBInsert
-import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.api.PadLockDBUpdate
-import com.pyamsoft.padlock.db.PadLockDBImpl
+import com.pyamsoft.padlock.api.PadLockDatabaseDelete
+import com.pyamsoft.padlock.api.PadLockDatabaseInsert
+import com.pyamsoft.padlock.api.PadLockDatabaseQuery
+import com.pyamsoft.padlock.api.PadLockDatabaseUpdate
+import com.pyamsoft.padlock.db.PadLockDatabaseImpl
 import dagger.Binds
 import dagger.Module
 
@@ -28,15 +28,15 @@ import dagger.Module
 abstract class PadLockModule {
 
   @Binds
-  internal abstract fun providePadLockInsert(impl: PadLockDBImpl): PadLockDBInsert
+  internal abstract fun providePadLockInsert(impl: PadLockDatabaseImpl): PadLockDatabaseInsert
 
   @Binds
-  internal abstract fun providePadLockQuery(impl: PadLockDBImpl): PadLockDBQuery
+  internal abstract fun providePadLockQuery(impl: PadLockDatabaseImpl): PadLockDatabaseQuery
 
   @Binds
-  internal abstract fun providePadLockUpdate(impl: PadLockDBImpl): PadLockDBUpdate
+  internal abstract fun providePadLockUpdate(impl: PadLockDatabaseImpl): PadLockDatabaseUpdate
 
   @Binds
-  internal abstract fun providePadLockDelete(impl: PadLockDBImpl): PadLockDBDelete
+  internal abstract fun providePadLockDelete(impl: PadLockDatabaseImpl): PadLockDatabaseDelete
 
 }

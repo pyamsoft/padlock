@@ -17,11 +17,11 @@
 package com.pyamsoft.padlock.main
 
 import android.content.Intent
-import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import androidx.core.view.ViewCompat
-import androidx.preference.PreferenceManager
 import android.view.View
+import androidx.core.view.ViewCompat
+import androidx.databinding.DataBindingUtil
+import androidx.preference.PreferenceManager
 import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
+import com.pyamsoft.pydroid.ui.bugreport.BugreportDialog
 import com.pyamsoft.pydroid.ui.rating.ChangeLogBuilder
 import com.pyamsoft.pydroid.ui.rating.RatingActivity
 import com.pyamsoft.pydroid.ui.rating.buildChangeLog
@@ -127,6 +128,10 @@ class MainActivity : RatingActivity(), MainPresenter.View {
         onBackPressed()
       })
     }
+
+    BugreportDialog.attachToToolbar(
+        this, binding.toolbar, applicationName, currentApplicationVersion
+    )
   }
 
   override fun onDestroy() {

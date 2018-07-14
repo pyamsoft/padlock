@@ -31,7 +31,7 @@ import java.util.Collections
 
 internal class QueryManager internal constructor(
   private val queries: PadLockEntrySqlQueries,
-  private val scheduler: () -> Scheduler
+  private val scheduler: Scheduler
 ) {
 
   @CheckResult
@@ -39,14 +39,10 @@ internal class QueryManager internal constructor(
     packageName: String,
     activityName: String
   ): Single<PadLockEntryModel> {
-    return queries.withPackageActivityNameDefault(
-        packageName, PadLockDbModels.PACKAGE_ACTIVITY_NAME, activityName
-    ) { pName, aName, lockCode, lockUntilTime, ignoreUntilTime, systemApplication, whitelist ->
-      PadLockDbEntryImpl.create(
-          pName, aName, lockCode, whitelist, systemApplication, ignoreUntilTime, lockUntilTime
-      )
-    }
-        .asObservable(scheduler())
+    return queries.withPackageActivityNameDefault<PadLockEntryModel>(
+        packageName, PadLockDbModels.PACKAGE_ACTIVITY_NAME, activityName, ::PadLockEntryImpl
+    )
+        .asObservable(scheduler)
         .mapToOne()
         .first(PadLockDbModels.EMPTY)
   }
@@ -55,22 +51,91 @@ internal class QueryManager internal constructor(
   internal fun queryWithPackageName(
     packageName: String
   ): Observable<List<WithPackageNameModel>> {
-    return queries.withPackageName(packageName) { pName, whitelist ->
-      WithPackageNameImpl.create(pName, whitelist)
-    }
-        .asObservable(scheduler())
+    return queries.withPackageName<WithPackageNameModel>(packageName, ::WithPackageNameImpl)
+        .asObservable(scheduler)
         .mapToList()
         .map { Collections.unmodifiableList(it) }
   }
 
   @CheckResult
   internal fun queryAll(): Observable<List<AllEntriesModel>> {
-    return queries.allEntries { packageName, activityName, whitelist ->
-      AllEntriesImpl.create(packageName, activityName, whitelist)
-    }
-        .asObservable(scheduler())
+    return queries.allEntries<AllEntriesModel>(::AllEntriesImpl)
+        .asObservable(scheduler)
         .mapToList()
         .map { Collections.unmodifiableList(it) }
   }
+
+  internal data class PadLockEntryImpl internal constructor(
+    private val packageName: String,
+    private val activityName: String,
+    private val lockCode: String?,
+    private val lockUntilTime: Long,
+    private val ignoreUntilTime: Long,
+    private val systemApplication: Boolean,
+    private val whitelist: Boolean
+  ) : PadLockEntryModel {
+
+    override fun packageName(): String {
+      return packageName
+    }
+
+    override fun activityName(): String {
+      return activityName
+    }
+
+    override fun lockCode(): String? {
+      return lockCode
+    }
+
+    override fun lockUntilTime(): Long {
+      return lockUntilTime
+    }
+
+    override fun ignoreUntilTime(): Long {
+      return ignoreUntilTime
+    }
+
+    override fun systemApplication(): Boolean {
+      return systemApplication
+    }
+
+    override fun whitelist(): Boolean {
+      return whitelist
+    }
+  }
+
+  internal data class AllEntriesImpl internal constructor(
+    private val packageName: String,
+    private val activityName: String,
+    private val whitelist: Boolean
+  ) : AllEntriesModel {
+
+    override fun packageName(): String {
+      return packageName
+    }
+
+    override fun activityName(): String {
+      return activityName
+    }
+
+    override fun whitelist(): Boolean {
+      return whitelist
+    }
+  }
+
+  internal data class WithPackageNameImpl internal constructor(
+    private val activityName: String,
+    private val whitelist: Boolean
+  ) : WithPackageNameModel {
+
+    override fun activityName(): String {
+      return activityName
+    }
+
+    override fun whitelist(): Boolean {
+      return whitelist
+    }
+  }
 }
+
 

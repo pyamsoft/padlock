@@ -17,19 +17,31 @@
 package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
-import io.reactivex.Completable
+import com.pyamsoft.padlock.model.db.AllEntriesModel
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.model.db.WithPackageNameModel
+import io.reactivex.Observable
+import io.reactivex.Single
 
-interface PadLockDBDelete {
+interface PadLockDatabaseQuery {
 
+  /**
+   * Get either the package with specific name of the PACKAGE entry
+   *
+   * SQLite only has bindings so we must make do
+   * ?1 package name
+   * ?2 the PadLock PACKAGE_TAG, see model.db.PadLockEntryModel
+   * ?3 the specific activity name
+   */
   @CheckResult
-  fun deleteWithPackageName(packageName: String): Completable
-
-  @CheckResult
-  fun deleteWithPackageActivityName(
+  fun queryWithPackageActivityNameDefault(
     packageName: String,
     activityName: String
-  ): Completable
+  ): Single<PadLockEntryModel>
 
   @CheckResult
-  fun deleteAll(): Completable
+  fun queryWithPackageName(packageName: String): Observable<List<WithPackageNameModel>>
+
+  @CheckResult
+  fun queryAll(): Observable<List<AllEntriesModel>>
 }

@@ -18,18 +18,13 @@ package com.pyamsoft.padlock.db
 
 import android.content.Context
 import androidx.annotation.CheckResult
-import androidx.sqlite.db.SupportSQLiteOpenHelper
-import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
-import com.pyamsoft.padlock.QueryWrapper
-import com.pyamsoft.padlock.api.PadLockDBDelete
-import com.pyamsoft.padlock.api.PadLockDBInsert
-import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.api.PadLockDBUpdate
+import com.pyamsoft.padlock.api.PadLockDatabaseDelete
+import com.pyamsoft.padlock.api.PadLockDatabaseInsert
+import com.pyamsoft.padlock.api.PadLockDatabaseQuery
+import com.pyamsoft.padlock.api.PadLockDatabaseUpdate
 import com.pyamsoft.padlock.model.db.AllEntriesModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
-import com.squareup.sqldelight.android.SqlDelightDatabaseHelper
-import com.squareup.sqldelight.android.create
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -39,8 +34,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class PadLockDBImpl @Inject internal constructor(context: Context) : PadLockDBInsert,
-    PadLockDBUpdate, PadLockDBQuery, PadLockDBDelete {
+internal class PadLockDatabaseImpl @Inject internal constructor(context: Context) :
+    PadLockDatabaseInsert,
+    PadLockDatabaseUpdate,
+    PadLockDatabaseQuery,
+    PadLockDatabaseDelete {
 
   private val queryManager: QueryManager
   private val insertManager: InsertManager
@@ -48,10 +46,9 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
   private val updateManager: UpdateManager
 
   init {
-    val driver = QueryWrapper.create(context, DATABASE_NAME)
-    val database = QueryWrapper(driver)
+    val database = PadLockQueryWrapper.create(context)
     val padLockEntrySqlQueries = database.padLockEntrySqlQueries
-    queryManager = QueryManager(padLockEntrySqlQueries) { Schedulers.io() }
+    queryManager = QueryManager(padLockEntrySqlQueries, Schedulers.io())
     deleteManager = DeleteManager(padLockEntrySqlQueries)
     insertManager = InsertManager(padLockEntrySqlQueries)
     updateManager = UpdateManager(padLockEntrySqlQueries)
@@ -172,8 +169,5 @@ internal class PadLockDBImpl @Inject internal constructor(context: Context) : Pa
   }
 
   companion object {
-
-    private const val DATABASE_NAME = "com.pyamsoft.padlock.PadLockEntrySql.db"
-    private const val OLD_DATABASE_NAME = "padlock_db"
   }
 }

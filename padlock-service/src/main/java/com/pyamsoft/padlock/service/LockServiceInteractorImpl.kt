@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.api.LockScreenPreferences
 import com.pyamsoft.padlock.api.LockServiceInteractor
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
 import com.pyamsoft.padlock.api.PackageActivityManager
-import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDatabaseQuery
 import com.pyamsoft.padlock.api.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.ForegroundEvent
@@ -56,7 +56,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   private val preferences: LockScreenPreferences,
   private val jobSchedulerCompat: JobSchedulerCompat,
   private val packageActivityManager: PackageActivityManager,
-  private val padLockDBQuery: PadLockDBQuery,
+  private val padLockDatabaseQuery: PadLockDatabaseQuery,
   @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
   private val stateInteractor: LockServiceStateInteractor
 ) : LockServiceInteractor {
@@ -152,7 +152,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
             "Get list of locked classes with package: %s, class: %s", packageName,
             activityName
         )
-        return@flatMap padLockDBQuery.queryWithPackageActivityNameDefault(
+        return@flatMap padLockDatabaseQuery.queryWithPackageActivityNameDefault(
             packageName,
             activityName
         )

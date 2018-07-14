@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.api
 import androidx.annotation.CheckResult
 import io.reactivex.Completable
 
-interface PadLockDBInsert {
+interface PadLockDatabaseInsert {
 
   @CheckResult
   fun insert(

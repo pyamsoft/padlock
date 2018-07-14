@@ -22,7 +22,7 @@ import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.OnboardingPreferences
 import com.pyamsoft.padlock.api.PackageActivityManager
-import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDatabaseQuery
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
@@ -40,7 +40,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockInfoInteractorDb @Inject internal constructor(
-  private val queryDb: PadLockDBQuery,
+  private val queryDatabase: PadLockDatabaseQuery,
   private val packageActivityManager: PackageActivityManager,
   private val preferences: OnboardingPreferences,
   private val modifyInteractor: LockStateModifyInteractor
@@ -54,7 +54,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   @CheckResult
   private fun getLockedActivityEntries(
     name: String
-  ): Observable<List<WithPackageNameModel>> = queryDb.queryWithPackageName(name)
+  ): Observable<List<WithPackageNameModel>> = queryDatabase.queryWithPackageName(name)
 
   @CheckResult
   private fun getPackageActivities(name: String): Single<List<String>> =

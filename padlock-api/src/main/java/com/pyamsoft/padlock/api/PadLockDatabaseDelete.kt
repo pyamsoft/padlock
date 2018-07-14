@@ -19,26 +19,17 @@ package com.pyamsoft.padlock.api
 import androidx.annotation.CheckResult
 import io.reactivex.Completable
 
-interface PadLockDBUpdate {
+interface PadLockDatabaseDelete {
 
   @CheckResult
-  fun updateLockTime(
+  fun deleteWithPackageName(packageName: String): Completable
+
+  @CheckResult
+  fun deleteWithPackageActivityName(
     packageName: String,
-    activityName: String,
-    lockUntilTime: Long
+    activityName: String
   ): Completable
 
   @CheckResult
-  fun updateIgnoreTime(
-    packageName: String,
-    activityName: String,
-    ignoreUntilTime: Long
-  ): Completable
-
-  @CheckResult
-  fun updateWhitelist(
-    packageName: String,
-    activityName: String,
-    whitelist: Boolean
-  ): Completable
+  fun deleteAll(): Completable
 }

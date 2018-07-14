@@ -17,31 +17,28 @@
 package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.db.AllEntriesModel
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.db.WithPackageNameModel
-import io.reactivex.Observable
-import io.reactivex.Single
+import io.reactivex.Completable
 
-interface PadLockDBQuery {
+interface PadLockDatabaseUpdate {
 
-  /**
-   * Get either the package with specific name of the PACKAGE entry
-   *
-   * SQLite only has bindings so we must make do
-   * ?1 package name
-   * ?2 the PadLock PACKAGE_TAG, see model.db.PadLockEntryModel
-   * ?3 the specific activity name
-   */
   @CheckResult
-  fun queryWithPackageActivityNameDefault(
+  fun updateLockTime(
     packageName: String,
-    activityName: String
-  ): Single<PadLockEntryModel>
+    activityName: String,
+    lockUntilTime: Long
+  ): Completable
 
   @CheckResult
-  fun queryWithPackageName(packageName: String): Observable<List<WithPackageNameModel>>
+  fun updateIgnoreTime(
+    packageName: String,
+    activityName: String,
+    ignoreUntilTime: Long
+  ): Completable
 
   @CheckResult
-  fun queryAll(): Observable<List<AllEntriesModel>>
+  fun updateWhitelist(
+    packageName: String,
+    activityName: String,
+    whitelist: Boolean
+  ): Completable
 }

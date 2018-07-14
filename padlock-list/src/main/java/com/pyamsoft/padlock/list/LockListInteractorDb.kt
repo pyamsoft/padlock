@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.api.OnboardingPreferences
 import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PackageLabelManager
-import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDatabaseQuery
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.LockState
@@ -42,7 +42,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockListInteractorDb @Inject internal constructor(
-  private val queryDb: PadLockDBQuery,
+  private val queryDatabase: PadLockDatabaseQuery,
   private val applicationManager: PackageApplicationManager,
   private val labelManager: PackageLabelManager,
   private val activityManager: PackageActivityManager,
@@ -214,7 +214,7 @@ internal class LockListInteractorDb @Inject internal constructor(
 
   @CheckResult
   private fun getAllEntries(): Observable<List<AllEntriesModel>> =
-    queryDb.queryAll()
+    queryDatabase.queryAll()
 
   override fun hasShownOnBoarding(): Single<Boolean> =
     Single.fromCallable { onboardingPreferences.isListOnBoard() }

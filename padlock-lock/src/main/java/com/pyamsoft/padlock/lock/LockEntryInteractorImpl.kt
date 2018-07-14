@@ -24,9 +24,9 @@ import com.pyamsoft.padlock.api.LockHelper
 import com.pyamsoft.padlock.api.LockPassed
 import com.pyamsoft.padlock.api.LockScreenPreferences
 import com.pyamsoft.padlock.api.MasterPinInteractor
-import com.pyamsoft.padlock.api.PadLockDBInsert
-import com.pyamsoft.padlock.api.PadLockDBQuery
-import com.pyamsoft.padlock.api.PadLockDBUpdate
+import com.pyamsoft.padlock.api.PadLockDatabaseInsert
+import com.pyamsoft.padlock.api.PadLockDatabaseQuery
+import com.pyamsoft.padlock.api.PadLockDatabaseUpdate
 import com.pyamsoft.padlock.model.service.Recheck
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
@@ -47,9 +47,9 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   private val preferences: LockScreenPreferences,
   private val jobSchedulerCompat: JobSchedulerCompat,
   private val masterPinInteractor: MasterPinInteractor,
-  private val dbInsert: PadLockDBInsert,
-  private val dbUpdate: PadLockDBUpdate,
-  private val dbQuery: PadLockDBQuery,
+  private val databaseInsert: PadLockDatabaseInsert,
+  private val dbUpdate: PadLockDatabaseUpdate,
+  private val databaseQuery: PadLockDatabaseQuery,
   @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>
 ) : LockEntryInteractor {
 
@@ -61,7 +61,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     lockCode: String?,
     currentAttempt: String
   ): Single<Boolean> {
-    return dbQuery.queryWithPackageActivityNameDefault(packageName, activityName)
+    return databaseQuery.queryWithPackageActivityNameDefault(packageName, activityName)
         .flatMap {
           val lockUntilTime = it.lockUntilTime()
           return@flatMap masterPinInteractor.getMasterPin()
@@ -99,7 +99,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     isSystem: Boolean
   ): Completable {
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName)
-    return dbInsert.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
+    return databaseInsert.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
   }
 
   @CheckResult

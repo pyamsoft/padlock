@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.settings
 import com.pyamsoft.padlock.api.ClearPreferences
 import com.pyamsoft.padlock.api.InstallListenerPreferences
 import com.pyamsoft.padlock.api.MasterPinPreferences
-import com.pyamsoft.padlock.api.PadLockDBDelete
+import com.pyamsoft.padlock.api.PadLockDatabaseDelete
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.optional.Optional.Present
@@ -33,7 +33,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class SettingsInteractorImpl @Inject internal constructor(
-  private val deleteDb: PadLockDBDelete,
+  private val deleteDatabase: PadLockDatabaseDelete,
   private val masterPinPreference: MasterPinPreferences,
   private val preferences: ClearPreferences,
   private val installListenerPreferences: InstallListenerPreferences,
@@ -51,7 +51,7 @@ internal class SettingsInteractorImpl @Inject internal constructor(
 
   override fun clearDatabase(): Single<Boolean> {
     Timber.d("clear database")
-    return deleteDb.deleteAll()
+    return deleteDatabase.deleteAll()
         .andThen(Completable.fromAction {
           lockListInteractor.clearCache()
           lockInfoInteractor.clearCache()

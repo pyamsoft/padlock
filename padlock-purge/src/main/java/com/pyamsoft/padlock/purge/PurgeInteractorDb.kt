@@ -19,8 +19,8 @@ package com.pyamsoft.padlock.purge
 import androidx.annotation.CheckResult
 import androidx.recyclerview.widget.DiffUtil
 import com.pyamsoft.padlock.api.PackageApplicationManager
-import com.pyamsoft.padlock.api.PadLockDBDelete
-import com.pyamsoft.padlock.api.PadLockDBQuery
+import com.pyamsoft.padlock.api.PadLockDatabaseDelete
+import com.pyamsoft.padlock.api.PadLockDatabaseQuery
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.db.AllEntriesModel
 import com.pyamsoft.pydroid.list.ListDiffResult
@@ -35,8 +35,8 @@ import javax.inject.Singleton
 @Singleton
 internal class PurgeInteractorDb @Inject internal constructor(
   private val applicationManager: PackageApplicationManager,
-  private val deleteDb: PadLockDBDelete,
-  private val queryDb: PadLockDBQuery
+  private val deleteDatabase: PadLockDatabaseDelete,
+  private val queryDatabase: PadLockDatabaseQuery
 ) : PurgeInteractor {
 
   override fun fetchStalePackageNames(bypass: Boolean): Observable<List<String>> {
@@ -90,7 +90,7 @@ internal class PurgeInteractorDb @Inject internal constructor(
 
   @CheckResult
   private fun getAllEntries(): Observable<List<AllEntriesModel>> =
-    queryDb.queryAll()
+    queryDatabase.queryAll()
 
   @CheckResult
   private fun getActiveApplications(): Single<List<String>> =
@@ -132,7 +132,7 @@ internal class PurgeInteractorDb @Inject internal constructor(
   }
 
   override fun deleteEntry(packageName: String): Completable =
-    deleteDb.deleteWithPackageName(packageName)
+    deleteDatabase.deleteWithPackageName(packageName)
 
   override fun deleteEntries(packageNames: List<String>): Completable {
     return Observable.defer { Observable.fromIterable(packageNames) }
