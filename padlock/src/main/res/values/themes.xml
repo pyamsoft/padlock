@@ -18,13 +18,17 @@
 
 <resources>
 
-  <style name="Base.Theme.PadLock.Light" parent="@style/Theme.AppCompat.Light.NoActionBar">
+  <style name="Base.Theme.PadLock.Light" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/blue500</item>
     <item name="android:navigationBarColor">@color/blue700</item>
     <item name="dialogTheme">@style/Theme.PadLock.Dialog</item>
     <item name="alertDialogTheme">@style/Theme.PadLock.Dialog</item>
+
+    <item name="colorSecondary">?attr/colorPrimary</item>
+    <item name="scrimBackground">@color/shadow_scrim45</item>
+    <item name="snackbarButtonStyle">?attr/borderlessButtonStyle</item>
   </style>
 
   <style name="Theme.PadLock.Dialog" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
