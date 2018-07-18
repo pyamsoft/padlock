@@ -20,7 +20,7 @@ buildscript {
 
   ext {
     kotlin_version = '1.2.51'
-    plugin_version = '3.2.0-beta03'
+    plugin_version = '3.2.0-beta04'
   }
 
   repositories {
@@ -40,7 +40,7 @@ buildscript {
     minSdk = 22
     maxSdk = 28
 
-    pydroid = "18.0.0"
+    pydroid = "18.0.1-SNAPSHOT"
     leakCanary = "1.5.4"
     sqldelight = "1.0.0-alpha4"
     dagger = "2.16"
@@ -52,10 +52,10 @@ buildscript {
     classpath "com.android.tools.build:gradle:$plugin_version"
 
     // Dex count
-    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.2'
+    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3'
 
     // Gradle version checker
-    classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
+    classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
 
     // SQLDelight
     classpath "com.squareup.sqldelight:android-gradle-plugin:$sqldelight"
