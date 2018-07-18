@@ -17,14 +17,14 @@
 package com.pyamsoft.padlock.list
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.mikepenz.fastadapter.commons.utils.FastAdapterDiffUtil
@@ -34,7 +34,6 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.NeverNotifyItemList
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
@@ -127,7 +126,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         }
       }
     }
-    adapter = ModelAdapter(NeverNotifyItemList.create()) { LockListItem(requireActivity(), it) }
+    adapter = ModelAdapter { LockListItem(requireActivity(), it) }
     filterListDelegate = FilterListDelegate()
     filterListDelegate.onViewCreated(adapter)
     setupRecyclerView()
@@ -218,13 +217,15 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         context
     )
         .apply {
-      isItemPrefetchEnabled = true
-      initialPrefetchItemCount = 3
-    }
+          isItemPrefetchEnabled = true
+          initialPrefetchItemCount = 3
+        }
 
     binding.apply {
       applistRecyclerview.setHasFixedSize(true)
-      applistRecyclerview.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+      applistRecyclerview.addItemDecoration(
+          DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
+      )
       applistRecyclerview.adapter =
           FastAdapter.with<LockListItem, ModelAdapter<AppEntry, LockListItem>>(
               adapter
@@ -365,9 +366,12 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   override fun onListLoaded(result: ListDiffResult<AppEntry>) {
     result.ifEmpty { adapter.clear() }
-    result.withValues {
-      adapter.setNewList(it.list())
-      it.dispatch { FastAdapterDiffUtil.set(adapter, it) }
+    result.withValues { payload ->
+      adapter.adapterItems.also {
+        it.clear()
+        it.addAll(adapter.intercept(payload.list()))
+      }
+      payload.dispatch { FastAdapterDiffUtil.set(adapter, it) }
     }
   }
 

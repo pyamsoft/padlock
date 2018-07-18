@@ -17,8 +17,6 @@
 package com.pyamsoft.padlock.purge
 
 import android.os.Bundle
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,7 +28,6 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.NeverNotifyItemList
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
@@ -161,9 +158,12 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
 
   override fun onRetrievedList(result: ListDiffResult<String>) {
     result.ifEmpty { adapter.clear() }
-    result.withValues {
-      adapter.setNewList(it.list())
-      it.dispatch { FastAdapterDiffUtil.set(adapter, it) }
+    result.withValues { payload ->
+      adapter.adapterItems.also {
+        it.clear()
+        it.addAll(adapter.intercept(payload.list()))
+      }
+      payload.dispatch { FastAdapterDiffUtil.set(adapter, it) }
     }
   }
 
@@ -200,13 +200,13 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
         context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
     )
 
-    adapter = ModelAdapter(NeverNotifyItemList.create()) { PurgeItem(it) }
+    adapter = ModelAdapter { PurgeItem(it) }
     binding.apply {
       purgeList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
           .apply {
-        isItemPrefetchEnabled = true
-        initialPrefetchItemCount = 3
-      }
+            isItemPrefetchEnabled = true
+            initialPrefetchItemCount = 3
+          }
       purgeList.setHasFixedSize(true)
       purgeList.addItemDecoration(decoration)
       purgeList.adapter = FastAdapter.with<PurgeItem, ModelAdapter<String, PurgeItem>>(

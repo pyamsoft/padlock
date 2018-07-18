@@ -36,7 +36,6 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.NeverNotifyItemList
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.AppEntry
@@ -129,7 +128,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       }
     }
     filterListDelegate = FilterListDelegate()
-    adapter = ModelAdapter(NeverNotifyItemList.create()) {
+    adapter = ModelAdapter {
       return@ModelAdapter when (it) {
         is ActivityEntry.Item -> LockInfoItem(it, appIsSystem)
         is ActivityEntry.Group -> LockInfoGroup(it)
@@ -275,9 +274,12 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
   override fun onListLoaded(result: ListDiffResult<ActivityEntry>) {
     result.ifEmpty { adapter.clear() }
-    result.withValues {
-      adapter.setNewList(it.list())
-      it.dispatch { FastAdapterDiffUtil.set(adapter, it) }
+    result.withValues { payload ->
+      adapter.adapterItems.also {
+        it.clear()
+        it.addAll(adapter.intercept(payload.list()))
+      }
+      payload.dispatch { FastAdapterDiffUtil.set(adapter, it) }
     }
   }
 
