@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
@@ -157,14 +158,7 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onRetrievedList(result: ListDiffResult<String>) {
-    result.ifEmpty { adapter.clear() }
-    result.withValues { payload ->
-      adapter.adapterItems.also {
-        it.clear()
-        it.addAll(adapter.intercept(payload.list()))
-      }
-      payload.dispatch { FastAdapterDiffUtil.set(adapter, it) }
-    }
+    result.dispatch(adapter)
   }
 
   override fun onRetrieveError(throwable: Throwable) {

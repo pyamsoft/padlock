@@ -27,13 +27,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
-import com.mikepenz.fastadapter.commons.utils.FastAdapterDiffUtil
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
@@ -365,14 +365,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onListLoaded(result: ListDiffResult<AppEntry>) {
-    result.ifEmpty { adapter.clear() }
-    result.withValues { payload ->
-      adapter.adapterItems.also {
-        it.clear()
-        it.addAll(adapter.intercept(payload.list()))
-      }
-      payload.dispatch { FastAdapterDiffUtil.set(adapter, it) }
-    }
+    result.dispatch(adapter)
   }
 
   private fun showRecycler() {

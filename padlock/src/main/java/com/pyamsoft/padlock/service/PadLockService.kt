@@ -20,17 +20,19 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
@@ -57,6 +59,7 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
   internal lateinit var presenter: LockServicePresenter
   private lateinit var notificationManagerCompat: NotificationManagerCompat
   private lateinit var notificationManager: NotificationManager
+  private lateinit var handler: Handler
 
   override fun onCreate() {
     super.onCreate()
@@ -65,6 +68,7 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
     presenter.bind(this, this)
     notificationManagerCompat = NotificationManagerCompat.from(this)
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    handler = Handler(Looper.getMainLooper())
     startInForeground()
     lifecycle.fakeBind()
   }
@@ -72,6 +76,7 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
   override fun onDestroy() {
     super.onDestroy()
     stopForeground(true)
+    handler.removeCallbacksAndMessages(null)
     notificationManagerCompat.cancel(NOTIFICATION_ID)
     lifecycle.fakeRelease()
     PadLock.getRefWatcher(this)
@@ -102,7 +107,8 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
     entry: PadLockEntryModel,
     realName: String
   ) {
-    LockScreenActivity.start(this, entry, realName)
+    // Delay by a little bit for Applications which launch a bunch of Activities in quick order.
+    handler.postDelayed({ LockScreenActivity.start(this, entry, realName) }, LAUNCH_DELAY)
   }
 
   private fun startInForeground() {
@@ -162,6 +168,7 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
     private const val NOTIFICATION_RC = 1004
     private const val OLD_CHANNEL_ID = "padlock_foreground"
     private const val NOTIFICATION_CHANNEL_ID = "padlock_foreground_v1"
+    private const val LAUNCH_DELAY = 300L
 
     @JvmStatic
     fun start(context: Context) {

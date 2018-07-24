@@ -41,11 +41,11 @@ buildscript {
     maxSdk = 28
 
     pydroid = "18.0.1-SNAPSHOT"
-    leakCanary = "1.5.4"
+    leakCanary = "1.6.1"
     sqldelight = "1.0.0-alpha4"
     dagger = "2.16"
     patternLock = "1.0.0"
-    fastAdapter = "3.2.5"
+    fastAdapter = "3.2.8"
   }
 
   dependencies {

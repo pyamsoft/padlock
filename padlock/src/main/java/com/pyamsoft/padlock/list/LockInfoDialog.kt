@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.AppEntry
@@ -273,14 +274,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   override fun onListLoaded(result: ListDiffResult<ActivityEntry>) {
-    result.ifEmpty { adapter.clear() }
-    result.withValues { payload ->
-      adapter.adapterItems.also {
-        it.clear()
-        it.addAll(adapter.intercept(payload.list()))
-      }
-      payload.dispatch { FastAdapterDiffUtil.set(adapter, it) }
-    }
+    result.dispatch(adapter)
   }
 
   override fun onListPopulateError(throwable: Throwable) {
