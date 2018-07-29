@@ -16,9 +16,6 @@
 
 <resources>
 
-
-  <color name="white">#FFFFFF</color>
-  <color name="black">#000000</color>
   <color name="blue500">#4768FD</color>
   <color name="blue700">#3C54FE</color>
   <color name="lock_info_dark_background">#ffdedede</color>

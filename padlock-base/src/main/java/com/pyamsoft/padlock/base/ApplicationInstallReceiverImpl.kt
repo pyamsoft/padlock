@@ -26,6 +26,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Build.VERSION_CODES
+import androidx.annotation.ColorRes
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -44,6 +45,7 @@ import javax.inject.Singleton
 @Singleton
 internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   private val context: Context,
+  @Named("notification_color") @ColorRes private val notificationColor: Int,
   private val packageManagerWrapper: PackageLabelManager,
   @Named("main_activity") mainActivityClass: Class<out Activity>,
   @param:Named("cache_purge") private val purgeCache: Cache,
@@ -147,7 +149,7 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
           setContentText("Click to lock the newly installed application: $name")
           setContentIntent(pendingIntent)
           setAutoCancel(true)
-          color = ContextCompat.getColor(context, R.color.blue500)
+          color = ContextCompat.getColor(context, notificationColor)
           priority = NotificationCompat.PRIORITY_LOW
         }
     notificationManagerCompat.notify(notificationId++, builder.build())

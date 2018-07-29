@@ -21,6 +21,7 @@ import android.app.Application
 import android.app.IntentService
 import android.content.Context
 import androidx.annotation.CheckResult
+import androidx.annotation.ColorRes
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.loader.ImageLoader
@@ -68,4 +69,10 @@ class PadLockProvider(
   @CheckResult
   @Named("recheck")
   fun provideRecheckServiceClass(): Class<out IntentService> = recheckServiceClass
+
+  @Provides
+  @CheckResult
+  @Named("notification_color")
+  @ColorRes
+  fun provideNotificationColor(): Int = R.color.blue500
 }

@@ -31,7 +31,7 @@
     <item name="snackbarButtonStyle">?attr/borderlessButtonStyle</item>
   </style>
 
-  <style name="Theme.PadLock.Dialog" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
+  <style name="Theme.PadLock.Dialog" parent="@style/Theme.MaterialComponents.Light.Dialog.Alert">
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/blue500</item>
