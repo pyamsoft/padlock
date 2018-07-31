@@ -16,9 +16,9 @@
 
 package com.pyamsoft.padlock.list
 
+import com.popinnow.android.repo.ObservableRepo
+import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.model.list.AppEntry
-import com.pyamsoft.pydroid.core.cache.Repository
-import com.pyamsoft.pydroid.core.cache.repository
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -26,11 +26,12 @@ import javax.inject.Named
 @Module
 object LockListSingletonProvider {
 
-  private val repo = repository<List<AppEntry>>()
+  private val repo = newRepoBuilder<List<AppEntry>>().memoryCache()
+      .buildObservable()
 
   @JvmStatic
   @Provides
   @Named("repo_lock_list")
-  internal fun provideRepo(): Repository<List<AppEntry>> = repo
+  internal fun provideRepo(): ObservableRepo<List<AppEntry>> = repo
 
 }

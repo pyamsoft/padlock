@@ -16,11 +16,10 @@
 
 package com.pyamsoft.padlock.purge
 
-import androidx.core.util.lruCache
+import com.popinnow.android.repo.ObservableRepo
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.core.cache.Cache
-import com.pyamsoft.pydroid.core.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -32,15 +31,13 @@ import javax.inject.Singleton
 @Singleton
 internal class PurgeInteractorImpl @Inject internal constructor(
   @Named("interactor_purge") private val db: PurgeInteractor,
-  @Named("repo_purge") private val repoStale: Repository<List<String>>,
-  @Named("repo_lock_list") private val repoLockList: Repository<List<AppEntry>>
+  @Named("repo_purge") private val repoStale: ObservableRepo<List<String>>,
+  @Named("repo_lock_list") private val repoLockList: ObservableRepo<List<AppEntry>>
 ) : PurgeInteractor, Cache {
 
-  private val cache = lruCache<String, List<String>>(10)
-
   override fun clearCache() {
-    repoStale.clearCache()
-    repoLockList.clearCache()
+    repoStale.clearAll()
+    repoLockList.clearAll()
   }
 
   override fun calculateDiff(
@@ -50,16 +47,18 @@ internal class PurgeInteractorImpl @Inject internal constructor(
       .doOnError { clearCache() }
 
   override fun fetchStalePackageNames(bypass: Boolean): Observable<List<String>> {
-    return Observable.defer {
-      val data: List<String>? = cache.get("list")
-      if (data == null || data.isEmpty()) {
-        return@defer Observable.empty<List<String>>()
-      } else {
-        return@defer Observable.just(data)
-      }
+    val key = "purge-list"
+    return repoStale.get(bypass, key) {
+      db.fetchStalePackageNames(true)
+          // Each time the db refreshes the entire list, clear out the cache to store the new list
+          .doOnNext { repoStale.invalidate(key) }
     }
-        .concatWith(db.fetchStalePackageNames(true).doOnNext { cache.put("list", it) })
-        .doOnError { clearCache() }
+        .doAfterNext {
+          // Cache should only ever hold the most recent list - be memory efficient
+          repoStale.memoryCache()
+              .trimToSize(1)
+        }
+        .doOnError { repoStale.clearAll() }
   }
 
   override fun deleteEntry(packageName: String): Completable =

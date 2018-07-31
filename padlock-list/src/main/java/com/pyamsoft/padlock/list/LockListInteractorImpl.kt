@@ -16,12 +16,11 @@
 
 package com.pyamsoft.padlock.list
 
-import androidx.core.util.lruCache
+import com.popinnow.android.repo.ObservableRepo
 import com.pyamsoft.padlock.api.LockListInteractor
-import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.core.cache.Cache
-import com.pyamsoft.pydroid.core.cache.Repository
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -33,11 +32,9 @@ import javax.inject.Singleton
 @Singleton
 internal class LockListInteractorImpl @Inject internal constructor(
   @param:Named("interactor_lock_list") private val db: LockListInteractor,
-  @param:Named("repo_lock_list") private val repoLockList: Repository<List<AppEntry>>,
+  @param:Named("repo_lock_list") private val repoLockList: ObservableRepo<List<AppEntry>>,
   @param:Named("cache_purge") private val purgeCache: Cache
 ) : LockListInteractor, Cache {
-
-  private val cache = lruCache<String, List<AppEntry>>(10)
 
   override fun hasShownOnBoarding(): Single<Boolean> = db.hasShownOnBoarding()
 
@@ -54,16 +51,18 @@ internal class LockListInteractorImpl @Inject internal constructor(
       .doOnError { clearCache() }
 
   override fun fetchAppEntryList(bypass: Boolean): Observable<List<AppEntry>> {
-    return Observable.defer {
-      val data: List<AppEntry>? = cache.get("list")
-      if (data == null || data.isEmpty()) {
-        return@defer Observable.empty<List<AppEntry>>()
-      } else {
-        return@defer Observable.just(data)
-      }
+    val key = "lock-list"
+    return repoLockList.get(bypass, key) {
+      return@get db.fetchAppEntryList(true)
+          // Each time the db refreshes the entire list, clear out the cache to store the new list
+          .doOnNext { repoLockList.invalidate(key) }
     }
-        .concatWith(db.fetchAppEntryList(true).doOnNext { cache.put("list", it) })
-        .doOnError { clearCache() }
+        .doAfterNext {
+          // Cache should only ever hold the most recent list - be memory efficient
+          repoLockList.memoryCache()
+              .trimToSize(1)
+        }
+        .doOnError { repoLockList.clearAll() }
   }
 
   override fun modifyEntry(
@@ -82,8 +81,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
   }
 
   override fun clearCache() {
-    repoLockList.clearCache()
+    repoLockList.clearAll()
     purgeCache.clearCache()
-    cache.evictAll()
   }
 }

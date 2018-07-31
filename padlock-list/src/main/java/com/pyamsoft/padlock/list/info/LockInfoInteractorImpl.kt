@@ -16,12 +16,11 @@
 
 package com.pyamsoft.padlock.list.info
 
-import androidx.core.util.lruCache
+import com.popinnow.android.repo.ObservableRepo
 import com.pyamsoft.padlock.api.LockInfoInteractor
-import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.pydroid.core.cache.Cache
-import com.pyamsoft.pydroid.core.cache.RepositoryMap
 import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -34,11 +33,9 @@ import javax.inject.Singleton
 @Singleton
 internal class LockInfoInteractorImpl @Inject internal constructor(
   @Named("interactor_lock_info") private val db: LockInfoInteractor,
-  @Named("repo_lock_info") private val repoLockInfo: RepositoryMap<String, List<ActivityEntry>>,
+  @Named("repo_lock_info") private val repoLockInfo: ObservableRepo<List<ActivityEntry>>,
   @Named("cache_lock_list") private val lockListCache: Cache
 ) : LockInfoInteractor, Cache {
-
-  private val cache = lruCache<String, List<ActivityEntry>>(10)
 
   override fun modifyEntry(
     oldLockState: LockState,
@@ -52,12 +49,12 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         oldLockState, newLockState, packageName, activityName,
         code, system
     )
-        .doAfterTerminate { repoLockInfo.clearKey(packageName) }
+        .doAfterTerminate { repoLockInfo.invalidate(packageName) }
         .doAfterTerminate { lockListCache.clearCache() }
   }
 
   override fun clearCache() {
-    repoLockInfo.clearCache()
+    repoLockInfo.clearAll()
     lockListCache.clearCache()
   }
 
@@ -67,19 +64,17 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     bypass: Boolean,
     packageName: String
   ): Observable<List<ActivityEntry>> {
-    return Observable.defer {
-      val data: List<ActivityEntry>? = cache.get(packageName)
-      if (data == null || data.isEmpty()) {
-        return@defer Observable.empty<List<ActivityEntry>>()
-      } else {
-        return@defer Observable.just(data)
-      }
+    return repoLockInfo.get(bypass, packageName) { key ->
+      return@get db.fetchActivityEntryList(true, key)
+          // Each time the db refreshes the entire list, clear out the cache to store the new list
+          .doOnNext { repoLockInfo.invalidate(key) }
     }
-        .concatWith(
-            db.fetchActivityEntryList(true, packageName)
-                .doOnNext { cache.put(packageName, it) }
-        )
-        .doOnError { cache.remove(packageName) }
+        .doAfterNext {
+          // Cache should only ever hold the most recent list - be memory efficient
+          repoLockInfo.memoryCache()
+              .trimToSize(1)
+        }
+        .doOnError { repoLockInfo.invalidate(packageName) }
   }
 
   override fun calculateListDiff(
@@ -88,6 +83,6 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     newList: List<ActivityEntry>
   ): Single<ListDiffResult<ActivityEntry>> =
     db.calculateListDiff(packageName, oldList, newList)
-        .doOnError { repoLockInfo.clearKey(packageName) }
+        .doOnError { repoLockInfo.invalidate(packageName) }
 
 }

@@ -40,7 +40,7 @@ buildscript {
     minSdk = 22
     maxSdk = 28
 
-    pydroid = "18.0.1-SNAPSHOT"
+    pydroid = "18.1.0-SNAPSHOT"
     leakCanary = "1.6.1"
     sqldelight = "1.0.0-alpha4"
     dagger = "2.16"

@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.pydroid.core.cache.Repository
-import com.pyamsoft.pydroid.core.cache.repository
+import com.popinnow.android.repo.ObservableRepo
+import com.popinnow.android.repo.newRepoBuilder
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -25,10 +25,12 @@ import javax.inject.Named
 @Module
 object PurgeSingletonProvider {
 
-  private val repo = repository<List<String>>()
+  private val repo = newRepoBuilder<List<String>>()
+      .memoryCache()
+      .buildObservable()
 
   @JvmStatic
   @Provides
   @Named("repo_purge")
-  internal fun provideRepo(): Repository<List<String>> = repo
+  internal fun provideRepo(): ObservableRepo<List<String>> = repo
 }
