@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.model.ConfirmEvent
 import io.reactivex.Single
 
 interface SettingsInteractor {
@@ -25,10 +26,10 @@ interface SettingsInteractor {
   fun isInstallListenerEnabled(): Single<Boolean>
 
   @CheckResult
-  fun clearDatabase(): Single<Boolean>
+  fun clearDatabase(): Single<ConfirmEvent>
 
   @CheckResult
-  fun clearAll(): Single<Boolean>
+  fun clearAll(): Single<ConfirmEvent>
 
   @CheckResult
   fun hasExistingMasterPassword(): Single<Boolean>

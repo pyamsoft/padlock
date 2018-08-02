@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.list
 
 import androidx.annotation.CheckResult
 import androidx.recyclerview.widget.DiffUtil
+import com.pyamsoft.padlock.api.EntryQueryDao
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockListPreferences
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
@@ -25,12 +26,16 @@ import com.pyamsoft.padlock.api.OnboardingPreferences
 import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PackageLabelManager
-import com.pyamsoft.padlock.api.PadLockDatabaseQuery
-import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.db.AllEntriesModel
+import com.pyamsoft.padlock.model.db.EntityChangeEvent
+import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.DELETED
+import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.INSERTED
+import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.UPDATED
 import com.pyamsoft.padlock.model.db.PadLockDbModels
+import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Completable
@@ -42,7 +47,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockListInteractorDb @Inject internal constructor(
-  private val queryDatabase: PadLockDatabaseQuery,
+  private val queryDao: EntryQueryDao,
   private val applicationManager: PackageApplicationManager,
   private val labelManager: PackageLabelManager,
   private val activityManager: PackageActivityManager,
@@ -69,14 +74,14 @@ internal class LockListInteractorDb @Inject internal constructor(
     removeEntries.clear()
 
     var locked = false
-    var whitelist = 0
-    var hardLocked = 0
+    val whitelist = LinkedHashSet<String>()
+    val hardLocked = LinkedHashSet<String>()
     for (entry in copyEntries) {
       if (entry.packageName() == packageName) {
         when {
           entry.activityName() == PadLockDbModels.PACKAGE_ACTIVITY_NAME -> locked = true
-          entry.whitelist() -> ++whitelist
-          else -> ++hardLocked
+          entry.whitelist() -> whitelist.add(entry.activityName())
+          else -> hardLocked.add(entry.activityName())
         }
 
         // Optimization for speed, trade off size
@@ -118,9 +123,9 @@ internal class LockListInteractorDb @Inject internal constructor(
     return packageNames.map { createNewLockTuple(it, copyEntries, removeEntries) }
   }
 
-  override fun fetchAppEntryList(bypass: Boolean): Observable<List<AppEntry>> {
-    return getAllEntries().flatMapSingle { entries ->
-      return@flatMapSingle getValidPackageNames()
+  override fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>> {
+    return getAllEntries().flatMap { entries ->
+      return@flatMap getValidPackageNames()
           .map { compileLockedTupleList(it, entries) }
           .flatMapObservable { Observable.fromIterable(it) }
           .flatMapSingle { createFromPackageInfo(it) }
@@ -130,55 +135,283 @@ internal class LockListInteractorDb @Inject internal constructor(
     }
   }
 
-  override fun calculateListDiff(
+  @CheckResult
+  private fun onEntityInserted(
+    event: EntityChangeEvent,
+    list: List<AppEntry>
+  ): List<Pair<Int, AppEntry?>> {
+    return onEntityInserted(event.packageName!!, event.activityName!!, event.whitelisted, list)
+  }
+
+  @CheckResult
+  private fun onEntityInserted(
+    packageName: String,
+    activityName: String,
+    whitelisted: Boolean,
+    list: List<AppEntry>
+  ): List<Pair<Int, AppEntry?>> {
+    return if (activityName == PadLockDbModels.PACKAGE_ACTIVITY_NAME) {
+      onParentEntityInserted(packageName, list)
+    } else {
+      onSubEntityInserted(packageName, activityName, whitelisted, list)
+    }
+  }
+
+  @CheckResult
+  private fun onSubEntityInserted(
+    packageName: String,
+    activityName: String,
+    whitelisted: Boolean,
+    list: List<AppEntry>
+  ): List<Pair<Int, AppEntry?>> {
+    // One of the sublist items was changed
+    val index = list.map { it.packageName }
+        .indexOf(packageName)
+    if (index < 0) {
+      Timber.w("Received a PACKAGE_INSERT event for $packageName - but it's not in the list")
+      return listOf(-1 to null)
+    }
+
+    val item = list[index]
+
+    if (whitelisted) {
+      if (item.hardLocked.contains(activityName)) {
+        item.hardLocked.remove(activityName)
+      }
+
+      item.whitelisted.add(activityName)
+    } else {
+      if (item.whitelisted.contains(activityName)) {
+        item.whitelisted.remove(activityName)
+      }
+
+      item.hardLocked.add(activityName)
+    }
+
+    return listOf(index to item)
+  }
+
+  @CheckResult
+  private fun onParentEntityInserted(
+    packageName: String,
+    list: List<AppEntry>
+  ): List<Pair<Int, AppEntry>> {
+    // We should be in scheduler at this point so it is safe to block off main thread
+    val appInfo = applicationManager.getApplicationInfo(packageName)
+        .blockingGet()
+    val entryName = labelManager.loadPackageLabel(packageName)
+        .blockingGet()
+
+    var index = 0
+    for ((i, entry) in list.withIndex()) {
+      // List is alphabetical, find our spot
+      if (entry.name < entryName) {
+        // We go after existing items
+        index = i + 1
+      }
+
+      // Hey look its us (whitelisted or hardlocked entries present)
+      if (entry.packageName == packageName) {
+        // Return out here for optimization
+        return listOf(i to entry.copy(locked = true))
+      }
+
+      // Don't exit out early because our package name may be zzz even though the app name is aaa
+    }
+
+    // We are new, add us somewhere
+    return listOf(
+        index to AppEntry(
+            entryName,
+            packageName,
+            appInfo.system,
+            true,
+            LinkedHashSet(),
+            LinkedHashSet()
+        )
+    )
+  }
+
+  @CheckResult
+  private fun onEntityUpdated(
+    event: EntityChangeEvent,
+    list: List<AppEntry>
+  ): List<Pair<Int, AppEntry?>> {
+    return onEntityUpdated(event.packageName!!, event.activityName!!, event.whitelisted, list)
+  }
+
+  @CheckResult
+  private fun onEntityUpdated(
+    packageName: String,
+    activityName: String,
+    whitelisted: Boolean,
+    list: List<AppEntry>
+  ): List<Pair<Int, AppEntry?>> {
+    val index = list.map { it.packageName }
+        .indexOf(packageName)
+    if (index < 0) {
+      Timber.w("Received a PACKAGE_UPDATE event for $packageName - but it's not in the list")
+      return listOf(-1 to null)
+    }
+
+    val item = list[index]
+
+    if (whitelisted) {
+      if (item.hardLocked.contains(activityName)) {
+        item.hardLocked.remove(activityName)
+      }
+
+      item.whitelisted.add(activityName)
+    } else {
+      if (item.whitelisted.contains(activityName)) {
+        item.whitelisted.remove(activityName)
+      }
+
+      // Don't touch hardlock set - if it was already in it stays in.
+    }
+
+    return listOf(index to item)
+  }
+
+  @CheckResult
+  private fun onEntityDeleted(
+    event: EntityChangeEvent,
+    list: List<AppEntry>
+  ): List<Pair<Int, AppEntry?>> {
+    return when {
+      event.packageName == null -> onAllEntitiesDeleted(list)
+      event.activityName == null -> onPackageDeleted(/* Never null */ event.packageName!!, list)
+      else -> onEntryDeleted(/* Never null*/ event.packageName!!, event.activityName!!, list)
+    }
+  }
+
+  @CheckResult
+  private fun onEntryDeleted(
+    packageName: String,
+    activityName: String,
+    list: List<AppEntry>
+  ): List<Pair<Int, AppEntry?>> {
+    val index = list.map { it.packageName }
+        .indexOf(packageName)
+    if (index < 0) {
+      Timber.w("Received a PACKAGE_DELETE event for $packageName - but it's not in the list")
+      return listOf(-1 to null)
+    }
+
+    val item = list[index]
+
+    val result: AppEntry
+    if (activityName == PadLockDbModels.PACKAGE_ACTIVITY_NAME) {
+      // Top level
+      result = item.copy(locked = false)
+    } else {
+      // Sub level
+
+      // Pop deleted out of whitelisted set
+      if (item.whitelisted.contains(activityName)) {
+        item.whitelisted.remove(activityName)
+      }
+
+      // Pop deleted out of hardlocked set
+      if (item.hardLocked.contains(activityName)) {
+        item.hardLocked.remove(activityName)
+      }
+
+      result = item
+    }
+
+    return listOf(index to result)
+  }
+
+  @CheckResult
+  private fun onPackageDeleted(
+    packageName: String,
+    list: List<AppEntry>
+  ): List<Pair<Int, AppEntry>> {
+    return list
+        .filter { it.packageName == packageName }
+        .map {
+          return@map it.copy(
+              locked = false,
+              whitelisted = LinkedHashSet(),
+              hardLocked = LinkedHashSet()
+          )
+        }
+        .mapIndexed { index, entry -> index to entry }
+  }
+
+  @CheckResult
+  private fun onAllEntitiesDeleted(list: List<AppEntry>): List<Pair<Int, AppEntry>> {
+    return list
+        .map {
+          it.copy(locked = false, whitelisted = LinkedHashSet(), hardLocked = LinkedHashSet())
+        }
+        .mapIndexed { index, entry -> index to entry }
+  }
+
+  override fun subscribeForUpdates(diffProvider: ListDiffProvider<AppEntry>):
+      Observable<Pair<List<AppEntry>, List<Pair<Int, AppEntry?>>>> {
+    return queryDao.subscribeToUpdates()
+        .map {
+          val oldList = diffProvider.data()
+          return@map oldList to when (it.type) {
+            INSERTED -> onEntityInserted(it, oldList.toList())
+            UPDATED -> onEntityUpdated(it, oldList.toList())
+            DELETED -> onEntityDeleted(it, oldList.toList())
+          }
+        }
+  }
+
+  @CheckResult
+  private fun calculateListDiff(
     oldList: List<AppEntry>,
     newList: List<AppEntry>
-  ): Single<ListDiffResult<AppEntry>> {
-    return Single.fromCallable {
-      val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+  ): ListDiffResult<AppEntry> {
+    val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
-        override fun getOldListSize(): Int = oldList.size
+      override fun getOldListSize(): Int = oldList.size
 
-        override fun getNewListSize(): Int = newList.size
+      override fun getNewListSize(): Int = newList.size
 
-        override fun areItemsTheSame(
-          oldItemPosition: Int,
-          newItemPosition: Int
-        ): Boolean {
-          val oldItem: AppEntry = oldList[oldItemPosition]
-          val newItem: AppEntry = newList[newItemPosition]
-          return oldItem.packageName == newItem.packageName
-        }
+      override fun areItemsTheSame(
+        oldItemPosition: Int,
+        newItemPosition: Int
+      ): Boolean {
+        val oldItem: AppEntry = oldList[oldItemPosition]
+        val newItem: AppEntry = newList[newItemPosition]
+        return oldItem.packageName == newItem.packageName
+      }
 
-        override fun areContentsTheSame(
-          oldItemPosition: Int,
-          newItemPosition: Int
-        ): Boolean {
-          val oldItem: AppEntry = oldList[oldItemPosition]
-          val newItem: AppEntry = newList[newItemPosition]
-          return oldItem == newItem
-        }
+      override fun areContentsTheSame(
+        oldItemPosition: Int,
+        newItemPosition: Int
+      ): Boolean {
+        val oldItem: AppEntry = oldList[oldItemPosition]
+        val newItem: AppEntry = newList[newItemPosition]
+        val same = oldItem == newItem
+        Timber.d("Are Contents same? $oldItem, $newItem    $same")
+        return same
+      }
 
-        override fun getChangePayload(
-          oldItemPosition: Int,
-          newItemPosition: Int
-        ): Any? {
-          // TODO: Construct specific change payload
-          Timber.w("TODO: Construct specific change payload")
-          return super.getChangePayload(oldItemPosition, newItemPosition)
-        }
+      override fun getChangePayload(
+        oldItemPosition: Int,
+        newItemPosition: Int
+      ): Any? {
+        // TODO: Construct specific change payload
+        Timber.w("TODO: Construct specific change payload")
+        return super.getChangePayload(oldItemPosition, newItemPosition)
+      }
 
-      }, false)
+    }, false)
 
-      return@fromCallable ListDiffResultImpl(newList, result)
-    }
+    return ListDiffResultImpl(newList, result)
   }
 
   @CheckResult
   private fun createFromPackageInfo(tuple: LockTuple): Single<AppEntry> {
     return applicationManager.getApplicationInfo(tuple.packageName)
         .flatMap { item ->
-          labelManager.loadPackageLabel(item)
+          labelManager.loadPackageLabel(item.packageName)
               .map {
                 AppEntry(
                     name = it, packageName = item.packageName,
@@ -213,8 +446,8 @@ internal class LockListInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getAllEntries(): Observable<List<AllEntriesModel>> =
-    queryDatabase.queryAll()
+  private fun getAllEntries(): Single<List<AllEntriesModel>> =
+    queryDao.queryAll()
 
   override fun hasShownOnBoarding(): Single<Boolean> =
     Single.fromCallable { onboardingPreferences.isListOnBoard() }
@@ -236,7 +469,7 @@ internal class LockListInteractorDb @Inject internal constructor(
   private data class LockTuple internal constructor(
     internal val packageName: String,
     internal val locked: Boolean,
-    internal val whitelist: Int,
-    internal val hardLocked: Int
+    internal val whitelist: MutableSet<String>,
+    internal val hardLocked: MutableSet<String>
   )
 }

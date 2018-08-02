@@ -21,6 +21,6 @@ data class AppEntry(
   val packageName: String,
   val system: Boolean,
   val locked: Boolean,
-  val whitelisted: Int,
-  val hardLocked: Int
+  val whitelisted: MutableSet<String>,
+  val hardLocked: MutableSet<String>
 )

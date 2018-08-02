@@ -33,13 +33,11 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.list.ListDiffProvider
-import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.popHide
@@ -364,15 +362,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     refreshLatch.isRefreshing = true
   }
 
-  override fun onListLoaded(result: ListDiffResult<AppEntry>) {
-    result.dispatch(adapter)
-  }
-
-  private fun showRecycler() {
-    binding.apply {
-      applistRecyclerview.visibility = View.VISIBLE
-      applistEmpty.visibility = View.GONE
-    }
+  override fun onListLoaded(result: List<AppEntry>) {
+    adapter.set(result)
   }
 
   override fun onListPopulated() {
@@ -381,6 +372,24 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   override fun onListPopulateError(throwable: Throwable) {
     ErrorDialog().show(requireActivity(), "list_error")
+  }
+
+  override fun onDatabaseChangeError(throwable: Throwable) {
+    ErrorDialog().show(requireActivity(), "db_change_error")
+  }
+
+  override fun onDatabaseChangeReceived(
+    index: Int,
+    entry: AppEntry
+  ) {
+    adapter.set(index, entry)
+  }
+
+  private fun showRecycler() {
+    binding.apply {
+      applistRecyclerview.visibility = View.VISIBLE
+      applistEmpty.visibility = View.GONE
+    }
   }
 
   companion object {

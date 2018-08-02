@@ -18,17 +18,18 @@ package com.pyamsoft.padlock.list.info
 
 import androidx.annotation.CheckResult
 import androidx.recyclerview.widget.DiffUtil
+import com.pyamsoft.padlock.api.EntryQueryDao
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.OnboardingPreferences
 import com.pyamsoft.padlock.api.PackageActivityManager
-import com.pyamsoft.padlock.api.PadLockDatabaseQuery
-import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
+import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.observables.GroupedObservable
@@ -40,7 +41,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockInfoInteractorDb @Inject internal constructor(
-  private val queryDatabase: PadLockDatabaseQuery,
+  private val queryDao: EntryQueryDao,
   private val packageActivityManager: PackageActivityManager,
   private val preferences: OnboardingPreferences,
   private val modifyInteractor: LockStateModifyInteractor
@@ -54,7 +55,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   @CheckResult
   private fun getLockedActivityEntries(
     name: String
-  ): Observable<List<WithPackageNameModel>> = queryDatabase.queryWithPackageName(name)
+  ): Flowable<List<WithPackageNameModel>> = queryDao.queryWithPackageName(name)
 
   @CheckResult
   private fun getPackageActivities(name: String): Single<List<String>> =
@@ -185,7 +186,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun fetchData(fetchName: String): Observable<List<ActivityEntry.Item>> {
+  private fun fetchData(fetchName: String): Flowable<List<ActivityEntry.Item>> {
     return getLockedActivityEntries(fetchName).flatMapSingle { entries ->
       return@flatMapSingle getPackageActivities(fetchName)
           .map { createSortedActivityEntryList(fetchName, it, entries) }
@@ -222,7 +223,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   override fun fetchActivityEntryList(
     bypass: Boolean,
     packageName: String
-  ): Observable<List<ActivityEntry>> {
+  ): Flowable<List<ActivityEntry>> {
     return fetchData(packageName).flatMapSingle {
       return@flatMapSingle Observable.fromIterable(it)
           .groupBy { it.group }

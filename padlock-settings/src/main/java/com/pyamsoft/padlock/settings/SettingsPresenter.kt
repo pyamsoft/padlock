@@ -18,10 +18,10 @@ package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.SettingsInteractor
-import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.model.ConfirmEvent.ALL
 import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
+import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.presenter.Presenter
@@ -48,10 +48,11 @@ class SettingsPresenter @Inject internal constructor(
     dispose {
       bus.listen()
           .flatMapSingle { type ->
-            when (type) {
+            return@flatMapSingle when (type) {
               DATABASE -> interactor.clearDatabase()
               ALL -> interactor.clearAll()
-            }.map { type }
+            }
+                .subscribeOn(Schedulers.io())
           }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())

@@ -17,9 +17,9 @@
 package com.pyamsoft.padlock.list.modify
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.api.EntryDeleteDao
+import com.pyamsoft.padlock.api.EntryInsertDao
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
-import com.pyamsoft.padlock.api.PadLockDatabaseDelete
-import com.pyamsoft.padlock.api.PadLockDatabaseInsert
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
@@ -30,8 +30,8 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockStateModifyInteractorImpl @Inject internal constructor(
-  private val insertDatabase: PadLockDatabaseInsert,
-  private val deleteDatabase: PadLockDatabaseDelete
+  private val insertDao: EntryInsertDao,
+  private val deleteDao: EntryDeleteDao
 ) : LockStateModifyInteractor {
 
   @CheckResult
@@ -43,7 +43,7 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     whitelist: Boolean
   ): Completable {
     Timber.d("Empty entry, create a new entry for: %s %s", packageName, activityName)
-    return insertDatabase.insert(packageName, activityName, code, 0, 0, system, whitelist)
+    return insertDao.insert(packageName, activityName, code, 0, 0, system, whitelist)
   }
 
   @CheckResult
@@ -52,7 +52,7 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     activityName: String
   ): Completable {
     Timber.d("Entry already exists for: %s %s, delete it", packageName, activityName)
-    return deleteDatabase.deleteWithPackageActivityName(packageName, activityName)
+    return deleteDao.deleteWithPackageActivityName(packageName, activityName)
   }
 
   @CheckResult

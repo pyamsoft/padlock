@@ -17,10 +17,13 @@
 package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.padlock.api.ClearPreferences
+import com.pyamsoft.padlock.api.EntryDeleteDao
 import com.pyamsoft.padlock.api.InstallListenerPreferences
 import com.pyamsoft.padlock.api.MasterPinPreferences
-import com.pyamsoft.padlock.api.PadLockDatabaseDelete
 import com.pyamsoft.padlock.api.SettingsInteractor
+import com.pyamsoft.padlock.model.ConfirmEvent
+import com.pyamsoft.padlock.model.ConfirmEvent.ALL
+import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional
@@ -33,7 +36,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class SettingsInteractorImpl @Inject internal constructor(
-  private val deleteDatabase: PadLockDatabaseDelete,
+  private val deleteDao: EntryDeleteDao,
   private val masterPinPreference: MasterPinPreferences,
   private val preferences: ClearPreferences,
   private val installListenerPreferences: InstallListenerPreferences,
@@ -49,9 +52,9 @@ internal class SettingsInteractorImpl @Inject internal constructor(
   override fun isInstallListenerEnabled(): Single<Boolean> =
     Single.fromCallable { installListenerPreferences.isInstallListenerEnabled() }
 
-  override fun clearDatabase(): Single<Boolean> {
+  override fun clearDatabase(): Single<ConfirmEvent> {
     Timber.d("clear database")
-    return deleteDatabase.deleteAll()
+    return deleteDao.deleteAll()
         .andThen(Completable.fromAction {
           lockListInteractor.clearCache()
           lockInfoInteractor.clearCache()
@@ -60,15 +63,15 @@ internal class SettingsInteractorImpl @Inject internal constructor(
           iconCache.clearCache()
           listStateCache.clearCache()
         })
-        .toSingleDefault(true)
+        .toSingleDefault(DATABASE)
   }
 
-  override fun clearAll(): Single<Boolean> {
+  override fun clearAll(): Single<ConfirmEvent> {
     // We map here to make sure the clear all is complete before stream continues
     return clearDatabase().map {
       Timber.d("Clear all preferences")
       preferences.clearAll()
-      return@map true
+      return@map ALL
     }
   }
 

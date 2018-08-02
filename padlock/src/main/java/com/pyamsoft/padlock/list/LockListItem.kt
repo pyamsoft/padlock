@@ -16,11 +16,12 @@
 
 package com.pyamsoft.padlock.list
 
+import android.view.View
+import androidx.core.view.isInvisible
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import androidx.fragment.app.FragmentActivity
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.Injector
@@ -64,8 +65,8 @@ class LockListItem internal constructor(
         lockListTitle.text = model.name
         lockListToggle.setOnCheckedChangeListener(null)
         lockListToggle.isChecked = model.locked
-        lockListWhite.visibility = if (model.whitelisted > 0) View.VISIBLE else View.INVISIBLE
-        lockListLocked.visibility = if (model.hardLocked > 0) View.VISIBLE else View.INVISIBLE
+        lockListWhite.isInvisible = model.whitelisted.isEmpty()
+        lockListLocked.isInvisible = model.hardLocked.isEmpty()
       }
 
       imageLoader.apply {

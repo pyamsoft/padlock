@@ -19,20 +19,20 @@ package com.pyamsoft.padlock.service
 import android.app.IntentService
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.DeviceLockStateProvider
+import com.pyamsoft.padlock.api.EntryQueryDao
 import com.pyamsoft.padlock.api.JobSchedulerCompat
 import com.pyamsoft.padlock.api.LockPassed
 import com.pyamsoft.padlock.api.LockScreenPreferences
 import com.pyamsoft.padlock.api.LockServiceInteractor
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
 import com.pyamsoft.padlock.api.PackageActivityManager
-import com.pyamsoft.padlock.api.PadLockDatabaseQuery
 import com.pyamsoft.padlock.api.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.ForegroundEvent
+import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.service.RecheckStatus
 import com.pyamsoft.padlock.model.service.RecheckStatus.FORCE
-import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional
@@ -56,7 +56,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   private val preferences: LockScreenPreferences,
   private val jobSchedulerCompat: JobSchedulerCompat,
   private val packageActivityManager: PackageActivityManager,
-  private val padLockDatabaseQuery: PadLockDatabaseQuery,
+  private val queryDao: EntryQueryDao,
   @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
   private val stateInteractor: LockServiceStateInteractor
 ) : LockServiceInteractor {
@@ -152,7 +152,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
             "Get list of locked classes with package: %s, class: %s", packageName,
             activityName
         )
-        return@flatMap padLockDatabaseQuery.queryWithPackageActivityNameDefault(
+        return@flatMap queryDao.queryWithPackageActivityName(
             packageName,
             activityName
         )

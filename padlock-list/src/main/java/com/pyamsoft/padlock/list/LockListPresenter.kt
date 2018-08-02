@@ -19,19 +19,19 @@ package com.pyamsoft.padlock.list
 import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
-import com.pyamsoft.padlock.model.list.AppEntry
-import com.pyamsoft.padlock.model.pin.ClearPinEvent
-import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.db.PadLockDbModels
+import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.padlock.model.pin.ClearPinEvent
+import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.presenter.Presenter
 import com.pyamsoft.pydroid.list.ListDiffProvider
-import com.pyamsoft.pydroid.list.ListDiffResult
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -61,7 +61,24 @@ class LockListPresenter @Inject internal constructor(
   override fun onStart() {
     super.onStart()
     populateList(false)
+    subscribeToDatabaseChanges()
     setFABStateFromPreference()
+  }
+
+  private fun subscribeToDatabaseChanges() {
+    dispose(ON_STOP) {
+      lockListInteractor.subscribeForUpdates(listDiffProvider)
+          .map { it.second }
+          .flatMap { Observable.fromIterable(it) }
+          .filter { it.first >= 0 }
+          .map { it.first to it.second!! }
+          .subscribeOn(Schedulers.computation())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe({ view?.onDatabaseChangeReceived(it.first, it.second) }, {
+            Timber.e(it, "Error while subscribed to database changes")
+            view?.onDatabaseChangeError(it)
+          })
+    }
   }
 
   private fun registerOnWhitelistedBus() {
@@ -202,11 +219,9 @@ class LockListPresenter @Inject internal constructor(
   fun populateList(force: Boolean) {
     dispose(ON_STOP) {
       lockListInteractor.fetchAppEntryList(force)
-          .flatMapSingle { lockListInteractor.calculateListDiff(listDiffProvider.data(), it) }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .doAfterNext { view?.onListPopulated() }
-          .doOnError { view?.onListPopulated() }
+          .doAfterTerminate { view?.onListPopulated() }
           .doOnSubscribe { view?.onListPopulateBegin() }
           .subscribe({ view?.onListLoaded(it) }, {
             Timber.e(it, "populateList onError")
@@ -224,7 +239,17 @@ class LockListPresenter @Inject internal constructor(
 
   interface View : LockModifyCallback, MasterPinCreateCallback, MasterPinClearCallback,
       FABStateCallback, SystemVisibilityChangeCallback, OnboardingCallback,
-      ListPopulateCallback
+      ListPopulateCallback, ChangeCallback
+
+  interface ChangeCallback {
+
+    fun onDatabaseChangeReceived(
+      index: Int,
+      entry: AppEntry
+    )
+
+    fun onDatabaseChangeError(throwable: Throwable)
+  }
 
   interface LockModifyCallback {
 
@@ -268,7 +293,7 @@ class LockListPresenter @Inject internal constructor(
 
     fun onListPopulateBegin()
 
-    fun onListLoaded(result: ListDiffResult<AppEntry>)
+    fun onListLoaded(result: List<AppEntry>)
 
     fun onListPopulated()
 

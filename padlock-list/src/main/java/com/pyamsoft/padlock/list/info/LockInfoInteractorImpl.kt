@@ -22,8 +22,9 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.list.ListDiffResult
+import io.reactivex.BackpressureStrategy.BUFFER
 import io.reactivex.Completable
-import io.reactivex.Observable
+import io.reactivex.Flowable
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Named
@@ -63,12 +64,14 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
   override fun fetchActivityEntryList(
     bypass: Boolean,
     packageName: String
-  ): Observable<List<ActivityEntry>> {
+  ): Flowable<List<ActivityEntry>> {
     return repoLockInfo.get(bypass, packageName) { key ->
       return@get db.fetchActivityEntryList(true, key)
           // Each time the db refreshes the entire list, clear out the cache to store the new list
           .doOnNext { repoLockInfo.invalidate(key) }
+          .toObservable()
     }
+        .toFlowable(BUFFER)
         .doAfterNext {
           // Cache should only ever hold the most recent list - be memory efficient
           repoLockInfo.memoryCache()

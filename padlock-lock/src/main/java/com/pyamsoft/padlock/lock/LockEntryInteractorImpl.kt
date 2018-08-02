@@ -18,15 +18,15 @@ package com.pyamsoft.padlock.lock
 
 import android.app.IntentService
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.api.EntryInsertDao
+import com.pyamsoft.padlock.api.EntryQueryDao
+import com.pyamsoft.padlock.api.EntryUpdateDao
 import com.pyamsoft.padlock.api.JobSchedulerCompat
 import com.pyamsoft.padlock.api.LockEntryInteractor
 import com.pyamsoft.padlock.api.LockHelper
 import com.pyamsoft.padlock.api.LockPassed
 import com.pyamsoft.padlock.api.LockScreenPreferences
 import com.pyamsoft.padlock.api.MasterPinInteractor
-import com.pyamsoft.padlock.api.PadLockDatabaseInsert
-import com.pyamsoft.padlock.api.PadLockDatabaseQuery
-import com.pyamsoft.padlock.api.PadLockDatabaseUpdate
 import com.pyamsoft.padlock.model.service.Recheck
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
@@ -47,9 +47,9 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   private val preferences: LockScreenPreferences,
   private val jobSchedulerCompat: JobSchedulerCompat,
   private val masterPinInteractor: MasterPinInteractor,
-  private val databaseInsert: PadLockDatabaseInsert,
-  private val dbUpdate: PadLockDatabaseUpdate,
-  private val databaseQuery: PadLockDatabaseQuery,
+  private val insertDao: EntryInsertDao,
+  private val updateDao: EntryUpdateDao,
+  private val queryDao: EntryQueryDao,
   @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>
 ) : LockEntryInteractor {
 
@@ -61,7 +61,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     lockCode: String?,
     currentAttempt: String
   ): Single<Boolean> {
-    return databaseQuery.queryWithPackageActivityNameDefault(packageName, activityName)
+    return queryDao.queryWithPackageActivityName(packageName, activityName)
         .flatMap {
           val lockUntilTime = it.lockUntilTime()
           return@flatMap masterPinInteractor.getMasterPin()
@@ -99,7 +99,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     isSystem: Boolean
   ): Completable {
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName)
-    return databaseInsert.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
+    return insertDao.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
   }
 
   @CheckResult
@@ -137,7 +137,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
       )
 
       // Add an extra second here to artificially de-bounce quick requests, like those commonly in multi window mode
-      return@defer dbUpdate.updateIgnoreTime(packageName, activityName, newIgnoreTime + 1000L)
+      return@defer updateDao.updateIgnoreUntilTime(packageName, activityName, newIgnoreTime + 1000L)
     }
   }
 
@@ -147,7 +147,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   ): Maybe<Long> {
     return Single.fromCallable {
       val failId: String = getFailId(packageName, activityName)
-      val newFailCount: Int = failCount.getOrPut(failId, { 0 }) + 1
+      val newFailCount: Int = failCount.getOrPut(failId) { 0 } + 1
       failCount[failId] = newFailCount
       return@fromCallable newFailCount
     }
@@ -182,7 +182,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
           timeOutMinutesInMillis
       )
 
-      return@defer dbUpdate.updateLockTime(packageName, activityName, newLockUntilTime)
+      return@defer updateDao.updateLockUntilTime(packageName, activityName, newLockUntilTime)
           .andThen(Maybe.just(newLockUntilTime))
     }
   }

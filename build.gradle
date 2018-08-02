@@ -27,12 +27,6 @@ buildscript {
     google()
     jcenter()
     mavenLocal()
-
-    // TODO
-    // add sonatype repository
-    maven {
-      url 'https://oss.sonatype.org/content/repositories/snapshots/'
-    }
   }
 
   ext {
@@ -40,9 +34,11 @@ buildscript {
     minSdk = 22
     maxSdk = 28
 
+    // AndroidX
+    room = "2.0.0-beta01"
+
     pydroid = "18.1.0-SNAPSHOT"
     leakCanary = "1.6.1"
-    sqldelight = "1.0.0-alpha4"
     dagger = "2.16"
     patternLock = "1.0.0"
     fastAdapter = "3.2.8"
@@ -56,9 +52,6 @@ buildscript {
 
     // Gradle version checker
     classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
-
-    // SQLDelight
-    classpath "com.squareup.sqldelight:android-gradle-plugin:$sqldelight"
 
     // Kotlin
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"

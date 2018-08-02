@@ -45,6 +45,11 @@ android {
 }
 
 dependencies {
+  // Room
+  implementation "androidx.room:room-rxjava2:$room"
+  implementation "androidx.room:room-runtime:$room"
+  kapt "androidx.room:room-compiler:$room"
+
   // Dagger
   kapt "com.google.dagger:dagger-compiler:$dagger"
 

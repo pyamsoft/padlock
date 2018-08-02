@@ -18,14 +18,15 @@ package com.pyamsoft.padlock.purge
 
 import androidx.annotation.CheckResult
 import androidx.recyclerview.widget.DiffUtil
+import com.pyamsoft.padlock.api.EntryDeleteDao
+import com.pyamsoft.padlock.api.EntryQueryDao
 import com.pyamsoft.padlock.api.PackageApplicationManager
-import com.pyamsoft.padlock.api.PadLockDatabaseDelete
-import com.pyamsoft.padlock.api.PadLockDatabaseQuery
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.db.AllEntriesModel
 import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import timber.log.Timber
@@ -35,17 +36,18 @@ import javax.inject.Singleton
 @Singleton
 internal class PurgeInteractorDb @Inject internal constructor(
   private val applicationManager: PackageApplicationManager,
-  private val deleteDatabase: PadLockDatabaseDelete,
-  private val queryDatabase: PadLockDatabaseQuery
+  private val deleteDao: EntryDeleteDao,
+  private val queryDao: EntryQueryDao
 ) : PurgeInteractor {
 
-  override fun fetchStalePackageNames(bypass: Boolean): Observable<List<String>> {
-    return getAllEntries().flatMapSingle { entries ->
-      return@flatMapSingle getActiveApplications()
+  override fun fetchStalePackageNames(bypass: Boolean): Flowable<List<String>> {
+    return getAllEntries().flatMap { entries ->
+      return@flatMap getActiveApplications()
           .map { c(entries, it) }
           .flatMapObservable { Observable.fromIterable(it) }
           .toSortedList { obj, str -> obj.compareTo(str, ignoreCase = true) }
     }
+        .toFlowable()
   }
 
   override fun calculateDiff(
@@ -89,8 +91,8 @@ internal class PurgeInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getAllEntries(): Observable<List<AllEntriesModel>> =
-    queryDatabase.queryAll()
+  private fun getAllEntries(): Single<List<AllEntriesModel>> =
+    queryDao.queryAll()
 
   @CheckResult
   private fun getActiveApplications(): Single<List<String>> =
@@ -132,7 +134,7 @@ internal class PurgeInteractorDb @Inject internal constructor(
   }
 
   override fun deleteEntry(packageName: String): Completable =
-    deleteDatabase.deleteWithPackageName(packageName)
+    deleteDao.deleteWithPackageName(packageName)
 
   override fun deleteEntries(packageNames: List<String>): Completable {
     return Observable.defer { Observable.fromIterable(packageNames) }
