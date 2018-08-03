@@ -21,9 +21,8 @@ import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.purge.PurgeAllEvent
 import com.pyamsoft.padlock.model.purge.PurgeEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.list.ListDiffProvider
-import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.core.presenter.Presenter
+import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -70,12 +69,10 @@ class PurgePresenter @Inject internal constructor(
   fun retrieveStaleApplications(force: Boolean) {
     dispose(ON_STOP) {
       interactor.fetchStalePackageNames(force)
-          .flatMapSingle { interactor.calculateDiff(listDiffProvider.data(), it) }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
+          .doAfterTerminate { view?.onRetrieveComplete() }
           .doOnSubscribe { view?.onRetrieveBegin() }
-          .doAfterNext { view?.onRetrieveComplete() }
-          .doOnError { view?.onRetrieveComplete() }
           .subscribe({ view?.onRetrievedList(it) }, {
             Timber.e(it, "onError retrieveStaleApplications")
             view?.onRetrieveError(it)
@@ -113,7 +110,7 @@ class PurgePresenter @Inject internal constructor(
 
     fun onRetrieveComplete()
 
-    fun onRetrievedList(result: ListDiffResult<String>)
+    fun onRetrievedList(result: List<String>)
 
     fun onRetrieveError(throwable: Throwable)
   }

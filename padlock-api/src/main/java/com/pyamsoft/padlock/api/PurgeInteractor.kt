@@ -17,22 +17,13 @@
 package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.pydroid.list.ListDiffResult
 import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Observable
 import io.reactivex.Single
 
 interface PurgeInteractor {
 
   @CheckResult
-  fun fetchStalePackageNames(bypass: Boolean): Flowable<List<String>>
-
-  @CheckResult
-  fun calculateDiff(
-    oldList: List<String>,
-    newList: List<String>
-  ): Single<ListDiffResult<String>>
+  fun fetchStalePackageNames(bypass: Boolean): Single<List<String>>
 
   @CheckResult
   fun deleteEntry(packageName: String): Completable

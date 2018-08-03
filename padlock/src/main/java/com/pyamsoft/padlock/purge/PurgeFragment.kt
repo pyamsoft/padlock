@@ -22,16 +22,13 @@ import android.view.View
 import android.view.ViewGroup
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
-import com.mikepenz.fastadapter.commons.utils.FastAdapterDiffUtil
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.list.ListDiffProvider
-import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import com.pyamsoft.pydroid.ui.util.refreshing
@@ -157,8 +154,8 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
     refreshLatch.isRefreshing = false
   }
 
-  override fun onRetrievedList(result: ListDiffResult<String>) {
-    result.dispatch(adapter)
+  override fun onRetrievedList(result: List<String>) {
+    adapter.set(result)
   }
 
   override fun onRetrieveError(throwable: Throwable) {

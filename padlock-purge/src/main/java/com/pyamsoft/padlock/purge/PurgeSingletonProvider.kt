@@ -16,21 +16,22 @@
 
 package com.pyamsoft.padlock.purge
 
-import com.popinnow.android.repo.ObservableRepo
+import com.popinnow.android.repo.SingleRepo
 import com.popinnow.android.repo.newRepoBuilder
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Named
 
 @Module
 object PurgeSingletonProvider {
 
   private val repo = newRepoBuilder<List<String>>()
-      .memoryCache()
-      .buildObservable()
+      .memoryCache(5, MINUTES)
+      .buildSingle()
 
   @JvmStatic
   @Provides
   @Named("repo_purge")
-  internal fun provideRepo(): ObservableRepo<List<String>> = repo
+  internal fun provideRepo(): SingleRepo<List<String>> = repo
 }

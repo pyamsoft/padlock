@@ -17,16 +17,12 @@
 package com.pyamsoft.padlock.purge
 
 import androidx.annotation.CheckResult
-import androidx.recyclerview.widget.DiffUtil
 import com.pyamsoft.padlock.api.EntryDeleteDao
 import com.pyamsoft.padlock.api.EntryQueryDao
 import com.pyamsoft.padlock.api.PackageApplicationManager
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.db.AllEntriesModel
-import com.pyamsoft.pydroid.list.ListDiffResult
-import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Completable
-import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import timber.log.Timber
@@ -40,53 +36,12 @@ internal class PurgeInteractorDb @Inject internal constructor(
   private val queryDao: EntryQueryDao
 ) : PurgeInteractor {
 
-  override fun fetchStalePackageNames(bypass: Boolean): Flowable<List<String>> {
+  override fun fetchStalePackageNames(bypass: Boolean): Single<List<String>> {
     return getAllEntries().flatMap { entries ->
       return@flatMap getActiveApplications()
           .map { c(entries, it) }
           .flatMapObservable { Observable.fromIterable(it) }
           .toSortedList { obj, str -> obj.compareTo(str, ignoreCase = true) }
-    }
-        .toFlowable()
-  }
-
-  override fun calculateDiff(
-    oldList: List<String>,
-    newList: List<String>
-  ): Single<ListDiffResult<String>> {
-    return Single.fromCallable {
-      val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-
-        override fun getOldListSize(): Int = oldList.size
-
-        override fun getNewListSize(): Int = newList.size
-
-        override fun areItemsTheSame(
-          oldItemPosition: Int,
-          newItemPosition: Int
-        ): Boolean {
-          val oldItem: String = oldList[oldItemPosition]
-          val newItem: String = newList[newItemPosition]
-          return oldItem == newItem
-        }
-
-        override fun areContentsTheSame(
-          oldItemPosition: Int,
-          newItemPosition: Int
-        ): Boolean = areItemsTheSame(oldItemPosition, newItemPosition)
-
-        override fun getChangePayload(
-          oldItemPosition: Int,
-          newItemPosition: Int
-        ): Any? {
-          // TODO: Construct specific change payload
-          Timber.w("TODO: Construct specific change payload")
-          return super.getChangePayload(oldItemPosition, newItemPosition)
-        }
-
-      }, false)
-
-      return@fromCallable ListDiffResultImpl(newList, result)
     }
   }
 

@@ -21,13 +21,15 @@ import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Named
 
 @JvmSuppressWildcards
 @Module
 object LockInfoSingletonProvider {
 
-  private val repo = newRepoBuilder<List<ActivityEntry>>().memoryCache()
+  private val repo = newRepoBuilder<List<ActivityEntry>>()
+      .memoryCache(5, MINUTES)
       .buildSingle()
 
   @JvmStatic

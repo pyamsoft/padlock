@@ -21,12 +21,14 @@ import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.model.list.AppEntry
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Named
 
 @Module
 object LockListSingletonProvider {
 
-  private val repo = newRepoBuilder<List<AppEntry>>().memoryCache()
+  private val repo = newRepoBuilder<List<AppEntry>>()
+      .memoryCache(5, MINUTES)
       .buildSingle()
 
   @JvmStatic
