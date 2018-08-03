@@ -34,8 +34,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LockInfoInteractorImpl @Inject internal constructor(
   @Named("interactor_lock_info") private val db: LockInfoInteractor,
-  @Named("repo_lock_info") private val repoLockInfo: SingleRepo<List<ActivityEntry>>,
-  @Named("cache_lock_list") private val lockListCache: Cache
+  @Named("repo_lock_info") private val repoLockInfo: SingleRepo<List<ActivityEntry>>
 ) : LockInfoInteractor, Cache {
 
   override fun modifyEntry(
@@ -51,12 +50,10 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         code, system
     )
         .doAfterTerminate { repoLockInfo.invalidate(packageName) }
-        .doAfterTerminate { lockListCache.clearCache() }
   }
 
   override fun clearCache() {
     repoLockInfo.clearAll()
-    lockListCache.clearCache()
   }
 
   override fun hasShownOnBoarding(): Single<Boolean> = db.hasShownOnBoarding()

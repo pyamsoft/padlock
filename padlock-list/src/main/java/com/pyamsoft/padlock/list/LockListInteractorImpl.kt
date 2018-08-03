@@ -33,8 +33,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LockListInteractorImpl @Inject internal constructor(
   @param:Named("interactor_lock_list") private val db: LockListInteractor,
-  @param:Named("repo_lock_list") private val repoLockList: SingleRepo<List<AppEntry>>,
-  @param:Named("cache_purge") private val purgeCache: Cache
+  @param:Named("repo_lock_list") private val repoLockList: SingleRepo<List<AppEntry>>
 ) : LockListInteractor, Cache {
 
   override fun hasShownOnBoarding(): Single<Boolean> = db.hasShownOnBoarding()
@@ -77,7 +76,6 @@ internal class LockListInteractorImpl @Inject internal constructor(
 
   override fun clearCache() {
     repoLockList.clearAll()
-    purgeCache.clearCache()
   }
 
   companion object {
