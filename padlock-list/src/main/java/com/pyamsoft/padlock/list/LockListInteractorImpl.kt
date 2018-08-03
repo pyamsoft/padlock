@@ -20,6 +20,7 @@ import com.popinnow.android.repo.SingleRepo
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.padlock.model.list.LockListUpdatePayload
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Completable
@@ -49,19 +50,13 @@ internal class LockListInteractorImpl @Inject internal constructor(
         .doOnError { repoLockList.clearAll() }
   }
 
-  override fun subscribeForUpdates(diffProvider: ListDiffProvider<AppEntry>):
-      Observable<Pair<List<AppEntry>, List<Pair<Int, AppEntry?>>>> {
-    return db.subscribeForUpdates(diffProvider)
+  override fun subscribeForUpdates(provider: ListDiffProvider<AppEntry>): Observable<LockListUpdatePayload> {
+    return db.subscribeForUpdates(provider)
         .doOnNext {
-          val newList = ArrayList(it.first)
-          for (change in it.second) {
-            val (index, entry) = change
-            if (entry != null) {
-              newList[index] = entry
-            }
-          }
-
-          repoLockList.put(REPO_KEY, newList)
+          // Each time the updater emits, we get the current list, update it, and cache it
+          val list = ArrayList(provider.data())
+          list[it.index] = it.entry
+          repoLockList.put(REPO_KEY, list)
         }
   }
 

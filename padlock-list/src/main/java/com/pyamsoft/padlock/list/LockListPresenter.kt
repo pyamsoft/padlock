@@ -31,7 +31,6 @@ import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.presenter.Presenter
 import com.pyamsoft.pydroid.list.ListDiffProvider
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -68,13 +67,9 @@ class LockListPresenter @Inject internal constructor(
   private fun subscribeToDatabaseChanges() {
     dispose(ON_STOP) {
       lockListInteractor.subscribeForUpdates(listDiffProvider)
-          .map { it.second }
-          .flatMap { Observable.fromIterable(it) }
-          .filter { it.first >= 0 }
-          .map { it.first to it.second!! }
           .subscribeOn(Schedulers.computation())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({ view?.onDatabaseChangeReceived(it.first, it.second) }, {
+          .subscribe({ view?.onDatabaseChangeReceived(it.index, it.entry) }, {
             Timber.e(it, "Error while subscribed to database changes")
             view?.onDatabaseChangeError(it)
           })

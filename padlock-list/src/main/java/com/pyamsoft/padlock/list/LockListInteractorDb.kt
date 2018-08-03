@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list
 
 import androidx.annotation.CheckResult
-import androidx.recyclerview.widget.DiffUtil
 import com.pyamsoft.padlock.api.EntryQueryDao
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockListPreferences
@@ -35,9 +34,8 @@ import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.INSERTED
 import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.UPDATED
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.padlock.model.list.LockListUpdatePayload
 import com.pyamsoft.pydroid.list.ListDiffProvider
-import com.pyamsoft.pydroid.list.ListDiffResult
-import com.pyamsoft.pydroid.list.ListDiffResultImpl
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -139,7 +137,7 @@ internal class LockListInteractorDb @Inject internal constructor(
   private fun onEntityInserted(
     event: EntityChangeEvent,
     list: List<AppEntry>
-  ): List<Pair<Int, AppEntry?>> {
+  ): Observable<LockListUpdatePayload> {
     return onEntityInserted(event.packageName!!, event.activityName!!, event.whitelisted, list)
   }
 
@@ -149,7 +147,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     activityName: String,
     whitelisted: Boolean,
     list: List<AppEntry>
-  ): List<Pair<Int, AppEntry?>> {
+  ): Observable<LockListUpdatePayload> {
     return if (activityName == PadLockDbModels.PACKAGE_ACTIVITY_NAME) {
       onParentEntityInserted(packageName, list)
     } else {
@@ -163,16 +161,16 @@ internal class LockListInteractorDb @Inject internal constructor(
     activityName: String,
     whitelisted: Boolean,
     list: List<AppEntry>
-  ): List<Pair<Int, AppEntry?>> {
+  ): Observable<LockListUpdatePayload> {
     // One of the sublist items was changed
     val index = list.map { it.packageName }
         .indexOf(packageName)
     if (index < 0) {
       Timber.w("Received a PACKAGE_INSERT event for $packageName - but it's not in the list")
-      return listOf(-1 to null)
+      return Observable.empty()
     }
 
-    val item = list[index]
+    val item = list[index].copy()
 
     if (whitelisted) {
       if (item.hardLocked.contains(activityName)) {
@@ -188,14 +186,14 @@ internal class LockListInteractorDb @Inject internal constructor(
       item.hardLocked.add(activityName)
     }
 
-    return listOf(index to item)
+    return Observable.just(LockListUpdatePayload(index, item))
   }
 
   @CheckResult
   private fun onParentEntityInserted(
     packageName: String,
     list: List<AppEntry>
-  ): List<Pair<Int, AppEntry>> {
+  ): Observable<LockListUpdatePayload> {
     // We should be in scheduler at this point so it is safe to block off main thread
     val appInfo = applicationManager.getApplicationInfo(packageName)
         .blockingGet()
@@ -213,21 +211,24 @@ internal class LockListInteractorDb @Inject internal constructor(
       // Hey look its us (whitelisted or hardlocked entries present)
       if (entry.packageName == packageName) {
         // Return out here for optimization
-        return listOf(i to entry.copy(locked = true))
+        return Observable.just(LockListUpdatePayload(i, entry.copy(locked = true)))
       }
 
       // Don't exit out early because our package name may be zzz even though the app name is aaa
     }
 
     // We are new, add us somewhere
-    return listOf(
-        index to AppEntry(
-            entryName,
-            packageName,
-            appInfo.system,
-            true,
-            LinkedHashSet(),
-            LinkedHashSet()
+    return Observable.just(
+        LockListUpdatePayload(
+            index,
+            AppEntry(
+                entryName,
+                packageName,
+                appInfo.system,
+                true,
+                LinkedHashSet(),
+                LinkedHashSet()
+            )
         )
     )
   }
@@ -236,7 +237,7 @@ internal class LockListInteractorDb @Inject internal constructor(
   private fun onEntityUpdated(
     event: EntityChangeEvent,
     list: List<AppEntry>
-  ): List<Pair<Int, AppEntry?>> {
+  ): Observable<LockListUpdatePayload> {
     return onEntityUpdated(event.packageName!!, event.activityName!!, event.whitelisted, list)
   }
 
@@ -246,16 +247,15 @@ internal class LockListInteractorDb @Inject internal constructor(
     activityName: String,
     whitelisted: Boolean,
     list: List<AppEntry>
-  ): List<Pair<Int, AppEntry?>> {
+  ): Observable<LockListUpdatePayload> {
     val index = list.map { it.packageName }
         .indexOf(packageName)
     if (index < 0) {
       Timber.w("Received a PACKAGE_UPDATE event for $packageName - but it's not in the list")
-      return listOf(-1 to null)
+      return Observable.empty()
     }
 
-    val item = list[index]
-
+    val item = list[index].copy()
     if (whitelisted) {
       if (item.hardLocked.contains(activityName)) {
         item.hardLocked.remove(activityName)
@@ -270,14 +270,14 @@ internal class LockListInteractorDb @Inject internal constructor(
       // Don't touch hardlock set - if it was already in it stays in.
     }
 
-    return listOf(index to item)
+    return Observable.just(LockListUpdatePayload(index, item))
   }
 
   @CheckResult
   private fun onEntityDeleted(
     event: EntityChangeEvent,
     list: List<AppEntry>
-  ): List<Pair<Int, AppEntry?>> {
+  ): Observable<LockListUpdatePayload> {
     return when {
       event.packageName == null -> onAllEntitiesDeleted(list)
       event.activityName == null -> onPackageDeleted(/* Never null */ event.packageName!!, list)
@@ -290,23 +290,22 @@ internal class LockListInteractorDb @Inject internal constructor(
     packageName: String,
     activityName: String,
     list: List<AppEntry>
-  ): List<Pair<Int, AppEntry?>> {
+  ): Observable<LockListUpdatePayload> {
     val index = list.map { it.packageName }
         .indexOf(packageName)
     if (index < 0) {
       Timber.w("Received a PACKAGE_DELETE event for $packageName - but it's not in the list")
-      return listOf(-1 to null)
+      return Observable.empty()
     }
 
-    val item = list[index]
-
-    val result: AppEntry
+    val item: AppEntry
     if (activityName == PadLockDbModels.PACKAGE_ACTIVITY_NAME) {
       // Top level
-      result = item.copy(locked = false)
+      item = list[index].copy(locked = false)
     } else {
       // Sub level
 
+      item = list[index].copy()
       // Pop deleted out of whitelisted set
       if (item.whitelisted.contains(activityName)) {
         item.whitelisted.remove(activityName)
@@ -316,19 +315,17 @@ internal class LockListInteractorDb @Inject internal constructor(
       if (item.hardLocked.contains(activityName)) {
         item.hardLocked.remove(activityName)
       }
-
-      result = item
     }
 
-    return listOf(index to result)
+    return Observable.just(LockListUpdatePayload(index, item))
   }
 
   @CheckResult
   private fun onPackageDeleted(
     packageName: String,
     list: List<AppEntry>
-  ): List<Pair<Int, AppEntry>> {
-    return list
+  ): Observable<LockListUpdatePayload> {
+    return Observable.fromIterable(list
         .filter { it.packageName == packageName }
         .map {
           return@map it.copy(
@@ -337,74 +334,30 @@ internal class LockListInteractorDb @Inject internal constructor(
               hardLocked = LinkedHashSet()
           )
         }
-        .mapIndexed { index, entry -> index to entry }
+        .mapIndexed { index, entry -> LockListUpdatePayload(index, entry) }
+    )
   }
 
   @CheckResult
-  private fun onAllEntitiesDeleted(list: List<AppEntry>): List<Pair<Int, AppEntry>> {
-    return list
+  private fun onAllEntitiesDeleted(list: List<AppEntry>): Observable<LockListUpdatePayload> {
+    return Observable.fromIterable(list
         .map {
           it.copy(locked = false, whitelisted = LinkedHashSet(), hardLocked = LinkedHashSet())
         }
-        .mapIndexed { index, entry -> index to entry }
+        .mapIndexed { index, entry -> LockListUpdatePayload(index, entry) }
+    )
   }
 
-  override fun subscribeForUpdates(diffProvider: ListDiffProvider<AppEntry>):
-      Observable<Pair<List<AppEntry>, List<Pair<Int, AppEntry?>>>> {
+  override fun subscribeForUpdates(provider: ListDiffProvider<AppEntry>): Observable<LockListUpdatePayload> {
     return queryDao.subscribeToUpdates()
-        .map {
-          val oldList = diffProvider.data()
-          return@map oldList to when (it.type) {
+        .flatMap {
+          val oldList = provider.data()
+          return@flatMap when (it.type) {
             INSERTED -> onEntityInserted(it, oldList.toList())
             UPDATED -> onEntityUpdated(it, oldList.toList())
             DELETED -> onEntityDeleted(it, oldList.toList())
           }
         }
-  }
-
-  @CheckResult
-  private fun calculateListDiff(
-    oldList: List<AppEntry>,
-    newList: List<AppEntry>
-  ): ListDiffResult<AppEntry> {
-    val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-
-      override fun getOldListSize(): Int = oldList.size
-
-      override fun getNewListSize(): Int = newList.size
-
-      override fun areItemsTheSame(
-        oldItemPosition: Int,
-        newItemPosition: Int
-      ): Boolean {
-        val oldItem: AppEntry = oldList[oldItemPosition]
-        val newItem: AppEntry = newList[newItemPosition]
-        return oldItem.packageName == newItem.packageName
-      }
-
-      override fun areContentsTheSame(
-        oldItemPosition: Int,
-        newItemPosition: Int
-      ): Boolean {
-        val oldItem: AppEntry = oldList[oldItemPosition]
-        val newItem: AppEntry = newList[newItemPosition]
-        val same = oldItem == newItem
-        Timber.d("Are Contents same? $oldItem, $newItem    $same")
-        return same
-      }
-
-      override fun getChangePayload(
-        oldItemPosition: Int,
-        newItemPosition: Int
-      ): Any? {
-        // TODO: Construct specific change payload
-        Timber.w("TODO: Construct specific change payload")
-        return super.getChangePayload(oldItemPosition, newItemPosition)
-      }
-
-    }, false)
-
-    return ListDiffResultImpl(newList, result)
   }
 
   @CheckResult

@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.padlock.model.list.LockListUpdatePayload
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -28,8 +29,7 @@ interface LockListInteractor : LockStateModifyInteractor {
   fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>>
 
   @CheckResult
-  fun subscribeForUpdates(diffProvider: ListDiffProvider<AppEntry>):
-      Observable<Pair<List<AppEntry>, List<Pair<Int, AppEntry?>>>>
+  fun subscribeForUpdates(provider: ListDiffProvider<AppEntry>): Observable<LockListUpdatePayload>
 
   @CheckResult
   fun hasShownOnBoarding(): Single<Boolean>
