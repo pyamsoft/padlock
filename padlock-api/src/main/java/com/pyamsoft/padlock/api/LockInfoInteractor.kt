@@ -18,12 +18,18 @@ package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.list.ActivityEntry
-import com.pyamsoft.pydroid.list.ListDiffResult
-import io.reactivex.Flowable
+import com.pyamsoft.padlock.model.list.LockInfoUpdatePayload
+import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Observable
 import io.reactivex.Single
 
 interface LockInfoInteractor : LockStateModifyInteractor {
+
+  @CheckResult
+  fun subscribeForUpdates(
+    packageName: String,
+    provider: ListDiffProvider<ActivityEntry>
+  ): Observable<LockInfoUpdatePayload>
 
   @CheckResult
   fun hasShownOnBoarding(): Single<Boolean>
@@ -32,12 +38,5 @@ interface LockInfoInteractor : LockStateModifyInteractor {
   fun fetchActivityEntryList(
     bypass: Boolean,
     packageName: String
-  ): Flowable<List<ActivityEntry>>
-
-  @CheckResult
-  fun calculateListDiff(
-    packageName: String,
-    oldList: List<ActivityEntry>,
-    newList: List<ActivityEntry>
-  ): Single<ListDiffResult<ActivityEntry>>
+  ): Single<List<ActivityEntry>>
 }

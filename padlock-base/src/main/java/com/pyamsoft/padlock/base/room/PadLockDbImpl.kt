@@ -16,7 +16,6 @@ import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
 import com.pyamsoft.pydroid.core.bus.RxBus
 import io.reactivex.Completable
-import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import timber.log.Timber
@@ -36,7 +35,7 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
       return bus.listen()
     }
 
-    override fun queryWithPackageName(packageName: String): Flowable<List<WithPackageNameModel>> {
+    override fun queryWithPackageName(packageName: String): Single<List<WithPackageNameModel>> {
       return queryDao().queryWithPackageName(packageName)
     }
 

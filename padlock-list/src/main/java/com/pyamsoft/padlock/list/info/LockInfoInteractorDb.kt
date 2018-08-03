@@ -17,19 +17,24 @@
 package com.pyamsoft.padlock.list.info
 
 import androidx.annotation.CheckResult
-import androidx.recyclerview.widget.DiffUtil
 import com.pyamsoft.padlock.api.EntryQueryDao
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.OnboardingPreferences
 import com.pyamsoft.padlock.api.PackageActivityManager
 import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.LockState.DEFAULT
+import com.pyamsoft.padlock.model.LockState.LOCKED
+import com.pyamsoft.padlock.model.LockState.WHITELISTED
+import com.pyamsoft.padlock.model.db.EntityChangeEvent
+import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.DELETED
+import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.INSERTED
+import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.UPDATED
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
 import com.pyamsoft.padlock.model.list.ActivityEntry
-import com.pyamsoft.pydroid.list.ListDiffResult
-import com.pyamsoft.pydroid.list.ListDiffResultImpl
+import com.pyamsoft.padlock.model.list.LockInfoUpdatePayload
+import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Completable
-import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.observables.GroupedObservable
@@ -55,7 +60,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   @CheckResult
   private fun getLockedActivityEntries(
     name: String
-  ): Flowable<List<WithPackageNameModel>> = queryDao.queryWithPackageName(name)
+  ): Single<List<WithPackageNameModel>> = queryDao.queryWithPackageName(name)
 
   @CheckResult
   private fun getPackageActivities(name: String): Single<List<String>> =
@@ -186,9 +191,9 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun fetchData(fetchName: String): Flowable<List<ActivityEntry.Item>> {
-    return getLockedActivityEntries(fetchName).flatMapSingle { entries ->
-      return@flatMapSingle getPackageActivities(fetchName)
+  private fun fetchData(fetchName: String): Single<List<ActivityEntry.Item>> {
+    return getLockedActivityEntries(fetchName).flatMap { entries ->
+      return@flatMap getPackageActivities(fetchName)
           .map { createSortedActivityEntryList(fetchName, it, entries) }
           .flatMapObservable { Observable.fromIterable(it) }
           .toSortedList { o1, o2 ->
@@ -223,70 +228,13 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   override fun fetchActivityEntryList(
     bypass: Boolean,
     packageName: String
-  ): Flowable<List<ActivityEntry>> {
-    return fetchData(packageName).flatMapSingle {
-      return@flatMapSingle Observable.fromIterable(it)
+  ): Single<List<ActivityEntry>> {
+    return fetchData(packageName).flatMap {
+      return@flatMap Observable.fromIterable(it)
           .groupBy { it.group }
           .sorted { o1, o2 -> compareByGroup(o1, o2) }
           .concatMap { sortWithinGroup(it) }
           .toList()
-    }
-  }
-
-  override fun calculateListDiff(
-    packageName: String,
-    oldList: List<ActivityEntry>,
-    newList: List<ActivityEntry>
-  ): Single<ListDiffResult<ActivityEntry>> {
-    return Single.fromCallable {
-      val result: DiffUtil.DiffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-
-        override fun getOldListSize(): Int = oldList.size
-
-        override fun getNewListSize(): Int = newList.size
-
-        override fun areItemsTheSame(
-          oldItemPosition: Int,
-          newItemPosition: Int
-        ): Boolean {
-          val oldItem: ActivityEntry = oldList[oldItemPosition]
-          val newItem: ActivityEntry = newList[newItemPosition]
-          if (oldItem is ActivityEntry.Item && newItem is ActivityEntry.Item) {
-            return oldItem.name == newItem.name
-          } else if (oldItem is ActivityEntry.Group && newItem is ActivityEntry.Group) {
-            return oldItem.name == newItem.name
-          } else {
-            return false
-          }
-        }
-
-        override fun areContentsTheSame(
-          oldItemPosition: Int,
-          newItemPosition: Int
-        ): Boolean {
-          val oldItem: ActivityEntry = oldList[oldItemPosition]
-          val newItem: ActivityEntry = newList[newItemPosition]
-          if (oldItem is ActivityEntry.Item && newItem is ActivityEntry.Item) {
-            return oldItem == newItem
-          } else if (oldItem is ActivityEntry.Group && newItem is ActivityEntry.Group) {
-            return oldItem == newItem
-          } else {
-            return false
-          }
-        }
-
-        override fun getChangePayload(
-          oldItemPosition: Int,
-          newItemPosition: Int
-        ): Any? {
-          // TODO: Construct specific change payload
-          Timber.w("TODO: Construct specific change payload")
-          return super.getChangePayload(oldItemPosition, newItemPosition)
-        }
-
-      }, false)
-
-      return@fromCallable ListDiffResultImpl(newList, result)
     }
   }
 
@@ -302,5 +250,169 @@ internal class LockInfoInteractorDb @Inject internal constructor(
         oldLockState, newLockState, packageName,
         activityName, code, system
     )
+  }
+
+  override fun subscribeForUpdates(
+    packageName: String,
+    provider: ListDiffProvider<ActivityEntry>
+  ): Observable<LockInfoUpdatePayload> {
+    return queryDao.subscribeToUpdates()
+        .filter { it.packageName == packageName }
+        .flatMap {
+          val oldList = provider.data()
+          return@flatMap when (it.type) {
+            INSERTED -> onEntityInserted(it, oldList.toList())
+            UPDATED -> onEntityUpdated(it, oldList.toList())
+            DELETED -> onEntityDeleted(it, oldList.toList())
+          }
+        }
+  }
+
+  private fun onEntityDeleted(
+    event: EntityChangeEvent,
+    list: List<ActivityEntry>
+  ): Observable<LockInfoUpdatePayload> {
+    return when {
+      event.packageName == null -> onAllEntitiesDeleted(list)
+      event.activityName == null -> onPackageDeleted(list)
+      else -> onEntryDeleted(/* Never null*/  event.activityName!!, list)
+    }
+  }
+
+  @CheckResult
+  private fun onAllEntitiesDeleted(list: List<ActivityEntry>): Observable<LockInfoUpdatePayload> {
+    return onPackageDeleted(list)
+  }
+
+  @CheckResult
+  private fun onPackageDeleted(
+    list: List<ActivityEntry>
+  ): Observable<LockInfoUpdatePayload> {
+    val result = ArrayList<LockInfoUpdatePayload>()
+    for ((index, item) in list.withIndex()) {
+      if (item is ActivityEntry.Item) {
+        result.add(LockInfoUpdatePayload(index, item.copy(lockState = DEFAULT)))
+      }
+    }
+
+    return Observable.fromIterable(result)
+  }
+
+  @CheckResult
+  private fun onEntryDeleted(
+    activityName: String,
+    list: List<ActivityEntry>
+  ): Observable<LockInfoUpdatePayload> {
+    var index: Int = -1
+
+    // We must loop manually because filtering out the list changes indexes
+    for ((i, item) in list.withIndex()) {
+      if (item is ActivityEntry.Item) {
+        if (item.name == activityName) {
+          index = i
+          break
+        }
+      }
+    }
+
+    if (index < 0) {
+      Timber.w("Received an ACTIVITY_DELETE event for $activityName but it's not in the list")
+      return Observable.empty()
+    }
+
+    val item = (list[index] as ActivityEntry.Item).copy(lockState = DEFAULT)
+    return Observable.just(LockInfoUpdatePayload(index, item))
+  }
+
+  @CheckResult
+  private fun onEntityUpdated(
+    event: EntityChangeEvent,
+    list: List<ActivityEntry>
+  ): Observable<LockInfoUpdatePayload> {
+    if (event.activityName == null || event.packageName == null) {
+      Timber.w("Received an ACTIVITY_INSERT event but will null package name and activity name")
+      return Observable.empty()
+    }
+
+    val packageName = event.packageName!!
+    val activityName = event.activityName!!
+
+    var index: Int = -1
+
+    // We must loop manually because filtering out the list changes indexes
+    for ((i, item) in list.withIndex()) {
+      if (item is ActivityEntry.Item) {
+        if (item.name == activityName) {
+          index = i
+          break
+        }
+      }
+    }
+
+    if (index < 0) {
+      Timber.w(
+          """
+        |Received an ACTIVITY_UPDATE event for $packageName $activityName
+        |but it's not in the list
+        |"""
+      )
+      return Observable.empty()
+    }
+
+    if (event.whitelisted) {
+      // Whitelisting
+      val item = (list[index] as ActivityEntry.Item).copy(lockState = WHITELISTED)
+      return Observable.just(LockInfoUpdatePayload(index, item))
+    } else {
+      // No change
+      return Observable.empty()
+    }
+  }
+
+  @CheckResult
+  private fun onEntityInserted(
+    event: EntityChangeEvent,
+    list: List<ActivityEntry>
+  ): Observable<LockInfoUpdatePayload> {
+    if (event.activityName == null || event.packageName == null) {
+      Timber.w("Received an ACTIVITY_INSERT event but will null package name and activity name")
+      return Observable.empty()
+    }
+
+    val packageName = event.packageName!!
+    val activityName = event.activityName!!
+
+    var index: Int = -1
+
+    // We must loop manually because filtering out the list changes indexes
+    for ((i, item) in list.withIndex()) {
+      if (item is ActivityEntry.Item) {
+        if (item.name == activityName) {
+          index = i
+          break
+        }
+      }
+    }
+
+    if (index < 0) {
+      Timber.w(
+          """
+        |Received an ACTIVITY_INSERT event for $packageName $activityName
+        |but it's not in the list
+        |"""
+      )
+      return Observable.empty()
+    }
+
+    val item: ActivityEntry.Item
+    if (event.whitelisted) {
+      // Whitelisting
+      item = (list[index] as ActivityEntry.Item).copy(lockState = WHITELISTED)
+    } else {
+      // Hardlocked
+      item = (list[index] as ActivityEntry.Item).copy(lockState = LOCKED)
+    }
+
+    return Observable.just(LockInfoUpdatePayload(index, item))
   }
 }

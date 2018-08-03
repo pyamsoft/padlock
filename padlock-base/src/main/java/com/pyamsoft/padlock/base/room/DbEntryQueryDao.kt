@@ -43,9 +43,9 @@ internal abstract class DbEntryQueryDao internal constructor() : EntryQueryDao {
   @CheckResult
   internal abstract fun daoQueryAll(): Maybe<List<PadLockEntryDb>>
 
-  override fun queryWithPackageName(packageName: String): Flowable<List<WithPackageNameModel>> {
+  override fun queryWithPackageName(packageName: String): Single<List<WithPackageNameModel>> {
     return daoQueryWithPackageName(packageName)
-        .defaultIfEmpty(emptyList())
+        .toSingle(emptyList())
         .map { it }
   }
 
@@ -55,7 +55,7 @@ internal abstract class DbEntryQueryDao internal constructor() : EntryQueryDao {
   // We intentionally do not ask for everything
   @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
   @CheckResult
-  internal abstract fun daoQueryWithPackageName(packageName: String): Flowable<List<PadLockEntryDb>>
+  internal abstract fun daoQueryWithPackageName(packageName: String): Maybe<List<PadLockEntryDb>>
 
   override fun queryWithPackageActivityName(
     packageName: String,

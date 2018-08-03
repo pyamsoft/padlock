@@ -5,7 +5,6 @@ import com.pyamsoft.padlock.model.db.AllEntriesModel
 import com.pyamsoft.padlock.model.db.EntityChangeEvent
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
-import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 
@@ -19,7 +18,7 @@ interface EntryQueryDao {
   fun queryAll(): Single<List<AllEntriesModel>>
 
   @CheckResult
-  fun queryWithPackageName(packageName: String): Flowable<List<WithPackageNameModel>>
+  fun queryWithPackageName(packageName: String): Single<List<WithPackageNameModel>>
 
   @CheckResult
   fun queryWithPackageActivityName(

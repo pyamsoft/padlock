@@ -18,12 +18,11 @@ package com.pyamsoft.padlock.list.info
 
 import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockInfoInteractor
-import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
+import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.list.ListDiffProvider
-import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.core.presenter.Presenter
+import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -48,6 +47,19 @@ class LockInfoPresenter @Inject internal constructor(
   override fun onStart() {
     super.onStart()
     populateList(false)
+    subscribeToDatabaseChanges()
+  }
+
+  private fun subscribeToDatabaseChanges() {
+    dispose(ON_STOP) {
+      interactor.subscribeForUpdates(packageName, listDiffProvider)
+          .subscribeOn(Schedulers.computation())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe({ view?.onDatabaseChangeReceived(it.index, it.entry) }, {
+            Timber.e(it, "Error while subscribed to database changes")
+            view?.onDatabaseChangeError(it)
+          })
+    }
   }
 
   private fun registerOnWhitelistedBus() {
@@ -92,14 +104,12 @@ class LockInfoPresenter @Inject internal constructor(
   fun populateList(forceRefresh: Boolean) {
     dispose(ON_STOP) {
       interactor.fetchActivityEntryList(forceRefresh, packageName)
-          .flatMapSingle { interactor.calculateListDiff(packageName, listDiffProvider.data(), it) }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .doAfterNext { view?.onListPopulated() }
-          .doOnError { view?.onListPopulated() }
+          .doAfterTerminate { view?.onListPopulated() }
           .doOnSubscribe { view?.onListPopulateBegin() }
           .subscribe({ view?.onListLoaded(it) }, {
-            Timber.e(it, "LockInfoPresenterImpl populateList onError")
+            Timber.e(it, "LockInfoPresenter populateList onError")
             view?.onListPopulateError(it)
           })
     }
@@ -120,7 +130,17 @@ class LockInfoPresenter @Inject internal constructor(
     }
   }
 
-  interface View : LockModifyCallback, ListPopulateCallback, OnboardingCallback
+  interface View : LockModifyCallback, ListPopulateCallback, OnboardingCallback, ChangeCallback
+
+  interface ChangeCallback {
+
+    fun onDatabaseChangeReceived(
+      index: Int,
+      entry: ActivityEntry
+    )
+
+    fun onDatabaseChangeError(throwable: Throwable)
+  }
 
   interface LockModifyCallback {
 
@@ -131,7 +151,7 @@ class LockInfoPresenter @Inject internal constructor(
 
     fun onListPopulateBegin()
 
-    fun onListLoaded(result: ListDiffResult<ActivityEntry>)
+    fun onListLoaded(list: List<ActivityEntry>)
 
     fun onListPopulateError(throwable: Throwable)
 

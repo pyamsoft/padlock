@@ -29,20 +29,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
-import com.mikepenz.fastadapter.commons.utils.FastAdapterDiffUtil
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.dispatch
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.list.ListDiffProvider
-import com.pyamsoft.pydroid.list.ListDiffResult
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
@@ -273,8 +270,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     refreshLatch.isRefreshing = false
   }
 
-  override fun onListLoaded(result: ListDiffResult<ActivityEntry>) {
-    result.dispatch(adapter)
+  override fun onListLoaded(list: List<ActivityEntry>) {
+    adapter.set(list)
   }
 
   override fun onListPopulateError(throwable: Throwable) {
@@ -291,6 +288,17 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
 
   override fun onModifyEntryError(throwable: Throwable) {
     ErrorDialog().show(requireActivity(), "error")
+  }
+
+  override fun onDatabaseChangeReceived(
+    index: Int,
+    entry: ActivityEntry
+  ) {
+    adapter.set(index, entry)
+  }
+
+  override fun onDatabaseChangeError(throwable: Throwable) {
+    ErrorDialog().show(requireActivity(), "db_change_error")
   }
 
   companion object {

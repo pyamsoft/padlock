@@ -16,15 +16,15 @@
 
 package com.pyamsoft.padlock.list.info
 
-import com.popinnow.android.repo.ObservableRepo
+import com.popinnow.android.repo.SingleRepo
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.ActivityEntry
+import com.pyamsoft.padlock.model.list.LockInfoUpdatePayload
 import com.pyamsoft.pydroid.core.cache.Cache
-import com.pyamsoft.pydroid.list.ListDiffResult
-import io.reactivex.BackpressureStrategy.BUFFER
+import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Completable
-import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Named
@@ -34,7 +34,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LockInfoInteractorImpl @Inject internal constructor(
   @Named("interactor_lock_info") private val db: LockInfoInteractor,
-  @Named("repo_lock_info") private val repoLockInfo: ObservableRepo<List<ActivityEntry>>,
+  @Named("repo_lock_info") private val repoLockInfo: SingleRepo<List<ActivityEntry>>,
   @Named("cache_lock_list") private val lockListCache: Cache
 ) : LockInfoInteractor, Cache {
 
@@ -61,31 +61,25 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
 
   override fun hasShownOnBoarding(): Single<Boolean> = db.hasShownOnBoarding()
 
+  override fun subscribeForUpdates(
+    packageName: String,
+    provider: ListDiffProvider<ActivityEntry>
+  ): Observable<LockInfoUpdatePayload> {
+    return db.subscribeForUpdates(packageName, provider)
+        .doOnNext {
+          // Each time the updater emits, we get the current list, update it, and cache it
+          val list = ArrayList(provider.data())
+          list[it.index] = it.entry
+          repoLockInfo.put(packageName, list)
+        }
+  }
+
   override fun fetchActivityEntryList(
     bypass: Boolean,
     packageName: String
-  ): Flowable<List<ActivityEntry>> {
-    return repoLockInfo.get(bypass, packageName) { key ->
-      return@get db.fetchActivityEntryList(true, key)
-          // Each time the db refreshes the entire list, clear out the cache to store the new list
-          .doOnNext { repoLockInfo.invalidate(key) }
-          .toObservable()
-    }
-        .toFlowable(BUFFER)
-        .doAfterNext {
-          // Cache should only ever hold the most recent list - be memory efficient
-          repoLockInfo.memoryCache()
-              .trimToSize(1)
-        }
+  ): Single<List<ActivityEntry>> {
+    return repoLockInfo.get(bypass, packageName) { db.fetchActivityEntryList(true, it) }
         .doOnError { repoLockInfo.invalidate(packageName) }
   }
-
-  override fun calculateListDiff(
-    packageName: String,
-    oldList: List<ActivityEntry>,
-    newList: List<ActivityEntry>
-  ): Single<ListDiffResult<ActivityEntry>> =
-    db.calculateListDiff(packageName, oldList, newList)
-        .doOnError { repoLockInfo.invalidate(packageName) }
 
 }
