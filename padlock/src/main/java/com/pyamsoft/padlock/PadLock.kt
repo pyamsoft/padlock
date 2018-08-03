@@ -47,20 +47,18 @@ class PadLock : Application(), PYDroid.Instance {
       refWatcher = RefWatcher.DISABLED
     }
 
+    AboutLibraries.create("Room", "https://source.android.com", "licenses/room")
     AboutLibraries.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
     AboutLibraries.create(
-        "FastAdapter", "https://github.com/mikepenz/fastadapter",
-        "licenses/fastadapter"
+        "FastAdapter", "https://github.com/mikepenz/fastadapter", "licenses/fastadapter"
     )
     AboutLibraries.create(
-        "PatternLockView", "https://github.com/aritraroy/PatternLockView",
-        "licenses/patternlock"
+        "PatternLockView", "https://github.com/aritraroy/PatternLockView", "licenses/patternlock"
     )
     AboutLibraries.create(
         PYDroidListLicenses.Names.RECYCLERVIEW, PYDroidListLicenses.HomepageUrls.RECYCLERVIEW,
         PYDroidListLicenses.LicenseLocations.RECYCLERVIEW
     )
-
     PYDroid.init(this, this, BuildConfig.DEBUG)
 
     val dagger = Injector.obtain<PadLockComponent>(this)
