@@ -57,6 +57,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
           list[it.index] = it.entry
           repoLockList.put(REPO_KEY, list)
         }
+        .doOnError { repoLockList.clearAll() }
   }
 
   override fun modifyEntry(
@@ -71,7 +72,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
         oldLockState, newLockState, packageName, activityName,
         code, system
     )
-        .doAfterTerminate { clearCache() }
+        .doOnError { repoLockList.clearAll() }
   }
 
   override fun clearCache() {

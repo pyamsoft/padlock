@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
@@ -30,7 +31,6 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.ui.util.Snackbreak
-import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
@@ -159,10 +159,13 @@ class PurgeFragment : CanaryFragment(), PurgePresenter.View {
   }
 
   override fun onRetrieveError(throwable: Throwable) {
-    Snackbreak.short(
-        requireActivity(), binding.root,
-        ErrorDetail("Error getting outdated application list", throwable.localizedMessage)
+    Snackbreak.make(
+        binding.root,
+        "Failed to load outdated application list",
+        Snackbar.LENGTH_LONG
     )
+        .setAction("Retry") { presenter.retrieveStaleApplications(true) }
+        .show()
   }
 
   override fun onPause() {

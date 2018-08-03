@@ -49,7 +49,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         oldLockState, newLockState, packageName, activityName,
         code, system
     )
-        .doAfterTerminate { repoLockInfo.invalidate(packageName) }
+        .doOnError { repoLockInfo.invalidate(packageName) }
   }
 
   override fun clearCache() {
@@ -69,6 +69,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
           list[it.index] = it.entry
           repoLockInfo.put(packageName, list)
         }
+        .doOnError { repoLockInfo.invalidate(packageName) }
   }
 
   override fun fetchActivityEntryList(

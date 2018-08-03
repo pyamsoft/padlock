@@ -115,12 +115,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
             applistRecyclerview.visibility = View.GONE
             applistEmpty.visibility = View.VISIBLE
           }
-          Snackbreak.make(
-              binding.root,
-              "Failed to load application list",
-              Snackbar.LENGTH_SHORT
-          )
-              .show()
         }
       }
     }
@@ -331,7 +325,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onModifyEntryError(throwable: Throwable) {
-    ErrorDialog().show(requireActivity(), "list_error")
+    Snackbreak.make(
+        binding.root,
+        "Failed to modify application list",
+        Snackbar.LENGTH_LONG
+    )
+        .setAction("Retry") { presenter.populateList(true) }
+        .show()
   }
 
   override fun onFABEnabled() {
@@ -371,7 +371,13 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onListPopulateError(throwable: Throwable) {
-    ErrorDialog().show(requireActivity(), "list_error")
+    Snackbreak.make(
+        binding.root,
+        "Failed to load application list",
+        Snackbar.LENGTH_LONG
+    )
+        .setAction("Retry") { presenter.populateList(true) }
+        .show()
   }
 
   override fun onDatabaseChangeError(throwable: Throwable) {

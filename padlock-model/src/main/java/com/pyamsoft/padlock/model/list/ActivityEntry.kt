@@ -24,7 +24,11 @@ sealed class ActivityEntry(name: String) {
 
   init {
     val lastIndex = name.lastIndexOf('.')
-    group = name.substring(0 until lastIndex)
+    if (lastIndex > 0) {
+      group = name.substring(0 until lastIndex)
+    } else {
+      group = name
+    }
   }
 
   data class Group(val name: String) : ActivityEntry(name)

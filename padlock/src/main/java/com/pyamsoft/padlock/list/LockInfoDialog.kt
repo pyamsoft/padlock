@@ -116,12 +116,6 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
             lockInfoRecycler.visibility = View.GONE
             lockInfoEmpty.visibility = View.VISIBLE
           }
-          Snackbreak.make(
-              binding.root,
-              "Failed to load list for $appName",
-              Snackbar.LENGTH_SHORT
-          )
-              .show()
         }
       }
     }
@@ -275,7 +269,13 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   override fun onListPopulateError(throwable: Throwable) {
-    ErrorDialog().show(requireActivity(), "error")
+    Snackbreak.make(
+        binding.root,
+        "Failed to load list for $appName",
+        Snackbar.LENGTH_LONG
+    )
+        .setAction("Retry") { presenter.populateList(true) }
+        .show()
   }
 
   override fun onOnboardingComplete() {
@@ -287,7 +287,13 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   }
 
   override fun onModifyEntryError(throwable: Throwable) {
-    ErrorDialog().show(requireActivity(), "error")
+    Snackbreak.make(
+        binding.root,
+        "Failed to modify list for $appName",
+        Snackbar.LENGTH_LONG
+    )
+        .setAction("Retry") { presenter.populateList(true) }
+        .show()
   }
 
   override fun onDatabaseChangeReceived(

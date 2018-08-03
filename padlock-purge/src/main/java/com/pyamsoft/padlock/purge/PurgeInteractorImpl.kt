@@ -42,8 +42,12 @@ internal class PurgeInteractorImpl @Inject internal constructor(
   }
 
   override fun deleteEntry(packageName: String): Completable =
-    db.deleteEntry(packageName).doAfterTerminate { clearCache() }
+    db.deleteEntry(packageName)
+        .doAfterTerminate { clearCache() }
+        .doOnError { repoStale.clearAll() }
 
   override fun deleteEntries(packageNames: List<String>): Completable =
-    db.deleteEntries(packageNames).doAfterTerminate { clearCache() }
+    db.deleteEntries(packageNames)
+        .doAfterTerminate { clearCache() }
+        .doOnError { repoStale.clearAll() }
 }
