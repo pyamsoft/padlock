@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.base
 
 import android.graphics.drawable.Drawable
-import androidx.annotation.CheckResult
 import android.widget.ImageView
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.PackageIconManager
 import com.pyamsoft.padlock.model.IconHolder
 import com.pyamsoft.pydroid.loader.GenericLoader
@@ -61,7 +61,7 @@ internal class AppIconImageLoader internal constructor(
     packageName: String
   ): Loaded {
     return RxLoaded(loadCached(packageName)
-        .subscribeOn(Schedulers.io())
+        .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .doOnSubscribe { startAction?.invoke() }
         .subscribe({ holder ->
@@ -78,17 +78,19 @@ internal class AppIconImageLoader internal constructor(
 
   @CheckResult
   private fun loadCached(packageName: String): Single<IconHolder<Drawable>> {
-    val key: ImageCacheKey<String> = packageName.toKey()
-    val cached: Drawable? = appIconImageCache.retrieve(key)
-    if (cached == null) {
-      val result = loadFresh(packageName)
-      return result.doOnSuccess { holder ->
-        holder.applyIcon {
-          appIconImageCache.cache(key, it)
+    return Single.defer {
+      val key: ImageCacheKey<String> = packageName.toKey()
+      val cached: Drawable? = appIconImageCache.retrieve(key)
+      if (cached == null) {
+        val result = loadFresh(packageName)
+        return@defer result.doOnSuccess { holder ->
+          holder.applyIcon {
+            appIconImageCache.cache(key, it)
+          }
         }
+      } else {
+        return@defer Single.just(IconHolder(cached))
       }
-    } else {
-      return Single.just(IconHolder(cached))
     }
   }
 

@@ -19,7 +19,7 @@
 
 # Keep the SearchView class so that it works in Release builds.
 # https://code.google.com/p/android/issues/detail?id=58508
--keep class android.support.v7.widget.SearchView { *; }
+-keep class androidx.appcompat.widget.SearchView { *; }
 
 # Don't warn about ourselves
 -dontwarn com.pyamsoft.padlock.**

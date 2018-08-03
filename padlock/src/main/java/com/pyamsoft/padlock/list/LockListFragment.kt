@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.list
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -145,7 +144,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       it.inflateMenu(R.menu.search_menu)
 
       it.menu.apply {
-        setupDisplaySystemVisibleItem(this)
+        displaySystemItem = findItem(R.id.menu_is_system)
         filterListDelegate.onPrepareOptionsMenu(this, adapter)
       }
 
@@ -235,11 +234,6 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       applistEmpty.visibility = View.GONE
       applistRecyclerview.visibility = View.VISIBLE
     }
-  }
-
-  private fun setupDisplaySystemVisibleItem(menu: Menu) {
-    displaySystemItem = menu.findItem(R.id.menu_is_system)
-    presenter.setSystemVisibilityFromPreference()
   }
 
   override fun onDestroyView() {
@@ -335,12 +329,14 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onFABEnabled() {
+    Timber.d("on FAB enabled")
     imageLoader.fromResource(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
   }
 
   override fun onFABDisabled() {
+    Timber.d("on FAB disabled")
     imageLoader.fromResource(R.drawable.ic_lock_open_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
@@ -362,8 +358,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     refreshLatch.isRefreshing = true
   }
 
-  override fun onListLoaded(result: List<AppEntry>) {
-    adapter.set(result)
+  override fun onListLoaded(entries: List<AppEntry>) {
+    adapter.set(entries)
   }
 
   override fun onListPopulated() {

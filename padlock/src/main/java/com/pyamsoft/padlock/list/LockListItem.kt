@@ -60,51 +60,18 @@ class LockListItem internal constructor(
     payloads: List<Any>
   ) {
     super.bindView(holder, payloads)
-    holder.apply {
-      binding.apply {
-        lockListTitle.text = model.name
-        lockListToggle.setOnCheckedChangeListener(null)
-        lockListToggle.isChecked = model.locked
-        lockListWhite.isInvisible = model.whitelisted.isEmpty()
-        lockListLocked.isInvisible = model.hardLocked.isEmpty()
-      }
-
-      imageLoader.apply {
-        fromResource(R.drawable.ic_whitelisted).into(binding.lockListWhite)
-            .bind(holder)
-        fromResource(R.drawable.ic_hardlocked).into(binding.lockListLocked)
-            .bind(holder)
-      }
-      appIconLoader.forPackageName(model.packageName)
-          .into(binding.lockListIcon)
-          .bind(holder)
-
-      binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
-        buttonView.isChecked = isChecked.not()
-        Timber.d("Modify the database entry: ${model.packageName} $isChecked")
-        publisher.modifyEntry(isChecked, model.packageName, null, model.system)
-      }
-
-      bind()
-    }
+    holder.bind(model)
   }
 
   override fun unbindView(holder: ViewHolder) {
     super.unbindView(holder)
-    holder.apply {
-      binding.apply {
-        lockListTitle.text = null
-        lockListIcon.setImageDrawable(null)
-        lockListToggle.setOnCheckedChangeListener(null)
-      }
-      unbind()
-    }
+    holder.unbind()
   }
 
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView),
       LifecycleOwner {
 
-    internal val binding: AdapterItemLocklistBinding = AdapterItemLocklistBinding.bind(itemView)
+    private val binding: AdapterItemLocklistBinding = AdapterItemLocklistBinding.bind(itemView)
     @field:Inject
     internal lateinit var publisher: LockListItemPublisher
     @field:Inject
@@ -120,11 +87,42 @@ class LockListItem internal constructor(
 
     override fun getLifecycle(): Lifecycle = lifecycle
 
-    fun bind() {
+    fun bind(model: AppEntry) {
+      binding.apply {
+        lockListTitle.text = model.name
+        lockListToggle.setOnCheckedChangeListener(null)
+        lockListToggle.isChecked = model.locked
+        lockListWhite.isInvisible = model.whitelisted.isEmpty()
+        lockListLocked.isInvisible = model.hardLocked.isEmpty()
+      }
+
+      imageLoader.also {
+        it.fromResource(R.drawable.ic_whitelisted)
+            .into(binding.lockListWhite)
+            .bind(this)
+        it.fromResource(R.drawable.ic_hardlocked)
+            .into(binding.lockListLocked)
+            .bind(this)
+      }
+
+      appIconLoader.forPackageName(model.packageName)
+          .into(binding.lockListIcon)
+          .bind(this)
+
+      binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
+        buttonView.isChecked = isChecked.not()
+        Timber.d("Modify the database entry: ${model.packageName} $isChecked")
+        publisher.modifyEntry(isChecked, model.packageName, null, model.system)
+      }
       lifecycle.fakeBind()
     }
 
     fun unbind() {
+      binding.apply {
+        lockListTitle.text = null
+        lockListIcon.setImageDrawable(null)
+        lockListToggle.setOnCheckedChangeListener(null)
+      }
       lifecycle.fakeRelease()
     }
 

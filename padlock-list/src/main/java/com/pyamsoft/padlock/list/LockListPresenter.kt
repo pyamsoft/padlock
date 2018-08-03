@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
+import androidx.lifecycle.Lifecycle.Event.ON_PAUSE
 import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.LockServiceStateInteractor
@@ -61,7 +62,12 @@ class LockListPresenter @Inject internal constructor(
     super.onStart()
     populateList(false)
     subscribeToDatabaseChanges()
+  }
+
+  override fun onResume() {
+    super.onResume()
     setFABStateFromPreference()
+    setSystemVisibilityFromPreference()
   }
 
   private fun subscribeToDatabaseChanges() {
@@ -166,7 +172,7 @@ class LockListPresenter @Inject internal constructor(
   }
 
   private fun setFABStateFromPreference() {
-    dispose(ON_STOP) {
+    dispose(ON_PAUSE) {
       stateInteractor.isServiceEnabled()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
@@ -180,8 +186,8 @@ class LockListPresenter @Inject internal constructor(
     }
   }
 
-  fun setSystemVisibilityFromPreference() {
-    dispose {
+  private fun setSystemVisibilityFromPreference() {
+    dispose(ON_PAUSE) {
       lockListInteractor.isSystemVisible()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
@@ -288,7 +294,7 @@ class LockListPresenter @Inject internal constructor(
 
     fun onListPopulateBegin()
 
-    fun onListLoaded(result: List<AppEntry>)
+    fun onListLoaded(entries: List<AppEntry>)
 
     fun onListPopulated()
 

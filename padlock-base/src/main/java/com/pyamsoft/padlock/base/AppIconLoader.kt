@@ -22,9 +22,7 @@ import com.pyamsoft.padlock.api.PackageIconManager
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.loader.GenericLoader
 import com.pyamsoft.pydroid.loader.cache.ImageCache
-import io.reactivex.Scheduler
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @JvmSuppressWildcards

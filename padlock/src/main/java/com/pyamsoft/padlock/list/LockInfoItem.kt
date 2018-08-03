@@ -16,16 +16,16 @@
 
 package com.pyamsoft.padlock.list
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.widget.RadioButton
+import androidx.recyclerview.widget.RecyclerView
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding
 import com.pyamsoft.padlock.list.info.LockInfoItemPublisher
-import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.model.list.ActivityEntry
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -43,7 +43,45 @@ class LockInfoItem internal constructor(
     payloads: List<Any>
   ) {
     super.bindView(holder, payloads)
-    holder.apply {
+    holder.bind(model, system)
+  }
+
+  override fun unbindView(holder: ViewHolder) {
+    super.unbindView(holder)
+    holder.unbind()
+  }
+
+  override fun filterAgainst(query: String): Boolean {
+    val name = model.name.toLowerCase()
+        .trim { it <= ' ' }
+    Timber.d("Filter predicate: '%s' against %s", query, name)
+    return name.contains(query)
+  }
+
+  override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
+
+  class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+    private val binding: AdapterItemLockinfoBinding = AdapterItemLockinfoBinding.bind(itemView)
+    @field:Inject internal lateinit var publisher: LockInfoItemPublisher
+
+    init {
+      Injector.obtain<PadLockComponent>(itemView.context.applicationContext)
+          .inject(this)
+    }
+
+    private fun processModifyDatabaseEntry(
+      model: ActivityEntry.Item,
+      system: Boolean,
+      newLockState: LockState
+    ) {
+      publisher.modifyEntry(model, newLockState, null, system)
+    }
+
+    fun bind(
+      model: ActivityEntry.Item,
+      system: Boolean
+    ) {
       binding.apply {
         // Remove any old binds
         val lockedButton: RadioButton = when (model.lockState) {
@@ -70,33 +108,23 @@ class LockInfoItem internal constructor(
 
         lockInfoRadioDefault.setOnCheckedChangeListener { _, isChecked ->
           if (isChecked) {
-            processModifyDatabaseEntry(holder, LockState.DEFAULT)
+            processModifyDatabaseEntry(model, system, LockState.DEFAULT)
           }
         }
         lockInfoRadioWhite.setOnCheckedChangeListener { _, isChecked ->
           if (isChecked) {
-            processModifyDatabaseEntry(holder, LockState.WHITELISTED)
+            processModifyDatabaseEntry(model, system, LockState.WHITELISTED)
           }
         }
         lockInfoRadioBlack.setOnCheckedChangeListener { _, isChecked ->
           if (isChecked) {
-            processModifyDatabaseEntry(holder, LockState.LOCKED)
+            processModifyDatabaseEntry(model, system, LockState.LOCKED)
           }
         }
       }
     }
-  }
 
-  private fun processModifyDatabaseEntry(
-    holder: ViewHolder,
-    newLockState: LockState
-  ) {
-    holder.publisher.modifyEntry(model, newLockState, null, system)
-  }
-
-  override fun unbindView(holder: ViewHolder) {
-    super.unbindView(holder)
-    holder.apply {
+    fun unbind() {
       binding.apply {
         lockInfoActivity.text = null
         lockInfoRadioBlack.setOnCheckedChangeListener(null)
@@ -104,27 +132,6 @@ class LockInfoItem internal constructor(
         lockInfoRadioDefault.setOnCheckedChangeListener(null)
         lockInfoRadioGroup.setOnCheckedChangeListener(null)
       }
-    }
-  }
-
-  override fun filterAgainst(query: String): Boolean {
-    val name = model.name.toLowerCase()
-        .trim { it <= ' ' }
-    Timber.d("Filter predicate: '%s' against %s", query, name)
-    return name.contains(query)
-  }
-
-  override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
-
-  class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-    internal val binding: AdapterItemLockinfoBinding = AdapterItemLockinfoBinding.bind(itemView)
-    @field:Inject
-    internal lateinit var publisher: LockInfoItemPublisher
-
-    init {
-      Injector.obtain<PadLockComponent>(itemView.context.applicationContext)
-          .inject(this)
     }
   }
 }

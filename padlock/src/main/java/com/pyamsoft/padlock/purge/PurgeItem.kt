@@ -16,8 +16,8 @@
 
 package com.pyamsoft.padlock.purge
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemPurgeBinding
@@ -34,25 +34,29 @@ internal class PurgeItem internal constructor(
 
   override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
 
-  override fun unbindView(holder: ViewHolder) {
-    super.unbindView(holder)
-    holder.apply {
-      binding.itemPurgeName.text = null
-    }
-  }
-
   override fun bindView(
     holder: ViewHolder,
     payloads: List<Any>
   ) {
     super.bindView(holder, payloads)
-    holder.apply {
-      binding.itemPurgeName.text = model
-    }
+    holder.bind(model)
   }
 
-  internal class ViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
+  override fun unbindView(holder: ViewHolder) {
+    super.unbindView(holder)
+    holder.unbind()
+  }
 
-    internal val binding: AdapterItemPurgeBinding = AdapterItemPurgeBinding.bind(itemView)
+  internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+    private val binding: AdapterItemPurgeBinding = AdapterItemPurgeBinding.bind(itemView)
+
+    fun bind(model: String) {
+      binding.itemPurgeName.text = model
+    }
+
+    fun unbind() {
+      binding.itemPurgeName.text = null
+    }
   }
 }
