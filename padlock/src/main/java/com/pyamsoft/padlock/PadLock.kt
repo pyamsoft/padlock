@@ -47,10 +47,6 @@ class PadLock : Application(), PYDroid.Instance {
       refWatcher = RefWatcher.DISABLED
     }
 
-    AboutLibraries.create("SQLBrite", "https://github.com/square/sqlbrite", "licenses/sqlbrite")
-    AboutLibraries.create(
-        "SQLDelight", "https://github.com/square/sqldelight", "licenses/sqldelight"
-    )
     AboutLibraries.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
     AboutLibraries.create(
         "FastAdapter", "https://github.com/mikepenz/fastadapter",
