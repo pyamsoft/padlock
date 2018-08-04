@@ -50,6 +50,12 @@
     <item name="colorAccent">@color/white</item>
   </style>
 
+  <style name="Theme.PadLock.LockScreenToolbar" parent="@style/ThemeOverlay.AppCompat.Light">
+    <item name="android:colorControlActivated">@color/blue700</item>
+    <item name="android:colorControlHighlight">@color/blue500</item>
+    <item name="android:colorControlNormal">@color/grey500</item>
+  </style>
+
   <!-- Splash screen -->
   <style name="Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock.Light">
     <item name="android:windowBackground">@drawable/splash_screen</item>
