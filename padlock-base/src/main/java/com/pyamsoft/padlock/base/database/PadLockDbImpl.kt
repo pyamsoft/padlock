@@ -280,6 +280,9 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
         }
       }
 
+      // Close the database once we're done reading
+      sqldelight.close()
+
       // Wait for all the inserts to happen
       return@defer Completable.mergeArray(*inserts.toTypedArray())
     }
