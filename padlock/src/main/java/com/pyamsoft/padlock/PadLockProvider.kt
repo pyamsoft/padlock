@@ -24,6 +24,7 @@ import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.pydroid.core.cache.Cache
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.LoaderModule
 import dagger.Module
@@ -34,9 +35,14 @@ import javax.inject.Named
 class PadLockProvider(
   private val application: Application,
   private val loaderModule: LoaderModule,
+  private val enforcer: Enforcer,
   private val mainActivityClass: Class<out Activity>,
   private val recheckServiceClass: Class<out IntentService>
 ) {
+
+  @Provides
+  @CheckResult
+  fun provideEnforcer(): Enforcer = enforcer
 
   @Provides
   @CheckResult

@@ -52,6 +52,7 @@ class SettingsPresenter @Inject internal constructor(
               DATABASE -> interactor.clearDatabase()
               ALL -> interactor.clearAll()
             }
+                // Must subscribe here too or this runs on the main thread
                 .subscribeOn(Schedulers.io())
           }
           .subscribeOn(Schedulers.io())

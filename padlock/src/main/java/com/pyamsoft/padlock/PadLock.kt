@@ -80,6 +80,7 @@ class PadLock : Application(), PYDroid.Instance {
       val provider = PadLockProvider(
           this,
           it.modules().loaderModule(),
+          it.enforcer(),
           MainActivity::class.java,
           RecheckService::class.java
       )

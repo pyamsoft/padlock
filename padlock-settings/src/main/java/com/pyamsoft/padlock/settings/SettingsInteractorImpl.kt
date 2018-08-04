@@ -16,17 +16,18 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.api.preferences.ClearPreferences
+import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.api.database.EntryDeleteDao
+import com.pyamsoft.padlock.api.preferences.ClearPreferences
 import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
-import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.model.ConfirmEvent.ALL
 import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
 import io.reactivex.Single
 import timber.log.Timber
@@ -36,6 +37,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class SettingsInteractorImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val deleteDao: EntryDeleteDao,
   private val masterPinPreference: MasterPinPreferences,
   private val preferences: ClearPreferences,
@@ -50,25 +52,33 @@ internal class SettingsInteractorImpl @Inject internal constructor(
     SettingsInteractor {
 
   override fun isInstallListenerEnabled(): Single<Boolean> =
-    Single.fromCallable { installListenerPreferences.isInstallListenerEnabled() }
+    Single.fromCallable {
+      enforcer.assertNotOnMainThread()
+      return@fromCallable installListenerPreferences.isInstallListenerEnabled()
+    }
 
   override fun clearDatabase(): Single<ConfirmEvent> {
-    Timber.d("clear database")
-    return deleteDao.deleteAll()
-        .andThen(Completable.fromAction {
-          lockListInteractor.clearCache()
-          lockInfoInteractor.clearCache()
-          purgeInteractor.clearCache()
-          lockEntryInteractor.clearCache()
-          iconCache.clearCache()
-          listStateCache.clearCache()
-        })
-        .toSingleDefault(DATABASE)
+    return Single.defer {
+      Timber.d("clear database")
+      enforcer.assertNotOnMainThread()
+      return@defer deleteDao.deleteAll()
+          .andThen(Completable.fromAction {
+            enforcer.assertNotOnMainThread()
+            lockListInteractor.clearCache()
+            lockInfoInteractor.clearCache()
+            purgeInteractor.clearCache()
+            lockEntryInteractor.clearCache()
+            iconCache.clearCache()
+            listStateCache.clearCache()
+          })
+          .toSingleDefault(DATABASE)
+    }
   }
 
   override fun clearAll(): Single<ConfirmEvent> {
     // We map here to make sure the clear all is complete before stream continues
     return clearDatabase().map {
+      enforcer.assertNotOnMainThread()
       Timber.d("Clear all preferences")
       preferences.clearAll()
       return@map ALL
@@ -77,7 +87,8 @@ internal class SettingsInteractorImpl @Inject internal constructor(
 
   override fun hasExistingMasterPassword(): Single<Boolean> {
     return Single.fromCallable {
-      masterPinPreference.getMasterPassword()
+      enforcer.assertNotOnMainThread()
+      return@fromCallable masterPinPreference.getMasterPassword()
           .asOptional()
     }
         .map { it is Present }
