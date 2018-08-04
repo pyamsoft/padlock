@@ -124,15 +124,18 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     activityName: String,
     code: String?,
     system: Boolean
-  ): Completable = when {
-    newLockState === LockState.WHITELISTED -> whitelistEntry(
-        oldLockState, packageName,
-        activityName, code, system
-    )
-    newLockState === LockState.LOCKED -> forceLockEntry(
-        oldLockState, packageName, activityName,
-        code, system
-    )
-    else -> addNewEntry(oldLockState, packageName, activityName, code, system)
+  ): Completable = Completable.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer when {
+      newLockState === LockState.WHITELISTED -> whitelistEntry(
+          oldLockState, packageName,
+          activityName, code, system
+      )
+      newLockState === LockState.LOCKED -> forceLockEntry(
+          oldLockState, packageName, activityName,
+          code, system
+      )
+      else -> addNewEntry(oldLockState, packageName, activityName, code, system)
+    }
   }
 }

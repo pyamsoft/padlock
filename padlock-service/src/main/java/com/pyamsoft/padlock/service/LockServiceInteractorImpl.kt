@@ -151,7 +151,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     activityName: String
   ): MaybeTransformer<Boolean, PadLockEntryModel> {
     return MaybeTransformer { source ->
-      enforcer.assertNotOnMainThread()
       return@MaybeTransformer source.flatMap { _ ->
         enforcer.assertNotOnMainThread()
         Timber.d("Get locked with package: %s, class: %s", packageName, activityName)
@@ -164,7 +163,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   @CheckResult
   private fun filterOutInvalidEntries(): MaybeTransformer<PadLockEntryModel, PadLockEntryModel> {
     return MaybeTransformer { source ->
-      enforcer.assertNotOnMainThread()
       return@MaybeTransformer source.filter {
         enforcer.assertNotOnMainThread()
         val ignoreUntilTime: Long = it.ignoreUntilTime()
@@ -190,8 +188,10 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     activityName: String
   ): SingleTransformer<Boolean, PadLockEntryModel> {
     return SingleTransformer { source ->
-      enforcer.assertNotOnMainThread()
-      return@SingleTransformer source.filter { it }
+      return@SingleTransformer source.filter {
+        enforcer.assertNotOnMainThread()
+        return@filter it
+      }
           .compose(prepareLockScreen(packageName, activityName))
           .compose(filterOutInvalidEntries())
           .toSingle(PadLockDbModels.EMPTY)
@@ -203,21 +203,24 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun isServiceEnabled(): Maybe<Boolean> {
-    return stateInteractor.isServiceEnabled()
-        .filter {
-          enforcer.assertNotOnMainThread()
-          if (!it) {
-            Timber.e("Service is not user enabled, ignore event")
-            resetState()
+    return Maybe.defer {
+      enforcer.assertNotOnMainThread()
+      return@defer stateInteractor.isServiceEnabled()
+          .filter {
+            enforcer.assertNotOnMainThread()
+            if (!it) {
+              Timber.e("Service is not user enabled, ignore event")
+              resetState()
+            }
+            return@filter it
           }
-          return@filter it
-        }
-        .doOnSuccess {
-          if (isDeviceLocked()) {
-            Timber.w("Device is locked, reset last")
-            reset()
+          .doOnSuccess {
+            if (isDeviceLocked()) {
+              Timber.w("Device is locked, reset last")
+              reset()
+            }
           }
-        }
+    }
   }
 
   @CheckResult
@@ -226,7 +229,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     className: String
   ): MaybeTransformer<Boolean, Boolean> {
     return MaybeTransformer { source ->
-      enforcer.assertNotOnMainThread()
       return@MaybeTransformer source.isEmpty
           .filter {
             enforcer.assertNotOnMainThread()
@@ -254,7 +256,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     className: String
   ): MaybeTransformer<Boolean, Boolean> {
     return MaybeTransformer { source ->
-      enforcer.assertNotOnMainThread()
       return@MaybeTransformer source.filter {
         enforcer.assertNotOnMainThread()
         val restrict: Boolean = preferences.isIgnoreInKeyguard() && isDeviceLocked()
