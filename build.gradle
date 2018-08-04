@@ -19,7 +19,7 @@
 buildscript {
 
   ext {
-    kotlin_version = '1.2.51'
+    kotlin_version = '1.2.60'
     plugin_version = '3.2.0-beta05'
   }
 
@@ -37,7 +37,7 @@ buildscript {
     // AndroidX
     room = "2.0.0-beta01"
 
-    pydroid = "18.1.0-SNAPSHOT"
+    pydroid = "18.1.0"
     leakCanary = "1.6.1"
     dagger = "2.16"
     patternLock = "1.0.0"
