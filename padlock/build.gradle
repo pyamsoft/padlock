@@ -28,7 +28,7 @@ android {
     minSdkVersion rootProject.ext.minSdk
     targetSdkVersion rootProject.ext.maxSdk
     versionCode 95
-    versionName "2.4.5"
+    versionName "3.0.0-SNAPSHOT"
 
     // For vector drawables
     vectorDrawables.useSupportLibrary = true
