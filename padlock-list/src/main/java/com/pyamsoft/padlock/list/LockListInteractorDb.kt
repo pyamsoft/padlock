@@ -17,14 +17,14 @@
 package com.pyamsoft.padlock.list
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.LockListInteractor
-import com.pyamsoft.padlock.api.preferences.LockListPreferences
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
-import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
+import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
+import com.pyamsoft.padlock.api.preferences.LockListPreferences
+import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.db.AllEntriesModel
@@ -35,6 +35,7 @@ import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.UPDATED
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.LockListUpdatePayload
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -45,6 +46,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockListInteractorDb @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val queryDao: EntryQueryDao,
   private val applicationManager: PackageApplicationManager,
   private val labelManager: PackageLabelManager,
@@ -55,7 +57,10 @@ internal class LockListInteractorDb @Inject internal constructor(
 ) : LockListInteractor {
 
   override fun isSystemVisible(): Single<Boolean> =
-    Single.fromCallable { preferences.isSystemVisible() }
+    Single.fromCallable {
+      enforcer.assertNotOnMainThread()
+      return@fromCallable preferences.isSystemVisible()
+    }
 
   override fun setSystemVisible(visible: Boolean) {
     preferences.setSystemVisible(visible)
@@ -67,6 +72,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     copyEntries: MutableList<AllEntriesModel>,
     removeEntries: MutableSet<AllEntriesModel>
   ): LockTuple {
+    enforcer.assertNotOnMainThread()
 
     // We clear out the removal list so it can be reused in a clean state
     removeEntries.clear()
@@ -111,6 +117,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     packageNames: List<String>,
     entries: List<AllEntriesModel>
   ): List<LockTuple> {
+    enforcer.assertNotOnMainThread()
     val copyEntries = ArrayList<AllEntriesModel>(entries)
     copyEntries.sortWith(
         Comparator { o1, o2 ->
@@ -123,10 +130,17 @@ internal class LockListInteractorDb @Inject internal constructor(
 
   override fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>> {
     return getAllEntries().flatMap { entries ->
+      enforcer.assertNotOnMainThread()
       return@flatMap getValidPackageNames()
           .map { compileLockedTupleList(it, entries) }
-          .flatMapObservable { Observable.fromIterable(it) }
-          .flatMapSingle { createFromPackageInfo(it) }
+          .flatMapObservable {
+            enforcer.assertNotOnMainThread()
+            return@flatMapObservable Observable.fromIterable(it)
+          }
+          .flatMapSingle {
+            enforcer.assertNotOnMainThread()
+            return@flatMapSingle createFromPackageInfo(it)
+          }
           .toSortedList { o1, o2 ->
             o1.name.compareTo(o2.name, ignoreCase = true)
           }
@@ -138,6 +152,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     event: EntityChangeEvent,
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
+    enforcer.assertNotOnMainThread()
     return onEntityInserted(event.packageName!!, event.activityName!!, event.whitelisted, list)
   }
 
@@ -148,6 +163,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     whitelisted: Boolean,
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
+    enforcer.assertNotOnMainThread()
     return if (activityName == PadLockDbModels.PACKAGE_ACTIVITY_NAME) {
       onParentEntityInserted(packageName, list)
     } else {
@@ -162,6 +178,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     whitelisted: Boolean,
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
+    enforcer.assertNotOnMainThread()
     // One of the sublist items was changed
     val index = list.map { it.packageName }
         .indexOf(packageName)
@@ -194,6 +211,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     packageName: String,
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
+    enforcer.assertNotOnMainThread()
     // We should be in scheduler at this point so it is safe to block off main thread
     val appInfo = applicationManager.getApplicationInfo(packageName)
         .blockingGet()
@@ -238,6 +256,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     event: EntityChangeEvent,
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
+    enforcer.assertNotOnMainThread()
     return onEntityUpdated(event.packageName!!, event.activityName!!, event.whitelisted, list)
   }
 
@@ -248,6 +267,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     whitelisted: Boolean,
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
+    enforcer.assertNotOnMainThread()
     val index = list.map { it.packageName }
         .indexOf(packageName)
     if (index < 0) {
@@ -278,6 +298,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     event: EntityChangeEvent,
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
+    enforcer.assertNotOnMainThread()
     return when {
       event.packageName == null -> onAllEntitiesDeleted(list)
       event.activityName == null -> onPackageDeleted(/* Never null */ event.packageName!!, list)
@@ -291,6 +312,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     activityName: String,
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
+    enforcer.assertNotOnMainThread()
     val index = list.map { it.packageName }
         .indexOf(packageName)
     if (index < 0) {
@@ -325,6 +347,7 @@ internal class LockListInteractorDb @Inject internal constructor(
     packageName: String,
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
+    enforcer.assertNotOnMainThread()
     return Observable.fromIterable(list
         .filter { it.packageName == packageName }
         .map {
@@ -340,6 +363,7 @@ internal class LockListInteractorDb @Inject internal constructor(
 
   @CheckResult
   private fun onAllEntitiesDeleted(list: List<AppEntry>): Observable<LockListUpdatePayload> {
+    enforcer.assertNotOnMainThread()
     return Observable.fromIterable(list
         .map {
           it.copy(locked = false, whitelisted = LinkedHashSet(), hardLocked = LinkedHashSet())
@@ -351,6 +375,7 @@ internal class LockListInteractorDb @Inject internal constructor(
   override fun subscribeForUpdates(provider: ListDiffProvider<AppEntry>): Observable<LockListUpdatePayload> {
     return queryDao.subscribeToUpdates()
         .flatMap {
+          enforcer.assertNotOnMainThread()
           val oldList = provider.data()
           return@flatMap when (it.type) {
             INSERTED -> onEntityInserted(it, oldList.toList())
@@ -364,6 +389,7 @@ internal class LockListInteractorDb @Inject internal constructor(
   private fun createFromPackageInfo(tuple: LockTuple): Single<AppEntry> {
     return applicationManager.getApplicationInfo(tuple.packageName)
         .flatMap { item ->
+          enforcer.assertNotOnMainThread()
           labelManager.loadPackageLabel(item.packageName)
               .map {
                 AppEntry(
@@ -379,7 +405,8 @@ internal class LockListInteractorDb @Inject internal constructor(
   @CheckResult
   private fun getActiveApplications(): Observable<ApplicationItem> =
     applicationManager.getActiveApplications().flatMapObservable {
-      Observable.fromIterable(it)
+      enforcer.assertNotOnMainThread()
+      return@flatMapObservable Observable.fromIterable(it)
     }
 
   @CheckResult
@@ -391,6 +418,7 @@ internal class LockListInteractorDb @Inject internal constructor(
   @CheckResult
   private fun getValidPackageNames(): Single<List<String>> {
     return getActiveApplications().flatMapSingle { item ->
+      enforcer.assertNotOnMainThread()
       return@flatMapSingle getActivityListForApplication(item)
           .map { if (it.isEmpty()) "" else item.packageName }
     }
@@ -399,11 +427,16 @@ internal class LockListInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getAllEntries(): Single<List<AllEntriesModel>> =
-    queryDao.queryAll()
+  private fun getAllEntries(): Single<List<AllEntriesModel>> = Single.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer queryDao.queryAll()
+  }
 
   override fun hasShownOnBoarding(): Single<Boolean> =
-    Single.fromCallable { onboardingPreferences.isListOnBoard() }
+    Single.fromCallable {
+      enforcer.assertNotOnMainThread()
+      return@fromCallable onboardingPreferences.isListOnBoard()
+    }
 
   override fun modifyEntry(
     oldLockState: LockState,

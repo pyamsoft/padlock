@@ -17,12 +17,13 @@
 package com.pyamsoft.padlock.list.modify
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.database.EntryDeleteDao
 import com.pyamsoft.padlock.api.database.EntryInsertDao
-import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockState.WHITELISTED
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
 import timber.log.Timber
 import javax.inject.Inject
@@ -30,6 +31,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockStateModifyInteractorImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val insertDao: EntryInsertDao,
   private val deleteDao: EntryDeleteDao
 ) : LockStateModifyInteractor {
@@ -42,6 +44,7 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     system: Boolean,
     whitelist: Boolean
   ): Completable {
+    enforcer.assertNotOnMainThread()
     Timber.d("Empty entry, create a new entry for: %s %s", packageName, activityName)
     return insertDao.insert(packageName, activityName, code, 0, 0, system, whitelist)
   }
@@ -51,6 +54,7 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     packageName: String,
     activityName: String
   ): Completable {
+    enforcer.assertNotOnMainThread()
     Timber.d("Entry already exists for: %s %s, delete it", packageName, activityName)
     return deleteDao.deleteWithPackageActivityName(packageName, activityName)
   }
@@ -64,6 +68,7 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     system: Boolean
   ): Completable {
     return Completable.defer {
+      enforcer.assertNotOnMainThread()
       if (oldLockState === WHITELISTED) {
         // Update existing entry
         throw RuntimeException("Can't whitelist, already whitelisted: $packageName $activityName")
@@ -83,6 +88,7 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     system: Boolean
   ): Completable {
     return Completable.defer {
+      enforcer.assertNotOnMainThread()
       if (oldLockState === LOCKED) {
         // Update existing entry
         throw RuntimeException("Can't lock, already locked: $packageName $activityName")
@@ -101,6 +107,7 @@ internal class LockStateModifyInteractorImpl @Inject internal constructor(
     code: String?,
     system: Boolean
   ): Completable {
+    enforcer.assertNotOnMainThread()
     return Completable.defer {
       if (oldLockState === LockState.DEFAULT) {
         return@defer createNewEntry(packageName, activityName, code, system, false)

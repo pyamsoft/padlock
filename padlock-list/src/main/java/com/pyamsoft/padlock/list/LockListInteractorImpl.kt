@@ -22,6 +22,7 @@ import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.LockListUpdatePayload
 import com.pyamsoft.pydroid.core.cache.Cache
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -32,6 +33,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockListInteractorImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   @param:Named("interactor_lock_list") private val db: LockListInteractor,
   @param:Named("repo_lock_list") private val repoLockList: SingleRepo<List<AppEntry>>
 ) : LockListInteractor, Cache {
@@ -45,13 +47,16 @@ internal class LockListInteractorImpl @Inject internal constructor(
   }
 
   override fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>> {
-    return repoLockList.get(bypass, REPO_KEY) { db.fetchAppEntryList(true) }
+    return repoLockList.get(bypass, REPO_KEY) {
+      enforcer.assertNotOnMainThread()
+      return@get db.fetchAppEntryList(true) }
         .doOnError { repoLockList.clearAll() }
   }
 
   override fun subscribeForUpdates(provider: ListDiffProvider<AppEntry>): Observable<LockListUpdatePayload> {
     return db.subscribeForUpdates(provider)
         .doOnNext {
+          enforcer.assertNotOnMainThread()
           // Each time the updater emits, we get the current list, update it, and cache it
           val list = ArrayList(provider.data())
           list[it.index] = it.entry

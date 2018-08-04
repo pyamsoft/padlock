@@ -20,35 +20,39 @@ import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.asOptional
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class MasterPinInteractorImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val preferences: MasterPinPreferences
 ) : MasterPinInteractor {
 
-  override fun getMasterPin(): Single<Optional<String>> =
-    Single.fromCallable {
-      preferences.getMasterPassword()
-          .asOptional()
-    }
+  override fun getMasterPin(): Single<Optional<String>> = Single.fromCallable {
+    enforcer.assertNotOnMainThread()
+    return@fromCallable preferences.getMasterPassword()
+        .asOptional()
+  }
 
   override fun setMasterPin(pin: String?) {
+    enforcer.assertNotOnMainThread()
     when (pin) {
       null -> preferences.clearMasterPassword()
       else -> preferences.setMasterPassword(pin)
     }
   }
 
-  override fun getHint(): Single<Optional<String>> =
-    Single.fromCallable {
-      preferences.getHint()
-          .asOptional()
-    }
+  override fun getHint(): Single<Optional<String>> = Single.fromCallable {
+    enforcer.assertNotOnMainThread()
+    return@fromCallable preferences.getHint()
+        .asOptional()
+  }
 
   override fun setHint(hint: String?) {
+    enforcer.assertNotOnMainThread()
     when (hint) {
       null -> preferences.clearHint()
       else -> preferences.setHint(hint)

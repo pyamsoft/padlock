@@ -18,32 +18,44 @@ package com.pyamsoft.padlock.lock.screen
 
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
-import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
+import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.model.LockScreenType
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class LockScreenInteractorImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val lockPassed: LockPassed,
   private val labelManager: PackageLabelManager,
   private val preferences: LockScreenPreferences
 ) : LockScreenInteractor {
 
   override fun getLockScreenType(): Single<LockScreenType> =
-    Single.fromCallable { preferences.getCurrentLockType() }
+    Single.fromCallable {
+      enforcer.assertNotOnMainThread()
+      return@fromCallable preferences.getCurrentLockType()
+    }
 
   override fun getDefaultIgnoreTime(): Single<Long> =
-    Single.fromCallable { preferences.getDefaultIgnoreTime() }
+    Single.fromCallable {
+      enforcer.assertNotOnMainThread()
+      return@fromCallable preferences.getDefaultIgnoreTime()
+    }
 
-  override fun getDisplayName(packageName: String): Single<String> =
-    labelManager.loadPackageLabel(packageName)
+  override fun getDisplayName(packageName: String): Single<String> = Single.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer labelManager.loadPackageLabel(packageName)
+  }
 
   override fun isAlreadyUnlocked(
     packageName: String,
     activityName: String
-  ): Single<Boolean> =
-    Single.fromCallable { lockPassed.check(packageName, activityName) }
+  ): Single<Boolean> = Single.fromCallable {
+    enforcer.assertNotOnMainThread()
+    return@fromCallable lockPassed.check(packageName, activityName)
+  }
 }

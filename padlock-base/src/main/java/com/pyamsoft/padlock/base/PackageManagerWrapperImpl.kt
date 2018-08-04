@@ -23,16 +23,17 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.preferences.LockListPreferences
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
 import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
+import com.pyamsoft.padlock.api.preferences.LockListPreferences
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.IconHolder
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.exceptions.Exceptions
@@ -44,6 +45,7 @@ import javax.inject.Singleton
 @Singleton
 internal class PackageManagerWrapperImpl @Inject internal constructor(
   context: Context,
+  private val enforcer: Enforcer,
   private val listPreferences: LockListPreferences
 ) : PackageActivityManager,
     PackageApplicationManager,
@@ -54,6 +56,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 
   override fun loadIconForPackageOrDefault(packageName: String): Single<IconHolder<Drawable>> {
     return Single.fromCallable {
+      enforcer.assertNotOnMainThread()
       val image: Drawable
       image = try {
         // Assign
@@ -70,6 +73,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 
   override fun getActivityListForPackage(packageName: String): Single<List<String>> {
     return Single.fromCallable {
+      enforcer.assertNotOnMainThread()
       val activityEntries: MutableList<String> = ArrayList()
       try {
         val packageInfo = packageManager.getPackageInfo(
@@ -82,7 +86,10 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
       }
       return@fromCallable activityEntries
     }
-        .flatMapObservable { Observable.fromIterable(it) }
+        .flatMapObservable {
+          enforcer.assertNotOnMainThread()
+          return@flatMapObservable Observable.fromIterable(it)
+        }
         .filter { !Excludes.isLockScreen(packageName, it) }
         .filter { !Excludes.isPackageExcluded(packageName) }
         .filter { !Excludes.isClassExcluded(it) }
@@ -91,14 +98,24 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 
   @CheckResult
   private fun getInstalledApplications(): Observable<ApplicationItem> {
-    return Single.fromCallable { packageManager.getInstalledApplications(0) }
-        .flatMapObservable { Observable.fromIterable(it) }
-        .flatMapSingle { getApplicationInfo(it) }
+    return Single.fromCallable {
+      enforcer.assertNotOnMainThread()
+      return@fromCallable packageManager.getInstalledApplications(0)
+    }
+        .flatMapObservable {
+          enforcer.assertNotOnMainThread()
+          return@flatMapObservable Observable.fromIterable(it)
+        }
+        .flatMapSingle {
+          enforcer.assertNotOnMainThread()
+          return@flatMapSingle getApplicationInfo(it)
+        }
         .filter { !it.isEmpty() }
   }
 
   override fun getActiveApplications(): Single<List<ApplicationItem>> {
     return getInstalledApplications().flatMap {
+      enforcer.assertNotOnMainThread()
       return@flatMap when {
         !it.enabled -> Observable.empty()
         it.system && !listPreferences.isSystemVisible() -> Observable.empty()
@@ -112,6 +129,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   @CheckResult
   private fun getApplicationInfo(info: ApplicationInfo?): Single<ApplicationItem> {
     return Single.fromCallable {
+      enforcer.assertNotOnMainThread()
       when (info) {
         null -> ApplicationItem.EMPTY
         else -> ApplicationItem.create(info.packageName, info.system(), info.enabled)
@@ -121,6 +139,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 
   override fun getApplicationInfo(packageName: String): Single<ApplicationItem> {
     return Single.defer {
+      enforcer.assertNotOnMainThread()
       var info: ApplicationInfo?
       try {
         info = packageManager.getApplicationInfo(packageName, 0)
@@ -137,6 +156,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 
   override fun loadPackageLabel(packageName: String): Single<String> {
     return Single.defer {
+      enforcer.assertNotOnMainThread()
       try {
         return@defer Single.just(
             packageManager.getApplicationInfo(packageName, 0).asOptional()
@@ -147,6 +167,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
       }
     }
         .flatMap {
+          enforcer.assertNotOnMainThread()
           return@flatMap when (it) {
             is Present -> loadPackageLabel(it.value)
             else -> Single.just("")
@@ -156,7 +177,8 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 
   @CheckResult
   private fun loadPackageLabel(info: ApplicationInfo): Single<String> = Single.fromCallable {
-    info.loadLabel(packageManager)?.toString() ?: ""
+    enforcer.assertNotOnMainThread()
+    return@fromCallable info.loadLabel(packageManager)?.toString() ?: ""
   }
 
   override fun isValidActivity(
@@ -164,6 +186,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
     activityName: String
   ): Single<Boolean> {
     return Single.defer {
+      enforcer.assertNotOnMainThread()
       if (packageName.isEmpty() || activityName.isEmpty()) {
         return@defer Single.just(false)
       }

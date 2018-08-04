@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.purge
 import com.popinnow.android.repo.SingleRepo
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.pydroid.core.cache.Cache
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
 import io.reactivex.Single
 import javax.inject.Inject
@@ -27,6 +28,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PurgeInteractorImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   @Named("interactor_purge") private val db: PurgeInteractor,
   @Named("repo_purge") private val repoStale: SingleRepo<List<String>>
 ) : PurgeInteractor, Cache {
@@ -37,17 +39,24 @@ internal class PurgeInteractorImpl @Inject internal constructor(
 
   override fun fetchStalePackageNames(bypass: Boolean): Single<List<String>> {
     val key = "purge-list"
-    return repoStale.get(bypass, key) { db.fetchStalePackageNames(true) }
+    return repoStale.get(bypass, key) {
+      enforcer.assertNotOnMainThread()
+      return@get db.fetchStalePackageNames(true)
+    }
         .doOnError { repoStale.clearAll() }
   }
 
-  override fun deleteEntry(packageName: String): Completable =
-    db.deleteEntry(packageName)
-        .doAfterTerminate { clearCache() }
-        .doOnError { repoStale.clearAll() }
+  override fun deleteEntry(packageName: String): Completable = Completable.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer db.deleteEntry(packageName)
+  }
+      .doAfterTerminate { clearCache() }
+      .doOnError { repoStale.clearAll() }
 
-  override fun deleteEntries(packageNames: List<String>): Completable =
-    db.deleteEntries(packageNames)
-        .doAfterTerminate { clearCache() }
-        .doOnError { repoStale.clearAll() }
+  override fun deleteEntries(packageNames: List<String>): Completable = Completable.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer db.deleteEntries(packageNames)
+  }
+      .doAfterTerminate { clearCache() }
+      .doOnError { repoStale.clearAll() }
 }

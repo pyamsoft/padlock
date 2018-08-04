@@ -17,11 +17,11 @@
 package com.pyamsoft.padlock.list.info
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
-import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
+import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
+import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
@@ -33,6 +33,7 @@ import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.UPDATED
 import com.pyamsoft.padlock.model.db.WithPackageNameModel
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.LockInfoUpdatePayload
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -46,6 +47,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockInfoInteractorDb @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val queryDao: EntryQueryDao,
   private val packageActivityManager: PackageActivityManager,
   private val preferences: OnboardingPreferences,
@@ -53,14 +55,20 @@ internal class LockInfoInteractorDb @Inject internal constructor(
 ) : LockInfoInteractor {
 
   override fun hasShownOnBoarding(): Single<Boolean> {
-    return Single.fromCallable { preferences.isInfoDialogOnBoard() }
+    return Single.fromCallable {
+      enforcer.assertNotOnMainThread()
+      return@fromCallable preferences.isInfoDialogOnBoard()
+    }
         .delay(300, TimeUnit.MILLISECONDS)
   }
 
   @CheckResult
   private fun getLockedActivityEntries(
     name: String
-  ): Single<List<WithPackageNameModel>> = queryDao.queryWithPackageName(name)
+  ): Single<List<WithPackageNameModel>> = Single.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer queryDao.queryWithPackageName(name)
+  }
 
   @CheckResult
   private fun getPackageActivities(name: String): Single<List<String>> =
@@ -71,6 +79,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     lockEntries: List<WithPackageNameModel>,
     activityName: String
   ): WithPackageNameModel? {
+    enforcer.assertNotOnMainThread()
     // Short circuit if empty
     if (lockEntries.isEmpty()) {
       return null
@@ -123,6 +132,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     activityName: String,
     padLockEntries: MutableList<WithPackageNameModel>
   ): ActivityEntry.Item {
+    enforcer.assertNotOnMainThread()
     val foundEntry = findMatchingEntry(padLockEntries, activityName)
 
     // Optimize for speed, trade off size
@@ -139,6 +149,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     name: String,
     foundEntry: WithPackageNameModel?
   ): ActivityEntry.Item {
+    enforcer.assertNotOnMainThread()
     val state: LockState
     if (foundEntry == null) {
       state = LockState.DEFAULT
@@ -158,6 +169,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     names: List<String>,
     entries: List<WithPackageNameModel>
   ): List<ActivityEntry.Item> {
+    enforcer.assertNotOnMainThread()
     // Sort here to avoid stream break
     // If the list is empty, the old flatMap call can hang, causing a list loading error
     // Sort here where we are guaranteed a list of some kind
@@ -193,9 +205,13 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   @CheckResult
   private fun fetchData(fetchName: String): Single<List<ActivityEntry.Item>> {
     return getLockedActivityEntries(fetchName).flatMap { entries ->
+      enforcer.assertNotOnMainThread()
       return@flatMap getPackageActivities(fetchName)
           .map { createSortedActivityEntryList(fetchName, it, entries) }
-          .flatMapObservable { Observable.fromIterable(it) }
+          .flatMapObservable {
+            enforcer.assertNotOnMainThread()
+            return@flatMapObservable Observable.fromIterable(it)
+          }
           .toSortedList { o1, o2 ->
             o1.name.compareTo(o2.name, ignoreCase = true)
           }
@@ -207,6 +223,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     o1: GroupedObservable<String?, ActivityEntry.Item>,
     o2: GroupedObservable<String?, ActivityEntry.Item>
   ): Int {
+    enforcer.assertNotOnMainThread()
     if (o1.key == null && o2.key == null) {
       return 0
     } else if (o1.key == null) {
@@ -220,6 +237,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   private fun sortWithinGroup(
     item: GroupedObservable<String?, ActivityEntry.Item>
   ): Observable<ActivityEntry> {
+    enforcer.assertNotOnMainThread()
     return item.sorted { o1, o2 -> o1.activity.compareTo(o2.activity, ignoreCase = true) }
         .map { it as ActivityEntry }
         .startWith(ActivityEntry.Group(item.key!!))
@@ -229,11 +247,15 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     bypass: Boolean,
     packageName: String
   ): Single<List<ActivityEntry>> {
-    return fetchData(packageName).flatMap {
-      return@flatMap Observable.fromIterable(it)
+    return fetchData(packageName).flatMap { source ->
+      enforcer.assertNotOnMainThread()
+      return@flatMap Observable.fromIterable(source)
           .groupBy { it.group }
           .sorted { o1, o2 -> compareByGroup(o1, o2) }
-          .concatMap { sortWithinGroup(it) }
+          .concatMap {
+            enforcer.assertNotOnMainThread()
+            return@concatMap sortWithinGroup(it)
+          }
           .toList()
     }
   }
@@ -259,6 +281,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     return queryDao.subscribeToUpdates()
         .filter { it.packageName == packageName }
         .flatMap {
+          enforcer.assertNotOnMainThread()
           val oldList = provider.data()
           return@flatMap when (it.type) {
             INSERTED -> onEntityInserted(it, oldList.toList())

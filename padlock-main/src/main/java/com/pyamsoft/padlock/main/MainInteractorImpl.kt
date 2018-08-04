@@ -18,15 +18,19 @@ package com.pyamsoft.padlock.main
 
 import com.pyamsoft.padlock.api.MainInteractor
 import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class MainInteractorImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val preferences: OnboardingPreferences
 ) : MainInteractor {
 
-  override fun isOnboardingComplete(): Single<Boolean> =
-    Single.fromCallable { preferences.hasAgreed() }
+  override fun isOnboardingComplete(): Single<Boolean> = Single.fromCallable {
+    enforcer.assertNotOnMainThread()
+    return@fromCallable preferences.hasAgreed()
+  }
 }

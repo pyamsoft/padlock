@@ -20,6 +20,7 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
 import com.pyamsoft.pydroid.core.cache.Cache
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.GenericLoader
 import com.pyamsoft.pydroid.loader.cache.ImageCache
 import javax.inject.Inject
@@ -28,6 +29,7 @@ import javax.inject.Singleton
 @JvmSuppressWildcards
 @Singleton
 class AppIconLoader @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val appIconImageCache: ImageCache<String, Drawable>,
   private val packageIconManager: PackageIconManager<Drawable>
 ) : Cache {
@@ -38,5 +40,5 @@ class AppIconLoader @Inject internal constructor(
 
   @CheckResult
   fun forPackageName(packageName: String): GenericLoader<Drawable> =
-    AppIconImageLoader(packageName, appIconImageCache, packageIconManager)
+    AppIconImageLoader(enforcer, packageName, appIconImageCache, packageIconManager)
 }

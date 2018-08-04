@@ -25,8 +25,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class UsageEventProviderImpl @Inject internal constructor(context: Context) :
-    UsageEventProvider {
+internal class UsageEventProviderImpl @Inject internal constructor(
+  context: Context
+) : UsageEventProvider {
 
   private val usage = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
@@ -53,7 +54,7 @@ internal class UsageEventProviderImpl @Inject internal constructor(context: Cont
 
     override fun createForegroundEvent(func: (String, String) -> ForegroundEvent): ForegroundEvent {
       if ((event?.eventType ?: UsageEvents.Event.NONE) == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-        return func(event?.packageName ?: "", event?.className ?: "")
+        return func(event?.packageName.orEmpty(), event?.className.orEmpty())
       } else {
         return func("", "")
       }

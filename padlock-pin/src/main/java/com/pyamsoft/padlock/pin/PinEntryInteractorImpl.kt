@@ -17,12 +17,13 @@
 package com.pyamsoft.padlock.pin
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.lockscreen.LockHelper
 import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.PinEntryInteractor
+import com.pyamsoft.padlock.api.lockscreen.LockHelper
 import com.pyamsoft.padlock.model.pin.PinEntryEvent
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
@@ -30,15 +31,21 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PinEntryInteractorImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val lockHelper: LockHelper,
   private val masterPinInteractor: MasterPinInteractor
 ) : PinEntryInteractor {
 
   @CheckResult
-  private fun getMasterPin(): Single<Optional<String>> =
-    masterPinInteractor.getMasterPin()
+  private fun getMasterPin(): Single<Optional<String>> = Single.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer masterPinInteractor.getMasterPin()
+  }
 
-  override fun hasMasterPin(): Single<Boolean> = getMasterPin().map { it is Present }
+  override fun hasMasterPin(): Single<Boolean> = getMasterPin().map {
+    enforcer.assertNotOnMainThread()
+    return@map it is Present
+  }
 
   override fun submitPin(
     currentAttempt: String,
@@ -46,6 +53,7 @@ internal class PinEntryInteractorImpl @Inject internal constructor(
     hint: String
   ): Single<PinEntryEvent> {
     return getMasterPin().flatMap {
+      enforcer.assertNotOnMainThread()
       return@flatMap when (it) {
         is Present -> clearPin(it.value, currentAttempt)
         else -> createPin(currentAttempt, reEntryAttempt, hint)
@@ -60,6 +68,7 @@ internal class PinEntryInteractorImpl @Inject internal constructor(
   ): Single<PinEntryEvent> {
     return lockHelper.checkSubmissionAttempt(attempt, masterPin)
         .map {
+          enforcer.assertNotOnMainThread()
           if (it) {
             Timber.d("Clear master item")
             masterPinInteractor.setMasterPin(null)
@@ -79,6 +88,7 @@ internal class PinEntryInteractorImpl @Inject internal constructor(
     hint: String
   ): Single<PinEntryEvent> {
     return Single.defer {
+      enforcer.assertNotOnMainThread()
       Timber.d("No existing master item, attempt to create a new one")
       return@defer when (attempt) {
         reentry -> lockHelper.encode(attempt)

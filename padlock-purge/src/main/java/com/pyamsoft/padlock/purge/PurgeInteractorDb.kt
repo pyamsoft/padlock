@@ -17,11 +17,12 @@
 package com.pyamsoft.padlock.purge
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.api.database.EntryDeleteDao
 import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
-import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.db.AllEntriesModel
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -31,6 +32,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PurgeInteractorDb @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val applicationManager: PackageApplicationManager,
   private val deleteDao: EntryDeleteDao,
   private val queryDao: EntryQueryDao
@@ -38,29 +40,39 @@ internal class PurgeInteractorDb @Inject internal constructor(
 
   override fun fetchStalePackageNames(bypass: Boolean): Single<List<String>> {
     return getAllEntries().flatMap { entries ->
+      enforcer.assertNotOnMainThread()
       return@flatMap getActiveApplications()
-          .map { c(entries, it) }
-          .flatMapObservable { Observable.fromIterable(it) }
-          .toSortedList { obj, str -> obj.compareTo(str, ignoreCase = true) }
+          .map { filterToStalePackageNames(entries, it) }
+          .flatMapObservable {
+            enforcer.assertNotOnMainThread()
+            return@flatMapObservable Observable.fromIterable(it)
+          }
+          .toSortedList { s1, s2 -> s1.compareTo(s2, ignoreCase = true) }
     }
   }
 
   @CheckResult
-  private fun getAllEntries(): Single<List<AllEntriesModel>> =
-    queryDao.queryAll()
+  private fun getAllEntries(): Single<List<AllEntriesModel>> = Single.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer queryDao.queryAll()
+  }
 
   @CheckResult
   private fun getActiveApplications(): Single<List<String>> =
     applicationManager.getActiveApplications()
-        .flatMapObservable { Observable.fromIterable(it) }
+        .flatMapObservable {
+          enforcer.assertNotOnMainThread()
+          return@flatMapObservable Observable.fromIterable(it)
+        }
         .map { it.packageName }
         .toSortedList()
 
   @CheckResult
-  private fun c(
+  private fun filterToStalePackageNames(
     allEntries: List<AllEntriesModel>,
     packageNames: List<String>
   ): List<String> {
+    enforcer.assertNotOnMainThread()
     if (allEntries.isEmpty()) {
       Timber.e("Database does not have any AppEntry items")
       return emptyList()
@@ -88,11 +100,19 @@ internal class PurgeInteractorDb @Inject internal constructor(
     return stalePackageNames
   }
 
-  override fun deleteEntry(packageName: String): Completable =
-    deleteDao.deleteWithPackageName(packageName)
+  override fun deleteEntry(packageName: String): Completable = Completable.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer deleteDao.deleteWithPackageName(packageName)
+  }
 
   override fun deleteEntries(packageNames: List<String>): Completable {
-    return Observable.defer { Observable.fromIterable(packageNames) }
-        .flatMapCompletable { deleteEntry(it) }
+    return Observable.defer {
+      enforcer.assertNotOnMainThread()
+      return@defer Observable.fromIterable(packageNames)
+    }
+        .flatMapCompletable {
+          enforcer.assertNotOnMainThread()
+          return@flatMapCompletable deleteEntry(it)
+        }
   }
 }

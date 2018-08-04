@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.lock.helper
 
 import android.util.Base64
 import com.pyamsoft.padlock.api.lockscreen.LockHelper
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
 import io.reactivex.Single
 import java.nio.charset.Charset
@@ -27,7 +28,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class SHA256LockHelper @Inject internal constructor() : LockHelper {
+internal class SHA256LockHelper @Inject internal constructor(
+  private val enforcer: Enforcer
+) : LockHelper {
 
   private val messageDigest: MessageDigest
 
@@ -46,9 +49,13 @@ internal class SHA256LockHelper @Inject internal constructor() : LockHelper {
     encode(attempt).map { it == encodedPin }
 
   override fun encode(attempt: String): Single<String> {
-    return Completable.fromAction({ messageDigest.reset() })
+    return Completable.fromAction {
+      enforcer.assertNotOnMainThread()
+      messageDigest.reset()
+    }
         .andThen(Single.fromCallable {
-          messageDigest.digest(attempt.toByteArray(Charset.defaultCharset()))
+          enforcer.assertNotOnMainThread()
+          return@fromCallable messageDigest.digest(attempt.toByteArray(Charset.defaultCharset()))
         })
         .map {
           Base64.encodeToString(it, Base64.DEFAULT)

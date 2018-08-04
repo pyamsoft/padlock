@@ -18,15 +18,20 @@ package com.pyamsoft.padlock.onboard.firstlaunch
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class OnboardAcceptTermsInteractor @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val preferences: OnboardingPreferences
 ) {
 
   @CheckResult
-  fun agreeToTerms(): Completable = Completable.fromAction({ preferences.setAgreed() })
+  fun agreeToTerms(): Completable = Completable.fromAction {
+    enforcer.assertNotOnMainThread()
+    return@fromAction preferences.setAgreed()
+  }
 }

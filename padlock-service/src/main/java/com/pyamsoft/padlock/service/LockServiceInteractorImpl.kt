@@ -18,14 +18,14 @@ package com.pyamsoft.padlock.service
 
 import android.app.IntentService
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.service.DeviceLockStateProvider
 import com.pyamsoft.padlock.api.database.EntryQueryDao
-import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
+import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
+import com.pyamsoft.padlock.api.service.DeviceLockStateProvider
+import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.api.service.LockServiceStateInteractor
-import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.ForegroundEvent
@@ -36,6 +36,7 @@ import com.pyamsoft.padlock.model.service.RecheckStatus.FORCE
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.MaybeTransformer
@@ -50,6 +51,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockServiceInteractorImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val usageEventProvider: UsageEventProvider,
   private val deviceLockStateProvider: DeviceLockStateProvider,
   private val lockPassed: LockPassed,
@@ -92,6 +94,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
     return Flowable.interval(LISTEN_INTERVAL, MILLISECONDS)
         .map {
+          enforcer.assertNotOnMainThread()
           val now: Long = System.currentTimeMillis()
           val beginTime = now - TEN_SECONDS_MILLIS
           val endTime = now + TEN_SECONDS_MILLIS
@@ -124,6 +127,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     className: String
   ): Single<Boolean> {
     return Single.fromCallable {
+      enforcer.assertNotOnMainThread()
       Timber.d(
           "Check against current window values: %s, %s", activePackageName,
           activeClassName
@@ -146,16 +150,12 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     packageName: String,
     activityName: String
   ): MaybeTransformer<Boolean, PadLockEntryModel> {
-    return MaybeTransformer {
-      it.flatMap {
-        Timber.d(
-            "Get list of locked classes with package: %s, class: %s", packageName,
-            activityName
-        )
-        return@flatMap queryDao.queryWithPackageActivityName(
-            packageName,
-            activityName
-        )
+    return MaybeTransformer { source ->
+      enforcer.assertNotOnMainThread()
+      return@MaybeTransformer source.flatMap { _ ->
+        enforcer.assertNotOnMainThread()
+        Timber.d("Get locked with package: %s, class: %s", packageName, activityName)
+        return@flatMap queryDao.queryWithPackageActivityName(packageName, activityName)
             .filter { !PadLockDbModels.isEmpty(it) }
       }
     }
@@ -163,8 +163,10 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   @CheckResult
   private fun filterOutInvalidEntries(): MaybeTransformer<PadLockEntryModel, PadLockEntryModel> {
-    return MaybeTransformer {
-      it.filter {
+    return MaybeTransformer { source ->
+      enforcer.assertNotOnMainThread()
+      return@MaybeTransformer source.filter {
+        enforcer.assertNotOnMainThread()
         val ignoreUntilTime: Long = it.ignoreUntilTime()
         val currentTime: Long = System.currentTimeMillis()
         Timber.d("Ignore until time: %d", ignoreUntilTime)
@@ -173,9 +175,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
       }
           .filter {
             if (PadLockDbModels.PACKAGE_ACTIVITY_NAME == it.activityName() && it.whitelist()) {
-              throw RuntimeException(
-                  "PACKAGE entry for package: ${it.packageName()} cannot be whitelisted"
-              )
+              throw RuntimeException("PACKAGE entry: ${it.packageName()} cannot be whitelisted")
             }
 
             Timber.d("Filter out whitelisted packages")
@@ -189,8 +189,9 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     packageName: String,
     activityName: String
   ): SingleTransformer<Boolean, PadLockEntryModel> {
-    return SingleTransformer {
-      it.filter { it }
+    return SingleTransformer { source ->
+      enforcer.assertNotOnMainThread()
+      return@SingleTransformer source.filter { it }
           .compose(prepareLockScreen(packageName, activityName))
           .compose(filterOutInvalidEntries())
           .toSingle(PadLockDbModels.EMPTY)
@@ -204,6 +205,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   private fun isServiceEnabled(): Maybe<Boolean> {
     return stateInteractor.isServiceEnabled()
         .filter {
+          enforcer.assertNotOnMainThread()
           if (!it) {
             Timber.e("Service is not user enabled, ignore event")
             resetState()
@@ -223,17 +225,17 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     packageName: String,
     className: String
   ): MaybeTransformer<Boolean, Boolean> {
-    return MaybeTransformer {
-      it.isEmpty.doOnSuccess {
-        Timber.d("Filter if empty: $it")
-      }
-          .filter { !it }
-          .flatMap {
+    return MaybeTransformer { source ->
+      enforcer.assertNotOnMainThread()
+      return@MaybeTransformer source.isEmpty
+          .filter {
+            enforcer.assertNotOnMainThread()
+            return@filter !it
+          }
+          .flatMap { _ ->
+            enforcer.assertNotOnMainThread()
             Timber.d("Check event from activity: %s %s", packageName, className)
-            return@flatMap packageActivityManager.isValidActivity(
-                packageName,
-                className
-            )
+            return@flatMap packageActivityManager.isValidActivity(packageName, className)
                 .doOnSuccess {
                   if (!it) {
                     Timber.w("Event not caused by activity.")
@@ -251,8 +253,10 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     packageName: String,
     className: String
   ): MaybeTransformer<Boolean, Boolean> {
-    return MaybeTransformer {
-      it.filter {
+    return MaybeTransformer { source ->
+      enforcer.assertNotOnMainThread()
+      return@MaybeTransformer source.filter {
+        enforcer.assertNotOnMainThread()
         val restrict: Boolean = preferences.isIgnoreInKeyguard() && isDeviceLocked()
         if (restrict) {
           Timber.w("Locking is restricted while device in keyguard.")
@@ -279,6 +283,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
         .toSingle(false)
 
     return windowEventObservable.map {
+      enforcer.assertNotOnMainThread()
       if (!it && forcedRecheck !== FORCE) {
         Timber.e("Failed to pass window checking")
         return@map false

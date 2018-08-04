@@ -21,6 +21,7 @@ import android.widget.ImageView
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
 import com.pyamsoft.padlock.model.IconHolder
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.GenericLoader
 import com.pyamsoft.pydroid.loader.cache.ImageCache
 import com.pyamsoft.pydroid.loader.cache.ImageCache.ImageCacheKey
@@ -35,6 +36,7 @@ import timber.log.Timber
 
 @JvmSuppressWildcards
 internal class AppIconImageLoader internal constructor(
+  private val enforcer: Enforcer,
   private val packageName: String,
   private val appIconImageCache: ImageCache<String, Drawable>,
   private val packageIconManager: PackageIconManager<Drawable>
@@ -79,6 +81,7 @@ internal class AppIconImageLoader internal constructor(
   @CheckResult
   private fun loadCached(packageName: String): Single<IconHolder<Drawable>> {
     return Single.defer {
+      enforcer.assertNotOnMainThread()
       val key: ImageCacheKey<String> = packageName.toKey()
       val cached: Drawable? = appIconImageCache.retrieve(key)
       if (cached == null) {
@@ -95,6 +98,8 @@ internal class AppIconImageLoader internal constructor(
   }
 
   @CheckResult
-  private fun loadFresh(packageName: String): Single<IconHolder<Drawable>> =
-    packageIconManager.loadIconForPackageOrDefault(packageName)
+  private fun loadFresh(packageName: String): Single<IconHolder<Drawable>> = Single.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer packageIconManager.loadIconForPackageOrDefault(packageName)
+  }
 }

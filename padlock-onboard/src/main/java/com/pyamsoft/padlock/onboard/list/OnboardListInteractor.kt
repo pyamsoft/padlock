@@ -17,15 +17,18 @@
 package com.pyamsoft.padlock.onboard.list
 
 import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class OnboardListInteractor @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val preferences: OnboardingPreferences
 ) {
 
   fun completeOnboarding() {
+    enforcer.assertNotOnMainThread()
     preferences.setListOnBoard()
   }
 }

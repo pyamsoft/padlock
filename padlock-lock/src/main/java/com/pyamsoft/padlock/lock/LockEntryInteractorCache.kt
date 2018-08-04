@@ -20,6 +20,7 @@ import com.pyamsoft.padlock.api.lockscreen.LockEntryInteractor
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.cache.Cache
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -29,6 +30,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockEntryInteractorCache @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
   @param:Named("cache_lock_list") private val lockListCache: Cache,
   @param:Named("cache_lock_info") private val lockInfoCache: Cache,
@@ -44,14 +46,18 @@ internal class LockEntryInteractorCache @Inject internal constructor(
     activityName: String,
     lockCode: String?,
     currentAttempt: String
-  ): Single<Boolean> =
-    impl.submitPin(packageName, activityName, lockCode, currentAttempt)
+  ): Single<Boolean> = Single.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer impl.submitPin(packageName, activityName, lockCode, currentAttempt)
+  }
 
   override fun lockEntryOnFail(
     packageName: String,
     activityName: String
-  ): Maybe<Long> =
-    impl.lockEntryOnFail(packageName, activityName)
+  ): Maybe<Long> = Maybe.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer impl.lockEntryOnFail(packageName, activityName)
+  }
 
   override fun getHint(): Single<String> = impl.getHint()
 
@@ -68,6 +74,7 @@ internal class LockEntryInteractorCache @Inject internal constructor(
         packageName, activityName, realName, lockCode, isSystem, whitelist,
         ignoreTime
     ).doOnComplete {
+      enforcer.assertNotOnMainThread()
       if (whitelist) {
         // Clear caches so that views update when we return to them
         lockListCache.clearCache()

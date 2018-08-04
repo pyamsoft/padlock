@@ -17,11 +17,14 @@
 package com.pyamsoft.padlock.lock.passed
 
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class LockPassedImpl @Inject internal constructor() : LockPassed {
+internal class LockPassedImpl @Inject internal constructor(
+  private val enforcer: Enforcer
+) : LockPassed {
 
   private val passedSet: MutableCollection<String> = LinkedHashSet()
 
@@ -29,6 +32,7 @@ internal class LockPassedImpl @Inject internal constructor() : LockPassed {
     packageName: String,
     activityName: String
   ) {
+    enforcer.assertNotOnMainThread()
     passedSet.add("$packageName$activityName")
   }
 
@@ -36,12 +40,12 @@ internal class LockPassedImpl @Inject internal constructor() : LockPassed {
     packageName: String,
     activityName: String
   ) {
+    enforcer.assertNotOnMainThread()
     passedSet.remove("$packageName$activityName")
   }
 
   override fun check(
     packageName: String,
     activityName: String
-  ): Boolean =
-    passedSet.contains("$packageName$activityName")
+  ): Boolean = passedSet.contains("$packageName$activityName")
 }

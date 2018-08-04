@@ -18,19 +18,20 @@ package com.pyamsoft.padlock.lock
 
 import android.app.IntentService
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.database.EntryInsertDao
 import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.database.EntryUpdateDao
-import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.lockscreen.LockEntryInteractor
 import com.pyamsoft.padlock.api.lockscreen.LockHelper
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
-import com.pyamsoft.padlock.api.MasterPinInteractor
+import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.model.service.Recheck
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -42,6 +43,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LockEntryInteractorImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val lockPassed: LockPassed,
   private val lockHelper: LockHelper,
   private val preferences: LockScreenPreferences,
@@ -62,8 +64,9 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     currentAttempt: String
   ): Single<Boolean> {
     return queryDao.queryWithPackageActivityName(packageName, activityName)
-        .flatMap {
-          val lockUntilTime = it.lockUntilTime()
+        .flatMap { model ->
+          enforcer.assertNotOnMainThread()
+          val lockUntilTime = model.lockUntilTime()
           return@flatMap masterPinInteractor.getMasterPin()
               .map {
                 Timber.d("Attempt unlock: %s %s", packageName, activityName)
@@ -80,6 +83,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
               }
         }
         .flatMap {
+          enforcer.assertNotOnMainThread()
           return@flatMap when (it) {
             is Present -> lockHelper.checkSubmissionAttempt(
                 currentAttempt,
@@ -109,6 +113,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     recheckTime: Long
   ): Completable {
     return Completable.fromAction {
+      enforcer.assertNotOnMainThread()
       // Cancel any old recheck job for the class, but not the package
       val params: List<Pair<String, String>> = ArrayList<Pair<String, String>>().apply {
         add(Recheck.EXTRA_PACKAGE_NAME to packageName)
@@ -130,6 +135,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     activityName: String
   ): Completable {
     return Completable.defer {
+      enforcer.assertNotOnMainThread()
       val newIgnoreTime = System.currentTimeMillis() + ignoreMinutesInMillis
       Timber.d(
           "Ignore %s %s until %d (for %d)", packageName, activityName, newIgnoreTime,
@@ -146,20 +152,30 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     activityName: String
   ): Maybe<Long> {
     return Single.fromCallable {
+      enforcer.assertNotOnMainThread()
       val failId: String = getFailId(packageName, activityName)
       val newFailCount: Int = failCount.getOrPut(failId) { 0 } + 1
       failCount[failId] = newFailCount
       return@fromCallable newFailCount
     }
         .filter { it > DEFAULT_MAX_FAIL_COUNT }
-        .flatMap { getTimeoutPeriodMinutesInMillis() }
+        .flatMap {
+          enforcer.assertNotOnMainThread()
+          return@flatMap getTimeoutPeriodMinutesInMillis()
+        }
         .filter { it > 0 }
-        .flatMap { lockEntry(it, packageName, activityName) }
+        .flatMap {
+          enforcer.assertNotOnMainThread()
+          return@flatMap lockEntry(it, packageName, activityName)
+        }
   }
 
   @CheckResult
   private fun getTimeoutPeriodMinutesInMillis(): Maybe<Long> {
-    return Maybe.fromCallable { preferences.getTimeoutPeriod() }
+    return Maybe.fromCallable {
+      enforcer.assertNotOnMainThread()
+      return@fromCallable preferences.getTimeoutPeriod()
+    }
         .map {
           TimeUnit.MINUTES.toMillis(it)
         }
@@ -175,6 +191,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     activityName: String
   ): Maybe<Long> {
     return Maybe.defer {
+      enforcer.assertNotOnMainThread()
       val currentTime = System.currentTimeMillis()
       val newLockUntilTime = currentTime + timeOutMinutesInMillis
       Timber.d(
@@ -190,6 +207,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   override fun getHint(): Single<String> {
     return masterPinInteractor.getHint()
         .map {
+          enforcer.assertNotOnMainThread()
           return@map when (it) {
             is Present -> it.value
             else -> ""
@@ -211,6 +229,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
     ignoreTime: Long
   ): Completable {
     return Completable.defer {
+      enforcer.assertNotOnMainThread()
       val ignoreMillis = TimeUnit.MINUTES.toMillis(ignoreTime)
       val whitelistObservable: Completable
       val ignoreObservable: Completable
@@ -256,8 +275,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   private fun getFailId(
     packageName: String,
     activityName: String
-  ): String =
-    "$packageName|$activityName"
+  ): String = "$packageName|$activityName"
 
   companion object {
     const val DEFAULT_MAX_FAIL_COUNT: Int = 2
