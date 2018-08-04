@@ -19,12 +19,10 @@ object DatabaseProvider {
   @Provides
   @CheckResult
   internal fun provideDb(context: Context): PadLockDb {
-    return Room.databaseBuilder(
-        context.applicationContext,
-        PadLockDbImpl::class.java,
-        PadLockDb.DATABASE_NAME
-    )
+    val appContext = context.applicationContext
+    return Room.databaseBuilder(appContext, PadLockDbImpl::class.java, PadLockDb.DATABASE_NAME)
         .build()
+        .also { it.migrateFromSqlDelight(context) }
   }
 
   @Singleton
