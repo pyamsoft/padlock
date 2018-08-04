@@ -245,7 +245,7 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
 
         while (cursor.moveToNext()) {
           val packageName: String = cursor.getString(columnPackageName)
-          val activityNMame: String = cursor.getString(columnActivityName)
+          val activityName: String = cursor.getString(columnActivityName)
           val lockCode: String? = cursor.getStringOrNull(columnLockCode)
           val lockUntilTime: Long = cursor.getLong(columnLockUntilTime)
           val ignoreUntilTime: Long = cursor.getLong(columnIgnoreUntilTime)
@@ -260,9 +260,21 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
           }
 
           // Queue up the insert into the new DB, migrating old data
+          Timber.w(
+              """Migrating old:
+            |(
+            | packageName       = $packageName
+            | activityName      = $activityName
+            | lockCode          = $lockCode
+            | lockUntilTime     = $lockUntilTime
+            | ignoreUntilTime   = $ignoreUntilTime
+            | systemApplication = $systemApplication
+            | whitelist         = $whitelist
+            |)""".trimMargin()
+          )
           inserts.add(
               insertDao().insert(
-                  packageName, activityNMame, lockCode, lockUntilTime,
+                  packageName, activityName, lockCode, lockUntilTime,
                   ignoreUntilTime, systemApplication, whitelist
               )
           )
