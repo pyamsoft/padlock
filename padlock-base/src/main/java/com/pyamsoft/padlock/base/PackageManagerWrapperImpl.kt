@@ -23,11 +23,11 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.LockListPreferences
-import com.pyamsoft.padlock.api.PackageActivityManager
-import com.pyamsoft.padlock.api.PackageApplicationManager
-import com.pyamsoft.padlock.api.PackageIconManager
-import com.pyamsoft.padlock.api.PackageLabelManager
+import com.pyamsoft.padlock.api.preferences.LockListPreferences
+import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
+import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
+import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
+import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.IconHolder

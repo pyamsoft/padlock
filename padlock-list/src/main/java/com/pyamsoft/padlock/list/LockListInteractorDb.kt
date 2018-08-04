@@ -17,14 +17,14 @@
 package com.pyamsoft.padlock.list
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.EntryQueryDao
+import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.LockListInteractor
-import com.pyamsoft.padlock.api.LockListPreferences
+import com.pyamsoft.padlock.api.preferences.LockListPreferences
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
-import com.pyamsoft.padlock.api.OnboardingPreferences
-import com.pyamsoft.padlock.api.PackageActivityManager
-import com.pyamsoft.padlock.api.PackageApplicationManager
-import com.pyamsoft.padlock.api.PackageLabelManager
+import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
+import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
+import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
+import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.db.AllEntriesModel

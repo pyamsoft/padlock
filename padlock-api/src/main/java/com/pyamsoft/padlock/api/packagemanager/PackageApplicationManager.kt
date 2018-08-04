@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.packagemanager
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.ApplicationItem
 import io.reactivex.Single
 
-interface PackageLabelManager {
+interface PackageApplicationManager {
 
   @CheckResult
-  fun loadPackageLabel(packageName: String): Single<String>
+  fun getActiveApplications(): Single<List<ApplicationItem>>
+
+  @CheckResult
+  fun getApplicationInfo(packageName: String): Single<ApplicationItem>
+
 }

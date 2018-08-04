@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.lockscreen
 
-interface JobSchedulerCompat {
+import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.model.LockScreenType
+import io.reactivex.Single
 
-  fun cancel(
-    targetClass: Class<*>,
-    params: List<Pair<String, String>> = emptyList()
-  )
+interface LockScreenInteractor {
 
-  fun queue(
-    targetClass: Class<*>,
-    params: List<Pair<String, String>> = emptyList(),
-    triggerTime: Long
-  )
+  @CheckResult
+  fun getLockScreenType(): Single<LockScreenType>
+
+  @CheckResult
+  fun getDefaultIgnoreTime(): Single<Long>
+
+  @CheckResult
+  fun getDisplayName(packageName: String): Single<String>
+
+  @CheckResult
+  fun isAlreadyUnlocked(
+    packageName: String,
+    activityName: String
+  ): Single<Boolean>
 }

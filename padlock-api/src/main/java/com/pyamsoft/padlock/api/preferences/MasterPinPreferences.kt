@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.preferences
 
 import androidx.annotation.CheckResult
 
-interface OnboardingPreferences {
+interface MasterPinPreferences {
 
   @CheckResult
-  fun hasAgreed(): Boolean
+  fun getHint(): String?
 
-  fun setAgreed()
+  fun setHint(hint: String)
 
-  @CheckResult
-  fun isListOnBoard(): Boolean
-
-  fun setListOnBoard()
+  fun clearHint()
 
   @CheckResult
-  fun isInfoDialogOnBoard(): Boolean
+  fun getMasterPassword(): String?
 
-  fun setInfoDialogOnBoard()
+  fun setMasterPassword(pw: String)
+
+  fun clearMasterPassword()
 }

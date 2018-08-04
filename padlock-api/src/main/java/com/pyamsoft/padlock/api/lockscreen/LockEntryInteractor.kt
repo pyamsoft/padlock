@@ -14,19 +14,42 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.lockscreen
 
 import androidx.annotation.CheckResult
+import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
 
-interface PackageActivityManager {
+interface LockEntryInteractor {
 
   @CheckResult
-  fun getActivityListForPackage(packageName: String): Single<List<String>>
+  fun submitPin(
+    packageName: String,
+    activityName: String,
+    lockCode: String?,
+    currentAttempt: String
+  ): Single<Boolean>
 
   @CheckResult
-  fun isValidActivity(
+  fun lockEntryOnFail(
     packageName: String,
     activityName: String
-  ): Single<Boolean>
+  ): Maybe<Long>
+
+  @CheckResult
+  fun getHint(): Single<String>
+
+  @CheckResult
+  fun postUnlock(
+    packageName: String,
+    activityName: String,
+    realName: String,
+    lockCode: String?,
+    isSystem: Boolean,
+    whitelist: Boolean,
+    ignoreTime: Long
+  ): Completable
+
+  fun clearFailCount()
 }

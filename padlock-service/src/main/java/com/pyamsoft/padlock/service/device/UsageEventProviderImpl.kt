@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.service.device
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
-import com.pyamsoft.padlock.api.UsageEventProvider
+import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.ForegroundEvent
 import javax.inject.Inject
 import javax.inject.Singleton

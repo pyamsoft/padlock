@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.padlock.api.LockEntryInteractor
+import com.pyamsoft.padlock.api.lockscreen.LockEntryInteractor
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.cache.Cache

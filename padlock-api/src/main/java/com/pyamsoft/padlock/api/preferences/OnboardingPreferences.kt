@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.preferences
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.ApplicationItem
-import io.reactivex.Single
 
-interface PackageApplicationManager {
+interface OnboardingPreferences {
 
   @CheckResult
-  fun getActiveApplications(): Single<List<ApplicationItem>>
+  fun hasAgreed(): Boolean
+
+  fun setAgreed()
 
   @CheckResult
-  fun getApplicationInfo(packageName: String): Single<ApplicationItem>
+  fun isListOnBoard(): Boolean
 
+  fun setListOnBoard()
+
+  @CheckResult
+  fun isInfoDialogOnBoard(): Boolean
+
+  fun setInfoDialogOnBoard()
 }

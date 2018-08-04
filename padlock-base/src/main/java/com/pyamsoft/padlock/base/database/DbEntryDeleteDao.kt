@@ -2,7 +2,7 @@ package com.pyamsoft.padlock.base.database
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.pyamsoft.padlock.api.EntryDeleteDao
+import com.pyamsoft.padlock.api.database.EntryDeleteDao
 import io.reactivex.Completable
 import timber.log.Timber
 

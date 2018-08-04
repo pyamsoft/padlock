@@ -4,7 +4,7 @@ import androidx.annotation.CheckResult
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RoomWarnings
-import com.pyamsoft.padlock.api.EntryQueryDao
+import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.model.db.AllEntriesModel
 import com.pyamsoft.padlock.model.db.EntityChangeEvent
 import com.pyamsoft.padlock.model.db.PadLockDbModels

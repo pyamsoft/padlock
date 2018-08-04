@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.packagemanager
 
-interface ClearPreferences {
+import androidx.annotation.CheckResult
+import io.reactivex.Single
 
-  fun clearAll()
+interface PackageActivityManager {
+
+  @CheckResult
+  fun getActivityListForPackage(packageName: String): Single<List<String>>
+
+  @CheckResult
+  fun isValidActivity(
+    packageName: String,
+    activityName: String
+  ): Single<Boolean>
 }

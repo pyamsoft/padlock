@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.packagemanager
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.ForegroundEvent
+import com.pyamsoft.padlock.model.IconHolder
+import io.reactivex.Single
 
-interface UsageEventProvider {
+interface PackageIconManager<T : Any> {
 
   @CheckResult
-  fun queryEvents(
-    begin: Long,
-    end: Long
-  ): EventQueryResult
-
-  interface EventQueryResult {
-
-    @CheckResult
-    fun createForegroundEvent(func: (String, String) -> ForegroundEvent): ForegroundEvent
-  }
+  fun loadIconForPackageOrDefault(packageName: String): Single<IconHolder<T>>
 }

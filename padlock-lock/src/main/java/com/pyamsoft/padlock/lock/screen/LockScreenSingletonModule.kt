@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-import com.pyamsoft.padlock.api.LockScreenInteractor
+import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
 import com.pyamsoft.pydroid.core.bus.EventBus
 import dagger.Binds
 import dagger.Module

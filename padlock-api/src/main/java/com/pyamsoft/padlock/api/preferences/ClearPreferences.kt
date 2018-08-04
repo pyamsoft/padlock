@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.preferences
 
-import androidx.annotation.CheckResult
+interface ClearPreferences {
 
-interface DeviceLockStateProvider {
-
-  @CheckResult
-  fun isLocked(): Boolean
-
+  fun clearAll()
 }

@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.main
 
 import com.pyamsoft.padlock.api.MainInteractor
-import com.pyamsoft.padlock.api.OnboardingPreferences
+import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton

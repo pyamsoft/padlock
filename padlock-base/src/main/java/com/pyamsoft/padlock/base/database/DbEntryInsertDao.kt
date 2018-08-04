@@ -3,7 +3,7 @@ package com.pyamsoft.padlock.base.database
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
-import com.pyamsoft.padlock.api.EntryInsertDao
+import com.pyamsoft.padlock.api.database.EntryInsertDao
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import io.reactivex.Completable
 import io.reactivex.Single

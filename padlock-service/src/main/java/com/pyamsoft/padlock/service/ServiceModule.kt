@@ -16,10 +16,10 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.padlock.api.DeviceLockStateProvider
-import com.pyamsoft.padlock.api.LockServiceInteractor
-import com.pyamsoft.padlock.api.LockServiceStateInteractor
-import com.pyamsoft.padlock.api.UsageEventProvider
+import com.pyamsoft.padlock.api.service.DeviceLockStateProvider
+import com.pyamsoft.padlock.api.service.LockServiceInteractor
+import com.pyamsoft.padlock.api.service.LockServiceStateInteractor
+import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.service.RecheckEvent
 import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.padlock.service.device.DeviceLockStateProviderImpl

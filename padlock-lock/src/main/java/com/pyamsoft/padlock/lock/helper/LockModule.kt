@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.lock.helper
 
-import com.pyamsoft.padlock.api.LockHelper
+import com.pyamsoft.padlock.api.lockscreen.LockHelper
 import dagger.Binds
 import dagger.Module
 

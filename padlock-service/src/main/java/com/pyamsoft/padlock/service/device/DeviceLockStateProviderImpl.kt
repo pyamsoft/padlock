@@ -18,7 +18,7 @@ package com.pyamsoft.padlock.service.device
 
 import android.app.KeyguardManager
 import android.content.Context
-import com.pyamsoft.padlock.api.DeviceLockStateProvider
+import com.pyamsoft.padlock.api.service.DeviceLockStateProvider
 import javax.inject.Inject
 import javax.inject.Singleton
 

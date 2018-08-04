@@ -17,9 +17,9 @@
 package com.pyamsoft.padlock.purge
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.EntryDeleteDao
-import com.pyamsoft.padlock.api.EntryQueryDao
-import com.pyamsoft.padlock.api.PackageApplicationManager
+import com.pyamsoft.padlock.api.database.EntryDeleteDao
+import com.pyamsoft.padlock.api.database.EntryQueryDao
+import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.model.db.AllEntriesModel
 import io.reactivex.Completable

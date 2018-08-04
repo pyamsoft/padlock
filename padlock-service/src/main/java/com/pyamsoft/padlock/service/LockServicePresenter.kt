@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.padlock.api.LockServiceInteractor
+import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.service.RecheckEvent
 import com.pyamsoft.padlock.model.service.RecheckStatus

@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.lockscreen
 
 import androidx.annotation.CheckResult
+import io.reactivex.Single
 
-interface LockPassed {
-
-  fun add(
-    packageName: String,
-    activityName: String
-  )
-
-  fun remove(
-    packageName: String,
-    activityName: String
-  )
+interface LockHelper {
 
   @CheckResult
-  fun check(
-    packageName: String,
-    activityName: String
-  ): Boolean
+  fun checkSubmissionAttempt(
+    attempt: String,
+    encodedPin: String
+  ): Single<Boolean>
+
+  @CheckResult
+  fun encode(attempt: String): Single<String>
 }

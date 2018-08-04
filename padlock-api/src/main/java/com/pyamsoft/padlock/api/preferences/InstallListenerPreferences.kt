@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.preferences
 
 import androidx.annotation.CheckResult
 
-interface LockListPreferences {
+interface InstallListenerPreferences {
 
   @CheckResult
-  fun isSystemVisible(): Boolean
-
-  fun setSystemVisible(visible: Boolean)
+  fun isInstallListenerEnabled(): Boolean
 }

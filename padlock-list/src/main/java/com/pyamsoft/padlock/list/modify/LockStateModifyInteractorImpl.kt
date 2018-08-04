@@ -17,8 +17,8 @@
 package com.pyamsoft.padlock.list.modify
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.EntryDeleteDao
-import com.pyamsoft.padlock.api.EntryInsertDao
+import com.pyamsoft.padlock.api.database.EntryDeleteDao
+import com.pyamsoft.padlock.api.database.EntryInsertDao
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.LOCKED

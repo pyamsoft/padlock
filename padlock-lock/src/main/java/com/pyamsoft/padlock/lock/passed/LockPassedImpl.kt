@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.lock.passed
 
-import com.pyamsoft.padlock.api.LockPassed
+import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import javax.inject.Inject
 import javax.inject.Singleton
 

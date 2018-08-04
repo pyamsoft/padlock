@@ -14,36 +14,22 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.preferences
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.padlock.model.service.RecheckStatus
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import io.reactivex.Flowable
-import io.reactivex.Single
+import com.pyamsoft.padlock.model.LockScreenType
 
-interface LockServiceInteractor {
-
-  fun cleanup()
-
-  fun reset()
-
-  fun clearMatchingForegroundEvent(event: ForegroundEvent)
+interface LockScreenPreferences {
 
   @CheckResult
-  fun isActiveMatching(
-    packageName: String,
-    className: String
-  ): Single<Boolean>
+  fun getCurrentLockType(): LockScreenType
 
   @CheckResult
-  fun listenForForegroundEvents(): Flowable<ForegroundEvent>
+  fun isIgnoreInKeyguard(): Boolean
 
   @CheckResult
-  fun processEvent(
-    packageName: String,
-    className: String,
-    forcedRecheck: RecheckStatus
-  ): Single<PadLockEntryModel>
+  fun getDefaultIgnoreTime(): Long
+
+  @CheckResult
+  fun getTimeoutPeriod(): Long
 }

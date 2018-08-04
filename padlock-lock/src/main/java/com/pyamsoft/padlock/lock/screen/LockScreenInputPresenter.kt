@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-import com.pyamsoft.padlock.api.LockScreenInteractor
+import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
 import com.pyamsoft.pydroid.core.presenter.Presenter

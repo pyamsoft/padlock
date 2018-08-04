@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.preferences
 
 import androidx.annotation.CheckResult
 
-interface MasterPinPreferences {
+interface LockListPreferences {
 
   @CheckResult
-  fun getHint(): String?
+  fun isSystemVisible(): Boolean
 
-  fun setHint(hint: String)
-
-  fun clearHint()
-
-  @CheckResult
-  fun getMasterPassword(): String?
-
-  fun setMasterPassword(pw: String)
-
-  fun clearMasterPassword()
+  fun setSystemVisible(visible: Boolean)
 }

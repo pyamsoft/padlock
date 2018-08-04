@@ -16,10 +16,10 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-import com.pyamsoft.padlock.api.LockPassed
-import com.pyamsoft.padlock.api.LockScreenInteractor
-import com.pyamsoft.padlock.api.LockScreenPreferences
-import com.pyamsoft.padlock.api.PackageLabelManager
+import com.pyamsoft.padlock.api.lockscreen.LockPassed
+import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
+import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
+import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.padlock.model.LockScreenType
 import io.reactivex.Single
 import javax.inject.Inject

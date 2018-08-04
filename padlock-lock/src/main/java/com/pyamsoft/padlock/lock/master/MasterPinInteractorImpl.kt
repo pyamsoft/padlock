@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.lock.master
 
 import com.pyamsoft.padlock.api.MasterPinInteractor
-import com.pyamsoft.padlock.api.MasterPinPreferences
+import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.asOptional
 import io.reactivex.Single

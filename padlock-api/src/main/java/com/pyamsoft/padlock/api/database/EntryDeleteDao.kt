@@ -1,4 +1,4 @@
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.database
 
 import androidx.annotation.CheckResult
 import io.reactivex.Completable

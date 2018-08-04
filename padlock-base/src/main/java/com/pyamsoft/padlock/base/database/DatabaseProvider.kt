@@ -3,10 +3,10 @@ package com.pyamsoft.padlock.base.database
 import android.content.Context
 import androidx.annotation.CheckResult
 import androidx.room.Room
-import com.pyamsoft.padlock.api.EntryDeleteDao
-import com.pyamsoft.padlock.api.EntryInsertDao
-import com.pyamsoft.padlock.api.EntryQueryDao
-import com.pyamsoft.padlock.api.EntryUpdateDao
+import com.pyamsoft.padlock.api.database.EntryDeleteDao
+import com.pyamsoft.padlock.api.database.EntryInsertDao
+import com.pyamsoft.padlock.api.database.EntryQueryDao
+import com.pyamsoft.padlock.api.database.EntryUpdateDao
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

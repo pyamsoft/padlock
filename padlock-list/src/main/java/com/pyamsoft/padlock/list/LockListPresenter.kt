@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.list
 import androidx.lifecycle.Lifecycle.Event.ON_PAUSE
 import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockListInteractor
-import com.pyamsoft.padlock.api.LockServiceStateInteractor
+import com.pyamsoft.padlock.api.service.LockServiceStateInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED

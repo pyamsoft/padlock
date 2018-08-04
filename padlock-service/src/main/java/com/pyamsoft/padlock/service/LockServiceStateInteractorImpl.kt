@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.padlock.api.LockServiceStateInteractor
+import com.pyamsoft.padlock.api.service.LockServiceStateInteractor
 import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import io.reactivex.Single

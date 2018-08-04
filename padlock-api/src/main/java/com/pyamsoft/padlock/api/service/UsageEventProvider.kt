@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.service
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.LockScreenType
+import com.pyamsoft.padlock.model.ForegroundEvent
 
-interface LockScreenPreferences {
-
-  @CheckResult
-  fun getCurrentLockType(): LockScreenType
+interface UsageEventProvider {
 
   @CheckResult
-  fun isIgnoreInKeyguard(): Boolean
+  fun queryEvents(
+    begin: Long,
+    end: Long
+  ): EventQueryResult
 
-  @CheckResult
-  fun getDefaultIgnoreTime(): Long
+  interface EventQueryResult {
 
-  @CheckResult
-  fun getTimeoutPeriod(): Long
+    @CheckResult
+    fun createForegroundEvent(func: (String, String) -> ForegroundEvent): ForegroundEvent
+  }
 }

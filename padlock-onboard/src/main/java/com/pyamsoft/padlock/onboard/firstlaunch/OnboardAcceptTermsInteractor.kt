@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.onboard.firstlaunch
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.OnboardingPreferences
+import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
 import io.reactivex.Completable
 import javax.inject.Inject
 import javax.inject.Singleton

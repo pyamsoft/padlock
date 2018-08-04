@@ -16,10 +16,10 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.api.ClearPreferences
-import com.pyamsoft.padlock.api.EntryDeleteDao
-import com.pyamsoft.padlock.api.InstallListenerPreferences
-import com.pyamsoft.padlock.api.MasterPinPreferences
+import com.pyamsoft.padlock.api.preferences.ClearPreferences
+import com.pyamsoft.padlock.api.database.EntryDeleteDao
+import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
+import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.model.ConfirmEvent.ALL

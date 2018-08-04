@@ -18,15 +18,15 @@ package com.pyamsoft.padlock.service
 
 import android.app.IntentService
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.DeviceLockStateProvider
-import com.pyamsoft.padlock.api.EntryQueryDao
-import com.pyamsoft.padlock.api.JobSchedulerCompat
-import com.pyamsoft.padlock.api.LockPassed
-import com.pyamsoft.padlock.api.LockScreenPreferences
-import com.pyamsoft.padlock.api.LockServiceInteractor
-import com.pyamsoft.padlock.api.LockServiceStateInteractor
-import com.pyamsoft.padlock.api.PackageActivityManager
-import com.pyamsoft.padlock.api.UsageEventProvider
+import com.pyamsoft.padlock.api.service.DeviceLockStateProvider
+import com.pyamsoft.padlock.api.database.EntryQueryDao
+import com.pyamsoft.padlock.api.service.JobSchedulerCompat
+import com.pyamsoft.padlock.api.lockscreen.LockPassed
+import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
+import com.pyamsoft.padlock.api.service.LockServiceInteractor
+import com.pyamsoft.padlock.api.service.LockServiceStateInteractor
+import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
+import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.db.PadLockDbModels

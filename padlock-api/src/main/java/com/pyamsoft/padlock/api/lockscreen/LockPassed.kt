@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.lockscreen
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.LockScreenType
-import io.reactivex.Single
 
-interface LockScreenInteractor {
+interface LockPassed {
 
-  @CheckResult
-  fun getLockScreenType(): Single<LockScreenType>
-
-  @CheckResult
-  fun getDefaultIgnoreTime(): Single<Long>
-
-  @CheckResult
-  fun getDisplayName(packageName: String): Single<String>
-
-  @CheckResult
-  fun isAlreadyUnlocked(
+  fun add(
     packageName: String,
     activityName: String
-  ): Single<Boolean>
+  )
+
+  fun remove(
+    packageName: String,
+    activityName: String
+  )
+
+  @CheckResult
+  fun check(
+    packageName: String,
+    activityName: String
+  ): Boolean
 }

@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.service
 
-import androidx.annotation.CheckResult
-import io.reactivex.Single
+interface JobSchedulerCompat {
 
-interface LockHelper {
+  fun cancel(
+    targetClass: Class<*>,
+    params: List<Pair<String, String>> = emptyList()
+  )
 
-  @CheckResult
-  fun checkSubmissionAttempt(
-    attempt: String,
-    encodedPin: String
-  ): Single<Boolean>
-
-  @CheckResult
-  fun encode(attempt: String): Single<String>
+  fun queue(
+    targetClass: Class<*>,
+    params: List<Pair<String, String>> = emptyList(),
+    triggerTime: Long
+  )
 }

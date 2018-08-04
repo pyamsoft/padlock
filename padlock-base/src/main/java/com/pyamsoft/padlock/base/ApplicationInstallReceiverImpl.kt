@@ -32,7 +32,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
-import com.pyamsoft.padlock.api.PackageLabelManager
+import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.pydroid.core.cache.Cache
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable

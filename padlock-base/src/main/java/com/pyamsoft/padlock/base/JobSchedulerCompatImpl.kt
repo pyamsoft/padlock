@@ -21,7 +21,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.JobSchedulerCompat
+import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import javax.inject.Inject
 import javax.inject.Singleton
 

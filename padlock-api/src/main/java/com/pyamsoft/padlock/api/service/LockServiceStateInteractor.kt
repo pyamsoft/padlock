@@ -14,42 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.service
 
 import androidx.annotation.CheckResult
-import io.reactivex.Completable
-import io.reactivex.Maybe
 import io.reactivex.Single
 
-interface LockEntryInteractor {
+interface LockServiceStateInteractor {
 
   @CheckResult
-  fun submitPin(
-    packageName: String,
-    activityName: String,
-    lockCode: String?,
-    currentAttempt: String
-  ): Single<Boolean>
-
-  @CheckResult
-  fun lockEntryOnFail(
-    packageName: String,
-    activityName: String
-  ): Maybe<Long>
-
-  @CheckResult
-  fun getHint(): Single<String>
-
-  @CheckResult
-  fun postUnlock(
-    packageName: String,
-    activityName: String,
-    realName: String,
-    lockCode: String?,
-    isSystem: Boolean,
-    whitelist: Boolean,
-    ignoreTime: Long
-  ): Completable
-
-  fun clearFailCount()
+  fun isServiceEnabled(): Single<Boolean>
 }

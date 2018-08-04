@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.lock.helper
 
 import android.util.Base64
-import com.pyamsoft.padlock.api.LockHelper
+import com.pyamsoft.padlock.api.lockscreen.LockHelper
 import io.reactivex.Completable
 import io.reactivex.Single
 import java.nio.charset.Charset

@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.api.service
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.IconHolder
-import io.reactivex.Single
 
-interface PackageIconManager<T : Any> {
+interface DeviceLockStateProvider {
 
   @CheckResult
-  fun loadIconForPackageOrDefault(packageName: String): Single<IconHolder<T>>
+  fun isLocked(): Boolean
+
 }
