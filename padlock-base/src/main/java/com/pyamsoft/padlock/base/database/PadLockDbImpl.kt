@@ -202,7 +202,9 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
   }
 
   private fun deleteOldSqlDelight(context: Context) {
-    context.deleteDatabase(SqlDelightMigrations.SQLDELIGHT_DB_NAME)
+    val name = SqlDelightMigrations.SQLDELIGHT_DB_NAME
+    Timber.w("Deleting old database held at $name")
+    context.deleteDatabase(name)
   }
 
   override fun migrateFromSqlDelight(context: Context) {
