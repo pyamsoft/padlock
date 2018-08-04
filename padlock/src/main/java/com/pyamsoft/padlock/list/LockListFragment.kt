@@ -21,6 +21,8 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewPropertyAnimatorListenerAdapter
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
@@ -45,8 +47,7 @@ import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
-import com.pyamsoft.pydroid.ui.util.withBehavior
-import com.pyamsoft.pydroid.ui.widget.HideScrollFABBehavior
+import com.pyamsoft.pydroid.ui.widget.HideOnScrollListener
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import timber.log.Timber
 import java.util.Collections
@@ -62,6 +63,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   private lateinit var binding: FragmentLockListBinding
   private lateinit var filterListDelegate: FilterListDelegate
   private lateinit var refreshLatch: RefreshLatch
+  private lateinit var hideScrollListener: HideOnScrollListener
   private var lastPosition: Int = 0
   private var displaySystemItem: MenuItem? = null
 
@@ -94,10 +96,19 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       binding.apply {
         applistSwipeRefresh.refreshing(it)
 
+        val animationListener = object : ViewPropertyAnimatorListenerAdapter() {
+          override fun onAnimationEnd(view: View?) {
+            super.onAnimationEnd(view)
+            hideScrollListener.syncVisibilityState()
+          }
+        }
+
         if (it) {
-          applistFab.hide()
+          applistFab.popHide()
+              .setListener(animationListener)
         } else {
-          applistFab.show()
+          applistFab.popShow()
+              .setListener(animationListener)
         }
       }
 
@@ -148,18 +159,18 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         filterListDelegate.onPrepareOptionsMenu(this, adapter)
       }
 
-      it.setOnMenuItemClickListener {
-        when (it.itemId) {
+      it.setOnMenuItemClickListener { menuItem ->
+        when (menuItem.itemId) {
           R.id.menu_is_system -> {
             if (!binding.applistSwipeRefresh.isRefreshing) {
               Timber.d("List is not refreshing. Allow change of system preference")
-              presenter.setSystemVisibility(!it.isChecked)
+              presenter.setSystemVisibility(!menuItem.isChecked)
               presenter.populateList(true)
             }
             return@setOnMenuItemClickListener true
           }
           else -> {
-            Timber.w("Unhandled menu item clicked: ${it.itemId}")
+            Timber.w("Unhandled menu item clicked: ${menuItem.itemId}")
             return@setOnMenuItemClickListener false
           }
         }
@@ -181,13 +192,10 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       it.setTitle(R.string.app_name)
       it.setUpEnabled(false)
     }
-
-    binding.applistFab.popShow()
   }
 
   override fun onPause() {
     super.onPause()
-    binding.applistFab.popHide()
     lastPosition = ListStateUtil.getCurrentPosition(binding.applistRecyclerview)
     ListStateUtil.saveState(TAG, null, binding.applistRecyclerview)
   }
@@ -241,6 +249,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
     filterListDelegate.onDestroyView()
     binding.apply {
       applistRecyclerview.setOnDebouncedClickListener(null)
+      applistRecyclerview.removeOnScrollListener(hideScrollListener)
       applistRecyclerview.layoutManager = null
       applistRecyclerview.adapter = null
       applistFab.setOnDebouncedClickListener(null)
@@ -260,6 +269,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   private fun setupFAB() {
     binding.apply {
+      applistFab.isVisible = false
       applistFab.setOnDebouncedClickListener {
         if (UsagePermissionChecker.missingUsageStatsPermission(
                 applistFab.context
@@ -267,13 +277,23 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         ) {
           UsageAccessRequestDialog().show(requireActivity(), "usage_access")
         } else {
-          requireActivity().let {
-            PinEntryDialog.newInstance(it.packageName)
-                .show(it, PinEntryDialog.TAG)
+          val activity = requireActivity()
+          PinEntryDialog.newInstance(activity.packageName)
+              .show(activity, PinEntryDialog.TAG)
+        }
+      }
+
+      // Attach the FAB to callbacks on the recycler scroll
+      hideScrollListener = HideOnScrollListener.withActionButton(applistFab) {
+        if (!applistSwipeRefresh.isRefreshing) {
+          if (it) {
+            applistFab.popShow()
+          } else {
+            applistFab.popHide()
           }
         }
       }
-      applistFab.withBehavior(HideScrollFABBehavior(24))
+      applistRecyclerview.addOnScrollListener(hideScrollListener)
     }
   }
 
