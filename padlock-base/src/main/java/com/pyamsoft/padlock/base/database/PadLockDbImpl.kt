@@ -222,45 +222,48 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
               .build()
       )
 
-      val inserts = ArrayList<Completable>()
-
       // Get all entries in the DB
-      val cursor =
-        sqldelight.readableDatabase.query("SELECT * FROM ${SqlDelightMigrations.TABLE_NAME}")
+      val inserts = ArrayList<Completable>()
+      sqldelight.readableDatabase.use { db ->
+        db.query("SELECT * FROM ${SqlDelightMigrations.TABLE_NAME}")
+            .use {
 
-      // Migrate them into Room via insert
-      if (cursor.moveToFirst()) {
-        val columnPackageName = cursor.getColumnIndexOrThrow(SqlDelightMigrations.PACKAGE_NAME)
-        val columnActivityName = cursor.getColumnIndexOrThrow(SqlDelightMigrations.ACTIVITY_NAME)
-        val columnLockCode = cursor.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_CODE)
-        val columnLockUntilTime = cursor.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_UNTIL_TIME)
-        val columnIgnoreUntilTime =
-          cursor.getColumnIndexOrThrow(SqlDelightMigrations.IGNORE_UNTIL_TIME)
-        val columnSystemApplication =
-          cursor.getColumnIndexOrThrow(SqlDelightMigrations.SYSTEM_APPLICATION)
+              // Migrate them into Room via insert
+              if (it.moveToFirst()) {
+                val columnPackageName =
+                  it.getColumnIndexOrThrow(SqlDelightMigrations.PACKAGE_NAME)
+                val columnActivityName =
+                  it.getColumnIndexOrThrow(SqlDelightMigrations.ACTIVITY_NAME)
+                val columnLockCode = it.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_CODE)
+                val columnLockUntilTime =
+                  it.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_UNTIL_TIME)
+                val columnIgnoreUntilTime =
+                  it.getColumnIndexOrThrow(SqlDelightMigrations.IGNORE_UNTIL_TIME)
+                val columnSystemApplication =
+                  it.getColumnIndexOrThrow(SqlDelightMigrations.SYSTEM_APPLICATION)
 
-        // Some old versions did not have whitelist column
-        val columnWhitelist = cursor.getColumnIndex(SqlDelightMigrations.WHITELIST)
+                // Some old versions did not have whitelist column
+                val columnWhitelist = it.getColumnIndex(SqlDelightMigrations.WHITELIST)
 
-        while (cursor.moveToNext()) {
-          val packageName: String = cursor.getString(columnPackageName)
-          val activityName: String = cursor.getString(columnActivityName)
-          val lockCode: String? = cursor.getStringOrNull(columnLockCode)
-          val lockUntilTime: Long = cursor.getLong(columnLockUntilTime)
-          val ignoreUntilTime: Long = cursor.getLong(columnIgnoreUntilTime)
-          val systemApplication: Boolean = cursor.getInt(columnSystemApplication) != 0
+                while (it.moveToNext()) {
+                  val packageName: String = it.getString(columnPackageName)
+                  val activityName: String = it.getString(columnActivityName)
+                  val lockCode: String? = it.getStringOrNull(columnLockCode)
+                  val lockUntilTime: Long = it.getLong(columnLockUntilTime)
+                  val ignoreUntilTime: Long = it.getLong(columnIgnoreUntilTime)
+                  val systemApplication: Boolean = it.getInt(columnSystemApplication) != 0
 
-          // Some old versions did not have whitelist column - default to false
-          val whitelist: Boolean
-          if (columnWhitelist < 0) {
-            whitelist = false
-          } else {
-            whitelist = cursor.getInt(columnWhitelist) != 0
-          }
+                  // Some old versions did not have whitelist column - default to false
+                  val whitelist: Boolean
+                  if (columnWhitelist < 0) {
+                    whitelist = false
+                  } else {
+                    whitelist = it.getInt(columnWhitelist) != 0
+                  }
 
-          // Queue up the insert into the new DB, migrating old data
-          Timber.w(
-              """Migrating old:
+                  // Queue up the insert into the new DB, migrating old data
+                  Timber.w(
+                      """Migrating old:
             |(
             | packageName       = $packageName
             | activityName      = $activityName
@@ -270,21 +273,24 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
             | systemApplication = $systemApplication
             | whitelist         = $whitelist
             |)""".trimMargin()
-          )
-          inserts.add(
-              insertDao().insert(
-                  packageName, activityName, lockCode, lockUntilTime,
-                  ignoreUntilTime, systemApplication, whitelist
-              )
-          )
-        }
+                  )
+                  inserts.add(
+                      insertDao().insert(
+                          packageName, activityName, lockCode, lockUntilTime,
+                          ignoreUntilTime, systemApplication, whitelist
+                      )
+                  )
+                }
+              }
+            }
       }
 
-      // Close the database once we're done reading
-      sqldelight.close()
-
       // Wait for all the inserts to happen
-      return@defer Completable.mergeArray(*inserts.toTypedArray())
+      if (inserts.isEmpty()) {
+        return@defer Completable.complete()
+      } else {
+        return@defer Completable.mergeArray(*inserts.toTypedArray())
+      }
     }
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
