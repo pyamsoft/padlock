@@ -284,7 +284,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       }
 
       // Attach the FAB to callbacks on the recycler scroll
-      hideScrollListener = HideOnScrollListener.withActionButton(applistFab) {
+      hideScrollListener = HideOnScrollListener.withView(applistFab) {
         if (!applistSwipeRefresh.isRefreshing) {
           if (it) {
             applistFab.popShow()
