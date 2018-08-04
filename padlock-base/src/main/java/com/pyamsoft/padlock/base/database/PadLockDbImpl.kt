@@ -5,6 +5,8 @@ import androidx.annotation.CheckResult
 import androidx.core.database.getStringOrNull
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.SupportSQLiteOpenHelper.Configuration
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import com.pyamsoft.padlock.api.database.EntryDeleteDao
@@ -214,6 +216,7 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
     Completable.defer {
       val sqldelight = FrameworkSQLiteOpenHelperFactory().create(
           Configuration.builder(context)
+              .callback(EmptyCallback)
               .name(SqlDelightMigrations.SQLDELIGHT_DB_NAME)
               .build()
       )
@@ -315,10 +318,29 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
   @CheckResult
   internal abstract fun deleteDao(): DbEntryDeleteDao
 
+  private object EmptyCallback : SupportSQLiteOpenHelper.Callback(
+      SqlDelightMigrations.SQLDELIGHT_DB_VERSION
+  ) {
+
+    override fun onCreate(db: SupportSQLiteDatabase?) {
+      Timber.d("Callback Create is intentionally empty, this database should already be set up")
+    }
+
+    override fun onUpgrade(
+      db: SupportSQLiteDatabase?,
+      oldVersion: Int,
+      newVersion: Int
+    ) {
+      Timber.d("Callback Migration is intentionally empty, this database should already be set up")
+    }
+
+  }
+
   companion object {
 
     private object SqlDelightMigrations {
 
+      internal const val SQLDELIGHT_DB_VERSION = 4
       internal const val SQLDELIGHT_DB_NAME = "padlock_db"
       internal const val TABLE_NAME = "padlock_entry"
       internal const val PACKAGE_NAME = "packageName"
