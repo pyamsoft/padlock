@@ -25,7 +25,6 @@ import io.reactivex.Completable
 import io.reactivex.CompletableObserver
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.AsyncSubject
@@ -208,14 +207,14 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
   }
 
   override fun migrateFromSqlDelight(context: Context) {
-    // If the old sqldelight file exists, migrate it
-    if (!oldSqlDelightExists(context)) {
-      Timber.d("No old SqlDelight file exists - assume migration complete or not needed")
-      sqlDelightMigrationComplete(context)
-      return
-    }
-
     Completable.defer {
+      // If the old sqldelight file exists, migrate it
+      if (!oldSqlDelightExists(context)) {
+        Timber.d("No old SqlDelight file exists - assume migration complete or not needed")
+        sqlDelightMigrationComplete(context)
+        return@defer Completable.complete()
+      }
+
       val sqldelight = FrameworkSQLiteOpenHelperFactory().create(
           Configuration.builder(context)
               .callback(EmptyCallback)
@@ -285,7 +284,7 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
       return@defer Completable.mergeArray(*inserts.toTypedArray())
     }
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .observeOn(Schedulers.io())
         .subscribe(object : CompletableObserver {
 
           override fun onError(e: Throwable) {
