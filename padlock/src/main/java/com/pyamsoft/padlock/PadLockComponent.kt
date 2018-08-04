@@ -20,7 +20,7 @@ import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.InstallListenerPreferences
 import com.pyamsoft.padlock.base.BaseModule
-import com.pyamsoft.padlock.base.room.DatabaseProvider
+import com.pyamsoft.padlock.base.database.DatabaseProvider
 import com.pyamsoft.padlock.list.ListListComponent
 import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.LockInfoItem

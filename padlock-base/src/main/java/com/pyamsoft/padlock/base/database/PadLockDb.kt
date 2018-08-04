@@ -1,4 +1,4 @@
-package com.pyamsoft.padlock.base.room
+package com.pyamsoft.padlock.base.database
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.EntryDeleteDao

@@ -34,6 +34,9 @@ android {
       annotationProcessorOptions {
         // Fix kapt
         includeCompileClasspath = true
+
+        // Export Room migrations
+        arguments = [ "room.schemaLocation": "$projectDir/schemas".toString()]
       }
     }
   }

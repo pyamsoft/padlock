@@ -1,4 +1,4 @@
-package com.pyamsoft.padlock.base.room
+package com.pyamsoft.padlock.base.database
 
 import androidx.room.Dao
 import androidx.room.Insert

@@ -1,4 +1,4 @@
-package com.pyamsoft.padlock.base.room
+package com.pyamsoft.padlock.base.database
 
 import android.content.Context
 import androidx.annotation.CheckResult
@@ -9,7 +9,6 @@ import com.pyamsoft.padlock.api.EntryQueryDao
 import com.pyamsoft.padlock.api.EntryUpdateDao
 import dagger.Module
 import dagger.Provides
-import timber.log.Timber
 import javax.inject.Singleton
 
 @Module
