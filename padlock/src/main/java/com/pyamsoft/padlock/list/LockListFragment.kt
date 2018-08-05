@@ -49,6 +49,7 @@ import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.HideOnScrollListener
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
+import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import java.util.Collections
 import javax.inject.Inject
@@ -157,6 +158,11 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       it.menu.apply {
         displaySystemItem = findItem(R.id.menu_is_system)
         filterListDelegate.onPrepareOptionsMenu(this, adapter)
+
+        val searchItem = findItem(R.id.menu_search)
+        val searchIcon = searchItem.icon
+        val tintedSearchIcon = searchIcon.tintWith(requireActivity(), R.color.black)
+        searchItem.icon = tintedSearchIcon
       }
 
       it.setOnMenuItemClickListener { menuItem ->
