@@ -63,6 +63,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   private lateinit var appName: String
   private lateinit var filterListDelegate: FilterListDelegate
   private lateinit var refreshLatch: RefreshLatch
+  private lateinit var listStateTag: String
   private var appIsSystem: Boolean = false
   private var lastPosition: Int = 0
 
@@ -73,6 +74,8 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
       appName = it.getString(ARG_APP_NAME, null)
       appIsSystem = it.getBoolean(ARG_APP_SYSTEM, false)
     }
+
+    listStateTag = TAG + appPackageName
 
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusLockInfoComponent(
@@ -123,7 +126,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     adapter = ModelAdapter {
       return@ModelAdapter when (it) {
         is ActivityEntry.Item -> LockInfoItem(it, appIsSystem)
-        is ActivityEntry.Group -> LockInfoGroup(it)
+        is ActivityEntry.Group -> LockInfoGroup(appPackageName, it)
       }
     }
     setupToolbar()
@@ -134,7 +137,7 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
     setupSwipeRefresh()
     setupRecyclerView()
     filterListDelegate.onViewCreated(adapter)
-    lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
+    lastPosition = ListStateUtil.restoreState(listStateTag, savedInstanceState)
 
     presenter.bind(viewLifecycleOwner, this)
   }
@@ -228,11 +231,11 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
   override fun onPause() {
     super.onPause()
     lastPosition = ListStateUtil.getCurrentPosition(binding.lockInfoRecycler)
-    ListStateUtil.saveState(TAG, null, binding.lockInfoRecycler)
+    ListStateUtil.saveState(listStateTag, null, binding.lockInfoRecycler)
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
-    ListStateUtil.saveState(TAG, outState, binding.lockInfoRecycler)
+    ListStateUtil.saveState(listStateTag, outState, binding.lockInfoRecycler)
     super.onSaveInstanceState(outState)
   }
 

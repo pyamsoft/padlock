@@ -220,16 +220,39 @@ internal class LockInfoInteractorDb @Inject internal constructor(
 
   @CheckResult
   private fun compareByGroup(
+    packageName: String,
     o1: GroupedObservable<String?, ActivityEntry.Item>,
     o2: GroupedObservable<String?, ActivityEntry.Item>
   ): Int {
     enforcer.assertNotOnMainThread()
-    if (o1.key == null && o2.key == null) {
+    val o1Key = o1.key
+    val o2Key = o2.key
+    if (o1Key == null && o2Key == null) {
+      // Both are null, equal - but should this be possible?
       return 0
-    } else if (o1.key == null) {
+    } else if (o1Key == null) {
+      // Left is null, right is higher
       return 1
-    } else {
+    } else if (o2Key == null) {
+      // Right is null, left is higher
       return -1
+    } else {
+      // Compare keys alphabetically
+      val o1IsPackage = o1Key.startsWith(packageName)
+      val o2IsPackage = o2Key.startsWith(packageName)
+      if (o1IsPackage && o2IsPackage) {
+        // Both within package, compare normally
+        return o1Key.compareTo(o2Key)
+      } else if (o1IsPackage) {
+        // Left in package, it comes first
+        return -1
+      } else if (o2IsPackage) {
+        // Right in package, it comes first
+        return 1
+      } else {
+        // No special treatment, normal compare
+        return o1Key.compareTo(o2Key)
+      }
     }
   }
 
@@ -251,7 +274,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
       enforcer.assertNotOnMainThread()
       return@flatMap Observable.fromIterable(source)
           .groupBy { it.group }
-          .sorted { o1, o2 -> compareByGroup(o1, o2) }
+          .sorted { o1, o2 -> compareByGroup(packageName, o1, o2) }
           .concatMap {
             enforcer.assertNotOnMainThread()
             return@concatMap sortWithinGroup(it)

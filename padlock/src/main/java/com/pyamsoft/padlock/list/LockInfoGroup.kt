@@ -16,13 +16,14 @@
 
 package com.pyamsoft.padlock.list
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoGroupBinding
 import com.pyamsoft.padlock.model.list.ActivityEntry
 
 class LockInfoGroup internal constructor(
+  private val packageName: String,
   entry: ActivityEntry.Group
 ) : LockInfoBaseItem<ActivityEntry.Group, LockInfoGroup, LockInfoGroup.ViewHolder>(entry) {
 
@@ -35,20 +36,12 @@ class LockInfoGroup internal constructor(
     payloads: List<Any>
   ) {
     super.bindView(holder, payloads)
-    holder.apply {
-      binding.apply {
-        lockInfoGroupName.text = model.name
-      }
-    }
+    holder.bind(model, packageName)
   }
 
   override fun unbindView(holder: ViewHolder) {
     super.unbindView(holder)
-    holder.apply {
-      binding.apply {
-        lockInfoGroupName.text = null
-      }
-    }
+    holder.unbind()
   }
 
   override fun filterAgainst(query: String): Boolean {
@@ -59,7 +52,29 @@ class LockInfoGroup internal constructor(
 
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    internal val binding: AdapterItemLockinfoGroupBinding =
-      AdapterItemLockinfoGroupBinding.bind(itemView)
+    private val binding = AdapterItemLockinfoGroupBinding.bind(itemView)
+
+    fun bind(
+      model: ActivityEntry.Group,
+      packageName: String
+    ) {
+      binding.apply {
+        val text: String
+        val modelName = model.name
+        if (modelName != packageName && modelName.startsWith(packageName)) {
+          text = modelName.replaceFirst(packageName, "")
+        } else {
+          text = modelName
+        }
+        lockInfoGroupName.text = text
+      }
+    }
+
+    fun unbind() {
+      binding.apply {
+        lockInfoGroupName.text = null
+      }
+    }
+
   }
 }

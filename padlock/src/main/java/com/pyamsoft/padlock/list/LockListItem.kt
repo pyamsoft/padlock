@@ -52,7 +52,7 @@ class LockListItem internal constructor(
     val name = model.name.toLowerCase()
         .trim { it <= ' ' }
     Timber.d("Filter predicate: '%s' against %s", query, name)
-    return name.startsWith(query)
+    return name.contains(query)
   }
 
   override fun bindView(
