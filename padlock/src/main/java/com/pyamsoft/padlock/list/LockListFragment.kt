@@ -213,11 +213,15 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   private inline fun showFab(crossinline onShown: FloatingActionButton.() -> Unit = {}) {
-    binding.applistFab.show { onShown(this) }
+    binding.applistFab.show {
+      onShown(this)
+    }
   }
 
   private inline fun hideFab(crossinline onHidden: FloatingActionButton.() -> Unit = {}) {
-    binding.applistFab.hide { onHidden(this) }
+    binding.applistFab.hide {
+      onHidden(this)
+    }
   }
 
   private fun setupSwipeRefresh() {
@@ -319,7 +323,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinCreateSuccess() {
-    onFABEnabled()
+    onFabIconLocked()
     val v = view
     if (v != null) {
       Snackbreak.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT)
@@ -337,7 +341,7 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinClearSuccess() {
-    onFABDisabled()
+    onFabIconUnlocked()
     val v = view
     if (v != null) {
       Snackbreak.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT)
@@ -364,14 +368,14 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
         .show()
   }
 
-  override fun onFABEnabled() {
+  override fun onFabIconLocked() {
     Timber.d("on FAB enabled")
     imageLoader.fromResource(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
   }
 
-  override fun onFABDisabled() {
+  override fun onFabIconUnlocked() {
     Timber.d("on FAB disabled")
     imageLoader.fromResource(R.drawable.ic_lock_open_24dp)
         .into(binding.applistFab)

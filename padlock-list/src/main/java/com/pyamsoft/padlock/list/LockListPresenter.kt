@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.list
 
-import androidx.lifecycle.Lifecycle.Event.ON_PAUSE
 import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.service.LockServiceStateInteractor
@@ -62,12 +61,8 @@ class LockListPresenter @Inject internal constructor(
     super.onStart()
     populateList(false)
     subscribeToDatabaseChanges()
-  }
-
-  override fun onResume() {
-    super.onResume()
-    setFABStateFromPreference()
     setSystemVisibilityFromPreference()
+    updateFabIcon()
   }
 
   private fun subscribeToDatabaseChanges() {
@@ -171,23 +166,23 @@ class LockListPresenter @Inject internal constructor(
     }
   }
 
-  private fun setFABStateFromPreference() {
-    dispose(ON_PAUSE) {
+  private fun updateFabIcon() {
+    dispose(ON_STOP) {
       stateInteractor.isServiceEnabled()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe({
             if (it) {
-              view?.onFABEnabled()
+              view?.onFabIconLocked()
             } else {
-              view?.onFABDisabled()
+              view?.onFabIconUnlocked()
             }
           }, { Timber.e(it, "onError") })
     }
   }
 
   private fun setSystemVisibilityFromPreference() {
-    dispose(ON_PAUSE) {
+    dispose(ON_STOP) {
       lockListInteractor.isSystemVisible()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
@@ -239,7 +234,7 @@ class LockListPresenter @Inject internal constructor(
   }
 
   interface View : LockModifyCallback, MasterPinCreateCallback, MasterPinClearCallback,
-      FABStateCallback, SystemVisibilityChangeCallback, OnboardingCallback,
+      FabIconStateCallback, SystemVisibilityChangeCallback, OnboardingCallback,
       ListPopulateCallback, ChangeCallback
 
   interface ChangeCallback {
@@ -271,11 +266,11 @@ class LockListPresenter @Inject internal constructor(
     fun onMasterPinClearFailure()
   }
 
-  interface FABStateCallback {
+  interface FabIconStateCallback {
 
-    fun onFABEnabled()
+    fun onFabIconLocked()
 
-    fun onFABDisabled()
+    fun onFabIconUnlocked()
   }
 
   interface SystemVisibilityChangeCallback {
