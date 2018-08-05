@@ -65,7 +65,7 @@
         android:layout_margin="16dp"
         android:visibility="invisible"
         app:elevation="6dp"
-        app:fabSize="normal"
+        app:fabSize="auto"
         app:pressedTranslationZ="12dp"
         app:useCompatPadding="true"
         />
