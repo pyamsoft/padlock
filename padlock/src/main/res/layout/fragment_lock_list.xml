@@ -63,6 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
         android:layout_margin="16dp"
+        android:visibility="invisible"
         app:elevation="6dp"
         app:fabSize="normal"
         app:pressedTranslationZ="12dp"

@@ -17,14 +17,16 @@
 package com.pyamsoft.padlock.list
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.ViewPropertyAnimatorListenerAdapter
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
@@ -41,8 +43,7 @@ import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.util.Snackbreak
-import com.pyamsoft.pydroid.ui.util.popHide
-import com.pyamsoft.pydroid.ui.util.popShow
+import com.pyamsoft.pydroid.ui.util.hide
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
@@ -56,10 +57,10 @@ import javax.inject.Inject
 
 class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
-  @field:Inject
-  internal lateinit var imageLoader: ImageLoader
-  @field:Inject
-  internal lateinit var presenter: LockListPresenter
+  private val handler = Handler(Looper.getMainLooper())
+
+  @field:Inject internal lateinit var imageLoader: ImageLoader
+  @field:Inject internal lateinit var presenter: LockListPresenter
   private lateinit var adapter: ModelAdapter<AppEntry, LockListItem>
   private lateinit var binding: FragmentLockListBinding
   private lateinit var filterListDelegate: FilterListDelegate
@@ -97,19 +98,10 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       binding.apply {
         applistSwipeRefresh.refreshing(it)
 
-        val animationListener = object : ViewPropertyAnimatorListenerAdapter() {
-          override fun onAnimationEnd(view: View?) {
-            super.onAnimationEnd(view)
-            hideScrollListener.syncVisibilityState()
-          }
-        }
-
         if (it) {
-          applistFab.popHide()
-              .setListener(animationListener)
+          hideFab { hideScrollListener.syncVisibilityState() }
         } else {
-          applistFab.popShow()
-              .setListener(animationListener)
+          showFab { hideScrollListener.syncVisibilityState() }
         }
       }
 
@@ -201,12 +193,31 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       it.setTitle(R.string.app_name)
       it.setUpEnabled(false)
     }
+
+    handler.postDelayed({
+      if (adapter.adapterItemCount > 0) {
+        showFab()
+      }
+    }, 300)
   }
 
   override fun onPause() {
     super.onPause()
     lastPosition = ListStateUtil.getCurrentPosition(binding.applistRecyclerview)
     ListStateUtil.saveState(TAG, null, binding.applistRecyclerview)
+
+    handler.removeCallbacksAndMessages(null)
+    if (binding.applistFab.isVisible) {
+      hideFab()
+    }
+  }
+
+  private inline fun showFab(crossinline onShown: FloatingActionButton.() -> Unit = {}) {
+    binding.applistFab.show { onShown(this) }
+  }
+
+  private inline fun hideFab(crossinline onHidden: FloatingActionButton.() -> Unit = {}) {
+    binding.applistFab.hide { onHidden(this) }
   }
 
   private fun setupSwipeRefresh() {
@@ -278,12 +289,8 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
   private fun setupFAB() {
     binding.apply {
-      applistFab.isVisible = false
       applistFab.setOnDebouncedClickListener {
-        if (UsagePermissionChecker.missingUsageStatsPermission(
-                applistFab.context
-            )
-        ) {
+        if (UsagePermissionChecker.missingUsageStatsPermission(applistFab.context)) {
           UsageAccessRequestDialog().show(requireActivity(), "usage_access")
         } else {
           val activity = requireActivity()
@@ -296,9 +303,9 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
       hideScrollListener = HideOnScrollListener.withView(applistFab) {
         if (!applistSwipeRefresh.isRefreshing) {
           if (it) {
-            applistFab.popShow()
+            showFab()
           } else {
-            applistFab.popHide()
+            hideFab()
           }
         }
       }
