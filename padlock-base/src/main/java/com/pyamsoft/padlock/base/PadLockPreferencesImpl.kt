@@ -18,8 +18,8 @@ package com.pyamsoft.padlock.base
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.preference.PreferenceManager
 import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import com.pyamsoft.padlock.api.preferences.ClearPreferences
 import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.padlock.api.preferences.LockListPreferences
@@ -32,7 +32,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PadLockPreferencesImpl @Inject internal constructor(
-  context: Context
+  private val context: Context
 ) : MasterPinPreferences,
     ClearPreferences,
     InstallListenerPreferences,
@@ -146,6 +146,12 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
 
   override fun clearAll() {
     preferences.edit(commit = true) {
+      clear()
+    }
+
+    val defaultValuesKey = PreferenceManager.KEY_HAS_SET_DEFAULT_VALUES
+    val defaultPrefs = context.getSharedPreferences(defaultValuesKey, Context.MODE_PRIVATE)
+    defaultPrefs.edit(commit = true) {
       clear()
     }
   }
