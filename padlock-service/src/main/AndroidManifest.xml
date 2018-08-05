@@ -14,4 +14,11 @@
   ~ limitations under the License.
   -->
 
-<manifest package="com.pyamsoft.padlock.service"/>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.pyamsoft.padlock.service">
+
+  <!-- To allow foreground services on Android P -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+</manifest>
