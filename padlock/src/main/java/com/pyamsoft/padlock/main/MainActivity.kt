@@ -36,6 +36,7 @@ import com.pyamsoft.pydroid.ui.rating.RatingActivity
 import com.pyamsoft.pydroid.ui.rating.buildChangeLog
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.animateMenu
+import com.pyamsoft.pydroid.util.tintWith
 import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import javax.inject.Inject
@@ -132,6 +133,10 @@ class MainActivity : RatingActivity(), MainPresenter.View {
     BugreportDialog.attachToToolbar(
         this, binding.toolbar, applicationName, currentApplicationVersion
     )
+    val bugReport = binding.toolbar.menu.findItem(R.id.menu_item_bugreport)
+    val icon = bugReport.icon
+    val tintedIcon = icon.tintWith(this, R.color.black)
+    bugReport.icon = tintedIcon
   }
 
   override fun onDestroy() {
