@@ -135,8 +135,11 @@ class MainActivity : RatingActivity(), MainPresenter.View {
     )
     val bugReport = binding.toolbar.menu.findItem(R.id.menu_item_bugreport)
     val icon = bugReport.icon
-    val tintedIcon = icon.tintWith(this, R.color.black)
-    bugReport.icon = tintedIcon
+    icon.mutate()
+        ?.also {
+          val tintedIcon = it.tintWith(this, R.color.black)
+          bugReport.icon = tintedIcon
+        }
   }
 
   override fun onDestroy() {

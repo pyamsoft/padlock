@@ -161,8 +161,11 @@ class LockListFragment : CanaryFragment(), LockListPresenter.View {
 
         val searchItem = findItem(R.id.menu_search)
         val searchIcon = searchItem.icon
-        val tintedSearchIcon = searchIcon.tintWith(requireActivity(), R.color.black)
-        searchItem.icon = tintedSearchIcon
+        searchIcon.mutate()
+            ?.also { icon ->
+              val tintedIcon = icon.tintWith(requireActivity(), R.color.black)
+              searchItem.icon = tintedIcon
+            }
       }
 
       it.setOnMenuItemClickListener { menuItem ->

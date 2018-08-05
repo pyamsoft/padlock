@@ -148,12 +148,12 @@ class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
         inflateMenu(R.menu.lockinfo_menu)
 
         // Tint search icon white to match Toolbar
-        menu?.findItem(R.id.menu_search)
-            ?.also {
-              val icon = it.icon
-              if (icon != null) {
-                it.icon = icon.tintWith(context, R.color.white)
-              }
+        val searchItem = menu.findItem(R.id.menu_search)
+        val searchIcon = searchItem.icon
+        searchIcon.mutate()
+            ?.also { icon ->
+              val tintedIcon = icon.tintWith(requireActivity(), R.color.white)
+              searchItem.icon = tintedIcon
             }
 
         setOnMenuItemClickListener {
