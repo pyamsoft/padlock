@@ -27,8 +27,8 @@ android {
     applicationId "com.pyamsoft.padlock"
     minSdkVersion rootProject.ext.minSdk
     targetSdkVersion rootProject.ext.maxSdk
-    versionCode 98
-    versionName "3.0.2"
+    versionCode 99
+    versionName "3.0.3-SNAPSHOT"
 
     // For vector drawables
     vectorDrawables.useSupportLibrary = true
@@ -74,11 +74,12 @@ android {
       minifyEnabled true
       shrinkResources true
       proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),
-              "proguard-rules.pro"
+          "proguard-rules.pro"
     }
 
     debug {
       versionNameSuffix "-dev"
+      applicationIdSuffix ".devel"
     }
   }
 }
