@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.list
 
 import android.view.View
 import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -96,18 +97,23 @@ class LockListItem internal constructor(
         lockListLocked.isInvisible = model.hardLocked.isEmpty()
       }
 
-      imageLoader.also {
-        it.fromResource(R.drawable.ic_whitelisted)
+      if (binding.lockListWhite.isVisible) {
+        imageLoader.fromResource(R.drawable.ic_whitelisted)
             .into(binding.lockListWhite)
             .bind(this)
-        it.fromResource(R.drawable.ic_hardlocked)
+      }
+
+      if (binding.lockListLocked.isVisible) {
+        imageLoader.fromResource(R.drawable.ic_hardlocked)
             .into(binding.lockListLocked)
             .bind(this)
       }
 
-      appIconLoader.forPackageName(model.packageName)
-          .into(binding.lockListIcon)
-          .bind(this)
+      if (binding.lockListIcon.isVisible) {
+        appIconLoader.forPackageName(model.packageName)
+            .into(binding.lockListIcon)
+            .bind(this)
+      }
 
       binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
         buttonView.isChecked = isChecked.not()
@@ -121,6 +127,8 @@ class LockListItem internal constructor(
       binding.apply {
         lockListTitle.text = null
         lockListIcon.setImageDrawable(null)
+        lockListWhite.setImageDrawable(null)
+        lockListLocked.setImageDrawable(null)
         lockListToggle.setOnCheckedChangeListener(null)
       }
       lifecycle.fakeRelease()
