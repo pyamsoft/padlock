@@ -18,27 +18,26 @@ package com.pyamsoft.padlock.pin
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import androidx.annotation.CheckResult
-import androidx.fragment.app.Fragment
-import androidx.core.content.ContextCompat
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.annotation.CheckResult
+import androidx.core.content.ContextCompat
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
-import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import javax.inject.Inject
 
-class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
+class PinEntryDialog : ToolbarDialog(), LockScreenInputPresenter.View {
 
   @field:Inject
   internal lateinit var presenter: LockScreenInputPresenter
@@ -49,8 +48,9 @@ class PinEntryDialog : CanaryDialog(), LockScreenInputPresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments?.let {
+    arguments!!.let {
       packageName = it.getString(ENTRY_PACKAGE_NAME)
+          .orEmpty()
     }
     isCancelable = true
 

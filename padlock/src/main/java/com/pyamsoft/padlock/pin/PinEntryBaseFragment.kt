@@ -16,10 +16,9 @@
 
 package com.pyamsoft.padlock.pin
 
-import androidx.fragment.app.FragmentManager
-import com.pyamsoft.padlock.uicommon.CanaryFragment
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 
-abstract class PinEntryBaseFragment : CanaryFragment() {
+abstract class PinEntryBaseFragment : ToolbarFragment() {
 
   fun dismissParent() {
     val fragmentManager: androidx.fragment.app.FragmentManager? = parentFragment?.fragmentManager

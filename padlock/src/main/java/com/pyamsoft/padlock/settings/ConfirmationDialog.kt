@@ -23,10 +23,10 @@ import androidx.appcompat.app.AlertDialog
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.model.ConfirmEvent
-import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import javax.inject.Inject
 
-class ConfirmationDialog : CanaryDialog() {
+class ConfirmationDialog : ToolbarDialog() {
 
   @field:Inject
   internal lateinit var publisher: SettingsPublisher
@@ -34,7 +34,7 @@ class ConfirmationDialog : CanaryDialog() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments?.let {
+    arguments!!.let {
       type = ConfirmEvent.valueOf(it.getString(WHICH, ConfirmEvent.DATABASE.name))
     }
 

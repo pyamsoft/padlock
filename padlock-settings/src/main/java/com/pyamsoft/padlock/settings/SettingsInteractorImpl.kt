@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.settings
 
+import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.api.database.EntryDeleteDao
 import com.pyamsoft.padlock.api.preferences.ClearPreferences
@@ -47,15 +48,25 @@ internal class SettingsInteractorImpl @Inject internal constructor(
   @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
   @param:Named("cache_app_icons") private val iconCache: Cache,
   @param:Named("cache_list_state") private val listStateCache: Cache,
-  @param:Named("cache_purge") private val purgeInteractor: Cache
+  @param:Named("cache_purge") private val purgeInteractor: Cache,
+  private val receiver: ApplicationInstallReceiver
 ) :
     SettingsInteractor {
 
-  override fun isInstallListenerEnabled(): Single<Boolean> =
-    Single.fromCallable {
+  override fun updateApplicationReceiver(): Completable {
+    return Single.fromCallable {
       enforcer.assertNotOnMainThread()
       return@fromCallable installListenerPreferences.isInstallListenerEnabled()
     }
+        .map {
+          if (it) {
+            receiver.register()
+          } else {
+            receiver.unregister()
+          }
+        }
+        .ignoreElement()
+  }
 
   override fun clearDatabase(): Single<ConfirmEvent> {
     return Single.defer {

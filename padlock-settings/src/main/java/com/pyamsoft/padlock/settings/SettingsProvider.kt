@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.uicommon
+package com.pyamsoft.padlock.settings
 
-import androidx.annotation.CallSuper
-import com.pyamsoft.padlock.PadLock
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
+import com.pyamsoft.padlock.api.SettingsInteractor
+import com.pyamsoft.padlock.model.ConfirmEvent
+import com.pyamsoft.pydroid.core.bus.EventBus
+import dagger.Binds
+import dagger.Module
 
-abstract class CanaryFragment : ToolbarFragment() {
+@Module
+abstract class SettingsModule {
 
-  @CallSuper
-  override fun onDestroy() {
-    super.onDestroy()
-    PadLock.getRefWatcher(this)
-        .watch(this)
-  }
+  @Binds
+  internal abstract fun provideConfirmBus(bus: ConfirmEventBus): EventBus<ConfirmEvent>
+
+  @Binds
+  internal abstract fun provideInteractor(impl: SettingsInteractorImpl): SettingsInteractor
 }

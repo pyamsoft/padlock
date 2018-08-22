@@ -19,7 +19,6 @@ package com.pyamsoft.padlock
 import android.app.Application
 import android.app.Service
 import androidx.annotation.CheckResult
-import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
@@ -90,7 +89,7 @@ class PadLock : Application(), PYDroid.Instance {
     }
   }
 
-  override fun getSystemService(name: String?): Any {
+  override fun getSystemService(name: String): Any {
     if (Injector.name == name) {
       return component
     } else {
@@ -99,12 +98,6 @@ class PadLock : Application(), PYDroid.Instance {
   }
 
   companion object {
-
-    @JvmStatic
-    @CheckResult
-    fun getRefWatcher(fragment: Fragment): RefWatcher = getRefWatcherInternal(
-        fragment.requireActivity().application
-    )
 
     @JvmStatic
     @CheckResult

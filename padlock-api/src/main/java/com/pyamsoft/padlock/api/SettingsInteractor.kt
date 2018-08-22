@@ -18,12 +18,13 @@ package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.ConfirmEvent
+import io.reactivex.Completable
 import io.reactivex.Single
 
 interface SettingsInteractor {
 
   @CheckResult
-  fun isInstallListenerEnabled(): Single<Boolean>
+  fun updateApplicationReceiver(): Completable
 
   @CheckResult
   fun clearDatabase(): Single<ConfirmEvent>

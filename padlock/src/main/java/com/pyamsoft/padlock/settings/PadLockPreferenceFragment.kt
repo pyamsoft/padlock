@@ -19,11 +19,12 @@ package com.pyamsoft.padlock.settings
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.preference.ListPreference
 import com.google.android.material.snackbar.Snackbar
 import com.pyamsoft.padlock.Injector
-import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.model.ConfirmEvent
@@ -37,10 +38,10 @@ import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresenter.View {
+class PadLockPreferenceFragment : SettingsPreferenceFragment() {
 
   @field:Inject
-  internal lateinit var presenter: SettingsPresenter
+  internal lateinit var viewModel: SettingsViewModel
   private lateinit var lockType: ListPreference
 
   override val preferenceXmlResId: Int = R.xml.preferences
@@ -61,11 +62,12 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
         .inject(this)
   }
 
-  override fun onViewCreated(
-    view: View,
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
     savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
+  ): View? {
+    val view = super.onCreateView(inflater, container, savedInstanceState)
     val clearDb = findPreference(getString(R.string.clear_db_key))
     val installListener = findPreference(getString(R.string.install_listener_key))
     lockType = findPreference(getString(R.string.lock_screen_type_key)) as ListPreference
@@ -78,13 +80,13 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
     }
 
     installListener.setOnPreferenceClickListener {
-      presenter.setApplicationInstallReceiverState()
+      viewModel.updateApplicationReceiver(viewLifecycleOwner)
       return@setOnPreferenceClickListener true
     }
 
     lockType.setOnPreferenceChangeListener { _, value ->
       if (value is String) {
-        presenter.checkLockType(value)
+        viewModel.switchLockType(viewLifecycleOwner, value)
       }
 
       Timber.d(
@@ -93,15 +95,31 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
       return@setOnPreferenceChangeListener false
     }
 
-    presenter.bind(viewLifecycleOwner, this)
+    viewModel.onAllSettingsCleared(viewLifecycleOwner) { onClearAll() }
+    viewModel.onDatabaseCleared(viewLifecycleOwner) { onClearDatabase() }
+    viewModel.onApplicationReceiverChanged(viewLifecycleOwner) { /* TODO */ }
+    viewModel.onPinClearFailed(viewLifecycleOwner) { onMasterPinClearFailure() }
+    viewModel.onPinCleared(viewLifecycleOwner) { onMasterPinClearSuccess() }
+    viewModel.onLockTypeSwitched(viewLifecycleOwner) { wrapper ->
+      wrapper.onSuccess {
+        if (it.isEmpty()) {
+          onLockTypeChangePrevented()
+        } else {
+          onLockTypeChangeAccepted(it)
+        }
+      }
+      wrapper.onError { onLockTypeChangeError(it) }
+    }
+
+    return view
   }
 
-  override fun onLockTypeChangeAccepted(value: String) {
+  private fun onLockTypeChangeAccepted(value: String) {
     Timber.d("Change accepted, set value: %s", value)
     lockType.value = value
   }
 
-  override fun onLockTypeChangePrevented() {
+  private fun onLockTypeChangePrevented() {
     Snackbreak.make(
         requireView(),
         "You must clear the current PIN before changing type",
@@ -116,26 +134,26 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
         .show()
   }
 
-  override fun onLockTypeChangeError(throwable: Throwable) {
+  private fun onLockTypeChangeError(throwable: Throwable) {
     Snackbreak.short(requireActivity(), requireView(), ErrorDetail("", throwable.localizedMessage))
   }
 
-  override fun onClearDatabase() {
+  private fun onClearDatabase() {
     Snackbreak.make(requireView(), "Locked application database cleared", Snackbar.LENGTH_SHORT)
         .show()
   }
 
-  override fun onMasterPinClearFailure() {
+  private fun onMasterPinClearFailure() {
     Snackbreak.make(requireView(), "Failed to clear master pin", Snackbar.LENGTH_SHORT)
         .show()
   }
 
-  override fun onMasterPinClearSuccess() {
+  private fun onMasterPinClearSuccess() {
     Snackbreak.make(requireView(), "You may now change lock type", Snackbar.LENGTH_SHORT)
         .show()
   }
 
-  override fun onClearAll() {
+  private fun onClearAll() {
     Timber.d("Everything is cleared, kill self")
     val activityManager = activity?.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     activityManager.clearApplicationUserData()
@@ -147,12 +165,6 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment(), SettingsPresente
       it.setTitle(R.string.app_name)
       it.setUpEnabled(false)
     }
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    PadLock.getRefWatcher(this)
-        .watch(this)
   }
 
   companion object {
