@@ -28,8 +28,8 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.list.ListDiffProvider
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
@@ -39,7 +39,7 @@ import timber.log.Timber
 import java.util.Collections
 import javax.inject.Inject
 
-class PurgeFragment : CanaryFragment(), PurgePresenter.View {
+class PurgeFragment : ToolbarFragment(), PurgePresenter.View {
   @Inject
   internal lateinit var presenter: PurgePresenter
   private lateinit var adapter: ModelAdapter<String, PurgeItem>

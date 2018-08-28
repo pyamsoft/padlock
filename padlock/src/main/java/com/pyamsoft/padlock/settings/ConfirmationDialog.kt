@@ -23,13 +23,14 @@ import androidx.appcompat.app.AlertDialog
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.model.ConfirmEvent
+import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import javax.inject.Inject
 
 class ConfirmationDialog : ToolbarDialog() {
 
   @field:Inject
-  internal lateinit var publisher: SettingsPublisher
+  internal lateinit var publisher: Publisher<ConfirmEvent>
   private lateinit var type: ConfirmEvent
 
   override fun onCreate(savedInstanceState: Bundle?) {

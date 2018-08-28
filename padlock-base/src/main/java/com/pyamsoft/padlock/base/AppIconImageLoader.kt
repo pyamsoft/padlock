@@ -19,18 +19,18 @@ package com.pyamsoft.padlock.base
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import androidx.annotation.CheckResult
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
 import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
-import com.pyamsoft.padlock.model.IconHolder
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.GenericLoader
-import com.pyamsoft.pydroid.loader.cache.ImageCache
-import com.pyamsoft.pydroid.loader.cache.ImageCache.ImageCacheKey
-import com.pyamsoft.pydroid.loader.loaded.Loaded
-import com.pyamsoft.pydroid.loader.loaded.RxLoaded
-import com.pyamsoft.pydroid.loader.targets.DrawableImageTarget
-import com.pyamsoft.pydroid.loader.targets.Target
+import com.pyamsoft.pydroid.loader.Loaded
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 
@@ -38,12 +38,8 @@ import timber.log.Timber
 internal class AppIconImageLoader internal constructor(
   private val enforcer: Enforcer,
   private val packageName: String,
-  private val appIconImageCache: ImageCache<String, Drawable>,
-  private val packageIconManager: PackageIconManager<Drawable>
+  private val packageIconManager: PackageIconManager
 ) : GenericLoader<Drawable>() {
-
-  @CheckResult
-  private fun String.toKey(): ImageCacheKey<String> = ImageCacheKey(this)
 
   init {
     if (packageName.isEmpty()) {
@@ -51,55 +47,48 @@ internal class AppIconImageLoader internal constructor(
     }
   }
 
-  override fun into(imageView: ImageView): Loaded = into(
-      DrawableImageTarget.forImageView(imageView)
-  )
-
-  override fun into(target: Target<Drawable>): Loaded = load(target, packageName)
-
-  @CheckResult
-  private fun load(
-    target: Target<Drawable>,
-    packageName: String
-  ): Loaded {
-    return RxLoaded(loadCached(packageName)
-        .subscribeOn(Schedulers.computation())
+  override fun into(imageView: ImageView): Loaded {
+    return RxLoaded(load(packageName)
+        .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .doOnSubscribe { startAction?.invoke() }
-        .subscribe({ holder ->
-          holder.applyIcon {
-            target.loadImage(it)
-            completeAction?.invoke(it)
-          }
+        .subscribe({
+          Timber.d("Loaded App icon for $packageName")
+          imageView.setImageDrawable(it)
         }, {
-          Timber.e(it, "Error loading Drawable AppIconLoader for: %s", packageName)
-          errorAction?.invoke(it)
-        })
+          Timber.e(it, "Error loading App icon for $packageName")
+          imageView.setImageDrawable(null)
+        }), imageView
     )
   }
 
   @CheckResult
-  private fun loadCached(packageName: String): Single<IconHolder<Drawable>> {
-    return Single.defer {
-      enforcer.assertNotOnMainThread()
-      val key: ImageCacheKey<String> = packageName.toKey()
-      val cached: Drawable? = appIconImageCache.retrieve(key)
-      if (cached == null) {
-        val result = loadFresh(packageName)
-        return@defer result.doOnSuccess { holder ->
-          holder.applyIcon {
-            appIconImageCache.cache(key, it)
-          }
-        }
-      } else {
-        return@defer Single.just(IconHolder(cached))
-      }
-    }
+  private fun load(packageName: String): Single<Drawable> = Single.defer {
+    enforcer.assertNotOnMainThread()
+    return@defer packageIconManager.loadIcon(packageName)
   }
 
-  @CheckResult
-  private fun loadFresh(packageName: String): Single<IconHolder<Drawable>> = Single.defer {
-    enforcer.assertNotOnMainThread()
-    return@defer packageIconManager.loadIconForPackageOrDefault(packageName)
+  private data class RxLoaded(
+    private val disposable: Disposable,
+    private val imageView: ImageView
+  ) : Loaded, LifecycleObserver {
+
+    private var lifecycle: Lifecycle? = null
+
+    override fun bind(owner: LifecycleOwner) {
+      owner.lifecycle.addObserver(this)
+      lifecycle = owner.lifecycle
+    }
+
+    @OnLifecycleEvent(ON_DESTROY)
+    internal fun onDestroy() {
+      lifecycle?.removeObserver(this)
+      lifecycle = null
+
+      if (!disposable.isDisposed) {
+        disposable.dispose()
+        imageView.setImageDrawable(null)
+      }
+    }
+
   }
 }

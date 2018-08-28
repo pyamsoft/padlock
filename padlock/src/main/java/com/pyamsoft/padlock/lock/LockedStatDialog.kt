@@ -18,15 +18,15 @@ package com.pyamsoft.padlock.lock
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.annotation.CheckResult
-import androidx.appcompat.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.CheckResult
+import androidx.appcompat.app.AlertDialog
 import com.pyamsoft.padlock.databinding.DialogLockStatBinding
-import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 
-class LockedStatDialog : CanaryDialog() {
+class LockedStatDialog : ToolbarDialog() {
 
   private lateinit var displayedLabel: String
   private lateinit var activityName: String

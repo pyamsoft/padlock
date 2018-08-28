@@ -23,10 +23,10 @@ import androidx.appcompat.app.AlertDialog
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.model.purge.PurgeEvent
-import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import javax.inject.Inject
 
-class PurgeSingleItemDialog : CanaryDialog() {
+class PurgeSingleItemDialog : ToolbarDialog() {
 
   @field:Inject
   internal lateinit var purgePublisher: PurgePublisher

@@ -20,10 +20,10 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 
-class UsageAccessRequestDialog : CanaryDialog() {
+class UsageAccessRequestDialog : ToolbarDialog() {
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     requireActivity().let {

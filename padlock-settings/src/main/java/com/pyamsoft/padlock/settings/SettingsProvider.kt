@@ -16,18 +16,32 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
-import dagger.Binds
+import com.pyamsoft.pydroid.core.bus.Listener
+import com.pyamsoft.pydroid.core.bus.Publisher
+import com.pyamsoft.pydroid.core.bus.RxBus
 import dagger.Module
+import dagger.Provides
+import javax.inject.Singleton
 
 @Module
-abstract class SettingsModule {
+object SettingsProvider {
 
-  @Binds
-  internal abstract fun provideConfirmBus(bus: ConfirmEventBus): EventBus<ConfirmEvent>
+  private val bus = RxBus.create<ConfirmEvent>()
 
-  @Binds
-  internal abstract fun provideInteractor(impl: SettingsInteractorImpl): SettingsInteractor
+  @Singleton
+  @JvmStatic
+  @Provides
+  internal fun provideBus(): EventBus<ConfirmEvent> = bus
+
+  @Singleton
+  @JvmStatic
+  @Provides
+  internal fun providePublisher(): Publisher<ConfirmEvent> = bus
+
+  @Singleton
+  @JvmStatic
+  @Provides
+  internal fun provideListener(): Listener<ConfirmEvent> = bus
 }

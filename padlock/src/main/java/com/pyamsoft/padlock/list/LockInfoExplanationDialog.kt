@@ -23,11 +23,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import com.pyamsoft.padlock.databinding.DialogInfoLocktypeExplainBinding
-import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 
-class LockInfoExplanationDialog : CanaryDialog() {
+class LockInfoExplanationDialog : ToolbarDialog() {
 
   private lateinit var binding: DialogInfoLocktypeExplainBinding
 

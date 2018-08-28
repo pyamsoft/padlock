@@ -26,12 +26,12 @@ import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_IS_SYSTEM
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_PACKAGE_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_REAL_NAME
-import com.pyamsoft.padlock.uicommon.CanaryFragment
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 
-abstract class LockScreenBaseFragment protected constructor() : CanaryFragment(),
+abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(),
     LockEntryPresenter.View {
 
   protected lateinit var lockedActivityName: String
@@ -43,7 +43,8 @@ abstract class LockScreenBaseFragment protected constructor() : CanaryFragment()
   internal fun showSnackbarWithText(text: String) {
     val activity = activity
     if (activity is LockScreenActivity) {
-      Snackbreak.make(activity.getRootView(), text, Snackbar.LENGTH_SHORT).show()
+      Snackbreak.make(activity.getRootView(), text, Snackbar.LENGTH_SHORT)
+          .show()
     }
   }
 

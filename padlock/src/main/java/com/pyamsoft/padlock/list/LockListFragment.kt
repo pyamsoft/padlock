@@ -39,9 +39,9 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
-import com.pyamsoft.padlock.uicommon.CanaryFragment
 import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.hide
 import com.pyamsoft.pydroid.ui.util.refreshing
@@ -55,7 +55,7 @@ import timber.log.Timber
 import java.util.Collections
 import javax.inject.Inject
 
-class LockListFragment : CanaryFragment(), LockListPresenter.View {
+class LockListFragment : ToolbarFragment(), LockListPresenter.View {
 
   private val handler = Handler(Looper.getMainLooper())
 

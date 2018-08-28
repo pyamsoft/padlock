@@ -49,7 +49,6 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   private val packageManagerWrapper: PackageLabelManager,
   @Named("main_activity") mainActivityClass: Class<out Activity>,
   @param:Named("cache_purge") private val purgeCache: Cache,
-  @param:Named("cache_app_icons") private val iconCache: Cache,
   @param:Named("cache_lock_list") private val listCache: Cache,
   @param:Named("cache_lock_info") private val infoCache: Cache
 ) : BroadcastReceiver(), ApplicationInstallReceiver {
@@ -112,7 +111,7 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
 
     val isNew = !intent.hasExtra(Intent.EXTRA_REPLACING)
     val data = intent.data
-    val packageName = data.schemeSpecificPart
+    val packageName = data?.schemeSpecificPart.orEmpty()
 
     compositeDisposable.add(
         packageManagerWrapper.loadPackageLabel(packageName)
@@ -123,7 +122,6 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
                 purgeCache.clearCache()
                 listCache.clearCache()
                 infoCache.clearCache()
-                iconCache.clearCache()
                 onNewPackageInstalled(packageName, it)
               } else {
                 Timber.d("Package updated: %s", packageName)

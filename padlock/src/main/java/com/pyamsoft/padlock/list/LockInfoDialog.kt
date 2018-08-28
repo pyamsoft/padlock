@@ -38,8 +38,8 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.AppEntry
-import com.pyamsoft.padlock.uicommon.CanaryDialog
 import com.pyamsoft.pydroid.list.ListDiffProvider
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
@@ -51,7 +51,7 @@ import timber.log.Timber
 import java.util.Collections
 import javax.inject.Inject
 
-class LockInfoDialog : CanaryDialog(), LockInfoPresenter.View {
+class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
 
   @field:Inject
   internal lateinit var appIconLoader: AppIconLoader

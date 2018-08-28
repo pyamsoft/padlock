@@ -16,26 +16,22 @@
 
 package com.pyamsoft.padlock.base
 
-import android.graphics.drawable.Drawable
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
-import com.pyamsoft.padlock.api.preferences.ClearPreferences
-import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
-import com.pyamsoft.padlock.api.service.JobSchedulerCompat
-import com.pyamsoft.padlock.api.preferences.LockListPreferences
-import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
-import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
-import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
 import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
+import com.pyamsoft.padlock.api.preferences.ClearPreferences
+import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
+import com.pyamsoft.padlock.api.preferences.LockListPreferences
+import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
+import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
+import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
+import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.cache.Cache
-import com.pyamsoft.pydroid.loader.cache.ImageCache
 import dagger.Binds
 import dagger.Module
-import javax.inject.Named
 
 @Module
 abstract class BaseModule {
@@ -98,20 +94,10 @@ abstract class BaseModule {
   @Binds
   internal abstract fun providePackageIconWrapper(
     impl: PackageManagerWrapperImpl
-  ): PackageIconManager<Drawable>
+  ): PackageIconManager
 
   @Binds
   internal abstract fun provideJobSchedulerCompat(
     impl: JobSchedulerCompatImpl
   ): JobSchedulerCompat
-
-  @JvmSuppressWildcards
-  @Binds
-  internal abstract fun provideAppIconImageCache(
-    cache: AppIconImageCache
-  ): ImageCache<String, Drawable>
-
-  @Binds
-  @Named("cache_app_icons")
-  internal abstract fun provideIconImageCache(cache: AppIconImageCache): Cache
 }

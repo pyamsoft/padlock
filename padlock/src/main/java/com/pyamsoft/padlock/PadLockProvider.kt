@@ -34,7 +34,7 @@ import javax.inject.Named
 @Module
 class PadLockProvider(
   private val application: Application,
-  private val loaderModule: LoaderModule,
+  private val imageLoader: ImageLoader,
   private val enforcer: Enforcer,
   private val mainActivityClass: Class<out Activity>,
   private val recheckServiceClass: Class<out IntentService>
@@ -54,12 +54,7 @@ class PadLockProvider(
 
   @Provides
   @CheckResult
-  fun provideImageLoader(): ImageLoader = loaderModule.provideImageLoader()
-
-  @Provides
-  @CheckResult
-  @Named("cache_image_loader")
-  fun provideImageLoaderCache(): Cache = loaderModule.provideImageLoaderCache()
+  fun provideImageLoader(): ImageLoader = imageLoader
 
   @Provides
   @CheckResult

@@ -17,23 +17,23 @@
 package com.pyamsoft.padlock.main
 
 import android.os.Bundle
-import androidx.annotation.CheckResult
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.CheckResult
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentMainBinding
 import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.settings.SettingsFragment
-import com.pyamsoft.padlock.uicommon.CanaryFragment
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 
-class MainFragment : CanaryFragment() {
+class MainFragment : ToolbarFragment() {
 
   private lateinit var binding: FragmentMainBinding
 

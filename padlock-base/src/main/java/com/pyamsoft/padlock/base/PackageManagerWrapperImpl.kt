@@ -30,7 +30,6 @@ import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.padlock.api.preferences.LockListPreferences
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.Excludes
-import com.pyamsoft.padlock.model.IconHolder
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional
 import com.pyamsoft.pydroid.core.threads.Enforcer
@@ -50,24 +49,24 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 ) : PackageActivityManager,
     PackageApplicationManager,
     PackageLabelManager,
-    PackageIconManager<Drawable> {
+    PackageIconManager {
 
   private val packageManager: PackageManager = context.applicationContext.packageManager
 
-  override fun loadIconForPackageOrDefault(packageName: String): Single<IconHolder<Drawable>> {
+  override fun loadIcon(packageName: String): Single<Drawable> {
     return Single.fromCallable {
       enforcer.assertNotOnMainThread()
-      val image: Drawable
-      image = try {
+      var image: Drawable
+      try {
         // Assign
-        packageManager.getApplicationInfo(packageName, 0)
+        image = packageManager.getApplicationInfo(packageName, 0)
             .loadIcon(packageManager)
       } catch (e: PackageManager.NameNotFoundException) {
         Timber.e(e, "PackageManager error")
         // Assign
-        packageManager.defaultActivityIcon
+        image = packageManager.defaultActivityIcon
       }
-      return@fromCallable IconHolder(image)
+      return@fromCallable image
     }
   }
 
@@ -178,7 +177,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   @CheckResult
   private fun loadPackageLabel(info: ApplicationInfo): Single<String> = Single.fromCallable {
     enforcer.assertNotOnMainThread()
-    return@fromCallable info.loadLabel(packageManager)?.toString() ?: ""
+    return@fromCallable info.loadLabel(packageManager).toString()
   }
 
   override fun isValidActivity(

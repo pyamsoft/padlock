@@ -19,9 +19,9 @@ package com.pyamsoft.padlock.list
 import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
-import com.pyamsoft.padlock.uicommon.CanaryDialog
+import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 
-class ErrorDialog : CanaryDialog() {
+class ErrorDialog : ToolbarDialog() {
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(requireActivity())

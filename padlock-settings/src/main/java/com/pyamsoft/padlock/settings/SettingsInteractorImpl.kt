@@ -46,12 +46,10 @@ internal class SettingsInteractorImpl @Inject internal constructor(
   @param:Named("cache_lock_list") private val lockListInteractor: Cache,
   @param:Named("cache_lock_info") private val lockInfoInteractor: Cache,
   @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
-  @param:Named("cache_app_icons") private val iconCache: Cache,
   @param:Named("cache_list_state") private val listStateCache: Cache,
   @param:Named("cache_purge") private val purgeInteractor: Cache,
   private val receiver: ApplicationInstallReceiver
-) :
-    SettingsInteractor {
+) : SettingsInteractor {
 
   override fun updateApplicationReceiver(): Completable {
     return Single.fromCallable {
@@ -79,7 +77,6 @@ internal class SettingsInteractorImpl @Inject internal constructor(
             lockInfoInteractor.clearCache()
             purgeInteractor.clearCache()
             lockEntryInteractor.clearCache()
-            iconCache.clearCache()
             listStateCache.clearCache()
           })
           .toSingleDefault(DATABASE)

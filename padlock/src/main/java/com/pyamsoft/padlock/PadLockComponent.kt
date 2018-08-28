@@ -56,6 +56,7 @@ import com.pyamsoft.padlock.service.ServiceModule
 import com.pyamsoft.padlock.settings.ConfirmationDialog
 import com.pyamsoft.padlock.settings.PadLockPreferenceFragment
 import com.pyamsoft.padlock.settings.SettingsModule
+import com.pyamsoft.padlock.settings.SettingsProvider
 import dagger.Component
 import javax.inject.Singleton
 
@@ -67,7 +68,7 @@ import javax.inject.Singleton
       MainModule::class, SettingsModule::class, LockInfoSingletonModule::class,
       LockInfoSingletonProvider::class, LockStateModule::class, LockListSingletonModule::class,
       LockListSingletonProvider::class, LockScreenSingletonModule::class,
-      LockEntrySingletonModule::class, MasterPinModule::class
+      LockEntrySingletonModule::class, MasterPinModule::class, SettingsProvider::class
     ]
 )
 interface PadLockComponent {
