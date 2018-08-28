@@ -17,7 +17,7 @@
 package com.pyamsoft.padlock.list
 
 import com.pyamsoft.padlock.model.list.AppEntry
-import com.pyamsoft.pydroid.list.ListDiffProvider
+import com.pyamsoft.padlock.model.list.ListDiffProvider
 import dagger.Module
 import dagger.Provides
 

@@ -18,19 +18,19 @@ package com.pyamsoft.padlock.list
 
 import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockListInteractor
-import com.pyamsoft.padlock.api.service.LockServiceStateInteractor
+import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.presenter.Presenter
-import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -40,13 +40,13 @@ import javax.inject.Named
 @JvmSuppressWildcards
 class LockListPresenter @Inject internal constructor(
   private val lockListInteractor: LockListInteractor,
-  @Named("cache_lock_list") private val cache: Cache,
-  private val stateInteractor: LockServiceStateInteractor,
+  private val serviceInteractor: LockServiceInteractor,
   private val lockListBus: EventBus<LockListEvent>,
   private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
   private val clearPinBus: EventBus<ClearPinEvent>,
   private val createPinBus: EventBus<CreatePinEvent>,
-  private val listDiffProvider: ListDiffProvider<AppEntry>
+  private val listDiffProvider: ListDiffProvider<AppEntry>,
+  @Named("cache_lock_list") private val cache: Cache
 ) : Presenter<LockListPresenter.View>() {
 
   override fun onCreate() {
@@ -168,7 +168,7 @@ class LockListPresenter @Inject internal constructor(
 
   private fun updateFabIcon() {
     dispose(ON_STOP) {
-      stateInteractor.isServiceEnabled()
+      serviceInteractor.isServiceEnabled()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe({

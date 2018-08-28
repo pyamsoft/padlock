@@ -23,13 +23,14 @@ import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.model.service.Recheck
 import com.pyamsoft.padlock.model.service.RecheckEvent
+import com.pyamsoft.pydroid.core.bus.Publisher
 import timber.log.Timber
 import javax.inject.Inject
 
 class RecheckService : IntentService(RecheckService::class.java.name) {
 
   @field:Inject
-  internal lateinit var recheckBus: RecheckPublisher
+  internal lateinit var recheckBus: Publisher<RecheckEvent>
 
   override fun onCreate() {
     super.onCreate()

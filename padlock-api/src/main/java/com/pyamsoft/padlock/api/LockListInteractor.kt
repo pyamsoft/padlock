@@ -18,8 +18,8 @@ package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.list.LockListUpdatePayload
-import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Observable
 import io.reactivex.Single
 

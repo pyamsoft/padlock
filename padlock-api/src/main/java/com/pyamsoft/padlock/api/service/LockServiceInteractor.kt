@@ -29,6 +29,9 @@ interface LockServiceInteractor {
 
   fun reset()
 
+  @CheckResult
+  fun isServiceEnabled(): Single<Boolean>
+
   fun clearMatchingForegroundEvent(event: ForegroundEvent)
 
   @CheckResult

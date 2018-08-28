@@ -20,6 +20,7 @@ import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.padlock.base.BaseModule
+import com.pyamsoft.padlock.base.BaseProvider
 import com.pyamsoft.padlock.base.database.DatabaseProvider
 import com.pyamsoft.padlock.list.ListListComponent
 import com.pyamsoft.padlock.list.LockInfoComponent
@@ -45,8 +46,7 @@ import com.pyamsoft.padlock.pin.PinEntryPatternFragment
 import com.pyamsoft.padlock.pin.PinEntryTextFragment
 import com.pyamsoft.padlock.pin.PinModule
 import com.pyamsoft.padlock.purge.PurgeAllDialog
-import com.pyamsoft.padlock.purge.PurgeListComponent
-import com.pyamsoft.padlock.purge.PurgeProvider
+import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.purge.PurgeSingletonModule
 import com.pyamsoft.padlock.purge.PurgeSingletonProvider
@@ -63,12 +63,13 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-      PadLockProvider::class, BaseModule::class, DatabaseProvider::class, LockModule::class, PinModule::class,
-      ServiceModule::class, PurgeSingletonModule::class, PurgeSingletonProvider::class,
-      MainModule::class, SettingsModule::class, LockInfoSingletonModule::class,
-      LockInfoSingletonProvider::class, LockStateModule::class, LockListSingletonModule::class,
-      LockListSingletonProvider::class, LockScreenSingletonModule::class,
-      LockEntrySingletonModule::class, MasterPinModule::class, SettingsProvider::class
+      PadLockProvider::class, BaseModule::class, DatabaseProvider::class, LockModule::class,
+      PinModule::class, ServiceModule::class, PurgeSingletonModule::class,
+      PurgeSingletonProvider::class, MainModule::class, SettingsModule::class,
+      LockInfoSingletonModule::class, LockInfoSingletonProvider::class, LockStateModule::class,
+      LockListSingletonModule::class, LockListSingletonProvider::class,
+      LockScreenSingletonModule::class, LockEntrySingletonModule::class, MasterPinModule::class,
+      SettingsProvider::class, BaseProvider::class
     ]
 )
 interface PadLockComponent {
@@ -97,6 +98,8 @@ interface PadLockComponent {
 
   fun inject(viewHolder: LockListItem.ViewHolder)
 
+  fun inject(fragment: PurgeFragment)
+
   // To be used directly by PadLockSingleInitProvider
   @CheckResult
   fun provideInstallListenerPreferences(): InstallListenerPreferences
@@ -110,9 +113,6 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusLockInfoComponent(module: LockInfoProvider): LockInfoComponent
-
-  @CheckResult
-  fun plusPurgeComponent(module: PurgeProvider): PurgeListComponent
 
   @CheckResult
   fun plusLockScreenComponent(entryModule: LockEntryModule): LockScreenComponent

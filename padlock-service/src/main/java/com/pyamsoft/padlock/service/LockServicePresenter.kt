@@ -18,13 +18,14 @@ package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
+import com.pyamsoft.padlock.model.db.PadLockDbModels
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.service.RecheckEvent
 import com.pyamsoft.padlock.model.service.RecheckStatus
 import com.pyamsoft.padlock.model.service.RecheckStatus.NOT_FORCE
 import com.pyamsoft.padlock.model.service.ServiceFinishEvent
-import com.pyamsoft.padlock.model.db.PadLockDbModels
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -35,8 +36,8 @@ import javax.inject.Inject
 
 class LockServicePresenter @Inject internal constructor(
   private val foregroundEventBus: EventBus<ForegroundEvent>,
-  private val serviceFinishBus: EventBus<ServiceFinishEvent>,
-  private val recheckEventBus: EventBus<RecheckEvent>,
+  private val serviceFinishBus: Listener<ServiceFinishEvent>,
+  private val recheckEventBus: Listener<RecheckEvent>,
   private val interactor: LockServiceInteractor
 ) : Presenter<LockServicePresenter.View>() {
 

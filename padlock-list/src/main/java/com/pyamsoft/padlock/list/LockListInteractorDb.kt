@@ -34,9 +34,9 @@ import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.INSERTED
 import com.pyamsoft.padlock.model.db.EntityChangeEvent.Type.UPDATED
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.list.LockListUpdatePayload
 import com.pyamsoft.pydroid.core.threads.Enforcer
-import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single

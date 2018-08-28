@@ -20,9 +20,9 @@ import com.popinnow.android.repo.SingleRepo
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.ActivityEntry
+import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.list.LockInfoUpdatePayload
 import com.pyamsoft.pydroid.core.cache.Cache
-import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single

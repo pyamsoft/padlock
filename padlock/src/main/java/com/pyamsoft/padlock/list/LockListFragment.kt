@@ -37,9 +37,9 @@ import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
-import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.util.Snackbreak

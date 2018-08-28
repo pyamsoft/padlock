@@ -28,7 +28,6 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.pydroid.list.ListDiffProvider
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
@@ -36,7 +35,6 @@ import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import timber.log.Timber
-import java.util.Collections
 import javax.inject.Inject
 
 class PurgeFragment : ToolbarFragment(), PurgePresenter.View {
@@ -62,9 +60,6 @@ class PurgeFragment : ToolbarFragment(), PurgePresenter.View {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusPurgeComponent(PurgeProvider(object : ListDiffProvider<String> {
-          override fun data(): List<String> = Collections.unmodifiableList(adapter.models)
-        }))
         .inject(this)
   }
 
@@ -118,10 +113,10 @@ class PurgeFragment : ToolbarFragment(), PurgePresenter.View {
   }
 
   private fun setupToolbarMenu() {
-    toolbarActivity.withToolbar {
-      it.inflateMenu(R.menu.purge_old_menu)
+    toolbarActivity.withToolbar { toolbar ->
+      toolbar.inflateMenu(R.menu.purge_old_menu)
 
-      it.setOnMenuItemClickListener {
+      toolbar.setOnMenuItemClickListener {
         when (it.itemId) {
           R.id.menu_purge_all -> {
             PurgeAllDialog().show(requireActivity(), "purge_all")

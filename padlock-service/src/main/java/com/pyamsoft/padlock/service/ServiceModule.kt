@@ -18,13 +18,9 @@ package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.api.service.DeviceLockStateProvider
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
-import com.pyamsoft.padlock.api.service.LockServiceStateInteractor
 import com.pyamsoft.padlock.api.service.UsageEventProvider
-import com.pyamsoft.padlock.model.service.RecheckEvent
-import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.padlock.service.device.DeviceLockStateProviderImpl
 import com.pyamsoft.padlock.service.device.UsageEventProviderImpl
-import com.pyamsoft.pydroid.core.bus.EventBus
 import dagger.Binds
 import dagger.Module
 
@@ -35,17 +31,6 @@ abstract class ServiceModule {
   internal abstract fun provideServiceInteractor(
     impl: LockServiceInteractorImpl
   ): LockServiceInteractor
-
-  @Binds
-  internal abstract fun provideServiceStateInteractor(
-    impl: LockServiceStateInteractorImpl
-  ): LockServiceStateInteractor
-
-  @Binds
-  internal abstract fun provideRecheckBus(bus: RecheckEventBus): EventBus<RecheckEvent>
-
-  @Binds
-  internal abstract fun serviceFinishBus(bus: ServiceFinishBus): EventBus<ServiceFinishEvent>
 
   @Binds
   internal abstract fun deviceLockState(impl: DeviceLockStateProviderImpl): DeviceLockStateProvider

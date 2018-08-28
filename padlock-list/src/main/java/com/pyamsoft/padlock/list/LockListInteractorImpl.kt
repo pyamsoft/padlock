@@ -20,10 +20,10 @@ import com.popinnow.android.repo.SingleRepo
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.list.LockListUpdatePayload
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.threads.Enforcer
-import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -49,7 +49,8 @@ internal class LockListInteractorImpl @Inject internal constructor(
   override fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>> {
     return repoLockList.get(bypass, REPO_KEY) {
       enforcer.assertNotOnMainThread()
-      return@get db.fetchAppEntryList(true) }
+      return@get db.fetchAppEntryList(true)
+    }
         .doOnError { repoLockList.clearAll() }
   }
 

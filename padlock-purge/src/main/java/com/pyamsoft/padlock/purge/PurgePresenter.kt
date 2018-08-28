@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.model.purge.PurgeAllEvent
 import com.pyamsoft.padlock.model.purge.PurgeEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.presenter.Presenter
-import com.pyamsoft.pydroid.list.ListDiffProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -32,8 +31,7 @@ import javax.inject.Inject
 class PurgePresenter @Inject internal constructor(
   private val interactor: PurgeInteractor,
   private val purgeBus: EventBus<PurgeEvent>,
-  private val purgeAllBus: EventBus<PurgeAllEvent>,
-  private val listDiffProvider: ListDiffProvider<String>
+  private val purgeAllBus: EventBus<PurgeAllEvent>
 ) : Presenter<PurgePresenter.View>() {
 
   override fun onCreate() {

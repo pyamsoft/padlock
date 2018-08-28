@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.service
 
 import android.app.IntentService
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
@@ -25,7 +26,6 @@ import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.api.service.DeviceLockStateProvider
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
-import com.pyamsoft.padlock.api.service.LockServiceStateInteractor
 import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.ForegroundEvent
@@ -60,7 +60,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   private val packageActivityManager: PackageActivityManager,
   private val queryDao: EntryQueryDao,
   @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
-  private val stateInteractor: LockServiceStateInteractor
+  private val pinInteractor: MasterPinInteractor
 ) : LockServiceInteractor {
 
   private var activePackageName = ""
@@ -73,6 +73,12 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     // Also reset last foreground
     lastForegroundEvent = ForegroundEvent.EMPTY
   }
+
+  override fun isServiceEnabled(): Single<Boolean> = pinInteractor.getMasterPin()
+      .map {
+        enforcer.assertNotOnMainThread()
+        return@map it is Present
+      }
 
   override fun clearMatchingForegroundEvent(event: ForegroundEvent) {
     Timber.d("Received foreground event: $event")
@@ -202,10 +208,10 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   private fun isDeviceLocked(): Boolean = deviceLockStateProvider.isLocked()
 
   @CheckResult
-  private fun isServiceEnabled(): Maybe<Boolean> {
+  private fun serviceEnabled(): Maybe<Boolean> {
     return Maybe.defer {
       enforcer.assertNotOnMainThread()
-      return@defer stateInteractor.isServiceEnabled()
+      return@defer isServiceEnabled()
           .filter {
             enforcer.assertNotOnMainThread()
             if (!it) {
@@ -274,7 +280,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     className: String,
     forcedRecheck: RecheckStatus
   ): Single<PadLockEntryModel> {
-    val windowEventObservable: Single<Boolean> = isServiceEnabled()
+    val windowEventObservable: Single<Boolean> = serviceEnabled()
         .compose(isEventFromActivity(packageName, className))
         .compose(isEventRestricted(packageName, className))
         .doOnSuccess {

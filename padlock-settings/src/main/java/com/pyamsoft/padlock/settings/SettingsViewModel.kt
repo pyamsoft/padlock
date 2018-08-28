@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.pydroid.core.DataBus
 import com.pyamsoft.pydroid.core.DataWrapper
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -37,7 +38,7 @@ class SettingsViewModel @Inject internal constructor(
   private val enforcer: Enforcer,
   private val interactor: SettingsInteractor,
   private val bus: EventBus<ConfirmEvent>,
-  private val serviceFinishBus: EventBus<ServiceFinishEvent>,
+  private val serviceFinishBus: Publisher<ServiceFinishEvent>,
   private val clearPinBus: EventBus<ClearPinEvent>
 ) {
 
