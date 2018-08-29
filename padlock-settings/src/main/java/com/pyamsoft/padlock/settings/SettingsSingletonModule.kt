@@ -23,7 +23,7 @@ import dagger.Binds
 import dagger.Module
 
 @Module
-abstract class SettingsModule {
+abstract class SettingsSingletonModule {
 
   @Binds
   internal abstract fun provideInteractor(impl: SettingsInteractorImpl): SettingsInteractor

@@ -16,105 +16,120 @@
 
 package com.pyamsoft.padlock.settings
 
-import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.model.ConfirmEvent.ALL
 import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.service.ServiceFinishEvent
-import com.pyamsoft.pydroid.core.DataBus
-import com.pyamsoft.pydroid.core.DataWrapper
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.threads.Enforcer
+import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
+import com.pyamsoft.pydroid.core.viewmodel.DataBus
+import com.pyamsoft.pydroid.core.viewmodel.DataWrapper
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
 class SettingsViewModel @Inject internal constructor(
+  owner: LifecycleOwner,
   private val enforcer: Enforcer,
   private val interactor: SettingsInteractor,
   private val bus: EventBus<ConfirmEvent>,
   private val serviceFinishBus: Publisher<ServiceFinishEvent>,
   private val clearPinBus: EventBus<ClearPinEvent>
-) {
+) : BaseViewModel(owner) {
 
   private val applicationBus = DataBus<Unit>()
   private val lockTypeBus = DataBus<String>()
 
-  @CheckResult
-  fun onDatabaseCleared(func: () -> Unit): Disposable {
-    return bus.listen()
-        .observeOn(Schedulers.io())
-        .filter { it == DATABASE }
-        .flatMapSingle {
-          enforcer.assertNotOnMainThread()
-          return@flatMapSingle interactor.clearDatabase()
-              .observeOn(Schedulers.io())
-        }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { func() }
+  private var updateDisposable by disposable()
+  private var switchDisposable by disposable()
+
+  override fun onCleared() {
+    super.onCleared()
+    updateDisposable.tryDispose()
+    switchDisposable.tryDispose()
   }
 
-  @CheckResult
-  fun onAllSettingsCleared(func: () -> Unit): Disposable {
-    return bus.listen()
-        .observeOn(Schedulers.io())
-        .filter { it == ALL }
-        .flatMapSingle {
-          enforcer.assertNotOnMainThread()
-          return@flatMapSingle interactor.clearAll()
-              .observeOn(Schedulers.io())
-        }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doOnNext { serviceFinishBus.publish(ServiceFinishEvent) }
-        .subscribe { func() }
+  fun onDatabaseCleared(func: () -> Unit) {
+    dispose {
+      bus.listen()
+          .observeOn(Schedulers.io())
+          .filter { it == DATABASE }
+          .flatMapSingle {
+            enforcer.assertNotOnMainThread()
+            return@flatMapSingle interactor.clearDatabase()
+                .observeOn(Schedulers.io())
+          }
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe { func() }
+    }
   }
 
-  @CheckResult
-  fun onPinCleared(func: () -> Unit): Disposable {
-    return clearPinBus.listen()
-        .filter { it.success }
-        .map { Unit }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { func() }
+  fun onAllSettingsCleared(func: () -> Unit) {
+    dispose {
+      bus.listen()
+          .observeOn(Schedulers.io())
+          .filter { it == ALL }
+          .flatMapSingle {
+            enforcer.assertNotOnMainThread()
+            return@flatMapSingle interactor.clearAll()
+                .observeOn(Schedulers.io())
+          }
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .doOnNext { serviceFinishBus.publish(ServiceFinishEvent) }
+          .subscribe { func() }
+    }
   }
 
-  @CheckResult
-  fun onPinClearFailed(func: () -> Unit): Disposable {
-    return clearPinBus.listen()
-        .filter { !it.success }
-        .map { Unit }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { func() }
+  fun onPinCleared(func: () -> Unit) {
+    dispose {
+      clearPinBus.listen()
+          .filter { it.success }
+          .map { Unit }
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe { func() }
+    }
   }
 
-  @CheckResult
-  fun onApplicationReceiverChanged(func: (DataWrapper<Unit>) -> Unit): Disposable {
-    return applicationBus.listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(func)
+  fun onPinClearFailed(func: () -> Unit) {
+    dispose {
+      clearPinBus.listen()
+          .filter { !it.success }
+          .map { Unit }
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe { func() }
+    }
   }
 
-  @CheckResult
-  fun onLockTypeSwitched(func: (DataWrapper<String>) -> Unit): Disposable {
-    return lockTypeBus.listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(func)
+  fun onApplicationReceiverChanged(func: (DataWrapper<Unit>) -> Unit) {
+    dispose {
+      applicationBus.listen()
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(func)
+    }
   }
 
-  @CheckResult
-  fun updateApplicationReceiver(): Disposable {
-    return interactor.updateApplicationReceiver()
+  fun onLockTypeSwitched(func: (DataWrapper<String>) -> Unit) {
+    dispose {
+      lockTypeBus.listen()
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(func)
+    }
+  }
+
+  fun updateApplicationReceiver() {
+    updateDisposable = interactor.updateApplicationReceiver()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .doOnSubscribe { applicationBus.publishLoading(false) }
@@ -125,9 +140,8 @@ class SettingsViewModel @Inject internal constructor(
         })
   }
 
-  @CheckResult
-  fun switchLockType(value: String): Disposable {
-    return interactor.hasExistingMasterPassword()
+  fun switchLockType(value: String) {
+    switchDisposable = interactor.hasExistingMasterPassword()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .doOnSubscribe { lockTypeBus.publishLoading(false) }

@@ -19,7 +19,7 @@
 buildscript {
 
   ext {
-    kotlin_version = '1.2.60'
+    kotlin_version = '1.2.61'
     plugin_version = '3.2.0-beta05'
   }
 
@@ -39,7 +39,7 @@ buildscript {
 
     pydroid = "18.1.5-SNAPSHOT"
     leakCanary = "1.6.1"
-    dagger = "2.16"
+    dagger = "2.17"
     patternLock = "1.0.0"
     fastAdapter = "3.2.8"
   }

@@ -16,32 +16,15 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.model.ConfirmEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.bus.Listener
-import com.pyamsoft.pydroid.core.bus.Publisher
-import com.pyamsoft.pydroid.core.bus.RxBus
+import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
 import dagger.Module
 import dagger.Provides
-import javax.inject.Singleton
 
 @Module
-object SettingsProvider {
+class SettingsModule(private val owner: LifecycleOwner) {
 
-  private val bus = RxBus.create<ConfirmEvent>()
-
-  @Singleton
-  @JvmStatic
   @Provides
-  internal fun provideBus(): EventBus<ConfirmEvent> = bus
-
-  @Singleton
-  @JvmStatic
-  @Provides
-  internal fun providePublisher(): Publisher<ConfirmEvent> = bus
-
-  @Singleton
-  @JvmStatic
-  @Provides
-  internal fun provideListener(): Listener<ConfirmEvent> = bus
+  @CheckResult
+  fun provideOwner(): LifecycleOwner = owner
 }

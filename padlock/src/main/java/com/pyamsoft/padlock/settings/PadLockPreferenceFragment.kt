@@ -29,16 +29,12 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinEntryDialog
-import com.pyamsoft.pydroid.core.addTo
-import com.pyamsoft.pydroid.core.disposable
-import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
-import io.reactivex.disposables.CompositeDisposable
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -55,19 +51,9 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
   override val applicationName: String
     get() = getString(R.string.app_name)
 
-  private val compositeDisposable = CompositeDisposable()
-  private var updateApplicationReceiver by disposable()
-  private var switchLockTypeDisposable by disposable()
-
   override fun onClearAllClicked() {
     ConfirmationDialog.newInstance(ConfirmEvent.ALL)
         .show(requireActivity(), "confirm_dialog")
-  }
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .inject(this)
   }
 
   override fun onCreateView(
@@ -75,6 +61,10 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusSettingsComponent(SettingsModule(viewLifecycleOwner))
+        .inject(this)
+
     val view = super.onCreateView(inflater, container, savedInstanceState)
     val clearDb = findPreference(getString(R.string.clear_db_key))
     val installListener = findPreference(getString(R.string.install_listener_key))
@@ -88,13 +78,13 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     }
 
     installListener.setOnPreferenceClickListener {
-      updateApplicationReceiver = viewModel.updateApplicationReceiver()
+      viewModel.updateApplicationReceiver()
       return@setOnPreferenceClickListener true
     }
 
     lockType.setOnPreferenceChangeListener { _, value ->
       if (value is String) {
-        switchLockTypeDisposable = viewModel.switchLockType(value)
+        viewModel.switchLockType(value)
       }
 
       Timber.d(
@@ -104,15 +94,10 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     }
 
     viewModel.onAllSettingsCleared { onClearAll() }
-        .addTo(compositeDisposable)
     viewModel.onDatabaseCleared { onClearDatabase() }
-        .addTo(compositeDisposable)
     viewModel.onApplicationReceiverChanged { /* TODO */ }
-        .addTo(compositeDisposable)
     viewModel.onPinClearFailed { onMasterPinClearFailure() }
-        .addTo(compositeDisposable)
     viewModel.onPinCleared { onMasterPinClearSuccess() }
-        .addTo(compositeDisposable)
     viewModel.onLockTypeSwitched { wrapper ->
       wrapper.onSuccess {
         if (it.isEmpty()) {
@@ -123,16 +108,8 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
       }
       wrapper.onError { onLockTypeChangeError(it) }
     }
-        .addTo(compositeDisposable)
 
     return view
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    compositeDisposable.clear()
-    updateApplicationReceiver.tryDispose()
-    switchLockTypeDisposable.tryDispose()
   }
 
   private fun onLockTypeChangeAccepted(value: String) {

@@ -68,7 +68,7 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
   }
 
   override fun getCurrentLockType(): LockScreenType =
-    LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault))
+    LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault).orEmpty())
 
   override fun isIgnoreInKeyguard(): Boolean =
     preferences.getBoolean(ignoreKeyguard, ignoreKeyguardDefault)
@@ -92,13 +92,11 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
 
   override fun isInfoDialogOnBoard(): Boolean = preferences.getBoolean(LOCK_DIALOG_ONBOARD, false)
 
-  override fun getDefaultIgnoreTime(): Long = preferences.getString(
-      ignoreTimeKey, ignoreTimeDefault
-  ).toLong()
+  override fun getDefaultIgnoreTime(): Long =
+    preferences.getString(ignoreTimeKey, ignoreTimeDefault).orEmpty().toLong()
 
-  override fun getTimeoutPeriod(): Long = preferences.getString(
-      timeoutTimeKey, timeoutTimeDefault
-  ).toLong()
+  override fun getTimeoutPeriod(): Long =
+    preferences.getString(timeoutTimeKey, timeoutTimeDefault).orEmpty().toLong()
 
   override fun isSystemVisible(): Boolean = preferences.getBoolean(IS_SYSTEM, false)
 
