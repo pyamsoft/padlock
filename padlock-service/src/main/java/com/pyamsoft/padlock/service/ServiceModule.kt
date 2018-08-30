@@ -18,8 +18,10 @@ package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.api.service.DeviceLockStateProvider
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
+import com.pyamsoft.padlock.api.service.ScreenStateObserver
 import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.service.device.DeviceLockStateProviderImpl
+import com.pyamsoft.padlock.service.device.ScreenStateObserverImpl
 import com.pyamsoft.padlock.service.device.UsageEventProviderImpl
 import dagger.Binds
 import dagger.Module
@@ -31,6 +33,9 @@ abstract class ServiceModule {
   internal abstract fun provideServiceInteractor(
     impl: LockServiceInteractorImpl
   ): LockServiceInteractor
+
+  @Binds
+  internal abstract fun screenState(impl: ScreenStateObserverImpl): ScreenStateObserver
 
   @Binds
   internal abstract fun deviceLockState(impl: DeviceLockStateProviderImpl): DeviceLockStateProvider

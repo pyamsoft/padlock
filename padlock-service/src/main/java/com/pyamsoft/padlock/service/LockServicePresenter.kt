@@ -28,7 +28,6 @@ import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -41,15 +40,13 @@ class LockServicePresenter @Inject internal constructor(
   private val interactor: LockServiceInteractor
 ) : Presenter<LockServicePresenter.View>() {
 
-  private var matchingDisposable: Disposable = Disposables.empty()
-  private var entryDisposable: Disposable = Disposables.empty()
-
-  init {
-    interactor.reset()
-  }
+  private var matchingDisposable = Disposables.empty()
+  private var entryDisposable = Disposables.empty()
+  private var foregroundDisposable = Disposables.empty()
 
   override fun onCreate() {
     super.onCreate()
+    interactor.init()
     registerOnBus()
     registerForegroundEventListener()
   }
@@ -57,10 +54,29 @@ class LockServicePresenter @Inject internal constructor(
   override fun onDestroy() {
     super.onDestroy()
     interactor.cleanup()
-    interactor.reset()
 
     matchingDisposable.dispose()
     entryDisposable.dispose()
+    foregroundDisposable.dispose()
+  }
+
+  private fun listenForForegroundEvents() {
+    foregroundDisposable = interactor.listenForForegroundEvents()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .onErrorReturn {
+          Timber.e(it, "Error while listening to foreground events")
+          return@onErrorReturn ForegroundEvent.EMPTY
+        }
+        .doOnCancel { Timber.d("Cancelling foreground listener") }
+        .doAfterTerminate { view?.onFinish() }
+        .subscribe({
+          if (ForegroundEvent.isEmpty(it)) {
+            Timber.w("Ignore empty foreground entry event")
+          } else {
+            processEvent(it.packageName, it.className, NOT_FORCE)
+          }
+        }, { Timber.e(it, "Error while listening to foreground event") })
   }
 
   private fun registerForegroundEventListener() {
@@ -72,22 +88,21 @@ class LockServicePresenter @Inject internal constructor(
             Timber.e(it, "Error listening for foreground event clears")
           })
     }
+
     dispose {
-      interactor.listenForForegroundEvents()
+      interactor.observeScreenState()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .onErrorReturn {
-            Timber.e(it, "Error while listening to foreground events")
-            return@onErrorReturn ForegroundEvent.EMPTY
-          }
-          .doAfterTerminate { view?.onFinish() }
-          .subscribe({
-            if (ForegroundEvent.isEmpty(it)) {
-              Timber.w("Ignore empty foreground entry event")
+          .subscribe {
+            foregroundDisposable.dispose()
+            if (it) {
+              // Screen on, begin observing foreground
+              Timber.d("Screen ON - start observing foreground")
+              listenForForegroundEvents()
             } else {
-              processEvent(it.packageName, it.className, NOT_FORCE)
+              Timber.d("Screen OFF - stop observing foreground")
             }
-          }, { Timber.e(it, "Error while listening to foreground event") })
+          }
     }
   }
 

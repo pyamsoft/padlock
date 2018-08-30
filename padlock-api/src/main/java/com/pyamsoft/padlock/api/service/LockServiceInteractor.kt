@@ -18,16 +18,17 @@ package com.pyamsoft.padlock.api.service
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.padlock.model.service.RecheckStatus
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.model.service.RecheckStatus
 import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.Single
 
 interface LockServiceInteractor {
 
-  fun cleanup()
+  fun init()
 
-  fun reset()
+  fun cleanup()
 
   @CheckResult
   fun isServiceEnabled(): Single<Boolean>
@@ -39,6 +40,9 @@ interface LockServiceInteractor {
     packageName: String,
     className: String
   ): Single<Boolean>
+
+  @CheckResult
+  fun observeScreenState(): Observable<Boolean>
 
   @CheckResult
   fun listenForForegroundEvents(): Flowable<ForegroundEvent>

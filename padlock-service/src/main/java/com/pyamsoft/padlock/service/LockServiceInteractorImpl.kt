@@ -22,10 +22,9 @@ import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
-import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
-import com.pyamsoft.padlock.api.service.DeviceLockStateProvider
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
+import com.pyamsoft.padlock.api.service.ScreenStateObserver
 import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
 import com.pyamsoft.padlock.model.ForegroundEvent
@@ -40,6 +39,8 @@ import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.MaybeTransformer
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.SingleTransformer
 import timber.log.Timber
@@ -52,10 +53,9 @@ import javax.inject.Singleton
 @Singleton
 internal class LockServiceInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
+  private val screenStateObserver: ScreenStateObserver,
   private val usageEventProvider: UsageEventProvider,
-  private val deviceLockStateProvider: DeviceLockStateProvider,
   private val lockPassed: LockPassed,
-  private val preferences: LockScreenPreferences,
   private val jobSchedulerCompat: JobSchedulerCompat,
   private val packageActivityManager: PackageActivityManager,
   private val queryDao: EntryQueryDao,
@@ -67,7 +67,17 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   private var activeClassName = ""
   private var lastForegroundEvent = ForegroundEvent.EMPTY
 
-  override fun reset() {
+  override fun init() {
+    reset()
+  }
+
+  override fun cleanup() {
+    Timber.d("Cleanup LockService")
+    jobSchedulerCompat.cancel(recheckServiceClass)
+    reset()
+  }
+
+  private fun reset() {
     resetState()
 
     // Also reset last foreground
@@ -92,6 +102,31 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     Timber.i("Reset name state")
     activeClassName = ""
     activePackageName = ""
+  }
+
+  private fun emit(
+    emitter: ObservableEmitter<Boolean>,
+    screenOn: Boolean
+  ) {
+    if (!emitter.isDisposed) {
+      emitter.onNext(screenOn)
+    }
+  }
+
+  override fun observeScreenState(): Observable<Boolean> {
+    return Observable.create { emitter ->
+      emitter.setCancellable {
+        screenStateObserver.unregister()
+      }
+
+      // Observe screen state changes
+      screenStateObserver.register {
+        emit(emitter, it)
+      }
+
+      // Start with screen as ON
+      emit(emitter, true)
+    }
   }
 
   /**
@@ -144,11 +179,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
       return@fromCallable (activePackageName == packageName)
           && (activeClassName == className || className == PadLockDbModels.PACKAGE_ACTIVITY_NAME)
     }
-  }
-
-  override fun cleanup() {
-    Timber.d("Cleanup LockService")
-    jobSchedulerCompat.cancel(recheckServiceClass)
   }
 
   @CheckResult
@@ -205,9 +235,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   }
 
   @CheckResult
-  private fun isDeviceLocked(): Boolean = deviceLockStateProvider.isLocked()
-
-  @CheckResult
   private fun serviceEnabled(): Maybe<Boolean> {
     return Maybe.defer {
       enforcer.assertNotOnMainThread()
@@ -219,12 +246,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
               resetState()
             }
             return@filter it
-          }
-          .doOnSuccess {
-            if (isDeviceLocked()) {
-              Timber.w("Device is locked, reset last")
-              reset()
-            }
           }
     }
   }
@@ -256,25 +277,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     }
   }
 
-  @CheckResult
-  private fun isEventRestricted(
-    packageName: String,
-    className: String
-  ): MaybeTransformer<Boolean, Boolean> {
-    return MaybeTransformer { source ->
-      return@MaybeTransformer source.filter {
-        enforcer.assertNotOnMainThread()
-        val restrict: Boolean = preferences.isIgnoreInKeyguard() && isDeviceLocked()
-        if (restrict) {
-          Timber.w("Locking is restricted while device in keyguard.")
-          Timber.w("P: %s, C: %s", packageName, className)
-          Timber.w("Ignore")
-        }
-        return@filter !restrict
-      }
-    }
-  }
-
   override fun processEvent(
     packageName: String,
     className: String,
@@ -282,7 +284,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   ): Single<PadLockEntryModel> {
     val windowEventObservable: Single<Boolean> = serviceEnabled()
         .compose(isEventFromActivity(packageName, className))
-        .compose(isEventRestricted(packageName, className))
         .doOnSuccess {
           activePackageName = packageName
           activeClassName = className
