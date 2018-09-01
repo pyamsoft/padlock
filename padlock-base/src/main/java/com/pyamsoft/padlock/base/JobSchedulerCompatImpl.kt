@@ -21,6 +21,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.CheckResult
+import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,8 +31,9 @@ internal class JobSchedulerCompatImpl @Inject internal constructor(
   private val context: Context
 ) : JobSchedulerCompat {
 
-  private val alarmManager: AlarmManager =
-    context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+  private val alarmManager by lazy {
+    requireNotNull(context.getSystemService<AlarmManager>())
+  }
 
   @CheckResult
   private fun Intent.toPending(): PendingIntent = PendingIntent.getService(context, 0, this, 0)

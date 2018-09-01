@@ -25,9 +25,6 @@ interface LockScreenPreferences {
   fun getCurrentLockType(): LockScreenType
 
   @CheckResult
-  fun isIgnoreInKeyguard(): Boolean
-
-  @CheckResult
   fun getDefaultIgnoreTime(): Long
 
   @CheckResult

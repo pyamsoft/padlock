@@ -29,8 +29,8 @@ import android.os.Build.VERSION_CODES
 import androidx.annotation.ColorRes
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.pydroid.core.cache.Cache
@@ -54,7 +54,6 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
 ) : BroadcastReceiver(), ApplicationInstallReceiver {
 
   private val notificationManager: NotificationManager
-  private val notificationManagerCompat: NotificationManagerCompat
   private val filter: IntentFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
   private val pendingIntent: PendingIntent
   private val compositeDisposable: CompositeDisposable = CompositeDisposable()
@@ -66,9 +65,7 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
       putExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST, true)
     }
     pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_RC, intent, 0)
-    notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManagerCompat = NotificationManagerCompat.from(context)
+    notificationManager = requireNotNull(context.getSystemService<NotificationManager>())
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       setupNotificationChannel()
@@ -150,7 +147,7 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
           color = ContextCompat.getColor(context, notificationColor)
           priority = NotificationCompat.PRIORITY_LOW
         }
-    notificationManagerCompat.notify(notificationId++, builder.build())
+    notificationManager.notify(notificationId++, builder.build())
   }
 
   override fun register() {

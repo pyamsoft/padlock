@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.base
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.pyamsoft.padlock.api.preferences.ClearPreferences
@@ -40,18 +39,15 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     LockScreenPreferences,
     OnboardingPreferences {
 
+  private val preferences by lazy { PreferenceManager.getDefaultSharedPreferences(context) }
   private val ignoreTimeKey: String
   private val ignoreTimeDefault: String
   private val timeoutTimeKey: String
   private val timeoutTimeDefault: String
   private val installListener: String
-  private val ignoreKeyguard: String
   private val lockScreenType: String
   private val lockScreenTypeDefault: String
   private val installListenerDefault: Boolean
-  private val ignoreKeyguardDefault: Boolean
-  private val preferences: SharedPreferences =
-    PreferenceManager.getDefaultSharedPreferences(context)
 
   init {
     val res = context.resources
@@ -61,17 +57,12 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     timeoutTimeDefault = res.getString(R.string.timeout_time_default)
     installListener = res.getString(R.string.install_listener_key)
     installListenerDefault = res.getBoolean(R.bool.install_listener_default)
-    ignoreKeyguard = res.getString(R.string.ignore_keyguard_key)
-    ignoreKeyguardDefault = res.getBoolean(R.bool.ignore_keyguard_default)
     lockScreenType = res.getString(R.string.lock_screen_type_key)
     lockScreenTypeDefault = res.getString(R.string.lock_screen_type_default)
   }
 
   override fun getCurrentLockType(): LockScreenType =
     LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault).orEmpty())
-
-  override fun isIgnoreInKeyguard(): Boolean =
-    preferences.getBoolean(ignoreKeyguard, ignoreKeyguardDefault)
 
   override fun isInstallListenerEnabled(): Boolean =
     preferences.getBoolean(installListener, installListenerDefault)

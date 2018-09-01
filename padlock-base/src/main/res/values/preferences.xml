@@ -25,9 +25,6 @@
   <string name="install_listener_key">install_listener</string>
   <bool name="install_listener_default">true</bool>
 
-  <string name="ignore_keyguard_key">ignore_keyguard</string>
-  <bool name="ignore_keyguard_default">true</bool>
-
   <string name="lock_screen_type_key">lock_screen_type</string>
   <string name="lock_screen_type_default">TYPE_TEXT</string>
 </resources>
