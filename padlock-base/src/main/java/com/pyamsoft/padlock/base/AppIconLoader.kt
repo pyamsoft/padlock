@@ -33,7 +33,7 @@ class AppIconLoader @Inject internal constructor(
   private val packageIconManager: PackageIconManager
 ) {
 
-  private val loadScheduler = Schedulers.from(Executors.newFixedThreadPool(8))
+  private val loadScheduler = Schedulers.from(Executors.newFixedThreadPool(4))
 
   @CheckResult
   fun forPackageName(packageName: String): GenericLoader<Drawable> =
