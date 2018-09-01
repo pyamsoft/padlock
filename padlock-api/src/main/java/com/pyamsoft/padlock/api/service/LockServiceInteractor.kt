@@ -21,6 +21,7 @@ import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.service.RecheckStatus
 import io.reactivex.Flowable
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 
@@ -36,10 +37,10 @@ interface LockServiceInteractor {
   fun clearMatchingForegroundEvent(event: ForegroundEvent)
 
   @CheckResult
-  fun isActiveMatching(
+  fun ifActiveMatching(
     packageName: String,
     className: String
-  ): Single<Boolean>
+  ): Maybe<Unit>
 
   @CheckResult
   fun observeScreenState(): Observable<Boolean>

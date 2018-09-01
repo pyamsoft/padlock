@@ -25,7 +25,7 @@ import dagger.Binds
 import dagger.Module
 
 @Module
-abstract class ServiceModule {
+abstract class ServiceSingletonModule {
 
   @Binds
   internal abstract fun provideServiceInteractor(

@@ -52,7 +52,9 @@ import com.pyamsoft.padlock.purge.PurgeSingletonModule
 import com.pyamsoft.padlock.purge.PurgeSingletonProvider
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
+import com.pyamsoft.padlock.service.ServiceComponent
 import com.pyamsoft.padlock.service.ServiceModule
+import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.settings.ConfirmationDialog
 import com.pyamsoft.padlock.settings.SettingsComponent
 import com.pyamsoft.padlock.settings.SettingsModule
@@ -65,7 +67,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
       PadLockProvider::class, BaseModule::class, DatabaseProvider::class, LockModule::class,
-      PinModule::class, ServiceModule::class, PurgeSingletonModule::class,
+      PinModule::class, ServiceSingletonModule::class, PurgeSingletonModule::class,
       PurgeSingletonProvider::class, MainModule::class, SettingsSingletonModule::class,
       LockInfoSingletonModule::class, LockInfoSingletonProvider::class, LockStateModule::class,
       LockListSingletonModule::class, LockListSingletonProvider::class,
@@ -82,8 +84,6 @@ interface PadLockComponent {
   fun inject(pinEntryDialog: PinEntryDialog)
 
   fun inject(pinEntryPatternFragment: PinEntryPatternFragment)
-
-  fun inject(padLockService: PadLockService)
 
   fun inject(recheckService: RecheckService)
 
@@ -118,4 +118,7 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusSettingsComponent(module: SettingsModule): SettingsComponent
+
+  @CheckResult
+  fun plusServiceComponent(module: ServiceModule): ServiceComponent
 }

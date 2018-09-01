@@ -41,11 +41,10 @@ import com.pyamsoft.padlock.lifecycle.fakeBind
 import com.pyamsoft.padlock.lifecycle.fakeRelease
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.main.MainActivity
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import timber.log.Timber
 import javax.inject.Inject
 
-class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
+class PadLockService : Service(), LifecycleOwner {
 
   private val lifecycle = LifecycleRegistry(this)
 
@@ -56,7 +55,7 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
   }
 
   @field:Inject
-  internal lateinit var presenter: LockServicePresenter
+  internal lateinit var viewModel: LockServiceViewModel
   private lateinit var notificationManagerCompat: NotificationManagerCompat
   private lateinit var notificationManager: NotificationManager
   private lateinit var handler: Handler
@@ -64,13 +63,20 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
   override fun onCreate() {
     super.onCreate()
     Injector.obtain<PadLockComponent>(applicationContext)
+        .plusServiceComponent(ServiceModule(this))
         .inject(this)
-    presenter.bind(this, this)
     notificationManagerCompat = NotificationManagerCompat.from(this)
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     handler = Handler(Looper.getMainLooper())
     startInForeground()
     lifecycle.fakeBind()
+
+    viewModel.onLockScreen { entry, realName ->
+      // Delay by a little bit for Applications which launch a bunch of Activities in quick order.
+      handler.postDelayed({ LockScreenActivity.start(this, entry, realName) }, LAUNCH_DELAY)
+    }
+
+    viewModel.onServiceFinishEvent { stopSelf() }
   }
 
   override fun onDestroy() {
@@ -83,10 +89,6 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
         .watch(this)
   }
 
-  override fun onFinish() {
-    stopSelf()
-  }
-
   override fun onStartCommand(
     intent: Intent?,
     flags: Int,
@@ -94,21 +96,6 @@ class PadLockService : Service(), LockServicePresenter.View, LifecycleOwner {
   ): Int {
     Timber.d("Service onStartCommand")
     return Service.START_STICKY
-  }
-
-  override fun onRecheck(
-    packageName: String,
-    className: String
-  ) {
-    presenter.processActiveApplicationIfMatching(packageName, className)
-  }
-
-  override fun onStartLockScreen(
-    entry: PadLockEntryModel,
-    realName: String
-  ) {
-    // Delay by a little bit for Applications which launch a bunch of Activities in quick order.
-    handler.postDelayed({ LockScreenActivity.start(this, entry, realName) }, LAUNCH_DELAY)
   }
 
   private fun startInForeground() {

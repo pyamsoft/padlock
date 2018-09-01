@@ -163,10 +163,10 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
         .doOnNext { lastForegroundEvent = it }
   }
 
-  override fun isActiveMatching(
+  override fun ifActiveMatching(
     packageName: String,
     className: String
-  ): Single<Boolean> {
+  ): Maybe<Unit> {
     return Single.fromCallable {
       enforcer.assertNotOnMainThread()
       Timber.d(
@@ -179,6 +179,8 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
       return@fromCallable (activePackageName == packageName)
           && (activeClassName == className || className == PadLockDbModels.PACKAGE_ACTIVITY_NAME)
     }
+        .filter { it }
+        .map { Unit }
   }
 
   @CheckResult

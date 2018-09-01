@@ -17,8 +17,10 @@
 package com.pyamsoft.padlock.base
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.service.RecheckEvent
 import com.pyamsoft.padlock.model.service.ServiceFinishEvent
+import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
@@ -30,6 +32,7 @@ object BaseProvider {
 
   private val serviceBus = RxBus.create<ServiceFinishEvent>()
   private val recheckBus = RxBus.create<RecheckEvent>()
+  private val foregroundBus = RxBus.create<ForegroundEvent>()
 
   @JvmStatic
   @Provides
@@ -44,11 +47,26 @@ object BaseProvider {
   @JvmStatic
   @Provides
   @CheckResult
+  fun provideServiceBus(): EventBus<ServiceFinishEvent> = serviceBus
+
+  @JvmStatic
+  @Provides
+  @CheckResult
   fun provideRecheckPublisher(): Publisher<RecheckEvent> = recheckBus
 
   @JvmStatic
   @Provides
   @CheckResult
   fun provideRecheckListener(): Listener<RecheckEvent> = recheckBus
+
+  @JvmStatic
+  @Provides
+  @CheckResult
+  fun provideForegroundPublisher(): Publisher<ForegroundEvent> = foregroundBus
+
+  @JvmStatic
+  @Provides
+  @CheckResult
+  fun provideForegroundListener(): Listener<ForegroundEvent> = foregroundBus
 
 }
