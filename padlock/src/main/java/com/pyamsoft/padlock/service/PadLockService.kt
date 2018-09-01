@@ -23,13 +23,11 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -43,10 +41,16 @@ import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.main.MainActivity
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.LazyThreadSafetyMode.NONE
 
 class PadLockService : Service(), LifecycleOwner {
 
   private val lifecycle = LifecycleRegistry(this)
+  private val notificationManager by lazy(NONE) {
+    requireNotNull(application.getSystemService<NotificationManager>())
+  }
+  @field:Inject
+  internal lateinit var viewModel: LockServiceViewModel
 
   override fun getLifecycle(): Lifecycle = lifecycle
 
@@ -54,26 +58,17 @@ class PadLockService : Service(), LifecycleOwner {
     throw AssertionError("Service is not bound")
   }
 
-  @field:Inject
-  internal lateinit var viewModel: LockServiceViewModel
-  private lateinit var notificationManagerCompat: NotificationManagerCompat
-  private lateinit var notificationManager: NotificationManager
-  private lateinit var handler: Handler
-
   override fun onCreate() {
     super.onCreate()
     Injector.obtain<PadLockComponent>(applicationContext)
         .plusServiceComponent(ServiceModule(this))
         .inject(this)
-    notificationManagerCompat = NotificationManagerCompat.from(this)
-    notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    handler = Handler(Looper.getMainLooper())
     startInForeground()
     lifecycle.fakeBind()
 
     viewModel.onLockScreen { entry, realName ->
       // Delay by a little bit for Applications which launch a bunch of Activities in quick order.
-      handler.postDelayed({ LockScreenActivity.start(this, entry, realName) }, LAUNCH_DELAY)
+      LockScreenActivity.start(this, entry, realName)
     }
 
     viewModel.onServiceFinishEvent { stopSelf() }
@@ -82,8 +77,7 @@ class PadLockService : Service(), LifecycleOwner {
   override fun onDestroy() {
     super.onDestroy()
     stopForeground(true)
-    handler.removeCallbacksAndMessages(null)
-    notificationManagerCompat.cancel(NOTIFICATION_ID)
+    notificationManager.cancel(NOTIFICATION_ID)
     lifecycle.fakeRelease()
     PadLock.getRefWatcher(this)
         .watch(this)
@@ -155,7 +149,6 @@ class PadLockService : Service(), LifecycleOwner {
     private const val NOTIFICATION_RC = 1004
     private const val OLD_CHANNEL_ID = "padlock_foreground"
     private const val NOTIFICATION_CHANNEL_ID = "padlock_foreground_v1"
-    private const val LAUNCH_DELAY = 300L
 
     @JvmStatic
     fun start(context: Context) {
