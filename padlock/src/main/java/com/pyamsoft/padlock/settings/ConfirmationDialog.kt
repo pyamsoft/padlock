@@ -53,7 +53,7 @@ class ConfirmationDialog : ToolbarDialog() {
             else
               """Really clear all application settings?
         |
-        |You will have to manually restart the Accessibility Service component of PadLock""".trimMargin()
+        |You will have to manually restart the Usage Access component of PadLock""".trimMargin()
         )
         .setPositiveButton("Yes") { _, _ ->
           publisher.publish(type)

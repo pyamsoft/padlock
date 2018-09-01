@@ -143,7 +143,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
       try {
         info = packageManager.getApplicationInfo(packageName, 0)
       } catch (e: PackageManager.NameNotFoundException) {
-        Timber.e(e, "onError getApplicationInfo: '$packageName'")
+        Timber.e(e, "Error getApplicationInfo: '$packageName'")
         info = null
       }
       return@defer getApplicationInfo(info)
@@ -161,7 +161,7 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
             packageManager.getApplicationInfo(packageName, 0).asOptional()
         )
       } catch (e: PackageManager.NameNotFoundException) {
-        Timber.e(e, "onError loadPackageLabel: '$packageName'")
+        Timber.e(e, "Error loadPackageLabel: '$packageName'")
         throw Exceptions.propagate(e)
       }
     }
