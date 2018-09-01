@@ -21,6 +21,8 @@ import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.GenericLoader
+import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,7 +33,9 @@ class AppIconLoader @Inject internal constructor(
   private val packageIconManager: PackageIconManager
 ) {
 
+  private val loadScheduler = Schedulers.from(Executors.newFixedThreadPool(8))
+
   @CheckResult
   fun forPackageName(packageName: String): GenericLoader<Drawable> =
-    AppIconImageLoader(enforcer, packageName, packageIconManager)
+    AppIconImageLoader(enforcer, packageName, packageIconManager, loadScheduler)
 }

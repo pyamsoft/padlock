@@ -28,17 +28,18 @@ import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.GenericLoader
 import com.pyamsoft.pydroid.loader.Loaded
+import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 
 @JvmSuppressWildcards
 internal class AppIconImageLoader internal constructor(
   private val enforcer: Enforcer,
   private val packageName: String,
-  private val packageIconManager: PackageIconManager
+  private val packageIconManager: PackageIconManager,
+  private val loadScheduler: Scheduler
 ) : GenericLoader<Drawable>() {
 
   init {
@@ -48,16 +49,17 @@ internal class AppIconImageLoader internal constructor(
   }
 
   override fun into(imageView: ImageView): Loaded {
-    return RxLoaded(load(packageName)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({
-          Timber.d("Loaded App icon for $packageName")
-          imageView.setImageDrawable(it)
-        }, {
-          Timber.e(it, "Error loading App icon for $packageName")
-          imageView.setImageDrawable(null)
-        }), imageView
+    return RxLoaded(
+        load(packageName)
+            .subscribeOn(loadScheduler)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+              Timber.d("Loaded App icon for $packageName")
+              imageView.setImageDrawable(it)
+            }, {
+              Timber.e(it, "Error loading App icon for $packageName")
+              imageView.setImageDrawable(null)
+            }), imageView
     )
   }
 

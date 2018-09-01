@@ -86,12 +86,6 @@
     applications
   </string>
 
-  <string name="ignore_keyguard_title">Ignore while Device Locked</string>
-  <string name="ignore_keyguard_summary_checked">Do not lock applications when device is locked
-  </string>
-  <string name="ignore_keyguard_summary_unchecked">Lock applications even when device is locked
-  </string>
-
   <string name="clear_db_key">clear_db</string>
   <string name="clear_db_title">Reset Database</string>
   <string name="clear_db_summary">Reset the locked applications database</string>
