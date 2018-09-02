@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
@@ -37,9 +38,11 @@ import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import timber.log.Timber
 import javax.inject.Inject
 
-class PurgeFragment : ToolbarFragment(), PurgePresenter.View {
-  @Inject
-  internal lateinit var presenter: PurgePresenter
+class PurgeFragment : ToolbarFragment() {
+
+  @field:Inject
+  internal lateinit var viewModel: PurgeViewModel
+
   private lateinit var adapter: ModelAdapter<String, PurgeItem>
   private lateinit var binding: FragmentPurgeBinding
   private lateinit var decoration: androidx.recyclerview.widget.DividerItemDecoration
@@ -57,18 +60,60 @@ class PurgeFragment : ToolbarFragment(), PurgePresenter.View {
     }
   }
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .inject(this)
-  }
-
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusPurgeComponent(PurgeModule(viewLifecycleOwner, object : ListDiffProvider<String> {
+          override fun data(): List<String> {
+            return adapter.models.toList()
+          }
+        }))
+        .inject(this)
+
     binding = FragmentPurgeBinding.inflate(inflater, container, false)
+
+    refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
+      binding.purgeSwipeRefresh.refreshing(it)
+
+      // Load complete
+      if (!it) {
+        lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
+        decideListState()
+      }
+    }
+    setupRecyclerView()
+    setupSwipeRefresh()
+    setupToolbarMenu()
+    lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
+
+    viewModel.onPurgeAllEvent {
+      Timber.d("Purged stale: $it")
+      viewModel.fetch(true)
+    }
+
+    viewModel.onPurgeEvent {
+      Timber.d("Purged stale: $it")
+      viewModel.fetch(true)
+    }
+
+    viewModel.onStaleApplicationsFetched { wrapper ->
+      wrapper.onLoading { refreshLatch.isRefreshing = true }
+      wrapper.onComplete { refreshLatch.isRefreshing = false }
+      wrapper.onError { _ ->
+        Snackbreak.make(
+            binding.root,
+            "Failed to load outdated application list",
+            Snackbar.LENGTH_LONG
+        )
+            .setAction("Retry") { viewModel.fetch(true) }
+            .show()
+      }
+      wrapper.onSuccess { adapter.set(it) }
+    }
+
     return binding.root
   }
 
@@ -88,28 +133,6 @@ class PurgeFragment : ToolbarFragment(), PurgePresenter.View {
       }
       it.setOnMenuItemClickListener(null)
     }
-  }
-
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
-    refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
-      binding.purgeSwipeRefresh.refreshing(it)
-
-      // Load complete
-      if (!it) {
-        lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
-        decideListState()
-      }
-    }
-    setupRecyclerView()
-    setupSwipeRefresh()
-    setupToolbarMenu()
-    lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
-
-    presenter.bind(viewLifecycleOwner, this)
   }
 
   private fun setupToolbarMenu() {
@@ -136,31 +159,9 @@ class PurgeFragment : ToolbarFragment(), PurgePresenter.View {
       purgeSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.blue700)
       purgeSwipeRefresh.setOnRefreshListener {
         refreshLatch.forceRefresh()
-        presenter.retrieveStaleApplications(true)
+        viewModel.fetch(true)
       }
     }
-  }
-
-  override fun onRetrieveBegin() {
-    refreshLatch.isRefreshing = true
-  }
-
-  override fun onRetrieveComplete() {
-    refreshLatch.isRefreshing = false
-  }
-
-  override fun onRetrievedList(result: List<String>) {
-    adapter.set(result)
-  }
-
-  override fun onRetrieveError(throwable: Throwable) {
-    Snackbreak.make(
-        binding.root,
-        "Failed to load outdated application list",
-        Snackbar.LENGTH_LONG
-    )
-        .setAction("Retry") { presenter.retrieveStaleApplications(true) }
-        .show()
   }
 
   override fun onPause() {
@@ -229,24 +230,6 @@ class PurgeFragment : ToolbarFragment(), PurgePresenter.View {
     Timber.d("Handle delete request for %s at %d", packageName, position)
     PurgeSingleItemDialog.newInstance(packageName)
         .show(requireActivity(), "purge_single")
-  }
-
-  override fun onPurge(packageName: String) {
-    Timber.d("Purge stale: %s", packageName)
-    presenter.deleteStale(packageName)
-  }
-
-  override fun onPurgeAll() {
-    val itemCount = adapter.fastAdapter.itemCount
-    if (itemCount == 0) {
-      Timber.e("Adapter is EMPTY")
-    } else {
-      presenter.deleteStale(adapter.models)
-    }
-  }
-
-  override fun onDeleted() {
-    presenter.retrieveStaleApplications(true)
   }
 
   companion object {

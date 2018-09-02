@@ -29,12 +29,6 @@ import javax.inject.Named
 abstract class PurgeSingletonModule {
 
   @Binds
-  internal abstract fun providePurgeBus(bus: PurgeBus): EventBus<PurgeEvent>
-
-  @Binds
-  internal abstract fun providePurgeAllBus(bus: PurgeAllBus): EventBus<PurgeAllEvent>
-
-  @Binds
   internal abstract fun providePurgeInteractor(impl: PurgeInteractorImpl): PurgeInteractor
 
   @Binds

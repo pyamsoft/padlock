@@ -54,9 +54,9 @@ class LockServiceViewModel @Inject internal constructor(
   override fun onCleared() {
     super.onCleared()
     interactor.cleanup()
-    matchingDisposable.dispose()
-    entryDisposable.dispose()
-    foregroundDisposable.dispose()
+    matchingDisposable.tryDispose()
+    entryDisposable.tryDispose()
+    foregroundDisposable.tryDispose()
   }
 
   fun onServiceFinishEvent(func: () -> Unit) {

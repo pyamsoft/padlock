@@ -30,17 +30,14 @@ object SettingsSingletonProvider {
 
   private val bus = RxBus.create<ConfirmEvent>()
 
-  @Singleton
   @JvmStatic
   @Provides
   internal fun provideBus(): EventBus<ConfirmEvent> = bus
 
-  @Singleton
   @JvmStatic
   @Provides
   internal fun providePublisher(): Publisher<ConfirmEvent> = bus
 
-  @Singleton
   @JvmStatic
   @Provides
   internal fun provideListener(): Listener<ConfirmEvent> = bus

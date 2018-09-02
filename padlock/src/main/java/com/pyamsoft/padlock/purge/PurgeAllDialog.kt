@@ -22,13 +22,14 @@ import androidx.appcompat.app.AlertDialog
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.model.purge.PurgeAllEvent
+import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import javax.inject.Inject
 
 class PurgeAllDialog : ToolbarDialog() {
 
   @field:Inject
-  internal lateinit var purgePublisher: PurgePublisher
+  internal lateinit var purgePublisher: Publisher<PurgeAllEvent>
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

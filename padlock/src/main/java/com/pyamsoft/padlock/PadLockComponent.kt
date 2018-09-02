@@ -46,11 +46,11 @@ import com.pyamsoft.padlock.pin.PinEntryPatternFragment
 import com.pyamsoft.padlock.pin.PinEntryTextFragment
 import com.pyamsoft.padlock.pin.PinModule
 import com.pyamsoft.padlock.purge.PurgeAllDialog
-import com.pyamsoft.padlock.purge.PurgeFragment
+import com.pyamsoft.padlock.purge.PurgeComponent
+import com.pyamsoft.padlock.purge.PurgeModule
 import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.purge.PurgeSingletonModule
 import com.pyamsoft.padlock.purge.PurgeSingletonProvider
-import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.service.ServiceComponent
 import com.pyamsoft.padlock.service.ServiceModule
@@ -97,8 +97,6 @@ interface PadLockComponent {
 
   fun inject(viewHolder: LockListItem.ViewHolder)
 
-  fun inject(fragment: PurgeFragment)
-
   // To be used directly by PadLockSingleInitProvider
   @CheckResult
   fun provideInstallListenerPreferences(): InstallListenerPreferences
@@ -121,4 +119,7 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusServiceComponent(module: ServiceModule): ServiceComponent
+
+  @CheckResult
+  fun plusPurgeComponent(module: PurgeModule): PurgeComponent
 }

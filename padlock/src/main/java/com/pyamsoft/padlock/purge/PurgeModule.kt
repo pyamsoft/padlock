@@ -16,21 +16,23 @@
 
 package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.padlock.model.purge.PurgeEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.bus.RxBus
-import io.reactivex.Observable
-import javax.inject.Inject
-import javax.inject.Singleton
+import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
+import com.pyamsoft.padlock.model.list.ListDiffProvider
+import dagger.Module
+import dagger.Provides
 
-@Singleton
-internal class PurgeBus @Inject internal constructor() : EventBus<PurgeEvent> {
+@Module
+class PurgeModule(
+  private val owner: LifecycleOwner,
+  private val diffProvider: ListDiffProvider<String>
+) {
 
-  private val bus: EventBus<PurgeEvent> = RxBus.create()
+  @Provides
+  @CheckResult
+  fun provideOwner(): LifecycleOwner = owner
 
-  override fun listen(): Observable<PurgeEvent> = bus.listen()
-
-  override fun publish(event: PurgeEvent) {
-    bus.publish(event)
-  }
+  @Provides
+  @CheckResult
+  fun provideDiffProvider(): ListDiffProvider<String> = diffProvider
 }
