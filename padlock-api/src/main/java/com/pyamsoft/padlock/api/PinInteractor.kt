@@ -20,7 +20,7 @@ import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.pin.PinEntryEvent
 import io.reactivex.Single
 
-interface PinEntryInteractor {
+interface PinInteractor {
 
   @CheckResult
   fun hasMasterPin(): Single<Boolean>

@@ -26,6 +26,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.annotation.CheckResult
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -37,7 +38,7 @@ import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import javax.inject.Inject
 
-class PinEntryDialog : ToolbarDialog(), LockScreenInputPresenter.View {
+class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
 
   @field:Inject
   internal lateinit var presenter: LockScreenInputPresenter
@@ -81,7 +82,7 @@ class PinEntryDialog : ToolbarDialog(), LockScreenInputPresenter.View {
   }
 
   private fun pushIfNotPresent(
-    pushFragment: PinEntryBaseFragment,
+    pushFragment: PinBaseFragment,
     tag: String
   ) {
     val fragmentManager = childFragmentManager
@@ -117,12 +118,12 @@ class PinEntryDialog : ToolbarDialog(), LockScreenInputPresenter.View {
   override fun onTypePattern() {
     // Push text as child fragment
     Timber.d("Type Pattern")
-    pushIfNotPresent(PinEntryPatternFragment(), PinEntryPatternFragment.TAG)
+    pushIfNotPresent(PinPatternFragment(), PinPatternFragment.TAG)
   }
 
   override fun onTypeText() {
     Timber.d("Type Text")
-    pushIfNotPresent(PinEntryTextFragment(), PinEntryTextFragment.TAG)
+    pushIfNotPresent(PinTextFragment(), PinTextFragment.TAG)
   }
 
   private fun setupToolbar() {
@@ -134,7 +135,7 @@ class PinEntryDialog : ToolbarDialog(), LockScreenInputPresenter.View {
       // Set up icon as black
       var icon: Drawable? = pinEntryToolbar.navigationIcon
       if (icon != null) {
-        icon = icon.tintWith(ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black))
+        icon = icon.tintWith(ContextCompat.getColor(pinEntryToolbar.context, R.color.black))
         pinEntryToolbar.navigationIcon = icon
       }
 
@@ -147,7 +148,7 @@ class PinEntryDialog : ToolbarDialog(), LockScreenInputPresenter.View {
         var pinIcon: Drawable? = pinItem.icon
         if (pinIcon != null) {
           pinIcon = pinIcon.tintWith(
-              ContextCompat.getColor(pinEntryToolbar.context, android.R.color.black)
+              ContextCompat.getColor(pinEntryToolbar.context, R.color.black)
           )
           pinItem.icon = pinIcon
         }
@@ -157,10 +158,9 @@ class PinEntryDialog : ToolbarDialog(), LockScreenInputPresenter.View {
         when (it.itemId) {
           R.id.menu_submit_pin -> {
             val fragmentManager = childFragmentManager
-            val fragment: androidx.fragment.app.Fragment? = fragmentManager.findFragmentById(
-                R.id.pin_entry_dialog_container
-            )
-            if (fragment is PinEntryBaseFragment) {
+            val fragment: Fragment? =
+              fragmentManager.findFragmentById(R.id.pin_entry_dialog_container)
+            if (fragment is PinBaseFragment) {
               fragment.onSubmitPressed()
               return@setOnMenuItemClickListener true
             }
@@ -179,13 +179,13 @@ class PinEntryDialog : ToolbarDialog(), LockScreenInputPresenter.View {
 
   companion object {
 
-    const val TAG = "PinEntryDialog"
+    const val TAG = "PinDialog"
     private const val ENTRY_PACKAGE_NAME = "entry_packagename"
 
     @JvmStatic
     @CheckResult
-    fun newInstance(packageName: String): PinEntryDialog {
-      return PinEntryDialog().apply {
+    fun newInstance(packageName: String): PinDialog {
+      return PinDialog().apply {
         arguments = Bundle().apply {
           putString(ENTRY_PACKAGE_NAME, packageName)
         }

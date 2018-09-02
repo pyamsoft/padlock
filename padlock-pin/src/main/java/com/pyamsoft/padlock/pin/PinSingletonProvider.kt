@@ -16,21 +16,33 @@
 
 package com.pyamsoft.padlock.pin
 
+import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.Listener
+import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
-import io.reactivex.Observable
-import javax.inject.Inject
-import javax.inject.Singleton
+import dagger.Module
+import dagger.Provides
 
-@Singleton
-internal class CreatePinBus @Inject internal constructor() : EventBus<CreatePinEvent> {
+@Module
+object PinSingletonProvider {
 
-  private val bus: EventBus<CreatePinEvent> = RxBus.create()
+  private val clearBus = RxBus.create<ClearPinEvent>()
+  private val createBus = RxBus.create<CreatePinEvent>()
 
-  override fun listen(): Observable<CreatePinEvent> = bus.listen()
+  @JvmStatic
+  @Provides
+  internal fun provideClearPublisher(): Publisher<ClearPinEvent> = clearBus
 
-  override fun publish(event: CreatePinEvent) {
-    bus.publish(event)
-  }
+  @JvmStatic
+  @Provides
+  internal fun provideClearListener(): Listener<ClearPinEvent> = clearBus
+
+  @JvmStatic
+  @Provides
+  internal fun provideCreatePublisher(): Publisher<CreatePinEvent> = createBus
+
+  @JvmStatic
+  @Provides
+  internal fun provideCreateListener(): Listener<CreatePinEvent> = createBus
 }

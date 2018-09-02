@@ -24,6 +24,7 @@ import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
@@ -38,9 +39,9 @@ class SettingsViewModel @Inject internal constructor(
   owner: LifecycleOwner,
   private val enforcer: Enforcer,
   private val interactor: SettingsInteractor,
-  private val bus: EventBus<ConfirmEvent>,
+  private val bus: Listener<ConfirmEvent>,
   private val serviceFinishBus: Publisher<ServiceFinishEvent>,
-  private val clearPinBus: EventBus<ClearPinEvent>
+  private val clearPinBus: Listener<ClearPinEvent>
 ) : BaseViewModel(owner) {
 
   private val applicationBus = DataBus<Unit>()

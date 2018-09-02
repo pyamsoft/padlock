@@ -16,19 +16,15 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
+import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
+import dagger.Module
+import dagger.Provides
 
-abstract class PinEntryBaseFragment : ToolbarFragment() {
+@Module
+class PinModule(private val owner: LifecycleOwner) {
 
-  fun dismissParent() {
-    val fragmentManager: androidx.fragment.app.FragmentManager? = parentFragment?.fragmentManager
-    val pinFragment = fragmentManager?.findFragmentByTag(PinEntryDialog.TAG)
-    if (pinFragment is PinEntryDialog) {
-      pinFragment.dismiss()
-    } else {
-      throw ClassCastException("Fragment is not PinEntryDialog")
-    }
-  }
-
-  abstract fun onSubmitPressed()
+  @Provides
+  @CheckResult
+  fun provideOwner(): LifecycleOwner = owner
 }

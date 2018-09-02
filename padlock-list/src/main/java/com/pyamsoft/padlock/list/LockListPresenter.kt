@@ -29,6 +29,7 @@ import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -43,8 +44,8 @@ class LockListPresenter @Inject internal constructor(
   private val serviceInteractor: LockServiceInteractor,
   private val lockListBus: EventBus<LockListEvent>,
   private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
-  private val clearPinBus: EventBus<ClearPinEvent>,
-  private val createPinBus: EventBus<CreatePinEvent>,
+  private val clearPinBus: Listener<ClearPinEvent>,
+  private val createPinBus: Listener<CreatePinEvent>,
   private val listDiffProvider: ListDiffProvider<AppEntry>,
   @Named("cache_lock_list") private val cache: Cache
 ) : Presenter<LockListPresenter.View>() {

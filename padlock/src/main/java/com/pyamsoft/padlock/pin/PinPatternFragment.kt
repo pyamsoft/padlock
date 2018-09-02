@@ -24,20 +24,14 @@ import android.view.ViewGroup
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.google.android.material.snackbar.Snackbar
-import com.pyamsoft.padlock.Injector
-import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
 import com.pyamsoft.pydroid.ui.util.Snackbreak
-import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import timber.log.Timber
 import java.util.ArrayList
-import javax.inject.Inject
 
-class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
+class PinPatternFragment : PinBaseFragment() {
 
-  @field:Inject
-  internal lateinit var presenter: PinEntryPresenter
   private lateinit var binding: FragmentLockScreenPatternBinding
   private val cellPattern: MutableList<PatternLockView.Dot> = ArrayList()
   private val repeatCellPattern: MutableList<PatternLockView.Dot> = ArrayList()
@@ -48,8 +42,6 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .inject(this)
 
     if (savedInstanceState == null) {
       repeatPattern = false
@@ -65,24 +57,9 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    super.onCreateView(inflater, container, savedInstanceState)
     binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
-    return binding.root
-  }
 
-  override fun onDestroyView() {
-    super.onDestroyView()
-    if (listener != null) {
-      binding.patternLock.removePatternLockListener(listener)
-      listener = null
-    }
-    binding.unbind()
-  }
-
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
     setupLockView()
 
     listener = object : PatternLockViewListener {
@@ -131,7 +108,16 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     binding.patternLock.isTactileFeedbackEnabled = false
     binding.patternLock.addPatternLockListener(listener)
 
-    presenter.bind(viewLifecycleOwner, this)
+    return binding.root
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    if (listener != null) {
+      binding.patternLock.removePatternLockListener(listener)
+      listener = null
+    }
+    binding.unbind()
   }
 
   private fun setupLockView() {
@@ -145,10 +131,7 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     super.onSaveInstanceState(outState)
   }
 
-  override fun onStart() {
-    super.onStart()
-
-    // Pattern gets visually screwed up in multiwindow mode, clear it
+  override fun clearDisplay() {
     binding.patternLock.clearPattern()
   }
 
@@ -196,41 +179,14 @@ class PinEntryPatternFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     nextButtonOnClickRunnable()
   }
 
-  override fun onPinSubmitCreateSuccess() {
-    Timber.d("Create success")
-  }
-
-  override fun onPinSubmitCreateFailure() {
-    Timber.d("Create failure")
-  }
-
-  override fun onPinSubmitClearSuccess() {
-    Timber.d("Clear success")
-  }
-
-  override fun onPinSubmitClearFailure() {
-    Timber.d("Clear failure")
-  }
-
-  override fun onPinSubmitError(throwable: Throwable) {
-    Snackbreak.short(
-        requireActivity(), binding.root,
-        ErrorDetail("PIN submission error", throwable.localizedMessage)
-    )
-  }
-
-  override fun onPinSubmitComplete() {
-    dismissParent()
-  }
-
   private fun submitPin(repeatText: String) {
     // Hint is blank for PIN code
-    presenter.submit(patternText, repeatText, "")
+    submitPin(patternText, repeatText, "")
   }
 
   companion object {
 
-    internal const val TAG = "PinEntryPatternFragment"
+    internal const val TAG = "PinPatternFragment"
     private const val REPEAT_CELL_PATTERN = "repeat_cell_pattern"
     private const val PATTERN_TEXT = "pattern_text"
     @JvmField

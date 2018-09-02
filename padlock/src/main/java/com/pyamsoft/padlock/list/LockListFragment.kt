@@ -38,7 +38,7 @@ import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
-import com.pyamsoft.padlock.pin.PinEntryDialog
+import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
@@ -298,8 +298,8 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
           UsageAccessRequestDialog().show(requireActivity(), "usage_access")
         } else {
           val activity = requireActivity()
-          PinEntryDialog.newInstance(activity.packageName)
-              .show(activity, PinEntryDialog.TAG)
+          PinDialog.newInstance(activity.packageName)
+              .show(activity, PinDialog.TAG)
         }
       }
 

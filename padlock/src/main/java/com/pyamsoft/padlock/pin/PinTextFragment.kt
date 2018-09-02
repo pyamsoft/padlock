@@ -16,9 +16,7 @@
 
 package com.pyamsoft.padlock.pin
 
-import android.content.Context
 import android.os.Bundle
-import androidx.annotation.CheckResult
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -26,59 +24,37 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import com.pyamsoft.padlock.Injector
-import com.pyamsoft.padlock.PadLockComponent
+import androidx.annotation.CheckResult
+import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
-import com.pyamsoft.pydroid.ui.util.Snackbreak
-import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import timber.log.Timber
-import javax.inject.Inject
+import kotlin.LazyThreadSafetyMode.NONE
 
-class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
+class PinTextFragment : PinBaseFragment() {
 
-  @field:Inject
-  internal lateinit var presenter: PinEntryPresenter
-  private lateinit var imm: InputMethodManager
+  private val imm by lazy(NONE) {
+    requireNotNull(requireContext().getSystemService<InputMethodManager>())
+  }
+
   private lateinit var binding: FragmentPinEntryTextBinding
   private var pinReentryText: EditText? = null
   private var pinEntryText: EditText? = null
   private var pinHintText: EditText? = null
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .inject(this)
-  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    super.onCreateView(inflater, container, savedInstanceState)
     binding = FragmentPinEntryTextBinding.inflate(inflater, container, false)
-    return binding.root
-  }
 
-  override fun onDestroyView() {
-    super.onDestroyView()
-    activity?.let {
-      imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)
-    }
-    binding.unbind()
-  }
-
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
     // Resolve TextInputLayout edit texts
     pinEntryText = binding.pinEntryCode.editText!!
     pinReentryText = binding.pinReentryCode.editText!!
     pinHintText = binding.pinHint.editText!!
 
     // Force the keyboard
-    imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
 
     clearDisplay()
@@ -88,7 +64,15 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
       onRestoreInstanceState(savedInstanceState)
     }
 
-    presenter.bind(viewLifecycleOwner, this)
+    return binding.root
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    activity?.let {
+      imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)
+    }
+    binding.unbind()
   }
 
   private fun setupSubmissionView(view: EditText) {
@@ -109,37 +93,18 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     }
   }
 
-  override fun onPinSubmitCreateSuccess() {
-    Timber.d("Create success")
-  }
-
-  override fun onPinSubmitCreateFailure() {
-    Timber.d("Create failure")
-  }
-
-  override fun onPinSubmitClearSuccess() {
-    Timber.d("Clear success")
-  }
-
-  override fun onPinSubmitClearFailure() {
-    Timber.d("Clear failure")
-  }
-
-  override fun onPinSubmitError(throwable: Throwable) {
-    Snackbreak.short(
-        requireActivity(), binding.root,
-        ErrorDetail("PIN submission error", throwable.localizedMessage)
-    )
-  }
-
-  override fun onPinSubmitComplete() {
-    clearDisplay()
-    dismissParent()
+  /**
+   * Clear the display of all text entry fields
+   */
+  override fun clearDisplay() {
+    pinEntryText?.setText("")
+    pinReentryText?.setText("")
+    pinHintText?.setText("")
   }
 
   private fun submitPin() {
     // Hint is blank for PIN code
-    presenter.submit(getCurrentAttempt(), getCurrentReentry(), getCurrentHint())
+    submitPin(getCurrentAttempt(), getCurrentReentry(), getCurrentHint())
   }
 
   override fun onMasterPinMissing() {
@@ -197,15 +162,6 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
     super.onSaveInstanceState(outState)
   }
 
-  /**
-   * Clear the display of all text entry fields
-   */
-  private fun clearDisplay() {
-    pinEntryText?.setText("")
-    pinReentryText?.setText("")
-    pinHintText?.setText("")
-  }
-
   @CheckResult
   private fun getCurrentAttempt(): String = pinEntryText?.text?.toString() ?: ""
 
@@ -217,7 +173,7 @@ class PinEntryTextFragment : PinEntryBaseFragment(), PinEntryPresenter.View {
 
   companion object {
 
-    internal const val TAG = "PinEntryTextFragment"
+    internal const val TAG = "PinTextFragment"
     private const val CODE_DISPLAY = "CODE_DISPLAY"
     private const val CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY"
     private const val HINT_DISPLAY = "HINT_DISPLAY"

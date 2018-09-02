@@ -28,7 +28,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.model.ConfirmEvent
-import com.pyamsoft.padlock.pin.PinEntryDialog
+import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
@@ -125,8 +125,8 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     )
         .apply {
           setAction("Okay", DebouncedOnClickListener.create {
-            PinEntryDialog.newInstance(requireContext().packageName)
-                .show(requireActivity(), PinEntryDialog.TAG)
+            PinDialog.newInstance(requireContext().packageName)
+                .show(requireActivity(), PinDialog.TAG)
           })
         }
         .show()

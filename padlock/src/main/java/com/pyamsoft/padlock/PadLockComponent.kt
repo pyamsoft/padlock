@@ -39,10 +39,11 @@ import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.helper.LockModule
 import com.pyamsoft.padlock.lock.master.MasterPinModule
 import com.pyamsoft.padlock.lock.screen.LockScreenSingletonModule
-import com.pyamsoft.padlock.pin.PinEntryDialog
-import com.pyamsoft.padlock.pin.PinEntryPatternFragment
-import com.pyamsoft.padlock.pin.PinEntryTextFragment
+import com.pyamsoft.padlock.pin.PinComponent
+import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.padlock.pin.PinModule
+import com.pyamsoft.padlock.pin.PinSingletonModule
+import com.pyamsoft.padlock.pin.PinSingletonProvider
 import com.pyamsoft.padlock.purge.PurgeAllDialog
 import com.pyamsoft.padlock.purge.PurgeComponent
 import com.pyamsoft.padlock.purge.PurgeModule
@@ -65,21 +66,17 @@ import javax.inject.Singleton
 @Component(
     modules = [
       PadLockProvider::class, BaseModule::class, DatabaseProvider::class, LockModule::class,
-      PinModule::class, ServiceSingletonModule::class, PurgeSingletonModule::class,
+      PinSingletonModule::class, ServiceSingletonModule::class, PurgeSingletonModule::class,
       PurgeSingletonProvider::class, SettingsSingletonModule::class,
       LockInfoSingletonModule::class, LockInfoSingletonProvider::class, LockStateModule::class,
       LockListSingletonModule::class, LockListSingletonProvider::class,
       LockScreenSingletonModule::class, LockEntrySingletonModule::class, MasterPinModule::class,
-      SettingsSingletonProvider::class, BaseProvider::class
+      SettingsSingletonProvider::class, BaseProvider::class, PinSingletonProvider::class
     ]
 )
 interface PadLockComponent {
 
-  fun inject(fragment: PinEntryTextFragment)
-
-  fun inject(pinEntryDialog: PinEntryDialog)
-
-  fun inject(pinEntryPatternFragment: PinEntryPatternFragment)
+  fun inject(pinDialog: PinDialog)
 
   fun inject(recheckService: RecheckService)
 
@@ -118,4 +115,7 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusPurgeComponent(module: PurgeModule): PurgeComponent
+
+  @CheckResult
+  fun plusPinComponent(module: PinModule): PinComponent
 }

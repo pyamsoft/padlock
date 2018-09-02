@@ -110,8 +110,6 @@ dependencies {
   implementation project(":padlock-base")
   implementation project(":padlock-list")
   implementation project(":padlock-lock")
-  implementation project(":padlock-main")
-  implementation project(":padlock-onboard")
   implementation project(":padlock-pin")
   implementation project(":padlock-purge")
   implementation project(":padlock-service")
