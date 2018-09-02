@@ -39,8 +39,6 @@ import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.helper.LockModule
 import com.pyamsoft.padlock.lock.master.MasterPinModule
 import com.pyamsoft.padlock.lock.screen.LockScreenSingletonModule
-import com.pyamsoft.padlock.main.MainActivity
-import com.pyamsoft.padlock.main.MainModule
 import com.pyamsoft.padlock.pin.PinEntryDialog
 import com.pyamsoft.padlock.pin.PinEntryPatternFragment
 import com.pyamsoft.padlock.pin.PinEntryTextFragment
@@ -68,7 +66,7 @@ import javax.inject.Singleton
     modules = [
       PadLockProvider::class, BaseModule::class, DatabaseProvider::class, LockModule::class,
       PinModule::class, ServiceSingletonModule::class, PurgeSingletonModule::class,
-      PurgeSingletonProvider::class, MainModule::class, SettingsSingletonModule::class,
+      PurgeSingletonProvider::class, SettingsSingletonModule::class,
       LockInfoSingletonModule::class, LockInfoSingletonProvider::class, LockStateModule::class,
       LockListSingletonModule::class, LockListSingletonProvider::class,
       LockScreenSingletonModule::class, LockEntrySingletonModule::class, MasterPinModule::class,
@@ -76,8 +74,6 @@ import javax.inject.Singleton
     ]
 )
 interface PadLockComponent {
-
-  fun inject(mainActivity: MainActivity)
 
   fun inject(fragment: PinEntryTextFragment)
 

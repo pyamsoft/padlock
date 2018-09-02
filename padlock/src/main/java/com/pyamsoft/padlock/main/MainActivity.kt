@@ -23,8 +23,6 @@ import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.preference.PreferenceManager
 import com.pyamsoft.padlock.BuildConfig
-import com.pyamsoft.padlock.Injector
-import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
@@ -41,10 +39,8 @@ import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import javax.inject.Inject
 
-class MainActivity : RatingActivity(), MainPresenter.View {
+class MainActivity : RatingActivity() {
 
-  @Inject
-  internal lateinit var presenter: MainPresenter
   private lateinit var binding: ActivityMainBinding
 
   override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
@@ -77,15 +73,12 @@ class MainActivity : RatingActivity(), MainPresenter.View {
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
-    Injector.obtain<PadLockComponent>(applicationContext)
-        .inject(this)
-
     setupToolbar()
 
-    presenter.bind(this, this)
+    showDefaultPage()
   }
 
-  override fun onShowDefaultPage() {
+  private fun showDefaultPage() {
     // Set normal navigation
     val fm = supportFragmentManager
     // Un hide the action bar in case it was hidden
@@ -104,11 +97,6 @@ class MainActivity : RatingActivity(), MainPresenter.View {
     } else {
       Timber.w("Default page or About libraries was already loaded")
     }
-  }
-
-  override fun onShowOnboarding() {
-    // TODO for now this is duplicated
-    onShowDefaultPage()
   }
 
   override fun onNewIntent(intent: Intent?) {
@@ -143,7 +131,7 @@ class MainActivity : RatingActivity(), MainPresenter.View {
     val bugReport = binding.toolbar.menu.findItem(R.id.menu_item_bugreport)
     val icon = bugReport.icon
     icon.mutate()
-        ?.also {
+        .also {
           val tintedIcon = it.tintWith(this, R.color.black)
           bugReport.icon = tintedIcon
         }
