@@ -16,18 +16,20 @@
 
 package com.pyamsoft.padlock.lock
 
+import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.lockscreen.LockEntryInteractor
+import com.pyamsoft.padlock.api.lockscreen.LockHelper
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
+import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
 import com.pyamsoft.padlock.lock.passed.LockPassedImpl
-import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.padlock.lock.screen.LockScreenInteractorImpl
 import com.pyamsoft.pydroid.core.cache.Cache
 import dagger.Binds
 import dagger.Module
 import javax.inject.Named
 
 @Module
-abstract class LockEntrySingletonModule {
+abstract class LockSingletonModule {
 
   @Binds
   internal abstract fun provideInteractorCache(
@@ -36,15 +38,21 @@ abstract class LockEntrySingletonModule {
 
   @Binds
   @Named("interactor_lock_entry")
-  internal abstract fun provideInteractor(impl: LockEntryInteractorImpl): LockEntryInteractor
+  internal abstract fun provideEntryInteractor(impl: LockEntryInteractorImpl): LockEntryInteractor
 
   @Binds
   @Named("cache_lock_entry")
   internal abstract fun provideCache(impl: LockEntryInteractorCache): Cache
 
   @Binds
-  internal abstract fun provideForegroundBus(bus: ForegroundEventBus): EventBus<ForegroundEvent>
+  internal abstract fun provideLockPassed(impl: LockPassedImpl): LockPassed
 
   @Binds
-  internal abstract fun provideLockPassed(impl: LockPassedImpl): LockPassed
+  internal abstract fun provideScreenInteractor(impl: LockScreenInteractorImpl): LockScreenInteractor
+
+  @Binds
+  internal abstract fun provideLockHelper(impl: SHA256LockHelper): LockHelper
+
+  @Binds
+  internal abstract fun provideMasterPin(impl: MasterPinInteractorImpl): MasterPinInteractor
 }

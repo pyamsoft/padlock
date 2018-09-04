@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock.master
+package com.pyamsoft.padlock.lock
 
 import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.preferences.MasterPinPreferences

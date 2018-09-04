@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock.screen
+package com.pyamsoft.padlock.lock
 
+import com.pyamsoft.padlock.lock.screen.CloseOldEvent
+import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.RxBus
-import io.reactivex.Observable
-import javax.inject.Inject
-import javax.inject.Singleton
+import dagger.Module
+import dagger.Provides
 
-@Singleton
-internal class CloseOldBus @Inject internal constructor() : EventBus<CloseOldEvent> {
+@Module
+object LockSingletonProvider {
 
-  private val bus: EventBus<CloseOldEvent> = RxBus.create()
+  private val closeBus = RxBus.create<CloseOldEvent>()
 
-  override fun listen(): Observable<CloseOldEvent> = bus.listen()
-
-  override fun publish(event: CloseOldEvent) {
-    bus.publish(event)
-  }
+  @JvmStatic
+  @Provides
+  fun provideCloseBus(): EventBus<CloseOldEvent> = closeBus
 }

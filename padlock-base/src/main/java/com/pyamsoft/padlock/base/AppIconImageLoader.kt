@@ -24,6 +24,7 @@ import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
+import com.popinnow.android.repo.SingleRepo
 import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.GenericLoader
@@ -32,6 +33,7 @@ import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 
 @JvmSuppressWildcards
@@ -39,7 +41,7 @@ internal class AppIconImageLoader internal constructor(
   private val enforcer: Enforcer,
   private val packageName: String,
   private val packageIconManager: PackageIconManager,
-  private val loadScheduler: Scheduler
+  private val cache: SingleRepo<Drawable>
 ) : GenericLoader<Drawable>() {
 
   init {
@@ -51,7 +53,7 @@ internal class AppIconImageLoader internal constructor(
   override fun into(imageView: ImageView): Loaded {
     return RxLoaded(
         load(packageName)
-            .subscribeOn(loadScheduler)
+            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
               Timber.d("Loaded App icon for $packageName")
@@ -66,7 +68,10 @@ internal class AppIconImageLoader internal constructor(
   @CheckResult
   private fun load(packageName: String): Single<Drawable> = Single.defer {
     enforcer.assertNotOnMainThread()
-    return@defer packageIconManager.loadIcon(packageName)
+    return@defer cache.get(false, packageName) {
+      enforcer.assertNotOnMainThread()
+      return@get packageIconManager.loadIcon(it)
+    }
   }
 
   private data class RxLoaded(

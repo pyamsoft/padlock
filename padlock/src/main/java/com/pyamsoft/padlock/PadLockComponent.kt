@@ -34,11 +34,9 @@ import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
 import com.pyamsoft.padlock.list.info.LockInfoSingletonProvider
 import com.pyamsoft.padlock.list.modify.LockStateModule
 import com.pyamsoft.padlock.lock.LockEntryModule
-import com.pyamsoft.padlock.lock.LockEntrySingletonModule
 import com.pyamsoft.padlock.lock.LockScreenComponent
-import com.pyamsoft.padlock.lock.helper.LockModule
-import com.pyamsoft.padlock.lock.master.MasterPinModule
-import com.pyamsoft.padlock.lock.screen.LockScreenSingletonModule
+import com.pyamsoft.padlock.lock.LockSingletonModule
+import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.padlock.pin.PinModule
@@ -65,12 +63,11 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-      PadLockProvider::class, BaseModule::class, DatabaseProvider::class, LockModule::class,
+      PadLockProvider::class, BaseModule::class, DatabaseProvider::class,
       PinSingletonModule::class, ServiceSingletonModule::class, PurgeSingletonModule::class,
-      PurgeSingletonProvider::class, SettingsSingletonModule::class,
-      LockInfoSingletonModule::class, LockInfoSingletonProvider::class, LockStateModule::class,
-      LockListSingletonModule::class, LockListSingletonProvider::class,
-      LockScreenSingletonModule::class, LockEntrySingletonModule::class, MasterPinModule::class,
+      PurgeSingletonProvider::class, SettingsSingletonModule::class, LockInfoSingletonModule::class,
+      LockInfoSingletonProvider::class, LockStateModule::class, LockListSingletonModule::class,
+      LockListSingletonProvider::class, LockSingletonModule::class, LockSingletonProvider::class,
       SettingsSingletonProvider::class, BaseProvider::class, PinSingletonProvider::class
     ]
 )

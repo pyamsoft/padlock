@@ -23,7 +23,6 @@ import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.pydroid.bootstrap.about.AboutLibraries
-import com.pyamsoft.pydroid.list.PYDroidListLicenses
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
@@ -53,10 +52,6 @@ class PadLock : Application(), PYDroid.Instance {
     )
     AboutLibraries.create(
         "PatternLockView", "https://github.com/aritraroy/PatternLockView", "licenses/patternlock"
-    )
-    AboutLibraries.create(
-        PYDroidListLicenses.Names.RECYCLERVIEW, PYDroidListLicenses.HomepageUrls.RECYCLERVIEW,
-        PYDroidListLicenses.LicenseLocations.RECYCLERVIEW
     )
     PYDroid.init(this, this, BuildConfig.DEBUG)
 

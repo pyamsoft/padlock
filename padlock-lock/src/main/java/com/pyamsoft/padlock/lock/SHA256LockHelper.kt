@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock.helper
+package com.pyamsoft.padlock.lock
 
 import android.util.Base64
 import com.pyamsoft.padlock.api.lockscreen.LockHelper
@@ -45,8 +45,7 @@ internal class SHA256LockHelper @Inject internal constructor(
   override fun checkSubmissionAttempt(
     attempt: String,
     encodedPin: String
-  ): Single<Boolean> =
-    encode(attempt).map { it == encodedPin }
+  ): Single<Boolean> = encode(attempt).map { it == encodedPin }
 
   override fun encode(attempt: String): Single<String> {
     return Completable.fromAction {

@@ -18,24 +18,28 @@ package com.pyamsoft.padlock.base
 
 import android.graphics.drawable.Drawable
 import androidx.annotation.CheckResult
+import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.GenericLoader
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@JvmSuppressWildcards
 @Singleton
 class AppIconLoader @Inject internal constructor(
   private val enforcer: Enforcer,
   private val packageIconManager: PackageIconManager
 ) {
 
-  private val loadScheduler = Schedulers.from(Executors.newFixedThreadPool(4))
+  private val cache = newRepoBuilder<Drawable>()
+      .memoryCache(10, MINUTES)
+      .scheduler(Schedulers.from(Executors.newFixedThreadPool(4)))
+      .buildSingle()
 
   @CheckResult
   fun forPackageName(packageName: String): GenericLoader<Drawable> =
-    AppIconImageLoader(enforcer, packageName, packageIconManager, loadScheduler)
+    AppIconImageLoader(enforcer, packageName, packageIconManager, cache)
 }

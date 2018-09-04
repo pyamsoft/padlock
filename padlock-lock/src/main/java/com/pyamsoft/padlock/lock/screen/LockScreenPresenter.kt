@@ -20,6 +20,8 @@ import androidx.lifecycle.Lifecycle.Event.ON_PAUSE
 import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.Listener
+import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -28,7 +30,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class LockScreenPresenter @Inject internal constructor(
-  private val foregroundEventBus: EventBus<ForegroundEvent>,
+  private val foregroundEventBus: Publisher<ForegroundEvent>,
   private val bus: EventBus<CloseOldEvent>,
   private val interactor: LockScreenInteractor,
   @param:Named("package_name") private val packageName: String,
