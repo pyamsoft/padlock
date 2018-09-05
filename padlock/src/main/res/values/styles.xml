@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <style name="Theme.PadLock.Dialog" parent="@style/Theme.MaterialComponents.Light.Dialog.Alert">
+    <item name="colorPrimary">@color/blue500</item>
+    <item name="colorPrimaryDark">@color/blue700</item>
+    <item name="colorAccent">@color/blue500</item>
+
+    <item name="colorSecondary">?attr/colorPrimary</item>
+    <item name="scrimBackground">@color/shadow_scrim45</item>
+    <item name="snackbarButtonStyle">?attr/borderlessButtonStyle</item>
+
+    <item name="android:navigationBarColor">@color/blue700</item>
+  </style>
+
+</resources>

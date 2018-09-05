@@ -31,11 +31,15 @@
     <item name="snackbarButtonStyle">?attr/borderlessButtonStyle</item>
   </style>
 
-  <style name="Theme.PadLock.Dialog" parent="@style/Theme.MaterialComponents.Light.Dialog.Alert">
-    <item name="colorPrimary">@color/blue500</item>
-    <item name="colorPrimaryDark">@color/blue700</item>
-    <item name="colorAccent">@color/blue500</item>
-    <item name="android:navigationBarColor">@color/blue700</item>
+  <!-- Lock Screen Theme -->
+  <style name="Base.Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
+    <item name="android:windowBackground">@color/blue700</item>
+    <item name="colorAccent">@color/white</item>
+  </style>
+
+  <!-- Splash screen -->
+  <style name="Base.Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock.Light">
+    <item name="android:windowBackground">@drawable/splash_screen</item>
   </style>
 
   <!-- Normal App Theme -->
@@ -44,11 +48,9 @@
     <item name="android:windowBackground">@color/white</item>
   </style>
 
+
   <!-- Lock Screen Theme -->
-  <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
-    <item name="android:windowBackground">@color/blue700</item>
-    <item name="colorAccent">@color/white</item>
-  </style>
+  <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light.Lock"/>
 
   <style name="Theme.PadLock.LockScreenToolbar" parent="@style/ThemeOverlay.AppCompat.Light">
     <item name="android:colorControlActivated">@color/blue700</item>
@@ -57,8 +59,6 @@
   </style>
 
   <!-- Splash screen -->
-  <style name="Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock.Light">
-    <item name="android:windowBackground">@drawable/splash_screen</item>
-  </style>
+  <style name="Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock.Light.Splash"/>
 
 </resources>
