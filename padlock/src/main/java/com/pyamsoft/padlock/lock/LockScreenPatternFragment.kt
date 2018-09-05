@@ -17,43 +17,47 @@
 package com.pyamsoft.padlock.lock
 
 import android.os.Bundle
-import androidx.annotation.CheckResult
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.CheckResult
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
-import com.pyamsoft.padlock.Injector
-import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
-import com.pyamsoft.padlock.list.ErrorDialog
-import com.pyamsoft.pydroid.ui.util.show
-import timber.log.Timber
-import javax.inject.Inject
 
-class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.View {
+class LockScreenPatternFragment : LockScreenBaseFragment() {
 
   private lateinit var binding: FragmentLockScreenPatternBinding
-  @field:Inject
-  internal lateinit var presenter: LockEntryPresenter
   private var listener: PatternLockViewListener? = null
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusLockScreenComponent(
-            LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)
-        )
-        .inject(this)
-  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    super.onCreateView(inflater, container, savedInstanceState)
     binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
+
+    listener = object : PatternLockViewListener {
+      override fun onStarted() {
+      }
+
+      override fun onProgress(list: List<PatternLockView.Dot>) {
+      }
+
+      override fun onComplete(list: List<PatternLockView.Dot>) {
+        submitPin(cellPatternToString(list))
+        binding.patternLock.clearPattern()
+      }
+
+      override fun onCleared() {
+      }
+    }
+
+    binding.patternLock.isTactileFeedbackEnabled = false
+    binding.patternLock.addPatternLockListener(listener)
+
     return binding.root
   }
 
@@ -66,60 +70,11 @@ class LockScreenPatternFragment : LockScreenBaseFragment(), LockEntryPresenter.V
     binding.unbind()
   }
 
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
-    listener = object : PatternLockViewListener {
-      override fun onStarted() {
-      }
-
-      override fun onProgress(list: List<PatternLockView.Dot>) {
-      }
-
-      override fun onComplete(list: List<PatternLockView.Dot>) {
-        presenter.submit(lockedCode, cellPatternToString(list))
-        binding.patternLock.clearPattern()
-      }
-
-      override fun onCleared() {
-      }
-    }
-
-    binding.patternLock.isTactileFeedbackEnabled = false
-    binding.patternLock.addPatternLockListener(listener)
-
-    presenter.bind(viewLifecycleOwner, this)
+  override fun onRestoreInstanceState(savedInstanceState: Bundle) {
   }
 
-  override fun onSubmitSuccess() {
-    Timber.d("Unlocked!")
-    presenter.postUnlock(lockedCode, isLockedSystem, isExcluded, selectedIgnoreTime)
-  }
-
-  override fun onSubmitFailure() {
-    Timber.e("Failed to unlock")
-    showSnackbarWithText("Error: Invalid PIN")
-
-    // Once fail count is tripped once, continue to update it every time following until time elapses
-    presenter.lockEntry()
-  }
-
-  override fun onSubmitError(throwable: Throwable) {
-    ErrorDialog().show(requireActivity(), "lock_screen_pattern_error")
-  }
-
-  override fun onUnlockError(throwable: Throwable) {
-    ErrorDialog().show(requireActivity(), "lock_screen_pattern_error")
-  }
-
-  override fun onLocked() {
-    showSnackbarWithText("This entry is temporarily locked")
-  }
-
-  override fun onLockedError(throwable: Throwable) {
-    ErrorDialog().show(requireActivity(), "lock_screen_pattern_error")
+  override fun clearDisplay() {
+    binding.patternLock.clearPattern()
   }
 
   override fun onDisplayHint(hint: String) {

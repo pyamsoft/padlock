@@ -17,32 +17,49 @@
 package com.pyamsoft.padlock.lock
 
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.annotation.CheckResult
 import com.google.android.material.snackbar.Snackbar
+import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.helper.isChecked
+import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_ACTIVITY_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_IS_SYSTEM
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_PACKAGE_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_REAL_NAME
+import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.LOCKED
+import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.POSTED
+import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.SUBMIT_FAILURE
+import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.SUBMIT_SUCCESS
+import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
-import timber.log.Timber
+import com.pyamsoft.pydroid.ui.util.show
+import javax.inject.Inject
 
-abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(),
-    LockEntryPresenter.View {
+abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment() {
 
-  protected lateinit var lockedActivityName: String
-  protected lateinit var lockedPackageName: String
-  protected var lockedCode: String? = null
-  protected lateinit var lockedRealName: String
-  protected var isLockedSystem: Boolean = false
+  @field:Inject
+  internal lateinit var viewModel: LockViewModel
 
-  internal fun showSnackbarWithText(text: String) {
+  @field:Inject
+  internal lateinit var imageLoader: ImageLoader
+
+  private lateinit var lockedActivityName: String
+  private lateinit var lockedPackageName: String
+  private lateinit var lockedRealName: String
+  private var lockedCode: String? = null
+  private var isLockedSystem: Boolean = false
+
+  private fun showSnackbarWithText(text: String) {
     val activity = activity
     if (activity is LockScreenActivity) {
       Snackbreak.make(activity.getRootView(), text, Snackbar.LENGTH_SHORT)
@@ -50,13 +67,13 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
     }
   }
 
-  internal val isExcluded: Boolean
+  private val isExcluded: Boolean
     @CheckResult get() {
       val activity = activity
       return activity is LockScreenActivity && activity.menuExclude.isChecked()
     }
 
-  internal val selectedIgnoreTime: Long
+  private val selectedIgnoreTime: Long
     @CheckResult get() {
       val activity = activity
       return (activity as? LockScreenActivity)?.getIgnoreTimeFromSelectedIndex() ?: 0
@@ -79,14 +96,63 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
     require(lockedRealName.isNotBlank())
   }
 
-  final override fun onPostUnlocked() {
-    Timber.d("POST Unlock Finished!")
-    requireActivity().finish()
+  @CallSuper
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View? {
+    val module =
+      LockEntryModule(viewLifecycleOwner, lockedPackageName, lockedActivityName, lockedRealName)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusLockScreenComponent(module)
+        .inject(this)
+
+    viewModel.onHintDisplay { onDisplayHint(it) }
+    viewModel.onLockStageBusEvent { wrapper ->
+      wrapper.onError {
+        clearDisplay()
+        ErrorDialog().show(requireActivity(), "lock_screen_text_error")
+      }
+
+      wrapper.onSuccess {
+        when (it) {
+          SUBMIT_FAILURE -> {
+            clearDisplay()
+            showSnackbarWithText("Error: Invalid PIN")
+          }
+          SUBMIT_SUCCESS -> {
+            clearDisplay()
+          }
+          LOCKED -> {
+            clearDisplay()
+            showSnackbarWithText("This entry is temporarily locked")
+          }
+          POSTED -> {
+            clearDisplay()
+            requireActivity().finish()
+          }
+        }
+      }
+    }
+
+    // Base provides no view
+    return null
   }
 
   override fun onResume() {
     super.onResume()
     requireToolbarActivity().withToolbar { it.setUpEnabled(false) }
+  }
+
+  internal abstract fun onRestoreInstanceState(savedInstanceState: Bundle)
+
+  protected abstract fun clearDisplay()
+
+  protected abstract fun onDisplayHint(hint: String)
+
+  protected fun submitPin(currentAttempt: String) {
+    viewModel.submit(lockedCode, currentAttempt, isLockedSystem, isExcluded, selectedIgnoreTime)
   }
 
   companion object {

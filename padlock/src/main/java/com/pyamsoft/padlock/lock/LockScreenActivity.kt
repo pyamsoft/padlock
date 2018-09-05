@@ -116,7 +116,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
     preInjectOnCreate()
     Injector.obtain<PadLockComponent>(applicationContext)
         .plusLockScreenComponent(
-            LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)
+            LockEntryModule(this, lockedPackageName, lockedActivityName, lockedRealName)
         )
         .inject(this)
     postInjectOnCreate()
@@ -295,7 +295,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
     excludeEntry = savedInstanceState.getBoolean(KEY_EXCLUDE, false)
     val lockScreenText: Fragment? =
       supportFragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
-    if (lockScreenText is LockScreenTextFragment) {
+    if (lockScreenText is LockScreenBaseFragment) {
       lockScreenText.onRestoreInstanceState(savedInstanceState)
     }
     super.onRestoreInstanceState(savedInstanceState)

@@ -16,16 +16,21 @@
 
 package com.pyamsoft.padlock.lock
 
+import androidx.lifecycle.LifecycleOwner
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 
 @Module
 class LockEntryModule(
+  private val owner: LifecycleOwner,
   private val packageName: String,
   private val activityName: String,
   private val realName: String
 ) {
+
+  @Provides
+  internal fun provideOwner(): LifecycleOwner = owner
 
   @Provides
   @Named("package_name")

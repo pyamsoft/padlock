@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.lock
 
-import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -26,46 +25,39 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.Injector
-import com.pyamsoft.padlock.PadLockComponent
+import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
-import com.pyamsoft.padlock.list.ErrorDialog
-import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
-import com.pyamsoft.pydroid.ui.util.show
 import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
-import javax.inject.Inject
+import kotlin.LazyThreadSafetyMode.NONE
 
-class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View {
+class LockScreenTextFragment : LockScreenBaseFragment() {
 
-  private lateinit var imm: InputMethodManager
+  private val imm by lazy(NONE) {
+    requireNotNull(requireActivity().application.getSystemService<InputMethodManager>())
+  }
+
   private lateinit var binding: FragmentLockScreenTextBinding
   private var editText: EditText? = null
-  @Inject
-  internal lateinit var presenter: LockEntryPresenter
-  @Inject
-  internal lateinit var imageLoader: ImageLoader
 
   @CheckResult
   private fun getCurrentAttempt(): String = editText?.text?.toString() ?: ""
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusLockScreenComponent(
-            LockEntryModule(lockedPackageName, lockedActivityName, lockedRealName)
-        )
-        .inject(this)
-  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    super.onCreateView(inflater, container, savedInstanceState)
     binding = FragmentLockScreenTextBinding.inflate(inflater, container, false)
+
+    setupTextInput()
+    setupGoArrow()
+    setupInputManager()
+    clearDisplay()
+
     return binding.root
   }
 
@@ -77,23 +69,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     binding.unbind()
   }
 
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
-    setupTextInput()
-    setupGoArrow()
-    setupInputManager()
-    clearDisplay()
-
-    // Hide hint to begin with
-    binding.lockDisplayHint.visibility = View.GONE
-
-    presenter.bind(viewLifecycleOwner, this)
-  }
-
-  fun onRestoreInstanceState(savedInstanceState: Bundle) {
+  override fun onRestoreInstanceState(savedInstanceState: Bundle) {
     val attempt = savedInstanceState.getString(CODE_DISPLAY, null)
     if (attempt == null) {
       Timber.d("Empty attempt")
@@ -112,13 +88,12 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
 
   private fun setupInputManager() {
     // Force the keyboard
-    imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
   }
 
   private fun setupGoArrow() {
     binding.lockImageGo.setOnDebouncedClickListener { _ ->
-      submit()
+      submitPin(getCurrentAttempt())
       activity?.also {
         imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)
       }
@@ -154,7 +129,7 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
       } else {
         if (keyEvent.action == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
           Timber.d("KeyEvent is Enter pressed")
-          submit()
+          submitPin(getCurrentAttempt())
           return@setOnEditorActionListener true
         }
 
@@ -164,55 +139,13 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
     }
   }
 
-  private fun submit() {
-    presenter.submit(lockedCode, getCurrentAttempt())
-  }
-
-  override fun onSubmitSuccess() {
-    Timber.d("Unlocked!")
-    clearDisplay()
-
-    presenter.postUnlock(lockedCode, isLockedSystem, isExcluded, selectedIgnoreTime)
-  }
-
-  override fun onSubmitFailure() {
-    Timber.e("Failed to unlock")
-    clearDisplay()
-    showSnackbarWithText("Error: Invalid PIN")
-    binding.lockDisplayHint.visibility = View.VISIBLE
-
-    // Display the hint if they fail unlocking
-    presenter.displayLockedHint()
-
-    // Once fail count is tripped once, continue to update it every time following until time elapses
-    presenter.lockEntry()
-  }
-
-  override fun onSubmitError(throwable: Throwable) {
-    clearDisplay()
-    ErrorDialog().show(requireActivity(), "lock_screen_text_error")
-  }
-
-  override fun onUnlockError(throwable: Throwable) {
-    clearDisplay()
-    ErrorDialog().show(requireActivity(), "lock_screen_text_error")
-  }
-
-  override fun onLocked() {
-    showSnackbarWithText("This entry is temporarily locked")
-  }
-
-  override fun onLockedError(throwable: Throwable) {
-    clearDisplay()
-    ErrorDialog().show(requireActivity(), "lock_screen_text_error")
-  }
-
   override fun onDisplayHint(hint: String) {
     binding.lockDisplayHint.text = "Hint: ${if (hint.isEmpty()) "NO HINT" else hint}"
   }
 
-  private fun clearDisplay() {
+  override fun clearDisplay() {
     editText?.setText("")
+    binding.lockDisplayHint.visibility = View.VISIBLE
   }
 
   companion object {

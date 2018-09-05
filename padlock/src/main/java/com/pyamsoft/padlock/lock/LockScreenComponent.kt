@@ -23,7 +23,5 @@ interface LockScreenComponent {
 
   fun inject(activity: LockScreenActivity)
 
-  fun inject(fragment: LockScreenPatternFragment)
-
-  fun inject(fragment: LockScreenTextFragment)
+  fun inject(fragment: LockScreenBaseFragment)
 }

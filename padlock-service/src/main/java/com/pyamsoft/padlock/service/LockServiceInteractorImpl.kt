@@ -45,6 +45,7 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.SingleTransformer
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.inject.Inject
 import javax.inject.Named
@@ -134,12 +135,18 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
    * Take care to avoid any calls to logging methods as it will run every 200 ms and flood
    */
   override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
-    return Flowable.interval(LISTEN_INTERVAL, MILLISECONDS)
+    return Flowable.interval(LISTEN_INTERVAL_MILLIS, MILLISECONDS)
         .map {
           enforcer.assertNotOnMainThread()
           val now = System.currentTimeMillis()
-          val beginTime = now - (LISTEN_INTERVAL * 2)
-          return@map usageEventProvider.queryEvents(beginTime, now)
+          // Watch from a period of time before this exact millisecond
+          val beginTime = now - QUERY_SPAN_MILLIS
+
+          // End the query in the future - this will make sure that any
+          // delays caused by threading or whatnot will be handled and
+          // seems to speed up responsiveness.
+          val endTime = now + QUERY_FUTURE_OFFSET_MILLIS
+          return@map usageEventProvider.queryEvents(beginTime, endTime)
               .asOptional()
         }
         .onBackpressureDrop()
@@ -321,6 +328,8 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   }
 
   companion object {
-    private const val LISTEN_INTERVAL = 300L
+    private const val LISTEN_INTERVAL_MILLIS = 500L
+    private val QUERY_SPAN_MILLIS = TimeUnit.SECONDS.toMillis(2L)
+    private val QUERY_FUTURE_OFFSET_MILLIS = TimeUnit.SECONDS.toMillis(5L)
   }
 }
