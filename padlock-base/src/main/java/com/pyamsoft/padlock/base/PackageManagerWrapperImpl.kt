@@ -44,11 +44,9 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   context: Context,
   private val enforcer: Enforcer,
   private val listPreferences: LockListPreferences
-) : PackageActivityManager,
-    PackageApplicationManager,
-    PackageLabelManager {
+) : PackageActivityManager, PackageApplicationManager, PackageLabelManager {
 
-  private val packageManager: PackageManager = context.applicationContext.packageManager
+  private val packageManager = context.applicationContext.packageManager
 
   override fun getActivityListForPackage(packageName: String): Single<List<String>> {
     return Single.fromCallable {
