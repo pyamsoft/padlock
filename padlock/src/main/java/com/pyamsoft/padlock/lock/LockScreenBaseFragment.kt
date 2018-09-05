@@ -27,6 +27,8 @@ import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_PACKAGE_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_REAL_NAME
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
+import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
@@ -64,13 +66,17 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    arguments?.let {
-      lockedPackageName = it.getString(ENTRY_PACKAGE_NAME)
-      lockedActivityName = it.getString(ENTRY_ACTIVITY_NAME)
-      lockedRealName = it.getString(ENTRY_REAL_NAME)
+    requireArguments().let {
+      lockedPackageName = it.getString(ENTRY_PACKAGE_NAME, "")
+      lockedActivityName = it.getString(ENTRY_ACTIVITY_NAME, "")
+      lockedRealName = it.getString(ENTRY_REAL_NAME, "")
       lockedCode = it.getString(ENTRY_LOCK_CODE)
       isLockedSystem = it.getBoolean(ENTRY_IS_SYSTEM, false)
     }
+
+    require(lockedPackageName.isNotBlank())
+    require(lockedActivityName.isNotBlank())
+    require(lockedRealName.isNotBlank())
   }
 
   final override fun onPostUnlocked() {
@@ -80,7 +86,7 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
 
   override fun onResume() {
     super.onResume()
-    toolbarActivity.withToolbar { it.setUpEnabled(false) }
+    requireToolbarActivity().withToolbar { it.setUpEnabled(false) }
   }
 
   companion object {

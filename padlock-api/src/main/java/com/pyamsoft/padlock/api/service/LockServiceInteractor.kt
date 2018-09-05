@@ -53,5 +53,5 @@ interface LockServiceInteractor {
     packageName: String,
     className: String,
     forcedRecheck: RecheckStatus
-  ): Single<PadLockEntryModel>
+  ): Single<Pair<PadLockEntryModel, Int>>
 }

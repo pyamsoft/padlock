@@ -212,12 +212,28 @@ internal class LockListInteractorDb @Inject internal constructor(
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
     enforcer.assertNotOnMainThread()
-    // We should be in scheduler at this point so it is safe to block off main thread
-    val appInfo = applicationManager.getApplicationInfo(packageName)
-        .blockingGet()
-    val entryName = labelManager.loadPackageLabel(packageName)
-        .blockingGet()
+    return Single.defer {
+      enforcer.assertNotOnMainThread()
+      return@defer applicationManager.getApplicationInfo(packageName)
+    }
+        .flatMap { item ->
+          enforcer.assertNotOnMainThread()
+          return@flatMap labelManager.loadPackageLabel(packageName)
+              .map { item to it }
+        }
+        .flatMapObservable { (appInfo, entryName) ->
+          enforcer.assertNotOnMainThread()
+          return@flatMapObservable createLockListUpdate(list, packageName, appInfo, entryName)
+        }
+  }
 
+  @CheckResult
+  private fun createLockListUpdate(
+    list: List<AppEntry>,
+    packageName: String,
+    appInfo: ApplicationItem,
+    entryName: String
+  ): Observable<LockListUpdatePayload> {
     var index = 0
     for ((i, entry) in list.withIndex()) {
       // List is alphabetical, find our spot
@@ -242,6 +258,7 @@ internal class LockListInteractorDb @Inject internal constructor(
             AppEntry(
                 entryName,
                 packageName,
+                appInfo.icon,
                 appInfo.system,
                 true,
                 LinkedHashSet(),
@@ -393,9 +410,12 @@ internal class LockListInteractorDb @Inject internal constructor(
           labelManager.loadPackageLabel(item.packageName)
               .map {
                 AppEntry(
-                    name = it, packageName = item.packageName,
+                    name = it,
+                    packageName = item.packageName,
+                    icon = item.icon,
                     system = item.system,
-                    locked = tuple.locked, whitelisted = tuple.whitelist,
+                    locked = tuple.locked,
+                    whitelisted = tuple.whitelist,
                     hardLocked = tuple.hardLocked
                 )
               }

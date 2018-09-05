@@ -30,6 +30,8 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
+import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
+import com.pyamsoft.pydroid.ui.app.fragment.requireView
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
@@ -125,8 +127,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     )
         .apply {
           setAction("Okay", DebouncedOnClickListener.create {
-            PinDialog.newInstance(requireContext().packageName)
-                .show(requireActivity(), PinDialog.TAG)
+            PinDialog().show(requireActivity(), PinDialog.TAG)
           })
         }
         .show()
@@ -159,7 +160,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
 
   override fun onResume() {
     super.onResume()
-    toolbarActivity.withToolbar {
+    requireToolbarActivity().withToolbar {
       it.setTitle(R.string.app_name)
       it.setUpEnabled(false)
     }

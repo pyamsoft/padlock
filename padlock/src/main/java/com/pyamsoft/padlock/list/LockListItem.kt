@@ -28,10 +28,10 @@ import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.lifecycle.fakeBind
 import com.pyamsoft.padlock.lifecycle.fakeRelease
+import com.pyamsoft.padlock.loader.loadAppIcon
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.loader.ImageLoader
 import timber.log.Timber
@@ -76,8 +76,6 @@ class LockListItem internal constructor(
     @field:Inject
     internal lateinit var publisher: LockListItemPublisher
     @field:Inject
-    internal lateinit var appIconLoader: AppIconLoader
-    @field:Inject
     internal lateinit var imageLoader: ImageLoader
     private val lifecycle = LifecycleRegistry(this)
 
@@ -98,19 +96,19 @@ class LockListItem internal constructor(
       }
 
       if (binding.lockListWhite.isVisible) {
-        imageLoader.fromResource(R.drawable.ic_whitelisted)
+        imageLoader.load(R.drawable.ic_whitelisted)
             .into(binding.lockListWhite)
             .bind(this)
       }
 
       if (binding.lockListLocked.isVisible) {
-        imageLoader.fromResource(R.drawable.ic_hardlocked)
+        imageLoader.load(R.drawable.ic_hardlocked)
             .into(binding.lockListLocked)
             .bind(this)
       }
 
       if (binding.lockListIcon.isVisible) {
-        appIconLoader.forPackageName(model.packageName)
+        imageLoader.loadAppIcon(model.packageName, model.icon)
             .into(binding.lockListIcon)
             .bind(this)
       }

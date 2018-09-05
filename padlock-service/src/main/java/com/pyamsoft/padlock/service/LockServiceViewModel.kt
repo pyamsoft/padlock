@@ -42,7 +42,7 @@ class LockServiceViewModel @Inject internal constructor(
   private val interactor: LockServiceInteractor
 ) : BaseViewModel(owner) {
 
-  private val lockScreenBus = RxBus.create<Pair<PadLockEntryModel, String>>()
+  private val lockScreenBus = RxBus.create<Triple<PadLockEntryModel, String, Int>>()
   private var matchingDisposable by disposable()
   private var entryDisposable by disposable()
   private var foregroundDisposable by disposable()
@@ -68,12 +68,12 @@ class LockServiceViewModel @Inject internal constructor(
     }
   }
 
-  fun onLockScreen(func: (PadLockEntryModel, String) -> Unit) {
+  fun onLockScreen(func: (PadLockEntryModel, String, Int) -> Unit) {
     dispose {
       lockScreenBus.listen()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func(it.first, it.second) }
+          .subscribe { func(it.first, it.second, it.third) }
     }
 
     listenForRecheckEvent()
@@ -155,11 +155,11 @@ class LockServiceViewModel @Inject internal constructor(
     entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({
-          if (PadLockDbModels.isEmpty(it)) {
+        .subscribe({ (model, icon) ->
+          if (PadLockDbModels.isEmpty(model)) {
             Timber.w("PadLockDbEntryImpl is EMPTY, ignore")
           } else {
-            lockScreenBus.publish(it to className)
+            lockScreenBus.publish(Triple(model, className, icon))
           }
         }, {
           if (it is NoSuchElementException) {

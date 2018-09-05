@@ -32,14 +32,16 @@ import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
+import com.pyamsoft.padlock.loader.loadAppIcon
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
+import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
+import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
@@ -54,7 +56,7 @@ import javax.inject.Inject
 class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
 
   @field:Inject
-  internal lateinit var appIconLoader: AppIconLoader
+  internal lateinit var imageLoader: ImageLoader
   @field:Inject
   internal lateinit var presenter: LockInfoPresenter
   private lateinit var adapter: ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
@@ -66,14 +68,20 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
   private lateinit var listStateTag: String
   private var appIsSystem: Boolean = false
   private var lastPosition: Int = 0
+  private var appIcon: Int = 0
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments?.let {
-      appPackageName = it.getString(ARG_APP_PACKAGE_NAME, null)
-      appName = it.getString(ARG_APP_NAME, null)
+    requireArguments().also {
+      appPackageName = it.getString(ARG_APP_PACKAGE_NAME, "")
+      appName = it.getString(ARG_APP_NAME, "")
+      appIcon = it.getInt(ARG_APP_ICON, 0)
       appIsSystem = it.getBoolean(ARG_APP_SYSTEM, false)
     }
+
+    require(appPackageName.isNotBlank())
+    require(appName.isNotBlank())
+    require(appIcon != 0)
 
     listStateTag = TAG + appPackageName
 
@@ -154,7 +162,7 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
         val searchItem = menu.findItem(R.id.menu_search)
         val searchIcon = searchItem.icon
         searchIcon.mutate()
-            ?.also { icon ->
+            .also { icon ->
               val tintedIcon = icon.tintWith(requireActivity(), R.color.white)
               searchItem.icon = tintedIcon
             }
@@ -223,7 +231,7 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
 
   override fun onStart() {
     super.onStart()
-    appIconLoader.forPackageName(appPackageName)
+    imageLoader.loadAppIcon(appPackageName, appIcon)
         .into(binding.lockInfoIcon)
         .bind(viewLifecycleOwner)
   }
@@ -314,6 +322,7 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
 
     internal const val TAG = "LockInfoDialog"
     private const val ARG_APP_PACKAGE_NAME = "app_packagename"
+    private const val ARG_APP_ICON = "app_icon"
     private const val ARG_APP_NAME = "app_name"
     private const val ARG_APP_SYSTEM = "app_system"
 
@@ -324,6 +333,7 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
         arguments = Bundle().apply {
           putString(ARG_APP_PACKAGE_NAME, appEntry.packageName)
           putString(ARG_APP_NAME, appEntry.name)
+          putInt(ARG_APP_ICON, appEntry.icon)
           putBoolean(ARG_APP_SYSTEM, appEntry.system)
         }
       }

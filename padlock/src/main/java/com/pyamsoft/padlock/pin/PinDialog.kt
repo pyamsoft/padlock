@@ -24,15 +24,15 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.annotation.CheckResult
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
+import com.pyamsoft.padlock.loader.loadPadLockIcon
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
+import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
@@ -43,16 +43,11 @@ class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
   @field:Inject
   internal lateinit var presenter: LockScreenInputPresenter
   @field:Inject
-  internal lateinit var appIconLoader: AppIconLoader
+  internal lateinit var imageLoader: ImageLoader
   private lateinit var binding: DialogPinEntryBinding
-  private lateinit var packageName: String
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments!!.let {
-      packageName = it.getString(ENTRY_PACKAGE_NAME)
-          .orEmpty()
-    }
     isCancelable = true
 
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
@@ -110,7 +105,7 @@ class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
 
   override fun onStart() {
     super.onStart()
-    appIconLoader.forPackageName(packageName)
+    imageLoader.loadPadLockIcon(requireContext())
         .into(binding.pinImage)
         .bind(viewLifecycleOwner)
   }
@@ -180,16 +175,6 @@ class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
   companion object {
 
     const val TAG = "PinDialog"
-    private const val ENTRY_PACKAGE_NAME = "entry_packagename"
 
-    @JvmStatic
-    @CheckResult
-    fun newInstance(packageName: String): PinDialog {
-      return PinDialog().apply {
-        arguments = Bundle().apply {
-          putString(ENTRY_PACKAGE_NAME, packageName)
-        }
-      }
-    }
   }
 }

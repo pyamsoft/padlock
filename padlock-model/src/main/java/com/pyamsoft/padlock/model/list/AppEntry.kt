@@ -16,9 +16,12 @@
 
 package com.pyamsoft.padlock.model.list
 
+import androidx.annotation.DrawableRes
+
 data class AppEntry(
   val name: String,
   val packageName: String,
+  @DrawableRes val icon: Int,
   val system: Boolean,
   val locked: Boolean,
   val whitelisted: MutableSet<String>,

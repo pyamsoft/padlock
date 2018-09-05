@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.base
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
-import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.padlock.api.preferences.ClearPreferences
 import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
@@ -90,11 +89,6 @@ abstract class BaseModule {
   internal abstract fun providePackageApplicationManager(
     impl: PackageManagerWrapperImpl
   ): PackageApplicationManager
-
-  @Binds
-  internal abstract fun providePackageIconWrapper(
-    impl: PackageManagerWrapperImpl
-  ): PackageIconManager
 
   @Binds
   internal abstract fun provideJobSchedulerCompat(

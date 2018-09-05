@@ -17,9 +17,11 @@
 package com.pyamsoft.padlock.model
 
 import androidx.annotation.CheckResult
+import androidx.annotation.DrawableRes
 
 data class ApplicationItem(
   val packageName: String,
+  @DrawableRes val icon: Int,
   val system: Boolean,
   val enabled: Boolean
 ) {
@@ -30,14 +32,15 @@ data class ApplicationItem(
   companion object {
 
     @JvmField
-    val EMPTY = ApplicationItem("", false, false)
+    val EMPTY = ApplicationItem("", 0, false, false)
 
     @CheckResult
     @JvmStatic
     fun create(
       packageName: String,
+      @DrawableRes icon: Int,
       system: Boolean,
       enabled: Boolean
-    ): ApplicationItem = ApplicationItem(packageName, system, enabled)
+    ): ApplicationItem = ApplicationItem(packageName, icon, system, enabled)
   }
 }

@@ -18,25 +18,26 @@ package com.pyamsoft.padlock.lock
 
 import android.content.Context
 import android.content.Intent
-import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import androidx.annotation.CallSuper
-import androidx.annotation.CheckResult
-import androidx.fragment.app.Fragment
-import androidx.core.view.ViewCompat
-import androidx.preference.PreferenceManager
 import android.view.MenuItem
 import android.view.ViewGroup
+import androidx.annotation.CallSuper
+import androidx.annotation.CheckResult
+import androidx.core.view.ViewCompat
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.base.AppIconLoader
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
+import com.pyamsoft.padlock.loader.loadAppIcon
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.show
@@ -51,7 +52,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
   @field:Inject
   internal lateinit var inputPresenter: LockScreenInputPresenter
   @field:Inject
-  internal lateinit var appIconLoader: AppIconLoader
+  internal lateinit var imageLoader: ImageLoader
   private lateinit var lockedActivityName: String
   private lateinit var lockedPackageName: String
   private lateinit var binding: ActivityLockBinding
@@ -61,6 +62,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
   private var ignorePeriod: Long = -1
   private var excludeEntry: Boolean = false
   private var lockedCode: String? = null
+  private var lockedIcon: Int = 0
 
   // These can potentially be unassigned in onSaveInstanceState, mark them nullable
   private var menuIgnoreOne: MenuItem? = null
@@ -129,7 +131,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
   }
 
   private fun postInjectOnCreate() {
-    appIconLoader.forPackageName(lockedPackageName)
+    imageLoader.loadAppIcon(lockedPackageName, lockedIcon)
         .into(binding.lockImage)
         .bind(this)
     populateIgnoreTimes()
@@ -188,13 +190,19 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
   }
 
   private fun getValuesFromBundle() {
-    intent.extras.let {
+    requireNotNull(intent.extras).also {
       lockedCode = it.getString(ENTRY_LOCK_CODE)
-      lockedPackageName = it.getString(ENTRY_PACKAGE_NAME)
-      lockedActivityName = it.getString(ENTRY_ACTIVITY_NAME)
-      lockedRealName = it.getString(ENTRY_REAL_NAME)
+      lockedPackageName = it.getString(ENTRY_PACKAGE_NAME, "")
+      lockedActivityName = it.getString(ENTRY_ACTIVITY_NAME, "")
+      lockedRealName = it.getString(ENTRY_REAL_NAME, "")
+      lockedIcon = it.getInt(ENTRY_ICON, 0)
       lockedSystem = it.getBoolean(ENTRY_IS_SYSTEM, false)
     }
+
+    require(lockedPackageName.isNotBlank())
+    require(lockedActivityName.isNotBlank())
+    require(lockedRealName.isNotBlank())
+    require(lockedIcon != 0)
 
     // Reload options
     invalidateOptionsMenu()
@@ -285,7 +293,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
   override fun onRestoreInstanceState(savedInstanceState: Bundle) {
     ignorePeriod = savedInstanceState.getLong(KEY_IGNORE_TIME, -1)
     excludeEntry = savedInstanceState.getBoolean(KEY_EXCLUDE, false)
-    val lockScreenText: Fragment? = supportFragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
+    val lockScreenText: Fragment? =
+      supportFragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
     if (lockScreenText is LockScreenTextFragment) {
       lockScreenText.onRestoreInstanceState(savedInstanceState)
     }
@@ -330,11 +339,12 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
 
     private const val KEY_IGNORE_TIME = "key_ignore_time"
     private const val KEY_EXCLUDE = "key_exclude"
-    const val ENTRY_PACKAGE_NAME = "entry_packagename"
-    const val ENTRY_ACTIVITY_NAME = "entry_activityname"
-    const val ENTRY_REAL_NAME = "real_name"
-    const val ENTRY_LOCK_CODE = "lock_code"
-    const val ENTRY_IS_SYSTEM = "is_system"
+    internal const val ENTRY_PACKAGE_NAME = "entry_packagename"
+    internal const val ENTRY_ACTIVITY_NAME = "entry_activityname"
+    internal const val ENTRY_REAL_NAME = "real_name"
+    internal const val ENTRY_LOCK_CODE = "lock_code"
+    internal const val ENTRY_IS_SYSTEM = "is_system"
+    internal const val ENTRY_ICON = "icon"
 
     /**
      * Starts a LockScreenActivity instance
@@ -343,7 +353,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
     fun start(
       context: Context,
       entry: PadLockEntryModel,
-      realName: String
+      realName: String,
+      icon: Int
     ) {
       val notPadLock = (entry.packageName() != context.applicationContext.packageName)
       val intent = Intent(context.applicationContext, LockScreenActivity::class.java).apply {
@@ -352,6 +363,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode())
         putExtra(LockScreenActivity.ENTRY_IS_SYSTEM, entry.systemApplication())
         putExtra(LockScreenActivity.ENTRY_REAL_NAME, realName)
+        putExtra(LockScreenActivity.ENTRY_ICON, icon)
 
         // Launch into new task
         flags = Intent.FLAG_ACTIVITY_NEW_TASK

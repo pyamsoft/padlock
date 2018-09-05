@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.settings.SettingsFragment
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
+import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 
@@ -97,20 +98,7 @@ class MainFragment : ToolbarFragment() {
               return false
             } else {
               fragmentManager.beginTransaction()
-                  .apply {
-                    // Detach current fragment if exists
-                    if (currentFragment != null) {
-                      detach(currentFragment)
-                    }
-
-                    // Add or re-attach nextFragment
-                    val nextFragment: Fragment? = fragmentManager.findFragmentByTag(tag)
-                    if (nextFragment == null) {
-                      replace(containerId, fragment, tag)
-                    } else {
-                      attach(nextFragment)
-                    }
-                  }
+                  .replace(containerId, fragment, tag)
                   .commit()
               return true
             }
@@ -120,7 +108,7 @@ class MainFragment : ToolbarFragment() {
 
   override fun onResume() {
     super.onResume()
-    toolbarActivity.withToolbar {
+    requireToolbarActivity().withToolbar {
       it.setTitle(R.string.app_name)
       it.setUpEnabled(false)
     }

@@ -22,6 +22,7 @@ import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
+import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.api.service.ScreenStateObserver
@@ -44,7 +45,6 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.SingleTransformer
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.inject.Inject
 import javax.inject.Named
@@ -58,6 +58,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   private val lockPassed: LockPassed,
   private val jobSchedulerCompat: JobSchedulerCompat,
   private val packageActivityManager: PackageActivityManager,
+  private val packageApplicationManager: PackageApplicationManager,
   private val queryDao: EntryQueryDao,
   @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
   private val pinInteractor: MasterPinInteractor
@@ -136,10 +137,9 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     return Flowable.interval(LISTEN_INTERVAL, MILLISECONDS)
         .map {
           enforcer.assertNotOnMainThread()
-          val now: Long = System.currentTimeMillis()
-          val beginTime = now - TEN_SECONDS_MILLIS
-          val endTime = now + TEN_SECONDS_MILLIS
-          return@map usageEventProvider.queryEvents(beginTime, endTime)
+          val now = System.currentTimeMillis()
+          val beginTime = now - (LISTEN_INTERVAL * 2)
+          return@map usageEventProvider.queryEvents(beginTime, now)
               .asOptional()
         }
         .onBackpressureDrop()
@@ -283,7 +283,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     packageName: String,
     className: String,
     forcedRecheck: RecheckStatus
-  ): Single<PadLockEntryModel> {
+  ): Single<Pair<PadLockEntryModel, Int>> {
     val windowEventObservable: Single<Boolean> = serviceEnabled()
         .compose(isEventFromActivity(packageName, className))
         .doOnSuccess {
@@ -311,10 +311,16 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
             lockPassed.remove(it.packageName(), it.activityName())
           }
         }
+        // Load the application info for the valid model so we can grab the icon id
+        .flatMap { model ->
+          enforcer.assertNotOnMainThread()
+          return@flatMap packageApplicationManager.getApplicationInfo(packageName)
+              .map { it.icon }
+              .map { model to it }
+        }
   }
 
   companion object {
     private const val LISTEN_INTERVAL = 300L
-    private val TEN_SECONDS_MILLIS = TimeUnit.SECONDS.toMillis(10L)
   }
 }

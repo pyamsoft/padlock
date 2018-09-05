@@ -66,9 +66,9 @@ class PadLockService : Service(), LifecycleOwner {
     startInForeground()
     lifecycle.fakeBind()
 
-    viewModel.onLockScreen { entry, realName ->
+    viewModel.onLockScreen { entry, realName, icon ->
       // Delay by a little bit for Applications which launch a bunch of Activities in quick order.
-      LockScreenActivity.start(this, entry, realName)
+      LockScreenActivity.start(this, entry, realName, icon)
     }
 
     viewModel.onServiceFinishEvent { stopSelf() }

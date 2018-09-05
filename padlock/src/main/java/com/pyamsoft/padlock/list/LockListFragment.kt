@@ -42,6 +42,8 @@ import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
+import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
+import com.pyamsoft.pydroid.ui.app.fragment.toolbarActivity
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.hide
 import com.pyamsoft.pydroid.ui.util.refreshing
@@ -143,7 +145,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
   }
 
   private fun setupToolbarMenu() {
-    toolbarActivity.withToolbar {
+    requireToolbarActivity().withToolbar {
       it.inflateMenu(R.menu.locklist_menu)
       it.inflateMenu(R.menu.search_menu)
 
@@ -154,7 +156,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         val searchItem = findItem(R.id.menu_search)
         val searchIcon = searchItem.icon
         searchIcon.mutate()
-            ?.also { icon ->
+            .also { icon ->
               val tintedIcon = icon.tintWith(requireActivity(), R.color.black)
               searchItem.icon = tintedIcon
             }
@@ -189,7 +191,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
 
   override fun onResume() {
     super.onResume()
-    toolbarActivity.withToolbar {
+    requireToolbarActivity().withToolbar {
       it.setTitle(R.string.app_name)
       it.setUpEnabled(false)
     }
@@ -209,6 +211,16 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
     handler.removeCallbacksAndMessages(null)
     if (binding.applistFab.isVisible) {
       hideFab()
+    }
+
+    if (isRemoving) {
+      toolbarActivity?.withToolbar {
+        it.menu.apply {
+          removeGroup(R.id.menu_group_list_system)
+          removeGroup(R.id.menu_group_list_search)
+        }
+        it.setOnMenuItemClickListener(null)
+      }
     }
   }
 
@@ -281,14 +293,6 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
       unbind()
     }
     adapter.clear()
-
-    toolbarActivity.withToolbar {
-      it.menu.apply {
-        removeGroup(R.id.menu_group_list_system)
-        removeGroup(R.id.menu_group_list_search)
-      }
-      it.setOnMenuItemClickListener(null)
-    }
   }
 
   private fun setupFAB() {
@@ -297,9 +301,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         if (UsagePermissionChecker.missingUsageStatsPermission(applistFab.context)) {
           UsageAccessRequestDialog().show(requireActivity(), "usage_access")
         } else {
-          val activity = requireActivity()
-          PinDialog.newInstance(activity.packageName)
-              .show(activity, PinDialog.TAG)
+          PinDialog().show(requireActivity(), PinDialog.TAG)
         }
       }
 
@@ -370,14 +372,14 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
 
   override fun onFabIconLocked() {
     Timber.d("on FAB enabled")
-    imageLoader.fromResource(R.drawable.ic_lock_outline_24dp)
+    imageLoader.load(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
   }
 
   override fun onFabIconUnlocked() {
     Timber.d("on FAB disabled")
-    imageLoader.fromResource(R.drawable.ic_lock_open_24dp)
+    imageLoader.load(R.drawable.ic_lock_open_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
   }

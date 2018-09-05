@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.api.packagemanager
+package com.pyamsoft.padlock.loader
 
+import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.annotation.CheckResult
-import io.reactivex.Single
+import androidx.annotation.DrawableRes
+import com.pyamsoft.padlock.R
+import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.loader.Loader
 
-interface PackageIconManager {
+@CheckResult
+fun ImageLoader.loadAppIcon(packageName: String, @DrawableRes icon: Int): Loader<Drawable> {
+  return AppIconImageLoader(packageName, icon)
+}
 
-  @CheckResult
-  fun loadIcon(packageName: String): Single<Drawable>
+@CheckResult
+fun ImageLoader.loadPadLockIcon(context: Context): Loader<Drawable> {
+  return AppIconImageLoader(context.packageName, R.mipmap.ic_launcher)
 }

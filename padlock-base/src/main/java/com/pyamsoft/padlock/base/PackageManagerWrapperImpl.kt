@@ -21,11 +21,9 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
-import com.pyamsoft.padlock.api.packagemanager.PackageIconManager
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.padlock.api.preferences.LockListPreferences
 import com.pyamsoft.padlock.model.ApplicationItem
@@ -48,27 +46,9 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   private val listPreferences: LockListPreferences
 ) : PackageActivityManager,
     PackageApplicationManager,
-    PackageLabelManager,
-    PackageIconManager {
+    PackageLabelManager {
 
   private val packageManager: PackageManager = context.applicationContext.packageManager
-
-  override fun loadIcon(packageName: String): Single<Drawable> {
-    return Single.fromCallable {
-      enforcer.assertNotOnMainThread()
-      var image: Drawable
-      try {
-        // Assign
-        image = packageManager.getApplicationInfo(packageName, 0)
-            .loadIcon(packageManager)
-      } catch (e: PackageManager.NameNotFoundException) {
-        Timber.e(e, "PackageManager error")
-        // Assign
-        image = packageManager.defaultActivityIcon
-      }
-      return@fromCallable image
-    }
-  }
 
   override fun getActivityListForPackage(packageName: String): Single<List<String>> {
     return Single.fromCallable {
@@ -129,9 +109,9 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   private fun getApplicationInfo(info: ApplicationInfo?): Single<ApplicationItem> {
     return Single.fromCallable {
       enforcer.assertNotOnMainThread()
-      when (info) {
+      return@fromCallable when (info) {
         null -> ApplicationItem.EMPTY
-        else -> ApplicationItem.create(info.packageName, info.system(), info.enabled)
+        else -> ApplicationItem.create(info.packageName, info.icon, info.system(), info.enabled)
       }
     }
   }
@@ -177,7 +157,8 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
   @CheckResult
   private fun loadPackageLabel(info: ApplicationInfo): Single<String> = Single.fromCallable {
     enforcer.assertNotOnMainThread()
-    return@fromCallable info.loadLabel(packageManager).toString()
+    return@fromCallable info.loadLabel(packageManager)
+        .toString()
   }
 
   override fun isValidActivity(

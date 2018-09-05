@@ -30,6 +30,8 @@ import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
+import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
+import com.pyamsoft.pydroid.ui.app.fragment.toolbarActivity
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
@@ -126,17 +128,15 @@ class PurgeFragment : ToolbarFragment() {
       unbind()
     }
     adapter.clear()
+  }
 
-    toolbarActivity.withToolbar {
-      it.menu.apply {
-        removeGroup(R.id.menu_group_purge_all)
-      }
-      it.setOnMenuItemClickListener(null)
-    }
+  override fun onStart() {
+    super.onStart()
+    viewModel.fetch(false)
   }
 
   private fun setupToolbarMenu() {
-    toolbarActivity.withToolbar { toolbar ->
+    requireToolbarActivity().withToolbar { toolbar ->
       toolbar.inflateMenu(R.menu.purge_old_menu)
 
       toolbar.setOnMenuItemClickListener {
@@ -168,6 +168,15 @@ class PurgeFragment : ToolbarFragment() {
     super.onPause()
     lastPosition = ListStateUtil.getCurrentPosition(binding.purgeList)
     ListStateUtil.saveState(TAG, null, binding.purgeList)
+
+    if (isRemoving) {
+      toolbarActivity?.withToolbar {
+        it.menu.apply {
+          removeGroup(R.id.menu_group_purge_all)
+        }
+        it.setOnMenuItemClickListener(null)
+      }
+    }
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -179,7 +188,7 @@ class PurgeFragment : ToolbarFragment() {
 
   override fun onResume() {
     super.onResume()
-    toolbarActivity.withToolbar {
+    requireToolbarActivity().withToolbar {
       it.setTitle(R.string.app_name)
       it.setUpEnabled(false)
     }

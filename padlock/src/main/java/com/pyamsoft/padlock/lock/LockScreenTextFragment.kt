@@ -18,7 +18,6 @@ package com.pyamsoft.padlock.lock
 
 import android.content.Context
 import android.os.Bundle
-import androidx.annotation.CheckResult
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +25,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -34,6 +34,7 @@ import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.show
+import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -116,9 +117,9 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
   }
 
   private fun setupGoArrow() {
-    binding.lockImageGo.setOnDebouncedClickListener {
+    binding.lockImageGo.setOnDebouncedClickListener { _ ->
       submit()
-      activity?.let {
+      activity?.also {
         imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)
       }
     }
@@ -135,8 +136,11 @@ class LockScreenTextFragment : LockScreenBaseFragment(), LockEntryPresenter.View
       }
     }
 
-    imageLoader.fromResource(R.drawable.ic_arrow_forward_24dp)
-        .tint(R.color.white)
+    imageLoader.load(R.drawable.ic_arrow_forward_24dp)
+        .mutate {
+          it.tintWith(requireActivity(), R.color.white)
+          return@mutate it
+        }
         .into(binding.lockImageGo)
         .bind(viewLifecycleOwner)
   }
