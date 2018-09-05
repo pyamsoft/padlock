@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.loader
 
+import android.content.ContentResolver
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
@@ -40,7 +41,7 @@ internal class AppIconImageLoader internal constructor(
   }
 
   override fun createRequest(request: RequestManager): RequestBuilder<Drawable> {
-    return request.load("android.resource://$packageName/$icon".toUri())
+    return request.load("${ContentResolver.SCHEME_ANDROID_RESOURCE}://$packageName/$icon".toUri())
   }
 
   override fun mutateResource(resource: Drawable): Drawable {
