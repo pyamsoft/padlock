@@ -18,7 +18,7 @@
 
 <resources>
 
-  <style name="Base.Theme.PadLock.Light" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
+  <style name="Base.Theme.PadLock" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/blue500</item>
@@ -32,22 +32,23 @@
   </style>
 
   <!-- Lock Screen Theme -->
-  <style name="Base.Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
+  <style name="Base.Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock">
     <item name="android:windowBackground">@color/blue700</item>
     <item name="colorAccent">@color/white</item>
   </style>
 
   <!-- Splash screen -->
-  <style name="Base.Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock.Light">
+  <style name="Base.Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock">
     <item name="android:windowBackground">@drawable/splash_screen</item>
   </style>
 
   <!-- Normal App Theme -->
-  <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light">
+  <style name="Base.Theme.PadLock.Light" parent="@style/Base.Theme.PadLock">
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     <item name="android:windowBackground">@color/white</item>
   </style>
 
+  <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light"/>
 
   <!-- Lock Screen Theme -->
   <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light.Lock"/>
