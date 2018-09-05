@@ -329,7 +329,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   companion object {
     private const val LISTEN_INTERVAL_MILLIS = 400L
-    private val QUERY_SPAN_MILLIS = TimeUnit.SECONDS.toMillis(3L)
-    private val QUERY_FUTURE_OFFSET_MILLIS = TimeUnit.SECONDS.toMillis(7L)
+    private val QUERY_SPAN_MILLIS = TimeUnit.SECONDS.toMillis(5L)
+    private val QUERY_FUTURE_OFFSET_MILLIS = TimeUnit.SECONDS.toMillis(5L)
   }
 }
