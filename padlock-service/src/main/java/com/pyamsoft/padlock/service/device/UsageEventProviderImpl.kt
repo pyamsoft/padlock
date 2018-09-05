@@ -19,17 +19,21 @@ package com.pyamsoft.padlock.service.device
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
+import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.ForegroundEvent
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.LazyThreadSafetyMode.NONE
 
 @Singleton
 internal class UsageEventProviderImpl @Inject internal constructor(
   context: Context
 ) : UsageEventProvider {
 
-  private val usage = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+  private val usage by lazy(NONE) {
+    requireNotNull(context.getSystemService<UsageStatsManager>())
+  }
 
   override fun queryEvents(
     begin: Long,
@@ -60,5 +64,6 @@ internal class UsageEventProviderImpl @Inject internal constructor(
       }
     }
   }
+}
 }
 
