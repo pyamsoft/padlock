@@ -65,5 +65,4 @@ internal class UsageEventProviderImpl @Inject internal constructor(
     }
   }
 }
-}
 
