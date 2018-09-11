@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.CheckResult
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.google.android.material.snackbar.Snackbar
@@ -191,5 +192,15 @@ class PinPatternFragment : PinBaseFragment() {
     private const val PATTERN_TEXT = "pattern_text"
     @JvmField
     internal var MINIMUM_PATTERN_LENGTH = 4
+
+    @CheckResult
+    @JvmStatic
+    fun newInstance(checkOnly: Boolean): PinPatternFragment {
+      return PinPatternFragment().apply {
+        arguments = Bundle().apply {
+          putBoolean(PinDialog.CHECK_ONLY, checkOnly)
+        }
+      }
+    }
   }
 }

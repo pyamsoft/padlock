@@ -61,7 +61,7 @@ class LockListPresenter @Inject internal constructor(
     registerOnClearBus()
     registerOnModifyBus()
     registerOnWhitelistedBus()
-    updateFabIcon()
+    watchFabState()
   }
 
   override fun onStart() {
@@ -172,21 +172,25 @@ class LockListPresenter @Inject internal constructor(
     }
   }
 
-  private fun updateFabIcon() {
+  fun checkFabState(manually: Boolean) {
     dispose {
       serviceInteractor.isServiceEnabled()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(Consumer {
             when (it) {
-              ENABLED -> view?.onFabIconLocked()
-              DISABLED -> view?.onFabIconUnlocked()
-              PAUSED -> view?.onFabIconPaused()
-              PERMISSION -> view?.onFabIconPermissionDenied()
+              ENABLED -> view?.onFabIconLocked(manually)
+              DISABLED -> view?.onFabIconUnlocked(manually)
+              PAUSED -> view?.onFabIconPaused(manually)
+              PERMISSION -> view?.onFabIconPermissionDenied(manually)
               else -> error("Enum ServiceState is null")
             }
           })
     }
+  }
+
+  private fun watchFabState() {
+    checkFabState(false)
 
     dispose {
       serviceInteractor.observeServiceState()
@@ -194,10 +198,10 @@ class LockListPresenter @Inject internal constructor(
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe {
             when (it) {
-              ENABLED -> view?.onFabIconLocked()
-              DISABLED -> view?.onFabIconUnlocked()
-              PAUSED -> view?.onFabIconPaused()
-              PERMISSION -> view?.onFabIconPermissionDenied()
+              ENABLED -> view?.onFabIconLocked(false)
+              DISABLED -> view?.onFabIconUnlocked(false)
+              PAUSED -> view?.onFabIconPaused(false)
+              PERMISSION -> view?.onFabIconPermissionDenied(false)
               else -> error("Enum ServiceState is null")
             }
           }
@@ -276,13 +280,13 @@ class LockListPresenter @Inject internal constructor(
 
   interface FabIconStateCallback {
 
-    fun onFabIconLocked()
+    fun onFabIconLocked(manually: Boolean)
 
-    fun onFabIconUnlocked()
+    fun onFabIconUnlocked(manually: Boolean)
 
-    fun onFabIconPermissionDenied()
+    fun onFabIconPermissionDenied(manually: Boolean)
 
-    fun onFabIconPaused()
+    fun onFabIconPaused(manually: Boolean)
   }
 
   interface SystemVisibilityChangeCallback {

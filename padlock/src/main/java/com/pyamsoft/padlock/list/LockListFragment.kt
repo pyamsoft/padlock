@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -39,6 +40,7 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.PinDialog
+import com.pyamsoft.padlock.service.ResumeService
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
@@ -297,11 +299,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
   private fun setupFAB() {
     binding.apply {
       applistFab.setOnDebouncedClickListener {
-        if (UsagePermissionChecker.hasPermission(applistFab.context)) {
-          PinDialog().show(requireActivity(), PinDialog.TAG)
-        } else {
-          UsageAccessRequestDialog().show(requireActivity(), "usage_access")
-        }
+        presenter.checkFabState(true)
       }
 
       // Attach the FAB to callbacks on the recycler scroll
@@ -367,44 +365,59 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         .show()
   }
 
-  override fun onFabIconLocked() {
-    Timber.d("on FAB enabled")
+  override fun onFabIconLocked(manually: Boolean) {
+    if (manually) {
+      if (UsagePermissionChecker.hasPermission(requireContext())) {
+        PinDialog.newInstance(false)
+            .show(requireActivity(), PinDialog.TAG)
+      }
+      return
+    }
 
-    // TODO: Need to clear drawable first for some reason?
-    binding.applistFab.setImageDrawable(null)
+    Timber.d("on FAB enabled")
 
     imageLoader.load(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
   }
 
-  override fun onFabIconUnlocked() {
-    Timber.d("on FAB disabled")
+  override fun onFabIconUnlocked(manually: Boolean) {
+    if (manually) {
+      if (UsagePermissionChecker.hasPermission(requireContext())) {
+        PinDialog.newInstance(false)
+            .show(requireActivity(), PinDialog.TAG)
+      }
+      return
+    }
 
-    // TODO: Need to clear drawable first for some reason?
-    binding.applistFab.setImageDrawable(null)
+    Timber.d("on FAB disabled")
 
     imageLoader.load(R.drawable.ic_lock_open_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
   }
 
-  override fun onFabIconPermissionDenied() {
-    Timber.d("on FAB permission denied")
+  override fun onFabIconPermissionDenied(manually: Boolean) {
+    if (manually) {
+      UsageAccessRequestDialog().show(requireActivity(), "usage_access")
+      return
+    }
 
-    // TODO: Need to clear drawable first for some reason?
-    binding.applistFab.setImageDrawable(null)
+    Timber.d("on FAB permission denied")
 
     imageLoader.load(R.drawable.ic_warning_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
   }
 
-  override fun onFabIconPaused() {
-    Timber.d("on FAB paused")
+  override fun onFabIconPaused(manually: Boolean) {
+    if (manually) {
+      val appContext = requireContext().applicationContext
+      appContext.startService(Intent(appContext, ResumeService::class.java))
+      return
+    }
 
-    // TODO: Need to clear drawable first for some reason?
-    binding.applistFab.setImageDrawable(null)
+    Timber.d("on FAB paused")
 
     imageLoader.load(R.drawable.ic_pause_24dp)
         .into(binding.applistFab)

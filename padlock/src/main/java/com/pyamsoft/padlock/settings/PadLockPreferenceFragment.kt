@@ -127,7 +127,8 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     )
         .apply {
           setAction("Okay", DebouncedOnClickListener.create {
-            PinDialog().show(requireActivity(), PinDialog.TAG)
+            PinDialog.newInstance(false)
+                .show(requireActivity(), PinDialog.TAG)
           })
         }
         .show()

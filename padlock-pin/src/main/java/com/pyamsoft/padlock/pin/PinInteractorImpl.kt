@@ -61,6 +61,16 @@ internal class PinInteractorImpl @Inject internal constructor(
     }
   }
 
+  override fun comparePin(attempt: String): Single<Boolean> {
+    return getMasterPin().flatMap {
+      if (it is Present) {
+        return@flatMap lockHelper.checkSubmissionAttempt(attempt, it.value)
+      } else {
+        return@flatMap Single.just(false)
+      }
+    }
+  }
+
   @CheckResult
   private fun clearPin(
     masterPin: String,

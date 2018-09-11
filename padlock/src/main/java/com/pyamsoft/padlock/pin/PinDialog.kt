@@ -24,6 +24,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.annotation.CheckResult
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.Injector
@@ -34,6 +35,7 @@ import com.pyamsoft.padlock.loader.loadPadLockIcon
 import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
+import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import javax.inject.Inject
@@ -46,9 +48,12 @@ class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
   internal lateinit var imageLoader: ImageLoader
   private lateinit var binding: DialogPinEntryBinding
 
+  private var checkOnly: Boolean = false
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     isCancelable = true
+    checkOnly = requireArguments().getBoolean(CHECK_ONLY, false)
 
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
@@ -113,12 +118,12 @@ class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
   override fun onTypePattern() {
     // Push text as child fragment
     Timber.d("Type Pattern")
-    pushIfNotPresent(PinPatternFragment(), PinPatternFragment.TAG)
+    pushIfNotPresent(PinPatternFragment.newInstance(checkOnly), PinPatternFragment.TAG)
   }
 
   override fun onTypeText() {
     Timber.d("Type Text")
-    pushIfNotPresent(PinTextFragment(), PinTextFragment.TAG)
+    pushIfNotPresent(PinTextFragment.newInstance(checkOnly), PinTextFragment.TAG)
   }
 
   private fun setupToolbar() {
@@ -175,6 +180,16 @@ class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
   companion object {
 
     const val TAG = "PinDialog"
+    internal const val CHECK_ONLY = "check_only"
 
+    @JvmStatic
+    @CheckResult
+    fun newInstance(checkOnly: Boolean): PinDialog {
+      return PinDialog().apply {
+        arguments = Bundle().apply {
+          putBoolean(CHECK_ONLY, checkOnly)
+        }
+      }
+    }
   }
 }

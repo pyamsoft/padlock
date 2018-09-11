@@ -26,6 +26,9 @@ interface PinInteractor {
   fun hasMasterPin(): Single<Boolean>
 
   @CheckResult
+  fun comparePin(attempt: String): Single<Boolean>
+
+  @CheckResult
   fun submitPin(
     currentAttempt: String,
     reEntryAttempt: String,

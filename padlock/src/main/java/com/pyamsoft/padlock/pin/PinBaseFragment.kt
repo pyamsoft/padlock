@@ -22,9 +22,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.fragment.app.FragmentManager
+import com.google.android.material.snackbar.Snackbar
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
+import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.ui.app.fragment.requireView
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
@@ -32,8 +34,15 @@ import javax.inject.Inject
 
 abstract class PinBaseFragment : ToolbarFragment() {
 
+  private var checkOnly: Boolean = false
+
   @field:Inject
   internal lateinit var viewModel: PinViewModel
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    checkOnly = requireArguments().getBoolean(PinDialog.CHECK_ONLY, false)
+  }
 
   @CallSuper
   override fun onCreateView(
@@ -61,6 +70,16 @@ abstract class PinBaseFragment : ToolbarFragment() {
     viewModel.onMasterPinSubmitted {
       clearDisplay()
       dismissParent()
+    }
+
+    viewModel.onMasterPinCheckEvent {
+      if (it) {
+        // check succeeds
+        dismissParent()
+      } else {
+        Snackbar.make(requireView(), "Invalid PIN", Snackbar.LENGTH_SHORT)
+            .show()
+      }
     }
 
     // Base provides no view
@@ -92,7 +111,11 @@ abstract class PinBaseFragment : ToolbarFragment() {
     reEntry: String,
     hint: String
   ) {
-    viewModel.submit(pin, reEntry, hint)
+    if (checkOnly) {
+      viewModel.checkPin(pin)
+    } else {
+      viewModel.submit(pin, reEntry, hint)
+    }
   }
 
   abstract fun onSubmitPressed()

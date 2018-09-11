@@ -24,6 +24,7 @@ import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.padlock.model.pin.PinEntryEvent
 import com.pyamsoft.padlock.model.pin.PinEntryEvent.Clear
 import com.pyamsoft.padlock.model.pin.PinEntryEvent.Create
+import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import com.pyamsoft.pydroid.core.viewmodel.DataBus
@@ -40,11 +41,13 @@ class PinViewModel @Inject internal constructor(
   owner: LifecycleOwner,
   private val interactor: PinInteractor,
   private val createPinBus: Publisher<CreatePinEvent>,
-  private val clearPinBus: Publisher<ClearPinEvent>
+  private val clearPinBus: Publisher<ClearPinEvent>,
+  private val checkPinBus: EventBus<CheckPinEvent>
 ) : BaseViewModel(owner) {
 
   private var masterPinDisposable by disposable()
   private var pinEntryDisposable by disposable()
+
   private val masterPinPresentBus = DataBus<Boolean>()
   private val pinEntryBus = DataBus<PinEntryEvent>()
 
@@ -136,6 +139,26 @@ class PinViewModel @Inject internal constructor(
         }, {
           Timber.e(it, "Pin entry submission error")
           pinEntryBus.publishError(it)
+        })
+  }
+
+  fun onMasterPinCheckEvent(func: (Boolean) -> Unit) {
+    dispose {
+      checkPinBus.listen()
+          .map { it.matching }
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(func)
+    }
+  }
+
+  fun checkPin(attempt: String) {
+    pinEntryDisposable = interactor.comparePin(attempt)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe({ checkPinBus.publish(CheckPinEvent(it)) }, {
+          Timber.e(it, "Error checking pin and attempt")
+          checkPinBus.publish(CheckPinEvent(false))
         })
   }
 }

@@ -177,5 +177,15 @@ class PinTextFragment : PinBaseFragment() {
     private const val CODE_DISPLAY = "CODE_DISPLAY"
     private const val CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY"
     private const val HINT_DISPLAY = "HINT_DISPLAY"
+
+    @CheckResult
+    @JvmStatic
+    fun newInstance(checkOnly: Boolean): PinTextFragment {
+      return PinTextFragment().apply {
+        arguments = Bundle().apply {
+          putBoolean(PinDialog.CHECK_ONLY, checkOnly)
+        }
+      }
+    }
   }
 }
