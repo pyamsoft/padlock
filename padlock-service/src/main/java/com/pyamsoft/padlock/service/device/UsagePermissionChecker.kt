@@ -23,33 +23,33 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.CheckResult
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 
 object UsagePermissionChecker {
 
   @JvmStatic
   @CheckResult
-  fun missingUsageStatsPermission(context: Context): Boolean {
-    val appOpsService: AppOpsManager = context.getSystemService(
-        Context.APP_OPS_SERVICE
-    ) as AppOpsManager
-    val mode: Int = appOpsService.checkOpNoThrow(
+  fun hasPermission(context: Context): Boolean {
+    val appContext = context.applicationContext
+    val appOpsService = requireNotNull(appContext.getSystemService<AppOpsManager>())
+    val mode = appOpsService.checkOpNoThrow(
         AppOpsManager.OPSTR_GET_USAGE_STATS,
-        android.os.Process.myUid(), context.packageName
+        android.os.Process.myUid(), appContext.packageName
     )
-    val missingPermission: Boolean
+    val hasPermission: Boolean
     if (mode == AppOpsManager.MODE_DEFAULT) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         // On some Marshmallow phones, the default return code means the permission may be controlled by the PM
-        missingPermission = (ContextCompat.checkSelfPermission(
-            context, Manifest.permission.PACKAGE_USAGE_STATS
-        ) != PackageManager.PERMISSION_GRANTED)
+        val usagePermission =
+          ContextCompat.checkSelfPermission(appContext, Manifest.permission.PACKAGE_USAGE_STATS)
+        hasPermission = (usagePermission == PackageManager.PERMISSION_GRANTED)
       } else {
         // Otherwise, we listen to app ops manager
-        missingPermission = true
+        hasPermission = false
       }
     } else {
-      missingPermission = (mode != AppOpsManager.MODE_ALLOWED)
+      hasPermission = (mode == AppOpsManager.MODE_ALLOWED)
     }
-    return missingPermission
+    return hasPermission
   }
 }

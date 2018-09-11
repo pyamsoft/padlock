@@ -119,7 +119,6 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
         if (adapter.adapterItemCount > 0) {
           showRecycler()
           Timber.d("Refresh finished")
-          presenter.showOnBoarding()
 
           lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
         } else {
@@ -287,14 +286,6 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
     )
         .setAction("Retry") { presenter.populateList(true) }
         .show()
-  }
-
-  override fun onOnboardingComplete() {
-    Timber.d("Show onboarding")
-  }
-
-  override fun onShowOnboarding() {
-    Timber.d("Onboarding complete")
   }
 
   override fun onModifyEntryError(throwable: Throwable) {

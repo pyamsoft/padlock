@@ -17,6 +17,7 @@
 package com.pyamsoft.padlock.api.service
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.api.preferences.PreferenceWatcher
 import com.pyamsoft.padlock.model.ForegroundEvent
 
 interface UsageEventProvider {
@@ -26,6 +27,9 @@ interface UsageEventProvider {
     begin: Long,
     end: Long
   ): EventQueryResult
+
+  @CheckResult
+  fun watchPermission(func: (Boolean) -> Unit): PreferenceWatcher
 
   interface EventQueryResult {
 

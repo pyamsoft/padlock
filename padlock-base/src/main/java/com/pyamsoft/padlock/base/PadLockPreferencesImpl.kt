@@ -17,6 +17,8 @@
 package com.pyamsoft.padlock.base
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.pyamsoft.padlock.api.preferences.ClearPreferences
@@ -24,8 +26,10 @@ import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.padlock.api.preferences.LockListPreferences
 import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
-import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
+import com.pyamsoft.padlock.api.preferences.PreferenceWatcher
+import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.model.LockScreenType
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,15 +41,17 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     InstallListenerPreferences,
     LockListPreferences,
     LockScreenPreferences,
-    OnboardingPreferences {
+    ServicePreferences {
 
   private val preferences by lazy { PreferenceManager.getDefaultSharedPreferences(context) }
+
   private val ignoreTimeKey: String
-  private val ignoreTimeDefault: String
   private val timeoutTimeKey: String
-  private val timeoutTimeDefault: String
   private val installListener: String
   private val lockScreenType: String
+
+  private val ignoreTimeDefault: String
+  private val timeoutTimeDefault: String
   private val lockScreenTypeDefault: String
   private val installListenerDefault: Boolean
 
@@ -81,8 +87,6 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     }
   }
 
-  override fun isInfoDialogOnBoard(): Boolean = preferences.getBoolean(LOCK_DIALOG_ONBOARD, false)
-
   override fun getDefaultIgnoreTime(): Long =
     preferences.getString(ignoreTimeKey, ignoreTimeDefault).orEmpty().toLong()
 
@@ -111,25 +115,25 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     }
   }
 
-  override fun hasAgreed(): Boolean = preferences.getBoolean(AGREED, false)
+  override fun isPaused(): Boolean {
+    return preferences.getBoolean(PAUSED, false)
+  }
 
-  override fun setAgreed() {
+  override fun setPaused(paused: Boolean) {
     preferences.edit {
-      putBoolean(AGREED, true)
+      putBoolean(PAUSED, paused)
     }
   }
 
-  override fun isListOnBoard(): Boolean = preferences.getBoolean(LOCK_LIST_ONBOARD, false)
-
-  override fun setListOnBoard() {
-    preferences.edit {
-      putBoolean(LOCK_LIST_ONBOARD, true)
+  override fun watchPausedState(func: (Boolean) -> Unit): PreferenceWatcher {
+    return KeyedPreferenceWatcher(preferences, PAUSED) {
+      func(isPaused())
     }
   }
 
-  override fun setInfoDialogOnBoard() {
-    preferences.edit {
-      putBoolean(LOCK_DIALOG_ONBOARD, true)
+  override fun watchPinPresence(func: (Boolean) -> Unit): PreferenceWatcher {
+    return KeyedPreferenceWatcher(preferences, MASTER_PASSWORD) {
+      func(!getMasterPassword().isNullOrEmpty())
     }
   }
 
@@ -145,13 +149,34 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     }
   }
 
+  private class KeyedPreferenceWatcher internal constructor(
+    private val preferences: SharedPreferences,
+    private val key: String,
+    func: () -> Unit
+  ) : PreferenceWatcher {
+
+    private val callback = OnSharedPreferenceChangeListener { _, preference ->
+      if (key == preference) {
+        func()
+      }
+    }
+
+    init {
+      preferences.registerOnSharedPreferenceChangeListener(callback)
+    }
+
+    override fun stopWatching() {
+      Timber.d("Stop watching preference: $key")
+      preferences.unregisterOnSharedPreferenceChangeListener(callback)
+    }
+
+  }
+
   companion object {
 
     private const val IS_SYSTEM = "is_system"
     private const val MASTER_PASSWORD = "master_password"
     private const val HINT = "hint"
-    private const val AGREED = "agreed"
-    private const val LOCK_LIST_ONBOARD = "list_onboard"
-    private const val LOCK_DIALOG_ONBOARD = "dialog_onboard"
+    private const val PAUSED = "paused"
   }
 }

@@ -32,9 +32,6 @@ interface LockInfoInteractor : LockStateModifyInteractor {
   ): Observable<LockInfoUpdatePayload>
 
   @CheckResult
-  fun hasShownOnBoarding(): Single<Boolean>
-
-  @CheckResult
   fun fetchActivityEntryList(
     bypass: Boolean,
     packageName: String

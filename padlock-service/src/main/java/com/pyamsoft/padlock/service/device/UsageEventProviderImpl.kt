@@ -16,10 +16,13 @@
 
 package com.pyamsoft.padlock.service.device
 
+import android.app.AppOpsManager
+import android.app.AppOpsManager.OnOpChangedListener
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import androidx.core.content.getSystemService
+import com.pyamsoft.padlock.api.preferences.PreferenceWatcher
 import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.ForegroundEvent
 import javax.inject.Inject
@@ -28,7 +31,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 @Singleton
 internal class UsageEventProviderImpl @Inject internal constructor(
-  context: Context
+  private val context: Context
 ) : UsageEventProvider {
 
   private val usage by lazy(NONE) {
@@ -39,6 +42,37 @@ internal class UsageEventProviderImpl @Inject internal constructor(
     begin: Long,
     end: Long
   ): UsageEventProvider.EventQueryResult = EventQueryResultImpl(usage.queryEvents(begin, end))
+
+  override fun watchPermission(func: (Boolean) -> Unit): PreferenceWatcher {
+    return AppUsagePreferenceWatcher(context, func)
+  }
+
+  private class AppUsagePreferenceWatcher internal constructor(
+    context: Context,
+    func: (Boolean) -> Unit
+  ) : PreferenceWatcher {
+
+    private val appOps = requireNotNull(context.getSystemService<AppOpsManager>())
+    private val callback = OnOpChangedListener { op, packageName ->
+      if (op == AppOpsManager.OPSTR_GET_USAGE_STATS) {
+        if (packageName == context.packageName) {
+          func(UsagePermissionChecker.hasPermission(context))
+        }
+      }
+    }
+
+    init {
+      // TODO: Causes memory leaks because stopWatchingMode leaks the callback
+      // appOps.startWatchingMode(AppOpsManager.OPSTR_GET_USAGE_STATS, context.packageName, callback)
+    }
+
+    override fun stopWatching() {
+      // TODO: Causes memory leaks because stopWatchingMode leaks the callback
+      // Timber.d("Stop watching Usage Permission")
+      // appOps.stopWatchingMode(callback)
+    }
+
+  }
 
   private data class EventQueryResultImpl(private val events: UsageEvents) : UsageEventProvider.EventQueryResult {
 

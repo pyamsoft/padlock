@@ -112,7 +112,6 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         if (adapter.adapterItemCount > 0) {
           showRecycler()
           Timber.d("We have refreshed")
-          presenter.showOnBoarding()
 
           lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
         } else {
@@ -298,10 +297,10 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
   private fun setupFAB() {
     binding.apply {
       applistFab.setOnDebouncedClickListener {
-        if (UsagePermissionChecker.missingUsageStatsPermission(applistFab.context)) {
-          UsageAccessRequestDialog().show(requireActivity(), "usage_access")
-        } else {
+        if (UsagePermissionChecker.hasPermission(applistFab.context)) {
           PinDialog().show(requireActivity(), PinDialog.TAG)
+        } else {
+          UsageAccessRequestDialog().show(requireActivity(), "usage_access")
         }
       }
 
@@ -325,7 +324,6 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinCreateSuccess() {
-    onFabIconLocked()
     val v = view
     if (v != null) {
       Snackbreak.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT)
@@ -343,7 +341,6 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
   }
 
   override fun onMasterPinClearSuccess() {
-    onFabIconUnlocked()
     val v = view
     if (v != null) {
       Snackbreak.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT)
@@ -372,6 +369,10 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
 
   override fun onFabIconLocked() {
     Timber.d("on FAB enabled")
+
+    // TODO: Need to clear drawable first for some reason?
+    binding.applistFab.setImageDrawable(null)
+
     imageLoader.load(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
@@ -379,21 +380,39 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
 
   override fun onFabIconUnlocked() {
     Timber.d("on FAB disabled")
+
+    // TODO: Need to clear drawable first for some reason?
+    binding.applistFab.setImageDrawable(null)
+
     imageLoader.load(R.drawable.ic_lock_open_24dp)
+        .into(binding.applistFab)
+        .bind(viewLifecycleOwner)
+  }
+
+  override fun onFabIconPermissionDenied() {
+    Timber.d("on FAB permission denied")
+
+    // TODO: Need to clear drawable first for some reason?
+    binding.applistFab.setImageDrawable(null)
+
+    imageLoader.load(R.drawable.ic_warning_24dp)
+        .into(binding.applistFab)
+        .bind(viewLifecycleOwner)
+  }
+
+  override fun onFabIconPaused() {
+    Timber.d("on FAB paused")
+
+    // TODO: Need to clear drawable first for some reason?
+    binding.applistFab.setImageDrawable(null)
+
+    imageLoader.load(R.drawable.ic_pause_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
   }
 
   override fun onSystemVisibilityChanged(visible: Boolean) {
     displaySystemItem?.isChecked = visible
-  }
-
-  override fun onOnboardingComplete() {
-    Timber.d("Onboarding complete")
-  }
-
-  override fun onShowOnboarding() {
-    Timber.d("Show onboarding")
   }
 
   override fun onListPopulateBegin() {

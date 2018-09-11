@@ -18,20 +18,13 @@ package com.pyamsoft.padlock.api.preferences
 
 import androidx.annotation.CheckResult
 
-interface OnboardingPreferences {
+interface ServicePreferences {
 
   @CheckResult
-  fun hasAgreed(): Boolean
+  fun isPaused(): Boolean
 
-  fun setAgreed()
-
-  @CheckResult
-  fun isListOnBoard(): Boolean
-
-  fun setListOnBoard()
+  fun setPaused(paused: Boolean)
 
   @CheckResult
-  fun isInfoDialogOnBoard(): Boolean
-
-  fun setInfoDialogOnBoard()
+  fun watchPausedState(func: (Boolean) -> Unit): PreferenceWatcher
 }

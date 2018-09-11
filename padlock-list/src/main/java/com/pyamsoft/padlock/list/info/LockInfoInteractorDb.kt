@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockStateModifyInteractor
 import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
-import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
@@ -41,7 +40,6 @@ import io.reactivex.Single
 import io.reactivex.observables.GroupedObservable
 import timber.log.Timber
 import java.util.ArrayList
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,17 +48,8 @@ internal class LockInfoInteractorDb @Inject internal constructor(
   private val enforcer: Enforcer,
   private val queryDao: EntryQueryDao,
   private val packageActivityManager: PackageActivityManager,
-  private val preferences: OnboardingPreferences,
   private val modifyInteractor: LockStateModifyInteractor
 ) : LockInfoInteractor {
-
-  override fun hasShownOnBoarding(): Single<Boolean> {
-    return Single.fromCallable {
-      enforcer.assertNotOnMainThread()
-      return@fromCallable preferences.isInfoDialogOnBoard()
-    }
-        .delay(300, TimeUnit.MILLISECONDS)
-  }
 
   @CheckResult
   private fun getLockedActivityEntries(

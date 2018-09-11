@@ -23,6 +23,7 @@ import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.preference.PreferenceManager
 import com.pyamsoft.padlock.BuildConfig
+import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
@@ -150,6 +151,6 @@ class MainActivity : RatingActivity() {
     binding.toolbar.animateMenu()
 
     // Try to start service, will not if we do not have permission
-    PadLockService.start(this)
+    PadLock.startService(this)
   }
 }

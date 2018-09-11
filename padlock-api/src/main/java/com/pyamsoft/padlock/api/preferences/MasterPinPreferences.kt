@@ -33,4 +33,7 @@ interface MasterPinPreferences {
   fun setMasterPassword(pw: String)
 
   fun clearMasterPassword()
+
+  @CheckResult
+  fun watchPinPresence(func: (Boolean) -> Unit): PreferenceWatcher
 }

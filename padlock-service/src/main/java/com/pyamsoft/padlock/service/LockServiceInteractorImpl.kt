@@ -17,14 +17,21 @@
 package com.pyamsoft.padlock.service
 
 import android.app.IntentService
+import android.content.Context
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
+import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
+import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.DISABLED
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.ENABLED
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PAUSED
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
 import com.pyamsoft.padlock.api.service.ScreenStateObserver
 import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
@@ -33,6 +40,7 @@ import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.service.RecheckStatus
 import com.pyamsoft.padlock.model.service.RecheckStatus.FORCE
+import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional
@@ -54,6 +62,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LockServiceInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
+  private val context: Context,
   private val screenStateObserver: ScreenStateObserver,
   private val usageEventProvider: UsageEventProvider,
   private val lockPassed: LockPassed,
@@ -62,7 +71,8 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   private val packageApplicationManager: PackageApplicationManager,
   private val queryDao: EntryQueryDao,
   @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
-  private val pinInteractor: MasterPinInteractor
+  private val pinPreferences: MasterPinPreferences,
+  private val servicePreferences: ServicePreferences
 ) : LockServiceInteractor {
 
   private var activePackageName = ""
@@ -86,11 +96,65 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     lastForegroundEvent = ForegroundEvent.EMPTY
   }
 
-  override fun isServiceEnabled(): Single<Boolean> = pinInteractor.getMasterPin()
-      .map {
-        enforcer.assertNotOnMainThread()
-        return@map it is Present
+  override fun pauseService(paused: Boolean) {
+    servicePreferences.setPaused(paused)
+  }
+
+  @CheckResult
+  private fun decideServiceEnabledState(): ServiceState {
+    if (servicePreferences.isPaused()) {
+      Timber.d("Service is paused")
+      return PAUSED
+    } else if (UsagePermissionChecker.hasPermission(context)) {
+      if (pinPreferences.getMasterPassword().isNullOrEmpty()) {
+        Timber.d("Service is disabled")
+        return DISABLED
+      } else {
+        Timber.d("Service is enabled")
+        return ENABLED
       }
+    } else {
+      Timber.d("Service lacks permission")
+      return PERMISSION
+    }
+  }
+
+  override fun observeServiceState(): Observable<ServiceState> {
+    return Observable.defer<ServiceState> {
+      enforcer.assertNotOnMainThread()
+      return@defer Observable.create { emitter ->
+        val usageWatcher = usageEventProvider.watchPermission {
+          Timber.d("Usage permission changed")
+          emit(emitter, decideServiceEnabledState())
+        }
+
+        val pausedState = servicePreferences.watchPausedState {
+          Timber.d("Paused changed")
+          emit(emitter, decideServiceEnabledState())
+        }
+
+        val masterPinPresence = pinPreferences.watchPinPresence {
+          Timber.d("Pin presence changed")
+          emit(emitter, decideServiceEnabledState())
+        }
+
+        emitter.setCancellable {
+          usageWatcher.stopWatching()
+          pausedState.stopWatching()
+          masterPinPresence.stopWatching()
+        }
+
+        enforcer.assertNotOnMainThread()
+      }
+    }
+  }
+
+  override fun isServiceEnabled(): Single<ServiceState> {
+    return Single.fromCallable {
+      enforcer.assertNotOnMainThread()
+      return@fromCallable decideServiceEnabledState()
+    }
+  }
 
   override fun clearMatchingForegroundEvent(event: ForegroundEvent) {
     Timber.d("Received foreground event: $event")
@@ -106,33 +170,39 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     activePackageName = ""
   }
 
-  private fun emit(
-    emitter: ObservableEmitter<Boolean>,
-    screenOn: Boolean
+  private fun <T : Any> emit(
+    emitter: ObservableEmitter<T>,
+    value: T
   ) {
     if (!emitter.isDisposed) {
-      emitter.onNext(screenOn)
+      emitter.onNext(value)
     }
   }
 
   override fun observeScreenState(): Observable<Boolean> {
-    return Observable.create { emitter ->
-      emitter.setCancellable {
-        screenStateObserver.unregister()
-      }
+    return Observable.defer<Boolean> {
+      enforcer.assertNotOnMainThread()
+      return@defer Observable.create { emitter ->
+        emitter.setCancellable {
+          screenStateObserver.unregister()
+        }
 
-      // Observe screen state changes
-      screenStateObserver.register {
-        emit(emitter, it)
-      }
+        // Observe screen state changes
+        screenStateObserver.register {
+          emit(emitter, it)
+        }
 
-      // Start with screen as ON
-      emit(emitter, true)
+        // Start with screen as ON
+        enforcer.assertNotOnMainThread()
+        emit(emitter, true)
+      }
     }
   }
 
   /**
    * Take care to avoid any calls to logging methods as it will run every 200 ms and flood
+   *
+   * TODO this should watch an event bus where interval checks usage permission on interval
    */
   override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
     return Flowable.interval(LISTEN_INTERVAL_MILLIS, MILLISECONDS)
@@ -148,6 +218,10 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
           val endTime = now + QUERY_FUTURE_OFFSET_MILLIS
           return@map usageEventProvider.queryEvents(beginTime, endTime)
               .asOptional()
+        }
+        .onErrorReturn {
+          Timber.e(it, "Error while querying usage events")
+          return@onErrorReturn Optional.ofNullable(null)
         }
         .onBackpressureDrop()
         .map {
@@ -168,6 +242,10 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
         .filter { !Excludes.isClassExcluded(it.className) }
         .filter { it != lastForegroundEvent }
         .doOnNext { lastForegroundEvent = it }
+        .onErrorReturn {
+          Timber.e(it, "Error listening to foreground events")
+          return@onErrorReturn ForegroundEvent.EMPTY
+        }
   }
 
   override fun ifActiveMatching(
@@ -248,6 +326,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     return Maybe.defer {
       enforcer.assertNotOnMainThread()
       return@defer isServiceEnabled()
+          .map { it == ENABLED }
           .filter {
             enforcer.assertNotOnMainThread()
             if (!it) {
@@ -324,6 +403,10 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
           return@flatMap packageApplicationManager.getApplicationInfo(packageName)
               .map { it.icon }
               .map { model to it }
+        }
+        .onErrorReturn {
+          Timber.e(it, "Error getting padlock entry")
+          return@onErrorReturn PadLockDbModels.EMPTY to 0
         }
   }
 

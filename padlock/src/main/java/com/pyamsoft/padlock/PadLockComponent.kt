@@ -19,6 +19,8 @@ package com.pyamsoft.padlock
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
+import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
+import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.base.BaseModule
 import com.pyamsoft.padlock.base.BaseProvider
 import com.pyamsoft.padlock.base.database.DatabaseProvider
@@ -87,14 +89,6 @@ interface PadLockComponent {
 
   fun inject(viewHolder: LockListItem.ViewHolder)
 
-  // To be used directly by PadLockSingleInitProvider
-  @CheckResult
-  fun provideInstallListenerPreferences(): InstallListenerPreferences
-
-  // To be used directly by PadLockSingleInitProvider
-  @CheckResult
-  fun provideApplicationInstallReceiver(): ApplicationInstallReceiver
-
   @CheckResult
   fun plusLockListComponent(module: LockListProvider): ListListComponent
 
@@ -115,4 +109,17 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusPinComponent(module: PinModule): PinComponent
+
+  // To be used directly by PadLock
+  @CheckResult
+  fun provideInstallListenerPreferences(): InstallListenerPreferences
+
+  @CheckResult
+  fun provideServicePreferences() : ServicePreferences
+
+  @CheckResult
+  fun provideMasterPinPreferences() : MasterPinPreferences
+
+  @CheckResult
+  fun provideApplicationInstallReceiver(): ApplicationInstallReceiver
 }

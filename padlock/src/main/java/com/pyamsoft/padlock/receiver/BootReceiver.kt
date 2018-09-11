@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.service.PadLockService
 import timber.log.Timber
 
@@ -32,7 +33,7 @@ class BootReceiver : BroadcastReceiver() {
       if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
         if (context != null) {
           Timber.d("Boot event received, start PadLockService")
-          PadLockService.start(context)
+          PadLock.startService(context)
         }
       }
     }

@@ -29,10 +29,10 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
-import com.pyamsoft.padlock.lifecycle.fakeBind
-import com.pyamsoft.padlock.lifecycle.fakeRelease
 import com.pyamsoft.padlock.loader.loadAppIcon
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.pydroid.core.lifecycle.fakeBind
+import com.pyamsoft.pydroid.core.lifecycle.fakeUnbind
 import com.pyamsoft.pydroid.loader.ImageLoader
 import timber.log.Timber
 import javax.inject.Inject
@@ -129,7 +129,7 @@ class LockListItem internal constructor(
         lockListLocked.setImageDrawable(null)
         lockListToggle.setOnCheckedChangeListener(null)
       }
-      lifecycle.fakeRelease()
+      lifecycle.fakeUnbind()
     }
 
   }

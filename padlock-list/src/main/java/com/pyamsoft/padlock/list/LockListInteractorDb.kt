@@ -24,7 +24,6 @@ import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.padlock.api.preferences.LockListPreferences
-import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
 import com.pyamsoft.padlock.model.ApplicationItem
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.db.AllEntriesModel
@@ -51,7 +50,6 @@ internal class LockListInteractorDb @Inject internal constructor(
   private val applicationManager: PackageApplicationManager,
   private val labelManager: PackageLabelManager,
   private val activityManager: PackageActivityManager,
-  private val onboardingPreferences: OnboardingPreferences,
   private val modifyInteractor: LockStateModifyInteractor,
   private val preferences: LockListPreferences
 ) : LockListInteractor {
@@ -451,12 +449,6 @@ internal class LockListInteractorDb @Inject internal constructor(
     enforcer.assertNotOnMainThread()
     return@defer queryDao.queryAll()
   }
-
-  override fun hasShownOnBoarding(): Single<Boolean> =
-    Single.fromCallable {
-      enforcer.assertNotOnMainThread()
-      return@fromCallable onboardingPreferences.isListOnBoard()
-    }
 
   override fun modifyEntry(
     oldLockState: LockState,

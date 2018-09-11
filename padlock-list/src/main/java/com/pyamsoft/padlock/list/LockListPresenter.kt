@@ -19,6 +19,10 @@ package com.pyamsoft.padlock.list
 import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.DISABLED
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.ENABLED
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PAUSED
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.LockState.DEFAULT
 import com.pyamsoft.padlock.model.LockState.LOCKED
@@ -33,6 +37,7 @@ import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
@@ -56,6 +61,7 @@ class LockListPresenter @Inject internal constructor(
     registerOnClearBus()
     registerOnModifyBus()
     registerOnWhitelistedBus()
+    updateFabIcon()
   }
 
   override fun onStart() {
@@ -63,7 +69,6 @@ class LockListPresenter @Inject internal constructor(
     populateList(false)
     subscribeToDatabaseChanges()
     setSystemVisibilityFromPreference()
-    updateFabIcon()
   }
 
   private fun subscribeToDatabaseChanges() {
@@ -168,17 +173,34 @@ class LockListPresenter @Inject internal constructor(
   }
 
   private fun updateFabIcon() {
-    dispose(ON_STOP) {
+    dispose {
       serviceInteractor.isServiceEnabled()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({
-            if (it) {
-              view?.onFabIconLocked()
-            } else {
-              view?.onFabIconUnlocked()
+          .subscribe(Consumer {
+            when (it) {
+              ENABLED -> view?.onFabIconLocked()
+              DISABLED -> view?.onFabIconUnlocked()
+              PAUSED -> view?.onFabIconPaused()
+              PERMISSION -> view?.onFabIconPermissionDenied()
+              else -> error("Enum ServiceState is null")
             }
-          }, { Timber.e(it, "onError") })
+          })
+    }
+
+    dispose {
+      serviceInteractor.observeServiceState()
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe {
+            when (it) {
+              ENABLED -> view?.onFabIconLocked()
+              DISABLED -> view?.onFabIconUnlocked()
+              PAUSED -> view?.onFabIconPaused()
+              PERMISSION -> view?.onFabIconPermissionDenied()
+              else -> error("Enum ServiceState is null")
+            }
+          }
     }
   }
 
@@ -196,21 +218,6 @@ class LockListPresenter @Inject internal constructor(
   fun setSystemVisibility(visible: Boolean) {
     lockListInteractor.setSystemVisible(visible)
     view?.onSystemVisibilityChanged(visible)
-  }
-
-  fun showOnBoarding() {
-    dispose {
-      lockListInteractor.hasShownOnBoarding()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({
-            if (it) {
-              view?.onOnboardingComplete()
-            } else {
-              view?.onShowOnboarding()
-            }
-          }, { Timber.e(it, "onError") })
-    }
   }
 
   fun populateList(force: Boolean) {
@@ -235,7 +242,7 @@ class LockListPresenter @Inject internal constructor(
   }
 
   interface View : LockModifyCallback, MasterPinCreateCallback, MasterPinClearCallback,
-      FabIconStateCallback, SystemVisibilityChangeCallback, OnboardingCallback,
+      FabIconStateCallback, SystemVisibilityChangeCallback,
       ListPopulateCallback, ChangeCallback
 
   interface ChangeCallback {
@@ -272,18 +279,15 @@ class LockListPresenter @Inject internal constructor(
     fun onFabIconLocked()
 
     fun onFabIconUnlocked()
+
+    fun onFabIconPermissionDenied()
+
+    fun onFabIconPaused()
   }
 
   interface SystemVisibilityChangeCallback {
 
     fun onSystemVisibilityChanged(visible: Boolean)
-  }
-
-  interface OnboardingCallback {
-
-    fun onOnboardingComplete()
-
-    fun onShowOnboarding()
   }
 
   interface ListPopulateCallback {

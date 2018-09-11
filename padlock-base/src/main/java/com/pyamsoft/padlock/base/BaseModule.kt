@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.padlock.api.preferences.LockListPreferences
 import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
-import com.pyamsoft.padlock.api.preferences.OnboardingPreferences
+import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
@@ -71,9 +71,9 @@ abstract class BaseModule {
   ): LockScreenPreferences
 
   @Binds
-  internal abstract fun provideOnboardingPreferences(
+  internal abstract fun provideServicePreferences(
     impl: PadLockPreferencesImpl
-  ): OnboardingPreferences
+  ): ServicePreferences
 
   @Binds
   internal abstract fun providePackageActivityManager(

@@ -115,22 +115,7 @@ class LockInfoPresenter @Inject internal constructor(
     }
   }
 
-  fun showOnBoarding() {
-    dispose {
-      interactor.hasShownOnBoarding()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({
-            if (it) {
-              view?.onOnboardingComplete()
-            } else {
-              view?.onShowOnboarding()
-            }
-          }, { Timber.e(it, "onError") })
-    }
-  }
-
-  interface View : LockModifyCallback, ListPopulateCallback, OnboardingCallback, ChangeCallback
+  interface View : LockModifyCallback, ListPopulateCallback, ChangeCallback
 
   interface ChangeCallback {
 
@@ -156,12 +141,5 @@ class LockInfoPresenter @Inject internal constructor(
     fun onListPopulateError(throwable: Throwable)
 
     fun onListPopulated()
-  }
-
-  interface OnboardingCallback {
-
-    fun onOnboardingComplete()
-
-    fun onShowOnboarding()
   }
 }

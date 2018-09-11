@@ -31,8 +31,13 @@ interface LockServiceInteractor {
 
   fun cleanup()
 
+  fun pauseService(paused: Boolean)
+
   @CheckResult
-  fun isServiceEnabled(): Single<Boolean>
+  fun isServiceEnabled(): Single<ServiceState>
+
+  @CheckResult
+  fun observeServiceState(): Observable<ServiceState>
 
   fun clearMatchingForegroundEvent(event: ForegroundEvent)
 
@@ -54,4 +59,11 @@ interface LockServiceInteractor {
     className: String,
     forcedRecheck: RecheckStatus
   ): Single<Pair<PadLockEntryModel, Int>>
+
+  enum class ServiceState {
+    PAUSED,
+    PERMISSION,
+    DISABLED,
+    ENABLED
+  }
 }

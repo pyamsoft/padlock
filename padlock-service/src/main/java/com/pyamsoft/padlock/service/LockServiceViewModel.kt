@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.service
 
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.ENABLED
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
@@ -66,6 +67,15 @@ class LockServiceViewModel @Inject internal constructor(
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe { func() }
     }
+
+    dispose {
+      interactor.observeServiceState()
+          .filter { it != ENABLED }
+          .map { Unit }
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe { func() }
+    }
   }
 
   fun onLockScreen(func: (PadLockEntryModel, String, Int) -> Unit) {
@@ -78,6 +88,10 @@ class LockServiceViewModel @Inject internal constructor(
 
     listenForRecheckEvent()
     listenForForegroundEvent()
+  }
+
+  fun setServicePaused(paused: Boolean) {
+    interactor.pauseService(paused)
   }
 
   private fun listenForRecheckEvent() {
@@ -132,10 +146,6 @@ class LockServiceViewModel @Inject internal constructor(
     foregroundDisposable = interactor.listenForForegroundEvents()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .onErrorReturn {
-          Timber.e(it, "Error while listening to foreground events")
-          return@onErrorReturn ForegroundEvent.EMPTY
-        }
         .doOnCancel { Timber.d("Cancelling foreground listener") }
         .doAfterTerminate { serviceFinishBus.publish(ServiceFinishEvent) }
         .subscribe({

@@ -18,10 +18,15 @@ package com.pyamsoft.padlock
 
 import android.app.Application
 import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockService
+import com.pyamsoft.padlock.service.PauseService
 import com.pyamsoft.padlock.service.RecheckService
+import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.bootstrap.about.AboutLibraries
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
@@ -64,8 +69,9 @@ class PadLock : Application(), PYDroid.Instance {
       receiver.unregister()
     }
 
-    PadLockService.start(this)
+    PadLock.startService(this)
   }
+
 
   override fun getPydroid(): PYDroid? = pyDroid
 
@@ -107,5 +113,27 @@ class PadLock : Application(), PYDroid.Instance {
         throw IllegalStateException("Application is not PadLock")
       }
     }
+
+    @JvmStatic
+    fun startService(context: Context) {
+      val appContext = context.applicationContext
+      if (appContext is PadLock) {
+        val masterPinPreferences = appContext.component.provideMasterPinPreferences()
+        val servicePreferences = appContext.component.provideServicePreferences()
+
+        if (servicePreferences.isPaused()) {
+          val service = Intent(appContext, PauseService::class.java)
+          appContext.startService(service)
+        } else if (UsagePermissionChecker.hasPermission(appContext) && !masterPinPreferences.getMasterPassword().isNullOrEmpty()) {
+          val service = Intent(appContext, PadLockService::class.java)
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            appContext.startForegroundService(service)
+          } else {
+            appContext.startService(service)
+          }
+        }
+      }
+    }
+
   }
 }

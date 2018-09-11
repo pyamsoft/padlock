@@ -32,9 +32,6 @@ interface LockListInteractor : LockStateModifyInteractor {
   fun subscribeForUpdates(provider: ListDiffProvider<AppEntry>): Observable<LockListUpdatePayload>
 
   @CheckResult
-  fun hasShownOnBoarding(): Single<Boolean>
-
-  @CheckResult
   fun isSystemVisible(): Single<Boolean>
 
   fun setSystemVisible(visible: Boolean)

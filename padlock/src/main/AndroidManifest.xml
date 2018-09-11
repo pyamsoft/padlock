@@ -83,6 +83,14 @@
         android:name=".service.RecheckService"
         android:exported="false"/>
 
+    <service
+        android:name=".service.PauseService"
+        android:exported="false"/>
+
+    <service
+        android:name=".service.ResumeService"
+        android:exported="false"/>
+
     <!-- Receive boot completed, only active when PadLockService is on -->
     <receiver
         android:name=".receiver.BootReceiver"

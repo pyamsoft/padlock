@@ -56,8 +56,6 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     repoLockInfo.clearAll()
   }
 
-  override fun hasShownOnBoarding(): Single<Boolean> = db.hasShownOnBoarding()
-
   override fun subscribeForUpdates(
     packageName: String,
     provider: ListDiffProvider<ActivityEntry>

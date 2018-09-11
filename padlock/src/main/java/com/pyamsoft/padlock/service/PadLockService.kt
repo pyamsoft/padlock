@@ -35,10 +35,10 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.lifecycle.fakeBind
-import com.pyamsoft.padlock.lifecycle.fakeRelease
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.main.MainActivity
+import com.pyamsoft.pydroid.core.lifecycle.fakeBind
+import com.pyamsoft.pydroid.core.lifecycle.fakeUnbind
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
@@ -63,8 +63,9 @@ class PadLockService : Service(), LifecycleOwner {
     Injector.obtain<PadLockComponent>(applicationContext)
         .plusServiceComponent(ServiceModule(this))
         .inject(this)
-    startInForeground()
     lifecycle.fakeBind()
+
+    startInForeground()
 
     viewModel.onLockScreen { entry, realName, icon ->
       // Delay by a little bit for Applications which launch a bunch of Activities in quick order.
@@ -72,13 +73,14 @@ class PadLockService : Service(), LifecycleOwner {
     }
 
     viewModel.onServiceFinishEvent { stopSelf() }
+
   }
 
   override fun onDestroy() {
     super.onDestroy()
     stopForeground(true)
     notificationManager.cancel(NOTIFICATION_ID)
-    lifecycle.fakeRelease()
+    lifecycle.fakeUnbind()
     PadLock.getRefWatcher(this)
         .watch(this)
   }
@@ -100,8 +102,12 @@ class PadLockService : Service(), LifecycleOwner {
     val launchMain = Intent(applicationContext, MainActivity::class.java).apply {
       flags = Intent.FLAG_ACTIVITY_NEW_TASK
     }
-
     val pe = PendingIntent.getActivity(applicationContext, NOTIFICATION_RC, launchMain, 0)
+
+    val pauseService = Intent(applicationContext, PauseService::class.java)
+    val pausePending =
+      PendingIntent.getService(applicationContext, NOTIFICATION_RC, pauseService, 0)
+
     val builder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
         .apply {
           setContentIntent(pe)
@@ -114,7 +120,10 @@ class PadLockService : Service(), LifecycleOwner {
           setContentText("PadLock Service is running")
           color = ContextCompat.getColor(applicationContext, R.color.blue500)
           priority = NotificationCompat.PRIORITY_MIN
+          addAction(R.drawable.ic_padlock_notification, "Pause", pausePending)
         }
+
+    notificationManager.cancel(PauseService.PAUSED_ID)
     startForeground(NOTIFICATION_ID, builder.build())
   }
 
@@ -145,7 +154,7 @@ class PadLockService : Service(), LifecycleOwner {
 
   companion object {
 
-    private const val NOTIFICATION_ID = 1001
+    const val NOTIFICATION_ID = 1001
     private const val NOTIFICATION_RC = 1004
     private const val OLD_CHANNEL_ID = "padlock_foreground"
     private const val NOTIFICATION_CHANNEL_ID = "padlock_foreground_v1"
@@ -159,6 +168,13 @@ class PadLockService : Service(), LifecycleOwner {
       } else {
         appContext.startService(service)
       }
+    }
+
+    @JvmStatic
+    fun stop(context: Context) {
+      val appContext = context.applicationContext
+      val service = Intent(appContext, PadLockService::class.java)
+      appContext.stopService(service)
     }
   }
 }
