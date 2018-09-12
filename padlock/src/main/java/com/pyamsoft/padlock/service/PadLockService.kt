@@ -157,7 +157,7 @@ class PadLockService : Service(), LifecycleOwner {
 
     var text = ""
     if (autoResume) {
-      text = "Auto-Resume in $TEMP_PAUSE_AMOUNT minutes.\n"
+      text = "Auto-Resume in $TEMP_PAUSE_AMOUNT minutes. "
     }
 
     text += "Tap to Resume."
