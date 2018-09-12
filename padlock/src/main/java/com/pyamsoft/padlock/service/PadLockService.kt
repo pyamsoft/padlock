@@ -33,15 +33,18 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.service.ServiceManager.Commands
 import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
 import com.pyamsoft.padlock.service.ServiceManager.Commands.STOP
+import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
 import com.pyamsoft.pydroid.core.lifecycle.fakeBind
 import com.pyamsoft.pydroid.core.lifecycle.fakeUnbind
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -58,6 +61,8 @@ class PadLockService : Service(), LifecycleOwner {
   internal lateinit var viewModel: LockServiceViewModel
   @field:Inject
   internal lateinit var serviceManager: ServiceManager
+  @field:Inject
+  internal lateinit var jobSchedulerCompat: JobSchedulerCompat
 
   override fun getLifecycle(): Lifecycle = lifecycle
 
@@ -110,34 +115,59 @@ class PadLockService : Service(), LifecycleOwner {
 
     when (command) {
       START -> serviceStart()
-      PAUSE -> servicePause()
+      PAUSE -> servicePause(false)
       STOP -> serviceStop()
+      TEMP_PAUSE -> serviceTempPause()
     }
     return Service.START_STICKY
   }
 
   private fun serviceStart() {
     viewModel.setServicePaused(false)
+    // Cancel old notifications
     notificationManager.cancel(PAUSED_ID)
     notificationManager.cancel(PERMISSION_ID)
+
+    // Cancel temporary intent
+    jobSchedulerCompat.cancel(serviceManager.startIntent())
     startForeground(NOTIFICATION_ID, notificationBuilder.build())
   }
 
-  private fun servicePause() {
+  private fun serviceTempPause() {
+    // Queue the service to restart after timeout via alarm manager
+    jobSchedulerCompat.queue(serviceManager.startIntent(), TIME_TEMP_PAUSE)
+
+    servicePause(true)
+  }
+
+  private fun servicePause(autoResume: Boolean) {
     viewModel.setServicePaused(true)
+
+    // Stop the service here
     serviceStop()
 
+    // But also create a paused notification
+    createPausedNotification(autoResume)
+  }
+
+  private fun createPausedNotification(autoResume: Boolean) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       setupPausedChannel()
     }
 
+    var text = ""
+    if (autoResume) {
+      text = "Auto-Resume in $TEMP_PAUSE_AMOUNT minutes.\n"
+    }
+
+    text += "Tap to Resume."
     val pausedNotificationBuilder = NotificationCompat.Builder(this, PAUSED_CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_padlock_notification)
         .setColor(ContextCompat.getColor(applicationContext, R.color.blue500))
         .setAutoCancel(true)
         .setPriority(NotificationCompat.PRIORITY_LOW)
         .setContentTitle("PadLock paused")
-        .setContentText("Tap to resume")
+        .setContentText(text)
         .setContentIntent(serviceManager.startIntent())
 
     notificationManager.notify(PAUSED_ID, pausedNotificationBuilder.build())
@@ -184,6 +214,11 @@ class PadLockService : Service(), LifecycleOwner {
             R.drawable.ic_padlock_notification,
             "Pause",
             serviceManager.pauseIntent()
+        )
+        .addAction(
+            R.drawable.ic_padlock_notification,
+            "Pause $TEMP_PAUSE_AMOUNT Minutes",
+            serviceManager.tempPauseIntent()
         )
   }
 
@@ -264,5 +299,8 @@ class PadLockService : Service(), LifecycleOwner {
     private const val PAUSED_CHANNEL_ID = "padlock_paused_v1"
 
     private const val PERMISSION_CHANNEL_ID = "padlock_permission_v1"
+
+    private const val TEMP_PAUSE_AMOUNT = 30L
+    private val TIME_TEMP_PAUSE = TimeUnit.MINUTES.toMillis(TEMP_PAUSE_AMOUNT)
   }
 }

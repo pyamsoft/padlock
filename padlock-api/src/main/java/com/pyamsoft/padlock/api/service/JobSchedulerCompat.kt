@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlock.api.service
 
+import android.app.PendingIntent
+
 interface JobSchedulerCompat {
 
   fun cancel(
@@ -23,9 +25,16 @@ interface JobSchedulerCompat {
     params: List<Pair<String, String>> = emptyList()
   )
 
+  fun cancel(pendingIntent: PendingIntent)
+
   fun queue(
     targetClass: Class<*>,
     params: List<Pair<String, String>> = emptyList(),
+    triggerTime: Long
+  )
+
+  fun queue(
+    pendingIntent: PendingIntent,
     triggerTime: Long
   )
 }

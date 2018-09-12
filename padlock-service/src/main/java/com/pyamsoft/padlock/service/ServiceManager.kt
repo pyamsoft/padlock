@@ -13,6 +13,7 @@ import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
 import com.pyamsoft.padlock.service.ServiceManager.Commands.STOP
+import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import timber.log.Timber
 import javax.inject.Inject
@@ -99,8 +100,8 @@ class ServiceManager @Inject internal constructor(
 
   @CheckResult
   fun tempPauseIntent(): PendingIntent {
-    val intent = service(PAUSE)
-    return PendingIntent.getService(appContext, REQUEST_CODE_SERVICE_PAUSE, intent, 0)
+    val intent = service(TEMP_PAUSE)
+    return PendingIntent.getService(appContext, REQUEST_CODE_SERVICE_TEMP_PAUSE, intent, 0)
   }
 
   @CheckResult
@@ -124,7 +125,8 @@ class ServiceManager @Inject internal constructor(
   enum class Commands {
     START,
     STOP,
-    PAUSE
+    PAUSE,
+    TEMP_PAUSE
   }
 
 }

@@ -50,7 +50,7 @@ internal class JobSchedulerCompatImpl @Inject internal constructor(
     }
   }
 
-  private fun cancel(pendingIntent: PendingIntent) {
+  override fun cancel(pendingIntent: PendingIntent) {
     pendingIntent.apply {
       alarmManager.cancel(this)
       cancel()
@@ -71,6 +71,10 @@ internal class JobSchedulerCompatImpl @Inject internal constructor(
     triggerTime: Long
   ) {
     val pendingIntent = createIntent(targetClass, params).toPending()
+    queue(pendingIntent, triggerTime)
+  }
+
+  override fun queue(pendingIntent: PendingIntent, triggerTime: Long) {
     cancel(pendingIntent)
     alarmManager.set(AlarmManager.RTC, triggerTime, pendingIntent)
   }
