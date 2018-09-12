@@ -45,8 +45,8 @@ class ServiceManager @Inject internal constructor(
     if (servicePreferences.isPaused() && !restart) {
       Timber.d("Starting service but in paused state")
       // We don't use startForeground because starting in paused mode will not call foreground service
-
-      // TODO crashes in boot receiver because service is not allowed
+      // NOTE: Can crash if service is not already running from the Foreground.
+      //       most noticed in BootReceiver if restart is false
       appContext.startService(service(PAUSE))
     } else {
       if (restart) {

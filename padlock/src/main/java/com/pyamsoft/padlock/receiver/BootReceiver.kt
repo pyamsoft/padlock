@@ -39,7 +39,7 @@ class BootReceiver : BroadcastReceiver() {
           Injector.obtain<PadLockComponent>(context.applicationContext)
               .inject(this)
           Timber.d("Boot event received, start PadLockService")
-          serviceManager.startService(false)
+          serviceManager.startService(true)
         }
       }
     }
