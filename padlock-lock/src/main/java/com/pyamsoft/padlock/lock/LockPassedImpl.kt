@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock.passed
+package com.pyamsoft.padlock.lock
 
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.pydroid.core.threads.Enforcer

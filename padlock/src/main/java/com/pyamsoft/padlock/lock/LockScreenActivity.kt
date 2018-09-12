@@ -34,7 +34,7 @@ import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
 import com.pyamsoft.padlock.loader.loadAppIcon
-import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
+import com.pyamsoft.padlock.lock.screen.LockScreenViewModel
 import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.loader.ImageLoader
@@ -44,11 +44,11 @@ import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenActivity : ActivityBase(), LockScreenPresenter.View {
+class LockScreenActivity : ActivityBase() {
 
   private val home: Intent = Intent(Intent.ACTION_MAIN)
   @field:Inject
-  internal lateinit var presenter: LockScreenPresenter
+  internal lateinit var viewModel: LockScreenViewModel
   @field:Inject
   internal lateinit var inputViewModel: PinScreenInputViewModel
   @field:Inject
@@ -123,9 +123,23 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View {
 
     inputViewModel.onLockScreenTypePattern { onTypePattern() }
     inputViewModel.onLockScreenTypeText { onTypeText() }
-    inputViewModel.resolveLockScreenType()
 
-    presenter.bind(this, this)
+    viewModel.onAlreadyUnlockedEvent { onAlreadyUnlocked() }
+    viewModel.onCloseOldEvent { onCloseOldReceived() }
+    viewModel.onDisplayName { onSetDisplayName(it) }
+    viewModel.onIgnoreTimesLoaded { onInitializeWithIgnoreTime(it) }
+
+    viewModel.checkIfAlreadyUnlocked()
+    viewModel.closeOld()
+    viewModel.createWithDefaultIgnoreTime()
+    viewModel.loadDisplayNameFromPackage()
+
+    inputViewModel.resolveLockScreenType()
+  }
+
+  override fun onResume() {
+    super.onResume()
+    viewModel.checkIfAlreadyUnlocked()
   }
 
   private fun preInjectOnCreate() {
@@ -164,7 +178,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View {
       }
 
       menuExclude.setChecked(excludeEntry)
-      presenter.createWithDefaultIgnoreTime()
+      viewModel.createWithDefaultIgnoreTime()
 
       setOnMenuItemClickListener {
         val itemId = it.itemId
@@ -211,7 +225,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View {
     invalidateOptionsMenu()
   }
 
-  override fun onSetDisplayName(name: String) {
+  private fun onSetDisplayName(name: String) {
     binding.toolbar.title = name
     val bar = supportActionBar
     if (bar != null) {
@@ -219,14 +233,12 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View {
     }
   }
 
-  override fun onAlreadyUnlocked() {
-    Timber.d(
-        "This entry $lockedPackageName $lockedActivityName is already unlocked, finish Lock Screen"
-    )
+  private fun onAlreadyUnlocked() {
+    Timber.d("$lockedPackageName $lockedActivityName is already unlocked")
     finish()
   }
 
-  override fun onCloseOldReceived() {
+  private fun onCloseOldReceived() {
     Timber.w("Close event received for this LockScreen: %s", this)
     finish()
   }
@@ -274,6 +286,8 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View {
       binding.toolbar.menu.close()
       binding.toolbar.dismissPopupMenus()
     }
+
+    viewModel.clearMatchingForegroundEvent()
   }
 
   override fun onBackPressed() {
@@ -312,7 +326,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View {
     super.onSaveInstanceState(outState)
   }
 
-  override fun onInitializeWithIgnoreTime(time: Long) {
+  private fun onInitializeWithIgnoreTime(time: Long) {
     val apply: Long
     if (ignorePeriod == -1L) {
       apply = time
