@@ -34,8 +34,8 @@ import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
 import com.pyamsoft.padlock.loader.loadAppIcon
-import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
 import com.pyamsoft.padlock.lock.screen.LockScreenPresenter
+import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
@@ -44,13 +44,13 @@ import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenInputPresenter.View {
+class LockScreenActivity : ActivityBase(), LockScreenPresenter.View {
 
   private val home: Intent = Intent(Intent.ACTION_MAIN)
   @field:Inject
   internal lateinit var presenter: LockScreenPresenter
   @field:Inject
-  internal lateinit var inputPresenter: LockScreenInputPresenter
+  internal lateinit var inputViewModel: PinScreenInputViewModel
   @field:Inject
   internal lateinit var imageLoader: ImageLoader
   private lateinit var lockedActivityName: String
@@ -121,8 +121,11 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
         .inject(this)
     postInjectOnCreate()
 
+    inputViewModel.onLockScreenTypePattern { onTypePattern() }
+    inputViewModel.onLockScreenTypeText { onTypeText() }
+    inputViewModel.resolveLockScreenType()
+
     presenter.bind(this, this)
-    inputPresenter.bind(this, this)
   }
 
   private fun preInjectOnCreate() {
@@ -241,7 +244,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
     }
   }
 
-  override fun onTypePattern() {
+  private fun onTypePattern() {
     pushFragment(
         LockScreenPatternFragment.newInstance(
             lockedPackageName, lockedActivityName,
@@ -251,7 +254,7 @@ class LockScreenActivity : ActivityBase(), LockScreenPresenter.View, LockScreenI
     )
   }
 
-  override fun onTypeText() {
+  private fun onTypeText() {
     pushFragment(
         LockScreenTextFragment.newInstance(
             lockedPackageName, lockedActivityName,

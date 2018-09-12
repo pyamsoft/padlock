@@ -79,8 +79,6 @@ interface PadLockComponent {
 
   fun inject(receiver: BootReceiver)
 
-  fun inject(pinDialog: PinDialog)
-
   fun inject(recheckService: RecheckService)
 
   fun inject(purgeAllDialog: PurgeAllDialog)

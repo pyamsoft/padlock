@@ -32,7 +32,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.loader.loadPadLockIcon
-import com.pyamsoft.padlock.lock.screen.LockScreenInputPresenter
+import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
@@ -40,10 +40,10 @@ import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import javax.inject.Inject
 
-class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
+class PinDialog : ToolbarDialog() {
 
   @field:Inject
-  internal lateinit var presenter: LockScreenInputPresenter
+  internal lateinit var viewModel: PinScreenInputViewModel
   @field:Inject
   internal lateinit var imageLoader: ImageLoader
   private lateinit var binding: DialogPinEntryBinding
@@ -54,9 +54,6 @@ class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
     super.onCreate(savedInstanceState)
     isCancelable = true
     checkOnly = requireArguments().getBoolean(CHECK_ONLY, false)
-
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .inject(this)
   }
 
   override fun onResume() {
@@ -77,7 +74,17 @@ class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusPinComponent(PinModule(viewLifecycleOwner))
+        .inject(this)
     binding = DialogPinEntryBinding.inflate(inflater, container, false)
+
+    setupToolbar()
+
+    viewModel.onLockScreenTypePattern { onTypePattern() }
+    viewModel.onLockScreenTypeText { onTypeText() }
+    viewModel.resolveLockScreenType()
+
     return binding.root
   }
 
@@ -98,16 +105,6 @@ class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
     }
   }
 
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
-    setupToolbar()
-
-    presenter.bind(viewLifecycleOwner, this)
-  }
-
   override fun onStart() {
     super.onStart()
     imageLoader.loadPadLockIcon(requireContext())
@@ -115,13 +112,13 @@ class PinDialog : ToolbarDialog(), LockScreenInputPresenter.View {
         .bind(viewLifecycleOwner)
   }
 
-  override fun onTypePattern() {
+  private fun onTypePattern() {
     // Push text as child fragment
     Timber.d("Type Pattern")
     pushIfNotPresent(PinPatternFragment.newInstance(checkOnly), PinPatternFragment.TAG)
   }
 
-  override fun onTypeText() {
+  private fun onTypeText() {
     Timber.d("Type Text")
     pushIfNotPresent(PinTextFragment.newInstance(checkOnly), PinTextFragment.TAG)
   }
