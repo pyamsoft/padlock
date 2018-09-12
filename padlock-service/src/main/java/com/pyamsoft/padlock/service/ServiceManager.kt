@@ -98,6 +98,12 @@ class ServiceManager @Inject internal constructor(
   }
 
   @CheckResult
+  fun tempPauseIntent(): PendingIntent {
+    val intent = service(PAUSE)
+    return PendingIntent.getService(appContext, REQUEST_CODE_SERVICE_PAUSE, intent, 0)
+  }
+
+  @CheckResult
   fun stopIntent(): PendingIntent {
     val intent = service(STOP)
     return PendingIntent.getService(appContext, REQUEST_CODE_SERVICE_STOP, intent, 0)
@@ -112,6 +118,7 @@ class ServiceManager @Inject internal constructor(
     private const val REQUEST_CODE_SERVICE_START = 1005
     private const val REQUEST_CODE_SERVICE_STOP = 1006
     private const val REQUEST_CODE_SERVICE_PAUSE = 1007
+    private const val REQUEST_CODE_SERVICE_TEMP_PAUSE = 1008
   }
 
   enum class Commands {
