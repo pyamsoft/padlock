@@ -68,14 +68,19 @@ internal class JobSchedulerCompatImpl @Inject internal constructor(
   override fun queue(
     targetClass: Class<*>,
     params: List<Pair<String, String>>,
-    triggerTime: Long
+    triggerAfter: Long
   ) {
     val pendingIntent = createIntent(targetClass, params).toPending()
-    queue(pendingIntent, triggerTime)
+    val time = System.currentTimeMillis() + triggerAfter
+    queue(pendingIntent, time)
   }
 
-  override fun queue(pendingIntent: PendingIntent, triggerTime: Long) {
+  override fun queue(
+    pendingIntent: PendingIntent,
+    triggerAfter: Long
+  ) {
     cancel(pendingIntent)
-    alarmManager.set(AlarmManager.RTC, triggerTime, pendingIntent)
+    val time = System.currentTimeMillis() + triggerAfter
+    alarmManager.set(AlarmManager.RTC, time, pendingIntent)
   }
 }

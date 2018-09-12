@@ -123,7 +123,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
 
       // Queue up a new recheck job
       // Since alarms are inexact, buffer by an extra minute
-      val triggerTime = System.currentTimeMillis() + recheckTime + ONE_MINUTE_MILLIS
+      val triggerTime = recheckTime + ONE_MINUTE_MILLIS
       jobSchedulerCompat.queue(recheckServiceClass, params, triggerTime)
     }
   }

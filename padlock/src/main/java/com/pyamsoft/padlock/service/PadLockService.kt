@@ -135,9 +135,7 @@ class PadLockService : Service(), LifecycleOwner {
 
   private fun serviceTempPause() {
     // Queue the service to restart after timeout via alarm manager
-    jobSchedulerCompat.queue(
-        serviceManager.startIntent(), System.currentTimeMillis() + TIME_TEMP_PAUSE
-    )
+    jobSchedulerCompat.queue(serviceManager.startIntent(), TIME_TEMP_PAUSE)
 
     servicePause(true)
   }

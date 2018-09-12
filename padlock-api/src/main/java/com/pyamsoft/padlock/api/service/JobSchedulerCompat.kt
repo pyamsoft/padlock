@@ -30,11 +30,11 @@ interface JobSchedulerCompat {
   fun queue(
     targetClass: Class<*>,
     params: List<Pair<String, String>> = emptyList(),
-    triggerTime: Long
+    triggerAfter: Long
   )
 
   fun queue(
     pendingIntent: PendingIntent,
-    triggerTime: Long
+    triggerAfter: Long
   )
 }
