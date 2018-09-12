@@ -119,6 +119,7 @@ class PadLockService : Service(), LifecycleOwner {
   private fun serviceStart() {
     viewModel.setServicePaused(false)
     notificationManager.cancel(PAUSED_ID)
+    notificationManager.cancel(PERMISSION_ID)
     startForeground(NOTIFICATION_ID, notificationBuilder.build())
   }
 
