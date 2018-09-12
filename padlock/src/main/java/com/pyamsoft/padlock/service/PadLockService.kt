@@ -160,7 +160,7 @@ class PadLockService : Service(), LifecycleOwner {
       text = "Auto-Resume in $TEMP_PAUSE_AMOUNT minutes. "
     }
 
-    text += "Tap to Resume."
+    text += "Tap to Resume now."
     val pausedNotificationBuilder = NotificationCompat.Builder(this, PAUSED_CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_padlock_notification)
         .setColor(ContextCompat.getColor(applicationContext, R.color.blue500))
