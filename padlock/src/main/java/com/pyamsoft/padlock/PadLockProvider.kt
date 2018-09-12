@@ -19,14 +19,15 @@ package com.pyamsoft.padlock
 import android.app.Activity
 import android.app.Application
 import android.app.IntentService
+import android.app.Service
 import android.content.Context
 import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.ImageLoader
-import com.pyamsoft.pydroid.loader.LoaderModule
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -37,6 +38,7 @@ class PadLockProvider(
   private val imageLoader: ImageLoader,
   private val enforcer: Enforcer,
   private val mainActivityClass: Class<out Activity>,
+  private val serviceClass: Class<out Service>,
   private val recheckServiceClass: Class<out IntentService>
 ) {
 
@@ -68,8 +70,19 @@ class PadLockProvider(
 
   @Provides
   @CheckResult
+  @Named("service")
+  fun provideServiceClass(): Class<out Service> = serviceClass
+
+  @Provides
+  @CheckResult
   @Named("recheck")
   fun provideRecheckServiceClass(): Class<out IntentService> = recheckServiceClass
+
+  @Provides
+  @CheckResult
+  @Named("notification_icon")
+  @DrawableRes
+  fun provideNotificationIcon(): Int = R.drawable.ic_padlock_notification
 
   @Provides
   @CheckResult

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.base
+package com.pyamsoft.padlock.service.device
 
 import android.app.Activity
 import android.app.NotificationChannel
@@ -27,12 +27,14 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
+import com.pyamsoft.padlock.service.ServiceManager
 import com.pyamsoft.pydroid.core.cache.Cache
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -45,9 +47,10 @@ import javax.inject.Singleton
 @Singleton
 internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   private val context: Context,
-  @Named("notification_color") @ColorRes private val notificationColor: Int,
   private val packageManagerWrapper: PackageLabelManager,
-  @Named("main_activity") mainActivityClass: Class<out Activity>,
+  private val serviceManager: ServiceManager,
+  @Named("notification_color") @ColorRes private val notificationColor: Int,
+  @Named("notification_icon") @DrawableRes private val notificationIcon: Int,
   @param:Named("cache_purge") private val purgeCache: Cache,
   @param:Named("cache_lock_list") private val listCache: Cache,
   @param:Named("cache_lock_info") private val infoCache: Cache
@@ -55,16 +58,11 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
 
   private val notificationManager: NotificationManager
   private val filter: IntentFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
-  private val pendingIntent: PendingIntent
   private val compositeDisposable: CompositeDisposable = CompositeDisposable()
   private var registered: Boolean = false
 
   init {
     filter.addDataScheme("package")
-    val intent = Intent(context, mainActivityClass).apply {
-      putExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST, true)
-    }
-    pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_RC, intent, 0)
     notificationManager = requireNotNull(context.getSystemService<NotificationManager>())
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -89,8 +87,13 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
     }
 
     // Delete old unversioned channel
-    if (notificationManager.getNotificationChannel(OLD_CHANNEL_ID) != null) {
-      notificationManager.deleteNotificationChannel(OLD_CHANNEL_ID)
+    if (notificationManager.getNotificationChannel(
+            OLD_CHANNEL_ID
+        ) != null
+    ) {
+      notificationManager.deleteNotificationChannel(
+          OLD_CHANNEL_ID
+      )
     }
 
     Timber.d("Create notification channel with id: %s", notificationChannel.id)
@@ -137,17 +140,22 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
     name: String
   ) {
     Timber.i("Package Added: %s", packageName)
-    val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+    val builder = NotificationCompat.Builder(
+        context,
+        NOTIFICATION_CHANNEL_ID
+    )
         .apply {
           setContentTitle("Lock New Application")
-          setSmallIcon(R.drawable.ic_lock_notification)
+          setSmallIcon(notificationIcon)
           setContentText("Click to lock the newly installed application: $name")
-          setContentIntent(pendingIntent)
+          setContentIntent(serviceManager.mainActivityIntent(true))
           setAutoCancel(true)
           color = ContextCompat.getColor(context, notificationColor)
           priority = NotificationCompat.PRIORITY_LOW
         }
-    notificationManager.notify(notificationId++, builder.build())
+    notificationManager.notify(
+        notificationId++, builder.build()
+    )
   }
 
   override fun register() {
@@ -168,14 +176,15 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   companion object {
     private const val OLD_CHANNEL_ID: String = "padlock_new_apps"
     private const val NOTIFICATION_CHANNEL_ID: String = "padlock_new_apps_v1"
-    private const val NOTIFICATION_RC = 421
     private const val NOTIFICATION_ID_START = 2000
     private const val NOTIFICATION_ID_MAX = 10000
 
-    private var notificationId: Int = NOTIFICATION_ID_START
+    private var notificationId: Int =
+      NOTIFICATION_ID_START
       get() {
         if (field == NOTIFICATION_ID_MAX) {
-          field = NOTIFICATION_ID_START
+          field =
+              NOTIFICATION_ID_START
         } else {
           field += 1
         }

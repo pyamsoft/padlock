@@ -7,7 +7,4 @@ interface ServiceComponent {
 
   fun inject(service: PadLockService)
 
-  fun inject(service: PauseService)
-
-  fun inject(service: ResumeService)
 }

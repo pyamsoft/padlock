@@ -23,11 +23,12 @@ import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.preference.PreferenceManager
 import com.pyamsoft.padlock.BuildConfig
-import com.pyamsoft.padlock.PadLock
+import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.service.PadLockService
+import com.pyamsoft.padlock.service.ServiceManager
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.bugreport.BugreportDialog
 import com.pyamsoft.pydroid.ui.rating.ChangeLogBuilder
@@ -43,6 +44,8 @@ import javax.inject.Inject
 class MainActivity : RatingActivity() {
 
   private lateinit var binding: ActivityMainBinding
+
+  @field:Inject internal lateinit var serviceManager: ServiceManager
 
   override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
 
@@ -74,6 +77,7 @@ class MainActivity : RatingActivity() {
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
+    Injector.obtain<PadLockComponent>(applicationContext).inject(this)
     setupToolbar()
 
     showDefaultPage()
@@ -151,6 +155,6 @@ class MainActivity : RatingActivity() {
     binding.toolbar.animateMenu()
 
     // Try to start service, will not if we do not have permission
-    PadLock.startService(this)
+    serviceManager.startService(false)
   }
 }

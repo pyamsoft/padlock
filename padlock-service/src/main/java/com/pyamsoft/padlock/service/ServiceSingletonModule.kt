@@ -16,9 +16,11 @@
 
 package com.pyamsoft.padlock.service
 
+import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.api.service.ScreenStateObserver
 import com.pyamsoft.padlock.api.service.UsageEventProvider
+import com.pyamsoft.padlock.service.device.ApplicationInstallReceiverImpl
 import com.pyamsoft.padlock.service.device.ScreenStateObserverImpl
 import com.pyamsoft.padlock.service.device.UsageEventProviderImpl
 import dagger.Binds
@@ -37,4 +39,9 @@ abstract class ServiceSingletonModule {
 
   @Binds
   internal abstract fun usageEvents(impl: UsageEventProviderImpl): UsageEventProvider
+
+  @Binds
+  internal abstract fun provideApplicationInstallReceiver(
+    impl: ApplicationInstallReceiverImpl
+  ): ApplicationInstallReceiver
 }

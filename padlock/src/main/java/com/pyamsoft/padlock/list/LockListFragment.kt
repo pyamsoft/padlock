@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.list
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -34,13 +33,12 @@ import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.PinDialog
-import com.pyamsoft.padlock.service.ResumeService
+import com.pyamsoft.padlock.service.ServiceManager
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
@@ -65,6 +63,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
 
   @field:Inject internal lateinit var imageLoader: ImageLoader
   @field:Inject internal lateinit var presenter: LockListPresenter
+  @field:Inject internal lateinit var serviceManager: ServiceManager
   private lateinit var adapter: ModelAdapter<AppEntry, LockListItem>
   private lateinit var binding: FragmentLockListBinding
   private lateinit var filterListDelegate: FilterListDelegate
@@ -137,8 +136,8 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
     presenter.bind(viewLifecycleOwner, this)
 
     val intent = requireActivity().intent
-    if (intent.hasExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)) {
-      intent.removeExtra(ApplicationInstallReceiver.FORCE_REFRESH_LIST)
+    if (intent.hasExtra(ServiceManager.FORCE_REFRESH_ON_OPEN)) {
+      intent.removeExtra(ServiceManager.FORCE_REFRESH_ON_OPEN)
 
       Timber.d("Launched from notification, clear list")
       presenter.forceClearCache()
@@ -412,8 +411,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
 
   override fun onFabIconPaused(manually: Boolean) {
     if (manually) {
-      val appContext = requireContext().applicationContext
-      appContext.startService(Intent(appContext, ResumeService::class.java))
+      serviceManager.startService(true)
       return
     }
 

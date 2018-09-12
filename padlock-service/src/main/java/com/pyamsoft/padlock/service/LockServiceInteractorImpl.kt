@@ -145,6 +145,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
         }
 
         enforcer.assertNotOnMainThread()
+        emit(emitter, decideServiceEnabledState())
       }
     }
   }

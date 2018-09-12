@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.base
 
-import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
@@ -39,11 +38,6 @@ abstract class BaseModule {
   internal abstract fun provideLockWhitelisted(
     bus: LockWhitelistedBus
   ): EventBus<LockWhitelistedEvent>
-
-  @Binds
-  internal abstract fun provideApplicationInstallReceiver(
-    impl: ApplicationInstallReceiverImpl
-  ): ApplicationInstallReceiver
 
   @Binds
   internal abstract fun provideMasterPinPreference(

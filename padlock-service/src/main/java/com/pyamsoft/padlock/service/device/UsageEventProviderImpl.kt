@@ -25,6 +25,8 @@ import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.preferences.PreferenceWatcher
 import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.ForegroundEvent
+import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.LazyThreadSafetyMode.NONE
@@ -38,19 +40,38 @@ internal class UsageEventProviderImpl @Inject internal constructor(
     requireNotNull(context.getSystemService<UsageStatsManager>())
   }
 
+  private val internalWatchers = LinkedHashSet<(Boolean) -> Unit>()
+
+  private val watcher = AppUsagePreferenceWatcher(context) {
+    for (watcher in internalWatchers) {
+      watcher(it)
+    }
+  }
+
   override fun queryEvents(
     begin: Long,
     end: Long
   ): UsageEventProvider.EventQueryResult = EventQueryResultImpl(usage.queryEvents(begin, end))
 
   override fun watchPermission(func: (Boolean) -> Unit): PreferenceWatcher {
-    return AppUsagePreferenceWatcher(context, func)
+    internalWatchers.add(func)
+    watcher.watch()
+
+    return object : PreferenceWatcher {
+
+      override fun stopWatching() {
+        Timber.d("Stop watching usage permission")
+        internalWatchers.remove(func)
+      }
+    }
   }
 
   private class AppUsagePreferenceWatcher internal constructor(
-    context: Context,
+    private val context: Context,
     func: (Boolean) -> Unit
   ) : PreferenceWatcher {
+
+    private var isWatching = AtomicBoolean(false)
 
     private val appOps = requireNotNull(context.getSystemService<AppOpsManager>())
     private val callback = OnOpChangedListener { op, packageName ->
@@ -61,15 +82,16 @@ internal class UsageEventProviderImpl @Inject internal constructor(
       }
     }
 
-    init {
-      // TODO: Causes memory leaks because stopWatchingMode leaks the callback
-      // appOps.startWatchingMode(AppOpsManager.OPSTR_GET_USAGE_STATS, context.packageName, callback)
+    fun watch() {
+      if (isWatching.compareAndSet(false, true)) {
+        appOps.startWatchingMode(AppOpsManager.OPSTR_GET_USAGE_STATS, context.packageName, callback)
+      }
     }
 
     override fun stopWatching() {
-      // TODO: Causes memory leaks because stopWatchingMode leaks the callback
-      // Timber.d("Stop watching Usage Permission")
-      // appOps.stopWatchingMode(callback)
+      // We register this onto the singleton instance because stopWatchingMode does not seem
+      // to actually unregister the callback, thus leading to memory leaks
+      appOps.stopWatchingMode(callback)
     }
 
   }

@@ -17,10 +17,6 @@
 package com.pyamsoft.padlock
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.ApplicationInstallReceiver
-import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
-import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
-import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.base.BaseModule
 import com.pyamsoft.padlock.base.BaseProvider
 import com.pyamsoft.padlock.base.database.DatabaseProvider
@@ -39,6 +35,7 @@ import com.pyamsoft.padlock.lock.LockEntryModule
 import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.LockSingletonModule
 import com.pyamsoft.padlock.lock.LockSingletonProvider
+import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.padlock.pin.PinModule
@@ -50,6 +47,7 @@ import com.pyamsoft.padlock.purge.PurgeModule
 import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.purge.PurgeSingletonModule
 import com.pyamsoft.padlock.purge.PurgeSingletonProvider
+import com.pyamsoft.padlock.receiver.BootReceiver
 import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.service.ServiceComponent
 import com.pyamsoft.padlock.service.ServiceModule
@@ -74,6 +72,12 @@ import javax.inject.Singleton
     ]
 )
 interface PadLockComponent {
+
+  fun inject(application: PadLock)
+
+  fun inject(activity: MainActivity)
+
+  fun inject(receiver: BootReceiver)
 
   fun inject(pinDialog: PinDialog)
 
@@ -109,17 +113,4 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusPinComponent(module: PinModule): PinComponent
-
-  // To be used directly by PadLock
-  @CheckResult
-  fun provideInstallListenerPreferences(): InstallListenerPreferences
-
-  @CheckResult
-  fun provideServicePreferences() : ServicePreferences
-
-  @CheckResult
-  fun provideMasterPinPreferences() : MasterPinPreferences
-
-  @CheckResult
-  fun provideApplicationInstallReceiver(): ApplicationInstallReceiver
 }

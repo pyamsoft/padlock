@@ -18,25 +18,26 @@ package com.pyamsoft.padlock
 
 import android.app.Application
 import android.app.Service
-import android.content.Context
-import android.content.Intent
-import android.os.Build
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.api.ApplicationInstallReceiver
+import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockService
-import com.pyamsoft.padlock.service.PauseService
 import com.pyamsoft.padlock.service.RecheckService
-import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.bootstrap.about.AboutLibraries
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
+import javax.inject.Inject
 
 class PadLock : Application(), PYDroid.Instance {
 
   private var pyDroid: PYDroid? = null
   private lateinit var component: PadLockComponent
   private lateinit var refWatcher: RefWatcher
+
+  @field:Inject internal lateinit var installListenerPreferences: InstallListenerPreferences
+  @field:Inject internal lateinit var receiver: ApplicationInstallReceiver
 
   override fun onCreate() {
     super.onCreate()
@@ -61,17 +62,14 @@ class PadLock : Application(), PYDroid.Instance {
     PYDroid.init(this, this, BuildConfig.DEBUG)
 
     val dagger = Injector.obtain<PadLockComponent>(this)
-    val receiver = dagger.provideApplicationInstallReceiver()
-    val preferences = dagger.provideInstallListenerPreferences()
-    if (preferences.isInstallListenerEnabled()) {
+    dagger.inject(this)
+
+    if (installListenerPreferences.isInstallListenerEnabled()) {
       receiver.register()
     } else {
       receiver.unregister()
     }
-
-    PadLock.startService(this)
   }
-
 
   override fun getPydroid(): PYDroid? = pyDroid
 
@@ -82,6 +80,7 @@ class PadLock : Application(), PYDroid.Instance {
           it.modules().loaderModule().provideImageLoader(),
           it.enforcer(),
           MainActivity::class.java,
+          PadLockService::class.java,
           RecheckService::class.java
       )
       component = DaggerPadLockComponent.builder()
@@ -111,27 +110,6 @@ class PadLock : Application(), PYDroid.Instance {
         return application.refWatcher
       } else {
         throw IllegalStateException("Application is not PadLock")
-      }
-    }
-
-    @JvmStatic
-    fun startService(context: Context) {
-      val appContext = context.applicationContext
-      if (appContext is PadLock) {
-        val masterPinPreferences = appContext.component.provideMasterPinPreferences()
-        val servicePreferences = appContext.component.provideServicePreferences()
-
-        if (servicePreferences.isPaused()) {
-          val service = Intent(appContext, PauseService::class.java)
-          appContext.startService(service)
-        } else if (UsagePermissionChecker.hasPermission(appContext) && !masterPinPreferences.getMasterPassword().isNullOrEmpty()) {
-          val service = Intent(appContext, PadLockService::class.java)
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            appContext.startForegroundService(service)
-          } else {
-            appContext.startService(service)
-          }
-        }
       }
     }
 

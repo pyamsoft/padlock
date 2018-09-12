@@ -19,11 +19,15 @@ package com.pyamsoft.padlock.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.pyamsoft.padlock.PadLock
-import com.pyamsoft.padlock.service.PadLockService
+import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.service.ServiceManager
 import timber.log.Timber
+import javax.inject.Inject
 
 class BootReceiver : BroadcastReceiver() {
+
+  @field:Inject internal lateinit var serviceManager: ServiceManager
 
   override fun onReceive(
     context: Context?,
@@ -32,8 +36,10 @@ class BootReceiver : BroadcastReceiver() {
     if (intent != null) {
       if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
         if (context != null) {
+          Injector.obtain<PadLockComponent>(context.applicationContext)
+              .inject(this)
           Timber.d("Boot event received, start PadLockService")
-          PadLock.startService(context)
+          serviceManager.startService(false)
         }
       }
     }

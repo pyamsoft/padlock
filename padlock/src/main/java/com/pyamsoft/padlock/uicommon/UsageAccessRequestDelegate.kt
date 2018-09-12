@@ -17,15 +17,25 @@
 package com.pyamsoft.padlock.uicommon
 
 import android.app.Activity
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import androidx.annotation.CheckResult
 
 object UsageAccessRequestDelegate {
 
+  private const val REQUEST_CODE_USAGE_ACCESS = 123
   private val INTENT: Intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
 
   @JvmStatic
   fun launchUsageAccessActivity(activity: Activity) {
     activity.startActivity(INTENT)
+  }
+
+  @JvmStatic
+  @CheckResult
+  fun pendingIntent(context: Context): PendingIntent {
+    return PendingIntent.getActivity(context, REQUEST_CODE_USAGE_ACCESS, INTENT, 0)
   }
 }
