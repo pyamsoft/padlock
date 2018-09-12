@@ -38,7 +38,6 @@ import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.service.ServiceManager.Commands
 import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
-import com.pyamsoft.padlock.service.ServiceManager.Commands.STOP
 import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
 import com.pyamsoft.pydroid.core.lifecycle.fakeBind
@@ -116,7 +115,6 @@ class PadLockService : Service(), LifecycleOwner {
     when (command) {
       START -> serviceStart()
       PAUSE -> servicePause(false)
-      STOP -> serviceStop()
       TEMP_PAUSE -> serviceTempPause()
     }
     return Service.START_STICKY

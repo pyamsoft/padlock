@@ -12,7 +12,6 @@ import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
 import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
-import com.pyamsoft.padlock.service.ServiceManager.Commands.STOP
 import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import timber.log.Timber
@@ -106,12 +105,6 @@ class ServiceManager @Inject internal constructor(
     return PendingIntent.getService(appContext, REQUEST_CODE_SERVICE_TEMP_PAUSE, intent, 0)
   }
 
-  @CheckResult
-  fun stopIntent(): PendingIntent {
-    val intent = service(STOP)
-    return PendingIntent.getService(appContext, REQUEST_CODE_SERVICE_STOP, intent, 0)
-  }
-
   companion object {
 
     const val SERVICE_COMMAND = "SERVICE_COMMAND"
@@ -119,14 +112,12 @@ class ServiceManager @Inject internal constructor(
 
     private const val REQUEST_CODE_MAIN_ACTIVITY = 1004
     private const val REQUEST_CODE_SERVICE_START = 1005
-    private const val REQUEST_CODE_SERVICE_STOP = 1006
     private const val REQUEST_CODE_SERVICE_PAUSE = 1007
     private const val REQUEST_CODE_SERVICE_TEMP_PAUSE = 1008
   }
 
   enum class Commands {
     START,
-    STOP,
     PAUSE,
     TEMP_PAUSE
   }
