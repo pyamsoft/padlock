@@ -60,6 +60,7 @@ class LockScreenViewModel @Inject internal constructor(
   fun onAlreadyUnlockedEvent(func: () -> Unit) {
     dispose {
       alreadyUnlockedBus.listen()
+          .filter { it }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe { func() }
@@ -69,6 +70,7 @@ class LockScreenViewModel @Inject internal constructor(
   fun onCloseOldEvent(func: (CloseOldEvent) -> Unit) {
     dispose {
       closeOldBus.listen()
+          .filter { it.packageName == packageName && it.activityName == activityName }
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(func)
