@@ -42,6 +42,7 @@ import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
+import timber.log.Timber
 import javax.inject.Inject
 
 abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment() {
@@ -115,20 +116,21 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
       }
 
       wrapper.onSuccess {
+        clearDisplay()
         when (it) {
           SUBMIT_FAILURE -> {
-            clearDisplay()
+            Timber.d("Submit failure")
             showSnackbarWithText("Error: Invalid PIN")
           }
           SUBMIT_SUCCESS -> {
-            clearDisplay()
+            Timber.d("Submit success")
           }
           LOCKED -> {
-            clearDisplay()
+            Timber.d("Locked out")
             showSnackbarWithText("This entry is temporarily locked")
           }
           POSTED -> {
-            clearDisplay()
+            Timber.d("Unlock posted")
             requireActivity().finish()
           }
         }
