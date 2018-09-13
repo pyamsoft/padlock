@@ -23,25 +23,27 @@ import androidx.annotation.DrawableRes
 import androidx.core.net.toUri
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
+import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.pydroid.loader.GlideLoader
 
 internal class AppIconImageLoader internal constructor(
   private val packageName: String,
-  @DrawableRes private val icon: Int
+  @DrawableRes private val icon: Int,
+  private val packageActivityManager: PackageActivityManager
 ) : GlideLoader<Drawable>() {
 
   init {
     if (packageName.isEmpty()) {
       throw IllegalArgumentException("AppIconImageLoader packageName must be non-empty")
     }
-
-    if (icon == 0) {
-      throw IllegalArgumentException("AppIconImageLoader icon must be non-zero")
-    }
   }
 
   override fun createRequest(request: RequestManager): RequestBuilder<Drawable> {
-    return request.load("${ContentResolver.SCHEME_ANDROID_RESOURCE}://$packageName/$icon".toUri())
+    if (icon == 0) {
+      return request.load(packageActivityManager.getDefaultActivityIcon())
+    } else {
+      return request.load("${ContentResolver.SCHEME_ANDROID_RESOURCE}://$packageName/$icon".toUri())
+    }
   }
 
   override fun mutateResource(resource: Drawable): Drawable {

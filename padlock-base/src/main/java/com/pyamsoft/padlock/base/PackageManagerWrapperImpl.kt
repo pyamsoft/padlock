@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.padlock.api.packagemanager.PackageApplicationManager
@@ -47,6 +48,11 @@ internal class PackageManagerWrapperImpl @Inject internal constructor(
 ) : PackageActivityManager, PackageApplicationManager, PackageLabelManager {
 
   private val packageManager = context.applicationContext.packageManager
+  private val defaultIcon: Drawable by lazy { packageManager.defaultActivityIcon }
+
+  override fun getDefaultActivityIcon(): Drawable {
+    return defaultIcon
+  }
 
   override fun getActivityListForPackage(packageName: String): Single<List<String>> {
     return Single.fromCallable {

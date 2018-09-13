@@ -33,7 +33,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
-import com.pyamsoft.padlock.loader.loadAppIcon
+import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.lock.screen.LockScreenViewModel
 import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
@@ -46,18 +46,19 @@ import javax.inject.Inject
 
 class LockScreenActivity : ActivityBase() {
 
-  private val home: Intent = Intent(Intent.ACTION_MAIN)
-  @field:Inject
-  internal lateinit var viewModel: LockScreenViewModel
-  @field:Inject
-  internal lateinit var inputViewModel: PinScreenInputViewModel
-  @field:Inject
-  internal lateinit var imageLoader: ImageLoader
+  @field:Inject internal lateinit var viewModel: LockScreenViewModel
+  @field:Inject internal lateinit var inputViewModel: PinScreenInputViewModel
+  @field:Inject internal lateinit var imageLoader: ImageLoader
+  @field:Inject internal lateinit var appIconLoader: AppIconLoader
+
   private lateinit var lockedActivityName: String
   private lateinit var lockedPackageName: String
   private lateinit var binding: ActivityLockBinding
   private lateinit var ignoreTimes: MutableList<Long>
   private lateinit var lockedRealName: String
+
+  private val home: Intent = Intent(Intent.ACTION_MAIN)
+
   private var lockedSystem: Boolean = false
   private var ignorePeriod: Long = -1
   private var excludeEntry: Boolean = false
@@ -73,7 +74,7 @@ class LockScreenActivity : ActivityBase() {
   private var menuIgnoreThirty: MenuItem? = null
   private var menuIgnoreFourtyFive: MenuItem? = null
   private var menuIgnoreSixty: MenuItem? = null
-  internal var menuExclude: MenuItem? = null
+  private var menuExclude: MenuItem? = null
 
   init {
     home.addCategory(Intent.CATEGORY_HOME)
@@ -148,7 +149,7 @@ class LockScreenActivity : ActivityBase() {
   }
 
   private fun postInjectOnCreate() {
-    imageLoader.loadAppIcon(lockedPackageName, lockedIcon)
+    appIconLoader.loadAppIcon(lockedPackageName, lockedIcon)
         .into(binding.lockImage)
         .bind(this)
     populateIgnoreTimes()

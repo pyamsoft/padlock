@@ -31,7 +31,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
-import com.pyamsoft.padlock.loader.loadPadLockIcon
+import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
@@ -42,10 +42,10 @@ import javax.inject.Inject
 
 class PinDialog : ToolbarDialog() {
 
-  @field:Inject
-  internal lateinit var viewModel: PinScreenInputViewModel
-  @field:Inject
-  internal lateinit var imageLoader: ImageLoader
+  @field:Inject internal lateinit var viewModel: PinScreenInputViewModel
+  @field:Inject internal lateinit var imageLoader: ImageLoader
+  @field:Inject internal lateinit var appIconLoader: AppIconLoader
+
   private lateinit var binding: DialogPinEntryBinding
 
   private var checkOnly: Boolean = false
@@ -107,7 +107,7 @@ class PinDialog : ToolbarDialog() {
 
   override fun onStart() {
     super.onStart()
-    imageLoader.loadPadLockIcon(requireContext())
+    appIconLoader.loadAppIcon(requireContext().packageName, R.mipmap.ic_launcher)
         .into(binding.pinImage)
         .bind(viewLifecycleOwner)
   }

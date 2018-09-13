@@ -16,10 +16,14 @@
 
 package com.pyamsoft.padlock.api.packagemanager
 
+import android.graphics.drawable.Drawable
 import androidx.annotation.CheckResult
 import io.reactivex.Single
 
 interface PackageActivityManager {
+
+  @CheckResult
+  fun getDefaultActivityIcon(): Drawable
 
   @CheckResult
   fun getActivityListForPackage(packageName: String): Single<List<String>>

@@ -29,7 +29,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
-import com.pyamsoft.padlock.loader.loadAppIcon
+import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.core.lifecycle.fakeBind
 import com.pyamsoft.pydroid.core.lifecycle.fakeUnbind
@@ -73,11 +73,11 @@ class LockListItem internal constructor(
       LifecycleOwner {
 
     private val binding: AdapterItemLocklistBinding = AdapterItemLocklistBinding.bind(itemView)
-    @field:Inject
-    internal lateinit var publisher: LockListItemPublisher
-    @field:Inject
-    internal lateinit var imageLoader: ImageLoader
     private val lifecycle = LifecycleRegistry(this)
+
+    @field:Inject internal lateinit var publisher: LockListItemPublisher
+    @field:Inject internal lateinit var imageLoader: ImageLoader
+    @field:Inject internal lateinit var appIconLoader: AppIconLoader
 
     init {
       Injector.obtain<PadLockComponent>(itemView.context.applicationContext)
@@ -108,7 +108,7 @@ class LockListItem internal constructor(
       }
 
       if (binding.lockListIcon.isVisible) {
-        imageLoader.loadAppIcon(model.packageName, model.icon)
+        appIconLoader.loadAppIcon(model.packageName, model.icon)
             .into(binding.lockListIcon)
             .bind(this)
       }

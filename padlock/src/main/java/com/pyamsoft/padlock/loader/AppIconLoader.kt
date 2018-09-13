@@ -16,20 +16,23 @@
 
 package com.pyamsoft.padlock.loader
 
-import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.annotation.CheckResult
 import androidx.annotation.DrawableRes
-import com.pyamsoft.padlock.R
-import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.pydroid.loader.Loader
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@CheckResult
-fun ImageLoader.loadAppIcon(packageName: String, @DrawableRes icon: Int): Loader<Drawable> {
-  return AppIconImageLoader(packageName, icon)
+@Singleton
+class AppIconLoader @Inject internal constructor(
+  private val packageActivityManager: PackageActivityManager
+) {
+
+  @CheckResult
+  fun loadAppIcon(packageName: String, @DrawableRes icon: Int): Loader<Drawable> {
+    return AppIconImageLoader(packageName, icon, packageActivityManager)
+  }
+
 }
 
-@CheckResult
-fun ImageLoader.loadPadLockIcon(context: Context): Loader<Drawable> {
-  return AppIconImageLoader(context.packageName, R.mipmap.ic_launcher)
-}

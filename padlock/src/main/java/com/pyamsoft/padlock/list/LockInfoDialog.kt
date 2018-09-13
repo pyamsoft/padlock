@@ -35,7 +35,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.list.info.LockInfoPresenter
-import com.pyamsoft.padlock.loader.loadAppIcon
+import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
@@ -55,10 +55,10 @@ import javax.inject.Inject
 
 class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
 
-  @field:Inject
-  internal lateinit var imageLoader: ImageLoader
-  @field:Inject
-  internal lateinit var presenter: LockInfoPresenter
+  @field:Inject internal lateinit var appIconLoader: AppIconLoader
+  @field:Inject internal lateinit var imageLoader: ImageLoader
+  @field:Inject internal lateinit var presenter: LockInfoPresenter
+
   private lateinit var adapter: ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
   private lateinit var binding: DialogLockInfoBinding
   private lateinit var appPackageName: String
@@ -230,7 +230,7 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
 
   override fun onStart() {
     super.onStart()
-    imageLoader.loadAppIcon(appPackageName, appIcon)
+    appIconLoader.loadAppIcon(appPackageName, appIcon)
         .into(binding.lockInfoIcon)
         .bind(viewLifecycleOwner)
   }
