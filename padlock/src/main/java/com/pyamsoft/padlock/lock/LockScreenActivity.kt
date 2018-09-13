@@ -82,6 +82,11 @@ class LockScreenActivity : ActivityBase() {
   }
 
   @CheckResult
+  internal fun isExcluded(): Boolean {
+    return menuExclude.isChecked()
+  }
+
+  @CheckResult
   internal fun getRootView(): ViewGroup = binding.lockScreenRoot
 
   @CheckResult
