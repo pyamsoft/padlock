@@ -225,7 +225,6 @@ class LockScreenActivity : ActivityBase() {
     require(lockedPackageName.isNotBlank())
     require(lockedActivityName.isNotBlank())
     require(lockedRealName.isNotBlank())
-    require(lockedIcon != 0)
 
     // Reload options
     invalidateOptionsMenu()

@@ -81,7 +81,6 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
 
     require(appPackageName.isNotBlank())
     require(appName.isNotBlank())
-    require(appIcon != 0)
 
     listStateTag = TAG + appPackageName
 
