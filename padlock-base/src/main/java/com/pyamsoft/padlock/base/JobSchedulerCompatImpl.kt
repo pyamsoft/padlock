@@ -71,8 +71,7 @@ internal class JobSchedulerCompatImpl @Inject internal constructor(
     triggerAfter: Long
   ) {
     val pendingIntent = createIntent(targetClass, params).toPending()
-    val time = System.currentTimeMillis() + triggerAfter
-    queue(pendingIntent, time)
+    queue(pendingIntent, triggerAfter)
   }
 
   override fun queue(
