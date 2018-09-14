@@ -34,7 +34,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.list.info.LockInfoPresenter
+import com.pyamsoft.padlock.list.info.LockInfoViewModel
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.AppEntry
@@ -53,11 +53,11 @@ import timber.log.Timber
 import java.util.Collections
 import javax.inject.Inject
 
-class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
+class LockInfoDialog : ToolbarDialog() {
 
   @field:Inject internal lateinit var appIconLoader: AppIconLoader
   @field:Inject internal lateinit var imageLoader: ImageLoader
-  @field:Inject internal lateinit var presenter: LockInfoPresenter
+  @field:Inject internal lateinit var viewModel: LockInfoViewModel
 
   private lateinit var adapter: ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
   private lateinit var binding: DialogLockInfoBinding
@@ -81,17 +81,7 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
 
     require(appPackageName.isNotBlank())
     require(appName.isNotBlank())
-
     listStateTag = TAG + appPackageName
-
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusLockInfoComponent(
-            LockInfoProvider(appPackageName, object : ListDiffProvider<ActivityEntry> {
-              override fun data(): List<ActivityEntry> =
-                Collections.unmodifiableList(adapter.models)
-            })
-        )
-        .inject(this)
   }
 
   override fun onCreateView(
@@ -99,15 +89,18 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    binding = DialogLockInfoBinding.inflate(inflater, container, false)
-    return binding.root
-  }
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusLockInfoComponent(
+            LockInfoProvider(
+                viewLifecycleOwner, appPackageName, object : ListDiffProvider<ActivityEntry> {
+              override fun data(): List<ActivityEntry> =
+                Collections.unmodifiableList(adapter.models)
+            })
+        )
+        .inject(this)
 
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
+    binding = DialogLockInfoBinding.inflate(inflater, container, false)
+
     refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
       Timber.d("Posting refresh latch: $it")
       binding.lockInfoSwipeRefresh.refreshing(it)
@@ -145,7 +138,20 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
     filterListDelegate.onViewCreated(adapter)
     lastPosition = ListStateUtil.restoreState(listStateTag, savedInstanceState)
 
-    presenter.bind(viewLifecycleOwner, this)
+    viewModel.onDatabaseChangeEvent { wrapper ->
+      wrapper.onSuccess { onDatabaseChangeReceived(it.index, it.entry) }
+      wrapper.onError { onDatabaseChangeError() }
+    }
+
+    viewModel.onModifyError { onModifyEntryError() }
+    viewModel.onPopulateListEvent { wrapper ->
+      wrapper.onLoading { onListPopulateBegin() }
+      wrapper.onSuccess { onListLoaded(it) }
+      wrapper.onError { onListPopulateError() }
+      wrapper.onComplete { onListPopulated() }
+    }
+
+    return binding.root
   }
 
   private fun setupToolbar() {
@@ -186,7 +192,7 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
       lockInfoSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.blue700)
       lockInfoSwipeRefresh.setOnRefreshListener {
         refreshLatch.forceRefresh()
-        presenter.populateList(true)
+        viewModel.populateList(true)
       }
     }
   }
@@ -232,6 +238,7 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
     appIconLoader.loadAppIcon(appPackageName, appIcon)
         .into(binding.lockInfoIcon)
         .bind(viewLifecycleOwner)
+    viewModel.populateList(false)
   }
 
   override fun onPause() {
@@ -265,46 +272,46 @@ class LockInfoDialog : ToolbarDialog(), LockInfoPresenter.View {
     }
   }
 
-  override fun onListPopulateBegin() {
+  private fun onListPopulateBegin() {
     refreshLatch.isRefreshing = true
   }
 
-  override fun onListPopulated() {
+  private fun onListPopulated() {
     refreshLatch.isRefreshing = false
   }
 
-  override fun onListLoaded(list: List<ActivityEntry>) {
+  private fun onListLoaded(list: List<ActivityEntry>) {
     adapter.set(list)
   }
 
-  override fun onListPopulateError(throwable: Throwable) {
+  private fun onListPopulateError() {
     Snackbreak.make(
         binding.root,
         "Failed to load list for $appName",
         Snackbar.LENGTH_LONG
     )
-        .setAction("Retry") { presenter.populateList(true) }
+        .setAction("Retry") { viewModel.populateList(true) }
         .show()
   }
 
-  override fun onModifyEntryError(throwable: Throwable) {
+  private fun onModifyEntryError() {
     Snackbreak.make(
         binding.root,
         "Failed to modify list for $appName",
         Snackbar.LENGTH_LONG
     )
-        .setAction("Retry") { presenter.populateList(true) }
+        .setAction("Retry") { viewModel.populateList(true) }
         .show()
   }
 
-  override fun onDatabaseChangeReceived(
+  private fun onDatabaseChangeReceived(
     index: Int,
     entry: ActivityEntry
   ) {
     adapter.set(index, entry)
   }
 
-  override fun onDatabaseChangeError(throwable: Throwable) {
+  private fun onDatabaseChangeError() {
     ErrorDialog().show(requireActivity(), "db_change_error")
   }
 

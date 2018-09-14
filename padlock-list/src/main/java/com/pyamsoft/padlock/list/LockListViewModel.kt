@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.list
 
+import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
@@ -141,6 +142,7 @@ class LockListViewModel @Inject internal constructor(
     }
   }
 
+  @CheckResult
   private fun modifyDatabaseEntry(
     isChecked: Boolean,
     packageName: String,
@@ -211,7 +213,7 @@ class LockListViewModel @Inject internal constructor(
         .doAfterTerminate { populateListBus.publishComplete() }
         .doOnSubscribe { populateListBus.publishLoading(force) }
         .subscribe({ populateListBus.publishSuccess(it) }, {
-          Timber.e(it, "populateList error")
+          Timber.e(it, "LockListPresenter populateList error")
           populateListBus.publishError(it)
         })
   }

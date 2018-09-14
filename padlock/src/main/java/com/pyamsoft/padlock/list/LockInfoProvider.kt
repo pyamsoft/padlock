@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlock.list
 
+import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import dagger.Module
@@ -24,9 +26,14 @@ import javax.inject.Named
 
 @Module
 class LockInfoProvider(
+  private val owner: LifecycleOwner,
   private val packageName: String,
   private val listDiffProvider: ListDiffProvider<ActivityEntry>
 ) {
+
+  @Provides
+  @CheckResult
+  fun provideOwner(): LifecycleOwner = owner
 
   @Provides
   @Named("package_name")
