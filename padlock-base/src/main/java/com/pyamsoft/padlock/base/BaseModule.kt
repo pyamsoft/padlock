@@ -26,18 +26,11 @@ import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
 import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
-import com.pyamsoft.padlock.model.LockWhitelistedEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
 import dagger.Binds
 import dagger.Module
 
 @Module
 abstract class BaseModule {
-
-  @Binds
-  internal abstract fun provideLockWhitelisted(
-    bus: LockWhitelistedBus
-  ): EventBus<LockWhitelistedEvent>
 
   @Binds
   internal abstract fun provideMasterPinPreference(

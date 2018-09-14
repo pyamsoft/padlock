@@ -21,7 +21,7 @@ import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
-import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.presenter.Presenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -31,8 +31,8 @@ import javax.inject.Named
 
 @JvmSuppressWildcards
 class LockInfoPresenter @Inject internal constructor(
-  private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
-  private val bus: EventBus<LockInfoEvent>,
+  private val lockWhitelistedBus: Listener<LockWhitelistedEvent>,
+  private val bus: Listener<LockInfoEvent>,
   private val interactor: LockInfoInteractor,
   @param:Named("package_name") private val packageName: String,
   private val listDiffProvider: ListDiffProvider<ActivityEntry>

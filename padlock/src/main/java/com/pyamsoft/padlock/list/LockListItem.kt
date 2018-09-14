@@ -31,6 +31,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.lifecycle.fakeBind
 import com.pyamsoft.pydroid.core.lifecycle.fakeUnbind
 import com.pyamsoft.pydroid.loader.ImageLoader
@@ -75,7 +76,7 @@ class LockListItem internal constructor(
     private val binding: AdapterItemLocklistBinding = AdapterItemLocklistBinding.bind(itemView)
     private val lifecycle = LifecycleRegistry(this)
 
-    @field:Inject internal lateinit var publisher: LockListItemPublisher
+    @field:Inject internal lateinit var publisher: Publisher<LockListEvent>
     @field:Inject internal lateinit var imageLoader: ImageLoader
     @field:Inject internal lateinit var appIconLoader: AppIconLoader
 
@@ -116,7 +117,7 @@ class LockListItem internal constructor(
       binding.lockListToggle.setOnCheckedChangeListener { buttonView, isChecked ->
         buttonView.isChecked = isChecked.not()
         Timber.d("Modify the database entry: ${model.packageName} $isChecked")
-        publisher.modifyEntry(isChecked, model.packageName, null, model.system)
+        publisher.publish(LockListEvent(model.packageName, null, model.system, isChecked))
       }
       lifecycle.fakeBind()
     }

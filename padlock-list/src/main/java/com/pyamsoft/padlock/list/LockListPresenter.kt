@@ -32,7 +32,6 @@ import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.presenter.Presenter
@@ -47,8 +46,8 @@ import javax.inject.Named
 class LockListPresenter @Inject internal constructor(
   private val lockListInteractor: LockListInteractor,
   private val serviceInteractor: LockServiceInteractor,
-  private val lockListBus: EventBus<LockListEvent>,
-  private val lockWhitelistedBus: EventBus<LockWhitelistedEvent>,
+  private val lockListBus: Listener<LockListEvent>,
+  private val lockWhitelistedBus: Listener<LockWhitelistedEvent>,
   private val clearPinBus: Listener<ClearPinEvent>,
   private val createPinBus: Listener<CreatePinEvent>,
   private val listDiffProvider: ListDiffProvider<AppEntry>,

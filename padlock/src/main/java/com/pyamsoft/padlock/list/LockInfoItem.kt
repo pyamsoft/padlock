@@ -23,9 +23,11 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding
-import com.pyamsoft.padlock.list.info.LockInfoItemPublisher
+import com.pyamsoft.padlock.list.info.LockInfoEvent
+import com.pyamsoft.padlock.list.info.LockInfoEvent.Companion
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.ActivityEntry
+import com.pyamsoft.pydroid.core.bus.Publisher
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -63,7 +65,7 @@ class LockInfoItem internal constructor(
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     private val binding: AdapterItemLockinfoBinding = AdapterItemLockinfoBinding.bind(itemView)
-    @field:Inject internal lateinit var publisher: LockInfoItemPublisher
+    @field:Inject internal lateinit var publisher: Publisher<LockInfoEvent>
 
     init {
       Injector.obtain<PadLockComponent>(itemView.context.applicationContext)
@@ -75,7 +77,7 @@ class LockInfoItem internal constructor(
       system: Boolean,
       newLockState: LockState
     ) {
-      publisher.modifyEntry(model, newLockState, null, system)
+      publisher.publish(LockInfoEvent.from(model, newLockState, null, system))
     }
 
     fun bind(

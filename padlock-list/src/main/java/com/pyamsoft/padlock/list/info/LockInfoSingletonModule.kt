@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.padlock.api.LockInfoInteractor
-import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.cache.Cache
 import dagger.Binds
 import dagger.Module
@@ -25,9 +24,6 @@ import javax.inject.Named
 
 @Module
 abstract class LockInfoSingletonModule {
-
-  @Binds
-  internal abstract fun provideBus(bus: LockInfoBus): EventBus<LockInfoEvent>
 
   @Binds
   internal abstract fun provideInteractor(impl: LockInfoInteractorImpl): LockInfoInteractor

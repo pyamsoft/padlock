@@ -27,7 +27,9 @@ import com.pyamsoft.padlock.api.lockscreen.LockHelper
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
+import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.service.Recheck
+import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional
@@ -44,6 +46,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LockEntryInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
+  private val lockWhitelistedBus: Publisher<LockWhitelistedEvent>,
   private val lockPassed: LockPassed,
   private val lockHelper: LockHelper,
   private val preferences: LockScreenPreferences,
@@ -269,6 +272,16 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
         .andThen(Completable.fromAction {
           lockPassed.add(packageName, activityName)
         })
+        .doOnComplete {
+          if (whitelist) {
+            lockWhitelistedBus.publish(
+                LockWhitelistedEvent(
+                    packageName,
+                    activityName
+                )
+            )
+          }
+        }
   }
 
   @CheckResult

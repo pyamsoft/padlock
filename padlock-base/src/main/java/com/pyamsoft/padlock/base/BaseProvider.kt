@@ -18,6 +18,7 @@ package com.pyamsoft.padlock.base
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.ForegroundEvent
+import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.service.RecheckEvent
 import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
@@ -33,6 +34,7 @@ object BaseProvider {
   private val serviceBus = RxBus.create<ServiceFinishEvent>()
   private val recheckBus = RxBus.create<RecheckEvent>()
   private val foregroundBus = RxBus.create<ForegroundEvent>()
+  private val whitelistBus = RxBus.create<LockWhitelistedEvent>()
 
   @JvmStatic
   @Provides
@@ -68,5 +70,15 @@ object BaseProvider {
   @Provides
   @CheckResult
   fun provideForegroundListener(): Listener<ForegroundEvent> = foregroundBus
+
+  @JvmStatic
+  @Provides
+  @CheckResult
+  fun provideWhitelistPublisher(): Publisher<LockWhitelistedEvent> = whitelistBus
+
+  @JvmStatic
+  @Provides
+  @CheckResult
+  fun provideWhitelistListener(): Listener<LockWhitelistedEvent> = whitelistBus
 
 }

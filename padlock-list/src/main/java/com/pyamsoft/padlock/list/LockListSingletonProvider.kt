@@ -19,6 +19,9 @@ package com.pyamsoft.padlock.list
 import com.popinnow.android.repo.SingleRepo
 import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.pydroid.core.bus.Listener
+import com.pyamsoft.pydroid.core.bus.Publisher
+import com.pyamsoft.pydroid.core.bus.RxBus
 import dagger.Module
 import dagger.Provides
 import java.util.concurrent.TimeUnit.MINUTES
@@ -26,6 +29,8 @@ import javax.inject.Named
 
 @Module
 object LockListSingletonProvider {
+
+  private val bus = RxBus.create<LockListEvent>()
 
   private val repo = newRepoBuilder<List<AppEntry>>()
       .memoryCache(5, MINUTES)
@@ -35,5 +40,13 @@ object LockListSingletonProvider {
   @Provides
   @Named("repo_lock_list")
   internal fun provideRepo(): SingleRepo<List<AppEntry>> = repo
+
+  @JvmStatic
+  @Provides
+  internal fun providePublisher(): Publisher<LockListEvent> = bus
+
+  @JvmStatic
+  @Provides
+  internal fun provideListener(): Listener<LockListEvent> = bus
 
 }
