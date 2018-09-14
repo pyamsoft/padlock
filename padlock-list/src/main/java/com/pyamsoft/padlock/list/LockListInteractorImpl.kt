@@ -38,7 +38,9 @@ internal class LockListInteractorImpl @Inject internal constructor(
   @param:Named("repo_lock_list") private val repoLockList: SingleRepo<List<AppEntry>>
 ) : LockListInteractor, Cache {
 
-  override fun isSystemVisible(): Single<Boolean> = db.isSystemVisible()
+  override fun watchSystemVisible(): Observable<Boolean> {
+    return db.watchSystemVisible()
+  }
 
   override fun setSystemVisible(visible: Boolean) {
     db.setSystemVisible(visible)

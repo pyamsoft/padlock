@@ -24,4 +24,7 @@ interface LockListPreferences {
   fun isSystemVisible(): Boolean
 
   fun setSystemVisible(visible: Boolean)
+
+  @CheckResult
+  fun watchSystemVisible(func: (Boolean) -> Unit): PreferenceWatcher
 }

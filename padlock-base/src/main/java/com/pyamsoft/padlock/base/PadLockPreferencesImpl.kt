@@ -137,6 +137,12 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     }
   }
 
+  override fun watchSystemVisible(func: (Boolean) -> Unit): PreferenceWatcher {
+    return KeyedPreferenceWatcher(preferences, IS_SYSTEM) {
+      func(isSystemVisible())
+    }
+  }
+
   override fun clearAll() {
     preferences.edit(commit = true) {
       clear()

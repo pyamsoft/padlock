@@ -16,13 +16,22 @@
 
 package com.pyamsoft.padlock.list
 
+import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import dagger.Module
 import dagger.Provides
 
 @Module
-class LockListProvider(private val listDiffProvider: ListDiffProvider<AppEntry>) {
+class LockListProvider(
+  private val owner: LifecycleOwner,
+  private val listDiffProvider: ListDiffProvider<AppEntry>
+) {
+
+  @Provides
+  @CheckResult
+  fun provideOwner(): LifecycleOwner = owner
 
   @Provides
   fun provideData(): ListDiffProvider<AppEntry> = listDiffProvider

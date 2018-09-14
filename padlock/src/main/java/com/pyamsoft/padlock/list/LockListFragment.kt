@@ -33,6 +33,10 @@ import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.DISABLED
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.ENABLED
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PAUSED
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.model.list.AppEntry
@@ -57,12 +61,12 @@ import timber.log.Timber
 import java.util.Collections
 import javax.inject.Inject
 
-class LockListFragment : ToolbarFragment(), LockListPresenter.View {
+class LockListFragment : ToolbarFragment() {
 
   private val handler = Handler(Looper.getMainLooper())
 
   @field:Inject internal lateinit var imageLoader: ImageLoader
-  @field:Inject internal lateinit var presenter: LockListPresenter
+  @field:Inject internal lateinit var viewModel: LockListViewModel
   @field:Inject internal lateinit var serviceManager: ServiceManager
   private lateinit var adapter: ModelAdapter<AppEntry, LockListItem>
   private lateinit var binding: FragmentLockListBinding
@@ -72,29 +76,20 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
   private var lastPosition: Int = 0
   private var displaySystemItem: MenuItem? = null
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusLockListComponent(LockListProvider(object : ListDiffProvider<AppEntry> {
-          override fun data(): List<AppEntry> = Collections.unmodifiableList(adapter.models)
-        }))
-        .inject(this)
-  }
-
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusLockListComponent(
+            LockListProvider(viewLifecycleOwner, object : ListDiffProvider<AppEntry> {
+              override fun data(): List<AppEntry> = Collections.unmodifiableList(adapter.models)
+            })
+        )
+        .inject(this)
     binding = FragmentLockListBinding.inflate(inflater, container, false)
-    return binding.root
-  }
 
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
     refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
       activity?.invalidateOptionsMenu()
       filterListDelegate.setEnabled(!it)
@@ -133,15 +128,52 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
 
     lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
-    presenter.bind(viewLifecycleOwner, this)
+    viewModel.onClearPinEvent {
+      if (it.success) {
+        onMasterPinClearSuccess()
+      } else {
+        onMasterPinClearFailure()
+      }
+    }
+
+    viewModel.onCreatePinEvent {
+      if (it.success) {
+        onMasterPinCreateSuccess()
+      } else {
+        onMasterPinCreateFailure()
+      }
+    }
+
+    viewModel.onModifyError { onModifyEntryError() }
+    viewModel.onSystemVisibilityChanged { onSystemVisibilityChanged(it) }
+    viewModel.onDatabaseChangeEvent { wrapper ->
+      wrapper.onSuccess { onDatabaseChangeReceived(it.index, it.entry) }
+      wrapper.onError { onDatabaseChangeError() }
+    }
+    viewModel.onFabStateChange { serviceState, manually ->
+      when (serviceState) {
+        ENABLED -> onFabIconLocked(manually)
+        DISABLED -> onFabIconUnlocked(manually)
+        PERMISSION -> onFabIconPermissionDenied(manually)
+        PAUSED -> onFabIconPaused(manually)
+      }
+    }
+    viewModel.onPopulateListEvent { wrapper ->
+      wrapper.onLoading { onListPopulateBegin() }
+      wrapper.onSuccess { onListLoaded(it) }
+      wrapper.onError { onListPopulateError() }
+      wrapper.onComplete { onListPopulated() }
+    }
 
     val intent = requireActivity().intent
     if (intent.hasExtra(ServiceManager.FORCE_REFRESH_ON_OPEN)) {
       intent.removeExtra(ServiceManager.FORCE_REFRESH_ON_OPEN)
 
-      Timber.d("Launched from notification, clear list")
-      presenter.forceClearCache()
+      Timber.d("Launched from notification, force list refresh")
+      viewModel.populateList(true)
     }
+
+    return binding.root
   }
 
   private fun setupToolbarMenu() {
@@ -167,8 +199,8 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
           R.id.menu_is_system -> {
             if (!binding.applistSwipeRefresh.isRefreshing) {
               Timber.d("List is not refreshing. Allow change of system preference")
-              presenter.setSystemVisibility(!menuItem.isChecked)
-              presenter.populateList(true)
+              viewModel.setSystemVisibility(!menuItem.isChecked)
+              viewModel.populateList(true)
             }
             return@setOnMenuItemClickListener true
           }
@@ -187,6 +219,11 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
       ListStateUtil.saveState(TAG, outState, binding.applistRecyclerview)
     }
     super.onSaveInstanceState(outState)
+  }
+
+  override fun onStart() {
+    super.onStart()
+    viewModel.populateList(false)
   }
 
   override fun onResume() {
@@ -242,7 +279,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
       applistSwipeRefresh.setOnRefreshListener {
         Timber.d("onRefresh")
         refreshLatch.forceRefresh()
-        presenter.populateList(true)
+        viewModel.populateList(true)
       }
     }
   }
@@ -298,7 +335,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
   private fun setupFAB() {
     binding.apply {
       applistFab.setOnDebouncedClickListener {
-        presenter.checkFabState(true)
+        viewModel.checkFabState(true)
       }
 
       // Attach the FAB to callbacks on the recycler scroll
@@ -320,7 +357,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         .show(requireActivity(), LockInfoDialog.TAG)
   }
 
-  override fun onMasterPinCreateSuccess() {
+  private fun onMasterPinCreateSuccess() {
     val v = view
     if (v != null) {
       Snackbreak.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT)
@@ -328,7 +365,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
     }
   }
 
-  override fun onMasterPinCreateFailure() {
+  private fun onMasterPinCreateFailure() {
     Snackbreak.make(
         binding.root,
         "Failed to create master pin",
@@ -337,7 +374,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         .show()
   }
 
-  override fun onMasterPinClearSuccess() {
+  private fun onMasterPinClearSuccess() {
     val v = view
     if (v != null) {
       Snackbreak.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT)
@@ -345,7 +382,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
     }
   }
 
-  override fun onMasterPinClearFailure() {
+  private fun onMasterPinClearFailure() {
     Snackbreak.make(
         binding.root,
         "Failed to clear master pin",
@@ -354,17 +391,17 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         .show()
   }
 
-  override fun onModifyEntryError(throwable: Throwable) {
+  private fun onModifyEntryError() {
     Snackbreak.make(
         binding.root,
         "Failed to modify application list",
         Snackbar.LENGTH_LONG
     )
-        .setAction("Retry") { presenter.populateList(true) }
+        .setAction("Retry") { viewModel.populateList(true) }
         .show()
   }
 
-  override fun onFabIconLocked(manually: Boolean) {
+  private fun onFabIconLocked(manually: Boolean) {
     if (manually) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
         PinDialog.newInstance(false)
@@ -380,7 +417,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         .bind(viewLifecycleOwner)
   }
 
-  override fun onFabIconUnlocked(manually: Boolean) {
+  private fun onFabIconUnlocked(manually: Boolean) {
     if (manually) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
         PinDialog.newInstance(false)
@@ -396,7 +433,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         .bind(viewLifecycleOwner)
   }
 
-  override fun onFabIconPermissionDenied(manually: Boolean) {
+  private fun onFabIconPermissionDenied(manually: Boolean) {
     if (manually) {
       UsageAccessRequestDialog().show(requireActivity(), "usage_access")
       return
@@ -409,7 +446,7 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         .bind(viewLifecycleOwner)
   }
 
-  override fun onFabIconPaused(manually: Boolean) {
+  private fun onFabIconPaused(manually: Boolean) {
     if (manually) {
       serviceManager.startService(true)
       return
@@ -422,37 +459,37 @@ class LockListFragment : ToolbarFragment(), LockListPresenter.View {
         .bind(viewLifecycleOwner)
   }
 
-  override fun onSystemVisibilityChanged(visible: Boolean) {
+  private fun onSystemVisibilityChanged(visible: Boolean) {
     displaySystemItem?.isChecked = visible
   }
 
-  override fun onListPopulateBegin() {
+  private fun onListPopulateBegin() {
     refreshLatch.isRefreshing = true
   }
 
-  override fun onListLoaded(entries: List<AppEntry>) {
+  private fun onListLoaded(entries: List<AppEntry>) {
     adapter.set(entries)
   }
 
-  override fun onListPopulated() {
+  private fun onListPopulated() {
     refreshLatch.isRefreshing = false
   }
 
-  override fun onListPopulateError(throwable: Throwable) {
+  private fun onListPopulateError() {
     Snackbreak.make(
         binding.root,
         "Failed to load application list",
         Snackbar.LENGTH_LONG
     )
-        .setAction("Retry") { presenter.populateList(true) }
+        .setAction("Retry") { viewModel.populateList(true) }
         .show()
   }
 
-  override fun onDatabaseChangeError(throwable: Throwable) {
+  private fun onDatabaseChangeError() {
     ErrorDialog().show(requireActivity(), "db_change_error")
   }
 
-  override fun onDatabaseChangeReceived(
+  private fun onDatabaseChangeReceived(
     index: Int,
     entry: AppEntry
   ) {

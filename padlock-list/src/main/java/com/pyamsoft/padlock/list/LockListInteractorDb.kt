@@ -38,6 +38,7 @@ import com.pyamsoft.padlock.model.list.LockListUpdatePayload
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
@@ -54,11 +55,27 @@ internal class LockListInteractorDb @Inject internal constructor(
   private val preferences: LockListPreferences
 ) : LockListInteractor {
 
-  override fun isSystemVisible(): Single<Boolean> =
-    Single.fromCallable {
-      enforcer.assertNotOnMainThread()
-      return@fromCallable preferences.isSystemVisible()
+  private fun emit(
+    emitter: ObservableEmitter<Boolean>,
+    value: Boolean
+  ) {
+    if (!emitter.isDisposed) {
+      emitter.onNext(value)
     }
+  }
+
+  override fun watchSystemVisible(): Observable<Boolean> {
+    return Observable.defer {
+      enforcer.assertNotOnMainThread()
+      return@defer Observable.create<Boolean> { emitter ->
+        val watcher = preferences.watchSystemVisible { emit(emitter, it) }
+        emitter.setCancellable { watcher.stopWatching() }
+
+        enforcer.assertNotOnMainThread()
+        emit(emitter, preferences.isSystemVisible())
+      }
+    }
+  }
 
   override fun setSystemVisible(visible: Boolean) {
     preferences.setSystemVisible(visible)
