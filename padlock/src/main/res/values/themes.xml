@@ -25,10 +25,6 @@
     <item name="android:navigationBarColor">@color/blue700</item>
     <item name="dialogTheme">@style/Theme.PadLock.Dialog</item>
     <item name="alertDialogTheme">@style/Theme.PadLock.Dialog</item>
-
-    <item name="colorSecondary">?attr/colorPrimary</item>
-    <item name="scrimBackground">@color/shadow_scrim45</item>
-    <item name="snackbarButtonStyle">?attr/borderlessButtonStyle</item>
   </style>
 
   <!-- Lock Screen Theme -->
