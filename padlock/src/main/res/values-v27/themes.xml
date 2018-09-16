@@ -39,4 +39,9 @@
     <item name="android:windowLightNavigationBar">false</item>
   </style>
 
+  <style name="Theme.PadLock.Light.Transparent" parent="@style/Base.Theme.PadLock.Light.Transparent">
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowLightNavigationBar">false</item>
+  </style>
+
 </resources>

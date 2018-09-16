@@ -37,7 +37,6 @@ import com.pyamsoft.padlock.lock.LockSingletonModule
 import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.pin.PinComponent
-import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.padlock.pin.PinModule
 import com.pyamsoft.padlock.pin.PinSingletonModule
 import com.pyamsoft.padlock.pin.PinSingletonProvider
@@ -52,6 +51,7 @@ import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.padlock.service.ServiceComponent
 import com.pyamsoft.padlock.service.ServiceModule
 import com.pyamsoft.padlock.service.ServiceSingletonModule
+import com.pyamsoft.padlock.service.ServiceSingletonProvider
 import com.pyamsoft.padlock.settings.ConfirmationDialog
 import com.pyamsoft.padlock.settings.SettingsComponent
 import com.pyamsoft.padlock.settings.SettingsModule
@@ -68,7 +68,8 @@ import javax.inject.Singleton
       PurgeSingletonProvider::class, SettingsSingletonModule::class, LockInfoSingletonModule::class,
       LockInfoSingletonProvider::class, LockStateModule::class, LockListSingletonModule::class,
       LockListSingletonProvider::class, LockSingletonModule::class, LockSingletonProvider::class,
-      SettingsSingletonProvider::class, BaseProvider::class, PinSingletonProvider::class
+      SettingsSingletonProvider::class, BaseProvider::class, PinSingletonProvider::class,
+      ServiceSingletonProvider::class
     ]
 )
 interface PadLockComponent {

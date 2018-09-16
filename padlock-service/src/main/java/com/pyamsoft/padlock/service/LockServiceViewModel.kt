@@ -41,6 +41,7 @@ class LockServiceViewModel @Inject internal constructor(
   private val foregroundEventBus: Listener<ForegroundEvent>,
   private val serviceFinishBus: EventBus<ServiceFinishEvent>,
   private val recheckEventBus: Listener<RecheckEvent>,
+  private val servicePauseBus: Listener<ServicePauseEvent>,
   private val interactor: LockServiceInteractor
 ) : BaseViewModel(owner) {
 
@@ -59,6 +60,16 @@ class LockServiceViewModel @Inject internal constructor(
     matchingDisposable.tryDispose()
     entryDisposable.tryDispose()
     foregroundDisposable.tryDispose()
+  }
+
+  fun onServicePauseEvent(func: (Boolean) -> Unit) {
+    dispose {
+      servicePauseBus.listen()
+          .map { it.autoResume }
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(func)
+    }
   }
 
   fun onServiceFinishEvent(func: () -> Unit) {

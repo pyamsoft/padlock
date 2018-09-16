@@ -74,6 +74,13 @@
 
     </activity>
 
+    <activity
+        android:name=".service.PauseConfirmActivity"
+        android:exported="false"
+        android:launchMode="singleInstance"
+        android:taskAffinity=""
+        android:windowSoftInputMode="adjustResize"/>
+
     <!-- Locking Service -->
     <service
         android:name=".service.PadLockService"

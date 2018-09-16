@@ -7,4 +7,6 @@ interface ServiceComponent {
 
   fun inject(service: PadLockService)
 
+  fun inject(activity: PauseConfirmActivity)
+
 }

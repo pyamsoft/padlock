@@ -36,4 +36,8 @@
     <item name="android:windowLightStatusBar">true</item>
   </style>
 
+  <style name="Theme.PadLock.Light.Transparent" parent="@style/Base.Theme.PadLock.Light.Transparent">
+    <item name="android:windowLightStatusBar">false</item>
+  </style>
+
 </resources>

@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.pin
 
+import com.pyamsoft.padlock.model.pin.CheckPinEvent
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.pydroid.core.bus.EventBus

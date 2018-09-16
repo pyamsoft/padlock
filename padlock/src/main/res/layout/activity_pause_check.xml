@@ -1,4 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
   ~ Copyright (C) 2018 Peter Kenji Yamanaka
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +16,13 @@
   ~ limitations under the License.
   -->
 
-<resources>
+<layout>
 
-  <color name="blue500">#4768FD</color>
-  <color name="blue700">#3C54FE</color>
-  <color name="transparent">#00000000</color>
-  <color name="lock_info_dark_background">#ffdedede</color>
+  <FrameLayout
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/pause_check_root"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      />
 
-</resources>
+</layout>

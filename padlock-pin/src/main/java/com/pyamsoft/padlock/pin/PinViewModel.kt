@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.pin
 import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.api.PinInteractor
+import com.pyamsoft.padlock.model.pin.CheckPinEvent
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.padlock.model.pin.PinEntryEvent

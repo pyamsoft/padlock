@@ -84,6 +84,7 @@ class PadLockService : Service(), LifecycleOwner {
     }
 
     viewModel.onServiceFinishEvent { serviceStop() }
+    viewModel.onServicePauseEvent { pauseService(it) }
 
     viewModel.onPermissionLostEvent { servicePermissionLost() }
 
@@ -114,7 +115,7 @@ class PadLockService : Service(), LifecycleOwner {
 
     when (command) {
       START -> serviceStart()
-      PAUSE -> servicePause(false)
+      PAUSE -> servicePause()
       TEMP_PAUSE -> serviceTempPause()
     }
     return Service.START_STICKY
@@ -122,24 +123,31 @@ class PadLockService : Service(), LifecycleOwner {
 
   private fun serviceStart() {
     viewModel.setServicePaused(false)
+
     // Cancel old notifications
     notificationManager.cancel(PAUSED_ID)
     notificationManager.cancel(PERMISSION_ID)
 
     // Cancel temporary intent
     jobSchedulerCompat.cancel(serviceManager.startIntent())
+
+    // Start foreground service
     startForeground(NOTIFICATION_ID, notificationBuilder.build())
   }
 
   private fun serviceTempPause() {
-    // Queue the service to restart after timeout via alarm manager
-    jobSchedulerCompat.queue(serviceManager.startIntent(), TIME_TEMP_PAUSE)
-
-    servicePause(true)
   }
 
-  private fun servicePause(autoResume: Boolean) {
+  private fun servicePause() {
+  }
+
+  private fun pauseService(autoResume: Boolean) {
     viewModel.setServicePaused(true)
+
+    if (autoResume) {
+      // Queue the service to restart after timeout via alarm manager
+      jobSchedulerCompat.queue(serviceManager.startIntent(), TIME_TEMP_PAUSE)
+    }
 
     // Stop the service here
     serviceStop()
