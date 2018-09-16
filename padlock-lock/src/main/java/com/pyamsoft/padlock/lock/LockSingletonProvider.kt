@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.lock
 
 import com.pyamsoft.padlock.lock.screen.CloseOldEvent
-import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.RxBus
 import dagger.Module

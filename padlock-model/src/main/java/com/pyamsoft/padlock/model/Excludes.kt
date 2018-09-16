@@ -31,6 +31,9 @@ object Excludes {
       // Lock Screen, can't lock itself
       "com.pyamsoft.padlock.lock.lockscreenactivity",
 
+      // Don't lock the pause confirm screen
+      "com.pyamsoft.padlock.service.pauseconfirmactivity",
+
       // Android USB mode chooser dialog (Transparent Activity)
       "com.android.settings.deviceinfo.usbmodechooseractivity",
 

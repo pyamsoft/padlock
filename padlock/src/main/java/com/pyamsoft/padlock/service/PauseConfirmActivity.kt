@@ -19,7 +19,7 @@ class PauseConfirmActivity : ActivityBase() {
 
   private var autoResume: Boolean = false
   @field:Inject internal lateinit var viewModel: PauseServiceViewModel
-  @field:Inject internal lateinit var publisher: Publisher<ServicePauseEvent>
+  @field:Inject internal lateinit var pausePublisher: Publisher<ServicePauseEvent>
 
   private lateinit var binding: ActivityPauseCheckBinding
 
@@ -42,7 +42,7 @@ class PauseConfirmActivity : ActivityBase() {
           .show()
     }
     viewModel.onCheckPinEventSuccess {
-      publisher.publish(ServicePauseEvent(autoResume))
+      pausePublisher.publish(ServicePauseEvent(autoResume))
       finish()
     }
 
