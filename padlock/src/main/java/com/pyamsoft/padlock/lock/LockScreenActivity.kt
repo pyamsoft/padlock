@@ -302,6 +302,7 @@ class LockScreenActivity : ActivityBase() {
   @CallSuper
   override fun onDestroy() {
     super.onDestroy()
+    overridePendingTransition(0, 0)
     binding.unbind()
     Timber.d("onDestroy LockScreenActivity for $lockedPackageName $lockedRealName")
   }

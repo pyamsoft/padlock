@@ -161,8 +161,12 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     func: () -> Unit
   ) : PreferenceWatcher {
 
+    // TODO this is emitting multiple events since each watcher registers a new listener.
+    // Fix this somehow, see UsageEventProviderImpl for inspiration
     private val callback = OnSharedPreferenceChangeListener { _, preference ->
+      Timber.d("on shared preference changed: $key")
       if (key == preference) {
+        Timber.d("on shared preference match: $key")
         func()
       }
     }

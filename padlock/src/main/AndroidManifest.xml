@@ -76,9 +76,11 @@
 
     <activity
         android:name=".service.PauseConfirmActivity"
+        android:excludeFromRecents="true"
         android:exported="false"
         android:launchMode="singleInstance"
-        android:taskAffinity=""
+        android:noHistory="true"
+        android:theme="@style/Theme.PadLock.Light.Transparent"
         android:windowSoftInputMode="adjustResize"/>
 
     <!-- Locking Service -->

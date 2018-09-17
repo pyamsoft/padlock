@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.pin
 
+import android.content.DialogInterface
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.Gravity
@@ -49,11 +50,13 @@ class PinDialog : ToolbarDialog() {
   private lateinit var binding: DialogPinEntryBinding
 
   private var checkOnly: Boolean = false
+  private var finishOnDismiss: Boolean = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     isCancelable = true
     checkOnly = requireArguments().getBoolean(CHECK_ONLY, false)
+    finishOnDismiss = requireArguments().getBoolean(FINISH_ON_DISMISS, false)
   }
 
   override fun onResume() {
@@ -168,6 +171,11 @@ class PinDialog : ToolbarDialog() {
     }
   }
 
+  override fun onDismiss(dialog: DialogInterface?) {
+    super.onDismiss(dialog)
+    activity?.also { it.finish() }
+  }
+
   override fun onDestroyView() {
     super.onDestroyView()
     Timber.d("Destroy AlertDialog")
@@ -178,13 +186,18 @@ class PinDialog : ToolbarDialog() {
 
     const val TAG = "PinDialog"
     internal const val CHECK_ONLY = "check_only"
+    private const val FINISH_ON_DISMISS = "check_only"
 
     @JvmStatic
     @CheckResult
-    fun newInstance(checkOnly: Boolean): PinDialog {
+    fun newInstance(
+      checkOnly: Boolean,
+      finishOnDismiss: Boolean
+    ): PinDialog {
       return PinDialog().apply {
         arguments = Bundle().apply {
           putBoolean(CHECK_ONLY, checkOnly)
+          putBoolean(FINISH_ON_DISMISS, finishOnDismiss)
         }
       }
     }

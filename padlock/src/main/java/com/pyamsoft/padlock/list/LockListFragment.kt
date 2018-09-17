@@ -404,7 +404,7 @@ class LockListFragment : ToolbarFragment() {
   private fun onFabIconLocked(manually: Boolean) {
     if (manually) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
-        PinDialog.newInstance(false)
+        PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
             .show(requireActivity(), PinDialog.TAG)
       }
       return
@@ -420,7 +420,7 @@ class LockListFragment : ToolbarFragment() {
   private fun onFabIconUnlocked(manually: Boolean) {
     if (manually) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
-        PinDialog.newInstance(false)
+        PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
             .show(requireActivity(), PinDialog.TAG)
       }
       return

@@ -13,11 +13,12 @@ import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.util.Snackbreak
+import com.pyamsoft.pydroid.ui.util.show
+import timber.log.Timber
 import javax.inject.Inject
 
 class PauseConfirmActivity : ActivityBase() {
 
-  private var autoResume: Boolean = false
   @field:Inject internal lateinit var viewModel: PauseServiceViewModel
   @field:Inject internal lateinit var pausePublisher: Publisher<ServicePauseEvent>
 
@@ -25,9 +26,10 @@ class PauseConfirmActivity : ActivityBase() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.Theme_PadLock_Light_Transparent)
+    overridePendingTransition(0, 0)
     super.onCreate(savedInstanceState)
+    Timber.d("Launch with intent: $intent")
     binding = DataBindingUtil.setContentView(this, R.layout.activity_pause_check)
-    autoResume = intent.getBooleanExtra(EXTRA_AUTO_RESUME, false)
 
     Injector.obtain<PadLockComponent>(application)
         .plusServiceComponent(ServiceModule(this))
@@ -42,6 +44,8 @@ class PauseConfirmActivity : ActivityBase() {
           .show()
     }
     viewModel.onCheckPinEventSuccess {
+      val autoResume = intent.getBooleanExtra(EXTRA_AUTO_RESUME, false)
+      Timber.d("Pausing service with auto resume: $autoResume")
       pausePublisher.publish(ServicePauseEvent(autoResume))
       finish()
     }
@@ -49,17 +53,25 @@ class PauseConfirmActivity : ActivityBase() {
     addPinFragment()
   }
 
+  override fun onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
+    Timber.d("New intent received: $intent")
+    setIntent(intent)
+  }
+
   private fun addPinFragment() {
-    val fragmentManager = supportFragmentManager
-    if (fragmentManager.findFragmentByTag(PinDialog.TAG) == null) {
-      fragmentManager.beginTransaction()
-          .replace(R.id.pause_check_root, PinDialog.newInstance(true), PinDialog.TAG)
-          .commit()
-    }
+    PinDialog.newInstance(checkOnly = true, finishOnDismiss = true)
+        .show(this, PinDialog.TAG)
+  }
+
+  override fun finish() {
+    super.finish()
+    overridePendingTransition(0, 0)
   }
 
   override fun onDestroy() {
     super.onDestroy()
+    overridePendingTransition(0, 0)
     binding.unbind()
   }
 

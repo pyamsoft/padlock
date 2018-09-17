@@ -13,6 +13,7 @@ import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
 import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
+import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_PAUSE
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import timber.log.Timber
 import javax.inject.Inject
@@ -89,20 +90,24 @@ class ServiceManager @Inject internal constructor(
   fun startIntent(): PendingIntent {
     val intent = service(START)
     return PendingIntent.getService(
-        appContext, REQUEST_CODE_SERVICE_START, intent, PendingIntent.FLAG_ONE_SHOT
+        appContext, REQUEST_CODE_SERVICE_START, intent, PendingIntent.FLAG_UPDATE_CURRENT
     )
   }
 
   @CheckResult
-  fun pauseIntent(): PendingIntent {
-    val intent = service(PAUSE)
-    return PendingIntent.getService(appContext, REQUEST_CODE_SERVICE_PAUSE, intent, 0)
+  fun userPauseIntent(): PendingIntent {
+    val intent = service(USER_PAUSE)
+    return PendingIntent.getService(
+        appContext, REQUEST_CODE_SERVICE_USER_PAUSE, intent, PendingIntent.FLAG_UPDATE_CURRENT
+    )
   }
 
   @CheckResult
   fun tempPauseIntent(): PendingIntent {
     val intent = service(TEMP_PAUSE)
-    return PendingIntent.getService(appContext, REQUEST_CODE_SERVICE_TEMP_PAUSE, intent, 0)
+    return PendingIntent.getService(
+        appContext, REQUEST_CODE_SERVICE_TEMP_PAUSE, intent, PendingIntent.FLAG_UPDATE_CURRENT
+    )
   }
 
   companion object {
@@ -112,13 +117,14 @@ class ServiceManager @Inject internal constructor(
 
     private const val REQUEST_CODE_MAIN_ACTIVITY = 1004
     private const val REQUEST_CODE_SERVICE_START = 1005
-    private const val REQUEST_CODE_SERVICE_PAUSE = 1007
-    private const val REQUEST_CODE_SERVICE_TEMP_PAUSE = 1008
+    private const val REQUEST_CODE_SERVICE_USER_PAUSE = 1006
+    private const val REQUEST_CODE_SERVICE_TEMP_PAUSE = 1007
   }
 
   enum class Commands {
     START,
     PAUSE,
+    USER_PAUSE,
     TEMP_PAUSE
   }
 

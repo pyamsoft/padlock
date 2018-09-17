@@ -39,6 +39,7 @@ import com.pyamsoft.padlock.service.ServiceManager.Commands
 import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
 import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
+import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_PAUSE
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
 import com.pyamsoft.pydroid.core.lifecycle.fakeBind
 import com.pyamsoft.pydroid.core.lifecycle.fakeUnbind
@@ -85,9 +86,7 @@ class PadLockService : Service(), LifecycleOwner {
 
     viewModel.onServiceFinishEvent { serviceStop() }
     viewModel.onServicePauseEvent { pauseService(it) }
-
     viewModel.onPermissionLostEvent { servicePermissionLost() }
-
   }
 
   override fun onDestroy() {
@@ -113,15 +112,18 @@ class PadLockService : Service(), LifecycleOwner {
       command = Commands.valueOf(requireNotNull(commandString))
     }
 
+    Timber.d("Service received command: $command")
     when (command) {
       START -> serviceStart()
       PAUSE -> servicePause()
+      USER_PAUSE -> serviceUserPause()
       TEMP_PAUSE -> serviceTempPause()
     }
     return Service.START_STICKY
   }
 
   private fun serviceStart() {
+    Timber.d("System asked for service start")
     viewModel.setServicePaused(false)
 
     // Cancel old notifications
@@ -135,13 +137,26 @@ class PadLockService : Service(), LifecycleOwner {
     startForeground(NOTIFICATION_ID, notificationBuilder.build())
   }
 
-  private fun serviceTempPause() {
+  private fun servicePause() {
+    Timber.d("System asked for service pause")
+    // Paused by system, do not auto resume
+    pauseService(false)
   }
 
-  private fun servicePause() {
+  private fun serviceUserPause() {
+    Timber.d("User asked for service pause")
+    // Pause by user, check permission
+    PauseConfirmActivity.start(applicationContext, autoResume = false)
+  }
+
+  private fun serviceTempPause() {
+    Timber.d("User asked for service temp pause")
+    // Auto resume pause by user, check permission
+    PauseConfirmActivity.start(applicationContext, autoResume = true)
   }
 
   private fun pauseService(autoResume: Boolean) {
+    Timber.d("Pause service with auto resume: $autoResume")
     viewModel.setServicePaused(true)
 
     if (autoResume) {
@@ -219,7 +234,7 @@ class PadLockService : Service(), LifecycleOwner {
         .addAction(
             R.drawable.ic_padlock_notification,
             "Pause",
-            serviceManager.pauseIntent()
+            serviceManager.userPauseIntent()
         )
         .addAction(
             R.drawable.ic_padlock_notification,
