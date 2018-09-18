@@ -163,8 +163,10 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
 
     private val watcherMap = LinkedHashMap<UUID, Pair<String, () -> Unit>>()
 
+    private var cachedValuesList: Collection<Pair<String, () -> Unit>> = emptyList()
+
     private val callback = OnSharedPreferenceChangeListener { _, preference ->
-      val values = watcherMap.values
+      val values = cachedValuesList
       for (entry in values) {
         val key = entry.first
         val func = entry.second
@@ -185,6 +187,9 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
 
       Timber.d("Adding PreferenceWatcher for key $key")
       watcherMap[uuid] = key to func
+
+      // Update the cached values list here
+      cachedValuesList = watcherMap.values
     }
 
     fun removeWatcher(uuid: UUID) {
@@ -192,6 +197,9 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
           ?.also { (key, _) ->
             Timber.d("Removing PreferenceWatcher for key $key")
           }
+
+      // Update the cached values list here
+      cachedValuesList = watcherMap.values
 
       if (watcherMap.isEmpty()) {
         Timber.d("Stop watching preferences")

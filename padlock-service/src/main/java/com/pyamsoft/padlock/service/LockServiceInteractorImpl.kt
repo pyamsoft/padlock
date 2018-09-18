@@ -145,7 +145,9 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
         }
 
         enforcer.assertNotOnMainThread()
-        emit(emitter, decideServiceEnabledState())
+        Timber.d("Watching service state")
+
+        // Don't emit an event here or we receive double pause events
       }
     }
   }
