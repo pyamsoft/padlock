@@ -206,7 +206,9 @@ class PinDialog : ToolbarDialog() {
 
   override fun onDismiss(dialog: DialogInterface?) {
     super.onDismiss(dialog)
-    activity?.also { it.finish() }
+    if (finishOnDismiss) {
+      activity?.also { it.finish() }
+    }
   }
 
   override fun onDestroyView() {

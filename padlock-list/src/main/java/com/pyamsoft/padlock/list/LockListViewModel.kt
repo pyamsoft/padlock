@@ -186,11 +186,11 @@ class LockListViewModel @Inject internal constructor(
     }
   }
 
-  fun checkFabState(manually: Boolean) {
+  fun checkFabState(fromClick: Boolean) {
     fabDisposable = serviceInteractor.isServiceEnabled()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(Consumer { fabStateBus.publish(it to manually) })
+        .subscribe(Consumer { fabStateBus.publish(it to fromClick) })
   }
 
   fun onSystemVisibilityChanged(func: (Boolean) -> Unit) {

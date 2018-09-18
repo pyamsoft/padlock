@@ -21,6 +21,7 @@
   <androidx.constraintlayout.widget.ConstraintLayout
       xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:minHeight="48dp"
@@ -36,6 +37,8 @@
         android:paddingEnd="12dp"
         android:paddingStart="4dp"
         android:paddingTop="4dp"
+        app:layout_constrainedHeight="true"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -45,6 +48,7 @@
           android:id="@+id/lock_info_radio_default"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
+          tools:checked="true"
           />
 
       <RadioButton
@@ -68,19 +72,21 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:clickable="false"
+        android:ellipsize="start"
         android:focusable="false"
         android:gravity="start|center_vertical"
         android:longClickable="false"
         android:paddingEnd="4dp"
         android:paddingStart="12dp"
-        android:textColor="@color/black"
         android:singleLine="true"
-        android:ellipsize="start"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/black"
+        app:layout_constrainedHeight="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/lock_info_radio_group"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        tools:text="PadLock Example Activity Name"
         />
 
   </androidx.constraintlayout.widget.ConstraintLayout>

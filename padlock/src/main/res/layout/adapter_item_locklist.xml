@@ -21,7 +21,7 @@
   <androidx.constraintlayout.widget.ConstraintLayout
       xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
-      android:id="@+id/linearLayout"
+      xmlns:tools="http://schemas.android.com/tools"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:gravity="center_vertical"
@@ -44,28 +44,29 @@
         app:layout_constraintEnd_toStartOf="@+id/lock_list_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        tools:src="@mipmap/ic_launcher"
         />
 
     <TextView
         android:id="@+id/lock_list_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginBottom="4dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="4dp"
         android:clickable="false"
+        android:ellipsize="end"
         android:focusable="false"
         android:gravity="center_vertical"
         android:longClickable="false"
         android:singleLine="true"
-        android:ellipsize="end"
-        android:textColor="@color/black"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/lock_list_white"
         app:layout_constraintStart_toEndOf="@+id/lock_list_icon"
         app:layout_constraintTop_toTopOf="parent"
+        tools:text="PadLock Example Application"
         />
 
     <ImageView
@@ -78,17 +79,20 @@
         app:layout_constraintEnd_toStartOf="@+id/lock_list_locked"
         app:layout_constraintStart_toEndOf="@+id/lock_list_title"
         app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_whitelisted"
         />
 
     <ImageView
         android:id="@+id/lock_list_locked"
         android:layout_width="12dp"
         android:layout_height="12dp"
+        android:layout_marginEnd="8dp"
         android:contentDescription="@string/blank"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/lock_list_toggle"
         app:layout_constraintStart_toEndOf="@+id/lock_list_white"
         app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_hardlocked"
         />
 
     <androidx.appcompat.widget.SwitchCompat
@@ -99,10 +103,12 @@
         android:paddingEnd="16dp"
         android:paddingStart="8dp"
         android:paddingTop="16dp"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/lock_list_locked"
         app:layout_constraintTop_toTopOf="parent"
+        tools:checked="true"
         />
 
   </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,10 +16,12 @@
   ~ limitations under the License.
   -->
 
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout>
 
   <androidx.constraintlayout.widget.ConstraintLayout
       xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       >
@@ -35,6 +37,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        tools:title="Lock Info Dialog"
         />
 
     <!-- Dark grey background, put it here so it shows up behind info on old Android -->
@@ -57,6 +60,7 @@
         android:contentDescription="@string/blank"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lock_info_toolbar"
+        tools:src="@mipmap/ic_launcher"
         />
 
     <TextView
@@ -65,6 +69,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:text="@string/package_name"
+        app:layout_constrainedHeight="true"
+        app:layout_constrainedWidth="true"
         app:layout_constraintStart_toEndOf="@+id/lock_info_icon"
         app:layout_constraintTop_toTopOf="@+id/lock_info_icon"
         />
@@ -79,9 +85,11 @@
         android:gravity="end"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textColor="@android:color/black"
+        app:layout_constrainedHeight="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/lock_info_package_label"
         app:layout_constraintTop_toBottomOf="@+id/lock_info_toolbar"
+        tools:text="Some Package Name"
         />
 
     <TextView
@@ -89,6 +97,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/system"
+        app:layout_constrainedHeight="true"
         app:layout_constraintEnd_toEndOf="@+id/lock_info_package_label"
         app:layout_constraintStart_toStartOf="@+id/lock_info_package_label"
         app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name"
@@ -103,10 +112,12 @@
         android:gravity="end"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textColor="@android:color/black"
+        app:layout_constrainedHeight="true"
         app:layout_constraintBottom_toBottomOf="@+id/lock_info_system_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/lock_info_system_label"
         app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name"
+        tools:text="You betcha"
         />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -130,6 +141,7 @@
             android:id="@+id/lock_info_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            tools:listitem="@layout/adapter_item_lockinfo"
             />
 
         <TextView

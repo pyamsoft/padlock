@@ -14,10 +14,12 @@
   ~ limitations under the License.
   -->
 
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout>
 
   <androidx.constraintlayout.widget.ConstraintLayout
       xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:padding="16dp"
@@ -31,9 +33,9 @@
         android:layout_marginEnd="16dp"
         android:gravity="center_horizontal"
         android:hint="@string/lock_code_hint"
+        app:layout_constrainedHeight="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/lock_image_go"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         >
@@ -46,6 +48,7 @@
           android:inputType="textPassword"
           android:textAppearance="@style/TextAppearance.AppCompat.Medium"
           android:textColor="@android:color/white"
+          tools:text="Something something"
           />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -58,9 +61,11 @@
         android:gravity="center_horizontal"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textColor="@color/material_light_background"
+        app:layout_constrainedHeight="true"
         app:layout_constraintEnd_toEndOf="@+id/lock_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lock_text"
+        tools:text="Secret Hint"
         />
 
     <ImageView
@@ -73,6 +78,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_arrow_forward_24dp"
         />
 
   </androidx.constraintlayout.widget.ConstraintLayout>

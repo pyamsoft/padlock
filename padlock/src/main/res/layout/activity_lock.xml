@@ -16,14 +16,16 @@
   ~ limitations under the License.
   -->
 
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
+<layout>
 
   <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/lock_screen_root"
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
+      tools:background="@color/blue500"
+      tools:theme="@style/Theme.PadLock.Light.Lock"
       >
 
     <androidx.appcompat.widget.Toolbar
@@ -35,6 +37,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/Theme.PadLock.LockScreenToolbar"
+        tools:title="Lock Screen"
         />
 
     <ImageView
@@ -58,16 +61,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lock_image"
         />
-
-    <!-- No dropshadow on the lock screen toolbar -->
-    <!-- <View
-        android:layout_width="0dp"
-        android:layout_height="4dp"
-        android:background="@drawable/dropshadow"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        /> -->
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 

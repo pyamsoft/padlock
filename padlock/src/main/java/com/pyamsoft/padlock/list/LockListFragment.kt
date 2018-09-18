@@ -134,6 +134,7 @@ class LockListFragment : ToolbarFragment() {
       } else {
         onMasterPinClearFailure()
       }
+      serviceManager.startService(false)
     }
 
     viewModel.onCreatePinEvent {
@@ -142,6 +143,7 @@ class LockListFragment : ToolbarFragment() {
       } else {
         onMasterPinCreateFailure()
       }
+      serviceManager.startService(false)
     }
 
     viewModel.onModifyError { onModifyEntryError() }
@@ -150,12 +152,12 @@ class LockListFragment : ToolbarFragment() {
       wrapper.onSuccess { onDatabaseChangeReceived(it.index, it.entry) }
       wrapper.onError { onDatabaseChangeError() }
     }
-    viewModel.onFabStateChange { serviceState, manually ->
+    viewModel.onFabStateChange { serviceState, fromClick ->
       when (serviceState) {
-        ENABLED -> onFabIconLocked(manually)
-        DISABLED -> onFabIconUnlocked(manually)
-        PERMISSION -> onFabIconPermissionDenied(manually)
-        PAUSED -> onFabIconPaused(manually)
+        ENABLED -> onFabIconLocked(fromClick)
+        DISABLED -> onFabIconUnlocked(fromClick)
+        PERMISSION -> onFabIconPermissionDenied(fromClick)
+        PAUSED -> onFabIconPaused(fromClick)
       }
     }
     viewModel.onPopulateListEvent { wrapper ->
@@ -235,6 +237,7 @@ class LockListFragment : ToolbarFragment() {
 
     handler.postDelayed({
       if (adapter.adapterItemCount > 0) {
+        viewModel.checkFabState(false)
         showFab()
       }
     }, 300)
@@ -401,62 +404,58 @@ class LockListFragment : ToolbarFragment() {
         .show()
   }
 
-  private fun onFabIconLocked(manually: Boolean) {
-    if (manually) {
-      if (UsagePermissionChecker.hasPermission(requireContext())) {
-        PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
-            .show(requireActivity(), PinDialog.TAG)
-      }
-      return
-    }
-
+  private fun onFabIconLocked(fromClick: Boolean) {
     Timber.d("on FAB enabled")
 
     imageLoader.load(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
-  }
 
-  private fun onFabIconUnlocked(manually: Boolean) {
-    if (manually) {
+    if (fromClick) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
         PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
             .show(requireActivity(), PinDialog.TAG)
       }
-      return
     }
+  }
 
+  private fun onFabIconUnlocked(fromClick: Boolean) {
     Timber.d("on FAB disabled")
 
     imageLoader.load(R.drawable.ic_lock_open_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
+
+    if (fromClick) {
+      if (UsagePermissionChecker.hasPermission(requireContext())) {
+        PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
+            .show(requireActivity(), PinDialog.TAG)
+      }
+    }
   }
 
-  private fun onFabIconPermissionDenied(manually: Boolean) {
-    if (manually) {
-      UsageAccessRequestDialog().show(requireActivity(), "usage_access")
-      return
-    }
-
+  private fun onFabIconPermissionDenied(fromClick: Boolean) {
     Timber.d("on FAB permission denied")
 
     imageLoader.load(R.drawable.ic_warning_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
+
+    if (fromClick) {
+      UsageAccessRequestDialog().show(requireActivity(), "usage_access")
+    }
   }
 
-  private fun onFabIconPaused(manually: Boolean) {
-    if (manually) {
-      serviceManager.startService(true)
-      return
-    }
-
+  private fun onFabIconPaused(fromClick: Boolean) {
     Timber.d("on FAB paused")
 
     imageLoader.load(R.drawable.ic_pause_24dp)
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
+
+    if (fromClick) {
+      serviceManager.startService(true)
+    }
   }
 
   private fun onSystemVisibilityChanged(visible: Boolean) {
@@ -500,6 +499,7 @@ class LockListFragment : ToolbarFragment() {
     binding.apply {
       applistRecyclerview.visibility = View.VISIBLE
       applistEmpty.visibility = View.GONE
+      viewModel.checkFabState(false)
     }
   }
 

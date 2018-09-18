@@ -15,6 +15,12 @@ import com.pyamsoft.padlock.service.ServiceManager.Commands.START
 import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_PAUSE
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
+import com.pyamsoft.pydroid.core.threads.Enforcer
+import io.reactivex.Completable
+import io.reactivex.CompletableObserver
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
@@ -23,6 +29,7 @@ import javax.inject.Singleton
 @Singleton
 class ServiceManager @Inject internal constructor(
   context: Context,
+  private val enforcer: Enforcer,
   @Named("main_activity") private val activityClass: Class<out Activity>,
   @Named("service") private val serviceClass: Class<out Service>,
   private val masterPinPreferences: MasterPinPreferences,
@@ -32,35 +39,55 @@ class ServiceManager @Inject internal constructor(
   private val appContext = context.applicationContext
 
   fun startService(restart: Boolean) {
-    if (!UsagePermissionChecker.hasPermission(appContext)) {
-      Timber.w("Cannot start service, missing usage permission")
-      return
-    }
-
-    if (masterPinPreferences.getMasterPassword() == null) {
-      Timber.w("Cannot start service, missing master password")
-      return
-    }
-
-    if (servicePreferences.isPaused() && !restart) {
-      Timber.d("Starting service but in paused state")
-      // We don't use startForeground because starting in paused mode will not call foreground service
-      // NOTE: Can crash if service is not already running from the Foreground.
-      //       most noticed in BootReceiver if restart is false
-      appContext.startService(service(PAUSE))
-    } else {
-      if (restart) {
-        Timber.d("Restarting service")
-      } else {
-        Timber.d("Starting service")
+    Completable.fromAction {
+      enforcer.assertNotOnMainThread()
+      if (!UsagePermissionChecker.hasPermission(appContext)) {
+        Timber.w("Cannot start service, missing usage permission")
+        return@fromAction
       }
-      val intent = service(START)
-      if (VERSION.SDK_INT >= VERSION_CODES.O) {
-        appContext.startForegroundService(intent)
+
+      if (masterPinPreferences.getMasterPassword() == null) {
+        Timber.w("Cannot start service, missing master password")
+        return@fromAction
+      }
+
+      if (servicePreferences.isPaused() && !restart) {
+        Timber.d("Starting service but in paused state")
+        // We don't use startForeground because starting in paused mode will not call foreground service
+        // NOTE: Can crash if service is not already running from the Foreground.
+        //       most noticed in BootReceiver if restart is false
+        appContext.startService(service(PAUSE))
       } else {
-        appContext.startService(intent)
+        if (restart) {
+          Timber.d("Restarting service")
+        } else {
+          Timber.d("Starting service")
+        }
+        val intent = service(START)
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+          appContext.startForegroundService(intent)
+        } else {
+          appContext.startService(intent)
+        }
       }
     }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(object : CompletableObserver {
+
+          override fun onComplete() {
+            Timber.d("Service started")
+          }
+
+          override fun onSubscribe(d: Disposable) {
+            Timber.d("Starting service...")
+          }
+
+          override fun onError(e: Throwable) {
+            Timber.e(e, "Failed to start service")
+          }
+
+        })
   }
 
   @CheckResult
