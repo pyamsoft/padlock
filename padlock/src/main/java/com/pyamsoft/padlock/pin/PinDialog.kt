@@ -35,8 +35,10 @@ import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.loader.ImageTarget
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import javax.inject.Inject
@@ -126,6 +128,11 @@ class PinDialog : ToolbarDialog() {
     pushIfNotPresent(PinTextFragment.newInstance(checkOnly), PinTextFragment.TAG)
   }
 
+  private fun applyBackNavigationIcon(icon: Drawable) {
+    val black = ContextCompat.getColor(binding.pinEntryToolbar.context, R.color.black)
+    binding.pinEntryToolbar.navigationIcon = icon.tintWith(black)
+  }
+
   private fun setupToolbar() {
     // Maybe something more descriptive
     binding.apply {
@@ -133,10 +140,36 @@ class PinDialog : ToolbarDialog() {
       pinEntryToolbar.setNavigationOnClickListener { dismiss() }
 
       // Set up icon as black
-      var icon: Drawable? = pinEntryToolbar.navigationIcon
-      if (icon != null) {
-        icon = icon.tintWith(ContextCompat.getColor(pinEntryToolbar.context, R.color.black))
-        pinEntryToolbar.navigationIcon = icon
+      if (finishOnDismiss) {
+        // Load a custom X icon if dismissing the dialog closes the activity
+        imageLoader.load(R.drawable.ic_close_24dp)
+            .into(object : ImageTarget<Drawable> {
+              override fun clear() {
+                pinEntryToolbar.navigationIcon = null
+              }
+
+              override fun setError(error: Drawable?) {
+                pinEntryToolbar.navigationIcon = error
+              }
+
+              override fun setImage(image: Drawable) {
+                applyBackNavigationIcon(image)
+              }
+
+              override fun setPlaceholder(placeholder: Drawable?) {
+                pinEntryToolbar.navigationIcon = placeholder
+              }
+
+              override fun view(): View {
+                return pinEntryToolbar
+              }
+
+            })
+            .bind(viewLifecycleOwner)
+      } else {
+        // Otherwise the usual back arrow is fine
+        pinEntryToolbar.setUpEnabled(true)
+        pinEntryToolbar.navigationIcon?.also { applyBackNavigationIcon(it) }
       }
 
       // Inflate menu

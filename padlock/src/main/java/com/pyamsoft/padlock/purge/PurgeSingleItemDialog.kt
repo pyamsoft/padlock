@@ -25,6 +25,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.model.purge.PurgeEvent
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
+import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import javax.inject.Inject
 
 class PurgeSingleItemDialog : ToolbarDialog() {
@@ -35,9 +36,7 @@ class PurgeSingleItemDialog : ToolbarDialog() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments?.let {
-      packageName = it.getString(PACKAGE, "")
-    }
+    packageName = requireArguments().getString(PACKAGE, "")
 
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)

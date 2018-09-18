@@ -25,6 +25,7 @@ import androidx.annotation.CheckResult
 import androidx.appcompat.app.AlertDialog
 import com.pyamsoft.padlock.databinding.DialogLockStatBinding
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
+import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 
 class LockedStatDialog : ToolbarDialog() {
 
@@ -37,7 +38,7 @@ class LockedStatDialog : ToolbarDialog() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    arguments?.let {
+    requireArguments().also {
       displayedLabel = it.getString(LABEL)
       packageName = it.getString(PKG_NAME)
       activityName = it.getString(ACT_NAME)
