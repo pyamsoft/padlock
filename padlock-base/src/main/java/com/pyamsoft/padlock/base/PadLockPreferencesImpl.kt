@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.api.preferences.PreferenceWatcher
 import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.model.LockScreenType
 import timber.log.Timber
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,6 +45,7 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     ServicePreferences {
 
   private val preferences by lazy { PreferenceManager.getDefaultSharedPreferences(context) }
+  private val globalPreferenceWatcher by lazy { GlobalPreferenceWatcher(preferences) }
 
   private val ignoreTimeKey: String
   private val timeoutTimeKey: String
@@ -126,19 +128,19 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
   }
 
   override fun watchPausedState(func: (Boolean) -> Unit): PreferenceWatcher {
-    return KeyedPreferenceWatcher(preferences, PAUSED) {
+    return KeyedPreferenceWatcher(globalPreferenceWatcher, PAUSED) {
       func(isPaused())
     }
   }
 
   override fun watchPinPresence(func: (Boolean) -> Unit): PreferenceWatcher {
-    return KeyedPreferenceWatcher(preferences, MASTER_PASSWORD) {
+    return KeyedPreferenceWatcher(globalPreferenceWatcher, MASTER_PASSWORD) {
       func(!getMasterPassword().isNullOrEmpty())
     }
   }
 
   override fun watchSystemVisible(func: (Boolean) -> Unit): PreferenceWatcher {
-    return KeyedPreferenceWatcher(preferences, IS_SYSTEM) {
+    return KeyedPreferenceWatcher(globalPreferenceWatcher, IS_SYSTEM) {
       func(isSystemVisible())
     }
   }
@@ -155,29 +157,63 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     }
   }
 
-  private class KeyedPreferenceWatcher internal constructor(
-    private val preferences: SharedPreferences,
-    private val key: String,
-    func: () -> Unit
-  ) : PreferenceWatcher {
+  private class GlobalPreferenceWatcher internal constructor(
+    private val preferences: SharedPreferences
+  ) {
 
-    // TODO this is emitting multiple events since each watcher registers a new listener.
-    // Fix this somehow, see UsageEventProviderImpl for inspiration
+    private val watcherMap = LinkedHashMap<UUID, Pair<String, () -> Unit>>()
+
     private val callback = OnSharedPreferenceChangeListener { _, preference ->
-      Timber.d("on shared preference changed: $key")
-      if (key == preference) {
-        Timber.d("on shared preference match: $key")
-        func()
+      val values = watcherMap.values
+      for (entry in values) {
+        val key = entry.first
+        val func = entry.second
+        if (key == preference) {
+          func()
+        }
       }
     }
 
+    fun addWatcher(
+      uuid: UUID,
+      key: String,
+      func: () -> Unit
+    ) {
+      if (watcherMap.isEmpty()) {
+        preferences.registerOnSharedPreferenceChangeListener(callback)
+      }
+
+      Timber.d("Adding PreferenceWatcher for key $key")
+      watcherMap[uuid] = key to func
+    }
+
+    fun removeWatcher(uuid: UUID) {
+      watcherMap.remove(uuid)
+          ?.also { (key, _) ->
+            Timber.d("Removing PreferenceWatcher for key $key")
+          }
+
+      if (watcherMap.isEmpty()) {
+        Timber.d("Stop watching preferences")
+        preferences.unregisterOnSharedPreferenceChangeListener(callback)
+      }
+    }
+  }
+
+  private class KeyedPreferenceWatcher(
+    private val globalPreferenceWatcher: GlobalPreferenceWatcher,
+    key: String,
+    func: () -> Unit
+  ) : PreferenceWatcher {
+
+    private val uuid = UUID.randomUUID()
+
     init {
-      preferences.registerOnSharedPreferenceChangeListener(callback)
+      globalPreferenceWatcher.addWatcher(uuid, key, func)
     }
 
     override fun stopWatching() {
-      Timber.d("Stop watching preference: $key")
-      preferences.unregisterOnSharedPreferenceChangeListener(callback)
+      globalPreferenceWatcher.removeWatcher(uuid)
     }
 
   }
