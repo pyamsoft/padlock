@@ -18,12 +18,10 @@ package com.pyamsoft.padlock.list
 
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -60,38 +58,39 @@ import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import java.util.Collections
 import javax.inject.Inject
+import kotlin.LazyThreadSafetyMode.NONE
 
 class LockListFragment : ToolbarFragment() {
-
-  private val handler = Handler(Looper.getMainLooper())
 
   @field:Inject internal lateinit var imageLoader: ImageLoader
   @field:Inject internal lateinit var viewModel: LockListViewModel
   @field:Inject internal lateinit var serviceManager: ServiceManager
-  private lateinit var adapter: ModelAdapter<AppEntry, LockListItem>
+
   private lateinit var binding: FragmentLockListBinding
-  private lateinit var filterListDelegate: FilterListDelegate
-  private lateinit var refreshLatch: RefreshLatch
-  private lateinit var hideScrollListener: HideOnScrollListener
+
   private var lastPosition: Int = 0
   private var displaySystemItem: MenuItem? = null
 
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusLockListComponent(
-            LockListProvider(viewLifecycleOwner, object : ListDiffProvider<AppEntry> {
-              override fun data(): List<AppEntry> = Collections.unmodifiableList(adapter.models)
-            })
-        )
-        .inject(this)
-    binding = FragmentLockListBinding.inflate(inflater, container, false)
-
-    refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
-      activity?.invalidateOptionsMenu()
+  private val handler by lazy(NONE) { Handler() }
+  private val filterListDelegate by lazy(NONE) { FilterListDelegate() }
+  private val adapter by lazy(NONE) {
+    ModelAdapter<AppEntry, LockListItem> { LockListItem(requireActivity(), it) }
+  }
+  private val hideScrollListener by lazy(NONE) {
+    // Attach the FAB to callbacks on the recycler scroll
+    HideOnScrollListener.withView(binding.applistFab) {
+      if (!binding.applistSwipeRefresh.isRefreshing) {
+        if (it) {
+          showFab()
+        } else {
+          hideFab()
+        }
+      }
+    }
+  }
+  private val refreshLatch by lazy(NONE) {
+    RefreshLatch.create(viewLifecycleOwner) {
+      Timber.d("RefreshLatch refreshing $it")
       filterListDelegate.setEnabled(!it)
       binding.apply {
         applistSwipeRefresh.refreshing(it)
@@ -118,8 +117,22 @@ class LockListFragment : ToolbarFragment() {
         }
       }
     }
-    adapter = ModelAdapter { LockListItem(requireActivity(), it) }
-    filterListDelegate = FilterListDelegate()
+  }
+
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View? {
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusLockListComponent(
+            LockListProvider(viewLifecycleOwner, object : ListDiffProvider<AppEntry> {
+              override fun data(): List<AppEntry> = Collections.unmodifiableList(adapter.models)
+            })
+        )
+        .inject(this)
+    binding = FragmentLockListBinding.inflate(inflater, container, false)
+
     filterListDelegate.onViewCreated(adapter)
     setupRecyclerView()
     setupSwipeRefresh()
@@ -225,7 +238,7 @@ class LockListFragment : ToolbarFragment() {
 
   override fun onStart() {
     super.onStart()
-    viewModel.populateList(false)
+    handler.post { viewModel.populateList(false) }
   }
 
   override fun onResume() {
@@ -234,24 +247,12 @@ class LockListFragment : ToolbarFragment() {
       it.setTitle(R.string.app_name)
       it.setUpEnabled(false)
     }
-
-    handler.postDelayed({
-      if (adapter.adapterItemCount > 0) {
-        viewModel.checkFabState(false)
-        showFab()
-      }
-    }, 300)
   }
 
   override fun onPause() {
     super.onPause()
     lastPosition = ListStateUtil.getCurrentPosition(binding.applistRecyclerview)
     ListStateUtil.saveState(TAG, null, binding.applistRecyclerview)
-
-    handler.removeCallbacksAndMessages(null)
-    if (binding.applistFab.isVisible) {
-      hideFab()
-    }
 
     if (isRemoving) {
       toolbarActivity?.withToolbar {
@@ -262,6 +263,11 @@ class LockListFragment : ToolbarFragment() {
         it.setOnMenuItemClickListener(null)
       }
     }
+  }
+
+  override fun onStop() {
+    super.onStop()
+    handler.removeCallbacksAndMessages(null)
   }
 
   private inline fun showFab(crossinline onShown: FloatingActionButton.() -> Unit = {}) {
@@ -339,17 +345,6 @@ class LockListFragment : ToolbarFragment() {
     binding.apply {
       applistFab.setOnDebouncedClickListener {
         viewModel.checkFabState(true)
-      }
-
-      // Attach the FAB to callbacks on the recycler scroll
-      hideScrollListener = HideOnScrollListener.withView(applistFab) {
-        if (!applistSwipeRefresh.isRefreshing) {
-          if (it) {
-            showFab()
-          } else {
-            hideFab()
-          }
-        }
       }
       applistRecyclerview.addOnScrollListener(hideScrollListener)
     }
