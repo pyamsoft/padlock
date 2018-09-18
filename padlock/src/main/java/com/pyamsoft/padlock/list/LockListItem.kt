@@ -90,10 +90,12 @@ class LockListItem internal constructor(
     fun bind(model: AppEntry) {
       binding.apply {
         lockListTitle.text = model.name
-        lockListToggle.setOnCheckedChangeListener(null)
-        lockListToggle.isChecked = model.locked
         lockListWhite.isInvisible = model.whitelisted.isEmpty()
         lockListLocked.isInvisible = model.hardLocked.isEmpty()
+
+        // Must null out the old listener to avoid loops
+        lockListToggle.setOnCheckedChangeListener(null)
+        lockListToggle.isChecked = model.locked
       }
 
       if (binding.lockListWhite.isVisible) {
@@ -123,13 +125,8 @@ class LockListItem internal constructor(
     }
 
     fun unbind() {
-      binding.apply {
-        lockListTitle.text = null
-        lockListIcon.setImageDrawable(null)
-        lockListWhite.setImageDrawable(null)
-        lockListLocked.setImageDrawable(null)
-        lockListToggle.setOnCheckedChangeListener(null)
-      }
+      // All the visible fields are explicitly set in bind so we don't need to unbind them
+      // We do want to clear out the lifecycle for any async processes though.
       lifecycle.fakeUnbind()
     }
 

@@ -24,7 +24,6 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding
 import com.pyamsoft.padlock.list.info.LockInfoEvent
-import com.pyamsoft.padlock.list.info.LockInfoEvent.Companion
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.pydroid.core.bus.Publisher
@@ -64,7 +63,7 @@ class LockInfoItem internal constructor(
 
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    private val binding: AdapterItemLockinfoBinding = AdapterItemLockinfoBinding.bind(itemView)
+    private val binding = AdapterItemLockinfoBinding.bind(itemView)
     @field:Inject internal lateinit var publisher: Publisher<LockInfoEvent>
 
     init {
@@ -92,6 +91,9 @@ class LockInfoItem internal constructor(
           LockState.LOCKED -> lockInfoRadioBlack
           else -> throw IllegalStateException("Illegal enum state")
         }
+
+        // Must null out the old listeners to avoid loops
+        lockInfoRadioGroup.setOnCheckedChangeListener(null)
         lockInfoRadioBlack.setOnCheckedChangeListener(null)
         lockInfoRadioWhite.setOnCheckedChangeListener(null)
         lockInfoRadioDefault.setOnCheckedChangeListener(null)
@@ -127,13 +129,7 @@ class LockInfoItem internal constructor(
     }
 
     fun unbind() {
-      binding.apply {
-        lockInfoActivity.text = null
-        lockInfoRadioBlack.setOnCheckedChangeListener(null)
-        lockInfoRadioWhite.setOnCheckedChangeListener(null)
-        lockInfoRadioDefault.setOnCheckedChangeListener(null)
-        lockInfoRadioGroup.setOnCheckedChangeListener(null)
-      }
+      // Unbind any lifecycle related async processes here if needed.
     }
   }
 }

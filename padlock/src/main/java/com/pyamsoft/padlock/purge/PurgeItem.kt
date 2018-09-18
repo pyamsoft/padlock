@@ -49,14 +49,14 @@ internal class PurgeItem internal constructor(
 
   internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    private val binding: AdapterItemPurgeBinding = AdapterItemPurgeBinding.bind(itemView)
+    private val binding = AdapterItemPurgeBinding.bind(itemView)
 
     fun bind(model: String) {
       binding.itemPurgeName.text = model
     }
 
     fun unbind() {
-      binding.itemPurgeName.text = null
+      // Unbind any lifecycle related async processes here if needed.
     }
   }
 }
