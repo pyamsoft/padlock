@@ -16,9 +16,8 @@
 
 package com.pyamsoft.padlock.list.info
 
-import com.popinnow.android.repo.SingleRepo
+import com.popinnow.android.repo.Repo
 import com.popinnow.android.repo.newRepoBuilder
-import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
@@ -33,14 +32,14 @@ object LockInfoSingletonProvider {
 
   private val bus = RxBus.create<LockInfoEvent>()
 
-  private val repo = newRepoBuilder<List<ActivityEntry>>()
+  private val repo = newRepoBuilder()
       .memoryCache(5, MINUTES)
-      .buildSingle()
+      .build()
 
   @JvmStatic
   @Provides
   @Named("repo_lock_info")
-  internal fun provideRepo(): SingleRepo<List<ActivityEntry>> = repo
+  internal fun provideRepo(): Repo = repo
 
   @JvmStatic
   @Provides

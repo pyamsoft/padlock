@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.settings
 
+import com.popinnow.android.repo.Repo
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.api.database.EntryDeleteDao
@@ -48,7 +49,12 @@ internal class SettingsInteractorImpl @Inject internal constructor(
   @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
   @param:Named("cache_list_state") private val listStateCache: Cache,
   @param:Named("cache_purge") private val purgeInteractor: Cache,
-  private val receiver: ApplicationInstallReceiver
+  private val receiver: ApplicationInstallReceiver,
+
+    // Just access these Repo instances for clearAll
+  @param:Named("pydroid_repo") private val pydroidRepo: Repo,
+  @param:Named("repo_padlock") private val padlockRepo: Repo,
+  @param:Named("repo_lock_info") private val lockInfoRepo: Repo
 ) : SettingsInteractor {
 
   override fun updateApplicationReceiver(): Completable {
@@ -74,10 +80,34 @@ internal class SettingsInteractorImpl @Inject internal constructor(
           .andThen(Completable.fromAction {
             enforcer.assertNotOnMainThread()
             lockListInteractor.clearCache()
+          })
+          .andThen(Completable.fromAction {
+            enforcer.assertNotOnMainThread()
             lockInfoInteractor.clearCache()
+          })
+          .andThen(Completable.fromAction {
+            enforcer.assertNotOnMainThread()
             purgeInteractor.clearCache()
+          })
+          .andThen(Completable.fromAction {
+            enforcer.assertNotOnMainThread()
             lockEntryInteractor.clearCache()
+          })
+          .andThen(Completable.fromAction {
+            enforcer.assertNotOnMainThread()
             listStateCache.clearCache()
+          })
+          .andThen(Completable.fromAction {
+            enforcer.assertNotOnMainThread()
+            pydroidRepo.clearAll()
+          })
+          .andThen(Completable.fromAction {
+            enforcer.assertNotOnMainThread()
+            padlockRepo.clearAll()
+          })
+          .andThen(Completable.fromAction {
+            enforcer.assertNotOnMainThread()
+            lockInfoRepo.clearAll()
           })
           .toSingleDefault(DATABASE)
     }

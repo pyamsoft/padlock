@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.list.info
 
-import com.popinnow.android.repo.SingleRepo
+import com.popinnow.android.repo.Repo
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.ActivityEntry
@@ -34,7 +34,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LockInfoInteractorImpl @Inject internal constructor(
   @Named("interactor_lock_info") private val db: LockInfoInteractor,
-  @Named("repo_lock_info") private val repoLockInfo: SingleRepo<List<ActivityEntry>>
+  @Named("repo_lock_info") private val repo: Repo
 ) : LockInfoInteractor, Cache {
 
   override fun modifyEntry(
@@ -49,11 +49,11 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
         oldLockState, newLockState, packageName, activityName,
         code, system
     )
-        .doOnError { repoLockInfo.invalidate(packageName) }
+        .doOnError { repo.invalidate(packageName) }
   }
 
   override fun clearCache() {
-    repoLockInfo.clearAll()
+    repo.clearAll()
   }
 
   override fun subscribeForUpdates(
@@ -65,17 +65,17 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
           // Each time the updater emits, we get the current list, update it, and cache it
           val list = ArrayList(provider.data())
           list[it.index] = it.entry
-          repoLockInfo.put(packageName, list)
+          repo.replace(packageName, list)
         }
-        .doOnError { repoLockInfo.invalidate(packageName) }
+        .doOnError { repo.invalidate(packageName) }
   }
 
   override fun fetchActivityEntryList(
     bypass: Boolean,
     packageName: String
   ): Single<List<ActivityEntry>> {
-    return repoLockInfo.get(bypass, packageName) { db.fetchActivityEntryList(true, it) }
-        .doOnError { repoLockInfo.invalidate(packageName) }
+    return repo.get(bypass, packageName) { db.fetchActivityEntryList(true, it) }
+        .doOnError { repo.invalidate(packageName) }
   }
 
 }

@@ -19,12 +19,13 @@
 buildscript {
 
   ext {
-    kotlin_version = '1.2.61'
+    kotlin_version = '1.2.70'
     plugin_version = '3.2.0-rc03'
   }
 
   repositories {
     google()
+    mavenCentral()
     jcenter()
     mavenLocal()
   }
@@ -37,7 +38,7 @@ buildscript {
     // AndroidX
     room = "2.0.0-rc01"
 
-    pydroid = "18.1.5-SNAPSHOT"
+    pydroid = "18.1.5"
     leakCanary = "1.6.1"
     dagger = "2.17"
     patternLock = "1.0.0"
@@ -65,6 +66,7 @@ subprojects {
 allprojects {
   repositories {
     google()
+    mavenCentral()
     jcenter()
     mavenLocal()
   }

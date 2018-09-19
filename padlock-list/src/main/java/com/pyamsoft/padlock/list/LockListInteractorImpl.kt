@@ -16,7 +16,8 @@
 
 package com.pyamsoft.padlock.list
 
-import com.popinnow.android.repo.SingleRepo
+import com.popinnow.android.repo.Repo
+import com.pyamsoft.padlock.api.Constants
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.AppEntry
@@ -35,7 +36,7 @@ import javax.inject.Singleton
 internal class LockListInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   @param:Named("interactor_lock_list") private val db: LockListInteractor,
-  @param:Named("repo_lock_list") private val repoLockList: SingleRepo<List<AppEntry>>
+  @param:Named("repo_padlock") private val repo: Repo
 ) : LockListInteractor, Cache {
 
   override fun watchSystemVisible(): Observable<Boolean> {
@@ -47,11 +48,11 @@ internal class LockListInteractorImpl @Inject internal constructor(
   }
 
   override fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>> {
-    return repoLockList.get(bypass, REPO_KEY) {
+    return repo.get(bypass, Constants.CACHE_KEY_LOCKLIST) {
       enforcer.assertNotOnMainThread()
       return@get db.fetchAppEntryList(true)
     }
-        .doOnError { repoLockList.clearAll() }
+        .doOnError { clearCache() }
   }
 
   override fun subscribeForUpdates(provider: ListDiffProvider<AppEntry>): Observable<LockListUpdatePayload> {
@@ -61,9 +62,9 @@ internal class LockListInteractorImpl @Inject internal constructor(
           // Each time the updater emits, we get the current list, update it, and cache it
           val list = ArrayList(provider.data())
           list[it.index] = it.entry
-          repoLockList.put(REPO_KEY, list)
+          repo.replace(Constants.CACHE_KEY_LOCKLIST, list)
         }
-        .doOnError { repoLockList.clearAll() }
+        .doOnError { clearCache() }
   }
 
   override fun modifyEntry(
@@ -78,15 +79,10 @@ internal class LockListInteractorImpl @Inject internal constructor(
         oldLockState, newLockState, packageName, activityName,
         code, system
     )
-        .doOnError { repoLockList.clearAll() }
+        .doOnError { clearCache() }
   }
 
   override fun clearCache() {
-    repoLockList.clearAll()
-  }
-
-  companion object {
-
-    const val REPO_KEY = "lock-list"
+    repo.invalidate(Constants.CACHE_KEY_LOCKLIST)
   }
 }

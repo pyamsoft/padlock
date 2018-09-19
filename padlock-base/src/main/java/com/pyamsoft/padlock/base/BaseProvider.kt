@@ -17,6 +17,8 @@
 package com.pyamsoft.padlock.base
 
 import androidx.annotation.CheckResult
+import com.popinnow.android.repo.Repo
+import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.service.RecheckEvent
@@ -27,6 +29,8 @@ import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.TimeUnit.MINUTES
+import javax.inject.Named
 
 @Module
 object BaseProvider {
@@ -35,6 +39,16 @@ object BaseProvider {
   private val recheckBus = RxBus.create<RecheckEvent>()
   private val foregroundBus = RxBus.create<ForegroundEvent>()
   private val whitelistBus = RxBus.create<LockWhitelistedEvent>()
+
+  private val appRepo = newRepoBuilder()
+      .memoryCache(5, MINUTES)
+      .build()
+
+  @JvmStatic
+  @Provides
+  @CheckResult
+  @Named("repo_padlock")
+  fun provideRepo(): Repo = appRepo
 
   @JvmStatic
   @Provides

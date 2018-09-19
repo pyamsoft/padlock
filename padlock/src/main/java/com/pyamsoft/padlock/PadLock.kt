@@ -77,8 +77,7 @@ class PadLock : Application(), PYDroid.Instance {
     pyDroid = instance.also {
       val provider = PadLockProvider(
           this,
-          it.modules().loaderModule().provideImageLoader(),
-          it.enforcer(),
+          it.modules(),
           MainActivity::class.java,
           PadLockService::class.java,
           RecheckService::class.java
