@@ -43,6 +43,7 @@ import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
 import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_PAUSE
+import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_TEMP_PAUSE
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
 import com.pyamsoft.pydroid.core.lifecycle.fakeBind
 import com.pyamsoft.pydroid.core.lifecycle.fakeUnbind
@@ -119,8 +120,9 @@ class PadLockService : Service(), LifecycleOwner {
     when (command) {
       START -> serviceStart()
       PAUSE -> servicePause()
-      USER_PAUSE -> serviceUserPause()
       TEMP_PAUSE -> serviceTempPause()
+      USER_PAUSE -> serviceUserPause()
+      USER_TEMP_PAUSE -> serviceUserTempPause()
     }
     return Service.START_STICKY
   }
@@ -146,13 +148,19 @@ class PadLockService : Service(), LifecycleOwner {
     pauseService(false)
   }
 
+  private fun serviceTempPause() {
+    Timber.d("System asked for service temp pause")
+    // Paused by system, auto resume later
+    pauseService(true)
+  }
+
   private fun serviceUserPause() {
     Timber.d("User asked for service pause")
     // Pause by user, check permission
     PauseConfirmActivity.start(applicationContext, autoResume = false)
   }
 
-  private fun serviceTempPause() {
+  private fun serviceUserTempPause() {
     Timber.d("User asked for service temp pause")
     // Auto resume pause by user, check permission
     PauseConfirmActivity.start(applicationContext, autoResume = true)

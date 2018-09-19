@@ -16,6 +16,7 @@ import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
 import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_PAUSE
+import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_TEMP_PAUSE
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
@@ -140,9 +141,9 @@ class ServiceManager @Inject internal constructor(
 
   @CheckResult
   fun tempPauseIntent(): PendingIntent {
-    val intent = service(TEMP_PAUSE)
+    val intent = service(USER_TEMP_PAUSE)
     return PendingIntent.getService(
-        appContext, REQUEST_CODE_SERVICE_TEMP_PAUSE, intent, PendingIntent.FLAG_UPDATE_CURRENT
+        appContext, REQUEST_CODE_SERVICE_USER_TEMP_PAUSE, intent, PendingIntent.FLAG_UPDATE_CURRENT
     )
   }
 
@@ -154,14 +155,15 @@ class ServiceManager @Inject internal constructor(
     private const val REQUEST_CODE_MAIN_ACTIVITY = 1004
     private const val REQUEST_CODE_SERVICE_START = 1005
     private const val REQUEST_CODE_SERVICE_USER_PAUSE = 1006
-    private const val REQUEST_CODE_SERVICE_TEMP_PAUSE = 1007
+    private const val REQUEST_CODE_SERVICE_USER_TEMP_PAUSE = 1007
   }
 
   enum class Commands {
     START,
     PAUSE,
+    TEMP_PAUSE,
     USER_PAUSE,
-    TEMP_PAUSE
+    USER_TEMP_PAUSE
   }
 
 }
