@@ -35,6 +35,9 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.lock.LockScreenActivity
+import com.pyamsoft.padlock.model.service.ServicePauseState.PAUSED
+import com.pyamsoft.padlock.model.service.ServicePauseState.STARTED
+import com.pyamsoft.padlock.model.service.ServicePauseState.TEMP_PAUSED
 import com.pyamsoft.padlock.service.ServiceManager.Commands
 import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
@@ -124,7 +127,7 @@ class PadLockService : Service(), LifecycleOwner {
 
   private fun serviceStart() {
     Timber.d("System asked for service start")
-    viewModel.setServicePaused(false)
+    viewModel.setServicePaused(STARTED)
 
     // Cancel old notifications
     notificationManager.cancel(PAUSED_ID)
@@ -157,7 +160,7 @@ class PadLockService : Service(), LifecycleOwner {
 
   private fun pauseService(autoResume: Boolean) {
     Timber.d("Pause service with auto resume: $autoResume")
-    viewModel.setServicePaused(true)
+    viewModel.setServicePaused(if (autoResume) TEMP_PAUSED else PAUSED)
 
     if (autoResume) {
       // Queue the service to restart after timeout via alarm manager

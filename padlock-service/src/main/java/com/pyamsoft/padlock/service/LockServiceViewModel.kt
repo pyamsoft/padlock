@@ -27,6 +27,7 @@ import com.pyamsoft.padlock.model.service.RecheckEvent
 import com.pyamsoft.padlock.model.service.RecheckStatus
 import com.pyamsoft.padlock.model.service.RecheckStatus.NOT_FORCE
 import com.pyamsoft.padlock.model.service.ServiceFinishEvent
+import com.pyamsoft.padlock.model.service.ServicePauseState
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.RxBus
@@ -111,7 +112,7 @@ class LockServiceViewModel @Inject internal constructor(
     listenForForegroundEvent()
   }
 
-  fun setServicePaused(paused: Boolean) {
+  fun setServicePaused(paused: ServicePauseState) {
     interactor.pauseService(paused)
   }
 

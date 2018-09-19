@@ -40,6 +40,8 @@ import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.service.RecheckStatus
 import com.pyamsoft.padlock.model.service.RecheckStatus.FORCE
+import com.pyamsoft.padlock.model.service.ServicePauseState
+import com.pyamsoft.padlock.model.service.ServicePauseState.STARTED
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.core.optional.Optional
 import com.pyamsoft.pydroid.core.optional.Optional.Present
@@ -96,13 +98,13 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     lastForegroundEvent = ForegroundEvent.EMPTY
   }
 
-  override fun pauseService(paused: Boolean) {
+  override fun pauseService(paused: ServicePauseState) {
     servicePreferences.setPaused(paused)
   }
 
   @CheckResult
   private fun decideServiceEnabledState(): ServiceState {
-    if (servicePreferences.isPaused()) {
+    if (servicePreferences.getPaused() != STARTED) {
       Timber.d("Service is paused")
       return PAUSED
     } else if (UsagePermissionChecker.hasPermission(context)) {

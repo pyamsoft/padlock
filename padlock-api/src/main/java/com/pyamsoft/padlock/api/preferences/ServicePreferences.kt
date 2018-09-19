@@ -17,14 +17,15 @@
 package com.pyamsoft.padlock.api.preferences
 
 import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.model.service.ServicePauseState
 
 interface ServicePreferences {
 
   @CheckResult
-  fun isPaused(): Boolean
+  fun getPaused(): ServicePauseState
 
-  fun setPaused(paused: Boolean)
+  fun setPaused(paused: ServicePauseState)
 
   @CheckResult
-  fun watchPausedState(func: (Boolean) -> Unit): PreferenceWatcher
+  fun watchPausedState(func: (ServicePauseState) -> Unit): PreferenceWatcher
 }

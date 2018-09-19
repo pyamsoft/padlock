@@ -20,6 +20,7 @@ import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.service.RecheckStatus
+import com.pyamsoft.padlock.model.service.ServicePauseState
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.Observable
@@ -31,7 +32,7 @@ interface LockServiceInteractor {
 
   fun cleanup()
 
-  fun pauseService(paused: Boolean)
+  fun pauseService(paused: ServicePauseState)
 
   @CheckResult
   fun isServiceEnabled(): Single<ServiceState>

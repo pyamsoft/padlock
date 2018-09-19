@@ -10,6 +10,8 @@ import android.os.Build.VERSION_CODES
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
 import com.pyamsoft.padlock.api.preferences.ServicePreferences
+import com.pyamsoft.padlock.model.service.ServicePauseState.PAUSED
+import com.pyamsoft.padlock.model.service.ServicePauseState.TEMP_PAUSED
 import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
 import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
@@ -51,12 +53,19 @@ class ServiceManager @Inject internal constructor(
         return@fromAction
       }
 
-      if (servicePreferences.isPaused() && !restart) {
+      val pausedState = servicePreferences.getPaused()
+      if (pausedState == PAUSED && !restart) {
         Timber.d("Starting service but in paused state")
         // We don't use startForeground because starting in paused mode will not call foreground service
         // NOTE: Can crash if service is not already running from the Foreground.
         //       most noticed in BootReceiver if restart is false
         appContext.startService(service(PAUSE))
+      } else if (pausedState == TEMP_PAUSED && !restart) {
+        Timber.d("Starting service but in temp_paused state")
+        // We don't use startForeground because starting in paused mode will not call foreground service
+        // NOTE: Can crash if service is not already running from the Foreground.
+        //       most noticed in BootReceiver if restart is false
+        appContext.startService(service(TEMP_PAUSE))
       } else {
         if (restart) {
           Timber.d("Restarting service")

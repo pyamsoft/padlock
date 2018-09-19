@@ -29,6 +29,9 @@ import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
 import com.pyamsoft.padlock.api.preferences.PreferenceWatcher
 import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.model.LockScreenType
+import com.pyamsoft.padlock.model.service.ServicePauseState
+import com.pyamsoft.padlock.model.service.ServicePauseState.STARTED
+import com.pyamsoft.padlock.model.service.ServicePauseState.valueOf
 import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
@@ -117,19 +120,19 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     }
   }
 
-  override fun isPaused(): Boolean {
-    return preferences.getBoolean(PAUSED, false)
+  override fun getPaused(): ServicePauseState {
+    return valueOf(preferences.getString(PAUSED, STARTED.name).orEmpty())
   }
 
-  override fun setPaused(paused: Boolean) {
+  override fun setPaused(paused: ServicePauseState) {
     preferences.edit {
-      putBoolean(PAUSED, paused)
+      putString(PAUSED, paused.name)
     }
   }
 
-  override fun watchPausedState(func: (Boolean) -> Unit): PreferenceWatcher {
+  override fun watchPausedState(func: (ServicePauseState) -> Unit): PreferenceWatcher {
     return KeyedPreferenceWatcher(globalPreferenceWatcher, PAUSED) {
-      func(isPaused())
+      func(getPaused())
     }
   }
 
@@ -231,6 +234,6 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     private const val IS_SYSTEM = "is_system"
     private const val MASTER_PASSWORD = "master_password"
     private const val HINT = "hint"
-    private const val PAUSED = "paused"
+    private const val PAUSED = "paused_state"
   }
 }
