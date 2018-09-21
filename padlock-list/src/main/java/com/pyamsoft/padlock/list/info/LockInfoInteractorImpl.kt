@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.list.info
 
-import com.popinnow.android.repo.Repo
+import com.popinnow.android.repo.MultiRepo
 import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.ActivityEntry
@@ -34,7 +34,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LockInfoInteractorImpl @Inject internal constructor(
   @Named("interactor_lock_info") private val db: LockInfoInteractor,
-  @Named("repo_lock_info") private val repo: Repo
+  @Named("repo_lock_info") private val repo: MultiRepo<List<ActivityEntry>>
 ) : LockInfoInteractor, Cache {
 
   override fun modifyEntry(
@@ -74,7 +74,7 @@ internal class LockInfoInteractorImpl @Inject internal constructor(
     bypass: Boolean,
     packageName: String
   ): Single<List<ActivityEntry>> {
-    return repo.get(bypass, packageName) { db.fetchActivityEntryList(true, it) }
+    return repo.get(packageName, bypass) { db.fetchActivityEntryList(true, packageName) }
         .doOnError { repo.invalidate(packageName) }
   }
 

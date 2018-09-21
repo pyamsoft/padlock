@@ -27,6 +27,8 @@ import com.pyamsoft.padlock.model.pin.PinEntryEvent.Clear
 import com.pyamsoft.padlock.model.pin.PinEntryEvent.Create
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Publisher
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import com.pyamsoft.pydroid.core.viewmodel.DataBus
 import com.pyamsoft.pydroid.core.viewmodel.DataWrapper.Complete
@@ -46,8 +48,8 @@ class PinViewModel @Inject internal constructor(
   private val checkPinBus: EventBus<CheckPinEvent>
 ) : BaseViewModel(owner) {
 
-  private var masterPinDisposable by disposable()
-  private var pinEntryDisposable by disposable()
+  private var masterPinDisposable by singleDisposable()
+  private var pinEntryDisposable by singleDisposable()
 
   private val masterPinPresentBus = DataBus<Boolean>()
   private val pinEntryBus = DataBus<PinEntryEvent>()

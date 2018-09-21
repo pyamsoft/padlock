@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list
 
 import com.popinnow.android.repo.Repo
-import com.pyamsoft.padlock.api.Constants
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.AppEntry
@@ -36,7 +35,7 @@ import javax.inject.Singleton
 internal class LockListInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   @param:Named("interactor_lock_list") private val db: LockListInteractor,
-  @param:Named("repo_padlock") private val repo: Repo
+  @param:Named("repo_lock_list") private val repo: Repo<List<AppEntry>>
 ) : LockListInteractor, Cache {
 
   override fun watchSystemVisible(): Observable<Boolean> {
@@ -48,7 +47,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
   }
 
   override fun fetchAppEntryList(bypass: Boolean): Single<List<AppEntry>> {
-    return repo.get(bypass, Constants.CACHE_KEY_LOCKLIST) {
+    return repo.get(bypass) {
       enforcer.assertNotOnMainThread()
       return@get db.fetchAppEntryList(true)
     }
@@ -62,7 +61,7 @@ internal class LockListInteractorImpl @Inject internal constructor(
           // Each time the updater emits, we get the current list, update it, and cache it
           val list = ArrayList(provider.data())
           list[it.index] = it.entry
-          repo.replace(Constants.CACHE_KEY_LOCKLIST, list)
+          repo.replace(list)
         }
         .doOnError { clearCache() }
   }
@@ -83,6 +82,6 @@ internal class LockListInteractorImpl @Inject internal constructor(
   }
 
   override fun clearCache() {
-    repo.invalidate(Constants.CACHE_KEY_LOCKLIST)
+    repo.clearAll()
   }
 }

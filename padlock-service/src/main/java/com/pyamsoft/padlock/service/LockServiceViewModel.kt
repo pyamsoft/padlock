@@ -31,6 +31,8 @@ import com.pyamsoft.padlock.model.service.ServicePauseState
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.RxBus
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -47,9 +49,9 @@ class LockServiceViewModel @Inject internal constructor(
 ) : BaseViewModel(owner) {
 
   private val lockScreenBus = RxBus.create<Triple<PadLockEntryModel, String, Int>>()
-  private var matchingDisposable by disposable()
-  private var entryDisposable by disposable()
-  private var foregroundDisposable by disposable()
+  private var matchingDisposable by singleDisposable()
+  private var entryDisposable by singleDisposable()
+  private var foregroundDisposable by singleDisposable()
 
   init {
     interactor.init()

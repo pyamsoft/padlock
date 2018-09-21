@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock.settings
 
+import com.popinnow.android.repo.MultiRepo
 import com.popinnow.android.repo.Repo
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.SettingsInteractor
@@ -26,6 +27,8 @@ import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.model.ConfirmEvent.ALL
 import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
+import com.pyamsoft.padlock.model.list.ActivityEntry
+import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.optional.Optional.Present
 import com.pyamsoft.pydroid.core.optional.asOptional
@@ -52,9 +55,9 @@ internal class SettingsInteractorImpl @Inject internal constructor(
   private val receiver: ApplicationInstallReceiver,
 
     // Just access these Repo instances for clearAll
-  @param:Named("pydroid_repo") private val pydroidRepo: Repo,
-  @param:Named("repo_padlock") private val padlockRepo: Repo,
-  @param:Named("repo_lock_info") private val lockInfoRepo: Repo
+  @param:Named("repo_lock_list") private val lockListRepo: Repo<List<AppEntry>>,
+  @param:Named("repo_lock_info") private val lockInfoRepo: MultiRepo<List<ActivityEntry>>,
+  @param:Named("repo_purge_list") private val purgeListRepo: Repo<List<String>>
 ) : SettingsInteractor {
 
   override fun updateApplicationReceiver(): Completable {
@@ -99,11 +102,11 @@ internal class SettingsInteractorImpl @Inject internal constructor(
           })
           .andThen(Completable.fromAction {
             enforcer.assertNotOnMainThread()
-            pydroidRepo.clearAll()
+            lockListRepo.clearAll()
           })
           .andThen(Completable.fromAction {
             enforcer.assertNotOnMainThread()
-            padlockRepo.clearAll()
+            purgeListRepo.clearAll()
           })
           .andThen(Completable.fromAction {
             enforcer.assertNotOnMainThread()

@@ -26,7 +26,9 @@ import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
+import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.threads.Enforcer
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import com.pyamsoft.pydroid.core.viewmodel.DataBus
 import com.pyamsoft.pydroid.core.viewmodel.DataWrapper
@@ -47,8 +49,8 @@ class SettingsViewModel @Inject internal constructor(
   private val applicationBus = DataBus<Unit>()
   private val lockTypeBus = DataBus<String>()
 
-  private var updateDisposable by disposable()
-  private var switchDisposable by disposable()
+  private var updateDisposable by singleDisposable()
+  private var switchDisposable by singleDisposable()
 
   override fun onCleared() {
     super.onCleared()

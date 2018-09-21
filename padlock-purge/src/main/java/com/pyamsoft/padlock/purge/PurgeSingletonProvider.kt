@@ -16,6 +16,8 @@
 
 package com.pyamsoft.padlock.purge
 
+import com.popinnow.android.repo.Repo
+import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.model.purge.PurgeAllEvent
 import com.pyamsoft.padlock.model.purge.PurgeEvent
 import com.pyamsoft.pydroid.core.bus.Listener
@@ -23,12 +25,23 @@ import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.TimeUnit.MINUTES
+import javax.inject.Named
 
 @Module
 object PurgeSingletonProvider {
 
   private val purgeBus = RxBus.create<PurgeEvent>()
   private val purgeAllBus = RxBus.create<PurgeAllEvent>()
+
+  private val repo = newRepoBuilder<List<String>>()
+      .memoryCache(10, MINUTES)
+      .build()
+
+  @JvmStatic
+  @Provides
+  @Named("repo_purge_list")
+  internal fun provideRepo(): Repo<List<String>> = repo
 
   @JvmStatic
   @Provides

@@ -24,7 +24,6 @@ import android.content.Context
 import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import com.popinnow.android.repo.Repo
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.threads.Enforcer
@@ -44,15 +43,9 @@ class PadLockProvider(
 ) {
 
   private val enforcer = moduleProvider.enforcer()
-  private val repo = moduleProvider.repo()
   private val imageLoader = moduleProvider
       .loaderModule()
       .provideImageLoader()
-
-  @Provides
-  @CheckResult
-  @Named("pydroid_repo")
-  fun providePydroidRepo(): Repo = repo
 
   @Provides
   @CheckResult

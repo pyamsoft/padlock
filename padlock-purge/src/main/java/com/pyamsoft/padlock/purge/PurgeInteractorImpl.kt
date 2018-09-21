@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.purge
 
 import com.popinnow.android.repo.Repo
-import com.pyamsoft.padlock.api.Constants
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.threads.Enforcer
@@ -31,15 +30,15 @@ import javax.inject.Singleton
 internal class PurgeInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   @Named("interactor_purge") private val db: PurgeInteractor,
-  @Named("repo_padlock") private val repo: Repo
+  @Named("repo_purge_list") private val repo: Repo<List<String>>
 ) : PurgeInteractor, Cache {
 
   override fun clearCache() {
-    repo.invalidate(Constants.CACHE_KEY_PURGE)
+    repo.clearAll()
   }
 
   override fun fetchStalePackageNames(bypass: Boolean): Single<List<String>> {
-    return repo.get(bypass, Constants.CACHE_KEY_PURGE) {
+    return repo.get(bypass) {
       enforcer.assertNotOnMainThread()
       return@get db.fetchStalePackageNames(true)
     }

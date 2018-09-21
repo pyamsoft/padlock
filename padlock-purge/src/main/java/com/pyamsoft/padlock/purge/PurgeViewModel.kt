@@ -23,7 +23,9 @@ import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.purge.PurgeAllEvent
 import com.pyamsoft.padlock.model.purge.PurgeEvent
 import com.pyamsoft.pydroid.core.bus.Listener
+import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.threads.Enforcer
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import com.pyamsoft.pydroid.core.viewmodel.DataBus
 import com.pyamsoft.pydroid.core.viewmodel.DataWrapper
@@ -43,7 +45,7 @@ class PurgeViewModel @Inject internal constructor(
   private val purgeAllBus: Listener<PurgeAllEvent>
 ) : BaseViewModel(owner) {
 
-  private var fetchDisposable by disposable()
+  private var fetchDisposable by singleDisposable()
   private val fetchBus = DataBus<List<String>>()
 
   override fun onCleared() {

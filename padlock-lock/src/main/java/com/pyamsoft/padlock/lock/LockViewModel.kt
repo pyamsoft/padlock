@@ -24,7 +24,9 @@ import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.POSTED
 import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.SUBMIT_FAILURE
 import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.SUBMIT_SUCCESS
 import com.pyamsoft.pydroid.core.bus.RxBus
+import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.threads.Enforcer
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import com.pyamsoft.pydroid.core.viewmodel.DataBus
 import com.pyamsoft.pydroid.core.viewmodel.DataWrapper
@@ -50,8 +52,8 @@ class LockViewModel @Inject internal constructor(
   private val lockStageBus = DataBus<LockEntryStage>()
   private val hintBus = RxBus.create<String>()
 
-  private var stageDisposable by disposable()
-  private var hintDisposable by disposable()
+  private var stageDisposable by singleDisposable()
+  private var hintDisposable by singleDisposable()
 
   override fun onCleared() {
     super.onCleared()

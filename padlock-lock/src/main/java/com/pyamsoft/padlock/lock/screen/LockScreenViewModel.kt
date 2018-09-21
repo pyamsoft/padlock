@@ -22,6 +22,8 @@ import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -44,10 +46,10 @@ class LockScreenViewModel @Inject internal constructor(
   private val closeOldBus = RxBus.create<CloseOldEvent>()
   private val ignoreTimeBus = RxBus.create<Long>()
 
-  private var alreadyUnlockedDisposable by disposable()
-  private var displayNameDisposable by disposable()
-  private var closeOldDisposable by disposable()
-  private var ignoreTimeDisposable by disposable()
+  private var alreadyUnlockedDisposable by singleDisposable()
+  private var displayNameDisposable by singleDisposable()
+  private var closeOldDisposable by singleDisposable()
+  private var ignoreTimeDisposable by singleDisposable()
 
   override fun onCleared() {
     super.onCleared()

@@ -22,6 +22,8 @@ import com.pyamsoft.padlock.model.LockScreenType
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
 import com.pyamsoft.pydroid.core.bus.RxBus
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -34,7 +36,7 @@ class PinScreenInputViewModel @Inject internal constructor(
 ) : BaseViewModel(owner) {
 
   private val lockScreenTypeBus = RxBus.create<LockScreenType>()
-  private var lockScreenTypeDisposable by disposable()
+  private var lockScreenTypeDisposable by singleDisposable()
 
   override fun onCleared() {
     super.onCleared()

@@ -33,7 +33,9 @@ import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.RxBus
+import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.threads.Enforcer
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import com.pyamsoft.pydroid.core.viewmodel.DataBus
 import com.pyamsoft.pydroid.core.viewmodel.DataWrapper
@@ -61,8 +63,8 @@ class LockListViewModel @Inject internal constructor(
   private val databaseChangeBus = DataBus<LockListUpdatePayload>()
   private val fabStateBus = RxBus.create<Pair<ServiceState, Boolean>>()
 
-  private var fabDisposable by disposable()
-  private var populateListDisposable by disposable()
+  private var fabDisposable by singleDisposable()
+  private var populateListDisposable by singleDisposable()
 
   override fun onCleared() {
     super.onCleared()

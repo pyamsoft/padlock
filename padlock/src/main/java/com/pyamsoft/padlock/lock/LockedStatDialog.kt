@@ -39,12 +39,17 @@ class LockedStatDialog : ToolbarDialog() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     requireArguments().also {
-      displayedLabel = it.getString(LABEL)
-      packageName = it.getString(PKG_NAME)
-      activityName = it.getString(ACT_NAME)
-      realName = it.getString(REAL_NAME)
+      displayedLabel = it.getString(LABEL, "")
+      packageName = it.getString(PKG_NAME, "")
+      activityName = it.getString(ACT_NAME, "")
+      realName = it.getString(REAL_NAME, "")
       system = it.getBoolean(SYSTEM)
     }
+
+    require(displayedLabel.isNotBlank())
+    require(packageName.isNotBlank())
+    require(activityName.isNotBlank())
+    require(realName.isNotBlank())
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
