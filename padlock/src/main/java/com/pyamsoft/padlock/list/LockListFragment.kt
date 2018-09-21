@@ -24,7 +24,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
@@ -47,7 +46,8 @@ import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.fragment.toolbarActivity
 import com.pyamsoft.pydroid.ui.util.Snackbreak
-import com.pyamsoft.pydroid.ui.util.hide
+import com.pyamsoft.pydroid.ui.util.popHide
+import com.pyamsoft.pydroid.ui.util.popShow
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
@@ -81,9 +81,9 @@ class LockListFragment : ToolbarFragment() {
     HideOnScrollListener.withView(binding.applistFab) {
       if (!binding.applistSwipeRefresh.isRefreshing) {
         if (it) {
-          showFab()
+          binding.applistFab.popShow()
         } else {
-          hideFab()
+          binding.applistFab.popHide()
         }
       }
     }
@@ -96,9 +96,9 @@ class LockListFragment : ToolbarFragment() {
         applistSwipeRefresh.refreshing(it)
 
         if (it) {
-          hideFab { hideScrollListener.syncVisibilityState() }
+          binding.applistFab.popHide()
         } else {
-          showFab { hideScrollListener.syncVisibilityState() }
+          binding.applistFab.popShow()
         }
       }
 
@@ -268,18 +268,6 @@ class LockListFragment : ToolbarFragment() {
   override fun onStop() {
     super.onStop()
     handler.removeCallbacksAndMessages(null)
-  }
-
-  private inline fun showFab(crossinline onShown: FloatingActionButton.() -> Unit = {}) {
-    binding.applistFab.show {
-      onShown(this)
-    }
-  }
-
-  private inline fun hideFab(crossinline onHidden: FloatingActionButton.() -> Unit = {}) {
-    binding.applistFab.hide {
-      onHidden(this)
-    }
   }
 
   private fun setupSwipeRefresh() {
