@@ -28,7 +28,7 @@ android {
     minSdkVersion rootProject.ext.minSdk
     targetSdkVersion rootProject.ext.maxSdk
     versionCode 99
-    versionName "3.0.3-SNAPSHOT"
+    versionName "3.0.3"
 
     // For vector drawables
     vectorDrawables.useSupportLibrary = true
@@ -78,6 +78,7 @@ android {
     }
 
     debug {
+      applicationIdSuffix ".dev"
       versionNameSuffix "-dev"
     }
   }

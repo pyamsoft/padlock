@@ -47,29 +47,34 @@ class MainActivity : RatingActivity() {
 
   @field:Inject internal lateinit var serviceManager: ServiceManager
 
-  override val currentApplicationVersion: Int = BuildConfig.VERSION_CODE
+  override val currentApplicationVersion: Int
+    get() = BuildConfig.VERSION_CODE
 
-  override val versionName: String = BuildConfig.VERSION_NAME
+  override val versionName: String
+    get() = BuildConfig.VERSION_NAME
 
-  override val applicationIcon: Int = R.mipmap.ic_launcher
+  override val applicationIcon: Int
+    get() = R.mipmap.ic_launcher
 
-  override val applicationName: String
-    get() = getString(R.string.app_name)
+  override val applicationName: String get() = getString(R.string.app_name)
 
   override val rootView: View
     get() = binding.fragmentContainer
 
+  override val forceUpdateCheck: Boolean get() = BuildConfig.DEBUG
+
   override val changeLogLines: ChangeLogBuilder
-    get() = buildChangeLog {
-      feature("New version release: 3.0.0")
-      change("Faster, more reliable locking of applications")
-      change("More material feeling with a fresh coat of paint and some animations")
-      feature("Search applications based on any letters in the name instead of exact matches")
-      feature("Application info dialog is split into logical groupings")
-      bugfix("Avoid spamming the lock screen for applications which quickly switch screens")
-      bugfix("Reduced memory usage on the lock screen and licenses screen")
-      bugfix("Logical work when locking and unlocking applications is guaranteed off of the UI")
-    }
+    get() =
+      buildChangeLog {
+        feature("New version release: 3.0.0")
+        change("Faster, more reliable locking of applications")
+        change("More material feeling with a fresh coat of paint and some animations")
+        feature("Search applications based on any letters in the name instead of exact matches")
+        feature("Application info dialog is split into logical groupings")
+        bugfix("Avoid spamming the lock screen for applications which quickly switch screens")
+        bugfix("Reduced memory usage on the lock screen and licenses screen")
+        bugfix("Logical work when locking and unlocking applications is guaranteed off of the UI")
+      }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.Theme_PadLock_Light)
@@ -77,7 +82,8 @@ class MainActivity : RatingActivity() {
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
-    Injector.obtain<PadLockComponent>(applicationContext).inject(this)
+    Injector.obtain<PadLockComponent>(applicationContext)
+        .inject(this)
     setupToolbar()
 
     showDefaultPage()
@@ -86,13 +92,6 @@ class MainActivity : RatingActivity() {
   private fun showDefaultPage() {
     // Set normal navigation
     val fm = supportFragmentManager
-    // Un hide the action bar in case it was hidden
-    val actionBar = supportActionBar
-    if (actionBar != null) {
-      if (!actionBar.isShowing) {
-        actionBar.show()
-      }
-    }
 
     if (fm.findFragmentByTag(MainFragment.TAG) == null && !AboutLibrariesFragment.isPresent(this)) {
       Timber.d("Load default page")

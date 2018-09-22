@@ -232,10 +232,6 @@ class LockScreenActivity : ActivityBase() {
 
   private fun onSetDisplayName(name: String) {
     binding.toolbar.title = name
-    val bar = supportActionBar
-    if (bar != null) {
-      bar.title = name
-    }
   }
 
   private fun onAlreadyUnlocked() {
