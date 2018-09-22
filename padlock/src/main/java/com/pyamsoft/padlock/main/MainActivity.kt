@@ -61,8 +61,6 @@ class MainActivity : RatingActivity() {
   override val rootView: View
     get() = binding.fragmentContainer
 
-  override val forceUpdateCheck: Boolean get() = BuildConfig.DEBUG
-
   override val changeLogLines: ChangeLogBuilder
     get() =
       buildChangeLog {
