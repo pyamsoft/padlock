@@ -66,14 +66,10 @@ class MainActivity : RatingActivity() {
   override val changeLogLines: ChangeLogBuilder
     get() =
       buildChangeLog {
-        feature("New version release: 3.0.0")
-        change("Faster, more reliable locking of applications")
-        change("More material feeling with a fresh coat of paint and some animations")
-        feature("Search applications based on any letters in the name instead of exact matches")
-        feature("Application info dialog is split into logical groupings")
-        bugfix("Avoid spamming the lock screen for applications which quickly switch screens")
-        bugfix("Reduced memory usage on the lock screen and licenses screen")
-        bugfix("Logical work when locking and unlocking applications is guaranteed off of the UI")
+        feature("More battery saving service")
+        feature("Pause the locking service when in trusted environments.")
+        feature("Auto-Resume the paused service after a time period")
+        feature("Stop the service cleanly when permission is lost")
       }
 
   override fun onCreate(savedInstanceState: Bundle?) {
