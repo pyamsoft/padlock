@@ -22,7 +22,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.annotation.CheckResult
-import com.google.android.material.snackbar.Snackbar
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.list.ErrorDialog
@@ -62,7 +61,7 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
   private fun showSnackbarWithText(text: String) {
     val activity = activity
     if (activity is LockScreenActivity) {
-      Snackbreak.make(activity.getRootView(), text, Snackbar.LENGTH_SHORT)
+      Snackbreak.short(activity.getRootView(), text)
           .show()
     }
   }

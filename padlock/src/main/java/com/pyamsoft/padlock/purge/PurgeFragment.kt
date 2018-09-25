@@ -20,7 +20,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
@@ -105,11 +104,7 @@ class PurgeFragment : ToolbarFragment() {
       wrapper.onLoading { refreshLatch.isRefreshing = true }
       wrapper.onComplete { refreshLatch.isRefreshing = false }
       wrapper.onError { _ ->
-        Snackbreak.make(
-            binding.root,
-            "Failed to load outdated application list",
-            Snackbar.LENGTH_LONG
-        )
+        Snackbreak.long(binding.root, "Failed to load outdated application list")
             .setAction("Retry") { viewModel.fetch(true) }
             .show()
       }

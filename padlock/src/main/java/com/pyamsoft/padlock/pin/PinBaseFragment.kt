@@ -29,7 +29,6 @@ import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.ui.app.fragment.requireView
 import com.pyamsoft.pydroid.ui.util.Snackbreak
-import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import javax.inject.Inject
 
 abstract class PinBaseFragment : ToolbarFragment() {
@@ -59,12 +58,9 @@ abstract class PinBaseFragment : ToolbarFragment() {
 
     viewModel.onMasterPinPresent { onMasterPinPresent() }
 
-    viewModel.onMasterPinSubmitError { error ->
+    viewModel.onMasterPinSubmitError {
       // Resolve the returned view at the time of error
-      Snackbreak.short(
-          requireActivity(), requireView(),
-          ErrorDetail("PIN submission error", error.localizedMessage)
-      )
+      Snackbreak.short(requireView(), it.localizedMessage)
     }
 
     viewModel.onMasterPinSubmitted {

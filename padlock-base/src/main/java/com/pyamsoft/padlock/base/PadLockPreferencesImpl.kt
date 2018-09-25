@@ -33,6 +33,7 @@ import com.pyamsoft.padlock.model.service.ServicePauseState
 import com.pyamsoft.padlock.model.service.ServicePauseState.STARTED
 import com.pyamsoft.padlock.model.service.ServicePauseState.valueOf
 import timber.log.Timber
+import java.util.Collections
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -192,7 +193,7 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
       watcherMap[uuid] = key to func
 
       // Update the cached values list here
-      cachedValuesList = watcherMap.values
+      cachedValuesList = Collections.unmodifiableCollection(watcherMap.values)
     }
 
     fun removeWatcher(uuid: UUID) {
@@ -202,7 +203,7 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
           }
 
       // Update the cached values list here
-      cachedValuesList = watcherMap.values
+      cachedValuesList = Collections.unmodifiableCollection(watcherMap.values)
 
       if (watcherMap.isEmpty()) {
         Timber.d("Stop watching preferences")

@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
-import com.google.android.material.snackbar.Snackbar
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -36,11 +35,7 @@ class PauseConfirmActivity : ActivityBase() {
         .inject(this)
 
     viewModel.onCheckPinEventFailed {
-      Snackbreak.make(
-          binding.pauseCheckRoot,
-          "Invalid PIN",
-          Snackbar.LENGTH_SHORT
-      )
+      Snackbreak.short(binding.pauseCheckRoot, "Invalid PIN")
           .show()
     }
     viewModel.onCheckPinEventSuccess {

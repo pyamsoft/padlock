@@ -26,7 +26,6 @@ import androidx.annotation.CheckResult
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
@@ -285,21 +284,13 @@ class LockInfoDialog : ToolbarDialog() {
   }
 
   private fun onListPopulateError() {
-    Snackbreak.make(
-        binding.root,
-        "Failed to load list for $appName",
-        Snackbar.LENGTH_LONG
-    )
+    Snackbreak.long(binding.root, "Failed to load list for $appName")
         .setAction("Retry") { viewModel.populateList(true) }
         .show()
   }
 
   private fun onModifyEntryError() {
-    Snackbreak.make(
-        binding.root,
-        "Failed to modify list for $appName",
-        Snackbar.LENGTH_LONG
-    )
+    Snackbreak.long(binding.root, "Failed to modify list for $appName")
         .setAction("Retry") { viewModel.populateList(true) }
         .show()
   }

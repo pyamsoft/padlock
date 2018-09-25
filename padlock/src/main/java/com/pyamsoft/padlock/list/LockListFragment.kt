@@ -24,7 +24,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
@@ -344,45 +343,31 @@ class LockListFragment : ToolbarFragment() {
   }
 
   private fun onMasterPinCreateSuccess() {
-    val v = view
-    if (v != null) {
-      Snackbreak.make(v, "PadLock Enabled", Snackbar.LENGTH_SHORT)
+    view?.also {
+      Snackbreak.short(it, "PadLock Enabled")
           .show()
     }
   }
 
   private fun onMasterPinCreateFailure() {
-    Snackbreak.make(
-        binding.root,
-        "Failed to create master pin",
-        Snackbar.LENGTH_SHORT
-    )
+    Snackbreak.short(binding.root, "Failed to create master pin")
         .show()
   }
 
   private fun onMasterPinClearSuccess() {
-    val v = view
-    if (v != null) {
-      Snackbreak.make(v, "PadLock Disabled", Snackbar.LENGTH_SHORT)
+    view?.also {
+      Snackbreak.short(it, "PadLock Disabled")
           .show()
     }
   }
 
   private fun onMasterPinClearFailure() {
-    Snackbreak.make(
-        binding.root,
-        "Failed to clear master pin",
-        Snackbar.LENGTH_SHORT
-    )
+    Snackbreak.short(binding.root, "Failed to clear master pin")
         .show()
   }
 
   private fun onModifyEntryError() {
-    Snackbreak.make(
-        binding.root,
-        "Failed to modify application list",
-        Snackbar.LENGTH_LONG
-    )
+    Snackbreak.long(binding.root, "Failed to modify application list")
         .setAction("Retry") { viewModel.populateList(true) }
         .show()
   }
@@ -458,11 +443,7 @@ class LockListFragment : ToolbarFragment() {
   }
 
   private fun onListPopulateError() {
-    Snackbreak.make(
-        binding.root,
-        "Failed to load application list",
-        Snackbar.LENGTH_LONG
-    )
+    Snackbreak.long(binding.root, "Failed to load application list")
         .setAction("Retry") { viewModel.populateList(true) }
         .show()
   }

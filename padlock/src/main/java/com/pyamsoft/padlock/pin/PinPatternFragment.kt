@@ -24,7 +24,6 @@ import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
-import com.google.android.material.snackbar.Snackbar
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
 import com.pyamsoft.pydroid.ui.util.Snackbreak
@@ -149,7 +148,7 @@ class PinPatternFragment : PinBaseFragment() {
         // process and show next
         if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
           Timber.d("Pattern is not long enough")
-          Snackbreak.make(binding.root, "Pattern is not long enough", Snackbar.LENGTH_SHORT)
+          Snackbreak.short(binding.root, "Pattern is not long enough")
               .show()
           binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
           return@runnable false
@@ -158,7 +157,7 @@ class PinPatternFragment : PinBaseFragment() {
           patternText = cellPatternToString(cellPattern)
           repeatPattern = true
           binding.patternLock.clearPattern()
-          Snackbreak.make(binding.root, "Please confirm pattern", Snackbar.LENGTH_SHORT)
+          Snackbreak.short(binding.root, "Please confirm pattern")
               .show()
           return@runnable false
         }

@@ -23,7 +23,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.preference.ListPreference
-import com.google.android.material.snackbar.Snackbar
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -34,7 +33,6 @@ import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.fragment.requireView
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
-import com.pyamsoft.pydroid.ui.util.Snackbreak.ErrorDetail
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
@@ -120,36 +118,31 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
   }
 
   private fun onLockTypeChangePrevented() {
-    Snackbreak.make(
-        requireView(),
-        "You must clear the current PIN before changing type",
-        Snackbar.LENGTH_LONG
-    )
-        .apply {
-          setAction("Okay", DebouncedOnClickListener.create {
-            PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
-                .show(requireActivity(), PinDialog.TAG)
-          })
-        }
+    Snackbreak.long(requireView(), "You must clear the current code before changing type")
+        .setAction("Okay", DebouncedOnClickListener.create {
+          PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
+              .show(requireActivity(), PinDialog.TAG)
+        })
         .show()
   }
 
   private fun onLockTypeChangeError(throwable: Throwable) {
-    Snackbreak.short(requireActivity(), requireView(), ErrorDetail("", throwable.localizedMessage))
+    Snackbreak.short(requireView(), throwable.localizedMessage)
+        .show()
   }
 
   private fun onClearDatabase() {
-    Snackbreak.make(requireView(), "Locked application database cleared", Snackbar.LENGTH_SHORT)
+    Snackbreak.short(requireView(), "Locked application database cleared")
         .show()
   }
 
   private fun onMasterPinClearFailure() {
-    Snackbreak.make(requireView(), "Failed to clear master pin", Snackbar.LENGTH_SHORT)
+    Snackbreak.short(requireView(), "Failed to clear master pin")
         .show()
   }
 
   private fun onMasterPinClearSuccess() {
-    Snackbreak.make(requireView(), "You may now change lock type", Snackbar.LENGTH_SHORT)
+    Snackbreak.short(requireView(), "You may now change lock type")
         .show()
   }
 
