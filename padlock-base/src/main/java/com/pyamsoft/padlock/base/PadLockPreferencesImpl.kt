@@ -33,8 +33,8 @@ import com.pyamsoft.padlock.model.service.ServicePauseState
 import com.pyamsoft.padlock.model.service.ServicePauseState.STARTED
 import com.pyamsoft.padlock.model.service.ServicePauseState.valueOf
 import timber.log.Timber
-import java.util.Collections
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -165,12 +165,10 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     private val preferences: SharedPreferences
   ) {
 
-    private val watcherMap = LinkedHashMap<UUID, Pair<String, () -> Unit>>()
-
-    private var cachedValuesList: Collection<Pair<String, () -> Unit>> = emptyList()
+    private val watcherMap = ConcurrentHashMap<UUID, Pair<String, () -> Unit>>()
 
     private val callback = OnSharedPreferenceChangeListener { _, preference ->
-      val values = cachedValuesList
+      val values = watcherMap.values
       for (entry in values) {
         val key = entry.first
         val func = entry.second
@@ -191,9 +189,6 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
 
       Timber.d("Adding PreferenceWatcher for key $key")
       watcherMap[uuid] = key to func
-
-      // Update the cached values list here
-      cachedValuesList = Collections.unmodifiableCollection(watcherMap.values)
     }
 
     fun removeWatcher(uuid: UUID) {
@@ -201,9 +196,6 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
           ?.also { (key, _) ->
             Timber.d("Removing PreferenceWatcher for key $key")
           }
-
-      // Update the cached values list here
-      cachedValuesList = Collections.unmodifiableCollection(watcherMap.values)
 
       if (watcherMap.isEmpty()) {
         Timber.d("Stop watching preferences")
