@@ -31,6 +31,7 @@ import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.settings.SettingsFragment
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
+import com.pyamsoft.pydroid.ui.util.commit
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 
@@ -99,7 +100,7 @@ class MainFragment : ToolbarFragment() {
             } else {
               fragmentManager.beginTransaction()
                   .replace(containerId, fragment, tag)
-                  .commit()
+                  .commit(viewLifecycleOwner)
               return true
             }
           }

@@ -40,6 +40,7 @@ import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
+import com.pyamsoft.pydroid.ui.util.commit
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
@@ -253,7 +254,7 @@ class LockScreenActivity : ActivityBase() {
     if (fragment == null) {
       fragmentManager.beginTransaction()
           .add(R.id.lock_screen_container, pushFragment, tag)
-          .commit()
+          .commit(this)
     }
   }
 

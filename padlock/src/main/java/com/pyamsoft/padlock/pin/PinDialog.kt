@@ -38,6 +38,7 @@ import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.ImageTarget
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import com.pyamsoft.pydroid.ui.util.commit
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
@@ -102,11 +103,8 @@ class PinDialog : ToolbarDialog() {
     if (fragment == null) {
       Timber.d("Push new pin fragment: $tag")
       fragmentManager.beginTransaction()
-          .add(
-              R.id.pin_entry_dialog_container, pushFragment,
-              tag
-          )
-          .commit()
+          .add(R.id.pin_entry_dialog_container, pushFragment, tag)
+          .commit(viewLifecycleOwner)
     }
   }
 

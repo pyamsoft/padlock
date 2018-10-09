@@ -35,7 +35,7 @@ import com.pyamsoft.pydroid.ui.rating.ChangeLogBuilder
 import com.pyamsoft.pydroid.ui.rating.RatingActivity
 import com.pyamsoft.pydroid.ui.rating.buildChangeLog
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
-import com.pyamsoft.pydroid.ui.util.animateMenu
+import com.pyamsoft.pydroid.ui.util.commit
 import com.pyamsoft.pydroid.util.tintWith
 import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
@@ -91,7 +91,7 @@ class MainActivity : RatingActivity() {
       Timber.d("Load default page")
       fm.beginTransaction()
           .add(R.id.fragment_container, MainFragment(), MainFragment.TAG)
-          .commit()
+          .commit(this)
     } else {
       Timber.w("Default page or About libraries was already loaded")
     }
@@ -145,8 +145,6 @@ class MainActivity : RatingActivity() {
 
   override fun onPostResume() {
     super.onPostResume()
-    binding.toolbar.animateMenu()
-
     // Try to start service, will not if we do not have permission
     serviceManager.startService(false)
   }
