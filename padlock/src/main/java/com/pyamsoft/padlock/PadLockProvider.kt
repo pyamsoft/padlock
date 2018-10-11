@@ -18,8 +18,8 @@ package com.pyamsoft.padlock
 
 import android.app.Activity
 import android.app.Application
-import android.app.IntentService
 import android.app.Service
+import android.app.job.JobService
 import android.content.Context
 import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
@@ -39,7 +39,7 @@ class PadLockProvider(
   moduleProvider: ModuleProvider,
   private val mainActivityClass: Class<out Activity>,
   private val serviceClass: Class<out Service>,
-  private val recheckServiceClass: Class<out IntentService>
+  private val jobServiceClass: Class<out JobService>
 ) {
 
   private val enforcer = moduleProvider.enforcer()
@@ -70,18 +70,15 @@ class PadLockProvider(
 
   @Provides
   @CheckResult
-  @Named("main_activity")
   fun provideMainActivityClass(): Class<out Activity> = mainActivityClass
 
   @Provides
   @CheckResult
-  @Named("service")
   fun provideServiceClass(): Class<out Service> = serviceClass
 
   @Provides
   @CheckResult
-  @Named("recheck")
-  fun provideRecheckServiceClass(): Class<out IntentService> = recheckServiceClass
+  fun provideJobServiceClass(): Class<out JobService> = jobServiceClass
 
   @Provides
   @CheckResult

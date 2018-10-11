@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.lock
 
-import android.app.IntentService
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.database.EntryInsertDao
@@ -27,6 +26,7 @@ import com.pyamsoft.padlock.api.lockscreen.LockHelper
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
+import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType.RECHECK
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.service.Recheck
 import com.pyamsoft.pydroid.core.bus.Publisher
@@ -40,7 +40,6 @@ import io.reactivex.Single
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
@@ -54,8 +53,7 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   private val masterPinInteractor: MasterPinInteractor,
   private val insertDao: EntryInsertDao,
   private val updateDao: EntryUpdateDao,
-  private val queryDao: EntryQueryDao,
-  @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>
+  private val queryDao: EntryQueryDao
 ) : LockEntryInteractor {
 
   private val failCount: MutableMap<String, Int> = HashMap()
@@ -117,17 +115,20 @@ internal class LockEntryInteractorImpl @Inject internal constructor(
   ): Completable {
     return Completable.fromAction {
       enforcer.assertNotOnMainThread()
+
+      val params: Map<String, String> = mapOf(
+          Recheck.EXTRA_PACKAGE_NAME to packageName,
+          Recheck.EXTRA_CLASS_NAME to realName
+      )
+
       // Cancel any old recheck job for the class, but not the package
-      val params: List<Pair<String, String>> = ArrayList<Pair<String, String>>().apply {
-        add(Recheck.EXTRA_PACKAGE_NAME to packageName)
-        add(Recheck.EXTRA_CLASS_NAME to realName)
-      }
-      jobSchedulerCompat.cancel(recheckServiceClass, params)
+      jobSchedulerCompat.cancel(RECHECK, params)
 
       // Queue up a new recheck job
       // Since alarms are inexact, buffer by an extra minute
       val triggerTime = recheckTime + ONE_MINUTE_MILLIS
-      jobSchedulerCompat.queue(recheckServiceClass, params, triggerTime)
+
+      jobSchedulerCompat.queue(RECHECK, triggerTime, params)
     }
   }
 

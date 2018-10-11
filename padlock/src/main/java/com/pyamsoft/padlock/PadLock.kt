@@ -22,8 +22,8 @@ import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.padlock.main.MainActivity
+import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
-import com.pyamsoft.padlock.service.RecheckService
 import com.pyamsoft.pydroid.bootstrap.about.AboutLibraries
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
@@ -80,7 +80,7 @@ class PadLock : Application(), PYDroid.Instance {
           it.modules(),
           MainActivity::class.java,
           PadLockService::class.java,
-          RecheckService::class.java
+          PadLockJobService::class.java
       )
       component = DaggerPadLockComponent.builder()
           .padLockProvider(provider)

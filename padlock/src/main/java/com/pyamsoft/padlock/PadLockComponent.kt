@@ -47,7 +47,7 @@ import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.purge.PurgeSingletonModule
 import com.pyamsoft.padlock.purge.PurgeSingletonProvider
 import com.pyamsoft.padlock.receiver.BootReceiver
-import com.pyamsoft.padlock.service.RecheckService
+import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.ServiceComponent
 import com.pyamsoft.padlock.service.ServiceModule
 import com.pyamsoft.padlock.service.ServiceSingletonModule
@@ -80,13 +80,13 @@ interface PadLockComponent {
 
   fun inject(receiver: BootReceiver)
 
-  fun inject(recheckService: RecheckService)
+  fun inject(service: PadLockJobService)
 
-  fun inject(purgeAllDialog: PurgeAllDialog)
+  fun inject(dialog: PurgeAllDialog)
 
-  fun inject(purgeSingleItemDialog: PurgeSingleItemDialog)
+  fun inject(dialog: PurgeSingleItemDialog)
 
-  fun inject(confirmationDialog: ConfirmationDialog)
+  fun inject(dialog: ConfirmationDialog)
 
   fun inject(viewHolder: LockInfoItem.ViewHolder)
 

@@ -86,13 +86,15 @@
     <!-- Locking Service -->
     <service
         android:name=".service.PadLockService"
+        android:label="PadLock Service"
         android:exported="false"
         android:stopWithTask="false"/>
 
     <service
-        android:name=".service.RecheckService"
+        android:name=".service.PadLockJobService"
         android:exported="false"
-        android:stopWithTask="false"/>
+        android:label="PadLock Job Service"
+        android:permission="android.permission.BIND_JOB_SERVICE"/>
 
     <!-- Receive boot completed, only active when PadLockService is on -->
     <receiver

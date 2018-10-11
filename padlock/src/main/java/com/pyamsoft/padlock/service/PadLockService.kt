@@ -34,6 +34,7 @@ import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
+import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType.SERVICE_TEMP_PAUSE
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.model.service.ServicePauseState.PAUSED
 import com.pyamsoft.padlock.model.service.ServicePauseState.STARTED
@@ -136,7 +137,7 @@ class PadLockService : Service(), LifecycleOwner {
     notificationManager.cancel(PERMISSION_ID)
 
     // Cancel temporary intent
-    jobSchedulerCompat.cancel(serviceManager.startIntent())
+    jobSchedulerCompat.cancel(SERVICE_TEMP_PAUSE)
 
     // Start foreground service
     startForeground(NOTIFICATION_ID, notificationBuilder.build())
@@ -172,7 +173,7 @@ class PadLockService : Service(), LifecycleOwner {
 
     if (autoResume) {
       // Queue the service to restart after timeout via alarm manager
-      jobSchedulerCompat.queue(serviceManager.startIntent(), TIME_TEMP_PAUSE)
+      jobSchedulerCompat.queue(SERVICE_TEMP_PAUSE, TIME_TEMP_PAUSE)
     }
 
     // Stop the service here

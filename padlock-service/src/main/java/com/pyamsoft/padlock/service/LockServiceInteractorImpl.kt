@@ -16,7 +16,6 @@
 
 package com.pyamsoft.padlock.service
 
-import android.app.IntentService
 import android.content.Context
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.database.EntryQueryDao
@@ -58,7 +57,6 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
@@ -72,7 +70,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   private val packageActivityManager: PackageActivityManager,
   private val packageApplicationManager: PackageApplicationManager,
   private val queryDao: EntryQueryDao,
-  @param:Named("recheck") private val recheckServiceClass: Class<out IntentService>,
   private val pinPreferences: MasterPinPreferences,
   private val servicePreferences: ServicePreferences
 ) : LockServiceInteractor {
@@ -87,7 +84,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   override fun cleanup() {
     Timber.d("Cleanup LockService")
-    jobSchedulerCompat.cancel(recheckServiceClass)
+    jobSchedulerCompat.cancelAll()
     reset()
   }
 

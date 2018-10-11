@@ -16,25 +16,28 @@
 
 package com.pyamsoft.padlock.api.service
 
-import android.app.PendingIntent
-
 interface JobSchedulerCompat {
 
   fun cancel(
-    targetClass: Class<*>,
-    params: List<Pair<String, String>> = emptyList()
-  )
-
-  fun cancel(pendingIntent: PendingIntent)
-
-  fun queue(
-    targetClass: Class<*>,
-    params: List<Pair<String, String>> = emptyList(),
-    triggerAfter: Long
+    type: JobType,
+    extras: Map<String, String> = emptyMap()
   )
 
   fun queue(
-    pendingIntent: PendingIntent,
-    triggerAfter: Long
+    type: JobType,
+    triggerAfter: Long,
+    extras: Map<String, String> = emptyMap()
   )
+
+  fun cancelAll()
+
+  enum class JobType {
+    RECHECK,
+    SERVICE_TEMP_PAUSE
+  }
+
+  companion object {
+
+    const val KEY_JOB_TYPE = "key_job_type"
+  }
 }

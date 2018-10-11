@@ -26,15 +26,14 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class ServiceManager @Inject internal constructor(
   context: Context,
   private val enforcer: Enforcer,
-  @Named("main_activity") private val activityClass: Class<out Activity>,
-  @Named("service") private val serviceClass: Class<out Service>,
+  private val activityClass: Class<out Activity>,
+  private val serviceClass: Class<out Service>,
   private val masterPinPreferences: MasterPinPreferences,
   private val servicePreferences: ServicePreferences
 ) {

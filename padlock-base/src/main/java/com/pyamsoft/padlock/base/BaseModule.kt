@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
 import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
+import com.pyamsoft.padlock.base.jobs.JobSchedulerCompatImpl
 import dagger.Binds
 import dagger.Module
 
