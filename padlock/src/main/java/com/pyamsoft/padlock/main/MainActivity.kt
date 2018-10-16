@@ -64,10 +64,9 @@ class MainActivity : RatingActivity() {
   override val changeLogLines: ChangeLogBuilder
     get() =
       buildChangeLog {
-        feature("More battery saving service")
-        feature("Pause the locking service when in trusted environments.")
-        feature("Auto-Resume the paused service after a time period")
-        feature("Stop the service cleanly when permission is lost")
+        bugfix("Temporarily pausing service and auto-restarting should work on all devices")
+        bugfix("Automatically re-locking the active application should work on all devices")
+        bugfix("Smoother locking with less UI lag")
       }
 
   override fun onCreate(savedInstanceState: Bundle?) {
