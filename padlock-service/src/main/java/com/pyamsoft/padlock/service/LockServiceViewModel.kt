@@ -187,6 +187,7 @@ class LockServiceViewModel @Inject internal constructor(
     forcedRecheck: RecheckStatus
   ) {
     entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
+        .unsubscribeOn(Schedulers.io())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe({ (model, icon) ->
