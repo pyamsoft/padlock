@@ -189,7 +189,7 @@ class LockServiceViewModel @Inject internal constructor(
     entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
         .unsubscribeOn(Schedulers.io())
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .observeOn(Schedulers.io())
         .subscribe({ (model, icon) ->
           if (PadLockDbModels.isEmpty(model)) {
             Timber.w("PadLockDbEntryImpl is EMPTY, ignore")
