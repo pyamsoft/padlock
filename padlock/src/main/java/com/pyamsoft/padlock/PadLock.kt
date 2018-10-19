@@ -24,7 +24,7 @@ import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
-import com.pyamsoft.pydroid.bootstrap.about.AboutLibraries
+import com.pyamsoft.pydroid.bootstrap.libraries.OssLibraries
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
@@ -51,14 +51,10 @@ class PadLock : Application(), PYDroid.Instance {
       refWatcher = RefWatcher.DISABLED
     }
 
-    AboutLibraries.create("Room", "https://source.android.com", "licenses/room")
-    AboutLibraries.create("Dagger", "https://github.com/google/dagger", "licenses/dagger2")
-    AboutLibraries.create(
-        "FastAdapter", "https://github.com/mikepenz/fastadapter", "licenses/fastadapter"
-    )
-    AboutLibraries.create(
-        "PatternLockView", "https://github.com/aritraroy/PatternLockView", "licenses/patternlock"
-    )
+    OssLibraries.add("Room", "https://source.android.com")
+    OssLibraries.add("Dagger", "https://github.com/google/dagger")
+    OssLibraries.add("FastAdapter", "https://github.com/mikepenz/fastadapter")
+    OssLibraries.add("PatternLockView", "https://github.com/aritraroy/PatternLockView")
     PYDroid.init(this, this, BuildConfig.DEBUG)
 
     val dagger = Injector.obtain<PadLockComponent>(this)

@@ -46,8 +46,8 @@ import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_TEMP_PAUSE
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
-import com.pyamsoft.pydroid.core.lifecycle.fakeBind
-import com.pyamsoft.pydroid.core.lifecycle.fakeUnbind
+import com.pyamsoft.pydroid.util.fakeBind
+import com.pyamsoft.pydroid.util.fakeUnbind
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
