@@ -29,6 +29,7 @@ import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.ModuleProvider
+import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -46,6 +47,12 @@ class PadLockProvider(
   private val imageLoader = moduleProvider
       .loaderModule()
       .provideImageLoader()
+  private val moshi = moduleProvider.versionCheckModule()
+      .getMoshi()
+
+  @Provides
+  @CheckResult
+  fun provideMoshi(): Moshi = moshi
 
   @Provides
   @CheckResult

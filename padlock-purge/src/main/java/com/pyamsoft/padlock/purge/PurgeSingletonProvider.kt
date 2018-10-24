@@ -16,17 +16,23 @@
 
 package com.pyamsoft.padlock.purge
 
+import android.content.Context
 import com.popinnow.android.repo.Repo
+import com.popinnow.android.repo.moshi.MoshiPersister
 import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.model.purge.PurgeAllEvent
 import com.pyamsoft.padlock.model.purge.PurgeEvent
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import dagger.Module
 import dagger.Provides
+import java.io.File
 import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Named
+import javax.inject.Singleton
 
 @Module
 object PurgeSingletonProvider {
@@ -34,14 +40,24 @@ object PurgeSingletonProvider {
   private val purgeBus = RxBus.create<PurgeEvent>()
   private val purgeAllBus = RxBus.create<PurgeAllEvent>()
 
-  private val repo = newRepoBuilder<List<String>>()
-      .memoryCache(10, MINUTES)
-      .build()
-
   @JvmStatic
   @Provides
+  @Singleton
   @Named("repo_purge_list")
-  internal fun provideRepo(): Repo<List<String>> = repo
+  internal fun provideRepo(
+    context: Context,
+    moshi: Moshi
+  ): Repo<List<String>> {
+    val type = Types.newParameterizedType(List::class.java, String::class.java)
+    return newRepoBuilder<List<String>>()
+        .memoryCache(10, MINUTES)
+        .persister(
+            30, MINUTES,
+            File(context.cacheDir, "repo-purge-list"),
+            MoshiPersister.create(moshi, type)
+        )
+        .build()
+  }
 
   @JvmStatic
   @Provides

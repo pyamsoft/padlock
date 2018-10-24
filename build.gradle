@@ -38,9 +38,9 @@ buildscript {
     // AndroidX
     room = "2.0.0"
 
-    pydroid = "18.1.6-SNAPSHOT-6"
+    pydroid = "18.1.6-SNAPSHOT-7"
     leakCanary = "1.6.1"
-    dagger = "2.17"
+    dagger = "2.18"
     patternLock = "1.0.0"
     fastAdapter = "3.3.1"
   }

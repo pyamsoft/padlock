@@ -16,30 +16,46 @@
 
 package com.pyamsoft.padlock.list
 
+import android.content.Context
 import com.popinnow.android.repo.Repo
+import com.popinnow.android.repo.moshi.MoshiPersister
 import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import dagger.Module
 import dagger.Provides
+import java.io.File
 import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Named
+import javax.inject.Singleton
 
 @Module
 object LockListSingletonProvider {
 
   private val bus = RxBus.create<LockListEvent>()
 
-  private val repo = newRepoBuilder<List<AppEntry>>()
-      .memoryCache(10, MINUTES)
-      .build()
-
   @JvmStatic
   @Provides
+  @Singleton
   @Named("repo_lock_list")
-  internal fun provideRepo(): Repo<List<AppEntry>> = repo
+  internal fun provideRepo(
+    context: Context,
+    moshi: Moshi
+  ): Repo<List<AppEntry>> {
+    val type = Types.newParameterizedType(List::class.java, AppEntry::class.java)
+    return newRepoBuilder<List<AppEntry>>()
+        .memoryCache(10, MINUTES)
+        .persister(
+            30, MINUTES,
+            File(context.cacheDir, "repo-lock-list"),
+            MoshiPersister.create(moshi, type)
+        )
+        .build()
+  }
 
   @JvmStatic
   @Provides
