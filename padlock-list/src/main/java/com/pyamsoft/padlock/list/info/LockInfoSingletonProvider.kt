@@ -34,6 +34,7 @@ import dagger.Module
 import dagger.Provides
 import timber.log.Timber
 import java.io.File
+import java.util.concurrent.TimeUnit.HOURS
 import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Named
 import javax.inject.Singleton
@@ -55,10 +56,9 @@ object LockInfoSingletonProvider {
     val type = Types.newParameterizedType(List::class.java, ActivityEntry::class.java)
     return newMultiRepo {
       newRepoBuilder<List<ActivityEntry>>()
-          .debug("AppInfo: $it")
-          .memoryCache(10, MINUTES)
+          .memoryCache(30, MINUTES)
           .persister(
-              30, MINUTES,
+              2, HOURS,
               File(context.cacheDir, "repo-$it"),
               MoshiPersister.create(addAdapterToMoshi(moshi), type)
           )

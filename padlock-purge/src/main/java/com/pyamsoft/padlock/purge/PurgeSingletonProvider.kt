@@ -30,6 +30,7 @@ import com.squareup.moshi.Types
 import dagger.Module
 import dagger.Provides
 import java.io.File
+import java.util.concurrent.TimeUnit.HOURS
 import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Named
 import javax.inject.Singleton
@@ -50,9 +51,9 @@ object PurgeSingletonProvider {
   ): Repo<List<String>> {
     val type = Types.newParameterizedType(List::class.java, String::class.java)
     return newRepoBuilder<List<String>>()
-        .memoryCache(10, MINUTES)
+        .memoryCache(30, MINUTES)
         .persister(
-            30, MINUTES,
+            2, HOURS,
             File(context.cacheDir, "repo-purge-list"),
             MoshiPersister.create(moshi, type)
         )

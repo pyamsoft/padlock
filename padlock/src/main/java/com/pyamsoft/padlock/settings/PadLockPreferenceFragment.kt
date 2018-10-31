@@ -51,6 +51,8 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
   override val applicationName: String
     get() = getString(R.string.app_name)
 
+  override val isDarkTheme: Boolean = false
+
   override fun onClearAllClicked() {
     ConfirmationDialog.newInstance(ConfirmEvent.ALL)
         .show(requireActivity(), "confirm_dialog")
@@ -87,9 +89,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
         viewModel.switchLockType(value)
       }
 
-      Timber.d(
-          "Always return false here, the callback will decide if we can set value properly"
-      )
+      // Always return false here, the callback will decide if we can set value properly
       return@setOnPreferenceChangeListener false
     }
 

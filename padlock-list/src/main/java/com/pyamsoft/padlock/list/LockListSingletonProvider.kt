@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.list
 import android.content.Context
 import com.popinnow.android.repo.Repo
 import com.popinnow.android.repo.moshi.MoshiPersister
+import com.popinnow.android.repo.moshi.persister
 import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.core.bus.Listener
@@ -29,6 +30,7 @@ import com.squareup.moshi.Types
 import dagger.Module
 import dagger.Provides
 import java.io.File
+import java.util.concurrent.TimeUnit.HOURS
 import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Named
 import javax.inject.Singleton
@@ -48,9 +50,9 @@ object LockListSingletonProvider {
   ): Repo<List<AppEntry>> {
     val type = Types.newParameterizedType(List::class.java, AppEntry::class.java)
     return newRepoBuilder<List<AppEntry>>()
-        .memoryCache(10, MINUTES)
+        .memoryCache(30, MINUTES)
         .persister(
-            30, MINUTES,
+            2, HOURS,
             File(context.cacheDir, "repo-lock-list"),
             MoshiPersister.create(moshi, type)
         )
