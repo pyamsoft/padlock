@@ -406,6 +406,7 @@ class LockListFragment : ToolbarFragment() {
     Timber.d("on FAB permission denied")
 
     imageLoader.load(R.drawable.ic_warning_24dp)
+        .mutate { it.tintWith(requireActivity(), R.color.white) }
         .into(binding.applistFab)
         .bind(viewLifecycleOwner)
 
