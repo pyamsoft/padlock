@@ -111,7 +111,7 @@ class LockScreenTextFragment : LockScreenBaseFragment() {
       }
     }
 
-    imageLoader.load(R.drawable.ic_arrow_forward_24dp)
+    imageLoader.load(R.drawable.ic_check_24dp)
         .mutate {
           it.tintWith(requireActivity(), R.color.white)
           return@mutate it
