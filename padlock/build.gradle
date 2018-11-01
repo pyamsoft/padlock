@@ -100,10 +100,6 @@ kapt {
 }
 
 dependencies {
-
-  // Databinding
-  kapt "androidx.databinding:databinding-compiler:$plugin_version"
-
   // FastAdapter
   implementation "com.mikepenz:fastadapter:$fastAdapter@aar"
   implementation "com.mikepenz:fastadapter-commons:$fastAdapter@aar"
