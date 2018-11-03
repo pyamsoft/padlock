@@ -45,26 +45,55 @@ class PadLock : Application(), PYDroid.Instance {
       return
     }
 
-    if (BuildConfig.DEBUG) {
-      refWatcher = LeakCanary.install(this)
-    } else {
-      refWatcher = RefWatcher.DISABLED
-    }
-
-    OssLibraries.add("Room", "https://source.android.com")
-    OssLibraries.add("Dagger", "https://github.com/google/dagger")
-    OssLibraries.add("FastAdapter", "https://github.com/mikepenz/fastadapter")
-    OssLibraries.add("PatternLockView", "https://github.com/aritraroy/PatternLockView")
     PYDroid.init(this, this, BuildConfig.DEBUG)
+    installRefWatcher()
+    addLibraries()
+    createDagger()
+    listenForNewAppInstalls()
+  }
 
-    val dagger = Injector.obtain<PadLockComponent>(this)
-    dagger.inject(this)
-
+  private fun listenForNewAppInstalls() {
     if (installListenerPreferences.isInstallListenerEnabled()) {
       receiver.register()
     } else {
       receiver.unregister()
     }
+  }
+
+  private fun createDagger() {
+    val dagger = Injector.obtain<PadLockComponent>(this)
+    dagger.inject(this)
+  }
+
+  private fun installRefWatcher() {
+    if (BuildConfig.DEBUG) {
+      refWatcher = LeakCanary.install(this)
+    } else {
+      refWatcher = RefWatcher.DISABLED
+    }
+  }
+
+  private fun addLibraries() {
+    OssLibraries.add(
+        "Room",
+        "https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/room/",
+        "The AndroidX Jetpack Room library. Fluent SQLite database access."
+    )
+    OssLibraries.add(
+        "Dagger",
+        "https://github.com/google/dagger",
+        "A fast dependency injector for Android and Java."
+    )
+    OssLibraries.add(
+        "FastAdapter",
+        "https://github.com/mikepenz/fastadapter",
+        "The bullet proof, fast and easy to use adapter library, which minimizes developing time to a fraction..."
+    )
+    OssLibraries.add(
+        "PatternLockView",
+        "https://github.com/aritraroy/PatternLockView",
+        "An easy-to-use, customizable and Material Design ready Pattern Lock view for Android."
+    )
   }
 
   override fun getPydroid(): PYDroid? = pyDroid
