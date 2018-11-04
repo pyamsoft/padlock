@@ -35,21 +35,29 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
 
   private val sqlDelightMigrationBus = AsyncSubject.create<Boolean>()
       .toSerialized()
+  private val realtimeChangeBus = RxBus.create<EntityChangeEvent>()
+  private val lock = Any()
 
-  private val bus = RxBus.create<EntityChangeEvent>()
-
-  private val queryDao = object : EntryQueryDao {
+  private val roomQueryDao = object : EntryQueryDao {
 
     override fun queryAll(): Single<List<AllEntriesModel>> {
-      return waitForSqldelightMigration().flatMap { queryDao().queryAll() }
+      return waitForSqldelightMigration().flatMap {
+        synchronized(lock) {
+          return@flatMap queryDao().queryAll()
+        }
+      }
     }
 
     override fun subscribeToUpdates(): Observable<EntityChangeEvent> {
-      return waitForSqldelightMigration().flatMapObservable { bus.listen() }
+      return waitForSqldelightMigration().flatMapObservable { realtimeChangeBus.listen() }
     }
 
     override fun queryWithPackageName(packageName: String): Single<List<WithPackageNameModel>> {
-      return waitForSqldelightMigration().flatMap { queryDao().queryWithPackageName(packageName) }
+      return waitForSqldelightMigration().flatMap {
+        synchronized(lock) {
+          return@flatMap queryDao().queryWithPackageName(packageName)
+        }
+      }
     }
 
     override fun queryWithPackageActivityName(
@@ -57,26 +65,32 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
       activityName: String
     ): Single<PadLockEntryModel> {
       return waitForSqldelightMigration().flatMap {
-        queryDao().queryWithPackageActivityName(packageName, activityName)
+        synchronized(lock) {
+          return@flatMap queryDao().queryWithPackageActivityName(packageName, activityName)
+        }
       }
     }
 
   }
 
-  private val insertDao = object : EntryInsertDao {
+  private val roomInsertDao = object : EntryInsertDao {
 
     override fun insert(entry: PadLockEntryModel): Completable {
-      return waitForSqldelightMigration().flatMapCompletable { insertDao().insert(entry) }
-          .doOnComplete {
-            bus.publish(
-                EntityChangeEvent(
-                    INSERTED,
-                    entry.packageName(),
-                    entry.activityName(),
-                    entry.whitelist()
+      return waitForSqldelightMigration().flatMapCompletable {
+        synchronized(lock) {
+          return@flatMapCompletable insertDao().insert(entry)
+              .doOnComplete {
+                realtimeChangeBus.publish(
+                    EntityChangeEvent(
+                        INSERTED,
+                        entry.packageName(),
+                        entry.activityName(),
+                        entry.whitelist()
+                    )
                 )
-            )
-          }
+              }
+        }
+      }
     }
 
     override fun insert(
@@ -88,23 +102,34 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
       isSystem: Boolean,
       whitelist: Boolean
     ): Completable {
-      return insertDao().insert(
-          packageName, activityName, lockCode, lockUntilTime, ignoreUntilTime, isSystem, whitelist
-      )
-          .doOnComplete {
-            bus.publish(EntityChangeEvent(INSERTED, packageName, activityName, whitelist))
-          }
+      return waitForSqldelightMigration().flatMapCompletable {
+        synchronized(lock) {
+          return@flatMapCompletable insertDao().insert(
+              packageName, activityName, lockCode,
+              lockUntilTime, ignoreUntilTime, isSystem, whitelist
+          )
+              .doOnComplete {
+                realtimeChangeBus.publish(
+                    EntityChangeEvent(INSERTED, packageName, activityName, whitelist)
+                )
+              }
+        }
+      }
     }
 
   }
-  private val updateDao = object : EntryUpdateDao {
+  private val roomUpdateDao = object : EntryUpdateDao {
     override fun updateLockUntilTime(
       packageName: String,
       activityName: String,
       lockUntilTime: Long
     ): Completable {
       return waitForSqldelightMigration().flatMapCompletable {
-        updateDao().updateLockUntilTime(packageName, activityName, lockUntilTime)
+        synchronized(lock) {
+          return@flatMapCompletable updateDao().updateLockUntilTime(
+              packageName, activityName, lockUntilTime
+          )
+        }
       }
     }
 
@@ -114,7 +139,11 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
       ignoreUntilTime: Long
     ): Completable {
       return waitForSqldelightMigration().flatMapCompletable {
-        updateDao().updateIgnoreUntilTime(packageName, activityName, ignoreUntilTime)
+        synchronized(lock) {
+          return@flatMapCompletable updateDao().updateIgnoreUntilTime(
+              packageName, activityName, ignoreUntilTime
+          )
+        }
       }
     }
 
@@ -124,25 +153,33 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
       whitelist: Boolean
     ): Completable {
       return waitForSqldelightMigration().flatMapCompletable {
-        updateDao().updateWhitelist(packageName, activityName, whitelist)
+        synchronized(lock) {
+          return@flatMapCompletable updateDao().updateWhitelist(
+              packageName, activityName, whitelist
+          )
+              .doOnComplete {
+                realtimeChangeBus.publish(
+                    EntityChangeEvent(UPDATED, packageName, activityName, whitelist)
+                )
+              }
+        }
       }
-          .doOnComplete {
-            bus.publish(EntityChangeEvent(UPDATED, packageName, activityName, whitelist))
-          }
     }
 
   }
-  private val deleteDao = object : EntryDeleteDao {
+  private val roomDeleteDao = object : EntryDeleteDao {
 
     override fun deleteWithPackageName(packageName: String): Completable {
       return waitForSqldelightMigration().flatMapCompletable {
-        deleteDao().deleteWithPackageName(packageName)
+        synchronized(lock) {
+          return@flatMapCompletable deleteDao().deleteWithPackageName(packageName)
+              .doOnComplete {
+                realtimeChangeBus.publish(
+                    EntityChangeEvent(DELETED, packageName, null, false)
+                )
+              }
+        }
       }
-          .doOnComplete {
-            bus.publish(
-                EntityChangeEvent(DELETED, packageName, null, false)
-            )
-          }
     }
 
     override fun deleteWithPackageActivityName(
@@ -150,22 +187,30 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
       activityName: String
     ): Completable {
       return waitForSqldelightMigration().flatMapCompletable {
-        deleteDao().deleteWithPackageActivityName(packageName, activityName)
+        synchronized(lock) {
+          return@flatMapCompletable deleteDao().deleteWithPackageActivityName(
+              packageName, activityName
+          )
+              .doOnComplete {
+                realtimeChangeBus.publish(
+                    EntityChangeEvent(DELETED, packageName, activityName, false)
+                )
+              }
+        }
       }
-          .doOnComplete {
-            bus.publish(
-                EntityChangeEvent(DELETED, packageName, activityName, false)
-            )
-          }
     }
 
     override fun deleteAll(): Completable {
-      return waitForSqldelightMigration().flatMapCompletable { deleteDao().deleteAll() }
-          .doOnComplete {
-            bus.publish(
-                EntityChangeEvent(DELETED, null, null, false)
-            )
-          }
+      return waitForSqldelightMigration().flatMapCompletable {
+        synchronized(lock) {
+          return@flatMapCompletable deleteDao().deleteAll()
+              .doOnComplete {
+                realtimeChangeBus.publish(
+                    EntityChangeEvent(DELETED, null, null, false)
+                )
+              }
+        }
+      }
     }
 
   }
@@ -208,62 +253,63 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
 
   override fun migrateFromSqlDelight(context: Context) {
     Completable.defer {
-      // If the old sqldelight file exists, migrate it
-      if (!oldSqlDelightExists(context)) {
-        Timber.d("No old SqlDelight file exists - assume migration complete or not needed")
-        sqlDelightMigrationComplete(context)
-        return@defer Completable.complete()
-      }
+      synchronized(lock) {
+        // If the old sqldelight file exists, migrate it
+        if (!oldSqlDelightExists(context)) {
+          Timber.d("No old SqlDelight file exists - assume migration complete or not needed")
+          sqlDelightMigrationComplete(context)
+          return@defer Completable.complete()
+        }
 
-      val sqldelight = FrameworkSQLiteOpenHelperFactory().create(
-          Configuration.builder(context)
-              .callback(EmptyCallback)
-              .name(SqlDelightMigrations.SQLDELIGHT_DB_NAME)
-              .build()
-      )
+        val sqldelight = FrameworkSQLiteOpenHelperFactory().create(
+            Configuration.builder(context)
+                .callback(EmptyCallback)
+                .name(SqlDelightMigrations.SQLDELIGHT_DB_NAME)
+                .build()
+        )
 
-      // Get all entries in the DB
-      val inserts = ArrayList<Completable>()
-      sqldelight.readableDatabase.use { db ->
-        db.query("SELECT * FROM ${SqlDelightMigrations.TABLE_NAME}")
-            .use {
+        // Get all entries in the DB
+        val inserts = ArrayList<Completable>()
+        sqldelight.readableDatabase.use { db ->
+          db.query("SELECT * FROM ${SqlDelightMigrations.TABLE_NAME}")
+              .use {
 
-              // Migrate them into Room via insert
-              if (it.moveToFirst()) {
-                val columnPackageName =
-                  it.getColumnIndexOrThrow(SqlDelightMigrations.PACKAGE_NAME)
-                val columnActivityName =
-                  it.getColumnIndexOrThrow(SqlDelightMigrations.ACTIVITY_NAME)
-                val columnLockCode = it.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_CODE)
-                val columnLockUntilTime =
-                  it.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_UNTIL_TIME)
-                val columnIgnoreUntilTime =
-                  it.getColumnIndexOrThrow(SqlDelightMigrations.IGNORE_UNTIL_TIME)
-                val columnSystemApplication =
-                  it.getColumnIndexOrThrow(SqlDelightMigrations.SYSTEM_APPLICATION)
+                // Migrate them into Room via insert
+                if (it.moveToFirst()) {
+                  val columnPackageName =
+                    it.getColumnIndexOrThrow(SqlDelightMigrations.PACKAGE_NAME)
+                  val columnActivityName =
+                    it.getColumnIndexOrThrow(SqlDelightMigrations.ACTIVITY_NAME)
+                  val columnLockCode = it.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_CODE)
+                  val columnLockUntilTime =
+                    it.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_UNTIL_TIME)
+                  val columnIgnoreUntilTime =
+                    it.getColumnIndexOrThrow(SqlDelightMigrations.IGNORE_UNTIL_TIME)
+                  val columnSystemApplication =
+                    it.getColumnIndexOrThrow(SqlDelightMigrations.SYSTEM_APPLICATION)
 
-                // Some old versions did not have whitelist column
-                val columnWhitelist = it.getColumnIndex(SqlDelightMigrations.WHITELIST)
+                  // Some old versions did not have whitelist column
+                  val columnWhitelist = it.getColumnIndex(SqlDelightMigrations.WHITELIST)
 
-                while (it.moveToNext()) {
-                  val packageName: String = it.getString(columnPackageName)
-                  val activityName: String = it.getString(columnActivityName)
-                  val lockCode: String? = it.getStringOrNull(columnLockCode)
-                  val lockUntilTime: Long = it.getLong(columnLockUntilTime)
-                  val ignoreUntilTime: Long = it.getLong(columnIgnoreUntilTime)
-                  val systemApplication: Boolean = it.getInt(columnSystemApplication) != 0
+                  while (it.moveToNext()) {
+                    val packageName: String = it.getString(columnPackageName)
+                    val activityName: String = it.getString(columnActivityName)
+                    val lockCode: String? = it.getStringOrNull(columnLockCode)
+                    val lockUntilTime: Long = it.getLong(columnLockUntilTime)
+                    val ignoreUntilTime: Long = it.getLong(columnIgnoreUntilTime)
+                    val systemApplication: Boolean = it.getInt(columnSystemApplication) != 0
 
-                  // Some old versions did not have whitelist column - default to false
-                  val whitelist: Boolean
-                  if (columnWhitelist < 0) {
-                    whitelist = false
-                  } else {
-                    whitelist = it.getInt(columnWhitelist) != 0
-                  }
+                    // Some old versions did not have whitelist column - default to false
+                    val whitelist: Boolean
+                    if (columnWhitelist < 0) {
+                      whitelist = false
+                    } else {
+                      whitelist = it.getInt(columnWhitelist) != 0
+                    }
 
-                  // Queue up the insert into the new DB, migrating old data
-                  Timber.w(
-                      """Migrating old:
+                    // Queue up the insert into the new DB, migrating old data
+                    Timber.w(
+                        """Migrating old:
             |(
             | packageName       = $packageName
             | activityName      = $activityName
@@ -273,23 +319,24 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
             | systemApplication = $systemApplication
             | whitelist         = $whitelist
             |)""".trimMargin()
-                  )
-                  inserts.add(
-                      insertDao().insert(
-                          packageName, activityName, lockCode, lockUntilTime,
-                          ignoreUntilTime, systemApplication, whitelist
-                      )
-                  )
+                    )
+                    inserts.add(
+                        insertDao().insert(
+                            packageName, activityName, lockCode, lockUntilTime,
+                            ignoreUntilTime, systemApplication, whitelist
+                        )
+                    )
+                  }
                 }
               }
-            }
-      }
+        }
 
-      // Wait for all the inserts to happen
-      if (inserts.isEmpty()) {
-        return@defer Completable.complete()
-      } else {
-        return@defer Completable.mergeArray(*inserts.toTypedArray())
+        // Wait for all the inserts to happen
+        if (inserts.isEmpty()) {
+          return@defer Completable.complete()
+        } else {
+          return@defer Completable.mergeArray(*inserts.toTypedArray())
+        }
       }
     }
         .subscribeOn(Schedulers.io())
@@ -313,32 +360,33 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
   }
 
   override fun query(): EntryQueryDao {
-    return queryDao
+    return roomQueryDao
+  }
+
+  override fun insert(): EntryInsertDao {
+    return roomInsertDao
+  }
+
+  override fun update(): EntryUpdateDao {
+    return roomUpdateDao
+  }
+
+  override fun delete(): EntryDeleteDao {
+    return roomDeleteDao
   }
 
   @CheckResult
   internal abstract fun queryDao(): DbEntryQueryDao
 
-  override fun insert(): EntryInsertDao {
-    return insertDao
-  }
-
   @CheckResult
   internal abstract fun insertDao(): DbEntryInsertDao
-
-  override fun update(): EntryUpdateDao {
-    return updateDao
-  }
 
   @CheckResult
   internal abstract fun updateDao(): DbEntryUpdateDao
 
-  override fun delete(): EntryDeleteDao {
-    return deleteDao
-  }
-
   @CheckResult
   internal abstract fun deleteDao(): DbEntryDeleteDao
+
 
   private object EmptyCallback : SupportSQLiteOpenHelper.Callback(
       SqlDelightMigrations.SQLDELIGHT_DB_VERSION
