@@ -203,8 +203,6 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
   /**
    * Take care to avoid any calls to logging methods as it will run every 200 ms and flood
-   *
-   * TODO this should watch an event bus where interval checks usage permission on interval
    */
   override fun listenForForegroundEvents(): Flowable<ForegroundEvent> {
     return Flowable.interval(LISTEN_INTERVAL_MILLIS, MILLISECONDS)
