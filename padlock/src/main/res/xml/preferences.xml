@@ -14,50 +14,52 @@
   ~ limitations under the License.
   -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
   <PreferenceCategory android:title="Service Settings">
 
-    <ListPreference
+    <com.pyamsoft.pydroid.ui.preference.ListPreferenceCompat
         android:defaultValue="@string/ignore_time_default"
         android:dialogTitle="@string/ignore_time_title"
         android:entries="@array/ignore_time"
         android:entryValues="@array/ignore_time_entries"
-        android:icon="@drawable/ic_redo_24dp"
+        app:iconCompat="@drawable/ic_redo_24dp"
         android:key="@string/ignore_time_key"
         android:summary="@string/ignore_time_summary"
         android:title="@string/ignore_time_title"/>
 
-    <ListPreference
+    <com.pyamsoft.pydroid.ui.preference.ListPreferenceCompat
         android:defaultValue="@string/timeout_time_default"
         android:dialogTitle="@string/timeout_time_title"
         android:entries="@array/timeout_time"
         android:entryValues="@array/timeout_time_entries"
-        android:icon="@drawable/ic_timelapse24dp"
+        app:iconCompat="@drawable/ic_timelapse24dp"
         android:key="@string/timeout_time_key"
         android:summary="@string/timeout_time_summary"
         android:title="@string/timeout_time_title"/>
 
-    <ListPreference
+    <com.pyamsoft.pydroid.ui.preference.ListPreferenceCompat
         android:defaultValue="@string/lock_screen_type_default"
         android:dialogTitle="@string/lock_screen_type_title"
         android:entries="@array/lock_screen_type_names"
         android:entryValues="@array/lock_screen_type_values"
-        android:icon="@drawable/ic_lock_type_24dp"
+        app:iconCompat="@drawable/ic_lock_type_24dp"
         android:key="@string/lock_screen_type_key"
         android:summary="@string/lock_screen_type_summary"
         android:title="@string/lock_screen_type_title"/>
 
-    <CheckBoxPreference
+    <com.pyamsoft.pydroid.ui.preference.CheckBoxPreferenceCompat
         android:defaultValue="@bool/install_listener_default"
-        android:icon="@drawable/ic_new_releases_24dp"
+        app:iconCompat="@drawable/ic_new_releases_24dp"
         android:key="@string/install_listener_key"
         android:summaryOff="@string/install_listener_summary_unchecked"
         android:summaryOn="@string/install_listener_summary_checked"
         android:title="@string/install_listener_title"/>
 
-    <Preference
-        android:icon="@drawable/ic_warning_24dp"
+    <com.pyamsoft.pydroid.ui.preference.PreferenceCompat
+        app:iconCompat="@drawable/ic_warning_24dp"
         android:key="@string/clear_db_key"
         android:summary="@string/clear_db_summary"
         android:title="@string/clear_db_title"/>
