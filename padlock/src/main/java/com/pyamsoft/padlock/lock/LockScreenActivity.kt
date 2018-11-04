@@ -27,6 +27,7 @@ import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -39,6 +40,7 @@ import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
+import com.pyamsoft.pydroid.ui.bugreport.BugreportDialog
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.commit
 import com.pyamsoft.pydroid.ui.util.show
@@ -164,44 +166,44 @@ class LockScreenActivity : ActivityBase() {
   }
 
   private fun setupToolbar() {
-    val self = this
-    binding.toolbar.apply {
-      setToolbar(this)
-      ViewCompat.setElevation(this, 0f)
+    setToolbar(binding.toolbar)
+    ViewCompat.setElevation(binding.toolbar, 0f)
 
-      setNavigationOnClickListener(DebouncedOnClickListener.create { onBackPressed() })
+    binding.toolbar.setNavigationOnClickListener(
+        DebouncedOnClickListener.create { onBackPressed() })
 
-      inflateMenu(R.menu.lockscreen_menu)
-      menu.let {
-        menuIgnoreOne = it.findItem(R.id.menu_ignore_one)
-        menuIgnoreFive = it.findItem(R.id.menu_ignore_five)
-        menuIgnoreTen = it.findItem(R.id.menu_ignore_ten)
-        menuIgnoreFifteen = it.findItem(R.id.menu_ignore_fifteen)
-        menuIgnoreTwenty = it.findItem(R.id.menu_ignore_twenty)
-        menuIgnoreThirty = it.findItem(R.id.menu_ignore_thirty)
-        menuIgnoreFourtyFive = it.findItem(R.id.menu_ignore_fourtyfive)
-        menuIgnoreSixty = it.findItem(R.id.menu_ignore_sixty)
-        menuExclude = it.findItem(R.id.menu_exclude)
-      }
+    BugreportDialog.attachToToolbar(this, getString(R.string.app_name), BuildConfig.VERSION_CODE)
 
-      menuExclude.setChecked(excludeEntry)
-      viewModel.createWithDefaultIgnoreTime()
+    binding.toolbar.inflateMenu(R.menu.lockscreen_menu)
+    binding.toolbar.menu.let {
+      menuIgnoreOne = it.findItem(R.id.menu_ignore_one)
+      menuIgnoreFive = it.findItem(R.id.menu_ignore_five)
+      menuIgnoreTen = it.findItem(R.id.menu_ignore_ten)
+      menuIgnoreFifteen = it.findItem(R.id.menu_ignore_fifteen)
+      menuIgnoreTwenty = it.findItem(R.id.menu_ignore_twenty)
+      menuIgnoreThirty = it.findItem(R.id.menu_ignore_thirty)
+      menuIgnoreFourtyFive = it.findItem(R.id.menu_ignore_fourtyfive)
+      menuIgnoreSixty = it.findItem(R.id.menu_ignore_sixty)
+      menuExclude = it.findItem(R.id.menu_exclude)
+    }
 
-      setOnMenuItemClickListener {
-        val itemId = it.itemId
-        when (itemId) {
-          R.id.menu_exclude -> it.isChecked = !it.isChecked
-          R.id.menu_lockscreen_info -> {
-            LockedStatDialog.newInstance(
-                binding.toolbar.title.toString(), lockedPackageName, lockedActivityName,
-                lockedRealName, lockedSystem
-            )
-                .show(self, "info_dialog")
-          }
-          else -> it.isChecked = true
+    menuExclude.setChecked(excludeEntry)
+    viewModel.createWithDefaultIgnoreTime()
+
+    binding.toolbar.setOnMenuItemClickListener {
+      val itemId = it.itemId
+      when (itemId) {
+        R.id.menu_exclude -> it.isChecked = !it.isChecked
+        R.id.menu_lockscreen_info -> {
+          LockedStatDialog.newInstance(
+              binding.toolbar.title.toString(), lockedPackageName, lockedActivityName,
+              lockedRealName, lockedSystem
+          )
+              .show(this, "info_dialog")
         }
-        return@setOnMenuItemClickListener true
+        else -> it.isChecked = true
       }
+      return@setOnMenuItemClickListener true
     }
   }
 
