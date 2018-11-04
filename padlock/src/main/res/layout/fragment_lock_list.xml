@@ -67,7 +67,7 @@
         android:layout_margin="16dp"
         android:visibility="gone"
         app:elevation="6dp"
-        app:fabSize="auto"
+        app:fabSize="normal"
         app:pressedTranslationZ="12dp"
         tools:src="@drawable/ic_lock_open_24dp"
         tools:visibility="visible"
