@@ -40,8 +40,7 @@ import javax.inject.Inject
 
 class PadLockPreferenceFragment : SettingsPreferenceFragment() {
 
-  @field:Inject
-  internal lateinit var viewModel: SettingsViewModel
+  @field:Inject internal lateinit var viewModel: SettingsViewModel
   private lateinit var lockType: ListPreference
 
   override val preferenceXmlResId: Int = R.xml.preferences
@@ -67,35 +66,14 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
         .plusSettingsComponent(SettingsModule(viewLifecycleOwner))
         .inject(this)
 
-    val view = super.onCreateView(inflater, container, savedInstanceState)
-    val clearDb = findPreference(getString(R.string.clear_db_key))
-    val installListener = findPreference(getString(R.string.install_listener_key))
-    lockType = findPreference(getString(R.string.lock_screen_type_key)) as ListPreference
+    val view = requireNotNull(super.onCreateView(inflater, container, savedInstanceState))
 
-    clearDb.setOnPreferenceClickListener {
-      Timber.d("Clear DB onClick")
-      ConfirmationDialog.newInstance(ConfirmEvent.DATABASE)
-          .show(requireActivity(), "confirm_dialog")
-      return@setOnPreferenceClickListener true
-    }
-
-    installListener.setOnPreferenceClickListener {
-      viewModel.updateApplicationReceiver()
-      return@setOnPreferenceClickListener true
-    }
-
-    lockType.setOnPreferenceChangeListener { _, value ->
-      if (value is String) {
-        viewModel.switchLockType(value)
-      }
-
-      // Always return false here, the callback will decide if we can set value properly
-      return@setOnPreferenceChangeListener false
-    }
+    setupClearPreference()
+    setupInstallListenerPreference()
+    setupLockTypePreference()
 
     viewModel.onAllSettingsCleared { onClearAll() }
     viewModel.onDatabaseCleared { onClearDatabase() }
-    viewModel.onApplicationReceiverChanged { /* TODO */ }
     viewModel.onPinClearFailed { onMasterPinClearFailure() }
     viewModel.onPinCleared { onMasterPinClearSuccess() }
     viewModel.onLockTypeSwitched { wrapper ->
@@ -109,7 +87,42 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
       wrapper.onError { onLockTypeChangeError(it) }
     }
 
+    viewModel.onApplicationReceiverChanged { wrapper ->
+      wrapper.onSuccess { Timber.d("Application notifier status changed") }
+      wrapper.onError { Timber.e(it, "Application notified status error") }
+    }
+
     return view
+  }
+
+  private fun setupLockTypePreference() {
+    lockType = findPreference(getString(R.string.lock_screen_type_key)) as ListPreference
+    lockType.setOnPreferenceChangeListener { _, value ->
+      if (value is String) {
+        viewModel.switchLockType(value)
+      }
+
+      // Always return false here, the callback will decide if we can set value properly
+      return@setOnPreferenceChangeListener false
+    }
+  }
+
+  private fun setupInstallListenerPreference() {
+    val installListener = findPreference(getString(R.string.install_listener_key))
+    installListener.setOnPreferenceClickListener {
+      viewModel.updateApplicationReceiver()
+      return@setOnPreferenceClickListener true
+    }
+  }
+
+  private fun setupClearPreference() {
+    val clearDb = findPreference(getString(R.string.clear_db_key))
+    clearDb.setOnPreferenceClickListener {
+      Timber.d("Clear DB onClick")
+      ConfirmationDialog.newInstance(ConfirmEvent.DATABASE)
+          .show(requireActivity(), "confirm_dialog")
+      return@setOnPreferenceClickListener true
+    }
   }
 
   private fun onLockTypeChangeAccepted(value: String) {
