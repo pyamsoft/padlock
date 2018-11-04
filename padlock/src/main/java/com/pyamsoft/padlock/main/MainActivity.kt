@@ -64,9 +64,9 @@ class MainActivity : RatingActivity() {
   override val changeLogLines: ChangeLogBuilder
     get() =
       buildChangeLog {
-        bugfix("Temporarily pausing service and auto-restarting should work on all devices")
-        bugfix("Automatically re-locking the active application should work on all devices")
-        bugfix("Smoother locking with less UI lag")
+        change("New icon style")
+        change("Better open source license viewing experience")
+        bugfix("Lots of tiny optimizations for locking applications.")
       }
 
   override fun onCreate(savedInstanceState: Bundle?) {
