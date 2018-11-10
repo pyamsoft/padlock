@@ -52,6 +52,8 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
 
   override val isDarkTheme: Boolean = false
 
+  override val bugreportUrl: String = "https://github.com/pyamsoft/padlock/issues"
+
   override fun onClearAllClicked() {
     ConfirmationDialog.newInstance(ConfirmEvent.ALL)
         .show(requireActivity(), "confirm_dialog")

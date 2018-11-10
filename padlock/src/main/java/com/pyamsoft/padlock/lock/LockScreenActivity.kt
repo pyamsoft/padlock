@@ -27,7 +27,6 @@ import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
-import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -40,7 +39,6 @@ import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
-import com.pyamsoft.pydroid.ui.bugreport.BugreportDialog
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.commit
 import com.pyamsoft.pydroid.ui.util.show
@@ -171,8 +169,6 @@ class LockScreenActivity : ActivityBase() {
 
     binding.toolbar.setNavigationOnClickListener(
         DebouncedOnClickListener.create { onBackPressed() })
-
-    BugreportDialog.attachToToolbar(this, getString(R.string.app_name), BuildConfig.VERSION_CODE)
 
     binding.toolbar.inflateMenu(R.menu.lockscreen_menu)
     binding.toolbar.menu.let {
