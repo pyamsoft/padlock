@@ -24,7 +24,6 @@ class PauseConfirmActivity : ActivityBase() {
   private lateinit var binding: ActivityPauseCheckBinding
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    setTheme(R.style.Theme_PadLock_Light_Transparent)
     overridePendingTransition(0, 0)
     super.onCreate(savedInstanceState)
     Timber.d("Launch with intent: $intent")

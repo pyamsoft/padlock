@@ -18,28 +18,28 @@
 
 <resources>
 
-  <style name="Base.Theme.PadLock" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
+  <style name="Base.Theme.PadLock.Light" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/blue500</item>
     <item name="android:navigationBarColor">@color/blue700</item>
-    <item name="dialogTheme">@style/Theme.PadLock.Dialog</item>
-    <item name="alertDialogTheme">@style/Theme.PadLock.Dialog</item>
+    <item name="dialogTheme">@style/Theme.PadLock.Light.Dialog</item>
+    <item name="alertDialogTheme">@style/Theme.PadLock.Light.Dialog</item>
   </style>
 
   <!-- Lock Screen Theme -->
-  <style name="Base.Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock">
+  <style name="Base.Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light">
     <item name="android:windowBackground">@color/blue700</item>
     <item name="colorAccent">@color/white</item>
   </style>
 
   <!-- Splash screen -->
-  <style name="Base.Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock">
+  <style name="Base.Theme.PadLock.Light.Splash" parent="@style/Base.Theme.PadLock.Light">
     <item name="android:windowBackground">@drawable/splash_screen</item>
   </style>
 
   <!-- Transparent Activity -->
-  <style name="Base.Theme.PadLock.Light.Transparent" parent="@style/Base.Theme.PadLock">
+  <style name="Base.Theme.PadLock.Light.Transparent" parent="@style/Base.Theme.PadLock.Light">
     <item name="android:windowIsTranslucent">true</item>
     <item name="android:windowBackground">@color/transparent</item>
     <item name="android:windowContentOverlay">@null</item>
@@ -50,17 +50,17 @@
   </style>
 
   <!-- Normal App Theme -->
-  <style name="Base.Theme.PadLock.Light" parent="@style/Base.Theme.PadLock">
+  <style name="Base.Theme.PadLock.Light.Normal" parent="@style/Base.Theme.PadLock.Light">
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     <item name="android:windowBackground">@color/white</item>
   </style>
 
-  <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light"/>
+  <style name="Theme.PadLock.Light.Normal" parent="@style/Base.Theme.PadLock.Light.Normal"/>
 
   <!-- Lock Screen Theme -->
   <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light.Lock"/>
 
-  <style name="Theme.PadLock.LockScreenToolbar" parent="@style/ThemeOverlay.AppCompat.Light">
+  <style name="Theme.PadLock.Light.ToolbarPopup" parent="@style/ThemeOverlay.AppCompat.Light">
     <item name="android:colorControlActivated">@color/blue700</item>
     <item name="android:colorControlHighlight">@color/blue500</item>
     <item name="android:colorControlNormal">@color/grey500</item>

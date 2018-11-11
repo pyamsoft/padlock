@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <style name="Theme.PadLock.Dialog" parent="@style/Theme.MaterialComponents.Light.Dialog.Alert">
+  <style name="Theme.PadLock.Light.Dialog" parent="@style/Theme.MaterialComponents.Light.Dialog.Alert">
     <item name="colorPrimary">@color/blue500</item>
     <item name="colorPrimaryDark">@color/blue700</item>
     <item name="colorAccent">@color/blue500</item>

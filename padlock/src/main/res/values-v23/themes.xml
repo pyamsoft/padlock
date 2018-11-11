@@ -19,7 +19,7 @@
 <resources>
 
   <!-- Normal App Theme -->
-  <style name="Theme.PadLock.Light" parent="@style/Base.Theme.PadLock.Light">
+  <style name="Theme.PadLock.Light.Normal" parent="@style/Base.Theme.PadLock.Light.Normal">
     <item name="android:statusBarColor">@color/white</item>
     <item name="android:windowLightStatusBar">true</item>
   </style>

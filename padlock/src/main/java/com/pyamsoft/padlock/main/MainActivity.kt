@@ -68,7 +68,7 @@ class MainActivity : RatingActivity() {
       }
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    setTheme(R.style.Theme_PadLock_Light)
+    setTheme(R.style.Theme_PadLock_Light_Normal)
     super.onCreate(savedInstanceState)
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)

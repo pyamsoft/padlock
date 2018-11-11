@@ -16,7 +16,8 @@
   ~ limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.pyamsoft.padlock">
 
@@ -35,7 +36,8 @@
       android:icon="@mipmap/ic_launcher"
       android:label="@string/app_name"
       android:roundIcon="@mipmap/ic_launcher"
-      android:theme="@style/Theme.PadLock.Light">
+      android:theme="@style/Theme.PadLock.Light.Normal"
+      tools:ignore="GoogleAppIndexingWarning">
 
     <!-- Support super wide screen -->
     <meta-data
@@ -63,6 +65,7 @@
         android:name=".lock.LockScreenActivity"
         android:exported="false"
         android:taskAffinity=""
+        android:theme="@style/Theme.PadLock.Light.Lock"
         android:windowSoftInputMode="adjustResize">
 
       <!-- Sets a default width/height for the lock screen when in freeform mode -->
@@ -86,8 +89,8 @@
     <!-- Locking Service -->
     <service
         android:name=".service.PadLockService"
-        android:label="PadLock Service"
         android:exported="false"
+        android:label="PadLock Service"
         android:stopWithTask="false"/>
 
     <service

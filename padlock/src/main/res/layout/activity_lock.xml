@@ -36,7 +36,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/Theme.PadLock.LockScreenToolbar"
+        app:popupTheme="@style/Theme.PadLock.Light.ToolbarPopup"
         tools:title="Lock Screen"
         />
 

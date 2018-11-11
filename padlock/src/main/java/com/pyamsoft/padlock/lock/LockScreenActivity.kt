@@ -115,7 +115,6 @@ class LockScreenActivity : ActivityBase() {
 
   @CallSuper
   public override fun onCreate(savedInstanceState: Bundle?) {
-    setTheme(R.style.Theme_PadLock_Light_Lock)
     overridePendingTransition(0, 0)
     super.onCreate(savedInstanceState)
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock)
