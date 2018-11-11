@@ -38,12 +38,11 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:clickable="false"
-        android:ellipsize="start"
         android:focusable="false"
         android:gravity="start|center_vertical"
         android:longClickable="false"
-        android:singleLine="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="?android:attr/textColorPrimary"
         tools:text="PadLock Example Activity Name"
         />
 

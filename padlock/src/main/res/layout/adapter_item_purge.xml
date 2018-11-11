@@ -36,6 +36,7 @@
         android:layout_gravity="center_vertical"
         android:gravity="center_vertical"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="?android:attr/textColorPrimary"
         tools:text="Old old app no longer installed"
         />
 

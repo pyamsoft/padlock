@@ -47,7 +47,7 @@
           android:imeOptions="actionGo"
           android:inputType="textPassword"
           android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-          android:textColor="@android:color/white"
+          android:textColor="@color/white"
           tools:text="Something something"
           />
 
