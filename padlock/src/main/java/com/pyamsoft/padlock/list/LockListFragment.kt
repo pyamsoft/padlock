@@ -65,6 +65,7 @@ class LockListFragment : ToolbarFragment() {
   @field:Inject internal lateinit var imageLoader: ImageLoader
   @field:Inject internal lateinit var viewModel: LockListViewModel
   @field:Inject internal lateinit var serviceManager: ServiceManager
+  @field:Inject internal lateinit var theming: Theming
 
   private lateinit var binding: FragmentLockListBinding
 
@@ -131,6 +132,8 @@ class LockListFragment : ToolbarFragment() {
             })
         )
         .inject(this)
+
+    super.onCreateView(inflater, container, savedInstanceState)
     binding = FragmentLockListBinding.inflate(inflater, container, false)
 
     filterListDelegate.onViewCreated(adapter)
@@ -205,7 +208,7 @@ class LockListFragment : ToolbarFragment() {
         searchIcon.mutate()
             .also { icon ->
               val color: Int
-              if (Theming.isDarkTheme(requireContext())) {
+              if (theming.isDarkTheme()) {
                 color = R.color.white
               } else {
                 color = R.color.black

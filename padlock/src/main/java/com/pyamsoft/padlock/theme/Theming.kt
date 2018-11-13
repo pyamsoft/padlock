@@ -1,32 +1,28 @@
 package com.pyamsoft.padlock.theme
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.annotation.CheckResult
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import com.pyamsoft.padlock.R
+import javax.inject.Inject
 
-object Theming {
+class Theming @Inject internal constructor(context: Context) {
 
-  private const val DARK_THEME_DEFAULT = false
-  private const val DARK_THEME_KEY = "dark_theme"
+  private val preferences by lazy {
+    PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+  }
+  private val key by lazy { context.getString(R.string.dark_mode_key) }
+  private val defaultValue by lazy { context.resources.getBoolean(R.bool.dark_mode_default) }
 
   @CheckResult
-  private fun preferences(context: Context): SharedPreferences {
-    return PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+  fun isDarkTheme(): Boolean {
+    return preferences.getBoolean(key, defaultValue)
   }
 
-  @CheckResult
-  fun isDarkTheme(context: Context): Boolean {
-    return preferences(context).getBoolean(DARK_THEME_KEY, DARK_THEME_DEFAULT)
-  }
-
-  fun setDarkTheme(
-    context: Context,
-    dark: Boolean
-  ) {
-    preferences(context).edit {
-      putBoolean(DARK_THEME_KEY, dark)
+  fun setDarkTheme(dark: Boolean) {
+    preferences.edit {
+      putBoolean(key, dark)
     }
   }
 }

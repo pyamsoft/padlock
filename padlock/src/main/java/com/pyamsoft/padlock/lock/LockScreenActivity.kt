@@ -26,7 +26,6 @@ import androidx.annotation.CheckResult
 import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.preference.PreferenceManager
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -52,6 +51,7 @@ class LockScreenActivity : ActivityBase() {
   @field:Inject internal lateinit var inputViewModel: PinScreenInputViewModel
   @field:Inject internal lateinit var imageLoader: ImageLoader
   @field:Inject internal lateinit var appIconLoader: AppIconLoader
+  @field:Inject internal lateinit var theming: Theming
 
   private lateinit var lockedActivityName: String
   private lateinit var lockedPackageName: String
@@ -116,22 +116,23 @@ class LockScreenActivity : ActivityBase() {
 
   @CallSuper
   public override fun onCreate(savedInstanceState: Bundle?) {
-    if (Theming.isDarkTheme(this)) {
-      setTheme(R.style.Theme_PadLock_Dark_Lock)
-    } else {
-      setTheme(R.style.Theme_PadLock_Light_Lock)
-    }
-
     overridePendingTransition(0, 0)
-    super.onCreate(savedInstanceState)
-    binding = DataBindingUtil.setContentView(this, R.layout.activity_lock)
-
     preInjectOnCreate()
+
     Injector.obtain<PadLockComponent>(applicationContext)
         .plusLockScreenComponent(
             LockEntryModule(this, lockedPackageName, lockedActivityName, lockedRealName)
         )
         .inject(this)
+
+    if (theming.isDarkTheme()) {
+      setTheme(R.style.Theme_PadLock_Dark_Lock)
+    } else {
+      setTheme(R.style.Theme_PadLock_Light_Lock)
+    }
+    super.onCreate(savedInstanceState)
+    binding = DataBindingUtil.setContentView(this, R.layout.activity_lock)
+
     postInjectOnCreate()
 
     inputViewModel.onLockScreenTypePattern { onTypePattern() }
@@ -146,6 +147,7 @@ class LockScreenActivity : ActivityBase() {
     viewModel.closeOld()
     viewModel.createWithDefaultIgnoreTime()
     viewModel.loadDisplayNameFromPackage()
+    viewModel.onRecreateEvent { recreate() }
 
     inputViewModel.resolveLockScreenType()
   }
@@ -156,7 +158,6 @@ class LockScreenActivity : ActivityBase() {
   }
 
   private fun preInjectOnCreate() {
-    PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
     getValuesFromBundle()
   }
 
@@ -170,23 +171,32 @@ class LockScreenActivity : ActivityBase() {
   }
 
   private fun setupToolbar() {
-    setToolbar(binding.toolbar)
-    ViewCompat.setElevation(binding.toolbar, 0f)
+    val theme: Int
+    if (theming.isDarkTheme()) {
+      theme = R.style.ThemeOverlay_PadLock_Dark_Lock
+    } else {
+      theme = R.style.ThemeOverlay_PadLock_Light_Lock
+    }
+    binding.toolbar.apply {
+      popupTheme = theme
 
-    binding.toolbar.setNavigationOnClickListener(
-        DebouncedOnClickListener.create { onBackPressed() })
+      setToolbar(this)
+      ViewCompat.setElevation(this, 0f)
+      setNavigationOnClickListener(
+          DebouncedOnClickListener.create { onBackPressed() })
 
-    binding.toolbar.inflateMenu(R.menu.lockscreen_menu)
-    binding.toolbar.menu.let {
-      menuIgnoreOne = it.findItem(R.id.menu_ignore_one)
-      menuIgnoreFive = it.findItem(R.id.menu_ignore_five)
-      menuIgnoreTen = it.findItem(R.id.menu_ignore_ten)
-      menuIgnoreFifteen = it.findItem(R.id.menu_ignore_fifteen)
-      menuIgnoreTwenty = it.findItem(R.id.menu_ignore_twenty)
-      menuIgnoreThirty = it.findItem(R.id.menu_ignore_thirty)
-      menuIgnoreFourtyFive = it.findItem(R.id.menu_ignore_fourtyfive)
-      menuIgnoreSixty = it.findItem(R.id.menu_ignore_sixty)
-      menuExclude = it.findItem(R.id.menu_exclude)
+      inflateMenu(R.menu.lockscreen_menu)
+      menu.let {
+        menuIgnoreOne = it.findItem(R.id.menu_ignore_one)
+        menuIgnoreFive = it.findItem(R.id.menu_ignore_five)
+        menuIgnoreTen = it.findItem(R.id.menu_ignore_ten)
+        menuIgnoreFifteen = it.findItem(R.id.menu_ignore_fifteen)
+        menuIgnoreTwenty = it.findItem(R.id.menu_ignore_twenty)
+        menuIgnoreThirty = it.findItem(R.id.menu_ignore_thirty)
+        menuIgnoreFourtyFive = it.findItem(R.id.menu_ignore_fourtyfive)
+        menuIgnoreSixty = it.findItem(R.id.menu_ignore_sixty)
+        menuExclude = it.findItem(R.id.menu_exclude)
+      }
     }
 
     menuExclude.setChecked(excludeEntry)
@@ -206,12 +216,6 @@ class LockScreenActivity : ActivityBase() {
         else -> it.isChecked = true
       }
       return@setOnMenuItemClickListener true
-    }
-
-    if (Theming.isDarkTheme(this)) {
-      binding.toolbar.popupTheme = R.style.Theme_PadLock_Dark_Lock_ToolbarPopup
-    } else {
-      binding.toolbar.popupTheme = R.style.Theme_PadLock_Light_Lock_ToolbarPopup
     }
   }
 
@@ -236,9 +240,6 @@ class LockScreenActivity : ActivityBase() {
     require(lockedPackageName.isNotBlank())
     require(lockedActivityName.isNotBlank())
     require(lockedRealName.isNotBlank())
-
-    // Reload options
-    invalidateOptionsMenu()
   }
 
   private fun onSetDisplayName(name: String) {

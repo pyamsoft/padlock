@@ -39,6 +39,7 @@ import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.ImageTarget
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.commit
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.util.tintWith
@@ -50,6 +51,7 @@ class PinDialog : ToolbarDialog() {
   @field:Inject internal lateinit var viewModel: PinScreenInputViewModel
   @field:Inject internal lateinit var imageLoader: ImageLoader
   @field:Inject internal lateinit var appIconLoader: AppIconLoader
+  @field:Inject internal lateinit var theming: Theming
 
   private lateinit var binding: DialogPinEntryBinding
 
@@ -84,6 +86,7 @@ class PinDialog : ToolbarDialog() {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusPinComponent(PinModule(viewLifecycleOwner))
         .inject(this)
+    super.onCreateView(inflater, container, savedInstanceState)
 
     binding = DialogPinEntryBinding.inflate(inflater, container, false)
 
@@ -130,7 +133,7 @@ class PinDialog : ToolbarDialog() {
 
   private fun applyBackNavigationIcon(icon: Drawable) {
     val color: Int
-    if (Theming.isDarkTheme(requireContext())) {
+    if (theming.isDarkTheme()) {
       color = R.color.white
     } else {
       color = R.color.black
@@ -142,8 +145,14 @@ class PinDialog : ToolbarDialog() {
   private fun setupToolbar() {
     // Maybe something more descriptive
     binding.apply {
+      if (theming.isDarkTheme()) {
+        pinEntryToolbar.popupTheme = R.style.ThemeOverlay_AppCompat
+      } else {
+        pinEntryToolbar.popupTheme = R.style.ThemeOverlay_AppCompat_Light
+      }
+
       pinEntryToolbar.title = "PIN"
-      pinEntryToolbar.setNavigationOnClickListener { dismiss() }
+      pinEntryToolbar.setNavigationOnClickListener(DebouncedOnClickListener.create { dismiss() })
 
       // Set up icon as black
       if (finishOnDismiss) {
@@ -186,7 +195,7 @@ class PinDialog : ToolbarDialog() {
         var pinIcon: Drawable? = pinItem.icon
         if (pinIcon != null) {
           val color: Int
-          if (Theming.isDarkTheme(requireContext())) {
+          if (theming.isDarkTheme()) {
             color = R.color.white
           } else {
             color = R.color.black
@@ -211,12 +220,6 @@ class PinDialog : ToolbarDialog() {
         }
         return@setOnMenuItemClickListener false
       }
-    }
-
-    if (Theming.isDarkTheme(requireContext())) {
-      binding.pinEntryToolbar.popupTheme = R.style.ThemeOverlay_AppCompat
-    } else {
-      binding.pinEntryToolbar.popupTheme = R.style.ThemeOverlay_AppCompat_Light
     }
   }
 

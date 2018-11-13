@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.main
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import com.pyamsoft.padlock.BuildConfig
@@ -44,6 +45,7 @@ class MainActivity : RatingActivity() {
   private lateinit var binding: ActivityMainBinding
 
   @field:Inject internal lateinit var serviceManager: ServiceManager
+  @field:Inject internal lateinit var theming: Theming
 
   override val currentApplicationVersion: Int
     get() = BuildConfig.VERSION_CODE
@@ -68,7 +70,10 @@ class MainActivity : RatingActivity() {
       }
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    if (Theming.isDarkTheme(this)) {
+    Injector.obtain<PadLockComponent>(applicationContext)
+        .inject(this)
+
+    if (theming.isDarkTheme()) {
       setTheme(R.style.Theme_PadLock_Dark_Normal)
     } else {
       setTheme(R.style.Theme_PadLock_Light_Normal)
@@ -77,8 +82,6 @@ class MainActivity : RatingActivity() {
     super.onCreate(savedInstanceState)
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-    Injector.obtain<PadLockComponent>(applicationContext)
-        .inject(this)
     setupToolbar()
 
     showDefaultPage()
@@ -115,19 +118,26 @@ class MainActivity : RatingActivity() {
   }
 
   private fun setupToolbar() {
+    val color: Int
+    val theme: Int
+    if (theming.isDarkTheme()) {
+      color = R.color.dark_background
+      theme = R.style.ThemeOverlay_AppCompat
+    } else {
+      color = R.color.white
+      theme = R.style.ThemeOverlay_AppCompat_Light
+    }
+
     binding.toolbar.apply {
+      popupTheme = theme
       setToolbar(this)
       setTitle(R.string.app_name)
       ViewCompat.setElevation(this, 4f.toDp(context).toFloat())
       setNavigationOnClickListener(DebouncedOnClickListener.create {
         onBackPressed()
       })
-    }
 
-    if (Theming.isDarkTheme(this)) {
-      binding.toolbar.popupTheme = R.style.ThemeOverlay_AppCompat
-    } else {
-      binding.toolbar.popupTheme = R.style.ThemeOverlay_AppCompat_Light
+      setBackgroundColor(ContextCompat.getColor(context, color))
     }
   }
 

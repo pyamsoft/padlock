@@ -20,6 +20,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.singleDisposable
@@ -38,7 +39,8 @@ class LockScreenViewModel @Inject internal constructor(
   private val interactor: LockScreenInteractor,
   @param:Named("package_name") private val packageName: String,
   @param:Named("activity_name") private val activityName: String,
-  @param:Named("real_name") private val realName: String
+  @param:Named("real_name") private val realName: String,
+  @param:Named("recreate_listener") private val recreateListener: Listener<Unit>
 ) : BaseViewModel(owner) {
 
   private val alreadyUnlockedBus = RxBus.create<Boolean>()
@@ -63,6 +65,15 @@ class LockScreenViewModel @Inject internal constructor(
     dispose {
       alreadyUnlockedBus.listen()
           .filter { it }
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe { func() }
+    }
+  }
+
+  fun onRecreateEvent(func: () -> Unit) {
+    dispose {
+      recreateListener.listen()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe { func() }

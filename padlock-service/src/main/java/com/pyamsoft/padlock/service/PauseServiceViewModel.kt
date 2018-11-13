@@ -7,16 +7,27 @@ import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
+import javax.inject.Named
 
 class PauseServiceViewModel @Inject internal constructor(
   owner: LifecycleOwner,
-  private val checkPinBus: Listener<CheckPinEvent>
+  private val checkPinBus: Listener<CheckPinEvent>,
+  @param:Named("recreate_listener") private val recreateListener: Listener<Unit>
 ) : BaseViewModel(owner) {
 
   fun onCheckPinEventSuccess(func: () -> Unit) {
     dispose {
       checkPinBus.listen()
           .filter { it.matching }
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe { func() }
+    }
+  }
+
+  fun onRecreateEvent(func: () -> Unit) {
+    dispose {
+      recreateListener.listen()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe { func() }

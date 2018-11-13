@@ -21,24 +21,24 @@ class PauseConfirmActivity : ActivityBase() {
 
   @field:Inject internal lateinit var viewModel: PauseServiceViewModel
   @field:Inject internal lateinit var pausePublisher: Publisher<ServicePauseEvent>
+  @field:Inject internal lateinit var theming: Theming
 
   private lateinit var binding: ActivityPauseCheckBinding
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    if (Theming.isDarkTheme(this)) {
-      setTheme(R.style.Theme_PadLock_Dark_Transparent)
-    } else {
-      setTheme(R.style.Theme_PadLock_Light_Transparent)
-    }
-
     overridePendingTransition(0, 0)
-    super.onCreate(savedInstanceState)
-    Timber.d("Launch with intent: $intent")
-    binding = DataBindingUtil.setContentView(this, R.layout.activity_pause_check)
 
     Injector.obtain<PadLockComponent>(application)
         .plusServiceComponent(ServiceModule(this))
         .inject(this)
+
+    if (theming.isDarkTheme()) {
+      setTheme(R.style.Theme_PadLock_Dark_Transparent)
+    } else {
+      setTheme(R.style.Theme_PadLock_Light_Transparent)
+    }
+    super.onCreate(savedInstanceState)
+    binding = DataBindingUtil.setContentView(this, R.layout.activity_pause_check)
 
     viewModel.onCheckPinEventFailed {
       Snackbreak.short(binding.pauseCheckRoot, "Invalid PIN")
@@ -50,6 +50,7 @@ class PauseConfirmActivity : ActivityBase() {
       pausePublisher.publish(ServicePauseEvent(autoResume))
       finish()
     }
+    viewModel.onRecreateEvent { recreate() }
 
     addPinFragment()
   }

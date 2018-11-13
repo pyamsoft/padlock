@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.preference.ListPreference
+import androidx.preference.SwitchPreferenceCompat
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -42,7 +43,7 @@ import javax.inject.Inject
 class PadLockPreferenceFragment : SettingsPreferenceFragment() {
 
   @field:Inject internal lateinit var viewModel: SettingsViewModel
-  private lateinit var lockType: ListPreference
+  @field:Inject internal lateinit var theming: Theming
 
   override val preferenceXmlResId: Int = R.xml.preferences
 
@@ -52,9 +53,12 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     get() = getString(R.string.app_name)
 
   override val isDarkTheme: Boolean
-    get() = Theming.isDarkTheme(requireContext())
+    get() = theming.isDarkTheme()
 
   override val bugreportUrl: String = "https://github.com/pyamsoft/padlock/issues"
+
+  private lateinit var lockType: ListPreference
+  private lateinit var darkMode: SwitchPreferenceCompat
 
   override fun onClearAllClicked() {
     ConfirmationDialog.newInstance(ConfirmEvent.ALL)
@@ -75,6 +79,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     setupClearPreference()
     setupInstallListenerPreference()
     setupLockTypePreference()
+    setupThemePreference()
 
     viewModel.onAllSettingsCleared { onClearAll() }
     viewModel.onDatabaseCleared { onClearDatabase() }
@@ -97,6 +102,24 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     }
 
     return view
+  }
+
+  private fun setupThemePreference() {
+    darkMode = findPreference(getString(R.string.dark_mode_key)) as SwitchPreferenceCompat
+    darkMode.setOnPreferenceChangeListener { _, newValue ->
+      if (newValue is Boolean) {
+        // Set dark mode
+        theming.setDarkTheme(newValue)
+
+        // Publish incase any other activities are listening
+        viewModel.publishRecreate()
+
+        // Recreate self
+        requireActivity().recreate()
+      }
+
+      return@setOnPreferenceChangeListener true
+    }
   }
 
   private fun setupLockTypePreference() {

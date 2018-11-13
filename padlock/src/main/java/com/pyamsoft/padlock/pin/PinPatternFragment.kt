@@ -32,9 +32,11 @@ import com.pyamsoft.padlock.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
 import java.util.ArrayList
+import javax.inject.Inject
 
 class PinPatternFragment : PinBaseFragment() {
 
+  @field:Inject internal lateinit var theming: Theming
   private lateinit var binding: FragmentLockScreenPatternBinding
   private val cellPattern: MutableList<PatternLockView.Dot> = ArrayList()
   private val repeatCellPattern: MutableList<PatternLockView.Dot> = ArrayList()
@@ -124,7 +126,7 @@ class PinPatternFragment : PinBaseFragment() {
 
   private fun setupLockView() {
     val theme: Int
-    if (Theming.isDarkTheme(requireContext())) {
+    if (theming.isDarkTheme()) {
       theme = R.style.Theme_PadLock_Dark_Dialog
     } else {
       theme = R.style.Theme_PadLock_Light_Dialog

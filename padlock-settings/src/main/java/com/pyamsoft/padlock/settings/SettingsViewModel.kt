@@ -23,7 +23,6 @@ import com.pyamsoft.padlock.model.ConfirmEvent.ALL
 import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.service.ServiceFinishEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.singleDisposable
@@ -36,6 +35,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
 
 class SettingsViewModel @Inject internal constructor(
   owner: LifecycleOwner,
@@ -43,7 +43,8 @@ class SettingsViewModel @Inject internal constructor(
   private val interactor: SettingsInteractor,
   private val bus: Listener<ConfirmEvent>,
   private val serviceFinishBus: Publisher<ServiceFinishEvent>,
-  private val clearPinBus: Listener<ClearPinEvent>
+  private val clearPinBus: Listener<ClearPinEvent>,
+  @param:Named("recreate_publisher") private val recreatePublisher: Publisher<Unit>
 ) : BaseViewModel(owner) {
 
   private val applicationBus = DataBus<Unit>()
@@ -153,5 +154,10 @@ class SettingsViewModel @Inject internal constructor(
           Timber.e(it, "Error switching lock type")
           lockTypeBus.publishError(it)
         })
+  }
+
+  fun publishRecreate() {
+    Timber.d("Publish recreate event")
+    recreatePublisher.publish(Unit)
   }
 }

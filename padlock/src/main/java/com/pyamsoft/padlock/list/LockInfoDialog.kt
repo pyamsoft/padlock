@@ -41,6 +41,7 @@ import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
@@ -157,7 +158,7 @@ class LockInfoDialog : ToolbarDialog() {
     binding.apply {
       lockInfoToolbar.apply {
         title = appName
-        setNavigationOnClickListener { dismiss() }
+        setNavigationOnClickListener(DebouncedOnClickListener.create { dismiss() })
         inflateMenu(R.menu.search_menu)
         inflateMenu(R.menu.lockinfo_menu)
 
