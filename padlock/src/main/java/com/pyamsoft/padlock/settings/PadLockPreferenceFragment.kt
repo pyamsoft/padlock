@@ -23,7 +23,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.preference.ListPreference
-import androidx.preference.SwitchPreferenceCompat
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -55,7 +54,6 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
   override val bugreportUrl: String = "https://github.com/pyamsoft/padlock/issues"
 
   private lateinit var lockType: ListPreference
-  private lateinit var darkMode: SwitchPreferenceCompat
 
   override fun onClearAllClicked() {
     ConfirmationDialog.newInstance(ConfirmEvent.ALL)
@@ -105,7 +103,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
   }
 
   private fun setupThemePreference() {
-    darkMode = findPreference(getString(R.string.dark_mode_key)) as SwitchPreferenceCompat
+    val darkMode = findPreference(getString(R.string.dark_mode_key))
     darkMode.setOnPreferenceChangeListener { _, newValue ->
       if (newValue is Boolean) {
         // Set dark mode
@@ -116,9 +114,10 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
 
         // Recreate self
         requireActivity().recreate()
+        return@setOnPreferenceChangeListener true
+      } else {
+        return@setOnPreferenceChangeListener false
       }
-
-      return@setOnPreferenceChangeListener true
     }
   }
 
@@ -127,10 +126,11 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     lockType.setOnPreferenceChangeListener { _, value ->
       if (value is String) {
         viewModel.switchLockType(value)
+        // Always return false here, the callback will decide if we can set value properly
+        return@setOnPreferenceChangeListener false
+      } else {
+        return@setOnPreferenceChangeListener false
       }
-
-      // Always return false here, the callback will decide if we can set value properly
-      return@setOnPreferenceChangeListener false
     }
   }
 

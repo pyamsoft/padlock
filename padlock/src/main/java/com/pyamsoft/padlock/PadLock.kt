@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.pydroid.bootstrap.libraries.OssLibraries
 import com.pyamsoft.pydroid.ui.PYDroid
+import com.pyamsoft.pydroid.ui.theme.Theming
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
 import javax.inject.Inject
@@ -45,6 +46,7 @@ class PadLock : Application(), PYDroid.Instance {
       return
     }
 
+    Theming.IS_DEFAULT_DARK_THEME = false
     PYDroid.init(this, this, BuildConfig.DEBUG)
     installRefWatcher()
     addLibraries()
