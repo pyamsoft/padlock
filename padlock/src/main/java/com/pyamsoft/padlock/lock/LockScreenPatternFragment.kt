@@ -39,6 +39,14 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
     super.onCreateView(inflater, container, savedInstanceState)
     binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
 
+    return binding.root
+  }
+
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
     listener = object : PatternLockViewListener {
       override fun onStarted() {
       }
@@ -58,7 +66,6 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
     binding.patternLock.isTactileFeedbackEnabled = false
     binding.patternLock.addPatternLockListener(listener)
 
-    return binding.root
   }
 
   override fun onDestroyView() {

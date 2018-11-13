@@ -18,14 +18,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-  <com.pyamsoft.pydroid.ui.preference.SwitchPreferenceCompat
-      android:defaultValue="@bool/dark_mode_default"
-      android:key="@string/dark_mode_key"
-      android:summaryOff="@string/dark_mode_summary_off"
-      android:summaryOn="@string/dark_mode_summary_on"
-      android:title="@string/dark_mode_title"
-      app:iconCompat="@drawable/ic_warning_24dp"/>
-
   <PreferenceCategory android:title="Service Settings">
 
     <com.pyamsoft.pydroid.ui.preference.ListPreferenceCompat

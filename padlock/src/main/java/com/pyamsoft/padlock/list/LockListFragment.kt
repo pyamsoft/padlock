@@ -40,11 +40,11 @@ import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.padlock.service.ServiceManager
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
-import com.pyamsoft.padlock.theme.Theming
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.fragment.toolbarActivity
+import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.popHide
 import com.pyamsoft.pydroid.ui.util.popShow
@@ -132,10 +132,15 @@ class LockListFragment : ToolbarFragment() {
             })
         )
         .inject(this)
-
-    super.onCreateView(inflater, container, savedInstanceState)
     binding = FragmentLockListBinding.inflate(inflater, container, false)
+    return binding.root
+  }
 
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
     filterListDelegate.onViewCreated(adapter)
     setupRecyclerView()
     setupSwipeRefresh()
@@ -191,7 +196,6 @@ class LockListFragment : ToolbarFragment() {
       viewModel.populateList(true)
     }
 
-    return binding.root
   }
 
   private fun setupToolbarMenu() {

@@ -93,12 +93,6 @@
   <string name="lock_screen_type_title">Lock Screen Type</string>
   <string name="lock_screen_type_summary">Type of password to lock with (pattern, pin)</string>
 
-  <string name="dark_mode_key">dark_mode</string>
-  <bool name="dark_mode_default">false</bool>
-  <string name="dark_mode_title">Enable Dark Mode</string>
-  <string name="dark_mode_summary_on">Dark Mode</string>
-  <string name="dark_mode_summary_off">Light Mode</string>
-
   <string-array name="lock_screen_type_names">
     <item name="type_text">PIN Password</item>
     <item name="type_pattern">Pattern Password</item>

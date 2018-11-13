@@ -48,7 +48,14 @@ class PinTextFragment : PinBaseFragment() {
   ): View? {
     super.onCreateView(inflater, container, savedInstanceState)
     binding = FragmentPinEntryTextBinding.inflate(inflater, container, false)
+    return binding.root
+  }
 
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
     // Resolve TextInputLayout edit texts
     pinEntryText = binding.pinEntryCode.editText!!
     pinReentryText = binding.pinReentryCode.editText!!
@@ -63,8 +70,6 @@ class PinTextFragment : PinBaseFragment() {
     if (savedInstanceState != null) {
       onRestoreInstanceState(savedInstanceState)
     }
-
-    return binding.root
   }
 
   override fun onDestroyView() {

@@ -28,7 +28,7 @@ import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
-import com.pyamsoft.padlock.theme.Theming
+import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
 import java.util.ArrayList
@@ -64,6 +64,14 @@ class PinPatternFragment : PinBaseFragment() {
   ): View? {
     super.onCreateView(inflater, container, savedInstanceState)
     binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
+    return binding.root
+  }
+
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
     setupLockView()
 
     listener = object : PatternLockViewListener {
@@ -112,7 +120,7 @@ class PinPatternFragment : PinBaseFragment() {
     binding.patternLock.isTactileFeedbackEnabled = false
     binding.patternLock.addPatternLockListener(listener)
 
-    return binding.root
+    checkMasterPin()
   }
 
   override fun onDestroyView() {

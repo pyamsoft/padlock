@@ -53,6 +53,17 @@ abstract class PinBaseFragment : ToolbarFragment() {
         .plusPinComponent(PinModule(viewLifecycleOwner))
         .inject(this)
 
+    // Base provides no view
+    return null
+  }
+
+  @CallSuper
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
+
     // Set up observers first
     viewModel.onMasterPinMissing { onMasterPinMissing() }
 
@@ -77,17 +88,9 @@ abstract class PinBaseFragment : ToolbarFragment() {
             .show()
       }
     }
-
-    // Base provides no view
-    return null
   }
 
-  @CallSuper
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
+  protected fun checkMasterPin() {
     // Fire initialize event once children have been created
     viewModel.checkMasterPin()
   }

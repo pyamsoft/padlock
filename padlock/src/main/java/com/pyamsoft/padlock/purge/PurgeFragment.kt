@@ -73,9 +73,15 @@ class PurgeFragment : ToolbarFragment() {
           }
         }))
         .inject(this)
-
     binding = FragmentPurgeBinding.inflate(inflater, container, false)
+    return binding.root
+  }
 
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
     refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
       binding.purgeSwipeRefresh.refreshing(it)
 
@@ -111,7 +117,6 @@ class PurgeFragment : ToolbarFragment() {
       wrapper.onSuccess { adapter.set(it) }
     }
 
-    return binding.root
   }
 
   override fun onDestroyView() {

@@ -101,12 +101,23 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    val module =
-      LockEntryModule(viewLifecycleOwner, lockedPackageName, lockedActivityName, lockedRealName)
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusLockScreenComponent(module)
+        .plusLockScreenComponent(
+            LockEntryModule(
+                viewLifecycleOwner, lockedPackageName, lockedActivityName, lockedRealName
+            )
+        )
         .inject(this)
 
+    // Base provides no view
+    return null
+  }
+
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
     viewModel.onHintDisplay { onDisplayHint(it) }
     viewModel.onLockStageBusEvent { wrapper ->
       wrapper.onError {
@@ -136,8 +147,6 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
       }
     }
 
-    // Base provides no view
-    return null
   }
 
   override fun onResume() {

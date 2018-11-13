@@ -37,12 +37,12 @@ class PurgeSingleItemDialog : ToolbarDialog() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     packageName = requireArguments().getString(PACKAGE, "")
-
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .inject(this)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .inject(this)
+
     return AlertDialog.Builder(requireActivity())
         .setMessage(
             "Really delete old entry for $packageName?"

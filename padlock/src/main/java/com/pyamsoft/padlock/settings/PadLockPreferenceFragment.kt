@@ -29,10 +29,10 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinDialog
-import com.pyamsoft.padlock.theme.Theming
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.fragment.requireView
+import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
@@ -52,9 +52,6 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
   override val applicationName: String
     get() = getString(R.string.app_name)
 
-  override val isDarkTheme: Boolean
-    get() = theming.isDarkTheme()
-
   override val bugreportUrl: String = "https://github.com/pyamsoft/padlock/issues"
 
   private lateinit var lockType: ListPreference
@@ -73,9 +70,14 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusSettingsComponent(SettingsModule(viewLifecycleOwner))
         .inject(this)
+    return requireNotNull(super.onCreateView(inflater, container, savedInstanceState))
+  }
 
-    val view = requireNotNull(super.onCreateView(inflater, container, savedInstanceState))
-
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
     setupClearPreference()
     setupInstallListenerPreference()
     setupLockTypePreference()
@@ -100,8 +102,6 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
       wrapper.onSuccess { Timber.d("Application notifier status changed") }
       wrapper.onError { Timber.e(it, "Application notified status error") }
     }
-
-    return view
   }
 
   private fun setupThemePreference() {

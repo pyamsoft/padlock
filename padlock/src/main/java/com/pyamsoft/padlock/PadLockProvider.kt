@@ -25,7 +25,6 @@ import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.theme.Theming
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
@@ -33,6 +32,7 @@ import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.ModuleProvider
+import com.pyamsoft.pydroid.ui.theme.Theming
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -47,7 +47,7 @@ class PadLockProvider(
   private val jobServiceClass: Class<out JobService>
 ) {
 
-  private val theming = Theming(application)
+  private val theming = moduleProvider.theming()
   private val recreateBus = RxBus.create<Unit>()
   private val enforcer = moduleProvider.enforcer()
   private val imageLoader = moduleProvider

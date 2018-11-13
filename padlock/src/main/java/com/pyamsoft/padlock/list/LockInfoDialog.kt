@@ -100,6 +100,14 @@ class LockInfoDialog : ToolbarDialog() {
         .inject(this)
 
     binding = DialogLockInfoBinding.inflate(inflater, container, false)
+    return binding.root
+  }
+
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
 
     refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
       Timber.d("Posting refresh latch: $it")
@@ -150,8 +158,6 @@ class LockInfoDialog : ToolbarDialog() {
       wrapper.onError { onListPopulateError() }
       wrapper.onComplete { onListPopulated() }
     }
-
-    return binding.root
   }
 
   private fun setupToolbar() {
