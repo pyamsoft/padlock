@@ -2,10 +2,10 @@
 <resources>
 
   <style name="Theme.PadLock.Dark.Dialog" parent="@style/Theme.MaterialComponents.Dialog.Alert">
-    <item name="colorPrimary">@color/blue700</item>
-    <item name="colorPrimaryDark">@color/blue900</item>
-    <item name="colorAccent">@color/blue700</item>
-    <item name="android:navigationBarColor">@color/blue900</item>
+    <item name="colorPrimary">@color/blue500</item>
+    <item name="colorPrimaryDark">@color/blue700</item>
+    <item name="colorAccent">@color/blue500</item>
+    <item name="android:navigationBarColor">@color/blue700</item>
   </style>
 
 </resources>

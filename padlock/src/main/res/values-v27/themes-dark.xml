@@ -27,7 +27,7 @@
 
   <!-- Lock Screen Theme -->
   <style name="Theme.PadLock.Dark.Lock" parent="@style/Base.Theme.PadLock.Dark.Lock">
-    <item name="android:statusBarColor">@color/blue900</item>
+    <item name="android:statusBarColor">@color/blue700</item>
     <item name="android:windowLightStatusBar">false</item>
     <item name="android:windowLightNavigationBar">true</item>
   </style>

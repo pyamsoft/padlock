@@ -19,17 +19,17 @@
 <resources>
 
   <style name="Base.Theme.PadLock.Dark" parent="@style/Theme.MaterialComponents.NoActionBar">
-    <item name="colorPrimary">@color/blue700</item>
-    <item name="colorPrimaryDark">@color/blue900</item>
-    <item name="colorAccent">@color/blue700</item>
-    <item name="android:navigationBarColor">@color/blue900</item>
+    <item name="colorPrimary">@color/blue500</item>
+    <item name="colorPrimaryDark">@color/blue700</item>
+    <item name="colorAccent">@color/blue500</item>
+    <item name="android:navigationBarColor">@color/blue700</item>
     <item name="dialogTheme">@style/Theme.PadLock.Dark.Dialog</item>
     <item name="alertDialogTheme">@style/Theme.PadLock.Dark.Dialog</item>
   </style>
 
   <!-- Lock Screen Theme -->
   <style name="Base.Theme.PadLock.Dark.Lock" parent="@style/Base.Theme.PadLock.Dark">
-    <item name="android:windowBackground">@color/blue900</item>
+    <item name="android:windowBackground">@color/blue700</item>
     <item name="colorAccent">@color/white</item>
   </style>
 
@@ -56,8 +56,8 @@
   <style name="Theme.PadLock.Dark.Lock" parent="@style/Base.Theme.PadLock.Dark.Lock"/>
 
   <style name="ThemeOverlay.PadLock.Dark.Lock" parent="@style/ThemeOverlay.AppCompat">
-    <item name="android:colorControlActivated">@color/blue900</item>
-    <item name="android:colorControlHighlight">@color/blue700</item>
+    <item name="android:colorControlActivated">@color/blue700</item>
+    <item name="android:colorControlHighlight">@color/blue500</item>
     <item name="android:colorControlNormal">@color/grey300</item>
   </style>
 

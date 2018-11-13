@@ -27,10 +27,12 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.padlock.helper.tintIcon
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.fragment.toolbarActivity
+import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
@@ -41,8 +43,8 @@ import javax.inject.Inject
 
 class PurgeFragment : ToolbarFragment() {
 
-  @field:Inject
-  internal lateinit var viewModel: PurgeViewModel
+  @field:Inject internal lateinit var viewModel: PurgeViewModel
+  @field:Inject internal lateinit var theming: Theming
 
   private lateinit var adapter: ModelAdapter<String, PurgeItem>
   private lateinit var binding: FragmentPurgeBinding
@@ -138,6 +140,7 @@ class PurgeFragment : ToolbarFragment() {
   private fun setupToolbarMenu() {
     requireToolbarActivity().withToolbar { toolbar ->
       toolbar.inflateMenu(R.menu.purge_old_menu)
+      toolbar.menu.tintIcon(requireActivity(), theming, R.id.menu_purge_all)
 
       toolbar.setOnMenuItemClickListener {
         when (it.itemId) {

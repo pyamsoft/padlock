@@ -35,6 +35,7 @@ import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PAUSE
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
 import com.pyamsoft.padlock.databinding.FragmentLockListBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.padlock.helper.tintIcon
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.PinDialog
@@ -206,20 +207,7 @@ class LockListFragment : ToolbarFragment() {
       it.menu.apply {
         displaySystemItem = findItem(R.id.menu_is_system)
         filterListDelegate.onPrepareOptionsMenu(this, adapter)
-
-        val searchItem = findItem(R.id.menu_search)
-        val searchIcon = searchItem.icon
-        searchIcon.mutate()
-            .also { icon ->
-              val color: Int
-              if (theming.isDarkTheme()) {
-                color = R.color.white
-              } else {
-                color = R.color.black
-              }
-              val tintedIcon = icon.tintWith(requireActivity(), color)
-              searchItem.icon = tintedIcon
-            }
+        tintIcon(requireActivity(), theming, R.id.menu_search)
       }
 
       it.setOnMenuItemClickListener { menuItem ->
