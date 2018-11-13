@@ -40,6 +40,7 @@ import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.padlock.service.ServiceManager
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
+import com.pyamsoft.padlock.theme.Theming
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
@@ -203,7 +204,13 @@ class LockListFragment : ToolbarFragment() {
         val searchIcon = searchItem.icon
         searchIcon.mutate()
             .also { icon ->
-              val tintedIcon = icon.tintWith(requireActivity(), R.color.black)
+              val color: Int
+              if (Theming.isDarkTheme(requireContext())) {
+                color = R.color.white
+              } else {
+                color = R.color.black
+              }
+              val tintedIcon = icon.tintWith(requireActivity(), color)
               searchItem.icon = tintedIcon
             }
       }

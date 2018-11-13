@@ -37,6 +37,7 @@ import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.lock.screen.LockScreenViewModel
 import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
+import com.pyamsoft.padlock.theme.Theming
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
@@ -115,6 +116,12 @@ class LockScreenActivity : ActivityBase() {
 
   @CallSuper
   public override fun onCreate(savedInstanceState: Bundle?) {
+    if (Theming.isDarkTheme(this)) {
+      setTheme(R.style.Theme_PadLock_Dark_Lock)
+    } else {
+      setTheme(R.style.Theme_PadLock_Light_Lock)
+    }
+
     overridePendingTransition(0, 0)
     super.onCreate(savedInstanceState)
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock)
@@ -199,6 +206,12 @@ class LockScreenActivity : ActivityBase() {
         else -> it.isChecked = true
       }
       return@setOnMenuItemClickListener true
+    }
+
+    if (Theming.isDarkTheme(this)) {
+      binding.toolbar.popupTheme = R.style.Theme_PadLock_Dark_Lock_ToolbarPopup
+    } else {
+      binding.toolbar.popupTheme = R.style.Theme_PadLock_Light_Lock_ToolbarPopup
     }
   }
 

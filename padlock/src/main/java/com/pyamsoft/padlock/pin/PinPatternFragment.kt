@@ -16,16 +16,19 @@
 
 package com.pyamsoft.padlock.pin
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
+import androidx.core.content.ContextCompat
+import androidx.core.content.withStyledAttributes
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
+import com.pyamsoft.padlock.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
 import java.util.ArrayList
@@ -59,7 +62,6 @@ class PinPatternFragment : PinBaseFragment() {
   ): View? {
     super.onCreateView(inflater, container, savedInstanceState)
     binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
-
     setupLockView()
 
     listener = object : PatternLockViewListener {
@@ -121,8 +123,22 @@ class PinPatternFragment : PinBaseFragment() {
   }
 
   private fun setupLockView() {
-    // Set the dots to be black so we can see them
-    binding.patternLock.normalStateColor = Color.BLACK
+    val theme: Int
+    if (Theming.isDarkTheme(requireContext())) {
+      theme = R.style.Theme_PadLock_Dark_Dialog
+    } else {
+      theme = R.style.Theme_PadLock_Light_Dialog
+    }
+
+    requireActivity().withStyledAttributes(
+        theme,
+        intArrayOf(android.R.attr.colorForegroundInverse)
+    ) {
+      val colorId = getResourceId(0, 0)
+      if (colorId != 0) {
+        binding.patternLock.normalStateColor = ContextCompat.getColor(requireActivity(), colorId)
+      }
+    }
   }
 
   override fun onSaveInstanceState(outState: Bundle) {

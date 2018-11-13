@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinDialog
+import com.pyamsoft.padlock.theme.Theming
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.fragment.requireView
@@ -50,7 +51,8 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
   override val applicationName: String
     get() = getString(R.string.app_name)
 
-  override val isDarkTheme: Boolean = false
+  override val isDarkTheme: Boolean
+    get() = Theming.isDarkTheme(requireContext())
 
   override val bugreportUrl: String = "https://github.com/pyamsoft/padlock/issues"
 

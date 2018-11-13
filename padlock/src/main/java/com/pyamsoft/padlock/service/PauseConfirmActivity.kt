@@ -9,6 +9,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityPauseCheckBinding
 import com.pyamsoft.padlock.pin.PinDialog
+import com.pyamsoft.padlock.theme.Theming
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.util.Snackbreak
@@ -24,6 +25,12 @@ class PauseConfirmActivity : ActivityBase() {
   private lateinit var binding: ActivityPauseCheckBinding
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    if (Theming.isDarkTheme(this)) {
+      setTheme(R.style.Theme_PadLock_Dark_Transparent)
+    } else {
+      setTheme(R.style.Theme_PadLock_Light_Transparent)
+    }
+
     overridePendingTransition(0, 0)
     super.onCreate(savedInstanceState)
     Timber.d("Launch with intent: $intent")

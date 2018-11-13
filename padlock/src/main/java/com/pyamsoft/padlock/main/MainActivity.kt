@@ -21,7 +21,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
-import androidx.preference.PreferenceManager
 import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
@@ -29,6 +28,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.ServiceManager
+import com.pyamsoft.padlock.theme.Theming
 import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
 import com.pyamsoft.pydroid.ui.rating.ChangeLogBuilder
 import com.pyamsoft.pydroid.ui.rating.RatingActivity
@@ -68,10 +68,14 @@ class MainActivity : RatingActivity() {
       }
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    setTheme(R.style.Theme_PadLock_Light_Normal)
+    if (Theming.isDarkTheme(this)) {
+      setTheme(R.style.Theme_PadLock_Dark_Normal)
+    } else {
+      setTheme(R.style.Theme_PadLock_Light_Normal)
+    }
+
     super.onCreate(savedInstanceState)
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-    PreferenceManager.setDefaultValues(applicationContext, R.xml.preferences, false)
 
     Injector.obtain<PadLockComponent>(applicationContext)
         .inject(this)
@@ -118,6 +122,12 @@ class MainActivity : RatingActivity() {
       setNavigationOnClickListener(DebouncedOnClickListener.create {
         onBackPressed()
       })
+    }
+
+    if (Theming.isDarkTheme(this)) {
+      binding.toolbar.popupTheme = R.style.ThemeOverlay_AppCompat
+    } else {
+      binding.toolbar.popupTheme = R.style.ThemeOverlay_AppCompat_Light
     }
   }
 

@@ -16,9 +16,7 @@
 
 <resources>
 
-  <color name="grey300">#E0E0E0</color>
-  <color name="blue500">#4768FD</color>
-  <color name="blue700">#3C54FE</color>
-  <color name="transparent">#00000000</color>
+  <color name="blue900">#2D47FF</color>
+  <color name="dark_background">#2D2D2D</color>
 
 </resources>

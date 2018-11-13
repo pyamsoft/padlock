@@ -44,7 +44,6 @@
     <View
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/lock_info_dark_background"
         app:layout_constraintBottom_toTopOf="@id/lock_info_swipe_refresh"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -69,10 +68,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:text="@string/package_name"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
         app:layout_constraintStart_toEndOf="@+id/lock_info_icon"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
         app:layout_constraintTop_toTopOf="@+id/lock_info_icon"
         />
 
@@ -97,8 +96,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/system"
-        app:layout_constrainedHeight="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constrainedHeight="true"
         app:layout_constraintEnd_toEndOf="@+id/lock_info_package_label"
         app:layout_constraintStart_toStartOf="@+id/lock_info_package_label"
         app:layout_constraintTop_toBottomOf="@+id/lock_info_package_name"

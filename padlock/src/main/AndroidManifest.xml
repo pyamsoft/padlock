@@ -65,7 +65,6 @@
         android:name=".lock.LockScreenActivity"
         android:exported="false"
         android:taskAffinity=""
-        android:theme="@style/Theme.PadLock.Light.Lock"
         android:windowSoftInputMode="adjustResize">
 
       <!-- Sets a default width/height for the lock screen when in freeform mode -->
@@ -83,7 +82,6 @@
         android:exported="false"
         android:launchMode="singleInstance"
         android:noHistory="true"
-        android:theme="@style/Theme.PadLock.Light.Transparent"
         android:windowSoftInputMode="adjustResize"/>
 
     <!-- Locking Service -->

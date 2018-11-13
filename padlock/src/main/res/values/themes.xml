@@ -60,7 +60,7 @@
   <!-- Lock Screen Theme -->
   <style name="Theme.PadLock.Light.Lock" parent="@style/Base.Theme.PadLock.Light.Lock"/>
 
-  <style name="Theme.PadLock.Light.ToolbarPopup" parent="@style/ThemeOverlay.AppCompat.Light">
+  <style name="Theme.PadLock.Light.Lock.ToolbarPopup" parent="@style/ThemeOverlay.AppCompat.Light">
     <item name="android:colorControlActivated">@color/blue700</item>
     <item name="android:colorControlHighlight">@color/blue500</item>
     <item name="android:colorControlNormal">@color/grey500</item>
