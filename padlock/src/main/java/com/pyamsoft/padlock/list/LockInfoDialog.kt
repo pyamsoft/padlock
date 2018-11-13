@@ -41,6 +41,7 @@ import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
@@ -58,6 +59,7 @@ class LockInfoDialog : ToolbarDialog() {
   @field:Inject internal lateinit var appIconLoader: AppIconLoader
   @field:Inject internal lateinit var imageLoader: ImageLoader
   @field:Inject internal lateinit var viewModel: LockInfoViewModel
+  @field:Inject internal lateinit var theming: Theming
 
   private lateinit var adapter: ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
   private lateinit var binding: DialogLockInfoBinding
@@ -161,8 +163,15 @@ class LockInfoDialog : ToolbarDialog() {
   }
 
   private fun setupToolbar() {
+    val theme: Int
+    if (theming.isDarkTheme()) {
+      theme = R.style.ThemeOverlay_AppCompat
+    } else {
+      theme = R.style.ThemeOverlay_AppCompat_Light
+    }
     binding.apply {
       lockInfoToolbar.apply {
+        popupTheme = theme
         title = appName
         setNavigationOnClickListener(DebouncedOnClickListener.create { dismiss() })
         inflateMenu(R.menu.search_menu)
