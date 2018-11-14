@@ -31,13 +31,10 @@ class PurgeAllDialog : ToolbarDialog() {
   @field:Inject
   internal lateinit var purgePublisher: Publisher<PurgeAllEvent>
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
-  }
 
-  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog.Builder(requireActivity())
         .setMessage("Really delete all old entries?")
         .setPositiveButton("Delete") { _, _ ->

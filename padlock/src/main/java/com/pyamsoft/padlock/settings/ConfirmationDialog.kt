@@ -38,12 +38,12 @@ class ConfirmationDialog : ToolbarDialog() {
     arguments!!.let {
       type = ConfirmEvent.valueOf(it.getString(WHICH, ConfirmEvent.DATABASE.name))
     }
-
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .inject(this)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .inject(this)
+
     return AlertDialog.Builder(requireActivity())
         .setMessage(
             if (type === ConfirmEvent.DATABASE)

@@ -86,7 +86,6 @@ class PinDialog : ToolbarDialog() {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusPinComponent(PinModule(viewLifecycleOwner))
         .inject(this)
-    super.onCreateView(inflater, container, savedInstanceState)
 
     binding = DialogPinEntryBinding.inflate(inflater, container, false)
 

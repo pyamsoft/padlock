@@ -68,7 +68,7 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusSettingsComponent(SettingsModule(viewLifecycleOwner))
         .inject(this)
-    return requireNotNull(super.onCreateView(inflater, container, savedInstanceState))
+    return super.onCreateView(inflater, container, savedInstanceState)
   }
 
   override fun onViewCreated(

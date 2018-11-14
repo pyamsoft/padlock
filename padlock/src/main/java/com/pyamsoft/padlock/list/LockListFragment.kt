@@ -133,6 +133,7 @@ class LockListFragment : ToolbarFragment() {
             })
         )
         .inject(this)
+
     binding = FragmentLockListBinding.inflate(inflater, container, false)
     return binding.root
   }
