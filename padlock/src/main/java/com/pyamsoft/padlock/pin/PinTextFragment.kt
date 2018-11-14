@@ -70,6 +70,8 @@ class PinTextFragment : PinBaseFragment() {
     if (savedInstanceState != null) {
       onRestoreInstanceState(savedInstanceState)
     }
+
+    checkMasterPin()
   }
 
   override fun onDestroyView() {
