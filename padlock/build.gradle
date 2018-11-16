@@ -27,8 +27,8 @@ android {
     applicationId "com.pyamsoft.padlock"
     minSdkVersion rootProject.ext.minSdk
     targetSdkVersion rootProject.ext.maxSdk
-    versionCode 109
-    versionName "3.1.9-SNAPSHOT"
+    versionCode 110
+    versionName "3.2.0"
 
     // For vector drawables
     vectorDrawables.useSupportLibrary = true
@@ -73,7 +73,7 @@ android {
       signingConfig signingConfigs.release
       minifyEnabled true
       shrinkResources true
-      proguardFiles getDefaultProguardFile("proguard-android.txt"),
+      proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),
           "proguard-rules.pro"
     }
 
