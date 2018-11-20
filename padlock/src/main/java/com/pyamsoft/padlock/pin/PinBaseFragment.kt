@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.ui.app.fragment.requireView
+import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import javax.inject.Inject
 
@@ -35,8 +36,8 @@ abstract class PinBaseFragment : ToolbarFragment() {
 
   private var checkOnly: Boolean = false
 
-  @field:Inject
-  internal lateinit var viewModel: PinViewModel
+  @field:Inject internal lateinit var viewModel: PinViewModel
+  @field:Inject internal lateinit var theming: Theming
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
