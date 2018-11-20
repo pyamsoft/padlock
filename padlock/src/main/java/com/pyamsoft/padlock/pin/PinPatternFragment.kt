@@ -139,7 +139,7 @@ class PinPatternFragment : PinBaseFragment() {
 
     requireActivity().withStyledAttributes(
         theme,
-        intArrayOf(android.R.attr.colorForegroundInverse)
+        intArrayOf(android.R.attr.colorForeground)
     ) {
       val colorId = getResourceId(0, 0)
       if (colorId != 0) {

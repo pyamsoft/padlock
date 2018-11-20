@@ -21,8 +21,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
+import androidx.core.content.ContextCompat
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.listener.PatternLockViewListener
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
 
@@ -66,6 +68,8 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
     binding.patternLock.isTactileFeedbackEnabled = false
     binding.patternLock.addPatternLockListener(listener)
 
+    // Dots always white
+    binding.patternLock.normalStateColor = ContextCompat.getColor(requireContext(), R.color.white)
   }
 
   override fun onDestroyView() {
