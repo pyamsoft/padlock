@@ -17,13 +17,14 @@
 package com.pyamsoft.padlock.settings
 
 import androidx.annotation.CheckResult
-import dagger.Binds
+import androidx.preference.PreferenceScreen
 import dagger.Module
+import dagger.Provides
 
 @Module
-abstract class SettingsModule {
+class SettingsProvider(private val preferenceScreen: PreferenceScreen) {
 
-  @Binds
+  @Provides
   @CheckResult
-  internal abstract fun bindSettingsView(impl: SettingsViewImpl): SettingsView
+  fun providePreferenceScreen(): PreferenceScreen = preferenceScreen
 }

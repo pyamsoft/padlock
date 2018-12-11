@@ -3,16 +3,15 @@ package com.pyamsoft.padlock.service
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.databinding.DataBindingUtil
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.databinding.ActivityPauseCheckBinding
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.pydroid.core.bus.Publisher
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.theme.Theming
-import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
@@ -22,14 +21,17 @@ class PauseConfirmActivity : ActivityBase() {
   @field:Inject internal lateinit var viewModel: PauseServiceViewModel
   @field:Inject internal lateinit var pausePublisher: Publisher<ServicePauseEvent>
   @field:Inject internal lateinit var theming: Theming
+  @field:Inject internal lateinit var pauseView: PauseView
 
-  private lateinit var binding: ActivityPauseCheckBinding
+  private var checkPinFailedDisposable by singleDisposable()
+  private var checkPinSuccessDisposable by singleDisposable()
+  private var recreateDisposable by singleDisposable()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     overridePendingTransition(0, 0)
 
     Injector.obtain<PadLockComponent>(application)
-        .plusServiceComponent(ServiceModule(this))
+        .plusPauseComponent(PauseModule(this))
         .inject(this)
 
     if (theming.isDarkTheme()) {
@@ -38,19 +40,18 @@ class PauseConfirmActivity : ActivityBase() {
       setTheme(R.style.Theme_PadLock_Light_Transparent)
     }
     super.onCreate(savedInstanceState)
-    binding = DataBindingUtil.setContentView(this, R.layout.activity_pause_check)
+    pauseView.create()
 
-    viewModel.onCheckPinEventFailed {
-      Snackbreak.short(binding.pauseCheckRoot, "Invalid PIN")
-          .show()
+    checkPinFailedDisposable = viewModel.onCheckPinEventFailed {
+      pauseView.onCheckPinFailed()
     }
-    viewModel.onCheckPinEventSuccess {
+    checkPinSuccessDisposable = viewModel.onCheckPinEventSuccess {
       val autoResume = intent.getBooleanExtra(EXTRA_AUTO_RESUME, false)
       Timber.d("Pausing service with auto resume: $autoResume")
       pausePublisher.publish(ServicePauseEvent(autoResume))
       finish()
     }
-    viewModel.onRecreateEvent { recreate() }
+    recreateDisposable = viewModel.onRecreateEvent { recreate() }
 
     addPinFragment()
   }
@@ -74,7 +75,9 @@ class PauseConfirmActivity : ActivityBase() {
   override fun onDestroy() {
     super.onDestroy()
     overridePendingTransition(0, 0)
-    binding.unbind()
+    checkPinFailedDisposable.tryDispose()
+    checkPinSuccessDisposable.tryDispose()
+    recreateDisposable.tryDispose()
   }
 
   companion object {

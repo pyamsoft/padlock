@@ -22,16 +22,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.preference.ListPreference
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinDialog
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.fragment.requireView
-import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
@@ -42,23 +42,18 @@ import javax.inject.Inject
 class PadLockPreferenceFragment : SettingsPreferenceFragment() {
 
   @field:Inject internal lateinit var viewModel: SettingsViewModel
-  @field:Inject internal lateinit var theming: Theming
+  @field:Inject internal lateinit var settingsView: SettingsView
 
   override val preferenceXmlResId: Int = R.xml.preferences
 
   override val rootViewContainer: Int = R.id.fragment_container
 
-  override val applicationName: String
-    get() = getString(R.string.app_name)
-
-  override val bugreportUrl: String = "https://github.com/pyamsoft/padlock/issues"
-
-  private lateinit var lockType: ListPreference
-
-  override fun onClearAllClicked() {
-    ConfirmationDialog.newInstance(ConfirmEvent.ALL)
-        .show(requireActivity(), "confirm_dialog")
-  }
+  private var installReceiverDisposable by singleDisposable()
+  private var lockTypeDisposable by singleDisposable()
+  private var allClearDisposable by singleDisposable()
+  private var dbClearDisposable by singleDisposable()
+  private var pinClearFailedDisposable by singleDisposable()
+  private var pinClearSuccessDisposable by singleDisposable()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -66,8 +61,10 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     savedInstanceState: Bundle?
   ): View? {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusSettingsComponent(SettingsModule(viewLifecycleOwner))
+        .plusSettingsComponent(SettingsProvider(preferenceScreen))
         .inject(this)
+
+    settingsView.create()
     return super.onCreateView(inflater, container, savedInstanceState)
   }
 
@@ -76,85 +73,67 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    setupClearPreference()
-    setupInstallListenerPreference()
-    setupLockTypePreference()
-    setupThemePreference()
 
-    viewModel.onAllSettingsCleared { onClearAll() }
-    viewModel.onDatabaseCleared { onClearDatabase() }
-    viewModel.onPinClearFailed { onMasterPinClearFailure() }
-    viewModel.onPinCleared { onMasterPinClearSuccess() }
-    viewModel.onLockTypeSwitched { wrapper ->
-      wrapper.onSuccess {
-        if (it.isEmpty()) {
-          onLockTypeChangePrevented()
-        } else {
-          onLockTypeChangeAccepted(it)
-        }
-      }
-      wrapper.onError { onLockTypeChangeError(it) }
-    }
-
-    viewModel.onApplicationReceiverChanged { wrapper ->
-      wrapper.onSuccess { Timber.d("Application notifier status changed") }
-      wrapper.onError { Timber.e(it, "Application notified status error") }
-    }
-  }
-
-  private fun setupThemePreference() {
-    val darkMode = findPreference(getString(R.string.dark_mode_key))
-    darkMode.setOnPreferenceChangeListener { _, newValue ->
-      if (newValue is Boolean) {
-        // Set dark mode
-        theming.setDarkTheme(newValue)
-
-        // Publish incase any other activities are listening
-        viewModel.publishRecreate()
-
-        // Recreate self
-        requireActivity().recreate()
-        return@setOnPreferenceChangeListener true
-      } else {
-        return@setOnPreferenceChangeListener false
-      }
-    }
-  }
-
-  private fun setupLockTypePreference() {
-    lockType = findPreference(getString(R.string.lock_screen_type_key)) as ListPreference
-    lockType.setOnPreferenceChangeListener { _, value ->
-      if (value is String) {
-        viewModel.switchLockType(value)
-        // Always return false here, the callback will decide if we can set value properly
-        return@setOnPreferenceChangeListener false
-      } else {
-        return@setOnPreferenceChangeListener false
-      }
-    }
-  }
-
-  private fun setupInstallListenerPreference() {
-    val installListener = findPreference(getString(R.string.install_listener_key))
-    installListener.setOnPreferenceClickListener {
-      viewModel.updateApplicationReceiver()
-      return@setOnPreferenceClickListener true
-    }
-  }
-
-  private fun setupClearPreference() {
-    val clearDb = findPreference(getString(R.string.clear_db_key))
-    clearDb.setOnPreferenceClickListener {
-      Timber.d("Clear DB onClick")
+    settingsView.onClearDatabaseClicked {
       ConfirmationDialog.newInstance(ConfirmEvent.DATABASE)
           .show(requireActivity(), "confirm_dialog")
-      return@setOnPreferenceClickListener true
     }
+
+    settingsView.onInstallListenerClicked {
+      installReceiverDisposable = viewModel.updateApplicationReceiver(
+          onUpdateBegin = {},
+          onUpdateSuccess = { Timber.d("Updated application install receiver") },
+          onUpdateError = { Timber.e(it, "Failed to update application install receiver") },
+          onUpdateComplete = {}
+      )
+    }
+
+    settingsView.onLockTypeChangeAttempt { newValue: String ->
+      lockTypeDisposable = viewModel.switchLockType(
+          onSwitchBegin = {},
+          onSwitchSuccess = { canSwitch: Boolean ->
+            if (canSwitch) {
+              onLockTypeChangeAccepted(newValue)
+            } else {
+              onLockTypeChangePrevented()
+            }
+          },
+          onSwitchError = { onLockTypeChangeError(it) },
+          onSwitchComplete = {}
+      )
+    }
+
+    allClearDisposable = viewModel.onAllSettingsCleared { onClearAll() }
+    dbClearDisposable = viewModel.onDatabaseCleared { onClearDatabase() }
+    pinClearFailedDisposable = viewModel.onPinClearFailed { onMasterPinClearFailure() }
+    pinClearSuccessDisposable = viewModel.onPinClearSuccess { onMasterPinClearSuccess() }
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    installReceiverDisposable.tryDispose()
+    lockTypeDisposable.tryDispose()
+    allClearDisposable.tryDispose()
+    dbClearDisposable.tryDispose()
+    pinClearFailedDisposable.tryDispose()
+    pinClearSuccessDisposable.tryDispose()
+  }
+
+  override fun onDarkThemeClicked(dark: Boolean) {
+    super.onDarkThemeClicked(dark)
+
+    // Publish incase any other activities are listening
+    viewModel.publishRecreate()
+  }
+
+  override fun onClearAllClicked() {
+    ConfirmationDialog.newInstance(ConfirmEvent.ALL)
+        .show(requireActivity(), "confirm_dialog")
   }
 
   private fun onLockTypeChangeAccepted(value: String) {
     Timber.d("Change accepted, set value: %s", value)
-    lockType.value = value
+    settingsView.changeLockType(value)
   }
 
   private fun onLockTypeChangePrevented() {

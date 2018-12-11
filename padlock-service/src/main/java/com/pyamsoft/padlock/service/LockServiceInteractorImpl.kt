@@ -349,7 +349,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
             enforcer.assertNotOnMainThread()
             return@filter !it
           }
-          .flatMap { _ ->
+          .flatMap {
             enforcer.assertNotOnMainThread()
             Timber.d("Check event from activity: %s %s", packageName, className)
             return@flatMap packageActivityManager.isValidActivity(packageName, className)

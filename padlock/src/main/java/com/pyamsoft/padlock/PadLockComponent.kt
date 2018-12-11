@@ -38,7 +38,6 @@ import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinModule
-import com.pyamsoft.padlock.pin.PinPatternFragment
 import com.pyamsoft.padlock.pin.PinSingletonModule
 import com.pyamsoft.padlock.pin.PinSingletonProvider
 import com.pyamsoft.padlock.purge.PurgeAllDialog
@@ -49,13 +48,14 @@ import com.pyamsoft.padlock.purge.PurgeSingletonModule
 import com.pyamsoft.padlock.purge.PurgeSingletonProvider
 import com.pyamsoft.padlock.receiver.BootReceiver
 import com.pyamsoft.padlock.service.PadLockJobService
-import com.pyamsoft.padlock.service.ServiceComponent
-import com.pyamsoft.padlock.service.ServiceModule
+import com.pyamsoft.padlock.service.PadLockService
+import com.pyamsoft.padlock.service.PauseComponent
+import com.pyamsoft.padlock.service.PauseModule
 import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.service.ServiceSingletonProvider
 import com.pyamsoft.padlock.settings.ConfirmationDialog
 import com.pyamsoft.padlock.settings.SettingsComponent
-import com.pyamsoft.padlock.settings.SettingsModule
+import com.pyamsoft.padlock.settings.SettingsProvider
 import com.pyamsoft.padlock.settings.SettingsSingletonModule
 import com.pyamsoft.padlock.settings.SettingsSingletonProvider
 import dagger.Component
@@ -81,6 +81,8 @@ interface PadLockComponent {
 
   fun inject(receiver: BootReceiver)
 
+  fun inject(service: PadLockService)
+
   fun inject(service: PadLockJobService)
 
   fun inject(dialog: PurgeAllDialog)
@@ -103,10 +105,10 @@ interface PadLockComponent {
   fun plusLockScreenComponent(entryModule: LockEntryModule): LockScreenComponent
 
   @CheckResult
-  fun plusSettingsComponent(module: SettingsModule): SettingsComponent
+  fun plusSettingsComponent(module: SettingsProvider): SettingsComponent
 
   @CheckResult
-  fun plusServiceComponent(module: ServiceModule): ServiceComponent
+  fun plusPauseComponent(module: PauseModule): PauseComponent
 
   @CheckResult
   fun plusPurgeComponent(module: PurgeModule): PurgeComponent

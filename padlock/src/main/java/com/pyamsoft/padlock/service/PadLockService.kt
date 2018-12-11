@@ -26,9 +26,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
@@ -36,6 +33,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType.SERVICE_TEMP_PAUSE
 import com.pyamsoft.padlock.lock.LockScreenActivity
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.service.ServicePauseState.PAUSED
 import com.pyamsoft.padlock.model.service.ServicePauseState.STARTED
 import com.pyamsoft.padlock.model.service.ServicePauseState.TEMP_PAUSED
@@ -46,30 +44,31 @@ import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_TEMP_PAUSE
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
-import com.pyamsoft.pydroid.util.fakeBind
-import com.pyamsoft.pydroid.util.fakeUnbind
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
-class PadLockService : Service(), LifecycleOwner {
+class PadLockService : Service() {
 
-  private val lifecycle = LifecycleRegistry(this)
   private val notificationManager by lazy(NONE) {
     requireNotNull(application.getSystemService<NotificationManager>())
   }
 
   private lateinit var notificationBuilder: NotificationCompat.Builder
 
-  @field:Inject
-  internal lateinit var viewModel: LockServiceViewModel
-  @field:Inject
-  internal lateinit var serviceManager: ServiceManager
-  @field:Inject
-  internal lateinit var jobSchedulerCompat: JobSchedulerCompat
+  @field:Inject internal lateinit var viewModel: LockServiceViewModel
+  @field:Inject internal lateinit var serviceManager: ServiceManager
+  @field:Inject internal lateinit var jobSchedulerCompat: JobSchedulerCompat
 
-  override fun getLifecycle(): Lifecycle = lifecycle
+  private var finishDisposable by singleDisposable()
+  private var pauseDisposable by singleDisposable()
+  private var permissionDisposable by singleDisposable()
+  private var screenStateDisposable by singleDisposable()
+  private var foregroundDisposable by singleDisposable()
+  private var recheckDisposable by singleDisposable()
 
   override fun onBind(ignore: Intent?): IBinder? {
     throw AssertionError("Service is not bound")
@@ -78,27 +77,56 @@ class PadLockService : Service(), LifecycleOwner {
   override fun onCreate() {
     super.onCreate()
     Injector.obtain<PadLockComponent>(applicationContext)
-        .plusServiceComponent(ServiceModule(this))
         .inject(this)
-    lifecycle.fakeBind()
 
     setupNotifications()
 
-    viewModel.onLockScreen { entry, realName, icon ->
-      // Delay by a little bit for Applications which launch a bunch of Activities in quick order.
-      LockScreenActivity.start(this, entry, realName, icon)
-    }
+    screenStateDisposable = viewModel.observeScreenState(
+        onScreenOn = {
+          foregroundDisposable.tryDispose()
+          recheckDisposable.tryDispose()
+          beginWatchingForLockedApplications()
+        },
+        onScreenOff = {
+          foregroundDisposable.tryDispose()
+          recheckDisposable.tryDispose()
+        }
+    )
 
-    viewModel.onServiceFinishEvent { serviceStop() }
-    viewModel.onServicePauseEvent { pauseService(it) }
-    viewModel.onPermissionLostEvent { servicePermissionLost() }
+    finishDisposable = viewModel.onServiceFinishEvent { serviceStop() }
+    pauseDisposable = viewModel.onServicePauseEvent { pauseService(it) }
+    permissionDisposable = viewModel.onPermissionLostEvent { servicePermissionLost() }
+  }
+
+  private fun beginWatchingForLockedApplications() {
+    foregroundDisposable = viewModel.onForegroundApplicationLockRequest(
+        onEvent = { model: PadLockEntryModel, className: String, icon: Int ->
+          LockScreenActivity.start(this, model, className, icon)
+        },
+        onError = { Timber.e(it, "Error while watching foreground applications") }
+    )
+
+    recheckDisposable = viewModel.onRecheckForcedLockEvent(
+        onEvent = { model: PadLockEntryModel, className: String, icon: Int ->
+          LockScreenActivity.start(this, model, className, icon)
+        },
+        onError = { Timber.e(it, "Error while attempting recheck") }
+    )
   }
 
   override fun onDestroy() {
     super.onDestroy()
     stopForeground(true)
+
+    finishDisposable.tryDispose()
+    pauseDisposable.tryDispose()
+    permissionDisposable.tryDispose()
+    foregroundDisposable.tryDispose()
+    recheckDisposable.tryDispose()
+    screenStateDisposable.tryDispose()
+
     notificationManager.cancel(NOTIFICATION_ID)
-    lifecycle.fakeUnbind()
+
     PadLock.getRefWatcher(this)
         .watch(this)
   }

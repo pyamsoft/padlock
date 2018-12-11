@@ -17,14 +17,13 @@
 package com.pyamsoft.padlock.service
 
 import androidx.annotation.CheckResult
-import androidx.lifecycle.LifecycleOwner
 import dagger.Module
 import dagger.Provides
 
 @Module
-class ServiceModule(private val owner: LifecycleOwner) {
+class PauseModule(private val activity: PauseConfirmActivity) {
 
   @Provides
   @CheckResult
-  fun provideOwner(): LifecycleOwner = owner
+  fun provideActivity(): PauseConfirmActivity = activity
 }

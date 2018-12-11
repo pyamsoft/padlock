@@ -16,7 +16,7 @@
 
 package com.pyamsoft.padlock.service
 
-import androidx.lifecycle.LifecycleOwner
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.DISABLED
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
@@ -25,184 +25,179 @@ import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.model.service.RecheckEvent
 import com.pyamsoft.padlock.model.service.RecheckStatus
+import com.pyamsoft.padlock.model.service.RecheckStatus.FORCE
 import com.pyamsoft.padlock.model.service.RecheckStatus.NOT_FORCE
 import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.padlock.model.service.ServicePauseState
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
-import com.pyamsoft.pydroid.core.bus.RxBus
-import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
+import io.reactivex.Maybe
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
 class LockServiceViewModel @Inject internal constructor(
-  owner: LifecycleOwner,
   private val foregroundEventBus: Listener<ForegroundEvent>,
   private val serviceFinishBus: EventBus<ServiceFinishEvent>,
   private val recheckEventBus: Listener<RecheckEvent>,
   private val servicePauseBus: Listener<ServicePauseEvent>,
   private val interactor: LockServiceInteractor
-) : BaseViewModel(owner) {
-
-  private val lockScreenBus = RxBus.create<Triple<PadLockEntryModel, String, Int>>()
-  private var matchingDisposable by singleDisposable()
-  private var entryDisposable by singleDisposable()
-  private var foregroundDisposable by singleDisposable()
+) {
 
   init {
     interactor.init()
   }
 
-  override fun onCleared() {
-    super.onCleared()
-    interactor.cleanup()
-    matchingDisposable.tryDispose()
-    entryDisposable.tryDispose()
-    foregroundDisposable.tryDispose()
-  }
-
-  fun onServicePauseEvent(func: (Boolean) -> Unit) {
-    dispose {
-      servicePauseBus.listen()
-          .map { it.autoResume }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
-  }
-
-  fun onServiceFinishEvent(func: () -> Unit) {
-    dispose {
-      serviceFinishBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func() }
-    }
-
-    dispose {
-      interactor.observeServiceState()
-          .filter { it == DISABLED }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func() }
-    }
-  }
-
-  fun onPermissionLostEvent(func: () -> Unit) {
-    dispose {
-      interactor.observeServiceState()
-          .filter { it == PERMISSION }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func() }
-    }
-  }
-
-  fun onLockScreen(func: (PadLockEntryModel, String, Int) -> Unit) {
-    dispose {
-      lockScreenBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func(it.first, it.second, it.third) }
-    }
-
-    listenForRecheckEvent()
-    listenForForegroundEvent()
-  }
-
-  fun setServicePaused(paused: ServicePauseState) {
-    interactor.pauseService(paused)
-  }
-
-  private fun listenForRecheckEvent() {
-    dispose {
-      recheckEventBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { processActiveApplicationIfMatching(it.packageName, it.className) }
-    }
-  }
-
-  private fun listenForForegroundEvent() {
-    dispose {
-      foregroundEventBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe({ interactor.clearMatchingForegroundEvent(it) }, {
-            Timber.e(it, "Error listening for foreground event clears")
-          })
-    }
-
-    dispose {
-      interactor.observeScreenState()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe {
-            foregroundDisposable.dispose()
-            if (it) {
-              // Screen on, begin observing foreground
-              Timber.d("Screen ON - start observing foreground")
-              watchForeground()
-            } else {
-              Timber.d("Screen OFF - stop observing foreground")
-            }
-          }
-    }
-  }
-
-  private fun processActiveApplicationIfMatching(
-    packageName: String,
-    className: String
-  ) {
-    matchingDisposable = interactor.ifActiveMatching(packageName, className)
+  @CheckResult
+  fun onServicePauseEvent(func: (Boolean) -> Unit): Disposable {
+    return servicePauseBus.listen()
+        .map { it.autoResume }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({
-          processEvent(packageName, className, RecheckStatus.FORCE)
-        }, { Timber.e(it, "onError processActiveApplicationIfMatching") })
+        .subscribe(func)
   }
 
-  private fun watchForeground() {
-    foregroundDisposable = interactor.listenForForegroundEvents()
+  @CheckResult
+  fun onServiceFinishEvent(func: () -> Unit): Disposable {
+    val finishDisposable = serviceFinishBus.listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { func() }
+
+    val disableDisposable = interactor.observeServiceState()
+        .filter { it == DISABLED }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { func() }
+
+    return object : Disposable {
+      override fun isDisposed(): Boolean {
+        return finishDisposable.isDisposed && disableDisposable.isDisposed
+      }
+
+      override fun dispose() {
+        finishDisposable.tryDispose()
+        disableDisposable.tryDispose()
+      }
+    }
+  }
+
+  @CheckResult
+  fun onPermissionLostEvent(func: () -> Unit): Disposable {
+    return interactor.observeServiceState()
+        .filter { it == PERMISSION }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { func() }
+  }
+
+  @CheckResult
+  fun observeScreenState(
+    onScreenOn: () -> Unit,
+    onScreenOff: () -> Unit
+  ): Disposable {
+    return interactor.observeScreenState()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { screenOn: Boolean ->
+          if (screenOn) {
+            onScreenOn()
+          } else {
+            onScreenOff()
+          }
+        }
+  }
+
+  @CheckResult
+  fun onForegroundApplicationLockRequest(
+    onEvent: (model: PadLockEntryModel, className: String, icon: Int) -> Unit,
+    onError: (error: Throwable) -> Unit
+  ): Disposable {
+    val foregroundDisposable = foregroundEventBus.listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe({ interactor.clearMatchingForegroundEvent(it) }, {
+          Timber.e(it, "Error listening for foreground event clears")
+        })
+
+    val eventDisposable = interactor.listenForForegroundEvents()
+        .filter { !ForegroundEvent.isEmpty(it) }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .doOnCancel { Timber.d("Cancelling foreground listener") }
         .doAfterTerminate { serviceFinishBus.publish(ServiceFinishEvent) }
-        .subscribe({
-          if (ForegroundEvent.isEmpty(it)) {
-            Timber.w("Ignore empty foreground entry event")
-          } else {
-            processEvent(it.packageName, it.className, NOT_FORCE)
-          }
-        }, { Timber.e(it, "Error while listening to foreground event") })
+        .flatMapMaybe { processEvent(it.packageName, it.className, NOT_FORCE) }
+        .subscribe({ (model: PadLockEntryModel, className: String, icon: Int) ->
+          onEvent(model, className, icon)
+        }, {
+          Timber.e(it, "Error while watching foreground events")
+          onError(it)
+        })
+
+    return object : Disposable {
+
+      override fun isDisposed(): Boolean {
+        return foregroundDisposable.isDisposed && eventDisposable.isDisposed
+      }
+
+      override fun dispose() {
+        foregroundDisposable.tryDispose()
+        eventDisposable.tryDispose()
+      }
+
+    }
   }
 
+  @CheckResult
+  fun onRecheckForcedLockEvent(
+    onEvent: (model: PadLockEntryModel, className: String, icon: Int) -> Unit,
+    onError: (error: Throwable) -> Unit
+  ): Disposable {
+    return recheckEventBus.listen()
+        .flatMapMaybe { processActiveApplicationIfMatching(it.packageName, it.className) }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe({ (model: PadLockEntryModel, className: String, icon: Int) ->
+          onEvent(model, className, icon)
+        }, {
+          Timber.e(it, "Error while watching foreground events")
+          onError(it)
+        })
+  }
+
+  @CheckResult
+  private fun processActiveApplicationIfMatching(
+    packageName: String,
+    className: String
+  ): Maybe<Triple<PadLockEntryModel, String, Int>> {
+    return interactor.ifActiveMatching(packageName, className)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .flatMap { processEvent(packageName, className, FORCE) }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+  }
+
+  @CheckResult
   private fun processEvent(
     packageName: String,
     className: String,
     forcedRecheck: RecheckStatus
-  ) {
-    entryDisposable = interactor.processEvent(packageName, className, forcedRecheck)
+  ): Maybe<Triple<PadLockEntryModel, String, Int>> {
+    return interactor.processEvent(packageName, className, forcedRecheck)
+        .filter { (model, _) -> !PadLockDbModels.isEmpty(model) }
+        .filter { (_, icon) -> icon != 0 }
+        .map { Triple(it.first, className, it.second) }
         .unsubscribeOn(Schedulers.io())
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .subscribe({ (model, icon) ->
-          if (PadLockDbModels.isEmpty(model)) {
-            Timber.w("PadLockDbEntryImpl is EMPTY, ignore")
-          } else {
-            lockScreenBus.publish(Triple(model, className, icon))
-          }
-        }, {
-          if (it is NoSuchElementException) {
-            Timber.w("PadLock not locking: $packageName, $className")
-          } else {
-            Timber.e(it, "Error getting PadLockDbEntryImpl for LockScreen")
-          }
-        })
+        .observeOn(AndroidSchedulers.mainThread())
+  }
+
+  fun setServicePaused(paused: ServicePauseState) {
+    interactor.pauseService(paused)
   }
 
 }

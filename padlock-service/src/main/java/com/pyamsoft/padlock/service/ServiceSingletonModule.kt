@@ -44,4 +44,7 @@ abstract class ServiceSingletonModule {
   internal abstract fun provideApplicationInstallReceiver(
     impl: ApplicationInstallReceiverImpl
   ): ApplicationInstallReceiver
+
+  @Binds
+  internal abstract fun serviceManager(impl: ServiceManagerImpl): ServiceManager
 }
