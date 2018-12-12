@@ -16,11 +16,11 @@
 
 package com.pyamsoft.padlock.helper
 
+import android.content.Context
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.CheckResult
 import androidx.annotation.IdRes
-import androidx.fragment.app.FragmentActivity
 import com.pyamsoft.padlock.R
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.util.tintWith
@@ -35,8 +35,9 @@ fun MenuItem?.setChecked(checked: Boolean) {
 }
 
 fun Menu.tintIcon(
-  activity: FragmentActivity,
-  theming: Theming, @IdRes id: Int
+  context: Context,
+  theming: Theming,
+  @IdRes id: Int
 ) {
   val item = findItem(id)
   if (item != null) {
@@ -50,7 +51,7 @@ fun Menu.tintIcon(
             } else {
               color = R.color.black
             }
-            return@let it.tintWith(activity, color)
+            return@let it.tintWith(context, color)
           }
     }
   }

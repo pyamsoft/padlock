@@ -20,63 +20,55 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.mikepenz.fastadapter.FastAdapter
-import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.databinding.FragmentPurgeBinding
-import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.tintIcon
 import com.pyamsoft.padlock.model.list.ListDiffProvider
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.fragment.toolbarActivity
-import com.pyamsoft.pydroid.ui.theme.Theming
-import com.pyamsoft.pydroid.ui.util.Snackbreak
-import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
-import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import timber.log.Timber
 import javax.inject.Inject
 
 class PurgeFragment : ToolbarFragment() {
 
   @field:Inject internal lateinit var viewModel: PurgeViewModel
-  @field:Inject internal lateinit var theming: Theming
+  @field:Inject internal lateinit var purgeView: PurgeView
 
-  private lateinit var adapter: ModelAdapter<String, PurgeItem>
-  private lateinit var binding: FragmentPurgeBinding
-  private lateinit var decoration: androidx.recyclerview.widget.DividerItemDecoration
-  private lateinit var refreshLatch: RefreshLatch
-  private var lastPosition: Int = 0
-
-  private fun decideListState() {
-    binding.apply {
-      if (adapter.adapterItemCount > 0) {
-        showRecycler()
-      } else {
-        purgeList.visibility = View.GONE
-        purgeEmpty.visibility = View.VISIBLE
-      }
-    }
-  }
+  private var fetchDisposable by singleDisposable()
+  private var purgeAllDisposable by singleDisposable()
+  private var purgeOneDisposable by singleDisposable()
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    val self = this
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusPurgeComponent(PurgeModule(viewLifecycleOwner, object : ListDiffProvider<String> {
-          override fun data(): List<String> {
-            return adapter.models.toList()
-          }
-        }))
+        .plusPurgeComponent(PurgeProvider(
+            viewLifecycleOwner,
+            inflater,
+            container,
+            savedInstanceState,
+            object : ListDiffProvider<String> {
+              override fun data(): List<String> {
+                if (self::purgeView.isInitialized) {
+                  return purgeView.getListModels()
+                } else {
+                  return emptyList()
+                }
+              }
+            }
+        ))
         .inject(this)
-    binding = FragmentPurgeBinding.inflate(inflater, container, false)
-    return binding.root
+
+    purgeView.create()
+    return purgeView.root()
   }
 
   override fun onViewCreated(
@@ -84,93 +76,59 @@ class PurgeFragment : ToolbarFragment() {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    refreshLatch = RefreshLatch.create(viewLifecycleOwner) {
-      binding.purgeSwipeRefresh.refreshing(it)
 
-      // Load complete
-      if (!it) {
-        lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
-        decideListState()
+    purgeView.onSwipeToRefresh { fetchStalePackages(true) }
+    purgeView.onListItemClicked { position: Int, model: String ->
+      handleDeleteRequest(position, model)
+    }
+    purgeView.onToolbarMenuItemClicked { id: Int ->
+      when (id) {
+        R.id.menu_purge_all -> PurgeAllDialog().show(requireActivity(), "purge_all")
+        else -> Timber.w("Unhandled menu item clicked: $id")
       }
     }
-    setupRecyclerView()
-    setupSwipeRefresh()
-    setupToolbarMenu()
-    lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
-    viewModel.onPurgeAllEvent {
+    purgeAllDisposable = viewModel.onPurgeAllEvent {
+      Timber.d("Purged all stale: $it")
+      fetchStalePackages(true)
+    }
+
+    purgeOneDisposable = viewModel.onPurgeEvent {
       Timber.d("Purged stale: $it")
-      viewModel.fetch(true)
+      fetchStalePackages(true)
     }
 
-    viewModel.onPurgeEvent {
-      Timber.d("Purged stale: $it")
-      viewModel.fetch(true)
-    }
+  }
 
-    viewModel.onStaleApplicationsFetched { wrapper ->
-      wrapper.onLoading { refreshLatch.isRefreshing = true }
-      wrapper.onComplete { refreshLatch.isRefreshing = false }
-      wrapper.onError { _ ->
-        Snackbreak.long(binding.root, "Failed to load outdated application list")
-            .setAction("Retry") { viewModel.fetch(true) }
-            .show()
-      }
-      wrapper.onSuccess { adapter.set(it) }
-    }
-
+  private fun fetchStalePackages(force: Boolean) {
+    fetchDisposable = viewModel.fetchStalePackages(
+        force,
+        onFetchBegin = { purgeView.onStaleFetchBegin(it) },
+        onFetchSuccess = { purgeView.onStaleFetchSuccess(it) },
+        onFetchError = { error: Throwable ->
+          purgeView.onStaleFetchError(error) { fetchStalePackages(true) }
+        },
+        onFetchComplete = { purgeView.onStaleFetchComplete() }
+    )
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
-    binding.apply {
-      purgeList.removeItemDecoration(decoration)
-      purgeList.layoutManager = null
-      purgeList.adapter = null
-      unbind()
-    }
-    adapter.clear()
+    purgeOneDisposable.tryDispose()
+    purgeAllDisposable.tryDispose()
+    fetchDisposable.tryDispose()
   }
 
   override fun onStart() {
     super.onStart()
-    viewModel.fetch(false)
-  }
-
-  private fun setupToolbarMenu() {
-    requireToolbarActivity().withToolbar { toolbar ->
-      toolbar.inflateMenu(R.menu.purge_old_menu)
-      toolbar.menu.tintIcon(requireActivity(), theming, R.id.menu_purge_all)
-
-      toolbar.setOnMenuItemClickListener {
-        when (it.itemId) {
-          R.id.menu_purge_all -> {
-            PurgeAllDialog().show(requireActivity(), "purge_all")
-            return@setOnMenuItemClickListener true
-          }
-          else -> {
-            Timber.w("Unhandled menu item clicked: ${it.itemId}")
-            return@setOnMenuItemClickListener false
-          }
-        }
-      }
-    }
-  }
-
-  private fun setupSwipeRefresh() {
-    binding.apply {
-      purgeSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.blue700)
-      purgeSwipeRefresh.setOnRefreshListener {
-        refreshLatch.forceRefresh()
-        viewModel.fetch(true)
-      }
-    }
+    fetchStalePackages(false)
   }
 
   override fun onPause() {
     super.onPause()
-    lastPosition = ListStateUtil.getCurrentPosition(binding.purgeList)
-    ListStateUtil.saveState(TAG, null, binding.purgeList)
+    if (this::purgeView.isInitialized) {
+      purgeView.saveListPosition(null)
+    }
 
     if (isRemoving) {
       toolbarActivity?.withToolbar {
@@ -183,8 +141,8 @@ class PurgeFragment : ToolbarFragment() {
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
-    if (this::binding.isInitialized) {
-      ListStateUtil.saveState(TAG, outState, binding.purgeList)
+    if (this::purgeView.isInitialized) {
+      purgeView.saveListPosition(outState)
     }
     super.onSaveInstanceState(outState)
   }
@@ -194,44 +152,6 @@ class PurgeFragment : ToolbarFragment() {
     requireToolbarActivity().withToolbar {
       it.setTitle(R.string.app_name)
       it.setUpEnabled(false)
-    }
-  }
-
-  private fun setupRecyclerView() {
-    decoration = androidx.recyclerview.widget.DividerItemDecoration(
-        context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
-    )
-
-    adapter = ModelAdapter { PurgeItem(it) }
-    binding.apply {
-      purgeList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-          .apply {
-            isItemPrefetchEnabled = true
-            initialPrefetchItemCount = 3
-          }
-      purgeList.setHasFixedSize(true)
-      purgeList.addItemDecoration(decoration)
-      purgeList.adapter = FastAdapter.with<PurgeItem, ModelAdapter<String, PurgeItem>>(
-          adapter
-      )
-
-      adapter.fastAdapter.apply {
-        withSelectable(true)
-        withOnClickListener { _, _, item, position ->
-          handleDeleteRequest(position, item.model)
-          return@withOnClickListener true
-        }
-      }
-
-      // Set up initial state
-      showRecycler()
-    }
-  }
-
-  private fun showRecycler() {
-    binding.apply {
-      purgeEmpty.visibility = View.GONE
-      purgeList.visibility = View.VISIBLE
     }
   }
 

@@ -17,22 +17,14 @@
 package com.pyamsoft.padlock.purge
 
 import androidx.annotation.CheckResult
-import androidx.lifecycle.LifecycleOwner
-import com.pyamsoft.padlock.model.list.ListDiffProvider
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 
 @Module
-class PurgeModule(
-  private val owner: LifecycleOwner,
-  private val diffProvider: ListDiffProvider<String>
-) {
+abstract class PurgeModule {
 
-  @Provides
+  @Binds
   @CheckResult
-  fun provideOwner(): LifecycleOwner = owner
+  internal abstract fun bindView(impl: PurgeViewImpl): PurgeView
 
-  @Provides
-  @CheckResult
-  fun provideDiffProvider(): ListDiffProvider<String> = diffProvider
 }
