@@ -42,6 +42,7 @@ import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.commit
 import com.pyamsoft.pydroid.ui.util.show
+import com.pyamsoft.pydroid.ui.widget.resize.FluidContentResizer
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -131,6 +132,7 @@ class LockScreenActivity : ActivityBase() {
       setTheme(R.style.Theme_PadLock_Light_Lock)
     }
     super.onCreate(savedInstanceState)
+    FluidContentResizer.listen(this)
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock)
 
     postInjectOnCreate()

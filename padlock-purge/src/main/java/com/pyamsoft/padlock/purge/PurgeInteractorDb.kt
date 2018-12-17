@@ -40,7 +40,6 @@ internal class PurgeInteractorDb @Inject internal constructor(
 
   override fun fetchStalePackageNames(bypass: Boolean): Single<List<String>> {
     return getAllEntries().flatMap { entries ->
-      enforcer.assertNotOnMainThread()
       return@flatMap getActiveApplications()
           .map { filterToStalePackageNames(entries, it) }
           .flatMapObservable {
@@ -58,14 +57,16 @@ internal class PurgeInteractorDb @Inject internal constructor(
   }
 
   @CheckResult
-  private fun getActiveApplications(): Single<List<String>> =
-    applicationManager.getActiveApplications()
+  private fun getActiveApplications(): Single<List<String>> {
+    enforcer.assertNotOnMainThread()
+    return applicationManager.getActiveApplications()
         .flatMapObservable {
           enforcer.assertNotOnMainThread()
           return@flatMapObservable Observable.fromIterable(it)
         }
         .map { it.packageName }
         .toSortedList()
+  }
 
   @CheckResult
   private fun filterToStalePackageNames(

@@ -28,11 +28,15 @@ import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
+import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
 import java.util.ArrayList
+import javax.inject.Inject
 
 class PinPatternFragment : PinBaseFragment() {
+
+  @field:Inject internal lateinit var theming: Theming
 
   private lateinit var binding: FragmentLockScreenPatternBinding
   private val cellPattern: MutableList<PatternLockView.Dot> = ArrayList()
@@ -60,6 +64,8 @@ class PinPatternFragment : PinBaseFragment() {
     savedInstanceState: Bundle?
   ): View? {
     super.onCreateView(inflater, container, savedInstanceState)
+    injectInto(this)
+
     binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
     return binding.root
   }

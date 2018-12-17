@@ -29,13 +29,14 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.ServiceManager
-import com.pyamsoft.pydroid.ui.about.AboutLibrariesFragment
+import com.pyamsoft.pydroid.ui.about.AboutFragment
 import com.pyamsoft.pydroid.ui.rating.ChangeLogBuilder
 import com.pyamsoft.pydroid.ui.rating.RatingActivity
 import com.pyamsoft.pydroid.ui.rating.buildChangeLog
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.commit
+import com.pyamsoft.pydroid.ui.widget.resize.FluidContentResizer
 import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import javax.inject.Inject
@@ -47,16 +48,11 @@ class MainActivity : RatingActivity() {
   @field:Inject internal lateinit var serviceManager: ServiceManager
   @field:Inject internal lateinit var theming: Theming
 
-  override val currentApplicationVersion: Int
-    get() = BuildConfig.VERSION_CODE
-
   override val versionName: String
     get() = BuildConfig.VERSION_NAME
 
   override val applicationIcon: Int
     get() = R.mipmap.ic_launcher
-
-  override val applicationName: String get() = getString(R.string.app_name)
 
   override val rootView: View
     get() = binding.fragmentContainer
@@ -80,6 +76,7 @@ class MainActivity : RatingActivity() {
     }
 
     super.onCreate(savedInstanceState)
+    FluidContentResizer.listen(this)
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
     setupToolbar()
@@ -91,7 +88,7 @@ class MainActivity : RatingActivity() {
     // Set normal navigation
     val fm = supportFragmentManager
 
-    if (fm.findFragmentByTag(MainFragment.TAG) == null && !AboutLibrariesFragment.isPresent(this)) {
+    if (fm.findFragmentByTag(MainFragment.TAG) == null && !AboutFragment.isPresent(this)) {
       Timber.d("Load default page")
       fm.beginTransaction()
           .add(R.id.fragment_container, MainFragment(), MainFragment.TAG)

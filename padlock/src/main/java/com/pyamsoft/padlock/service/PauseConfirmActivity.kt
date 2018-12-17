@@ -13,6 +13,7 @@ import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.show
+import com.pyamsoft.pydroid.ui.widget.resize.FluidContentResizer
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -40,6 +41,7 @@ class PauseConfirmActivity : ActivityBase() {
       setTheme(R.style.Theme_PadLock_Light_Transparent)
     }
     super.onCreate(savedInstanceState)
+    FluidContentResizer.listen(this)
     pauseView.create()
 
     checkPinFailedDisposable = viewModel.onCheckPinEventFailed {

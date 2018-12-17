@@ -47,6 +47,8 @@ class PinTextFragment : PinBaseFragment() {
     savedInstanceState: Bundle?
   ): View? {
     super.onCreateView(inflater, container, savedInstanceState)
+    injectInto(this)
+
     binding = FragmentPinEntryTextBinding.inflate(inflater, container, false)
     return binding.root
   }

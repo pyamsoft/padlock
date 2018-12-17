@@ -17,19 +17,15 @@
 package com.pyamsoft.padlock.pin
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.fragment.app.FragmentManager
-import com.google.android.material.snackbar.Snackbar
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
-import com.pyamsoft.pydroid.ui.app.fragment.requireView
-import com.pyamsoft.pydroid.ui.theme.Theming
-import com.pyamsoft.pydroid.ui.util.Snackbreak
 import javax.inject.Inject
 
 abstract class PinBaseFragment : ToolbarFragment() {
@@ -37,25 +33,17 @@ abstract class PinBaseFragment : ToolbarFragment() {
   private var checkOnly: Boolean = false
 
   @field:Inject internal lateinit var viewModel: PinViewModel
-  @field:Inject internal lateinit var theming: Theming
+
+  private var masterPinCheckedBeforeStart = false
+  private var injected = false
+
+  private var presenceCheckDisposable by singleDisposable()
+  private var pinCheckDisposable by singleDisposable()
+  private var submitDisposable by singleDisposable()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     checkOnly = requireArguments().getBoolean(PinDialog.CHECK_ONLY, false)
-  }
-
-  @CallSuper
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusPinComponent(PinModule(viewLifecycleOwner))
-        .inject(this)
-
-    // Base provides no view
-    return null
   }
 
   @CallSuper
@@ -64,36 +52,35 @@ abstract class PinBaseFragment : ToolbarFragment() {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
+    masterPinCheckedBeforeStart = false
 
-    // Set up observers first
-    viewModel.onMasterPinMissing { onMasterPinMissing() }
-
-    viewModel.onMasterPinPresent { onMasterPinPresent() }
-
-    viewModel.onMasterPinSubmitError {
-      // Resolve the returned view at the time of error
-      Snackbreak.short(requireView(), it.localizedMessage)
-    }
-
-    viewModel.onMasterPinSubmitted {
-      clearDisplay()
-      dismissParent()
-    }
-
-    viewModel.onMasterPinCheckEvent {
+    presenceCheckDisposable = viewModel.onMasterPinCheckEvent {
       if (it) {
         // check succeeds
         dismissParent()
       } else {
-        Snackbar.make(requireView(), "Invalid PIN", Snackbar.LENGTH_SHORT)
-            .show()
+        // check fails
+        onInvalidPin()
       }
     }
   }
 
+  protected fun <T : PinBaseFragment> injectInto(target: T) {
+    injected = true
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusPinComponent(PinModule(viewLifecycleOwner))
+        .inject(target)
+  }
+
   protected fun checkMasterPin() {
+    masterPinCheckedBeforeStart = true
+
     // Fire initialize event once children have been created
-    viewModel.checkMasterPin()
+    pinCheckDisposable = viewModel.checkMasterPin(
+        onMasterPinPresent = { onMasterPinPresent() },
+        onMasterPinMissing = { onMasterPinMissing() },
+        onCheckError = { onCheckError() }
+    )
   }
 
   private fun dismissParent() {
@@ -112,22 +99,54 @@ abstract class PinBaseFragment : ToolbarFragment() {
     hint: String
   ) {
     if (checkOnly) {
-      viewModel.checkPin(pin)
+      submitDisposable = viewModel.checkPin(pin)
     } else {
-      viewModel.submit(pin, reEntry, hint)
+      submitDisposable = viewModel.submit(
+          pin, reEntry, hint,
+          onSubmitError = { onSubmitError(it) },
+          onSubmitComplete = {
+            clearDisplay()
+            dismissParent()
+          })
     }
   }
 
-  abstract fun onSubmitPressed()
+  private fun validateChildLifecycle() {
+    if (!masterPinCheckedBeforeStart) {
+      throw RuntimeException("You must call checkMasterPin() before onStart")
+    }
+
+    if (!injected) {
+      throw RuntimeException("You must call injectInto() before onStart")
+    }
+  }
+
+  @CallSuper
+  override fun onStart() {
+    super.onStart()
+    validateChildLifecycle()
+    clearDisplay()
+  }
+
+  @CallSuper
+  override fun onDestroyView() {
+    super.onDestroyView()
+    presenceCheckDisposable.tryDispose()
+    pinCheckDisposable.tryDispose()
+    submitDisposable.tryDispose()
+  }
 
   protected abstract fun onMasterPinMissing()
 
   protected abstract fun onMasterPinPresent()
 
+  protected abstract fun onCheckError()
+
   protected abstract fun clearDisplay()
 
-  override fun onStart() {
-    super.onStart()
-    clearDisplay()
-  }
+  protected abstract fun onSubmitError(error: Throwable)
+
+  protected abstract fun onInvalidPin()
+
+  abstract fun onSubmitPressed()
 }

@@ -7,5 +7,7 @@ interface PinComponent {
 
   fun inject(dialog: PinDialog)
 
-  fun inject(fragment: PinBaseFragment)
+  fun inject(fragment: PinPatternFragment)
+
+  fun inject(fragment: PinTextFragment)
 }
