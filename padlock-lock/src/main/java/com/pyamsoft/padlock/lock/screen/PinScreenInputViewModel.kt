@@ -16,59 +16,38 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-import androidx.lifecycle.LifecycleOwner
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
-import com.pyamsoft.padlock.model.LockScreenType
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
-import com.pyamsoft.pydroid.core.bus.RxBus
-import com.pyamsoft.pydroid.core.singleDisposable
-import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
 class PinScreenInputViewModel @Inject internal constructor(
-  owner: LifecycleOwner,
   private val interactor: LockScreenInteractor
-) : BaseViewModel(owner) {
+) {
 
-  private val lockScreenTypeBus = RxBus.create<LockScreenType>()
-  private var lockScreenTypeDisposable by singleDisposable()
-
-  override fun onCleared() {
-    super.onCleared()
-    lockScreenTypeDisposable.tryDispose()
-  }
-
-  fun onLockScreenTypePattern(func: () -> Unit) {
-    dispose {
-      lockScreenTypeBus.listen()
-          .filter { it == TYPE_PATTERN }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func() }
-    }
-  }
-
-  fun onLockScreenTypeText(func: () -> Unit) {
-    dispose {
-      lockScreenTypeBus.listen()
-          .filter { it == TYPE_TEXT }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func() }
-    }
-  }
-
-  fun resolveLockScreenType() {
-    lockScreenTypeDisposable = interactor.getLockScreenType()
+  @CheckResult
+  fun resolveLockScreenType(
+    onTypeText: () -> Unit,
+    onTypePattern: () -> Unit,
+    onError: (error: Throwable) -> Unit
+  ): Disposable {
+    return interactor.getLockScreenType()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({ lockScreenTypeBus.publish(it) }, {
+        .subscribe({
+          when (it) {
+            TYPE_TEXT -> onTypeText()
+            TYPE_PATTERN -> onTypePattern()
+            else -> throw IllegalArgumentException("Invalid lock screen type: $it")
+          }
+        }, {
           Timber.e(it, "Error resolving lock screen type")
+          onError(it)
         })
   }
 

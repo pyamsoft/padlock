@@ -16,14 +16,12 @@
 
 package com.pyamsoft.padlock.service
 
-import androidx.annotation.CheckResult
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 
 @Module
-class PauseModule(private val activity: PauseConfirmActivity) {
+abstract class PauseModule {
 
-  @Provides
-  @CheckResult
-  fun provideActivity(): PauseConfirmActivity = activity
+  @Binds
+  internal abstract fun bindPauseView(impl: PauseViewImpl): PauseView
 }

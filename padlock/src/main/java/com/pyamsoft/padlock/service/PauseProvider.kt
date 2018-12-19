@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.pyamsoft.padlock.lock
+package com.pyamsoft.padlock.service
 
-import dagger.Subcomponent
+import androidx.annotation.CheckResult
+import dagger.Module
+import dagger.Provides
 
-@Subcomponent(modules = [LockEntryModule::class])
-interface LockScreenComponent {
+@Module
+class PauseProvider(private val activity: PauseConfirmActivity) {
 
-  fun inject(activity: LockScreenActivity)
-
-  fun inject(fragment: LockScreenPatternFragment)
-
-  fun inject(fragment: LockScreenTextFragment)
+  @Provides
+  @CheckResult
+  fun provideActivity(): PauseConfirmActivity = activity
 }

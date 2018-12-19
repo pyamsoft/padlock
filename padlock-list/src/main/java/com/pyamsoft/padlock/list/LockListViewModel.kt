@@ -17,7 +17,6 @@
 package com.pyamsoft.padlock.list
 
 import androidx.annotation.CheckResult
-import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.api.LockListInteractor
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState
@@ -32,23 +31,17 @@ import com.pyamsoft.padlock.model.list.LockListUpdatePayload
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.pydroid.core.bus.Listener
-import com.pyamsoft.pydroid.core.bus.RxBus
-import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
-import com.pyamsoft.pydroid.core.viewmodel.DataBus
-import com.pyamsoft.pydroid.core.viewmodel.DataWrapper
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.Consumer
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
 @JvmSuppressWildcards
 class LockListViewModel @Inject internal constructor(
-  owner: LifecycleOwner,
   private val enforcer: Enforcer,
   private val lockListInteractor: LockListInteractor,
   private val serviceInteractor: LockServiceInteractor,
@@ -57,91 +50,74 @@ class LockListViewModel @Inject internal constructor(
   private val clearPinBus: Listener<ClearPinEvent>,
   private val createPinBus: Listener<CreatePinEvent>,
   private val listDiffProvider: ListDiffProvider<AppEntry>
-) : BaseViewModel(owner) {
+) {
 
-  private val populateListBus = DataBus<List<AppEntry>>()
-  private val databaseChangeBus = DataBus<LockListUpdatePayload>()
-  private val fabStateBus = RxBus.create<Pair<ServiceState, Boolean>>()
-
-  private var fabDisposable by singleDisposable()
-  private var populateListDisposable by singleDisposable()
-
-  override fun onCleared() {
-    super.onCleared()
-    fabDisposable.tryDispose()
-    populateListDisposable.tryDispose()
+  @CheckResult
+  fun onDatabaseChangeEvent(
+    onChange: (payload: LockListUpdatePayload) -> Unit,
+    onError: (error: Throwable) -> Unit
+  ): Disposable {
+    return lockListInteractor.subscribeForUpdates(listDiffProvider)
+        .unsubscribeOn(Schedulers.io())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe({ onChange(it) }, {
+          Timber.e(it, "Error while subscribed to database changes")
+          onError(it)
+        })
   }
 
-  fun onDatabaseChangeEvent(func: (DataWrapper<LockListUpdatePayload>) -> Unit) {
-    dispose {
-      lockListInteractor.subscribeForUpdates(listDiffProvider)
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
-          .doOnSubscribe { databaseChangeBus.publishLoading(false) }
-          .doAfterTerminate { databaseChangeBus.publishComplete() }
-          .subscribe({ databaseChangeBus.publishSuccess(it) }, {
-            Timber.e(it, "Error while subscribed to database changes")
-            databaseChangeBus.publishError(it)
-          })
+  @CheckResult
+  fun onLockEvent(
+    onWhitelist: (event: LockWhitelistedEvent) -> Unit,
+    onError: (error: Throwable) -> Unit
+  ): Disposable {
+    val whitelistDisposable = lockWhitelistedBus.listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { onWhitelist(it) }
 
-    }
+    val errorDisposable = lockListBus.listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .flatMapSingle { modifyDatabaseEntry(it.isChecked, it.packageName, it.code, it.isSystem) }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .doOnError {
+          Timber.e(it, "Error occurred modifying database entry")
+          onError(it)
+        }
+        .onErrorReturnItem(Unit)
+        .subscribe()
 
-    dispose {
-      databaseChangeBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
-  }
+    return object : Disposable {
 
-  fun onPopulateListEvent(func: (DataWrapper<List<AppEntry>>) -> Unit) {
-    dispose {
-      populateListBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
+      override fun isDisposed(): Boolean {
+        return whitelistDisposable.isDisposed && errorDisposable.isDisposed
+      }
 
-    dispose {
-      lockWhitelistedBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { populateList(true) }
-    }
-  }
+      override fun dispose() {
+        whitelistDisposable.tryDispose()
+        errorDisposable.tryDispose()
+      }
 
-  fun onModifyError(func: (Throwable) -> Unit) {
-    dispose {
-      lockListBus.listen()
-          .observeOn(Schedulers.io())
-          .flatMapSingle { modifyDatabaseEntry(it.isChecked, it.packageName, it.code, it.isSystem) }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .doOnError {
-            Timber.e(it, "Error occurred modifying database entry")
-            func(it)
-          }
-          .onErrorReturnItem(Unit)
-          .subscribe()
     }
   }
 
-  fun onClearPinEvent(func: (ClearPinEvent) -> Unit) {
-    dispose {
-      clearPinBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
+  @CheckResult
+  fun onClearPinEvent(onClear: (event: ClearPinEvent) -> Unit): Disposable {
+    return clearPinBus.listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(onClear)
   }
 
-  fun onCreatePinEvent(func: (CreatePinEvent) -> Unit) {
-    dispose {
-      createPinBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
+  @CheckResult
+  fun onCreatePinEvent(onCreate: (event: CreatePinEvent) -> Unit): Disposable {
+    return createPinBus.listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(onCreate)
   }
 
   @CheckResult
@@ -172,51 +148,50 @@ class LockListViewModel @Inject internal constructor(
     }
   }
 
-  fun onFabStateChange(func: (ServiceState, Boolean) -> Unit) {
-    dispose {
-      serviceInteractor.observeServiceState()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func(it, false) }
-    }
-
-    dispose {
-      fabStateBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func(it.first, it.second) }
-    }
-  }
-
-  fun checkFabState(fromClick: Boolean) {
-    fabDisposable = serviceInteractor.isServiceEnabled()
+  @CheckResult
+  fun onFabStateChange(onChange: (state: ServiceState) -> Unit): Disposable {
+    return serviceInteractor.observeServiceState()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(Consumer { fabStateBus.publish(it to fromClick) })
+        .subscribe(onChange)
   }
 
-  fun onSystemVisibilityChanged(func: (Boolean) -> Unit) {
-    dispose {
-      lockListInteractor.watchSystemVisible()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
+  @CheckResult
+  fun checkFabState(onChecked: (state: ServiceState) -> Unit): Disposable {
+    return serviceInteractor.isServiceEnabled()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(onChecked)
+  }
+
+  @CheckResult
+  fun onSystemVisibilityChanged(onChange: (visible: Boolean) -> Unit): Disposable {
+    return lockListInteractor.watchSystemVisible()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(onChange)
   }
 
   fun setSystemVisibility(visible: Boolean) {
     lockListInteractor.setSystemVisible(visible)
   }
 
-  fun populateList(force: Boolean) {
-    populateListDisposable = lockListInteractor.fetchAppEntryList(force)
+  @CheckResult
+  fun populateList(
+    force: Boolean,
+    onPopulateBegin: (forced: Boolean) -> Unit,
+    onPopulateSuccess: (appList: List<AppEntry>) -> Unit,
+    onPopulateError: (error: Throwable) -> Unit,
+    onPopulateComplete: () -> Unit
+  ): Disposable {
+    return lockListInteractor.fetchAppEntryList(force)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .doAfterTerminate { populateListBus.publishComplete() }
-        .doOnSubscribe { populateListBus.publishLoading(force) }
-        .subscribe({ populateListBus.publishSuccess(it) }, {
+        .doAfterTerminate { onPopulateComplete() }
+        .doOnSubscribe { onPopulateBegin(force) }
+        .subscribe({ onPopulateSuccess(it) }, {
           Timber.e(it, "LockListPresenter populateList error")
-          populateListBus.publishError(it)
+          onPopulateError(it)
         })
   }
 

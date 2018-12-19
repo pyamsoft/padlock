@@ -72,6 +72,11 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
     binding.patternLock.normalStateColor = ContextCompat.getColor(requireContext(), R.color.white)
   }
 
+  override fun onStart() {
+    super.onStart()
+    binding.patternLock.clearPattern()
+  }
+
   override fun onDestroyView() {
     super.onDestroyView()
     if (listener != null) {
@@ -92,9 +97,8 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
     // No hints for pattern fragment
   }
 
-  override fun onStart() {
-    super.onStart()
-    binding.patternLock.clearPattern()
+  override fun injectInto(injector: LockScreenComponent) {
+    injector.inject(this)
   }
 
   companion object {

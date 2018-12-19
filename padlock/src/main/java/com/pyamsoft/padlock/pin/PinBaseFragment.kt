@@ -17,7 +17,9 @@
 package com.pyamsoft.padlock.pin
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.fragment.app.FragmentManager
 import com.pyamsoft.padlock.Injector
@@ -35,7 +37,6 @@ abstract class PinBaseFragment : ToolbarFragment() {
   @field:Inject internal lateinit var viewModel: PinViewModel
 
   private var masterPinCheckedBeforeStart = false
-  private var injected = false
 
   private var presenceCheckDisposable by singleDisposable()
   private var pinCheckDisposable by singleDisposable()
@@ -44,6 +45,19 @@ abstract class PinBaseFragment : ToolbarFragment() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     checkOnly = requireArguments().getBoolean(PinDialog.CHECK_ONLY, false)
+  }
+
+  @CallSuper
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View? {
+    val injector = Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusPinComponent(PinModule(viewLifecycleOwner))
+    injectInto(injector)
+
+    return super.onCreateView(inflater, container, savedInstanceState)
   }
 
   @CallSuper
@@ -63,13 +77,6 @@ abstract class PinBaseFragment : ToolbarFragment() {
         onInvalidPin()
       }
     }
-  }
-
-  protected fun <T : PinBaseFragment> injectInto(target: T) {
-    injected = true
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusPinComponent(PinModule(viewLifecycleOwner))
-        .inject(target)
   }
 
   protected fun checkMasterPin() {
@@ -115,10 +122,6 @@ abstract class PinBaseFragment : ToolbarFragment() {
     if (!masterPinCheckedBeforeStart) {
       throw RuntimeException("You must call checkMasterPin() before onStart")
     }
-
-    if (!injected) {
-      throw RuntimeException("You must call injectInto() before onStart")
-    }
   }
 
   @CallSuper
@@ -147,6 +150,8 @@ abstract class PinBaseFragment : ToolbarFragment() {
   protected abstract fun onSubmitError(error: Throwable)
 
   protected abstract fun onInvalidPin()
+
+  protected abstract fun injectInto(injector: PinComponent)
 
   abstract fun onSubmitPressed()
 }

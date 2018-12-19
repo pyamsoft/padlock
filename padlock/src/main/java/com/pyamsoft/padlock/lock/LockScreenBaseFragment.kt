@@ -24,17 +24,13 @@ import androidx.annotation.CallSuper
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.padlock.list.ErrorDialog
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_ACTIVITY_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_IS_SYSTEM
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_PACKAGE_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_REAL_NAME
-import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.LOCKED
-import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.POSTED
-import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.SUBMIT_FAILURE
-import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.SUBMIT_SUCCESS
-import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
@@ -49,14 +45,14 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
   @field:Inject
   internal lateinit var viewModel: LockViewModel
 
-  @field:Inject
-  internal lateinit var imageLoader: ImageLoader
-
   private lateinit var lockedActivityName: String
   private lateinit var lockedPackageName: String
   private lateinit var lockedRealName: String
   private var lockedCode: String? = null
   private var isLockedSystem: Boolean = false
+
+  private var submitDisposable by singleDisposable()
+  private var hintDisposable by singleDisposable()
 
   private fun showSnackbarWithText(text: String) {
     val activity = activity
@@ -101,57 +97,61 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+    val injector = Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusLockScreenComponent(
             LockEntryModule(
                 viewLifecycleOwner, lockedPackageName, lockedActivityName, lockedRealName
             )
         )
-        .inject(this)
+    injectInto(injector)
 
     // Base provides no view
     return null
   }
 
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
-    viewModel.onHintDisplay { onDisplayHint(it) }
-    viewModel.onLockStageBusEvent { wrapper ->
-      wrapper.onError {
-        clearDisplay()
-        ErrorDialog().show(requireActivity(), "lock_screen_text_error")
-      }
-
-      wrapper.onSuccess {
-        clearDisplay()
-        when (it) {
-          SUBMIT_FAILURE -> {
-            Timber.d("Submit failure")
-            showSnackbarWithText("Error: Invalid PIN")
-          }
-          SUBMIT_SUCCESS -> {
-            Timber.d("Submit success")
-          }
-          LOCKED -> {
-            Timber.d("Locked out")
-            showSnackbarWithText("This entry is temporarily locked")
-          }
-          POSTED -> {
-            Timber.d("Unlock posted")
-            requireActivity().finish()
-          }
-        }
-      }
-    }
-
-  }
-
   override fun onResume() {
     super.onResume()
     requireToolbarActivity().withToolbar { it.setUpEnabled(false) }
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    submitDisposable.tryDispose()
+    hintDisposable.tryDispose()
+  }
+
+  protected fun submitPin(currentAttempt: String) {
+    submitDisposable =
+        viewModel.submit(lockedCode, currentAttempt, isLockedSystem, isExcluded, selectedIgnoreTime,
+            onSubmitSuccess = {
+              Timber.d("PIN submit success")
+              clearDisplay()
+            },
+            onSubmitFailure = {
+              Timber.w("PIN submit failure")
+              clearDisplay()
+
+              hintDisposable = viewModel.displayLockedHint { onDisplayHint(it) }
+              showSnackbarWithText("Error: Invalid PIN")
+            },
+            onSubmitError = {
+              clearDisplay()
+              UnrecoverableErrorDialog.newInstance(it.localizedMessage)
+                  .show(requireActivity(), "lock_screen_text_error")
+            },
+            onSubmitResultPostUnlock = {
+              Timber.d("Unlock posted")
+              clearDisplay()
+
+              requireActivity().finish()
+            },
+            onSubmitResultAttemptLock = {
+              Timber.w("Locked out after bad attempts")
+              clearDisplay()
+
+              showSnackbarWithText("This entry is temporarily locked")
+            }
+        )
   }
 
   internal abstract fun onRestoreInstanceState(savedInstanceState: Bundle)
@@ -160,9 +160,7 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
 
   protected abstract fun onDisplayHint(hint: String)
 
-  protected fun submitPin(currentAttempt: String) {
-    viewModel.submit(lockedCode, currentAttempt, isLockedSystem, isExcluded, selectedIgnoreTime)
-  }
+  protected abstract fun injectInto(injector: LockScreenComponent)
 
   companion object {
 

@@ -22,17 +22,23 @@ import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.model.list.ListDiffProvider
+import com.pyamsoft.pydroid.ui.app.activity.ToolbarActivity
 import dagger.Module
 import dagger.Provides
 
 @Module
 class PurgeProvider(
+  private val toolbarActivity: ToolbarActivity,
   private val owner: LifecycleOwner,
   private val inflater: LayoutInflater,
   private val container: ViewGroup?,
   private val savedInstanceState: Bundle?,
   private val diffProvider: ListDiffProvider<String>
 ) {
+
+  @Provides
+  @CheckResult
+  fun provideToolbarActivity(): ToolbarActivity = toolbarActivity
 
   @Provides
   @CheckResult

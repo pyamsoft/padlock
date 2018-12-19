@@ -17,73 +17,32 @@
 package com.pyamsoft.padlock.lock
 
 import androidx.annotation.CheckResult
-import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.api.lockscreen.LockEntryInteractor
-import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.LOCKED
-import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.POSTED
-import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.SUBMIT_FAILURE
-import com.pyamsoft.padlock.lock.LockViewModel.LockEntryStage.SUBMIT_SUCCESS
-import com.pyamsoft.pydroid.core.bus.RxBus
-import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.threads.Enforcer
-import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
-import com.pyamsoft.pydroid.core.viewmodel.DataBus
-import com.pyamsoft.pydroid.core.viewmodel.DataWrapper
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.Consumer
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
 class LockViewModel @Inject internal constructor(
-  owner: LifecycleOwner,
   private val enforcer: Enforcer,
   private val interactor: LockEntryInteractor,
   @param:Named("package_name") private val packageName: String,
   @param:Named("activity_name") private val activityName: String,
   @param:Named("real_name") private val realName: String
-) : BaseViewModel(owner) {
+) {
 
-  private val lockStageBus = DataBus<LockEntryStage>()
-  private val hintBus = RxBus.create<String>()
-
-  private var stageDisposable by singleDisposable()
-  private var hintDisposable by singleDisposable()
-
-  override fun onCleared() {
-    super.onCleared()
-    hintDisposable.tryDispose()
-    stageDisposable.tryDispose()
-  }
-
-  fun onHintDisplay(func: (String) -> Unit) {
-    dispose {
-      hintBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
-  }
-
-  private fun displayLockedHint() {
-    hintDisposable = interactor.getHint()
+  @CheckResult
+  fun displayLockedHint(onDisplayHint: (hint: String) -> Unit): Disposable {
+    return interactor.getHint()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(Consumer { hintBus.publish(it) })
-  }
-
-  fun onLockStageBusEvent(func: (DataWrapper<LockEntryStage>) -> Unit) {
-    dispose {
-      lockStageBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
+        .subscribe(onDisplayHint)
   }
 
   @CheckResult
@@ -91,7 +50,9 @@ class LockViewModel @Inject internal constructor(
     packageName: String,
     activityName: String,
     lockCode: String?,
-    currentAttempt: String
+    currentAttempt: String,
+    onSubmitSuccess: () -> Unit,
+    onSubmitFailure: () -> Unit
   ): Single<Boolean> {
     return Single.defer {
       enforcer.assertNotOnMainThread()
@@ -101,10 +62,9 @@ class LockViewModel @Inject internal constructor(
         .observeOn(AndroidSchedulers.mainThread())
         .doOnSuccess {
           if (it) {
-            lockStageBus.publishSuccess(SUBMIT_SUCCESS)
+            onSubmitSuccess()
           } else {
-            displayLockedHint()
-            lockStageBus.publishSuccess(SUBMIT_FAILURE)
+            onSubmitFailure()
           }
         }
   }
@@ -114,7 +74,8 @@ class LockViewModel @Inject internal constructor(
     lockCode: String?,
     isSystem: Boolean,
     shouldExclude: Boolean,
-    ignoreTime: Long
+    ignoreTime: Long,
+    onSubmitResultPostUnlock: () -> Unit
   ): Single<Unit> {
     return Completable.defer {
       enforcer.assertNotOnMainThread()
@@ -125,19 +86,19 @@ class LockViewModel @Inject internal constructor(
     }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .doOnComplete { lockStageBus.publishSuccess(POSTED) }
+        .doOnComplete { onSubmitResultPostUnlock() }
         .andThen(Single.just(Unit))
   }
 
   @CheckResult
-  private fun tryLockEntry(): Single<Unit> {
+  private fun tryLockEntry(onSubmitResultAttemptLock: () -> Unit): Single<Unit> {
     return Maybe.defer {
       enforcer.assertNotOnMainThread()
       return@defer interactor.lockEntryOnFail(packageName, activityName)
     }
         .doOnSuccess {
           if (System.currentTimeMillis() < it) {
-            lockStageBus.publishSuccess(LOCKED)
+            onSubmitResultAttemptLock()
           }
         }
         .subscribeOn(Schedulers.io())
@@ -146,37 +107,64 @@ class LockViewModel @Inject internal constructor(
         .toSingle(Unit)
   }
 
+  @CheckResult
+  private fun processSubmit(
+    lockCode: String?,
+    isSystem: Boolean,
+    shouldExclude: Boolean,
+    ignoreTime: Long,
+    success: Boolean,
+    onSubmitResultPostUnlock: () -> Unit,
+    onSubmitResultAttemptLock: () -> Unit
+  ): Single<Boolean> {
+    enforcer.assertNotOnMainThread()
+    return Single.defer {
+      if (success) {
+        return@defer postUnlock(
+            lockCode, isSystem, shouldExclude,
+            ignoreTime, onSubmitResultPostUnlock
+        )
+      } else {
+        return@defer tryLockEntry(onSubmitResultAttemptLock)
+      }
+    }
+        .map { success }
+  }
+
+  @CheckResult
   fun submit(
     lockCode: String?,
     currentAttempt: String,
     isSystem: Boolean,
     shouldExclude: Boolean,
-    ignoreTime: Long
-  ) {
-    stageDisposable = submitPin(packageName, activityName, lockCode, currentAttempt)
+    ignoreTime: Long,
+    onSubmitSuccess: () -> Unit,
+    onSubmitFailure: () -> Unit,
+    onSubmitError: (error: Throwable) -> Unit,
+    onSubmitResultPostUnlock: () -> Unit,
+    onSubmitResultAttemptLock: () -> Unit
+  ): Disposable {
+    return submitPin(
+        packageName,
+        activityName,
+        lockCode,
+        currentAttempt,
+        onSubmitSuccess,
+        onSubmitFailure
+    )
+        .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .flatMap {
-          enforcer.assertNotOnMainThread()
-          if (it) {
-            return@flatMap postUnlock(lockCode, isSystem, shouldExclude, ignoreTime)
-          } else {
-            return@flatMap tryLockEntry()
-          }
+          processSubmit(
+              lockCode, isSystem, shouldExclude, ignoreTime, it,
+              onSubmitResultPostUnlock, onSubmitResultAttemptLock
+          )
         }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .doOnSubscribe { lockStageBus.publishLoading(false) }
-        .doAfterTerminate { lockStageBus.publishComplete() }
         .subscribe({}, {
           Timber.e(it, "Error occurred during submit chain")
-          lockStageBus.publishError(it)
+          onSubmitError(it)
         })
-  }
-
-  enum class LockEntryStage {
-    SUBMIT_SUCCESS,
-    SUBMIT_FAILURE,
-    LOCKED,
-    POSTED
   }
 }

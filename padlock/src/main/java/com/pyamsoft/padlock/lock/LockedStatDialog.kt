@@ -57,7 +57,7 @@ class LockedStatDialog : ToolbarDialog() {
 
     return AlertDialog.Builder(requireActivity())
         .setView(binding.root)
-        .setPositiveButton("Okay") { dialogInterface, _ -> dialogInterface.dismiss() }
+        .setPositiveButton("Okay") { _, _ -> dismiss() }
         .setCancelable(true)
         .create()
   }

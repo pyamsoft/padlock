@@ -34,6 +34,8 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.ImageTarget
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
@@ -57,6 +59,8 @@ class PinDialog : ToolbarDialog() {
 
   private var checkOnly: Boolean = false
   private var finishOnDismiss: Boolean = false
+
+  private var lockScreenTypeDisposable by singleDisposable()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -91,9 +95,15 @@ class PinDialog : ToolbarDialog() {
 
     setupToolbar()
 
-    viewModel.onLockScreenTypePattern { onTypePattern() }
-    viewModel.onLockScreenTypeText { onTypeText() }
-    viewModel.resolveLockScreenType()
+    lockScreenTypeDisposable = viewModel.resolveLockScreenType(
+        onTypePattern = { onTypePattern() },
+        onTypeText = { onTypeText() },
+        onError = {
+          Timber.e(it, "Failed to resolve lock screen type")
+          // TODO
+          dismiss()
+        }
+    )
 
     return binding.root
   }
@@ -232,6 +242,7 @@ class PinDialog : ToolbarDialog() {
   override fun onDestroyView() {
     super.onDestroyView()
     Timber.d("Destroy AlertDialog")
+    lockScreenTypeDisposable.tryDispose()
     binding.unbind()
   }
 

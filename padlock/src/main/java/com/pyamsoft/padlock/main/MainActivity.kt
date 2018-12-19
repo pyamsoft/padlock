@@ -36,7 +36,6 @@ import com.pyamsoft.pydroid.ui.rating.buildChangeLog
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.commit
-import com.pyamsoft.pydroid.ui.widget.resize.FluidContentResizer
 import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import javax.inject.Inject
@@ -76,7 +75,6 @@ class MainActivity : RatingActivity() {
     }
 
     super.onCreate(savedInstanceState)
-    FluidContentResizer.listen(this)
     binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
     setupToolbar()

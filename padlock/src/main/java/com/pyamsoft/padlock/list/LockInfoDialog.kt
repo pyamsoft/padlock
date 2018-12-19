@@ -38,7 +38,8 @@ import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
-import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.ui.theme.Theming
@@ -57,7 +58,6 @@ import javax.inject.Inject
 class LockInfoDialog : ToolbarDialog() {
 
   @field:Inject internal lateinit var appIconLoader: AppIconLoader
-  @field:Inject internal lateinit var imageLoader: ImageLoader
   @field:Inject internal lateinit var viewModel: LockInfoViewModel
   @field:Inject internal lateinit var theming: Theming
 
@@ -71,6 +71,10 @@ class LockInfoDialog : ToolbarDialog() {
   private var appIsSystem: Boolean = false
   private var lastPosition: Int = 0
   private var appIcon: Int = 0
+
+  private var databaseChangeDisposable by singleDisposable()
+  private var lockEventDisposable by singleDisposable()
+  private var populateDisposable by singleDisposable()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -148,18 +152,24 @@ class LockInfoDialog : ToolbarDialog() {
     filterListDelegate.onViewCreated(adapter)
     lastPosition = ListStateUtil.restoreState(listStateTag, savedInstanceState)
 
-    viewModel.onDatabaseChangeEvent { wrapper ->
-      wrapper.onSuccess { onDatabaseChangeReceived(it.index, it.entry) }
-      wrapper.onError { onDatabaseChangeError() }
-    }
+    databaseChangeDisposable = viewModel.onDatabaseChangeEvent(
+        onChange = { onDatabaseChangeReceived(it.index, it.entry) },
+        onError = { onDatabaseChangeError() }
+    )
 
-    viewModel.onModifyError { onModifyEntryError() }
-    viewModel.onPopulateListEvent { wrapper ->
-      wrapper.onLoading { onListPopulateBegin() }
-      wrapper.onSuccess { onListLoaded(it) }
-      wrapper.onError { onListPopulateError() }
-      wrapper.onComplete { onListPopulated() }
-    }
+    lockEventDisposable = viewModel.onLockEvent(
+        onWhitelist = { populateList(true) },
+        onError = { onModifyEntryError() }
+    )
+  }
+
+  private fun populateList(forced: Boolean) {
+    populateDisposable = viewModel.populateList(forced,
+        onPopulateBegin = { onListPopulateBegin() },
+        onPopulateSuccess = { onListLoaded(it) },
+        onPopulateError = { onListPopulateError() },
+        onPopulateComplete = { onListPopulated() }
+    )
   }
 
   private fun setupToolbar() {
@@ -207,7 +217,7 @@ class LockInfoDialog : ToolbarDialog() {
       lockInfoSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.blue700)
       lockInfoSwipeRefresh.setOnRefreshListener {
         refreshLatch.forceRefresh()
-        viewModel.populateList(true)
+        populateList(true)
       }
     }
   }
@@ -246,6 +256,10 @@ class LockInfoDialog : ToolbarDialog() {
     }
 
     adapter.clear()
+
+    databaseChangeDisposable.tryDispose()
+    lockEventDisposable.tryDispose()
+    populateDisposable.tryDispose()
   }
 
   override fun onStart() {
@@ -253,7 +267,7 @@ class LockInfoDialog : ToolbarDialog() {
     appIconLoader.loadAppIcon(appPackageName, appIcon)
         .into(binding.lockInfoIcon)
         .bind(viewLifecycleOwner)
-    viewModel.populateList(false)
+    populateList(false)
   }
 
   override fun onPause() {
@@ -301,13 +315,13 @@ class LockInfoDialog : ToolbarDialog() {
 
   private fun onListPopulateError() {
     Snackbreak.long(binding.root, "Failed to load list for $appName")
-        .setAction("Retry") { viewModel.populateList(true) }
+        .setAction("Retry") { populateList(true) }
         .show()
   }
 
   private fun onModifyEntryError() {
     Snackbreak.long(binding.root, "Failed to modify list for $appName")
-        .setAction("Retry") { viewModel.populateList(true) }
+        .setAction("Retry") { populateList(true) }
         .show()
   }
 

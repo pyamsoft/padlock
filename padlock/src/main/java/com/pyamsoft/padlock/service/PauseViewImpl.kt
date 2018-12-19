@@ -4,6 +4,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.ActivityPauseCheckBinding
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import javax.inject.Inject

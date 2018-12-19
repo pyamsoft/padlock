@@ -28,12 +28,17 @@ import androidx.annotation.CheckResult
 import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
+import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
+import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
 class LockScreenTextFragment : LockScreenBaseFragment() {
+
+  @field:Inject
+  internal lateinit var imageLoader: ImageLoader
 
   private val imm by lazy(NONE) {
     requireNotNull(requireActivity().application.getSystemService<InputMethodManager>())
@@ -151,6 +156,10 @@ class LockScreenTextFragment : LockScreenBaseFragment() {
   override fun clearDisplay() {
     editText?.setText("")
     binding.lockDisplayHint.visibility = View.VISIBLE
+  }
+
+  override fun injectInto(injector: LockScreenComponent) {
+    injector.inject(this)
   }
 
   companion object {

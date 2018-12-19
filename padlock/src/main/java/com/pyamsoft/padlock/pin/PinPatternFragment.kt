@@ -28,6 +28,7 @@ import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
+import com.pyamsoft.pydroid.ui.app.fragment.requireView
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
@@ -64,8 +65,6 @@ class PinPatternFragment : PinBaseFragment() {
     savedInstanceState: Bundle?
   ): View? {
     super.onCreateView(inflater, container, savedInstanceState)
-    injectInto(this)
-
     binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -206,6 +205,25 @@ class PinPatternFragment : PinBaseFragment() {
   override fun onSubmitPressed() {
     Timber.d("Next button pressed, store pattern for re-entry")
     nextButtonOnClickRunnable()
+  }
+
+  override fun onCheckError() {
+    Snackbreak.short(requireView(), "Error checking PIN, please try again")
+        .show()
+  }
+
+  override fun onInvalidPin() {
+    Snackbreak.short(requireView(), "Error incorrect PIN")
+        .show()
+  }
+
+  override fun onSubmitError(error: Throwable) {
+    Snackbreak.short(requireView(), "Error submitting PIN, please try again")
+        .show()
+  }
+
+  override fun injectInto(injector: PinComponent) {
+    injector.inject(this)
   }
 
   private fun submitPin(repeatText: String) {

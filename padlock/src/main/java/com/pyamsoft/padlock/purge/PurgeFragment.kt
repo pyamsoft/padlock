@@ -51,6 +51,7 @@ class PurgeFragment : ToolbarFragment() {
     val self = this
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusPurgeComponent(PurgeProvider(
+            requireToolbarActivity(),
             viewLifecycleOwner,
             inflater,
             container,

@@ -27,6 +27,8 @@ import android.widget.EditText
 import androidx.annotation.CheckResult
 import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
+import com.pyamsoft.pydroid.ui.app.fragment.requireView
+import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -47,8 +49,6 @@ class PinTextFragment : PinBaseFragment() {
     savedInstanceState: Bundle?
   ): View? {
     super.onCreateView(inflater, container, savedInstanceState)
-    injectInto(this)
-
     binding = FragmentPinEntryTextBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -143,6 +143,25 @@ class PinTextFragment : PinBaseFragment() {
   private fun setupGoArrow() {
     // Force keyboard focus
     pinEntryText?.requestFocus()
+  }
+
+  override fun onCheckError() {
+    Snackbreak.short(requireView(), "Error checking PIN, please try again")
+        .show()
+  }
+
+  override fun onInvalidPin() {
+    Snackbreak.short(requireView(), "Error incorrect PIN")
+        .show()
+  }
+
+  override fun onSubmitError(error: Throwable) {
+    Snackbreak.short(requireView(), "Error submitting PIN, please try again")
+        .show()
+  }
+
+  override fun injectInto(injector: PinComponent) {
+    injector.inject(this)
   }
 
   private fun onRestoreInstanceState(savedInstanceState: Bundle) {

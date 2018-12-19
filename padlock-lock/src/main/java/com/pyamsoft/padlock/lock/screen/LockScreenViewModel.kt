@@ -16,24 +16,20 @@
 
 package com.pyamsoft.padlock.lock.screen
 
-import androidx.lifecycle.LifecycleOwner
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
-import com.pyamsoft.pydroid.core.bus.RxBus
-import com.pyamsoft.pydroid.core.singleDisposable
-import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.core.viewmodel.BaseViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
 class LockScreenViewModel @Inject internal constructor(
-  owner: LifecycleOwner,
   private val foregroundEventBus: Publisher<ForegroundEvent>,
   private val bus: EventBus<CloseOldEvent>,
   private val interactor: LockScreenInteractor,
@@ -41,71 +37,14 @@ class LockScreenViewModel @Inject internal constructor(
   @param:Named("activity_name") private val activityName: String,
   @param:Named("real_name") private val realName: String,
   @param:Named("recreate_listener") private val recreateListener: Listener<Unit>
-) : BaseViewModel(owner) {
+) {
 
-  private val alreadyUnlockedBus = RxBus.create<Boolean>()
-  private val displayNameBus = RxBus.create<String>()
-  private val closeOldBus = RxBus.create<CloseOldEvent>()
-  private val ignoreTimeBus = RxBus.create<Long>()
-
-  private var alreadyUnlockedDisposable by singleDisposable()
-  private var displayNameDisposable by singleDisposable()
-  private var closeOldDisposable by singleDisposable()
-  private var ignoreTimeDisposable by singleDisposable()
-
-  override fun onCleared() {
-    super.onCleared()
-    alreadyUnlockedDisposable.tryDispose()
-    displayNameDisposable.tryDispose()
-    closeOldDisposable.tryDispose()
-    ignoreTimeDisposable.tryDispose()
-  }
-
-  fun onAlreadyUnlockedEvent(func: () -> Unit) {
-    dispose {
-      alreadyUnlockedBus.listen()
-          .filter { it }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func() }
-    }
-  }
-
-  fun onRecreateEvent(func: () -> Unit) {
-    dispose {
-      recreateListener.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe { func() }
-    }
-  }
-
-  fun onCloseOldEvent(func: (CloseOldEvent) -> Unit) {
-    dispose {
-      closeOldBus.listen()
-          .filter { it.packageName == packageName && it.activityName == activityName }
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
-  }
-
-  fun onDisplayName(func: (String) -> Unit) {
-    dispose {
-      displayNameBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
-  }
-
-  fun onIgnoreTimesLoaded(func: (Long) -> Unit) {
-    dispose {
-      ignoreTimeBus.listen()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(func)
-    }
+  @CheckResult
+  fun onRecreateEvent(func: () -> Unit): Disposable {
+    return recreateListener.listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { func() }
   }
 
   fun clearMatchingForegroundEvent() {
@@ -113,46 +52,68 @@ class LockScreenViewModel @Inject internal constructor(
     foregroundEventBus.publish(ForegroundEvent(packageName, realName))
   }
 
-  fun checkIfAlreadyUnlocked() {
-    Timber.d("Check if $packageName $activityName already unlocked")
-    alreadyUnlockedDisposable = interactor.isAlreadyUnlocked(packageName, activityName)
+  @CheckResult
+  fun checkIfAlreadyUnlocked(
+    onAlreadyUnlocked: () -> Unit,
+    onUnlockError: (error: Throwable) -> Unit
+  ): Disposable {
+    return interactor.isAlreadyUnlocked(packageName, activityName)
+        .filter { it }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({ alreadyUnlockedBus.publish(it) }, {
+        .doOnSubscribe { Timber.d("Check if $packageName $activityName already unlocked") }
+        .subscribe({ onAlreadyUnlocked() }, {
           Timber.e(it, "Error checking already unlocked state")
+          onUnlockError(it)
         })
   }
 
-  fun loadDisplayNameFromPackage() {
-    displayNameDisposable = interactor.getDisplayName(packageName)
+  @CheckResult
+  fun loadDisplayNameFromPackage(
+    onLoadDisplayName: (name: String) -> Unit,
+    onLoadDisplayError: (error: Throwable) -> Unit
+  ): Disposable {
+    return interactor.getDisplayName(packageName)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({ displayNameBus.publish(it) }, {
+        .subscribe({ onLoadDisplayName(it) }, {
           Timber.e(it, "Error loading display name from package")
-          displayNameBus.publish("")
+          onLoadDisplayError(it)
         })
   }
 
-  fun closeOld() {
+  @CheckResult
+  fun closeOld(
+    onCloseOldEvent: (event: CloseOldEvent) -> Unit,
+    onCloseOldError: (error: Throwable) -> Unit
+  ): Disposable {
     // Send bus event first before we register or we may catch our own event.
     bus.publish(CloseOldEvent(packageName, activityName))
 
-    closeOldDisposable = bus.listen()
+    return bus.listen()
         .filter { it.packageName == packageName && it.activityName == activityName }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe {
-          Timber.w("Received a close old event: %s %s", it.packageName, it.activityName)
-          closeOldBus.publish(it)
-        }
+        .subscribe({
+          Timber.i("Received a close old event: %s %s", it.packageName, it.activityName)
+          onCloseOldEvent(it)
+        }, {
+          Timber.e(it, "Error receiving close old event")
+          onCloseOldError(it)
+        })
   }
 
-  fun createWithDefaultIgnoreTime() {
-    ignoreTimeDisposable = interactor.getDefaultIgnoreTime()
+  @CheckResult
+  fun createWithDefaultIgnoreTime(
+    onIgnoreTimesLoaded: (time: Long) -> Unit,
+    onIgnoreTimeLoadError: (error: Throwable) -> Unit
+  ): Disposable {
+    return interactor.getDefaultIgnoreTime()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({ ignoreTimeBus.publish(it) }, {
-          Timber.e(it, "onError createWithDefaultIgnoreTime")
+        .subscribe({ onIgnoreTimesLoaded(it) }, {
+          Timber.e(it, "Error createWithDefaultIgnoreTime")
+          onIgnoreTimeLoadError(it)
         })
   }
 

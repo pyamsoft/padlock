@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceScreen
+import com.pyamsoft.padlock.R
 import timber.log.Timber
 import javax.inject.Inject
 

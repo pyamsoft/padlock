@@ -29,6 +29,7 @@ import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.DISABLED
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.ENABLED
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PAUSED
@@ -41,6 +42,8 @@ import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.padlock.service.ServiceManager
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
@@ -121,6 +124,15 @@ class LockListFragment : ToolbarFragment() {
     }
   }
 
+  private var clearPinDisposable by singleDisposable()
+  private var createPinDisposable by singleDisposable()
+  private var visibilityDisposable by singleDisposable()
+  private var databaseChangeDisposable by singleDisposable()
+  private var lockEventDisposable by singleDisposable()
+  private var fabStateChangeDisposable by singleDisposable()
+  private var fabStateCheckDisposable by singleDisposable()
+  private var populateDisposable by singleDisposable()
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -151,7 +163,7 @@ class LockListFragment : ToolbarFragment() {
 
     lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
 
-    viewModel.onClearPinEvent {
+    clearPinDisposable = viewModel.onClearPinEvent {
       if (it.success) {
         onMasterPinClearSuccess()
       } else {
@@ -160,7 +172,7 @@ class LockListFragment : ToolbarFragment() {
       serviceManager.startService(false)
     }
 
-    viewModel.onCreatePinEvent {
+    createPinDisposable = viewModel.onCreatePinEvent {
       if (it.success) {
         onMasterPinCreateSuccess()
       } else {
@@ -169,25 +181,22 @@ class LockListFragment : ToolbarFragment() {
       serviceManager.startService(false)
     }
 
-    viewModel.onModifyError { onModifyEntryError() }
-    viewModel.onSystemVisibilityChanged { onSystemVisibilityChanged(it) }
-    viewModel.onDatabaseChangeEvent { wrapper ->
-      wrapper.onSuccess { onDatabaseChangeReceived(it.index, it.entry) }
-      wrapper.onError { onDatabaseChangeError() }
+    visibilityDisposable = viewModel.onSystemVisibilityChanged {
+      onSystemVisibilityChanged(it)
     }
-    viewModel.onFabStateChange { serviceState, fromClick ->
-      when (serviceState) {
-        ENABLED -> onFabIconLocked(fromClick)
-        DISABLED -> onFabIconUnlocked(fromClick)
-        PERMISSION -> onFabIconPermissionDenied(fromClick)
-        PAUSED -> onFabIconPaused(fromClick)
-      }
-    }
-    viewModel.onPopulateListEvent { wrapper ->
-      wrapper.onLoading { onListPopulateBegin() }
-      wrapper.onSuccess { onListLoaded(it) }
-      wrapper.onError { onListPopulateError() }
-      wrapper.onComplete { onListPopulated() }
+
+    lockEventDisposable = viewModel.onLockEvent(
+        onWhitelist = { populateList(true) },
+        onError = { onModifyEntryError() }
+    )
+
+    databaseChangeDisposable = viewModel.onDatabaseChangeEvent(
+        onChange = { onDatabaseChangeReceived(it.index, it.entry) },
+        onError = { onDatabaseChangeError() }
+    )
+
+    fabStateChangeDisposable = viewModel.onFabStateChange {
+      onFabStateChanged(it, false)
     }
 
     val intent = requireActivity().intent
@@ -195,9 +204,30 @@ class LockListFragment : ToolbarFragment() {
       intent.removeExtra(ServiceManager.FORCE_REFRESH_ON_OPEN)
 
       Timber.d("Launched from notification, force list refresh")
-      viewModel.populateList(true)
+      populateList(true)
     }
 
+  }
+
+  private fun onFabStateChanged(
+    state: ServiceState,
+    fromClick: Boolean
+  ) {
+    when (state) {
+      ENABLED -> onFabIconLocked(fromClick)
+      DISABLED -> onFabIconUnlocked(fromClick)
+      PERMISSION -> onFabIconPermissionDenied(fromClick)
+      PAUSED -> onFabIconPaused(fromClick)
+    }
+  }
+
+  private fun populateList(forced: Boolean) {
+    populateDisposable = viewModel.populateList(forced,
+        onPopulateBegin = { onListPopulateBegin() },
+        onPopulateSuccess = { onListLoaded(it) },
+        onPopulateError = { onListPopulateError() },
+        onPopulateComplete = { onListPopulated() }
+    )
   }
 
   private fun setupToolbarMenu() {
@@ -217,7 +247,7 @@ class LockListFragment : ToolbarFragment() {
             if (!binding.applistSwipeRefresh.isRefreshing) {
               Timber.d("List is not refreshing. Allow change of system preference")
               viewModel.setSystemVisibility(!menuItem.isChecked)
-              viewModel.populateList(true)
+              populateList(true)
             }
             return@setOnMenuItemClickListener true
           }
@@ -240,7 +270,7 @@ class LockListFragment : ToolbarFragment() {
 
   override fun onStart() {
     super.onStart()
-    handler.post { viewModel.populateList(false) }
+    handler.post { populateList(false) }
   }
 
   override fun onResume() {
@@ -278,7 +308,7 @@ class LockListFragment : ToolbarFragment() {
       applistSwipeRefresh.setOnRefreshListener {
         Timber.d("onRefresh")
         refreshLatch.forceRefresh()
-        viewModel.populateList(true)
+        populateList(true)
       }
     }
   }
@@ -329,13 +359,26 @@ class LockListFragment : ToolbarFragment() {
       unbind()
     }
     adapter.clear()
+
+    fabStateCheckDisposable.tryDispose()
+    populateDisposable.tryDispose()
+    fabStateChangeDisposable.tryDispose()
+    databaseChangeDisposable.tryDispose()
+    lockEventDisposable.tryDispose()
+    clearPinDisposable.tryDispose()
+    createPinDisposable.tryDispose()
+    visibilityDisposable.tryDispose()
+  }
+
+  private fun checkFabState(fromClick: Boolean) {
+    fabStateCheckDisposable = viewModel.checkFabState {
+      onFabStateChanged(it, fromClick)
+    }
   }
 
   private fun setupFAB() {
     binding.apply {
-      applistFab.setOnDebouncedClickListener {
-        viewModel.checkFabState(true)
-      }
+      applistFab.setOnDebouncedClickListener { checkFabState(true) }
       applistRecyclerview.addOnScrollListener(hideScrollListener)
     }
   }
@@ -371,7 +414,7 @@ class LockListFragment : ToolbarFragment() {
 
   private fun onModifyEntryError() {
     Snackbreak.long(binding.root, "Failed to modify application list")
-        .setAction("Retry") { viewModel.populateList(true) }
+        .setAction("Retry") { populateList(true) }
         .show()
   }
 
@@ -448,7 +491,7 @@ class LockListFragment : ToolbarFragment() {
 
   private fun onListPopulateError() {
     Snackbreak.long(binding.root, "Failed to load application list")
-        .setAction("Retry") { viewModel.populateList(true) }
+        .setAction("Retry") { populateList(true) }
         .show()
   }
 
@@ -467,7 +510,7 @@ class LockListFragment : ToolbarFragment() {
     binding.apply {
       applistRecyclerview.visibility = View.VISIBLE
       applistEmpty.visibility = View.GONE
-      viewModel.checkFabState(false)
+      checkFabState(false)
     }
   }
 

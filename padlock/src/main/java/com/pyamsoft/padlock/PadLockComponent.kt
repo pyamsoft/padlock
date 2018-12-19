@@ -51,6 +51,7 @@ import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.PauseComponent
 import com.pyamsoft.padlock.service.PauseModule
+import com.pyamsoft.padlock.service.PauseProvider
 import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.service.ServiceSingletonProvider
 import com.pyamsoft.padlock.settings.ConfirmationDialog
@@ -108,7 +109,7 @@ interface PadLockComponent {
   fun plusSettingsComponent(module: SettingsProvider): SettingsComponent
 
   @CheckResult
-  fun plusPauseComponent(module: PauseModule): PauseComponent
+  fun plusPauseComponent(module: PauseProvider): PauseComponent
 
   @CheckResult
   fun plusPurgeComponent(module: PurgeProvider): PurgeComponent

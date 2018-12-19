@@ -36,13 +36,13 @@ import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.lock.screen.LockScreenViewModel
 import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.activity.ActivityBase
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.commit
 import com.pyamsoft.pydroid.ui.util.show
-import com.pyamsoft.pydroid.ui.widget.resize.FluidContentResizer
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -50,7 +50,6 @@ class LockScreenActivity : ActivityBase() {
 
   @field:Inject internal lateinit var viewModel: LockScreenViewModel
   @field:Inject internal lateinit var inputViewModel: PinScreenInputViewModel
-  @field:Inject internal lateinit var imageLoader: ImageLoader
   @field:Inject internal lateinit var appIconLoader: AppIconLoader
   @field:Inject internal lateinit var theming: Theming
 
@@ -78,6 +77,13 @@ class LockScreenActivity : ActivityBase() {
   private var menuIgnoreFourtyFive: MenuItem? = null
   private var menuIgnoreSixty: MenuItem? = null
   private var menuExclude: MenuItem? = null
+
+  private var alreadyUnlockedDisposable by singleDisposable()
+  private var lockScreenTypeDisposable by singleDisposable()
+  private var recreateDisposable by singleDisposable()
+  private var displayNameDisposable by singleDisposable()
+  private var ignoreTimeDisposable by singleDisposable()
+  private var closeOldDisposable by singleDisposable()
 
   init {
     home.addCategory(Intent.CATEGORY_HOME)
@@ -132,31 +138,53 @@ class LockScreenActivity : ActivityBase() {
       setTheme(R.style.Theme_PadLock_Light_Lock)
     }
     super.onCreate(savedInstanceState)
-    FluidContentResizer.listen(this)
     binding = DataBindingUtil.setContentView(this, R.layout.activity_lock)
 
     postInjectOnCreate()
 
-    inputViewModel.onLockScreenTypePattern { onTypePattern() }
-    inputViewModel.onLockScreenTypeText { onTypeText() }
 
-    viewModel.onAlreadyUnlockedEvent { onAlreadyUnlocked() }
-    viewModel.onCloseOldEvent { onCloseOldReceived() }
-    viewModel.onDisplayName { onSetDisplayName(it) }
-    viewModel.onIgnoreTimesLoaded { onInitializeWithIgnoreTime(it) }
+    checkIfAlreadyUnlocked()
 
-    viewModel.checkIfAlreadyUnlocked()
-    viewModel.closeOld()
-    viewModel.createWithDefaultIgnoreTime()
-    viewModel.loadDisplayNameFromPackage()
-    viewModel.onRecreateEvent { recreate() }
+    closeOldDisposable = viewModel.closeOld(
+        onCloseOldEvent = { onCloseOldReceived() },
+        onCloseOldError = { lockScreenUnrecoverableError(it) }
+    )
 
-    inputViewModel.resolveLockScreenType()
+    ignoreTimeDisposable = viewModel.createWithDefaultIgnoreTime(
+        onIgnoreTimesLoaded = { onInitializeWithIgnoreTime(it) },
+        onIgnoreTimeLoadError = { lockScreenUnrecoverableError(it) }
+    )
+
+    displayNameDisposable = viewModel.loadDisplayNameFromPackage(
+        onLoadDisplayName = { onSetDisplayName(it) },
+        onLoadDisplayError = { lockScreenUnrecoverableError(it) }
+    )
+
+    recreateDisposable = viewModel.onRecreateEvent { recreate() }
+
+    lockScreenTypeDisposable = inputViewModel.resolveLockScreenType(
+        onTypeText = { onTypeText() },
+        onTypePattern = { onTypePattern() },
+        onError = { lockScreenUnrecoverableError(it) }
+    )
+  }
+
+  private fun lockScreenUnrecoverableError(error: Throwable) {
+    Timber.e(error, "An unrecoverable lock screen error has occurred and the screen must close")
+    UnrecoverableErrorDialog.newInstance(error.localizedMessage)
+        .show(this, "bad_error")
   }
 
   override fun onResume() {
     super.onResume()
-    viewModel.checkIfAlreadyUnlocked()
+    checkIfAlreadyUnlocked()
+  }
+
+  private fun checkIfAlreadyUnlocked() {
+    alreadyUnlockedDisposable = viewModel.checkIfAlreadyUnlocked(
+        onAlreadyUnlocked = { onAlreadyUnlocked() },
+        onUnlockError = { lockScreenUnrecoverableError(it) }
+    )
   }
 
   private fun preInjectOnCreate() {
@@ -202,7 +230,6 @@ class LockScreenActivity : ActivityBase() {
     }
 
     menuExclude.setChecked(excludeEntry)
-    viewModel.createWithDefaultIgnoreTime()
 
     binding.toolbar.setOnMenuItemClickListener {
       val itemId = it.itemId
@@ -313,8 +340,15 @@ class LockScreenActivity : ActivityBase() {
   override fun onDestroy() {
     super.onDestroy()
     overridePendingTransition(0, 0)
+
+    alreadyUnlockedDisposable.tryDispose()
+    lockScreenTypeDisposable.tryDispose()
+    recreateDisposable.tryDispose()
+    displayNameDisposable.tryDispose()
+    ignoreTimeDisposable.tryDispose()
+    closeOldDisposable.tryDispose()
+
     binding.unbind()
-    Timber.d("onDestroy LockScreenActivity for $lockedPackageName $lockedRealName")
   }
 
   override fun finish() {
