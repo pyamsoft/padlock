@@ -16,6 +16,7 @@
 
 package com.pyamsoft.padlock
 
+import android.app.Application
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.base.BaseModule
 import com.pyamsoft.padlock.base.BaseProvider
@@ -62,6 +63,11 @@ import com.pyamsoft.padlock.settings.ConfirmationDialog
 import com.pyamsoft.padlock.settings.SettingsComponent
 import com.pyamsoft.padlock.settings.SettingsSingletonModule
 import com.pyamsoft.padlock.settings.SettingsSingletonProvider
+import com.pyamsoft.pydroid.core.threads.Enforcer
+import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.ui.theme.Theming
+import com.squareup.moshi.Moshi
+import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
 
@@ -128,4 +134,21 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusMainViewComponent(provider: MainViewProvider): MainViewComponent
+
+  @Component.Builder
+  interface Builder {
+
+    @BindsInstance fun theming(theming: Theming): Builder
+
+    @BindsInstance fun moshi(moshi: Moshi): Builder
+
+    @BindsInstance fun enforcer(enforcer: Enforcer): Builder
+
+    @BindsInstance fun application(application: Application): Builder
+
+    @BindsInstance fun imageLoader(imageLoader: ImageLoader): Builder
+
+    fun build(): PadLockComponent
+
+  }
 }

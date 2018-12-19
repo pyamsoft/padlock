@@ -25,97 +25,61 @@ import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.settings.SettingsComponent
+import com.pyamsoft.padlock.main.MainActivity
+import com.pyamsoft.padlock.service.PadLockJobService
+import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.cache.Cache
-import com.pyamsoft.pydroid.core.threads.Enforcer
-import com.pyamsoft.pydroid.loader.ImageLoader
-import com.pyamsoft.pydroid.ui.ModuleProvider
-import com.pyamsoft.pydroid.ui.theme.Theming
-import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 
-@Module(subcomponents = [SettingsComponent::class])
-class PadLockProvider(
-  private val application: Application,
-  moduleProvider: ModuleProvider,
-  private val mainActivityClass: Class<out Activity>,
-  private val serviceClass: Class<out Service>,
-  private val jobServiceClass: Class<out JobService>
-) {
+@Module
+object PadLockProvider {
 
-  private val theming = moduleProvider.theming()
   private val recreateBus = RxBus.create<Unit>()
-  private val enforcer = moduleProvider.enforcer()
-  private val imageLoader = moduleProvider
-      .loaderModule()
-      .provideImageLoader()
-  private val moshi = moduleProvider.versionCheckModule()
-      .getMoshi()
 
+  @JvmStatic
   @Provides
-  @CheckResult
-  fun provideTheming(): Theming = theming
-
-  @Provides
-  @CheckResult
   @Named("recreate_publisher")
   fun provideRecreatePublisher(): Publisher<Unit> = recreateBus
 
+  @JvmStatic
   @Provides
-  @CheckResult
   @Named("recreate_listener")
   fun provideRecreateListener(): Listener<Unit> = recreateBus
 
+  @JvmStatic
   @Provides
-  @CheckResult
-  fun provideMoshi(): Moshi = moshi
+  fun provideContext(application: Application): Context = application
 
+  @JvmStatic
   @Provides
-  @CheckResult
-  fun provideEnforcer(): Enforcer = enforcer
-
-  @Provides
-  @CheckResult
-  fun provideApplication(): Application = application
-
-  @Provides
-  @CheckResult
-  fun provideContext(): Context = provideApplication()
-
-  @Provides
-  @CheckResult
-  fun provideImageLoader(): ImageLoader = imageLoader
-
-  @Provides
-  @CheckResult
   @Named("cache_list_state")
   fun provideListStateCache(): Cache = ListStateUtil
 
+  @JvmStatic
   @Provides
-  @CheckResult
-  fun provideMainActivityClass(): Class<out Activity> = mainActivityClass
+  fun provideMainActivityClass(): Class<out Activity> = MainActivity::class.java
 
+  @JvmStatic
   @Provides
-  @CheckResult
-  fun provideServiceClass(): Class<out Service> = serviceClass
+  fun provideServiceClass(): Class<out Service> = PadLockService::class.java
 
+  @JvmStatic
   @Provides
-  @CheckResult
-  fun provideJobServiceClass(): Class<out JobService> = jobServiceClass
+  fun provideJobServiceClass(): Class<out JobService> = PadLockJobService::class.java
 
+  @JvmStatic
   @Provides
-  @CheckResult
   @Named("notification_icon")
   @DrawableRes
   fun provideNotificationIcon(): Int = R.drawable.ic_padlock_notification
 
+  @JvmStatic
   @Provides
-  @CheckResult
   @Named("notification_color")
   @ColorRes
   fun provideNotificationColor(): Int = R.color.blue500

@@ -21,9 +21,6 @@ import android.app.Service
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
-import com.pyamsoft.padlock.main.MainActivity
-import com.pyamsoft.padlock.service.PadLockJobService
-import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.pydroid.bootstrap.libraries.OssLibraries
 import com.pyamsoft.pydroid.ui.PYDroid
 import com.pyamsoft.pydroid.ui.theme.Theming
@@ -110,15 +107,12 @@ class PadLock : Application(), PYDroid.Instance {
 
   override fun setPydroid(instance: PYDroid) {
     pyDroid = instance.also {
-      val provider = PadLockProvider(
-          this,
-          it.modules(),
-          MainActivity::class.java,
-          PadLockService::class.java,
-          PadLockJobService::class.java
-      )
       component = DaggerPadLockComponent.builder()
-          .padLockProvider(provider)
+          .application(this)
+          .enforcer(it.modules().enforcer())
+          .imageLoader(it.modules().loaderModule().provideImageLoader())
+          .theming(it.modules().theming())
+          .moshi(it.modules().versionCheckModule().getMoshi())
           .build()
     }
   }
