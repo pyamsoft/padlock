@@ -113,13 +113,10 @@ class MainActivity : RatingActivity() {
   }
 
   private fun setupToolbar() {
-    val color: Int
     val theme: Int
     if (theming.isDarkTheme()) {
-      color = R.color.dark_background
       theme = R.style.ThemeOverlay_AppCompat
     } else {
-      color = R.color.white
       theme = R.style.ThemeOverlay_AppCompat_Light
     }
 
@@ -131,8 +128,6 @@ class MainActivity : RatingActivity() {
       setNavigationOnClickListener(DebouncedOnClickListener.create {
         onBackPressed()
       })
-
-      setBackgroundColor(ContextCompat.getColor(context, color))
     }
   }
 
