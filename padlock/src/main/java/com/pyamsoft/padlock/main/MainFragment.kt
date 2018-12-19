@@ -44,7 +44,7 @@ class MainFragment : ToolbarFragment() {
     savedInstanceState: Bundle?
   ): View? {
     Injector.obtain<PadLockComponent>(requireActivity().applicationContext)
-        .plusMainComponent()
+        .plusMainFragmentComponent()
         .owner(viewLifecycleOwner)
         .inflater(inflater)
         .container(container)

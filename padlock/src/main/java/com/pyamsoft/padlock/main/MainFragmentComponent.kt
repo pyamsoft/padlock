@@ -1,27 +1,23 @@
-package com.pyamsoft.padlock.purge
+package com.pyamsoft.padlock.main
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
-import com.pyamsoft.padlock.model.list.ListDiffProvider
-import com.pyamsoft.padlock.purge.PurgeComponent.PurgeModule
-import com.pyamsoft.pydroid.ui.app.activity.ToolbarActivity
+import com.pyamsoft.padlock.main.MainFragmentComponent.MainModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
 import dagger.Subcomponent
 
-@Subcomponent(modules = [PurgeModule::class])
-interface PurgeComponent {
+@Subcomponent(modules = [MainModule::class])
+interface MainFragmentComponent {
 
-  fun inject(fragment: PurgeFragment)
+  fun inject(fragment: MainFragment)
 
   @Subcomponent.Builder
   interface Builder {
-
-    @BindsInstance fun toolbarActivity(toolbarActivity: ToolbarActivity): Builder
 
     @BindsInstance fun owner(owner: LifecycleOwner): Builder
 
@@ -31,18 +27,16 @@ interface PurgeComponent {
 
     @BindsInstance fun savedInstanceState(savedInstanceState: Bundle?): Builder
 
-    @BindsInstance fun diffProvider(diffProvider: ListDiffProvider<String>): Builder
-
-    fun build(): PurgeComponent
+    fun build(): MainFragmentComponent
   }
 
   @Module
-  abstract class PurgeModule {
+  abstract class MainModule {
 
     @Binds
     @CheckResult
-    internal abstract fun bindView(impl: PurgeViewImpl): PurgeView
+    internal abstract fun bindView(impl: MainFragmentViewImpl): MainFragmentView
 
   }
-}
 
+}

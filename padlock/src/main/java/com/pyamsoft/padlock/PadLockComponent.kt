@@ -37,12 +37,14 @@ import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.LockSingletonModule
 import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.main.MainComponent
+import com.pyamsoft.padlock.main.MainFragmentComponent
 import com.pyamsoft.padlock.pin.PinBaseFragment
 import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinSingletonModule
 import com.pyamsoft.padlock.pin.PinSingletonProvider
 import com.pyamsoft.padlock.purge.PurgeAllDialog
 import com.pyamsoft.padlock.purge.PurgeComponent
+import com.pyamsoft.padlock.purge.PurgeItemComponent
 import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.purge.PurgeSingletonModule
 import com.pyamsoft.padlock.purge.PurgeSingletonProvider
@@ -117,10 +119,16 @@ interface PadLockComponent {
   fun plusPurgeComponent(): PurgeComponent.Builder
 
   @CheckResult
+  fun plusPurgeItemComponent(): PurgeItemComponent.Builder
+
+  @CheckResult
   fun plusPinComponent(): PinComponent.Builder
 
   @CheckResult
   fun plusMainComponent(): MainComponent.Builder
+
+  @CheckResult
+  fun plusMainFragmentComponent(): MainFragmentComponent.Builder
 
   @Component.Builder
   interface Builder {
