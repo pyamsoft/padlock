@@ -59,7 +59,9 @@ class MainActivity : RatingActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     Injector.obtain<PadLockComponent>(applicationContext)
-        .plusMainComponent(MainProvider(this))
+        .plusMainComponent()
+        .mainActivity(this)
+        .build()
         .inject(this)
 
     if (theming.isDarkTheme()) {

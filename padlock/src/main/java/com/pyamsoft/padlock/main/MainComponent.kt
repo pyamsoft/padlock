@@ -1,34 +1,50 @@
 package com.pyamsoft.padlock.main
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.ViewGroup
 import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
+import com.pyamsoft.padlock.main.MainComponent.MainModule
 import dagger.Binds
+import dagger.BindsInstance
 import dagger.Module
-import dagger.Provides
 import dagger.Subcomponent
 
-@Subcomponent(modules = [MainProvider::class, MainModule::class])
+@Subcomponent(modules = [MainModule::class])
 interface MainComponent {
 
   fun inject(activity: MainActivity)
 
-}
+  fun inject(fragment: MainFragment)
 
-@Module
-abstract class MainModule {
+  @Subcomponent.Builder
+  interface Builder {
 
-  @Binds
-  @CheckResult
-  internal abstract fun bind(impl: MainViewImpl): MainView
+    @BindsInstance fun mainActivity(mainActivity: MainActivity): Builder
 
-}
+    @BindsInstance fun owner(owner: LifecycleOwner): Builder
 
-@Module
-class MainProvider(
-  private val activity: MainActivity
-) {
+    @BindsInstance fun inflater(inflater: LayoutInflater): Builder
 
-  @Provides
-  @CheckResult
-  fun provideActivity(): MainActivity = activity
+    @BindsInstance fun container(container: ViewGroup?): Builder
+
+    @BindsInstance fun savedInstanceState(savedInstanceState: Bundle?): Builder
+
+    fun build(): MainComponent
+  }
+
+  @Module
+  abstract class MainModule {
+
+    @Binds
+    @CheckResult
+    internal abstract fun bind(impl: MainViewImpl): MainView
+
+    @Binds
+    @CheckResult
+    internal abstract fun bindView(impl: MainFragmentViewImpl): MainFragmentView
+
+  }
 
 }

@@ -77,7 +77,6 @@ class PinDialog : ToolbarDialog() {
         .owner(viewLifecycleOwner)
         .inflater(inflater)
         .container(container)
-        .savedInstanceState(savedInstanceState)
         .build()
         .inject(this)
 
