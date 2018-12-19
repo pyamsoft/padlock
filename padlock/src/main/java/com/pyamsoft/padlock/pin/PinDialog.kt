@@ -244,7 +244,7 @@ class PinDialog : ToolbarDialog() {
 
     const val TAG = "PinDialog"
     internal const val CHECK_ONLY = "check_only"
-    private const val FINISH_ON_DISMISS = "check_only"
+    private const val FINISH_ON_DISMISS = "finish_dismiss"
 
     @JvmStatic
     @CheckResult
