@@ -36,10 +36,9 @@ import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.LockSingletonModule
 import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.main.MainActivity
+import com.pyamsoft.padlock.pin.PinBaseFragment
 import com.pyamsoft.padlock.pin.PinComponent
-import com.pyamsoft.padlock.pin.PinModule
-import com.pyamsoft.padlock.pin.PinPatternComponent
-import com.pyamsoft.padlock.pin.PinPatternProvider
+import com.pyamsoft.padlock.pin.PinProvider
 import com.pyamsoft.padlock.pin.PinSingletonModule
 import com.pyamsoft.padlock.pin.PinSingletonProvider
 import com.pyamsoft.padlock.purge.PurgeAllDialog
@@ -89,6 +88,8 @@ interface PadLockComponent {
 
   fun inject(service: PadLockJobService)
 
+  fun inject(base: PinBaseFragment)
+
   fun inject(dialog: PurgeAllDialog)
 
   fun inject(dialog: PurgeSingleItemDialog)
@@ -121,8 +122,5 @@ interface PadLockComponent {
   fun plusPurgeItemComponent(provider: PurgeItemProvider): PurgeItemComponent
 
   @CheckResult
-  fun plusPinComponent(module: PinModule): PinComponent
-
-  @CheckResult
-  fun plusPinPatternComponent(provider: PinPatternProvider): PinPatternComponent
+  fun plusPinComponent(provider: PinProvider): PinComponent
 }

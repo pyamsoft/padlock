@@ -17,45 +17,30 @@
 package com.pyamsoft.padlock.pin
 
 import android.content.DialogInterface
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.annotation.CheckResult
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
-import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.loader.ImageLoader
-import com.pyamsoft.pydroid.loader.ImageTarget
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
-import com.pyamsoft.pydroid.ui.theme.Theming
-import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.commit
-import com.pyamsoft.pydroid.ui.util.setUpEnabled
-import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import javax.inject.Inject
 
 class PinDialog : ToolbarDialog() {
 
+  @field:Inject internal lateinit var pinView: PinView
   @field:Inject internal lateinit var viewModel: PinScreenInputViewModel
-  @field:Inject internal lateinit var imageLoader: ImageLoader
-  @field:Inject internal lateinit var appIconLoader: AppIconLoader
-  @field:Inject internal lateinit var theming: Theming
-
-  private lateinit var binding: DialogPinEntryBinding
 
   private var checkOnly: Boolean = false
   private var finishOnDismiss: Boolean = false
@@ -65,6 +50,7 @@ class PinDialog : ToolbarDialog() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     isCancelable = true
+
     checkOnly = requireArguments().getBoolean(CHECK_ONLY, false)
     finishOnDismiss = requireArguments().getBoolean(FINISH_ON_DISMISS, false)
   }
@@ -72,8 +58,7 @@ class PinDialog : ToolbarDialog() {
   override fun onResume() {
     super.onResume()
     // The dialog is super small for some reason. We have to set the size manually, in onResume
-    val window = dialog.window
-    window?.apply {
+    dialog.window?.apply {
       setLayout(
           WindowManager.LayoutParams.MATCH_PARENT,
           WindowManager.LayoutParams.WRAP_CONTENT
@@ -88,24 +73,38 @@ class PinDialog : ToolbarDialog() {
     savedInstanceState: Bundle?
   ): View? {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusPinComponent(PinModule(viewLifecycleOwner))
+        .plusPinComponent(PinProvider(viewLifecycleOwner, inflater, container, savedInstanceState))
         .inject(this)
 
-    binding = DialogPinEntryBinding.inflate(inflater, container, false)
+    pinView.create()
+    return pinView.root()
+  }
 
-    setupToolbar()
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
+
+    pinView.onToolbarMenuItemClicked { dismiss() }
+
+    pinView.onToolbarMenuItemClicked {
+      when (it) {
+        R.id.menu_submit_pin -> {
+          val fragmentManager = childFragmentManager
+          val fragment: Fragment? =
+            fragmentManager.findFragmentById(R.id.pin_entry_dialog_container)
+          if (fragment is PinBaseFragment) {
+            fragment.onSubmitPressed()
+          }
+        }
+      }
+    }
 
     lockScreenTypeDisposable = viewModel.resolveLockScreenType(
         onTypePattern = { onTypePattern() },
-        onTypeText = { onTypeText() },
-        onError = {
-          Timber.e(it, "Failed to resolve lock screen type")
-          // TODO
-          dismiss()
-        }
+        onTypeText = { onTypeText() }
     )
-
-    return binding.root
   }
 
   private fun pushIfNotPresent(
@@ -122,13 +121,6 @@ class PinDialog : ToolbarDialog() {
     }
   }
 
-  override fun onStart() {
-    super.onStart()
-    appIconLoader.loadAppIcon(requireContext().packageName, R.mipmap.ic_launcher)
-        .into(binding.pinImage)
-        .bind(viewLifecycleOwner)
-  }
-
   private fun onTypePattern() {
     // Push text as child fragment
     Timber.d("Type Pattern")
@@ -138,92 +130,6 @@ class PinDialog : ToolbarDialog() {
   private fun onTypeText() {
     Timber.d("Type Text")
     pushIfNotPresent(PinTextFragment.newInstance(checkOnly), PinTextFragment.TAG)
-  }
-
-  private fun applyBackNavigationIcon(icon: Drawable) {
-    val color: Int
-    if (theming.isDarkTheme()) {
-      color = R.color.white
-    } else {
-      color = R.color.black
-    }
-    val tint = ContextCompat.getColor(binding.pinEntryToolbar.context, color)
-    binding.pinEntryToolbar.navigationIcon = icon.tintWith(tint)
-  }
-
-  private fun setupToolbar() {
-    // Maybe something more descriptive
-    binding.apply {
-      if (theming.isDarkTheme()) {
-        pinEntryToolbar.popupTheme = R.style.ThemeOverlay_AppCompat
-      } else {
-        pinEntryToolbar.popupTheme = R.style.ThemeOverlay_AppCompat_Light
-      }
-
-      pinEntryToolbar.title = "PIN"
-      pinEntryToolbar.setNavigationOnClickListener(DebouncedOnClickListener.create { dismiss() })
-
-      // Load a custom X icon
-      pinEntryToolbar.setUpEnabled(true)
-      imageLoader.load(R.drawable.ic_close_24dp)
-          .into(object : ImageTarget<Drawable> {
-            override fun clear() {
-              pinEntryToolbar.navigationIcon = null
-            }
-
-            override fun setError(error: Drawable?) {
-              pinEntryToolbar.navigationIcon = error
-            }
-
-            override fun setImage(image: Drawable) {
-              applyBackNavigationIcon(image)
-            }
-
-            override fun setPlaceholder(placeholder: Drawable?) {
-              pinEntryToolbar.navigationIcon = placeholder
-            }
-
-            override fun view(): View {
-              return pinEntryToolbar
-            }
-
-          })
-          .bind(viewLifecycleOwner)
-
-      // Inflate menu
-      pinEntryToolbar.inflateMenu(R.menu.pin_menu)
-
-      val pinItem: MenuItem? = pinEntryToolbar.menu.findItem(R.id.menu_submit_pin)
-      if (pinItem != null) {
-        var pinIcon: Drawable? = pinItem.icon
-        if (pinIcon != null) {
-          val color: Int
-          if (theming.isDarkTheme()) {
-            color = R.color.white
-          } else {
-            color = R.color.black
-          }
-          val tint = ContextCompat.getColor(pinEntryToolbar.context, color)
-          pinIcon = pinIcon.tintWith(tint)
-          pinItem.icon = pinIcon
-        }
-      }
-
-      pinEntryToolbar.setOnMenuItemClickListener {
-        when (it.itemId) {
-          R.id.menu_submit_pin -> {
-            val fragmentManager = childFragmentManager
-            val fragment: Fragment? =
-              fragmentManager.findFragmentById(R.id.pin_entry_dialog_container)
-            if (fragment is PinBaseFragment) {
-              fragment.onSubmitPressed()
-              return@setOnMenuItemClickListener true
-            }
-          }
-        }
-        return@setOnMenuItemClickListener false
-      }
-    }
   }
 
   override fun onDismiss(dialog: DialogInterface?) {
@@ -237,7 +143,6 @@ class PinDialog : ToolbarDialog() {
     super.onDestroyView()
     Timber.d("Destroy AlertDialog")
     lockScreenTypeDisposable.tryDispose()
-    binding.unbind()
   }
 
   companion object {

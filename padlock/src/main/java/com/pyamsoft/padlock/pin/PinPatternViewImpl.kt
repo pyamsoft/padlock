@@ -5,9 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
 import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.PatternLockView.Dot
@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 internal class PinPatternViewImpl @Inject internal constructor(
   private val theming: Theming,
-  private val activity: FragmentActivity,
+  private val owner: LifecycleOwner,
   private val inflater: LayoutInflater,
   private val container: ViewGroup?
 ) : PinPatternView, LifecycleObserver {
@@ -29,16 +29,18 @@ internal class PinPatternViewImpl @Inject internal constructor(
   private var listener: PatternLockViewListener? = null
 
   init {
-    activity.lifecycle.addObserver(this)
+    owner.lifecycle.addObserver(this)
   }
 
   @Suppress("unused")
   @OnLifecycleEvent(ON_DESTROY)
   internal fun destroy() {
-    activity.lifecycle.removeObserver(this)
+    owner.lifecycle.removeObserver(this)
 
     listener?.let { binding.patternLock.removePatternLockListener(it) }
     listener = null
+
+    binding.unbind()
   }
 
   override fun root(): View {
@@ -59,13 +61,13 @@ internal class PinPatternViewImpl @Inject internal constructor(
       theme = R.style.Theme_PadLock_Light_Dialog
     }
 
-    activity.withStyledAttributes(
+    root().context.withStyledAttributes(
         theme,
         intArrayOf(android.R.attr.colorForeground)
     ) {
       val colorId = getResourceId(0, 0)
       if (colorId != 0) {
-        binding.patternLock.normalStateColor = ContextCompat.getColor(activity, colorId)
+        binding.patternLock.normalStateColor = ContextCompat.getColor(root().context, colorId)
       }
     }
   }
@@ -121,16 +123,6 @@ internal class PinPatternViewImpl @Inject internal constructor(
     Snackbreak.short(binding.root, "Pattern is not long enough")
         .show()
     setPatternWrong()
-  }
-
-  override fun onPinSubmitError(error: Throwable) {
-    Snackbreak.short(binding.root, "Error submitting PIN, please try again")
-        .show()
-  }
-
-  override fun onPinCheckError() {
-    Snackbreak.short(binding.root, "Error checking PIN, please try again")
-        .show()
   }
 
   override fun onInvalidPin() {

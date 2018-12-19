@@ -134,11 +134,6 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
               hintDisposable = viewModel.displayLockedHint { onDisplayHint(it) }
               showSnackbarWithText("Error: Invalid PIN")
             },
-            onSubmitError = {
-              clearDisplay()
-              UnrecoverableErrorDialog.newInstance(it.localizedMessage)
-                  .show(requireActivity(), "lock_screen_text_error")
-            },
             onSubmitResultPostUnlock = {
               Timber.d("Unlock posted")
               clearDisplay()

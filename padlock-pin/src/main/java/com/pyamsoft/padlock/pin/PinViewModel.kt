@@ -27,6 +27,7 @@ import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Publisher
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
@@ -41,21 +42,17 @@ class PinViewModel @Inject internal constructor(
   @CheckResult
   fun checkMasterPin(
     onMasterPinPresent: () -> Unit,
-    onMasterPinMissing: () -> Unit,
-    onCheckError: (error: Throwable) -> Unit
+    onMasterPinMissing: () -> Unit
   ): Disposable {
     return interactor.hasMasterPin()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({
+        .subscribe(Consumer {
           if (it) {
             onMasterPinPresent()
           } else {
             onMasterPinMissing()
           }
-        }, {
-          Timber.e(it, "Error checkMasterPin")
-          onCheckError(it)
         })
   }
 
@@ -64,21 +61,17 @@ class PinViewModel @Inject internal constructor(
     currentAttempt: String,
     reEntryAttempt: String,
     hint: String,
-    onSubmitError: (error: Throwable) -> Unit,
     onSubmitComplete: () -> Unit
   ): Disposable {
     return interactor.submitPin(currentAttempt, reEntryAttempt, hint)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .doAfterTerminate { onSubmitComplete() }
-        .subscribe({
+        .subscribe(Consumer {
           when (it) {
             is Create -> createPinBus.publish(CreatePinEvent(it.complete))
             is Clear -> clearPinBus.publish(ClearPinEvent(it.complete))
           }
-        }, {
-          Timber.e(it, "Pin entry submission error")
-          onSubmitError(it)
         })
   }
 

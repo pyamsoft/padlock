@@ -145,34 +145,18 @@ class LockScreenActivity : ActivityBase() {
 
     checkIfAlreadyUnlocked()
 
-    closeOldDisposable = viewModel.closeOld(
-        onCloseOldEvent = { onCloseOldReceived() },
-        onCloseOldError = { lockScreenUnrecoverableError(it) }
-    )
+    closeOldDisposable = viewModel.closeOld { onCloseOldReceived() }
 
-    ignoreTimeDisposable = viewModel.createWithDefaultIgnoreTime(
-        onIgnoreTimesLoaded = { onInitializeWithIgnoreTime(it) },
-        onIgnoreTimeLoadError = { lockScreenUnrecoverableError(it) }
-    )
+    ignoreTimeDisposable = viewModel.createWithDefaultIgnoreTime { onInitializeWithIgnoreTime(it) }
 
-    displayNameDisposable = viewModel.loadDisplayNameFromPackage(
-        onLoadDisplayName = { onSetDisplayName(it) },
-        onLoadDisplayError = { lockScreenUnrecoverableError(it) }
-    )
+    displayNameDisposable = viewModel.loadDisplayNameFromPackage { onSetDisplayName(it) }
 
     recreateDisposable = viewModel.onRecreateEvent { recreate() }
 
     lockScreenTypeDisposable = inputViewModel.resolveLockScreenType(
         onTypeText = { onTypeText() },
-        onTypePattern = { onTypePattern() },
-        onError = { lockScreenUnrecoverableError(it) }
+        onTypePattern = { onTypePattern() }
     )
-  }
-
-  private fun lockScreenUnrecoverableError(error: Throwable) {
-    Timber.e(error, "An unrecoverable lock screen error has occurred and the screen must close")
-    UnrecoverableErrorDialog.newInstance(error.localizedMessage)
-        .show(this, "bad_error")
   }
 
   override fun onResume() {
@@ -181,10 +165,7 @@ class LockScreenActivity : ActivityBase() {
   }
 
   private fun checkIfAlreadyUnlocked() {
-    alreadyUnlockedDisposable = viewModel.checkIfAlreadyUnlocked(
-        onAlreadyUnlocked = { onAlreadyUnlocked() },
-        onUnlockError = { lockScreenUnrecoverableError(it) }
-    )
+    alreadyUnlockedDisposable = viewModel.checkIfAlreadyUnlocked { onAlreadyUnlocked() }
   }
 
   private fun preInjectOnCreate() {

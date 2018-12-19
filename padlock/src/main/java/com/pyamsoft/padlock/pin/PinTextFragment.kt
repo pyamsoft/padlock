@@ -17,40 +17,44 @@
 package com.pyamsoft.padlock.pin
 
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import androidx.annotation.CheckResult
 import androidx.core.content.getSystemService
-import com.pyamsoft.padlock.databinding.FragmentPinEntryTextBinding
+import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.pydroid.ui.app.fragment.requireView
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
+import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
 class PinTextFragment : PinBaseFragment() {
+
+  @field:Inject internal lateinit var pinView: PinTextView
 
   private val imm by lazy(NONE) {
     requireNotNull(requireContext().getSystemService<InputMethodManager>())
   }
 
-  private lateinit var binding: FragmentPinEntryTextBinding
-  private var pinReentryText: EditText? = null
-  private var pinEntryText: EditText? = null
-  private var pinHintText: EditText? = null
+  private val submitCallback: (String, String, String) -> Unit = { attempt, reEntry, hint ->
+    submitPin(attempt, reEntry, hint)
+  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    Injector.obtain<PadLockComponent>(requireActivity().applicationContext)
+        .plusPinComponent(PinProvider(viewLifecycleOwner, inflater, container, savedInstanceState))
+        .inject(this)
+
     super.onCreateView(inflater, container, savedInstanceState)
-    binding = FragmentPinEntryTextBinding.inflate(inflater, container, false)
-    return binding.root
+    pinView.create()
+    return pinView.root()
   }
 
   override fun onViewCreated(
@@ -58,20 +62,12 @@ class PinTextFragment : PinBaseFragment() {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    // Resolve TextInputLayout edit texts
-    pinEntryText = binding.pinEntryCode.editText!!
-    pinReentryText = binding.pinReentryCode.editText!!
-    pinHintText = binding.pinHint.editText!!
 
     // Force the keyboard
     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
 
     clearDisplay()
     setupGoArrow()
-
-    if (savedInstanceState != null) {
-      onRestoreInstanceState(savedInstanceState)
-    }
 
     checkMasterPin()
   }
@@ -81,73 +77,32 @@ class PinTextFragment : PinBaseFragment() {
     activity?.let {
       imm.toggleSoftInputFromWindow(it.window.decorView.windowToken, 0, 0)
     }
-    binding.unbind()
-  }
-
-  private fun setupSubmissionView(view: EditText) {
-    view.setOnEditorActionListener { _, actionId, keyEvent ->
-      if (keyEvent == null) {
-        Timber.e("KeyEvent was not caused by keypress")
-        return@setOnEditorActionListener false
-      }
-
-      if (keyEvent.action == KeyEvent.ACTION_DOWN && actionId == EditorInfo.IME_NULL) {
-        Timber.d("KeyEvent is Enter pressed")
-        submitPin()
-        return@setOnEditorActionListener true
-      }
-
-      Timber.d("Do not handle key event")
-      return@setOnEditorActionListener false
-    }
   }
 
   /**
    * Clear the display of all text entry fields
    */
   override fun clearDisplay() {
-    pinEntryText?.setText("")
-    pinReentryText?.setText("")
-    pinHintText?.setText("")
-  }
-
-  private fun submitPin() {
-    // Hint is blank for PIN code
-    submitPin(getCurrentAttempt(), getCurrentReentry(), getCurrentHint())
+    pinView.clearDisplay()
   }
 
   override fun onMasterPinMissing() {
     Timber.d("No active master, show extra views")
-    binding.pinReentryCode.visibility = View.VISIBLE
-    binding.pinHint.visibility = View.VISIBLE
-    val obj = pinHintText
-    if (obj != null) {
-      setupSubmissionView(obj)
-    }
+    pinView.showReEntry(submitCallback)
   }
 
   override fun onMasterPinPresent() {
     Timber.d("Active master, hide extra views")
-    binding.pinReentryCode.visibility = View.GONE
-    binding.pinHint.visibility = View.GONE
-    val obj = pinEntryText
-    if (obj != null) {
-      setupSubmissionView(obj)
-    }
+    pinView.hideReEntry(submitCallback)
   }
 
   override fun onSubmitPressed() {
-    submitPin()
+    pinView.onSubmitPressed(submitCallback)
   }
 
   private fun setupGoArrow() {
     // Force keyboard focus
-    pinEntryText?.requestFocus()
-  }
-
-  override fun onCheckError() {
-    Snackbreak.short(requireView(), "Error checking PIN, please try again")
-        .show()
+    pinView.focus()
   }
 
   override fun onInvalidPin() {
@@ -155,52 +110,14 @@ class PinTextFragment : PinBaseFragment() {
         .show()
   }
 
-  override fun onSubmitError(error: Throwable) {
-    Snackbreak.short(requireView(), "Error submitting PIN, please try again")
-        .show()
-  }
-
-  private fun onRestoreInstanceState(savedInstanceState: Bundle) {
-    Timber.d("onRestoreInstanceState")
-    val attempt = savedInstanceState.getString(CODE_DISPLAY, null)
-    val reentry = savedInstanceState.getString(CODE_REENTRY_DISPLAY, null)
-    val hint = savedInstanceState.getString(HINT_DISPLAY, null)
-    if (attempt == null || reentry == null || hint == null) {
-      Timber.d("Empty attempt")
-      clearDisplay()
-    } else {
-      Timber.d("Set attempt %s", attempt)
-      pinEntryText?.setText(attempt)
-      Timber.d("Set reentry %s", reentry)
-      pinReentryText?.setText(reentry)
-      Timber.d("Set hint %s", hint)
-      pinHintText?.setText(hint)
-    }
-  }
-
   override fun onSaveInstanceState(outState: Bundle) {
-    Timber.d("onSaveInstanceState")
-    outState.putString(CODE_DISPLAY, getCurrentAttempt())
-    outState.putString(CODE_REENTRY_DISPLAY, getCurrentReentry())
-    outState.putString(HINT_DISPLAY, getCurrentHint())
+    pinView.saveState(outState)
     super.onSaveInstanceState(outState)
   }
-
-  @CheckResult
-  private fun getCurrentAttempt(): String = pinEntryText?.text?.toString() ?: ""
-
-  @CheckResult
-  private fun getCurrentReentry(): String = pinReentryText?.text?.toString() ?: ""
-
-  @CheckResult
-  private fun getCurrentHint(): String = pinHintText?.text?.toString() ?: ""
 
   companion object {
 
     internal const val TAG = "PinTextFragment"
-    private const val CODE_DISPLAY = "CODE_DISPLAY"
-    private const val CODE_REENTRY_DISPLAY = "CODE_REENTRY_DISPLAY"
-    private const val HINT_DISPLAY = "HINT_DISPLAY"
 
     @CheckResult
     @JvmStatic

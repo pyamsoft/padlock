@@ -6,10 +6,6 @@ interface PinBaseView : BaseScreen {
 
   fun clearDisplay()
 
-  fun onPinCheckError()
-
   fun onInvalidPin()
-
-  fun onPinSubmitError(error: Throwable)
 
 }

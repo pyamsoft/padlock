@@ -25,7 +25,6 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -140,7 +139,6 @@ class LockViewModel @Inject internal constructor(
     ignoreTime: Long,
     onSubmitSuccess: () -> Unit,
     onSubmitFailure: () -> Unit,
-    onSubmitError: (error: Throwable) -> Unit,
     onSubmitResultPostUnlock: () -> Unit,
     onSubmitResultAttemptLock: () -> Unit
   ): Disposable {
@@ -162,9 +160,6 @@ class LockViewModel @Inject internal constructor(
         }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({}, {
-          Timber.e(it, "Error occurred during submit chain")
-          onSubmitError(it)
-        })
+        .subscribe()
   }
 }

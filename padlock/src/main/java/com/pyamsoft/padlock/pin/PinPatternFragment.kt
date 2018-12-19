@@ -57,7 +57,7 @@ class PinPatternFragment : PinBaseFragment() {
     savedInstanceState: Bundle?
   ): View? {
     Injector.obtain<PadLockComponent>(requireActivity().applicationContext)
-        .plusPinPatternComponent(PinPatternProvider(requireActivity(), inflater, container))
+        .plusPinComponent(PinProvider(viewLifecycleOwner, inflater, container, savedInstanceState))
         .inject(this)
 
     super.onCreateView(inflater, container, savedInstanceState)
@@ -151,16 +151,8 @@ class PinPatternFragment : PinBaseFragment() {
     }
   }
 
-  override fun onCheckError() {
-    pinView.onPinCheckError()
-  }
-
   override fun onInvalidPin() {
     pinView.onInvalidPin()
-  }
-
-  override fun onSubmitError(error: Throwable) {
-    pinView.onPinSubmitError(error)
   }
 
   private fun submitPin(repeatText: String) {

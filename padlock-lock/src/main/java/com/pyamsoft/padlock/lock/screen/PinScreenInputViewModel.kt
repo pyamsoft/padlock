@@ -22,8 +22,8 @@ import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
-import timber.log.Timber
 import javax.inject.Inject
 
 class PinScreenInputViewModel @Inject internal constructor(
@@ -33,21 +33,17 @@ class PinScreenInputViewModel @Inject internal constructor(
   @CheckResult
   fun resolveLockScreenType(
     onTypeText: () -> Unit,
-    onTypePattern: () -> Unit,
-    onError: (error: Throwable) -> Unit
+    onTypePattern: () -> Unit
   ): Disposable {
     return interactor.getLockScreenType()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({
+        .subscribe(Consumer {
           when (it) {
             TYPE_TEXT -> onTypeText()
             TYPE_PATTERN -> onTypePattern()
             else -> throw IllegalArgumentException("Invalid lock screen type: $it")
           }
-        }, {
-          Timber.e(it, "Error resolving lock screen type")
-          onError(it)
         })
   }
 

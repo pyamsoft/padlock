@@ -54,7 +54,6 @@ abstract class PinBaseFragment : ToolbarFragment() {
     savedInstanceState: Bundle?
   ): View? {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusPinComponent(PinModule(viewLifecycleOwner))
         .inject(this)
 
     return super.onCreateView(inflater, container, savedInstanceState)
@@ -85,8 +84,7 @@ abstract class PinBaseFragment : ToolbarFragment() {
     // Fire initialize event once children have been created
     pinCheckDisposable = viewModel.checkMasterPin(
         onMasterPinPresent = { onMasterPinPresent() },
-        onMasterPinMissing = { onMasterPinMissing() },
-        onCheckError = { onCheckError() }
+        onMasterPinMissing = { onMasterPinMissing() }
     )
   }
 
@@ -108,13 +106,10 @@ abstract class PinBaseFragment : ToolbarFragment() {
     if (checkOnly) {
       submitDisposable = viewModel.checkPin(pin)
     } else {
-      submitDisposable = viewModel.submit(
-          pin, reEntry, hint,
-          onSubmitError = { onSubmitError(it) },
-          onSubmitComplete = {
-            clearDisplay()
-            dismissParent()
-          })
+      submitDisposable = viewModel.submit(pin, reEntry, hint) {
+        clearDisplay()
+        dismissParent()
+      }
     }
   }
 
@@ -143,11 +138,7 @@ abstract class PinBaseFragment : ToolbarFragment() {
 
   protected abstract fun onMasterPinPresent()
 
-  protected abstract fun onCheckError()
-
   protected abstract fun clearDisplay()
-
-  protected abstract fun onSubmitError(error: Throwable)
 
   protected abstract fun onInvalidPin()
 
