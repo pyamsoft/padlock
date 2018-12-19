@@ -122,7 +122,7 @@ class LockScreenActivity : ActivityBase() {
   }
 
   @CallSuper
-  public override fun onCreate(savedInstanceState: Bundle?) {
+  override fun onCreate(savedInstanceState: Bundle?) {
     overridePendingTransition(0, 0)
     preInjectOnCreate()
 

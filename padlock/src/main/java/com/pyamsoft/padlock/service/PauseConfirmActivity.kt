@@ -31,7 +31,9 @@ class PauseConfirmActivity : ActivityBase() {
     overridePendingTransition(0, 0)
 
     Injector.obtain<PadLockComponent>(application)
-        .plusPauseComponent(PauseProvider(this))
+        .plusPauseComponent()
+        .activity(this)
+        .build()
         .inject(this)
 
     if (theming.isDarkTheme()) {

@@ -61,7 +61,9 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
     savedInstanceState: Bundle?
   ): View? {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusSettingsComponent(SettingsProvider(preferenceScreen))
+        .plusSettingsComponent()
+        .preferenceScreen(preferenceScreen)
+        .build()
         .inject(this)
 
     settingsView.create()

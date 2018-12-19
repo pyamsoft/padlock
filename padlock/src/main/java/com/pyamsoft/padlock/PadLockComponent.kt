@@ -56,12 +56,10 @@ import com.pyamsoft.padlock.receiver.BootReceiver
 import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.PauseComponent
-import com.pyamsoft.padlock.service.PauseProvider
 import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.service.ServiceSingletonProvider
 import com.pyamsoft.padlock.settings.ConfirmationDialog
 import com.pyamsoft.padlock.settings.SettingsComponent
-import com.pyamsoft.padlock.settings.SettingsProvider
 import com.pyamsoft.padlock.settings.SettingsSingletonModule
 import com.pyamsoft.padlock.settings.SettingsSingletonProvider
 import dagger.Component
@@ -111,10 +109,10 @@ interface PadLockComponent {
   fun plusLockScreenComponent(entryModule: LockEntryModule): LockScreenComponent
 
   @CheckResult
-  fun plusSettingsComponent(provider: SettingsProvider): SettingsComponent
+  fun plusSettingsComponent(): SettingsComponent.Builder
 
   @CheckResult
-  fun plusPauseComponent(provider: PauseProvider): PauseComponent
+  fun plusPauseComponent(): PauseComponent.Builder
 
   @CheckResult
   fun plusPurgeComponent(provider: PurgeProvider): PurgeComponent

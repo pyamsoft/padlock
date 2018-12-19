@@ -25,6 +25,7 @@ import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.padlock.settings.SettingsComponent
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
@@ -38,7 +39,7 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 
-@Module
+@Module(subcomponents = [SettingsComponent::class])
 class PadLockProvider(
   private val application: Application,
   moduleProvider: ModuleProvider,
