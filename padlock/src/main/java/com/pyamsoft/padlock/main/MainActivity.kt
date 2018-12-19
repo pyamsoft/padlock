@@ -19,14 +19,10 @@ package com.pyamsoft.padlock.main
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.databinding.DataBindingUtil
 import com.pyamsoft.padlock.BuildConfig
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.databinding.ActivityMainBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.service.ServiceManager
 import com.pyamsoft.pydroid.ui.about.AboutFragment
@@ -34,16 +30,13 @@ import com.pyamsoft.pydroid.ui.rating.ChangeLogBuilder
 import com.pyamsoft.pydroid.ui.rating.RatingActivity
 import com.pyamsoft.pydroid.ui.rating.buildChangeLog
 import com.pyamsoft.pydroid.ui.theme.Theming
-import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.commit
-import com.pyamsoft.pydroid.util.toDp
 import timber.log.Timber
 import javax.inject.Inject
 
 class MainActivity : RatingActivity() {
 
-  private lateinit var binding: ActivityMainBinding
-
+  @field:Inject internal lateinit var mainView: MainView
   @field:Inject internal lateinit var serviceManager: ServiceManager
   @field:Inject internal lateinit var theming: Theming
 
@@ -54,7 +47,7 @@ class MainActivity : RatingActivity() {
     get() = R.mipmap.ic_launcher
 
   override val rootView: View
-    get() = binding.fragmentContainer
+    get() = mainView.root()
 
   override val changeLogLines: ChangeLogBuilder
     get() =
@@ -66,6 +59,7 @@ class MainActivity : RatingActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     Injector.obtain<PadLockComponent>(applicationContext)
+        .plusMainComponent(MainProvider(this))
         .inject(this)
 
     if (theming.isDarkTheme()) {
@@ -75,9 +69,9 @@ class MainActivity : RatingActivity() {
     }
 
     super.onCreate(savedInstanceState)
-    binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+    mainView.create()
 
-    setupToolbar()
+    mainView.onToolbarNavigationClicked { onBackPressed() }
 
     showDefaultPage()
   }
@@ -104,36 +98,13 @@ class MainActivity : RatingActivity() {
   override fun onPause() {
     super.onPause()
     if (isFinishing || isChangingConfigurations) {
-      Timber.d(
-          "Even though a leak is reported, this should dismiss the window, and clear the leak"
-      )
-      binding.toolbar.menu.close()
-      binding.toolbar.dismissPopupMenus()
-    }
-  }
-
-  private fun setupToolbar() {
-    val theme: Int
-    if (theming.isDarkTheme()) {
-      theme = R.style.ThemeOverlay_AppCompat
-    } else {
-      theme = R.style.ThemeOverlay_AppCompat_Light
-    }
-
-    binding.toolbar.apply {
-      popupTheme = theme
-      setToolbar(this)
-      setTitle(R.string.app_name)
-      ViewCompat.setElevation(this, 4f.toDp(context).toFloat())
-      setNavigationOnClickListener(DebouncedOnClickListener.create {
-        onBackPressed()
-      })
+      mainView.closeToolbarMenu()
     }
   }
 
   override fun onDestroy() {
     super.onDestroy()
-    binding.unbind()
+
     if (!isChangingConfigurations) {
       ListStateUtil.clearCache()
     }
