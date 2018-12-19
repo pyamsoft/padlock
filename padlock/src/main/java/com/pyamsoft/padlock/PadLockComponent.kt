@@ -36,6 +36,8 @@ import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.LockSingletonModule
 import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.main.MainActivity
+import com.pyamsoft.padlock.main.MainViewComponent
+import com.pyamsoft.padlock.main.MainViewProvider
 import com.pyamsoft.padlock.pin.PinBaseFragment
 import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinProvider
@@ -123,4 +125,7 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusPinComponent(provider: PinProvider): PinComponent
+
+  @CheckResult
+  fun plusMainViewComponent(provider: MainViewProvider): MainViewComponent
 }
