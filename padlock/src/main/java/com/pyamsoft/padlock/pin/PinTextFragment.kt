@@ -49,7 +49,12 @@ class PinTextFragment : PinBaseFragment() {
     savedInstanceState: Bundle?
   ): View? {
     Injector.obtain<PadLockComponent>(requireActivity().applicationContext)
-        .plusPinComponent(PinProvider(viewLifecycleOwner, inflater, container, savedInstanceState))
+        .plusPinComponent()
+        .owner(viewLifecycleOwner)
+        .inflater(inflater)
+        .container(container)
+        .savedInstanceState(savedInstanceState)
+        .build()
         .inject(this)
 
     super.onCreateView(inflater, container, savedInstanceState)

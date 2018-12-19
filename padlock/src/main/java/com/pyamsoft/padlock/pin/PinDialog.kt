@@ -73,7 +73,12 @@ class PinDialog : ToolbarDialog() {
     savedInstanceState: Bundle?
   ): View? {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusPinComponent(PinProvider(viewLifecycleOwner, inflater, container, savedInstanceState))
+        .plusPinComponent()
+        .owner(viewLifecycleOwner)
+        .inflater(inflater)
+        .container(container)
+        .savedInstanceState(savedInstanceState)
+        .build()
         .inject(this)
 
     pinView.create()

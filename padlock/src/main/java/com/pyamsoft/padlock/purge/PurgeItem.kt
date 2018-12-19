@@ -55,7 +55,9 @@ class PurgeItem internal constructor(
 
     init {
       Injector.obtain<PadLockComponent>(itemView.context.applicationContext)
-          .plusPurgeItemComponent(PurgeItemProvider(itemView))
+          .plusPurgeComponent()
+          .itemView(itemView)
+          .build()
           .inject(this)
     }
 
