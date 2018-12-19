@@ -33,9 +33,9 @@ class LockScreenViewModel @Inject internal constructor(
   private val foregroundEventBus: Publisher<ForegroundEvent>,
   private val bus: EventBus<CloseOldEvent>,
   private val interactor: LockScreenInteractor,
-  @param:Named("package_name") private val packageName: String,
-  @param:Named("activity_name") private val activityName: String,
-  @param:Named("real_name") private val realName: String,
+  @param:Named("locked_package_name") private val packageName: String,
+  @param:Named("locked_activity_name") private val activityName: String,
+  @param:Named("locked_real_name") private val realName: String,
   @param:Named("recreate_listener") private val recreateListener: Listener<Unit>
 ) {
 

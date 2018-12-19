@@ -16,14 +16,40 @@
 
 package com.pyamsoft.padlock.lock
 
+import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
+import dagger.BindsInstance
 import dagger.Subcomponent
+import javax.inject.Named
 
-@Subcomponent(modules = [LockEntryModule::class])
+@Subcomponent
 interface LockScreenComponent {
 
   fun inject(activity: LockScreenActivity)
 
-  fun inject(fragment: LockScreenPatternFragment)
+  @CheckResult
+  fun plusFragmentComponent(): LockScreenFragmentComponent
 
-  fun inject(fragment: LockScreenTextFragment)
+  @Subcomponent.Builder
+  interface Builder {
+
+    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+
+    @BindsInstance fun packageName(@Named("locked_package_name") packageName: String): Builder
+
+    @BindsInstance fun activityName(@Named("locked_activity_name") activityName: String): Builder
+
+    @BindsInstance fun realName(@Named("locked_real_name") realName: String): Builder
+
+    fun build(): LockScreenComponent
+  }
+
+  @Subcomponent
+  interface LockScreenFragmentComponent {
+
+    fun inject(fragment: LockScreenPatternFragment)
+
+    fun inject(fragment: LockScreenTextFragment)
+
+  }
 }

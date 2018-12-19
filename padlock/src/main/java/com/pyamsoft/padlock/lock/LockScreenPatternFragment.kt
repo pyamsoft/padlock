@@ -27,6 +27,7 @@ import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
+import com.pyamsoft.padlock.lock.LockScreenComponent.LockScreenFragmentComponent
 
 class LockScreenPatternFragment : LockScreenBaseFragment() {
 
@@ -97,7 +98,7 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
     // No hints for pattern fragment
   }
 
-  override fun injectInto(injector: LockScreenComponent) {
+  override fun injectInto(injector: LockScreenFragmentComponent) {
     injector.inject(this)
   }
 

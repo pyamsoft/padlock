@@ -59,6 +59,8 @@ class LockScreenActivity : ActivityBase() {
   private lateinit var ignoreTimes: MutableList<Long>
   private lateinit var lockedRealName: String
 
+  private lateinit var lockScreenComponent: LockScreenComponent
+
   private val home: Intent = Intent(Intent.ACTION_MAIN)
 
   private var lockedSystem: Boolean = false
@@ -121,16 +123,28 @@ class LockScreenActivity : ActivityBase() {
     return ignoreTimes[index]
   }
 
+  override fun getSystemService(name: String): Any {
+    if (Injector.name == name) {
+      return lockScreenComponent
+    } else {
+      return super.getSystemService(name)
+    }
+  }
+
   @CallSuper
   override fun onCreate(savedInstanceState: Bundle?) {
     overridePendingTransition(0, 0)
     preInjectOnCreate()
 
-    Injector.obtain<PadLockComponent>(applicationContext)
-        .plusLockScreenComponent(
-            LockEntryModule(this, lockedPackageName, lockedActivityName, lockedRealName)
-        )
-        .inject(this)
+    lockScreenComponent = Injector.obtain<PadLockComponent>(applicationContext)
+        .plusLockScreenComponent()
+        .owner(this)
+        .packageName(lockedPackageName)
+        .activityName(lockedActivityName)
+        .realName(lockedRealName)
+        .build()
+
+    lockScreenComponent.inject(this)
 
     if (theming.isDarkTheme()) {
       setTheme(R.style.Theme_PadLock_Dark_Lock)

@@ -28,6 +28,7 @@ import androidx.annotation.CheckResult
 import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
+import com.pyamsoft.padlock.lock.LockScreenComponent.LockScreenFragmentComponent
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.util.tintWith
@@ -158,7 +159,7 @@ class LockScreenTextFragment : LockScreenBaseFragment() {
     binding.lockDisplayHint.visibility = View.VISIBLE
   }
 
-  override fun injectInto(injector: LockScreenComponent) {
+  override fun injectInto(injector: LockScreenFragmentComponent) {
     injector.inject(this)
   }
 

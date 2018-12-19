@@ -32,7 +32,6 @@ import com.pyamsoft.padlock.list.LockListSingletonProvider
 import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
 import com.pyamsoft.padlock.list.info.LockInfoSingletonProvider
 import com.pyamsoft.padlock.list.modify.LockStateModule
-import com.pyamsoft.padlock.lock.LockEntryModule
 import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.LockSingletonModule
 import com.pyamsoft.padlock.lock.LockSingletonProvider
@@ -107,7 +106,7 @@ interface PadLockComponent {
   fun plusLockInfoComponent(provider: LockInfoProvider): LockInfoComponent
 
   @CheckResult
-  fun plusLockScreenComponent(entryModule: LockEntryModule): LockScreenComponent
+  fun plusLockScreenComponent(): LockScreenComponent.Builder
 
   @CheckResult
   fun plusSettingsComponent(): SettingsComponent.Builder

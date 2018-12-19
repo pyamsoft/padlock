@@ -23,12 +23,12 @@ import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.Injector
-import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_ACTIVITY_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_IS_SYSTEM
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_PACKAGE_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_REAL_NAME
+import com.pyamsoft.padlock.lock.LockScreenComponent.LockScreenFragmentComponent
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
@@ -36,7 +36,6 @@ import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
-import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -97,12 +96,8 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    val injector = Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusLockScreenComponent(
-            LockEntryModule(
-                viewLifecycleOwner, lockedPackageName, lockedActivityName, lockedRealName
-            )
-        )
+    val injector = Injector.obtain<LockScreenComponent>(requireActivity())
+        .plusFragmentComponent()
     injectInto(injector)
 
     // Base provides no view
@@ -155,7 +150,7 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
 
   protected abstract fun onDisplayHint(hint: String)
 
-  protected abstract fun injectInto(injector: LockScreenComponent)
+  protected abstract fun injectInto(injector: LockScreenFragmentComponent)
 
   companion object {
 

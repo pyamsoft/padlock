@@ -31,9 +31,9 @@ import javax.inject.Named
 class LockViewModel @Inject internal constructor(
   private val enforcer: Enforcer,
   private val interactor: LockEntryInteractor,
-  @param:Named("package_name") private val packageName: String,
-  @param:Named("activity_name") private val activityName: String,
-  @param:Named("real_name") private val realName: String
+  @param:Named("locked_package_name") private val packageName: String,
+  @param:Named("locked_activity_name") private val activityName: String,
+  @param:Named("locked_real_name") private val realName: String
 ) {
 
   @CheckResult
