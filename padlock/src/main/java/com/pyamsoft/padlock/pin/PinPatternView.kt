@@ -1,9 +1,8 @@
 package com.pyamsoft.padlock.pin
 
 import com.andrognito.patternlockview.PatternLockView
-import com.pyamsoft.pydroid.ui.app.BaseScreen
 
-interface PinPatternView : BaseScreen {
+interface PinPatternView : PinBaseView {
 
   fun onPatternEntry(
     onPattern: (list: List<PatternLockView.Dot>) -> Unit,
@@ -14,16 +13,8 @@ interface PinPatternView : BaseScreen {
 
   fun setPatternWrong()
 
-  fun clearDisplay()
-
   fun infoPatternNotLongEnough()
 
   fun infoPatternNeedsRepeat()
-
-  fun onPinCheckError()
-
-  fun onInvalidPin()
-
-  fun onPinSubmitError(error: Throwable)
 
 }

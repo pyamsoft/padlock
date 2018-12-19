@@ -163,38 +163,32 @@ class PinDialog : ToolbarDialog() {
       pinEntryToolbar.title = "PIN"
       pinEntryToolbar.setNavigationOnClickListener(DebouncedOnClickListener.create { dismiss() })
 
-      // Set up icon as black
-      if (finishOnDismiss) {
-        // Load a custom X icon if dismissing the dialog closes the activity
-        imageLoader.load(R.drawable.ic_close_24dp)
-            .into(object : ImageTarget<Drawable> {
-              override fun clear() {
-                pinEntryToolbar.navigationIcon = null
-              }
+      // Load a custom X icon
+      pinEntryToolbar.setUpEnabled(true)
+      imageLoader.load(R.drawable.ic_close_24dp)
+          .into(object : ImageTarget<Drawable> {
+            override fun clear() {
+              pinEntryToolbar.navigationIcon = null
+            }
 
-              override fun setError(error: Drawable?) {
-                pinEntryToolbar.navigationIcon = error
-              }
+            override fun setError(error: Drawable?) {
+              pinEntryToolbar.navigationIcon = error
+            }
 
-              override fun setImage(image: Drawable) {
-                applyBackNavigationIcon(image)
-              }
+            override fun setImage(image: Drawable) {
+              applyBackNavigationIcon(image)
+            }
 
-              override fun setPlaceholder(placeholder: Drawable?) {
-                pinEntryToolbar.navigationIcon = placeholder
-              }
+            override fun setPlaceholder(placeholder: Drawable?) {
+              pinEntryToolbar.navigationIcon = placeholder
+            }
 
-              override fun view(): View {
-                return pinEntryToolbar
-              }
+            override fun view(): View {
+              return pinEntryToolbar
+            }
 
-            })
-            .bind(viewLifecycleOwner)
-      } else {
-        // Otherwise the usual back arrow is fine
-        pinEntryToolbar.setUpEnabled(true)
-        pinEntryToolbar.navigationIcon?.also { applyBackNavigationIcon(it) }
-      }
+          })
+          .bind(viewLifecycleOwner)
 
       // Inflate menu
       pinEntryToolbar.inflateMenu(R.menu.pin_menu)
