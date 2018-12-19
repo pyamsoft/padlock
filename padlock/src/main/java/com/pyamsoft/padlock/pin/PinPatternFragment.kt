@@ -21,30 +21,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
-import androidx.core.content.ContextCompat
-import androidx.core.content.withStyledAttributes
 import com.andrognito.patternlockview.PatternLockView
-import com.andrognito.patternlockview.listener.PatternLockViewListener
-import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
+import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.helper.cellPatternToString
-import com.pyamsoft.pydroid.ui.app.fragment.requireView
-import com.pyamsoft.pydroid.ui.theme.Theming
-import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
 import java.util.ArrayList
 import javax.inject.Inject
 
 class PinPatternFragment : PinBaseFragment() {
 
-  @field:Inject internal lateinit var theming: Theming
+  @field:Inject internal lateinit var pinView: PinPatternView
 
-  private lateinit var binding: FragmentLockScreenPatternBinding
   private val cellPattern: MutableList<PatternLockView.Dot> = ArrayList()
   private val repeatCellPattern: MutableList<PatternLockView.Dot> = ArrayList()
-  private var nextButtonOnClickRunnable: (() -> Boolean) = { false }
+  private var nextButtonOnClickRunnable: (() -> Unit)? = null
   private var patternText = ""
-  private var listener: PatternLockViewListener? = null
   private var repeatPattern = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,9 +56,23 @@ class PinPatternFragment : PinBaseFragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    Injector.obtain<PadLockComponent>(requireActivity().applicationContext)
+        .plusPinPatternComponent(PinPatternProvider(requireActivity(), inflater, container))
+        .inject(this)
+
     super.onCreateView(inflater, container, savedInstanceState)
-    binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
-    return binding.root
+
+    pinView.create()
+
+    return pinView.root()
+  }
+
+  private fun clearPattern() {
+    if (repeatPattern) {
+      repeatCellPattern.clear()
+    } else {
+      cellPattern.clear()
+    }
   }
 
   override fun onViewCreated(
@@ -74,83 +80,28 @@ class PinPatternFragment : PinBaseFragment() {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    setupLockView()
-
-    listener = object : PatternLockViewListener {
-
-      private fun clearPattern() {
-        if (repeatPattern) {
-          repeatCellPattern.clear()
-        } else {
-          cellPattern.clear()
-        }
-      }
-
-      override fun onStarted() {
-        binding.patternLock.setViewMode(PatternLockView.PatternViewMode.CORRECT)
-        clearPattern()
-      }
-
-      override fun onProgress(list: List<PatternLockView.Dot>) {
-      }
-
-      override fun onComplete(list: List<PatternLockView.Dot>) {
-        if (!repeatPattern) {
-          if (list.size < MINIMUM_PATTERN_LENGTH) {
-            binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
+    pinView.onPatternEntry(
+        onPattern = {
+          if (!repeatPattern) {
+            if (it.size < MINIMUM_PATTERN_LENGTH) {
+              pinView.setPatternWrong()
+            }
           }
-        }
 
-        Timber.d("onPatternDetected")
-        val cellList: MutableList<PatternLockView.Dot> = if (repeatPattern) {
-          // Assign to cellList
-          repeatCellPattern
-        } else {
-          // Assign to cellList
-          cellPattern
-        }
-
-        cellList.clear()
-        cellList.addAll(list)
-      }
-
-      override fun onCleared() {
-        clearPattern()
-      }
-    }
-
-    binding.patternLock.isTactileFeedbackEnabled = false
-    binding.patternLock.addPatternLockListener(listener)
+          Timber.d("onPatternDetected")
+          val cellList: MutableList<PatternLockView.Dot>
+          if (repeatPattern) {
+            cellList = repeatCellPattern
+          } else {
+            cellList = cellPattern
+          }
+          cellList.clear()
+          cellList.addAll(it)
+        },
+        onClear = { clearPattern() }
+    )
 
     checkMasterPin()
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    if (listener != null) {
-      binding.patternLock.removePatternLockListener(listener)
-      listener = null
-    }
-    binding.unbind()
-  }
-
-  private fun setupLockView() {
-    val theme: Int
-    if (theming.isDarkTheme()) {
-      theme = R.style.Theme_PadLock_Dark_Dialog
-    } else {
-      theme = R.style.Theme_PadLock_Light_Dialog
-    }
-
-    requireActivity().withStyledAttributes(
-        theme,
-        intArrayOf(android.R.attr.colorForeground)
-    ) {
-      val colorId = getResourceId(0, 0)
-      if (colorId != 0) {
-        binding.patternLock.normalStateColor = ContextCompat.getColor(requireActivity(), colorId)
-      }
-    }
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -160,70 +111,56 @@ class PinPatternFragment : PinBaseFragment() {
   }
 
   override fun clearDisplay() {
-    binding.patternLock.clearPattern()
+    pinView.clearDisplay()
   }
 
   override fun onMasterPinMissing() {
-    nextButtonOnClickRunnable = runnable@{
+    nextButtonOnClickRunnable = {
       if (repeatPattern) {
         Timber.d("Submit repeat attempt")
         // Submit
         val repeatText = cellPatternToString(repeatCellPattern)
         submitPin(repeatText)
-        // No follow up acton
-        return@runnable false
       } else {
         // process and show next
         if (cellPattern.size < MINIMUM_PATTERN_LENGTH) {
           Timber.d("Pattern is not long enough")
-          Snackbreak.short(binding.root, "Pattern is not long enough")
-              .show()
-          binding.patternLock.setViewMode(PatternLockView.PatternViewMode.WRONG)
-          return@runnable false
+          pinView.infoPatternNotLongEnough()
         } else {
           Timber.d("Submit initial attempt")
           patternText = cellPatternToString(cellPattern)
           repeatPattern = true
-          binding.patternLock.clearPattern()
-          Snackbreak.short(binding.root, "Please confirm pattern")
-              .show()
-          return@runnable false
+          pinView.infoPatternNeedsRepeat()
         }
       }
     }
   }
 
   override fun onMasterPinPresent() {
-    nextButtonOnClickRunnable = runnable@{
+    nextButtonOnClickRunnable = {
       patternText = cellPatternToString(cellPattern)
-      binding.patternLock.clearPattern()
+      pinView.clearDisplay()
       submitPin("")
-      return@runnable false
     }
   }
 
   override fun onSubmitPressed() {
-    Timber.d("Next button pressed, store pattern for re-entry")
-    nextButtonOnClickRunnable()
+    nextButtonOnClickRunnable?.let {
+      Timber.d("Next button pressed, store pattern for re-entry")
+      it()
+    }
   }
 
   override fun onCheckError() {
-    Snackbreak.short(requireView(), "Error checking PIN, please try again")
-        .show()
+    pinView.onPinCheckError()
   }
 
   override fun onInvalidPin() {
-    Snackbreak.short(requireView(), "Error incorrect PIN")
-        .show()
+    pinView.onInvalidPin()
   }
 
   override fun onSubmitError(error: Throwable) {
-    Snackbreak.short(requireView(), "Error submitting PIN, please try again")
-        .show()
-  }
-
-  override fun injectInto(injector: PinComponent) {
-    injector.inject(this)
+    pinView.onPinSubmitError(error)
   }
 
   private fun submitPin(repeatText: String) {

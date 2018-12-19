@@ -53,9 +53,9 @@ abstract class PinBaseFragment : ToolbarFragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    val injector = Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusPinComponent(PinModule(viewLifecycleOwner))
-    injectInto(injector)
+        .inject(this)
 
     return super.onCreateView(inflater, container, savedInstanceState)
   }
@@ -150,8 +150,6 @@ abstract class PinBaseFragment : ToolbarFragment() {
   protected abstract fun onSubmitError(error: Throwable)
 
   protected abstract fun onInvalidPin()
-
-  protected abstract fun injectInto(injector: PinComponent)
 
   abstract fun onSubmitPressed()
 }

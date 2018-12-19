@@ -19,10 +19,12 @@ package com.pyamsoft.padlock.purge
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.items.ModelAbstractItem
+import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.databinding.AdapterItemPurgeBinding
+import javax.inject.Inject
 
-internal class PurgeItem internal constructor(
+class PurgeItem internal constructor(
   packageName: String
 ) : ModelAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
     packageName
@@ -47,16 +49,22 @@ internal class PurgeItem internal constructor(
     holder.unbind()
   }
 
-  internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+  class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    private val binding = AdapterItemPurgeBinding.bind(itemView)
+    @field:Inject lateinit var view: PurgeItemView
+
+    init {
+      Injector.obtain<PadLockComponent>(itemView.context.applicationContext)
+          .plusPurgeItemComponent(PurgeItemProvider(itemView))
+          .inject(this)
+    }
 
     fun bind(model: String) {
-      binding.itemPurgeName.text = model
+      view.bind(model)
     }
 
     fun unbind() {
-      // Unbind any lifecycle related async processes here if needed.
+      view.unbind()
     }
   }
 }

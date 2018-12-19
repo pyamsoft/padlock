@@ -160,10 +160,6 @@ class PinTextFragment : PinBaseFragment() {
         .show()
   }
 
-  override fun injectInto(injector: PinComponent) {
-    injector.inject(this)
-  }
-
   private fun onRestoreInstanceState(savedInstanceState: Bundle) {
     Timber.d("onRestoreInstanceState")
     val attempt = savedInstanceState.getString(CODE_DISPLAY, null)

@@ -38,10 +38,14 @@ import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinModule
+import com.pyamsoft.padlock.pin.PinPatternComponent
+import com.pyamsoft.padlock.pin.PinPatternProvider
 import com.pyamsoft.padlock.pin.PinSingletonModule
 import com.pyamsoft.padlock.pin.PinSingletonProvider
 import com.pyamsoft.padlock.purge.PurgeAllDialog
 import com.pyamsoft.padlock.purge.PurgeComponent
+import com.pyamsoft.padlock.purge.PurgeItemComponent
+import com.pyamsoft.padlock.purge.PurgeItemProvider
 import com.pyamsoft.padlock.purge.PurgeProvider
 import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.purge.PurgeSingletonModule
@@ -50,7 +54,6 @@ import com.pyamsoft.padlock.receiver.BootReceiver
 import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.PauseComponent
-import com.pyamsoft.padlock.service.PauseModule
 import com.pyamsoft.padlock.service.PauseProvider
 import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.service.ServiceSingletonProvider
@@ -97,23 +100,29 @@ interface PadLockComponent {
   fun inject(viewHolder: LockListItem.ViewHolder)
 
   @CheckResult
-  fun plusLockListComponent(module: LockListProvider): ListListComponent
+  fun plusLockListComponent(provider: LockListProvider): ListListComponent
 
   @CheckResult
-  fun plusLockInfoComponent(module: LockInfoProvider): LockInfoComponent
+  fun plusLockInfoComponent(provider: LockInfoProvider): LockInfoComponent
 
   @CheckResult
   fun plusLockScreenComponent(entryModule: LockEntryModule): LockScreenComponent
 
   @CheckResult
-  fun plusSettingsComponent(module: SettingsProvider): SettingsComponent
+  fun plusSettingsComponent(provider: SettingsProvider): SettingsComponent
 
   @CheckResult
-  fun plusPauseComponent(module: PauseProvider): PauseComponent
+  fun plusPauseComponent(provider: PauseProvider): PauseComponent
 
   @CheckResult
-  fun plusPurgeComponent(module: PurgeProvider): PurgeComponent
+  fun plusPurgeComponent(provider: PurgeProvider): PurgeComponent
+
+  @CheckResult
+  fun plusPurgeItemComponent(provider: PurgeItemProvider): PurgeItemComponent
 
   @CheckResult
   fun plusPinComponent(module: PinModule): PinComponent
+
+  @CheckResult
+  fun plusPinPatternComponent(provider: PinPatternProvider): PinPatternComponent
 }
