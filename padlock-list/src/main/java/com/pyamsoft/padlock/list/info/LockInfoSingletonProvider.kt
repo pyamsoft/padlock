@@ -39,7 +39,6 @@ import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Named
 import javax.inject.Singleton
 
-@JvmSuppressWildcards
 @Module
 object LockInfoSingletonProvider {
 

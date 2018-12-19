@@ -139,11 +139,14 @@ class LockListFragment : ToolbarFragment() {
     savedInstanceState: Bundle?
   ): View? {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusLockListComponent(
-            LockListProvider(viewLifecycleOwner, object : ListDiffProvider<AppEntry> {
-              override fun data(): List<AppEntry> = Collections.unmodifiableList(adapter.models)
-            })
-        )
+        .plusLockListComponent()
+        .owner(viewLifecycleOwner)
+        .diffProvider(object : ListDiffProvider<AppEntry> {
+          override fun data(): List<AppEntry> {
+            return Collections.unmodifiableList(adapter.models)
+          }
+        })
+        .build()
         .inject(this)
 
     binding = FragmentLockListBinding.inflate(inflater, container, false)

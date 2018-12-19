@@ -96,13 +96,14 @@ class LockInfoDialog : ToolbarDialog() {
     savedInstanceState: Bundle?
   ): View? {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusLockInfoComponent(
-            LockInfoProvider(
-                viewLifecycleOwner, appPackageName, object : ListDiffProvider<ActivityEntry> {
-              override fun data(): List<ActivityEntry> =
-                Collections.unmodifiableList(adapter.models)
-            })
-        )
+        .plusLockInfoComponent()
+        .owner(viewLifecycleOwner)
+        .packageName(appPackageName)
+        .diffProvider(object : ListDiffProvider<ActivityEntry> {
+          override fun data(): List<ActivityEntry> =
+            Collections.unmodifiableList(adapter.models)
+        })
+        .build()
         .inject(this)
 
     binding = DialogLockInfoBinding.inflate(inflater, container, false)

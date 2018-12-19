@@ -16,10 +16,27 @@
 
 package com.pyamsoft.padlock.list
 
+import androidx.lifecycle.LifecycleOwner
+import com.pyamsoft.padlock.model.list.ActivityEntry
+import com.pyamsoft.padlock.model.list.ListDiffProvider
+import dagger.BindsInstance
 import dagger.Subcomponent
+import javax.inject.Named
 
-@Subcomponent(modules = [LockInfoProvider::class])
+@Subcomponent
 interface LockInfoComponent {
 
   fun inject(dialog: LockInfoDialog)
+
+  @Subcomponent.Builder
+  interface Builder {
+
+    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+
+    @BindsInstance fun diffProvider(diffProvider: ListDiffProvider<ActivityEntry>): Builder
+
+    @BindsInstance fun packageName(@Named("package_name") packageName: String): Builder
+
+    fun build(): LockInfoComponent
+  }
 }

@@ -40,7 +40,6 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
-@JvmSuppressWildcards
 class LockListViewModel @Inject internal constructor(
   private val enforcer: Enforcer,
   private val lockListInteractor: LockListInteractor,

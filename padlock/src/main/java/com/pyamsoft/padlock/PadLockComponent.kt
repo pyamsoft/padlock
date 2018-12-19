@@ -21,12 +21,10 @@ import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.base.BaseModule
 import com.pyamsoft.padlock.base.BaseProvider
 import com.pyamsoft.padlock.base.database.DatabaseProvider
-import com.pyamsoft.padlock.list.ListListComponent
 import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.LockInfoItem
-import com.pyamsoft.padlock.list.LockInfoProvider
+import com.pyamsoft.padlock.list.LockListComponent
 import com.pyamsoft.padlock.list.LockListItem
-import com.pyamsoft.padlock.list.LockListProvider
 import com.pyamsoft.padlock.list.LockListSingletonModule
 import com.pyamsoft.padlock.list.LockListSingletonProvider
 import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
@@ -100,10 +98,10 @@ interface PadLockComponent {
   fun inject(viewHolder: LockListItem.ViewHolder)
 
   @CheckResult
-  fun plusLockListComponent(provider: LockListProvider): ListListComponent
+  fun plusLockListComponent(): LockListComponent.Builder
 
   @CheckResult
-  fun plusLockInfoComponent(provider: LockInfoProvider): LockInfoComponent
+  fun plusLockInfoComponent(): LockInfoComponent.Builder
 
   @CheckResult
   fun plusLockScreenComponent(): LockScreenComponent.Builder

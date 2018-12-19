@@ -33,7 +33,6 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-@JvmSuppressWildcards
 class LockInfoViewModel @Inject internal constructor(
   private val enforcer: Enforcer,
   private val lockWhitelistedBus: Listener<LockWhitelistedEvent>,
