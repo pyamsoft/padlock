@@ -59,7 +59,6 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 internal class LockServiceInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   private val context: Context,

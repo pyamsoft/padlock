@@ -30,7 +30,6 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 internal class ServiceManagerImpl @Inject internal constructor(
   context: Context,
   private val enforcer: Enforcer,

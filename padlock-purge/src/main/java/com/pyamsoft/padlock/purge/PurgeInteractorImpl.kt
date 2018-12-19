@@ -26,7 +26,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton
 internal class PurgeInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   @Named("interactor_purge") private val db: PurgeInteractor,

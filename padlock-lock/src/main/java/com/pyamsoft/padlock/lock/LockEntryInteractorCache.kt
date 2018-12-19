@@ -26,7 +26,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton
 internal class LockEntryInteractorCache @Inject internal constructor(
   private val enforcer: Enforcer,
   @param:Named("cache_lock_list") private val lockListCache: Cache,

@@ -24,7 +24,6 @@ import com.pyamsoft.pydroid.loader.Loader
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 class AppIconLoader @Inject internal constructor(
   private val packageActivityManager: PackageActivityManager
 ) {

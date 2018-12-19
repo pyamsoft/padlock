@@ -43,7 +43,6 @@ import java.util.ArrayList
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 internal class LockInfoInteractorDb @Inject internal constructor(
   private val enforcer: Enforcer,
   private val queryDao: EntryQueryDao,

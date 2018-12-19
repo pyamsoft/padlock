@@ -12,7 +12,6 @@ import com.pyamsoft.padlock.api.service.ScreenStateObserver
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 internal class ScreenStateObserverImpl @Inject internal constructor(
   private val context: Context
 ) : BroadcastReceiver(), ScreenStateObserver {

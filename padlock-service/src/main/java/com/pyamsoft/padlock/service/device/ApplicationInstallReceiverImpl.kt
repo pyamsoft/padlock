@@ -42,7 +42,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton
 internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   private val context: Context,
   private val packageManagerWrapper: PackageLabelManager,
@@ -85,13 +84,8 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
     }
 
     // Delete old unversioned channel
-    if (notificationManager.getNotificationChannel(
-            OLD_CHANNEL_ID
-        ) != null
-    ) {
-      notificationManager.deleteNotificationChannel(
-          OLD_CHANNEL_ID
-      )
+    if (notificationManager.getNotificationChannel(OLD_CHANNEL_ID) != null) {
+      notificationManager.deleteNotificationChannel(OLD_CHANNEL_ID)
     }
 
     Timber.d("Create notification channel with id: %s", notificationChannel.id)

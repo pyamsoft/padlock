@@ -29,7 +29,6 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 internal class LockStateModifyInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   private val insertDao: EntryInsertDao,

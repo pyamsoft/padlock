@@ -40,7 +40,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton
 internal class SettingsInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   private val deleteDao: EntryDeleteDao,

@@ -40,7 +40,6 @@ import java.util.ArrayList
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 internal class PackageManagerWrapperImpl @Inject internal constructor(
   context: Context,
   private val enforcer: Enforcer,

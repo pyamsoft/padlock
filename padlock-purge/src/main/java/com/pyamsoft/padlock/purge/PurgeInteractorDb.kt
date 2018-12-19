@@ -30,7 +30,6 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 internal class PurgeInteractorDb @Inject internal constructor(
   private val enforcer: Enforcer,
   private val applicationManager: PackageApplicationManager,

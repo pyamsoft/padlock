@@ -26,7 +26,6 @@ import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 internal class LockScreenInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   private val lockPassed: LockPassed,

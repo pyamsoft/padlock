@@ -25,7 +25,6 @@ import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 internal class MasterPinInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   private val preferences: MasterPinPreferences

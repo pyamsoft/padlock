@@ -31,7 +31,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Singleton
 internal class LockListInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   @param:Named("interactor_lock_list") private val db: LockListInteractor,

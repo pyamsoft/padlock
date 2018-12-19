@@ -44,7 +44,6 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 internal class LockListInteractorDb @Inject internal constructor(
   private val enforcer: Enforcer,
   private val queryDao: EntryQueryDao,
