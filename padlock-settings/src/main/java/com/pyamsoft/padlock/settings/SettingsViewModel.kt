@@ -132,7 +132,7 @@ class SettingsViewModel @Inject internal constructor(
         .observeOn(AndroidSchedulers.mainThread())
         .doOnSubscribe { onSwitchBegin() }
         .doAfterTerminate { onSwitchComplete() }
-        .subscribe({ onSwitchSuccess(it) }, {
+        .subscribe({ onSwitchSuccess(!it) }, {
           Timber.e(it, "Error switching lock type")
           onSwitchError(it)
         })

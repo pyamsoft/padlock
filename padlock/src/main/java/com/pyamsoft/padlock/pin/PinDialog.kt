@@ -91,7 +91,7 @@ class PinDialog : ToolbarDialog() {
   ) {
     super.onViewCreated(view, savedInstanceState)
 
-    pinView.onToolbarMenuItemClicked { dismiss() }
+    pinView.onToolbarNavigationClicked { dismiss() }
 
     pinView.onToolbarMenuItemClicked {
       when (it) {
