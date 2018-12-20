@@ -34,6 +34,7 @@ import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
+import com.pyamsoft.pydroid.ui.app.fragment.requireView
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
@@ -41,8 +42,8 @@ import javax.inject.Inject
 
 abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment() {
 
-  @field:Inject
-  internal lateinit var viewModel: LockViewModel
+  @field:Inject internal lateinit var viewModel: LockViewModel
+  @field:Inject internal lateinit var toolbarView: LockToolbarView
 
   private lateinit var lockedActivityName: String
   private lateinit var lockedPackageName: String
@@ -56,22 +57,10 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
   private fun showSnackbarWithText(text: String) {
     val activity = activity
     if (activity is LockScreenActivity) {
-      Snackbreak.short(activity.getRootView(), text)
+      Snackbreak.short(requireView(), text)
           .show()
     }
   }
-
-  private val isExcluded: Boolean
-    @CheckResult get() {
-      val activity = activity
-      return activity is LockScreenActivity && activity.isExcluded()
-    }
-
-  private val selectedIgnoreTime: Long
-    @CheckResult get() {
-      val activity = activity
-      return (activity as? LockScreenActivity)?.getIgnoreTimeFromSelectedIndex() ?: 0
-    }
 
   @CallSuper
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,7 +106,9 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
 
   protected fun submitPin(currentAttempt: String) {
     submitDisposable =
-        viewModel.submit(lockedCode, currentAttempt, isLockedSystem, isExcluded, selectedIgnoreTime,
+        viewModel.submit(lockedCode, currentAttempt, isLockedSystem,
+            toolbarView.isExcludeChecked(),
+            toolbarView.getSelectedIgnoreTime(),
             onSubmitSuccess = {
               Timber.d("PIN submit success")
               clearDisplay()

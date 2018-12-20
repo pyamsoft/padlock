@@ -16,13 +16,20 @@
 
 package com.pyamsoft.padlock.lock
 
+import android.os.Bundle
 import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
+import com.pyamsoft.padlock.lock.LockScreenComponent.LockScreenModule
+import com.pyamsoft.padlock.lock.LockScreenComponent.LockScreenProvider
+import dagger.Binds
 import dagger.BindsInstance
+import dagger.Module
+import dagger.Provides
 import dagger.Subcomponent
 import javax.inject.Named
 
-@Subcomponent
+@LockScreen
+@Subcomponent(modules = [LockScreenModule::class, LockScreenProvider::class])
 interface LockScreenComponent {
 
   fun inject(activity: LockScreenActivity)
@@ -33,7 +40,9 @@ interface LockScreenComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+    @BindsInstance fun activity(activity: LockScreenActivity): Builder
+
+    @BindsInstance fun savedInstanceState(savedInstanceState: Bundle?): Builder
 
     @BindsInstance fun packageName(@Named("locked_package_name") packageName: String): Builder
 
@@ -41,7 +50,29 @@ interface LockScreenComponent {
 
     @BindsInstance fun realName(@Named("locked_real_name") realName: String): Builder
 
+    @BindsInstance fun lockedIcon(lockedIcon: Int): Builder
+
     fun build(): LockScreenComponent
+  }
+
+  @Module
+  abstract class LockScreenModule {
+
+    @Binds
+    internal abstract fun bindToolbarView(impl: LockScreenViewImpl): LockToolbarView
+
+    @Binds
+    internal abstract fun bindView(impl: LockScreenViewImpl): LockScreenView
+  }
+
+  @Module
+  object LockScreenProvider {
+
+    @JvmStatic
+    @Provides
+    fun owner(activity: LockScreenActivity): LifecycleOwner {
+      return activity
+    }
   }
 
   @Subcomponent

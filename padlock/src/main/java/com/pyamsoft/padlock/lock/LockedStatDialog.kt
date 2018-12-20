@@ -29,7 +29,6 @@ import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 
 class LockedStatDialog : ToolbarDialog() {
 
-  private lateinit var displayedLabel: String
   private lateinit var activityName: String
   private lateinit var packageName: String
   private lateinit var realName: String
@@ -39,14 +38,12 @@ class LockedStatDialog : ToolbarDialog() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     requireArguments().also {
-      displayedLabel = it.getString(LABEL, "")
       packageName = it.getString(PKG_NAME, "")
       activityName = it.getString(ACT_NAME, "")
       realName = it.getString(REAL_NAME, "")
       system = it.getBoolean(SYSTEM)
     }
 
-    require(displayedLabel.isNotBlank())
     require(packageName.isNotBlank())
     require(activityName.isNotBlank())
     require(realName.isNotBlank())
@@ -74,7 +71,7 @@ class LockedStatDialog : ToolbarDialog() {
   ) {
     super.onViewCreated(view, savedInstanceState)
     binding.apply {
-      statDisplayName.text = displayedLabel
+      statDisplayName.text = realName
       statPackageName.text = packageName
       statRealName.text = realName
       statLockedBy.text = activityName
@@ -93,12 +90,10 @@ class LockedStatDialog : ToolbarDialog() {
     private const val ACT_NAME = "actname"
     private const val REAL_NAME = "realname"
     private const val SYSTEM = "system"
-    private const val LABEL = "label"
 
     @CheckResult
     @JvmStatic
     fun newInstance(
-      displayedLabel: String,
       packageName: String,
       activityName: String,
       realName: String,
@@ -106,7 +101,6 @@ class LockedStatDialog : ToolbarDialog() {
     ): LockedStatDialog {
       return LockedStatDialog().apply {
         arguments = Bundle().apply {
-          putString(LABEL, displayedLabel)
           putString(PKG_NAME, packageName)
           putString(ACT_NAME, activityName)
           putString(REAL_NAME, realName)
