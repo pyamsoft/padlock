@@ -61,8 +61,7 @@ class LockInfoExplanationDialog : ToolbarDialog() {
   override fun onResume() {
     super.onResume()
     // The dialog is super small for some reason. We have to set the size manually, in onResume
-    val window = dialog.window
-    window?.apply {
+    dialog.window?.apply {
       setLayout(
           WindowManager.LayoutParams.MATCH_PARENT,
           WindowManager.LayoutParams.WRAP_CONTENT
