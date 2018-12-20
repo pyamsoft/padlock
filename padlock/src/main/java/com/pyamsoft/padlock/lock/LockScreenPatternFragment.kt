@@ -21,28 +21,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
-import androidx.core.content.ContextCompat
-import com.andrognito.patternlockview.PatternLockView
-import com.andrognito.patternlockview.listener.PatternLockViewListener
-import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.padlock.helper.cellPatternToString
-import com.pyamsoft.padlock.lock.LockScreenComponent.LockScreenFragmentComponent
+import javax.inject.Inject
 
 class LockScreenPatternFragment : LockScreenBaseFragment() {
 
-  private lateinit var binding: FragmentLockScreenPatternBinding
-  private var listener: PatternLockViewListener? = null
+  @field:Inject internal lateinit var lockScreen: LockScreenPatternView
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    super.onCreateView(inflater, container, savedInstanceState)
-    binding = FragmentLockScreenPatternBinding.inflate(inflater, container, false)
+    inject()
+        .owner(viewLifecycleOwner)
+        .inflater(inflater)
+        .container(container)
+        .savedInstanceState(savedInstanceState)
+        .build()
+        .inject(this)
 
-    return binding.root
+    lockScreen.create()
+    return lockScreen.root()
+  }
+
+  override fun showSnackbarWithText(text: String) {
+    lockScreen.showSnackbar(text)
   }
 
   override fun onViewCreated(
@@ -50,56 +54,23 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    listener = object : PatternLockViewListener {
-      override fun onStarted() {
-      }
-
-      override fun onProgress(list: List<PatternLockView.Dot>) {
-      }
-
-      override fun onComplete(list: List<PatternLockView.Dot>) {
-        submitPin(cellPatternToString(list))
-        binding.patternLock.clearPattern()
-      }
-
-      override fun onCleared() {
-      }
+    lockScreen.onPatternComplete {
+      submitPin(cellPatternToString(it))
+      clearDisplay()
     }
-
-    binding.patternLock.isTactileFeedbackEnabled = false
-    binding.patternLock.addPatternLockListener(listener)
-
-    // Dots always white
-    binding.patternLock.normalStateColor = ContextCompat.getColor(requireContext(), R.color.white)
   }
 
   override fun onStart() {
     super.onStart()
-    binding.patternLock.clearPattern()
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    if (listener != null) {
-      binding.patternLock.removePatternLockListener(listener)
-      listener = null
-    }
-    binding.unbind()
-  }
-
-  override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+    clearDisplay()
   }
 
   override fun clearDisplay() {
-    binding.patternLock.clearPattern()
+    lockScreen.clearDisplay()
   }
 
   override fun onDisplayHint(hint: String) {
     // No hints for pattern fragment
-  }
-
-  override fun injectInto(injector: LockScreenFragmentComponent) {
-    injector.inject(this)
   }
 
   companion object {
@@ -109,18 +80,11 @@ class LockScreenPatternFragment : LockScreenBaseFragment() {
     @JvmStatic
     @CheckResult
     fun newInstance(
-      lockedPackageName: String,
-      lockedActivityName: String,
       lockedCode: String?,
-      lockedRealName: String,
       lockedSystem: Boolean
     ): LockScreenPatternFragment {
       val fragment = LockScreenPatternFragment()
-      fragment.arguments = LockScreenBaseFragment.buildBundle(
-          lockedPackageName,
-          lockedActivityName,
-          lockedCode, lockedRealName, lockedSystem
-      )
+      fragment.arguments = LockScreenBaseFragment.buildBundle(lockedCode, lockedSystem)
       return fragment
     }
   }

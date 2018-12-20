@@ -20,8 +20,8 @@ import javax.inject.Named
 @LockScreen
 internal class LockScreenViewImpl @Inject internal constructor(
   @Named("locked_package_name") private val lockedPackageName: String,
+  @Named("activity_bundle") private val savedInstanceState: Bundle?,
   private val activity: LockScreenActivity,
-  private val savedInstanceState: Bundle?,
   private val appIconLoader: AppIconLoader,
   private val theming: Theming,
   private val lockedIcon: Int

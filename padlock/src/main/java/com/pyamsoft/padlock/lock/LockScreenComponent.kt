@@ -18,31 +18,28 @@ package com.pyamsoft.padlock.lock
 
 import android.os.Bundle
 import androidx.annotation.CheckResult
-import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.lock.LockScreenComponent.LockScreenModule
-import com.pyamsoft.padlock.lock.LockScreenComponent.LockScreenProvider
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
-import dagger.Provides
 import dagger.Subcomponent
 import javax.inject.Named
 
 @LockScreen
-@Subcomponent(modules = [LockScreenModule::class, LockScreenProvider::class])
+@Subcomponent(modules = [LockScreenModule::class])
 interface LockScreenComponent {
 
   fun inject(activity: LockScreenActivity)
 
   @CheckResult
-  fun plusFragmentComponent(): LockScreenFragmentComponent
+  fun plusFragmentComponent(): LockScreenFragmentComponent.Builder
 
   @Subcomponent.Builder
   interface Builder {
 
     @BindsInstance fun activity(activity: LockScreenActivity): Builder
 
-    @BindsInstance fun savedInstanceState(savedInstanceState: Bundle?): Builder
+    @BindsInstance fun savedInstanceState(@Named("activity_bundle") savedInstanceState: Bundle?): Builder
 
     @BindsInstance fun packageName(@Named("locked_package_name") packageName: String): Builder
 
@@ -65,22 +62,4 @@ interface LockScreenComponent {
     internal abstract fun bindView(impl: LockScreenViewImpl): LockScreenView
   }
 
-  @Module
-  object LockScreenProvider {
-
-    @JvmStatic
-    @Provides
-    fun owner(activity: LockScreenActivity): LifecycleOwner {
-      return activity
-    }
-  }
-
-  @Subcomponent
-  interface LockScreenFragmentComponent {
-
-    fun inject(fragment: LockScreenPatternFragment)
-
-    fun inject(fragment: LockScreenTextFragment)
-
-  }
 }

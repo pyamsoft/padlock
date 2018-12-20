@@ -17,9 +17,7 @@
 package com.pyamsoft.padlock.lock
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.Injector
@@ -28,14 +26,11 @@ import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_IS_SYSTEM
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_PACKAGE_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_REAL_NAME
-import com.pyamsoft.padlock.lock.LockScreenComponent.LockScreenFragmentComponent
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
-import com.pyamsoft.pydroid.ui.app.fragment.requireView
-import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 import javax.inject.Inject
@@ -45,52 +40,41 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
   @field:Inject internal lateinit var viewModel: LockViewModel
   @field:Inject internal lateinit var toolbarView: LockToolbarView
 
-  private lateinit var lockedActivityName: String
-  private lateinit var lockedPackageName: String
-  private lateinit var lockedRealName: String
+  private var isComponentInjected = false
+
   private var lockedCode: String? = null
   private var isLockedSystem: Boolean = false
 
   private var submitDisposable by singleDisposable()
   private var hintDisposable by singleDisposable()
 
-  private fun showSnackbarWithText(text: String) {
-    val activity = activity
-    if (activity is LockScreenActivity) {
-      Snackbreak.short(requireView(), text)
-          .show()
-    }
-  }
-
   @CallSuper
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     requireArguments().let {
-      lockedPackageName = it.getString(ENTRY_PACKAGE_NAME, "")
-      lockedActivityName = it.getString(ENTRY_ACTIVITY_NAME, "")
-      lockedRealName = it.getString(ENTRY_REAL_NAME, "")
       lockedCode = it.getString(ENTRY_LOCK_CODE)
       isLockedSystem = it.getBoolean(ENTRY_IS_SYSTEM, false)
     }
-
-    require(lockedPackageName.isNotBlank())
-    require(lockedActivityName.isNotBlank())
-    require(lockedRealName.isNotBlank())
   }
 
   @CallSuper
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
+  override fun onViewCreated(
+    view: View,
     savedInstanceState: Bundle?
-  ): View? {
-    val injector = Injector.obtain<LockScreenComponent>(requireActivity())
-        .plusFragmentComponent()
-    injectInto(injector)
+  ) {
+    super.onViewCreated(view, savedInstanceState)
 
-    // Base provides no view
-    return null
+    if (!isComponentInjected) {
+      throw RuntimeException("Must inject component before onViewCreated()")
+    }
+  }
+
+  @CheckResult
+  protected fun inject(): LockScreenFragmentComponent.Builder {
+    isComponentInjected = true
+    return Injector.obtain<LockScreenComponent>(requireActivity())
+        .plusFragmentComponent()
   }
 
   override fun onResume() {
@@ -116,49 +100,38 @@ abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment(
             onSubmitFailure = {
               Timber.w("PIN submit failure")
               clearDisplay()
-
               hintDisposable = viewModel.displayLockedHint { onDisplayHint(it) }
               showSnackbarWithText("Error: Invalid PIN")
             },
             onSubmitResultPostUnlock = {
               Timber.d("Unlock posted")
               clearDisplay()
-
               requireActivity().finish()
             },
             onSubmitResultAttemptLock = {
               Timber.w("Locked out after bad attempts")
               clearDisplay()
-
               showSnackbarWithText("This entry is temporarily locked")
             }
         )
   }
 
-  internal abstract fun onRestoreInstanceState(savedInstanceState: Bundle)
-
   protected abstract fun clearDisplay()
 
   protected abstract fun onDisplayHint(hint: String)
 
-  protected abstract fun injectInto(injector: LockScreenFragmentComponent)
+  protected abstract fun showSnackbarWithText(text: String)
 
   companion object {
 
     @JvmStatic
     @CheckResult
     internal fun buildBundle(
-      lockedPackageName: String,
-      lockedActivityName: String,
       lockedCode: String?,
-      lockedRealName: String,
       lockedSystem: Boolean
     ): Bundle {
       val args = Bundle()
-      args.putString(ENTRY_PACKAGE_NAME, lockedPackageName)
-      args.putString(ENTRY_ACTIVITY_NAME, lockedActivityName)
       args.putString(ENTRY_LOCK_CODE, lockedCode)
-      args.putString(ENTRY_REAL_NAME, lockedRealName)
       args.putBoolean(ENTRY_IS_SYSTEM, lockedSystem)
       return args
     }

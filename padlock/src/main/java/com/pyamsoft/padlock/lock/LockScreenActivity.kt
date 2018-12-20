@@ -174,19 +174,15 @@ class LockScreenActivity : ActivityBase() {
 
   private fun onTypePattern() {
     pushFragment(
-        LockScreenPatternFragment.newInstance(
-            lockedPackageName, lockedActivityName,
-            lockedCode, lockedRealName, lockedSystem
-        ), LockScreenPatternFragment.TAG
+        LockScreenPatternFragment.newInstance(lockedCode, lockedSystem),
+        LockScreenPatternFragment.TAG
     )
   }
 
   private fun onTypeText() {
     pushFragment(
-        LockScreenTextFragment.newInstance(
-            lockedPackageName, lockedActivityName,
-            lockedCode, lockedRealName, lockedSystem
-        ), LockScreenTextFragment.TAG
+        LockScreenTextFragment.newInstance(lockedCode, lockedSystem),
+        LockScreenTextFragment.TAG
     )
   }
 
@@ -221,13 +217,9 @@ class LockScreenActivity : ActivityBase() {
     overridePendingTransition(0, 0)
   }
 
-  override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-    val lockScreenText: Fragment? =
-      supportFragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
-    if (lockScreenText is LockScreenBaseFragment) {
-      lockScreenText.onRestoreInstanceState(savedInstanceState)
-    }
-    super.onRestoreInstanceState(savedInstanceState)
+  override fun onSaveInstanceState(outState: Bundle?) {
+    outState?.let { lockScreen.saveState(it) }
+    super.onSaveInstanceState(outState)
   }
 
   companion object {

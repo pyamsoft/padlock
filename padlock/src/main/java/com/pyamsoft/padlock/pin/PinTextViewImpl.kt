@@ -25,9 +25,9 @@ internal class PinTextViewImpl @Inject internal constructor(
 ) : PinTextView, LifecycleObserver {
 
   private lateinit var binding: FragmentPinEntryTextBinding
-  private lateinit var pinReentryText: EditText
-  private lateinit var pinEntryText: EditText
-  private lateinit var pinHintText: EditText
+  private var pinReentryText: EditText? = null
+  private var pinEntryText: EditText? = null
+  private var pinHintText: EditText? = null
 
   init {
     owner.lifecycle.addObserver(this)
@@ -42,9 +42,9 @@ internal class PinTextViewImpl @Inject internal constructor(
   }
 
   override fun clearDisplay() {
-    pinEntryText.setText("")
-    pinReentryText.setText("")
-    pinHintText.setText("")
+    pinEntryText?.setText("")
+    pinReentryText?.setText("")
+    pinHintText?.setText("")
   }
 
   override fun onInvalidPin() {
@@ -55,13 +55,13 @@ internal class PinTextViewImpl @Inject internal constructor(
   override fun showReEntry(onSubmit: (attempt: String, reEntry: String, hint: String) -> Unit) {
     binding.pinReentryCode.visibility = View.VISIBLE
     binding.pinHint.visibility = View.VISIBLE
-    setupSubmissionView(pinHintText, onSubmit)
+    pinHintText?.let { setupSubmissionView(it, onSubmit) }
   }
 
   override fun hideReEntry(onSubmit: (attempt: String, reEntry: String, hint: String) -> Unit) {
     binding.pinReentryCode.visibility = View.GONE
     binding.pinHint.visibility = View.GONE
-    setupSubmissionView(pinEntryText, onSubmit)
+    pinEntryText?.let { setupSubmissionView(it, onSubmit) }
   }
 
   override fun onSubmitPressed(onSubmit: (attempt: String, reEntry: String, hint: String) -> Unit) {
@@ -69,7 +69,7 @@ internal class PinTextViewImpl @Inject internal constructor(
   }
 
   override fun focus() {
-    pinEntryText.requestFocus()
+    pinEntryText?.requestFocus()
   }
 
   override fun create() {
@@ -101,9 +101,9 @@ internal class PinTextViewImpl @Inject internal constructor(
     if (attempt == null || reentry == null || hint == null) {
       clearDisplay()
     } else {
-      pinEntryText.setText(attempt)
-      pinReentryText.setText(reentry)
-      pinHintText.setText(hint)
+      pinEntryText?.setText(attempt)
+      pinReentryText?.setText(reentry)
+      pinHintText?.setText(hint)
     }
   }
 
@@ -116,21 +116,21 @@ internal class PinTextViewImpl @Inject internal constructor(
 
   @CheckResult
   private fun getAttempt(): String {
-    return pinEntryText.text
+    return pinEntryText?.text
         ?.toString()
         .orEmpty()
   }
 
   @CheckResult
   private fun getReEntry(): String {
-    return pinReentryText.text
+    return pinReentryText?.text
         ?.toString()
         .orEmpty()
   }
 
   @CheckResult
   private fun getHint(): String {
-    return pinHintText.text
+    return pinHintText?.text
         ?.toString()
         .orEmpty()
   }
