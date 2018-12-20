@@ -78,10 +78,11 @@ class LockScreenActivity : ActivityBase() {
         .plusLockScreenComponent()
         .activity(this)
         .savedInstanceState(savedInstanceState)
-        .lockedIcon(lockedIcon)
         .packageName(lockedPackageName)
         .activityName(lockedActivityName)
         .realName(lockedRealName)
+        .lockedIcon(lockedIcon)
+        .system(lockedSystem)
         .build()
 
     lockScreenComponent.inject(this)
@@ -99,13 +100,7 @@ class LockScreenActivity : ActivityBase() {
     lockScreen.onMenuItemClicked {
       when (it.itemId) {
         R.id.menu_exclude -> it.isChecked = !it.isChecked
-        R.id.menu_lockscreen_info -> {
-          LockedStatDialog.newInstance(
-              lockedPackageName, lockedActivityName,
-              lockedRealName, lockedSystem
-          )
-              .show(this, "info_dialog")
-        }
+        R.id.menu_lockscreen_info -> LockedStatDialog.newInstance().show(this, "info_dialog")
         else -> it.isChecked = true
       }
     }

@@ -63,9 +63,7 @@ class LockScreenViewModel @Inject internal constructor(
   }
 
   @CheckResult
-  fun loadDisplayNameFromPackage(
-    onLoadDisplayName: (name: String) -> Unit
-  ): Disposable {
+  fun loadDisplayNameFromPackage(onLoadDisplayName: (name: String) -> Unit): Disposable {
     return interactor.getDisplayName(packageName)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())

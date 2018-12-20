@@ -34,12 +34,15 @@ interface LockScreenComponent {
   @CheckResult
   fun plusFragmentComponent(): LockScreenFragmentComponent.Builder
 
+  @CheckResult
+  fun plusStatsComponent(): LockStatsComponent.Builder
+
   @Subcomponent.Builder
   interface Builder {
 
     @BindsInstance fun activity(activity: LockScreenActivity): Builder
 
-    @BindsInstance fun savedInstanceState(@Named("activity_bundle") savedInstanceState: Bundle?): Builder
+    @BindsInstance fun savedInstanceState(@Named("activity_bundle") bundle: Bundle?): Builder
 
     @BindsInstance fun packageName(@Named("locked_package_name") packageName: String): Builder
 
@@ -47,7 +50,9 @@ interface LockScreenComponent {
 
     @BindsInstance fun realName(@Named("locked_real_name") realName: String): Builder
 
-    @BindsInstance fun lockedIcon(lockedIcon: Int): Builder
+    @BindsInstance fun lockedIcon(@Named("locked_icon") lockedIcon: Int): Builder
+
+    @BindsInstance fun system(@Named("locked_system") system: Boolean): Builder
 
     fun build(): LockScreenComponent
   }

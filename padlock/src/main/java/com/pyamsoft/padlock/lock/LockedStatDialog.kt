@@ -23,37 +23,32 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.appcompat.app.AlertDialog
-import com.pyamsoft.padlock.databinding.DialogLockStatBinding
+import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.lock.screen.LockScreenViewModel
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
-import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import javax.inject.Inject
 
 class LockedStatDialog : ToolbarDialog() {
 
-  private lateinit var activityName: String
-  private lateinit var packageName: String
-  private lateinit var realName: String
-  private lateinit var binding: DialogLockStatBinding
-  private var system: Boolean = false
+  @field:Inject internal lateinit var statView: LockStatView
+  @field:Inject internal lateinit var viewModel: LockScreenViewModel
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    requireArguments().also {
-      packageName = it.getString(PKG_NAME, "")
-      activityName = it.getString(ACT_NAME, "")
-      realName = it.getString(REAL_NAME, "")
-      system = it.getBoolean(SYSTEM)
-    }
-
-    require(packageName.isNotBlank())
-    require(activityName.isNotBlank())
-    require(realName.isNotBlank())
-  }
+  private var displayNameDisposable by singleDisposable()
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    binding = DialogLockStatBinding.inflate(LayoutInflater.from(activity), null, false)
+    Injector.obtain<LockScreenComponent>(requireActivity())
+        .plusStatsComponent()
+        .lifecycle(lifecycle)
+        .inflater(LayoutInflater.from(activity))
+        .build()
+        .inject(this)
+
+    statView.create()
 
     return AlertDialog.Builder(requireActivity())
-        .setView(binding.root)
+        .setView(statView.root())
         .setPositiveButton("Okay") { _, _ -> dismiss() }
         .setCancelable(true)
         .create()
@@ -63,50 +58,30 @@ class LockedStatDialog : ToolbarDialog() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? = binding.root
+  ): View? {
+    // We override this so that we get onViewCreated callback
+    return statView.root()
+  }
 
   override fun onViewCreated(
     view: View,
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    binding.apply {
-      statDisplayName.text = realName
-      statPackageName.text = packageName
-      statRealName.text = realName
-      statLockedBy.text = activityName
-      statSystem.text = if (system) "Yes" else "No"
-    }
+    displayNameDisposable = viewModel.loadDisplayNameFromPackage { statView.setDisplayName(it) }
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
-    binding.unbind()
+    displayNameDisposable.tryDispose()
   }
 
   companion object {
 
-    private const val PKG_NAME = "pkgname"
-    private const val ACT_NAME = "actname"
-    private const val REAL_NAME = "realname"
-    private const val SYSTEM = "system"
-
     @CheckResult
     @JvmStatic
-    fun newInstance(
-      packageName: String,
-      activityName: String,
-      realName: String,
-      system: Boolean
-    ): LockedStatDialog {
-      return LockedStatDialog().apply {
-        arguments = Bundle().apply {
-          putString(PKG_NAME, packageName)
-          putString(ACT_NAME, activityName)
-          putString(REAL_NAME, realName)
-          putBoolean(SYSTEM, system)
-        }
-      }
+    fun newInstance(): LockedStatDialog {
+      return LockedStatDialog()
     }
   }
 }
